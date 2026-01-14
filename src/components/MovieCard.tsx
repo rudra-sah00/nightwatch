@@ -15,8 +15,8 @@ interface MovieCardProps {
 
 export default function MovieCard({ id, title, poster, year, type }: MovieCardProps) {
   return (
-    <Link href={`/watch/${id}?title=${encodeURIComponent(title)}`} className="group relative block">
-      <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-stone-800 shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+    <Link href={`/watch/${id}`} className="group relative block">
+      <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 transition-transform duration-300 group-hover:scale-105">
         {poster ? (
           <Image
             src={poster}
@@ -26,31 +26,28 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-amber-500">
-            <span className="text-4xl">🎬</span>
+          <div className="w-full h-full flex items-center justify-center bg-zinc-800">
+            <span className="text-zinc-600 text-sm">No Image</span>
           </div>
         )}
 
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <PlayIcon className="w-16 h-16 text-amber-500" />
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <PlayIcon className="w-12 h-12 text-white" />
         </div>
 
-        {/* Type badge */}
         {type && (
-          <div className="absolute top-2 right-2 px-2 py-1 bg-amber-600 text-stone-900 text-xs font-semibold rounded uppercase shadow-md">
+          <div className="absolute top-2 right-2 px-2 py-1 bg-zinc-900/80 text-white text-xs font-medium rounded">
             {type}
           </div>
         )}
       </div>
 
-      {/* Title and year */}
-      <div className="mt-2 px-1">
-        <h3 className="text-amber-100 font-semibold truncate group-hover:text-amber-400 transition-colors">
+      <div className="mt-2">
+        <h3 className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors">
           {title}
         </h3>
         {year && (
-          <p className="text-stone-400 text-sm">{year}</p>
+          <p className="text-zinc-500 text-xs">{year}</p>
         )}
       </div>
     </Link>

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Poster CDN base URL
+const POSTER_CDN = 'https://imgcdn.kim/poster/342';
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('q');
@@ -33,6 +36,8 @@ export async function GET(request: NextRequest) {
       id: item.id,
       title: item.t,
       type: data.type === 0 ? 'movie' : 'series',
+      // Construct poster URL using the ID
+      poster: `${POSTER_CDN}/${item.id}.jpg`,
     }));
     return NextResponse.json({ results });
   } catch (error) {

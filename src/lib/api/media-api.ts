@@ -1,6 +1,6 @@
 /**
- * Netflix Mirror API Service
- * Handles all API calls to the mirror service
+ * Media API Service
+ * Handles all API calls to the streaming service
  */
 
 const API_ENDPOINTS = {
