@@ -2,14 +2,20 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import VideoPlayer from '@/components/VideoPlayer';
-import { getVideoSources, PlaylistResponse } from '@/lib/api/media-api';
+import VideoPlayer from '@/components/video/VideoPlayer';
+import { getVideoSources, VideoSourcesResponse } from '@/lib/api/media';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+
+interface WatchPageData extends VideoSourcesResponse {
+  title?: string;
+  poster?: string;
+}
 
 export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const [playlist, setPlaylist] = useState<PlaylistResponse | null>(null);
+  const [playlist, setPlaylist] = useState<WatchPageData | null>(null);
+  const [videoTitle, setVideoTitle] = useState<string>('Video');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,13 +25,21 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
       setError(null);
 
       try {
-        const sources = await getVideoSources(resolvedParams.id);
-        if (!sources) {
+        // Extract title from query params or use default
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get('title') || 'Video';
+        setVideoTitle(title);
+
+        const response = await getVideoSources(resolvedParams.id, title);
+        if (!response.data) {
           setError('Failed to load video sources');
           return;
         }
 
-        setPlaylist(sources);
+        setPlaylist({
+          ...response.data,
+          title,
+        });
       } catch (err) {
         console.error('Error loading video:', err);
         setError('An error occurred while loading the video');
@@ -84,15 +98,14 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
       {/* Video Player - Full Width */}
       <div className="w-full max-w-7xl mx-auto px-4 py-6">
         <VideoPlayer
-          src={playlist.sources[0]?.url || ''}
+          src={playlist.sources?.[0]?.url || ''}
           poster={playlist.poster}
-          title={playlist.title}
-          subtitles={playlist.subtitles}
+          title={videoTitle}
         />
 
         {/* Video Info */}
         <div className="mt-8 pb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-white">{playlist.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white">{videoTitle}</h1>
         </div>
       </div>
     </div>

@@ -75,7 +75,7 @@ export function SettingsMenu({
           <div className="absolute bottom-full right-0 mb-2 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[240px] animate-in slide-in-from-bottom-2 duration-200">
             {tab === 'main' && (
               <MainMenu
-                qualityLevels={qualityLevels}
+                hasQualityLevels={qualityLevels.length > 0}
                 currentQualityLabel={currentQualityLabel}
                 audioTracks={audioTracks}
                 localSubtitles={localSubtitles}
@@ -132,7 +132,7 @@ export function SettingsMenu({
 // Sub-components
 
 interface MainMenuProps {
-  qualityLevels: QualityLevel[];
+  hasQualityLevels: boolean;
   currentQualityLabel: string;
   audioTracks: AudioTrack[];
   localSubtitles: LocalSubtitle[];
@@ -143,7 +143,7 @@ interface MainMenuProps {
 }
 
 function MainMenu({
-  qualityLevels,
+  hasQualityLevels,
   currentQualityLabel,
   audioTracks,
   localSubtitles,
@@ -155,12 +155,14 @@ function MainMenu({
   return (
     <div className="py-2">
       {/* Quality */}
-      <MenuRow
-        icon={<QualityIcon />}
-        label="Quality"
-        value={currentQualityLabel}
-        onClick={() => onTabChange('quality')}
-      />
+      {hasQualityLevels && (
+        <MenuRow
+          icon={<QualityIcon />}
+          label="Quality"
+          value={currentQualityLabel}
+          onClick={() => onTabChange('quality')}
+        />
+      )}
 
       {/* Subtitles */}
       {localSubtitles.length > 0 && (

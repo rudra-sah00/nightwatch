@@ -113,8 +113,8 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Native HLS support (Safari)
       video.src = src;
-      setQualityLevels([]);
-      setCurrentQuality('auto');
+      // For native HLS, quality selection is handled by the browser
+      // These values are set during component initialization
     } else {
       onError?.('HLS not supported in this browser');
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SubtitleTrack, SubtitleCue, LocalSubtitle } from '@/types/video';
 import { parseSubtitleContent, convertToVtt } from '@/lib/utils/video-utils';
 
@@ -26,7 +26,7 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
 
   // Load and parse subtitles
   useEffect(() => {
-    let revokedUrls: string[] = [];
+    const revokedUrls: string[] = [];
 
     const loadSubtitles = async () => {
       if (!subtitles || subtitles.length === 0) {
@@ -72,17 +72,27 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
   }, [subtitles]);
 
   // Update current subtitle text based on time
+  // Using a ref to compute without triggering setState synchronously
+  const subtitleTextRef = useRef('');
+  
   useEffect(() => {
-    if (currentSubtitleIndex < 0 || !parsedCues[currentSubtitleIndex]) {
-      setCurrentSubtitleText('');
-      return;
+    let newText = '';
+    
+    if (currentSubtitleIndex >= 0 && parsedCues[currentSubtitleIndex]) {
+      const cues = parsedCues[currentSubtitleIndex];
+      const activeCue = cues.find(
+        (cue) => currentTime >= cue.start && currentTime <= cue.end
+      );
+      newText = activeCue?.text || '';
     }
-
-    const cues = parsedCues[currentSubtitleIndex];
-    const activeCue = cues.find(
-      (cue) => currentTime >= cue.start && currentTime <= cue.end
-    );
-    setCurrentSubtitleText(activeCue?.text || '');
+    
+    // Only update if text changed
+    if (newText !== subtitleTextRef.current) {
+      subtitleTextRef.current = newText;
+      queueMicrotask(() => {
+        setCurrentSubtitleText(newText);
+      });
+    }
   }, [currentTime, currentSubtitleIndex, parsedCues]);
 
   const setCurrentSubtitle = useCallback((index: number) => {

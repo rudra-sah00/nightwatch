@@ -18,7 +18,7 @@ import {
   PlayButtonOverlay,
   ErrorOverlay,
   TitleOverlay,
-} from './video-player';
+} from './components';
 
 export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,26 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
   // Custom hooks
-  const player = useHlsPlayer({
+  const {
+    videoRef,
+    isPlaying,
+    currentTime,
+    duration,
+    buffered,
+    volume,
+    isMuted: playerIsMuted,
+    qualityLevels,
+    currentQuality,
+    audioTracks,
+    currentAudioTrack,
+    togglePlay,
+    seek,
+    skip,
+    setVolume: setPlayerVolume,
+    toggleMute,
+    changeQuality,
+    changeAudioTrack,
+  } = useHlsPlayer({
     src,
     onError: setError,
   });
@@ -45,11 +64,11 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
     getSubtitleLabel,
   } = useSubtitles({
     subtitles,
-    currentTime: player.currentTime,
+    currentTime,
   });
 
   const { showControls, handleMouseMove, handleMouseLeave } = useVideoControls({
-    isPlaying: player.isPlaying,
+    isPlaying,
     showSettingsMenu,
   });
 
@@ -64,11 +83,11 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
 
   useKeyboardControls({
     containerRef,
-    togglePlay: player.togglePlay,
-    skip: player.skip,
-    setVolume: player.setVolume,
-    volume: player.volume,
-    toggleMute: player.toggleMute,
+    togglePlay,
+    skip,
+    setVolume: setPlayerVolume,
+    volume,
+    toggleMute,
     toggleFullscreen,
     closeMenus,
   });
@@ -78,25 +97,25 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!progressBarRef.current) return;
       const pos = getPositionFromEvent(e, progressBarRef.current);
-      player.seek(pos * player.duration);
+      seek(pos * duration);
     },
-    [player]
+    [seek, duration]
   );
 
   const handleProgressHover = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!progressBarRef.current) return;
       const pos = getPositionFromEvent(e, progressBarRef.current);
-      setHoverTime(pos * player.duration);
+      setHoverTime(pos * duration);
     },
-    [player.duration]
+    [duration]
   );
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      player.setVolume(parseFloat(e.target.value));
+      setPlayerVolume(parseFloat(e.target.value));
     },
-    [player]
+    [setPlayerVolume]
   );
 
   const handleToggleSettings = useCallback(() => {
@@ -114,33 +133,33 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
 
   const handleQualityChange = useCallback(
     (level: number | 'auto') => {
-      player.changeQuality(level);
+      changeQuality(level);
       setSettingsTab('main');
     },
-    [player]
+    [changeQuality]
   );
 
   const handleAudioChange = useCallback(
     (trackId: number) => {
-      player.changeAudioTrack(trackId);
+      changeAudioTrack(trackId);
       setSettingsTab('main');
     },
-    [player]
+    [changeAudioTrack]
   );
 
   // Computed values
   const currentQualityLabel = useMemo(() => {
-    if (player.currentQuality === 'auto') return 'Auto';
-    const level = player.qualityLevels.find((l) => l.id === player.currentQuality);
+    if (currentQuality === 'auto') return 'Auto';
+    const level = qualityLevels.find((l) => l.id === currentQuality);
     return level ? getQualityLabel(level) : 'Auto';
-  }, [player.currentQuality, player.qualityLevels]);
+  }, [currentQuality, qualityLevels]);
 
   const getCurrentAudioLabel = useCallback(() => {
-    const track = player.audioTracks.find((t) => t.id === player.currentAudioTrack);
+    const track = audioTracks.find((t) => t.id === currentAudioTrack);
     return track
       ? `${track.name}${track.lang !== 'unknown' ? ` (${track.lang})` : ''}`
       : 'Default';
-  }, [player.audioTracks, player.currentAudioTrack]);
+  }, [audioTracks, currentAudioTrack]);
 
   return (
     <div
@@ -155,11 +174,11 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
     >
       {/* Video Element */}
       <video
-        ref={player.videoRef}
+        ref={videoRef}
         poster={poster}
         className="w-full h-full object-contain"
         crossOrigin="anonymous"
-        onClick={player.togglePlay}
+        onClick={togglePlay}
         playsInline
       />
 
@@ -167,7 +186,7 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
       <SubtitleOverlay text={currentSubtitleText} isFullscreen={isFullscreen} />
 
       {/* Center Play Button */}
-      <PlayButtonOverlay isPlaying={player.isPlaying} onTogglePlay={player.togglePlay} />
+      <PlayButtonOverlay isPlaying={isPlaying} onTogglePlay={togglePlay} />
 
       {/* Error Message */}
       <ErrorOverlay error={error} />
@@ -185,9 +204,9 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-20">
           {/* Progress Bar */}
           <ProgressBar
-            currentTime={player.currentTime}
-            duration={player.duration}
-            buffered={player.buffered}
+            currentTime={currentTime}
+            duration={duration}
+            buffered={buffered}
             hoverTime={hoverTime}
             progressBarRef={progressBarRef}
             onSeek={handleSeek}
@@ -198,15 +217,15 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
           {/* Control Buttons */}
           <div className="flex items-center justify-between px-4 pb-4">
             <ControlButtons
-              isPlaying={player.isPlaying}
-              volume={player.volume}
-              isMuted={player.isMuted}
-              currentTime={player.currentTime}
-              duration={player.duration}
+              isPlaying={isPlaying}
+              volume={volume}
+              isMuted={playerIsMuted}
+              currentTime={currentTime}
+              duration={duration}
               showVolumeSlider={showVolumeSlider}
-              onTogglePlay={player.togglePlay}
-              onSkip={player.skip}
-              onToggleMute={player.toggleMute}
+              onTogglePlay={togglePlay}
+              onSkip={skip}
+              onToggleMute={toggleMute}
               onVolumeChange={handleVolumeChange}
               onVolumeSliderEnter={() => setShowVolumeSlider(true)}
               onVolumeSliderLeave={() => setShowVolumeSlider(false)}
@@ -216,11 +235,11 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
               isOpen={showSettingsMenu}
               tab={settingsTab}
               isFullscreen={isFullscreen}
-              qualityLevels={player.qualityLevels}
-              currentQuality={player.currentQuality}
+              qualityLevels={qualityLevels}
+              currentQuality={currentQuality}
               currentQualityLabel={currentQualityLabel}
-              audioTracks={player.audioTracks}
-              currentAudioTrack={player.currentAudioTrack}
+              audioTracks={audioTracks}
+              currentAudioTrack={currentAudioTrack}
               localSubtitles={localSubtitles}
               currentSubtitleIndex={currentSubtitleIndex}
               onToggleMenu={handleToggleSettings}
