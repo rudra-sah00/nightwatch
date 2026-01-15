@@ -13,6 +13,7 @@ interface UseLiveKitReturn {
     roomRef: React.MutableRefObject<LiveKitRoom | null>;
     isConnected: boolean;
     connectionState: ConnectionState | null;
+    cleanup: () => Promise<void>;
 }
 
 // Track connections globally to survive StrictMode remounts
@@ -168,5 +169,37 @@ export function useLiveKit({ livekitToken, localVideoRef, audioElementRef }: Use
         };
     }, [livekitToken, localVideoRef, audioElementRef, attachLocalVideo]);
 
-    return { roomRef: livekitRoomRef, isConnected, connectionState };
+    // Cleanup function to properly stop all tracks and disconnect
+    const cleanup = useCallback(async () => {
+        const room = livekitRoomRef.current;
+        if (!room) return;
+
+        try {
+            // Stop all local tracks
+            const tracks = Array.from(room.localParticipant.trackPublications.values());
+            for (const publication of tracks) {
+                if (publication.track) {
+                    publication.track.stop();
+                    await room.localParticipant.unpublishTrack(publication.track);
+                }
+            }
+
+            // Disconnect from room
+            await room.disconnect();
+            
+            // Clear from active connections
+            const tokenKey = livekitToken?.substring(0, 50);
+            if (tokenKey) {
+                activeConnections.delete(tokenKey);
+            }
+        } catch (err) {
+            console.error('Error during cleanup:', err);
+        }
+
+        livekitRoomRef.current = null;
+        setIsConnected(false);
+        setConnectionState(null);
+    }, [livekitToken]);
+
+    return { roomRef: livekitRoomRef, isConnected, connectionState, cleanup };
 }

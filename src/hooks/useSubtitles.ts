@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { SubtitleTrack, SubtitleCue, LocalSubtitle } from '@/types/video';
+import { PlayerSubtitleTrack, SubtitleCue, LocalSubtitle } from '@/types/video';
 import { parseSubtitleContent, convertToVtt } from '@/lib/utils/video-utils';
 
 interface UseSubtitlesOptions {
-  subtitles?: SubtitleTrack[];
+  subtitles?: PlayerSubtitleTrack[];
   currentTime: number;
 }
 

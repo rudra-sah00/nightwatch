@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
-import { QualityLevel, AudioTrack, LocalSubtitle, SettingsTab, QualityValue } from '@/types/video';
+import { QualityLevel, PlayerAudioTrack, LocalSubtitle, SettingsTab, QualityValue } from '@/types/video';
 import { getQualityLabel } from '@/lib/utils/video-utils';
 
 interface SettingsMenuProps {
@@ -12,7 +12,7 @@ interface SettingsMenuProps {
   qualityLevels: QualityLevel[];
   currentQuality: QualityValue;
   currentQualityLabel: string;
-  audioTracks: AudioTrack[];
+  audioTracks: PlayerAudioTrack[];
   currentAudioTrack: number;
   localSubtitles: LocalSubtitle[];
   currentSubtitleIndex: number;
@@ -134,7 +134,7 @@ export function SettingsMenu({
 interface MainMenuProps {
   hasQualityLevels: boolean;
   currentQualityLabel: string;
-  audioTracks: AudioTrack[];
+  audioTracks: PlayerAudioTrack[];
   localSubtitles: LocalSubtitle[];
   currentSubtitleIndex: number;
   onTabChange: (tab: SettingsTab) => void;
@@ -273,7 +273,7 @@ function SubtitlesMenu({ subtitles, currentIndex, onBack, onSelect }: SubtitlesM
 }
 
 interface AudioMenuProps {
-  tracks: AudioTrack[];
+  tracks: PlayerAudioTrack[];
   currentTrack: number;
   onBack: () => void;
   onSelect: (trackId: number) => void;

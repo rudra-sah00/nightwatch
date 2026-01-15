@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Room, JoinRequest, getPendingRequests, getRoom } from '@/lib/api/rooms';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoomEvents, RoomEvent } from '@/hooks/useRoomEvents';
 import { RoomHeader } from './RoomHeader';
 import { RoomSidebar } from './RoomSidebar';
 import { RoomContent } from './RoomContent';
 import { VideoPreview } from './VideoPreview';
+import { ParticipantsGrid } from './ParticipantsGrid';
 import { useLiveKit } from './useLiveKit';
 
 interface RoomViewProps {
@@ -28,7 +30,8 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [isRoomAudioOff, setIsRoomAudioOff] = useState(false);
-    const [showSearch, setShowSearch] = useState(!room.video_id);
+    const isHost = user?.id === room.host_id;
+    // Remove showSearch state - host always has access to search
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [chatMessage, setChatMessage] = useState('');
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -38,58 +41,107 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
     const audioElementRef = useRef<HTMLDivElement>(null);
     const localVideoRef = useRef<HTMLVideoElement>(null);
 
-    const isHost = user?.id === room.host_id;
     const currentParticipant = room.participants.find(p => p.user_id === user?.id);
     const canControlPlayback = currentParticipant?.permissions.can_control_playback || false;
 
     // Initialize LiveKit connection
-    const { roomRef: livekitRoomRef, isConnected } = useLiveKit({
+    const { roomRef: livekitRoomRef, isConnected, cleanup: cleanupLiveKit } = useLiveKit({
         livekitToken,
         localVideoRef,
         audioElementRef,
     });
 
-    // Poll for room status (non-host only) - detect when host ends room
-    useEffect(() => {
-        if (isHost || roomClosed) return;
-
-        const checkRoomStatus = async () => {
+    // Handle leave room - disconnect LiveKit before calling onLeave
+    const handleLeave = useCallback(async () => {
+        console.log('Leaving room...');
+        
+        // If host is ending room, broadcast to all participants
+        if (isHost && livekitRoomRef.current && isConnected) {
             try {
-                const result = await getRoom(room.code);
+                const textEncoder = new TextEncoder();
+                const data = JSON.stringify({
+                    type: 'room_ended',
+                    message: 'The host has ended the room'
+                });
+                const encodedData = textEncoder.encode(data);
+                
+                console.log('Broadcasting room_ended message');
+                await livekitRoomRef.current.localParticipant.publishData(
+                    encodedData,
+                    { reliable: true }
+                );
+            } catch (err) {
+                console.error('Error broadcasting room_ended:', err);
+            }
+        }
+        
+        // Properly cleanup all tracks and disconnect
+        await cleanupLiveKit();
+        
+        // Then call parent's onLeave handler which will call backend API
+        onLeave();
+    }, [livekitRoomRef, onLeave, isHost, isConnected, cleanupLiveKit]);
 
-                // If room doesn't exist or error, the host likely ended it
-                if (result.error) {
-                    console.log('Room closed detected:', result.error);
-                    setRoomClosed(true);
-                    // Show brief message then leave
-                    setChatMessages(prev => [...prev, {
-                        id: `system-${Date.now()}`,
-                        username: 'System',
-                        message: 'The host has ended the room',
-                        type: 'leave',
-                    }]);
-                    // Disconnect LiveKit
-                    if (livekitRoomRef.current) {
-                        livekitRoomRef.current.disconnect();
-                    }
-                    // Auto-leave after a short delay
+    // Handle room events from SSE
+    const handleRoomEvent = useCallback((event: RoomEvent) => {
+        console.log('Room event received:', event);
+        
+        switch (event.type) {
+            case 'room_deleted':
+                console.log('Room deleted event received');
+                setRoomClosed(true);
+                setChatMessages(prev => [...prev, {
+                    id: `system-${Date.now()}`,
+                    username: 'System',
+                    message: event.reason || 'The host has ended the room',
+                    type: 'leave',
+                }]);
+                // Cleanup and leave (async)
+                (async () => {
+                    await cleanupLiveKit();
                     setTimeout(() => {
                         onLeave();
                     }, 1500);
+                })();
+                break;
+
+            case 'participant_joined':
+                if (event.username) {
+                    setChatMessages(prev => [...prev, {
+                        id: `join-${event.user_id}-${Date.now()}`,
+                        username: event.username!,
+                        message: '',
+                        type: 'join',
+                    }]);
                 }
-            } catch (err) {
-                console.error('Error checking room status:', err);
-            }
-        };
+                break;
 
-        // Check immediately on mount
-        checkRoomStatus();
+            case 'participant_left':
+                if (event.username) {
+                    setChatMessages(prev => [...prev, {
+                        id: `leave-${event.user_id}-${Date.now()}`,
+                        username: event.username!,
+                        message: '',
+                        type: 'leave',
+                    }]);
+                }
+                break;
+        }
+    }, [cleanupLiveKit, onLeave]);
 
-        // Then check every 2 seconds
-        const interval = setInterval(checkRoomStatus, 2000);
+    // Subscribe to room events via SSE (replaces polling!)
+    useRoomEvents({
+        roomCode: room.code,
+        enabled: !roomClosed,
+        onEvent: handleRoomEvent,
+    });
 
-        return () => clearInterval(interval);
-    }, [isHost, room.code, roomClosed, onLeave, livekitRoomRef]);
+    // Subscribe to room events via SSE (replaces polling!)
+    useRoomEvents({
+        roomCode: room.code,
+        enabled: !roomClosed,
+        onEvent: handleRoomEvent,
+    });
 
     // Poll for pending join requests (host only)
     useEffect(() => {
@@ -182,51 +234,97 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
         }
     }, [isRoomAudioOff]);
 
-    // Track participant changes for join/leave messages
-    const previousParticipantsRef = useRef<string[]>([]);
-
+    // Listen for chat messages via LiveKit DataChannel
     useEffect(() => {
-        const currentIds = room.participants.map(p => p.user_id);
-        const previousIds = previousParticipantsRef.current;
+        if (!livekitRoomRef.current || !isConnected) return;
 
-        const newParticipantIds = currentIds.filter(id => !previousIds.includes(id));
+        const handleDataReceived = async (
+            payload: Uint8Array,
+            participant: any
+        ) => {
+            try {
+                const textDecoder = new TextDecoder();
+                const text = textDecoder.decode(payload);
+                const data = JSON.parse(text);
 
-        if (newParticipantIds.length > 0) {
-            const timestamp = Date.now();
-            const newMessages: ChatMessage[] = newParticipantIds.map((id, index) => {
-                const participant = room.participants.find(p => p.user_id === id);
-                return {
-                    id: `join-${id}-${timestamp}-${index}`,
-                    username: participant?.username || 'Unknown',
-                    message: '',
-                    type: 'join' as const
-                };
-            });
+                if (data.type === 'chat') {
+                    console.log('Received chat message:', data, 'from:', participant?.name);
+                    setChatMessages(prev => [...prev, {
+                        id: `msg-${Date.now()}-${Math.random()}`,
+                        username: data.username || participant?.name || 'Unknown',
+                        message: data.message,
+                        type: 'message'
+                    }]);
+                } else if (data.type === 'room_ended') {
+                    console.log('Received room_ended message from host');
+                    setRoomClosed(true);
+                    setChatMessages(prev => [...prev, {
+                        id: `system-${Date.now()}`,
+                        username: 'System',
+                        message: data.message || 'The host has ended the room',
+                        type: 'leave',
+                    }]);
+                    // Cleanup LiveKit properly (wrap in async IIFE)
+                    (async () => {
+                        await cleanupLiveKit();
+                        // Auto-leave after a short delay
+                        setTimeout(() => {
+                            onLeave();
+                        }, 1500);
+                    })();
+                }
+            } catch (err) {
+                console.error('Error parsing data:', err);
+            }
+        };
 
-            queueMicrotask(() => {
-                setChatMessages(prev => [...prev, ...newMessages]);
-            });
-        }
+        livekitRoomRef.current.on('dataReceived', handleDataReceived);
 
-        previousParticipantsRef.current = currentIds;
-    }, [room.participants]);
+        return () => {
+            livekitRoomRef.current?.off('dataReceived', handleDataReceived);
+        };
+    }, [livekitRoomRef, isConnected, onLeave, cleanupLiveKit]);
 
     const handleSearch = async () => {
-        setShowSearch(true);
+        // Search is always visible for host
     };
 
     const handleClearSearch = () => {
-        setShowSearch(false);
+        // Search is always visible for host
     };
 
-    const handleSendMessage = () => {
-        if (chatMessage.trim() && user) {
+    const handleSendMessage = async () => {
+        if (chatMessage.trim() && user && livekitRoomRef.current && isConnected) {
+            const message = chatMessage.trim();
+            
+            // Add to local chat immediately
             setChatMessages(prev => [...prev, {
                 id: `msg-${Date.now()}`,
                 username: user.username,
-                message: chatMessage.trim(),
+                message: message,
                 type: 'message'
             }]);
+
+            // Broadcast to other participants via LiveKit
+            try {
+                const textEncoder = new TextEncoder();
+                const data = JSON.stringify({
+                    type: 'chat',
+                    username: user.username,
+                    message: message
+                });
+                const encodedData = textEncoder.encode(data);
+                
+                console.log('Broadcasting message:', data);
+                await livekitRoomRef.current.localParticipant.publishData(
+                    encodedData,
+                    { reliable: true }
+                );
+                console.log('Message broadcast successful');
+            } catch (err) {
+                console.error('Error broadcasting message:', err);
+            }
+
             setChatMessage('');
         }
     };
@@ -243,7 +341,7 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                 onToggleMute={() => setIsMuted(!isMuted)}
                 onToggleRoomAudio={() => setIsRoomAudioOff(!isRoomAudioOff)}
                 onToggleVideo={() => setIsVideoOff(!isVideoOff)}
-                onLeave={onLeave}
+                onLeave={handleLeave}
                 onRequestHandled={handleRequestHandled}
             />
 
@@ -260,13 +358,14 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                 />
 
                 <RoomContent
-                    showSearch={showSearch}
+                    showSearch={true}
                     canControlPlayback={canControlPlayback}
                     hasVideo={!!room.video_id}
                     isPlaying={room.playback.is_playing}
+                    isHost={isHost}
                     onSearch={handleSearch}
                     onClearSearch={handleClearSearch}
-                    onShowSearch={() => setShowSearch(true)}
+                    onShowSearch={() => {}}
                 />
             </div>
 
@@ -278,6 +377,14 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
 
             {/* Hidden container for LiveKit audio/video elements */}
             <div ref={audioElementRef} className="hidden" />
+
+            {/* Participants Grid */}
+            <ParticipantsGrid 
+                livekitRoom={livekitRoomRef.current}
+                isConnected={isConnected}
+                hostId={room.host_id}
+                currentUserId={user?.id || ''}
+            />
 
             {/* Room Closed Overlay */}
             {roomClosed && (

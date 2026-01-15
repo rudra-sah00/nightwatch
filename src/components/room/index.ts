@@ -6,5 +6,7 @@ export { RoomSidebar } from './RoomSidebar';
 export { RoomContent } from './RoomContent';
 export { VideoPreview } from './VideoPreview';
 export { JoinRequestsPanel } from './JoinRequestsPanel';
+export { ParticipantsGrid } from './ParticipantsGrid';
 export { useLiveKit } from './useLiveKit';
+
 

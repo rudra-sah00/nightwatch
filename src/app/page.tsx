@@ -2,11 +2,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { AuthGuard } from '@/components/auth';
-import { RoomModal, RoomView, RoomBanner } from '@/components/room';
+import { RoomModal, RoomView } from '@/components/room';
 import { HomeContent } from '@/components/home';
 import { useAuth } from '@/hooks/useAuth';
 import { search, SearchResult } from '@/lib/api';
-import { Room } from '@/lib/api/rooms';
+import { Room, leaveRoom } from '@/lib/api/rooms';
 
 function HomePage() {
   const { user } = useAuth();
@@ -18,7 +18,6 @@ function HomePage() {
   const [selectedVideo, setSelectedVideo] = useState<{ id: string; title: string } | null>(null);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
-  const [showFullRoomView, setShowFullRoomView] = useState(false);
   const [livekitToken, setLivekitToken] = useState<string | null>(null);
 
   const handleSearch = useCallback(async (query: string) => {
@@ -53,10 +52,19 @@ function HomePage() {
     setIsRoomModalOpen(false);
   };
 
-  const handleLeaveRoom = () => {
-    setCurrentRoom(null);
-    setLivekitToken(null);
-    setShowFullRoomView(false);
+  const handleLeaveRoom = async () => {
+    if (!currentRoom) return;
+    
+    try {
+      // Call backend to leave room (this will remove user from participants or delete room if host)
+      await leaveRoom(currentRoom.code);
+    } catch (err) {
+      console.error('Error leaving room:', err);
+    } finally {
+      // Always clear local state regardless of API result
+      setCurrentRoom(null);
+      setLivekitToken(null);
+    }
   };
 
   const handleOpenRoomModal = (mode: 'create' | 'join') => {
@@ -64,24 +72,13 @@ function HomePage() {
     setIsRoomModalOpen(true);
   };
 
-  // If in full room view, show full room view
-  if (currentRoom && showFullRoomView) {
+  // Always show full room view when in a room
+  if (currentRoom) {
     return <RoomView room={currentRoom} onLeave={handleLeaveRoom} livekitToken={livekitToken || undefined} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
-      {/* Room Banner - Shows when in a room but not expanded */}
-      {currentRoom && !showFullRoomView && (
-        <RoomBanner
-          room={currentRoom}
-          onExpand={() => setShowFullRoomView(true)}
-          onLeave={handleLeaveRoom}
-          isHost={user?.id === currentRoom.host_id}
-          livekitToken={livekitToken || undefined}
-        />
-      )}
-
       {/* Main Home Content */}
       <HomeContent
         results={results}

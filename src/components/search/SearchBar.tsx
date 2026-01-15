@@ -1,18 +1,26 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, X, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
+  onSearch?: (query: string) => void;  // Optional legacy callback
   onClear?: () => void;
   placeholder?: string;
+  useUrlNavigation?: boolean;  // If true, navigates to /search/{query}
 }
 
-export default function SearchBar({ onSearch, onClear, placeholder = 'Search movies and TV shows...' }: SearchBarProps) {
+export default function SearchBar({
+  onSearch,
+  onClear,
+  placeholder = 'Search movies and TV shows...',
+  useUrlNavigation = true  // Default to URL navigation
+}: SearchBarProps) {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,7 +28,13 @@ export default function SearchBar({ onSearch, onClear, placeholder = 'Search mov
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      onSearch(query.trim());
+      if (useUrlNavigation) {
+        // Navigate to /search/{query} URL
+        router.push(`/search/${encodeURIComponent(query.trim())}`);
+      } else if (onSearch) {
+        // Legacy callback mode
+        onSearch(query.trim());
+      }
       inputRef.current?.blur();
     }
   };
@@ -64,7 +78,7 @@ export default function SearchBar({ onSearch, onClear, placeholder = 'Search mov
           )}>
             <Search className="w-4 h-4 md:w-5 md:h-5" />
           </div>
-          
+
           {/* Input */}
           <Input
             ref={inputRef}
@@ -82,7 +96,7 @@ export default function SearchBar({ onSearch, onClear, placeholder = 'Search mov
               "focus-visible:ring-0 focus-visible:ring-offset-0"
             )}
           />
-          
+
           {/* Right side controls */}
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
             {/* Keyboard shortcut hint */}
@@ -92,7 +106,7 @@ export default function SearchBar({ onSearch, onClear, placeholder = 'Search mov
                 <span className="text-zinc-500 text-xs font-medium">K</span>
               </div>
             )}
-            
+
             {/* Clear button */}
             {query && (
               <Button
@@ -105,7 +119,7 @@ export default function SearchBar({ onSearch, onClear, placeholder = 'Search mov
                 <X className="w-4 h-4" />
               </Button>
             )}
-            
+
             {/* Search button */}
             <Button
               type="submit"

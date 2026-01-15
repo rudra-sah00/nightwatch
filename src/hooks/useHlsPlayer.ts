@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { QualityLevel, AudioTrack, QualityValue } from '@/types/video';
+import { QualityLevel, PlayerAudioTrack, QualityValue } from '@/types/video';
 
 interface UseHlsPlayerOptions {
   src: string;
@@ -20,7 +20,7 @@ interface UseHlsPlayerReturn {
   isMuted: boolean;
   qualityLevels: QualityLevel[];
   currentQuality: QualityValue;
-  audioTracks: AudioTrack[];
+  audioTracks: PlayerAudioTrack[];
   currentAudioTrack: number;
   // Actions
   togglePlay: () => void;
@@ -44,7 +44,7 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
   const [isMuted, setIsMuted] = useState(false);
   const [qualityLevels, setQualityLevels] = useState<QualityLevel[]>([]);
   const [currentQuality, setCurrentQuality] = useState<QualityValue>('auto');
-  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
+  const [audioTracks, setAudioTracks] = useState<PlayerAudioTrack[]>([]);
   const [currentAudioTrack, setCurrentAudioTrack] = useState(0);
 
   // Initialize HLS

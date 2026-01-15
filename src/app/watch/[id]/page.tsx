@@ -3,19 +3,14 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import VideoPlayer from '@/components/video/VideoPlayer';
-import { getVideoSources, VideoSourcesResponse } from '@/lib/api/media';
+import { getVideoData } from '@/lib/api/media';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-
-interface WatchPageData extends VideoSourcesResponse {
-  title?: string;
-  poster?: string;
-}
+import type { CompleteVideoData } from '@/types/content';
 
 export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const [playlist, setPlaylist] = useState<WatchPageData | null>(null);
-  const [videoTitle, setVideoTitle] = useState<string>('Video');
+  const [videoData, setVideoData] = useState<CompleteVideoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,21 +20,13 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
       setError(null);
 
       try {
-        // Extract title from query params or use default
-        const urlParams = new URLSearchParams(window.location.search);
-        const title = urlParams.get('title') || 'Video';
-        setVideoTitle(title);
-
-        const response = await getVideoSources(resolvedParams.id, title);
-        if (!response.data) {
-          setError('Failed to load video sources');
+        const response = await getVideoData(resolvedParams.id);
+        if (!response.data?.video) {
+          setError('Failed to load video');
           return;
         }
 
-        setPlaylist({
-          ...response.data,
-          title,
-        });
+        setVideoData(response.data.video);
       } catch (err) {
         console.error('Error loading video:', err);
         setError('An error occurred while loading the video');
@@ -64,7 +51,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
     );
   }
 
-  if (error || !playlist) {
+  if (error || !videoData) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -98,14 +85,20 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
       {/* Video Player - Full Width */}
       <div className="w-full max-w-7xl mx-auto px-4 py-6">
         <VideoPlayer
-          src={playlist.sources?.[0]?.url || ''}
-          poster={playlist.poster}
-          title={videoTitle}
+          src={videoData.master_playlist_url}
+          poster={videoData.metadata.poster_url}
+          title={videoData.metadata.title}
         />
 
         {/* Video Info */}
         <div className="mt-8 pb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-white">{videoTitle}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white">{videoData.metadata.title}</h1>
+          {videoData.metadata.year && (
+            <p className="text-zinc-400 mt-2">{videoData.metadata.year}</p>
+          )}
+          {videoData.metadata.genre && videoData.metadata.genre.length > 0 && (
+            <p className="text-zinc-500 mt-1">{videoData.metadata.genre.join(', ')}</p>
+          )}
         </div>
       </div>
     </div>

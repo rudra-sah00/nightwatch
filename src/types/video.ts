@@ -6,10 +6,10 @@ export interface VideoPlayerProps {
   src: string;
   poster?: string;
   title?: string;
-  subtitles?: SubtitleTrack[];
+  subtitles?: PlayerSubtitleTrack[];
 }
 
-export interface SubtitleTrack {
+export interface PlayerSubtitleTrack {
   language: string;
   url: string;
 }
@@ -20,7 +20,7 @@ export interface SubtitleCue {
   text: string;
 }
 
-export interface AudioTrack {
+export interface PlayerAudioTrack {
   id: number;
   name: string;
   lang: string;
