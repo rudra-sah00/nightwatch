@@ -56,7 +56,7 @@ export interface JoinRoomResponse {
 
 export interface JoinPendingResponse {
     message: string;
-    status: 'pending';
+    status: 'pending' | 'rejected';
 }
 
 // ============ Room Management Functions ============

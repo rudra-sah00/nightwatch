@@ -11,3 +11,6 @@ export { ScrollArea, ScrollBar } from './scroll-area';
 export { Progress } from './progress';
 export { Slider } from './slider';
 export { Label } from './label';
+export { ParticipantAvatar } from './ParticipantAvatar';
+export { RoleIcon } from './RoleIcon';
+export { ControlButton } from './ControlButton';

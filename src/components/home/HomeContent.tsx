@@ -14,6 +14,7 @@ import {
     LogOut,
     ChevronDown,
     Search,
+    Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ContentType } from '@/types/content';
@@ -27,6 +28,9 @@ interface HomeContentProps {
     onClear: () => void;
     onOpenRoomModal: (mode: 'create' | 'join') => void;
     inRoom?: boolean;
+    isHost?: boolean;
+    roomCode?: string;
+    onLeaveRoom?: () => void;
 }
 
 // Selected content for the modal
@@ -46,13 +50,22 @@ export function HomeContent({
     onSearch,
     onClear,
     onOpenRoomModal,
-    inRoom = false
+    inRoom = false,
+    isHost = false,
+    roomCode,
+    onLeaveRoom,
 }: HomeContentProps) {
     const { user, logout } = useAuth();
     const router = useRouter();
     const [showRoomDropdown, setShowRoomDropdown] = useState(false);
     const [selectedContent, setSelectedContent] = useState<SelectedContent | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Handle logout
+    const handleLogout = async () => {
+        await logout();
+        router.push('/login');
+    };
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -105,10 +118,9 @@ export function HomeContent({
                 />
             )}
 
-            {/* Fixed Header Section - Always show at top unless in room */}
-            {!inRoom && (
-                <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800/50">
-                    <div className="max-w-7xl mx-auto px-6 py-6">
+            {/* Fixed Header Section - Always visible */}
+            <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800/50">
+                <div className="max-w-7xl mx-auto px-6 py-6">
                         <div className="space-y-6">
                             {/* Welcome message */}
                             <div className="text-center">
@@ -122,9 +134,12 @@ export function HomeContent({
 
                             {/* Search bar and room button */}
                             <div className="flex gap-3 items-center justify-center max-w-3xl mx-auto">
-                                <div className="flex-1">
-                                    <SearchBar onSearch={onSearch} onClear={onClear} initialQuery={searchQuery} />
-                                </div>
+                                {/* Only show search bar if not in room OR if user is the host */}
+                                {(!inRoom || isHost) && (
+                                    <div className="flex-1">
+                                        <SearchBar onSearch={onSearch} onClear={onClear} initialQuery={searchQuery} />
+                                    </div>
+                                )}
 
                                 {/* Room Button with Dropdown */}
                                 <div className="relative room-dropdown-container" ref={dropdownRef}>
@@ -132,13 +147,15 @@ export function HomeContent({
                                         variant="outline"
                                         onClick={() => setShowRoomDropdown(!showRoomDropdown)}
                                         className={cn(
-                                            "gap-2 bg-zinc-800/80 backdrop-blur-sm border-zinc-700 hover:bg-zinc-700",
-                                            "hover:border-zinc-600 transition-all duration-200",
-                                            showRoomDropdown && "bg-zinc-700 border-zinc-600"
+                                            "gap-2 backdrop-blur-sm transition-all duration-200",
+                                            inRoom 
+                                                ? "bg-violet-600/80 border-violet-500 hover:bg-violet-500 hover:border-violet-400 text-white"
+                                                : "bg-zinc-800/80 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600",
+                                            showRoomDropdown && (inRoom ? "bg-violet-500 border-violet-400" : "bg-zinc-700 border-zinc-600")
                                         )}
                                     >
-                                        <Menu className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Menu</span>
+                                        {inRoom ? <Users className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                                        <span className="hidden sm:inline">{inRoom ? 'In Room' : 'Menu'}</span>
                                         <ChevronDown className={cn(
                                             "w-4 h-4 transition-transform duration-200",
                                             showRoomDropdown && "rotate-180"
@@ -149,58 +166,85 @@ export function HomeContent({
                                         <div className="absolute right-0 mt-2 w-60 bg-zinc-900/98 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl shadow-black/60 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                             {/* Dropdown header */}
                                             <div className="px-4 py-2.5 border-b border-zinc-800/80">
-                                                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Watch Party</p>
+                                                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                                                    {inRoom ? `In Room: ${roomCode}` : 'Watch Party'}
+                                                </p>
                                             </div>
 
-                                            <div className="p-1.5">
-                                                <button
-                                                    onClick={() => { onOpenRoomModal('create'); setShowRoomDropdown(false); }}
-                                                    className="w-full px-3 py-2.5 text-left text-white hover:bg-zinc-800/80 rounded-xl transition-all duration-200 flex items-center gap-3 group"
-                                                >
-                                                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-200">
-                                                        <Plus className="w-4 h-4 text-purple-300" />
+                                            {inRoom ? (
+                                                /* In Room - Show Leave Room option only */
+                                                <div className="p-1.5">
+                                                    <button
+                                                        onClick={() => { onLeaveRoom?.(); setShowRoomDropdown(false); }}
+                                                        className="w-full px-3 py-2.5 text-left text-white hover:bg-red-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group"
+                                                    >
+                                                        <div className="p-2 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl group-hover:from-red-500/30 group-hover:to-orange-500/30 transition-all duration-200">
+                                                            <LogOut className="w-4 h-4 text-red-400" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-sm text-red-400">Leave Room</div>
+                                                            <div className="text-xs text-zinc-500">Exit current watch party</div>
+                                                        </div>
+                                                    </button>
+                                                    
+                                                    <div className="mt-2 px-3 py-2 rounded-lg bg-zinc-800/50">
+                                                        <p className="text-xs text-zinc-500 text-center">
+                                                            Leave the room first to create or join another party
+                                                        </p>
                                                     </div>
-                                                    <div>
-                                                        <div className="font-medium text-sm">Create Room</div>
-                                                        <div className="text-xs text-zinc-500">Start a new watch party</div>
-                                                    </div>
-                                                </button>
+                                                </div>
+                                            ) : (
+                                                /* Not in Room - Show Create/Join options */
+                                                <>
+                                                    <div className="p-1.5">
+                                                        <button
+                                                            onClick={() => { onOpenRoomModal('create'); setShowRoomDropdown(false); }}
+                                                            className="w-full px-3 py-2.5 text-left text-white hover:bg-zinc-800/80 rounded-xl transition-all duration-200 flex items-center gap-3 group"
+                                                        >
+                                                            <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-200">
+                                                                <Plus className="w-4 h-4 text-purple-300" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium text-sm">Create Room</div>
+                                                                <div className="text-xs text-zinc-500">Start a new watch party</div>
+                                                            </div>
+                                                        </button>
 
-                                                <button
-                                                    onClick={() => { onOpenRoomModal('join'); setShowRoomDropdown(false); }}
-                                                    className="w-full px-3 py-2.5 text-left text-white hover:bg-zinc-800/80 rounded-xl transition-all duration-200 flex items-center gap-3 group"
-                                                >
-                                                    <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all duration-200">
-                                                        <LogIn className="w-4 h-4 text-blue-300" />
+                                                        <button
+                                                            onClick={() => { onOpenRoomModal('join'); setShowRoomDropdown(false); }}
+                                                            className="w-full px-3 py-2.5 text-left text-white hover:bg-zinc-800/80 rounded-xl transition-all duration-200 flex items-center gap-3 group"
+                                                        >
+                                                            <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all duration-200">
+                                                                <LogIn className="w-4 h-4 text-blue-300" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium text-sm">Join Room</div>
+                                                                <div className="text-xs text-zinc-500">Enter with invite code</div>
+                                                            </div>
+                                                        </button>
                                                     </div>
-                                                    <div>
-                                                        <div className="font-medium text-sm">Join Room</div>
-                                                        <div className="text-xs text-zinc-500">Enter with invite code</div>
-                                                    </div>
-                                                </button>
-                                            </div>
 
-                                            {/* Logout option - subtle at bottom */}
-                                            <div className="border-t border-zinc-800/80 p-1.5">
-                                                <button
-                                                    onClick={() => { logout(); setShowRoomDropdown(false); }}
-                                                    className="w-full px-3 py-2 text-left text-zinc-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all duration-200 flex items-center gap-3 group"
-                                                >
-                                                    <div className="p-1.5 bg-zinc-800/50 rounded-lg group-hover:bg-red-500/10 transition-all duration-200">
-                                                        <LogOut className="w-3.5 h-3.5 group-hover:text-red-400" />
+                                                    {/* Logout option - only when not in room */}
+                                                    <div className="border-t border-zinc-800/80 p-1.5">
+                                                        <button
+                                                            onClick={() => { handleLogout(); setShowRoomDropdown(false); }}
+                                                            className="w-full px-3 py-2 text-left text-zinc-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all duration-200 flex items-center gap-3 group"
+                                                        >
+                                                            <div className="p-1.5 bg-zinc-800/50 rounded-lg group-hover:bg-red-500/10 transition-all duration-200">
+                                                                <LogOut className="w-3.5 h-3.5 group-hover:text-red-400" />
+                                                            </div>
+                                                            <span className="text-sm">Sign out</span>
+                                                        </button>
                                                     </div>
-                                                    <span className="text-sm">Sign out</span>
-                                                </button>
-                                            </div>
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
+            </div>
             {/* Results Section */}
             {searched && (
                 <div className="px-6 pb-12 max-w-7xl mx-auto w-full">

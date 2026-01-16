@@ -1,41 +1,32 @@
-// API Client - Core HTTP request handling and token management
-// Fully Refactored for Cookie-Only Authentication (HttpOnly)
+// API Client - Core HTTP request handling with HttpOnly cookie authentication
+// SECURITY: Tokens are stored in HttpOnly cookies, not accessible to JavaScript
 
 const API_BASE = typeof window === 'undefined'
     ? (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080')
     : ''; // Relative path on client to use Next.js rewrites (avoids CORS)
 
-// Storage keys
+// Storage keys - only for user info, NOT tokens
 const USER_KEY = 'wr_user';
-// Note: Tokens are no longer stored in LocalStorage. They are HttpOnly cookies.
 
-// Cookie Helpers (Only used for clearing non-HttpOnly cookies if any exist)
-function eraseCookie(name: string) {
-    if (typeof window === 'undefined') return;
-    document.cookie = name + '=; Max-Age=-99999999; path=/;';
-}
-
-// Token Management - No-Ops for Frontend
+// Token Management - Frontend CANNOT access HttpOnly cookies
 export function getAccessToken(): string | null {
-    return null; // Frontend cannot access HttpOnly cookie
+    return null; // HttpOnly cookies are not accessible to JavaScript
 }
 
 export function getRefreshToken(): string | null {
-    return null;
+    return null; // HttpOnly cookies are not accessible to JavaScript
 }
 
 export function setTokens(_access: string, _refresh: string): void {
-    // Backend sets HttpOnly cookies. Frontend stores nothing.
-    // Ensure any legacy storage is cleared
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('wr_access_token');
-    localStorage.removeItem('wr_refresh_token');
+    // Backend sets HttpOnly cookies automatically via Set-Cookie headers
+    // Frontend doesn't need to do anything
 }
 
 export function clearTokens(): void {
     if (typeof window === 'undefined') return;
+    // Only clear user info from localStorage
+    // Cookies are cleared by backend on logout
     localStorage.removeItem(USER_KEY);
-    // Tokens are cleared by calling /api/auth/logout which sets expired cookies
 }
 
 export function getStoredUser(): { id: string; username: string; name: string } | null {
@@ -61,8 +52,8 @@ export function setStoredUser(user: { id: string; username: string; name: string
 }
 
 export function isAuthenticated(): boolean {
-    // Optimistic: Check if user info is present
-    // Exact verification happens on API call
+    // Check if user info exists (optimistic check)
+    // Actual auth status is verified by backend via HttpOnly cookie
     return !!getStoredUser();
 }
 
@@ -87,21 +78,28 @@ export async function apiRequest<T>(
         ...options.headers,
     };
 
-    // No Authorization header injected. Browser handles Cookies.
+    // IMPORTANT: Include credentials to send HttpOnly cookies
+    const fetchOptions: RequestInit = {
+        ...options,
+        headers,
+        credentials: 'include', // Always send cookies with requests
+    };
 
     try {
-        const response = await fetch(url, {
-            ...options,
-            headers,
-        });
+        const response = await fetch(url, fetchOptions);
 
-        // Handle 401 Unauthorized
+        // Handle 401 Unauthorized - token expired or invalid
         if (response.status === 401) {
-            // Note: Automatic refresh logic is tricky with HttpOnly cookies on client without a dedicated endpoint that reads cookies
-            // Since backend handles refresh via /refresh endpoint, we can try calling it?
-            // But if request failed with 401, it means Access Token expired.
-            // Ideally, we could try hitting /refresh (POST with empty body?) if backend supports it.
-            // But for now, simple logout on 401.
+            // Try to refresh token automatically
+            if (endpoint !== '/api/auth/refresh' && endpoint !== '/api/auth/login') {
+                const refreshResult = await tryRefreshToken();
+                if (refreshResult) {
+                    // Retry original request
+                    return apiRequest<T>(endpoint, options);
+                }
+            }
+
+            // If refresh failed or this was a refresh/login request, redirect to login
             if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
                 clearTokens();
                 window.location.href = '/login';
@@ -114,4 +112,45 @@ export async function apiRequest<T>(
     } catch {
         return { error: 'Network error' };
     }
+}
+
+// Get a short-lived WebSocket token (for WebSocket connections that can't use cookies)
+export async function getWebSocketToken(): Promise<string | null> {
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/ws-token`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.token;
+        }
+    } catch (error) {
+        console.error('Failed to get WebSocket token:', error);
+    }
+    return null;
+}
+
+// Try to refresh token automatically
+async function tryRefreshToken(): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            return true;
+        }
+    } catch (error) {
+        console.error('Token refresh failed:', error);
+    }
+    return false;
 }

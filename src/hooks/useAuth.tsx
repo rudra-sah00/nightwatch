@@ -38,18 +38,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 try {
                     // SECURE: Always verify token with backend
-                    // If token is invalid (401), client.ts will auto-logout
+                    // If token is invalid (401), client.ts will auto-refresh or redirect
                     const result = await getCurrentUser({ signal: controller.signal });
 
                     if (controller.signal.aborted) return;
 
-                    if (result.data) {
+                    if (result.data?.user) {
                         setUser(result.data.user);
                         setStoredUser(result.data.user);
+                    } else if (result.error) {
+                        // Token invalid and refresh failed - clear local state
+                        console.warn('Auth verification failed:', result.error);
+                        setUser(null);
                     }
                 } catch {
                     // Start fresh if verification fails unexpectedly
+                    setUser(null);
                 }
+            } else {
+                // No stored user - ensure state is clean
+                setUser(null);
             }
 
             if (!controller.signal.aborted) {
@@ -61,15 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Listen for storage changes to sync auth state across tabs
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'wr_access_token') {
+            // Watch for user info changes (tokens are in HttpOnly cookies, not localStorage)
+            if (e.key === 'wr_user') {
                 if (!e.newValue) {
                     // User logged out in another tab
                     setUser(null);
                 } else {
                     // User logged in in another tab - reload user data
-                    const storedUser = getStoredUser();
-                    if (storedUser) {
+                    try {
+                        const storedUser = JSON.parse(e.newValue);
                         setUser(storedUser);
+                    } catch {
+                        setUser(null);
                     }
                 }
             }

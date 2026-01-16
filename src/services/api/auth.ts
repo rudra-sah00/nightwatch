@@ -46,3 +46,35 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(options: RequestInit = {}): Promise<ApiResponse<{ user: User }>> {
     return apiRequest<{ user: User }>('/api/auth/me', options);
 }
+
+// ============ Session Management ============
+
+export interface SessionInfo {
+    id: string;
+    user_id: string;
+    device_info?: string;
+    ip_address?: string;
+    last_used: string;
+    created_at: string;
+    expires_at: string;
+}
+
+export interface SessionsResponse {
+    sessions: SessionInfo[];
+}
+
+/**
+ * Get all active sessions for current user
+ */
+export async function getSessions(): Promise<ApiResponse<SessionsResponse>> {
+    return apiRequest<SessionsResponse>('/api/auth/sessions');
+}
+
+/**
+ * Revoke a specific session
+ */
+export async function revokeSession(sessionId: string): Promise<ApiResponse<{ message: string }>> {
+    return apiRequest<{ message: string }>(`/api/auth/sessions/${sessionId}`, {
+        method: 'DELETE',
+    });
+}

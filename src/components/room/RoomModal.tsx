@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createRoom, joinRoom } from '@/lib/api';
 import { Room } from '@/services/api/rooms';
+import { getWebSocketToken } from '@/services/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckIcon, ClockIcon, XMarkIcon, ClipboardIcon, UsersIcon } from '@heroicons/react/24/outline';
+
+const PENDING_TIMEOUT_MS = 30000; // 30 seconds timeout
+const MAX_ATTEMPTS = 3;
 
 interface RoomModalProps {
     isOpen: boolean;
@@ -26,6 +30,11 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
     const [roomInfo, setRoomInfo] = useState<{ code: string; token: string } | null>(null);
     const [pendingMessage, setPendingMessage] = useState('');
     const [copied, setCopied] = useState(false);
+    const [attemptCount, setAttemptCount] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(0);
+    
+    const wsRef = useRef<WebSocket | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Reset state when modal opens
     useEffect(() => {
@@ -36,6 +45,8 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
             setRoomInfo(null);
             setPendingMessage('');
             setCopied(false);
+            setAttemptCount(0);
+            setTimeRemaining(0);
         }
     }, [isOpen, initialMode]);
 
@@ -47,34 +58,130 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, mode]);
 
-    // Poll for approval when in pending state
+    // WebSocket connection for pending state
     useEffect(() => {
         if (!pendingMessage || !joinCode) return;
 
-        const checkApproval = async () => {
-            const result = await joinRoom(joinCode.toUpperCase());
+        let ws: WebSocket | null = null;
+        let countdownInterval: NodeJS.Timeout | null = null;
 
-            if (result.data && 'livekit_token' in result.data && 'room' in result.data) {
-                // Approved! Join the room
-                setRoomInfo({ code: joinCode.toUpperCase(), token: result.data.livekit_token });
+        const connectWebSocket = async () => {
+            // Get a short-lived token for WebSocket authentication
+            const token = await getWebSocketToken();
+            if (!token) {
+                setError('Authentication required');
                 setPendingMessage('');
-                if (onRoomJoined) {
-                    onRoomJoined(result.data.room as Room, result.data.livekit_token);
-                }
-            } else if (result.error && result.error.includes('rejected')) {
-                // Rejected
-                setPendingMessage('');
-                setError('Your join request was rejected by the host.');
+                return;
             }
-            // If still pending, keep polling
+
+            // Connect to pending WebSocket - use backend URL directly (not through Next.js proxy)
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+            const wsBackendUrl = backendUrl.replace(/^http/, 'ws');
+            const wsUrl = `${wsBackendUrl}/api/rooms/${joinCode.toUpperCase()}/ws/pending?token=${token}`;
+            
+            console.log('Connecting to pending WebSocket:', wsUrl);
+            ws = new WebSocket(wsUrl);
+            wsRef.current = ws;
+
+            // Start countdown timer
+            setTimeRemaining(PENDING_TIMEOUT_MS / 1000);
+            countdownInterval = setInterval(() => {
+                setTimeRemaining(prev => {
+                    if (prev <= 1) {
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            // Set timeout for request
+            timeoutRef.current = setTimeout(() => {
+                ws?.close();
+                setPendingMessage('');
+                setError('Request timed out. The host did not respond in time.');
+            }, PENDING_TIMEOUT_MS);
+
+            ws.onopen = () => {
+                console.log('Connected to pending WebSocket');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Received WebSocket event:', data);
+                    
+                    if (data.type === 'join_request_approved') {
+                        // Clear timeout and close WS
+                        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        ws?.close();
+                        
+                        // Fetch the room data now that we're approved
+                        handleApproved();
+                    } else if (data.type === 'join_request_rejected') {
+                        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        ws?.close();
+                        
+                        setPendingMessage('');
+                        setError('Your join request was rejected by the host.');
+                    }
+                } catch (e) {
+                    console.error('Error parsing WebSocket message:', e);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = () => {
+                console.log('Pending WebSocket closed');
+            };
         };
 
-        // Poll every 2 seconds
-        const interval = setInterval(checkApproval, 2000);
+        connectWebSocket();
 
-        return () => clearInterval(interval);
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (wsRef.current) {
+                wsRef.current.close();
+                wsRef.current = null;
+            }
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingMessage, joinCode]);
+
+    // Cleanup on unmount or close
+    useEffect(() => {
+        return () => {
+            if (wsRef.current) {
+                wsRef.current.close();
+                wsRef.current = null;
+            }
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleApproved = async () => {
+        // Re-fetch room data after approval
+        const result = await joinRoom(joinCode.toUpperCase());
+        
+        if (result.data && 'livekit_token' in result.data && 'room' in result.data) {
+            setRoomInfo({ code: joinCode.toUpperCase(), token: result.data.livekit_token });
+            setPendingMessage('');
+            if (onRoomJoined) {
+                onRoomJoined(result.data.room as Room, result.data.livekit_token);
+            }
+        } else {
+            setError('Failed to join room after approval');
+            setPendingMessage('');
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -105,6 +212,12 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
             return;
         }
 
+        // Check attempt limit
+        if (attemptCount >= MAX_ATTEMPTS) {
+            setError(`Maximum attempts reached (${MAX_ATTEMPTS}). Please try again later.`);
+            return;
+        }
+
         setIsLoading(true);
         setError('');
 
@@ -114,8 +227,13 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
             if ('status' in result.data && result.data.status === 'pending') {
                 const pendingData = result.data as { message: string; status: 'pending' };
                 setPendingMessage(pendingData.message);
+                setAttemptCount(prev => prev + 1);
+            } else if ('status' in result.data && result.data.status === 'rejected') {
+                // Previously rejected - increment attempt and show error
+                setAttemptCount(prev => prev + 1);
+                setError('Your previous request was rejected. You can try again.');
             } else if ('livekit_token' in result.data && 'room' in result.data) {
-                // It's a JoinRoomResponse
+                // It's a JoinRoomResponse (direct join or already approved)
                 const joinData = result.data as { room: Room; livekit_token: string };
                 setRoomInfo({ code: joinCode.toUpperCase(), token: joinData.livekit_token });
                 if (onRoomJoined) {
@@ -123,6 +241,10 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                 }
             }
         } else {
+            // Check if error mentions max attempts
+            if (result.error?.includes('Maximum')) {
+                setAttemptCount(MAX_ATTEMPTS);
+            }
             setError(result.error || 'Failed to join');
         }
 
@@ -207,13 +329,40 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                     {/* Pending State */}
                     {pendingMessage && (
                         <div className="text-center space-y-6 py-4">
-                            <div className="w-16 h-16 mx-auto bg-yellow-900/30 rounded-full flex items-center justify-center ring-2 ring-yellow-500/30">
+                            <div className="w-16 h-16 mx-auto bg-yellow-900/30 rounded-full flex items-center justify-center ring-2 ring-yellow-500/30 relative">
                                 <ClockIcon className="w-8 h-8 text-yellow-400 animate-pulse" />
+                                {/* Countdown ring */}
+                                <svg className="absolute inset-0 w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                                    <circle
+                                        cx="32"
+                                        cy="32"
+                                        r="28"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        className="text-yellow-500/20"
+                                    />
+                                    <circle
+                                        cx="32"
+                                        cy="32"
+                                        r="28"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        strokeDasharray={`${(timeRemaining / 30) * 176} 176`}
+                                        className="text-yellow-500 transition-all duration-1000"
+                                    />
+                                </svg>
                             </div>
                             <div>
                                 <Badge variant="warning" className="mb-3">Waiting for Approval</Badge>
                                 <p className="text-white mb-2">{pendingMessage}</p>
-                                <p className="text-zinc-500 text-sm">Checking every 2 seconds...</p>
+                                <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm">
+                                    <span className="font-mono text-yellow-400">{timeRemaining}s</span>
+                                    <span>remaining</span>
+                                    <span className="text-zinc-600">•</span>
+                                    <span>Attempt {attemptCount}/{MAX_ATTEMPTS}</span>
+                                </div>
                             </div>
                             <Button
                                 variant="outline"
@@ -272,9 +421,15 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                                 </div>
                             )}
 
+                            {attemptCount > 0 && attemptCount < MAX_ATTEMPTS && (
+                                <p className="text-zinc-500 text-xs text-center">
+                                    Attempts remaining: {MAX_ATTEMPTS - attemptCount}
+                                </p>
+                            )}
+
                             <Button
                                 onClick={handleJoin}
-                                disabled={isLoading || joinCode.length !== 6}
+                                disabled={isLoading || joinCode.length !== 6 || attemptCount >= MAX_ATTEMPTS}
                                 className="w-full h-12 text-base"
                             >
                                 {isLoading ? (
@@ -282,7 +437,7 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                                         <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                                         Joining...
                                     </span>
-                                ) : 'Join Room'}
+                                ) : attemptCount >= MAX_ATTEMPTS ? 'Max Attempts Reached' : 'Join Room'}
                             </Button>
                         </div>
                     )}

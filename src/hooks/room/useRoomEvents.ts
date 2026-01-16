@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { getAccessToken } from '@/services/api/client';
+import { getWebSocketToken } from '@/services/api/client';
 
 export interface RoomEvent {
-    type: 'participant_joined' | 'participant_left' | 'room_deleted' | 'room_updated';
+    type: 'participant_joined' | 'participant_left' | 'room_deleted' | 'room_updated' | 'join_request_received';
     room_code: string;
     user_id?: string;
     username?: string;
@@ -18,44 +18,55 @@ interface UseRoomEventsProps {
 }
 
 /**
- * Hook to subscribe to real-time room events via SSE
+ * Hook to subscribe to real-time room events via WebSocket
  */
 export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps) {
-    const eventSourceRef = useRef<EventSource | null>(null);
+    const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const maxReconnectAttempts = 5;
 
-    const connect = useCallback(() => {
+    const connect = useCallback(async () => {
         if (!enabled || !roomCode) return;
 
-        const token = getAccessToken();
+        // Close any existing connection first
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+
+        const token = await getWebSocketToken();
         if (!token) {
+            console.error('Failed to get WebSocket token');
             return;
         }
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-        const url = `${apiUrl}/api/rooms/${roomCode.toUpperCase()}/events?token=${encodeURIComponent(token)}`;
+        // WebSocket must connect directly to backend (not through Next.js proxy)
+        // Use NEXT_PUBLIC_BACKEND_URL for direct backend connection
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+        const wsUrl = backendUrl.replace(/^http/, 'ws');
+        const url = `${wsUrl}/api/rooms/${roomCode.toUpperCase()}/ws?token=${encodeURIComponent(token)}`;
 
-        const eventSource = new EventSource(url);
-        eventSourceRef.current = eventSource;
+        console.log('Connecting to room WebSocket:', url);
+        const ws = new WebSocket(url);
+        wsRef.current = ws;
 
-        eventSource.onopen = () => {
+        ws.onopen = () => {
+            console.log('Room WebSocket connected to', roomCode);
             reconnectAttemptsRef.current = 0;
         };
 
-        eventSource.onmessage = (event) => {
+        ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data) as RoomEvent;
                 onEvent(data);
             } catch {
-                // Failed to parse SSE event
+                // Failed to parse WebSocket message
             }
         };
 
-        eventSource.onerror = () => {
-            eventSource.close();
-            eventSourceRef.current = null;
+        ws.onclose = () => {
+            wsRef.current = null;
 
             // Attempt reconnection with exponential backoff
             if (enabled && reconnectAttemptsRef.current < maxReconnectAttempts) {
@@ -65,9 +76,11 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
                 reconnectTimeoutRef.current = setTimeout(() => {
                     connect();
                 }, delay);
-            } else {
-                // Max reconnection attempts reached or SSE disabled
             }
+        };
+
+        ws.onerror = (error) => {
+            console.error('Room WebSocket error:', error);
         };
     }, [enabled, roomCode, onEvent]);
 
@@ -77,9 +90,9 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
             reconnectTimeoutRef.current = null;
         }
 
-        if (eventSourceRef.current) {
-            eventSourceRef.current.close();
-            eventSourceRef.current = null;
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
         }
 
         reconnectAttemptsRef.current = 0;

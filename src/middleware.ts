@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
     }
 
     const isPublic = PUBLIC_ROUTES.some(route => pathname === route);
+    // Check for HttpOnly cookie (wr_access_token)
     const token = request.cookies.get('wr_access_token')?.value;
 
     let response: NextResponse;
@@ -33,23 +34,63 @@ export function middleware(request: NextRequest) {
         response = NextResponse.next();
     }
 
-    // --- Security Headers Injection ---
+    // --- Enhanced Security Headers ---
     const headers = response.headers;
 
+    // Prevent clickjacking
     headers.set('X-Frame-Options', 'DENY');
+    
+    // Prevent MIME type sniffing
     headers.set('X-Content-Type-Options', 'nosniff');
+    
+    // Control referrer information
     headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // XSS Protection (legacy but still useful)
+    headers.set('X-XSS-Protection', '1; mode=block');
 
+    // HTTPS enforcement in production
     if (process.env.NODE_ENV === 'production') {
-        headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     }
 
-    headers.set(
-        'Content-Security-Policy',
-        "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; connect-src 'self' https:;"
-    );
+    // Content Security Policy - Different for dev/prod
+    const isDev = process.env.NODE_ENV === 'development';
+    
+    const cspPolicy = isDev
+        ? // Development: Allow Next.js hot reload and inline scripts
+          "default-src 'self'; " +
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+          "style-src 'self' 'unsafe-inline'; " +
+          "img-src 'self' blob: data: https:; " +
+          "font-src 'self' data:; " +
+          "connect-src 'self' https: wss: ws:; " +
+          "media-src 'self' https: blob:; " +
+          "object-src 'none'; " +
+          "base-uri 'self'; " +
+          "form-action 'self'; " +
+          "frame-ancestors 'none';"
+        : // Production: Strict CSP (no unsafe-inline/eval)
+          "default-src 'self'; " +
+          "script-src 'self'; " +
+          "style-src 'self' 'unsafe-inline'; " +
+          "img-src 'self' blob: data: https:; " +
+          "font-src 'self' data:; " +
+          "connect-src 'self' https: wss:; " +
+          "media-src 'self' https: blob:; " +
+          "object-src 'none'; " +
+          "base-uri 'self'; " +
+          "form-action 'self'; " +
+          "frame-ancestors 'none'; " +
+          "upgrade-insecure-requests;";
 
-    headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+    headers.set('Content-Security-Policy', cspPolicy);
+
+    // Permissions Policy - Restrict dangerous features
+    headers.set(
+        'Permissions-Policy',
+        'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+    );
 
     return response;
 }

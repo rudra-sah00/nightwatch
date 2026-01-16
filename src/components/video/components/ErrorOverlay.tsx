@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-
 interface ErrorOverlayProps {
   error: string | null;
 }

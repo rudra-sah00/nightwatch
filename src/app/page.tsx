@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { RoomModal, RoomView } from '@/components/room';
+import React, { useState, useCallback, useEffect } from 'react';
+import { RoomModal, Sidebar } from '@/components/room';
 import { HomeContent } from '@/components/home';
 import { useAuth } from '@/hooks/useAuth';
 import { search, SearchResult } from '@/lib/api';
-import { Room, leaveRoom } from '@/services/api/rooms';
+import { Room, leaveRoom, getPendingRequests, JoinRequest, getRoom } from '@/services/api/rooms';
+import { useRoomEvents, RoomEvent, useLiveKitRoom } from '@/hooks';
 
 function HomePage() {
   const { user } = useAuth();
@@ -18,6 +19,104 @@ function HomePage() {
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
   const [livekitToken, setLivekitToken] = useState<string | null>(null);
+  
+  // Room audio (video player audio, not mic)
+  const [isRoomAudioOff, setIsRoomAudioOff] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
+
+  const isHost = user?.id === currentRoom?.host_id;
+
+  // LiveKit room connection with real audio/video controls
+  const {
+    isConnected: isLiveKitConnected,
+    isMuted,
+    isVideoOff,
+    toggleMute,
+    toggleVideo,
+    disconnect: disconnectLiveKit,
+  } = useLiveKitRoom({
+    token: livekitToken,
+    enabled: !!currentRoom && !!livekitToken,
+  });
+
+  // Leave room handler
+  const handleLeaveRoom = useCallback(async () => {
+    if (!currentRoom) return;
+    
+    // Disconnect from LiveKit first
+    disconnectLiveKit();
+
+    try {
+      await leaveRoom(currentRoom.code);
+    } catch {
+      // Ignore errors during leave
+    } finally {
+      setCurrentRoom(null);
+      setLivekitToken(null);
+      setPendingRequests([]);
+    }
+  }, [currentRoom]);
+
+  // Fetch pending join requests (for host only)
+  const fetchPendingRequests = useCallback(async () => {
+    if (!currentRoom || !isHost) return;
+    
+    try {
+      const response = await getPendingRequests(currentRoom.code);
+      setPendingRequests(response.data?.requests || []);
+    } catch (error) {
+      console.error('Failed to fetch pending requests:', error);
+    }
+  }, [currentRoom, isHost]);
+
+  // Refresh room data (participants list, etc.)
+  const refreshRoomData = useCallback(async () => {
+    if (!currentRoom) return;
+    
+    try {
+      const response = await getRoom(currentRoom.code);
+      if (response.data?.room) {
+        setCurrentRoom(response.data.room);
+      }
+    } catch (error) {
+      console.error('Failed to refresh room data:', error);
+    }
+  }, [currentRoom]);
+
+  // Listen to room events via WebSocket
+  useRoomEvents({
+    roomCode: currentRoom?.code || '',
+    enabled: !!currentRoom,
+    onEvent: useCallback((event: RoomEvent) => {
+      if (!currentRoom) return;
+      
+      console.log('Room event received:', event);
+      
+      switch (event.type) {
+        case 'participant_joined':
+        case 'participant_left':
+        case 'room_updated':
+          // Refresh room data to update sidebar
+          refreshRoomData();
+          break;
+        case 'room_deleted':
+          handleLeaveRoom();
+          break;
+        case 'join_request_received':
+          // Refresh pending requests when a new join request arrives
+          fetchPendingRequests();
+          break;
+      }
+    }, [currentRoom, fetchPendingRequests, handleLeaveRoom, refreshRoomData])
+  });
+
+  // Fetch pending requests when room changes
+  useEffect(() => {
+    if (currentRoom && isHost) {
+      fetchPendingRequests();
+    }
+  }, [currentRoom?.code, isHost, fetchPendingRequests]);
 
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) return;
@@ -51,44 +150,49 @@ function HomePage() {
     setIsRoomModalOpen(false);
   };
 
-  const handleLeaveRoom = async () => {
-    if (!currentRoom) return;
-
-    try {
-      // Call backend to leave room (this will remove user from participants or delete room if host)
-      await leaveRoom(currentRoom.code);
-    } catch {
-      // Ignore errors during leave
-    } finally {
-      // Always clear local state regardless of API result
-      setCurrentRoom(null);
-      setLivekitToken(null);
-    }
-  };
-
   const handleOpenRoomModal = (mode: 'create' | 'join') => {
     setRoomMode(mode);
     setIsRoomModalOpen(true);
   };
 
-  // Always show full room view when in a room
-  if (currentRoom) {
-    return <RoomView room={currentRoom} onLeave={handleLeaveRoom} livekitToken={livekitToken || undefined} />;
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-black">
-      {/* Main Home Content */}
-      <HomeContent
-        results={results}
-        loading={loading}
-        searched={searched}
-        searchQuery={searchQuery}
-        onSearch={handleSearch}
-        onClear={handleClear}
-        onOpenRoomModal={handleOpenRoomModal}
-        inRoom={!!currentRoom}
-      />
+    <div className="min-h-screen flex bg-black">
+      {/* Room Sidebar (when in room) */}
+      {currentRoom && (
+        <Sidebar
+          room={currentRoom}
+          currentUserId={user?.id}
+          isMuted={isMuted}
+          isVideoOff={isVideoOff}
+          isRoomAudioOff={isRoomAudioOff}
+          isCollapsed={isSidebarCollapsed}
+          pendingRequests={pendingRequests}
+          isLiveKitConnected={isLiveKitConnected}
+          onToggleMute={toggleMute}
+          onToggleVideo={toggleVideo}
+          onToggleRoomAudio={() => setIsRoomAudioOff(!isRoomAudioOff)}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onLeaveRoom={handleLeaveRoom}
+          onRequestHandled={() => fetchPendingRequests()}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1">
+        <HomeContent
+          results={results}
+          loading={loading}
+          searched={searched}
+          searchQuery={searchQuery}
+          onSearch={handleSearch}
+          onClear={handleClear}
+          onOpenRoomModal={handleOpenRoomModal}
+          inRoom={!!currentRoom}
+          isHost={isHost}
+          roomCode={currentRoom?.code}
+          onLeaveRoom={handleLeaveRoom}
+        />
+      </div>
 
       {/* Room Modal */}
       <RoomModal
