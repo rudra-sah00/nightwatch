@@ -3,7 +3,6 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoPlayer from '@/components/video/VideoPlayer';
-import { AuthGuard } from '@/components/auth';
 import { getVideoData, getShowDetails, getEpisodeData, getSeriesEpisodes } from '@/services/api/media';
 import { ArrowLeftIcon, PlayIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +18,7 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const [showDetails, setShowDetails] = useState<ShowDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const hasLoadedRef = React.useRef(false);
+
   const fetchedSeasons = React.useRef<Set<number>>(new Set());
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [seasonEpisodes, setSeasonEpisodes] = useState<Episode[]>([]);
@@ -29,9 +28,9 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const episodeId = searchParams.get('episode');
 
   useEffect(() => {
-    // Prevent duplicate calls in React StrictMode
-    if (hasLoadedRef.current) return;
-    hasLoadedRef.current = true;
+    // Robust cancellation handling with AbortController
+    const controller = new AbortController();
+
     const loadVideo = async () => {
       setLoading(true);
       setError(null);
@@ -41,10 +40,13 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
         let response;
         if (episodeId) {
           // If we have an episode ID, get episode stream data
-          response = await getEpisodeData(resolvedParams.id, episodeId);
+          response = await getEpisodeData(resolvedParams.id, episodeId, { signal: controller.signal });
         } else {
-          response = await getVideoData(resolvedParams.id);
+          response = await getVideoData(resolvedParams.id, { signal: controller.signal });
         }
+
+        // Check if aborted before updating state
+        if (controller.signal.aborted) return;
 
         if (!response.data?.video) {
           setError('Failed to load video');
@@ -56,7 +58,10 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
         // Load show details for series to get episodes list
         if (response.data.video.metadata.content_type === 'Series') {
           try {
-            const showResponse = await getShowDetails(resolvedParams.id);
+            const showResponse = await getShowDetails(resolvedParams.id, { signal: controller.signal });
+
+            if (controller.signal.aborted) return;
+
             if (showResponse.data?.show) {
               setShowDetails(showResponse.data.show);
 
@@ -75,14 +80,22 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
             // Show details fetch failed silently
           }
         }
-      } catch {
-        setError('An error occurred while loading the video');
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setError('An error occurred while loading the video');
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     loadVideo();
+
+    return () => {
+      controller.abort();
+    };
   }, [resolvedParams.id, episodeId]);
 
   // Dynamic document title based on content
@@ -114,12 +127,21 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     const selectedSeasonInfo = showDetails?.seasons?.find(s => s.season_number === selectedSeason);
 
     if (showDetails?.content_type === 'Series' && selectedSeasonInfo) {
+      const controller = new AbortController();
+
       // Mark this season as fetched to prevent duplicate requests
       fetchedSeasons.current.add(selectedSeason);
 
       const fetchSeasonEpisodes = async () => {
         try {
-          const response = await getSeriesEpisodes(resolvedParams.id, selectedSeasonInfo.season_id);
+          const response = await getSeriesEpisodes(resolvedParams.id, selectedSeasonInfo.season_id, { signal: controller.signal });
+
+          if (controller.signal.aborted) {
+            // If aborted, remove from fetched set so we can retry later
+            fetchedSeasons.current.delete(selectedSeason);
+            return;
+          }
+
           if (response.data && response.data.episodes) {
             const newEps = response.data.episodes;
             // Update showDetails episodes with new episodes
@@ -134,13 +156,19 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
             });
             // Update filtered episodes for display
             setSeasonEpisodes(newEps);
+          } else {
+            // Request failed (api error), allow retry
+            fetchedSeasons.current.delete(selectedSeason);
           }
         } catch {
-          // On error, allow retry by removing from fetched set
+          // On error, allow retry
           fetchedSeasons.current.delete(selectedSeason);
         }
       };
+
       fetchSeasonEpisodes();
+
+      return () => controller.abort();
     } else if (showDetails?.episodes) {
       // Not a series or no season info, just filter
       const filtered = showDetails.episodes.filter(ep => ep.season_number === selectedSeason);
@@ -549,11 +577,9 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-// Wrap with AuthGuard to protect the route
+// Route protected by middleware
 export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <AuthGuard>
-      <WatchPageContent params={params} />
-    </AuthGuard>
+    <WatchPageContent params={params} />
   );
 }

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import {
     isAuthenticated,
     getStoredUser,
+    setStoredUser,
     logout as apiLogout,
     getCurrentUser,
     login as apiLoginFn,
@@ -25,22 +26,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const checkAuth = async () => {
             if (isAuthenticated()) {
+                // Optimistic: Load from storage first for speed
                 const storedUser = getStoredUser();
                 if (storedUser) {
                     setUser(storedUser);
-                } else {
-                    const result = await getCurrentUser();
+                }
+
+                try {
+                    // SECURE: Always verify token with backend
+                    // If token is invalid (401), client.ts will auto-logout
+                    const result = await getCurrentUser({ signal: controller.signal });
+
+                    if (controller.signal.aborted) return;
+
                     if (result.data) {
                         setUser(result.data.user);
+                        setStoredUser(result.data.user);
                     }
+                } catch {
+                    // Start fresh if verification fails unexpectedly
                 }
             }
-            setIsLoading(false);
+
+            if (!controller.signal.aborted) {
+                setIsLoading(false);
+            }
         };
 
         checkAuth();
+
+        // Listen for storage changes to sync auth state across tabs
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'wr_access_token') {
+                if (!e.newValue) {
+                    // User logged out in another tab
+                    setUser(null);
+                } else {
+                    // User logged in in another tab - reload user data
+                    const storedUser = getStoredUser();
+                    if (storedUser) {
+                        setUser(storedUser);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            controller.abort();
+            window.removeEventListener('storage', handleStorageChange);
+        };
     }, []);
 
     const login = async (username: string, password: string) => {

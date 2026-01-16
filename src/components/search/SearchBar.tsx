@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Command } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -53,10 +53,7 @@ export default function SearchBar({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
+      // Cmd+K shortcut removed as requested
       if (e.key === 'Escape' && isFocused) {
         inputRef.current?.blur();
       }
@@ -67,10 +64,7 @@ export default function SearchBar({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className={cn(
-        "relative transition-all duration-300",
-        isFocused && "scale-[1.01]"
-      )}>
+      <div className="relative transition-all duration-300">
         <div className={cn(
           "relative flex items-center rounded-xl transition-all duration-300",
           "bg-zinc-900/80 backdrop-blur-md",
@@ -95,7 +89,7 @@ export default function SearchBar({
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             className={cn(
-              "w-full py-3 md:py-4 pl-10 md:pl-12 pr-32 md:pr-40",
+              "w-full py-3 md:py-4 pl-10 md:pl-12 pr-12 md:pr-14",
               "bg-transparent border-none",
               "text-white text-sm md:text-base",
               "placeholder-zinc-500",
@@ -105,14 +99,6 @@ export default function SearchBar({
 
           {/* Right side controls */}
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            {/* Keyboard shortcut hint */}
-            {!query && !isFocused && (
-              <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-zinc-800/80 rounded-md border border-zinc-700/50">
-                <Command className="w-3 h-3 text-zinc-500" />
-                <span className="text-zinc-500 text-xs font-medium">K</span>
-              </div>
-            )}
-
             {/* Clear button */}
             {query && (
               <Button
@@ -120,27 +106,11 @@ export default function SearchBar({
                 variant="ghost"
                 size="icon"
                 onClick={handleClear}
-                className="h-8 w-8 text-zinc-500 hover:text-white hover:bg-zinc-800"
+                className="h-8 w-8 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-full"
               >
                 <X className="w-4 h-4" />
               </Button>
             )}
-
-            {/* Search button */}
-            <Button
-              type="submit"
-              disabled={!query.trim()}
-              variant="default"
-              size="sm"
-              className={cn(
-                "px-4 py-2 font-medium",
-                "bg-white text-black hover:bg-zinc-200",
-                "disabled:bg-zinc-800 disabled:text-zinc-600",
-                "transition-all duration-200 active:scale-95"
-              )}
-            >
-              Search
-            </Button>
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { login } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,21 +15,27 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { login } = useAuth();
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
-        const result = await login(username, password);
+        try {
+            const result = await login(username, password);
 
-        if (result.data) {
-            window.location.href = '/';
-        } else {
-            setError(result.error || 'Login failed');
+            if (result.success) {
+                router.push('/');
+            } else {
+                setError(result.error || 'Login failed');
+            }
+        } catch (err) {
+            setError('An unexpected error occurred');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     return (

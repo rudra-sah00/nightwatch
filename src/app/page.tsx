@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { AuthGuard } from '@/components/auth';
 import { RoomModal, RoomView } from '@/components/room';
 import { HomeContent } from '@/components/home';
 import { useAuth } from '@/hooks/useAuth';
@@ -106,8 +105,6 @@ function HomePage() {
 
 export default function Home() {
   return (
-    <AuthGuard>
-      <HomePage />
-    </AuthGuard>
+    <HomePage />
   );
 }

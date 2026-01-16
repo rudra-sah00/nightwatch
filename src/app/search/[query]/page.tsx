@@ -4,9 +4,10 @@ import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { search, SearchResult } from '@/services/api/media';
 import { HomeContent } from '@/components/home';
-import { AuthGuard } from '@/components/auth';
 import { RoomModal } from '@/components/room';
 import { Room, leaveRoom } from '@/services/api/rooms';
+
+import { useQuery } from '@tanstack/react-query';
 
 interface SearchPageProps {
     params: Promise<{ query: string }>;
@@ -16,31 +17,23 @@ function SearchPageContent({ params }: SearchPageProps) {
     const resolvedParams = use(params);
     const decodedQuery = decodeURIComponent(resolvedParams.query);
     const router = useRouter();
-    const [results, setResults] = useState<SearchResult[]>([]);
-    const [loading, setLoading] = useState(true);
+
+    // React Query - Proper State Management
+    const { data: results = [], isLoading: loading } = useQuery({
+        queryKey: ['search', decodedQuery],
+        queryFn: async ({ signal }) => {
+            const response = await search(decodedQuery, { signal });
+            if (response.error) throw new Error(response.error);
+            return response.data?.results || [];
+        },
+        enabled: !!decodedQuery,
+        staleTime: 60 * 1000, // Data fresh for 1 min
+    });
+
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
     const [selectedVideo, setSelectedVideo] = useState<{ id: string; title: string } | null>(null);
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
     const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
-
-    // Fetch search results automatically
-    useEffect(() => {
-        const fetchResults = async () => {
-            if (!decodedQuery) return;
-
-            setLoading(true);
-            try {
-                const response = await search(decodedQuery);
-                setResults(response.data?.results || []);
-            } catch {
-                setResults([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchResults();
-    }, [decodedQuery]);
 
     const handleSearch = useCallback(async (query: string) => {
         if (!query.trim()) return;
@@ -98,12 +91,10 @@ function SearchPageContent({ params }: SearchPageProps) {
     );
 }
 
-// Wrap with AuthGuard to protect the route
+// Route protected by middleware
 export default function SearchPage({ params }: SearchPageProps) {
     return (
-        <AuthGuard>
-            <SearchPageContent params={params} />
-        </AuthGuard>
+        <SearchPageContent params={params} />
     );
 }
 

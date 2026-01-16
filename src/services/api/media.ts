@@ -32,9 +32,10 @@ export interface SearchResponse {
 /**
  * Search for movies and TV shows
  */
-export async function search(query: string): Promise<ApiResponse<SearchResponse>> {
+export async function search(query: string, options: RequestInit = {}): Promise<ApiResponse<SearchResponse>> {
     return apiRequest<SearchResponse>(
-        `/api/search?q=${encodeURIComponent(query)}`
+        `/api/search?q=${encodeURIComponent(query)}`,
+        options
     );
 }
 
@@ -42,10 +43,12 @@ export async function search(query: string): Promise<ApiResponse<SearchResponse>
  * Search IMDB for additional metadata
  */
 export async function searchImdb(
-    query: string
+    query: string,
+    options: RequestInit = {}
 ): Promise<ApiResponse<VideoMetadata | null>> {
     return apiRequest<VideoMetadata | null>(
-        `/api/video/search/imdb?q=${encodeURIComponent(query)}`
+        `/api/video/search/imdb?q=${encodeURIComponent(query)}`,
+        options
     );
 }
 
@@ -55,16 +58,26 @@ export async function searchImdb(
  * Get complete video data for playback (movie) with proxied URLs
  */
 export async function getVideoData(
-    movieId: string
+    movieId: string,
+    options: RequestInit = {}
 ): Promise<ApiResponse<{ video: CompleteVideoData }>> {
-    return apiRequest<{ video: CompleteVideoData }>(`/api/video/${movieId}/proxied`);
+    return apiRequest<{ video: CompleteVideoData }>(
+        `/api/video/${movieId}/proxied`,
+        options
+    );
 }
 
 /**
  * Get video playlist
  */
-export async function getVideoPlaylist(movieId: string): Promise<ApiResponse<VideoPlaylistResponse>> {
-    return apiRequest<VideoPlaylistResponse>(`/api/video/${movieId}/playlist`);
+export async function getVideoPlaylist(
+    movieId: string,
+    options: RequestInit = {}
+): Promise<ApiResponse<VideoPlaylistResponse>> {
+    return apiRequest<VideoPlaylistResponse>(
+        `/api/video/${movieId}/playlist`,
+        options
+    );
 }
 
 /**
@@ -72,10 +85,12 @@ export async function getVideoPlaylist(movieId: string): Promise<ApiResponse<Vid
  */
 export async function getEpisodeData(
     seriesId: string,
-    episodeId: string
+    episodeId: string,
+    options: RequestInit = {}
 ): Promise<ApiResponse<{ video: CompleteVideoData }>> {
     return apiRequest<{ video: CompleteVideoData }>(
-        `/api/series/${seriesId}/episode/${episodeId}/proxied`
+        `/api/series/${seriesId}/episode/${episodeId}/proxied`,
+        options
     );
 }
 
@@ -83,9 +98,13 @@ export async function getEpisodeData(
  * Get show details (metadata, seasons, episodes list)
  */
 export async function getShowDetails(
-    showId: string
+    showId: string,
+    options: RequestInit = {}
 ): Promise<ApiResponse<ShowDetailsResponse>> {
-    return apiRequest<ShowDetailsResponse>(`/api/video/show/${showId}`);
+    return apiRequest<ShowDetailsResponse>(
+        `/api/video/show/${showId}`,
+        options
+    );
 }
 
 /**
@@ -93,11 +112,13 @@ export async function getShowDetails(
  */
 export async function getSeriesEpisodes(
     seriesId: string,
-    startEpisode?: string
+    startEpisode?: string,
+    options: RequestInit = {}
 ): Promise<ApiResponse<SeriesEpisodesResponse>> {
     const params = startEpisode ? `?start_episode=${startEpisode}` : '';
     return apiRequest<SeriesEpisodesResponse>(
-        `/api/series/${seriesId}/episodes${params}`
+        `/api/series/${seriesId}/episodes${params}`,
+        options
     );
 }
 

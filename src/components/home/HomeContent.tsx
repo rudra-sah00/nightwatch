@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SearchResult } from '@/lib/api';
 import { Button, Skeleton } from '@/components/ui';
 import {
-    Users,
+    Menu,
     Plus,
     LogIn,
     LogOut,
@@ -137,8 +137,8 @@ export function HomeContent({
                                             showRoomDropdown && "bg-zinc-700 border-zinc-600"
                                         )}
                                     >
-                                        <Users className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Rooms</span>
+                                        <Menu className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Menu</span>
                                         <ChevronDown className={cn(
                                             "w-4 h-4 transition-transform duration-200",
                                             showRoomDropdown && "rotate-180"

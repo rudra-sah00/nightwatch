@@ -43,6 +43,6 @@ export async function logout(): Promise<void> {
 /**
  * Get current authenticated user info
  */
-export async function getCurrentUser(): Promise<ApiResponse<{ user: User }>> {
-    return apiRequest<{ user: User }>('/api/auth/me');
+export async function getCurrentUser(options: RequestInit = {}): Promise<ApiResponse<{ user: User }>> {
+    return apiRequest<{ user: User }>('/api/auth/me', options);
 }
