@@ -8,7 +8,7 @@ import type { ContentType, Episode, CompleteVideoData, VideoMetadata, ShowDetail
 // Sub-components
 import HeroSection from './HeroSection';
 import MetadataSection from './MetadataSection';
-import SeasonSelector from './SeasonSelector';
+import { DropdownSelector } from '@/components/ui/dropdown-selector';
 import EpisodesList from './EpisodesList';
 
 interface ContentDetailModalProps {
@@ -42,6 +42,7 @@ export default function ContentDetailModal({
   const [actualType, setActualType] = useState<ContentType>(type);
   const hasFetched = useRef(false);
   const imdbFetched = useRef(false);
+  const fetchedSeasons = useRef<Set<number>>(new Set());
 
   // Fetch show details (proper API - no hit-and-trial)
   useEffect(() => {
@@ -61,7 +62,9 @@ export default function ContentDetailModal({
 
           if (show.seasons && show.seasons.length > 0) {
             setSeasonsList(show.seasons);
-            setSelectedSeason(show.seasons[0]?.season_number || 1);
+            // Default to latest/last season
+            const lastSeason = show.seasons[show.seasons.length - 1];
+            setSelectedSeason(lastSeason?.season_number || 1);
           }
 
           if (show.episodes && show.episodes.length > 0) {
@@ -142,10 +145,15 @@ export default function ContentDetailModal({
 
   // Fetch episodes when season changes
   useEffect(() => {
-    const currentSeasonHasEpisodes = episodes.some(e => e.season_number === selectedSeason);
+    // Skip if we already fetched this season
+    if (fetchedSeasons.current.has(selectedSeason)) return;
+
     const selectedSeasonInfo = seasonsList.find(s => s.season_number === selectedSeason);
 
-    if (actualType === 'Series' && seasonsList.length > 0 && !currentSeasonHasEpisodes && selectedSeasonInfo) {
+    if (actualType === 'Series' && seasonsList.length > 0 && selectedSeasonInfo) {
+      // Mark this season as fetched to prevent duplicate requests
+      fetchedSeasons.current.add(selectedSeason);
+
       const fetchSeasonEpisodes = async () => {
         try {
           const response = await getSeriesEpisodes(id, selectedSeasonInfo.season_id);
@@ -159,11 +167,13 @@ export default function ContentDetailModal({
           }
         } catch (err) {
           console.error('Failed to fetch season episodes:', err);
+          // On error, allow retry by removing from fetched set
+          fetchedSeasons.current.delete(selectedSeason);
         }
       };
       fetchSeasonEpisodes();
     }
-  }, [selectedSeason, seasonsList, actualType, episodes, id]);
+  }, [selectedSeason, seasonsList, actualType, id]);
 
   const posterUrl = poster || getPosterUrl(id, true);
 
@@ -224,13 +234,19 @@ export default function ContentDetailModal({
             <div className="pt-8 mt-6 border-t border-zinc-800">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-semibold">Episodes</h3>
-                <SeasonSelector
-                  seasons={seasons}
-                  selectedSeason={selectedSeason}
-                  showDropdown={showSeasonDropdown}
-                  onToggleDropdown={() => setShowSeasonDropdown(!showSeasonDropdown)}
-                  onSelectSeason={handleSeasonSelect}
-                  currentSeasonEpisodes={currentSeasonEpisodes}
+                <DropdownSelector
+                  options={seasons.map(([seasonNum, eps]) => {
+                    const seasonInfo = seasonsList.find(s => s.season_number === seasonNum);
+                    return {
+                      value: seasonNum,
+                      label: `Season ${seasonNum}`,
+                      count: seasonInfo?.episode_count ?? eps.length,
+                    };
+                  })}
+                  selectedValue={selectedSeason}
+                  isOpen={showSeasonDropdown}
+                  onToggle={() => setShowSeasonDropdown(!showSeasonDropdown)}
+                  onSelect={handleSeasonSelect}
                 />
               </div>
               <EpisodesList

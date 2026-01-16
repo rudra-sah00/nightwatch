@@ -1,9 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
-import { QualityLevel, PlayerAudioTrack, LocalSubtitle, SettingsTab, QualityValue } from '@/types/video';
+import { QualityLevel, PlayerAudioTrack, LocalSubtitle, SettingsTab, QualityValue, PlaybackSpeed } from '@/types/video';
 import { getQualityLabel } from '@/lib/utils/video-utils';
+
+// Playback speed options
+const PLAYBACK_SPEEDS: PlaybackSpeed[] = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 interface SettingsMenuProps {
   isOpen: boolean;
@@ -16,12 +19,17 @@ interface SettingsMenuProps {
   currentAudioTrack: number;
   localSubtitles: LocalSubtitle[];
   currentSubtitleIndex: number;
+  isAutoQuality?: boolean;
+  actualQualityLevel?: number;
+  playbackSpeed?: number;
   onToggleMenu: () => void;
+  onCloseMenu: () => void;  // Close menu entirely
   onTabChange: (tab: SettingsTab) => void;
   onQualityChange: (level: QualityValue) => void;
   onAudioChange: (trackId: number) => void;
   onSubtitleChange: (index: number) => void;
   onToggleFullscreen: () => void;
+  onPlaybackSpeedChange?: (speed: PlaybackSpeed) => void;
   getSubtitleLabel: (index: number) => string;
   getCurrentAudioLabel: () => string;
 }
@@ -37,29 +45,73 @@ export function SettingsMenu({
   currentAudioTrack,
   localSubtitles,
   currentSubtitleIndex,
+  isAutoQuality = false,
+  actualQualityLevel,
+  playbackSpeed = 1,
   onToggleMenu,
+  onCloseMenu,
   onTabChange,
   onQualityChange,
   onAudioChange,
   onSubtitleChange,
   onToggleFullscreen,
+  onPlaybackSpeedChange,
   getSubtitleLabel,
   getCurrentAudioLabel,
 }: SettingsMenuProps) {
-  const sortedQualityLevels = [...qualityLevels].sort((a, b) => (b.height || 0) - (a.height || 0));
+  const sortedQualityLevels = useMemo(() =>
+    [...qualityLevels].sort((a, b) => (b.height || 0) - (a.height || 0)),
+    [qualityLevels]
+  );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-0.5 md:gap-1">
+      {/* Subtitles Quick Button */}
+      {localSubtitles.length > 0 && (
+        <button
+          onClick={() => {
+            if (!isOpen) onToggleMenu();
+            onTabChange('subtitles');
+          }}
+          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-200 rounded-lg hover:bg-white/10 group ${currentSubtitleIndex >= 0 ? 'text-red-500' : 'text-white/70 hover:text-white'
+            }`}
+          aria-label="Subtitles"
+          title="Subtitles"
+        >
+          <SubtitleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+        </button>
+      )}
+
+      {/* Audio Quick Button */}
+      {audioTracks.length > 1 && (
+        <button
+          onClick={() => {
+            if (!isOpen) onToggleMenu();
+            onTabChange('audio');
+          }}
+          className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-lg hover:bg-white/10 group"
+          aria-label="Audio Track"
+          title="Audio Track"
+        >
+          <AudioIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+        </button>
+      )}
+
       {/* Settings Button */}
       <div className="relative">
         <button
           onClick={onToggleMenu}
-          className={`w-10 h-10 flex items-center justify-center transition-all duration-200 ${
-            isOpen ? 'text-white rotate-45' : 'text-white hover:text-zinc-300'
-          }`}
+          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-300 rounded-lg hover:bg-white/10 group ${isOpen ? 'text-white' : 'text-white/70 hover:text-white'
+            }`}
           aria-label="Settings"
+          title="Settings"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className={`w-5 h-5 transition-all duration-300 group-hover:scale-110 ${isOpen ? 'rotate-90' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -70,9 +122,17 @@ export function SettingsMenu({
           </svg>
         </button>
 
+        {/* Click-outside backdrop to close menu */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={onCloseMenu}
+          />
+        )}
+
         {/* Menu Panel */}
         {isOpen && (
-          <div className="absolute bottom-full right-0 mb-2 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[240px] animate-in slide-in-from-bottom-2 duration-200">
+          <div className="absolute bottom-full right-0 mb-3 bg-zinc-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden min-w-[300px] animate-in slide-in-from-bottom-3 fade-in duration-200 z-50">
             {tab === 'main' && (
               <MainMenu
                 hasQualityLevels={qualityLevels.length > 0}
@@ -80,6 +140,11 @@ export function SettingsMenu({
                 audioTracks={audioTracks}
                 localSubtitles={localSubtitles}
                 currentSubtitleIndex={currentSubtitleIndex}
+                isAutoQuality={isAutoQuality}
+                actualQualityLevel={actualQualityLevel}
+                qualityLevels={qualityLevels}
+                playbackSpeed={playbackSpeed}
+                hasSpeedControl={!!onPlaybackSpeedChange}
                 onTabChange={onTabChange}
                 getSubtitleLabel={getSubtitleLabel}
                 getCurrentAudioLabel={getCurrentAudioLabel}
@@ -89,24 +154,45 @@ export function SettingsMenu({
               <QualityMenu
                 levels={sortedQualityLevels}
                 currentQuality={currentQuality}
-                onBack={() => onTabChange('main')}
-                onSelect={onQualityChange}
+                isAutoQuality={isAutoQuality}
+                actualQualityLevel={actualQualityLevel}
+                onBack={onCloseMenu}
+                onSelect={(level) => {
+                  onQualityChange(level);
+                  onCloseMenu();
+                }}
               />
             )}
             {tab === 'subtitles' && (
               <SubtitlesMenu
                 subtitles={localSubtitles}
                 currentIndex={currentSubtitleIndex}
-                onBack={() => onTabChange('main')}
-                onSelect={onSubtitleChange}
+                onBack={onCloseMenu}
+                onSelect={(index) => {
+                  onSubtitleChange(index);
+                  onCloseMenu();
+                }}
               />
             )}
             {tab === 'audio' && (
               <AudioMenu
                 tracks={audioTracks}
                 currentTrack={currentAudioTrack}
-                onBack={() => onTabChange('main')}
-                onSelect={onAudioChange}
+                onBack={onCloseMenu}
+                onSelect={(trackId) => {
+                  onAudioChange(trackId);
+                  onCloseMenu();
+                }}
+              />
+            )}
+            {tab === 'speed' && onPlaybackSpeedChange && (
+              <SpeedMenu
+                currentSpeed={playbackSpeed}
+                onBack={onCloseMenu}
+                onSelect={(speed) => {
+                  onPlaybackSpeedChange(speed);
+                  onCloseMenu();
+                }}
               />
             )}
           </div>
@@ -116,13 +202,14 @@ export function SettingsMenu({
       {/* Fullscreen Button */}
       <button
         onClick={onToggleFullscreen}
-        className="w-10 h-10 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+        className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-lg hover:bg-white/10 group"
         aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+        title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
       >
         {isFullscreen ? (
-          <ArrowsPointingInIcon className="w-6 h-6" />
+          <ArrowsPointingInIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
         ) : (
-          <ArrowsPointingOutIcon className="w-6 h-6" />
+          <ArrowsPointingOutIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
         )}
       </button>
     </div>
@@ -137,6 +224,11 @@ interface MainMenuProps {
   audioTracks: PlayerAudioTrack[];
   localSubtitles: LocalSubtitle[];
   currentSubtitleIndex: number;
+  isAutoQuality?: boolean;
+  actualQualityLevel?: number;
+  qualityLevels: QualityLevel[];
+  playbackSpeed: number;
+  hasSpeedControl: boolean;
   onTabChange: (tab: SettingsTab) => void;
   getSubtitleLabel: (index: number) => string;
   getCurrentAudioLabel: () => string;
@@ -148,19 +240,59 @@ function MainMenu({
   audioTracks,
   localSubtitles,
   currentSubtitleIndex,
+  isAutoQuality,
+  actualQualityLevel,
+  qualityLevels,
+  playbackSpeed,
+  hasSpeedControl,
   onTabChange,
   getSubtitleLabel,
   getCurrentAudioLabel,
 }: MainMenuProps) {
+  // Get actual quality label when in auto mode
+  const getAutoQualityDisplay = () => {
+    if (isAutoQuality && actualQualityLevel !== undefined && actualQualityLevel >= 0) {
+      const level = qualityLevels.find(l => l.id === actualQualityLevel);
+      if (level) {
+        return `Auto (${getQualityLabel(level)})`;
+      }
+    }
+    return currentQualityLabel;
+  };
+
+  const getSpeedLabel = (speed: number) => {
+    if (speed === 1) return 'Normal';
+    return `${speed}x`;
+  };
+
   return (
-    <div className="py-2">
+    <div className="py-1">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-white/10">
+        <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Settings</span>
+      </div>
+
       {/* Quality */}
       {hasQualityLevels && (
         <MenuRow
           icon={<QualityIcon />}
           label="Quality"
-          value={currentQualityLabel}
+          value={getAutoQualityDisplay()}
+          badge={isAutoQuality ? 'AUTO' : undefined}
+          badgeColor="blue"
           onClick={() => onTabChange('quality')}
+        />
+      )}
+
+      {/* Playback Speed */}
+      {hasSpeedControl && (
+        <MenuRow
+          icon={<SpeedIcon />}
+          label="Playback Speed"
+          value={getSpeedLabel(playbackSpeed)}
+          badge={playbackSpeed !== 1 ? `${playbackSpeed}x` : undefined}
+          badgeColor="purple"
+          onClick={() => onTabChange('speed')}
         />
       )}
 
@@ -170,6 +302,8 @@ function MainMenu({
           icon={<SubtitleIcon />}
           label="Subtitles"
           value={getSubtitleLabel(currentSubtitleIndex)}
+          badge={currentSubtitleIndex >= 0 ? 'ON' : undefined}
+          badgeColor="red"
           onClick={() => onTabChange('subtitles')}
         />
       )}
@@ -191,21 +325,38 @@ interface MenuRowProps {
   icon: React.ReactNode;
   label: string;
   value: string;
+  badge?: string;
+  badgeColor?: 'blue' | 'red' | 'green' | 'purple' | 'yellow';
   onClick: () => void;
 }
 
-function MenuRow({ icon, label, value, onClick }: MenuRowProps) {
+function MenuRow({ icon, label, value, badge, badgeColor = 'blue', onClick }: MenuRowProps) {
+  const badgeStyles = {
+    blue: 'bg-blue-500/20 text-blue-400',
+    red: 'bg-red-500/20 text-red-400',
+    green: 'bg-green-500/20 text-green-400',
+    purple: 'bg-purple-500/20 text-purple-400',
+    yellow: 'bg-yellow-500/20 text-yellow-400',
+  };
+
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
+      className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 group"
     >
       <div className="flex items-center gap-3">
-        {icon}
-        <span className="text-white">{label}</span>
+        <span className="text-white/50 group-hover:text-white/70 transition-colors">{icon}</span>
+        <span className="text-white font-medium text-sm">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-white/60 text-sm truncate max-w-[100px]">{value}</span>
+        {badge && (
+          <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md ${badgeStyles[badgeColor]}`}>
+            {badge}
+          </span>
+        )}
+        <span className="text-white/50 text-sm truncate max-w-[120px] group-hover:text-white/70 transition-colors">
+          {value}
+        </span>
         <ChevronRightIcon />
       </div>
     </button>
@@ -215,28 +366,141 @@ function MenuRow({ icon, label, value, onClick }: MenuRowProps) {
 interface QualityMenuProps {
   levels: QualityLevel[];
   currentQuality: QualityValue;
+  isAutoQuality?: boolean;
+  actualQualityLevel?: number;
   onBack: () => void;
   onSelect: (level: QualityValue) => void;
 }
 
-function QualityMenu({ levels, currentQuality, onBack, onSelect }: QualityMenuProps) {
+function QualityMenu({ levels, currentQuality, isAutoQuality, actualQualityLevel, onBack, onSelect }: QualityMenuProps) {
   return (
     <div>
-      <SubMenuHeader title="Quality" onBack={onBack} />
-      <div className="py-2 max-h-[300px] overflow-y-auto">
-        <SelectableItem
-          label="Auto"
-          isSelected={currentQuality === 'auto'}
+      <SubMenuHeader title="Video Quality" onBack={onBack} />
+      <div className="py-2 max-h-[360px] overflow-y-auto custom-scrollbar">
+        {/* Auto Option */}
+        <button
           onClick={() => onSelect('auto')}
-        />
-        {levels.map((lvl) => (
-          <SelectableItem
-            key={lvl.id}
-            label={getQualityLabel(lvl)}
-            isSelected={currentQuality === lvl.id}
-            onClick={() => onSelect(lvl.id)}
-          />
-        ))}
+          className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentQuality === 'auto' ? 'bg-white/5' : ''
+            }`}
+        >
+          <div className="flex items-center gap-3">
+            <RadioIndicator isSelected={currentQuality === 'auto'} />
+            <div className="flex flex-col items-start">
+              <span className={`font-medium text-sm ${currentQuality === 'auto' ? 'text-white' : 'text-white/70'}`}>
+                Auto
+              </span>
+              {isAutoQuality && actualQualityLevel !== undefined && actualQualityLevel >= 0 && (
+                <span className="text-xs text-blue-400 mt-0.5">
+                  Currently: {getQualityLabel(levels.find(l => l.id === actualQualityLevel) || levels[0])}
+                </span>
+              )}
+            </div>
+          </div>
+          <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-blue-500/20 text-blue-400">
+            RECOMMENDED
+          </span>
+        </button>
+
+        {/* Divider */}
+        <div className="mx-4 my-2 border-t border-white/10" />
+
+        {/* Quality Levels */}
+        {levels.map((lvl) => {
+          const label = getQualityLabel(lvl);
+          const isHD = (lvl.height || 0) >= 720;
+          const is4K = (lvl.height || 0) >= 2160;
+          const is1080 = (lvl.height || 0) >= 1080;
+
+          return (
+            <button
+              key={lvl.id}
+              onClick={() => onSelect(lvl.id)}
+              className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentQuality === lvl.id ? 'bg-white/5' : ''
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                <RadioIndicator isSelected={currentQuality === lvl.id} />
+                <span className={`font-medium text-sm ${currentQuality === lvl.id ? 'text-white' : 'text-white/70'}`}>
+                  {label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {is4K && (
+                  <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-gradient-to-r from-yellow-500/30 to-orange-500/30 text-yellow-400 border border-yellow-500/30">
+                    4K UHD
+                  </span>
+                )}
+                {is1080 && !is4K && (
+                  <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-green-500/20 text-green-400">
+                    FHD
+                  </span>
+                )}
+                {isHD && !is1080 && (
+                  <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-green-500/20 text-green-400">
+                    HD
+                  </span>
+                )}
+                {lvl.bitrate && (
+                  <span className="text-xs text-white/40 font-mono">
+                    {lvl.bitrate >= 1000000
+                      ? `${(lvl.bitrate / 1000000).toFixed(1)}Mbps`
+                      : `${Math.round(lvl.bitrate / 1000)}kbps`
+                    }
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface SpeedMenuProps {
+  currentSpeed: number;
+  onBack: () => void;
+  onSelect: (speed: PlaybackSpeed) => void;
+}
+
+function SpeedMenu({ currentSpeed, onBack, onSelect }: SpeedMenuProps) {
+  return (
+    <div>
+      <SubMenuHeader title="Playback Speed" onBack={onBack} />
+      <div className="py-2 max-h-[360px] overflow-y-auto custom-scrollbar">
+        {PLAYBACK_SPEEDS.map((speed) => {
+          const isNormal = speed === 1;
+          const isSlow = speed < 1;
+
+          return (
+            <button
+              key={speed}
+              onClick={() => onSelect(speed)}
+              className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentSpeed === speed ? 'bg-white/5' : ''
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                <RadioIndicator isSelected={currentSpeed === speed} />
+                <span className={`font-medium text-sm ${currentSpeed === speed ? 'text-white' : 'text-white/70'}`}>
+                  {isNormal ? 'Normal' : `${speed}x`}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {isNormal && (
+                  <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-green-500/20 text-green-400">
+                    DEFAULT
+                  </span>
+                )}
+                {isSlow && (
+                  <span className="text-xs text-white/40">Slower</span>
+                )}
+                {speed > 1 && (
+                  <span className="text-xs text-white/40">Faster</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -252,20 +516,45 @@ interface SubtitlesMenuProps {
 function SubtitlesMenu({ subtitles, currentIndex, onBack, onSelect }: SubtitlesMenuProps) {
   return (
     <div>
-      <SubMenuHeader title="Subtitles" onBack={onBack} />
-      <div className="py-2 max-h-[300px] overflow-y-auto">
-        <SelectableItem
-          label="Off"
-          isSelected={currentIndex === -1}
+      <SubMenuHeader title="Subtitles / CC" onBack={onBack} />
+      <div className="py-2 max-h-[360px] overflow-y-auto custom-scrollbar">
+        {/* Off Option */}
+        <button
           onClick={() => onSelect(-1)}
-        />
+          className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentIndex === -1 ? 'bg-white/5' : ''
+            }`}
+        >
+          <div className="flex items-center gap-3">
+            <RadioIndicator isSelected={currentIndex === -1} />
+            <span className={`font-medium text-sm ${currentIndex === -1 ? 'text-white' : 'text-white/70'}`}>
+              Off
+            </span>
+          </div>
+        </button>
+
+        {/* Divider */}
+        {subtitles.length > 0 && <div className="mx-4 my-2 border-t border-white/10" />}
+
+        {/* Subtitle Options */}
         {subtitles.map((sub, index) => (
-          <SelectableItem
+          <button
             key={index}
-            label={sub.language}
-            isSelected={currentIndex === index}
             onClick={() => onSelect(index)}
-          />
+            className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentIndex === index ? 'bg-white/5' : ''
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <RadioIndicator isSelected={currentIndex === index} />
+              <div className="flex items-center gap-2">
+                <span className={`font-medium text-sm ${currentIndex === index ? 'text-white' : 'text-white/70'}`}>
+                  {sub.language}
+                </span>
+              </div>
+            </div>
+            <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-white/10 text-white/60">
+              CC
+            </span>
+          </button>
         ))}
       </div>
     </div>
@@ -283,14 +572,31 @@ function AudioMenu({ tracks, currentTrack, onBack, onSelect }: AudioMenuProps) {
   return (
     <div>
       <SubMenuHeader title="Audio Track" onBack={onBack} />
-      <div className="py-2 max-h-[300px] overflow-y-auto">
+      <div className="py-2 max-h-[360px] overflow-y-auto custom-scrollbar">
         {tracks.map((track) => (
-          <SelectableItem
+          <button
             key={track.id}
-            label={`${track.name}${track.lang !== 'unknown' ? ` (${track.lang})` : ''}`}
-            isSelected={currentTrack === track.id}
             onClick={() => onSelect(track.id)}
-          />
+            className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/8 active:bg-white/12 transition-all duration-150 ${currentTrack === track.id ? 'bg-white/5' : ''
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <RadioIndicator isSelected={currentTrack === track.id} />
+              <div className="flex flex-col items-start">
+                <span className={`font-medium text-sm ${currentTrack === track.id ? 'text-white' : 'text-white/70'}`}>
+                  {track.name}
+                </span>
+                {track.lang !== 'unknown' && (
+                  <span className="text-xs text-white/40 uppercase mt-0.5">{track.lang}</span>
+                )}
+              </div>
+            </div>
+            {currentTrack === track.id && (
+              <span className="px-2 py-1 text-[10px] font-bold rounded-md bg-green-500/20 text-green-400">
+                ACTIVE
+              </span>
+            )}
+          </button>
         ))}
       </div>
     </div>
@@ -306,55 +612,63 @@ function SubMenuHeader({ title, onBack }: SubMenuHeaderProps) {
   return (
     <button
       onClick={onBack}
-      className="w-full flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10 hover:bg-white/10 transition-colors"
+      className="w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 border-b border-white/10 hover:bg-white/8 transition-colors"
     >
       <ChevronLeftIcon />
-      <span className="text-white font-medium">{title}</span>
+      <span className="text-white font-semibold text-sm">{title}</span>
     </button>
   );
 }
 
-interface SelectableItemProps {
-  label: string;
-  isSelected: boolean;
-  onClick: () => void;
-}
-
-function SelectableItem({ label, isSelected, onClick }: SelectableItemProps) {
+function RadioIndicator({ isSelected }: { isSelected: boolean }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 transition-colors ${
-        isSelected ? 'text-white font-medium' : 'text-white/70'
-      }`}
-    >
-      <span>{label}</span>
-      {isSelected && <CheckIcon />}
-    </button>
+    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected ? 'border-red-500 bg-red-500' : 'border-white/30 hover:border-white/50'
+      }`}>
+      {isSelected && (
+        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+      )}
+    </div>
   );
 }
 
 // Icons
-function QualityIcon() {
+function QualityIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2m0 2v2m0-2h10m0 0V2m0 2v2m0-2h3a1 1 0 011 1v3M4 8h16M4 8a1 1 0 00-1 1v3m1-4v10a1 1 0 001 1h14a1 1 0 001-1V9" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <text x="12" y="14" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none" fontWeight="bold">HD</text>
     </svg>
   );
 }
 
-function SubtitleIcon() {
+function SpeedIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function AudioIcon() {
+function SubtitleIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M6 12h4" strokeLinecap="round" />
+      <path d="M14 12h4" strokeLinecap="round" />
+      <path d="M6 16h12" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function AudioIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 3v18" strokeLinecap="round" />
+      <path d="M8 8v8" strokeLinecap="round" />
+      <path d="M16 6v12" strokeLinecap="round" />
+      <path d="M4 11v2" strokeLinecap="round" />
+      <path d="M20 10v4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -371,14 +685,6 @@ function ChevronLeftIcon() {
   return (
     <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
     </svg>
   );
 }

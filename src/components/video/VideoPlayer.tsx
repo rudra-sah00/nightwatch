@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useCallback, useMemo } from 'react';
-import { VideoPlayerProps, SettingsTab } from '@/types/video';
+import { VideoPlayerProps, SettingsTab, PlaybackSpeed } from '@/types/video';
 import { getQualityLabel, getPositionFromEvent } from '@/lib/utils/video-utils';
 import {
   useHlsPlayer,
@@ -17,10 +17,16 @@ import {
   SettingsMenu,
   PlayButtonOverlay,
   ErrorOverlay,
-  TitleOverlay,
 } from './components';
 
-export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlayerProps) {
+export default function VideoPlayer({
+  src,
+  poster,
+  title,
+  subtitles,
+  spriteSheets,
+  episodeInfo
+}: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
@@ -30,6 +36,7 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('main');
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
 
   // Custom hooks
   const {
@@ -42,6 +49,8 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
     isMuted: playerIsMuted,
     qualityLevels,
     currentQuality,
+    actualQualityLevel,
+    isAutoQuality,
     audioTracks,
     currentAudioTrack,
     togglePlay,
@@ -147,6 +156,18 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
     [changeAudioTrack]
   );
 
+  const handlePlaybackSpeedChange = useCallback(
+    (speed: PlaybackSpeed) => {
+      const video = videoRef.current;
+      if (video) {
+        video.playbackRate = speed;
+        setPlaybackSpeed(speed);
+      }
+      setSettingsTab('main');
+    },
+    [videoRef]
+  );
+
   // Computed values
   const currentQualityLabel = useMemo(() => {
     if (currentQuality === 'auto') return 'Auto';
@@ -178,7 +199,14 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
         poster={poster}
         className="w-full h-full object-contain"
         crossOrigin="anonymous"
-        onClick={togglePlay}
+        onClick={() => {
+          // Close any open menus first, then toggle play
+          if (showSettingsMenu) {
+            closeMenus();
+          } else {
+            togglePlay();
+          }
+        }}
         playsInline
       />
 
@@ -193,15 +221,11 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
 
       {/* Controls Overlay */}
       <div
-        className={`absolute inset-0 transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
       >
-        {/* Title */}
-        <TitleOverlay title={title} showControls={showControls} />
-
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-20">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-24">
           {/* Progress Bar */}
           <ProgressBar
             currentTime={currentTime}
@@ -209,13 +233,15 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
             buffered={buffered}
             hoverTime={hoverTime}
             progressBarRef={progressBarRef}
+            spriteSheets={spriteSheets}
             onSeek={handleSeek}
             onHover={handleProgressHover}
             onLeave={() => setHoverTime(null)}
           />
 
-          {/* Control Buttons */}
+          {/* Control Buttons Row - Netflix style layout */}
           <div className="flex items-center justify-between px-4 pb-4">
+            {/* Left: Play controls + Volume + Time */}
             <ControlButtons
               isPlaying={isPlaying}
               volume={volume}
@@ -223,6 +249,8 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
               currentTime={currentTime}
               duration={duration}
               showVolumeSlider={showVolumeSlider}
+              title={title}
+              episodeInfo={episodeInfo}
               onTogglePlay={togglePlay}
               onSkip={skip}
               onToggleMute={toggleMute}
@@ -231,6 +259,7 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
               onVolumeSliderLeave={() => setShowVolumeSlider(false)}
             />
 
+            {/* Right: Episodes, Subtitles, Settings, Fullscreen */}
             <SettingsMenu
               isOpen={showSettingsMenu}
               tab={settingsTab}
@@ -242,12 +271,17 @@ export default function VideoPlayer({ src, poster, title, subtitles }: VideoPlay
               currentAudioTrack={currentAudioTrack}
               localSubtitles={localSubtitles}
               currentSubtitleIndex={currentSubtitleIndex}
+              isAutoQuality={isAutoQuality}
+              actualQualityLevel={actualQualityLevel}
+              playbackSpeed={playbackSpeed}
               onToggleMenu={handleToggleSettings}
+              onCloseMenu={closeMenus}
               onTabChange={setSettingsTab}
               onQualityChange={handleQualityChange}
               onAudioChange={handleAudioChange}
               onSubtitleChange={handleSubtitleChange}
               onToggleFullscreen={toggleFullscreen}
+              onPlaybackSpeedChange={handlePlaybackSpeedChange}
               getSubtitleLabel={getSubtitleLabel}
               getCurrentAudioLabel={getCurrentAudioLabel}
             />

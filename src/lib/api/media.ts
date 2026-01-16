@@ -38,9 +38,10 @@ export async function search(query: string) {
     return apiRequest<{ results: SearchResult[] }>(`/api/search?q=${encodeURIComponent(query)}`);
 }
 
-// Get complete video data for a movie
+// Get complete video data for a movie (with proxied URLs for playback)
+// Uses /proxied endpoint which rewrites CDN URLs to go through our backend
 export async function getVideoData(movieId: string) {
-    return apiRequest<{ video: CompleteVideoData }>(`/api/video/${movieId}`);
+    return apiRequest<{ video: CompleteVideoData }>(`/api/video/${movieId}/proxied`);
 }
 
 // Get video playlist
@@ -66,9 +67,9 @@ export async function getSeriesEpisodes(seriesId: string, startEpisode?: string)
     return apiRequest<SeriesEpisodesResponse>(`/api/series/${seriesId}/episodes${params}`);
 }
 
-// Get episode stream data
+// Get episode stream data (with proxied URLs for playback)
 export async function getEpisodeData(seriesId: string, episodeId: string) {
-    return apiRequest<{ video: CompleteVideoData }>(`/api/series/${seriesId}/episode/${episodeId}`);
+    return apiRequest<{ video: CompleteVideoData }>(`/api/series/${seriesId}/episode/${episodeId}/proxied`);
 }
 
 // Generate poster URL from movie/series ID

@@ -9,6 +9,11 @@ interface UseHlsPlayerOptions {
   onError?: (message: string) => void;
 }
 
+interface NetworkStats {
+  bandwidth: number; // estimated bandwidth in bits/s
+  latency: number;   // estimated latency in ms
+}
+
 interface UseHlsPlayerReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   hlsRef: React.RefObject<Hls | null>;
@@ -20,8 +25,12 @@ interface UseHlsPlayerReturn {
   isMuted: boolean;
   qualityLevels: QualityLevel[];
   currentQuality: QualityValue;
+  actualQualityLevel: number;
+  isAutoQuality: boolean;
   audioTracks: PlayerAudioTrack[];
   currentAudioTrack: number;
+  networkStats: NetworkStats | null;
+  isBuffering: boolean;
   // Actions
   togglePlay: () => void;
   seek: (time: number) => void;
@@ -44,8 +53,12 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
   const [isMuted, setIsMuted] = useState(false);
   const [qualityLevels, setQualityLevels] = useState<QualityLevel[]>([]);
   const [currentQuality, setCurrentQuality] = useState<QualityValue>('auto');
+  const [actualQualityLevel, setActualQualityLevel] = useState<number>(-1);
+  const [isAutoQuality, setIsAutoQuality] = useState(true);
   const [audioTracks, setAudioTracks] = useState<PlayerAudioTrack[]>([]);
   const [currentAudioTrack, setCurrentAudioTrack] = useState(0);
+  const [networkStats, setNetworkStats] = useState<NetworkStats | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   // Initialize HLS
   useEffect(() => {
@@ -56,7 +69,23 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        backBufferLength: 90,
+        backBufferLength: 30,  // Reduced to avoid rate limiting
+        maxBufferLength: 20,   // Reduced buffer length
+        maxMaxBufferLength: 40,  // Reduced max buffer
+        // Enable ABR (Adaptive Bitrate) settings
+        abrEwmaDefaultEstimate: 500000, // 500kbps default
+        abrBandWidthFactor: 0.95,
+        abrBandWidthUpFactor: 0.7,
+        abrMaxWithRealBitrate: true,
+        // Progressive loading for smoother switching
+        progressive: true,
+        // Retry settings to avoid rate limiting
+        manifestLoadingRetryDelay: 2000,  // Wait 2s before retrying manifest
+        manifestLoadingMaxRetry: 2,  // Only retry twice
+        levelLoadingRetryDelay: 2000,  // Wait 2s before retrying level
+        levelLoadingMaxRetry: 2,  // Only retry twice
+        fragLoadingRetryDelay: 2000,  // Wait 2s before retrying fragment
+        fragLoadingMaxRetry: 2,  // Only retry twice
       });
 
       hlsRef.current = hls;
@@ -80,8 +109,40 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
         setAudioTracks(tracks);
       });
 
+      // Audio tracks might be populated after manifest parsing
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, _data) => {
+        const tracks = hls.audioTracks.map((track, index) => ({
+          id: index,
+          name: track.name || `Audio ${index + 1}`,
+          lang: track.lang || 'unknown',
+        }));
+        setAudioTracks(tracks);
+      });
+
       hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => {
-        setCurrentQuality(data.level === -1 ? 'auto' : data.level);
+        // Update actual quality level (what's actually playing)
+        setActualQualityLevel(data.level);
+        
+        // Only update currentQuality if not in auto mode
+        if (hlsRef.current && hlsRef.current.autoLevelEnabled) {
+          setIsAutoQuality(true);
+          setCurrentQuality('auto');
+        } else {
+          setCurrentQuality(data.level);
+          setIsAutoQuality(false);
+        }
+      });
+
+      // Track network statistics for quality display
+      hls.on(Hls.Events.FRAG_LOADED, (_e, data) => {
+        if (data.frag.stats) {
+          const stats = data.frag.stats;
+          const bandwidth = stats.loaded * 8 / (stats.loading.end - stats.loading.start) * 1000;
+          setNetworkStats({
+            bandwidth: Math.round(bandwidth),
+            latency: Math.round(stats.loading.first - stats.loading.start)
+          });
+        }
       });
 
       hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_event, data) => {
@@ -195,7 +256,13 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
 
   const changeQuality = useCallback((level: QualityValue) => {
     if (hlsRef.current) {
-      hlsRef.current.currentLevel = level === 'auto' ? -1 : level;
+      if (level === 'auto') {
+        hlsRef.current.currentLevel = -1; // Enable auto level selection
+        setIsAutoQuality(true);
+      } else {
+        hlsRef.current.currentLevel = level;
+        setIsAutoQuality(false);
+      }
       setCurrentQuality(level);
     }
   }, []);
@@ -217,6 +284,8 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
     isMuted,
     qualityLevels,
     currentQuality,
+    actualQualityLevel,
+    isAutoQuality,
     audioTracks,
     currentAudioTrack,
     togglePlay,
