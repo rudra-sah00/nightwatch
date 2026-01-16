@@ -2,20 +2,19 @@
 
 import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { search, SearchResult } from '@/lib/api/media';
+import { search, SearchResult } from '@/services/api/media';
 import { HomeContent } from '@/components/home';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthGuard } from '@/components/auth';
 import { RoomModal } from '@/components/room';
-import { Room, leaveRoom } from '@/lib/api/rooms';
+import { Room, leaveRoom } from '@/services/api/rooms';
 
 interface SearchPageProps {
     params: Promise<{ query: string }>;
 }
 
-export default function SearchPage({ params }: SearchPageProps) {
+function SearchPageContent({ params }: SearchPageProps) {
     const resolvedParams = use(params);
     const decodedQuery = decodeURIComponent(resolvedParams.query);
-    const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const [results, setResults] = useState<SearchResult[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,14 +22,6 @@ export default function SearchPage({ params }: SearchPageProps) {
     const [selectedVideo, setSelectedVideo] = useState<{ id: string; title: string } | null>(null);
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
     const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
-    const [livekitToken, setLivekitToken] = useState<string | null>(null);
-
-    // Redirect to login if not authenticated
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-        }
-    }, [user, authLoading, router]);
 
     // Fetch search results automatically
     useEffect(() => {
@@ -41,8 +32,7 @@ export default function SearchPage({ params }: SearchPageProps) {
             try {
                 const response = await search(decodedQuery);
                 setResults(response.data?.results || []);
-            } catch (err) {
-                console.error('Search failed:', err);
+            } catch {
                 setResults([]);
             } finally {
                 setLoading(false);
@@ -54,8 +44,6 @@ export default function SearchPage({ params }: SearchPageProps) {
 
     const handleSearch = useCallback(async (query: string) => {
         if (!query.trim()) return;
-
-        // Navigate to new search URL
         router.push(`/search/${encodeURIComponent(query)}`);
     }, [router]);
 
@@ -63,24 +51,20 @@ export default function SearchPage({ params }: SearchPageProps) {
         router.push('/');
     }, [router]);
 
-    const handleRoomJoined = (room: Room, token?: string) => {
+    const handleRoomJoined = (room: Room) => {
         setCurrentRoom(room);
-        if (token) {
-            setLivekitToken(token);
-        }
         setIsRoomModalOpen(false);
     };
 
     const handleLeaveRoom = async () => {
         if (!currentRoom) return;
-        
+
         try {
             await leaveRoom(currentRoom.code);
-        } catch (err) {
-            console.error('Error leaving room:', err);
+        } catch {
+            // Ignore errors during leave
         } finally {
             setCurrentRoom(null);
-            setLivekitToken(null);
         }
     };
 
@@ -89,17 +73,8 @@ export default function SearchPage({ params }: SearchPageProps) {
         setIsRoomModalOpen(true);
     };
 
-    if (authLoading) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full" />
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen flex flex-col bg-black">
-            {/* Use HomeContent component with search results */}
             <HomeContent
                 results={results}
                 loading={loading}
@@ -111,15 +86,24 @@ export default function SearchPage({ params }: SearchPageProps) {
                 inRoom={!!currentRoom}
             />
 
-            {/* Room Modal */}
             <RoomModal
                 isOpen={isRoomModalOpen}
                 onClose={() => { setIsRoomModalOpen(false); setSelectedVideo(null); setRoomMode('select'); }}
                 videoId={selectedVideo?.id}
                 videoTitle={selectedVideo?.title}
                 initialMode={roomMode}
-                onJoin={handleRoomJoined}
+                onRoomJoined={handleRoomJoined}
             />
         </div>
     );
 }
+
+// Wrap with AuthGuard to protect the route
+export default function SearchPage({ params }: SearchPageProps) {
+    return (
+        <AuthGuard>
+            <SearchPageContent params={params} />
+        </AuthGuard>
+    );
+}
+

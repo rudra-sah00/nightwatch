@@ -122,7 +122,7 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
       hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => {
         // Update actual quality level (what's actually playing)
         setActualQualityLevel(data.level);
-        
+
         // Only update currentQuality if not in auto mode
         if (hlsRef.current && hlsRef.current.autoLevelEnabled) {
           setIsAutoQuality(true);
@@ -288,6 +288,8 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
     isAutoQuality,
     audioTracks,
     currentAudioTrack,
+    networkStats,
+    isBuffering,
     togglePlay,
     seek,
     skip,

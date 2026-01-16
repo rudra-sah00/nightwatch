@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Play } from 'lucide-react';
-import { getEpisodeThumbnailUrl } from '@/lib/api/media';
+import { getEpisodeThumbnailUrl } from '@/services/api/media';
 import type { Episode } from '@/types/content';
 
 interface EpisodeCardProps {

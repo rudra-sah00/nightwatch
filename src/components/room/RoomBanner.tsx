@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Room } from '@/lib/api/rooms';
+import { Room } from '@/services/api/rooms';
 import { Room as LiveKitRoom, RoomEvent, Track, ConnectionState } from 'livekit-client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -110,8 +110,6 @@ export function RoomBanner({ room, onExpand, onLeave, isHost, livekitToken }: Ro
         } catch (err) {
             // Only log if this is still the current attempt
             if (attemptId === connectionAttemptRef.current) {
-                console.error('Failed to connect to LiveKit:', err);
-                
                 // Clean up on error
                 if (livekitRoomRef.current) {
                     try {
@@ -145,12 +143,12 @@ export function RoomBanner({ room, onExpand, onLeave, isHost, livekitToken }: Ro
             if (connectionAttemptRef.current === cleanupAttemptId) {
                 connectionAttemptRef.current++;
             }
-            
+
             // Disconnect if we have a room
             const room = livekitRoomRef.current;
             if (room) {
                 livekitRoomRef.current = null;
-                
+
                 // Use setTimeout to avoid React state updates during unmount
                 setTimeout(() => {
                     try {
@@ -216,7 +214,7 @@ export function RoomBanner({ room, onExpand, onLeave, isHost, livekitToken }: Ro
                             </span>
                         )}
                     </div>
-                    
+
                     {/* Right Section - Controls */}
                     <div className="flex items-center gap-3">
                         {/* Audio/Video Controls */}
@@ -350,7 +348,7 @@ export function RoomBanner({ room, onExpand, onLeave, isHost, livekitToken }: Ro
                     </div>
                 </div>
             )}
-            
+
             {/* Hidden container for LiveKit audio/video elements */}
             <div ref={audioElementRef} className="hidden" />
         </TooltipProvider>

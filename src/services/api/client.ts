@@ -1,4 +1,5 @@
-// API Client Base - Core request handling and token management
+// API Client - Core HTTP request handling and token management
+// This is the foundation layer for all API calls
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -114,8 +115,7 @@ export async function apiRequest<T>(
 
         const data = await response.json();
         return response.ok ? { data } : { error: data.error || 'Request failed' };
-    } catch (error) {
-        console.error('API Error:', error);
+    } catch {
         return { error: 'Network error' };
     }
 }

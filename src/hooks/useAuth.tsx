@@ -5,14 +5,10 @@ import {
     isAuthenticated,
     getStoredUser,
     logout as apiLogout,
-    getCurrentUser
-} from '@/lib/api';
-
-interface User {
-    id: string;
-    username: string;
-    name: string;
-}
+    getCurrentUser,
+    login as apiLoginFn,
+    type User
+} from '@/services/api';
 
 interface AuthContextType {
     user: User | null;
@@ -37,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } else {
                     const result = await getCurrentUser();
                     if (result.data) {
-                        setUser(result.data);
+                        setUser(result.data.user);
                     }
                 }
             }
@@ -48,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = async (username: string, password: string) => {
-        const { login: apiLoginFn } = await import('@/lib/api');
         const result = await apiLoginFn(username, password);
 
         if (result.data) {

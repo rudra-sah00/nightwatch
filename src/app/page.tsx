@@ -6,7 +6,7 @@ import { RoomModal, RoomView } from '@/components/room';
 import { HomeContent } from '@/components/home';
 import { useAuth } from '@/hooks/useAuth';
 import { search, SearchResult } from '@/lib/api';
-import { Room, leaveRoom } from '@/lib/api/rooms';
+import { Room, leaveRoom } from '@/services/api/rooms';
 
 function HomePage() {
   const { user } = useAuth();
@@ -54,12 +54,12 @@ function HomePage() {
 
   const handleLeaveRoom = async () => {
     if (!currentRoom) return;
-    
+
     try {
       // Call backend to leave room (this will remove user from participants or delete room if host)
       await leaveRoom(currentRoom.code);
-    } catch (err) {
-      console.error('Error leaving room:', err);
+    } catch {
+      // Ignore errors during leave
     } finally {
       // Always clear local state regardless of API result
       setCurrentRoom(null);

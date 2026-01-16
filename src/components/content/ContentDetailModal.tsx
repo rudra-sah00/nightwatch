@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { getVideoData, getShowDetails, getSeriesEpisodes, getPosterUrl, searchImdb } from '@/lib/api/media';
+import { getVideoData, getShowDetails, getSeriesEpisodes, getPosterUrl, searchImdb } from '@/services/api/media';
 import type { ContentType, Episode, CompleteVideoData, VideoMetadata, ShowDetails, Season } from '@/types/content';
 
 // Sub-components
@@ -82,8 +82,7 @@ export default function ContentDetailModal({
             }
           }
         }
-      } catch (err) {
-        console.error('Failed to fetch content data:', err);
+      } catch {
         setError('Failed to load content details');
       } finally {
         setLoading(false);
@@ -104,8 +103,8 @@ export default function ContentDetailModal({
         if (imdbResponse.data) {
           setImdbData(imdbResponse.data);
         }
-      } catch (err) {
-        console.warn('IMDB search failed:', err);
+      } catch {
+        // IMDB search failed silently
       }
     };
 
@@ -165,8 +164,7 @@ export default function ContentDetailModal({
               return [...prev, ...newEpisodes];
             });
           }
-        } catch (err) {
-          console.error('Failed to fetch season episodes:', err);
+        } catch {
           // On error, allow retry by removing from fetched set
           fetchedSeasons.current.delete(selectedSeason);
         }

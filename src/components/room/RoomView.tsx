@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Room, JoinRequest, getPendingRequests, getRoom } from '@/lib/api/rooms';
+import { Room, JoinRequest, getPendingRequests, getRoom } from '@/services/api/rooms';
 import { useAuth } from '@/hooks/useAuth';
-import { useRoomEvents, RoomEvent } from '@/hooks/useRoomEvents';
+import { useRoomEvents, RoomEvent } from '@/hooks';
 import { RoomHeader } from './RoomHeader';
 import { RoomSidebar } from './RoomSidebar';
 import { RoomContent } from './RoomContent';
@@ -53,8 +53,6 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
 
     // Handle leave room - disconnect LiveKit before calling onLeave
     const handleLeave = useCallback(async () => {
-        console.log('Leaving room...');
-        
         // If host is ending room, broadcast to all participants
         if (isHost && livekitRoomRef.current && isConnected) {
             try {
@@ -64,31 +62,27 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                     message: 'The host has ended the room'
                 });
                 const encodedData = textEncoder.encode(data);
-                
-                console.log('Broadcasting room_ended message');
+
                 await livekitRoomRef.current.localParticipant.publishData(
                     encodedData,
                     { reliable: true }
                 );
-            } catch (err) {
-                console.error('Error broadcasting room_ended:', err);
+            } catch {
+                // Error broadcasting room_ended
             }
         }
-        
+
         // Properly cleanup all tracks and disconnect
         await cleanupLiveKit();
-        
+
         // Then call parent's onLeave handler which will call backend API
         onLeave();
     }, [livekitRoomRef, onLeave, isHost, isConnected, cleanupLiveKit]);
 
     // Handle room events from SSE
     const handleRoomEvent = useCallback((event: RoomEvent) => {
-        console.log('Room event received:', event);
-        
         switch (event.type) {
             case 'room_deleted':
-                console.log('Room deleted event received');
                 setRoomClosed(true);
                 setChatMessages(prev => [...prev, {
                     id: `system-${Date.now()}`,
@@ -248,7 +242,6 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                 const data = JSON.parse(text);
 
                 if (data.type === 'chat') {
-                    console.log('Received chat message:', data, 'from:', participant?.name);
                     setChatMessages(prev => [...prev, {
                         id: `msg-${Date.now()}-${Math.random()}`,
                         username: data.username || participant?.name || 'Unknown',
@@ -256,7 +249,6 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                         type: 'message'
                     }]);
                 } else if (data.type === 'room_ended') {
-                    console.log('Received room_ended message from host');
                     setRoomClosed(true);
                     setChatMessages(prev => [...prev, {
                         id: `system-${Date.now()}`,
@@ -273,8 +265,8 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                         }, 1500);
                     })();
                 }
-            } catch (err) {
-                console.error('Error parsing data:', err);
+            } catch {
+                // Error parsing data
             }
         };
 
@@ -296,7 +288,7 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
     const handleSendMessage = async () => {
         if (chatMessage.trim() && user && livekitRoomRef.current && isConnected) {
             const message = chatMessage.trim();
-            
+
             // Add to local chat immediately
             setChatMessages(prev => [...prev, {
                 id: `msg-${Date.now()}`,
@@ -314,15 +306,13 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                     message: message
                 });
                 const encodedData = textEncoder.encode(data);
-                
-                console.log('Broadcasting message:', data);
+
                 await livekitRoomRef.current.localParticipant.publishData(
                     encodedData,
                     { reliable: true }
                 );
-                console.log('Message broadcast successful');
-            } catch (err) {
-                console.error('Error broadcasting message:', err);
+            } catch {
+                // Error broadcasting message
             }
 
             setChatMessage('');
@@ -365,7 +355,7 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
                     isHost={isHost}
                     onSearch={handleSearch}
                     onClearSearch={handleClearSearch}
-                    onShowSearch={() => {}}
+                    onShowSearch={() => { }}
                 />
             </div>
 
@@ -379,7 +369,7 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
             <div ref={audioElementRef} className="hidden" />
 
             {/* Participants Grid */}
-            <ParticipantsGrid 
+            <ParticipantsGrid
                 livekitRoom={livekitRoomRef.current}
                 isConnected={isConnected}
                 hostId={room.host_id}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Room, JoinRequest } from '@/lib/api/rooms';
+import { Room, JoinRequest } from '@/services/api/rooms';
 import { JoinRequestsPanel } from './JoinRequestsPanel';
 import { Badge } from '@/components/ui';
 import { Maximize2 } from 'lucide-react';
@@ -60,8 +60,8 @@ export function RoomHeader({
                     <button
                         onClick={onToggleMute}
                         className={`p-2 rounded transition-colors ${isMuted
-                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
-                                : 'hover:bg-zinc-700 text-white'
+                            ? 'bg-white/20 ring-1 ring-white/50 text-white'
+                            : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isMuted ? 'Unmute Microphone' : 'Mute Microphone'}
                     >
@@ -76,8 +76,8 @@ export function RoomHeader({
                     <button
                         onClick={onToggleRoomAudio}
                         className={`p-2 rounded transition-colors ${isRoomAudioOff
-                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
-                                : 'hover:bg-zinc-700 text-white'
+                            ? 'bg-white/20 ring-1 ring-white/50 text-white'
+                            : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isRoomAudioOff ? 'Listen to Room Audio' : 'Mute Room Audio'}
                     >
@@ -92,8 +92,8 @@ export function RoomHeader({
                     <button
                         onClick={onToggleVideo}
                         className={`p-2 rounded transition-colors ${isVideoOff
-                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
-                                : 'hover:bg-zinc-700 text-white'
+                            ? 'bg-white/20 ring-1 ring-white/50 text-white'
+                            : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'}
                     >

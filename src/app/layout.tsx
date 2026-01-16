@@ -3,8 +3,16 @@ import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 
 export const metadata: Metadata = {
-  title: 'Watch Rudra - Stream Movies & TV Shows',
-  description: 'Watch together with friends',
+  title: {
+    default: 'Watch Rudra - Stream Movies & TV Shows',
+    template: '%s | Watch Rudra',
+  },
+  description: 'Watch movies and TV shows together with friends in real-time',
+  icons: {
+    icon: '/play.ico',
+    shortcut: '/play.ico',
+    apple: '/play.ico',
+  },
 };
 
 export default function RootLayout({
@@ -24,3 +32,4 @@ export default function RootLayout({
     </html>
   );
 }
+

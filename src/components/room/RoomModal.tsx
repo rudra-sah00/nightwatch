@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createRoom, joinRoom } from '@/lib/api';
-import { Room } from '@/lib/api/rooms';
+import { Room } from '@/services/api/rooms';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,7 +85,10 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
         const result = await createRoom(videoId, videoTitle);
 
         if (result.data) {
-            setRoomInfo({ code: result.data.code, token: result.data.livekit_token });
+            setRoomInfo({
+                code: result.data.code || result.data.room.code,
+                token: result.data.livekit_token || ''
+            });
             if (onRoomJoined && result.data.room) {
                 onRoomJoined(result.data.room, result.data.livekit_token);
             }
@@ -109,11 +112,14 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
 
         if (result.data) {
             if ('status' in result.data && result.data.status === 'pending') {
-                setPendingMessage(result.data.message);
+                const pendingData = result.data as { message: string; status: 'pending' };
+                setPendingMessage(pendingData.message);
             } else if ('livekit_token' in result.data && 'room' in result.data) {
-                setRoomInfo({ code: joinCode.toUpperCase(), token: result.data.livekit_token });
+                // It's a JoinRoomResponse
+                const joinData = result.data as { room: Room; livekit_token: string };
+                setRoomInfo({ code: joinCode.toUpperCase(), token: joinData.livekit_token });
                 if (onRoomJoined) {
-                    onRoomJoined(result.data.room as Room, result.data.livekit_token);
+                    onRoomJoined(joinData.room, joinData.livekit_token);
                 }
             }
         } else {

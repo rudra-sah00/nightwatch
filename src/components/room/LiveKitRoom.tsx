@@ -56,7 +56,6 @@ export function LiveKitRoom({ token, serverUrl, onConnected, onDisconnected }: L
                 await room.localParticipant.enableCameraAndMicrophone();
 
             } catch (err) {
-                console.error('Failed to connect to LiveKit:', err);
                 setError(err instanceof Error ? err.message : 'Failed to connect');
                 setIsConnecting(false);
             }

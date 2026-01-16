@@ -8,7 +8,7 @@ interface ThumbnailPreviewProps {
   time: number;
   duration: number;
   spriteSheets: SpriteSheet[];  // Array of sprite sheets for long movies
-  position: number;  
+  position: number;
 }
 
 export function ThumbnailPreview({ time, duration, spriteSheets, position }: ThumbnailPreviewProps) {
@@ -78,7 +78,6 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
       };
 
       img.onerror = () => {
-        console.warn('Failed to load sprite:', url);
         loadingUrlsRef.current.delete(url);
         setImageError(true);
       };
@@ -138,8 +137,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
         displayWidth,
         displayHeight
       );
-    } catch (e) {
-      console.warn('Failed to draw thumbnail:', e);
+    } catch {
       setImageError(true);
     }
   }, [spriteInfo, loadCount]);

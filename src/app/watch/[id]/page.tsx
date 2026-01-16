@@ -3,14 +3,15 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoPlayer from '@/components/video/VideoPlayer';
-import { getVideoData, getShowDetails, getEpisodeData, getSeriesEpisodes } from '@/lib/api/media';
+import { AuthGuard } from '@/components/auth';
+import { getVideoData, getShowDetails, getEpisodeData, getSeriesEpisodes } from '@/services/api/media';
 import { ArrowLeftIcon, PlayIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownSelector } from '@/components/ui/dropdown-selector';
 import type { CompleteVideoData, ShowDetails, Episode } from '@/types/content';
 
-export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
+function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,7 +59,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
             const showResponse = await getShowDetails(resolvedParams.id);
             if (showResponse.data?.show) {
               setShowDetails(showResponse.data.show);
-              
+
               // Set initial season based on current episode or last season
               if (episodeId && showResponse.data.show.episodes) {
                 const currentEp = showResponse.data.show.episodes.find(ep => ep.episode_id === episodeId);
@@ -70,12 +71,11 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                 setSelectedSeason(lastSeason.season_number || 1);
               }
             }
-          } catch (err) {
-            console.error('Failed to load show details:', err);
+          } catch {
+            // Show details fetch failed silently
           }
         }
-      } catch (err) {
-        console.error('Error loading video:', err);
+      } catch {
         setError('An error occurred while loading the video');
       } finally {
         setLoading(false);
@@ -84,6 +84,20 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
 
     loadVideo();
   }, [resolvedParams.id, episodeId]);
+
+  // Dynamic document title based on content
+  useEffect(() => {
+    if (videoData?.metadata) {
+      const meta = videoData.metadata;
+      const contentType = meta.content_type === 'Series' ? 'TV Series' : 'Movie';
+      document.title = `${meta.title} (${contentType}) | Watch Rudra`;
+    }
+
+    // Cleanup: Reset title when leaving
+    return () => {
+      document.title = 'Watch Rudra - Stream Movies & TV Shows';
+    };
+  }, [videoData]);
 
   // Fetch episodes when season changes (like ContentDetailModal)
   useEffect(() => {
@@ -121,8 +135,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
             // Update filtered episodes for display
             setSeasonEpisodes(newEps);
           }
-        } catch (err) {
-          console.error('Failed to fetch season episodes:', err);
+        } catch {
           // On error, allow retry by removing from fetched set
           fetchedSeasons.current.delete(selectedSeason);
         }
@@ -140,16 +153,16 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
     if (!showDetails?.episodes || !showDetails?.seasons) {
       return [];
     }
-    
+
     // Create groups based on ALL seasons from API, not just loaded episodes
     const groups = new Map<number, Episode[]>();
-    
+
     // Initialize all seasons from API
     showDetails.seasons.forEach(season => {
       const seasonNum = season.season_number || 1;
       groups.set(seasonNum, []);
     });
-    
+
     // Add episodes to their respective seasons
     showDetails.episodes.forEach(ep => {
       const season = ep.season_number || 1;
@@ -158,7 +171,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
       }
       groups.get(season)!.push(ep);
     });
-    
+
     const result = Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
     return result;
   }, [showDetails?.episodes, showDetails?.seasons]);
@@ -205,7 +218,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
           <div className="relative aspect-video w-full rounded-2xl bg-zinc-900 overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
             {/* Shimmer effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
-            
+
             {/* Center loading animation */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
               {/* Animated loader */}
@@ -219,7 +232,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                   </svg>
                 </div>
               </div>
-              
+
               <div className="flex flex-col items-center gap-2">
                 <p className="text-lg font-medium text-white/90 animate-pulse">Preparing your video...</p>
                 <div className="flex items-center gap-1.5">
@@ -228,21 +241,21 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                   <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
-              
+
               {/* Progress bar shimmer */}
               <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
               </div>
             </div>
           </div>
-          
+
           <div className="mt-8 space-y-4">
             <div className="h-10 w-2/3 bg-zinc-800 rounded-lg animate-pulse" />
             <div className="h-4 w-1/4 bg-zinc-800 rounded animate-pulse" />
             <div className="h-20 w-full bg-zinc-800 rounded-lg animate-pulse" />
           </div>
         </div>
-        
+
         {/* Add shimmer keyframe styles */}
         <style jsx>{`
           @keyframes shimmer {
@@ -253,7 +266,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
             animation: shimmer 2s infinite;
           }
         `}</style>
-      </div> 
+      </div>
     );
   }
 
@@ -330,11 +343,11 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                   {episodeInfo.seriesName}
                 </h2>
               </div>
-              
+
               {/* Season/Episode Badge and Episode Title */}
               <div className="flex items-start gap-4 mb-4">
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className="bg-white text-black hover:bg-zinc-200 border-0 px-3 py-1.5 text-sm font-semibold"
                 >
                   S{episodeInfo.season}E{episodeInfo.episode}
@@ -428,113 +441,119 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
           )}
 
           {/* Episodes List - Only for Series */}
-          {(showDetails?.content_type === 'Series' || metadata?.content_type === 'Series') && 
-           showDetails?.seasons && showDetails.seasons.length > 0 && (
-            <div className="mt-12 border-t border-zinc-800 pt-8">
-              {/* Season Selector */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Episodes</h2>
-                <DropdownSelector
-                  options={groupedSeasons.map(([seasonNum, eps]) => {
-                    const seasonInfo = showDetails.seasons?.find(s => s.season_number === seasonNum);
-                    return {
-                      value: seasonNum,
-                      label: `Season ${seasonNum}`,
-                      count: seasonInfo?.episode_count ?? eps.length,
-                    };
-                  })}
-                  selectedValue={selectedSeason}
-                  isOpen={showSeasonDropdown}
-                  onToggle={() => setShowSeasonDropdown(!showSeasonDropdown)}
-                  onSelect={(season) => {
-                    setSelectedSeason(season);
-                    setShowSeasonDropdown(false);
-                  }}
-                />
-              </div>
+          {(showDetails?.content_type === 'Series' || metadata?.content_type === 'Series') &&
+            showDetails?.seasons && showDetails.seasons.length > 0 && (
+              <div className="mt-12 border-t border-zinc-800 pt-8">
+                {/* Season Selector */}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Episodes</h2>
+                  <DropdownSelector
+                    options={groupedSeasons.map(([seasonNum, eps]) => {
+                      const seasonInfo = showDetails.seasons?.find(s => s.season_number === seasonNum);
+                      return {
+                        value: seasonNum,
+                        label: `Season ${seasonNum}`,
+                        count: seasonInfo?.episode_count ?? eps.length,
+                      };
+                    })}
+                    selectedValue={selectedSeason}
+                    isOpen={showSeasonDropdown}
+                    onToggle={() => setShowSeasonDropdown(!showSeasonDropdown)}
+                    onSelect={(season) => {
+                      setSelectedSeason(season);
+                      setShowSeasonDropdown(false);
+                    }}
+                  />
+                </div>
 
-              {/* Episodes Grid */}
-              <div className="grid grid-cols-1 gap-3">
-                {seasonEpisodes.length === 0 ? (
-                  <div className="text-center py-12 text-zinc-500">
-                    No episodes available for this season
-                  </div>
-                ) : (
-                  seasonEpisodes.map((episode, index) => {
-                    const isCurrentEpisode = episode.episode_id === episodeId;
-                    return (
-                      <button
-                        key={episode.episode_id}
-                        onClick={() => {
-                          if (!isCurrentEpisode) {
-                            router.push(`/watch/${resolvedParams.id}?episode=${episode.episode_id}`);
-                          }
-                        }}
-                        className={`group flex gap-4 p-4 rounded-lg transition-all ${
-                          isCurrentEpisode
+                {/* Episodes Grid */}
+                <div className="grid grid-cols-1 gap-3">
+                  {seasonEpisodes.length === 0 ? (
+                    <div className="text-center py-12 text-zinc-500">
+                      No episodes available for this season
+                    </div>
+                  ) : (
+                    seasonEpisodes.map((episode, index) => {
+                      const isCurrentEpisode = episode.episode_id === episodeId;
+                      return (
+                        <button
+                          key={episode.episode_id}
+                          onClick={() => {
+                            if (!isCurrentEpisode) {
+                              router.push(`/watch/${resolvedParams.id}?episode=${episode.episode_id}`);
+                            }
+                          }}
+                          className={`group flex gap-4 p-4 rounded-lg transition-all ${isCurrentEpisode
                             ? 'bg-zinc-800 border-2 border-white'
                             : 'bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700'
-                        }`}
-                      >
-                        {/* Episode Thumbnail */}
-                        <div className="relative flex-shrink-0 w-40 h-24 bg-zinc-800 rounded-lg overflow-hidden">
-                          <img
-                            src={episode.thumbnail_url}
-                            alt={episode.title || `Episode ${episode.episode_number}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"%3E%3Crect fill="%2327272a" width="160" height="90"/%3E%3C/svg%3E';
-                            }}
-                          />
-                          {isCurrentEpisode ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                              <CheckIcon className="w-8 h-8 text-white" />
-                            </div>
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <PlayIcon className="w-8 h-8 text-white" />
-                            </div>
-                          )}
-                          {episode.duration && (
-                            <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-xs text-white">
-                              {episode.duration}m
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Episode Info */}
-                        <div className="flex-1 text-left min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-1">
-                                <span className={`text-sm font-semibold ${
-                                  isCurrentEpisode ? 'text-white' : 'text-zinc-400'
-                                }`}>
-                                  {episode.episode_number}
-                                </span>
-                                <h3 className={`text-lg font-semibold truncate ${
-                                  isCurrentEpisode ? 'text-white' : 'text-zinc-200 group-hover:text-white'
-                                }`}>
-                                  {episode.title || `Episode ${episode.episode_number}`}
-                                </h3>
+                            }`}
+                        >
+                          {/* Episode Thumbnail */}
+                          <div className="relative flex-shrink-0 w-40 h-24 bg-zinc-800 rounded-lg overflow-hidden">
+                            <img
+                              src={episode.thumbnail_url}
+                              alt={episode.title || `Episode ${episode.episode_number}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"%3E%3Crect fill="%2327272a" width="160" height="90"/%3E%3C/svg%3E';
+                              }}
+                            />
+                            {isCurrentEpisode ? (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                                <CheckIcon className="w-8 h-8 text-white" />
                               </div>
-                              {episode.description && (
-                                <p className="text-sm text-zinc-400 line-clamp-2 mt-1">
-                                  {episode.description}
-                                </p>
-                              )}
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <PlayIcon className="w-8 h-8 text-white" />
+                              </div>
+                            )}
+                            {episode.duration && (
+                              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-xs text-white">
+                                {episode.duration}m
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Episode Info */}
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-1">
+                                  <span className={`text-sm font-semibold ${isCurrentEpisode ? 'text-white' : 'text-zinc-400'
+                                    }`}>
+                                    {episode.episode_number}
+                                  </span>
+                                  <h3 className={`text-lg font-semibold truncate ${isCurrentEpisode ? 'text-white' : 'text-zinc-200 group-hover:text-white'
+                                    }`}>
+                                    {episode.title || `Episode ${episode.episode_number}`}
+                                  </h3>
+                                </div>
+                                {episode.description && (
+                                  <p className="text-sm text-zinc-400 line-clamp-2 mt-1">
+                                    {episode.description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    );
-                  })
-                )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap with AuthGuard to protect the route
+export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <AuthGuard>
+      <WatchPageContent params={params} />
+    </AuthGuard>
   );
 }

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Play, Film, Tv, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getPosterUrl } from '@/lib/api/media';
+import { getPosterUrl } from '@/services/api/media';
 import type { ContentType } from '@/types/content';
 
 interface ContentCardProps {
@@ -17,22 +17,22 @@ interface ContentCardProps {
   onClick?: () => void;
 }
 
-export default function ContentCard({ 
-  id, 
-  title, 
-  poster, 
-  year, 
+export default function ContentCard({
+  id,
+  title,
+  poster,
+  year,
   type,
-  onClick 
+  onClick
 }: ContentCardProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   // Use backend poster URL pattern if no poster provided
   const posterUrl = poster || getPosterUrl(id);
   const fallbackPoster = getPosterUrl(id, true); // HD fallback
 
   return (
-    <div 
+    <div
       className="group relative block cursor-pointer"
       onClick={onClick}
     >
@@ -72,7 +72,7 @@ export default function ContentCard({
 
           {/* Info button at bottom */}
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-            <button 
+            <button
               className="p-2 rounded-full bg-zinc-800/80 hover:bg-zinc-700 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
@@ -86,12 +86,12 @@ export default function ContentCard({
 
         {/* Type badge */}
         <div className="absolute top-2 right-2">
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className={cn(
               "text-xs backdrop-blur-sm border-none",
-              type === 'Series' 
-                ? "bg-blue-600/80 text-white" 
+              type === 'Series'
+                ? "bg-blue-600/80 text-white"
                 : "bg-white/80 text-black"
             )}
           >

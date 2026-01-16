@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { JoinRequest, handleJoinRequest } from '@/lib/api/rooms';
+import { JoinRequest, handleJoinRequest } from '@/services/api/rooms';
 import { Button } from '@/components/ui';
 import { Bell, Check, X, UserPlus } from 'lucide-react';
 

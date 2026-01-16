@@ -133,9 +133,9 @@ export function useLiveKit({ livekitToken, localVideoRef, audioElementRef }: Use
                 connectionAttempts.delete(tokenKey);
 
             } catch (err) {
-                // Only log if it's not a user-initiated disconnect
+                // Only cleanup if it's not a user-initiated disconnect
                 if (!isCleanedUp && !(err instanceof Error && err.message.includes('disconnect'))) {
-                    console.error('Failed to connect to LiveKit:', err);
+                    // Connection failed silently
                 }
                 connectionAttempts.delete(tokenKey);
                 activeConnections.delete(tokenKey);
@@ -186,14 +186,14 @@ export function useLiveKit({ livekitToken, localVideoRef, audioElementRef }: Use
 
             // Disconnect from room
             await room.disconnect();
-            
+
             // Clear from active connections
             const tokenKey = livekitToken?.substring(0, 50);
             if (tokenKey) {
                 activeConnections.delete(tokenKey);
             }
-        } catch (err) {
-            console.error('Error during cleanup:', err);
+        } catch {
+            // Ignore cleanup errors
         }
 
         livekitRoomRef.current = null;

@@ -51,16 +51,15 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
             const url = URL.createObjectURL(blob);
             results.push({ language: sub.language, url });
             revokedUrls.push(url);
-          } catch (e) {
-            console.warn('Failed to load subtitle:', sub.language, e);
+          } catch {
             parsed.push([]);
           }
         }
 
         setLocalSubtitles(results);
         setParsedCues(parsed);
-      } catch (e) {
-        console.warn('Subtitle preprocessing failed:', e);
+      } catch {
+        // Subtitle preprocessing failed silently
       }
     };
 
@@ -74,10 +73,10 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
   // Update current subtitle text based on time
   // Using a ref to compute without triggering setState synchronously
   const subtitleTextRef = useRef('');
-  
+
   useEffect(() => {
     let newText = '';
-    
+
     if (currentSubtitleIndex >= 0 && parsedCues[currentSubtitleIndex]) {
       const cues = parsedCues[currentSubtitleIndex];
       const activeCue = cues.find(
@@ -85,7 +84,7 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
       );
       newText = activeCue?.text || '';
     }
-    
+
     // Only update if text changed
     if (newText !== subtitleTextRef.current) {
       subtitleTextRef.current = newText;

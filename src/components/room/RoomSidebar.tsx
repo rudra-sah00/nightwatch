@@ -1,6 +1,6 @@
 'use client';
 
-import { Room } from '@/lib/api/rooms';
+import { Room } from '@/services/api/rooms';
 import { Play, Pause, Video, VideoOff, Mic, MicOff, FastForward } from 'lucide-react';
 
 interface ChatMessage {
