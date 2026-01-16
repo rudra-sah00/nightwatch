@@ -84,46 +84,14 @@ export default function ContentCard({
           </div>
         </div>
 
-        {/* Type badge */}
-        <div className="absolute top-2 right-2">
-          <Badge
-            variant="secondary"
-            className={cn(
-              "text-xs backdrop-blur-sm border-none",
-              type === 'Series'
-                ? "bg-blue-600/80 text-white"
-                : "bg-white/80 text-black"
-            )}
-          >
-            {type === 'Series' ? (
-              <><Tv className="w-3 h-3 mr-1" />Series</>
-            ) : (
-              <><Film className="w-3 h-3 mr-1" />Movie</>
-            )}
-          </Badge>
-        </div>
-
-        {/* Bottom gradient for text visibility */}
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* Title section */}
       <div className="mt-3 space-y-1">
         <h3 className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors duration-200">
           {title}
         </h3>
-        <div className="flex items-center gap-2">
-          {year && (
-            <p className="text-zinc-500 text-xs font-medium">{year}</p>
-          )}
-          <span className={cn(
-            "text-xs px-1.5 py-0.5 rounded",
-            type === 'Series' ? "text-blue-400 bg-blue-500/10" : "text-zinc-400 bg-zinc-500/10"
-          )}>
-            {type}
-          </span>
-        </div>
       </div>
-    </div>
+    </div >
   );
 }

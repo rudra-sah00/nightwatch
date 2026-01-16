@@ -123,7 +123,7 @@ export function HomeContent({
                             {/* Search bar and room button */}
                             <div className="flex gap-3 items-center justify-center max-w-3xl mx-auto">
                                 <div className="flex-1">
-                                    <SearchBar onSearch={onSearch} onClear={onClear} />
+                                    <SearchBar onSearch={onSearch} onClear={onClear} initialQuery={searchQuery} />
                                 </div>
 
                                 {/* Room Button with Dropdown */}
@@ -248,13 +248,7 @@ export function HomeContent({
                                         </h3>
                                         <div className="flex items-center gap-3 text-sm text-zinc-400 mb-2">
                                             {result.year && <span>{result.year}</span>}
-                                            <span className="px-2 py-0.5 border border-zinc-600 text-zinc-300 text-xs rounded">
-                                                {result.type || 'Movie'}
-                                            </span>
                                         </div>
-                                        <p className="text-sm text-zinc-500 line-clamp-2">
-                                            {result.type === 'Series' ? 'TV Series' : 'Movie'}
-                                        </p>
                                     </div>
                                 </button>
                             ))}

@@ -12,18 +12,24 @@ interface SearchBarProps {
   onClear?: () => void;
   placeholder?: string;
   useUrlNavigation?: boolean;  // If true, navigates to /search/{query}
+  initialQuery?: string;
 }
 
 export default function SearchBar({
   onSearch,
   onClear,
   placeholder = 'Search movies and TV shows...',
-  useUrlNavigation = true  // Default to URL navigation
+  useUrlNavigation = true,  // Default to URL navigation
+  initialQuery = ''
 }: SearchBarProps) {
   const router = useRouter();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
