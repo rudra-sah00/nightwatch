@@ -223,7 +223,7 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                     {mode === 'create' && !roomInfo && (
                         <div className="space-y-4">
                             {error && (
-                                <div className="p-4 bg-red-900/20 border border-red-800/50 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                                <div className="p-4 bg-amber-900/20 border border-amber-800/50 rounded-lg text-amber-400 text-sm flex items-center gap-2">
                                     <XMarkIcon className="w-4 h-4 flex-shrink-0" />
                                     {error}
                                 </div>
@@ -260,7 +260,7 @@ export function RoomModal({ isOpen, onClose, videoId, videoTitle, initialMode = 
                             </div>
 
                             {error && (
-                                <div className="p-4 bg-red-900/20 border border-red-800/50 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                                <div className="p-4 bg-amber-900/20 border border-amber-800/50 rounded-lg text-amber-400 text-sm flex items-center gap-2">
                                     <XMarkIcon className="w-4 h-4 flex-shrink-0" />
                                     {error}
                                 </div>

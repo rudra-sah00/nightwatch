@@ -105,7 +105,7 @@ export function RoomContent({
                                     {searchResults.map((result) => (
                                         <button
                                             key={result.id}
-                                            className="group text-left bg-zinc-900 rounded-lg overflow-hidden hover:ring-2 hover:ring-red-500 transition-all"
+                                            className="group text-left bg-zinc-900 rounded-lg overflow-hidden hover:ring-2 hover:ring-white/50 transition-all"
                                         >
                                             <div className="aspect-[2/3] bg-zinc-800 relative">
                                                 {result.poster && (
@@ -115,12 +115,12 @@ export function RoomContent({
                                                         className="w-full h-full object-cover"
                                                     />
                                                 )}
-                                                <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-red-600 rounded text-[10px] font-medium text-white">
+                                                <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-white/90 text-black rounded text-[10px] font-medium">
                                                     {result.type}
                                                 </div>
                                             </div>
                                             <div className="p-2">
-                                                <p className="text-white text-sm font-medium truncate group-hover:text-red-400 transition-colors">
+                                                <p className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors">
                                                     {result.title}
                                                 </p>
                                             </div>
@@ -163,8 +163,8 @@ export function RoomContent({
                     {/* Host View: No video selected yet */}
                     {!hasVideo && isHost && (
                         <div className="text-center space-y-6 px-4">
-                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-red-900/30 to-red-800/20 rounded-full flex items-center justify-center ring-4 ring-red-900/30">
-                                <svg className="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-white/10 to-white/5 rounded-full flex items-center justify-center ring-4 ring-white/20">
+                                <svg className="w-12 h-12 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
@@ -173,7 +173,7 @@ export function RoomContent({
                                 <p className="text-zinc-400 max-w-md mx-auto mb-6">Search and select a video to start the watch party with your room</p>
                                 <button
                                     onClick={onShowSearch}
-                                    className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg shadow-red-900/50"
+                                    className="px-8 py-3 bg-white text-black hover:bg-zinc-200 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg shadow-white/10"
                                 >
                                     Search Videos
                                 </button>
@@ -206,7 +206,7 @@ export function RoomContent({
                     {hasVideo && isHost && (
                         <div className="text-center space-y-4 px-4">
                             <p className="text-zinc-400">Video player will appear here</p>
-                            <button className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg shadow-red-900/50">
+                            <button className="px-8 py-3 bg-white text-black hover:bg-zinc-200 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg shadow-white/10">
                                 Start Video
                             </button>
                         </div>

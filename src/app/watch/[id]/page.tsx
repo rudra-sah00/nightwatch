@@ -198,17 +198,62 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
     return (
       <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
         <div className="container mx-auto px-4 pt-6">
-          <Skeleton className="h-6 w-24" />
+          <div className="h-6 w-24 bg-zinc-800 rounded animate-pulse" />
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 py-6">
-          <Skeleton className="aspect-video w-full rounded-xl" />
+          {/* Video player loading skeleton with beautiful animation */}
+          <div className="relative aspect-video w-full rounded-2xl bg-zinc-900 overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+            
+            {/* Center loading animation */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+              {/* Animated loader */}
+              <div className="relative w-20 h-20">
+                <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-white animate-spin" />
+                <div className="absolute inset-3 rounded-full bg-gradient-to-br from-white/20 to-white/5 animate-pulse" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white/80 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-lg font-medium text-white/90 animate-pulse">Preparing your video...</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+              
+              {/* Progress bar shimmer */}
+              <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
+              </div>
+            </div>
+          </div>
+          
           <div className="mt-8 space-y-4">
-            <Skeleton className="h-10 w-2/3" />
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-20 w-full" />
+            <div className="h-10 w-2/3 bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-4 w-1/4 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-20 w-full bg-zinc-800 rounded-lg animate-pulse" />
           </div>
         </div>
-      </div>
+        
+        {/* Add shimmer keyframe styles */}
+        <style jsx>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+          .animate-shimmer {
+            animation: shimmer 2s infinite;
+          }
+        `}</style>
+      </div> 
     );
   }
 
@@ -218,8 +263,8 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
         <div className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto rounded-full bg-red-500/10 flex items-center justify-center">
-                <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center">
+                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
@@ -290,7 +335,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
               <div className="flex items-start gap-4 mb-4">
                 <Badge 
                   variant="secondary" 
-                  className="bg-red-600 hover:bg-red-700 text-white border-0 px-3 py-1.5 text-sm font-semibold"
+                  className="bg-white text-black hover:bg-zinc-200 border-0 px-3 py-1.5 text-sm font-semibold"
                 >
                   S{episodeInfo.season}E{episodeInfo.episode}
                 </Badge>
@@ -427,7 +472,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                         }}
                         className={`group flex gap-4 p-4 rounded-lg transition-all ${
                           isCurrentEpisode
-                            ? 'bg-zinc-800 border-2 border-red-600'
+                            ? 'bg-zinc-800 border-2 border-white'
                             : 'bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700'
                         }`}
                       >
@@ -443,7 +488,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                           />
                           {isCurrentEpisode ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                              <CheckIcon className="w-8 h-8 text-red-600" />
+                              <CheckIcon className="w-8 h-8 text-white" />
                             </div>
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -463,7 +508,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3 mb-1">
                                 <span className={`text-sm font-semibold ${
-                                  isCurrentEpisode ? 'text-red-600' : 'text-zinc-400'
+                                  isCurrentEpisode ? 'text-white' : 'text-zinc-400'
                                 }`}>
                                   {episode.episode_number}
                                 </span>

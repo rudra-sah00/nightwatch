@@ -36,7 +36,7 @@ export default function ContentCard({
       className="group relative block cursor-pointer"
       onClick={onClick}
     >
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-zinc-900 transition-all duration-300 group-hover:scale-105 group-hover:ring-2 group-hover:ring-red-500/50 group-hover:shadow-xl group-hover:shadow-red-500/10">
+      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-zinc-900 transition-all duration-300 group-hover:scale-105 group-hover:ring-2 group-hover:ring-white/50 group-hover:shadow-xl group-hover:shadow-white/10">
         {!imageError ? (
           <Image
             src={posterUrl}
@@ -92,7 +92,7 @@ export default function ContentCard({
               "text-xs backdrop-blur-sm border-none",
               type === 'Series' 
                 ? "bg-blue-600/80 text-white" 
-                : "bg-red-600/80 text-white"
+                : "bg-white/80 text-black"
             )}
           >
             {type === 'Series' ? (
@@ -109,7 +109,7 @@ export default function ContentCard({
 
       {/* Title section */}
       <div className="mt-3 space-y-1">
-        <h3 className="text-white text-sm font-medium truncate group-hover:text-red-400 transition-colors duration-200">
+        <h3 className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors duration-200">
           {title}
         </h3>
         <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function ContentCard({
           )}
           <span className={cn(
             "text-xs px-1.5 py-0.5 rounded",
-            type === 'Series' ? "text-blue-400 bg-blue-500/10" : "text-red-400 bg-red-500/10"
+            type === 'Series' ? "text-blue-400 bg-blue-500/10" : "text-zinc-400 bg-zinc-500/10"
           )}>
             {type}
           </span>

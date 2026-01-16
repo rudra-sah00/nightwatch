@@ -46,7 +46,7 @@ export function JoinRequestsPanel({ roomCode, requests, onRequestHandled }: Join
 
                 {/* Notification Badge */}
                 {pendingCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black rounded-full flex items-center justify-center text-[10px] font-bold">
                         {pendingCount > 9 ? '9+' : pendingCount}
                     </span>
                 )}
@@ -112,7 +112,7 @@ export function JoinRequestsPanel({ roomCode, requests, onRequestHandled }: Join
                                                         variant="ghost"
                                                         onClick={() => handleRequest(request.user_id, false)}
                                                         disabled={isProcessing}
-                                                        className="p-2 h-8 w-8 hover:bg-red-500/20 hover:text-red-400"
+                                                        className="p-2 h-8 w-8 hover:bg-zinc-600/20 hover:text-zinc-300"
                                                     >
                                                         <X className="w-4 h-4" />
                                                     </Button>

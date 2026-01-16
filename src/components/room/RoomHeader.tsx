@@ -42,7 +42,7 @@ export function RoomHeader({
                     <span className="text-white font-medium">Room: {room.code}</span>
                 </div>
                 {isHost && (
-                    <Badge variant="default" className="bg-red-600 hover:bg-red-600">
+                    <Badge variant="default" className="bg-white text-black hover:bg-zinc-200">
                         Host
                     </Badge>
                 )}
@@ -60,7 +60,7 @@ export function RoomHeader({
                     <button
                         onClick={onToggleMute}
                         className={`p-2 rounded transition-colors ${isMuted
-                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
                                 : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isMuted ? 'Unmute Microphone' : 'Mute Microphone'}
@@ -76,7 +76,7 @@ export function RoomHeader({
                     <button
                         onClick={onToggleRoomAudio}
                         className={`p-2 rounded transition-colors ${isRoomAudioOff
-                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
                                 : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isRoomAudioOff ? 'Listen to Room Audio' : 'Mute Room Audio'}
@@ -92,7 +92,7 @@ export function RoomHeader({
                     <button
                         onClick={onToggleVideo}
                         className={`p-2 rounded transition-colors ${isVideoOff
-                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                ? 'bg-white/20 ring-1 ring-white/50 text-white'
                                 : 'hover:bg-zinc-700 text-white'
                             }`}
                         title={isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'}
@@ -131,7 +131,7 @@ export function RoomHeader({
                 {/* Leave/End Room Button */}
                 <button
                     onClick={onLeave}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-white text-black hover:bg-zinc-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

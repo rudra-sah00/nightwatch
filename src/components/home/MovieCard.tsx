@@ -18,7 +18,7 @@ interface MovieCardProps {
 export default function MovieCard({ id, title, poster, year, type }: MovieCardProps) {
   return (
     <Link href={`/watch/${id}`} className="group relative block">
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-zinc-900 transition-all duration-300 group-hover:scale-105 group-hover:ring-2 group-hover:ring-red-500/50 group-hover:shadow-xl group-hover:shadow-red-500/10">
+      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-zinc-900 transition-all duration-300 group-hover:scale-105 group-hover:ring-2 group-hover:ring-white/50 group-hover:shadow-xl group-hover:shadow-white/10">
         {poster ? (
           <Image
             src={poster}
@@ -37,12 +37,12 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
         {/* Play button overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
           <div className={cn(
-            "w-14 h-14 rounded-full bg-red-600 flex items-center justify-center",
+            "w-14 h-14 rounded-full bg-white flex items-center justify-center",
             "transform scale-75 group-hover:scale-100 transition-all duration-300",
-            "shadow-lg shadow-red-600/50",
+            "shadow-lg shadow-white/30",
             "ring-2 ring-white/20"
           )}>
-            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+            <Play className="w-6 h-6 text-black fill-black ml-0.5" />
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
 
       {/* Title section */}
       <div className="mt-3 space-y-1">
-        <h3 className="text-white text-sm font-medium truncate group-hover:text-red-400 transition-colors duration-200">
+        <h3 className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors duration-200">
           {title}
         </h3>
         {year && (

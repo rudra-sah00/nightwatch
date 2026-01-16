@@ -216,7 +216,7 @@ export default function ContentDetailModal({
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-red-400">{error}</p>
+              <p className="text-amber-400">{error}</p>
             </div>
           ) : (
             <MetadataSection

@@ -75,7 +75,7 @@ export function LiveKitRoom({ token, serverUrl, onConnected, onDisconnected }: L
 
     if (error) {
         return (
-            <div className="text-red-400 text-sm">
+            <div className="text-amber-400 text-sm">
                 Failed to connect: {error}
             </div>
         );

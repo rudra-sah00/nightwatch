@@ -180,7 +180,7 @@ export function ParticipantsGrid({ livekitRoom, isConnected, hostId, currentUser
                                         )}
                                     </div>
                                     {participant.audioMuted ? (
-                                        <MicOff className="w-3 h-3 text-red-400 flex-shrink-0" />
+                                        <MicOff className="w-3 h-3 text-zinc-400 flex-shrink-0" />
                                     ) : (
                                         <Mic className="w-3 h-3 text-green-400 flex-shrink-0" />
                                     )}

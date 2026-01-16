@@ -151,8 +151,8 @@ export function HomeContent({
                                                 onClick={() => { onOpenRoomModal('create'); setShowRoomDropdown(false); }}
                                                 className="w-full px-4 py-3 text-left text-white hover:bg-zinc-700/80 transition-colors flex items-center gap-3 group"
                                             >
-                                                <div className="p-1.5 bg-red-500/20 rounded-lg group-hover:bg-red-500/30 transition-colors">
-                                                    <Plus className="w-4 h-4 text-red-400" />
+                                                <div className="p-1.5 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                                    <Plus className="w-4 h-4 text-white" />
                                                 </div>
                                                 <div>
                                                     <div className="font-medium text-sm">Create Room</div>
@@ -258,7 +258,7 @@ export function HomeContent({
                     <Button
                         variant="outline"
                         onClick={logout}
-                        className="gap-2 bg-zinc-900/90 backdrop-blur-md border-zinc-700 hover:bg-red-600/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-200 shadow-lg shadow-black/50"
+                        className="gap-2 bg-zinc-900/90 backdrop-blur-md border-zinc-700 hover:bg-white/10 hover:border-white/30 hover:text-white transition-all duration-200 shadow-lg shadow-black/50"
                     >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>

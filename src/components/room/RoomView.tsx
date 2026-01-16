@@ -390,8 +390,8 @@ export function RoomView({ room, onLeave, livekitToken }: RoomViewProps) {
             {roomClosed && (
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[100] animate-in fade-in duration-300">
                     <div className="text-center space-y-4">
-                        <div className="w-20 h-20 mx-auto bg-red-900/30 rounded-full flex items-center justify-center ring-2 ring-red-500/30">
-                            <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-20 h-20 mx-auto bg-zinc-800/50 rounded-full flex items-center justify-center ring-2 ring-white/20">
+                            <svg className="w-10 h-10 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                         </div>

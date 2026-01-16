@@ -17,6 +17,7 @@ import {
   SettingsMenu,
   PlayButtonOverlay,
   ErrorOverlay,
+  LoadingOverlay,
 } from './components';
 
 export default function VideoPlayer({
@@ -53,6 +54,7 @@ export default function VideoPlayer({
     isAutoQuality,
     audioTracks,
     currentAudioTrack,
+    isBuffering,
     togglePlay,
     seek,
     skip,
@@ -64,6 +66,9 @@ export default function VideoPlayer({
     src,
     onError: setError,
   });
+
+  // Show loading when buffering or when video hasn't started yet
+  const isLoading = isBuffering || (duration === 0 && !error);
 
   const {
     localSubtitles,
@@ -213,8 +218,14 @@ export default function VideoPlayer({
       {/* Subtitle Overlay */}
       <SubtitleOverlay text={currentSubtitleText} isFullscreen={isFullscreen} />
 
-      {/* Center Play Button */}
-      <PlayButtonOverlay isPlaying={isPlaying} onTogglePlay={togglePlay} />
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isLoading={isLoading} 
+        message={duration === 0 ? 'Preparing your video...' : 'Buffering...'} 
+      />
+
+      {/* Center Play Button - hidden when loading */}
+      {!isLoading && <PlayButtonOverlay isPlaying={isPlaying} onTogglePlay={togglePlay} />}
 
       {/* Error Message */}
       <ErrorOverlay error={error} />

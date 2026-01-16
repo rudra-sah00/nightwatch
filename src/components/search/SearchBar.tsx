@@ -74,7 +74,7 @@ export default function SearchBar({
           {/* Search Icon */}
           <div className={cn(
             "absolute left-3 md:left-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-            isFocused ? "text-red-500" : "text-zinc-500"
+            isFocused ? "text-white" : "text-zinc-500"
           )}>
             <Search className="w-4 h-4 md:w-5 md:h-5" />
           </div>
@@ -128,7 +128,7 @@ export default function SearchBar({
               size="sm"
               className={cn(
                 "px-4 py-2 font-medium",
-                "bg-red-600 hover:bg-red-700 text-white",
+                "bg-white text-black hover:bg-zinc-200",
                 "disabled:bg-zinc-800 disabled:text-zinc-600",
                 "transition-all duration-200 active:scale-95"
               )}

@@ -10,3 +10,4 @@ export { PlayButtonOverlay } from './PlayButtonOverlay';
 export { ErrorOverlay } from './ErrorOverlay';
 export { TitleOverlay } from './TitleOverlay';
 export { ThumbnailPreview } from './ThumbnailPreview';
+export { LoadingOverlay } from './LoadingOverlay';

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
@@ -35,29 +35,13 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-950 to-black relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-red-900/10 blur-3xl" />
+                <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-white/5 blur-3xl" />
                 <div className="absolute -bottom-[40%] -right-[20%] w-[70%] h-[70%] rounded-full bg-zinc-800/20 blur-3xl" />
             </div>
 
             <div className="w-full max-w-md px-4 relative z-10">
-                {/* Logo */}
-                <div className="text-center mb-10">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                        <div className={cn(
-                            "w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700",
-                            "flex items-center justify-center shadow-lg shadow-red-500/30"
-                        )}>
-                            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent tracking-tight">
-                        Watch Rudra
-                    </h1>
-                    <p className="text-zinc-500 mt-2">Sign in to continue watching</p>
-                </div>
-
                 {/* Login Card */}
-                <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-800/50 shadow-2xl">
+                <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-700/50 shadow-2xl">
                     <CardHeader className="space-y-1 pb-4">
                         <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
                         <CardDescription>Enter your credentials to access your account</CardDescription>
@@ -65,9 +49,9 @@ export default function LoginPage() {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {error && (
-                                <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                                    <span className="text-red-400 text-sm">{error}</span>
+                                <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                                    <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                                    <span className="text-amber-400 text-sm">{error}</span>
                                 </div>
                             )}
 
@@ -82,8 +66,8 @@ export default function LoginPage() {
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder="Enter username"
                                     className={cn(
-                                        "bg-black/50 border-zinc-800 text-white placeholder-zinc-600",
-                                        "focus:border-red-500/50 focus:ring-red-500/20 transition-all"
+                                        "bg-black/50 border-zinc-700 text-white placeholder-zinc-600",
+                                        "focus:border-white/50 focus:ring-white/20 transition-all"
                                     )}
                                     required
                                 />
@@ -100,8 +84,8 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter password"
                                     className={cn(
-                                        "bg-black/50 border-zinc-800 text-white placeholder-zinc-600",
-                                        "focus:border-red-500/50 focus:ring-red-500/20 transition-all"
+                                        "bg-black/50 border-zinc-700 text-white placeholder-zinc-600",
+                                        "focus:border-white/50 focus:ring-white/20 transition-all"
                                     )}
                                     required
                                 />
@@ -112,8 +96,8 @@ export default function LoginPage() {
                                 disabled={isLoading}
                                 className={cn(
                                     "w-full py-6 font-semibold transition-all duration-200",
-                                    "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600",
-                                    "shadow-lg shadow-red-600/20 hover:shadow-red-600/30"
+                                    "bg-white text-black hover:bg-zinc-200",
+                                    "shadow-lg shadow-white/10 hover:shadow-white/20"
                                 )}
                             >
                                 {isLoading ? (

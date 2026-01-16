@@ -54,7 +54,7 @@ const getActivityColor = (activityType?: string) => {
         case 'video_on':
             return 'text-green-400 bg-green-500/10';
         case 'video_off':
-            return 'text-red-400 bg-red-500/10';
+            return 'text-zinc-400 bg-zinc-500/10';
         case 'mute':
             return 'text-orange-400 bg-orange-500/10';
         case 'unmute':
@@ -128,9 +128,9 @@ export function RoomSidebar({
                                     </div>
                                 )}
                                 {msg.type === 'leave' && (
-                                    <div className="text-xs py-1.5 px-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                                        <span className="text-red-400 font-medium">{msg.username}</span>
-                                        <span className="text-red-300/70"> left the room</span>
+                                    <div className="text-xs py-1.5 px-2 rounded-lg bg-zinc-500/10 border border-zinc-500/20">
+                                        <span className="text-zinc-400 font-medium">{msg.username}</span>
+                                        <span className="text-zinc-500"> left the room</span>
                                     </div>
                                 )}
                                 {msg.type === 'activity' && (

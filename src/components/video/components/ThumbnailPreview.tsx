@@ -8,7 +8,7 @@ interface ThumbnailPreviewProps {
   time: number;
   duration: number;
   spriteSheets: SpriteSheet[];  // Array of sprite sheets for long movies
-  position: number; // percentage 0-100
+  position: number;  
 }
 
 export function ThumbnailPreview({ time, duration, spriteSheets, position }: ThumbnailPreviewProps) {

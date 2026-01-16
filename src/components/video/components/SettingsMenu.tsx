@@ -73,7 +73,7 @@ export function SettingsMenu({
             if (!isOpen) onToggleMenu();
             onTabChange('subtitles');
           }}
-          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-200 rounded-lg hover:bg-white/10 group ${currentSubtitleIndex >= 0 ? 'text-red-500' : 'text-white/70 hover:text-white'
+          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-200 rounded-lg hover:bg-white/10 group ${currentSubtitleIndex >= 0 ? 'text-white' : 'text-white/70 hover:text-white'
             }`}
           aria-label="Subtitles"
           title="Subtitles"
@@ -333,7 +333,7 @@ interface MenuRowProps {
 function MenuRow({ icon, label, value, badge, badgeColor = 'blue', onClick }: MenuRowProps) {
   const badgeStyles = {
     blue: 'bg-blue-500/20 text-blue-400',
-    red: 'bg-red-500/20 text-red-400',
+    red: 'bg-white/20 text-white',
     green: 'bg-green-500/20 text-green-400',
     purple: 'bg-purple-500/20 text-purple-400',
     yellow: 'bg-yellow-500/20 text-yellow-400',
@@ -622,10 +622,10 @@ function SubMenuHeader({ title, onBack }: SubMenuHeaderProps) {
 
 function RadioIndicator({ isSelected }: { isSelected: boolean }) {
   return (
-    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected ? 'border-red-500 bg-red-500' : 'border-white/30 hover:border-white/50'
+    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected ? 'border-white bg-white' : 'border-white/30 hover:border-white/50'
       }`}>
       {isSelected && (
-        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+        <div className="w-1.5 h-1.5 bg-black rounded-full" />
       )}
     </div>
   );
