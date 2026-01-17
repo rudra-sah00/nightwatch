@@ -70,17 +70,19 @@ export function middleware(request: NextRequest) {
           "base-uri 'self'; " +
           "form-action 'self'; " +
           "frame-ancestors 'none';"
-        : // Production: Strict CSP (no unsafe-inline/eval)
+        : // Production: CSP that works with Next.js and Vercel
           "default-src 'self'; " +
-          "script-src 'self'; " +
-          "style-src 'self' 'unsafe-inline'; " +
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com; " +
+          "style-src 'self' 'unsafe-inline' https://vercel.live; " +
           "img-src 'self' blob: data: https:; " +
           "font-src 'self' data:; " +
-          "connect-src 'self' https: wss:; " +
-          "media-src 'self' https: blob:; " +
+          "connect-src 'self' https://api.rudrasahoo.live wss://api.rudrasahoo.live https://vercel.live wss://*.pusher.com wss://*.vercel.live; " +
+          "media-src 'self' https://api.rudrasahoo.live https://*.net51.cc https://*.net20.cc blob:; " +
           "object-src 'none'; " +
           "base-uri 'self'; " +
           "form-action 'self'; " +
+          "frame-src 'self' https://vercel.live; " +
+          "worker-src 'self' blob:; " +
           "frame-ancestors 'none'; " +
           "upgrade-insecure-requests;";
 
