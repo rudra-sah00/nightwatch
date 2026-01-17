@@ -7,6 +7,7 @@ import { ContentCard, ContentDetailModal } from '@/components/content';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchResult } from '@/lib/api';
 import { Button, Skeleton } from '@/components/ui';
+import { loadVideoForRoom } from '@/services/api/rooms';
 import {
     Menu,
     Plus,
@@ -15,6 +16,8 @@ import {
     ChevronDown,
     Search,
     Users,
+    Clock,
+    Tv,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ContentType } from '@/types/content';
@@ -90,8 +93,19 @@ export function HomeContent({
     };
 
     // Handle play from modal
-    const handlePlay = (episodeId?: string) => {
+    const handlePlay = async (episodeId?: string) => {
         if (!selectedContent) return;
+
+        // If host in a room, notify participants before navigating
+        if (inRoom && isHost && roomCode) {
+            try {
+                console.log('📺 Host selecting video for room:', selectedContent.id, episodeId);
+                await loadVideoForRoom(roomCode, selectedContent.id, episodeId);
+            } catch (error) {
+                console.error('Failed to notify room of video selection:', error);
+                // Continue anyway - host should still be able to watch
+            }
+        }
 
         if (episodeId) {
             // Series episode - navigate to episode
@@ -122,15 +136,17 @@ export function HomeContent({
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800/50">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                         <div className="space-y-6">
-                            {/* Welcome message */}
-                            <div className="text-center">
-                                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-                                    Welcome, {user?.name || user?.username}
-                                </h1>
-                                <p className="text-lg text-zinc-400 mt-2">
-                                    Search for movies and TV shows
-                                </p>
-                            </div>
+                            {/* Welcome message - hide for non-host members in room */}
+                            {(!inRoom || isHost) && (
+                                <div className="text-center">
+                                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                                        Welcome, {user?.name || user?.username}
+                                    </h1>
+                                    <p className="text-lg text-zinc-400 mt-2">
+                                        Search for movies and TV shows
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Search bar and room button */}
                             <div className="flex gap-3 items-center justify-center max-w-3xl mx-auto">
@@ -308,6 +324,37 @@ export function HomeContent({
                             </p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Member Waiting State - Show when in room as non-host member and no search */}
+            {inRoom && !isHost && !searched && (
+                <div className="flex-1 flex items-center justify-center px-6 py-12">
+                    <div className="text-center max-w-md">
+                        {/* Animated waiting icon */}
+                        <div className="relative w-32 h-32 mx-auto mb-8">
+                            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full animate-pulse" />
+                            <div className="absolute inset-2 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-full flex items-center justify-center ring-1 ring-zinc-700/50">
+                                <div className="relative">
+                                    <Tv className="w-12 h-12 text-violet-400" />
+                                    <Clock className="w-5 h-5 text-amber-400 absolute -bottom-1 -right-1 animate-pulse" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 className="text-2xl font-semibold text-white mb-3">
+                            Waiting for host to start
+                        </h2>
+                        <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                            The host will select something to watch. Once they start playback, you&apos;ll automatically join the watch party.
+                        </p>
+                        
+                        {/* Room info badge */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800/50 rounded-full border border-zinc-700/50">
+                            <Users className="w-4 h-4 text-violet-400" />
+                            <span className="text-sm text-zinc-300">Room: <span className="font-mono text-violet-400">{roomCode}</span></span>
+                        </div>
+                    </div>
                 </div>
             )}
 

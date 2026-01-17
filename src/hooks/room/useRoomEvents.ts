@@ -3,12 +3,38 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { getWebSocketToken } from '@/services/api/client';
 
+export interface PlaybackUpdateEvent {
+    type: 'playback_update';
+    room_code: string;
+    is_playing: boolean;
+    current_time: number;
+    playback_rate: number;
+    updated_by: string;
+}
+
+export interface VideoSelectedEvent {
+    type: 'video_selected';
+    room_code: string;
+    video_id: string;
+    video_title: string;
+    episode_id?: string;
+}
+
 export interface RoomEvent {
-    type: 'participant_joined' | 'participant_left' | 'room_deleted' | 'room_updated' | 'join_request_received';
+    type: 'participant_joined' | 'participant_left' | 'room_deleted' | 'room_updated' | 'join_request_received' | 'playback_update' | 'video_selected';
     room_code: string;
     user_id?: string;
     username?: string;
     reason?: string;
+    // Playback update fields
+    is_playing?: boolean;
+    current_time?: number;
+    playback_rate?: number;
+    updated_by?: string;
+    // Video selected fields
+    video_id?: string;
+    video_title?: string;
+    episode_id?: string;
 }
 
 interface UseRoomEventsProps {
@@ -25,9 +51,22 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const maxReconnectAttempts = 5;
+    const onEventRef = useRef(onEvent);
+    const isConnectingRef = useRef(false);
+    
+    // Keep onEvent ref updated without triggering reconnects
+    useEffect(() => {
+        onEventRef.current = onEvent;
+    }, [onEvent]);
 
     const connect = useCallback(async () => {
         if (!enabled || !roomCode) return;
+        
+        // Prevent multiple simultaneous connection attempts
+        if (isConnectingRef.current || wsRef.current?.readyState === WebSocket.OPEN) {
+            return;
+        }
+        isConnectingRef.current = true;
 
         // Close any existing connection first
         if (wsRef.current) {
@@ -38,6 +77,7 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
         const token = await getWebSocketToken();
         if (!token) {
             console.error('Failed to get WebSocket token');
+            isConnectingRef.current = false;
             return;
         }
 
@@ -54,12 +94,13 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
         ws.onopen = () => {
             console.log('Room WebSocket connected to', roomCode);
             reconnectAttemptsRef.current = 0;
+            isConnectingRef.current = false;
         };
 
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data) as RoomEvent;
-                onEvent(data);
+                onEventRef.current(data);
             } catch {
                 // Failed to parse WebSocket message
             }
@@ -67,6 +108,7 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
 
         ws.onclose = () => {
             wsRef.current = null;
+            isConnectingRef.current = false;
 
             // Attempt reconnection with exponential backoff
             if (enabled && reconnectAttemptsRef.current < maxReconnectAttempts) {
@@ -81,8 +123,9 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
 
         ws.onerror = (error) => {
             console.error('Room WebSocket error:', error);
+            isConnectingRef.current = false;
         };
-    }, [enabled, roomCode, onEvent]);
+    }, [enabled, roomCode]); // Removed onEvent - using ref instead
 
     const disconnect = useCallback(() => {
         if (reconnectTimeoutRef.current) {
@@ -96,6 +139,7 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
         }
 
         reconnectAttemptsRef.current = 0;
+        isConnectingRef.current = false;
     }, []);
 
     useEffect(() => {
@@ -108,7 +152,7 @@ export function useRoomEvents({ roomCode, enabled, onEvent }: UseRoomEventsProps
         return () => {
             disconnect();
         };
-    }, [enabled, connect, disconnect]);
+    }, [enabled, roomCode, connect, disconnect]); // Added roomCode to reconnect on room change
 
     return { disconnect };
 }

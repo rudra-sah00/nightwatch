@@ -1,88 +1,35 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { RoomModal, Sidebar } from '@/components/room';
+import { useRouter } from 'next/navigation';
+import { RoomModal } from '@/components/room';
 import { HomeContent } from '@/components/home';
 import { useAuth } from '@/hooks/useAuth';
 import { search, SearchResult } from '@/lib/api';
-import { Room, leaveRoom, getPendingRequests, JoinRequest, getRoom } from '@/services/api/rooms';
-import { useRoomEvents, RoomEvent, useLiveKitRoom } from '@/hooks';
+import { Room } from '@/services/api/rooms';
+import { useRoomEvents, RoomEvent } from '@/hooks';
+import { useRoom } from '@/providers/RoomProvider';
 
 function HomePage() {
+  const router = useRouter();
   const { user } = useAuth();
+  const {
+    currentRoom,
+    setCurrentRoom,
+    setLivekitToken,
+    isHost,
+    fetchPendingRequests,
+    handleLeaveRoom,
+    refreshRoomData,
+  } = useRoom();
+
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<{ id: string; title: string } | null>(null);
-  const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
-  const [livekitToken, setLivekitToken] = useState<string | null>(null);
-  
-  // Room audio (video player audio, not mic)
-  const [isRoomAudioOff, setIsRoomAudioOff] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
-
-  const isHost = user?.id === currentRoom?.host_id;
-
-  // LiveKit room connection with real audio/video controls
-  const {
-    isConnected: isLiveKitConnected,
-    isMuted,
-    isVideoOff,
-    toggleMute,
-    toggleVideo,
-    disconnect: disconnectLiveKit,
-  } = useLiveKitRoom({
-    token: livekitToken,
-    enabled: !!currentRoom && !!livekitToken,
-  });
-
-  // Leave room handler
-  const handleLeaveRoom = useCallback(async () => {
-    if (!currentRoom) return;
-    
-    // Disconnect from LiveKit first
-    disconnectLiveKit();
-
-    try {
-      await leaveRoom(currentRoom.code);
-    } catch {
-      // Ignore errors during leave
-    } finally {
-      setCurrentRoom(null);
-      setLivekitToken(null);
-      setPendingRequests([]);
-    }
-  }, [currentRoom]);
-
-  // Fetch pending join requests (for host only)
-  const fetchPendingRequests = useCallback(async () => {
-    if (!currentRoom || !isHost) return;
-    
-    try {
-      const response = await getPendingRequests(currentRoom.code);
-      setPendingRequests(response.data?.requests || []);
-    } catch (error) {
-      console.error('Failed to fetch pending requests:', error);
-    }
-  }, [currentRoom, isHost]);
-
-  // Refresh room data (participants list, etc.)
-  const refreshRoomData = useCallback(async () => {
-    if (!currentRoom) return;
-    
-    try {
-      const response = await getRoom(currentRoom.code);
-      if (response.data?.room) {
-        setCurrentRoom(response.data.room);
-      }
-    } catch (error) {
-      console.error('Failed to refresh room data:', error);
-    }
-  }, [currentRoom]);
 
   // Listen to room events via WebSocket
   useRoomEvents({
@@ -107,16 +54,31 @@ function HomePage() {
           // Refresh pending requests when a new join request arrives
           fetchPendingRequests();
           break;
+        case 'video_selected':
+          // Host selected a video - navigate all participants to watch page
+          // Each user will fetch their own video data (own CDN token)
+          if (!isHost && event.video_id) {
+            console.log('📺 Host selected video, navigating:', event.video_id);
+            const url = event.episode_id 
+              ? `/watch/${event.video_id}?episode=${event.episode_id}`
+              : `/watch/${event.video_id}`;
+            router.push(url);
+          }
+          break;
+        case 'playback_update':
+          // If member receives playback_update while on home page, 
+          // it means they missed video_selected - check room video and navigate
+          if (!isHost && currentRoom.video_id) {
+            console.log('📺 Received playback_update on home page, navigating to video:', currentRoom.video_id);
+            const url = currentRoom.episode_id
+              ? `/watch/${currentRoom.video_id}?episode=${currentRoom.episode_id}`
+              : `/watch/${currentRoom.video_id}`;
+            router.push(url);
+          }
+          break;
       }
-    }, [currentRoom, fetchPendingRequests, handleLeaveRoom, refreshRoomData])
+    }, [currentRoom, fetchPendingRequests, handleLeaveRoom, refreshRoomData, isHost, router])
   });
-
-  // Fetch pending requests when room changes
-  useEffect(() => {
-    if (currentRoom && isHost) {
-      fetchPendingRequests();
-    }
-  }, [currentRoom?.code, isHost, fetchPendingRequests]);
 
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) return;
@@ -156,43 +118,20 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-black">
-      {/* Room Sidebar (when in room) */}
-      {currentRoom && (
-        <Sidebar
-          room={currentRoom}
-          currentUserId={user?.id}
-          isMuted={isMuted}
-          isVideoOff={isVideoOff}
-          isRoomAudioOff={isRoomAudioOff}
-          isCollapsed={isSidebarCollapsed}
-          pendingRequests={pendingRequests}
-          isLiveKitConnected={isLiveKitConnected}
-          onToggleMute={toggleMute}
-          onToggleVideo={toggleVideo}
-          onToggleRoomAudio={() => setIsRoomAudioOff(!isRoomAudioOff)}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          onLeaveRoom={handleLeaveRoom}
-          onRequestHandled={() => fetchPendingRequests()}
-        />
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1">
-        <HomeContent
-          results={results}
-          loading={loading}
-          searched={searched}
-          searchQuery={searchQuery}
-          onSearch={handleSearch}
-          onClear={handleClear}
-          onOpenRoomModal={handleOpenRoomModal}
-          inRoom={!!currentRoom}
-          isHost={isHost}
-          roomCode={currentRoom?.code}
-          onLeaveRoom={handleLeaveRoom}
-        />
-      </div>
+    <>
+      <HomeContent
+        results={results}
+        loading={loading}
+        searched={searched}
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
+        onClear={handleClear}
+        onOpenRoomModal={handleOpenRoomModal}
+        inRoom={!!currentRoom}
+        isHost={isHost}
+        roomCode={currentRoom?.code}
+        onLeaveRoom={handleLeaveRoom}
+      />
 
       {/* Room Modal */}
       <RoomModal
@@ -203,7 +142,7 @@ function HomePage() {
         initialMode={roomMode}
         onRoomJoined={handleRoomJoined}
       />
-    </div>
+    </>
   );
 }
 

@@ -2,6 +2,7 @@
 // Handles all watch party room-related API calls
 
 import { apiRequest, ApiResponse } from './client';
+import type { CompleteVideoData } from '@/types/content';
 
 // ============ Room Types ============
 
@@ -21,8 +22,10 @@ export interface Participant {
 
 export interface PlaybackState {
     is_playing: boolean;
-    position_seconds: number;
+    current_time: number;
+    playback_rate: number;
     updated_at: string;
+    updated_by: string;
 }
 
 export interface Room {
@@ -31,6 +34,7 @@ export interface Room {
     host_id: string;
     video_id?: string;
     video_title?: string;
+    episode_id?: string;
     playback: PlaybackState;
     participants: Participant[];
     created_at: string;
@@ -152,15 +156,17 @@ export async function rejectJoinRequest(
 export async function updatePlaybackState(
     code: string,
     isPlaying: boolean,
-    positionSeconds: number
+    currentTime: number,
+    playbackRate: number = 1.0
 ): Promise<ApiResponse<{ playback: PlaybackState }>> {
     return apiRequest<{ playback: PlaybackState }>(
         `/api/rooms/${code.toUpperCase()}/playback`,
         {
-            method: 'PUT',
+            method: 'POST',
             body: JSON.stringify({
                 is_playing: isPlaying,
-                position_seconds: positionSeconds,
+                current_time: currentTime,
+                playback_rate: playbackRate,
             }),
         }
     );
@@ -191,21 +197,35 @@ export async function getChat(code: string) {
     return apiRequest<{ messages: ChatMessage[] }>(`/api/rooms/${code.toUpperCase()}/chat`);
 }
 
+/**
+ * Load video for room (host only)
+ * Backend fetches video data via Playwright and broadcasts to all participants
+ * This is the optimized flow: ONE Playwright call per video, not per participant
+ */
+export async function loadVideoForRoom(
+    code: string,
+    videoId: string,
+    episodeId?: string
+): Promise<ApiResponse<{ message: string; video_id: string; video_title: string; video: CompleteVideoData }>> {
+    return apiRequest<{ message: string; video_id: string; video_title: string; video: CompleteVideoData }>(
+        `/api/rooms/${code.toUpperCase()}/video`,
+        {
+            method: 'PUT',
+            body: JSON.stringify({
+                video_id: videoId,
+                episode_id: episodeId,
+            }),
+        }
+    );
+}
+
+// Alias for backward compatibility
+export const updateRoomVideo = loadVideoForRoom;
+
+
 // ============ Backward Compatibility Aliases ============
 
 export const joinRoom = requestToJoinRoom;
-
-/**
- * Legacy wrapper for updatePlaybackState to match old signature
- */
-export async function updatePlayback(
-    code: string,
-    isPlaying: boolean,
-    currentTime: number,
-    _playbackRate?: number
-) {
-    return updatePlaybackState(code, isPlaying, currentTime);
-}
 
 export async function getPlaybackState(code: string) {
     const result = await getRoom(code);

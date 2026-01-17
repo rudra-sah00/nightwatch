@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoPlayer from '@/components/video/VideoPlayer';
 import { getVideoData, getShowDetails, getEpisodeData, getSeriesEpisodes } from '@/services/api/media';
@@ -8,12 +8,15 @@ import { ArrowLeftIcon, PlayIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownSelector } from '@/components/ui/dropdown-selector';
+import { useRoom } from '@/providers/RoomProvider';
+import { useRoomEvents, RoomEvent } from '@/hooks';
 import type { CompleteVideoData, ShowDetails, Episode } from '@/types/content';
 
 function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { currentRoom, isRoomAudioOff, isHost } = useRoom();
   const [videoData, setVideoData] = useState<CompleteVideoData | null>(null);
   const [showDetails, setShowDetails] = useState<ShowDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +30,45 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   // Get episode from query params if present
   const episodeId = searchParams.get('episode');
 
+  // Debug: Log room state
+  console.log('[WatchPage] Room state:', { 
+    hasRoom: !!currentRoom, 
+    roomCode: currentRoom?.code, 
+    isHost,
+    hostId: currentRoom?.host_id,
+  });
+
+  // Handle room events for playback sync
+  const handleRoomEvent = useCallback((event: RoomEvent) => {
+    console.log('[WatchPage] Room event received:', event.type, event);
+    if (event.type === 'playback_update') {
+      // Store in window for when VideoPlayer mounts (sync handler might not exist yet)
+      const syncData = {
+        isPlaying: event.is_playing ?? false,
+        currentTime: event.current_time ?? 0,
+        playbackRate: event.playback_rate ?? 1,
+        updatedBy: event.updated_by ?? '',
+      };
+      (window as any).__pendingSyncState = syncData;
+      
+      // Call the global video sync handler if available
+      const handler = (window as any).__videoSyncHandler;
+      console.log('[WatchPage] Calling sync handler:', { handlerExists: !!handler, syncData });
+      if (handler && typeof handler === 'function') {
+        handler(syncData);
+      } else {
+        console.warn('[WatchPage] No sync handler available!');
+      }
+    }
+  }, []);
+
+  // Subscribe to room events
+  useRoomEvents({
+    roomCode: currentRoom?.code ?? '',
+    enabled: !!currentRoom,
+    onEvent: handleRoomEvent,
+  });
+
   useEffect(() => {
     // Robust cancellation handling with AbortController
     const controller = new AbortController();
@@ -35,17 +77,15 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
       setLoading(true);
       setError(null);
 
+      // Everyone fetches their own video data (own CDN token)
       try {
-        // Get video data for playback (includes metadata in video.metadata)
         let response;
         if (episodeId) {
-          // If we have an episode ID, get episode stream data
           response = await getEpisodeData(resolvedParams.id, episodeId, { signal: controller.signal });
         } else {
           response = await getVideoData(resolvedParams.id, { signal: controller.signal });
         }
 
-        // Check if aborted before updating state
         if (controller.signal.aborted) return;
 
         if (!response.data?.video) {
@@ -55,7 +95,7 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
         setVideoData(response.data.video);
 
-        // Load show details for series to get episodes list
+        // Load show details for series
         if (response.data.video.metadata.content_type === 'Series') {
           try {
             const showResponse = await getShowDetails(resolvedParams.id, { signal: controller.signal });
@@ -65,7 +105,6 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
             if (showResponse.data?.show) {
               setShowDetails(showResponse.data.show);
 
-              // Set initial season based on current episode or last season
               if (episodeId && showResponse.data.show.episodes) {
                 const currentEp = showResponse.data.show.episodes.find(ep => ep.episode_id === episodeId);
                 if (currentEp?.season_number) {
@@ -96,7 +135,7 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     return () => {
       controller.abort();
     };
-  }, [resolvedParams.id, episodeId]);
+  }, [resolvedParams.id, episodeId, currentRoom, isHost]);
 
   // Dynamic document title based on content
   useEffect(() => {
@@ -237,9 +276,9 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
-        <div className="container mx-auto px-4 pt-6">
-          <div className="h-6 w-24 bg-zinc-800 rounded animate-pulse" />
+        <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+          <div className="container mx-auto px-4 pt-6">
+            <div className="h-6 w-24 bg-zinc-800 rounded animate-pulse" />
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 py-6">
           {/* Video player loading skeleton with beautiful animation */}
@@ -294,32 +333,32 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
             animation: shimmer 2s infinite;
           }
         `}</style>
-      </div>
+        </div>
     );
   }
 
   if (error || !videoData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center">
-                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+        <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+          <div className="container mx-auto px-4 py-12">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <p className="text-zinc-300 text-xl font-medium">{error || 'Video not found'}</p>
+                <button
+                  onClick={() => router.push('/')}
+                  className="px-8 py-3 bg-white text-black font-semibold hover:bg-zinc-200 rounded-full transition-all hover:scale-105 shadow-lg"
+                >
+                  Go Back Home
+                </button>
               </div>
-              <p className="text-zinc-300 text-xl font-medium">{error || 'Video not found'}</p>
-              <button
-                onClick={() => router.push('/')}
-                className="px-8 py-3 bg-white text-black font-semibold hover:bg-zinc-200 rounded-full transition-all hover:scale-105 shadow-lg"
-              >
-                Go Back Home
-              </button>
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
@@ -357,6 +396,12 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
               totalTiles: s.total_tiles,
               intervalSeconds: s.interval_seconds,
             }))}
+            syncMode={currentRoom ? {
+              enabled: true,
+              isHost: isHost,
+              roomCode: currentRoom.code,
+            } : undefined}
+            externalMuted={currentRoom ? isRoomAudioOff : undefined}
           />
         </div>
 

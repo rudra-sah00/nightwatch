@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getRoom, updatePlayback, PlaybackState, Room } from '@/lib/api';
+import { getRoom, updatePlaybackState, PlaybackState, Room } from '@/lib/api';
 
 interface UseSyncOptions {
     roomCode: string;
@@ -76,7 +76,7 @@ export function usePlaybackSync({ roomCode, canControl, onPlaybackUpdate }: UseS
     const play = useCallback(async (currentTime: number) => {
         if (!canControl) return;
 
-        const result = await updatePlayback(roomCode, true, currentTime);
+        const result = await updatePlaybackState(roomCode, true, currentTime);
         if (result.data) {
             setState(prev => ({ ...prev, playback: result.data!.playback }));
         }
@@ -85,7 +85,7 @@ export function usePlaybackSync({ roomCode, canControl, onPlaybackUpdate }: UseS
     const pause = useCallback(async (currentTime: number) => {
         if (!canControl) return;
 
-        const result = await updatePlayback(roomCode, false, currentTime);
+        const result = await updatePlaybackState(roomCode, false, currentTime);
         if (result.data) {
             setState(prev => ({ ...prev, playback: result.data!.playback }));
         }
@@ -94,7 +94,7 @@ export function usePlaybackSync({ roomCode, canControl, onPlaybackUpdate }: UseS
     const seek = useCallback(async (currentTime: number, isPlaying: boolean) => {
         if (!canControl) return;
 
-        const result = await updatePlayback(roomCode, isPlaying, currentTime);
+        const result = await updatePlaybackState(roomCode, isPlaying, currentTime);
         if (result.data) {
             setState(prev => ({ ...prev, playback: result.data!.playback }));
         }
@@ -103,7 +103,7 @@ export function usePlaybackSync({ roomCode, canControl, onPlaybackUpdate }: UseS
     const setPlaybackRate = useCallback(async (rate: number, currentTime: number, isPlaying: boolean) => {
         if (!canControl) return;
 
-        const result = await updatePlayback(roomCode, isPlaying, currentTime, rate);
+        const result = await updatePlaybackState(roomCode, isPlaying, currentTime, rate);
         if (result.data) {
             setState(prev => ({ ...prev, playback: result.data!.playback }));
         }

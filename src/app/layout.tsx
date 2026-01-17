@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 import QueryProvider from '@/providers/QueryProvider';
+import { RoomProvider } from '@/providers/RoomProvider';
+import { RoomLayout } from '@/components/layout';
 
 export const metadata: Metadata = {
   title: {
@@ -26,9 +28,11 @@ export default function RootLayout({
       <body className="bg-zinc-950 text-white antialiased">
         <QueryProvider>
           <AuthProvider>
-            <main className="min-h-screen">
-              {children}
-            </main>
+            <RoomProvider>
+              <RoomLayout>
+                {children}
+              </RoomLayout>
+            </RoomProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

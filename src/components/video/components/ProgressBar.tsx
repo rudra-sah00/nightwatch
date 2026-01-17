@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { formatTime } from '@/lib/utils/video-utils';
 import { ThumbnailPreview } from './ThumbnailPreview';
 import { SpriteSheet } from '@/types/video';
+import { Lock } from 'lucide-react';
 
 interface ProgressBarProps {
   currentTime: number;
@@ -12,6 +13,7 @@ interface ProgressBarProps {
   hoverTime: number | null;
   progressBarRef: React.RefObject<HTMLDivElement | null>;
   spriteSheets?: SpriteSheet[];  // Array of sprite sheets for long movies
+  locked?: boolean;  // When true, user cannot seek (sync mode for non-host)
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
   onHover: (e: React.MouseEvent<HTMLDivElement>) => void;
   onLeave: () => void;
@@ -24,6 +26,7 @@ export function ProgressBar({
   hoverTime,
   progressBarRef,
   spriteSheets,
+  locked = false,
   onSeek,
   onHover,
   onLeave,
@@ -33,6 +36,7 @@ export function ProgressBar({
   const hoverPosition = hoverTime !== null && duration > 0 ? (hoverTime / duration) * 100 : 0;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (locked) return;
     setIsDragging(true);
     onSeek(e);
   };
@@ -41,13 +45,28 @@ export function ProgressBar({
     setIsDragging(false);
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (locked) return;
+    onSeek(e);
+  };
+
   return (
     <div className="px-4 mb-3 relative group/progress-container">
+      {/* Locked indicator */}
+      {locked && (
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1 text-xs text-zinc-400 opacity-0 group-hover/progress-container:opacity-100 transition-opacity">
+          <Lock className="w-3 h-3" />
+          <span>Host controls timeline</span>
+        </div>
+      )}
+      
       {/* Progress bar wrapper with larger hit area */}
       <div
         ref={progressBarRef}
-        className="relative h-2 md:h-1.5 bg-white/20 rounded-full cursor-pointer transition-all duration-200 group-hover/progress-container:h-3"
-        onClick={onSeek}
+        className={`relative h-2 md:h-1.5 bg-white/20 rounded-full transition-all duration-200 group-hover/progress-container:h-3 ${
+          locked ? 'cursor-not-allowed' : 'cursor-pointer'
+        }`}
+        onClick={handleClick}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={onHover}
@@ -64,26 +83,30 @@ export function ProgressBar({
 
         {/* Progress - Clean white bar */}
         <div
-          className="absolute h-full bg-white rounded-full transition-[width] duration-75 ease-linear"
+          className={`absolute h-full rounded-full transition-[width] duration-75 ease-linear ${
+            locked ? 'bg-white/70' : 'bg-white'
+          }`}
           style={{
             width: `${progress}%`,
             boxShadow: isDragging ? '0 0 12px rgba(255, 255, 255, 0.4)' : '0 0 6px rgba(255, 255, 255, 0.2)'
           }}
         >
-          {/* Scrubber handle */}
-          <div
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-150 ${isDragging
-              ? 'scale-125 ring-4 ring-white/30'
-              : 'scale-0 opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
-              }`}
-            style={{
-              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-            }}
-          />
+          {/* Scrubber handle - hidden when locked */}
+          {!locked && (
+            <div
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-150 ${isDragging
+                ? 'scale-125 ring-4 ring-white/30'
+                : 'scale-0 opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
+                }`}
+              style={{
+                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              }}
+            />
+          )}
         </div>
 
         {/* Hover indicator line - shows when hovering but not on current position */}
-        {hoverTime !== null && Math.abs(hoverPosition - progress) > 2 && (
+        {hoverTime !== null && !locked && Math.abs(hoverPosition - progress) > 2 && (
           <div
             className="absolute top-0 h-full w-0.5 bg-white/70 pointer-events-none rounded-full transition-opacity duration-150"
             style={{ left: `${hoverPosition}%` }}
@@ -91,7 +114,7 @@ export function ProgressBar({
         )}
 
         {/* Thumbnail Preview or Time Tooltip */}
-        {hoverTime !== null && (
+        {hoverTime !== null && !locked && (
           spriteSheets && spriteSheets.length > 0 ? (
             <ThumbnailPreview
               time={hoverTime}

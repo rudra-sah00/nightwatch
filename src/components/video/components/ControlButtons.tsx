@@ -4,6 +4,7 @@ import React from 'react';
 import { formatTime } from '@/lib/utils/video-utils';
 import { SKIP_SECONDS } from '@/lib/constants';
 import { EpisodeInfo } from '@/types/video';
+import { Lock } from 'lucide-react';
 
 interface ControlButtonsProps {
   isPlaying: boolean;
@@ -14,6 +15,7 @@ interface ControlButtonsProps {
   showVolumeSlider: boolean;
   title?: string;
   episodeInfo?: EpisodeInfo;
+  locked?: boolean;  // When true, play/skip controls are disabled (sync mode for non-host)
   onTogglePlay: () => void;
   onSkip: (seconds: number) => void;
   onToggleMute: () => void;
@@ -31,6 +33,7 @@ export function ControlButtons({
   showVolumeSlider,
   title,
   episodeInfo,
+  locked = false,
   onTogglePlay,
   onSkip,
   onToggleMute,
@@ -42,32 +45,47 @@ export function ControlButtons({
     <div className="flex items-center gap-1 md:gap-2">
       {/* Play/Pause */}
       <button
-        onClick={onTogglePlay}
-        className="w-10 h-10 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+        onClick={locked ? undefined : onTogglePlay}
+        className={`w-10 h-10 flex items-center justify-center transition-colors ${
+          locked 
+            ? 'text-white/40 cursor-not-allowed' 
+            : 'text-white hover:text-zinc-300'
+        }`}
         aria-label={isPlaying ? 'Pause' : 'Play'}
+        title={locked ? 'Host controls playback' : undefined}
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </button>
 
       {/* Skip Backward - Circle with 10 */}
       <button
-        onClick={() => onSkip(-SKIP_SECONDS)}
-        className="w-10 h-10 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+        onClick={locked ? undefined : () => onSkip(-SKIP_SECONDS)}
+        className={`w-10 h-10 flex items-center justify-center transition-colors ${
+          locked 
+            ? 'text-white/40 cursor-not-allowed' 
+            : 'text-white hover:text-zinc-300'
+        }`}
         aria-label={`Rewind ${SKIP_SECONDS} seconds`}
+        title={locked ? 'Host controls playback' : undefined}
       >
         <SkipBackIcon />
       </button>
 
       {/* Skip Forward - Circle with 10 */}
       <button
-        onClick={() => onSkip(SKIP_SECONDS)}
-        className="w-10 h-10 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+        onClick={locked ? undefined : () => onSkip(SKIP_SECONDS)}
+        className={`w-10 h-10 flex items-center justify-center transition-colors ${
+          locked 
+            ? 'text-white/40 cursor-not-allowed' 
+            : 'text-white hover:text-zinc-300'
+        }`}
         aria-label={`Forward ${SKIP_SECONDS} seconds`}
+        title={locked ? 'Host controls playback' : undefined}
       >
         <SkipForwardIcon />
       </button>
 
-      {/* Volume */}
+      {/* Volume - always available for all users */}
       <div
         className="flex items-center relative"
         onMouseEnter={onVolumeSliderEnter}

@@ -9,12 +9,21 @@ import {
     RemoteParticipant,
     Participant,
     ConnectionState,
+    TrackPublication,
+    RemoteTrackPublication,
 } from 'livekit-client';
 
 interface UseLiveKitRoomProps {
     token: string | null;
     serverUrl?: string;
     enabled?: boolean;
+}
+
+interface ParticipantState {
+    participant: Participant;
+    isMuted: boolean;
+    isVideoOff: boolean;
+    isSpeaking: boolean;
 }
 
 interface UseLiveKitRoomReturn {
@@ -24,6 +33,7 @@ interface UseLiveKitRoomReturn {
     connectionState: ConnectionState;
     localParticipant: LocalParticipant | null;
     remoteParticipants: RemoteParticipant[];
+    participantStates: Map<string, ParticipantState>;
     isMuted: boolean;
     isVideoOff: boolean;
     toggleMute: () => Promise<void>;
@@ -43,6 +53,7 @@ export function useLiveKitRoom({
     const [connectionState, setConnectionState] = useState<ConnectionState>(ConnectionState.Disconnected);
     const [localParticipant, setLocalParticipant] = useState<LocalParticipant | null>(null);
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
+    const [participantStates, setParticipantStates] = useState<Map<string, ParticipantState>>(new Map());
     const [isMuted, setIsMuted] = useState(true); // Start muted by default
     const [isVideoOff, setIsVideoOff] = useState(true); // Start with video off by default
     const [error, setError] = useState<string | null>(null);
@@ -82,23 +93,92 @@ export function useLiveKitRoom({
         };
 
         const handleLocalTrackPublished = () => {
+            console.log('Local track published');
             updateLocalMediaState(newRoom.localParticipant);
+            updateParticipantStates(newRoom);
         };
 
         const handleLocalTrackUnpublished = () => {
+            console.log('Local track unpublished');
             updateLocalMediaState(newRoom.localParticipant);
+            updateParticipantStates(newRoom);
         };
 
         const handleTrackMuted = (track: any, participant: Participant) => {
             if (participant === newRoom.localParticipant) {
                 updateLocalMediaState(newRoom.localParticipant);
             }
+            updateParticipantStates(newRoom);
         };
 
         const handleTrackUnmuted = (track: any, participant: Participant) => {
             if (participant === newRoom.localParticipant) {
                 updateLocalMediaState(newRoom.localParticipant);
             }
+            updateParticipantStates(newRoom);
+        };
+
+        const handleTrackSubscribed = (
+            track: any,
+            publication: RemoteTrackPublication,
+            participant: RemoteParticipant
+        ) => {
+            console.log('Track subscribed:', track.kind, 'from', participant.identity, 'trackSid:', publication.trackSid);
+            updateParticipantStates(newRoom);
+        };
+
+        const handleTrackUnsubscribed = (
+            track: any,
+            publication: RemoteTrackPublication,
+            participant: RemoteParticipant
+        ) => {
+            console.log('Track unsubscribed:', track.kind, 'from', participant.identity);
+            updateParticipantStates(newRoom);
+        };
+
+        // Handle when a remote participant publishes a track
+        const handleTrackPublished = (
+            publication: RemoteTrackPublication,
+            participant: RemoteParticipant
+        ) => {
+            console.log('Remote track published:', publication.kind, 'from', participant.identity, 'subscribed:', publication.isSubscribed);
+            // Auto-subscribe is enabled by default, but force update state
+            updateParticipantStates(newRoom);
+        };
+
+        const handleActiveSpeakersChanged = (speakers: Participant[]) => {
+            updateParticipantStates(newRoom);
+        };
+
+        const updateParticipantStates = (r: Room) => {
+            const states = new Map<string, ParticipantState>();
+            
+            // Add local participant
+            if (r.localParticipant) {
+                const local = r.localParticipant;
+                const audioTrack = local.getTrackPublication(Track.Source.Microphone);
+                const videoTrack = local.getTrackPublication(Track.Source.Camera);
+                states.set(local.identity, {
+                    participant: local,
+                    isMuted: !audioTrack || audioTrack.isMuted || !audioTrack.track,
+                    isVideoOff: !videoTrack || videoTrack.isMuted || !videoTrack.track,
+                    isSpeaking: local.isSpeaking,
+                });
+            }
+            
+            // Add remote participants
+            r.remoteParticipants.forEach((remote) => {
+                const audioTrack = remote.getTrackPublication(Track.Source.Microphone);
+                const videoTrack = remote.getTrackPublication(Track.Source.Camera);
+                states.set(remote.identity, {
+                    participant: remote,
+                    isMuted: !audioTrack || audioTrack.isMuted || !audioTrack.track,
+                    isVideoOff: !videoTrack || videoTrack.isMuted || !videoTrack.track,
+                    isSpeaking: remote.isSpeaking,
+                });
+            });
+            
+            setParticipantStates(states);
         };
 
         const updateLocalMediaState = (local: LocalParticipant) => {
@@ -117,6 +197,10 @@ export function useLiveKitRoom({
         newRoom.on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
         newRoom.on(RoomEvent.TrackMuted, handleTrackMuted);
         newRoom.on(RoomEvent.TrackUnmuted, handleTrackUnmuted);
+        newRoom.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+        newRoom.on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed);
+        newRoom.on(RoomEvent.TrackPublished, handleTrackPublished);
+        newRoom.on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakersChanged);
 
         // Connect
         setIsConnecting(true);
@@ -130,6 +214,7 @@ export function useLiveKitRoom({
                 setLocalParticipant(newRoom.localParticipant);
                 setRemoteParticipants(Array.from(newRoom.remoteParticipants.values()));
                 updateLocalMediaState(newRoom.localParticipant);
+                updateParticipantStates(newRoom);
             })
             .catch((err) => {
                 console.error('Failed to connect to LiveKit:', err);
@@ -145,12 +230,17 @@ export function useLiveKitRoom({
             newRoom.off(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
             newRoom.off(RoomEvent.TrackMuted, handleTrackMuted);
             newRoom.off(RoomEvent.TrackUnmuted, handleTrackUnmuted);
+            newRoom.off(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+            newRoom.off(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed);
+            newRoom.off(RoomEvent.TrackPublished, handleTrackPublished);
+            newRoom.off(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakersChanged);
             
             newRoom.disconnect();
             setRoom(null);
             setIsConnected(false);
             setLocalParticipant(null);
             setRemoteParticipants([]);
+            setParticipantStates(new Map());
         };
     }, [token, serverUrl, enabled]);
 
@@ -162,9 +252,23 @@ export function useLiveKitRoom({
             const audioTrack = localParticipant.getTrackPublication(Track.Source.Microphone);
             
             if (!audioTrack || !audioTrack.track) {
-                // No audio track, enable microphone
-                await localParticipant.setMicrophoneEnabled(true);
-                setIsMuted(false);
+                // No audio track, request permission and enable microphone
+                try {
+                    // Request microphone permission first
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+                    
+                    await localParticipant.setMicrophoneEnabled(true);
+                    setIsMuted(false);
+                } catch (permErr: any) {
+                    if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+                        setError('Microphone permission denied. Please allow microphone access in your browser settings.');
+                    } else {
+                        setError('Failed to access microphone: ' + permErr.message);
+                    }
+                    console.error('Microphone permission error:', permErr);
+                    return;
+                }
             } else if (audioTrack.isMuted) {
                 // Track exists but is muted
                 await audioTrack.unmute();
@@ -187,9 +291,23 @@ export function useLiveKitRoom({
             const videoTrack = localParticipant.getTrackPublication(Track.Source.Camera);
             
             if (!videoTrack || !videoTrack.track) {
-                // No video track, enable camera
-                await localParticipant.setCameraEnabled(true);
-                setIsVideoOff(false);
+                // No video track, request permission and enable camera
+                try {
+                    // Request camera permission first
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+                    
+                    await localParticipant.setCameraEnabled(true);
+                    setIsVideoOff(false);
+                } catch (permErr: any) {
+                    if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+                        setError('Camera permission denied. Please allow camera access in your browser settings.');
+                    } else {
+                        setError('Failed to access camera: ' + permErr.message);
+                    }
+                    console.error('Camera permission error:', permErr);
+                    return;
+                }
             } else if (videoTrack.isMuted) {
                 // Track exists but is muted
                 await videoTrack.unmute();
@@ -218,6 +336,7 @@ export function useLiveKitRoom({
         connectionState,
         localParticipant,
         remoteParticipants,
+        participantStates,
         isMuted,
         isVideoOff,
         toggleMute,

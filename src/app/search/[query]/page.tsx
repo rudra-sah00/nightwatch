@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useState, use, useCallback } from 'react';
+import { use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { search, SearchResult } from '@/services/api/media';
+import { search } from '@/services/api/media';
 import { HomeContent } from '@/components/home';
-import { RoomModal } from '@/components/room';
-import { Room, leaveRoom } from '@/services/api/rooms';
-
+import { useRoom } from '@/providers/RoomProvider';
 import { useQuery } from '@tanstack/react-query';
 
 interface SearchPageProps {
@@ -17,6 +15,7 @@ function SearchPageContent({ params }: SearchPageProps) {
     const resolvedParams = use(params);
     const decodedQuery = decodeURIComponent(resolvedParams.query);
     const router = useRouter();
+    const { currentRoom, isHost, handleLeaveRoom } = useRoom();
 
     // React Query - Proper State Management
     const { data: results = [], isLoading: loading } = useQuery({
@@ -30,11 +29,6 @@ function SearchPageContent({ params }: SearchPageProps) {
         staleTime: 60 * 1000, // Data fresh for 1 min
     });
 
-    const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
-    const [selectedVideo, setSelectedVideo] = useState<{ id: string; title: string } | null>(null);
-    const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
-    const [roomMode, setRoomMode] = useState<'select' | 'create' | 'join'>('select');
-
     const handleSearch = useCallback(async (query: string) => {
         if (!query.trim()) return;
         router.push(`/search/${encodeURIComponent(query)}`);
@@ -44,50 +38,25 @@ function SearchPageContent({ params }: SearchPageProps) {
         router.push('/');
     }, [router]);
 
-    const handleRoomJoined = (room: Room) => {
-        setCurrentRoom(room);
-        setIsRoomModalOpen(false);
-    };
-
-    const handleLeaveRoom = async () => {
-        if (!currentRoom) return;
-
-        try {
-            await leaveRoom(currentRoom.code);
-        } catch {
-            // Ignore errors during leave
-        } finally {
-            setCurrentRoom(null);
-        }
-    };
-
-    const handleOpenRoomModal = (mode: 'create' | 'join') => {
-        setRoomMode(mode);
-        setIsRoomModalOpen(true);
-    };
+    // Room modal not needed on search page - user can use main page
+    const handleOpenRoomModal = useCallback(() => {
+        router.push('/');
+    }, [router]);
 
     return (
-        <div className="min-h-screen flex flex-col bg-black">
-            <HomeContent
-                results={results}
-                loading={loading}
-                searched={true}
-                searchQuery={decodedQuery}
-                onSearch={handleSearch}
-                onClear={handleClear}
-                onOpenRoomModal={handleOpenRoomModal}
-                inRoom={!!currentRoom}
-            />
-
-            <RoomModal
-                isOpen={isRoomModalOpen}
-                onClose={() => { setIsRoomModalOpen(false); setSelectedVideo(null); setRoomMode('select'); }}
-                videoId={selectedVideo?.id}
-                videoTitle={selectedVideo?.title}
-                initialMode={roomMode}
-                onRoomJoined={handleRoomJoined}
-            />
-        </div>
+        <HomeContent
+            results={results}
+            loading={loading}
+            searched={true}
+            searchQuery={decodedQuery}
+            onSearch={handleSearch}
+            onClear={handleClear}
+            onOpenRoomModal={handleOpenRoomModal}
+            inRoom={!!currentRoom}
+            isHost={isHost}
+            roomCode={currentRoom?.code}
+            onLeaveRoom={handleLeaveRoom}
+        />
     );
 }
 
@@ -97,4 +66,3 @@ export default function SearchPage({ params }: SearchPageProps) {
         <SearchPageContent params={params} />
     );
 }
-

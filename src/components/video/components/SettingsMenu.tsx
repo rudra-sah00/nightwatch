@@ -22,6 +22,7 @@ interface SettingsMenuProps {
   isAutoQuality?: boolean;
   actualQualityLevel?: number;
   playbackSpeed?: number;
+  hideSpeedControl?: boolean;  // Hide speed control for non-hosts in sync mode
   onToggleMenu: () => void;
   onCloseMenu: () => void;  // Close menu entirely
   onTabChange: (tab: SettingsTab) => void;
@@ -48,6 +49,7 @@ export function SettingsMenu({
   isAutoQuality = false,
   actualQualityLevel,
   playbackSpeed = 1,
+  hideSpeedControl = false,
   onToggleMenu,
   onCloseMenu,
   onTabChange,
@@ -144,7 +146,7 @@ export function SettingsMenu({
                 actualQualityLevel={actualQualityLevel}
                 qualityLevels={qualityLevels}
                 playbackSpeed={playbackSpeed}
-                hasSpeedControl={!!onPlaybackSpeedChange}
+                hasSpeedControl={!!onPlaybackSpeedChange && !hideSpeedControl}
                 onTabChange={onTabChange}
                 getSubtitleLabel={getSubtitleLabel}
                 getCurrentAudioLabel={getCurrentAudioLabel}

@@ -10,7 +10,17 @@ import { ParticipantItem } from './ParticipantItem';
 import { PendingRequestItem } from './PendingRequestItem';
 import { ParticipantAvatar } from '@/components/ui/ParticipantAvatar';
 import { ControlButton } from '@/components/ui/ControlButton';
-import { useState } from 'react';
+import { VideoTile } from './VideoTile';
+import { AudioTrack } from './AudioTrack';
+import { useState, useEffect, useRef } from 'react';
+import { LocalParticipant, RemoteParticipant, Participant, Track } from 'livekit-client';
+
+interface ParticipantState {
+    participant: Participant;
+    isMuted: boolean;
+    isVideoOff: boolean;
+    isSpeaking: boolean;
+}
 
 interface SidebarProps {
     room: Room;
@@ -21,6 +31,9 @@ interface SidebarProps {
     isCollapsed: boolean;
     pendingRequests: JoinRequest[];
     isLiveKitConnected?: boolean;
+    localParticipant?: LocalParticipant | null;
+    remoteParticipants?: RemoteParticipant[];
+    participantStates?: Map<string, ParticipantState>;
     onToggleMute: () => void | Promise<void>;
     onToggleVideo: () => void | Promise<void>;
     onToggleRoomAudio: () => void;
@@ -38,6 +51,9 @@ export function Sidebar({
     isCollapsed,
     pendingRequests,
     isLiveKitConnected = false,
+    localParticipant,
+    remoteParticipants = [],
+    participantStates = new Map(),
     onToggleMute,
     onToggleVideo,
     onToggleRoomAudio,
@@ -46,8 +62,56 @@ export function Sidebar({
     onRequestHandled,
 }: SidebarProps) {
     const [copied, setCopied] = useState(false);
+    const localVideoRef = useRef<HTMLVideoElement>(null);
     const isHost = currentUserId === room.host_id;
     const currentParticipant = room.participants.find(p => p.user_id === currentUserId);
+
+    // Check if anyone has video on
+    const anyoneHasVideo = Array.from(participantStates.values()).some(state => !state.isVideoOff);
+    
+    // Build unified participant list with video state
+    // LiveKit uses user_id as identity (set by backend)
+    const participantsWithState = room.participants.map(roomParticipant => {
+        // LiveKit uses user_id as identity
+        const state = participantStates.get(roomParticipant.user_id);
+        
+        // For local participant, also check localParticipant directly
+        const isLocalUser = roomParticipant.user_id === currentUserId;
+        
+        // Try to find the LiveKit participant
+        let lkParticipant: Participant | undefined;
+        if (isLocalUser && localParticipant) {
+            lkParticipant = localParticipant;
+        } else if (state?.participant) {
+            lkParticipant = state.participant;
+        } else {
+            // Fallback: try to find from remoteParticipants by user_id
+            lkParticipant = remoteParticipants.find(rp => rp.identity === roomParticipant.user_id);
+        }
+        
+        return {
+            roomParticipant,
+            livekitState: state,
+            lkParticipant,
+            hasVideo: state ? !state.isVideoOff : false,
+            isMuted: state ? state.isMuted : true,
+            isSpeaking: state ? state.isSpeaking : false,
+            isLocalUser,
+        };
+    });
+
+    // Attach local video to preview
+    useEffect(() => {
+        if (localVideoRef.current && localParticipant && !isVideoOff) {
+            const videoTrack = localParticipant.getTrackPublication(Track.Source.Camera);
+            if (videoTrack?.track) {
+                videoTrack.track.attach(localVideoRef.current);
+                return () => {
+                    videoTrack.track?.detach(localVideoRef.current!);
+                };
+            }
+        }
+    }, [localParticipant, isVideoOff]);
 
     const getRoleBadge = (userId: string): 'HOST' | 'ADMIN' | null => {
         if (userId === room.host_id) return 'HOST';
@@ -64,10 +128,33 @@ export function Sidebar({
 
     return (
         <div className="relative flex">
+            {/* Expand button - shows when collapsed (on the left of sidebar when on right) */}
+            <button
+                onClick={onToggleCollapse}
+                className={cn(
+                    "absolute top-1/2 -translate-y-1/2 z-50",
+                    "bg-zinc-900/95 backdrop-blur-xl text-zinc-400 hover:text-white",
+                    "p-2 rounded-l-xl",
+                    "border-l border-t border-b border-white/10",
+                    "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                    "shadow-xl shadow-black/30",
+                    "hover:bg-zinc-800/95 hover:pl-3",
+                    isCollapsed 
+                        ? "right-0 opacity-100 translate-x-0" 
+                        : "-left-10 opacity-0 translate-x-4 pointer-events-none"
+                )}
+                title="Open sidebar"
+            >
+                <ChevronLeft className={cn(
+                    "w-5 h-5 transition-transform duration-200",
+                    isCollapsed && "rotate-180"
+                )} />
+            </button>
+
             {/* Main Sidebar Container with smooth width transition */}
             <div 
                 className={cn(
-                    "bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 backdrop-blur-xl flex flex-col h-screen border-r border-white/5",
+                    "bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 backdrop-blur-xl flex flex-col h-screen border-l border-white/5",
                     "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                     "overflow-hidden",
                     isCollapsed ? "w-0 opacity-0" : "w-72 opacity-100"
@@ -77,7 +164,7 @@ export function Sidebar({
                 <div className={cn(
                     "w-72 flex flex-col h-full",
                     "transition-all duration-300 ease-out",
-                    isCollapsed ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"
+                    isCollapsed ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
                 )}>
                     {/* Room Header */}
                     <div className="p-4 border-b border-white/5">
@@ -117,18 +204,18 @@ export function Sidebar({
                                 className="p-1.5 hover:bg-white/10 rounded-lg transition-all duration-200 text-zinc-500 hover:text-white group"
                                 title="Collapse sidebar"
                             >
-                                <ChevronLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+                                <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Voice Channel Section */}
-                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                    {/* Participants Section */}
+                    <div className="flex-1 overflow-y-auto scrollbar-none">
                         <div className="p-3">
                             {/* Section Header */}
-                            <div className="flex items-center gap-2 px-2 py-2 mb-2">
+                            <div className="flex items-center gap-2 px-2 py-2 mb-3">
                                 <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                                    <Volume2 className="w-4 h-4" />
+                                    <Users className="w-4 h-4" />
                                     <span>In Room</span>
                                 </div>
                                 <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
@@ -137,23 +224,80 @@ export function Sidebar({
                                 </span>
                             </div>
 
-                            {/* Participants List */}
-                            <div className="space-y-1">
-                                {room.participants.map((participant, index) => (
-                                    <div
-                                        key={participant.user_id}
-                                        className="transition-all duration-300"
-                                        style={{ transitionDelay: `${index * 50}ms` }}
-                                    >
-                                        <ParticipantItem
-                                            participant={participant}
-                                            isCurrentUser={participant.user_id === currentUserId}
-                                            role={getRoleBadge(participant.user_id)}
-                                            isMuted={isMuted}
-                                            isVideoOff={isVideoOff}
-                                        />
-                                    </div>
-                                ))}
+                            {/* Video Tiles - Single column for cleaner look */}
+                            <div className="flex flex-col gap-2">
+                                {participantsWithState.map(({ roomParticipant, lkParticipant, hasVideo, isMuted: participantMuted, isSpeaking, isLocalUser }) => {
+                                    const role = getRoleBadge(roomParticipant.user_id);
+                                    
+                                    return (
+                                        <div
+                                            key={roomParticipant.user_id}
+                                            className={cn(
+                                                "relative aspect-[16/10] rounded-lg overflow-hidden border transition-all duration-200",
+                                                isSpeaking 
+                                                    ? "border-green-500/50 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30" 
+                                                    : "border-white/10 hover:border-white/20",
+                                                "bg-gradient-to-br from-zinc-800 to-zinc-900"
+                                            )}
+                                        >
+                                            {/* Always show VideoTile - it handles both video and avatar states */}
+                                            {lkParticipant ? (
+                                                <VideoTile
+                                                    participant={lkParticipant}
+                                                    name={roomParticipant.name}
+                                                    username={roomParticipant.username}
+                                                    isCurrentUser={isLocalUser}
+                                                    className="w-full h-full"
+                                                />
+                                            ) : (
+                                                /* Fallback when not connected to LiveKit yet */
+                                                <div className="w-full h-full flex flex-col items-center justify-center">
+                                                    <ParticipantAvatar
+                                                        name={roomParticipant.name}
+                                                        username={roomParticipant.username}
+                                                        size="md"
+                                                    />
+                                                    {/* Overlay info */}
+                                                    <div className="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+                                                        <div className="flex items-center justify-between gap-1">
+                                                            <span className="text-[11px] font-medium text-white truncate">
+                                                                {roomParticipant.name || roomParticipant.username}
+                                                                {isLocalUser && <span className="text-zinc-400 ml-1">(You)</span>}
+                                                            </span>
+                                                            <div className="flex items-center gap-0.5">
+                                                                <MicOff className="w-2.5 h-2.5 text-red-400" />
+                                                                <VideoOff className="w-2.5 h-2.5 text-red-400" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Role badge overlay */}
+                                            {role && (
+                                                <div className="absolute top-1.5 left-1.5">
+                                                    <span className={cn(
+                                                        "inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold shadow-lg",
+                                                        role === 'HOST' 
+                                                            ? "bg-amber-500/90 text-black" 
+                                                            : "bg-blue-500/90 text-white"
+                                                    )}>
+                                                        {role === 'HOST' && <Sparkles className="w-2 h-2" />}
+                                                        {role}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Audio track for remote participants */}
+                                            {!isLocalUser && lkParticipant && (
+                                                <AudioTrack
+                                                    participant={lkParticipant}
+                                                    isCurrentUser={false}
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Pending Requests */}
@@ -253,29 +397,6 @@ export function Sidebar({
                     </div>
                 </div>
             </div>
-
-            {/* Expand button - shows when collapsed */}
-            <button
-                onClick={onToggleCollapse}
-                className={cn(
-                    "absolute top-1/2 -translate-y-1/2 z-50",
-                    "bg-zinc-900/95 backdrop-blur-xl text-zinc-400 hover:text-white",
-                    "p-2 rounded-r-xl",
-                    "border-r border-t border-b border-white/10",
-                    "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                    "shadow-xl shadow-black/30",
-                    "hover:bg-zinc-800/95 hover:pr-3",
-                    isCollapsed 
-                        ? "left-0 opacity-100 translate-x-0" 
-                        : "left-72 opacity-0 -translate-x-4 pointer-events-none"
-                )}
-                title="Open sidebar"
-            >
-                <ChevronRight className={cn(
-                    "w-5 h-5 transition-transform duration-200",
-                    !isCollapsed && "rotate-180"
-                )} />
-            </button>
         </div>
     );
 }

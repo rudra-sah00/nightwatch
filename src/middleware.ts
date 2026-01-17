@@ -62,10 +62,10 @@ export function middleware(request: NextRequest) {
           "default-src 'self'; " +
           "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
           "style-src 'self' 'unsafe-inline'; " +
-          "img-src 'self' blob: data: https:; " +
+          "img-src 'self' blob: data: https: http:; " +
           "font-src 'self' data:; " +
-          "connect-src 'self' https: wss: ws:; " +
-          "media-src 'self' https: blob:; " +
+          "connect-src 'self' https: http: wss: ws:; " +
+          "media-src 'self' https: http: blob:; " +
           "object-src 'none'; " +
           "base-uri 'self'; " +
           "form-action 'self'; " +
@@ -86,10 +86,10 @@ export function middleware(request: NextRequest) {
 
     headers.set('Content-Security-Policy', cspPolicy);
 
-    // Permissions Policy - Restrict dangerous features
+    // Permissions Policy - Allow camera/microphone for WebRTC, restrict other dangerous features
     headers.set(
         'Permissions-Policy',
-        'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+        'camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
     );
 
     return response;
