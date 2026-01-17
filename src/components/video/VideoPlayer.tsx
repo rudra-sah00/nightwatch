@@ -9,7 +9,7 @@ import {
   useVideoControls,
   useFullscreen,
   useKeyboardControls,
-  useVideoSync,
+
 } from '@/hooks';
 import {
   ProgressBar,
@@ -28,8 +28,6 @@ export default function VideoPlayer({
   subtitles,
   spriteSheets,
   episodeInfo,
-  syncMode,
-  externalMuted,
 }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -70,55 +68,21 @@ export default function VideoPlayer({
     onError: setError,
   });
 
-  // Video sync for watch party
-  const {
-    hostPlay,
-    hostPause,
-    hostSeek,
-    controlsLocked,
-  } = useVideoSync({
-    videoRef,
-    enabled: syncMode?.enabled ?? false,
-    isHost: syncMode?.isHost ?? false,
-    roomCode: syncMode?.roomCode ?? '',
-  });
 
-  // Determine if user can control playback
-  const canControlPlayback = !syncMode?.enabled || syncMode?.isHost;
 
-  // Wrapped controls that respect sync mode
+  // Standard controls
   const togglePlay = useCallback(() => {
-    if (!canControlPlayback) return;
-    
-    if (syncMode?.enabled && syncMode?.isHost) {
-      // Host controls through sync
-      if (isPlaying) {
-        hostPause();
-      } else {
-        hostPlay();
-      }
-    } else {
-      // Normal playback
-      hlsTogglePlay();
-    }
-  }, [canControlPlayback, syncMode, isPlaying, hostPause, hostPlay, hlsTogglePlay]);
+    hlsTogglePlay();
+  }, [hlsTogglePlay]);
 
   const seek = useCallback((time: number) => {
-    if (!canControlPlayback) return;
-    
-    if (syncMode?.enabled && syncMode?.isHost) {
-      hostSeek(time);
-    } else {
-      hlsSeek(time);
-    }
-  }, [canControlPlayback, syncMode, hostSeek, hlsSeek]);
+    hlsSeek(time);
+  }, [hlsSeek]);
 
   const skip = useCallback((seconds: number) => {
-    if (!canControlPlayback) return;
-    
     const newTime = Math.max(0, Math.min(currentTime + seconds, duration));
     seek(newTime);
-  }, [canControlPlayback, currentTime, duration, seek]);
+  }, [currentTime, duration, seek]);
 
   // Show loading when buffering or when video hasn't started yet
   const isLoading = isBuffering || (duration === 0 && !error);
@@ -159,21 +123,16 @@ export default function VideoPlayer({
     closeMenus,
   });
 
-  // Handle external mute (from room audio toggle)
-  useEffect(() => {
-    if (videoRef.current && externalMuted !== undefined) {
-      videoRef.current.muted = externalMuted;
-    }
-  }, [externalMuted, videoRef]);
+
 
   // Handlers
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!canControlPlayback || !progressBarRef.current) return;
+      if (!progressBarRef.current) return;
       const pos = getPositionFromEvent(e, progressBarRef.current);
       seek(pos * duration);
     },
-    [canControlPlayback, seek, duration]
+    [seek, duration]
   );
 
   const handleProgressHover = useCallback(
@@ -223,10 +182,6 @@ export default function VideoPlayer({
 
   const handlePlaybackSpeedChange = useCallback(
     (speed: PlaybackSpeed) => {
-      // In sync mode, only host can change playback speed
-      if (syncMode?.enabled && !syncMode?.isHost) {
-        return;
-      }
       const video = videoRef.current;
       if (video) {
         video.playbackRate = speed;
@@ -234,7 +189,7 @@ export default function VideoPlayer({
       }
       setSettingsTab('main');
     },
-    [videoRef, syncMode]
+    [videoRef]
   );
 
   // Computed values
@@ -272,42 +227,30 @@ export default function VideoPlayer({
           // Close any open menus first, then toggle play
           if (showSettingsMenu) {
             closeMenus();
-          } else if (!controlsLocked) {
+          } else {
             togglePlay();
           }
         }}
         playsInline
       />
 
-      {/* Sync Mode Indicator */}
-      {syncMode?.enabled && (
-        <div className={`absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0'
-        } ${
-          syncMode.isHost 
-            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-        }`}>
-          <div className="w-2 h-2 rounded-full bg-current animate-pulse" />
-          {syncMode.isHost ? 'Hosting' : 'Synced with host'}
-        </div>
-      )}
+
 
       {/* Subtitle Overlay */}
       <SubtitleOverlay text={currentSubtitleText} isFullscreen={isFullscreen} />
 
       {/* Loading Overlay */}
-      <LoadingOverlay 
-        isLoading={isLoading} 
-        message={duration === 0 ? 'Preparing your video...' : 'Buffering...'} 
+      <LoadingOverlay
+        isLoading={isLoading}
+        message={duration === 0 ? 'Preparing your video...' : 'Buffering...'}
       />
 
       {/* Center Play Button - hidden when loading */}
       {!isLoading && (
-        <PlayButtonOverlay 
-          isPlaying={isPlaying} 
-          locked={controlsLocked}
-          onTogglePlay={togglePlay} 
+        <PlayButtonOverlay
+          isPlaying={isPlaying}
+          locked={false}
+          onTogglePlay={togglePlay}
         />
       )}
 
@@ -329,7 +272,7 @@ export default function VideoPlayer({
             hoverTime={hoverTime}
             progressBarRef={progressBarRef}
             spriteSheets={spriteSheets}
-            locked={controlsLocked}
+            locked={false}
             onSeek={handleSeek}
             onHover={handleProgressHover}
             onLeave={() => setHoverTime(null)}
@@ -347,7 +290,7 @@ export default function VideoPlayer({
               showVolumeSlider={showVolumeSlider}
               title={title}
               episodeInfo={episodeInfo}
-              locked={controlsLocked}
+              locked={false}
               onTogglePlay={togglePlay}
               onSkip={skip}
               onToggleMute={toggleMute}
@@ -371,7 +314,7 @@ export default function VideoPlayer({
               isAutoQuality={isAutoQuality}
               actualQualityLevel={actualQualityLevel}
               playbackSpeed={playbackSpeed}
-              hideSpeedControl={controlsLocked}
+              hideSpeedControl={false}
               onToggleMenu={handleToggleSettings}
               onCloseMenu={closeMenus}
               onTabChange={setSettingsTab}

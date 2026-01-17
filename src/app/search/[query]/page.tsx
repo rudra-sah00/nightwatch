@@ -4,7 +4,7 @@ import { use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { search } from '@/services/api/media';
 import { HomeContent } from '@/components/home';
-import { useRoom } from '@/providers/RoomProvider';
+
 import { useQuery } from '@tanstack/react-query';
 
 interface SearchPageProps {
@@ -15,8 +15,6 @@ function SearchPageContent({ params }: SearchPageProps) {
     const resolvedParams = use(params);
     const decodedQuery = decodeURIComponent(resolvedParams.query);
     const router = useRouter();
-    const { currentRoom, isHost, handleLeaveRoom } = useRoom();
-
     // React Query - Proper State Management
     const { data: results = [], isLoading: loading } = useQuery({
         queryKey: ['search', decodedQuery],
@@ -38,11 +36,6 @@ function SearchPageContent({ params }: SearchPageProps) {
         router.push('/');
     }, [router]);
 
-    // Room modal not needed on search page - user can use main page
-    const handleOpenRoomModal = useCallback(() => {
-        router.push('/');
-    }, [router]);
-
     return (
         <HomeContent
             results={results}
@@ -51,11 +44,6 @@ function SearchPageContent({ params }: SearchPageProps) {
             searchQuery={decodedQuery}
             onSearch={handleSearch}
             onClear={handleClear}
-            onOpenRoomModal={handleOpenRoomModal}
-            inRoom={!!currentRoom}
-            isHost={isHost}
-            roomCode={currentRoom?.code}
-            onLeaveRoom={handleLeaveRoom}
         />
     );
 }

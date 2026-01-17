@@ -19,12 +19,7 @@ export interface EpisodeInfo {
   title: string;
 }
 
-export interface SyncModeProps {
-  enabled: boolean;
-  isHost: boolean;
-  roomCode: string;
-  onPlaybackEvent?: (event: { type: string; isPlaying: boolean; currentTime: number; playbackRate: number }) => void;
-}
+
 
 export interface VideoPlayerProps {
   src: string;
@@ -33,10 +28,7 @@ export interface VideoPlayerProps {
   subtitles?: PlayerSubtitleTrack[];
   spriteSheets?: SpriteSheet[];  // Multiple sprite sheets for long movies
   episodeInfo?: EpisodeInfo;
-  // Sync mode for watch party
-  syncMode?: SyncModeProps;
-  // Mute audio (e.g., when in room and user wants to mute video audio)
-  externalMuted?: boolean;
+
 }
 
 export interface PlayerSubtitleTrack {

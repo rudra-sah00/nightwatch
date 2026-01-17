@@ -14,15 +14,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: process.env.BACKEND_URL
-          ? `${process.env.BACKEND_URL}/api/:path*`
-          : 'http://localhost:8080/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,
       },
       {
-        source: '/socket/:path*',
-        destination: process.env.BACKEND_URL
-          ? `${process.env.BACKEND_URL}/socket/:path*`
-          : 'http://localhost:8080/socket/:path*',
+        source: '/stream/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/stream/:path*`,
       }
     ];
   },

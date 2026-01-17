@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 import QueryProvider from '@/providers/QueryProvider';
-import { RoomProvider } from '@/providers/RoomProvider';
-import { RoomLayout } from '@/components/layout';
+
 
 export const metadata: Metadata = {
   title: {
@@ -28,11 +27,9 @@ export default function RootLayout({
       <body className="bg-zinc-950 text-white antialiased">
         <QueryProvider>
           <AuthProvider>
-            <RoomProvider>
-              <RoomLayout>
-                {children}
-              </RoomLayout>
-            </RoomProvider>
+            <div className="h-screen w-full overflow-y-auto">
+              {children}
+            </div>
           </AuthProvider>
         </QueryProvider>
       </body>

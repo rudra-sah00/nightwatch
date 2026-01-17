@@ -38,19 +38,4 @@ export {
     type SearchResponse,
 } from './media';
 
-// Rooms service
-export {
-    createRoom,
-    getRoom,
-    requestToJoinRoom,
-    leaveRoom,
-    getPendingRequests,
-    approveJoinRequest,
-    rejectJoinRequest,
-    updatePlaybackState,
-    type Room,
-    type Participant,
-    type ParticipantPermissions,
-    type PlaybackState,
-    type JoinRequest,
-} from './rooms';
+

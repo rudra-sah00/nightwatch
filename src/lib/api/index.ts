@@ -4,4 +4,4 @@
 export * from '@/services/api/client';
 export * from '@/services/api/auth';
 export * from '@/services/api/media';
-export * from '@/services/api/rooms';
+
