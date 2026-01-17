@@ -14,6 +14,7 @@ import {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -115,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isLoading,
+        isAuthenticated: !!user,
         isLoggedIn: !!user,
         login,
         logout,

@@ -9,6 +9,7 @@ import {
   useSubtitles,
   useVideoControls,
 } from '@/hooks';
+import { useWatchActivity } from '@/hooks/useWatchActivity';
 import { SKIP_SECONDS } from '@/lib/constants';
 import { getPositionFromEvent, getQualityLabel } from '@/lib/utils/video-utils';
 import type { PlaybackSpeed, SettingsTab, VideoPlayerProps } from '@/types/video';
@@ -74,6 +75,9 @@ export default function VideoPlayer({
     src,
     onError: setError,
   });
+
+  // Track watch activity
+  useWatchActivity({ isPlaying });
 
   // Standard controls
   const togglePlay = useCallback(() => {

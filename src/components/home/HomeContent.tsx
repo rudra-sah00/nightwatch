@@ -4,6 +4,7 @@ import { LogOut, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ContentDetailModal } from '@/components/content';
+import { ProfileBadge } from '@/components/profile';
 import SearchBar from '@/components/search/SearchBar';
 import { Button, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -109,6 +110,9 @@ export function HomeContent({
                   useUrlNavigation={true}
                 />
               </div>
+
+              {/* Profile Badge */}
+              <ProfileBadge />
 
               <Button
                 variant="outline"
