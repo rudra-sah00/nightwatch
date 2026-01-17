@@ -104,12 +104,12 @@ export interface ShowDetails {
   cast?: string;
   genre?: string;
   runtime?: string;
-  rating?: string;          // U/A 16+, A, etc.
-  match_score?: string;     // 48% match
-  quality?: string;         // HD
+  rating?: string; // U/A 16+, A, etc.
+  match_score?: string; // 48% match
+  quality?: string; // HD
   content_type: ContentType;
   seasons: Season[];
-  episodes: Episode[];      // First batch of episodes
+  episodes: Episode[]; // First batch of episodes
   default_language?: string;
   poster_url: string;
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { PlayerSubtitleTrack, SubtitleCue, LocalSubtitle } from '@/types/video';
-import { parseSubtitleContent, convertToVtt } from '@/lib/utils/video-utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { convertToVtt, parseSubtitleContent } from '@/lib/utils/video-utils';
+import type { LocalSubtitle, PlayerSubtitleTrack, SubtitleCue } from '@/types/video';
 
 interface UseSubtitlesOptions {
   subtitles?: PlayerSubtitleTrack[];
@@ -66,7 +66,9 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
     loadSubtitles();
 
     return () => {
-      revokedUrls.forEach((url) => URL.revokeObjectURL(url));
+      for (const url of revokedUrls) {
+        URL.revokeObjectURL(url);
+      }
     };
   }, [subtitles]);
 
@@ -79,9 +81,7 @@ export function useSubtitles({ subtitles, currentTime }: UseSubtitlesOptions): U
 
     if (currentSubtitleIndex >= 0 && parsedCues[currentSubtitleIndex]) {
       const cues = parsedCues[currentSubtitleIndex];
-      const activeCue = cues.find(
-        (cue) => currentTime >= cue.start && currentTime <= cue.end
-      );
+      const activeCue = cues.find((cue) => currentTime >= cue.start && currentTime <= cue.end);
       newText = activeCue?.text || '';
     }
 

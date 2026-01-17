@@ -1,30 +1,28 @@
 // Media Service
 // Handles all media-related API calls (search, video data, episodes, etc.)
 
-import { apiRequest, ApiResponse } from './client';
 import type {
-    CompleteVideoData,
-    ShowDetails,
-    Episode,
-    VideoMetadata,
-    ContentType,
-    SeriesEpisodesResponse,
-    VideoPlaylistResponse,
-    ShowDetailsResponse
+  CompleteVideoData,
+  ContentType,
+  SeriesEpisodesResponse,
+  ShowDetailsResponse,
+  VideoMetadata,
+  VideoPlaylistResponse,
 } from '@/types/content';
+import { type ApiResponse, apiRequest } from './client';
 
 // ============ Search Types ============
 
 export interface SearchResult {
-    id: string;
-    title: string;
-    type: ContentType;
-    poster: string;
-    year?: number;
+  id: string;
+  title: string;
+  type: ContentType;
+  poster: string;
+  year?: number;
 }
 
 export interface SearchResponse {
-    results: SearchResult[];
+  results: SearchResult[];
 }
 
 // ============ Search Functions ============
@@ -32,24 +30,24 @@ export interface SearchResponse {
 /**
  * Search for movies and TV shows
  */
-export async function search(query: string, options: RequestInit = {}): Promise<ApiResponse<SearchResponse>> {
-    return apiRequest<SearchResponse>(
-        `/api/search?q=${encodeURIComponent(query)}`,
-        options
-    );
+export async function search(
+  query: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<SearchResponse>> {
+  return apiRequest<SearchResponse>(`/api/search?q=${encodeURIComponent(query)}`, options);
 }
 
 /**
  * Search IMDB for additional metadata
  */
 export async function searchImdb(
-    query: string,
-    options: RequestInit = {}
+  query: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<VideoMetadata | null>> {
-    return apiRequest<VideoMetadata | null>(
-        `/api/video/search/imdb?q=${encodeURIComponent(query)}`,
-        options
-    );
+  return apiRequest<VideoMetadata | null>(
+    `/api/video/search/imdb?q=${encodeURIComponent(query)}`,
+    options
+  );
 }
 
 // ============ Video Data Functions ============
@@ -58,68 +56,56 @@ export async function searchImdb(
  * Get complete video data for playback (movie) with proxied URLs
  */
 export async function getVideoData(
-    movieId: string,
-    options: RequestInit = {}
+  movieId: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<{ video: CompleteVideoData }>> {
-    return apiRequest<{ video: CompleteVideoData }>(
-        `/api/video/${movieId}/proxied`,
-        options
-    );
+  return apiRequest<{ video: CompleteVideoData }>(`/api/video/${movieId}/proxied`, options);
 }
 
 /**
  * Get video playlist
  */
 export async function getVideoPlaylist(
-    movieId: string,
-    options: RequestInit = {}
+  movieId: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<VideoPlaylistResponse>> {
-    return apiRequest<VideoPlaylistResponse>(
-        `/api/video/${movieId}/playlist`,
-        options
-    );
+  return apiRequest<VideoPlaylistResponse>(`/api/video/${movieId}/playlist`, options);
 }
 
 /**
  * Get episode stream data for a specific episode with proxied URLs
  */
 export async function getEpisodeData(
-    seriesId: string,
-    episodeId: string,
-    options: RequestInit = {}
+  seriesId: string,
+  episodeId: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<{ video: CompleteVideoData }>> {
-    return apiRequest<{ video: CompleteVideoData }>(
-        `/api/series/${seriesId}/episode/${episodeId}/proxied`,
-        options
-    );
+  return apiRequest<{ video: CompleteVideoData }>(
+    `/api/series/${seriesId}/episode/${episodeId}/proxied`,
+    options
+  );
 }
 
 /**
  * Get show details (metadata, seasons, episodes list)
  */
 export async function getShowDetails(
-    showId: string,
-    options: RequestInit = {}
+  showId: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<ShowDetailsResponse>> {
-    return apiRequest<ShowDetailsResponse>(
-        `/api/video/show/${showId}`,
-        options
-    );
+  return apiRequest<ShowDetailsResponse>(`/api/video/show/${showId}`, options);
 }
 
 /**
  * Get episodes for a specific season (Legacy/Hit-and-trial)
  */
 export async function getSeriesEpisodes(
-    seriesId: string,
-    startEpisode?: string,
-    options: RequestInit = {}
+  seriesId: string,
+  startEpisode?: string,
+  options: RequestInit = {}
 ): Promise<ApiResponse<SeriesEpisodesResponse>> {
-    const params = startEpisode ? `?start_episode=${startEpisode}` : '';
-    return apiRequest<SeriesEpisodesResponse>(
-        `/api/series/${seriesId}/episodes${params}`,
-        options
-    );
+  const params = startEpisode ? `?start_episode=${startEpisode}` : '';
+  return apiRequest<SeriesEpisodesResponse>(`/api/series/${seriesId}/episodes${params}`, options);
 }
 
 // ============ Asset Utilities ============
@@ -128,16 +114,14 @@ export async function getSeriesEpisodes(
  * Get poster URL for a show/movie (CDN)
  */
 export function getPosterUrl(id: string, hd: boolean = false): string {
-    return hd
-        ? `https://imgcdn.kim/poster/h/${id}.jpg`
-        : `https://imgcdn.kim/poster/341/${id}.jpg`;
+  return hd ? `https://imgcdn.kim/poster/h/${id}.jpg` : `https://imgcdn.kim/poster/341/${id}.jpg`;
 }
 
 /**
  * Get thumbnail URL for an episode (CDN)
  */
 export function getThumbnailUrl(episodeId: string): string {
-    return `https://imgcdn.kim/epimg/150/${episodeId}.jpg`;
+  return `https://imgcdn.kim/epimg/150/${episodeId}.jpg`;
 }
 
 // Alias for backward compatibility
@@ -147,5 +131,5 @@ export const getEpisodeThumbnailUrl = getThumbnailUrl;
  * Get sprite sheet URL for timeline preview (CDN)
  */
 export function getSpriteSheetUrl(movieId: string): string {
-    return `https://back02.nfmirrorcdn.top/files/${movieId}/t001.jpg`;
+  return `https://back02.nfmirrorcdn.top/files/${movieId}/t001.jpg`;
 }

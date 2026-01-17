@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       {
         source: '/stream/:path*',
         destination: `${process.env.BACKEND_URL}/stream/:path*`,
-      }
+      },
     ];
   },
 };

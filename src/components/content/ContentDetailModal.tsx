@@ -1,15 +1,27 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { getVideoData, getShowDetails, getSeriesEpisodes, getPosterUrl, searchImdb } from '@/services/api/media';
-import type { ContentType, Episode, CompleteVideoData, VideoMetadata, ShowDetails, Season } from '@/types/content';
-
+import React, { useEffect, useRef, useState } from 'react';
+import { DropdownSelector } from '@/components/ui/dropdown-selector';
+import {
+  getPosterUrl,
+  getSeriesEpisodes,
+  getShowDetails,
+  getVideoData,
+  searchImdb,
+} from '@/services/api/media';
+import type {
+  CompleteVideoData,
+  ContentType,
+  Episode,
+  Season,
+  ShowDetails,
+  VideoMetadata,
+} from '@/types/content';
+import EpisodesList from './EpisodesList';
 // Sub-components
 import HeroSection from './HeroSection';
 import MetadataSection from './MetadataSection';
-import { DropdownSelector } from '@/components/ui/dropdown-selector';
-import EpisodesList from './EpisodesList';
 
 interface ContentDetailModalProps {
   id: string;
@@ -123,19 +135,25 @@ export default function ContentDetailModal({
   // Group episodes by season
   const seasons = React.useMemo(() => {
     if (seasonsList.length > 0) {
-      return seasonsList.map(s => [s.season_number, episodes.filter(e => e.season_number === s.season_number)] as [number, Episode[]]);
+      return seasonsList.map(
+        (s) =>
+          [s.season_number, episodes.filter((e) => e.season_number === s.season_number)] as [
+            number,
+            Episode[],
+          ]
+      );
     }
 
     if (episodes.length === 0) return [];
 
     const seasonMap = new Map<number, Episode[]>();
-    episodes.forEach(ep => {
+    for (const ep of episodes) {
       const season = ep.season_number || 1;
       if (!seasonMap.has(season)) {
         seasonMap.set(season, []);
       }
-      seasonMap.get(season)!.push(ep);
-    });
+      seasonMap.get(season)?.push(ep);
+    }
 
     return Array.from(seasonMap.entries()).sort((a, b) => a[0] - b[0]);
   }, [episodes, seasonsList]);
@@ -147,7 +165,7 @@ export default function ContentDetailModal({
     // Skip if we already fetched this season
     if (fetchedSeasons.current.has(selectedSeason)) return;
 
-    const selectedSeasonInfo = seasonsList.find(s => s.season_number === selectedSeason);
+    const selectedSeasonInfo = seasonsList.find((s) => s.season_number === selectedSeason);
 
     if (actualType === 'Series' && seasonsList.length > 0 && selectedSeasonInfo) {
       // Mark this season as fetched to prevent duplicate requests
@@ -156,11 +174,11 @@ export default function ContentDetailModal({
       const fetchSeasonEpisodes = async () => {
         try {
           const response = await getSeriesEpisodes(id, selectedSeasonInfo.season_id);
-          if (response.data && response.data.episodes) {
+          if (response.data?.episodes) {
             const newEps = response.data.episodes;
-            setEpisodes(prev => {
-              const existingIds = new Set(prev.map(e => e.episode_id));
-              const newEpisodes = newEps.filter(e => !existingIds.has(e.episode_id));
+            setEpisodes((prev) => {
+              const existingIds = new Set(prev.map((e) => e.episode_id));
+              const newEpisodes = newEps.filter((e) => !existingIds.has(e.episode_id));
               return [...prev, ...newEpisodes];
             });
           }
@@ -186,15 +204,25 @@ export default function ContentDetailModal({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       className="fixed inset-0 z-50 flex items-start justify-center pt-8 bg-black/90 backdrop-blur-sm overflow-y-auto"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      }}
     >
       <div
+        role="document"
         className="relative w-full max-w-5xl mb-20 rounded-xl bg-zinc-900 shadow-2xl overflow-hidden"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-6 right-6 z-20 p-2 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
           aria-label="Close"
@@ -234,7 +262,7 @@ export default function ContentDetailModal({
                 <h3 className="text-2xl font-semibold">Episodes</h3>
                 <DropdownSelector
                   options={seasons.map(([seasonNum, eps]) => {
-                    const seasonInfo = seasonsList.find(s => s.season_number === seasonNum);
+                    const seasonInfo = seasonsList.find((s) => s.season_number === seasonNum);
                     return {
                       value: seasonNum,
                       label: `Season ${seasonNum}`,

@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
-  onSearch?: (query: string) => void;  // Optional legacy callback
+  onSearch?: (query: string) => void; // Optional legacy callback
   onClear?: () => void;
   placeholder?: string;
-  useUrlNavigation?: boolean;  // If true, navigates to /search/{query}
+  useUrlNavigation?: boolean; // If true, navigates to /search/{query}
   initialQuery?: string;
 }
 
@@ -19,8 +20,8 @@ export default function SearchBar({
   onSearch,
   onClear,
   placeholder = 'Search movies and TV shows...',
-  useUrlNavigation = true,  // Default to URL navigation
-  initialQuery = ''
+  useUrlNavigation = true, // Default to URL navigation
+  initialQuery = '',
 }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -65,17 +66,22 @@ export default function SearchBar({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative transition-all duration-300">
-        <div className={cn(
-          "relative flex items-center rounded-xl transition-all duration-300",
-          "bg-zinc-900/80 backdrop-blur-md",
-          "border border-zinc-800",
-          isFocused && "border-zinc-600 bg-zinc-900 ring-2 ring-zinc-700/50 shadow-lg shadow-black/20"
-        )}>
+        <div
+          className={cn(
+            'relative flex items-center rounded-xl transition-all duration-300',
+            'bg-zinc-900/80 backdrop-blur-md',
+            'border border-zinc-800',
+            isFocused &&
+              'border-zinc-600 bg-zinc-900 ring-2 ring-zinc-700/50 shadow-lg shadow-black/20'
+          )}
+        >
           {/* Search Icon */}
-          <div className={cn(
-            "absolute left-3 md:left-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-            isFocused ? "text-white" : "text-zinc-500"
-          )}>
+          <div
+            className={cn(
+              'absolute left-3 md:left-4 top-1/2 -translate-y-1/2 transition-colors duration-200',
+              isFocused ? 'text-white' : 'text-zinc-500'
+            )}
+          >
             <Search className="w-4 h-4 md:w-5 md:h-5" />
           </div>
 
@@ -89,11 +95,11 @@ export default function SearchBar({
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             className={cn(
-              "w-full py-3 md:py-4 pl-10 md:pl-12 pr-12 md:pr-14",
-              "bg-transparent border-none",
-              "text-white text-sm md:text-base",
-              "placeholder-zinc-500",
-              "focus-visible:ring-0 focus-visible:ring-offset-0"
+              'w-full py-3 md:py-4 pl-10 md:pl-12 pr-12 md:pr-14',
+              'bg-transparent border-none',
+              'text-white text-sm md:text-base',
+              'placeholder-zinc-500',
+              'focus-visible:ring-0 focus-visible:ring-offset-0'
             )}
           />
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { QualityLevel, PlayerAudioTrack, QualityValue } from '@/types/video';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PlayerAudioTrack, QualityLevel, QualityValue } from '@/types/video';
 
 interface UseHlsPlayerOptions {
   src: string;
@@ -11,7 +11,7 @@ interface UseHlsPlayerOptions {
 
 interface NetworkStats {
   bandwidth: number; // estimated bandwidth in bits/s
-  latency: number;   // estimated latency in ms
+  latency: number; // estimated latency in ms
 }
 
 interface UseHlsPlayerReturn {
@@ -58,7 +58,7 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
   const [audioTracks, setAudioTracks] = useState<PlayerAudioTrack[]>([]);
   const [currentAudioTrack, setCurrentAudioTrack] = useState(0);
   const [networkStats, setNetworkStats] = useState<NetworkStats | null>(null);
-  const [isBuffering, setIsBuffering] = useState(false);
+  const [isBuffering, _setIsBuffering] = useState(false);
 
   // Initialize HLS
   useEffect(() => {
@@ -69,9 +69,9 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        backBufferLength: 30,  // Reduced to avoid rate limiting
-        maxBufferLength: 20,   // Reduced buffer length
-        maxMaxBufferLength: 40,  // Reduced max buffer
+        backBufferLength: 30, // Reduced to avoid rate limiting
+        maxBufferLength: 20, // Reduced buffer length
+        maxMaxBufferLength: 40, // Reduced max buffer
         // Enable ABR (Adaptive Bitrate) settings
         abrEwmaDefaultEstimate: 500000, // 500kbps default
         abrBandWidthFactor: 0.95,
@@ -80,12 +80,12 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
         // Progressive loading for smoother switching
         progressive: true,
         // Retry settings to avoid rate limiting
-        manifestLoadingRetryDelay: 2000,  // Wait 2s before retrying manifest
-        manifestLoadingMaxRetry: 2,  // Only retry twice
-        levelLoadingRetryDelay: 2000,  // Wait 2s before retrying level
-        levelLoadingMaxRetry: 2,  // Only retry twice
-        fragLoadingRetryDelay: 2000,  // Wait 2s before retrying fragment
-        fragLoadingMaxRetry: 2,  // Only retry twice
+        manifestLoadingRetryDelay: 2000, // Wait 2s before retrying manifest
+        manifestLoadingMaxRetry: 2, // Only retry twice
+        levelLoadingRetryDelay: 2000, // Wait 2s before retrying level
+        levelLoadingMaxRetry: 2, // Only retry twice
+        fragLoadingRetryDelay: 2000, // Wait 2s before retrying fragment
+        fragLoadingMaxRetry: 2, // Only retry twice
       });
 
       hlsRef.current = hls;
@@ -124,7 +124,7 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
         setActualQualityLevel(data.level);
 
         // Only update currentQuality if not in auto mode
-        if (hlsRef.current && hlsRef.current.autoLevelEnabled) {
+        if (hlsRef.current?.autoLevelEnabled) {
           setIsAutoQuality(true);
           setCurrentQuality('auto');
         } else {
@@ -137,10 +137,10 @@ export function useHlsPlayer({ src, onError }: UseHlsPlayerOptions): UseHlsPlaye
       hls.on(Hls.Events.FRAG_LOADED, (_e, data) => {
         if (data.frag.stats) {
           const stats = data.frag.stats;
-          const bandwidth = stats.loaded * 8 / (stats.loading.end - stats.loading.start) * 1000;
+          const bandwidth = ((stats.loaded * 8) / (stats.loading.end - stats.loading.start)) * 1000;
           setNetworkStats({
             bandwidth: Math.round(bandwidth),
-            latency: Math.round(stats.loading.first - stats.loading.start)
+            latency: Math.round(stats.loading.first - stats.loading.start),
           });
         }
       });

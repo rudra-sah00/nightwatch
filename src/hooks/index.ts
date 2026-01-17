@@ -2,7 +2,10 @@
 // Organized by feature domain
 
 // Auth hook
-export { useAuth, AuthProvider } from './useAuth';
+export { AuthProvider, useAuth } from './useAuth';
+
+// Series data hook
+export { useSeriesData } from './useSeriesData';
 
 // Video hooks (Re-exported from sub-module)
 export * from './video';

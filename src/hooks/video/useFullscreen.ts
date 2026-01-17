@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseFullscreenOptions {
   containerRef: React.RefObject<HTMLElement | null>;

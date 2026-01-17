@@ -1,129 +1,127 @@
 'use client';
 
-import { useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const { login } = useAuth();
-    const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-        try {
-            const result = await login(username, password);
+    try {
+      const result = await login(username, password);
 
-            if (result.success) {
-                router.push('/');
-            } else {
-                setError(result.error || 'Login failed');
-            }
-        } catch (err) {
-            setError('An unexpected error occurred');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      if (result.success) {
+        router.push('/');
+      } else {
+        setError(result.error || 'Login failed');
+      }
+    } catch {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-950 to-black relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-white/5 blur-3xl" />
-                <div className="absolute -bottom-[40%] -right-[20%] w-[70%] h-[70%] rounded-full bg-zinc-800/20 blur-3xl" />
-            </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-950 to-black relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-[40%] -right-[20%] w-[70%] h-[70%] rounded-full bg-zinc-800/20 blur-3xl" />
+      </div>
 
-            <div className="w-full max-w-md px-4 relative z-10">
-                {/* Login Card */}
-                <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-700/50 shadow-2xl">
-                    <CardHeader className="space-y-1 pb-4">
-                        <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
-                        <CardDescription>Enter your credentials to access your account</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            {error && (
-                                <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                                    <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-                                    <span className="text-amber-400 text-sm">{error}</span>
-                                </div>
-                            )}
+      <div className="w-full max-w-md px-4 relative z-10">
+        {/* Login Card */}
+        <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-700/50 shadow-2xl">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
+            <CardDescription>Enter your credentials to access your account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                  <span className="text-amber-400 text-sm">{error}</span>
+                </div>
+              )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="username" className="text-zinc-300">
-                                    Username
-                                </Label>
-                                <Input
-                                    id="username"
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Enter username"
-                                    className={cn(
-                                        "bg-black/50 border-zinc-700 text-white placeholder-zinc-600",
-                                        "focus:border-white/50 focus:ring-white/20 transition-all"
-                                    )}
-                                    required
-                                />
-                            </div>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-zinc-300">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  className={cn(
+                    'bg-black/50 border-zinc-700 text-white placeholder-zinc-600',
+                    'focus:border-white/50 focus:ring-white/20 transition-all'
+                  )}
+                  required
+                />
+              </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password" className="text-zinc-300">
-                                    Password
-                                </Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter password"
-                                    className={cn(
-                                        "bg-black/50 border-zinc-700 text-white placeholder-zinc-600",
-                                        "focus:border-white/50 focus:ring-white/20 transition-all"
-                                    )}
-                                    required
-                                />
-                            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-zinc-300">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className={cn(
+                    'bg-black/50 border-zinc-700 text-white placeholder-zinc-600',
+                    'focus:border-white/50 focus:ring-white/20 transition-all'
+                  )}
+                  required
+                />
+              </div>
 
-                            <Button
-                                type="submit"
-                                disabled={isLoading}
-                                className={cn(
-                                    "w-full py-6 font-semibold transition-all duration-200",
-                                    "bg-white text-black hover:bg-zinc-200",
-                                    "shadow-lg shadow-white/10 hover:shadow-white/20"
-                                )}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Signing in...
-                                    </>
-                                ) : (
-                                    'Sign In'
-                                )}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={cn(
+                  'w-full py-6 font-semibold transition-all duration-200',
+                  'bg-white text-black hover:bg-zinc-200',
+                  'shadow-lg shadow-white/10 hover:shadow-white/20'
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-                <p className="text-center text-zinc-600 text-sm mt-6">
-                    Contact admin for access
-                </p>
-            </div>
-        </div>
-    );
+        <p className="text-center text-zinc-600 text-sm mt-6">Contact admin for access</p>
+      </div>
+    </div>
+  );
 }

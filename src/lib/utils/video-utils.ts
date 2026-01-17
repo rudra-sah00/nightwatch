@@ -2,18 +2,18 @@
  * Video Player Utility Functions
  */
 
-import { SubtitleCue, QualityLevel } from '@/types/video';
+import type { QualityLevel, SubtitleCue } from '@/types/video';
 
 /**
  * Format seconds to time string (e.g., "1:23:45" or "23:45")
  */
 export function formatTime(seconds: number): string {
-  if (isNaN(seconds) || seconds < 0) return '0:00';
-  
+  if (Number.isNaN(seconds) || seconds < 0) return '0:00';
+
   const hrs = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  
+
   if (hrs > 0) {
     return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
@@ -44,12 +44,12 @@ export function srtToVtt(srt: string): string {
   const text = srt.replace(/\r/g, '');
   const lines = text.split('\n');
   const out: string[] = ['WEBVTT', ''];
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // Skip index numbers
     if (/^\d+$/.test(line.trim())) continue;
-    
+
     // Convert timestamp format from SRT (comma) to VTT (dot)
     const match = line.match(/(\d{2}:\d{2}:\d{2}),(\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}),(\d{3})(.*)/);
     if (match) {
@@ -58,7 +58,7 @@ export function srtToVtt(srt: string): string {
     }
     out.push(line);
   }
-  
+
   return out.join('\n');
 }
 
@@ -69,38 +69,38 @@ export function parseSubtitleContent(content: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
   const lines = content.replace(/\r/g, '').split('\n');
   let i = 0;
-  
+
   // Skip WEBVTT header and any metadata
   while (i < lines.length && !lines[i].includes('-->')) {
     i++;
   }
-  
+
   while (i < lines.length) {
     const line = lines[i];
     const timeMatch = line.match(
       /(\d{2}:)?(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(\d{2}:)?(\d{2}):(\d{2})[.,](\d{3})/
     );
-    
+
     if (timeMatch) {
-      const startH = timeMatch[1] ? parseInt(timeMatch[1]) : 0;
-      const startM = parseInt(timeMatch[2]);
-      const startS = parseInt(timeMatch[3]);
-      const startMs = parseInt(timeMatch[4]);
+      const startH = timeMatch[1] ? parseInt(timeMatch[1], 10) : 0;
+      const startM = parseInt(timeMatch[2], 10);
+      const startS = parseInt(timeMatch[3], 10);
+      const startMs = parseInt(timeMatch[4], 10);
       const start = startH * 3600 + startM * 60 + startS + startMs / 1000;
-      
-      const endH = timeMatch[5] ? parseInt(timeMatch[5]) : 0;
-      const endM = parseInt(timeMatch[6]);
-      const endS = parseInt(timeMatch[7]);
-      const endMs = parseInt(timeMatch[8]);
+
+      const endH = timeMatch[5] ? parseInt(timeMatch[5], 10) : 0;
+      const endM = parseInt(timeMatch[6], 10);
+      const endS = parseInt(timeMatch[7], 10);
+      const endMs = parseInt(timeMatch[8], 10);
       const end = endH * 3600 + endM * 60 + endS + endMs / 1000;
-      
+
       i++;
       const textLines: string[] = [];
       while (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('-->')) {
         textLines.push(lines[i]);
         i++;
       }
-      
+
       if (textLines.length > 0) {
         cues.push({ start, end, text: textLines.join('\n') });
       }
@@ -108,7 +108,7 @@ export function parseSubtitleContent(content: string): SubtitleCue[] {
       i++;
     }
   }
-  
+
   return cues;
 }
 

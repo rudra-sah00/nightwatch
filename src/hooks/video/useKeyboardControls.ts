@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { SKIP_SECONDS, VOLUME_STEP } from '@/lib/constants';
 
 interface UseKeyboardControlsOptions {

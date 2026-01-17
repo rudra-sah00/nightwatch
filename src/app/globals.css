@@ -21,7 +21,9 @@ body {
 }
 
 /* Hide scrollbar globally */
-html, body, * {
+html,
+body,
+* {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
 }
@@ -38,7 +40,7 @@ body::-webkit-scrollbar,
 /* Custom scrollbar for video player settings menu */
 .custom-scrollbar {
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(255,255,255,0.2) transparent !important;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -52,12 +54,12 @@ body::-webkit-scrollbar,
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
   border-radius: 4px !important;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.3) !important;
+  background: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Mirror effect for local video */
@@ -67,53 +69,106 @@ body::-webkit-scrollbar,
 
 /* Animation keyframes */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slide-in-from-bottom {
-  from { transform: translateY(var(--slide-from, 16px)); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(var(--slide-from, 16px));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-from-top {
-  from { transform: translateY(calc(var(--slide-from, 16px) * -1)); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(calc(var(--slide-from, 16px) * -1));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-from-left {
-  from { transform: translateX(calc(var(--slide-from, 16px) * -1)); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(calc(var(--slide-from, 16px) * -1));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-from-right {
-  from { transform: translateX(var(--slide-from, 16px)); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(var(--slide-from, 16px));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes scale-out {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(0.95); opacity: 0; }
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 20px 10px rgba(239, 68, 68, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(239, 68, 68, 0);
+  }
 }
 
 @keyframes shimmer {
-  from { background-position: -200% 0; }
-  to { background-position: 200% 0; }
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
 }
 
 /* Animation utility classes */

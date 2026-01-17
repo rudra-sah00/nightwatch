@@ -11,10 +11,27 @@ env:
   VERCEL_PROJECT_ID: prj_GvurtLT1apyIWx5cvAa4BfLNQNni
 
 jobs:
-  deploy:
+  lint-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Biome lint check
+        run: npx biome check .
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

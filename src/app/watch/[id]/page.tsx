@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
+import { EpisodesList, VideoMetadata } from '@/components/content';
 import VideoPlayer from '@/components/video/VideoPlayer';
-import { getVideoData, getShowDetails, getEpisodeData, getSeriesEpisodes } from '@/services/api/media';
-import { ArrowLeftIcon, PlayIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { DropdownSelector } from '@/components/ui/dropdown-selector';
-
-import type { CompleteVideoData, ShowDetails, Episode } from '@/types/content';
+import { useSeriesData } from '@/hooks';
+import { getEpisodeData, getVideoData } from '@/services/api/media';
+import type { CompleteVideoData } from '@/types/content';
 
 function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -17,19 +14,18 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const searchParams = useSearchParams();
 
   const [videoData, setVideoData] = useState<CompleteVideoData | null>(null);
-  const [showDetails, setShowDetails] = useState<ShowDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchedSeasons = React.useRef<Set<number>>(new Set());
-  const [selectedSeason, setSelectedSeason] = useState<number>(1);
-  const [seasonEpisodes, setSeasonEpisodes] = useState<Episode[]>([]);
-  const [showSeasonDropdown, setShowSeasonDropdown] = useState(false);
 
   // Get episode from query params if present
   const episodeId = searchParams.get('episode');
 
-
+  // Use custom hook for series data
+  const { showDetails, selectedSeason, setSelectedSeason, seasonEpisodes } = useSeriesData({
+    contentId: resolvedParams.id,
+    episodeId,
+    contentType: videoData?.metadata.content_type,
+  });
 
   useEffect(() => {
     // Robust cancellation handling with AbortController
@@ -41,9 +37,13 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
       // Everyone fetches their own video data (own CDN token)
       try {
-        let response;
+        let response:
+          | Awaited<ReturnType<typeof getEpisodeData>>
+          | Awaited<ReturnType<typeof getVideoData>>;
         if (episodeId) {
-          response = await getEpisodeData(resolvedParams.id, episodeId, { signal: controller.signal });
+          response = await getEpisodeData(resolvedParams.id, episodeId, {
+            signal: controller.signal,
+          });
         } else {
           response = await getVideoData(resolvedParams.id, { signal: controller.signal });
         }
@@ -56,32 +56,7 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
         }
 
         setVideoData(response.data.video);
-
-        // Load show details for series
-        if (response.data.video.metadata.content_type === 'Series') {
-          try {
-            const showResponse = await getShowDetails(resolvedParams.id, { signal: controller.signal });
-
-            if (controller.signal.aborted) return;
-
-            if (showResponse.data?.show) {
-              setShowDetails(showResponse.data.show);
-
-              if (episodeId && showResponse.data.show.episodes) {
-                const currentEp = showResponse.data.show.episodes.find(ep => ep.episode_id === episodeId);
-                if (currentEp?.season_number) {
-                  setSelectedSeason(currentEp.season_number);
-                }
-              } else if (showResponse.data.show.seasons && showResponse.data.show.seasons.length > 0) {
-                const lastSeason = showResponse.data.show.seasons[showResponse.data.show.seasons.length - 1];
-                setSelectedSeason(lastSeason.season_number || 1);
-              }
-            }
-          } catch {
-            // Show details fetch failed silently
-          }
-        }
-      } catch (err) {
+      } catch {
         if (!controller.signal.aborted) {
           setError('An error occurred while loading the video');
         }
@@ -113,100 +88,10 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     };
   }, [videoData]);
 
-  // Fetch episodes when season changes (like ContentDetailModal)
-  useEffect(() => {
-    // Skip if we already fetched this season
-    if (fetchedSeasons.current.has(selectedSeason)) {
-      // Just filter the already loaded episodes
-      if (showDetails?.episodes) {
-        const filtered = showDetails.episodes.filter(ep => ep.season_number === selectedSeason);
-        setSeasonEpisodes(filtered);
-      }
-      return;
-    }
-
-    const selectedSeasonInfo = showDetails?.seasons?.find(s => s.season_number === selectedSeason);
-
-    if (showDetails?.content_type === 'Series' && selectedSeasonInfo) {
-      const controller = new AbortController();
-
-      // Mark this season as fetched to prevent duplicate requests
-      fetchedSeasons.current.add(selectedSeason);
-
-      const fetchSeasonEpisodes = async () => {
-        try {
-          const response = await getSeriesEpisodes(resolvedParams.id, selectedSeasonInfo.season_id, { signal: controller.signal });
-
-          if (controller.signal.aborted) {
-            // If aborted, remove from fetched set so we can retry later
-            fetchedSeasons.current.delete(selectedSeason);
-            return;
-          }
-
-          if (response.data && response.data.episodes) {
-            const newEps = response.data.episodes;
-            // Update showDetails episodes with new episodes
-            setShowDetails(prev => {
-              if (!prev) return prev;
-              const existingIds = new Set(prev.episodes.map(e => e.episode_id));
-              const newEpisodes = newEps.filter(e => !existingIds.has(e.episode_id));
-              return {
-                ...prev,
-                episodes: [...prev.episodes, ...newEpisodes]
-              };
-            });
-            // Update filtered episodes for display
-            setSeasonEpisodes(newEps);
-          } else {
-            // Request failed (api error), allow retry
-            fetchedSeasons.current.delete(selectedSeason);
-          }
-        } catch {
-          // On error, allow retry
-          fetchedSeasons.current.delete(selectedSeason);
-        }
-      };
-
-      fetchSeasonEpisodes();
-
-      return () => controller.abort();
-    } else if (showDetails?.episodes) {
-      // Not a series or no season info, just filter
-      const filtered = showDetails.episodes.filter(ep => ep.season_number === selectedSeason);
-      setSeasonEpisodes(filtered);
-    }
-  }, [showDetails, selectedSeason, resolvedParams.id]);
-
-  // Prepare seasons array for dropdown (grouped episodes by season)
-  const groupedSeasons: [number, Episode[]][] = React.useMemo(() => {
-    if (!showDetails?.episodes || !showDetails?.seasons) {
-      return [];
-    }
-
-    // Create groups based on ALL seasons from API, not just loaded episodes
-    const groups = new Map<number, Episode[]>();
-
-    // Initialize all seasons from API
-    showDetails.seasons.forEach(season => {
-      const seasonNum = season.season_number || 1;
-      groups.set(seasonNum, []);
-    });
-
-    // Add episodes to their respective seasons
-    showDetails.episodes.forEach(ep => {
-      const season = ep.season_number || 1;
-      if (!groups.has(season)) {
-        groups.set(season, []);
-      }
-      groups.get(season)!.push(ep);
-    });
-
-    const result = Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
-    return result;
-  }, [showDetails?.episodes, showDetails?.seasons]);
-
   // Get current episode info
-  const currentEpisode = episodeId ? showDetails?.episodes?.find(ep => ep.episode_id === episodeId) : undefined;
+  const currentEpisode = episodeId
+    ? showDetails?.episodes?.find((ep) => ep.episode_id === episodeId)
+    : undefined;
 
   // Display title - use video metadata which has all the data
   const metadata = videoData?.metadata;
@@ -226,15 +111,16 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     if (match) {
       return {
         seriesName: match[1],
-        season: parseInt(match[2]),
-        episode: parseInt(match[3]),
+        season: parseInt(match[2], 10),
+        episode: parseInt(match[3], 10),
         episodeTitle: match[4],
       };
     }
     return null;
   };
 
-  const episodeInfo = episodeId && metadata?.content_type === 'Series' ? parseEpisodeTitle(displayTitle) : null;
+  const episodeInfo =
+    episodeId && metadata?.content_type === 'Series' ? parseEpisodeTitle(displayTitle) : null;
 
   if (loading) {
     return (
@@ -256,18 +142,35 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
                 <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-white animate-spin" />
                 <div className="absolute inset-3 rounded-full bg-gradient-to-br from-white/20 to-white/5 animate-pulse" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-white/80 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-8 h-8 text-white/80 animate-pulse"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-label="Play icon"
+                  >
+                    <title>Play icon</title>
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
               </div>
 
               <div className="flex flex-col items-center gap-2">
-                <p className="text-lg font-medium text-white/90 animate-pulse">Preparing your video...</p>
+                <p className="text-lg font-medium text-white/90 animate-pulse">
+                  Preparing your video...
+                </p>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span
+                    className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+                    style={{ animationDelay: '0ms' }}
+                  />
+                  <span
+                    className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+                    style={{ animationDelay: '150ms' }}
+                  />
+                  <span
+                    className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+                    style={{ animationDelay: '300ms' }}
+                  />
                 </div>
               </div>
 
@@ -306,12 +209,25 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-6">
               <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center">
-                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  className="w-10 h-10 text-amber-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-label="Warning icon"
+                >
+                  <title>Warning</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
               </div>
               <p className="text-zinc-300 text-xl font-medium">{error || 'Video not found'}</p>
               <button
+                type="button"
                 onClick={() => router.push('/')}
                 className="px-8 py-3 bg-white text-black font-semibold hover:bg-zinc-200 rounded-full transition-all hover:scale-105 shadow-lg"
               >
@@ -326,39 +242,19 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
-      {/* Modern Close/Back Button */}
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => router.back()}
-          className="group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-          aria-label="Go back"
-        >
-          <svg 
-            className="w-5 h-5 sm:w-6 sm:h-6 text-white/80 group-hover:text-white transition-colors" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
       {/* Video Player - Full Width */}
-      <div className="w-full max-w-7xl mx-auto px-4 pt-20 sm:pt-6 pb-6">
+      <div className="w-full max-w-7xl mx-auto px-4 pt-6 pb-6">
         <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
           <VideoPlayer
             src={videoData.master_playlist_url}
             poster={videoData.metadata.poster_url}
             title={displayTitle}
-            subtitles={videoData.subtitles?.map(s => ({
+            onBack={() => router.push('/')}
+            subtitles={videoData.subtitles?.map((s) => ({
               language: s.language_name || s.language,
               url: s.vtt_url,
             }))}
-            spriteSheets={videoData.sprite_sheets?.map(s => ({
+            spriteSheets={videoData.sprite_sheets?.map((s) => ({
               spriteUrl: s.sprite_url,
               spriteWidth: s.sprite_width,
               spriteHeight: s.sprite_height,
@@ -368,222 +264,41 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
               totalTiles: s.total_tiles,
               intervalSeconds: s.interval_seconds,
             }))}
-
           />
         </div>
 
-        {/* Video Info Card */}
-        <div className="mt-8 pb-12">
-          {/* Episode Info for Series */}
-          {episodeInfo ? (
-            <>
-              {/* Series Name */}
-              <div className="mb-3">
-                <h2 className="text-2xl md:text-3xl font-bold text-white">
-                  {episodeInfo.seriesName}
-                </h2>
-              </div>
+        {/* Video Metadata */}
+        <VideoMetadata
+          title={displayTitle}
+          year={displayYear}
+          rating={displayRating}
+          duration={displayDuration}
+          quality={displayQuality}
+          runtime={showDetails?.runtime}
+          genre={displayGenre}
+          description={displayDescription}
+          cast={displayCast}
+          contentType={metadata?.content_type}
+          episodeInfo={episodeInfo}
+          showDetails={showDetails}
+        />
 
-              {/* Season/Episode Badge and Episode Title */}
-              <div className="flex items-start gap-4 mb-4">
-                <Badge
-                  variant="secondary"
-                  className="bg-white text-black hover:bg-zinc-200 border-0 px-3 py-1.5 text-sm font-semibold"
-                >
-                  S{episodeInfo.season}E{episodeInfo.episode}
-                </Badge>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-zinc-100 flex-1">
-                  {episodeInfo.episodeTitle}
-                </h1>
-              </div>
-            </>
-          ) : (
-            /* Movie or Series without episode info */
-            <>
-              {/* Episode Title (if watching an episode with legacy format) */}
-              {currentEpisode && !episodeInfo && (
-                <div className="mb-4">
-                  <Badge variant="secondary" className="mb-2">
-                    S{currentEpisode.season_number} E{currentEpisode.episode_number}
-                  </Badge>
-                  <h2 className="text-xl text-zinc-300 font-medium">{currentEpisode.title}</h2>
-                </div>
-              )}
-
-              {/* Main Title */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-                {displayTitle}
-              </h1>
-            </>
+        {/* Episodes List - Only for Series */}
+        {(showDetails?.content_type === 'Series' || metadata?.content_type === 'Series') &&
+          showDetails?.seasons &&
+          showDetails.seasons.length > 0 && (
+            <EpisodesList
+              showDetails={showDetails}
+              currentEpisodeId={episodeId}
+              selectedSeason={selectedSeason}
+              seasonEpisodes={seasonEpisodes}
+              contentId={resolvedParams.id}
+              onSeasonChange={setSelectedSeason}
+              onEpisodeClick={(episodeId) => {
+                router.push(`/watch/${resolvedParams.id}?episode=${episodeId}`);
+              }}
+            />
           )}
-
-          {/* Metadata Row */}
-          <div className="flex flex-wrap items-center gap-3 mt-4">
-            {displayYear && (
-              <Badge variant="outline" className="text-zinc-300 border-zinc-700">
-                {displayYear}
-              </Badge>
-            )}
-            {displayDuration && metadata?.content_type === 'Movie' && (
-              <Badge variant="outline" className="text-zinc-300 border-zinc-700">
-                {Math.floor(displayDuration / 60)}h {displayDuration % 60}m
-              </Badge>
-            )}
-            {displayRating && (
-              <Badge variant="outline" className="text-zinc-300 border-zinc-700">
-                ⭐ {typeof displayRating === 'number' ? displayRating.toFixed(1) : displayRating}
-              </Badge>
-            )}
-            {displayQuality && (
-              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
-                {displayQuality}
-              </Badge>
-            )}
-            {showDetails?.content_type === 'Series' && showDetails?.runtime && (
-              <Badge variant="outline" className="text-zinc-300 border-zinc-700">
-                {showDetails.runtime}
-              </Badge>
-            )}
-          </div>
-
-          {/* Genre Pills */}
-          {displayGenre && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {displayGenre.split(',').map((genre, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 text-sm bg-zinc-800/80 text-zinc-300 rounded-full border border-zinc-700/50 hover:border-zinc-600 transition-colors"
-                >
-                  {genre.trim()}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Description */}
-          {displayDescription && (
-            <div className="mt-6">
-              <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2">
-                {episodeInfo ? 'Episode Description' : 'Description'}
-              </h3>
-              <p className="text-zinc-400 text-lg leading-relaxed max-w-4xl">
-                {displayDescription}
-              </p>
-            </div>
-          )}
-
-          {/* Cast - Only show if not an episode description */}
-          {displayCast && !episodeInfo && (
-            <div className="mt-6">
-              <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2">Cast</h3>
-              <p className="text-zinc-300">{displayCast}</p>
-            </div>
-          )}
-
-          {/* Episodes List - Only for Series */}
-          {(showDetails?.content_type === 'Series' || metadata?.content_type === 'Series') &&
-            showDetails?.seasons && showDetails.seasons.length > 0 && (
-              <div className="mt-12 border-t border-zinc-800 pt-8">
-                {/* Season Selector */}
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">Episodes</h2>
-                  <DropdownSelector
-                    options={groupedSeasons.map(([seasonNum, eps]) => {
-                      const seasonInfo = showDetails.seasons?.find(s => s.season_number === seasonNum);
-                      return {
-                        value: seasonNum,
-                        label: `Season ${seasonNum}`,
-                        count: seasonInfo?.episode_count ?? eps.length,
-                      };
-                    })}
-                    selectedValue={selectedSeason}
-                    isOpen={showSeasonDropdown}
-                    onToggle={() => setShowSeasonDropdown(!showSeasonDropdown)}
-                    onSelect={(season) => {
-                      setSelectedSeason(season);
-                      setShowSeasonDropdown(false);
-                    }}
-                  />
-                </div>
-
-                {/* Episodes Grid */}
-                <div className="grid grid-cols-1 gap-3">
-                  {seasonEpisodes.length === 0 ? (
-                    <div className="text-center py-12 text-zinc-500">
-                      No episodes available for this season
-                    </div>
-                  ) : (
-                    seasonEpisodes.map((episode, index) => {
-                      const isCurrentEpisode = episode.episode_id === episodeId;
-                      return (
-                        <button
-                          key={episode.episode_id}
-                          onClick={() => {
-                            if (!isCurrentEpisode) {
-                              router.push(`/watch/${resolvedParams.id}?episode=${episode.episode_id}`);
-                            }
-                          }}
-                          className={`group flex gap-4 p-4 rounded-lg transition-all ${isCurrentEpisode
-                            ? 'bg-zinc-800 border-2 border-white'
-                            : 'bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700'
-                            }`}
-                        >
-                          {/* Episode Thumbnail */}
-                          <div className="relative flex-shrink-0 w-40 h-24 bg-zinc-800 rounded-lg overflow-hidden">
-                            <img
-                              src={episode.thumbnail_url}
-                              alt={episode.title || `Episode ${episode.episode_number}`}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"%3E%3Crect fill="%2327272a" width="160" height="90"/%3E%3C/svg%3E';
-                              }}
-                            />
-                            {isCurrentEpisode ? (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                                <CheckIcon className="w-8 h-8 text-white" />
-                              </div>
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <PlayIcon className="w-8 h-8 text-white" />
-                              </div>
-                            )}
-                            {episode.duration && (
-                              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-xs text-white">
-                                {episode.duration}m
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Episode Info */}
-                          <div className="flex-1 text-left min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-1">
-                                  <span className={`text-sm font-semibold ${isCurrentEpisode ? 'text-white' : 'text-zinc-400'
-                                    }`}>
-                                    {episode.episode_number}
-                                  </span>
-                                  <h3 className={`text-lg font-semibold truncate ${isCurrentEpisode ? 'text-white' : 'text-zinc-200 group-hover:text-white'
-                                    }`}>
-                                    {episode.title || `Episode ${episode.episode_number}`}
-                                  </h3>
-                                </div>
-                                {episode.description && (
-                                  <p className="text-sm text-zinc-400 line-clamp-2 mt-1">
-                                    {episode.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-        </div>
       </div>
     </div>
   );
@@ -591,7 +306,5 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
 // Route protected by middleware
 export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
-  return (
-    <WatchPageContent params={params} />
-  );
+  return <WatchPageContent params={params} />;
 }

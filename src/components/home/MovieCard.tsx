@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
+import { Film, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Film } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -36,12 +35,14 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
 
         {/* Play button overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-          <div className={cn(
-            "w-14 h-14 rounded-full bg-white flex items-center justify-center",
-            "transform scale-75 group-hover:scale-100 transition-all duration-300",
-            "shadow-lg shadow-white/30",
-            "ring-2 ring-white/20"
-          )}>
+          <div
+            className={cn(
+              'w-14 h-14 rounded-full bg-white flex items-center justify-center',
+              'transform scale-75 group-hover:scale-100 transition-all duration-300',
+              'shadow-lg shadow-white/30',
+              'ring-2 ring-white/20'
+            )}
+          >
             <Play className="w-6 h-6 text-black fill-black ml-0.5" />
           </div>
         </div>
@@ -49,10 +50,7 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
         {/* Type badge */}
         {type && (
           <div className="absolute top-2 right-2">
-            <Badge 
-              variant="secondary" 
-              className="text-xs bg-black/60 backdrop-blur-sm border-none"
-            >
+            <Badge variant="secondary" className="text-xs bg-black/60 backdrop-blur-sm border-none">
               {type}
             </Badge>
           </div>
@@ -67,9 +65,7 @@ export default function MovieCard({ id, title, poster, year, type }: MovieCardPr
         <h3 className="text-white text-sm font-medium truncate group-hover:text-zinc-300 transition-colors duration-200">
           {title}
         </h3>
-        {year && (
-          <p className="text-zinc-500 text-xs font-medium">{year}</p>
-        )}
+        {year && <p className="text-zinc-500 text-xs font-medium">{year}</p>}
       </div>
     </Link>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONTROLS_HIDE_DELAY } from '@/lib/constants';
 
 interface UseVideoControlsOptions {

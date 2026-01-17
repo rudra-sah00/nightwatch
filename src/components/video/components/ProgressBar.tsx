@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { formatTime } from '@/lib/utils/video-utils';
-import { ThumbnailPreview } from './ThumbnailPreview';
-import { SpriteSheet } from '@/types/video';
 import { Lock } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { formatTime } from '@/lib/utils/video-utils';
+import type { SpriteSheet } from '@/types/video';
+import { ThumbnailPreview } from './ThumbnailPreview';
 
 interface ProgressBarProps {
   currentTime: number;
@@ -12,8 +13,8 @@ interface ProgressBarProps {
   buffered: number;
   hoverTime: number | null;
   progressBarRef: React.RefObject<HTMLDivElement | null>;
-  spriteSheets?: SpriteSheet[];  // Array of sprite sheets for long movies
-  locked?: boolean;  // When true, user cannot seek (sync mode for non-host)
+  spriteSheets?: SpriteSheet[]; // Array of sprite sheets for long movies
+  locked?: boolean; // When true, user cannot seek (sync mode for non-host)
   onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
   onHover: (e: React.MouseEvent<HTMLDivElement>) => void;
   onLeave: () => void;
@@ -59,14 +60,29 @@ export function ProgressBar({
           <span>Host controls timeline</span>
         </div>
       )}
-      
+
       {/* Progress bar wrapper with larger hit area for touch */}
       <div
         ref={progressBarRef}
+        role="slider"
+        tabIndex={locked ? -1 : 0}
+        aria-label="Video progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress)}
+        aria-valuetext={`${Math.round(progress)}% played`}
         className={`relative h-3 sm:h-2.5 md:h-2 bg-white/20 rounded-full transition-all duration-200 group-hover/progress-container:h-4 sm:group-hover/progress-container:h-3.5 md:group-hover/progress-container:h-3 ${
           locked ? 'cursor-not-allowed' : 'cursor-pointer'
         }`}
         onClick={handleClick}
+        onKeyDown={(e) => {
+          if (locked) return;
+          // Note: Keyboard navigation is handled at the VideoPlayer level
+          // This handler prevents default browser behavior for arrow keys
+          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+          }
+        }}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={onHover}
@@ -88,16 +104,19 @@ export function ProgressBar({
           }`}
           style={{
             width: `${progress}%`,
-            boxShadow: isDragging ? '0 0 12px rgba(255, 255, 255, 0.4)' : '0 0 6px rgba(255, 255, 255, 0.2)'
+            boxShadow: isDragging
+              ? '0 0 12px rgba(255, 255, 255, 0.4)'
+              : '0 0 6px rgba(255, 255, 255, 0.2)',
           }}
         >
           {/* Scrubber handle - hidden when locked, larger for touch */}
           {!locked && (
             <div
-              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 bg-white rounded-full shadow-lg transition-all duration-150 touch-manipulation ${isDragging
-                ? 'scale-125 ring-4 ring-white/30'
-                : 'scale-100 sm:scale-0 sm:opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
-                }`}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 bg-white rounded-full shadow-lg transition-all duration-150 touch-manipulation ${
+                isDragging
+                  ? 'scale-125 ring-4 ring-white/30'
+                  : 'scale-100 sm:scale-0 sm:opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
+              }`}
               style={{
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
               }}
@@ -114,8 +133,9 @@ export function ProgressBar({
         )}
 
         {/* Thumbnail Preview or Time Tooltip */}
-        {hoverTime !== null && !locked && (
-          spriteSheets && spriteSheets.length > 0 ? (
+        {hoverTime !== null &&
+          !locked &&
+          (spriteSheets && spriteSheets.length > 0 ? (
             <ThumbnailPreview
               time={hoverTime}
               duration={duration}
@@ -133,8 +153,7 @@ export function ProgressBar({
                 <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-zinc-900/98" />
               </div>
             </div>
-          )
-        )}
+          ))}
       </div>
     </div>
   );

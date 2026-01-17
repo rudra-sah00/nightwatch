@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { Lock } from 'lucide-react';
 
@@ -10,22 +9,28 @@ interface PlayButtonOverlayProps {
   onTogglePlay: () => void;
 }
 
-export function PlayButtonOverlay({ isPlaying, locked = false, onTogglePlay }: PlayButtonOverlayProps) {
+export function PlayButtonOverlay({
+  isPlaying,
+  locked = false,
+  onTogglePlay,
+}: PlayButtonOverlayProps) {
   if (isPlaying) return null;
 
   return (
-    <div
-      className={`absolute inset-0 flex items-center justify-center z-10 ${
+    <button
+      type="button"
+      className={`absolute inset-0 flex items-center justify-center z-10 w-full h-full border-0 p-0 ${
         locked ? 'cursor-not-allowed' : 'cursor-pointer'
       }`}
       onClick={locked ? undefined : onTogglePlay}
+      disabled={locked}
     >
       {/* Responsive play button: larger on tablets/laptops */}
-      <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 touch-manipulation active:scale-95 ${
-        locked 
-          ? 'bg-white/50' 
-          : 'bg-white/90 hover:bg-white hover:scale-110'
-      }`}>
+      <div
+        className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 touch-manipulation active:scale-95 ${
+          locked ? 'bg-white/50' : 'bg-white/90 hover:bg-white hover:scale-110'
+        }`}
+      >
         {locked ? (
           <Lock className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-black/50" />
         ) : (
@@ -37,6 +42,6 @@ export function PlayButtonOverlay({ isPlaying, locked = false, onTogglePlay }: P
           Waiting for host to play
         </div>
       )}
-    </div>
+    </button>
   );
 }

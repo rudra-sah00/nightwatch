@@ -3,7 +3,6 @@ import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 import QueryProvider from '@/providers/QueryProvider';
 
-
 export const metadata: Metadata = {
   title: {
     default: 'Watch Rudra - Stream Movies & TV Shows',
@@ -27,13 +26,10 @@ export default function RootLayout({
       <body className="bg-zinc-950 text-white antialiased">
         <QueryProvider>
           <AuthProvider>
-            <div className="h-screen w-full overflow-y-auto">
-              {children}
-            </div>
+            <div className="h-screen w-full overflow-y-auto">{children}</div>
           </AuthProvider>
         </QueryProvider>
       </body>
     </html>
   );
 }
-

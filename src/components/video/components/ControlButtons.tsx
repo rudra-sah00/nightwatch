@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
-import { formatTime } from '@/lib/utils/video-utils';
+import type React from 'react';
 import { SKIP_SECONDS } from '@/lib/constants';
-import { EpisodeInfo } from '@/types/video';
-import { Lock } from 'lucide-react';
+import { formatTime } from '@/lib/utils/video-utils';
+import type { EpisodeInfo } from '@/types/video';
 
 interface ControlButtonsProps {
   isPlaying: boolean;
@@ -15,7 +14,7 @@ interface ControlButtonsProps {
   showVolumeSlider: boolean;
   title?: string;
   episodeInfo?: EpisodeInfo;
-  locked?: boolean;  // When true, play/skip controls are disabled (sync mode for non-host)
+  locked?: boolean; // When true, play/skip controls are disabled (sync mode for non-host)
   onTogglePlay: () => void;
   onSkip: (seconds: number) => void;
   onToggleMute: () => void;
@@ -42,14 +41,13 @@ export function ControlButtons({
   onVolumeSliderLeave,
 }: ControlButtonsProps) {
   return (
-    <div className="flex items-center gap-1 md:gap-2">
+    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
       {/* Play/Pause */}
       <button
+        type="button"
         onClick={locked ? undefined : onTogglePlay}
-        className={`w-10 h-10 flex items-center justify-center transition-colors ${
-          locked 
-            ? 'text-white/40 cursor-not-allowed' 
-            : 'text-white hover:text-zinc-300'
+        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
+          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
         }`}
         aria-label={isPlaying ? 'Pause' : 'Play'}
         title={locked ? 'Host controls playback' : undefined}
@@ -59,11 +57,10 @@ export function ControlButtons({
 
       {/* Skip Backward - Circle with 10 */}
       <button
+        type="button"
         onClick={locked ? undefined : () => onSkip(-SKIP_SECONDS)}
-        className={`w-10 h-10 flex items-center justify-center transition-colors ${
-          locked 
-            ? 'text-white/40 cursor-not-allowed' 
-            : 'text-white hover:text-zinc-300'
+        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
+          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
         }`}
         aria-label={`Rewind ${SKIP_SECONDS} seconds`}
         title={locked ? 'Host controls playback' : undefined}
@@ -73,11 +70,10 @@ export function ControlButtons({
 
       {/* Skip Forward - Circle with 10 */}
       <button
+        type="button"
         onClick={locked ? undefined : () => onSkip(SKIP_SECONDS)}
-        className={`w-10 h-10 flex items-center justify-center transition-colors ${
-          locked 
-            ? 'text-white/40 cursor-not-allowed' 
-            : 'text-white hover:text-zinc-300'
+        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
+          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
         }`}
         aria-label={`Forward ${SKIP_SECONDS} seconds`}
         title={locked ? 'Host controls playback' : undefined}
@@ -86,21 +82,24 @@ export function ControlButtons({
       </button>
 
       {/* Volume - always available for all users */}
-      <div
-        className="flex items-center relative"
+      <fieldset
+        aria-label="Volume control"
+        className="flex items-center relative ml-1 sm:ml-2 border-none p-0 m-0"
         onMouseEnter={onVolumeSliderEnter}
         onMouseLeave={onVolumeSliderLeave}
       >
         <button
+          type="button"
           onClick={onToggleMute}
-          className="w-10 h-10 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+          className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
           aria-label={isMuted ? 'Unmute' : 'Mute'}
         >
           {isMuted || volume === 0 ? <VolumeMuteIcon /> : <VolumeIcon />}
         </button>
         <div
-          className={`flex items-center overflow-hidden transition-all duration-200 ${showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0'
-            }`}
+          className={`flex items-center overflow-hidden transition-all duration-200 ${
+            showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0'
+          }`}
         >
           <input
             type="range"
@@ -112,10 +111,10 @@ export function ControlButtons({
             className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer"
           />
         </div>
-      </div>
+      </fieldset>
 
       {/* Time Display */}
-      <div className="text-white text-sm font-medium ml-2 hidden sm:flex items-center gap-1">
+      <div className="text-white text-sm font-medium ml-3 sm:ml-4 hidden sm:flex items-center gap-1">
         <span>{formatTime(currentTime)}</span>
         <span className="text-white/50">/</span>
         <span className="text-white/70">{formatTime(duration)}</span>
@@ -143,11 +142,17 @@ export function ControlButtons({
   );
 }
 
-// Custom Icons 
+// Custom Icons
 
 function PlayIcon() {
   return (
-    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor">
+    <svg
+      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-label="Play"
+    >
+      <title>Play</title>
       <path d="M8 5v14l11-7z" />
     </svg>
   );
@@ -155,7 +160,13 @@ function PlayIcon() {
 
 function PauseIcon() {
   return (
-    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor">
+    <svg
+      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-label="Pause"
+    >
+      <title>Pause</title>
       <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
     </svg>
   );
@@ -163,9 +174,27 @@ function PauseIcon() {
 
 function SkipBackIcon() {
   return (
-    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-label="Skip back 10 seconds"
+    >
+      <title>Skip back 10 seconds</title>
       <circle cx="12" cy="12" r="9" />
-      <text x="12" y="15" textAnchor="middle" fontSize="7" fontWeight="bold" fill="currentColor" stroke="none">10</text>
+      <text
+        x="12"
+        y="15"
+        textAnchor="middle"
+        fontSize="7"
+        fontWeight="bold"
+        fill="currentColor"
+        stroke="none"
+      >
+        10
+      </text>
       <path d="M12 3C9 3 6.5 4.5 5 7" strokeLinecap="round" />
       <path d="M5 4v3h3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -174,9 +203,27 @@ function SkipBackIcon() {
 
 function SkipForwardIcon() {
   return (
-    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-label="Skip forward 10 seconds"
+    >
+      <title>Skip forward 10 seconds</title>
       <circle cx="12" cy="12" r="9" />
-      <text x="12" y="15" textAnchor="middle" fontSize="7" fontWeight="bold" fill="currentColor" stroke="none">10</text>
+      <text
+        x="12"
+        y="15"
+        textAnchor="middle"
+        fontSize="7"
+        fontWeight="bold"
+        fill="currentColor"
+        stroke="none"
+      >
+        10
+      </text>
       <path d="M12 3c3 0 5.5 1.5 7 4" strokeLinecap="round" />
       <path d="M19 4v3h-3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -185,7 +232,15 @@ function SkipForwardIcon() {
 
 function VolumeIcon() {
   return (
-    <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-label="Volume"
+    >
+      <title>Volume</title>
       <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none" />
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" strokeLinecap="round" />
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14" strokeLinecap="round" />
@@ -195,7 +250,15 @@ function VolumeIcon() {
 
 function VolumeMuteIcon() {
   return (
-    <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-label="Volume muted"
+    >
+      <title>Volume muted</title>
       <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none" />
       <line x1="23" y1="9" x2="17" y2="15" strokeLinecap="round" />
       <line x1="17" y1="9" x2="23" y2="15" strokeLinecap="round" />

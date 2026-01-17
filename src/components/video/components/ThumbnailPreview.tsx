@@ -1,17 +1,22 @@
 'use client';
 
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { SpriteSheet } from '@/types/video';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatTime } from '@/lib/utils/video-utils';
+import type { SpriteSheet } from '@/types/video';
 
 interface ThumbnailPreviewProps {
   time: number;
   duration: number;
-  spriteSheets: SpriteSheet[];  // Array of sprite sheets for long movies
+  spriteSheets: SpriteSheet[]; // Array of sprite sheets for long movies
   position: number;
 }
 
-export function ThumbnailPreview({ time, duration, spriteSheets, position }: ThumbnailPreviewProps) {
+export function ThumbnailPreview({
+  time,
+  duration,
+  spriteSheets,
+  position,
+}: ThumbnailPreviewProps) {
   const [imageError, setImageError] = useState(false);
   // Track loaded URLs in state to safely access during render
   const [loadedUrls, setLoadedUrls] = useState<Set<string>>(new Set());
@@ -20,7 +25,6 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
   const loadingUrlsRef = useRef<Set<string>>(new Set());
 
   // Determine which sprite sheet and tile to use based on time
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const spriteInfo = useMemo(() => {
     if (!spriteSheets || spriteSheets.length === 0 || duration <= 0) return null;
 
@@ -62,7 +66,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
   useEffect(() => {
     if (!spriteSheets || spriteSheets.length === 0) return;
 
-    spriteSheets.forEach(sheet => {
+    for (const sheet of spriteSheets) {
       const url = sheet.spriteUrl;
 
       // Skip if already loaded or currently loading
@@ -78,7 +82,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
         loadingUrlsRef.current.delete(url);
 
         // Update state to trigger re-render safely
-        setLoadedUrls(prev => {
+        setLoadedUrls((prev) => {
           const next = new Set(prev);
           next.add(url);
           return next;
@@ -91,7 +95,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
       };
 
       img.src = url;
-    });
+    }
   }, [spriteSheets, imageError]);
 
   // Draw thumbnail using canvas for better sprite handling
@@ -150,7 +154,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
     } catch {
       if (!imageError) setImageError(true);
     }
-  }, [spriteInfo, loadedUrls, imageError]);
+  }, [spriteInfo, imageError]);
 
   // Calculate safe position to keep preview within bounds
   const safePosition = useMemo(() => {

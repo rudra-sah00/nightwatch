@@ -19,16 +19,14 @@ export interface EpisodeInfo {
   title: string;
 }
 
-
-
 export interface VideoPlayerProps {
   src: string;
   poster?: string;
   title?: string;
   subtitles?: PlayerSubtitleTrack[];
-  spriteSheets?: SpriteSheet[];  // Multiple sprite sheets for long movies
+  spriteSheets?: SpriteSheet[]; // Multiple sprite sheets for long movies
   episodeInfo?: EpisodeInfo;
-
+  onBack?: () => void;
 }
 
 export interface PlayerSubtitleTrack {

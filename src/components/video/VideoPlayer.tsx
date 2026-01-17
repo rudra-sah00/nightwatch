@@ -1,24 +1,26 @@
 'use client';
 
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { VideoPlayerProps, SettingsTab, PlaybackSpeed } from '@/types/video';
-import { getQualityLabel, getPositionFromEvent } from '@/lib/utils/video-utils';
+import type React from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  useFullscreen,
   useHlsPlayer,
+  useKeyboardControls,
   useSubtitles,
   useVideoControls,
-  useFullscreen,
-  useKeyboardControls,
-
 } from '@/hooks';
+import { SKIP_SECONDS } from '@/lib/constants';
+import { getPositionFromEvent, getQualityLabel } from '@/lib/utils/video-utils';
+import type { PlaybackSpeed, SettingsTab, VideoPlayerProps } from '@/types/video';
 import {
-  ProgressBar,
-  SubtitleOverlay,
   ControlButtons,
-  SettingsMenu,
-  PlayButtonOverlay,
   ErrorOverlay,
   LoadingOverlay,
+  PlayButtonOverlay,
+  ProgressBar,
+  SettingsMenu,
+  SkipIndicator,
+  SubtitleOverlay,
 } from './components';
 
 export default function VideoPlayer({
@@ -28,6 +30,7 @@ export default function VideoPlayer({
   subtitles,
   spriteSheets,
   episodeInfo,
+  onBack,
 }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -39,6 +42,10 @@ export default function VideoPlayer({
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
+  const [skipIndicator, setSkipIndicator] = useState<{
+    direction: 'forward' | 'backward';
+    isActive: boolean;
+  } | null>(null);
 
   // Custom hooks
   const {
@@ -58,7 +65,7 @@ export default function VideoPlayer({
     isBuffering,
     togglePlay: hlsTogglePlay,
     seek: hlsSeek,
-    skip: hlsSkip,
+
     setVolume: setPlayerVolume,
     toggleMute,
     changeQuality,
@@ -68,21 +75,32 @@ export default function VideoPlayer({
     onError: setError,
   });
 
-
-
   // Standard controls
   const togglePlay = useCallback(() => {
     hlsTogglePlay();
   }, [hlsTogglePlay]);
 
-  const seek = useCallback((time: number) => {
-    hlsSeek(time);
-  }, [hlsSeek]);
+  const seek = useCallback(
+    (time: number) => {
+      hlsSeek(time);
+    },
+    [hlsSeek]
+  );
 
-  const skip = useCallback((seconds: number) => {
-    const newTime = Math.max(0, Math.min(currentTime + seconds, duration));
-    seek(newTime);
-  }, [currentTime, duration, seek]);
+  const skip = useCallback(
+    (seconds: number) => {
+      const newTime = Math.max(0, Math.min(currentTime + seconds, duration));
+      seek(newTime);
+
+      // Show skip indicator
+      const direction = seconds > 0 ? 'forward' : 'backward';
+      setSkipIndicator({ direction, isActive: true });
+      setTimeout(() => {
+        setSkipIndicator({ direction, isActive: false });
+      }, 500);
+    },
+    [currentTime, duration, seek]
+  );
 
   // Show loading when buffering or when video hasn't started yet
   const isLoading = isBuffering || (duration === 0 && !error);
@@ -122,8 +140,6 @@ export default function VideoPlayer({
     toggleFullscreen,
     closeMenus,
   });
-
-
 
   // Handlers
   const handleSeek = useCallback(
@@ -201,14 +217,13 @@ export default function VideoPlayer({
 
   const getCurrentAudioLabel = useCallback(() => {
     const track = audioTracks.find((t) => t.id === currentAudioTrack);
-    return track
-      ? `${track.name}${track.lang !== 'unknown' ? ` (${track.lang})` : ''}`
-      : 'Default';
+    return track ? `${track.name}${track.lang !== 'unknown' ? ` (${track.lang})` : ''}` : 'Default';
   }, [audioTracks, currentAudioTrack]);
 
   return (
-    <div
+    <section
       ref={containerRef}
+      aria-label="Video Player"
       className="relative w-full bg-black rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden shadow-2xl aspect-video group touch-manipulation"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
@@ -216,7 +231,6 @@ export default function VideoPlayer({
         setHoverTime(null);
       }}
       onTouchStart={handleMouseMove}
-      tabIndex={0}
     >
       {/* Video Element */}
       <video
@@ -234,12 +248,21 @@ export default function VideoPlayer({
         }}
         playsInline
         webkit-playsinline="true"
-      />
-
-
+      >
+        <track kind="captions" />
+      </video>
 
       {/* Subtitle Overlay */}
       <SubtitleOverlay text={currentSubtitleText} isFullscreen={isFullscreen} />
+
+      {/* Skip Indicator */}
+      {skipIndicator && (
+        <SkipIndicator
+          direction={skipIndicator.direction}
+          isActive={skipIndicator.isActive}
+          skipSeconds={SKIP_SECONDS}
+        />
+      )}
 
       {/* Loading Overlay */}
       <LoadingOverlay
@@ -249,11 +272,7 @@ export default function VideoPlayer({
 
       {/* Center Play Button - hidden when loading */}
       {!isLoading && (
-        <PlayButtonOverlay
-          isPlaying={isPlaying}
-          locked={false}
-          onTogglePlay={togglePlay}
-        />
+        <PlayButtonOverlay isPlaying={isPlaying} locked={false} onTogglePlay={togglePlay} />
       )}
 
       {/* Error Message */}
@@ -261,9 +280,40 @@ export default function VideoPlayer({
 
       {/* Controls Overlay */}
       <div
-        className={`absolute inset-0 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
+        className={`absolute inset-0 transition-opacity duration-300 ${
+          showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
       >
+        {/* Back Button - Top Left */}
+        {onBack && (
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 z-10">
+            <button
+              type="button"
+              onClick={onBack}
+              className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20 hover:bg-black/80 hover:border-white/30 transition-all duration-200 shadow-lg"
+              aria-label="Go back to home"
+            >
+              <svg
+                aria-hidden="true"
+                className="w-4 h-4 sm:w-5 sm:h-5 text-white/90 group-hover:text-white transition-colors"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span className="text-white/90 group-hover:text-white text-xs sm:text-sm font-medium transition-colors hidden sm:inline">
+                Home
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-16 sm:pt-20 md:pt-24">
           {/* Progress Bar */}
@@ -331,6 +381,6 @@ export default function VideoPlayer({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
