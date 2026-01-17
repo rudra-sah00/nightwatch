@@ -14,11 +14,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,
+        destination: `${process.env.BACKEND_URL}/api/:path*`,
       },
       {
         source: '/stream/:path*',
-        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/stream/:path*`,
+        destination: `${process.env.BACKEND_URL}/stream/:path*`,
       }
     ];
   },
