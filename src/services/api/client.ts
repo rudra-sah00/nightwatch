@@ -2,7 +2,7 @@
 // SECURITY: Tokens are stored in HttpOnly cookies, not accessible to JavaScript
 
 const API_BASE = typeof window === 'undefined'
-    ? (process.env.NEXT_PUBLIC_BACKEND_URL || '')
+    ? (process.env.BACKEND_URL || '')
     : ''; // Relative path on client to use Next.js rewrites (avoids CORS)
 
 // Storage keys - only for user info, NOT tokens
