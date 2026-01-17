@@ -76,7 +76,7 @@ export function middleware(request: NextRequest) {
           "style-src 'self' 'unsafe-inline' https://vercel.live; " +
           "img-src 'self' blob: data: https:; " +
           "font-src 'self' data:; " +
-          "connect-src 'self' https://api.rudrasahoo.live wss://api.rudrasahoo.live https://vercel.live wss://*.pusher.com wss://*.vercel.live; " +
+          "connect-src 'self' https: wss: https://api.rudrasahoo.live wss://api.rudrasahoo.live https://vercel.live wss://*.pusher.com wss://*.vercel.live; " +
           "media-src 'self' https://api.rudrasahoo.live https://*.net51.cc https://*.net20.cc blob:; " +
           "object-src 'none'; " +
           "base-uri 'self'; " +
