@@ -71,10 +71,15 @@ export async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE}${endpoint}`;
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+  // biome-ignore lint/suspicious/noExplicitAny: Need flexible type for header manipulation
+  const headers: any = {
     ...options.headers,
   };
+
+  // Only set Content-Type to application/json if not already set and body is not FormData
+  if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // IMPORTANT: Include credentials to send HttpOnly cookies
   const fetchOptions: RequestInit = {

@@ -91,7 +91,12 @@ export function HomeContent({
 
       {/* Fixed Header Section - Always visible */}
       <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-6 py-6 relative">
+          {/* Absolute Top Right Profile Badge */}
+          <div className="absolute top-6 right-6 z-50">
+            <ProfileBadge className="transform scale-110 hover:scale-125" />
+          </div>
+
           <div className="space-y-6">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
@@ -110,9 +115,6 @@ export function HomeContent({
                   useUrlNavigation={true}
                 />
               </div>
-
-              {/* Profile Badge */}
-              <ProfileBadge />
 
               <Button
                 variant="outline"

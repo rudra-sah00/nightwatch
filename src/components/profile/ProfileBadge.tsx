@@ -33,7 +33,24 @@ export function ProfileBadge({ className = '' }: ProfileBadgeProps) {
       className={`profile-badge ${className}`}
       title={`Profile - ${user.name || user.username}`}
     >
-      <div className="avatar">{initials || <User size={18} />}</div>
+      <div className="avatar">
+        {user.avatar_url ? (
+          <img
+            src={user.avatar_url}
+            alt={user.username}
+            className="avatar-img"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement?.querySelector('.fallback')?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+
+        {/* Initials Fallback */}
+        <span className={`fallback ${user.avatar_url ? '' : 'only-fallback'}`}>
+          {initials || <User size={18} />}
+        </span>
+      </div>
 
       <style jsx>{`
         .profile-badge {
@@ -62,6 +79,25 @@ export function ProfileBadge({ className = '' }: ProfileBadgeProps) {
           border: 2px solid rgba(255, 255, 255, 0.2);
           cursor: pointer;
           transition: all 0.2s ease;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+        }
+
+        .fallback {
+            z-index: 1;
+        }
+
+        .hidden {
+            display: none;
         }
         
         .profile-badge:hover .avatar {

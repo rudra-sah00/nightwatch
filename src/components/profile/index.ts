@@ -1,5 +1,4 @@
-// Profile components
-
-export { ChangePasswordForm } from './ChangePasswordForm';
-export { ContributionGraph } from './ContributionGraph';
-export { ProfileBadge } from './ProfileBadge';
+export * from './ChangePasswordForm';
+export * from './ContributionGraph';
+export * from './ProfileBadge';
+export * from './ProfileSettingsForm';

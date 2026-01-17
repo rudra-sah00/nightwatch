@@ -1,10 +1,12 @@
 'use client';
 
 /**
- * GitHub-style contribution graph for watch activity
+ * Premium Contribution Graph
+ * A highly aesthetic, glowing activity heatmap
  */
 
-import { useMemo } from 'react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 import type { DailyActivity } from '@/services/api/user';
 import { formatWatchTime } from '@/services/api/user';
 
@@ -13,19 +15,32 @@ interface ContributionGraphProps {
   className?: string;
 }
 
-// Colors for different activity levels (GitHub-like palette)
-const LEVEL_COLORS = [
-  'var(--contribution-level-0, #1a1a2e)', // No activity
-  'var(--contribution-level-1, #0e4429)', // Low
-  'var(--contribution-level-2, #006d32)', // Medium-low
-  'var(--contribution-level-3, #26a641)', // Medium-high
-  'var(--contribution-level-4, #39d353)', // High
-];
+// Premium Color Palette (Dark Mode Glows)
+// Level 0: Near black/invisible
+// Level 1-4: Progressively brighter neon green/emerald
+const THEME = {
+  background: 'transparent',
+  levelColors: [
+    'rgba(255, 255, 255, 0.03)', // Level 0 (Empty)
+    'rgba(16, 185, 129, 0.3)', // Level 1
+    'rgba(16, 185, 129, 0.5)', // Level 2
+    'rgba(16, 185, 129, 0.7)', // Level 3
+    '#10b981', // Level 4 (Max)
+  ],
+  glows: [
+    'none',
+    '0 0 5px rgba(16, 185, 129, 0.1)',
+    '0 0 8px rgba(16, 185, 129, 0.2)',
+    '0 0 12px rgba(16, 185, 129, 0.3)',
+    '0 0 16px rgba(16, 185, 129, 0.4)',
+  ],
+  text: '#71717a', // Zinc-500
+};
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export function ContributionGraph({ activities, className = '' }: ContributionGraphProps) {
-  // Build a map of date -> activity for quick lookup
+  // Build lookup map
   const activityMap = useMemo(() => {
     const map = new Map<string, DailyActivity>();
     for (const activity of activities) {
@@ -34,17 +49,17 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
     return map;
   }, [activities]);
 
-  // Generate the grid data (52 weeks x 7 days)
+  // Generate grid data
   const { weeks, monthLabels } = useMemo(() => {
     const today = new Date();
     const weeksData: { date: Date; activity: DailyActivity | null }[][] = [];
     const months: { month: number; weekIndex: number }[] = [];
 
-    // Start from 52 weeks ago
+    // Start 52 weeks ago
     const startDate = new Date(today);
     startDate.setDate(startDate.getDate() - 364);
 
-    // Adjust to start on Sunday
+    // Align to Sunday
     const dayOfWeek = startDate.getDay();
     startDate.setDate(startDate.getDate() - dayOfWeek);
 
@@ -57,10 +72,12 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
       const dateStr = currentDate.toISOString().split('T')[0];
       const activity = activityMap.get(dateStr) || null;
 
-      // Track month changes for labels
       const month = currentDate.getMonth();
+      // Add month label if it changes and we are at least 2 weeks in (to avoid label at very edge)
       if (month !== lastMonth) {
-        months.push({ month, weekIndex: weeksData.length });
+        if (weeksData.length > 1) {
+          months.push({ month, weekIndex: weeksData.length });
+        }
         lastMonth = month;
       }
 
@@ -69,7 +86,6 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
         activity,
       });
 
-      // If we've filled a week (7 days), start a new one
       if (currentWeek.length === 7) {
         weeksData.push(currentWeek);
         currentWeek = [];
@@ -78,7 +94,7 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Add remaining days
+    // Add partial last week
     if (currentWeek.length > 0) {
       weeksData.push(currentWeek);
     }
@@ -86,59 +102,66 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
     return { weeks: weeksData, monthLabels: months };
   }, [activityMap]);
 
-  const formatTooltip = (date: Date, activity: DailyActivity | null) => {
-    const dateStr = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+  // Tooltip state
+  const [hoveredData, setHoveredData] = useState<{
+    x: number;
+    y: number;
+    date: Date;
+    activity: DailyActivity | null;
+  } | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent, date: Date, activity: DailyActivity | null) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredData({
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      date,
+      activity,
     });
-    if (activity && activity.watch_seconds > 0) {
-      return `${formatWatchTime(activity.watch_seconds)} watched on ${dateStr}`;
-    }
-    return `No activity on ${dateStr}`;
   };
 
   return (
-    <div className={`contribution-graph ${className}`}>
-      <div className="graph-container">
-        {/* Day labels */}
-        <div className="day-labels">
-          <div className="day-label" />
-          <div className="day-label">Mon</div>
-          <div className="day-label" />
-          <div className="day-label">Wed</div>
-          <div className="day-label" />
-          <div className="day-label">Fri</div>
-          <div className="day-label" />
-        </div>
-
-        <div className="graph-body">
-          {/* Month labels */}
-          <div className="month-labels">
+    <div className={`contribution-wrapper ${className}`}>
+      <div className="graph-scroll-container">
+        <div className="graph-content">
+          {/* Month Labels */}
+          <div className="months-row">
             {monthLabels.map(({ month, weekIndex }) => (
               <span
-                key={`${month}-${weekIndex}`}
+                key={`month-${month}-${weekIndex}`}
                 className="month-label"
-                style={{ gridColumn: weekIndex + 1 }}
+                style={{ left: `${weekIndex * 16}px` }}
               >
                 {MONTHS[month]}
               </span>
             ))}
           </div>
 
-          {/* Grid */}
+          {/* Activity Grid */}
           <div className="grid">
-            {weeks.map((week, weekIndex) => (
-              <div key={`week-${weekIndex}`} className="week">
+            {weeks.map((week) => (
+              <div key={`week-${week[0].date.toISOString()}`} className="week-col">
                 {week.map(({ date, activity }) => {
                   const level = activity?.level ?? 0;
                   const dateStr = date.toISOString().split('T')[0];
+
                   return (
-                    <div
+                    <button
                       key={dateStr}
-                      className="day"
-                      style={{ backgroundColor: LEVEL_COLORS[level] }}
-                      title={formatTooltip(date, activity)}
+                      type="button"
+                      className="day-cell"
+                      aria-label={`${dateStr}: ${activity ? formatWatchTime(activity.watch_seconds) : 'No activity'}`}
+                      style={{
+                        backgroundColor: THEME.levelColors[level],
+                        boxShadow: THEME.glows[level],
+                      }}
+                      onMouseEnter={(e) => handleMouseEnter(e, date, activity)}
+                      onMouseLeave={() => setHoveredData(null)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          // Allow keyboard activation if we had click logic
+                        }
+                      }}
                     />
                   );
                 })}
@@ -150,123 +173,191 @@ export function ContributionGraph({ activities, className = '' }: ContributionGr
 
       {/* Legend */}
       <div className="legend">
-        <span className="legend-label">Less</span>
-        {LEVEL_COLORS.map((color, i) => (
-          <div
-            key={`legend-${color}`}
-            className="legend-item"
-            style={{ backgroundColor: color }}
-            title={getLevelDescription(i)}
-          />
-        ))}
-        <span className="legend-label">More</span>
+        <span className="legend-text">Less</span>
+        <div className="legend-scale">
+          {[0, 1, 2, 3, 4].map((level) => (
+            <div
+              key={`legend-${level}`}
+              className="day-cell legend-item"
+              style={{
+                backgroundColor: THEME.levelColors[level],
+                boxShadow: THEME.glows[level],
+              }}
+            />
+          ))}
+        </div>
+        <span className="legend-text">More</span>
       </div>
 
+      {/* Fixed Tooltip Overlay */}
+      {hoveredData && (
+        <div
+          className="fixed-tooltip"
+          style={{
+            top: hoveredData.y - 8,
+            left: hoveredData.x,
+          }}
+        >
+          <div className="tooltip-date">
+            {hoveredData.date.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </div>
+          <div className="tooltip-time">
+            {hoveredData.activity
+              ? formatWatchTime(hoveredData.activity.watch_seconds)
+              : 'No activity'}
+          </div>
+          {(hoveredData.activity?.level ?? 0) > 0 && (
+            <div className="tooltip-level">Level {hoveredData.activity?.level}</div>
+          )}
+        </div>
+      )}
+
       <style jsx>{`
-        .contribution-graph {
+        .contribution-wrapper {
           width: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
+          padding: 24px;
+          backdrop-filter: blur(10px);
+        }
+
+        .graph-scroll-container {
           overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 12px;
+          /* Custom Scrollbar */
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
         }
-        
-        .graph-container {
-          display: flex;
-          gap: 4px;
-          min-width: fit-content;
+
+        .graph-scroll-container::-webkit-scrollbar {
+          height: 6px;
         }
-        
-        .day-labels {
+        .graph-scroll-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .graph-scroll-container::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 20px;
+        }
+
+        .graph-content {
           display: flex;
           flex-direction: column;
-          gap: 3px;
-          font-size: 10px;
-          color: var(--text-secondary, #8b949e);
-          padding-top: 20px;
+          gap: 8px;
+          min-width: max-content;
         }
-        
-        .day-label {
-          height: 13px;
-          line-height: 13px;
+
+        .months-row {
+          position: relative;
+          height: 20px;
+          margin-bottom: 4px;
         }
-        
-        .graph-body {
+
+        .month-label {
+          position: absolute;
+          font-size: 11px;
+          color: ${THEME.text};
+          font-weight: 500;
+        }
+
+        .grid {
+          display: flex;
+          gap: 4px;
+        }
+
+        .week-col {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .day-cell {
+          width: 12px;
+          height: 12px;
+          border-radius: 3px;
+          transition: all 0.2s;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+          appearance: none;
+        }
+
+        .day-cell:hover {
+          transform: scale(1.2);
+          border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        /* Fixed Tooltip Styling */
+        .fixed-tooltip {
+          position: fixed;
+          background: #09090b;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 8px 12px;
+          border-radius: 8px;
+          pointer-events: none;
+          z-index: 9999;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
           display: flex;
           flex-direction: column;
           gap: 2px;
+          transform: translate(-50%, -100%);
+          min-width: 150px;
+          pointer-events: none;
+        }
+
+        .tooltip-date {
+          color: #a1a1aa;
+          font-size: 11px;
         }
         
-        .month-labels {
-          display: grid;
-          grid-template-columns: repeat(53, 13px);
-          gap: 3px;
+        .tooltip-time {
+          color: #ffffff;
+          font-weight: 600;
+          font-size: 13px;
+        }
+
+        .tooltip-level {
           font-size: 10px;
-          color: var(--text-secondary, #8b949e);
-          height: 16px;
+          color: #10b981;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-top: 2px;
         }
-        
-        .month-label {
-          white-space: nowrap;
-        }
-        
-        .grid {
-          display: flex;
-          gap: 3px;
-        }
-        
-        .week {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-        
-        .day {
-          width: 13px;
-          height: 13px;
-          border-radius: 2px;
-          cursor: pointer;
-          transition: transform 0.1s ease;
-        }
-        
-        .day:hover {
-          transform: scale(1.3);
-          outline: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
+
+        /* Legend Styling */
         .legend {
           display: flex;
           align-items: center;
+          justify-content: flex-end;
+          gap: 8px;
+          margin-top: 16px;
+        }
+
+        .legend-scale {
+          display: flex;
           gap: 4px;
-          margin-top: 12px;
+        }
+
+        .legend-text {
           font-size: 11px;
-          color: var(--text-secondary, #8b949e);
+          color: ${THEME.text};
         }
-        
-        .legend-label {
-          margin: 0 4px;
-        }
-        
+
         .legend-item {
-          width: 13px;
-          height: 13px;
-          border-radius: 2px;
+          cursor: default;
+        }
+        .legend-item:hover {
+          transform: none;
+          border: none;
         }
       `}</style>
     </div>
   );
-}
-
-function getLevelDescription(level: number): string {
-  switch (level) {
-    case 0:
-      return 'No activity';
-    case 1:
-      return '1-30 minutes';
-    case 2:
-      return '31-60 minutes';
-    case 3:
-      return '1-2 hours';
-    case 4:
-      return '2+ hours';
-    default:
-      return '';
-  }
 }

@@ -2,13 +2,22 @@
 
 /**
  * User Profile Page
- * Shows watch activity graph, stats, and settings
+ * Premium OLED Dark Design
  */
 
-import { ArrowLeft, Calendar, Clock, Flame, Key, TrendingUp } from 'lucide-react';
+import {
+  Activity,
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Flame,
+  Shield,
+  TrendingUp,
+  User as UserIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { ChangePasswordForm, ContributionGraph } from '@/components/profile';
+import { useCallback, useEffect, useState } from 'react';
+import { ChangePasswordForm, ContributionGraph, ProfileSettingsForm } from '@/components/profile';
 import { Button, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import type { UserProfile, WatchActivitySummary } from '@/services/api/user';
@@ -20,7 +29,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<WatchActivitySummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'security'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'security'>('overview');
   const [error, setError] = useState<string | null>(null);
 
   // Redirect if not authenticated
@@ -30,45 +39,62 @@ export default function ProfilePage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Fetch profile and activity data
+  const fetchData = useCallback(async () => {
+    try {
+      const [profileData, activityData] = await Promise.all([getUserProfile(), getWatchActivity()]);
+      setProfile(profileData);
+      setActivity(activityData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch data on mount
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    const fetchData = async () => {
-      try {
-        const [profileData, activityData] = await Promise.all([
-          getUserProfile(),
-          getWatchActivity(),
-        ]);
-        setProfile(profileData);
-        setActivity(activityData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchData]);
+
+  const handleProfileUpdate = () => {
+    // Refresh profile data
+    getUserProfile().then(setProfile);
+  };
 
   if (authLoading || loading) {
     return (
       <div className="profile-page">
         <div className="container">
-          <Skeleton className="header-skeleton" />
-          <Skeleton className="stats-skeleton" />
-          <Skeleton className="graph-skeleton" />
+          <div className="header-skeleton">
+            <Skeleton className="w-24 h-24 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="w-48 h-8" />
+              <Skeleton className="w-32 h-4" />
+            </div>
+          </div>
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="mt-12 h-64 rounded-xl" />
         </div>
         <style jsx>{`
           .profile-page {
             min-height: 100vh;
-            background: var(--bg-primary, #0d1117);
-            padding: 24px;
+            background: #000000;
+            padding: 40px 24px;
+            color: #fff;
           }
           .container {
             max-width: 1000px;
             margin: 0 auto;
+          }
+          .header-skeleton {
+            display: flex;
+            gap: 24px;
+            align-items: center;
           }
         `}</style>
       </div>
@@ -78,8 +104,11 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="profile-page error-page">
-        <p>{error}</p>
-        <Button onClick={() => router.push('/')}>Go Home</Button>
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-semibold text-red-500">Something went wrong</h2>
+          <p className="text-zinc-400">{error}</p>
+          <Button onClick={() => router.push('/')}>Return Home</Button>
+        </div>
       </div>
     );
   }
@@ -89,293 +118,417 @@ export default function ProfilePage() {
   return (
     <div className="profile-page">
       <div className="container">
-        {/* Header */}
-        <header className="profile-header">
+        {/* Navigation */}
+        <nav className="nav-header">
           <button type="button" className="back-button" onClick={() => router.push('/')}>
             <ArrowLeft size={20} />
-            <span>Back</span>
+            <span>Home</span>
           </button>
+        </nav>
 
-          <div className="user-info">
+        {/* Profile Header */}
+        <header className="profile-header">
+          <div className="avatar-wrapper">
             <div className="avatar">
-              {profile?.name
-                ? profile.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .toUpperCase()
-                    .slice(0, 2)
-                : profile?.username.slice(0, 2).toUpperCase()}
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.username}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback if image fails
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement?.classList.add('fallback');
+                  }}
+                />
+              ) : null}
+
+              {/* Fallback Initials (shown if no url or error) */}
+              <span className="initials">
+                {profile?.name
+                  ? profile.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)
+                  : profile?.username.slice(0, 2).toUpperCase()}
+              </span>
             </div>
-            <div className="user-details">
-              <h1>{profile?.name || profile?.username}</h1>
-              <p>@{profile?.username}</p>
+            <div className="avatar-glow" />
+          </div>
+
+          <div className="user-details">
+            <h1>{profile?.name || profile?.username}</h1>
+            <p>@{profile?.username}</p>
+            <div className="join-date">
+              Joined{' '}
+              {profile?.created_at
+                ? new Date(profile.created_at).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                : 'recently'}
             </div>
           </div>
         </header>
 
         {/* Tabs */}
-        <nav className="tabs">
-          <button
-            type="button"
-            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <TrendingUp size={18} />
-            Overview
-          </button>
-          <button
-            type="button"
-            className={`tab ${activeTab === 'security' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security')}
-          >
-            <Key size={18} />
-            Security
-          </button>
-        </nav>
+        <div className="tabs-container">
+          <div className="tabs">
+            <button
+              type="button"
+              className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              <Activity size={18} />
+              <span>Overview</span>
+              {activeTab === 'overview' && <div className="active-indicator" />}
+            </button>
+            <button
+              type="button"
+              className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <UserIcon size={18} />
+              <span>Profile</span>
+              {activeTab === 'profile' && <div className="active-indicator" />}
+            </button>
+            <button
+              type="button"
+              className={`tab ${activeTab === 'security' ? 'active' : ''}`}
+              onClick={() => setActiveTab('security')}
+            >
+              <Shield size={18} />
+              <span>Security</span>
+              {activeTab === 'security' && <div className="active-indicator" />}
+            </button>
+          </div>
+        </div>
 
-        {activeTab === 'overview' && (
-          <>
-            {/* Stats Cards */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <Clock className="stat-icon" size={24} />
-                <div className="stat-content">
-                  <span className="stat-value">
-                    {formatWatchTimeDetailed(stats?.total_watch_time_seconds || 0)}
-                  </span>
-                  <span className="stat-label">Total Watch Time</span>
+        <main className="content-area">
+          {activeTab === 'overview' && (
+            <div className="tab-content overview-content">
+              {/* Stats Grid */}
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-icon-wrapper blue">
+                    <Clock size={20} />
+                  </div>
+                  <div className="stat-info">
+                    <span className="stat-value">
+                      {formatWatchTimeDetailed(stats?.total_watch_time_seconds || 0)}
+                    </span>
+                    <span className="stat-label">Total Watch Time</span>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon-wrapper purple">
+                    <Calendar size={20} />
+                  </div>
+                  <div className="stat-info">
+                    <span className="stat-value">{stats?.total_days_active || 0} days</span>
+                    <span className="stat-label">Days Active</span>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon-wrapper orange">
+                    <Flame size={20} />
+                  </div>
+                  <div className="stat-info">
+                    <span className="stat-value">{stats?.current_streak || 0} days</span>
+                    <span className="stat-label">Current Streak</span>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon-wrapper green">
+                    <TrendingUp size={20} />
+                  </div>
+                  <div className="stat-info">
+                    <span className="stat-value">{stats?.longest_streak || 0} days</span>
+                    <span className="stat-label">Longest Streak</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="stat-card">
-                <Calendar className="stat-icon" size={24} />
-                <div className="stat-content">
-                  <span className="stat-value">{stats?.total_days_active || 0} days</span>
-                  <span className="stat-label">Days Active</span>
+              {/* Contribution Graph Section */}
+              <section className="graph-section">
+                <div className="section-header">
+                  <h2>Watch Activity</h2>
+                  <div className="year-badge">Last 365 Days</div>
                 </div>
-              </div>
 
-              <div className="stat-card">
-                <Flame className="stat-icon fire" size={24} />
-                <div className="stat-content">
-                  <span className="stat-value">{stats?.current_streak || 0} days</span>
-                  <span className="stat-label">Current Streak</span>
-                </div>
-              </div>
+                <ContributionGraph activities={activity?.activities || []} />
+              </section>
+            </div>
+          )}
 
-              <div className="stat-card">
-                <TrendingUp className="stat-icon" size={24} />
-                <div className="stat-content">
-                  <span className="stat-value">{stats?.longest_streak || 0} days</span>
-                  <span className="stat-label">Longest Streak</span>
-                </div>
+          {activeTab === 'profile' && profile && (
+            <div className="tab-content profile-content">
+              <div className="settings-container">
+                <ProfileSettingsForm initialData={profile} onUpdate={handleProfileUpdate} />
               </div>
             </div>
+          )}
 
-            {/* Contribution Graph */}
-            <section className="activity-section">
-              <h2>Watch Activity</h2>
-              <p className="section-subtitle">
-                {activity?.total_days || 0} days of activity in the last year
-              </p>
-
-              <div className="graph-wrapper">
-                <ContributionGraph activities={activity?.activities || []} />
+          {activeTab === 'security' && (
+            <div className="tab-content security-content">
+              <div className="settings-container">
+                <ChangePasswordForm />
               </div>
-            </section>
-          </>
-        )}
-
-        {activeTab === 'security' && (
-          <section className="security-section">
-            <h2>Change Password</h2>
-            <p className="section-subtitle">Update your password to keep your account secure</p>
-
-            <ChangePasswordForm />
-          </section>
-        )}
+            </div>
+          )}
+        </main>
       </div>
 
       <style jsx>{`
         .profile-page {
           min-height: 100vh;
-          background: var(--bg-primary, #0d1117);
-          padding: 24px;
+          background: #000000;
+          color: #ffffff;
+          padding: 2px 0; /* Minimized padding */
         }
         
         .container {
-          max-width: 1000px;
+          max-width: 1100px;
           margin: 0 auto;
+          padding: 40px 24px;
+        }
+
+        /* Navigation */
+        .nav-header {
+            margin-bottom: 40px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateX(-2px);
         }
         
+        /* Profile Header */
         .profile-header {
           display: flex;
-          align-items: center;
-          gap: 24px;
-          margin-bottom: 32px;
+          align-items: flex-end;
+          gap: 32px;
+          margin-bottom: 48px;
+          padding-bottom: 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .back-button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: transparent;
-          border: none;
-          color: var(--text-secondary, #8b949e);
-          cursor: pointer;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: all 0.2s ease;
+        .avatar-wrapper {
+            position: relative;
         }
-        
-        .back-button:hover {
-          color: var(--text-primary, #e6edf3);
-          background: var(--bg-secondary, #161b22);
-        }
-        
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-        
+
         .avatar {
-          width: 64px;
-          height: 64px;
+          width: 96px;
+          height: 96px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
-          font-weight: 600;
+          font-size: 36px;
+          font-weight: 700;
           color: white;
-          border: 3px solid rgba(255, 255, 255, 0.15);
+          position: relative;
+          z-index: 2;
+          border: 4px solid #000;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: 1;
         }
         
         .user-details h1 {
-          font-size: 24px;
-          font-weight: 600;
-          color: var(--text-primary, #e6edf3);
+          font-size: 36px;
+          font-weight: 700;
+          letter-spacing: -0.5px;
           margin: 0;
+          background: linear-gradient(to right, #fff, #a1a1aa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
         
         .user-details p {
-          font-size: 14px;
-          color: var(--text-secondary, #8b949e);
-          margin: 4px 0 0 0;
+          font-size: 18px;
+          color: #a1a1aa; /* Zinc-400 */
+          margin: 4px 0 8px 0;
         }
-        
+
+        .join-date {
+            font-size: 13px;
+            color: #52525b; /* Zinc-600 */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            margin-bottom: 32px;
+        }
+
         .tabs {
           display: flex;
-          gap: 4px;
-          border-bottom: 1px solid var(--border-color, #30363d);
-          margin-bottom: 32px;
+          gap: 8px;
         }
         
         .tab {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 16px;
+          gap: 10px;
+          padding: 10px 20px;
           background: transparent;
           border: none;
-          color: var(--text-secondary, #8b949e);
+          color: #71717a;
           cursor: pointer;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 500;
-          border-bottom: 2px solid transparent;
-          margin-bottom: -1px;
-          transition: all 0.2s ease;
+          transition: all 0.2s;
         }
         
         .tab:hover {
-          color: var(--text-primary, #e6edf3);
+          color: #fff;
         }
         
         .tab.active {
-          color: var(--text-primary, #e6edf3);
-          border-bottom-color: var(--accent-primary, #f78166);
+          color: #fff;
+        }
+
+        .active-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
+        /* Stats Grid */
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 16px;
-          margin-bottom: 40px;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 20px;
+          margin-bottom: 48px;
         }
         
         .stat-card {
-          display: flex;
-          align-items: center;
-          gap: 16px;
           padding: 20px;
-          background: var(--bg-secondary, #161b22);
-          border: 1px solid var(--border-color, #30363d);
-          border-radius: 12px;
-        }
-        
-        .stat-icon {
-          color: var(--accent-primary, #58a6ff);
-          flex-shrink: 0;
-        }
-        
-        .stat-icon.fire {
-          color: #f78166;
-        }
-        
-        .stat-content {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 16px;
+          transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         
+        .stat-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon-wrapper.blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .stat-icon-wrapper.purple { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+        .stat-icon-wrapper.orange { background: rgba(249, 115, 22, 0.1); color: #fb923c; }
+        .stat-icon-wrapper.green { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .stat-value {
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--text-primary, #e6edf3);
+          font-size: 20px;
+          font-weight: 700;
+          color: #fff;
         }
         
         .stat-label {
           font-size: 13px;
-          color: var(--text-secondary, #8b949e);
+          color: #a1a1aa;
         }
         
-        .activity-section,
-        .security-section {
-          background: var(--bg-secondary, #161b22);
-          border: 1px solid var(--border-color, #30363d);
-          border-radius: 12px;
-          padding: 24px;
+        /* Graph Section */
+        .graph-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
-        
-        .activity-section h2,
-        .security-section h2 {
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--text-primary, #e6edf3);
-          margin: 0 0 4px 0;
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        
-        .section-subtitle {
-          font-size: 14px;
-          color: var(--text-secondary, #8b949e);
-          margin: 0 0 24px 0;
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
         }
-        
-        .graph-wrapper {
-          overflow-x: auto;
-          padding: 8px 0;
+
+        .year-badge {
+            font-size: 12px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 99px;
+            color: #a1a1aa;
         }
-        
+
+        .overview-content, .security-content, .profile-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .error-page {
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 16px;
+          min-height: 100vh;
+          background: #000;
+          padding: 24px;
         }
       `}</style>
     </div>

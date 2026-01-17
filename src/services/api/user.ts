@@ -17,9 +17,16 @@ export interface UserProfile {
   id: string;
   username: string;
   name: string;
+  avatar_url: string | null;
   created_at: string | null;
   last_login: string | null;
   stats: UserStats;
+}
+
+export interface UpdateProfileRequest {
+  name?: string;
+  username?: string;
+  avatar_url?: string;
 }
 
 export interface DailyActivity {
@@ -58,6 +65,31 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
  */
 export async function getUserProfile(): Promise<UserProfile> {
   return request<UserProfile>('/api/user/profile');
+}
+
+/**
+ * Upload profile avatar
+ */
+export async function uploadAvatar(file: File): Promise<{ success: boolean; avatar_url: string }> {
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  return request<{ success: boolean; avatar_url: string }>('/api/user/profile/avatar', {
+    method: 'POST',
+    body: formData,
+  });
+}
+
+/**
+ * Update user profile
+ */
+export async function updateProfile(
+  data: UpdateProfileRequest
+): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>('/api/user/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
 
 /**
