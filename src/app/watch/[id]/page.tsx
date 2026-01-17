@@ -326,19 +326,29 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
-      {/* Back Button */}
-      <div className="container mx-auto px-4 pt-6">
+      {/* Modern Close/Back Button */}
+      <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all group px-4 py-2 rounded-full hover:bg-white/5"
+          className="group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          aria-label="Go back"
         >
-          <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Back</span>
+          <svg 
+            className="w-5 h-5 sm:w-6 sm:h-6 text-white/80 group-hover:text-white transition-colors" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
       {/* Video Player - Full Width */}
-      <div className="w-full max-w-7xl mx-auto px-4 py-6">
+      <div className="w-full max-w-7xl mx-auto px-4 pt-20 sm:pt-6 pb-6">
         <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
           <VideoPlayer
             src={videoData.master_playlist_url}

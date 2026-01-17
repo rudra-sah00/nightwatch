@@ -143,11 +143,11 @@ export function ControlButtons({
   );
 }
 
-// Custom Icons matching Netflix style
+// Custom Icons 
 
 function PlayIcon() {
   return (
-    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor">
       <path d="M8 5v14l11-7z" />
     </svg>
   );
@@ -155,7 +155,7 @@ function PlayIcon() {
 
 function PauseIcon() {
   return (
-    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor">
       <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
     </svg>
   );
@@ -163,7 +163,7 @@ function PauseIcon() {
 
 function SkipBackIcon() {
   return (
-    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="12" r="9" />
       <text x="12" y="15" textAnchor="middle" fontSize="7" fontWeight="bold" fill="currentColor" stroke="none">10</text>
       <path d="M12 3C9 3 6.5 4.5 5 7" strokeLinecap="round" />
@@ -174,7 +174,7 @@ function SkipBackIcon() {
 
 function SkipForwardIcon() {
   return (
-    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="12" r="9" />
       <text x="12" y="15" textAnchor="middle" fontSize="7" fontWeight="bold" fill="currentColor" stroke="none">10</text>
       <path d="M12 3c3 0 5.5 1.5 7 4" strokeLinecap="round" />
@@ -185,7 +185,7 @@ function SkipForwardIcon() {
 
 function VolumeIcon() {
   return (
-    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none" />
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" strokeLinecap="round" />
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14" strokeLinecap="round" />
@@ -195,7 +195,7 @@ function VolumeIcon() {
 
 function VolumeMuteIcon() {
   return (
-    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none" />
       <line x1="23" y1="9" x2="17" y2="15" strokeLinecap="round" />
       <line x1="17" y1="9" x2="23" y2="15" strokeLinecap="round" />

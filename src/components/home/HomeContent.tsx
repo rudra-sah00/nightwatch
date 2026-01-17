@@ -57,10 +57,11 @@ export function HomeContent({
         });
     };
 
-    // Handle play from modal
+    // Handle play from modal - navigate first to prevent flash
     const handlePlay = async (episodeId?: string) => {
         if (!selectedContent) return;
 
+        // Navigate first before closing modal to prevent seeing search results flash
         if (episodeId) {
             // Series episode - navigate to episode
             router.push(`/watch/${selectedContent.id}?episode=${episodeId}`);
@@ -68,7 +69,8 @@ export function HomeContent({
             // Movie - navigate directly
             router.push(`/watch/${selectedContent.id}`);
         }
-        setSelectedContent(null);
+        // Small delay to let navigation start before closing modal
+        setTimeout(() => setSelectedContent(null), 100);
     };
 
     return (
@@ -102,7 +104,7 @@ export function HomeContent({
                         {/* Search bar and logout button */}
                         <div className="flex gap-3 items-center justify-center max-w-3xl mx-auto">
                             <div className="flex-1">
-                                <SearchBar onSearch={onSearch} onClear={onClear} initialQuery={searchQuery} useUrlNavigation={false} />
+                                <SearchBar onSearch={onSearch} onClear={onClear} initialQuery={searchQuery} useUrlNavigation={true} />
                             </div>
 
                             <Button

@@ -51,7 +51,7 @@ export function ProgressBar({
   };
 
   return (
-    <div className="px-4 mb-3 relative group/progress-container">
+    <div className="px-3 sm:px-4 md:px-5 lg:px-6 mb-2 sm:mb-3 relative group/progress-container">
       {/* Locked indicator */}
       {locked && (
         <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1 text-xs text-zinc-400 opacity-0 group-hover/progress-container:opacity-100 transition-opacity">
@@ -60,10 +60,10 @@ export function ProgressBar({
         </div>
       )}
       
-      {/* Progress bar wrapper with larger hit area */}
+      {/* Progress bar wrapper with larger hit area for touch */}
       <div
         ref={progressBarRef}
-        className={`relative h-2 md:h-1.5 bg-white/20 rounded-full transition-all duration-200 group-hover/progress-container:h-3 ${
+        className={`relative h-3 sm:h-2.5 md:h-2 bg-white/20 rounded-full transition-all duration-200 group-hover/progress-container:h-4 sm:group-hover/progress-container:h-3.5 md:group-hover/progress-container:h-3 ${
           locked ? 'cursor-not-allowed' : 'cursor-pointer'
         }`}
         onClick={handleClick}
@@ -91,12 +91,12 @@ export function ProgressBar({
             boxShadow: isDragging ? '0 0 12px rgba(255, 255, 255, 0.4)' : '0 0 6px rgba(255, 255, 255, 0.2)'
           }}
         >
-          {/* Scrubber handle - hidden when locked */}
+          {/* Scrubber handle - hidden when locked, larger for touch */}
           {!locked && (
             <div
-              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-150 ${isDragging
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 bg-white rounded-full shadow-lg transition-all duration-150 touch-manipulation ${isDragging
                 ? 'scale-125 ring-4 ring-white/30'
-                : 'scale-0 opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
+                : 'scale-100 sm:scale-0 sm:opacity-0 group-hover/progress-container:scale-100 group-hover/progress-container:opacity-100'
                 }`}
               style={{
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
@@ -124,7 +124,7 @@ export function ProgressBar({
             />
           ) : (
             <div
-              className="absolute -top-14 transform -translate-x-1/2 bg-zinc-900/98 text-white text-sm px-4 py-2.5 rounded-xl pointer-events-none shadow-2xl border border-white/15 backdrop-blur-md z-50"
+              className="absolute -top-12 sm:-top-14 transform -translate-x-1/2 bg-zinc-900/98 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl pointer-events-none shadow-2xl border border-white/15 backdrop-blur-md z-50"
               style={{ left: `${Math.max(8, Math.min(92, hoverPosition))}%` }}
             >
               <span className="font-bold tracking-wider tabular-nums">{formatTime(hoverTime)}</span>

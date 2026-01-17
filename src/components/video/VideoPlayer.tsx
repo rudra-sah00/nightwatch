@@ -209,12 +209,13 @@ export default function VideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video group"
+      className="relative w-full bg-black rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden shadow-2xl aspect-video group touch-manipulation"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         handleMouseLeave();
         setHoverTime(null);
       }}
+      onTouchStart={handleMouseMove}
       tabIndex={0}
     >
       {/* Video Element */}
@@ -232,6 +233,7 @@ export default function VideoPlayer({
           }
         }}
         playsInline
+        webkit-playsinline="true"
       />
 
 
@@ -263,7 +265,7 @@ export default function VideoPlayer({
           }`}
       >
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-24">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-16 sm:pt-20 md:pt-24">
           {/* Progress Bar */}
           <ProgressBar
             currentTime={currentTime}
@@ -279,7 +281,7 @@ export default function VideoPlayer({
           />
 
           {/* Control Buttons Row - Netflix style layout */}
-          <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 lg:px-6 pb-2 sm:pb-3 md:pb-4 lg:pb-5">
             {/* Left: Play controls + Volume + Time */}
             <ControlButtons
               isPlaying={isPlaying}

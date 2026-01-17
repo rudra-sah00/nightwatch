@@ -4,14 +4,14 @@ import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface DropdownOption<T = any> {
+interface DropdownOption<T = unknown> {
   value: T;
   label: string;
   count?: number;
-  data?: any;
+  data?: unknown;
 }
 
-interface DropdownSelectorProps<T = any> {
+interface DropdownSelectorProps<T = unknown> {
   options: DropdownOption<T>[];
   selectedValue: T;
   isOpen: boolean;
@@ -23,7 +23,7 @@ interface DropdownSelectorProps<T = any> {
   className?: string;
 }
 
-export function DropdownSelector<T = any>({
+export function DropdownSelector<T = unknown>({
   options,
   selectedValue,
   isOpen,

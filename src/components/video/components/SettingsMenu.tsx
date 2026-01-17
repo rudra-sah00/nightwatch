@@ -67,7 +67,7 @@ export function SettingsMenu({
   );
 
   return (
-    <div className="flex items-center gap-0.5 md:gap-1">
+    <div className="flex items-center gap-1 sm:gap-2 md:gap-2 lg:gap-3">
       {/* Subtitles Quick Button */}
       {localSubtitles.length > 0 && (
         <button
@@ -75,12 +75,12 @@ export function SettingsMenu({
             if (!isOpen) onToggleMenu();
             onTabChange('subtitles');
           }}
-          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-200 rounded-lg hover:bg-white/10 group ${currentSubtitleIndex >= 0 ? 'text-white' : 'text-white/70 hover:text-white'
+          className={`w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex items-center justify-center transition-all duration-200 rounded-full hover:bg-white/10 active:scale-95 touch-manipulation group ${currentSubtitleIndex >= 0 ? 'text-white' : 'text-white/70 hover:text-white'
             }`}
           aria-label="Subtitles"
           title="Subtitles"
         >
-          <SubtitleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+          <SubtitleIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-transform group-hover:scale-110" />
         </button>
       )}
 
@@ -91,11 +91,11 @@ export function SettingsMenu({
             if (!isOpen) onToggleMenu();
             onTabChange('audio');
           }}
-          className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-lg hover:bg-white/10 group"
+          className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-full hover:bg-white/10 active:scale-95 touch-manipulation group"
           aria-label="Audio Track"
           title="Audio Track"
         >
-          <AudioIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+          <AudioIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-transform group-hover:scale-110" />
         </button>
       )}
 
@@ -103,13 +103,13 @@ export function SettingsMenu({
       <div className="relative">
         <button
           onClick={onToggleMenu}
-          className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all duration-300 rounded-lg hover:bg-white/10 group ${isOpen ? 'text-white' : 'text-white/70 hover:text-white'
+          className={`w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex items-center justify-center transition-all duration-300 rounded-full hover:bg-white/10 active:scale-95 touch-manipulation group ${isOpen ? 'text-white' : 'text-white/70 hover:text-white'
             }`}
           aria-label="Settings"
           title="Settings"
         >
           <svg
-            className={`w-5 h-5 transition-all duration-300 group-hover:scale-110 ${isOpen ? 'rotate-90' : ''}`}
+            className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-all duration-300 group-hover:scale-110 ${isOpen ? 'rotate-90' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -204,14 +204,14 @@ export function SettingsMenu({
       {/* Fullscreen Button */}
       <button
         onClick={onToggleFullscreen}
-        className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-lg hover:bg-white/10 group"
+        className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 rounded-full hover:bg-white/10 active:scale-95 touch-manipulation group"
         aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
         title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
       >
         {isFullscreen ? (
-          <ArrowsPointingInIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+          <ArrowsPointingInIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-transform group-hover:scale-110" />
         ) : (
-          <ArrowsPointingOutIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+          <ArrowsPointingOutIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-transform group-hover:scale-110" />
         )}
       </button>
     </div>

@@ -13,12 +13,14 @@ interface ThumbnailPreviewProps {
 
 export function ThumbnailPreview({ time, duration, spriteSheets, position }: ThumbnailPreviewProps) {
   const [imageError, setImageError] = useState(false);
-  const [loadCount, setLoadCount] = useState(0); // Force re-render when images load
+  // Track loaded URLs in state to safely access during render
+  const [loadedUrls, setLoadedUrls] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const loadedImagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const loadingUrlsRef = useRef<Set<string>>(new Set());
 
   // Determine which sprite sheet and tile to use based on time
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const spriteInfo = useMemo(() => {
     if (!spriteSheets || spriteSheets.length === 0 || duration <= 0) return null;
 
@@ -74,17 +76,23 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
       img.onload = () => {
         loadedImagesRef.current.set(url, img);
         loadingUrlsRef.current.delete(url);
-        setLoadCount(c => c + 1); // Trigger re-render
+
+        // Update state to trigger re-render safely
+        setLoadedUrls(prev => {
+          const next = new Set(prev);
+          next.add(url);
+          return next;
+        });
       };
 
       img.onerror = () => {
         loadingUrlsRef.current.delete(url);
-        setImageError(true);
+        if (!imageError) setImageError(true);
       };
 
       img.src = url;
     });
-  }, [spriteSheets]);
+  }, [spriteSheets, imageError]);
 
   // Draw thumbnail using canvas for better sprite handling
   useEffect(() => {
@@ -126,6 +134,8 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
 
     // Draw the specific tile from sprite sheet
     try {
+      if (imageError) return;
+
       ctx.drawImage(
         img,
         sourceX,
@@ -138,9 +148,9 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
         displayHeight
       );
     } catch {
-      setImageError(true);
+      if (!imageError) setImageError(true);
     }
-  }, [spriteInfo, loadCount]);
+  }, [spriteInfo, loadedUrls, imageError]);
 
   // Calculate safe position to keep preview within bounds
   const safePosition = useMemo(() => {
@@ -149,7 +159,7 @@ export function ThumbnailPreview({ time, duration, spriteSheets, position }: Thu
   }, [position]);
 
   // Check if current sprite image is loaded
-  const currentImageLoaded = spriteInfo && loadedImagesRef.current.has(spriteInfo.spriteSheet.spriteUrl);
+  const currentImageLoaded = spriteInfo && loadedUrls.has(spriteInfo.spriteSheet.spriteUrl);
 
   // Time-only fallback when no sprite available or error
   if (!spriteInfo || imageError) {

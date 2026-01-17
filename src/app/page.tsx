@@ -1,46 +1,28 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { HomeContent } from '@/components/home';
-import { useAuth } from '@/hooks/useAuth';
-import { search, SearchResult } from '@/lib/api';
 
 function HomePage() {
-  const { user } = useAuth();
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     if (!query.trim()) return;
-
-    setLoading(true);
-    setSearchQuery(query);
-    setSearched(true);
-
-    try {
-      const response = await search(query);
-      setResults(response.data?.results || []);
-    } catch {
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    // Navigate to the search page with the query
+    router.push(`/search/${encodeURIComponent(query.trim())}`);
+  }, [router]);
 
   const handleClear = useCallback(() => {
-    setResults([]);
-    setSearchQuery('');
-    setSearched(false);
+    // Already on home page, nothing to clear
   }, []);
 
   return (
     <HomeContent
-      results={results}
-      loading={loading}
-      searched={searched}
-      searchQuery={searchQuery}
+      results={[]}
+      loading={false}
+      searched={false}
+      searchQuery=""
       onSearch={handleSearch}
       onClear={handleClear}
     />
