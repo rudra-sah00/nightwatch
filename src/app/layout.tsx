@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: 'Watch Rudra - Stream Movies & TV Shows',
     template: '%s | Watch Rudra',
   },
-  description: 'Watch movies and TV shows together with friends in real-time',
+  description: 'Watch movies and TV shows',
   icons: {
     icon: '/play.ico',
     shortcut: '/play.ico',

@@ -68,18 +68,20 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
   };
 
   return (
-    <div className="security-section">
+    <div className="flex flex-col gap-6">
       <div className="section-header">
-        <h3>Password Security</h3>
-        <p>Manage your account password.</p>
+        <h3 className="text-lg font-semibold text-white mb-1">Password Security</h3>
+        <p className="text-zinc-500 text-sm">Manage your account password.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="form-grid">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Current Password - Full Width */}
-        <div className="input-group full-width">
-          <label htmlFor="current-password">Current Password</label>
-          <div className="input-wrapper">
-            <Lock size={16} className="field-icon" />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="current-password" className="text-[13px] font-medium text-zinc-300">
+            Current Password
+          </label>
+          <div className="relative flex items-center gap-3">
+            <Lock size={16} className="text-zinc-500 shrink-0" />
             <input
               id="current-password"
               type={visible.current ? 'text' : 'password'}
@@ -88,11 +90,12 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
               onChange={handleChange}
               placeholder="••••••••••••"
               required
+              className="w-full flex-1 py-2.5 px-4 pr-10 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-sm transition-all focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
             <button
               type="button"
               onClick={() => toggleVisibility('current')}
-              className="visibility-btn"
+              className="absolute right-3 bg-transparent border-none text-zinc-500 cursor-pointer p-1 flex items-center hover:text-white transition-colors"
             >
               {visible.current ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -100,11 +103,13 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         </div>
 
         {/* New Password Fields - Side by Side */}
-        <div className="fields-row">
-          <div className="input-group">
-            <label htmlFor="new-password">New Password</label>
-            <div className="input-wrapper">
-              <Lock size={16} className="field-icon" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="new-password" className="text-[13px] font-medium text-zinc-300">
+              New Password
+            </label>
+            <div className="relative flex items-center gap-3">
+              <Lock size={16} className="text-zinc-500 shrink-0" />
               <input
                 id="new-password"
                 type={visible.new ? 'text' : 'password'}
@@ -114,21 +119,24 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
                 placeholder="New password (min 8 chars)"
                 minLength={8}
                 required
+                className="w-full flex-1 py-2.5 px-4 pr-10 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-sm transition-all focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
               <button
                 type="button"
                 onClick={() => toggleVisibility('new')}
-                className="visibility-btn"
+                className="absolute right-3 bg-transparent border-none text-zinc-500 cursor-pointer p-1 flex items-center hover:text-white transition-colors"
               >
                 {visible.new ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
-          <div className="input-group">
-            <label htmlFor="confirm-password">Confirm Password</label>
-            <div className="input-wrapper">
-              <Lock size={16} className="field-icon" />
+          <div className="flex flex-col gap-2">
+            <label htmlFor="confirm-password" className="text-[13px] font-medium text-zinc-300">
+              Confirm Password
+            </label>
+            <div className="relative flex items-center gap-3">
+              <Lock size={16} className="text-zinc-500 shrink-0" />
               <input
                 id="confirm-password"
                 type={visible.confirm ? 'text' : 'password'}
@@ -137,6 +145,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
                 onChange={handleChange}
                 placeholder="Confirm new password"
                 required
+                className="w-full flex-1 py-2.5 px-4 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-sm transition-all focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -144,167 +153,37 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
 
         {/* Validation Hints */}
         {(formData.new || formData.confirm) && (
-          <div className="validation-hints">
+          <div className="flex gap-4 text-xs">
             {!isStrong && formData.new && (
-              <span className="error">• Password too short (min 8)</span>
+              <span className="text-red-500">• Password too short (min 8)</span>
             )}
             {!passwordsMatch && formData.confirm && (
-              <span className="error">• Passwords do not match</span>
+              <span className="text-red-500">• Passwords do not match</span>
             )}
           </div>
         )}
 
-        <div className="form-actions">
+        <div className="flex items-center justify-end gap-4 mt-2">
           {status === 'success' && (
-            <div className="status-text success">
+            <div className="flex items-center gap-1.5 text-[13px] font-medium text-emerald-500">
               <Check size={16} /> <span>{message}</span>
             </div>
           )}
           {status === 'error' && (
-            <div className="status-text error">
+            <div className="flex items-center gap-1.5 text-[13px] font-medium text-red-500">
               <AlertCircle size={16} /> <span>{message}</span>
             </div>
           )}
 
-          <Button type="submit" disabled={!isValid || status === 'loading'} className="update-btn">
+          <Button
+            type="submit"
+            disabled={!isValid || status === 'loading'}
+            className="bg-white text-black font-semibold hover:bg-zinc-200 disabled:opacity-50"
+          >
             {status === 'loading' ? 'Updating...' : 'Update Password'}
           </Button>
         </div>
       </form>
-
-      <style jsx>{`
-        .security-section {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .section-header h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-            margin: 0 0 4px 0;
-        }
-        
-        .section-header p {
-            color: #71717a;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .form-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .fields-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 640px) {
-            .fields-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #d4d4d8;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .field-icon {
-            /* Icon is now flex item outside input */
-            color: #71717a;
-            flex-shrink: 0;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 40px 10px 16px; /* Reduced left padding */
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            transition: all 0.2s;
-            flex: 1; /* Take remaining width */
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6;
-        }
-
-        .visibility-btn {
-            position: absolute;
-            right: 12px;
-            background: none;
-            border: none;
-            color: #71717a;
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-        }
-
-        .visibility-btn:hover {
-            color: #fff;
-        }
-
-        .validation-hints {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-        }
-
-        .validation-hints .error {
-            color: #ef4444;
-        }
-
-        .form-actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 16px;
-            margin-top: 8px;
-        }
-        
-        .status-text {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .status-text.success { color: #10b981; }
-        .status-text.error { color: #ef4444; }
-
-        .update-btn {
-            background: #fff;
-            color: #000;
-            font-weight: 600;
-        }
-        .update-btn:hover:not(:disabled) { background: #e4e4e7; }
-        .update-btn:disabled { opacity: 0.5; }
-      `}</style>
     </div>
   );
 }

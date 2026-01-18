@@ -13,7 +13,9 @@ export {
 export {
   type ApiResponse,
   apiRequest,
+  clearStoredUser,
   clearTokens,
+  forceLogout,
   getAccessToken,
   getApiBase,
   getRefreshToken,

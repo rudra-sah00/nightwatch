@@ -3,9 +3,11 @@
 import type React from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  useDoubleTap,
   useFullscreen,
   useHlsPlayer,
   useKeyboardControls,
+  useSkipIndicator,
   useSubtitles,
   useVideoControls,
 } from '@/hooks';
@@ -43,10 +45,9 @@ export default function VideoPlayer({
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
-  const [skipIndicator, setSkipIndicator] = useState<{
-    direction: 'forward' | 'backward';
-    isActive: boolean;
-  } | null>(null);
+
+  // Skip indicator hook
+  const { skipIndicator, showSkipIndicator } = useSkipIndicator();
 
   // Custom hooks
   const {
@@ -79,6 +80,12 @@ export default function VideoPlayer({
   // Track watch activity
   useWatchActivity({ isPlaying });
 
+  // Close menus helper (defined early for use in handlers)
+  const closeMenus = useCallback(() => {
+    setShowSettingsMenu(false);
+    setSettingsTab('main');
+  }, []);
+
   // Standard controls
   const togglePlay = useCallback(() => {
     hlsTogglePlay();
@@ -96,14 +103,39 @@ export default function VideoPlayer({
       const newTime = Math.max(0, Math.min(currentTime + seconds, duration));
       seek(newTime);
 
-      // Show skip indicator
+      // Show skip indicator using hook
       const direction = seconds > 0 ? 'forward' : 'backward';
-      setSkipIndicator({ direction, isActive: true });
-      setTimeout(() => {
-        setSkipIndicator({ direction, isActive: false });
-      }, 500);
+      showSkipIndicator(direction);
     },
-    [currentTime, duration, seek]
+    [currentTime, duration, seek, showSkipIndicator]
+  );
+
+  // Double-tap detection using hook
+  const { handleTap } = useDoubleTap({
+    onSingleTap: () => {
+      // Single tap - toggle play/pause (if menu not open)
+      if (!showSettingsMenu) {
+        togglePlay();
+      } else {
+        closeMenus();
+      }
+    },
+    onDoubleTapLeft: () => skip(-SKIP_SECONDS),
+    onDoubleTapRight: () => skip(SKIP_SECONDS),
+    onDoubleTapCenter: () => togglePlay(),
+  });
+
+  // Handle video click/tap
+  const handleVideoInteraction = useCallback(
+    (e: React.MouseEvent<HTMLVideoElement> | React.TouchEvent<HTMLVideoElement>) => {
+      // Close menus first if open
+      if (showSettingsMenu) {
+        closeMenus();
+        return;
+      }
+      handleTap(e);
+    },
+    [showSettingsMenu, closeMenus, handleTap]
   );
 
   // Show loading when buffering or when video hasn't started yet
@@ -125,14 +157,10 @@ export default function VideoPlayer({
     showSettingsMenu,
   });
 
-  const { isFullscreen, toggleFullscreen } = useFullscreen({
+  const { isFullscreen, toggleFullscreen, isMobile } = useFullscreen({
     containerRef,
+    videoRef,
   });
-
-  const closeMenus = useCallback(() => {
-    setShowSettingsMenu(false);
-    setSettingsTab('main');
-  }, []);
 
   useKeyboardControls({
     containerRef,
@@ -236,20 +264,14 @@ export default function VideoPlayer({
       }}
       onTouchStart={handleMouseMove}
     >
-      {/* Video Element */}
+      {/* Video Element - Click/Tap to play/pause, Double-tap sides to seek */}
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain cursor-pointer"
         crossOrigin="anonymous"
-        onClick={() => {
-          // Close any open menus first, then toggle play
-          if (showSettingsMenu) {
-            closeMenus();
-          } else {
-            togglePlay();
-          }
-        }}
+        onClick={handleVideoInteraction}
+        onTouchEnd={handleVideoInteraction}
         playsInline
         webkit-playsinline="true"
       >
@@ -347,6 +369,7 @@ export default function VideoPlayer({
               title={title}
               episodeInfo={episodeInfo}
               locked={false}
+              isMobile={isMobile}
               onTogglePlay={togglePlay}
               onSkip={skip}
               onToggleMute={toggleMute}
@@ -371,6 +394,7 @@ export default function VideoPlayer({
               actualQualityLevel={actualQualityLevel}
               playbackSpeed={playbackSpeed}
               hideSpeedControl={false}
+              isMobile={isMobile}
               onToggleMenu={handleToggleSettings}
               onCloseMenu={closeMenus}
               onTabChange={setSettingsTab}

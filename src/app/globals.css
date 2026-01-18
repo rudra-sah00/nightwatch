@@ -292,6 +292,80 @@ body::-webkit-scrollbar,
   animation: shimmer 2s infinite linear;
 }
 
+/* Skip indicator animations */
+@keyframes ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes indicator-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes arrow-slide {
+  0% {
+    opacity: 0.4;
+    transform: translateX(-4px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0.4;
+    transform: translateX(4px);
+  }
+}
+
+@keyframes arrow-slide-back {
+  0% {
+    opacity: 0.4;
+    transform: translateX(4px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0.4;
+    transform: translateX(-4px);
+  }
+}
+
+/* Loading shimmer animation for progress bars */
+@keyframes loading-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-shimmer {
+  animation: loading-shimmer 1.5s infinite;
+}
+
 /* Video player subtitle styling override */
 video::cue {
   background: transparent;

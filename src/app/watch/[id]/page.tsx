@@ -125,15 +125,15 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 pt-6">
-          <div className="h-6 w-24 bg-zinc-800 rounded animate-pulse" />
+          <div className="h-6 w-24 bg-zinc-900 rounded animate-pulse" />
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 py-6">
           {/* Video player loading skeleton with beautiful animation */}
-          <div className="relative aspect-video w-full rounded-2xl bg-zinc-900 overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+          <div className="relative aspect-video w-full rounded-2xl bg-black overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/5">
+            {/* Subtle pulse effect */}
+            <div className="absolute inset-0 bg-zinc-950 animate-pulse" />
 
             {/* Center loading animation */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
@@ -183,29 +183,18 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div className="mt-8 space-y-4">
-            <div className="h-10 w-2/3 bg-zinc-800 rounded-lg animate-pulse" />
-            <div className="h-4 w-1/4 bg-zinc-800 rounded animate-pulse" />
-            <div className="h-20 w-full bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-10 w-2/3 bg-zinc-900 rounded-lg animate-pulse" />
+            <div className="h-4 w-1/4 bg-zinc-900 rounded animate-pulse" />
+            <div className="h-20 w-full bg-zinc-900 rounded-lg animate-pulse" />
           </div>
         </div>
-
-        {/* Add shimmer keyframe styles */}
-        <style jsx>{`
-          @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(400%); }
-          }
-          .animate-shimmer {
-            animation: shimmer 2s infinite;
-          }
-        `}</style>
       </div>
     );
   }
 
   if (error || !videoData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-6">
@@ -242,10 +231,10 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+    <div className="min-h-screen bg-black">
       {/* Video Player - Full Width */}
       <div className="w-full max-w-7xl mx-auto px-4 pt-6 pb-6">
-        <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
+        <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/5">
           <VideoPlayer
             src={videoData.master_playlist_url}
             poster={videoData.metadata.poster_url}

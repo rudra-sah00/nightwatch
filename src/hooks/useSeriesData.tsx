@@ -15,6 +15,8 @@ export function useSeriesData({ contentId, episodeId, contentType }: UseSeriesDa
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [seasonEpisodes, setSeasonEpisodes] = useState<Episode[]>([]);
   const fetchedSeasons = useRef<Set<number>>(new Set());
+  const initialSeasonSet = useRef<boolean>(false);
+  const initialEpisodeId = useRef<string | null | undefined>(episodeId);
 
   // Load show details for series
   useEffect(() => {
@@ -33,18 +35,28 @@ export function useSeriesData({ contentId, episodeId, contentType }: UseSeriesDa
         if (showResponse.data?.show) {
           setShowDetails(showResponse.data.show);
 
-          // Set initial season based on current episode or last season
-          if (episodeId && showResponse.data.show.episodes) {
-            const currentEp = showResponse.data.show.episodes.find(
-              (ep) => ep.episode_id === episodeId
-            );
-            if (currentEp?.season_number) {
-              setSelectedSeason(currentEp.season_number);
+          // Set initial season based on current episode (PRIORITY: current episode's season)
+          // Only do this once when we first load
+          if (!initialSeasonSet.current) {
+            initialSeasonSet.current = true;
+
+            const epId = initialEpisodeId.current;
+            if (epId && showResponse.data.show.episodes) {
+              const currentEp = showResponse.data.show.episodes.find(
+                (ep) => ep.episode_id === epId
+              );
+              if (currentEp?.season_number) {
+                setSelectedSeason(currentEp.season_number);
+                return; // Season set from current episode
+              }
             }
-          } else if (showResponse.data.show.seasons && showResponse.data.show.seasons.length > 0) {
-            const lastSeason =
-              showResponse.data.show.seasons[showResponse.data.show.seasons.length - 1];
-            setSelectedSeason(lastSeason.season_number || 1);
+
+            // Fallback: if no episode ID or episode not found, use last season
+            if (showResponse.data.show.seasons && showResponse.data.show.seasons.length > 0) {
+              const lastSeason =
+                showResponse.data.show.seasons[showResponse.data.show.seasons.length - 1];
+              setSelectedSeason(lastSeason.season_number || 1);
+            }
           }
         }
       } catch {
@@ -57,7 +69,17 @@ export function useSeriesData({ contentId, episodeId, contentType }: UseSeriesDa
     return () => {
       controller.abort();
     };
-  }, [contentId, episodeId, contentType]);
+  }, [contentId, contentType]);
+
+  // Update selected season when episodeId changes (e.g., navigating to different episode)
+  useEffect(() => {
+    if (!episodeId || !showDetails?.episodes) return;
+
+    const currentEp = showDetails.episodes.find((ep) => ep.episode_id === episodeId);
+    if (currentEp?.season_number && currentEp.season_number !== selectedSeason) {
+      setSelectedSeason(currentEp.season_number);
+    }
+  }, [episodeId, showDetails?.episodes, selectedSeason]);
 
   // Fetch episodes when season changes
   useEffect(() => {

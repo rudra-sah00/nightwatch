@@ -34,7 +34,6 @@ function ProfileSkeleton() {
           {/* Avatar Skeleton */}
           <div className="relative">
             <Skeleton className="w-24 h-24 sm:w-28 sm:h-28 rounded-full" />
-            <div className="absolute inset-[-8px] rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-xl -z-10" />
           </div>
 
           {/* User Details Skeleton */}
@@ -100,7 +99,7 @@ function ProfilePageContent() {
     }
   }, []);
 
-  // Fetch data on mount
+  // Fetch data on mount only - user can manually refresh to see updates
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -138,7 +137,7 @@ function ProfilePageContent() {
         <header className="relative flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-8 mb-8 sm:mb-12 pb-6 border-b border-white/10">
           {/* Avatar */}
           <div className="relative">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-2xl sm:text-4xl font-bold text-white relative z-10 border-4 border-black overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-2xl sm:text-4xl font-bold text-white relative z-10 border-4 border-black overflow-hidden shadow-xl">
               <span className="relative z-[1]">
                 {profile?.name
                   ? profile.name
@@ -160,7 +159,6 @@ function ProfilePageContent() {
                 />
               )}
             </div>
-            <div className="absolute inset-[-8px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 blur-[25px] opacity-40 z-[1]" />
           </div>
 
           {/* User Details */}

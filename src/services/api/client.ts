@@ -6,6 +6,23 @@ const API_BASE = typeof window === 'undefined' ? process.env.BACKEND_URL || '' :
 // Storage keys - only for user info, NOT tokens
 const USER_KEY = 'wr_user';
 
+// Flag to prevent multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshSubscribers: ((success: boolean) => void)[] = [];
+
+// Subscribe to refresh result
+function subscribeToRefresh(callback: (success: boolean) => void) {
+  refreshSubscribers.push(callback);
+}
+
+// Notify all subscribers
+function notifyRefreshSubscribers(success: boolean) {
+  for (const callback of refreshSubscribers) {
+    callback(success);
+  }
+  refreshSubscribers = [];
+}
+
 // Token Management - Frontend CANNOT access HttpOnly cookies
 export function getAccessToken(): string | null {
   return null; // HttpOnly cookies are not accessible to JavaScript
@@ -47,6 +64,11 @@ export function getStoredUser(): { id: string; username: string; name: string } 
 export function setStoredUser(user: { id: string; username: string; name: string }): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+export function clearStoredUser(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(USER_KEY);
 }
 
 export function isAuthenticated(): boolean {
@@ -93,21 +115,26 @@ export async function apiRequest<T>(
 
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
-      // Try to refresh token automatically
-      if (endpoint !== '/api/auth/refresh' && endpoint !== '/api/auth/login') {
-        const refreshResult = await tryRefreshToken();
-        if (refreshResult) {
-          // Retry original request
-          return apiRequest<T>(endpoint, options);
-        }
+      // Don't try to refresh for auth endpoints - just return error
+      // Let the caller handle it (especially important for /api/auth/me during init)
+      if (
+        endpoint === '/api/auth/refresh' ||
+        endpoint === '/api/auth/login' ||
+        endpoint === '/api/auth/me'
+      ) {
+        return { error: 'Unauthorized' };
       }
 
-      // If refresh failed or this was a refresh/login request, redirect to login
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        clearTokens();
-        window.location.href = '/login';
+      // Try to refresh token automatically (with deduplication)
+      const refreshResult = await tryRefreshToken();
+      if (refreshResult) {
+        // Retry original request with fresh token
+        return apiRequest<T>(endpoint, options);
       }
-      return { error: 'Unauthorized' };
+
+      // Refresh failed - force full logout
+      forceLogout();
+      return { error: 'Session expired' };
     }
 
     const data = await response.json();
@@ -138,8 +165,43 @@ export async function getWebSocketToken(): Promise<string | null> {
   return null;
 }
 
-// Try to refresh token automatically
+/**
+ * Force logout - clears all local state and redirects to login
+ * Used when auth is definitively invalid (not just a network error)
+ */
+export function forceLogout(): void {
+  if (typeof window === 'undefined') return;
+
+  // Clear all local storage auth data
+  localStorage.removeItem(USER_KEY);
+
+  // Clear any session storage
+  sessionStorage.clear();
+
+  // Dispatch custom event so React components can react
+  window.dispatchEvent(new CustomEvent('auth:logout'));
+
+  // Only redirect if not already on login page
+  if (!window.location.pathname.includes('/login')) {
+    // Use replace to prevent back button returning to protected page
+    window.location.replace('/login');
+  }
+}
+
+/**
+ * Try to refresh token automatically with request deduplication
+ * Multiple concurrent requests will share the same refresh attempt
+ */
 async function tryRefreshToken(): Promise<boolean> {
+  // If already refreshing, wait for the result
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      subscribeToRefresh(resolve);
+    });
+  }
+
+  isRefreshing = true;
+
   try {
     const response = await fetch(`${API_BASE}/api/auth/refresh`, {
       method: 'POST',
@@ -149,11 +211,14 @@ async function tryRefreshToken(): Promise<boolean> {
       },
     });
 
-    if (response.ok) {
-      return true;
-    }
+    const success = response.ok;
+    notifyRefreshSubscribers(success);
+    isRefreshing = false;
+    return success;
   } catch (error) {
     console.error('Token refresh failed:', error);
+    notifyRefreshSubscribers(false);
+    isRefreshing = false;
+    return false;
   }
-  return false;
 }

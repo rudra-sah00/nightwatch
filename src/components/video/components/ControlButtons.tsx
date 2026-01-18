@@ -15,6 +15,7 @@ interface ControlButtonsProps {
   title?: string;
   episodeInfo?: EpisodeInfo;
   locked?: boolean; // When true, play/skip controls are disabled (sync mode for non-host)
+  isMobile?: boolean; // Hide volume controls on mobile
   onTogglePlay: () => void;
   onSkip: (seconds: number) => void;
   onToggleMute: () => void;
@@ -33,6 +34,7 @@ export function ControlButtons({
   title,
   episodeInfo,
   locked = false,
+  isMobile = false,
   onTogglePlay,
   onSkip,
   onToggleMute,
@@ -41,87 +43,95 @@ export function ControlButtons({
   onVolumeSliderLeave,
 }: ControlButtonsProps) {
   return (
-    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+    <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
       {/* Play/Pause */}
       <button
         type="button"
         onClick={locked ? undefined : onTogglePlay}
-        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
-          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
+        className={`w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center transition-colors ${
+          locked
+            ? 'text-white/40 cursor-not-allowed'
+            : 'text-white hover:text-zinc-300 active:scale-95'
         }`}
         aria-label={isPlaying ? 'Pause' : 'Play'}
         title={locked ? 'Host controls playback' : undefined}
       >
-        {isPlaying ? <PauseIcon /> : <PlayIcon />}
+        {isPlaying ? <PauseIcon isMobile={isMobile} /> : <PlayIcon isMobile={isMobile} />}
       </button>
 
       {/* Skip Backward - Circle with 10 */}
       <button
         type="button"
         onClick={locked ? undefined : () => onSkip(-SKIP_SECONDS)}
-        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
-          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
+        className={`w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center transition-colors ${
+          locked
+            ? 'text-white/40 cursor-not-allowed'
+            : 'text-white hover:text-zinc-300 active:scale-95'
         }`}
         aria-label={`Rewind ${SKIP_SECONDS} seconds`}
         title={locked ? 'Host controls playback' : undefined}
       >
-        <SkipBackIcon />
+        <SkipBackIcon isMobile={isMobile} />
       </button>
 
       {/* Skip Forward - Circle with 10 */}
       <button
         type="button"
         onClick={locked ? undefined : () => onSkip(SKIP_SECONDS)}
-        className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors ${
-          locked ? 'text-white/40 cursor-not-allowed' : 'text-white hover:text-zinc-300'
+        className={`w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center transition-colors ${
+          locked
+            ? 'text-white/40 cursor-not-allowed'
+            : 'text-white hover:text-zinc-300 active:scale-95'
         }`}
         aria-label={`Forward ${SKIP_SECONDS} seconds`}
         title={locked ? 'Host controls playback' : undefined}
       >
-        <SkipForwardIcon />
+        <SkipForwardIcon isMobile={isMobile} />
       </button>
 
-      {/* Volume - always available for all users */}
-      <fieldset
-        aria-label="Volume control"
-        className="flex items-center relative ml-1 sm:ml-2 border-none p-0 m-0"
-        onMouseEnter={onVolumeSliderEnter}
-        onMouseLeave={onVolumeSliderLeave}
-      >
-        <button
-          type="button"
-          onClick={onToggleMute}
-          className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
+      {/* Volume - hidden on mobile (iOS/Android control volume via hardware buttons) */}
+      {!isMobile && (
+        <fieldset
+          aria-label="Volume control"
+          className="flex items-center relative ml-1 sm:ml-2 border-none p-0 m-0"
+          onMouseEnter={onVolumeSliderEnter}
+          onMouseLeave={onVolumeSliderLeave}
         >
-          {isMuted || volume === 0 ? <VolumeMuteIcon /> : <VolumeIcon />}
-        </button>
-        <div
-          className={`flex items-center overflow-hidden transition-all duration-200 ${
-            showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0'
-          }`}
-        >
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={isMuted ? 0 : volume}
-            onChange={onVolumeChange}
-            className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer"
-          />
-        </div>
-      </fieldset>
+          <button
+            type="button"
+            onClick={onToggleMute}
+            className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center text-white hover:text-zinc-300 transition-colors"
+            aria-label={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted || volume === 0 ? <VolumeMuteIcon /> : <VolumeIcon />}
+          </button>
+          <div
+            className={`flex items-center overflow-hidden transition-all duration-200 ${
+              showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0'
+            }`}
+          >
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={isMuted ? 0 : volume}
+              onChange={onVolumeChange}
+              className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+        </fieldset>
+      )}
 
       {/* Time Display */}
-      <div className="text-white text-sm font-medium ml-3 sm:ml-4 hidden sm:flex items-center gap-1">
+      <div className="text-white text-[10px] xs:text-xs sm:text-sm font-medium ml-1 sm:ml-2 md:ml-3 lg:ml-4 flex items-center gap-0.5 sm:gap-1">
         <span>{formatTime(currentTime)}</span>
         <span className="text-white/50">/</span>
         <span className="text-white/70">{formatTime(duration)}</span>
       </div>
 
-      {/* Center Title with Episode Badge */}
-      {(title || episodeInfo) && (
+      {/* Center Title with Episode Badge - hidden on mobile */}
+      {!isMobile && (title || episodeInfo) && (
         <div className="flex-1 flex items-center justify-center gap-3 mx-4 overflow-hidden">
           {episodeInfo && (
             <span className="px-2.5 py-1 bg-zinc-700/80 text-white text-xs font-bold rounded border border-zinc-600 whitespace-nowrap">
@@ -142,12 +152,18 @@ export function ControlButtons({
   );
 }
 
-// Custom Icons
+// Custom Icons with mobile size support
 
-function PlayIcon() {
+interface IconProps {
+  isMobile?: boolean;
+}
+
+function PlayIcon({ isMobile }: IconProps) {
   return (
     <svg
-      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      className={
+        isMobile ? 'w-5 h-5 xs:w-6 xs:h-6' : 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9'
+      }
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-label="Play"
@@ -158,10 +174,12 @@ function PlayIcon() {
   );
 }
 
-function PauseIcon() {
+function PauseIcon({ isMobile }: IconProps) {
   return (
     <svg
-      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      className={
+        isMobile ? 'w-5 h-5 xs:w-6 xs:h-6' : 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9'
+      }
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-label="Pause"
@@ -172,10 +190,12 @@ function PauseIcon() {
   );
 }
 
-function SkipBackIcon() {
+function SkipBackIcon({ isMobile }: IconProps) {
   return (
     <svg
-      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      className={
+        isMobile ? 'w-5 h-5 xs:w-6 xs:h-6' : 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9'
+      }
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -201,10 +221,12 @@ function SkipBackIcon() {
   );
 }
 
-function SkipForwardIcon() {
+function SkipForwardIcon({ isMobile }: IconProps) {
   return (
     <svg
-      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+      className={
+        isMobile ? 'w-5 h-5 xs:w-6 xs:h-6' : 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9'
+      }
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -233,7 +255,7 @@ function SkipForwardIcon() {
 function VolumeIcon() {
   return (
     <svg
-      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9"
+      className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -251,7 +273,7 @@ function VolumeIcon() {
 function VolumeMuteIcon() {
   return (
     <svg
-      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9"
+      className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

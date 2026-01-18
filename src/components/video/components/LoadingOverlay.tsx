@@ -9,7 +9,7 @@ export function LoadingOverlay({ isLoading, message = 'Loading video...' }: Load
   if (!isLoading) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40">
+    <div className="absolute inset-0 bg-black flex items-center justify-center z-40">
       <div className="flex flex-col items-center gap-6">
         {/* Animated Loader */}
         <div className="relative w-20 h-20">
@@ -62,21 +62,6 @@ export function LoadingOverlay({ isLoading, message = 'Loading video...' }: Load
           <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
         </div>
       </div>
-
-      {/* Add shimmer animation style */}
-      <style jsx>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(400%);
-          }
-        }
-        .animate-shimmer {
-          animation: shimmer 1.5s infinite;
-        }
-      `}</style>
     </div>
   );
 }

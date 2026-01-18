@@ -14,87 +14,91 @@ export function SkipIndicator({
   isActive,
   skipSeconds = SKIP_SECONDS,
 }: SkipIndicatorProps) {
-  const [displayText, setDisplayText] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
     if (isActive) {
-      setDisplayText(`${direction === 'forward' ? '+' : '-'}${skipSeconds}s`);
+      setVisible(true);
+      setAnimationKey((prev) => prev + 1);
 
-      // Auto hide after 500ms
       const timer = setTimeout(() => {
-        setDisplayText('');
-      }, 500);
+        setVisible(false);
+      }, 600);
 
       return () => clearTimeout(timer);
     }
-    setDisplayText('');
-  }, [isActive, direction, skipSeconds]);
+  }, [isActive]);
 
-  if (!displayText) return null;
+  if (!visible) return null;
+
+  const isForward = direction === 'forward';
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <div className="animate-skip-fade">
-        <div className="flex flex-col items-center gap-3">
-          {/* Icon based on direction */}
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-            {direction === 'forward' ? (
-              <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-black"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-label="Forward"
-              >
-                <title>Forward</title>
-                <path d="M4 12a8 8 0 0 0 14.93 5M4 12a8 8 0 0 1 14.93-5M4 12H1m19 0h-3m-5.93-5a8 8 0 0 1 2.87 6M4 12a8 8 0 0 0 10.87 7.87" />
-                <path
-                  d="M17 8l4 4m0 0l-4 4m4-4H9"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  fill="none"
-                />
-              </svg>
+    <div
+      className={`absolute inset-y-0 ${isForward ? 'right-0' : 'left-0'} w-1/3 flex items-center justify-center pointer-events-none`}
+    >
+      {/* Ripple background effect */}
+      <div
+        key={`ripple-${animationKey}`}
+        className="absolute w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white/20 animate-[ripple-expand_0.6s_ease-out_forwards]"
+      />
+
+      {/* Main indicator */}
+      <div
+        key={`content-${animationKey}`}
+        className="relative z-10 animate-[indicator-pop_0.6s_ease-out_forwards]"
+      >
+        <div className="flex flex-col items-center gap-2">
+          {/* Animated arrows */}
+          <div className="flex items-center gap-0.5">
+            {isForward ? (
+              <>
+                <svg
+                  aria-hidden="true"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-[arrow-slide_0.4s_ease-out_infinite]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <svg
+                  aria-hidden="true"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-[arrow-slide_0.4s_ease-out_0.1s_infinite]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </>
             ) : (
-              <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-black"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-label="Backward"
-              >
-                <title>Backward</title>
-                <path d="M20 12a8 8 0 0 1-14.93 5M20 12a8 8 0 0 0-14.93-5M20 12h3m-19 0h3m5.93-5a8 8 0 0 0-2.87 6M20 12a8 8 0 0 1-10.87 7.87" />
-                <path
-                  d="M7 8L3 12m0 0l4 4m-4-4h8"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  fill="none"
-                />
-              </svg>
+              <>
+                <svg
+                  aria-hidden="true"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-[arrow-slide-back_0.4s_ease-out_0.1s_infinite]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M16 19V5l-11 7z" />
+                </svg>
+                <svg
+                  aria-hidden="true"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-[arrow-slide-back_0.4s_ease-out_infinite]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M16 19V5l-11 7z" />
+                </svg>
+              </>
             )}
           </div>
 
           {/* Text showing skip amount */}
-          <div className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
-            {displayText}
+          <div className="text-sm sm:text-base font-semibold text-white drop-shadow-lg">
+            {skipSeconds} seconds
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes skipFade {
-          0% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-        }
-        .animate-skip-fade {
-          animation: skipFade 0.5s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 }

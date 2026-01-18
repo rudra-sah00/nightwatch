@@ -11,7 +11,7 @@ interface UseWatchActivityProps {
   enabled?: boolean;
 }
 
-const SYNC_INTERVAL_MS = 30000; // 30 seconds
+const SYNC_INTERVAL_MS = 3000; // 3 seconds - sync to Redis frequently
 
 export function useWatchActivity({ isPlaying, enabled = true }: UseWatchActivityProps) {
   const accumulatedSecondsRef = useRef(0);
@@ -60,9 +60,10 @@ export function useWatchActivity({ isPlaying, enabled = true }: UseWatchActivity
         }
       };
     } else {
-      // Paused - sync remaining time and stop tracking
+      // Paused - stop tracking but DON'T sync yet
+      // We only want to sync accumulated time, not on every pause
+      // The accumulated time will be synced on next play or unmount
       lastTickRef.current = null;
-      syncToBackend();
 
       if (syncIntervalRef.current) {
         clearInterval(syncIntervalRef.current);
