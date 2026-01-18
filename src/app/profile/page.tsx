@@ -18,7 +18,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGuard } from '@/components/auth';
-import { ChangePasswordForm, ContributionGraph, ProfileSettingsForm } from '@/components/profile';
+import { ChangePasswordForm, ProfileSettingsForm, WatchTimeGraph } from '@/components/profile';
 import { Button, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import type { UserProfile, WatchActivitySummary } from '@/services/api/user';
@@ -296,7 +296,7 @@ function ProfilePageContent() {
                     Last 365 Days
                   </span>
                 </div>
-                <ContributionGraph activities={activity?.activities || []} />
+                <WatchTimeGraph activities={activity?.activities || []} />
               </section>
             </div>
           )}

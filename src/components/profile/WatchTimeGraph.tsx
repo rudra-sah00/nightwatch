@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import type { DailyActivity } from '@/services/api/user';
 import { formatWatchTime, formatWatchTimeDetailed } from '@/services/api/user';
 
-interface ContributionGraphProps {
+interface WatchTimeGraphProps {
   activities: DailyActivity[];
   className?: string;
 }
@@ -27,7 +27,7 @@ const LEVEL_STYLES = [
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function ContributionGraph({ activities, className = '' }: ContributionGraphProps) {
+export function WatchTimeGraph({ activities, className = '' }: WatchTimeGraphProps) {
   // Build lookup map
   const activityMap = useMemo(() => {
     const map = new Map<string, DailyActivity>();
