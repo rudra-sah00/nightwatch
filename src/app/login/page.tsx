@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Info, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GuestGuard } from '@/components/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,14 +15,25 @@ function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [sessionMessage, setSessionMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Check for session termination message on mount
+  useEffect(() => {
+    const message = sessionStorage.getItem('session_terminated_message');
+    if (message) {
+      setSessionMessage(message);
+      sessionStorage.removeItem('session_terminated_message');
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSessionMessage('');
     setIsLoading(true);
 
     try {
@@ -51,6 +62,17 @@ function LoginForm() {
       </div>
 
       <div className="w-full max-w-md px-4 relative z-10">
+        {/* Session Termination Message */}
+        {sessionMessage && (
+          <div className="mb-4 flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg backdrop-blur-sm">
+            <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="text-blue-400 text-sm font-medium block">Session Ended</span>
+              <span className="text-blue-300/80 text-sm">{sessionMessage}</span>
+            </div>
+          </div>
+        )}
+
         {/* Login Card */}
         <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-700/50 shadow-2xl">
           <CardHeader className="space-y-1 pb-4">

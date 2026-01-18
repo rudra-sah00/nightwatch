@@ -115,6 +115,19 @@ export async function apiRequest<T>(
 
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
+      // Parse response to check for session termination
+      const data = await response.json().catch(() => ({}));
+
+      // Check for session terminated error (logged in from another device)
+      if (data.code === 'SESSION_TERMINATED') {
+        // Force immediate logout with specific message
+        forceLogoutWithMessage(
+          data.message ||
+            'Your session has been terminated because you logged in from another device.'
+        );
+        return { error: 'Session terminated' };
+      }
+
       // Don't try to refresh for auth endpoints - just return error
       // Let the caller handle it (especially important for /api/auth/me during init)
       if (
@@ -122,7 +135,7 @@ export async function apiRequest<T>(
         endpoint === '/api/auth/login' ||
         endpoint === '/api/auth/me'
       ) {
-        return { error: 'Unauthorized' };
+        return { error: data.error || 'Unauthorized' };
       }
 
       // Try to refresh token automatically (with deduplication)
@@ -170,16 +183,33 @@ export async function getWebSocketToken(): Promise<string | null> {
  * Used when auth is definitively invalid (not just a network error)
  */
 export function forceLogout(): void {
+  forceLogoutWithMessage();
+}
+
+/**
+ * Force logout with optional message - clears all local state and redirects to login
+ * Used for session termination (logged in from another device)
+ */
+export function forceLogoutWithMessage(message?: string): void {
   if (typeof window === 'undefined') return;
 
   // Clear all local storage auth data
   localStorage.removeItem(USER_KEY);
 
-  // Clear any session storage
+  // Store message for display on login page
+  if (message) {
+    sessionStorage.setItem('session_terminated_message', message);
+  }
+
+  // Clear any other session storage (except the message)
+  const savedMessage = sessionStorage.getItem('session_terminated_message');
   sessionStorage.clear();
+  if (savedMessage) {
+    sessionStorage.setItem('session_terminated_message', savedMessage);
+  }
 
   // Dispatch custom event so React components can react
-  window.dispatchEvent(new CustomEvent('auth:logout'));
+  window.dispatchEvent(new CustomEvent('auth:logout', { detail: { message } }));
 
   // Only redirect if not already on login page
   if (!window.location.pathname.includes('/login')) {

@@ -1,13 +1,15 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import { AuthGuard } from '@/components/auth';
 import { EpisodesList, VideoMetadata } from '@/components/content';
 import VideoPlayer from '@/components/video/VideoPlayer';
 import { useSeriesData } from '@/hooks';
 import { getEpisodeData, getVideoData } from '@/services/api/media';
+import { getContentProgress } from '@/services/api/watchProgress';
 import type { CompleteVideoData } from '@/types/content';
+import type { ContentTrackingInfo } from '@/types/video';
 
 function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -17,9 +19,12 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   const [videoData, setVideoData] = useState<CompleteVideoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resumeTime, setResumeTime] = useState<number | undefined>(undefined);
 
   // Get episode from query params if present
   const episodeId = searchParams.get('episode');
+  // Get resume time from URL (passed from Continue Watching)
+  const urlResumeTime = searchParams.get('t');
 
   // Use custom hook for series data
   const { showDetails, selectedSeason, setSelectedSeason, seasonEpisodes } = useSeriesData({
@@ -27,6 +32,37 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     episodeId,
     contentType: videoData?.metadata.content_type,
   });
+
+  // Set resume time from URL immediately (for Continue Watching clicks)
+  useEffect(() => {
+    if (urlResumeTime) {
+      const time = parseInt(urlResumeTime, 10);
+      if (!Number.isNaN(time) && time > 10) {
+        setResumeTime(time);
+      }
+    }
+  }, [urlResumeTime]);
+
+  // Fetch saved progress from API only if not provided in URL
+  const fetchProgress = useCallback(async () => {
+    // Skip if already have resume time from URL
+    if (urlResumeTime) return;
+
+    try {
+      const response = await getContentProgress(resolvedParams.id, episodeId || undefined);
+      if (response.progress && response.progress.progress_seconds > 10) {
+        // Only resume if more than 10 seconds in
+        setResumeTime(response.progress.progress_seconds);
+      }
+    } catch (err) {
+      // Silently fail - not critical
+      console.debug('Could not fetch progress:', err);
+    }
+  }, [resolvedParams.id, episodeId, urlResumeTime]);
+
+  useEffect(() => {
+    fetchProgress();
+  }, [fetchProgress]);
 
   useEffect(() => {
     // Robust cancellation handling with AbortController
@@ -230,6 +266,20 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
     );
   }
 
+  // Build tracking info for continue watching
+  const trackingInfo: ContentTrackingInfo | undefined = videoData
+    ? {
+        contentId: resolvedParams.id,
+        contentType: metadata?.content_type || 'Movie',
+        title: metadata?.title || displayTitle,
+        posterUrl: metadata?.poster_url,
+        episodeId: episodeId || undefined,
+        seasonNumber: currentEpisode?.season_number,
+        episodeNumber: currentEpisode?.episode_number,
+        episodeTitle: currentEpisode?.title,
+      }
+    : undefined;
+
   return (
     <div className="min-h-screen bg-black">
       {/* Video Player - Full Width */}
@@ -240,6 +290,8 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
             poster={videoData.metadata.poster_url}
             title={displayTitle}
             onBack={() => router.push('/')}
+            trackingInfo={trackingInfo}
+            initialTime={resumeTime}
             subtitles={videoData.subtitles?.map((s) => ({
               language: s.language_name || s.language,
               url: s.vtt_url,

@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useDoubleTap,
   useFullscreen,
@@ -10,6 +10,7 @@ import {
   useSkipIndicator,
   useSubtitles,
   useVideoControls,
+  useWatchProgress,
 } from '@/hooks';
 import { useWatchActivity } from '@/hooks/useWatchActivity';
 import { SKIP_SECONDS } from '@/lib/constants';
@@ -33,10 +34,13 @@ export default function VideoPlayer({
   subtitles,
   spriteSheets,
   episodeInfo,
+  trackingInfo,
+  initialTime,
   onBack,
 }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const hasSetInitialTime = useRef(false);
 
   // Player state
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +48,7 @@ export default function VideoPlayer({
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('main');
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [resumeToast, setResumeToast] = useState<string | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
 
   // Skip indicator hook
@@ -77,8 +82,41 @@ export default function VideoPlayer({
     onError: setError,
   });
 
-  // Track watch activity
+  // Track watch activity (daily stats for profile)
   useWatchActivity({ isPlaying });
+
+  // Track watch progress (continue watching feature)
+  useWatchProgress({
+    contentId: trackingInfo?.contentId || '',
+    contentType: trackingInfo?.contentType || 'Movie',
+    title: trackingInfo?.title || title || '',
+    posterUrl: trackingInfo?.posterUrl,
+    episodeId: trackingInfo?.episodeId,
+    seasonNumber: trackingInfo?.seasonNumber,
+    episodeNumber: trackingInfo?.episodeNumber,
+    episodeTitle: trackingInfo?.episodeTitle,
+    currentTime,
+    duration,
+    isPlaying,
+    enabled: !!trackingInfo?.contentId,
+  });
+
+  // Seek to initial time when video is ready (resume functionality)
+  useEffect(() => {
+    if (initialTime && duration > 0 && !hasSetInitialTime.current) {
+      hlsSeek(initialTime);
+      hasSetInitialTime.current = true;
+
+      // Show resume toast notification
+      const mins = Math.floor(initialTime / 60);
+      const secs = Math.floor(initialTime % 60);
+      const timeStr = mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+      setResumeToast(`Resuming from ${timeStr}`);
+
+      // Hide toast after 3 seconds
+      setTimeout(() => setResumeToast(null), 3000);
+    }
+  }, [initialTime, duration, hlsSeek]);
 
   // Close menus helper (defined early for use in handlers)
   const closeMenus = useCallback(() => {
@@ -288,6 +326,15 @@ export default function VideoPlayer({
           isActive={skipIndicator.isActive}
           skipSeconds={SKIP_SECONDS}
         />
+      )}
+
+      {/* Resume Toast Notification */}
+      {resumeToast && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="px-4 py-2 bg-black/80 backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+            <span className="text-white text-sm font-medium">{resumeToast}</span>
+          </div>
+        </div>
       )}
 
       {/* Loading Overlay */}

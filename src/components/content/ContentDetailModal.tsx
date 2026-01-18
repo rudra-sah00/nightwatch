@@ -10,6 +10,7 @@ import {
   getVideoData,
   searchImdb,
 } from '@/services/api/media';
+import { type ContinueWatchingItem, getContentProgress } from '@/services/api/watchProgress';
 import type {
   CompleteVideoData,
   ContentType,
@@ -29,8 +30,10 @@ interface ContentDetailModalProps {
   type: ContentType;
   poster?: string;
   year?: number;
+  // Resume info - pre-populated from Continue Watching
+  resumeProgress?: ContinueWatchingItem;
   onClose: () => void;
-  onPlay: (episodeId?: string) => void;
+  onPlay: (episodeId?: string, resumeTime?: number) => void;
 }
 
 export default function ContentDetailModal({
@@ -39,6 +42,7 @@ export default function ContentDetailModal({
   type,
   poster,
   year,
+  resumeProgress,
   onClose,
   onPlay,
 }: ContentDetailModalProps) {
@@ -52,8 +56,13 @@ export default function ContentDetailModal({
   const [showSeasonDropdown, setShowSeasonDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actualType, setActualType] = useState<ContentType>(type);
+  // Watch progress state
+  const [watchProgress, setWatchProgress] = useState<ContinueWatchingItem | null>(
+    resumeProgress || null
+  );
   const hasFetched = useRef(false);
   const imdbFetched = useRef(false);
+  const progressFetched = useRef(false);
   const fetchedSeasons = useRef<Set<number>>(new Set());
 
   // Fetch show details (proper API - no hit-and-trial)
@@ -122,6 +131,27 @@ export default function ContentDetailModal({
 
     fetchImdb();
   }, [title, showDetails]);
+
+  // Fetch watch progress (non-blocking) - only if not provided via props
+  useEffect(() => {
+    if (progressFetched.current || resumeProgress) return;
+    progressFetched.current = true;
+
+    const fetchProgress = async () => {
+      try {
+        // For movies, just fetch by content_id
+        // For series, we need to check the most recent episode progress
+        const response = await getContentProgress(id);
+        if (response.progress && response.progress.progress_seconds > 10) {
+          setWatchProgress(response.progress);
+        }
+      } catch {
+        // Progress fetch failed silently - not critical
+      }
+    };
+
+    fetchProgress();
+  }, [id, resumeProgress]);
 
   // Escape key handler
   useEffect(() => {
@@ -193,7 +223,19 @@ export default function ContentDetailModal({
 
   const posterUrl = poster || getPosterUrl(id, true);
 
+  // Handle play - with resume time if available
   const handlePlay = () => {
+    if (watchProgress) {
+      // Resume from where we left off
+      onPlay(watchProgress.episode_id || undefined, watchProgress.progress_seconds);
+    } else {
+      // Start fresh - first episode for series, no episode for movies
+      onPlay(actualType === 'Series' && episodes[0] ? episodes[0].episode_id : undefined);
+    }
+  };
+
+  // Handle fresh play (ignore resume)
+  const handlePlayFresh = () => {
     onPlay(actualType === 'Series' && episodes[0] ? episodes[0].episode_id : undefined);
   };
 
@@ -231,7 +273,13 @@ export default function ContentDetailModal({
         </button>
 
         {/* Hero Section */}
-        <HeroSection posterUrl={posterUrl} title={title} onPlay={handlePlay} />
+        <HeroSection
+          posterUrl={posterUrl}
+          title={title}
+          watchProgress={watchProgress}
+          onPlay={handlePlay}
+          onPlayFresh={handlePlayFresh}
+        />
 
         {/* Content Details */}
         <div className="px-12 py-8">

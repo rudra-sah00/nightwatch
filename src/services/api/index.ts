@@ -16,6 +16,7 @@ export {
   clearStoredUser,
   clearTokens,
   forceLogout,
+  forceLogoutWithMessage,
   getAccessToken,
   getApiBase,
   getRefreshToken,
@@ -38,3 +39,16 @@ export {
   search,
   searchImdb,
 } from './media';
+
+// Watch Progress / Continue Watching service
+export {
+  type ContinueWatchingItem,
+  type ContinueWatchingResponse,
+  formatProgressTime,
+  formatRemainingTime,
+  getContentProgress,
+  getContinueWatching,
+  removeFromContinueWatching,
+  type UpdateWatchProgressRequest,
+  updateWatchProgress,
+} from './watchProgress';

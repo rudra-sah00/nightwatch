@@ -1,15 +1,17 @@
 'use client';
 
-import { LogOut, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ContentDetailModal } from '@/components/content';
 import { ProfileBadge } from '@/components/profile';
 import SearchBar from '@/components/search/SearchBar';
-import { Button, Skeleton } from '@/components/ui';
+import { Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import type { SearchResult } from '@/lib/api';
+import type { ContinueWatchingItem } from '@/services/api/watchProgress';
 import type { ContentType } from '@/types/content';
+import { ContinueWatchingSection } from './ContinueWatchingSection';
 
 interface HomeContentProps {
   results: SearchResult[];
@@ -18,6 +20,7 @@ interface HomeContentProps {
   searchQuery: string;
   onSearch: (query: string) => void;
   onClear: () => void;
+  initialContinueWatchingItems?: ContinueWatchingItem[];
 }
 
 // Selected content for the modal
@@ -27,6 +30,7 @@ interface SelectedContent {
   type: ContentType;
   poster?: string;
   year?: number;
+  resumeProgress?: ContinueWatchingItem;
 }
 
 export function HomeContent({
@@ -36,18 +40,13 @@ export function HomeContent({
   searchQuery,
   onSearch,
   onClear,
+  initialContinueWatchingItems,
 }: HomeContentProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [selectedContent, setSelectedContent] = useState<SelectedContent | null>(null);
 
-  // Handle logout
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
-
-  // Handle content card click - open modal
+  // Handle content card click - open modal (from search results)
   const handleContentClick = (result: SearchResult) => {
     setSelectedContent({
       id: result.id,
@@ -58,18 +57,38 @@ export function HomeContent({
     });
   };
 
-  // Handle play from modal - navigate first to prevent flash
-  const handlePlay = async (episodeId?: string) => {
+  // Handle continue watching card click - open modal with resume info
+  const handleContinueWatchingClick = (item: ContinueWatchingItem) => {
+    setSelectedContent({
+      id: item.content_id,
+      title: item.title,
+      type: item.content_type,
+      poster: item.poster_url || undefined,
+      resumeProgress: item,
+    });
+  };
+
+  // Handle play from modal - navigate with optional resume time
+  const handlePlay = async (episodeId?: string, resumeTime?: number) => {
     if (!selectedContent) return;
 
-    // Navigate first before closing modal to prevent seeing search results flash
+    // Build URL with optional parameters
+    let url = `/watch/${selectedContent.id}`;
+    const params = new URLSearchParams();
+
     if (episodeId) {
-      // Series episode - navigate to episode
-      router.push(`/watch/${selectedContent.id}?episode=${episodeId}`);
-    } else {
-      // Movie - navigate directly
-      router.push(`/watch/${selectedContent.id}`);
+      params.set('episode', episodeId);
     }
+    if (resumeTime && resumeTime > 0) {
+      params.set('t', Math.floor(resumeTime).toString());
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    // Navigate first before closing modal
+    router.push(url);
     // Small delay to let navigation start before closing modal
     setTimeout(() => setSelectedContent(null), 100);
   };
@@ -84,6 +103,7 @@ export function HomeContent({
           type={selectedContent.type}
           poster={selectedContent.poster}
           year={selectedContent.year}
+          resumeProgress={selectedContent.resumeProgress}
           onClose={() => setSelectedContent(null)}
           onPlay={handlePlay}
         />
@@ -113,7 +133,7 @@ export function HomeContent({
               </p>
             </div>
 
-            {/* Search bar and logout button */}
+            {/* Search bar */}
             <div className="flex gap-2 sm:gap-3 items-center justify-center max-w-3xl mx-auto">
               <div className="flex-1">
                 <SearchBar
@@ -123,19 +143,20 @@ export function HomeContent({
                   useUrlNavigation={true}
                 />
               </div>
-
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="bg-zinc-800/80 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 gap-2 backdrop-blur-sm h-10 sm:h-auto px-3 sm:px-4"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign out</span>
-              </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Continue Watching Section - Only show when not searching */}
+      {!searched && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <ContinueWatchingSection
+            onOpenModal={handleContinueWatchingClick}
+            initialItems={initialContinueWatchingItems}
+          />
+        </div>
+      )}
 
       {/* Results Section */}
       {searched && (

@@ -19,6 +19,18 @@ export interface EpisodeInfo {
   title: string;
 }
 
+// Content info for watch progress tracking
+export interface ContentTrackingInfo {
+  contentId: string;
+  contentType: 'Movie' | 'Series';
+  title: string;
+  posterUrl?: string;
+  episodeId?: string;
+  seasonNumber?: number;
+  episodeNumber?: number;
+  episodeTitle?: string;
+}
+
 export interface VideoPlayerProps {
   src: string;
   poster?: string;
@@ -26,6 +38,8 @@ export interface VideoPlayerProps {
   subtitles?: PlayerSubtitleTrack[];
   spriteSheets?: SpriteSheet[]; // Multiple sprite sheets for long movies
   episodeInfo?: EpisodeInfo;
+  trackingInfo?: ContentTrackingInfo; // For continue watching feature
+  initialTime?: number; // Resume position
   onBack?: () => void;
 }
 
