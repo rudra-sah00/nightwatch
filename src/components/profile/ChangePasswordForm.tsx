@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
+import { analytics } from '@/services/analytics';
 import { changePassword } from '@/services/api/user';
 
 interface ChangePasswordFormProps {
@@ -36,6 +37,8 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
+      // Track logout
+      analytics.user.logout();
       await logout();
       router.push('/login');
     } catch (_error) {
@@ -66,6 +69,9 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         current_password: formData.current,
         new_password: formData.new,
       });
+
+      // Track password change
+      analytics.user.changePassword();
 
       setStatus('success');
       setMessage('Password updated successfully');

@@ -8,6 +8,7 @@
 import { AlertCircle, AtSign, Camera, Check, Save, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui';
+import { analytics } from '@/services/analytics';
 import { type UserProfile, updateProfile, uploadAvatar } from '@/services/api/user';
 
 interface ProfileSettingsFormProps {
@@ -44,12 +45,22 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
     setStatus('loading');
 
     try {
+      const updates: string[] = [];
+      if (formData.name !== initialData.name) updates.push('name');
+      if (formData.username !== initialData.username) updates.push('username');
+      if (formData.avatar_url !== initialData.avatar_url) updates.push('avatar');
+
       await updateProfile({
         name: formData.name,
         username: formData.username !== initialData.username ? formData.username : undefined,
         avatar_url:
           formData.avatar_url !== initialData.avatar_url ? formData.avatar_url : undefined,
       });
+
+      // Track profile update
+      if (updates.length > 0) {
+        analytics.user.updateProfile(updates);
+      }
 
       setStatus('success');
       setMessage('Profile updated successfully');
@@ -122,6 +133,10 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
                       setStatus('loading');
                       const res = await uploadAvatar(e.target.files[0]);
                       setFormData((prev) => ({ ...prev, avatar_url: res.avatar_url }));
+
+                      // Track avatar update
+                      analytics.user.updateProfile(['avatar']);
+
                       setStatus('success');
                       setMessage('Photo uploaded');
                       onUpdate?.();

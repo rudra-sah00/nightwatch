@@ -21,8 +21,8 @@ export type AnalyticsEvent =
   // User Events
   | 'login'
   | 'logout'
-  | 'signup'
   | 'profile_update'
+  | 'password_change'
   // Feature Usage
   | 'resume_watching'
   | 'remove_continue_watching';
@@ -81,8 +81,17 @@ export const analytics = {
     login: (method: string = 'credentials') => {
       analytics.track('login', { method });
     },
+    logout: () => {
+      analytics.track('logout');
+    },
     resume: (meta: { id: string; title: string; progress: number }) => {
       analytics.track('resume_watching', meta);
+    },
+    updateProfile: (updatedFields: string[]) => {
+      analytics.track('profile_update', { fields: updatedFields.join(',') });
+    },
+    changePassword: () => {
+      analytics.track('password_change');
     },
   },
 };

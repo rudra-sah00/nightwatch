@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/services/analytics';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -40,6 +41,9 @@ function LoginForm() {
       const result = await login(username, password);
 
       if (result.success) {
+        // Track login
+        analytics.user.login();
+
         // Redirect to original URL or home
         const redirect = searchParams.get('redirect') || '/';
         router.push(redirect);
