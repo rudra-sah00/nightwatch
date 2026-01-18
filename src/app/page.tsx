@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
+import { AuthGuard } from '@/components/auth';
 import { HomeContent } from '@/components/home';
 
 function HomePage() {
@@ -10,7 +11,6 @@ function HomePage() {
   const handleSearch = useCallback(
     (query: string) => {
       if (!query.trim()) return;
-      // Navigate to the search page with the query
       router.push(`/search/${encodeURIComponent(query.trim())}`);
     },
     [router]
@@ -33,5 +33,9 @@ function HomePage() {
 }
 
 export default function Home() {
-  return <HomePage />;
+  return (
+    <AuthGuard>
+      <HomePage />
+    </AuthGuard>
+  );
 }

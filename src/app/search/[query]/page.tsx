@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { use, useCallback } from 'react';
+import { AuthGuard } from '@/components/auth';
 import { HomeContent } from '@/components/home';
 import { search } from '@/services/api/media';
 
@@ -14,6 +15,7 @@ function SearchPageContent({ params }: SearchPageProps) {
   const resolvedParams = use(params);
   const decodedQuery = decodeURIComponent(resolvedParams.query);
   const router = useRouter();
+
   // React Query - Proper State Management
   const { data: results = [], isLoading: loading } = useQuery({
     queryKey: ['search', decodedQuery],
@@ -50,7 +52,10 @@ function SearchPageContent({ params }: SearchPageProps) {
   );
 }
 
-// Route protected by middleware
 export default function SearchPage({ params }: SearchPageProps) {
-  return <SearchPageContent params={params} />;
+  return (
+    <AuthGuard>
+      <SearchPageContent params={params} />
+    </AuthGuard>
+  );
 }

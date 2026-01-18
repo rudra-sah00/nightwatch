@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { AuthGuard } from '@/components/auth';
 import { ChangePasswordForm, ContributionGraph, ProfileSettingsForm } from '@/components/profile';
 import { Button, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -78,21 +79,14 @@ function ProfileSkeleton() {
   );
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, refreshUser } = useAuth();
+  const { refreshUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<WatchActivitySummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'security'>('overview');
   const [error, setError] = useState<string | null>(null);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [authLoading, isAuthenticated, router]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -108,9 +102,8 @@ export default function ProfilePage() {
 
   // Fetch data on mount
   useEffect(() => {
-    if (!isAuthenticated) return;
     fetchData();
-  }, [isAuthenticated, fetchData]);
+  }, [fetchData]);
 
   const handleProfileUpdate = () => {
     // Refresh local profile data
@@ -120,7 +113,7 @@ export default function ProfilePage() {
   };
 
   // Show skeleton during loading
-  if (authLoading || loading) {
+  if (loading) {
     return <ProfileSkeleton />;
   }
 
@@ -324,5 +317,13 @@ export default function ProfilePage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <AuthGuard>
+      <ProfilePageContent />
+    </AuthGuard>
   );
 }

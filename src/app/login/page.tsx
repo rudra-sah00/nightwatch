@@ -1,8 +1,9 @@
 'use client';
 
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { GuestGuard } from '@/components/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,13 +11,14 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-export default function LoginPage() {
+function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,9 @@ export default function LoginPage() {
       const result = await login(username, password);
 
       if (result.success) {
-        router.push('/');
+        // Redirect to original URL or home
+        const redirect = searchParams.get('redirect') || '/';
+        router.push(redirect);
       } else {
         setError(result.error || 'Login failed');
       }
@@ -123,5 +127,13 @@ export default function LoginPage() {
         <p className="text-center text-zinc-600 text-sm mt-6">Contact admin for access</p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <GuestGuard>
+      <LoginForm />
+    </GuestGuard>
   );
 }

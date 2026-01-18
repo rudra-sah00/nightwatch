@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
+import { AuthGuard } from '@/components/auth';
 import { EpisodesList, VideoMetadata } from '@/components/content';
 import VideoPlayer from '@/components/video/VideoPlayer';
 import { useSeriesData } from '@/hooks';
@@ -304,7 +305,11 @@ function WatchPageContent({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-// Route protected by middleware
+// Route protected by AuthGuard
 export default function WatchPage({ params }: { params: Promise<{ id: string }> }) {
-  return <WatchPageContent params={params} />;
+  return (
+    <AuthGuard>
+      <WatchPageContent params={params} />
+    </AuthGuard>
+  );
 }
