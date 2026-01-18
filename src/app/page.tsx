@@ -31,6 +31,12 @@ function HomePage() {
   const handleSearch = useCallback(
     (query: string) => {
       if (!query.trim()) return;
+
+      // Track search
+      import('@vercel/analytics/react').then(({ track }) => {
+        track('search', { query: query.trim() });
+      });
+
       router.push(`/search/${encodeURIComponent(query.trim())}`);
     },
     [router]

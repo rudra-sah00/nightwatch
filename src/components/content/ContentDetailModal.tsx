@@ -65,6 +65,17 @@ export default function ContentDetailModal({
   const progressFetched = useRef(false);
   const fetchedSeasons = useRef<Set<number>>(new Set());
 
+  // Analytics - View Content
+  const hasTrackedView = useRef(false);
+  useEffect(() => {
+    if (!hasTrackedView.current) {
+      hasTrackedView.current = true;
+      import('@vercel/analytics/react').then(({ track }) => {
+        track('view_content', { id, title, type });
+      });
+    }
+  }, [id, title, type]);
+
   // Fetch show details (proper API - no hit-and-trial)
   useEffect(() => {
     if (hasFetched.current) return;

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import { AuthProvider } from '@/hooks/useAuth';
 import QueryProvider from '@/providers/QueryProvider';
 
@@ -27,6 +28,7 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <div className="h-screen w-full overflow-y-auto">{children}</div>
+            <Analytics />
           </AuthProvider>
         </QueryProvider>
       </body>

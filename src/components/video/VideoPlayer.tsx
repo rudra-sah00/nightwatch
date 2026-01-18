@@ -85,6 +85,20 @@ export default function VideoPlayer({
   // Track watch activity (daily stats for profile)
   useWatchActivity({ isPlaying });
 
+  // Analytics
+  const hasTrackedStart = useRef(false);
+  useEffect(() => {
+    if (isPlaying && !hasTrackedStart.current) {
+      hasTrackedStart.current = true;
+      import('@vercel/analytics/react').then(({ track }) => {
+        track('video_start', {
+          title: title || 'Unknown',
+          src,
+        });
+      });
+    }
+  }, [isPlaying, title, src]);
+
   // Track watch progress (continue watching feature)
   useWatchProgress({
     contentId: trackingInfo?.contentId || '',
