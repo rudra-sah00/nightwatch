@@ -91,22 +91,30 @@ export function HomeContent({
 
       {/* Fixed Header Section - Always visible */}
       <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-6 relative">
-          {/* Absolute Top Right Profile Badge */}
-          <div className="absolute top-6 right-6 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          {/* Mobile: Profile badge in row with title | Desktop: Absolute positioned */}
+          <div className="flex items-center justify-between sm:hidden mb-4">
+            <div className="flex-1" />
+            <ProfileBadge className="transform hover:scale-105" />
+          </div>
+
+          {/* Desktop: Absolute Top Right Profile Badge */}
+          <div className="hidden sm:block absolute top-6 right-6 z-50">
             <ProfileBadge className="transform scale-110 hover:scale-125" />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
                 Welcome, {user?.name || user?.username}
               </h1>
-              <p className="text-lg text-zinc-400 mt-2">Search for movies and TV shows</p>
+              <p className="text-sm sm:text-lg text-zinc-400 mt-1 sm:mt-2">
+                Search for movies and TV shows
+              </p>
             </div>
 
             {/* Search bar and logout button */}
-            <div className="flex gap-3 items-center justify-center max-w-3xl mx-auto">
+            <div className="flex gap-2 sm:gap-3 items-center justify-center max-w-3xl mx-auto">
               <div className="flex-1">
                 <SearchBar
                   onSearch={onSearch}
@@ -119,7 +127,7 @@ export function HomeContent({
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="bg-zinc-800/80 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 gap-2 backdrop-blur-sm"
+                className="bg-zinc-800/80 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 gap-2 backdrop-blur-sm h-10 sm:h-auto px-3 sm:px-4"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign out</span>

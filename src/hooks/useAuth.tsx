@@ -18,6 +18,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -106,6 +107,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: false, error: result.error || 'Login failed' };
   };
 
+  const refreshUser = async () => {
+    try {
+      const result = await getCurrentUser();
+      if (result.data?.user) {
+        setUser(result.data.user);
+        setStoredUser(result.data.user);
+      }
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
+    }
+  };
+
   const logout = async () => {
     await apiLogout();
     setUser(null);
@@ -120,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoggedIn: !!user,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

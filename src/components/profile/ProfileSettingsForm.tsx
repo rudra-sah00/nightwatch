@@ -2,7 +2,7 @@
 
 /**
  * Profile Settings Form
- * Update name, username, and avatar
+ * Update name, username, and avatar - Tailwind CSS optimized
  */
 
 import { AlertCircle, AtSign, Camera, Check, Save, User } from 'lucide-react';
@@ -59,46 +59,55 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
         setStatus('idle');
         setMessage('');
       }, 3000);
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Profile update error:', err);
       setStatus('error');
-      setMessage(err instanceof Error ? err.message : 'Failed to update profile');
+
+      // Handle structured errors from our API client
+      const error = err as { response?: { data?: { details?: string } }; message?: string };
+      const errorMsg = error.response?.data?.details || error.message || 'Failed to update profile';
+      setMessage(errorMsg);
     }
   };
 
   return (
-    <div className="profile-settings">
-      <div className="section-header">
-        <h3>Profile Information</h3>
-        <p>Update your public profile details.</p>
+    <div className="flex flex-col gap-6">
+      {/* Section Header */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-1">Profile Information</h3>
+        <p className="text-zinc-500 text-sm">Update your public profile details.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="form-grid">
-        {/* Avatar Preview & URL Input */}
-        <div className="avatar-section">
-          <div className="avatar-preview">
-            {formData.avatar_url ? (
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {/* Avatar Preview & Upload */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          {/* Avatar Preview */}
+          <div className="relative w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 border-2 border-zinc-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <span className="text-2xl sm:text-3xl font-bold text-white z-[1]">
+              {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
+            </span>
+            {formData.avatar_url && (
               <img
                 src={formData.avatar_url}
                 alt="Avatar"
-                className="avatar-img"
+                className="absolute inset-0 w-full h-full object-cover z-[2] rounded-full"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-            ) : (
-              <div className="avatar-fallback">
-                {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
-              </div>
             )}
           </div>
 
-          <div className="avatar-input">
-            <label htmlFor="avatar-upload">Profile Photo</label>
-            <div className="flex gap-4 items-center">
+          {/* Upload Section */}
+          <div className="flex flex-col gap-2 text-center sm:text-left">
+            <label htmlFor="avatar-upload" className="text-sm font-medium text-zinc-300">
+              Profile Photo
+            </label>
+            <div className="flex gap-3 items-center justify-center sm:justify-start">
               <Button
                 type="button"
                 variant="ghost"
-                className="upload-btn"
+                className="h-9 px-4 text-sm bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 gap-2"
                 onClick={() => document.getElementById('avatar-upload')?.click()}
               >
                 <Camera size={16} /> Upload Photo
@@ -122,19 +131,25 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
                     }
                   }
                 }}
-                style={{ display: 'none' }}
+                className="hidden"
               />
             </div>
+            <p className="text-xs text-zinc-600">JPG, PNG or GIF. Max 2MB.</p>
           </div>
         </div>
 
-        <div className="divider" />
+        {/* Divider */}
+        <div className="h-px bg-white/[0.06] w-full" />
 
-        <div className="fields-grid">
-          <div className="input-group">
-            <label htmlFor="name-input">Display Name</label>
-            <div className="input-wrapper">
-              <User size={16} className="field-icon" />
+        {/* Fields Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Display Name */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="name-input" className="text-[13px] font-medium text-zinc-300">
+              Display Name
+            </label>
+            <div className="relative flex items-center gap-3">
+              <User size={16} className="text-zinc-500 flex-shrink-0" />
               <input
                 id="name-input"
                 type="text"
@@ -144,14 +159,18 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
                 placeholder="Your Name"
                 required
                 minLength={2}
+                className="flex-1 w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
               />
             </div>
           </div>
 
-          <div className="input-group">
-            <label htmlFor="username-input">Username</label>
-            <div className="input-wrapper">
-              <AtSign size={16} className="field-icon" />
+          {/* Username */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username-input" className="text-[13px] font-medium text-zinc-300">
+              Username
+            </label>
+            <div className="relative flex items-center gap-3">
+              <AtSign size={16} className="text-zinc-500 flex-shrink-0" />
               <input
                 id="username-input"
                 type="text"
@@ -164,25 +183,30 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
                 maxLength={30}
                 pattern="^[a-zA-Z0-9_-]+$"
                 title="Usernames can only contain letters, numbers, underscores, and hyphens"
+                className="flex-1 w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
               />
             </div>
           </div>
         </div>
 
         {/* Status & Actions */}
-        <div className="form-actions">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-2">
           {status === 'success' && (
-            <div className="status-text success">
+            <div className="flex items-center gap-1.5 text-emerald-500 text-sm font-medium animate-in fade-in duration-200">
               <Check size={16} /> <span>{message}</span>
             </div>
           )}
           {status === 'error' && (
-            <div className="status-text error">
+            <div className="flex items-center gap-1.5 text-red-500 text-sm font-medium animate-in fade-in duration-200">
               <AlertCircle size={16} /> <span>{message}</span>
             </div>
           )}
 
-          <Button type="submit" disabled={status === 'loading'} className="save-btn">
+          <Button
+            type="submit"
+            disabled={status === 'loading'}
+            className="w-full sm:w-auto bg-white text-black font-semibold hover:bg-zinc-200 disabled:opacity-70 disabled:cursor-not-allowed gap-2"
+          >
             {status === 'loading' ? (
               'Saving...'
             ) : (
@@ -193,173 +217,6 @@ export function ProfileSettingsForm({ initialData, onUpdate }: ProfileSettingsFo
           </Button>
         </div>
       </form>
-
-      <style jsx>{`
-        .profile-settings {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .section-header h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-            margin: 0 0 4px 0;
-        }
-        
-        .section-header p {
-            color: #71717a;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .form-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .avatar-section {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .avatar-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #27272a;
-            border: 2px solid #3f3f46;
-            overflow: hidden;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .avatar-fallback {
-            font-size: 32px;
-            font-weight: 700;
-            color: #71717a;
-        }
-
-        .avatar-input {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .fields-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 640px) {
-            .fields-grid {
-                grid-template-columns: 1fr;
-            }
-            .avatar-section {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #d4d4d8;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .field-icon {
-            /* Icon is now flex item outside input */
-            color: #71717a;
-            flex-shrink: 0;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 16px;
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6;
-        }
-        
-        .hint {
-            font-size: 12px;
-            color: #52525b;
-            margin: 0;
-        }
-        
-        .divider {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.06);
-            width: 100%;
-        }
-
-        .form-actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 16px;
-            margin-top: 8px;
-        }
-
-        .status-text {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .status-text.success { color: #10b981; }
-        .status-text.error { color: #ef4444; }
-
-        .save-btn {
-            background: #fff;
-            color: #000;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .save-btn:hover { background: #e4e4e7; }
-        .save-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-      `}</style>
     </div>
   );
 }

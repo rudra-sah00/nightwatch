@@ -3,10 +3,16 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
+      // Trusted image CDNs for movie/TV posters
+      { protocol: 'https', hostname: 'imgcdn.kim' },
+      { protocol: 'https', hostname: 'imgcdn.in' },
+      { protocol: 'https', hostname: 'm.media-amazon.com' },
+      { protocol: 'https', hostname: 'images-na.ssl-images-amazon.com' },
+      { protocol: 'https', hostname: 'image.tmdb.org' },
+      // Backend API for avatars
+      { protocol: 'https', hostname: 'api.rudrasahoo.live' },
+      // Fallback for local development
+      { protocol: 'http', hostname: 'localhost' },
     ],
     unoptimized: true,
   },
