@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGuard } from '@/components/auth';
 import { HomeContent } from '@/components/home';
+import { analytics } from '@/services/analytics';
 import { type ContinueWatchingItem, getContinueWatching } from '@/services/api/watchProgress';
 
 function HomePage() {
@@ -33,9 +34,7 @@ function HomePage() {
       if (!query.trim()) return;
 
       // Track search
-      import('@vercel/analytics/react').then(({ track }) => {
-        track('search', { query: query.trim() });
-      });
+      analytics.content.search(query.trim());
 
       router.push(`/search/${encodeURIComponent(query.trim())}`);
     },

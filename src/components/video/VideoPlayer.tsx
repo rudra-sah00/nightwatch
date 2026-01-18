@@ -15,6 +15,7 @@ import {
 import { useWatchActivity } from '@/hooks/useWatchActivity';
 import { SKIP_SECONDS } from '@/lib/constants';
 import { getPositionFromEvent, getQualityLabel } from '@/lib/utils/video-utils';
+import { analytics } from '@/services/analytics';
 import type { PlaybackSpeed, SettingsTab, VideoPlayerProps } from '@/types/video';
 import {
   ControlButtons,
@@ -44,6 +45,18 @@ export default function VideoPlayer({
 
   // Player state
   const [error, setError] = useState<string | null>(null);
+
+  // Track errors
+  useEffect(() => {
+    if (error) {
+      analytics.video.error({
+        title: title || 'Unknown',
+        error,
+        src,
+      });
+    }
+  }, [error, title, src]);
+  // ...
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('main');
   const [hoverTime, setHoverTime] = useState<number | null>(null);
@@ -90,14 +103,13 @@ export default function VideoPlayer({
   useEffect(() => {
     if (isPlaying && !hasTrackedStart.current) {
       hasTrackedStart.current = true;
-      import('@vercel/analytics/react').then(({ track }) => {
-        track('video_start', {
-          title: title || 'Unknown',
-          src,
-        });
+      analytics.video.start({
+        title: title || 'Unknown',
+        src,
+        contentId: trackingInfo?.contentId,
       });
     }
-  }, [isPlaying, title, src]);
+  }, [isPlaying, title, src, trackingInfo]);
 
   // Track watch progress (continue watching feature)
   useWatchProgress({
@@ -141,7 +153,13 @@ export default function VideoPlayer({
   // Standard controls
   const togglePlay = useCallback(() => {
     hlsTogglePlay();
-  }, [hlsTogglePlay]);
+    // Track state change (next state)
+    const nextState = !isPlaying;
+    analytics.track(nextState ? 'video_play' : 'video_pause', {
+      title: title || 'Unknown',
+      currentTime: Math.floor(currentTime),
+    });
+  }, [hlsTogglePlay, isPlaying, title, currentTime]);
 
   const seek = useCallback(
     (time: number) => {

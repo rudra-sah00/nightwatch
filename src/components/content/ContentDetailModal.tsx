@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { DropdownSelector } from '@/components/ui/dropdown-selector';
+import { analytics } from '@/services/analytics';
 import {
   getPosterUrl,
   getSeriesEpisodes,
@@ -70,9 +71,7 @@ export default function ContentDetailModal({
   useEffect(() => {
     if (!hasTrackedView.current) {
       hasTrackedView.current = true;
-      import('@vercel/analytics/react').then(({ track }) => {
-        track('view_content', { id, title, type });
-      });
+      analytics.content.view({ id, title, type });
     }
   }, [id, title, type]);
 
