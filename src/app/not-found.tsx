@@ -1,29 +1,21 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { isAuthenticated } from '@/services/api/client';
+import Link from 'next/link';
+import { Button } from '@/components/ui';
 
 export default function NotFound() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // Check if user is logged in using the local storage token
-    const loggedIn = isAuthenticated();
-
-    if (loggedIn) {
-      // If logged in, go to home
-      router.replace('/');
-    } else {
-      // If not logged in, go to login
-      router.replace('/login');
-    }
-  }, [router]);
-
-  // Show a minimal loading state while redirecting
-  return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-500"></div>
-    </div>
-  );
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <div className="text-center max-w-md">
+                <h1 className="text-8xl font-bold gradient-text mb-4">404</h1>
+                <h2 className="text-2xl font-semibold text-white mb-2">
+                    Page Not Found
+                </h2>
+                <p className="text-white/60 mb-8">
+                    The page you&apos;re looking for doesn&apos;t exist or has been moved.
+                </p>
+                <Link href="/">
+                    <Button variant="primary">Go Home</Button>
+                </Link>
+            </div>
+        </div>
+    );
 }

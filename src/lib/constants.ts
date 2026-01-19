@@ -1,26 +1,22 @@
-/**
- * Common Constants
- */
+// API Endpoints
+export const API_ROUTES = {
+    AUTH: {
+        LOGIN: '/api/auth/login',
+        LOGOUT: '/api/auth/logout',
+        REFRESH: '/api/auth/refresh',
+    },
+} as const;
 
-export const POPULAR_SEARCHES = [
-  'Avengers',
-  'Stranger Things',
-  'Breaking Bad',
-  'The Office',
-  'Game of Thrones',
-  'Friends',
-  'Naruto',
-  'One Piece',
-] as const;
+// Storage Keys
+export const STORAGE_KEYS = {
+    USER: 'user',
+    SESSION_ID: 'sessionId',
+} as const;
 
-export const CONTROLS_HIDE_DELAY = 3000;
-
-export const SKIP_SECONDS = 10;
-
-export const VOLUME_STEP = 0.1;
-
-export const ANIMATION_DELAYS = {
-  stagger: 50,
-  fadeIn: 500,
-  slideUp: 600,
+// WebSocket Events
+export const WS_EVENTS = {
+    FORCE_LOGOUT: 'force_logout',
+    WATCH_RECORD_TIME: 'watch:record_time',
+    WATCH_UPDATE_PROGRESS: 'watch:update_progress',
+    WATCH_GET_CONTINUE: 'watch:get_continue_watching',
 } as const;
