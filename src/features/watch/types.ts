@@ -1,4 +1,13 @@
-// Watch feature types
+// Watch feature types - re-exports from player types
+export * from './player/types';
+
+// API types
+export interface StreamResponse {
+    masterPlaylistUrl: string;
+    movieId: string;
+    token?: string;
+}
+
 export interface WatchProgress {
     id: string;
     contentId: string;
@@ -20,6 +29,6 @@ export interface WatchProgress {
 
 export interface WatchActivity {
     date: string;
-    watchSeconds: number;
+    count: number;
     level: 0 | 1 | 2 | 3 | 4;
 }

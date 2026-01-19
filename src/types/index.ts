@@ -2,9 +2,11 @@
 export interface User {
     id: string;
     name: string;
+    username: string | null;
     email: string;
     profilePhoto: string | null;
     sessionId: string;
+    createdAt: string;
 }
 
 // Auth types

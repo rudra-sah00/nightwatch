@@ -12,6 +12,7 @@ import { User, ForceLogoutPayload } from '@/types';
 import { getStoredUser, storeUser, clearStoredUser } from '@/lib/auth';
 import { initSocket, disconnectSocket, onForceLogout, offForceLogout } from '@/lib/ws';
 import { loginUser, logoutUser, LoginInput } from '@/features/auth';
+import { getProfile } from '@/features/profile/api';
 
 interface AuthContextType {
     user: User | null;
@@ -19,6 +20,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (data: LoginInput) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (data: Partial<User>) => void;
     forceLogoutMessage: string | null;
     clearForceLogoutMessage: () => void;
 }
@@ -42,15 +44,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Initialize from localStorage on mount
     useEffect(() => {
-        const storedUser = getStoredUser();
-        if (storedUser) {
-            setUser(storedUser);
-            // Connect WebSocket with stored credentials
-            initSocket(storedUser.id, storedUser.sessionId);
-            forceLogoutHandlerRef.current = handleForceLogout;
-            onForceLogout(handleForceLogout);
-        }
-        setIsLoading(false);
+        const initAuth = async () => {
+            const storedUser = getStoredUser();
+            if (storedUser) {
+                setUser(storedUser);
+                // Connect WebSocket with stored credentials
+                initSocket(storedUser.id, storedUser.sessionId);
+                forceLogoutHandlerRef.current = handleForceLogout;
+                onForceLogout(handleForceLogout);
+
+                // Fetch latest profile to get missing fields like createdAt
+                try {
+                    const { user: profileData } = await getProfile();
+                    const updatedUser = { ...storedUser, ...profileData };
+                    setUser(updatedUser);
+                    storeUser(updatedUser);
+                } catch (error: any) {
+                    console.error('Failed to refresh profile:', error);
+                    // If Unauthorized (401) or User not found (404), logout immediately
+                    // This happens if the session was cleared in Redis or user deleted
+                    if (error.status === 401 || error.status === 404) {
+                        console.warn('Session invalid, logging out...');
+                        clearStoredUser();
+                        disconnectSocket();
+                        setUser(null);
+                    }
+                }
+            }
+            setIsLoading(false);
+        };
+
+        initAuth();
 
         return () => {
             if (forceLogoutHandlerRef.current) {
@@ -93,12 +117,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setForceLogoutMessage(null);
     }, []);
 
+    const updateUser = useCallback((data: Partial<User>) => {
+        setUser(prev => {
+            if (!prev) return null;
+            const updated = { ...prev, ...data };
+            storeUser(updated);
+            return updated;
+        });
+    }, []);
+
     const value: AuthContextType = {
         user,
         isLoading,
         isAuthenticated: !!user,
         login,
         logout,
+        updateUser,
         forceLogoutMessage,
         clearForceLogoutMessage,
     };

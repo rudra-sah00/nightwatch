@@ -17,8 +17,10 @@ export function initSocket(userId: string, sessionId: string): Socket {
         query: { userId, sessionId },
         transports: ['websocket'],
         reconnection: true,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: Infinity, // Keep trying indefinitely
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,     // Cap delay at 5s
+        timeout: 20000,                 // Connection timeout
     });
 
     socket.on('connect', () => {

@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <body className={`${inter.variable} antialiased bg-black text-white`}>
+            <body className={`${inter.variable} antialiased bg-background text-foreground`}>
                 <AuthProvider>{children}</AuthProvider>
             </body>
         </html>

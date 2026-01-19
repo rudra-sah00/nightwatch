@@ -33,7 +33,7 @@ export async function apiFetch<T>(
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const error: ApiError = {
-                message: errorData.message || `HTTP ${response.status}`,
+                message: errorData.error || errorData.message || `HTTP ${response.status}`,
                 status: response.status,
             };
             throw error;

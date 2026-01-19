@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/auth-provider';
 import { LoginForm } from '@/features/auth/components';
 import { Toast } from '@/components/feedback';
+import { ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -16,58 +17,25 @@ export default function LoginPage() {
         }
     }, [isAuthenticated, isLoading, router]);
 
+    // Loading State
     if (isLoading) {
         return (
-            <main
-                style={{
-                    minHeight: '100vh',
-                    backgroundColor: '#000000',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-            >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ position: 'relative', width: '3rem', height: '3rem' }}>
-                        <div
-                            style={{
-                                position: 'absolute',
-                                inset: 0,
-                                borderRadius: '50%',
-                                border: '2px solid rgba(255, 255, 255, 0.1)',
-                            }}
-                        />
-                        <div
-                            style={{
-                                position: 'absolute',
-                                inset: 0,
-                                borderRadius: '50%',
-                                border: '2px solid transparent',
-                                borderTopColor: '#ffffff',
-                                animation: 'spin 1s linear infinite',
-                            }}
-                        />
+            <main className="min-h-screen bg-background flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-12 h-12">
+                        <div className="absolute inset-0 rounded-full border-2 border-primary/20"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin"></div>
                     </div>
                 </div>
             </main>
         );
     }
 
-    if (isAuthenticated) {
-        return null;
-    }
+    if (isAuthenticated) return null;
 
     return (
-        <main
-            style={{
-                minHeight: '100vh',
-                backgroundColor: '#000000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem',
-            }}
-        >
+        <main className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+
             {forceLogoutMessage && (
                 <Toast
                     message={forceLogoutMessage}
@@ -76,77 +44,24 @@ export default function LoginPage() {
                 />
             )}
 
-            <div
-                style={{
-                    width: '100%',
-                    maxWidth: '28rem',
-                    animation: 'fadeIn 0.5s ease-out forwards',
-                }}
-            >
-                {/* Logo/Brand */}
-                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <div
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '5rem',
-                            height: '5rem',
-                            marginBottom: '1.5rem',
-                        }}
-                    >
-                        <img
-                            src="/play.ico"
-                            alt="Watch Rudra"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain'
-                            }}
-                        />
-                    </div>
-                    <h1
-                        style={{
-                            fontSize: '2.5rem',
-                            fontWeight: 700,
-                            marginBottom: '0.5rem',
-                            background: 'linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                        }}
-                    >
-                        Watch Rudra
+            <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative z-10">
+                {/* Brand */}
+                <div className="flex flex-col items-center mb-8 text-center space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-gradient">
+                        Welcome Back
                     </h1>
-                    <p style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Sign in to continue</p>
                 </div>
 
                 {/* Login Card */}
-                <div
-                    style={{
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        borderRadius: '1.5rem',
-                        padding: '2rem',
-                        boxShadow: '0 0 30px rgba(255, 255, 255, 0.1)',
-                    }}
-                >
+                <div className="glass rounded-3xl p-8 shadow-2xl shadow-black/50">
                     <LoginForm />
                 </div>
 
                 {/* Footer */}
-                <p
-                    style={{
-                        textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.3)',
-                        fontSize: '0.75rem',
-                        marginTop: '2rem',
-                    }}
-                >
-                    Secure single-session authentication
-                </p>
+                <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground opacity-60">
+                    <ShieldCheck className="w-3 h-3" />
+                    <p>Secure single-session authentication</p>
+                </div>
             </div>
         </main>
     );
