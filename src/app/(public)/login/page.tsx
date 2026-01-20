@@ -3,13 +3,12 @@
 import { ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Toast } from '@/components/feedback';
 import { LoginForm } from '@/features/auth/components';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, forceLogoutMessage, clearForceLogoutMessage } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -35,10 +34,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      {forceLogoutMessage && (
-        <Toast message={forceLogoutMessage} type="warning" onClose={clearForceLogoutMessage} />
-      )}
-
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative z-10">
         {/* Brand */}
         <div className="flex flex-col items-center mb-8 text-center space-y-2">

@@ -3,12 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
 import { getSocket } from '@/lib/ws';
 import { getSeriesEpisodes, getShowDetails, playVideo } from '../api';
 import { ContentType, type Episode, type Season, type ShowDetails } from '../types';
 
 interface UseContentDetailOptions {
   contentId: string;
+  fromContinueWatching?: boolean;
 }
 
 interface WatchProgress {
@@ -25,6 +27,7 @@ interface UseContentDetailReturn {
   isLoading: boolean;
   isLoadingEpisodes: boolean;
   isPlaying: boolean;
+  playingEpisodeId: string | number | null;
   selectedSeason: Season | null;
   hasWatchProgress: boolean;
   watchProgress: WatchProgress | null;
@@ -45,7 +48,7 @@ interface SocketResponse {
   };
 }
 
-export function useContentDetail({ contentId }: UseContentDetailOptions): UseContentDetailReturn {
+export function useContentDetail({ contentId, fromContinueWatching = false }: UseContentDetailOptions): UseContentDetailReturn {
   const router = useRouter();
   const [show, setShow] = useState<ShowDetails | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -53,45 +56,73 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasWatchProgress, setHasWatchProgress] = useState(false);
+  const [playingEpisodeId, setPlayingEpisodeId] = useState<string | number | null>(null);
+  // Initialize hasWatchProgress to true if coming from Continue Watching
+  const [hasWatchProgress, setHasWatchProgress] = useState(fromContinueWatching);
   const [watchProgress, setWatchProgress] = useState<WatchProgress | null>(null);
   const progressCheckedRef = useRef(false);
 
   // Fetch show details
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchDetails = async () => {
       try {
         setIsLoading(true);
         progressCheckedRef.current = false;
-        const details = await getShowDetails(contentId);
-        setShow(details);
+        const details = await getShowDetails(contentId, { signal: controller.signal });
+
+        if (!controller.signal.aborted) {
+          setShow(details);
+        }
 
         // For series, we'll wait for progress check before selecting season
         // For movies, nothing to do here
-      } catch {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         toast.error('Failed to fetch show details');
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchDetails();
+
+    return () => {
+      controller.abort();
+    };
   }, [contentId]);
 
   // Internal function to load episodes (to avoid dependency issues)
   const loadSeasonEpisodesInternal = useCallback(async (showData: ShowDetails, season: Season) => {
+    const controller = new AbortController();
+
     setIsLoadingEpisodes(true);
     try {
-      const { episodes: seasonEpisodes } = await getSeriesEpisodes(showData.id, season.seasonId);
-      setEpisodes(seasonEpisodes);
-    } catch {
+      const { episodes: seasonEpisodes } = await getSeriesEpisodes(showData.id, season.seasonId, { signal: controller.signal });
+      if (!controller.signal.aborted) {
+        setEpisodes(seasonEpisodes);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') return;
       toast.error('Failed to load episodes');
-      if (showData.episodes) {
+      if (showData.episodes && !controller.signal.aborted) {
         setEpisodes(showData.episodes.filter((ep) => ep.seasonNumber === season.seasonNumber));
       }
     } finally {
-      setIsLoadingEpisodes(false);
+      if (!controller.signal.aborted) {
+        setIsLoadingEpisodes(false);
+      }
     }
+
+    // Cleanup/Cancel previous request if needed? 
+    // This function is called by effects/handlers - tricky to return cleanup.
+    // Instead we rely on the fact it's async and we check aborted status.
+    // But we need to store the controller to abort it if the hook unmounts or if it's called again?
+    // For simplicity in this structure: we just ensure we don't set state if aborted.
+    // Ideally we should track the active request to cancel it on next call.
   }, []);
 
   // Check for existing watch progress and set default season
@@ -174,16 +205,31 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
     [loadSeasonEpisodes],
   );
 
+  const activePlayControllerRef = useRef<AbortController | null>(null);
+
   // Internal play function
   const handlePlayInternal = useCallback(
-    async (showData: ShowDetails, episode?: Episode) => {
+    async (showData: ShowDetails, currentEpisodes: Episode[], episode?: Episode) => {
+      // Cancel previous play request if any
+      if (activePlayControllerRef.current) {
+        activePlayControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      activePlayControllerRef.current = controller;
+
       setIsPlaying(true);
+      // Track which episode is being played for UI feedback
+      if (episode) {
+        setPlayingEpisodeId(episode.episodeId || episode.episodeNumber);
+      }
       try {
         if (showData.contentType === ContentType.Movie) {
           const response = await playVideo({
             type: 'movie',
             title: showData.title,
-          });
+          }, { signal: controller.signal });
+
+          if (controller.signal.aborted) return;
 
           if (response.success && response.movieId && response.masterPlaylistUrl) {
             const streamUrl = encodeURIComponent(response.masterPlaylistUrl);
@@ -206,12 +252,19 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
             toast.error('Movie playback failed - please try again');
           }
         } else if (episode) {
+          // Cache series data before playing (for next episode feature)
+          // Pass episode duration for smart cache expiry
+          const seasonNumber = episode.seasonNumber || 1;
+          cacheSeriesData(showData.id, showData, seasonNumber, currentEpisodes, episode.duration);
+          
           const response = await playVideo({
             type: 'series',
             title: showData.title,
-            season: episode.seasonNumber || 1,
+            season: seasonNumber,
             episode: episode.episodeNumber,
-          });
+          }, { signal: controller.signal });
+
+          if (controller.signal.aborted) return;
 
           if (response.success && response.movieId && response.masterPlaylistUrl) {
             const streamUrl = encodeURIComponent(response.masterPlaylistUrl);
@@ -222,7 +275,7 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
             const year = showData.year ? encodeURIComponent(showData.year) : '';
             const posterUrl = showData.posterUrl ? encodeURIComponent(showData.posterUrl) : '';
 
-            let url = `/watch/${response.movieId}?type=series&title=${encodeURIComponent(showData.title)}&season=${episode.seasonNumber}&episode=${episode.episodeNumber}&seriesId=${showData.id}&stream=${streamUrl}`;
+            let url = `/watch/${response.movieId}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episode.episodeNumber}&seriesId=${showData.id}&stream=${streamUrl}`;
             if (captionUrl) url += `&caption=${captionUrl}`;
             if (response.spriteVtt) url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
             if (description) url += `&description=${description}`;
@@ -235,10 +288,18 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
           }
         }
       } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         toast.error(`Playback failed: ${errorMessage}`);
       } finally {
-        setIsPlaying(false);
+        if (!controller.signal.aborted) {
+          setIsPlaying(false);
+          setPlayingEpisodeId(null);
+          // If this was the active controller, clear it
+          if (activePlayControllerRef.current === controller) {
+            activePlayControllerRef.current = null;
+          }
+        }
       }
     },
     [router],
@@ -250,7 +311,7 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
 
     if (show.contentType === ContentType.Movie) {
       // Movie resume
-      await handlePlayInternal(show, undefined);
+      await handlePlayInternal(show, [], undefined);
     } else {
       // Series resume - create minimal episode object for playback
       const resumeEpisode: Episode = {
@@ -262,16 +323,16 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
         thumbnailUrl: '',
         duration: 0,
       };
-      await handlePlayInternal(show, resumeEpisode);
+      await handlePlayInternal(show, episodes, resumeEpisode);
     }
-  }, [show, watchProgress, handlePlayInternal]);
+  }, [show, watchProgress, episodes, handlePlayInternal]);
 
   const handlePlay = useCallback(
     async (episode?: Episode) => {
       if (!show) return;
-      await handlePlayInternal(show, episode);
+      await handlePlayInternal(show, episodes, episode);
     },
-    [show, handlePlayInternal],
+    [show, episodes, handlePlayInternal],
   );
 
   return {
@@ -280,6 +341,7 @@ export function useContentDetail({ contentId }: UseContentDetailOptions): UseCon
     isLoading,
     isLoadingEpisodes,
     isPlaying,
+    playingEpisodeId,
     selectedSeason,
     hasWatchProgress,
     watchProgress,

@@ -57,6 +57,15 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  // Handle external abort signal
+  if (fetchOptions.signal) {
+    if (fetchOptions.signal.aborted) {
+      controller.abort();
+    } else {
+      fetchOptions.signal.addEventListener('abort', () => controller.abort());
+    }
+  }
+
   try {
     const response = await fetch(`${env.BACKEND_URL}${endpoint}`, {
       ...fetchOptions,

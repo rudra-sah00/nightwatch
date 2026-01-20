@@ -21,10 +21,13 @@ function HomeContent() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedContent, setSelectedContent] = useState<SearchResult | null>(null);
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
+  const [fromContinueWatching, setFromContinueWatching] = useState(false);
   const [continueWatchingCount, setContinueWatchingCount] = useState(0);
 
   // Fetch search results when query changes
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchResults = async () => {
       if (!query.trim()) {
         setResults([]);
@@ -36,33 +39,47 @@ function HomeContent() {
       setHasSearched(true);
 
       try {
-        const data = await searchContent(query);
-        setResults(data);
-      } catch {
+        const data = await searchContent(query, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setResults(data);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         toast.error('Search failed');
-        setResults([]);
+        if (!controller.signal.aborted) {
+          setResults([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchResults();
+
+    return () => {
+      controller.abort();
+    };
   }, [query]);
 
   const handleSelectContent = useCallback((result: SearchResult) => {
     setSelectedContent(result);
     setSelectedContentId(null);
+    setFromContinueWatching(false);
   }, []);
 
   // Handler for continue watching selection - by contentId
   const handleContinueWatchingSelect = useCallback((contentId: string) => {
     setSelectedContent(null);
     setSelectedContentId(contentId);
+    setFromContinueWatching(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setSelectedContent(null);
     setSelectedContentId(null);
+    setFromContinueWatching(false);
   }, []);
 
   // Handle continue watching load
@@ -123,6 +140,7 @@ function HomeContent() {
       {(selectedContent || selectedContentId) && (
         <ContentDetailModal
           contentId={selectedContent?.id || selectedContentId || ''}
+          fromContinueWatching={fromContinueWatching}
           onClose={handleCloseModal}
         />
       )}

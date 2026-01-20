@@ -6,10 +6,12 @@ import { cn } from '@/lib/utils';
 // Controls
 import { ControlBar } from '../controls/ControlBar';
 import { CenterPlayButton } from '../controls/PlayPause';
+import type { SubtitleSettings } from '../controls/SubtitleSelector';
 import { BufferingOverlay } from '../overlays/BufferingOverlay';
 import { ErrorOverlay } from '../overlays/ErrorOverlay';
 // Overlays
 import { LoadingOverlay } from '../overlays/LoadingOverlay';
+import { NextEpisodeOverlay } from '../overlays/NextEpisodeOverlay';
 import {
   initialPlayerState,
   playerReducer,
@@ -19,6 +21,7 @@ import {
 import { useFullscreen } from '../player/useFullscreen';
 import { useHls } from '../player/useHls';
 import { useKeyboard } from '../player/useKeyboard';
+import { useNextEpisode } from '../player/useNextEpisode';
 import { useWatchProgress } from '../player/useWatchProgress';
 // Player components
 import { VideoElement } from '../player/VideoElement';
@@ -44,6 +47,18 @@ export function WatchPage({
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
+
+  // Subtitle settings state
+  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>({
+    fontSize: '1.25rem',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+  });
+
+  // Apply subtitle settings to CSS variables
+  useEffect(() => {
+    document.documentElement.style.setProperty('--subtitle-font-size', subtitleSettings.fontSize);
+    document.documentElement.style.setProperty('--subtitle-font-family', subtitleSettings.fontFamily);
+  }, [subtitleSettings]);
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false);
@@ -90,6 +105,26 @@ export function WatchPage({
     metadata,
     isPlaying: state.isPlaying && !state.isPaused && !state.isBuffering,
     onProgressLoaded: handleProgressLoaded,
+  });
+
+  // Handle navigating to next episode
+  const handleNavigate = useCallback((url: string) => {
+    router.push(url);
+  }, [router]);
+
+  // Next episode for series
+  const {
+    showNextEpisode,
+    nextEpisodeInfo,
+    isLoadingNext,
+    playNextEpisode,
+    cancelNextEpisode,
+  } = useNextEpisode({
+    metadata,
+    currentTime: state.currentTime,
+    duration: state.duration,
+    isPlaying: state.isPlaying && !state.isPaused,
+    onNavigate: handleNavigate,
   });
 
   // Handle going back
@@ -317,6 +352,17 @@ export function WatchPage({
         onBack={handleBack}
       />
 
+      {/* Next Episode Overlay - Netflix style */}
+      {nextEpisodeInfo && (
+        <NextEpisodeOverlay
+          isVisible={showNextEpisode}
+          nextEpisode={nextEpisodeInfo}
+          onPlayNext={playNextEpisode}
+          onCancel={cancelNextEpisode}
+          isLoading={isLoadingNext}
+        />
+      )}
+
       {/* Center Play Button - Netflix style pause overlay with movie info */}
       <CenterPlayButton
         isPlaying={state.isPlaying}
@@ -340,6 +386,8 @@ export function WatchPage({
         onPlaybackRateChange={handlePlaybackRateChange}
         onAudioChange={handleAudioChange}
         onSubtitleChange={handleSubtitleChange}
+        subtitleSettings={subtitleSettings}
+        onSubtitleSettingsChange={setSubtitleSettings}
         isMobile={isMobile}
       />
     </section>

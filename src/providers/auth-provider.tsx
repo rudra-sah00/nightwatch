@@ -16,8 +16,6 @@ interface AuthContextType {
   login: (data: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
-  forceLogoutMessage: string | null;
-  clearForceLogoutMessage: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,14 +23,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [forceLogoutMessage, setForceLogoutMessage] = useState<string | null>(null);
   const forceLogoutHandlerRef = useRef<((payload: ForceLogoutPayload) => void) | null>(null);
 
   // Handle force logout from WebSocket
   const handleForceLogout = useCallback((payload: ForceLogoutPayload) => {
     toast.error(payload.message || 'You have been logged out');
-
-    setForceLogoutMessage(payload.message);
     clearStoredUser();
     disconnectSocket();
     setUser(null);
@@ -40,10 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize from localStorage on mount
   useEffect(() => {
+    const controller = new AbortController();
+
     const initAuth = async () => {
       const storedUser = getStoredUser();
       if (storedUser) {
+        if (controller.signal.aborted) return;
         setUser(storedUser);
+
         // Connect WebSocket with stored credentials
         initSocket(storedUser.id, storedUser.sessionId);
         forceLogoutHandlerRef.current = handleForceLogout;
@@ -51,11 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Fetch latest profile to get missing fields like createdAt
         try {
-          const { user: profileData } = await getProfile();
-          const updatedUser = { ...storedUser, ...profileData };
-          setUser(updatedUser);
-          storeUser(updatedUser);
+          const { user: profileData } = await getProfile({ signal: controller.signal });
+          if (!controller.signal.aborted) {
+            const updatedUser = { ...storedUser, ...profileData };
+            setUser(updatedUser);
+            storeUser(updatedUser);
+          }
         } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') return;
+
           const err = error as { status?: number };
           // If Unauthorized (401) or User not found (404), logout immediately
           // This happens if the session was cleared in Redis or user deleted
@@ -64,16 +67,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             clearStoredUser();
             disconnectSocket();
-            setUser(null);
+            if (!controller.signal.aborted) {
+              setUser(null);
+            }
           }
         }
       }
-      setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     };
 
     initAuth();
 
     return () => {
+      controller.abort();
       if (forceLogoutHandlerRef.current) {
         offForceLogout(forceLogoutHandlerRef.current);
       }
@@ -90,9 +98,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       storeUser(loggedInUser);
       setUser(loggedInUser);
 
-      // Clear any previous force logout message
-      setForceLogoutMessage(null);
-
       // Initialize WebSocket connection
       initSocket(loggedInUser.id, loggedInUser.sessionId);
       forceLogoutHandlerRef.current = handleForceLogout;
@@ -105,16 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutUser();
     } catch {
-      toast.error('Logout failed (local session cleared)');
+      // Silent fail - local session will be cleared regardless
     } finally {
       clearStoredUser();
       disconnectSocket();
       setUser(null);
     }
-  }, []);
-
-  const clearForceLogoutMessage = useCallback(() => {
-    setForceLogoutMessage(null);
   }, []);
 
   const updateUser = useCallback((data: Partial<User>) => {
@@ -133,8 +134,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     updateUser,
-    forceLogoutMessage,
-    clearForceLogoutMessage,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
