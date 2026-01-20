@@ -122,7 +122,7 @@ function HomeContent() {
       {/* Content Detail Modal */}
       {(selectedContent || selectedContentId) && (
         <ContentDetailModal
-          contentId={selectedContent?.id || selectedContentId!}
+          contentId={selectedContent?.id || selectedContentId || ''}
           onClose={handleCloseModal}
         />
       )}

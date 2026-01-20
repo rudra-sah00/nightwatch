@@ -3,7 +3,7 @@
 import { Loader2, X } from 'lucide-react';
 // import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 // Hook for data management
 import { useContentDetail } from '../hooks/use-content-detail';

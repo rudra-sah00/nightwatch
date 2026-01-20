@@ -84,7 +84,6 @@ export const VideoElement = memo(
     }, [videoRef, dispatch, onTimeUpdate, onDurationChange]);
 
     return (
-      // biome-ignore lint/a11y/useMediaCaption: Captions are conditionally rendered via track element
       <video
         ref={ref}
         className="w-full h-full object-contain"
@@ -92,7 +91,13 @@ export const VideoElement = memo(
         crossOrigin="anonymous"
         onClick={onClick}
       >
-        {captionUrl && <track kind="subtitles" src={captionUrl} label="English" srcLang="en" />}
+        <track
+          kind="captions"
+          src={captionUrl || 'data:text/vtt,WEBVTT'}
+          label="English"
+          srcLang="en"
+          default={!!captionUrl}
+        />
       </video>
     );
   }),
