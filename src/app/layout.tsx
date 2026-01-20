@@ -1,20 +1,26 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { Analytics } from '@vercel/analytics/next';
-import { AuthProvider } from '@/hooks/useAuth';
-import QueryProvider from '@/providers/QueryProvider';
+import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/providers/auth-provider';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-geist-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Watch Rudra - Stream Movies & TV Shows',
-    template: '%s | Watch Rudra',
-  },
-  description: 'Watch movies and TV shows',
+  title: 'Watch Rudra',
+  description: 'Your personal streaming companion',
   icons: {
     icon: '/play.ico',
-    shortcut: '/play.ico',
-    apple: '/play.ico',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({
@@ -23,14 +29,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-zinc-950 text-white antialiased">
-        <QueryProvider>
-          <AuthProvider>
-            <div className="h-screen w-full overflow-y-auto">{children}</div>
-            <Analytics />
-          </AuthProvider>
-        </QueryProvider>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} antialiased bg-background text-foreground`}>
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

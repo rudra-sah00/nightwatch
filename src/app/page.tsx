@@ -1,75 +1,26 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { AuthGuard } from '@/components/auth';
-import { HomeContent } from '@/components/home';
-import { analytics } from '@/services/analytics';
-import { type ContinueWatchingItem, getContinueWatching } from '@/services/api/watchProgress';
+import { useEffect } from 'react';
+import { useAuth } from '@/providers/auth-provider';
 
-function HomePage() {
+export default function RootPage() {
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [continueWatchingItems, setContinueWatchingItems] = useState<ContinueWatchingItem[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
 
-  // Pre-fetch continue watching data to avoid "blink"
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const response = await getContinueWatching(20);
-        setContinueWatchingItems(response.items);
-      } catch (error) {
-        console.error('Failed to pre-fetch home data:', error);
-      } finally {
-        setInitialLoading(false);
-      }
-    };
+    if (isLoading) return;
 
-    fetchInitialData();
-  }, []);
-
-  const handleSearch = useCallback(
-    (query: string) => {
-      if (!query.trim()) return;
-
-      // Track search
-      analytics.content.search(query.trim());
-
-      router.push(`/search/${encodeURIComponent(query.trim())}`);
-    },
-    [router]
-  );
-
-  const handleClear = useCallback(() => {
-    // Already on home page, nothing to clear
-  }, []);
-
-  if (initialLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="w-6 h-6 animate-spin text-white/50" />
-      </div>
-    );
-  }
+    if (isAuthenticated) {
+      router.replace('/home');
+    } else {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   return (
-    <HomeContent
-      results={[]}
-      loading={false}
-      searched={false}
-      searchQuery=""
-      onSearch={handleSearch}
-      onClear={handleClear}
-      initialContinueWatchingItems={continueWatchingItems}
-    />
-  );
-}
-
-export default function Home() {
-  return (
-    <AuthGuard>
-      <HomePage />
-    </AuthGuard>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+    </div>
   );
 }
