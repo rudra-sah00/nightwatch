@@ -1,30 +1,31 @@
 // User types
 export interface User {
-    id: string;
-    name: string;
-    username: string | null;
-    email: string;
-    profilePhoto: string | null;
-    sessionId: string;
-    createdAt: string;
+  id: string;
+  name: string;
+  username: string | null;
+  email: string;
+  profilePhoto: string | null;
+  sessionId: string;
+  createdAt: string;
 }
 
 // Auth types
 export interface LoginResponse {
-    user: User;
+  user: User;
 }
 
 export interface LogoutResponse {
-    message: string;
+  message: string;
 }
 
 export interface ApiError {
-    message: string;
-    status?: number;
+  message: string;
+  status?: number;
+  code?: string; // e.g., 'SESSION_EXPIRED'
 }
 
 // WebSocket types
 export interface ForceLogoutPayload {
-    reason: 'new_login' | 'invalid_session';
-    message: string;
+  reason: 'new_login' | 'invalid_session';
+  message: string;
 }

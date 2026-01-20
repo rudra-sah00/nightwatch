@@ -1,2 +1,2 @@
-export { loginSchema, type LoginInput } from './schema';
 export { loginUser, logoutUser } from './api';
+export { type LoginInput, loginSchema } from './schema';

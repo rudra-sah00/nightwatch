@@ -9,7 +9,6 @@ on:
 env:
   VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
   VERCEL_PROJECT_ID: prj_GvurtLT1apyIWx5cvAa4BfLNQNni
-  BACKEND_URL: ${{ secrets.BACKEND_URL }}
 
 jobs:
   lint-and-deploy:
@@ -28,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Biome strict CI check
-        run: pnpm biome ci .
+      - name: Run Biome check (Frontend)
+        run: pnpm check
 
       - name: Run TypeScript check
         run: pnpm tsc --noEmit
