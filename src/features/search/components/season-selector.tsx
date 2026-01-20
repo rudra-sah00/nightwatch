@@ -66,7 +66,7 @@ export function SeasonSelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl rounded-lg border border-white/10 shadow-2xl overflow-hidden z-50">
+        <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl rounded-lg border border-white/10 shadow-2xl overflow-hidden z-50">
           {seasons.map((season) => (
             <button
               type="button"

@@ -3,25 +3,26 @@ import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { WatchActivity } from './types';
 
-export async function getProfile(): Promise<{ user: User }> {
-  return apiFetch('/api/auth/me');
+export async function getProfile(options?: RequestInit): Promise<{ user: User }> {
+  return apiFetch('/api/auth/me', options);
 }
 
-export async function updateProfile(data: Partial<User>): Promise<{ user: User }> {
+export async function updateProfile(data: Partial<User>, options?: RequestInit): Promise<{ user: User }> {
   return apiFetch('/api/user/profile', {
     method: 'PATCH',
     body: JSON.stringify(data),
+    ...options,
   });
 }
 
-export async function checkUsername(username: string): Promise<{ available: boolean }> {
-  return apiFetch(`/api/user/check-username/${username}`);
+export async function checkUsername(username: string, options?: RequestInit): Promise<{ available: boolean }> {
+  return apiFetch(`/api/user/check-username/${username}`, options);
 }
 
-export async function getWatchActivity(): Promise<WatchActivity[]> {
+export async function getWatchActivity(options?: RequestInit): Promise<WatchActivity[]> {
   const { activity } = await apiFetch<{
     activity: { date: string; watchSeconds: number; level: number }[];
-  }>('/api/watch/activity');
+  }>('/api/watch/activity', options);
   return activity.map((a) => ({
     date: a.date,
     count: a.watchSeconds / 60,
@@ -60,9 +61,14 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   });
 }
 
-export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+  options?: RequestInit,
+): Promise<void> {
   await apiFetch('/api/auth/password', {
     method: 'PATCH',
     body: JSON.stringify({ currentPassword, newPassword }),
+    ...options,
   });
 }

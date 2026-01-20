@@ -56,17 +56,17 @@ export function SeekBar({
       if (!timestamp) return 0;
       const parts = timestamp.split(':');
       if (parts.length === 3) {
-        return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+        return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
       }
       if (parts.length === 2) {
-        return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+        return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
       }
       return parseFloat(parts[0]);
     };
 
     fetch(spriteVtt)
       .then((res) => {
-        if (!res.ok) throw new Error('Status ' + res.status);
+        if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.text();
       })
       .then((text) => {

@@ -3,36 +3,39 @@ import type { Episode, PlayResponse, SearchHistory, SearchResult, ShowDetails } 
 
 // ===== SEARCH HISTORY =====
 
-export async function getSearchHistory(): Promise<SearchHistory[]> {
-  const { history } = await apiFetch<{ history: SearchHistory[] }>('/api/video/history');
+export async function getSearchHistory(options?: RequestInit): Promise<SearchHistory[]> {
+  const { history } = await apiFetch<{ history: SearchHistory[] }>('/api/video/history', options);
   return history;
 }
 
-export async function deleteSearchHistoryItem(id: string): Promise<void> {
+export async function deleteSearchHistoryItem(id: string, options?: RequestInit): Promise<void> {
   await apiFetch(`/api/video/history/${id}`, {
     method: 'DELETE',
+    ...options,
   });
 }
 
-export async function clearSearchHistory(): Promise<void> {
+export async function clearSearchHistory(options?: RequestInit): Promise<void> {
   await apiFetch('/api/video/history', {
     method: 'DELETE',
+    ...options,
   });
 }
 
 // ===== SEARCH CONTENT =====
 
-export async function searchContent(query: string): Promise<SearchResult[]> {
+export async function searchContent(query: string, options?: RequestInit): Promise<SearchResult[]> {
   const { results } = await apiFetch<{ results: SearchResult[] }>(
     `/api/video/search?q=${encodeURIComponent(query)}`,
+    options,
   );
   return results;
 }
 
 // ===== SHOW DETAILS =====
 
-export async function getShowDetails(id: string): Promise<ShowDetails> {
-  const { show } = await apiFetch<{ show: ShowDetails }>(`/api/video/show/${id}`);
+export async function getShowDetails(id: string, options?: RequestInit): Promise<ShowDetails> {
+  const { show } = await apiFetch<{ show: ShowDetails }>(`/api/video/show/${id}`, options);
   return show;
 }
 
@@ -41,11 +44,12 @@ export async function getShowDetails(id: string): Promise<ShowDetails> {
 export async function getSeriesEpisodes(
   seriesId: string,
   startSeasonId?: string,
+  options?: RequestInit,
 ): Promise<{ episodes: Episode[]; totalEpisodes: number }> {
   const url = startSeasonId
     ? `/api/video/episodes/${seriesId}?start_season_id=${startSeasonId}`
     : `/api/video/episodes/${seriesId}`;
-  return apiFetch(url);
+  return apiFetch(url, options);
 }
 
 // ===== PLAY VIDEO =====
@@ -64,12 +68,13 @@ export interface PlaySeriesParams {
 
 export type PlayParams = PlayMovieParams | PlaySeriesParams;
 
-export async function playVideo(params: PlayParams): Promise<PlayResponse> {
+export async function playVideo(params: PlayParams, options?: RequestInit): Promise<PlayResponse> {
   // Longer timeout since Playwright automation takes ~30+ seconds
   return apiFetch<PlayResponse>('/api/video/play', {
     method: 'POST',
     body: JSON.stringify(params),
     timeout: 120000,
+    ...options,
   });
 }
 

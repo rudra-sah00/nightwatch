@@ -7,6 +7,7 @@ import { Fullscreen } from './Fullscreen';
 import { PlayPause } from './PlayPause';
 import { SeekBar } from './SeekBar';
 import { SettingsMenu } from './SettingsMenu';
+import type { SubtitleSettings } from './SubtitleSelector';
 import { SubtitleSelector } from './SubtitleSelector';
 import { Volume } from './Volume';
 
@@ -38,6 +39,8 @@ interface ControlBarProps {
   onPlaybackRateChange?: (rate: number) => void;
   onAudioChange?: (trackId: string) => void;
   onSubtitleChange?: (trackId: string | null) => void;
+  subtitleSettings?: SubtitleSettings;
+  onSubtitleSettingsChange?: (settings: SubtitleSettings) => void;
   isMobile?: boolean;
 }
 
@@ -70,6 +73,8 @@ export function ControlBar({
   onPlaybackRateChange,
   onAudioChange,
   onSubtitleChange,
+  subtitleSettings,
+  onSubtitleSettingsChange,
   isMobile = false,
 }: ControlBarProps) {
   // Convert audio tracks for selectors
@@ -186,6 +191,8 @@ export function ControlBar({
               tracks={subtitleTracksForMenu}
               currentTrack={currentSubtitleId}
               onTrackChange={onSubtitleChange}
+              subtitleSettings={subtitleSettings}
+              onSubtitleSettingsChange={onSubtitleSettingsChange}
             />
 
             {/* Audio Selector (desktop only - hidden on mobile via component) */}
@@ -196,15 +203,13 @@ export function ControlBar({
               disabled={isMobile}
             />
 
-            {/* Settings (Quality & Speed only now) */}
+            {/* Settings (Quality & Speed) */}
             <SettingsMenu
               qualities={state.qualities}
               currentQuality={state.currentQuality}
               playbackRate={state.playbackRate}
               onQualityChange={onQualityChange || (() => {})}
               onPlaybackRateChange={onPlaybackRateChange || (() => {})}
-              audioTracks={[]} // Empty - moved to separate selector
-              subtitleTracks={[]} // Empty - moved to separate selector
             />
 
             {/* Fullscreen */}

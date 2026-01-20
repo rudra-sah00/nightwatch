@@ -3,7 +3,7 @@
 import { Loader2, X } from 'lucide-react';
 // import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 // Hook for data management
 import { useContentDetail } from '../hooks/use-content-detail';
@@ -16,10 +16,11 @@ import { SeasonSelector } from './season-selector';
 
 interface ContentDetailModalProps {
   contentId: string;
+  fromContinueWatching?: boolean;
   onClose: () => void;
 }
 
-export function ContentDetailModal({ contentId, onClose }: ContentDetailModalProps) {
+export function ContentDetailModal({ contentId, fromContinueWatching = false, onClose }: ContentDetailModalProps) {
   // State from custom hook
   const {
     show,
@@ -27,13 +28,14 @@ export function ContentDetailModal({ contentId, onClose }: ContentDetailModalPro
     isLoading,
     isLoadingEpisodes,
     isPlaying,
+    playingEpisodeId,
     selectedSeason,
     hasWatchProgress,
     watchProgress,
     handleSeasonSelect,
     handlePlay,
     handleResume,
-  } = useContentDetail({ contentId });
+  } = useContentDetail({ contentId, fromContinueWatching });
 
   // Local UI state
   const [imageError, setImageError] = useState(false);
@@ -149,7 +151,7 @@ export function ContentDetailModal({ contentId, onClose }: ContentDetailModalPro
           <EpisodeList
             episodes={episodes}
             isLoading={isLoadingEpisodes}
-            playingEpisodeId={null}
+            playingEpisodeId={playingEpisodeId}
             onPlayEpisode={(episode) => handlePlay(episode)}
           />
         </div>

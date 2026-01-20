@@ -39,8 +39,8 @@ function WatchContent() {
   const metadata: VideoMetadata = {
     title: decodeURIComponent(title),
     type,
-    season: season ? parseInt(season) : undefined,
-    episode: episode ? parseInt(episode) : undefined,
+    season: season ? parseInt(season, 10) : undefined,
+    episode: episode ? parseInt(episode, 10) : undefined,
     movieId,
     seriesId: seriesId || undefined, // For series: use this as contentId for continue watching
     description: description ? decodeURIComponent(description) : undefined,

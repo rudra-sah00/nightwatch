@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Film, Loader2, Play, Tv, X } from 'lucide-react';
+import { Clock, Film, Loader2, RotateCcw, Tv, X } from 'lucide-react';
 import Image from 'next/image';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -141,14 +141,20 @@ export function ContinueWatching({
       {/* Vertical List items */}
       <div className="flex flex-col gap-2">
         {items.map((item) => (
-          <button
-            type="button"
+          <div
             key={item.id}
+            role="button"
+            tabIndex={0}
             className={cn(
               'group flex items-center gap-4 p-2 rounded-xl cursor-pointer w-full text-left',
               'hover:bg-accent/40 transition-all border border-transparent hover:border-border/50',
             )}
             onClick={() => handleSelect(item)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleSelect(item);
+              }
+            }}
           >
             {/* Thumbnail */}
             <div className="relative w-48 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-muted shadow-sm">
@@ -178,10 +184,11 @@ export function ContinueWatching({
                 />
               </div>
 
-              {/* Play overlay - subtle */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-                  <Play className="w-5 h-5 text-white fill-current" />
+              {/* Resume overlay - enhanced styling */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm border border-primary/50 shadow-lg">
+                  <RotateCcw className="w-4 h-4 text-white" />
+                  <span className="text-xs font-medium text-white">Resume</span>
                 </div>
               </div>
             </div>
@@ -235,7 +242,7 @@ export function ContinueWatching({
                 <X className="w-5 h-5" />
               </button>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>

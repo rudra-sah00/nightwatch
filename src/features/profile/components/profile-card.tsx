@@ -58,7 +58,7 @@ const TabButton = ({ isActive, onClick, children }: TabButtonProps) => (
 type TabType = 'overview' | 'settings';
 
 export function ProfileCard() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [activity, setActivity] = useState<WatchActivity[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -80,14 +80,16 @@ export function ProfileCard() {
 
     try {
       setIsUploading(true);
-      await uploadProfileImage(file);
-      window.location.reload();
+      const { url } = await uploadProfileImage(file);
+      // Update user profile photo in auth context
+      updateUser({ profilePhoto: url });
+      toast.success('Profile image updated successfully');
     } catch {
       toast.error('Failed to upload profile image');
     } finally {
       setIsUploading(false);
     }
-  }, []);
+  }, [updateUser]);
 
   const userCreatedAtDate = useMemo(
     () => (user?.createdAt ? new Date(user.createdAt) : undefined),

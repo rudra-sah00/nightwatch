@@ -42,6 +42,10 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
+    
+    /* Subtitle customization */
+    --subtitle-font-size: 1.25rem;
+    --subtitle-font-family: system-ui, -apple-system, sans-serif;
 
     --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
@@ -160,4 +164,15 @@
   .styled-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.35);
   }
+}
+
+/* Video subtitle/caption styling */
+video::cue {
+  font-size: var(--subtitle-font-size);
+  font-family: var(--subtitle-font-family);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 0.25em 0.5em;
+  border-radius: 4px;
+  line-height: 1.4;
 }

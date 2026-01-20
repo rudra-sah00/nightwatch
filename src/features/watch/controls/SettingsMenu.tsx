@@ -297,7 +297,7 @@ export function SettingsMenu({
 
       {/* Menu dropdown */}
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-3 w-64 bg-zinc-900/98 backdrop-blur-2xl rounded-xl shadow-2xl shadow-black/40 border border-white/15 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto styled-scrollbar bg-zinc-900/98 backdrop-blur-2xl rounded-xl shadow-2xl shadow-black/40 border border-white/15 animate-in fade-in slide-in-from-bottom-2 duration-200">
           {currentScreen === 'main' && renderMainMenu()}
           {currentScreen === 'quality' && renderQualityMenu()}
           {currentScreen === 'speed' && renderSpeedMenu()}

@@ -21,9 +21,10 @@ export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
       className={cn(
         'group flex gap-4 p-3 rounded-xl cursor-pointer transition-all duration-300 w-full text-left',
         'hover:bg-white/5 border border-transparent hover:border-white/10',
-        isPlaying && 'opacity-60 pointer-events-none',
+        isPlaying && 'bg-primary/10 border-primary/30 pointer-events-none',
       )}
       onClick={onPlay}
+      disabled={isPlaying}
     >
       {/* Episode Thumbnail */}
       <div className="relative w-40 md:w-48 aspect-video rounded-lg overflow-hidden bg-muted flex-shrink-0">
@@ -32,7 +33,7 @@ export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
             src={episode.thumbnailUrl}
             alt={episode.title || `Episode ${episode.episodeNumber}`}
             fill
-            className="object-cover"
+            className={cn('object-cover', isPlaying && 'opacity-70')}
             unoptimized
             onError={() => setImageError(true)}
           />
@@ -42,15 +43,19 @@ export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
           </div>
         )}
 
-        {/* Play Overlay */}
+        {/* Play/Loading Overlay */}
         <div
           className={cn(
             'absolute inset-0 flex items-center justify-center bg-black/40',
-            'opacity-0 group-hover:opacity-100 transition-opacity',
+            isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+            'transition-opacity',
           )}
         >
           {isPlaying ? (
-            <Loader2 className="w-8 h-8 text-white animate-spin" />
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
+              <span className="text-xs text-white font-medium">Loading...</span>
+            </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
               <Play className="w-5 h-5 text-black fill-current ml-0.5" />
