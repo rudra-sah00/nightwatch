@@ -98,18 +98,18 @@ export function ControlBar({
   return (
     <div
       className={cn(
-        'control-bar absolute left-0 right-0 bottom-0 z-10 transition-opacity duration-300',
-        state.showControls ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        'control-bar absolute inset-0 z-10 flex flex-col justify-between pointer-events-none transition-opacity duration-300',
+        state.showControls ? 'opacity-100' : 'opacity-0',
       )}
     >
-      {/* Top Gradient - positioned absolutely from parent container */}
-      <div className="fixed top-0 left-0 right-0 h-36 md:h-48 lg:h-56 2xl:h-64 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
+      {/* Top Gradient */}
+      <div className="absolute top-0 left-0 right-0 h-36 md:h-48 lg:h-56 2xl:h-64 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
 
       {/* Bottom Gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-48 md:h-56 lg:h-64 2xl:h-72 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Top Bar - Fixed to top of screen */}
-      <div className="fixed top-0 left-0 right-0 p-4 md:p-6 lg:p-8 2xl:p-10 flex items-center gap-4 lg:gap-6 z-20">
+      {/* Top Bar */}
+      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto">
         <button
           type="button"
           onClick={onBack}
@@ -131,8 +131,8 @@ export function ControlBar({
         </div>
       </div>
 
-      {/* Bottom Controls - pinned to bottom */}
-      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4">
+      {/* Bottom Controls */}
+      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto">
         {/* Progress Bar */}
         <SeekBar
           currentTime={state.currentTime}
