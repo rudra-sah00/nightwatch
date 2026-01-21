@@ -138,7 +138,9 @@ export function ContentDetailModal({
         <div className="px-6 md:px-10 lg:px-16 py-8 bg-gradient-to-b from-black to-background">
           {/* Season Selector */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl md:text-2xl font-semibold text-foreground">Episodes</h2>
+            <h2 className="text-xl md:text-2xl font-semibold text-foreground">
+              Episodes
+            </h2>
             <SeasonSelector
               seasons={show.seasons || []}
               selectedSeason={selectedSeason}

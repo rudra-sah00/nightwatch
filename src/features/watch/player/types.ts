@@ -102,7 +102,10 @@ export const initialPlayerState: PlayerState = {
   currentSubtitleTrack: null,
 };
 
-export function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
+export function playerReducer(
+  state: PlayerState,
+  action: PlayerAction,
+): PlayerState {
   switch (action.type) {
     case 'PLAY':
       return { ...state, isPlaying: true, isPaused: false };

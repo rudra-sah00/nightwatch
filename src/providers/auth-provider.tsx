@@ -1,12 +1,24 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { type LoginInput, loginUser, logoutUser } from '@/features/auth';
 import { getProfile } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
-import { disconnectSocket, initSocket, offForceLogout, onForceLogout } from '@/lib/ws';
+import {
+  disconnectSocket,
+  initSocket,
+  offForceLogout,
+  onForceLogout,
+} from '@/lib/ws';
 import type { ForceLogoutPayload, User } from '@/types';
 
 interface AuthContextType {
@@ -23,7 +35,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const forceLogoutHandlerRef = useRef<((payload: ForceLogoutPayload) => void) | null>(null);
+  const forceLogoutHandlerRef = useRef<
+    ((payload: ForceLogoutPayload) => void) | null
+  >(null);
 
   // Handle force logout from WebSocket
   const handleForceLogout = useCallback((payload: ForceLogoutPayload) => {

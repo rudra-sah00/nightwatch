@@ -58,9 +58,14 @@ export function SeasonSelector({
           'text-white font-medium transition-colors',
         )}
       >
-        {selectedSeason ? `Season ${selectedSeason.seasonNumber}` : 'Select Season'}
+        {selectedSeason
+          ? `Season ${selectedSeason.seasonNumber}`
+          : 'Select Season'}
         <ChevronDown
-          className={cn('w-4 h-4 transition-transform duration-200', isOpen && 'rotate-180')}
+          className={cn(
+            'w-4 h-4 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
         />
       </button>
 
@@ -85,7 +90,9 @@ export function SeasonSelector({
             >
               Season {season.seasonNumber}
               {season.episodeCount && (
-                <span className="text-muted-foreground ml-2">({season.episodeCount} episodes)</span>
+                <span className="text-muted-foreground ml-2">
+                  ({season.episodeCount} episodes)
+                </span>
               )}
             </button>
           ))}

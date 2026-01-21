@@ -121,11 +121,13 @@ export function ControlBar({
           <h1 className="text-white font-semibold text-lg md:text-2xl lg:text-3xl 2xl:text-4xl truncate drop-shadow-lg">
             {metadata.title}
           </h1>
-          {metadata.type === 'series' && metadata.season && metadata.episode && (
-            <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
-              Season {metadata.season} · Episode {metadata.episode}
-            </p>
-          )}
+          {metadata.type === 'series' &&
+            metadata.season &&
+            metadata.episode && (
+              <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
+                Season {metadata.season} · Episode {metadata.episode}
+              </p>
+            )}
         </div>
       </div>
 
@@ -146,7 +148,11 @@ export function ControlBar({
           {/* Left Controls */}
           <div className="flex items-center gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
             {/* Play/Pause */}
-            <PlayPause isPlaying={state.isPlaying} onToggle={onTogglePlay} size="lg" />
+            <PlayPause
+              isPlaying={state.isPlaying}
+              onToggle={onTogglePlay}
+              size="lg"
+            />
 
             {/* Skip buttons - Desktop only */}
             <div className="hidden md:flex items-center gap-1 lg:gap-2">
@@ -179,8 +185,12 @@ export function ControlBar({
             {/* Time Display */}
             <div className="text-white text-sm md:text-base lg:text-lg 2xl:text-xl font-medium ml-2 md:ml-3 lg:ml-4 2xl:ml-5 tabular-nums">
               <span>{formatTime(state.currentTime)}</span>
-              <span className="text-white/50 mx-1 md:mx-2 lg:mx-3 2xl:mx-4">/</span>
-              <span className="text-white/70">{formatTime(state.duration)}</span>
+              <span className="text-white/50 mx-1 md:mx-2 lg:mx-3 2xl:mx-4">
+                /
+              </span>
+              <span className="text-white/70">
+                {formatTime(state.duration)}
+              </span>
             </div>
           </div>
 
@@ -213,7 +223,10 @@ export function ControlBar({
             />
 
             {/* Fullscreen */}
-            <Fullscreen isFullscreen={state.isFullscreen} onToggle={onFullscreenToggle} />
+            <Fullscreen
+              isFullscreen={state.isFullscreen}
+              onToggle={onFullscreenToggle}
+            />
           </div>
         </div>
       </div>

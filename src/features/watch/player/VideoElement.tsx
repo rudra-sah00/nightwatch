@@ -50,10 +50,14 @@ export const VideoElement = memo(
           dispatch({ type: 'UNMUTE' });
         }
       };
-      const handleWaiting = () => dispatch({ type: 'SET_BUFFERING', isBuffering: true });
-      const handlePlaying = () => dispatch({ type: 'SET_BUFFERING', isBuffering: false });
-      const handleCanPlay = () => dispatch({ type: 'SET_LOADING', isLoading: false });
-      const handleError = () => dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+      const handleWaiting = () =>
+        dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+      const handlePlaying = () =>
+        dispatch({ type: 'SET_BUFFERING', isBuffering: false });
+      const handleCanPlay = () =>
+        dispatch({ type: 'SET_LOADING', isLoading: false });
+      const handleError = () =>
+        dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
       const handleEnded = () => dispatch({ type: 'PAUSE' });
 
       video.addEventListener('play', handlePlay);

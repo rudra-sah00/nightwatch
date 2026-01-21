@@ -45,16 +45,19 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
 
           // Extract audio tracks
           if (data.audioTracks && data.audioTracks.length > 0) {
-            const audioTracks: AudioTrack[] = data.audioTracks.map((track, index) => ({
-              id: String(index),
-              label: track.name || track.lang || `Audio ${index + 1}`,
-              language: track.lang || 'unknown',
-              isDefault: track.default || index === 0,
-            }));
+            const audioTracks: AudioTrack[] = data.audioTracks.map(
+              (track, index) => ({
+                id: String(index),
+                label: track.name || track.lang || `Audio ${index + 1}`,
+                language: track.lang || 'unknown',
+                isDefault: track.default || index === 0,
+              }),
+            );
             dispatch({ type: 'SET_AUDIO_TRACKS', audioTracks });
 
             // Set default audio track
-            const defaultTrack = audioTracks.find((t) => t.isDefault) || audioTracks[0];
+            const defaultTrack =
+              audioTracks.find((t) => t.isDefault) || audioTracks[0];
             if (defaultTrack) {
               dispatch({
                 type: 'SET_CURRENT_AUDIO_TRACK',
@@ -78,12 +81,14 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
         // Handle audio tracks loading/updating
         hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_, data) => {
           if (data.audioTracks && data.audioTracks.length > 0) {
-            const audioTracks: AudioTrack[] = data.audioTracks.map((track, index) => ({
-              id: String(index),
-              label: track.name || track.lang || `Audio ${index + 1}`,
-              language: track.lang || 'unknown',
-              isDefault: track.default || index === 0,
-            }));
+            const audioTracks: AudioTrack[] = data.audioTracks.map(
+              (track, index) => ({
+                id: String(index),
+                label: track.name || track.lang || `Audio ${index + 1}`,
+                language: track.lang || 'unknown',
+                isDefault: track.default || index === 0,
+              }),
+            );
             dispatch({ type: 'SET_AUDIO_TRACKS', audioTracks });
           }
         });

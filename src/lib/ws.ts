@@ -52,7 +52,9 @@ export function getSocket(): Socket | null {
 /**
  * Register force logout handler
  */
-export function onForceLogout(callback: (payload: ForceLogoutPayload) => void): void {
+export function onForceLogout(
+  callback: (payload: ForceLogoutPayload) => void,
+): void {
   if (socket) {
     socket.on(WS_EVENTS.FORCE_LOGOUT, callback);
   }
@@ -61,7 +63,9 @@ export function onForceLogout(callback: (payload: ForceLogoutPayload) => void): 
 /**
  * Remove force logout handler
  */
-export function offForceLogout(callback?: (payload: ForceLogoutPayload) => void): void {
+export function offForceLogout(
+  callback?: (payload: ForceLogoutPayload) => void,
+): void {
   if (socket) {
     if (callback) {
       socket.off(WS_EVENTS.FORCE_LOGOUT, callback);

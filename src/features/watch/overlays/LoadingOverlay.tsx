@@ -20,7 +20,9 @@ export function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
           <div className="w-16 h-16 rounded-full border-4 border-white/20" />
           <Loader2 className="absolute inset-0 w-16 h-16 text-white animate-spin" />
         </div>
-        <p className="text-white/80 text-sm font-medium animate-pulse">Loading...</p>
+        <p className="text-white/80 text-sm font-medium animate-pulse">
+          Loading...
+        </p>
       </div>
     </div>
   );

@@ -109,17 +109,20 @@ export function ContinueWatching({
   );
 
   // Handle removing from continue watching
-  const handleRemove = useCallback((item: WatchProgress, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleRemove = useCallback(
+    (item: WatchProgress, e: React.MouseEvent) => {
+      e.stopPropagation();
 
-    deleteWatchProgress(item.id, (success) => {
-      if (success) {
-        setItems((prev) => prev.filter((i) => i.id !== item.id));
-      } else {
-        toast.error('Failed to remove from list');
-      }
-    });
-  }, []);
+      deleteWatchProgress(item.id, (success) => {
+        if (success) {
+          setItems((prev) => prev.filter((i) => i.id !== item.id));
+        } else {
+          toast.error('Failed to remove from list');
+        }
+      });
+    },
+    [],
+  );
 
   // Format remaining time
   const formatRemainingTime = (minutes: number) => {
@@ -132,7 +135,9 @@ export function ContinueWatching({
   if (isLoading) {
     return (
       <div className={cn('py-6', className)}>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Continue Watching</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">
+          Continue Watching
+        </h2>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
@@ -146,7 +151,9 @@ export function ContinueWatching({
 
   return (
     <div className={cn('py-6', className)}>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Continue Watching</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">
+        Continue Watching
+      </h2>
 
       {/* Vertical List items */}
       <div className="flex flex-col gap-2">
@@ -209,16 +216,20 @@ export function ContinueWatching({
               </h3>
 
               <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
-                {item.contentType === 'Series' && item.seasonNumber && item.episodeNumber && (
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-foreground/80">
-                      S{item.seasonNumber}:E{item.episodeNumber}
+                {item.contentType === 'Series' &&
+                  item.seasonNumber &&
+                  item.episodeNumber && (
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-foreground/80">
+                        S{item.seasonNumber}:E{item.episodeNumber}
+                      </span>
+                      {item.episodeTitle && (
+                        <span className="opacity-60 truncate">
+                          • {item.episodeTitle}
+                        </span>
+                      )}
                     </span>
-                    {item.episodeTitle && (
-                      <span className="opacity-60 truncate">• {item.episodeTitle}</span>
-                    )}
-                  </span>
-                )}
+                  )}
 
                 <span className="flex items-center gap-1.5 text-xs opacity-70">
                   <Clock className="w-3 h-3" />

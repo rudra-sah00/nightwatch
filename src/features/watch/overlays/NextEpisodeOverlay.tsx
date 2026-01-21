@@ -44,7 +44,14 @@ export function NextEpisodeOverlay({
 
   // Countdown timer
   useEffect(() => {
-    if (!isVisible || !nextEpisode || cancelled || autoPlayDelay === 0 || isLoading) return;
+    if (
+      !isVisible ||
+      !nextEpisode ||
+      cancelled ||
+      autoPlayDelay === 0 ||
+      isLoading
+    )
+      return;
 
     if (countdown <= 0) {
       onPlayNext();
@@ -56,7 +63,15 @@ export function NextEpisodeOverlay({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isVisible, nextEpisode, countdown, cancelled, autoPlayDelay, isLoading, onPlayNext]);
+  }, [
+    isVisible,
+    nextEpisode,
+    countdown,
+    cancelled,
+    autoPlayDelay,
+    isLoading,
+    onPlayNext,
+  ]);
 
   const handleCancel = useCallback(() => {
     setCancelled(true);
@@ -83,7 +98,9 @@ export function NextEpisodeOverlay({
               {isNextSeason ? 'Next Season' : 'Next Episode'}
             </span>
             {!cancelled && autoPlayDelay > 0 && !isLoading && (
-              <span className="ml-auto text-xs text-white/50">Playing in {countdown}s</span>
+              <span className="ml-auto text-xs text-white/50">
+                Playing in {countdown}s
+              </span>
             )}
           </div>
         </div>
@@ -119,7 +136,9 @@ export function NextEpisodeOverlay({
                 {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
               </h4>
               {nextEpisode.duration && (
-                <p className="text-xs text-white/40 mt-1">{nextEpisode.duration}m</p>
+                <p className="text-xs text-white/40 mt-1">
+                  {nextEpisode.duration}m
+                </p>
               )}
             </div>
           </div>

@@ -9,7 +9,11 @@ interface PlayPauseProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function PlayPause({ isPlaying, onToggle, size = 'md' }: PlayPauseProps) {
+export function PlayPause({
+  isPlaying,
+  onToggle,
+  size = 'md',
+}: PlayPauseProps) {
   const sizeClasses = {
     sm: 'w-10 h-10',
     md: 'w-12 h-12',
@@ -37,9 +41,19 @@ export function PlayPause({ isPlaying, onToggle, size = 'md' }: PlayPauseProps) 
       )}
     >
       {isPlaying ? (
-        <Pause className={cn('text-white fill-white drop-shadow-sm', iconSizes[size])} />
+        <Pause
+          className={cn(
+            'text-white fill-white drop-shadow-sm',
+            iconSizes[size],
+          )}
+        />
       ) : (
-        <Play className={cn('text-white fill-white ml-0.5 drop-shadow-sm', iconSizes[size])} />
+        <Play
+          className={cn(
+            'text-white fill-white ml-0.5 drop-shadow-sm',
+            iconSizes[size],
+          )}
+        />
       )}
     </button>
   );
@@ -60,7 +74,11 @@ interface CenterPlayButtonProps {
   };
 }
 
-export function CenterPlayButton({ isPlaying, onToggle, metadata }: CenterPlayButtonProps) {
+export function CenterPlayButton({
+  isPlaying,
+  onToggle,
+  metadata,
+}: CenterPlayButtonProps) {
   return (
     <button
       type="button"
@@ -97,7 +115,9 @@ export function CenterPlayButton({ isPlaying, onToggle, metadata }: CenterPlayBu
             <div
               className={cn(
                 'px-2.5 py-1 sm:px-3 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-4 flex-shrink-0',
-                metadata.type === 'series' ? 'bg-purple-600 text-white' : 'bg-red-600 text-white',
+                metadata.type === 'series'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-red-600 text-white',
               )}
             >
               {metadata.type === 'series' ? 'TV Series' : 'Movie'}
@@ -109,11 +129,13 @@ export function CenterPlayButton({ isPlaying, onToggle, metadata }: CenterPlayBu
             </h2>
 
             {/* Episode info for series */}
-            {metadata.type === 'series' && metadata.season && metadata.episode && (
-              <p className="text-white/80 text-sm sm:text-lg md:text-xl mb-1.5 sm:mb-3 flex-shrink-0">
-                S{metadata.season} · E{metadata.episode}
-              </p>
-            )}
+            {metadata.type === 'series' &&
+              metadata.season &&
+              metadata.episode && (
+                <p className="text-white/80 text-sm sm:text-lg md:text-xl mb-1.5 sm:mb-3 flex-shrink-0">
+                  S{metadata.season} · E{metadata.episode}
+                </p>
+              )}
 
             {/* Year - hidden on very small mobile portrait */}
             {metadata.year && (
@@ -133,7 +155,9 @@ export function CenterPlayButton({ isPlaying, onToggle, metadata }: CenterPlayBu
             <div className="flex items-center gap-2 mt-2 sm:mt-4 flex-shrink-0">
               <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-white/90 text-xs sm:text-sm font-medium">Tap to resume</span>
+                <span className="text-white/90 text-xs sm:text-sm font-medium">
+                  Tap to resume
+                </span>
               </div>
             </div>
           </div>
@@ -145,7 +169,9 @@ export function CenterPlayButton({ isPlaying, onToggle, metadata }: CenterPlayBu
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
           <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
             <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-white/90 text-xs sm:text-sm font-medium">Tap to resume</span>
+            <span className="text-white/90 text-xs sm:text-sm font-medium">
+              Tap to resume
+            </span>
           </div>
         </div>
       )}
@@ -160,7 +186,11 @@ interface TapIndicatorProps {
   isVisible: boolean;
 }
 
-export function TapIndicator({ direction, seconds, isVisible }: TapIndicatorProps) {
+export function TapIndicator({
+  direction,
+  seconds,
+  isVisible,
+}: TapIndicatorProps) {
   if (!isVisible) return null;
 
   return (

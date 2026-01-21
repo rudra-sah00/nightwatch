@@ -80,11 +80,17 @@ export function UpdateProfileForm() {
       <div className="space-y-2">
         <Label htmlFor="username">Username</Label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            @
+          </span>
           <Input
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            onChange={(e) =>
+              setUsername(
+                e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+              )
+            }
             className="pl-7 pr-10"
             placeholder="username"
           />

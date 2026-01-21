@@ -51,7 +51,10 @@ async function refreshAccessToken(): Promise<boolean> {
 /**
  * Fetch wrapper with credentials, error handling, and automatic token refresh
  */
-export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export async function apiFetch<T>(
+  endpoint: string,
+  options: FetchOptions = {},
+): Promise<T> {
   const { timeout = 10000, skipRefresh = false, ...fetchOptions } = options;
 
   const controller = new AbortController();
@@ -100,7 +103,8 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const error: ApiError = {
-        message: errorData.error || errorData.message || `HTTP ${response.status}`,
+        message:
+          errorData.error || errorData.message || `HTTP ${response.status}`,
         status: response.status,
       };
       throw error;
