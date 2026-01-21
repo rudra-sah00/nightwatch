@@ -30,7 +30,9 @@ export function invalidateContinueWatchingCache(): void {
 // Check if cache is fresh
 export function isContinueWatchingCacheFresh(): boolean {
   if (!continueWatchingCache) return false;
-  return Date.now() - continueWatchingCache.timestamp < CONTINUE_WATCHING_STALE_TIME;
+  return (
+    Date.now() - continueWatchingCache.timestamp < CONTINUE_WATCHING_STALE_TIME
+  );
 }
 
 // Get cached continue watching data
@@ -49,7 +51,9 @@ export function setContinueWatchingCache(data: WatchProgress[]): void {
 // Remove item from cache (optimistic update)
 export function removeFromContinueWatchingCache(itemId: string): void {
   if (continueWatchingCache) {
-    continueWatchingCache.data = continueWatchingCache.data.filter((i) => i.id !== itemId);
+    continueWatchingCache.data = continueWatchingCache.data.filter(
+      (i) => i.id !== itemId,
+    );
   }
 }
 
@@ -70,14 +74,18 @@ export function fetchContinueWatching(
     return;
   }
 
-  socket.emit('watch:get_continue_watching', { limit }, (response: SocketResponse) => {
-    if (response?.success && response.items) {
-      setContinueWatchingCache(response.items);
-      callback(response.items);
-    } else {
-      callback(null, response?.error || 'Failed to load');
-    }
-  });
+  socket.emit(
+    'watch:get_continue_watching',
+    { limit },
+    (response: SocketResponse) => {
+      if (response?.success && response.items) {
+        setContinueWatchingCache(response.items);
+        callback(response.items);
+      } else {
+        callback(null, response?.error || 'Failed to load');
+      }
+    },
+  );
 }
 
 // Delete progress via WebSocket
@@ -91,14 +99,18 @@ export function deleteWatchProgress(
     return;
   }
 
-  socket.emit('watch:delete_progress', { progressId }, (response: SocketResponse) => {
-    if (response?.success) {
-      removeFromContinueWatchingCache(progressId);
-      callback(true);
-    } else {
-      callback(false);
-    }
-  });
+  socket.emit(
+    'watch:delete_progress',
+    { progressId },
+    (response: SocketResponse) => {
+      if (response?.success) {
+        removeFromContinueWatchingCache(progressId);
+        callback(true);
+      } else {
+        callback(false);
+      }
+    },
+  );
 }
 
 // ===== WATCH PROGRESS =====
@@ -130,7 +142,9 @@ export function invalidateProgressCache(contentId?: string): void {
 }
 
 // Get cached progress
-export function getCachedProgress(contentId: string): ProgressCacheEntry | null {
+export function getCachedProgress(
+  contentId: string,
+): ProgressCacheEntry | null {
   const cached = progressCache.get(contentId);
   if (cached && cached.expiry > Date.now()) {
     return cached;
@@ -172,23 +186,31 @@ export function fetchContentProgress(
     return;
   }
 
-  socket.emit('watch:get_progress', { contentId }, (response: ProgressSocketResponse) => {
-    let progress: ContentProgress | null = null;
-    let hasProgress = false;
+  socket.emit(
+    'watch:get_progress',
+    { contentId },
+    (response: ProgressSocketResponse) => {
+      let progress: ContentProgress | null = null;
+      let hasProgress = false;
 
-    if (response?.success && response.progress && response.progress.progressSeconds > 0) {
-      hasProgress = true;
-      progress = {
-        seasonNumber: response.progress.seasonNumber,
-        episodeNumber: response.progress.episodeNumber,
-        progressSeconds: response.progress.progressSeconds,
-        progressPercent: response.progress.progressPercent,
-      };
-    }
+      if (
+        response?.success &&
+        response.progress &&
+        response.progress.progressSeconds > 0
+      ) {
+        hasProgress = true;
+        progress = {
+          seasonNumber: response.progress.seasonNumber,
+          episodeNumber: response.progress.episodeNumber,
+          progressSeconds: response.progress.progressSeconds,
+          progressPercent: response.progress.progressPercent,
+        };
+      }
 
-    setProgressCache(contentId, progress, hasProgress);
-    callback(progress, hasProgress);
-  });
+      setProgressCache(contentId, progress, hasProgress);
+      callback(progress, hasProgress);
+    },
+  );
 }
 
 // ===== SPRITE VTT =====
@@ -208,7 +230,11 @@ function parseVttTime(timestamp: string): number {
   if (!timestamp) return 0;
   const parts = timestamp.split(':');
   if (parts.length === 3) {
-    return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
+    return (
+      parseInt(parts[0], 10) * 3600 +
+      parseInt(parts[1], 10) * 60 +
+      parseFloat(parts[2])
+    );
   }
   if (parts.length === 2) {
     return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);

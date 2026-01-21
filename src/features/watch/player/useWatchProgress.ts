@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { invalidateWatchActivityCache } from '@/features/profile/api';
-import { invalidateContinueWatchingCache, invalidateProgressCache } from '@/features/watch/api';
+import {
+  invalidateContinueWatchingCache,
+  invalidateProgressCache,
+} from '@/features/watch/api';
 import { getSocket } from '@/lib/ws';
 import type { VideoMetadata } from './types';
 
@@ -55,7 +58,10 @@ export function useWatchProgress({
         (res: SocketResponse) => {
           if (res?.success) {
             // Reset accumulated seconds on success
-            accumulateSecondsRef.current = Math.max(0, accumulateSecondsRef.current - seconds);
+            accumulateSecondsRef.current = Math.max(
+              0,
+              accumulateSecondsRef.current - seconds,
+            );
             // Invalidate watch activity cache for real-time updates
             if (forceFlush) {
               invalidateWatchActivityCache();
@@ -80,7 +86,9 @@ export function useWatchProgress({
       // CRITICAL: For series, use seriesId as contentId to ensure single entry per series
       // For movies, use movieId
       const contentId =
-        metadata.type === 'series' && metadata.seriesId ? metadata.seriesId : metadata.movieId;
+        metadata.type === 'series' && metadata.seriesId
+          ? metadata.seriesId
+          : metadata.movieId;
 
       const payload = {
         contentId,
@@ -117,7 +125,9 @@ export function useWatchProgress({
 
     // Use seriesId for series, movieId for movies
     const contentId =
-      metadata.type === 'series' && metadata.seriesId ? metadata.seriesId : metadata.movieId;
+      metadata.type === 'series' && metadata.seriesId
+        ? metadata.seriesId
+        : metadata.movieId;
 
     // Wait for socket to be connected
     const loadProgress = () => {
@@ -210,7 +220,10 @@ export function useWatchProgress({
   useEffect(() => {
     if (!isPlaying) return;
 
-    progressIntervalRef.current = setInterval(updateProgress, PROGRESS_SYNC_INTERVAL);
+    progressIntervalRef.current = setInterval(
+      updateProgress,
+      PROGRESS_SYNC_INTERVAL,
+    );
 
     return () => {
       if (progressIntervalRef.current) {

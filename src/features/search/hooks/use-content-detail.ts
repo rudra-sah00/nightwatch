@@ -11,7 +11,12 @@ import {
 import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
 import { getSocket } from '@/lib/ws';
 import { getSeriesEpisodes, getShowDetails, playVideo } from '../api';
-import { ContentType, type Episode, type Season, type ShowDetails } from '../types';
+import {
+  ContentType,
+  type Episode,
+  type Season,
+  type ShowDetails,
+} from '../types';
 
 // Re-export for backwards compatibility
 export { invalidateProgressCache } from '@/features/watch/api';
@@ -94,10 +99,15 @@ export function useContentDetail({
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playingEpisodeId, setPlayingEpisodeId] = useState<string | number | null>(null);
+  const [playingEpisodeId, setPlayingEpisodeId] = useState<
+    string | number | null
+  >(null);
   // Initialize hasWatchProgress to true if coming from Continue Watching
-  const [hasWatchProgress, setHasWatchProgress] = useState(fromContinueWatching);
-  const [watchProgress, setWatchProgress] = useState<WatchProgress | null>(null);
+  const [hasWatchProgress, setHasWatchProgress] =
+    useState(fromContinueWatching);
+  const [watchProgress, setWatchProgress] = useState<WatchProgress | null>(
+    null,
+  );
   const progressCheckedRef = useRef(false);
 
   // Fetch show details
@@ -136,36 +146,47 @@ export function useContentDetail({
   }, [contentId]);
 
   // Internal function to load episodes (to avoid dependency issues)
-  const loadSeasonEpisodesInternal = useCallback(async (showData: ShowDetails, season: Season) => {
-    const controller = new AbortController();
+  const loadSeasonEpisodesInternal = useCallback(
+    async (showData: ShowDetails, season: Season) => {
+      const controller = new AbortController();
 
-    setIsLoadingEpisodes(true);
-    try {
-      const { episodes: seasonEpisodes } = await getSeriesEpisodes(showData.id, season.seasonId, {
-        signal: controller.signal,
-      });
-      if (!controller.signal.aborted) {
-        setEpisodes(seasonEpisodes);
+      setIsLoadingEpisodes(true);
+      try {
+        const { episodes: seasonEpisodes } = await getSeriesEpisodes(
+          showData.id,
+          season.seasonId,
+          {
+            signal: controller.signal,
+          },
+        );
+        if (!controller.signal.aborted) {
+          setEpisodes(seasonEpisodes);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        toast.error('Failed to load episodes');
+        if (showData.episodes && !controller.signal.aborted) {
+          setEpisodes(
+            showData.episodes.filter(
+              (ep) => ep.seasonNumber === season.seasonNumber,
+            ),
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingEpisodes(false);
+        }
       }
-    } catch (error: unknown) {
-      if (error instanceof Error && error.name === 'AbortError') return;
-      toast.error('Failed to load episodes');
-      if (showData.episodes && !controller.signal.aborted) {
-        setEpisodes(showData.episodes.filter((ep) => ep.seasonNumber === season.seasonNumber));
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setIsLoadingEpisodes(false);
-      }
-    }
 
-    // Cleanup/Cancel previous request if needed?
-    // This function is called by effects/handlers - tricky to return cleanup.
-    // Instead we rely on the fact it's async and we check aborted status.
-    // But we need to store the controller to abort it if the hook unmounts or if it's called again?
-    // For simplicity in this structure: we just ensure we don't set state if aborted.
-    // Ideally we should track the active request to cancel it on next call.
-  }, []);
+      // Cleanup/Cancel previous request if needed?
+      // This function is called by effects/handlers - tricky to return cleanup.
+      // Instead we rely on the fact it's async and we check aborted status.
+      // But we need to store the controller to abort it if the hook unmounts or if it's called again?
+      // For simplicity in this structure: we just ensure we don't set state if aborted.
+      // Ideally we should track the active request to cancel it on next call.
+    },
+    [],
+  );
 
   // Check for existing watch progress and set default season
   useEffect(() => {
@@ -175,7 +196,10 @@ export function useContentDetail({
     const isSeries = show.contentType === ContentType.Series;
 
     // Helper to process progress response (used for both cache hit and socket response)
-    const processProgress = (hasProgress: boolean, progress: WatchProgress | null) => {
+    const processProgress = (
+      hasProgress: boolean,
+      progress: WatchProgress | null,
+    ) => {
       progressCheckedRef.current = true;
 
       if (hasProgress && progress && progress.progressSeconds > 0) {
@@ -253,7 +277,11 @@ export function useContentDetail({
 
   // Internal play function
   const handlePlayInternal = useCallback(
-    async (showData: ShowDetails, currentEpisodes: Episode[], episode?: Episode) => {
+    async (
+      showData: ShowDetails,
+      currentEpisodes: Episode[],
+      episode?: Episode,
+    ) => {
       // Cancel previous play request if any
       if (activePlayControllerRef.current) {
         activePlayControllerRef.current.abort();
@@ -284,18 +312,27 @@ export function useContentDetail({
 
           if (controller.signal.aborted) return;
 
-          if (response.success && response.movieId && response.masterPlaylistUrl) {
+          if (
+            response.success &&
+            response.movieId &&
+            response.masterPlaylistUrl
+          ) {
             const streamUrl = encodeURIComponent(response.masterPlaylistUrl);
-            const captionUrl = response.captionSrt ? encodeURIComponent(response.captionSrt) : '';
+            const captionUrl = response.captionSrt
+              ? encodeURIComponent(response.captionSrt)
+              : '';
             const description = showData.description
               ? encodeURIComponent(showData.description)
               : '';
             const year = showData.year ? encodeURIComponent(showData.year) : '';
-            const posterUrl = showData.posterUrl ? encodeURIComponent(showData.posterUrl) : '';
+            const posterUrl = showData.posterUrl
+              ? encodeURIComponent(showData.posterUrl)
+              : '';
 
             let url = `/watch/${response.movieId}?type=movie&title=${encodeURIComponent(showData.title)}&stream=${streamUrl}`;
             if (captionUrl) url += `&caption=${captionUrl}`;
-            if (response.spriteVtt) url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
+            if (response.spriteVtt)
+              url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
             if (description) url += `&description=${description}`;
             if (year) url += `&year=${year}`;
             if (posterUrl) url += `&poster=${posterUrl}`;
@@ -308,7 +345,13 @@ export function useContentDetail({
           // Cache series data before playing (for next episode feature)
           // Pass episode duration for smart cache expiry
           const seasonNumber = episode.seasonNumber || 1;
-          cacheSeriesData(showData.id, showData, seasonNumber, currentEpisodes, episode.duration);
+          cacheSeriesData(
+            showData.id,
+            showData,
+            seasonNumber,
+            currentEpisodes,
+            episode.duration,
+          );
 
           const response = await playVideo(
             {
@@ -323,18 +366,27 @@ export function useContentDetail({
 
           if (controller.signal.aborted) return;
 
-          if (response.success && response.movieId && response.masterPlaylistUrl) {
+          if (
+            response.success &&
+            response.movieId &&
+            response.masterPlaylistUrl
+          ) {
             const streamUrl = encodeURIComponent(response.masterPlaylistUrl);
-            const captionUrl = response.captionSrt ? encodeURIComponent(response.captionSrt) : '';
+            const captionUrl = response.captionSrt
+              ? encodeURIComponent(response.captionSrt)
+              : '';
             const description = showData.description
               ? encodeURIComponent(showData.description)
               : '';
             const year = showData.year ? encodeURIComponent(showData.year) : '';
-            const posterUrl = showData.posterUrl ? encodeURIComponent(showData.posterUrl) : '';
+            const posterUrl = showData.posterUrl
+              ? encodeURIComponent(showData.posterUrl)
+              : '';
 
             let url = `/watch/${response.movieId}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episode.episodeNumber}&seriesId=${showData.id}&stream=${streamUrl}`;
             if (captionUrl) url += `&caption=${captionUrl}`;
-            if (response.spriteVtt) url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
+            if (response.spriteVtt)
+              url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
             if (description) url += `&description=${description}`;
             if (year) url += `&year=${year}`;
             if (posterUrl) url += `&poster=${posterUrl}`;
@@ -346,7 +398,8 @@ export function useContentDetail({
         }
       } catch (error: unknown) {
         if (error instanceof Error && error.name === 'AbortError') return;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error occurred';
         toast.error(`Playback failed: ${errorMessage}`);
       } finally {
         if (!controller.signal.aborted) {

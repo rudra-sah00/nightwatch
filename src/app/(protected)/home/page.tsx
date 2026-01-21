@@ -19,8 +19,12 @@ function HomeContent() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<SearchResult | null>(null);
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
+  const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
+    null,
+  );
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(
+    null,
+  );
   const [fromContinueWatching, setFromContinueWatching] = useState(false);
   const [continueWatchingCount, setContinueWatchingCount] = useState(0);
 
@@ -103,14 +107,19 @@ function HomeContent() {
                 </h1>
                 {!isLoading && hasSearched && (
                   <p className="text-sm text-muted-foreground">
-                    {results.length} {results.length === 1 ? 'result' : 'results'} found
+                    {results.length}{' '}
+                    {results.length === 1 ? 'result' : 'results'} found
                   </p>
                 )}
               </div>
             </div>
 
             {/* Results Grid */}
-            <SearchResults results={results} isLoading={isLoading} onSelect={handleSelectContent} />
+            <SearchResults
+              results={results}
+              isLoading={isLoading}
+              onSelect={handleSelectContent}
+            />
           </div>
         ) : (
           /* Home state - show Continue Watching and recommendation sections */

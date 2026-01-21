@@ -30,6 +30,8 @@ export function delay(ms: number): Promise<void> {
 /**
  * Class name utility for conditional classes
  */
-export function cn(...classes: (string | boolean | undefined | null)[]): string {
+export function cn(
+  ...classes: (string | boolean | undefined | null)[]
+): string {
   return classes.filter(Boolean).join(' ');
 }

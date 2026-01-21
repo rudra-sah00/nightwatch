@@ -154,7 +154,9 @@ export function SeekBar({
 
     // VTT based sprites - use original coords, scale via container
     if (vttSprites.length > 0) {
-      const cue = vttSprites.find((s) => hoverTime >= s.start && hoverTime < s.end);
+      const cue = vttSprites.find(
+        (s) => hoverTime >= s.start && hoverTime < s.end,
+      );
       if (cue) {
         // Return original dimensions - scaling handled by container
         return {
@@ -171,7 +173,10 @@ export function SeekBar({
 
     const { imageUrl, width, height, columns, rows, interval } = spriteSheet;
     const totalThumbnails = columns * rows;
-    const thumbnailIndex = Math.min(Math.floor(hoverTime / interval), totalThumbnails - 1);
+    const thumbnailIndex = Math.min(
+      Math.floor(hoverTime / interval),
+      totalThumbnails - 1,
+    );
 
     const col = thumbnailIndex % columns;
     const row = Math.floor(thumbnailIndex / columns);
@@ -198,7 +203,9 @@ export function SeekBar({
               100 * previewScale,
               Math.min(
                 hoverPosition,
-                barRef.current ? barRef.current.offsetWidth - 100 * previewScale : hoverPosition,
+                barRef.current
+                  ? barRef.current.offsetWidth - 100 * previewScale
+                  : hoverPosition,
               ),
             ),
           }}
@@ -235,7 +242,9 @@ export function SeekBar({
               ) : (
                 // Placeholder when no sprite sheet
                 <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-                  <div className="text-xs lg:text-sm 2xl:text-base text-white/30">Preview</div>
+                  <div className="text-xs lg:text-sm 2xl:text-base text-white/30">
+                    Preview
+                  </div>
                 </div>
               )}
             </div>

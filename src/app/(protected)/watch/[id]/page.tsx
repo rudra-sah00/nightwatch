@@ -29,19 +29,27 @@ function WatchContent() {
 
   // Get the caption URL from query params
   const captionParam = searchParams.get('caption');
-  const initialCaptionUrl = captionParam ? decodeURIComponent(captionParam) : null;
+  const initialCaptionUrl = captionParam
+    ? decodeURIComponent(captionParam)
+    : null;
 
   // Get the sprite URL from query params
   const spriteParam = searchParams.get('sprite');
-  const initialSpriteVtt = spriteParam ? decodeURIComponent(spriteParam) : undefined;
+  const initialSpriteVtt = spriteParam
+    ? decodeURIComponent(spriteParam)
+    : undefined;
 
   // Decode poster URL
   const posterUrl = poster ? decodeURIComponent(poster) : undefined;
 
   // State for dynamically fetched stream (on page reload)
   const [streamUrl, setStreamUrl] = useState<string | null>(initialStreamUrl);
-  const [captionUrl, setCaptionUrl] = useState<string | null>(initialCaptionUrl);
-  const [spriteVtt, setSpriteVtt] = useState<string | undefined>(initialSpriteVtt);
+  const [captionUrl, setCaptionUrl] = useState<string | null>(
+    initialCaptionUrl,
+  );
+  const [spriteVtt, setSpriteVtt] = useState<string | undefined>(
+    initialSpriteVtt,
+  );
   const [isRefetching, setIsRefetching] = useState(false);
   const [refetchError, setRefetchError] = useState<string | null>(null);
 
@@ -88,7 +96,9 @@ function WatchContent() {
         setRefetchError('Failed to load stream');
       }
     } catch (err) {
-      setRefetchError(err instanceof Error ? err.message : 'Failed to load stream');
+      setRefetchError(
+        err instanceof Error ? err.message : 'Failed to load stream',
+      );
     } finally {
       setIsRefetching(false);
     }

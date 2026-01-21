@@ -1,6 +1,13 @@
 'use client';
 
-import { Calendar, Camera, Loader2, Mail, User as UserIcon, X } from 'lucide-react';
+import {
+  Calendar,
+  Camera,
+  Loader2,
+  Mail,
+  User as UserIcon,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -21,7 +28,11 @@ interface ProfileSectionProps {
   children: React.ReactNode;
 }
 
-const ProfileSection = ({ title, description, children }: ProfileSectionProps) => (
+const ProfileSection = ({
+  title,
+  description,
+  children,
+}: ProfileSectionProps) => (
   <section className="space-y-4 w-full">
     <div>
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
@@ -168,7 +179,9 @@ export function ProfileCard() {
                   {user.name}
                 </h1>
                 {user.username && (
-                  <p className="text-muted-foreground font-medium text-sm">@{user.username}</p>
+                  <p className="text-muted-foreground font-medium text-sm">
+                    @{user.username}
+                  </p>
                 )}
               </div>
 
@@ -230,14 +243,20 @@ export function ProfileCard() {
             </div>
 
             {/* Tab Content - Full width for laptop */}
-            <div key={activeTab} className="animate-in fade-in duration-300 slide-in-from-bottom-2">
+            <div
+              key={activeTab}
+              className="animate-in fade-in duration-300 slide-in-from-bottom-2"
+            >
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   <ProfileSection
                     title="Watch Activity"
                     description="Your viewing history over the past year"
                   >
-                    <ActivityGraph activity={activity} createdAt={userCreatedAtDate} />
+                    <ActivityGraph
+                      activity={activity}
+                      createdAt={userCreatedAtDate}
+                    />
                   </ProfileSection>
                 </div>
               )}

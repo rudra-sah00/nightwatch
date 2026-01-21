@@ -18,7 +18,9 @@ const PROFILE_CACHE_TTL = 5 * 60 * 1000;
 let watchActivityCache: CacheEntry<WatchActivity[]> | null = null;
 const WATCH_ACTIVITY_CACHE_TTL = 5 * 60 * 1000;
 
-export async function getProfile(options?: RequestInit): Promise<{ user: User }> {
+export async function getProfile(
+  options?: RequestInit,
+): Promise<{ user: User }> {
   // Check cache first
   if (profileCache && profileCache.expiry > Date.now()) {
     return profileCache.data;
@@ -55,7 +57,9 @@ export async function checkUsername(
   return apiFetch(`/api/user/check-username/${username}`, options);
 }
 
-export async function getWatchActivity(options?: RequestInit): Promise<WatchActivity[]> {
+export async function getWatchActivity(
+  options?: RequestInit,
+): Promise<WatchActivity[]> {
   // Check cache first
   if (watchActivityCache && watchActivityCache.expiry > Date.now()) {
     return watchActivityCache.data;

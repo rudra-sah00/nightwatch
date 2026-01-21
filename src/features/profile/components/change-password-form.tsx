@@ -87,7 +87,11 @@ export function ChangePasswordForm() {
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {success && <p className="text-sm text-green-500">Password updated successfully</p>}
+        {success && (
+          <p className="text-sm text-green-500">
+            Password updated successfully
+          </p>
+        )}
 
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

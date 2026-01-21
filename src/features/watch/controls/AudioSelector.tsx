@@ -118,13 +118,17 @@ export function AudioSelector({
                   <span
                     className={cn(
                       'text-sm',
-                      currentTrack === track.id ? 'text-white font-medium' : 'text-white/80',
+                      currentTrack === track.id
+                        ? 'text-white font-medium'
+                        : 'text-white/80',
                     )}
                   >
                     {track.label}
                   </span>
                   {track.language && track.language !== track.label && (
-                    <span className="text-xs text-white/40">{track.language}</span>
+                    <span className="text-xs text-white/40">
+                      {track.language}
+                    </span>
                   )}
                 </div>
                 {currentTrack === track.id && (

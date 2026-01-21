@@ -41,7 +41,8 @@ export function EpisodeList({
           episode={episode}
           onPlay={() => onPlayEpisode(episode)}
           isPlaying={
-            playingEpisodeId === episode.episodeId || playingEpisodeId === episode.episodeNumber
+            playingEpisodeId === episode.episodeId ||
+            playingEpisodeId === episode.episodeNumber
           }
         />
       ))}

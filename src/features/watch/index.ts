@@ -18,7 +18,11 @@ export { ContinueWatching } from './components/ContinueWatching';
 // Controls
 export { ControlBar } from './controls/ControlBar';
 export { Fullscreen } from './controls/Fullscreen';
-export { CenterPlayButton, PlayPause, TapIndicator } from './controls/PlayPause';
+export {
+  CenterPlayButton,
+  PlayPause,
+  TapIndicator,
+} from './controls/PlayPause';
 export { SeekBar } from './controls/SeekBar';
 export { SettingsMenu } from './controls/SettingsMenu';
 export { SeekIndicator, SkipButton } from './controls/SkipButtons';

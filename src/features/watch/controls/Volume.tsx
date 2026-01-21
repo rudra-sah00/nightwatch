@@ -12,7 +12,12 @@ interface VolumeProps {
   onMuteToggle: () => void;
 }
 
-export function Volume({ volume, isMuted, onVolumeChange, onMuteToggle }: VolumeProps) {
+export function Volume({
+  volume,
+  isMuted,
+  onVolumeChange,
+  onMuteToggle,
+}: VolumeProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -62,7 +67,8 @@ export function Volume({ volume, isMuted, onVolumeChange, onMuteToggle }: Volume
   }, [isDragging, calculateVolume]);
 
   // Determine which volume icon to show
-  const VolumeIcon = isMuted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
+  const VolumeIcon =
+    isMuted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
 
   const displayVolume = isMuted ? 0 : volume;
 
@@ -140,7 +146,9 @@ export function Volume({ volume, isMuted, onVolumeChange, onMuteToggle }: Volume
             )}
             style={{
               left: `calc(${displayVolume * 100}% - 6px)`,
-              transition: isDragging ? 'transform 100ms' : 'left 50ms ease-out, transform 100ms',
+              transition: isDragging
+                ? 'transform 100ms'
+                : 'left 50ms ease-out, transform 100ms',
             }}
           />
         </div>

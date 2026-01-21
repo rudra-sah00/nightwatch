@@ -124,7 +124,10 @@ export function SubtitleSelector({
           )}
         >
           <span
-            className={cn('text-sm', !currentTrack ? 'text-white font-medium' : 'text-white/80')}
+            className={cn(
+              'text-sm',
+              !currentTrack ? 'text-white font-medium' : 'text-white/80',
+            )}
           >
             Off
           </span>
@@ -154,7 +157,9 @@ export function SubtitleSelector({
               <span
                 className={cn(
                   'text-sm',
-                  currentTrack === track.id ? 'text-white font-medium' : 'text-white/80',
+                  currentTrack === track.id
+                    ? 'text-white font-medium'
+                    : 'text-white/80',
                 )}
               >
                 {track.label}
@@ -211,7 +216,9 @@ export function SubtitleSelector({
       <div className="overflow-y-auto max-h-64 overscroll-contain styled-scrollbar">
         {/* Font Size Section */}
         <div className="px-4 py-2 bg-white/5 border-b border-white/5">
-          <span className="text-white/50 text-xs uppercase tracking-wider">Size</span>
+          <span className="text-white/50 text-xs uppercase tracking-wider">
+            Size
+          </span>
         </div>
         {SUBTITLE_FONT_SIZES.map((size) => (
           <button
@@ -231,7 +238,9 @@ export function SubtitleSelector({
 
         {/* Font Family Section */}
         <div className="px-4 py-2 bg-white/5 border-t border-b border-white/5">
-          <span className="text-white/50 text-xs uppercase tracking-wider">Font</span>
+          <span className="text-white/50 text-xs uppercase tracking-wider">
+            Font
+          </span>
         </div>
         {SUBTITLE_FONTS.map((font) => (
           <button
@@ -240,7 +249,10 @@ export function SubtitleSelector({
             onClick={() => handleFontFamilyChange(font.value)}
             className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 transition-colors"
           >
-            <span className="text-white text-sm" style={{ fontFamily: font.value }}>
+            <span
+              className="text-white text-sm"
+              style={{ fontFamily: font.value }}
+            >
               {font.label}
             </span>
             {subtitleSettings.fontFamily === font.value && (

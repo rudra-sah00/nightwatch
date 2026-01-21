@@ -11,7 +11,11 @@ interface SearchResultsProps {
   onSelect: (result: SearchResult) => void;
 }
 
-export function SearchResults({ results, isLoading, onSelect }: SearchResultsProps) {
+export function SearchResults({
+  results,
+  isLoading,
+  onSelect,
+}: SearchResultsProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -27,8 +31,12 @@ export function SearchResults({ results, isLoading, onSelect }: SearchResultsPro
         <div className="w-20 h-20 rounded-full bg-muted/30 flex items-center justify-center mb-4">
           <Film className="w-10 h-10 text-muted-foreground/50" />
         </div>
-        <h3 className="text-lg font-medium text-muted-foreground">No results found</h3>
-        <p className="text-sm text-muted-foreground/70 mt-1">Try searching for something else</p>
+        <h3 className="text-lg font-medium text-muted-foreground">
+          No results found
+        </h3>
+        <p className="text-sm text-muted-foreground/70 mt-1">
+          Try searching for something else
+        </p>
       </div>
     );
   }
@@ -80,7 +88,9 @@ function SearchResultItem({ result, onSelect }: SearchResultItemProps) {
         <h3 className="text-foreground font-medium text-base group-hover:text-primary transition-colors line-clamp-2">
           {result.title}
         </h3>
-        {result.year && <p className="text-muted-foreground text-sm mt-0.5">{result.year}</p>}
+        {result.year && (
+          <p className="text-muted-foreground text-sm mt-0.5">{result.year}</p>
+        )}
       </div>
 
       {/* Arrow */}

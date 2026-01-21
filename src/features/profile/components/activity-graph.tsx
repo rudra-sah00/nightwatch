@@ -25,7 +25,10 @@ interface ActivityGraphProps {
   activity: WatchActivity[];
 }
 
-export function ActivityGraph({ activity, createdAt }: ActivityGraphProps & { createdAt?: Date }) {
+export function ActivityGraph({
+  activity,
+  createdAt,
+}: ActivityGraphProps & { createdAt?: Date }) {
   // Generate dataset
   const { weeks, totalCount } = useMemo(() => {
     // Strip time to ensure consistent comparisons
@@ -140,7 +143,10 @@ export function ActivityGraph({ activity, createdAt }: ActivityGraphProps & { cr
             ) : (
               <span>{Math.floor(totalCount / 60)} hours</span>
             )}
-            <span className="text-muted-foreground font-normal"> watched in the last year</span>
+            <span className="text-muted-foreground font-normal">
+              {' '}
+              watched in the last year
+            </span>
           </h3>
         </div>
       </div>
@@ -189,8 +195,12 @@ export function ActivityGraph({ activity, createdAt }: ActivityGraphProps & { cr
                         {/* Enhanced Tooltip */}
                         {day.isValid && (
                           <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block z-[9999] whitespace-nowrap bg-zinc-900/90 backdrop-blur-md text-zinc-100 text-xs px-3 py-2 rounded-lg shadow-xl border border-white/10 pointer-events-none animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
-                            <div className="font-semibold">{Math.ceil(day.count)} minutes</div>
-                            <div className="text-zinc-400 text-[10px]">{formatDate(day.date)}</div>
+                            <div className="font-semibold">
+                              {Math.ceil(day.count)} minutes
+                            </div>
+                            <div className="text-zinc-400 text-[10px]">
+                              {formatDate(day.date)}
+                            </div>
                           </div>
                         )}
                       </div>

@@ -1,6 +1,14 @@
 'use client';
 
-import { Calendar, Clock, Film, Loader2, Play, RotateCcw, Tv } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  Film,
+  Loader2,
+  Play,
+  RotateCcw,
+  Tv,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ContentType, type ShowDetails } from '../types';
@@ -35,7 +43,11 @@ export function ContentInfo({
   const getResumeLabel = () => {
     if (!hasWatchProgress) return 'Play';
 
-    if (isSeries && watchProgress?.seasonNumber && watchProgress?.episodeNumber) {
+    if (
+      isSeries &&
+      watchProgress?.seasonNumber &&
+      watchProgress?.episodeNumber
+    ) {
       return `Resume S${watchProgress.seasonNumber} E${watchProgress.episodeNumber}`;
     }
     return 'Resume';
@@ -56,7 +68,9 @@ export function ContentInfo({
         <span
           className={cn(
             'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider',
-            isSeries ? 'bg-purple-600/80 text-white' : 'bg-blue-600/80 text-white',
+            isSeries
+              ? 'bg-purple-600/80 text-white'
+              : 'bg-blue-600/80 text-white',
           )}
         >
           {isSeries ? (

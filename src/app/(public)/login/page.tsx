@@ -37,7 +37,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative z-10">
         {/* Brand */}
         <div className="flex flex-col items-center mb-8 text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-gradient">Welcome Back</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gradient">
+            Welcome Back
+          </h1>
         </div>
 
         {/* Login Card */}

@@ -11,7 +11,13 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   fallback?: React.ReactNode;
 }
 
-export function Avatar({ className, src, alt, fallback, ...props }: AvatarProps) {
+export function Avatar({
+  className,
+  src,
+  alt,
+  fallback,
+  ...props
+}: AvatarProps) {
   const [hasError, setHasError] = React.useState(false);
 
   return (

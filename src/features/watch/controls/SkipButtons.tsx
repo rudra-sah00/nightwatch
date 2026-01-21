@@ -8,7 +8,11 @@ interface SkipButtonProps {
   onSkip: () => void;
 }
 
-export function SkipButton({ direction, seconds = 10, onSkip }: SkipButtonProps) {
+export function SkipButton({
+  direction,
+  seconds = 10,
+  onSkip,
+}: SkipButtonProps) {
   const Icon = direction === 'back' ? SkipBack : SkipForward;
 
   return (
@@ -33,7 +37,11 @@ interface SeekIndicatorProps {
   isVisible: boolean;
 }
 
-export function SeekIndicator({ seconds, direction, isVisible }: SeekIndicatorProps) {
+export function SeekIndicator({
+  seconds,
+  direction,
+  isVisible,
+}: SeekIndicatorProps) {
   if (!isVisible) return null;
 
   return (

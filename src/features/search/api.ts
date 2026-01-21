@@ -1,5 +1,11 @@
 import { apiFetch } from '@/lib/fetch';
-import type { Episode, PlayResponse, SearchHistory, SearchResult, ShowDetails } from './types';
+import type {
+  Episode,
+  PlayResponse,
+  SearchHistory,
+  SearchResult,
+  ShowDetails,
+} from './types';
 
 // ===== CACHE UTILITIES =====
 
@@ -31,14 +37,19 @@ function cleanupCache<T>(cache: Map<string, CacheEntry<T>>, maxSize: number) {
 const searchHistoryCache = createCache<SearchHistory[]>();
 const SEARCH_HISTORY_CACHE_TTL = 5 * 60 * 1000;
 
-export async function getSearchHistory(options?: RequestInit): Promise<SearchHistory[]> {
+export async function getSearchHistory(
+  options?: RequestInit,
+): Promise<SearchHistory[]> {
   const cacheKey = 'history';
   const cached = searchHistoryCache.get(cacheKey);
   if (cached && cached.expiry > Date.now()) {
     return cached.data;
   }
 
-  const { history } = await apiFetch<{ history: SearchHistory[] }>('/api/video/history', options);
+  const { history } = await apiFetch<{ history: SearchHistory[] }>(
+    '/api/video/history',
+    options,
+  );
   searchHistoryCache.set(cacheKey, {
     data: history,
     expiry: Date.now() + SEARCH_HISTORY_CACHE_TTL,
@@ -51,7 +62,10 @@ export function invalidateSearchHistoryCache(): void {
   searchHistoryCache.clear();
 }
 
-export async function deleteSearchHistoryItem(id: string, options?: RequestInit): Promise<void> {
+export async function deleteSearchHistoryItem(
+  id: string,
+  options?: RequestInit,
+): Promise<void> {
   await apiFetch(`/api/video/history/${id}`, {
     method: 'DELETE',
     ...options,
@@ -73,7 +87,10 @@ export async function clearSearchHistory(options?: RequestInit): Promise<void> {
 const searchResultsCache = createCache<SearchResult[]>();
 const SEARCH_CACHE_TTL = 5 * 60 * 1000;
 
-export async function searchContent(query: string, options?: RequestInit): Promise<SearchResult[]> {
+export async function searchContent(
+  query: string,
+  options?: RequestInit,
+): Promise<SearchResult[]> {
   const normalizedQuery = query.toLowerCase().trim();
   const cached = searchResultsCache.get(normalizedQuery);
   if (cached && cached.expiry > Date.now()) {
@@ -103,13 +120,19 @@ export async function searchContent(query: string, options?: RequestInit): Promi
 const showDetailsCache = createCache<ShowDetails>();
 const SHOW_CACHE_TTL = 5 * 60 * 1000;
 
-export async function getShowDetails(id: string, options?: RequestInit): Promise<ShowDetails> {
+export async function getShowDetails(
+  id: string,
+  options?: RequestInit,
+): Promise<ShowDetails> {
   const cached = showDetailsCache.get(id);
   if (cached && cached.expiry > Date.now()) {
     return cached.data;
   }
 
-  const { show } = await apiFetch<{ show: ShowDetails }>(`/api/video/show/${id}`, options);
+  const { show } = await apiFetch<{ show: ShowDetails }>(
+    `/api/video/show/${id}`,
+    options,
+  );
   showDetailsCache.set(id, { data: show, expiry: Date.now() + SHOW_CACHE_TTL });
   cleanupCache(showDetailsCache, 50);
 
@@ -138,7 +161,9 @@ export async function getSeriesEpisodes(
   startSeasonId?: string,
   options?: RequestInit,
 ): Promise<{ episodes: Episode[]; totalEpisodes: number }> {
-  const cacheKey = startSeasonId ? `${seriesId}:${startSeasonId}` : `${seriesId}:all`;
+  const cacheKey = startSeasonId
+    ? `${seriesId}:${startSeasonId}`
+    : `${seriesId}:all`;
   const cached = episodesCache.get(cacheKey);
   if (cached && cached.expiry > Date.now()) {
     return cached.data;
@@ -147,7 +172,10 @@ export async function getSeriesEpisodes(
   const url = startSeasonId
     ? `/api/video/episodes/${seriesId}?start_season_id=${startSeasonId}`
     : `/api/video/episodes/${seriesId}`;
-  const result = await apiFetch<{ episodes: Episode[]; totalEpisodes: number }>(url, options);
+  const result = await apiFetch<{ episodes: Episode[]; totalEpisodes: number }>(
+    url,
+    options,
+  );
 
   episodesCache.set(cacheKey, {
     data: result,
@@ -189,7 +217,10 @@ export interface PlaySeriesParams {
 
 export type PlayParams = PlayMovieParams | PlaySeriesParams;
 
-export async function playVideo(params: PlayParams, options?: RequestInit): Promise<PlayResponse> {
+export async function playVideo(
+  params: PlayParams,
+  options?: RequestInit,
+): Promise<PlayResponse> {
   // Longer timeout since Playwright automation takes ~30+ seconds
   return apiFetch<PlayResponse>('/api/video/play', {
     method: 'POST',

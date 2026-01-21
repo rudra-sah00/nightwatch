@@ -39,7 +39,9 @@ export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/10 flex items-center justify-center">
-            <span className="text-2xl font-bold text-white/20">{episode.episodeNumber}</span>
+            <span className="text-2xl font-bold text-white/20">
+              {episode.episodeNumber}
+            </span>
           </div>
         )}
 

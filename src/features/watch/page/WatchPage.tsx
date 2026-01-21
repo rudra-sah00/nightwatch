@@ -56,7 +56,10 @@ export function WatchPage({
 
   // Apply subtitle settings to CSS variables
   useEffect(() => {
-    document.documentElement.style.setProperty('--subtitle-font-size', subtitleSettings.fontSize);
+    document.documentElement.style.setProperty(
+      '--subtitle-font-size',
+      subtitleSettings.fontSize,
+    );
     document.documentElement.style.setProperty(
       '--subtitle-font-family',
       subtitleSettings.fontFamily,
@@ -119,14 +122,19 @@ export function WatchPage({
   );
 
   // Next episode for series
-  const { showNextEpisode, nextEpisodeInfo, isLoadingNext, playNextEpisode, cancelNextEpisode } =
-    useNextEpisode({
-      metadata,
-      currentTime: state.currentTime,
-      duration: state.duration,
-      isPlaying: state.isPlaying && !state.isPaused,
-      onNavigate: handleNavigate,
-    });
+  const {
+    showNextEpisode,
+    nextEpisodeInfo,
+    isLoadingNext,
+    playNextEpisode,
+    cancelNextEpisode,
+  } = useNextEpisode({
+    metadata,
+    currentTime: state.currentTime,
+    duration: state.duration,
+    isPlaying: state.isPlaying && !state.isPaused,
+    onNavigate: handleNavigate,
+  });
 
   // Handle going back
   const handleBack = useCallback(() => {
@@ -232,7 +240,9 @@ export function WatchPage({
         setQuality(-1); // Auto quality
       } else {
         // Find quality level index
-        const levelIndex = state.qualities.findIndex((q) => q.label === quality);
+        const levelIndex = state.qualities.findIndex(
+          (q) => q.label === quality,
+        );
         if (levelIndex !== -1) {
           setQuality(levelIndex);
         }

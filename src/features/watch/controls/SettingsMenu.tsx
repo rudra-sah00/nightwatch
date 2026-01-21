@@ -1,6 +1,13 @@
 'use client';
 
-import { Check, ChevronRight, Gauge, Settings, Subtitles, Volume2 } from 'lucide-react';
+import {
+  Check,
+  ChevronRight,
+  Gauge,
+  Settings,
+  Subtitles,
+  Volume2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { Quality } from '../player/types';
@@ -141,7 +148,11 @@ export function SettingsMenu({
   const renderQualityMenu = () => (
     <div className="py-1">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-        <button type="button" onClick={handleBack} className="text-white/70 hover:text-white">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="text-white/70 hover:text-white"
+        >
           <ChevronRight className="w-5 h-5 rotate-180" />
         </button>
         <span className="text-white font-medium text-sm">Quality</span>
@@ -172,7 +183,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{quality.label}</span>
-          {currentQuality === quality.label && <Check className="w-4 h-4 text-white" />}
+          {currentQuality === quality.label && (
+            <Check className="w-4 h-4 text-white" />
+          )}
         </button>
       ))}
     </div>
@@ -181,7 +194,11 @@ export function SettingsMenu({
   const renderSpeedMenu = () => (
     <div className="py-1">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-        <button type="button" onClick={handleBack} className="text-white/70 hover:text-white">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="text-white/70 hover:text-white"
+        >
           <ChevronRight className="w-5 h-5 rotate-180" />
         </button>
         <span className="text-white font-medium text-sm">Playback Speed</span>
@@ -198,7 +215,9 @@ export function SettingsMenu({
           }}
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
-          <span className="text-white text-sm">{speed === 1 ? 'Normal' : `${speed}x`}</span>
+          <span className="text-white text-sm">
+            {speed === 1 ? 'Normal' : `${speed}x`}
+          </span>
           {playbackRate === speed && <Check className="w-4 h-4 text-white" />}
         </button>
       ))}
@@ -208,7 +227,11 @@ export function SettingsMenu({
   const renderSubtitlesMenu = () => (
     <div className="py-1">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-        <button type="button" onClick={handleBack} className="text-white/70 hover:text-white">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="text-white/70 hover:text-white"
+        >
           <ChevronRight className="w-5 h-5 rotate-180" />
         </button>
         <span className="text-white font-medium text-sm">Subtitles</span>
@@ -238,7 +261,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{track.label}</span>
-          {currentSubtitle === track.id && <Check className="w-4 h-4 text-white" />}
+          {currentSubtitle === track.id && (
+            <Check className="w-4 h-4 text-white" />
+          )}
         </button>
       ))}
     </div>
@@ -247,7 +272,11 @@ export function SettingsMenu({
   const renderAudioMenu = () => (
     <div className="py-1">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-        <button type="button" onClick={handleBack} className="text-white/70 hover:text-white">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="text-white/70 hover:text-white"
+        >
           <ChevronRight className="w-5 h-5 rotate-180" />
         </button>
         <span className="text-white font-medium text-sm">Audio</span>
@@ -265,7 +294,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{track.label}</span>
-          {currentAudio === track.id && <Check className="w-4 h-4 text-white" />}
+          {currentAudio === track.id && (
+            <Check className="w-4 h-4 text-white" />
+          )}
         </button>
       ))}
     </div>

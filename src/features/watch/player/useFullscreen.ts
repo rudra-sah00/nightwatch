@@ -25,7 +25,11 @@ interface HTMLElementWithWebkit extends HTMLElement {
   webkitRequestFullscreen?: () => Promise<void>;
 }
 
-export function useFullscreen({ containerRef, videoRef, dispatch }: UseFullscreenOptions) {
+export function useFullscreen({
+  containerRef,
+  videoRef,
+  dispatch,
+}: UseFullscreenOptions) {
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile
@@ -56,16 +60,28 @@ export function useFullscreen({ containerRef, videoRef, dispatch }: UseFullscree
 
     // iOS Safari video fullscreen events
     if (videoElem) {
-      videoElem.addEventListener('webkitbeginfullscreen', handleFullscreenChange);
+      videoElem.addEventListener(
+        'webkitbeginfullscreen',
+        handleFullscreenChange,
+      );
       videoElem.addEventListener('webkitendfullscreen', handleFullscreenChange);
     }
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange,
+      );
       if (videoElem) {
-        videoElem.removeEventListener('webkitbeginfullscreen', handleFullscreenChange);
-        videoElem.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        videoElem.removeEventListener(
+          'webkitbeginfullscreen',
+          handleFullscreenChange,
+        );
+        videoElem.removeEventListener(
+          'webkitendfullscreen',
+          handleFullscreenChange,
+        );
       }
     };
   }, [dispatch, videoRef]);
