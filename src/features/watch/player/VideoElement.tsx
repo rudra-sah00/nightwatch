@@ -102,9 +102,13 @@ export const VideoElement = memo(
       >
         <track
           kind="captions"
-          src={captionUrl || 'data:text/vtt;base64,V0VCVlRVCg=='}
+          src={
+            captionUrl ||
+            'data:text/vtt;base64,V0VCVlRUCgowMDowMDowMC4wMDAgLS0+IDAwOjAwOjAwLjAwMQo='
+          }
           label="English"
           srcLang="en"
+          default={!!captionUrl}
         />
       </video>
     );

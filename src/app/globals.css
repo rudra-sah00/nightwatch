@@ -46,6 +46,10 @@
     /* Subtitle customization */
     --subtitle-font-size: 1.25rem;
     --subtitle-font-family: system-ui, -apple-system, sans-serif;
+    --subtitle-bg-color: rgba(0, 0, 0, 0.75);
+    --subtitle-text-color: white;
+    --subtitle-text-shadow: none;
+    --subtitle-opacity: 1;
 
     --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
@@ -219,8 +223,10 @@
 video::cue {
   font-size: var(--subtitle-font-size);
   font-family: var(--subtitle-font-family);
-  background-color: rgba(0, 0, 0, 0.75);
-  color: white;
+  background-color: var(--subtitle-bg-color);
+  color: var(--subtitle-text-color);
+  text-shadow: var(--subtitle-text-shadow);
+  opacity: var(--subtitle-opacity);
   padding: 0.25em 0.5em;
   border-radius: 4px;
   line-height: 1.4;

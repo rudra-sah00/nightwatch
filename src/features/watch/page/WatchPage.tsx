@@ -6,7 +6,12 @@ import { cn } from '@/lib/utils';
 // Controls
 import { ControlBar } from '../controls/ControlBar';
 import { CenterPlayButton } from '../controls/PlayPause';
-import type { SubtitleSettings } from '../controls/SubtitleSelector';
+import {
+  applySubtitleSettings,
+  defaultSubtitleSettings,
+  loadSubtitleSettings,
+  type SubtitleSettings,
+} from '../controls/SubtitleSelector';
 import { BufferingOverlay } from '../overlays/BufferingOverlay';
 import { ErrorOverlay } from '../overlays/ErrorOverlay';
 // Overlays
@@ -48,23 +53,17 @@ export function WatchPage({
 
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
 
-  // Subtitle settings state
-  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>({
-    fontSize: '1.25rem',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  });
+  // Subtitle settings state - load from localStorage
+  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
+    defaultSubtitleSettings,
+  );
 
-  // Apply subtitle settings to CSS variables
+  // Load and apply saved subtitle settings on mount
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--subtitle-font-size',
-      subtitleSettings.fontSize,
-    );
-    document.documentElement.style.setProperty(
-      '--subtitle-font-family',
-      subtitleSettings.fontFamily,
-    );
-  }, [subtitleSettings]);
+    const savedSettings = loadSubtitleSettings();
+    setSubtitleSettings(savedSettings);
+    applySubtitleSettings(savedSettings);
+  }, []);
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false);

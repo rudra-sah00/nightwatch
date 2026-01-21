@@ -99,7 +99,7 @@ export function ControlBar({
     <div
       className={cn(
         'control-bar absolute inset-0 z-10 flex flex-col justify-between pointer-events-none transition-opacity duration-300',
-        state.showControls ? 'opacity-100' : 'opacity-0',
+        state.showControls || state.isLoading ? 'opacity-100' : 'opacity-0',
       )}
     >
       {/* Top Gradient */}

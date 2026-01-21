@@ -11,11 +11,12 @@ export function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
   return (
     <div
       className={cn(
-        'absolute inset-0 flex items-center justify-center bg-black/60 z-20 transition-opacity duration-300',
+        'absolute inset-0 bg-black/60 z-30 transition-opacity duration-300',
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none',
       )}
     >
-      <div className="flex flex-col items-center gap-4">
+      {/* Center the loading spinner using absolute positioning */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
         <div className="relative">
           <div className="w-16 h-16 rounded-full border-4 border-white/20" />
           <Loader2 className="absolute inset-0 w-16 h-16 text-white animate-spin" />
