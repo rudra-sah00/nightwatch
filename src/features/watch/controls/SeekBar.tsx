@@ -22,6 +22,26 @@ interface SpriteSheet {
   interval: number; // Seconds between each thumbnail
 }
 
+// Preview size scales for different screen sizes
+const PREVIEW_SCALES = {
+  base: 1, // Mobile/default
+  lg: 1.3, // Large screens
+  xl: 1.5, // Extra large
+  '2xl': 1.8, // 2K+
+  '3xl': 2.2, // Ultrawide/4K
+};
+
+// Sprite data for rendering
+interface SpriteData {
+  url: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  totalW?: number; // Total sprite sheet width (for spriteSheet type)
+  totalH?: number; // Total sprite sheet height
+}
+
 interface SeekBarProps {
   currentTime: number;
   duration: number;
@@ -44,10 +64,32 @@ export function SeekBar({
 
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
+  const [previewScale, setPreviewScale] = useState(1);
   const barRef = useRef<HTMLDivElement>(null);
 
   // VTT Logic
   const [vttSprites, setVttSprites] = useState<SpriteCue[]>([]);
+
+  // Detect screen size for preview scaling
+  useEffect(() => {
+    const updateScale = () => {
+      const width = window.innerWidth;
+      if (width >= 3440) {
+        setPreviewScale(PREVIEW_SCALES['3xl']);
+      } else if (width >= 2560) {
+        setPreviewScale(PREVIEW_SCALES['2xl']);
+      } else if (width >= 1920) {
+        setPreviewScale(PREVIEW_SCALES.xl);
+      } else if (width >= 1280) {
+        setPreviewScale(PREVIEW_SCALES.lg);
+      } else {
+        setPreviewScale(PREVIEW_SCALES.base);
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   useEffect(() => {
     if (!spriteVtt) return;
@@ -156,19 +198,21 @@ export function SeekBar({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Calculate sprite background position for the given time
-  const getSpriteStyle = useMemo(() => {
+  // Calculate sprite data for the given time
+  const getSpriteStyle = useMemo((): SpriteData | null => {
     if (hoverTime === null) return null;
 
-    // VTT based sprites
+    // VTT based sprites - use original coords, scale via container
     if (vttSprites.length > 0) {
       const cue = vttSprites.find((s) => hoverTime >= s.start && hoverTime < s.end);
       if (cue) {
+        // Return original dimensions - scaling handled by container
         return {
-          backgroundImage: `url(${cue.url})`,
-          backgroundPosition: `-${cue.x}px -${cue.y}px`,
-          width: `${cue.w}px`,
-          height: `${cue.h}px`,
+          url: cue.url,
+          x: cue.x,
+          y: cue.y,
+          w: cue.w,
+          h: cue.h,
         };
       }
     }
@@ -183,48 +227,70 @@ export function SeekBar({
     const row = Math.floor(thumbnailIndex / columns);
 
     return {
-      backgroundImage: `url(${imageUrl})`,
-      backgroundPosition: `-${col * width}px -${row * height}px`,
-      backgroundSize: `${columns * width}px ${rows * height}px`,
-      width: `${width}px`,
-      height: `${height}px`,
+      url: imageUrl,
+      x: col * width,
+      y: row * height,
+      w: width,
+      h: height,
+      totalW: columns * width,
+      totalH: rows * height,
     };
   }, [spriteSheet, hoverTime, vttSprites]);
 
   return (
-    <div className="relative group py-2">
-      {/* Time preview tooltip */}
+    <div className="relative group py-2 lg:py-3 2xl:py-4">
+      {/* Time preview tooltip - only show when hovering */}
       {hoverTime !== null && (
         <div
-          className="absolute bottom-full mb-4 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
-          style={{ left: hoverPosition }}
+          className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
+          style={{ left: Math.max(100 * previewScale, Math.min(hoverPosition, barRef.current ? barRef.current.offsetWidth - 100 * previewScale : hoverPosition)) }}
         >
-          <div className="relative bg-zinc-900/90 backdrop-blur-xl p-1.5 rounded-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)] ring-1 ring-white/5">
-            <div className="relative overflow-hidden rounded-lg bg-black/50 aspect-video min-w-[170px] min-h-[96px]">
+          <div className="relative bg-zinc-900/95 backdrop-blur-xl p-1.5 lg:p-2 2xl:p-2.5 rounded-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)] ring-1 ring-white/5">
+            {/* Sprite thumbnail preview container */}
+            <div 
+              className="relative overflow-hidden rounded-lg bg-black"
+              style={{
+                width: getSpriteStyle ? `${getSpriteStyle.w * previewScale}px` : `${160 * previewScale}px`,
+                height: getSpriteStyle ? `${getSpriteStyle.h * previewScale}px` : `${90 * previewScale}px`,
+              }}
+            >
               {/* Sprite thumbnail preview */}
-              {(spriteSheet || vttSprites.length > 0) && getSpriteStyle ? (
-                <div className="bg-black" style={getSpriteStyle} />
+              {getSpriteStyle ? (
+                <div 
+                  className="absolute bg-no-repeat"
+                  style={{
+                    backgroundImage: `url(${getSpriteStyle.url})`,
+                    backgroundPosition: `-${getSpriteStyle.x}px -${getSpriteStyle.y}px`,
+                    backgroundSize: getSpriteStyle.totalW 
+                      ? `${getSpriteStyle.totalW}px ${getSpriteStyle.totalH}px` 
+                      : 'auto',
+                    width: `${getSpriteStyle.w}px`,
+                    height: `${getSpriteStyle.h}px`,
+                    transform: `scale(${previewScale})`,
+                    transformOrigin: 'top left',
+                  }} 
+                />
               ) : (
                 // Placeholder when no sprite sheet
                 <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-                  <div className="text-xs text-white/30">Preview</div>
+                  <div className="text-xs lg:text-sm 2xl:text-base text-white/30">Preview</div>
                 </div>
               )}
             </div>
             {/* Time display pill */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-md border border-white/10 text-[11px] font-medium text-white/90 shadow-sm tabular-nums tracking-wide">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-2.5 lg:px-3 2xl:px-4 py-1 lg:py-1.5 2xl:py-2 bg-black/80 backdrop-blur-md rounded-md border border-white/10 text-[11px] lg:text-xs 2xl:text-sm font-medium text-white/90 shadow-sm tabular-nums tracking-wide">
               {formatTime(hoverTime)}
             </div>
           </div>
           {/* Tooltip Arrow */}
-          <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-zinc-900/90 -mt-[1px] drop-shadow-sm" />
+          <div className="w-0 h-0 border-l-[8px] lg:border-l-[10px] 2xl:border-l-[12px] border-l-transparent border-r-[8px] lg:border-r-[10px] 2xl:border-r-[12px] border-r-transparent border-t-[8px] lg:border-t-[10px] 2xl:border-t-[12px] border-t-zinc-900/95 -mt-[1px] drop-shadow-sm" />
         </div>
       )}
 
       {/* Seek bar */}
       <div
         ref={barRef}
-        className="relative h-1.5 bg-white/20 rounded-full cursor-pointer group-hover:h-2.5 transition-all duration-200"
+        className="relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full cursor-pointer group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4 transition-all duration-200"
         onClick={handleClick}
         onMouseMove={(e) => {
           handleMouseMove(e);
@@ -269,7 +335,7 @@ export function SeekBar({
 
         {/* Scrubber */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-600 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200 hover:scale-125"
+          className="absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 bg-red-600 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200 hover:scale-125"
           style={{ left: `calc(${progress}% - 8px)` }}
         />
       </div>

@@ -8,6 +8,43 @@ import { getSocket } from '@/lib/ws';
 import { getSeriesEpisodes, getShowDetails, playVideo } from '../api';
 import { ContentType, type Episode, type Season, type ShowDetails } from '../types';
 
+/**
+ * Parse runtime string to seconds
+ * Supports formats like: "2h 30m", "1h 45m", "90m", "2h", "1:30:00", "90"
+ */
+function parseRuntimeToSeconds(runtime: string): number | undefined {
+  if (!runtime) return undefined;
+
+  // Try "Xh Ym" or "Xh" or "Ym" format
+  const hMatch = runtime.match(/(\d+)\s*h/i);
+  const mMatch = runtime.match(/(\d+)\s*m/i);
+
+  if (hMatch || mMatch) {
+    const hours = hMatch ? parseInt(hMatch[1], 10) : 0;
+    const minutes = mMatch ? parseInt(mMatch[1], 10) : 0;
+    return hours * 3600 + minutes * 60;
+  }
+
+  // Try "H:MM:SS" or "MM:SS" format
+  const colonMatch = runtime.match(/^(\d+):(\d+)(?::(\d+))?$/);
+  if (colonMatch) {
+    if (colonMatch[3]) {
+      // H:MM:SS
+      return parseInt(colonMatch[1], 10) * 3600 + parseInt(colonMatch[2], 10) * 60 + parseInt(colonMatch[3], 10);
+    }
+    // MM:SS
+    return parseInt(colonMatch[1], 10) * 60 + parseInt(colonMatch[2], 10);
+  }
+
+  // Try plain number (assume minutes)
+  const plainNum = parseInt(runtime, 10);
+  if (!isNaN(plainNum)) {
+    return plainNum * 60;
+  }
+
+  return undefined;
+}
+
 interface UseContentDetailOptions {
   contentId: string;
   fromContinueWatching?: boolean;
@@ -224,9 +261,13 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
       }
       try {
         if (showData.contentType === ContentType.Movie) {
+          // Parse runtime string to seconds (e.g., "2h 30m" -> 9000)
+          const movieDuration = showData.runtime ? parseRuntimeToSeconds(showData.runtime) : undefined;
+          
           const response = await playVideo({
             type: 'movie',
             title: showData.title,
+            duration: movieDuration,
           }, { signal: controller.signal });
 
           if (controller.signal.aborted) return;
@@ -262,6 +303,7 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
             title: showData.title,
             season: seasonNumber,
             episode: episode.episodeNumber,
+            duration: episode.duration, // Pass episode duration for smart cache TTL
           }, { signal: controller.signal });
 
           if (controller.signal.aborted) return;
