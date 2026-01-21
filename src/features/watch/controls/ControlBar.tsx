@@ -98,39 +98,39 @@ export function ControlBar({
   return (
     <div
       className={cn(
-        'absolute inset-0 z-10 transition-opacity duration-300',
+        'control-bar absolute left-0 right-0 bottom-0 z-10 transition-opacity duration-300',
         state.showControls ? 'opacity-100' : 'opacity-0 pointer-events-none',
       )}
     >
-      {/* Top Gradient */}
-      <div className="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
+      {/* Top Gradient - positioned absolutely from parent container */}
+      <div className="fixed top-0 left-0 right-0 h-36 md:h-48 lg:h-56 2xl:h-64 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 md:h-56 lg:h-64 2xl:h-72 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex items-center gap-4">
+      {/* Top Bar - Fixed to top of screen */}
+      <div className="fixed top-0 left-0 right-0 p-4 md:p-6 lg:p-8 2xl:p-10 flex items-center gap-4 lg:gap-6 z-20">
         <button
           type="button"
           onClick={onBack}
-          className="p-3 rounded-full bg-white/5 hover:bg-white/20 transition-all duration-200 active:scale-95 backdrop-blur-sm border border-white/10"
+          className="p-3 lg:p-4 2xl:p-5 rounded-full bg-white/5 hover:bg-white/20 transition-all duration-200 active:scale-95 backdrop-blur-sm border border-white/10 flex-shrink-0"
         >
-          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 text-white" />
+          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-white font-semibold text-lg md:text-2xl truncate drop-shadow-lg">
+          <h1 className="text-white font-semibold text-lg md:text-2xl lg:text-3xl 2xl:text-4xl truncate drop-shadow-lg">
             {metadata.title}
           </h1>
           {metadata.type === 'series' && metadata.season && metadata.episode && (
-            <p className="text-white/60 text-sm md:text-base">
+            <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
               Season {metadata.season} · Episode {metadata.episode}
             </p>
           )}
         </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 space-y-2">
+      {/* Bottom Controls - pinned to bottom */}
+      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4">
         {/* Progress Bar */}
         <SeekBar
           currentTime={state.currentTime}
@@ -144,25 +144,25 @@ export function ControlBar({
         {/* Controls Row */}
         <div className="flex items-center justify-between">
           {/* Left Controls */}
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
             {/* Play/Pause */}
             <PlayPause isPlaying={state.isPlaying} onToggle={onTogglePlay} size="lg" />
 
             {/* Skip buttons - Desktop only */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1 lg:gap-2">
               <button
                 type="button"
                 onClick={() => onSkip(-10)}
-                className="p-3 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
+                className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
               >
-                <SkipBack className="w-6 h-6 text-white group-hover:text-white/90" />
+                <SkipBack className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
               </button>
               <button
                 type="button"
                 onClick={() => onSkip(10)}
-                className="p-3 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
+                className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
               >
-                <SkipForward className="w-6 h-6 text-white group-hover:text-white/90" />
+                <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
               </button>
             </div>
 
@@ -177,15 +177,15 @@ export function ControlBar({
             </div>
 
             {/* Time Display */}
-            <div className="text-white text-sm md:text-base font-medium ml-2 md:ml-3 tabular-nums">
+            <div className="text-white text-sm md:text-base lg:text-lg 2xl:text-xl font-medium ml-2 md:ml-3 lg:ml-4 2xl:ml-5 tabular-nums">
               <span>{formatTime(state.currentTime)}</span>
-              <span className="text-white/50 mx-1 md:mx-2">/</span>
+              <span className="text-white/50 mx-1 md:mx-2 lg:mx-3 2xl:mx-4">/</span>
               <span className="text-white/70">{formatTime(state.duration)}</span>
             </div>
           </div>
 
           {/* Right Controls */}
-          <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 2xl:gap-4">
             {/* Subtitle Selector (always visible) */}
             <SubtitleSelector
               tracks={subtitleTracksForMenu}

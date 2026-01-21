@@ -322,10 +322,16 @@ export function WatchPage({
     <section
       ref={containerRef}
       className={cn(
-        'relative w-full h-screen bg-black overflow-hidden select-none',
+        'video-container relative w-full h-screen bg-black overflow-hidden select-none',
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
+      style={{
+        width: '100%',
+        height: '100%',
+        maxWidth: '100vw',
+        maxHeight: '100vh',
+      }}
       onMouseMove={showControls}
       onMouseEnter={showControls}
       aria-label="Video Player"

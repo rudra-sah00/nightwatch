@@ -57,6 +57,7 @@ export async function getSeriesEpisodes(
 export interface PlayMovieParams {
   type: 'movie';
   title: string;
+  duration?: number; // Duration in seconds for smart caching
 }
 
 export interface PlaySeriesParams {
@@ -64,6 +65,7 @@ export interface PlaySeriesParams {
   title: string;
   season: number;
   episode: number;
+  duration?: number; // Duration in seconds for smart caching
 }
 
 export type PlayParams = PlayMovieParams | PlaySeriesParams;

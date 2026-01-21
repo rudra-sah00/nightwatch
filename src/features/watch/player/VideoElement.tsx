@@ -86,7 +86,12 @@ export const VideoElement = memo(
     return (
       <video
         ref={ref}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain bg-black"
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'block',
+        }}
         playsInline
         crossOrigin="anonymous"
         onClick={onClick}
