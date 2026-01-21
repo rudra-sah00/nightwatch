@@ -42,7 +42,7 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-    
+
     /* Subtitle customization */
     --subtitle-font-size: 1.25rem;
     --subtitle-font-family: system-ui, -apple-system, sans-serif;
@@ -168,29 +168,29 @@
 
 /* Fullscreen optimizations for large screens */
 :fullscreen {
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100vw;
+  height: 100vh;
 }
 
 :fullscreen video {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100vw !important;
-  max-height: 100vh !important;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
   object-fit: contain;
 }
 
 /* Webkit fullscreen for Safari */
 :-webkit-full-screen {
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100vw;
+  height: 100vh;
 }
 
 :-webkit-full-screen video {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100vw !important;
-  max-height: 100vh !important;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
   object-fit: contain;
 }
 
@@ -200,7 +200,7 @@
   .video-container:-webkit-full-screen {
     padding: 0;
   }
-  
+
   .video-container:fullscreen .control-bar,
   .video-container:-webkit-full-screen .control-bar {
     padding: 1.25rem 2rem;

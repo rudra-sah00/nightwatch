@@ -3,10 +3,18 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  type ContentProgress,
+  fetchContentProgress,
+  getCachedProgress,
+} from '@/features/watch/api';
 import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
 import { getSocket } from '@/lib/ws';
 import { getSeriesEpisodes, getShowDetails, playVideo } from '../api';
 import { ContentType, type Episode, type Season, type ShowDetails } from '../types';
+
+// Re-export for backwards compatibility
+export { invalidateProgressCache } from '@/features/watch/api';
 
 /**
  * Parse runtime string to seconds
@@ -30,7 +38,11 @@ function parseRuntimeToSeconds(runtime: string): number | undefined {
   if (colonMatch) {
     if (colonMatch[3]) {
       // H:MM:SS
-      return parseInt(colonMatch[1], 10) * 3600 + parseInt(colonMatch[2], 10) * 60 + parseInt(colonMatch[3], 10);
+      return (
+        parseInt(colonMatch[1], 10) * 3600 +
+        parseInt(colonMatch[2], 10) * 60 +
+        parseInt(colonMatch[3], 10)
+      );
     }
     // MM:SS
     return parseInt(colonMatch[1], 10) * 60 + parseInt(colonMatch[2], 10);
@@ -38,7 +50,7 @@ function parseRuntimeToSeconds(runtime: string): number | undefined {
 
   // Try plain number (assume minutes)
   const plainNum = parseInt(runtime, 10);
-  if (!isNaN(plainNum)) {
+  if (!Number.isNaN(plainNum)) {
     return plainNum * 60;
   }
 
@@ -50,12 +62,8 @@ interface UseContentDetailOptions {
   fromContinueWatching?: boolean;
 }
 
-interface WatchProgress {
-  seasonNumber?: number;
-  episodeNumber?: number;
-  progressSeconds: number;
-  progressPercent: number;
-}
+// Use ContentProgress from watch/api.ts
+type WatchProgress = ContentProgress;
 
 interface UseContentDetailReturn {
   // State
@@ -75,17 +83,10 @@ interface UseContentDetailReturn {
   handleResume: () => Promise<void>;
 }
 
-interface SocketResponse {
-  success: boolean;
-  progress?: {
-    progressSeconds: number;
-    seasonNumber?: number;
-    episodeNumber?: number;
-    progressPercent: number;
-  };
-}
-
-export function useContentDetail({ contentId, fromContinueWatching = false }: UseContentDetailOptions): UseContentDetailReturn {
+export function useContentDetail({
+  contentId,
+  fromContinueWatching = false,
+}: UseContentDetailOptions): UseContentDetailReturn {
   const router = useRouter();
   const [show, setShow] = useState<ShowDetails | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -107,7 +108,9 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
       try {
         setIsLoading(true);
         progressCheckedRef.current = false;
-        const details = await getShowDetails(contentId, { signal: controller.signal });
+        const details = await getShowDetails(contentId, {
+          signal: controller.signal,
+        });
 
         if (!controller.signal.aborted) {
           setShow(details);
@@ -138,7 +141,9 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
 
     setIsLoadingEpisodes(true);
     try {
-      const { episodes: seasonEpisodes } = await getSeriesEpisodes(showData.id, season.seasonId, { signal: controller.signal });
+      const { episodes: seasonEpisodes } = await getSeriesEpisodes(showData.id, season.seasonId, {
+        signal: controller.signal,
+      });
       if (!controller.signal.aborted) {
         setEpisodes(seasonEpisodes);
       }
@@ -154,7 +159,7 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
       }
     }
 
-    // Cleanup/Cancel previous request if needed? 
+    // Cleanup/Cancel previous request if needed?
     // This function is called by effects/handlers - tricky to return cleanup.
     // Instead we rely on the fact it's async and we check aborted status.
     // But we need to store the controller to abort it if the hook unmounts or if it's called again?
@@ -169,48 +174,50 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
     const socket = getSocket();
     const isSeries = show.contentType === ContentType.Series;
 
-    // Check if there's watch progress for this content
+    // Helper to process progress response (used for both cache hit and socket response)
+    const processProgress = (hasProgress: boolean, progress: WatchProgress | null) => {
+      progressCheckedRef.current = true;
+
+      if (hasProgress && progress && progress.progressSeconds > 0) {
+        setHasWatchProgress(true);
+        setWatchProgress(progress);
+
+        // For series: Set season to the one from progress
+        if (isSeries && show.seasons && show.seasons.length > 0) {
+          const progressSeason = show.seasons.find(
+            (s) => s.seasonNumber === progress?.seasonNumber,
+          );
+          if (progressSeason) {
+            setSelectedSeason(progressSeason);
+            loadSeasonEpisodesInternal(show, progressSeason);
+            return;
+          }
+        }
+      }
+
+      // No progress or no matching season - default to LAST season (highest number)
+      if (isSeries && show.seasons && show.seasons.length > 0) {
+        const sortedSeasons = [...show.seasons].sort(
+          (a, b) => (b.seasonNumber || 0) - (a.seasonNumber || 0),
+        );
+        const lastSeason = sortedSeasons[0];
+        setSelectedSeason(lastSeason);
+        loadSeasonEpisodesInternal(show, lastSeason);
+      }
+    };
+
+    // Check cache first
+    const cached = getCachedProgress(show.id);
+    if (cached) {
+      processProgress(cached.hasProgress, cached.progress);
+      return;
+    }
+
+    // Check if there's watch progress for this content via socket
     if (socket?.connected) {
-      socket.emit(
-        'watch:get_progress',
-        { contentId: show.id },
-        async (response: SocketResponse) => {
-          progressCheckedRef.current = true;
-
-          if (response?.success && response.progress && response.progress.progressSeconds > 0) {
-            setHasWatchProgress(true);
-            setWatchProgress({
-              seasonNumber: response.progress.seasonNumber,
-              episodeNumber: response.progress.episodeNumber,
-              progressSeconds: response.progress.progressSeconds,
-              progressPercent: response.progress.progressPercent,
-            });
-
-            // For series: Set season to the one from progress
-            if (isSeries && show.seasons && show.seasons.length > 0) {
-              const progressSeason = show.seasons.find(
-                (s) => s.seasonNumber === response.progress?.seasonNumber,
-              );
-              if (progressSeason) {
-                setSelectedSeason(progressSeason);
-                loadSeasonEpisodesInternal(show, progressSeason);
-                return;
-              }
-            }
-          }
-
-          // No progress or no matching season - default to LAST season (highest number)
-          if (isSeries && show.seasons && show.seasons.length > 0) {
-            // Sort seasons by seasonNumber descending and take first (highest)
-            const sortedSeasons = [...show.seasons].sort(
-              (a, b) => (b.seasonNumber || 0) - (a.seasonNumber || 0),
-            );
-            const lastSeason = sortedSeasons[0];
-            setSelectedSeason(lastSeason);
-            loadSeasonEpisodesInternal(show, lastSeason);
-          }
-        },
-      );
+      fetchContentProgress(show.id, (progress, hasProgress) => {
+        processProgress(hasProgress, progress);
+      });
     } else {
       // No socket - just set default season
       progressCheckedRef.current = true;
@@ -262,13 +269,18 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
       try {
         if (showData.contentType === ContentType.Movie) {
           // Parse runtime string to seconds (e.g., "2h 30m" -> 9000)
-          const movieDuration = showData.runtime ? parseRuntimeToSeconds(showData.runtime) : undefined;
-          
-          const response = await playVideo({
-            type: 'movie',
-            title: showData.title,
-            duration: movieDuration,
-          }, { signal: controller.signal });
+          const movieDuration = showData.runtime
+            ? parseRuntimeToSeconds(showData.runtime)
+            : undefined;
+
+          const response = await playVideo(
+            {
+              type: 'movie',
+              title: showData.title,
+              duration: movieDuration,
+            },
+            { signal: controller.signal },
+          );
 
           if (controller.signal.aborted) return;
 
@@ -297,14 +309,17 @@ export function useContentDetail({ contentId, fromContinueWatching = false }: Us
           // Pass episode duration for smart cache expiry
           const seasonNumber = episode.seasonNumber || 1;
           cacheSeriesData(showData.id, showData, seasonNumber, currentEpisodes, episode.duration);
-          
-          const response = await playVideo({
-            type: 'series',
-            title: showData.title,
-            season: seasonNumber,
-            episode: episode.episodeNumber,
-            duration: episode.duration, // Pass episode duration for smart cache TTL
-          }, { signal: controller.signal });
+
+          const response = await playVideo(
+            {
+              type: 'series',
+              title: showData.title,
+              season: seasonNumber,
+              episode: episode.episodeNumber,
+              duration: episode.duration, // Pass episode duration for smart cache TTL
+            },
+            { signal: controller.signal },
+          );
 
           if (controller.signal.aborted) return;
 

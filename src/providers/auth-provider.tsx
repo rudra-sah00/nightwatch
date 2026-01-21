@@ -50,7 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Fetch latest profile to get missing fields like createdAt
         try {
-          const { user: profileData } = await getProfile({ signal: controller.signal });
+          const { user: profileData } = await getProfile({
+            signal: controller.signal,
+          });
           if (!controller.signal.aborted) {
             const updatedUser = { ...storedUser, ...profileData };
             setUser(updatedUser);

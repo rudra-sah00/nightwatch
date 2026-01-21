@@ -20,7 +20,11 @@ interface ContentDetailModalProps {
   onClose: () => void;
 }
 
-export function ContentDetailModal({ contentId, fromContinueWatching = false, onClose }: ContentDetailModalProps) {
+export function ContentDetailModal({
+  contentId,
+  fromContinueWatching = false,
+  onClose,
+}: ContentDetailModalProps) {
   // State from custom hook
   const {
     show,

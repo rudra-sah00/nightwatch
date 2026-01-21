@@ -1,5 +1,18 @@
 // Watch Feature Exports
 
+// API and Cache Functions
+export {
+  deleteWatchProgress,
+  fetchContentProgress,
+  fetchContinueWatching,
+  fetchSpriteVtt,
+  getCachedContinueWatching,
+  getCachedProgress,
+  invalidateContinueWatchingCache,
+  invalidateProgressCache,
+  type SpriteCue,
+} from './api';
+
 // Components
 export { ContinueWatching } from './components/ContinueWatching';
 // Controls

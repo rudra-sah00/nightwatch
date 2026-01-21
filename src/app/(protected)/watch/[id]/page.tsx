@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { playVideo } from '@/features/search/api';
+import type { PlayResponse } from '@/features/search/types';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 
@@ -63,7 +64,7 @@ function WatchContent() {
 
     try {
       const decodedTitle = decodeURIComponent(title);
-      let response;
+      let response: PlayResponse;
 
       if (type === 'series' && season && episode) {
         response = await playVideo({
@@ -121,7 +122,9 @@ function WatchContent() {
           {refetchError || 'No Stream Available'}
         </h2>
         <p className="text-white/60 mb-6">
-          {refetchError ? 'There was an error loading the stream' : 'Please start playback from the content page'}
+          {refetchError
+            ? 'There was an error loading the stream'
+            : 'Please start playback from the content page'}
         </p>
         <div className="flex gap-3">
           {refetchError && (

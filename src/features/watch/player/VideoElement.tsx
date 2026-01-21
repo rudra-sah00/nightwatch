@@ -96,14 +96,12 @@ export const VideoElement = memo(
         crossOrigin="anonymous"
         onClick={onClick}
       >
-        {captionUrl && (
-          <track
-            kind="captions"
-            src={captionUrl}
-            label="English"
-            srcLang="en"
-          />
-        )}
+        <track
+          kind="captions"
+          src={captionUrl || 'data:text/vtt;base64,V0VCVlRVCg=='}
+          label="English"
+          srcLang="en"
+        />
       </video>
     );
   }),

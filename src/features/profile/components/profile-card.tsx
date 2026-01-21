@@ -74,22 +74,25 @@ export function ProfileCard() {
     fileInputRef.current?.click();
   }, []);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    try {
-      setIsUploading(true);
-      const { url } = await uploadProfileImage(file);
-      // Update user profile photo in auth context
-      updateUser({ profilePhoto: url });
-      toast.success('Profile image updated successfully');
-    } catch {
-      toast.error('Failed to upload profile image');
-    } finally {
-      setIsUploading(false);
-    }
-  }, [updateUser]);
+      try {
+        setIsUploading(true);
+        const { url } = await uploadProfileImage(file);
+        // Update user profile photo in auth context
+        updateUser({ profilePhoto: url });
+        toast.success('Profile image updated successfully');
+      } catch {
+        toast.error('Failed to upload profile image');
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [updateUser],
+  );
 
   const userCreatedAtDate = useMemo(
     () => (user?.createdAt ? new Date(user.createdAt) : undefined),

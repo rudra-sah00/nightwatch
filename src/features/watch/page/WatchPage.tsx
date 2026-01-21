@@ -57,7 +57,10 @@ export function WatchPage({
   // Apply subtitle settings to CSS variables
   useEffect(() => {
     document.documentElement.style.setProperty('--subtitle-font-size', subtitleSettings.fontSize);
-    document.documentElement.style.setProperty('--subtitle-font-family', subtitleSettings.fontFamily);
+    document.documentElement.style.setProperty(
+      '--subtitle-font-family',
+      subtitleSettings.fontFamily,
+    );
   }, [subtitleSettings]);
 
   // Mobile detection
@@ -108,24 +111,22 @@ export function WatchPage({
   });
 
   // Handle navigating to next episode
-  const handleNavigate = useCallback((url: string) => {
-    router.push(url);
-  }, [router]);
+  const handleNavigate = useCallback(
+    (url: string) => {
+      router.push(url);
+    },
+    [router],
+  );
 
   // Next episode for series
-  const {
-    showNextEpisode,
-    nextEpisodeInfo,
-    isLoadingNext,
-    playNextEpisode,
-    cancelNextEpisode,
-  } = useNextEpisode({
-    metadata,
-    currentTime: state.currentTime,
-    duration: state.duration,
-    isPlaying: state.isPlaying && !state.isPaused,
-    onNavigate: handleNavigate,
-  });
+  const { showNextEpisode, nextEpisodeInfo, isLoadingNext, playNextEpisode, cancelNextEpisode } =
+    useNextEpisode({
+      metadata,
+      currentTime: state.currentTime,
+      duration: state.duration,
+      isPlaying: state.isPlaying && !state.isPaused,
+      onNavigate: handleNavigate,
+    });
 
   // Handle going back
   const handleBack = useCallback(() => {

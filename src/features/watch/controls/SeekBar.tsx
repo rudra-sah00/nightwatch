@@ -2,17 +2,9 @@
 
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fetchSpriteVtt, type SpriteCue } from '../api';
 
-// Sprite sheet configuration
-interface SpriteCue {
-  start: number;
-  end: number;
-  url: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+// Sprite sheet configuration (keep interface here as it's UI-specific)
 interface SpriteSheet {
   imageUrl: string;
   width: number; // Width of each thumbnail
@@ -94,61 +86,19 @@ export function SeekBar({
   useEffect(() => {
     if (!spriteVtt) return;
 
-    const parseVttTime = (timestamp: string) => {
-      if (!timestamp) return 0;
-      const parts = timestamp.split(':');
-      if (parts.length === 3) {
-        return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
-      }
-      if (parts.length === 2) {
-        return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
-      }
-      return parseFloat(parts[0]);
-    };
+    let cancelled = false;
 
-    fetch(spriteVtt)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.text();
-      })
-      .then((text) => {
-        const sprites: SpriteCue[] = [];
-        const lines = text.split('\n');
-        let currentStart = 0;
-        let currentEnd = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (line.includes('-->')) {
-            const parts = line.split('-->');
-            currentStart = parseVttTime(parts[0].trim());
-            currentEnd = parseVttTime(parts[1].trim());
-          } else if (line.includes('#xywh=')) {
-            const [url, hash] = line.split('#xywh=');
-            const coords = hash.split(',').map(Number);
-            if (coords.length === 4) {
-              sprites.push({
-                start: currentStart,
-                end: currentEnd,
-                url,
-                x: coords[0],
-                y: coords[1],
-                w: coords[2],
-                h: coords[3],
-              });
-            }
-          }
+    fetchSpriteVtt(spriteVtt)
+      .then((sprites) => {
+        if (!cancelled) {
+          setVttSprites(sprites);
         }
-        setVttSprites(sprites);
-
-        // Preload unique images for instant hover
-        const uniqueUrls = new Set(sprites.map((s) => s.url));
-        uniqueUrls.forEach((url) => {
-          const img = new Image();
-          img.src = url;
-        });
       })
       .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, [spriteVtt]);
 
   const handleMouseMove = useCallback(
@@ -243,32 +193,44 @@ export function SeekBar({
       {hoverTime !== null && (
         <div
           className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
-          style={{ left: Math.max(100 * previewScale, Math.min(hoverPosition, barRef.current ? barRef.current.offsetWidth - 100 * previewScale : hoverPosition)) }}
+          style={{
+            left: Math.max(
+              100 * previewScale,
+              Math.min(
+                hoverPosition,
+                barRef.current ? barRef.current.offsetWidth - 100 * previewScale : hoverPosition,
+              ),
+            ),
+          }}
         >
           <div className="relative bg-zinc-900/95 backdrop-blur-xl p-1.5 lg:p-2 2xl:p-2.5 rounded-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)] ring-1 ring-white/5">
             {/* Sprite thumbnail preview container */}
-            <div 
+            <div
               className="relative overflow-hidden rounded-lg bg-black"
               style={{
-                width: getSpriteStyle ? `${getSpriteStyle.w * previewScale}px` : `${160 * previewScale}px`,
-                height: getSpriteStyle ? `${getSpriteStyle.h * previewScale}px` : `${90 * previewScale}px`,
+                width: getSpriteStyle
+                  ? `${getSpriteStyle.w * previewScale}px`
+                  : `${160 * previewScale}px`,
+                height: getSpriteStyle
+                  ? `${getSpriteStyle.h * previewScale}px`
+                  : `${90 * previewScale}px`,
               }}
             >
               {/* Sprite thumbnail preview */}
               {getSpriteStyle ? (
-                <div 
+                <div
                   className="absolute bg-no-repeat"
                   style={{
                     backgroundImage: `url(${getSpriteStyle.url})`,
                     backgroundPosition: `-${getSpriteStyle.x}px -${getSpriteStyle.y}px`,
-                    backgroundSize: getSpriteStyle.totalW 
-                      ? `${getSpriteStyle.totalW}px ${getSpriteStyle.totalH}px` 
+                    backgroundSize: getSpriteStyle.totalW
+                      ? `${getSpriteStyle.totalW}px ${getSpriteStyle.totalH}px`
                       : 'auto',
                     width: `${getSpriteStyle.w}px`,
                     height: `${getSpriteStyle.h}px`,
                     transform: `scale(${previewScale})`,
                     transformOrigin: 'top left',
-                  }} 
+                  }}
                 />
               ) : (
                 // Placeholder when no sprite sheet
