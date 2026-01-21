@@ -3,55 +3,94 @@ import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { WatchActivity } from './types';
 
-export async function getProfile(options?: RequestInit): Promise<{ user: User }> {
-  return apiFetch('/api/auth/me', options);
+// ===== CACHE UTILITIES =====
+
+interface CacheEntry<T> {
+  data: T;
+  expiry: number;
 }
 
-export async function updateProfile(data: Partial<User>, options?: RequestInit): Promise<{ user: User }> {
-  return apiFetch('/api/user/profile', {
+// Profile cache (5 minutes)
+let profileCache: CacheEntry<{ user: User }> | null = null;
+const PROFILE_CACHE_TTL = 5 * 60 * 1000;
+
+// Watch activity cache (5 minutes)
+let watchActivityCache: CacheEntry<WatchActivity[]> | null = null;
+const WATCH_ACTIVITY_CACHE_TTL = 5 * 60 * 1000;
+
+export async function getProfile(options?: RequestInit): Promise<{ user: User }> {
+  // Check cache first
+  if (profileCache && profileCache.expiry > Date.now()) {
+    return profileCache.data;
+  }
+
+  const result = await apiFetch<{ user: User }>('/api/auth/me', options);
+  profileCache = { data: result, expiry: Date.now() + PROFILE_CACHE_TTL };
+  return result;
+}
+
+// Invalidate profile cache (call after updates)
+export function invalidateProfileCache(): void {
+  profileCache = null;
+}
+
+export async function updateProfile(
+  data: Partial<User>,
+  options?: RequestInit,
+): Promise<{ user: User }> {
+  const result = await apiFetch<{ user: User }>('/api/user/profile', {
     method: 'PATCH',
     body: JSON.stringify(data),
     ...options,
   });
+  // Update cache with new data
+  profileCache = { data: result, expiry: Date.now() + PROFILE_CACHE_TTL };
+  return result;
 }
 
-export async function checkUsername(username: string, options?: RequestInit): Promise<{ available: boolean }> {
+export async function checkUsername(
+  username: string,
+  options?: RequestInit,
+): Promise<{ available: boolean }> {
   return apiFetch(`/api/user/check-username/${username}`, options);
 }
 
 export async function getWatchActivity(options?: RequestInit): Promise<WatchActivity[]> {
+  // Check cache first
+  if (watchActivityCache && watchActivityCache.expiry > Date.now()) {
+    return watchActivityCache.data;
+  }
+
   const { activity } = await apiFetch<{
     activity: { date: string; watchSeconds: number; level: number }[];
   }>('/api/watch/activity', options);
-  return activity.map((a) => ({
+
+  const mappedActivity = activity.map((a) => ({
     date: a.date,
     count: a.watchSeconds / 60,
     level: a.level as WatchActivity['level'],
   }));
+
+  watchActivityCache = {
+    data: mappedActivity,
+    expiry: Date.now() + WATCH_ACTIVITY_CACHE_TTL,
+  };
+  return mappedActivity;
+}
+
+// Invalidate watch activity cache (call after significant watch time)
+export function invalidateWatchActivityCache(): void {
+  watchActivityCache = null;
 }
 
 export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('image', file);
 
-  // We can't use apiFetch for FormData directly if it sets Content-Type to json
-  // Usually apiFetch wrapper handles this or we need to override.
-  // My apiFetch forces 'Content-Type': 'application/json'.
-  // I should probably manually fetch or update apiFetch.
-  // For now I'll use raw fetch wrapper or assume apiFetch can be patched.
-  // Actually best to just use fetch + get token logic if needed.
-  // But apiFetch includes credentials: included.
-
-  // I'll assume simple fetch for now since I can't easily change apiFetch right now without risk.
-  // Actually I can modify apiFetch to NOT set Content-Type if body is FormData.
-  // But let's check apiFetch implementation in step 512.
-  // It spreads headers.
-
-  return fetch(`${env.BACKEND_URL}/api/user/profile-image`, {
+  const result = await fetch(`${env.BACKEND_URL}/api/user/profile-image`, {
     method: 'POST',
     body: formData,
     credentials: 'include',
-    // no Content-Type header so browser sets boundary
   }).then(async (res) => {
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
@@ -59,6 +98,10 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
     }
     return res.json();
   });
+
+  // Invalidate profile cache so fresh data is fetched
+  invalidateProfileCache();
+  return result;
 }
 
 export async function changePassword(

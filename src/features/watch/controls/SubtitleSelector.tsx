@@ -40,11 +40,14 @@ interface SubtitleSelectorProps {
 
 type MenuScreen = 'tracks' | 'style';
 
-export function SubtitleSelector({ 
-  tracks, 
-  currentTrack, 
+export function SubtitleSelector({
+  tracks,
+  currentTrack,
   onTrackChange,
-  subtitleSettings = { fontSize: '1.25rem', fontFamily: 'system-ui, -apple-system, sans-serif' },
+  subtitleSettings = {
+    fontSize: '1.25rem',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+  },
   onSubtitleSettingsChange,
 }: SubtitleSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,10 +124,7 @@ export function SubtitleSelector({
           )}
         >
           <span
-            className={cn(
-              'text-sm',
-              !currentTrack ? 'text-white font-medium' : 'text-white/80',
-            )}
+            className={cn('text-sm', !currentTrack ? 'text-white font-medium' : 'text-white/80')}
           >
             Off
           </span>
@@ -240,7 +240,9 @@ export function SubtitleSelector({
             onClick={() => handleFontFamilyChange(font.value)}
             className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 transition-colors"
           >
-            <span className="text-white text-sm" style={{ fontFamily: font.value }}>{font.label}</span>
+            <span className="text-white text-sm" style={{ fontFamily: font.value }}>
+              {font.label}
+            </span>
             {subtitleSettings.fontFamily === font.value && (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />

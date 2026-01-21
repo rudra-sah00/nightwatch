@@ -108,13 +108,14 @@ export function ContentInfo({
       )}
 
       {/* Play/Resume Button - Now for both Movies AND Series */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           size="lg"
           className={cn(
-            'gap-2 px-8 py-6 text-lg font-semibold shadow-lg',
-            'bg-white text-black hover:bg-white/90',
-            hasWatchProgress && 'bg-primary text-white hover:bg-primary/90',
+            'gap-2.5 px-8 py-6 text-lg font-semibold shadow-xl transition-all duration-200',
+            hasWatchProgress
+              ? 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 border border-red-400/30'
+              : 'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
           disabled={isPlaying}
@@ -134,7 +135,7 @@ export function ContentInfo({
           <Button
             size="lg"
             variant="outline"
-            className="gap-2 px-6 py-6 text-lg font-semibold border-white/20 text-white hover:bg-white/10"
+            className="gap-2 px-6 py-6 text-lg font-semibold border-white/30 text-white hover:bg-white/15 hover:border-white/40 transition-all duration-200"
             onClick={onPlay}
           >
             <Play className="w-4 h-4" />

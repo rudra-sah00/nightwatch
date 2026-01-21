@@ -69,10 +69,12 @@ export function NextEpisodeOverlay({
 
   return (
     <div className="absolute bottom-24 right-6 z-20 animate-in slide-in-from-right-4 fade-in duration-300">
-      <div className={cn(
-        'w-80 bg-zinc-900/95 backdrop-blur-xl rounded-xl overflow-hidden',
-        'shadow-2xl shadow-black/50 border border-white/10',
-      )}>
+      <div
+        className={cn(
+          'w-80 bg-zinc-900/95 backdrop-blur-xl rounded-xl overflow-hidden',
+          'shadow-2xl shadow-black/50 border border-white/10',
+        )}
+      >
         {/* Header */}
         <div className="px-4 py-3 bg-white/5 border-b border-white/10">
           <div className="flex items-center gap-2">
@@ -81,9 +83,7 @@ export function NextEpisodeOverlay({
               {isNextSeason ? 'Next Season' : 'Next Episode'}
             </span>
             {!cancelled && autoPlayDelay > 0 && !isLoading && (
-              <span className="ml-auto text-xs text-white/50">
-                Playing in {countdown}s
-              </span>
+              <span className="ml-auto text-xs text-white/50">Playing in {countdown}s</span>
             )}
           </div>
         </div>
@@ -119,9 +119,7 @@ export function NextEpisodeOverlay({
                 {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
               </h4>
               {nextEpisode.duration && (
-                <p className="text-xs text-white/40 mt-1">
-                  {nextEpisode.duration}m
-                </p>
+                <p className="text-xs text-white/40 mt-1">{nextEpisode.duration}m</p>
               )}
             </div>
           </div>

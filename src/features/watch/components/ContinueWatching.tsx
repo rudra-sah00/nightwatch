@@ -1,12 +1,17 @@
 'use client';
 
-import { Clock, Film, Loader2, RotateCcw, Tv, X } from 'lucide-react';
+import { Clock, Film, Loader2, Tv, X } from 'lucide-react';
 import Image from 'next/image';
 import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getSocket } from '@/lib/ws';
+import {
+  fetchContinueWatching as apiFetchContinueWatching,
+  deleteWatchProgress,
+  getCachedContinueWatching,
+} from '../api';
 import type { WatchProgress } from '../types';
 
 interface ContinueWatchingProps {
@@ -15,69 +20,83 @@ interface ContinueWatchingProps {
   onLoadComplete?: (itemCount: number) => void;
 }
 
-interface SocketResponse {
-  success: boolean;
-  items?: WatchProgress[];
-  error?: string;
-}
-
 export function ContinueWatching({
   className,
   onSelectContent,
   onLoadComplete,
 }: ContinueWatchingProps) {
-  // const router = useRouter();
   const [items, setItems] = useState<WatchProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
+  const lastFetchRef = useRef<number>(0);
 
-  // Fetch continue watching items
-  const fetchContinueWatching = useCallback(() => {
-    const socket = getSocket();
-    if (!socket?.connected) {
-      setIsLoading(false);
-      onLoadComplete?.(0);
-      return;
-    }
+  // Fetch continue watching items with stale-while-revalidate pattern
+  const fetchItems = useCallback(
+    (force = false) => {
+      const now = Date.now();
 
-    socket.emit('watch:get_continue_watching', { limit: 10 }, (response: SocketResponse) => {
-      setIsLoading(false);
-      if (response?.success && response.items) {
-        setItems(response.items);
-        onLoadComplete?.(response.items.length);
-      } else {
-        // setError(response?.error || 'Failed to load');
-        onLoadComplete?.(0);
+      // If cache is fresh and not forced, use cached data
+      if (!force) {
+        const cached = getCachedContinueWatching();
+        if (cached) {
+          setItems(cached);
+          setIsLoading(false);
+          onLoadComplete?.(cached.length);
+          return;
+        }
       }
-    });
-  }, [onLoadComplete]);
+
+      // Prevent duplicate fetches within 1 second
+      if (now - lastFetchRef.current < 1000) {
+        return;
+      }
+      lastFetchRef.current = now;
+
+      const socket = getSocket();
+      if (!socket?.connected) {
+        setIsLoading(false);
+        onLoadComplete?.(0);
+        return;
+      }
+
+      apiFetchContinueWatching(10, (fetchedItems, _error) => {
+        setIsLoading(false);
+        if (fetchedItems) {
+          setItems(fetchedItems);
+          onLoadComplete?.(fetchedItems.length);
+        } else {
+          onLoadComplete?.(0);
+        }
+      });
+    },
+    [onLoadComplete],
+  );
 
   useEffect(() => {
     const socket = getSocket();
 
     if (socket?.connected) {
       // Avoid sync state update in effect
-      setTimeout(() => fetchContinueWatching(), 0);
+      setTimeout(() => fetchItems(), 0);
     } else if (socket) {
-      socket.once('connect', fetchContinueWatching);
+      socket.once('connect', () => fetchItems());
     } else {
       // Avoid sync state update in effect
       setTimeout(() => setIsLoading(false), 0);
     }
 
-    // Refresh on window focus
+    // Refresh on window focus (with debounce via cache)
     const handleFocus = () => {
       if (getSocket()?.connected) {
-        fetchContinueWatching();
+        fetchItems(); // Cache will prevent excessive refetch
       }
     };
     window.addEventListener('focus', handleFocus);
 
     return () => {
       window.removeEventListener('focus', handleFocus);
-      socket?.off('connect', fetchContinueWatching);
+      socket?.off('connect', fetchItems);
     };
-  }, [fetchContinueWatching]);
+  }, [fetchItems]);
 
   // Handle selecting content - opens modal
   const handleSelect = useCallback(
@@ -92,23 +111,14 @@ export function ContinueWatching({
   // Handle removing from continue watching
   const handleRemove = useCallback((item: WatchProgress, e: React.MouseEvent) => {
     e.stopPropagation();
-    const socket = getSocket();
-    if (!socket?.connected) return;
 
-    // Backend expects progressId (which is item.id)
-    socket.emit(
-      'watch:delete_progress',
-      {
-        progressId: item.id,
-      },
-      (response: SocketResponse) => {
-        if (response?.success) {
-          setItems((prev) => prev.filter((i) => i.id !== item.id));
-        } else {
-          toast.error('Failed to remove from list');
-        }
-      },
-    );
+    deleteWatchProgress(item.id, (success) => {
+      if (success) {
+        setItems((prev) => prev.filter((i) => i.id !== item.id));
+      } else {
+        toast.error('Failed to remove from list');
+      }
+    });
   }, []);
 
   // Format remaining time
@@ -141,20 +151,14 @@ export function ContinueWatching({
       {/* Vertical List items */}
       <div className="flex flex-col gap-2">
         {items.map((item) => (
-          <div
+          <button
             key={item.id}
-            role="button"
-            tabIndex={0}
+            type="button"
             className={cn(
               'group flex items-center gap-4 p-2 rounded-xl cursor-pointer w-full text-left',
               'hover:bg-accent/40 transition-all border border-transparent hover:border-border/50',
             )}
             onClick={() => handleSelect(item)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleSelect(item);
-              }
-            }}
           >
             {/* Thumbnail */}
             <div className="relative w-48 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-muted shadow-sm">
@@ -182,14 +186,6 @@ export function ContinueWatching({
                   className="h-full bg-red-600 transition-all"
                   style={{ width: `${item.progressPercent}%` }}
                 />
-              </div>
-
-              {/* Resume overlay - enhanced styling */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm border border-primary/50 shadow-lg">
-                  <RotateCcw className="w-4 h-4 text-white" />
-                  <span className="text-xs font-medium text-white">Resume</span>
-                </div>
               </div>
             </div>
 
@@ -242,7 +238,7 @@ export function ContinueWatching({
                 <X className="w-5 h-5" />
               </button>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

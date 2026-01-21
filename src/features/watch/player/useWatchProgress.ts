@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { invalidateWatchActivityCache } from '@/features/profile/api';
+import { invalidateContinueWatchingCache, invalidateProgressCache } from '@/features/watch/api';
 import { getSocket } from '@/lib/ws';
 import type { VideoMetadata } from './types';
 
@@ -54,6 +56,10 @@ export function useWatchProgress({
           if (res?.success) {
             // Reset accumulated seconds on success
             accumulateSecondsRef.current = Math.max(0, accumulateSecondsRef.current - seconds);
+            // Invalidate watch activity cache for real-time updates
+            if (forceFlush) {
+              invalidateWatchActivityCache();
+            }
           }
         },
       );
@@ -95,7 +101,10 @@ export function useWatchProgress({
       };
 
       socket.emit('watch:update_progress', payload, (res: SocketResponse) => {
-        if (!res?.success) {
+        if (res?.success) {
+          // Invalidate caches for real-time updates when user returns to home
+          invalidateProgressCache(contentId);
+          invalidateContinueWatchingCache();
         }
       });
     }

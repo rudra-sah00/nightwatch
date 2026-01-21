@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getSeriesEpisodes, getShowDetails, playVideo } from '@/features/search/api';
-import type { Episode, Season, ShowDetails } from '@/features/search/types';
+import type { Episode, ShowDetails } from '@/features/search/types';
 import type { NextEpisodeInfo } from '../overlays/NextEpisodeOverlay';
 import type { VideoMetadata } from './types';
 
@@ -30,10 +30,10 @@ function calculateCacheExpiry(episodeDurationSeconds?: number): number {
   if (!episodeDurationSeconds || episodeDurationSeconds <= 0) {
     return MIN_CACHE_EXPIRY_MS;
   }
-  
+
   // Convert to ms and add buffer
-  const durationBasedExpiry = (episodeDurationSeconds * 1000) + CACHE_BUFFER_MS;
-  
+  const durationBasedExpiry = episodeDurationSeconds * 1000 + CACHE_BUFFER_MS;
+
   // Return the larger of duration-based or minimum expiry
   return Math.max(durationBasedExpiry, MIN_CACHE_EXPIRY_MS);
 }
@@ -43,19 +43,19 @@ function calculateCacheExpiry(episodeDurationSeconds?: number): number {
  */
 export function getCachedSeriesData(seriesId: string): CachedSeriesData | null {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const cached = sessionStorage.getItem(SERIES_CACHE_KEY);
     if (!cached) return null;
-    
+
     const data: CachedSeriesData = JSON.parse(cached);
-    
+
     // Check if it's for the same series and not expired
     const expiryMs = data.expiryMs || MIN_CACHE_EXPIRY_MS;
     if (data.seriesId === seriesId && Date.now() - data.timestamp < expiryMs) {
       return data;
     }
-    
+
     return null;
   } catch {
     return null;
@@ -71,20 +71,18 @@ export function cacheSeriesData(
   showDetails: ShowDetails,
   currentSeasonNumber: number,
   currentSeasonEpisodes: Episode[],
-  episodeDurationSeconds?: number
+  episodeDurationSeconds?: number,
 ): void {
   if (typeof window === 'undefined') return;
-  
+
   try {
     const existingCache = getCachedSeriesData(seriesId);
-    
+
     // Calculate smart expiry based on episode duration
     const newExpiry = calculateCacheExpiry(episodeDurationSeconds);
     // Keep the longer expiry if existing cache has more time
-    const expiryMs = existingCache 
-      ? Math.max(existingCache.expiryMs, newExpiry)
-      : newExpiry;
-    
+    const expiryMs = existingCache ? Math.max(existingCache.expiryMs, newExpiry) : newExpiry;
+
     const cacheData: CachedSeriesData = {
       seriesId,
       showDetails,
@@ -92,10 +90,10 @@ export function cacheSeriesData(
       timestamp: Date.now(),
       expiryMs,
     };
-    
+
     // Add/update the current season's episodes
     cacheData.loadedSeasons[currentSeasonNumber] = currentSeasonEpisodes;
-    
+
     sessionStorage.setItem(SERIES_CACHE_KEY, JSON.stringify(cacheData));
   } catch {
     // Storage quota exceeded or other error - ignore
@@ -140,9 +138,12 @@ export function useNextEpisode({
   const [nextEpisodeInfo, setNextEpisodeInfo] = useState<NextEpisodeInfo | null>(null);
   const [isLoadingNext, setIsLoadingNext] = useState(false);
   const [cancelled, setCancelled] = useState(false);
-  
+
   const fetchedRef = useRef(false);
-  const currentEpisodeRef = useRef({ season: metadata.season, episode: metadata.episode });
+  const currentEpisodeRef = useRef({
+    season: metadata.season,
+    episode: metadata.episode,
+  });
 
   // Reset when episode changes
   useEffect(() => {
@@ -154,7 +155,10 @@ export function useNextEpisode({
       setNextEpisodeInfo(null);
       setShowNextEpisode(false);
       setCancelled(false);
-      currentEpisodeRef.current = { season: metadata.season, episode: metadata.episode };
+      currentEpisodeRef.current = {
+        season: metadata.season,
+        episode: metadata.episode,
+      };
     }
   }, [metadata.season, metadata.episode]);
 
@@ -165,64 +169,60 @@ export function useNextEpisode({
     const fetchNextEpisode = async () => {
       try {
         fetchedRef.current = true;
-        
+
         const currentSeason = metadata.season || 1;
         const currentEpisode = metadata.episode || 1;
-        
+        const seriesId = metadata.seriesId;
+        if (!seriesId) return;
+
         // Try to get cached data first
-        const cachedData = getCachedSeriesData(metadata.seriesId!);
-        
+        const cachedData = getCachedSeriesData(seriesId);
+
         let showDetails: ShowDetails;
         let currentSeasonEpisodes: Episode[];
-        
+
         if (cachedData) {
           // Use cached show details
           showDetails = cachedData.showDetails;
-          
+
           // Check if we have cached episodes for current season
           if (cachedData.loadedSeasons[currentSeason]) {
             currentSeasonEpisodes = cachedData.loadedSeasons[currentSeason];
           } else {
             // Need to fetch episodes for this season
             const currentSeasonData = showDetails.seasons?.find(
-              (s) => s.seasonNumber === currentSeason
+              (s) => s.seasonNumber === currentSeason,
             );
             if (!currentSeasonData) return;
-            
-            const { episodes } = await getSeriesEpisodes(
-              metadata.seriesId!,
-              currentSeasonData.seasonId
-            );
+
+            const { episodes } = await getSeriesEpisodes(seriesId, currentSeasonData.seasonId);
             currentSeasonEpisodes = episodes;
-            
+
             // Update cache with new season data
-            cacheSeriesData(metadata.seriesId!, showDetails, currentSeason, currentSeasonEpisodes);
+            cacheSeriesData(seriesId, showDetails, currentSeason, currentSeasonEpisodes);
           }
         } else {
           // No cache - fetch fresh data
-          showDetails = await getShowDetails(metadata.seriesId!);
+          showDetails = await getShowDetails(seriesId);
           if (!showDetails.seasons || showDetails.seasons.length === 0) return;
-          
+
           const currentSeasonData = showDetails.seasons.find(
-            (s) => s.seasonNumber === currentSeason
+            (s) => s.seasonNumber === currentSeason,
           );
           if (!currentSeasonData) return;
-          
-          const { episodes } = await getSeriesEpisodes(
-            metadata.seriesId!,
-            currentSeasonData.seasonId
-          );
+
+          const { episodes } = await getSeriesEpisodes(seriesId, currentSeasonData.seasonId);
           currentSeasonEpisodes = episodes;
-          
+
           // Cache the data for future use
-          cacheSeriesData(metadata.seriesId!, showDetails, currentSeason, currentSeasonEpisodes);
+          cacheSeriesData(seriesId, showDetails, currentSeason, currentSeasonEpisodes);
         }
 
         if (!showDetails.seasons || showDetails.seasons.length === 0) return;
 
         // Find next episode in current season
         const nextEpisodeInSeason = currentSeasonEpisodes.find(
-          (ep) => ep.episodeNumber === currentEpisode + 1
+          (ep) => ep.episodeNumber === currentEpisode + 1,
         );
 
         if (nextEpisodeInSeason) {
@@ -238,30 +238,25 @@ export function useNextEpisode({
         } else {
           // Current season ended - check for next season
           const nextSeasonData = showDetails.seasons.find(
-            (s) => s.seasonNumber === currentSeason + 1
+            (s) => s.seasonNumber === currentSeason + 1,
           );
 
           if (nextSeasonData) {
             // Check cache for next season episodes
             let nextSeasonEpisodes: Episode[];
-            
+
             if (cachedData?.loadedSeasons[currentSeason + 1]) {
               nextSeasonEpisodes = cachedData.loadedSeasons[currentSeason + 1];
             } else {
               // Fetch first episode of next season
-              const { episodes } = await getSeriesEpisodes(
-                metadata.seriesId!,
-                nextSeasonData.seasonId
-              );
+              const { episodes } = await getSeriesEpisodes(seriesId, nextSeasonData.seasonId);
               nextSeasonEpisodes = episodes;
-              
+
               // Update cache with next season data
-              cacheSeriesData(metadata.seriesId!, showDetails, currentSeason + 1, nextSeasonEpisodes);
+              cacheSeriesData(seriesId, showDetails, currentSeason + 1, nextSeasonEpisodes);
             }
 
-            const firstEpisodeNextSeason = nextSeasonEpisodes.find(
-              (ep) => ep.episodeNumber === 1
-            );
+            const firstEpisodeNextSeason = nextSeasonEpisodes.find((ep) => ep.episodeNumber === 1);
 
             if (firstEpisodeNextSeason) {
               setNextEpisodeInfo({
@@ -276,7 +271,7 @@ export function useNextEpisode({
           }
           // If no next season, nextEpisodeInfo stays null (series finished)
         }
-      } catch (error) {
+      } catch (_error) {
         // Silent fail - don't show next episode overlay
         fetchedRef.current = false;
       }
@@ -306,7 +301,15 @@ export function useNextEpisode({
       // Hide if user seeks back
       setShowNextEpisode(false);
     }
-  }, [metadata.type, nextEpisodeInfo, currentTime, duration, isPlaying, cancelled, showNextEpisode]);
+  }, [
+    metadata.type,
+    nextEpisodeInfo,
+    currentTime,
+    duration,
+    isPlaying,
+    cancelled,
+    showNextEpisode,
+  ]);
 
   // Play next episode
   const playNextEpisode = useCallback(async () => {
@@ -337,7 +340,7 @@ export function useNextEpisode({
 
         onNavigate(url);
       }
-    } catch (error) {
+    } catch (_error) {
       // Failed to load next episode
       setIsLoadingNext(false);
     }
