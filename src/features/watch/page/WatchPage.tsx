@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -223,7 +224,6 @@ export function WatchPage({
   }, [togglePlay, showControls]);
 
   const handleRetry = useCallback(() => {
-    // setRetryCount(prev => prev + 1);
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
   }, []);
@@ -332,80 +332,103 @@ export function WatchPage({
     <section
       ref={containerRef}
       className={cn(
-        'video-container relative w-full h-screen bg-black overflow-hidden select-none',
+        'video-container relative w-full h-[100dvh] bg-black overflow-hidden select-none flex flex-col',
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
       style={{
         width: '100%',
-        height: '100%',
-        maxWidth: '100vw',
-        maxHeight: '100vh',
+        height: '100dvh', // Explicit height for flex container
       }}
       onMouseMove={showControls}
       onMouseEnter={showControls}
       aria-label="Video Player"
     >
-      {/* Video Element */}
-      <VideoElement
-        ref={videoRef}
-        dispatch={dispatch}
-        onClick={handleVideoClick}
-        captionUrl={captionUrl}
-      />
+      {/* Mobile Header - Solid Top Bar, pushes video down */}
+      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base font-semibold text-white truncate">
+            {metadata.title}
+          </h1>
+          {metadata.season && metadata.episode && (
+            <p className="text-xs text-white/70 truncate">
+              S{metadata.season}:E{metadata.episode}
+            </p>
+          )}
+        </div>
+      </div>
 
-      {/* Loading Overlay */}
-      <LoadingOverlay isVisible={state.isLoading} />
-
-      {/* Buffering Overlay */}
-      <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
-
-      {/* Error Overlay */}
-      <ErrorOverlay
-        isVisible={!!state.error}
-        message={state.error || 'An error occurred'}
-        onRetry={handleRetry}
-        onBack={handleBack}
-      />
-
-      {/* Next Episode Overlay - Netflix style */}
-      {nextEpisodeInfo && (
-        <NextEpisodeOverlay
-          isVisible={showNextEpisode}
-          nextEpisode={nextEpisodeInfo}
-          onPlayNext={playNextEpisode}
-          onCancel={cancelNextEpisode}
-          isLoading={isLoadingNext}
+      {/* Main Player Area - Takes remaining space */}
+      <div className="flex-1 relative w-full overflow-hidden bg-black flex items-center justify-center">
+        {/* Video Element */}
+        <VideoElement
+          ref={videoRef}
+          dispatch={dispatch}
+          onClick={handleVideoClick}
+          captionUrl={captionUrl}
+          controls={isMobile && state.isFullscreen}
         />
-      )}
 
-      {/* Center Play Button - Netflix style pause overlay with movie info */}
-      <CenterPlayButton
-        isPlaying={state.isPlaying}
-        onToggle={handleTogglePlay}
-        metadata={pauseOverlayMetadata}
-      />
+        {/* Loading Overlay */}
+        <LoadingOverlay isVisible={state.isLoading} />
 
-      {/* Control Bar */}
-      <ControlBar
-        state={state}
-        metadata={metadata}
-        spriteVtt={spriteVtt}
-        onTogglePlay={handleTogglePlay}
-        onSeek={handleSeek}
-        onSkip={handleSkip}
-        onVolumeChange={handleVolumeChange}
-        onMuteToggle={handleMuteToggle}
-        onFullscreenToggle={toggleFullscreen}
-        onBack={handleBack}
-        onQualityChange={handleQualityChange}
-        onPlaybackRateChange={handlePlaybackRateChange}
-        onAudioChange={handleAudioChange}
-        onSubtitleChange={handleSubtitleChange}
-        subtitleSettings={subtitleSettings}
-        onSubtitleSettingsChange={setSubtitleSettings}
-        isMobile={isMobile}
-      />
+        {/* Buffering Overlay */}
+        <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+
+        {/* Error Overlay */}
+        <ErrorOverlay
+          isVisible={!!state.error}
+          message={state.error || 'An error occurred'}
+          onRetry={handleRetry}
+          onBack={handleBack}
+        />
+
+        {/* Next Episode Overlay - Netflix style */}
+        {nextEpisodeInfo && (
+          <NextEpisodeOverlay
+            isVisible={showNextEpisode}
+            nextEpisode={nextEpisodeInfo}
+            onPlayNext={playNextEpisode}
+            onCancel={cancelNextEpisode}
+            isLoading={isLoadingNext}
+          />
+        )}
+
+        {/* Center Play Button - Netflix style pause overlay with movie info */}
+        <CenterPlayButton
+          isPlaying={state.isPlaying}
+          onToggle={handleTogglePlay}
+          metadata={pauseOverlayMetadata}
+        />
+
+        {/* Control Bar */}
+        <ControlBar
+          state={state}
+          metadata={metadata}
+          spriteVtt={spriteVtt}
+          onTogglePlay={handleTogglePlay}
+          onSeek={handleSeek}
+          onSkip={handleSkip}
+          onVolumeChange={handleVolumeChange}
+          onMuteToggle={handleMuteToggle}
+          onFullscreenToggle={toggleFullscreen}
+          onBack={handleBack}
+          onQualityChange={handleQualityChange}
+          onPlaybackRateChange={handlePlaybackRateChange}
+          onAudioChange={handleAudioChange}
+          onSubtitleChange={handleSubtitleChange}
+          subtitleSettings={subtitleSettings}
+          onSubtitleSettingsChange={setSubtitleSettings}
+          isMobile={isMobile}
+        />
+      </div>
     </section>
   );
 }

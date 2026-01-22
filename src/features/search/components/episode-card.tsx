@@ -3,6 +3,7 @@
 import { Clock, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Episode } from '../types';
 
@@ -10,10 +11,24 @@ interface EpisodeCardProps {
   episode: Episode;
   onPlay: () => void;
   isPlaying: boolean;
+  isAnyLoading?: boolean;
 }
 
-export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
+export function EpisodeCard({
+  episode,
+  onPlay,
+  isPlaying,
+  isAnyLoading = false,
+}: EpisodeCardProps) {
   const [imageError, setImageError] = React.useState(false);
+
+  const handleClick = () => {
+    if (isAnyLoading && !isPlaying) {
+      toast.error('Please wait for the current episode to load');
+      return;
+    }
+    onPlay();
+  };
 
   return (
     <button
@@ -22,8 +37,9 @@ export function EpisodeCard({ episode, onPlay, isPlaying }: EpisodeCardProps) {
         'group flex gap-4 p-3 rounded-xl cursor-pointer transition-all duration-300 w-full text-left',
         'hover:bg-white/5 border border-transparent hover:border-white/10',
         isPlaying && 'bg-primary/10 border-primary/30 pointer-events-none',
+        isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',
       )}
-      onClick={onPlay}
+      onClick={handleClick}
       disabled={isPlaying}
     >
       {/* Episode Thumbnail */}

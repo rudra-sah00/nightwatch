@@ -44,6 +44,7 @@ export function EpisodeList({
             playingEpisodeId === episode.episodeId ||
             playingEpisodeId === episode.episodeNumber
           }
+          isAnyLoading={!!playingEpisodeId}
         />
       ))}
     </div>

@@ -169,10 +169,22 @@ export function useNextEpisode({
     }
   }, [metadata.season, metadata.episode]);
 
-  // Fetch next episode info for series (uses cache when available)
+  // Calculate if we're near the end (7 minutes threshold to give time to fetch)
+  const FETCH_THRESHOLD_SECONDS = 7 * 60;
+  const isNearEnd =
+    duration > 0 && duration - currentTime <= FETCH_THRESHOLD_SECONDS;
+
+  // Fetch next episode info ONLY when near end of video (not on mount)
   useEffect(() => {
-    if (metadata.type !== 'series' || !metadata.seriesId || fetchedRef.current)
+    // Only fetch when: series, has seriesId, not already fetched, and near the end
+    if (
+      metadata.type !== 'series' ||
+      !metadata.seriesId ||
+      fetchedRef.current ||
+      !isNearEnd // KEY CHANGE: Only fetch when near end
+    ) {
       return;
+    }
 
     const fetchNextEpisode = async () => {
       try {
@@ -320,6 +332,7 @@ export function useNextEpisode({
     metadata.season,
     metadata.episode,
     metadata.title,
+    isNearEnd, // Trigger fetch when user is near end
   ]);
 
   // Show overlay when near end of video

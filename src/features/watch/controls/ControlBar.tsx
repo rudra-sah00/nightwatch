@@ -98,7 +98,7 @@ export function ControlBar({
   return (
     <div
       className={cn(
-        'control-bar absolute inset-0 z-10 flex flex-col justify-between pointer-events-none transition-opacity duration-300',
+        'control-bar absolute inset-0 z-10 flex flex-col justify-end md:justify-between pointer-events-none transition-opacity duration-300',
         state.showControls || state.isLoading ? 'opacity-100' : 'opacity-0',
       )}
     >
@@ -108,8 +108,13 @@ export function ControlBar({
       {/* Bottom Gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-48 md:h-56 lg:h-64 2xl:h-72 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Top Bar */}
-      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto">
+      {/* Top Bar - Hidden on mobile, shown on desktop (replaces old header) */}
+      <div
+        className={cn(
+          'relative p-4 md:p-6 lg:p-8 2xl:p-10 hidden md:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300',
+          state.isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100',
+        )}
+      >
         <button
           type="button"
           onClick={onBack}

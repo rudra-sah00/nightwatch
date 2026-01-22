@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  Calendar,
-  Clock,
-  Film,
-  Loader2,
-  Play,
-  RotateCcw,
-  Tv,
-} from 'lucide-react';
+import { Calendar, Clock, Film, Loader2, Play, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ContentType, type ShowDetails } from '../types';
@@ -38,20 +30,6 @@ export function ContentInfo({
   onResume,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
-
-  // Build resume text for series
-  const getResumeLabel = () => {
-    if (!hasWatchProgress) return 'Play';
-
-    if (
-      isSeries &&
-      watchProgress?.seasonNumber &&
-      watchProgress?.episodeNumber
-    ) {
-      return `Resume S${watchProgress.seasonNumber} E${watchProgress.episodeNumber}`;
-    }
-    return 'Resume';
-  };
 
   const handleButtonClick = () => {
     if (hasWatchProgress && onResume) {
@@ -88,7 +66,7 @@ export function ContentInfo({
       </div>
 
       {/* Title */}
-      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
+      <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
         {show.title}
       </h1>
 
@@ -107,16 +85,16 @@ export function ContentInfo({
           </span>
         )}
         {isSeries && show.seasons && show.seasons.length > 0 && (
-          <span>
+          <span className="hidden md:inline">
             {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
           </span>
         )}
-        {show.genre && <span>{show.genre}</span>}
+        {show.genre && <span className="hidden md:inline">{show.genre}</span>}
       </div>
 
-      {/* Description */}
+      {/* Description - Hidden in Hero for cleaner look (moved to body) */}
       {show.description && (
-        <p className="text-white/80 text-sm md:text-base leading-relaxed max-w-2xl line-clamp-4">
+        <p className="hidden text-white/80 text-sm md:text-base leading-relaxed max-w-2xl line-clamp-4">
           {show.description}
         </p>
       )}
@@ -126,22 +104,27 @@ export function ContentInfo({
         <Button
           size="lg"
           className={cn(
-            'gap-2.5 px-8 py-6 text-lg font-semibold shadow-xl transition-all duration-200',
-            hasWatchProgress
-              ? 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 border border-red-400/30'
-              : 'bg-white text-black hover:bg-white/90',
+            'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-xl transition-all duration-200',
+            'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
           disabled={isPlaying}
         >
           {isPlaying ? (
             <Loader2 className="w-5 h-5 animate-spin" />
-          ) : hasWatchProgress ? (
-            <RotateCcw className="w-5 h-5" />
           ) : (
             <Play className="w-5 h-5 fill-current" />
           )}
-          {isPlaying ? 'Loading...' : getResumeLabel()}
+          {isPlaying
+            ? 'Loading...'
+            : hasWatchProgress &&
+                isSeries &&
+                watchProgress?.seasonNumber &&
+                watchProgress?.episodeNumber
+              ? `Resume S${watchProgress.seasonNumber} E${watchProgress.episodeNumber}`
+              : hasWatchProgress
+                ? 'Resume'
+                : 'Play'}
         </Button>
 
         {/* If series has progress, also show "Play from Start" option */}

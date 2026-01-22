@@ -158,17 +158,25 @@ export function ContinueWatching({
       {/* Vertical List items */}
       <div className="flex flex-col gap-2">
         {items.map((item) => (
-          <button
+          <div
             key={item.id}
-            type="button"
             className={cn(
-              'group flex items-center gap-4 p-2 rounded-xl cursor-pointer w-full text-left',
+              'group relative flex items-center gap-4 p-2 rounded-xl w-full text-left',
               'hover:bg-accent/40 transition-all border border-transparent hover:border-border/50',
             )}
-            onClick={() => handleSelect(item)}
           >
+            {/* Main Click Action (Stretched Button) */}
+            <button
+              type="button"
+              className="absolute inset-0 z-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              onClick={() => handleSelect(item)}
+              title={`Continue watching ${item.title}`}
+            >
+              <span className="sr-only">Continue watching {item.title}</span>
+            </button>
+
             {/* Thumbnail */}
-            <div className="relative w-48 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-muted shadow-sm">
+            <div className="relative z-10 pointer-events-none w-48 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-muted shadow-sm">
               {item.posterUrl ? (
                 <Image
                   src={item.posterUrl}
@@ -197,7 +205,7 @@ export function ContinueWatching({
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0 py-1">
+            <div className="flex-1 min-w-0 py-1 z-10 pointer-events-none">
               <div className="flex items-center gap-2 mb-1">
                 <span
                   className={cn(
@@ -238,18 +246,18 @@ export function ContinueWatching({
               </div>
             </div>
 
-            {/* Remove Action */}
-            <div className="pr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {/* Remove Action - Z-Index 20 to sit above stretched link */}
+            <div className="pr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
               <button
                 type="button"
                 onClick={(e) => handleRemove(item, e)}
-                className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors tooltip-trigger"
+                className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors tooltip-trigger relative cursor-pointer"
                 title="Remove from list"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>

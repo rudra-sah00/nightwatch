@@ -10,12 +10,13 @@ interface VideoElementProps {
   onDurationChange?: (duration: number) => void;
   onClick?: () => void;
   captionUrl?: string | null;
+  controls?: boolean;
 }
 
 // Memoized video element that should never re-render
 export const VideoElement = memo(
   forwardRef<HTMLVideoElement, VideoElementProps>(function VideoElement(
-    { dispatch, onTimeUpdate, onDurationChange, onClick, captionUrl },
+    { dispatch, onTimeUpdate, onDurationChange, onClick, captionUrl, controls },
     ref,
   ) {
     const videoRef = ref as React.MutableRefObject<HTMLVideoElement | null>;
@@ -99,6 +100,7 @@ export const VideoElement = memo(
         playsInline
         crossOrigin="anonymous"
         onClick={onClick}
+        controls={controls}
       >
         <track
           kind="captions"
@@ -108,7 +110,6 @@ export const VideoElement = memo(
           }
           label="English"
           srcLang="en"
-          default={!!captionUrl}
         />
       </video>
     );

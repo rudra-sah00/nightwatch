@@ -49,23 +49,29 @@ export function useWatchProgress({
 
     const socket = getSocket();
     if (socket?.connected) {
+      // Optimistically decrement to prevent double-sending if interval fires fast
+      const sentSeconds = Math.max(seconds, 0);
+      accumulateSecondsRef.current = Math.max(
+        0,
+        accumulateSecondsRef.current - sentSeconds,
+      );
+
+      if (sentSeconds === 0) return;
+
       socket.emit(
         'watch:record_time',
         {
-          seconds: Math.max(seconds, 0),
+          seconds: sentSeconds,
           forceFlush,
         },
         (res: SocketResponse) => {
           if (res?.success) {
-            // Reset accumulated seconds on success
-            accumulateSecondsRef.current = Math.max(
-              0,
-              accumulateSecondsRef.current - seconds,
-            );
-            // Invalidate watch activity cache for real-time updates
-            if (forceFlush) {
-              invalidateWatchActivityCache();
-            }
+            // Invalidate watch activity cache to ensure Profile graph is live
+            invalidateWatchActivityCache();
+          } else {
+            // On failure, add time back to retry later
+            accumulateSecondsRef.current += sentSeconds;
+            console.error('Failed to record watch activity:', res?.error);
           }
         },
       );
@@ -189,8 +195,8 @@ export function useWatchProgress({
     const updateAccumulation = () => {
       const now = Date.now();
       const delta = (now - lastTimeRef.current) / 1000;
-      // Sanity check: ignore large jumps (>5s means tab was hidden/system sleep)
-      if (delta > 0 && delta < 5) {
+      // Sanity check: ignore large jumps (>30s means tab was hidden/system sleep or resumed)
+      if (delta > 0 && delta < 30) {
         accumulateSecondsRef.current += delta;
       }
       lastTimeRef.current = now;

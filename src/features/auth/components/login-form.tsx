@@ -5,6 +5,7 @@ import type React from 'react';
 import { useState } from 'react';
 import type { z } from 'zod';
 import { Button, Input, Label } from '@/components/ui';
+import { Captcha } from '@/components/ui/captcha';
 import { type LoginInput, loginSchema } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
@@ -14,6 +15,7 @@ export function LoginForm() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<LoginInput>({
     email: '',
@@ -38,6 +40,11 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+
+    if (!captchaToken) {
+      setError('Please complete the security verification.');
+      return;
+    }
 
     const result = loginSchema.safeParse(formData);
     if (!result.success) {
@@ -114,11 +121,17 @@ export function LoginForm() {
         />
       </div>
 
+      <Captcha
+        onVerify={(token) => setCaptchaToken(token)}
+        onError={() => setCaptchaToken(null)}
+      />
+
       <Button
         type="submit"
         size="lg"
         isLoading={isLoading}
-        className="w-full text-base font-semibold mt-6"
+        disabled={!captchaToken || isLoading}
+        className="w-full text-base font-semibold mt-2"
       >
         Sign In
       </Button>

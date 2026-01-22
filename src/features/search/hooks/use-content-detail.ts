@@ -129,8 +129,16 @@ export function useContentDetail({
         // For series, we'll wait for progress check before selecting season
         // For movies, nothing to do here
       } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') return;
-        toast.error('Failed to fetch show details');
+        // Check for abort in multiple ways - error name, or signal aborted
+        const isAborted =
+          (error instanceof Error && error.name === 'AbortError') ||
+          controller.signal.aborted;
+
+        if (isAborted) return; // Silent return for aborted requests
+
+        toast.error(
+          'Failed to load show details. Please check your connection and try again.',
+        );
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
@@ -148,6 +156,26 @@ export function useContentDetail({
   // Internal function to load episodes (to avoid dependency issues)
   const loadSeasonEpisodesInternal = useCallback(
     async (showData: ShowDetails, season: Season) => {
+      // Check if we already have ALL episodes for this season in showData
+      const localEpisodes = showData.episodes?.filter(
+        (ep) => ep.seasonNumber === season.seasonNumber,
+      );
+
+      // Only use local episodes if we have ALL of them (compare with season.episodeCount)
+      // If episodeCount is unknown (0), always fetch to be safe
+      const hasAllEpisodes =
+        localEpisodes &&
+        localEpisodes.length > 0 &&
+        season.episodeCount > 0 &&
+        localEpisodes.length >= season.episodeCount;
+
+      if (hasAllEpisodes) {
+        // Use locally available episodes - no API call needed
+        setEpisodes(localEpisodes);
+        return;
+      }
+
+      // Need to fetch from API
       const controller = new AbortController();
 
       setIsLoadingEpisodes(true);
@@ -163,8 +191,16 @@ export function useContentDetail({
           setEpisodes(seasonEpisodes);
         }
       } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') return;
-        toast.error('Failed to load episodes');
+        // Check for abort in multiple ways
+        const isAborted =
+          (error instanceof Error && error.name === 'AbortError') ||
+          controller.signal.aborted;
+
+        if (isAborted) return; // Silent return for aborted requests
+
+        toast.error(
+          'Failed to load episode list. Using cached data if available.',
+        );
         if (showData.episodes && !controller.signal.aborted) {
           setEpisodes(
             showData.episodes.filter(
@@ -177,13 +213,6 @@ export function useContentDetail({
           setIsLoadingEpisodes(false);
         }
       }
-
-      // Cleanup/Cancel previous request if needed?
-      // This function is called by effects/handlers - tricky to return cleanup.
-      // Instead we rely on the fact it's async and we check aborted status.
-      // But we need to store the controller to abort it if the hook unmounts or if it's called again?
-      // For simplicity in this structure: we just ensure we don't set state if aborted.
-      // Ideally we should track the active request to cancel it on next call.
     },
     [],
   );
@@ -338,8 +367,15 @@ export function useContentDetail({
             if (posterUrl) url += `&poster=${posterUrl}`;
 
             router.push(url);
+            // Reset playing state immediately after navigation starts
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
           } else {
-            toast.error('Movie playback failed - please try again');
+            toast.error(
+              'Unable to start movie playback. The stream may be temporarily unavailable.',
+            );
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
           }
         } else if (episode) {
           // Cache series data before playing (for next episode feature)
@@ -392,15 +428,37 @@ export function useContentDetail({
             if (posterUrl) url += `&poster=${posterUrl}`;
 
             router.push(url);
+            // Reset playing state immediately after navigation starts
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
           } else {
-            toast.error('Series playback failed - please try again');
+            toast.error(
+              'Unable to start episode playback. The stream may be temporarily unavailable.',
+            );
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
           }
         }
       } catch (error: unknown) {
         if (error instanceof Error && error.name === 'AbortError') return;
         const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        toast.error(`Playback failed: ${errorMessage}`);
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred';
+
+        // Provide more specific error messages based on error type
+        if (
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('network')
+        ) {
+          toast.error(
+            'Connection timed out. Please check your internet and try again.',
+          );
+        } else if (errorMessage.includes('stream')) {
+          toast.error('Stream unavailable. Please try again in a moment.');
+        } else {
+          toast.error(`Playback failed: ${errorMessage}`);
+        }
       } finally {
         if (!controller.signal.aborted) {
           setIsPlaying(false);
@@ -417,20 +475,28 @@ export function useContentDetail({
 
   // Resume from continue watching
   const handleResume = useCallback(async () => {
-    if (!show || !watchProgress) return;
+    if (!show || !watchProgress) {
+      toast.error('Unable to resume - progress data not available.');
+      return;
+    }
 
     if (show.contentType === ContentType.Movie) {
       // Movie resume
       await handlePlayInternal(show, [], undefined);
     } else {
-      // Series resume - create minimal episode object for playback
+      // Series resume - create episode object for playback
+      if (!watchProgress.seasonNumber || !watchProgress.episodeNumber) {
+        toast.error('Unable to resume - episode information missing.');
+        return;
+      }
+
       const resumeEpisode: Episode = {
-        episodeId: `resume-${watchProgress.seasonNumber}-${watchProgress.episodeNumber}`,
+        episodeId: `resume-${show.id}-S${watchProgress.seasonNumber}E${watchProgress.episodeNumber}`,
         seriesId: show.id,
-        episodeNumber: watchProgress.episodeNumber || 1,
-        seasonNumber: watchProgress.seasonNumber || 1,
-        title: '',
-        thumbnailUrl: '',
+        episodeNumber: watchProgress.episodeNumber,
+        seasonNumber: watchProgress.seasonNumber,
+        title: `Season ${watchProgress.seasonNumber} Episode ${watchProgress.episodeNumber}`,
+        thumbnailUrl: show.posterUrl || '',
         duration: 0,
       };
       await handlePlayInternal(show, episodes, resumeEpisode);

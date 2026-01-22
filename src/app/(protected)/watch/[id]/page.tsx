@@ -2,7 +2,7 @@
 
 import { Loader2 } from 'lucide-react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { playVideo } from '@/features/search/api';
 import type { PlayResponse } from '@/features/search/types';
 import { WatchPage } from '@/features/watch/page/WatchPage';
@@ -115,8 +115,7 @@ function WatchContent() {
   if (isRefetching) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <Loader2 className="w-16 h-16 text-white animate-spin mb-4" />
-        <p className="text-white/60">Loading stream...</p>
+        <Loader2 className="w-16 h-16 text-white animate-spin" />
       </div>
     );
   }
@@ -170,15 +169,5 @@ function WatchContent() {
 }
 
 export default function WatchRoutePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <Loader2 className="w-16 h-16 text-white animate-spin" />
-        </div>
-      }
-    >
-      <WatchContent />
-    </Suspense>
-  );
+  return <WatchContent />;
 }

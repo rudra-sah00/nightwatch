@@ -48,8 +48,14 @@ function HomeContent() {
           setResults(data);
         }
       } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') return;
-        toast.error('Search failed');
+        // Check for abort in multiple ways - error name or signal aborted
+        const isAborted =
+          (error instanceof Error && error.name === 'AbortError') ||
+          controller.signal.aborted;
+
+        if (isAborted) return; // Silent return for aborted requests
+
+        toast.error('Search failed. Please try again.');
         if (!controller.signal.aborted) {
           setResults([]);
         }

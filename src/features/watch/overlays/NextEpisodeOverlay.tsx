@@ -28,7 +28,7 @@ export function NextEpisodeOverlay({
   nextEpisode,
   onPlayNext,
   onCancel,
-  autoPlayDelay = 10,
+  autoPlayDelay = 0, // Disabled by default - user must click to play
   isLoading = false,
 }: NextEpisodeOverlayProps) {
   const [countdown, setCountdown] = useState(autoPlayDelay);

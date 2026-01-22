@@ -1,14 +1,14 @@
 'use client';
 
-import { LogOut, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui';
+
 import { Avatar } from '@/components/ui/avatar';
 import { SearchInput } from '@/features/search/components/search-input';
 import { useAuth } from '@/providers/auth-provider';
 
 export function Navbar() {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-black/50 backdrop-blur-xl">
@@ -31,14 +31,6 @@ export function Navbar() {
               className="w-9 h-9 border border-white/10 group-hover:border-white/30 transition-colors"
             />
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={logout}
-            className="text-muted-foreground hover:text-white"
-          >
-            <LogOut className="w-5 h-5" />
-          </Button>
         </div>
       </div>
     </header>

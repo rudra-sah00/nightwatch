@@ -57,6 +57,10 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const { timeout = 10000, skipRefresh = false, ...fetchOptions } = options;
 
+  // Skip refresh for auth endpoints - they return 401 for invalid credentials, not expired session
+  const isAuthEndpoint =
+    endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -82,8 +86,8 @@ export async function apiFetch<T>(
 
     clearTimeout(timeoutId);
 
-    // Handle 401 Unauthorized - attempt token refresh
-    if (response.status === 401 && !skipRefresh) {
+    // Handle 401 Unauthorized - attempt token refresh (but not for auth endpoints)
+    if (response.status === 401 && !skipRefresh && !isAuthEndpoint) {
       const refreshed = await refreshAccessToken();
 
       if (refreshed) {
@@ -115,7 +119,11 @@ export async function apiFetch<T>(
     clearTimeout(timeoutId);
 
     if (error instanceof Error && error.name === 'AbortError') {
-      throw { message: 'Request timeout', status: 408 } as ApiError;
+      throw {
+        message:
+          'Request timed out. Please check your connection and try again.',
+        status: 408,
+      } as ApiError;
     }
 
     throw error;

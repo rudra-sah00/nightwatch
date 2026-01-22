@@ -11,12 +11,15 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
   return (
     <div
       className={cn(
-        'absolute inset-0 flex items-center justify-center z-20 pointer-events-none transition-opacity duration-200',
+        'absolute inset-0 z-20 flex items-center justify-center pointer-events-none transition-opacity duration-200',
         isVisible ? 'opacity-100' : 'opacity-0',
       )}
     >
-      <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative w-16 h-16">
+          <div className="w-16 h-16 rounded-full border-4 border-white/20" />
+          <Loader2 className="absolute top-0 left-0 w-16 h-16 text-white animate-spin" />
+        </div>
       </div>
     </div>
   );

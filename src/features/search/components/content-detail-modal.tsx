@@ -133,9 +133,63 @@ export function ContentDetailModal({
         </div>
       </div>
 
-      {/* Series Episodes Section */}
+      {/* Details Section (Description & Metadata) - Below Hero for all screens */}
+      <div className="px-6 md:px-10 lg:px-16 py-8 bg-black">
+        <div className="max-w-4xl space-y-6">
+          {/* Description */}
+          {show.description && (
+            <p className="text-white/80 text-sm md:text-lg leading-relaxed font-light">
+              {show.description}
+            </p>
+          )}
+
+          {/* Metadata Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
+            {/* Genres */}
+            {show.genre && (
+              <div>
+                <span className="block text-white/40 text-xs uppercase tracking-wider mb-2">
+                  Genres
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {show.genre
+                    .split(',')
+                    .map((g) => g.trim())
+                    .filter(Boolean)
+                    .map((genre) => (
+                      <span
+                        key={genre}
+                        className="px-2.5 py-1 rounded-md text-sm bg-white/10 text-white/90 border border-white/5"
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Details (Series specific or other metadata) */}
+            {isSeries && show.seasons && (
+              <div>
+                <span className="block text-white/40 text-xs uppercase tracking-wider mb-2">
+                  Series Info
+                </span>
+                <div className="flex flex-wrap gap-3 text-white/80 text-sm">
+                  <span>
+                    {show.seasons.length} Season
+                    {show.seasons.length > 1 ? 's' : ''}
+                  </span>
+                  {show.year && <span>• {show.year}</span>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Series Episodes Listing */}
       {isSeries && (
-        <div className="px-6 md:px-10 lg:px-16 py-8 bg-gradient-to-b from-black to-background">
+        <div className="px-6 md:px-10 lg:px-16 py-8 bg-gradient-to-b from-black to-background border-t border-white/5">
           {/* Season Selector */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl md:text-2xl font-semibold text-foreground">
@@ -160,29 +214,6 @@ export function ContentDetailModal({
             playingEpisodeId={playingEpisodeId}
             onPlayEpisode={(episode) => handlePlay(episode)}
           />
-        </div>
-      )}
-
-      {/* Movie - Additional Info Section */}
-      {!isSeries && (
-        <div className="px-6 md:px-10 lg:px-16 py-8 bg-gradient-to-b from-black to-background">
-          {/* Additional movie info can go here */}
-          {show.genre && (
-            <div className="flex flex-wrap gap-2">
-              {show.genre
-                .split(',')
-                .map((g) => g.trim())
-                .filter(Boolean)
-                .map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-full text-sm bg-white/10 text-white/80"
-                  >
-                    {genre}
-                  </span>
-                ))}
-            </div>
-          )}
         </div>
       )}
     </div>

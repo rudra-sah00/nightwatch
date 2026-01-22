@@ -76,9 +76,22 @@ export function ProfileCard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    getWatchActivity()
-      .then(setActivity)
-      .catch(() => toast.error('Failed to load activity'));
+    const loadActivity = () => {
+      getWatchActivity()
+        .then(setActivity)
+        .catch(() => toast.error('Failed to load activity'));
+    };
+
+    loadActivity();
+
+    const handleFocus = () => {
+      // Invalidate cache to force fresh fetch
+      getWatchActivity() // This relies on internal cache, we might need to force it?
+        .then(setActivity);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const handleFileClick = useCallback(() => {
