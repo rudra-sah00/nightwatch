@@ -10,6 +10,13 @@ interface UseKeyboardOptions {
   dispatch: React.Dispatch<PlayerAction>;
   isFullscreen: boolean;
   onBack: () => void;
+  // Caption toggle
+  currentSubtitleTrack: string | null;
+  onToggleCaptions: () => void;
+  // Next episode
+  hasNextEpisode: boolean;
+  onNextEpisode: () => void;
+  disabled?: boolean; // For watch party guests (disables playback controls)
 }
 
 export function useKeyboard({
@@ -18,9 +25,14 @@ export function useKeyboard({
   dispatch,
   isFullscreen,
   onBack,
+  onToggleCaptions,
+  hasNextEpisode,
+  onNextEpisode,
+  disabled = false,
 }: UseKeyboardOptions) {
   const seek = useCallback(
     (seconds: number) => {
+      if (disabled) return;
       const video = videoRef.current;
       if (!video) return;
       video.currentTime = Math.max(
@@ -28,7 +40,7 @@ export function useKeyboard({
         Math.min(video.duration, video.currentTime + seconds),
       );
     },
-    [videoRef],
+    [videoRef, disabled],
   );
 
   const adjustVolume = useCallback(
@@ -43,6 +55,7 @@ export function useKeyboard({
   );
 
   const togglePlay = useCallback(() => {
+    if (disabled) return;
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
@@ -50,7 +63,7 @@ export function useKeyboard({
     } else {
       video.pause();
     }
-  }, [videoRef]);
+  }, [videoRef, disabled]);
 
   const toggleMute = useCallback(() => {
     const video = videoRef.current;
@@ -86,18 +99,21 @@ export function useKeyboard({
       switch (e.code) {
         case 'Space':
         case 'KeyK':
+          if (disabled) break;
           e.preventDefault();
           togglePlay();
           dispatch({ type: 'SHOW_CONTROLS' });
           break;
         case 'ArrowLeft':
         case 'KeyJ':
+          if (disabled) break;
           e.preventDefault();
           seek(-10);
           dispatch({ type: 'SHOW_CONTROLS' });
           break;
         case 'ArrowRight':
         case 'KeyL':
+          if (disabled) break;
           e.preventDefault();
           seek(10);
           dispatch({ type: 'SHOW_CONTROLS' });
@@ -126,6 +142,17 @@ export function useKeyboard({
             onBack();
           }
           break;
+        case 'KeyC':
+          e.preventDefault();
+          onToggleCaptions();
+          dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'KeyN':
+          if (hasNextEpisode && !disabled) {
+            e.preventDefault();
+            onNextEpisode();
+          }
+          break;
       }
     };
 
@@ -140,6 +167,10 @@ export function useKeyboard({
     isFullscreen,
     onBack,
     dispatch,
+    onToggleCaptions,
+    hasNextEpisode,
+    onNextEpisode,
+    disabled,
   ]);
 
   return { togglePlay, toggleMute, toggleFullscreen, seek, adjustVolume };

@@ -13,9 +13,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
-import { getWatchActivity, uploadProfileImage } from '../api';
+import {
+  getWatchActivity,
+  invalidateWatchActivityCache,
+  uploadProfileImage,
+} from '../api';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
 import { ChangePasswordForm } from './change-password-form';
@@ -77,6 +82,8 @@ export function ProfileCard() {
 
   useEffect(() => {
     const loadActivity = () => {
+      // Invalidate cache to ensure fresh data on mount
+      invalidateWatchActivityCache();
       getWatchActivity()
         .then(setActivity)
         .catch(() => toast.error('Failed to load activity'));
@@ -85,9 +92,9 @@ export function ProfileCard() {
     loadActivity();
 
     const handleFocus = () => {
-      // Invalidate cache to force fresh fetch
-      getWatchActivity() // This relies on internal cache, we might need to force it?
-        .then(setActivity);
+      // Invalidate cache before fetching fresh data
+      invalidateWatchActivityCache();
+      getWatchActivity().then(setActivity);
     };
 
     window.addEventListener('focus', handleFocus);
@@ -276,6 +283,13 @@ export function ProfileCard() {
 
               {activeTab === 'settings' && (
                 <div className="space-y-6 lg:space-y-8">
+                  <ProfileSection
+                    title="Appearance"
+                    description="Customize how Watch Rudra looks on your device"
+                  >
+                    <ThemeSwitcher />
+                  </ProfileSection>
+
                   <ProfileSection
                     title="Public Profile"
                     description="Manage how others see you on the platform"

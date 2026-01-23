@@ -3,10 +3,15 @@
 import { Loader2, X } from 'lucide-react';
 // import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+// Watch Party
+import { useWatchParty } from '@/features/watch-party';
 // Hook for data management
 import { useContentDetail } from '../hooks/use-content-detail';
+// Types
 // Types
 import { ContentType } from '../types';
 // Extracted components
@@ -25,6 +30,7 @@ export function ContentDetailModal({
   fromContinueWatching = false,
   onClose,
 }: ContentDetailModalProps) {
+  const router = useRouter();
   // State from custom hook
   const {
     show,
@@ -41,9 +47,51 @@ export function ContentDetailModal({
     handleResume,
   } = useContentDetail({ contentId, fromContinueWatching });
 
+  // Watch Party Hook
+  const { createRoom, isLoading: isCreatingParty } = useWatchParty();
+
   // Local UI state
   const [imageError, setImageError] = useState(false);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
+
+  // Handle Watch Party Creation
+  const handleWatchParty = async () => {
+    if (!show) {
+      toast.error('Unable to create party: Content details missing');
+      return;
+    }
+
+    try {
+      const roomPayload = {
+        contentId: show.id,
+        title: show.title,
+        type: (show.contentType === ContentType.Movie ? 'movie' : 'series') as
+          | 'movie'
+          | 'series',
+        streamUrl: '', // Stream URL will be fetched by backend or resolved later
+        posterUrl: show.posterUrl,
+        season:
+          show.contentType === ContentType.Series
+            ? selectedSeason?.seasonNumber || 1
+            : undefined,
+        episode: show.contentType === ContentType.Series ? 1 : undefined, // Default to ep 1 for now
+      };
+
+      const room = await createRoom(roomPayload);
+
+      if (room) {
+        toast.success('Party room created! Redirecting...');
+        router.push(`/watch-party/${room.id}?new=true`);
+        onClose();
+      } else {
+        toast.error('Failed to create party room. Please try again.');
+      }
+    } catch (_err) {
+      toast.error(
+        'An unexpected error occurred while creating the watch party.',
+      );
+    }
+  };
 
   // Block body scroll when modal is open
   useEffect(() => {
@@ -67,7 +115,7 @@ export function ContentDetailModal({
   // Loading state
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
       </div>
     );
@@ -76,9 +124,9 @@ export function ContentDetailModal({
   // Error state
   if (!show) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md">
-        <p className="text-white text-lg">Failed to load content</p>
-        <Button variant="ghost" className="mt-4 text-white" onClick={onClose}>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
+        <p className="text-foreground text-lg">Failed to load content</p>
+        <Button variant="ghost" className="mt-4" onClick={onClose}>
           Close
         </Button>
       </div>
@@ -88,14 +136,14 @@ export function ContentDetailModal({
   const isSeries = show.contentType === ContentType.Series;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/95 backdrop-blur-xl">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-xl">
       {/* Close Button */}
       <button
         type="button"
         onClick={onClose}
-        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-black/50 backdrop-blur-md hover:bg-white/10 transition-colors border border-white/10"
+        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-background/50 backdrop-blur-md hover:bg-muted transition-colors border border-border"
       >
-        <X className="w-6 h-6 text-white" />
+        <X className="w-6 h-6 text-foreground" />
       </button>
 
       {/* Hero Section */}
@@ -113,11 +161,11 @@ export function ContentDetailModal({
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />
+            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
           )}
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
+          {/* Gradient overlays - these need to stay dark for image readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
         </div>
 
         {/* Content Info Overlay */}
@@ -125,30 +173,32 @@ export function ContentDetailModal({
           <ContentInfo
             show={show}
             isPlaying={isPlaying}
+            isCreatingParty={isCreatingParty}
             hasWatchProgress={hasWatchProgress}
             watchProgress={watchProgress}
             onPlay={() => handlePlay()}
             onResume={handleResume}
+            onWatchParty={handleWatchParty}
           />
         </div>
       </div>
 
       {/* Details Section (Description & Metadata) - Below Hero for all screens */}
-      <div className="px-6 md:px-10 lg:px-16 py-8 bg-black">
+      <div className="px-6 md:px-10 lg:px-16 py-8 bg-background">
         <div className="max-w-4xl space-y-6">
           {/* Description */}
           {show.description && (
-            <p className="text-white/80 text-sm md:text-lg leading-relaxed font-light">
+            <p className="text-muted-foreground text-sm md:text-lg leading-relaxed font-light">
               {show.description}
             </p>
           )}
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border">
             {/* Genres */}
             {show.genre && (
               <div>
-                <span className="block text-white/40 text-xs uppercase tracking-wider mb-2">
+                <span className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">
                   Genres
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -159,7 +209,7 @@ export function ContentDetailModal({
                     .map((genre) => (
                       <span
                         key={genre}
-                        className="px-2.5 py-1 rounded-md text-sm bg-white/10 text-white/90 border border-white/5"
+                        className="px-2.5 py-1 rounded-md text-sm bg-secondary text-secondary-foreground border border-border"
                       >
                         {genre}
                       </span>
@@ -171,10 +221,10 @@ export function ContentDetailModal({
             {/* Additional Details (Series specific or other metadata) */}
             {isSeries && show.seasons && (
               <div>
-                <span className="block text-white/40 text-xs uppercase tracking-wider mb-2">
+                <span className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">
                   Series Info
                 </span>
-                <div className="flex flex-wrap gap-3 text-white/80 text-sm">
+                <div className="flex flex-wrap gap-3 text-muted-foreground text-sm">
                   <span>
                     {show.seasons.length} Season
                     {show.seasons.length > 1 ? 's' : ''}
@@ -189,7 +239,7 @@ export function ContentDetailModal({
 
       {/* Series Episodes Listing */}
       {isSeries && (
-        <div className="px-6 md:px-10 lg:px-16 py-8 bg-gradient-to-b from-black to-background border-t border-white/5">
+        <div className="px-6 md:px-10 lg:px-16 py-8 bg-background border-t border-border">
           {/* Season Selector */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl md:text-2xl font-semibold text-foreground">

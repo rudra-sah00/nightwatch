@@ -62,7 +62,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await login(formData);
+      await login({ ...formData, captchaToken });
     } catch (err: unknown) {
       const apiError = err as ApiError;
       setError(apiError.message || 'Login failed. Please try again.');

@@ -17,6 +17,10 @@ interface UseWatchProgressProps {
   metadata: VideoMetadata;
   isPlaying: boolean;
   onProgressLoaded?: (seconds: number) => void;
+  /** Skip saving watch progress/history (for watch party guests) */
+  skipProgressHistory?: boolean;
+  /** Enable loading previous progress (only for host/normal playback) */
+  enableProgressLoad?: boolean;
 }
 
 interface SocketResponse {
@@ -35,6 +39,8 @@ export function useWatchProgress({
   metadata,
   isPlaying,
   onProgressLoaded,
+  skipProgressHistory = false,
+  enableProgressLoad = true,
 }: UseWatchProgressProps) {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -71,15 +77,19 @@ export function useWatchProgress({
           } else {
             // On failure, add time back to retry later
             accumulateSecondsRef.current += sentSeconds;
-            console.error('Failed to record watch activity:', res?.error);
+            // Fail silently or maybe toast debug in dev?
+            // console.error('Failed to record watch activity:', res?.error);
           }
         },
       );
     }
   }, []);
 
-  // Helper to update progress
+  // Helper to update progress (skip if skipProgressHistory is true)
   const updateProgress = useCallback(() => {
+    // Skip progress saving for watch party guests
+    if (skipProgressHistory) return;
+
     if (!videoRef.current || !metadata.movieId) return;
 
     const currentTime = videoRef.current.currentTime;
@@ -122,10 +132,13 @@ export function useWatchProgress({
         }
       });
     }
-  }, [metadata, videoRef]);
+  }, [metadata, videoRef, skipProgressHistory]);
 
-  // Initial load: Get previous progress
+  // Initial load: Get previous progress (only if enableProgressLoad is true)
   useEffect(() => {
+    // Skip loading progress for watch party guests
+    if (!enableProgressLoad) return;
+
     const socket = getSocket();
     if (!socket || !metadata.movieId) return;
 
@@ -173,6 +186,7 @@ export function useWatchProgress({
     metadata.episode,
     metadata.type,
     onProgressLoaded,
+    enableProgressLoad,
   ]);
 
   // Monitor playback to accumulate "watch time"

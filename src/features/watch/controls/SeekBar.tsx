@@ -41,6 +41,7 @@ interface SeekBarProps {
   onSeek: (time: number) => void;
   spriteVtt?: string;
   spriteSheet?: SpriteSheet;
+  disabled?: boolean;
 }
 
 export function SeekBar({
@@ -50,6 +51,7 @@ export function SeekBar({
   onSeek,
   spriteVtt,
   spriteSheet,
+  disabled = false,
 }: SeekBarProps) {
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const bufferedProgress = duration ? (buffered / duration) * 100 : 0;
@@ -103,14 +105,14 @@ export function SeekBar({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!barRef.current || !duration) return;
+      if (disabled || !barRef.current || !duration) return;
       const rect = barRef.current.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const time = Math.max(0, Math.min(duration, percent * duration));
       setHoverTime(time);
       setHoverPosition(e.clientX - rect.left);
     },
-    [duration],
+    [duration, disabled],
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -119,21 +121,21 @@ export function SeekBar({
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!barRef.current || !duration) return;
+      if (disabled || !barRef.current || !duration) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const time = Math.max(0, Math.min(duration, percent * duration));
       onSeek(time);
     },
-    [duration, onSeek],
+    [duration, onSeek, disabled],
   );
 
   const handleDrag = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.buttons !== 1) return;
+      if (disabled || e.buttons !== 1) return;
       handleClick(e);
     },
-    [handleClick],
+    [handleClick, disabled],
   );
 
   const formatTime = (seconds: number) => {
@@ -193,9 +195,11 @@ export function SeekBar({
   }, [spriteSheet, hoverTime, vttSprites]);
 
   return (
-    <div className="relative group py-2 lg:py-3 2xl:py-4">
-      {/* Time preview tooltip - only show when hovering */}
-      {hoverTime !== null && (
+    <div
+      className={`relative group py-2 lg:py-3 2xl:py-4 ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+    >
+      {/* Time preview tooltip - only show when hovering and not disabled */}
+      {!disabled && hoverTime !== null && (
         <div
           className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={{
@@ -261,7 +265,7 @@ export function SeekBar({
       {/* Seek bar */}
       <div
         ref={barRef}
-        className="relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full cursor-pointer group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4 transition-all duration-200"
+        className={`relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full transition-all duration-200 ${!disabled ? 'group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4' : ''}`}
         onClick={handleClick}
         onMouseMove={(e) => {
           handleMouseMove(e);

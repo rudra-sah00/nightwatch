@@ -30,12 +30,10 @@ export function SearchInput() {
   // Load history when focused
   const loadHistory = async () => {
     try {
-      // setIsLoading(true);
       const data = await getSearchHistory();
       setHistory(data);
     } catch {
-    } finally {
-      // setIsLoading(false);
+      // Silently fail
     }
   };
 
@@ -93,7 +91,7 @@ export function SearchInput() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search for movies, shows..."
-          className="pl-10 pr-10 bg-secondary/50 border-white/10 focus-visible:ring-primary/50 h-10 w-full"
+          className="pl-10 pr-10 bg-secondary border-border focus-visible:ring-primary/50 h-10 w-full"
           onFocus={handleFocus}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -104,7 +102,7 @@ export function SearchInput() {
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -112,7 +110,7 @@ export function SearchInput() {
       </div>
 
       {isOpen && history.length > 0 && !query && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           <div className="py-2">
             <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-between items-center">
               <span>Recent Searches</span>
@@ -122,7 +120,7 @@ export function SearchInput() {
                   clearSearchHistory();
                   setHistory([]);
                 }}
-                className="text-xs hover:text-white transition-colors"
+                className="text-xs hover:text-foreground transition-colors"
               >
                 Clear All
               </button>
@@ -132,11 +130,11 @@ export function SearchInput() {
               {history.map((item) => (
                 <div
                   key={item.id}
-                  className="group flex items-center pr-2 hover:bg-white/5 transition-colors rounded-lg"
+                  className="group flex items-center pr-2 hover:bg-muted/50 transition-colors rounded-lg"
                 >
                   <button
                     type="button"
-                    className="flex-1 flex items-center gap-3 px-4 py-2 text-sm text-gray-300 group-hover:text-white truncate text-left bg-transparent border-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-l-lg"
+                    className="flex-1 flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground group-hover:text-foreground truncate text-left bg-transparent border-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-l-lg"
                     onClick={() => handleSelect(item.query)}
                   >
                     <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -145,7 +143,7 @@ export function SearchInput() {
                   <button
                     type="button"
                     onClick={(e) => handleDeleteItem(e, item.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-white/10 text-muted-foreground hover:text-destructive transition-all flex-shrink-0 focus:opacity-100 focus-visible:opacity-100"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-destructive transition-all flex-shrink-0 focus:opacity-100 focus-visible:opacity-100"
                     aria-label="Remove from history"
                   >
                     <X className="w-4 h-4" />

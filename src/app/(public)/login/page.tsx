@@ -43,7 +43,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="glass rounded-3xl p-8 shadow-2xl shadow-black/50">
+        <div className="glass rounded-3xl p-8 shadow-2xl">
           <LoginForm />
         </div>
 

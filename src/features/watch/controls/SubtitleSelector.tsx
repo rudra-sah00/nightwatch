@@ -93,7 +93,7 @@ export function loadSubtitleSettings(): SubtitleSettings {
       return { ...defaultSubtitleSettings, ...parsed };
     }
   } catch (e) {
-    console.warn('Failed to load subtitle settings:', e);
+    // Ignore load error
   }
   return defaultSubtitleSettings;
 }
@@ -105,7 +105,7 @@ function saveSubtitleSettings(settings: SubtitleSettings) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   } catch (e) {
-    console.warn('Failed to save subtitle settings:', e);
+    // Ignore save error
   }
 }
 

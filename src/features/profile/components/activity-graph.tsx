@@ -174,9 +174,9 @@ export function ActivityGraph({
               {weeks.map((week) => (
                 <div key={week[0].dateStr} className="flex flex-col gap-[2px]">
                   {week.map((day) => {
-                    // Red Theme Colors (Heatmap style)
+                    // Red Theme Colors (Heatmap style) - uses muted for empty state
                     const themeColors = [
-                      'bg-zinc-800/50', // Empty
+                      'bg-muted', // Empty
                       'bg-red-900/40', // L1
                       'bg-red-800/60', // L2
                       'bg-red-600/80', // L3
@@ -194,11 +194,11 @@ export function ActivityGraph({
                       >
                         {/* Enhanced Tooltip */}
                         {day.isValid && (
-                          <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block z-[9999] whitespace-nowrap bg-zinc-900/90 backdrop-blur-md text-zinc-100 text-xs px-3 py-2 rounded-lg shadow-xl border border-white/10 pointer-events-none animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
+                          <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block z-[9999] whitespace-nowrap bg-popover backdrop-blur-md text-popover-foreground text-xs px-3 py-2 rounded-lg shadow-xl border border-border pointer-events-none animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
                             <div className="font-semibold">
                               {Math.ceil(day.count)} minutes
                             </div>
-                            <div className="text-zinc-400 text-[10px]">
+                            <div className="text-muted-foreground text-[10px]">
                               {formatDate(day.date)}
                             </div>
                           </div>
@@ -216,7 +216,7 @@ export function ActivityGraph({
         <div className="mt-4 flex items-center justify-end gap-2 text-xs text-muted-foreground">
           <span>Less</span>
           <div className="flex gap-[2px]">
-            <div className="w-[10px] h-[10px] rounded-[2px] bg-zinc-800/50" />
+            <div className="w-[10px] h-[10px] rounded-[2px] bg-muted" />
             <div className="w-[10px] h-[10px] rounded-[2px] bg-red-900/40" />
             <div className="w-[10px] h-[10px] rounded-[2px] bg-red-800/60" />
             <div className="w-[10px] h-[10px] rounded-[2px] bg-red-600/80" />

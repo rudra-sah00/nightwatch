@@ -38,6 +38,12 @@ interface WatchPageProps {
   captionUrl?: string | null;
   spriteVtt?: string;
   description?: string;
+  onVideoRef?: (ref: HTMLVideoElement) => void;
+  mobileHeaderContent?: React.ReactNode;
+  readOnly?: boolean; // For watch party guests (controls disabled)
+  isHost?: boolean; // For watch party - controls watch history tracking
+  onSidebarToggle?: () => void;
+  onNavigate?: (url: string) => void;
 }
 
 export function WatchPage({
@@ -46,6 +52,12 @@ export function WatchPage({
   captionUrl,
   spriteVtt,
   description,
+  onVideoRef,
+  mobileHeaderContent,
+  readOnly = false,
+  isHost = true, // Default true for normal playback
+  onSidebarToggle,
+  onNavigate,
 }: WatchPageProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -53,6 +65,13 @@ export function WatchPage({
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
+
+  // Expose video ref to parent (for Watch Party)
+  useEffect(() => {
+    if (videoRef.current && onVideoRef) {
+      onVideoRef(videoRef.current);
+    }
+  }, [onVideoRef]);
 
   // Subtitle settings state - load from localStorage
   const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
@@ -106,19 +125,26 @@ export function WatchPage({
   }, []);
 
   // Track watch progress
+  // For watch party guests (isHost=false): track activity time but skip saving progress/history
   useWatchProgress({
     videoRef,
     metadata,
     isPlaying: state.isPlaying && !state.isPaused && !state.isBuffering,
-    onProgressLoaded: handleProgressLoaded,
+    onProgressLoaded: isHost ? handleProgressLoaded : undefined,
+    skipProgressHistory: !isHost, // Guests don't save progress
+    enableProgressLoad: isHost, // Only host loads previous progress
   });
 
   // Handle navigating to next episode
   const handleNavigate = useCallback(
     (url: string) => {
-      router.push(url);
+      if (onNavigate) {
+        onNavigate(url);
+      } else {
+        router.push(url);
+      }
     },
-    [router],
+    [router, onNavigate],
   );
 
   // Next episode for series
@@ -136,10 +162,24 @@ export function WatchPage({
     onNavigate: handleNavigate,
   });
 
-  // Handle going back
+  // Handle going back - always go to home (not browser history)
   const handleBack = useCallback(() => {
-    router.back();
+    router.push('/home');
   }, [router]);
+
+  // Toggle captions on/off
+  const toggleCaptions = useCallback(() => {
+    if (state.currentSubtitleTrack) {
+      // Turn off captions
+      dispatch({ type: 'SET_CURRENT_SUBTITLE_TRACK', trackId: null });
+    } else if (state.subtitleTracks.length > 0) {
+      // Turn on first available caption track
+      dispatch({
+        type: 'SET_CURRENT_SUBTITLE_TRACK',
+        trackId: state.subtitleTracks[0].id,
+      });
+    }
+  }, [state.currentSubtitleTrack, state.subtitleTracks]);
 
   // Keyboard controls
   const { togglePlay, toggleMute, seek } = useKeyboard({
@@ -148,6 +188,11 @@ export function WatchPage({
     dispatch,
     isFullscreen: state.isFullscreen,
     onBack: handleBack,
+    currentSubtitleTrack: state.currentSubtitleTrack,
+    onToggleCaptions: toggleCaptions,
+    hasNextEpisode: !!nextEpisodeInfo,
+    onNextEpisode: playNextEpisode,
+    disabled: readOnly, // Disable keyboard shortcuts if readOnly
   });
 
   // Fullscreen (with mobile native video support)
@@ -182,20 +227,22 @@ export function WatchPage({
   // Control handlers
   const handleSeek = useCallback(
     (time: number) => {
+      if (readOnly) return; // Prevent seek when readOnly
       if (videoRef.current) {
         videoRef.current.currentTime = time;
       }
       showControls();
     },
-    [showControls],
+    [showControls, readOnly],
   );
 
   const handleSkip = useCallback(
     (seconds: number) => {
+      if (readOnly) return; // Prevent skip when readOnly
       seek(seconds);
       showControls();
     },
-    [seek, showControls],
+    [seek, showControls, readOnly],
   );
 
   const handleVolumeChange = useCallback(
@@ -219,9 +266,10 @@ export function WatchPage({
   }, [toggleMute, showControls]);
 
   const handleTogglePlay = useCallback(() => {
+    if (readOnly) return; // Prevent toggle play when readOnly
     togglePlay();
     showControls();
-  }, [togglePlay, showControls]);
+  }, [togglePlay, showControls, readOnly]);
 
   const handleRetry = useCallback(() => {
     dispatch({ type: 'SET_ERROR', error: null });
@@ -229,8 +277,9 @@ export function WatchPage({
   }, []);
 
   const handleVideoClick = useCallback(() => {
+    if (readOnly) return; // Prevent click toggle when readOnly
     handleTogglePlay();
-  }, [handleTogglePlay]);
+  }, [handleTogglePlay, readOnly]);
 
   // Quality change handler
   const handleQualityChange = useCallback(
@@ -255,13 +304,14 @@ export function WatchPage({
   // Playback rate handler
   const handlePlaybackRateChange = useCallback(
     (rate: number) => {
+      if (readOnly) return; // Prevent speed change when readOnly
       if (videoRef.current) {
         videoRef.current.playbackRate = rate;
       }
       dispatch({ type: 'SET_PLAYBACK_RATE', rate });
       showControls();
     },
-    [showControls],
+    [showControls, readOnly],
   );
 
   // Audio track change handler
@@ -363,6 +413,7 @@ export function WatchPage({
             </p>
           )}
         </div>
+        {mobileHeaderContent}
       </div>
 
       {/* Main Player Area - Takes remaining space */}
@@ -406,6 +457,7 @@ export function WatchPage({
           isPlaying={state.isPlaying}
           onToggle={handleTogglePlay}
           metadata={pauseOverlayMetadata}
+          disabled={readOnly}
         />
 
         {/* Control Bar */}
@@ -427,6 +479,8 @@ export function WatchPage({
           subtitleSettings={subtitleSettings}
           onSubtitleSettingsChange={setSubtitleSettings}
           isMobile={isMobile}
+          readOnly={readOnly}
+          onSidebarToggle={onSidebarToggle}
         />
       </div>
     </section>

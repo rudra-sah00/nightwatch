@@ -6,15 +6,24 @@ import { env } from './env';
 let socket: Socket | null = null;
 
 /**
- * Initialize WebSocket connection with user credentials
+ * Initialize WebSocket connection with user credentials or as guest
  */
-export function initSocket(userId: string, sessionId: string): Socket {
+export function initSocket(
+  userId?: string,
+  sessionId?: string,
+  isGuest = false,
+): Socket {
   if (socket?.connected) {
     socket.disconnect();
   }
 
+  const query: Record<string, string> = {};
+  if (userId) query.userId = userId;
+  if (sessionId) query.sessionId = sessionId;
+  if (isGuest) query.isGuest = 'true';
+
   socket = io(env.WS_URL, {
-    query: { userId, sessionId },
+    query,
     transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: Infinity, // Keep trying indefinitely

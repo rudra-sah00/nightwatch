@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Clock, Film, Loader2, Play, Tv } from 'lucide-react';
+import { Calendar, Clock, Film, Loader2, Play, Tv, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ContentType, type ShowDetails } from '../types';
@@ -19,6 +19,10 @@ interface ContentInfoProps {
   watchProgress?: WatchProgress | null;
   onPlay: () => void;
   onResume?: () => void;
+  onWatchParty?: () => void;
+  isWatchPartyDisabled?: boolean;
+  watchPartyDisabledReason?: string;
+  isCreatingParty?: boolean;
 }
 
 export function ContentInfo({
@@ -28,6 +32,10 @@ export function ContentInfo({
   watchProgress,
   onPlay,
   onResume,
+  onWatchParty,
+  isWatchPartyDisabled,
+  watchPartyDisabledReason,
+  isCreatingParty = false,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
 
@@ -108,7 +116,7 @@ export function ContentInfo({
             'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
-          disabled={isPlaying}
+          disabled={isPlaying || isCreatingParty}
         >
           {isPlaying ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -127,16 +135,32 @@ export function ContentInfo({
                 : 'Play'}
         </Button>
 
-        {/* If series has progress, also show "Play from Start" option */}
-        {isSeries && hasWatchProgress && !isPlaying && (
+        {/* Watch Together Button */}
+        {onWatchParty && (
           <Button
             size="lg"
-            variant="outline"
-            className="gap-2 px-6 py-6 text-lg font-semibold border-white/30 text-white hover:bg-white/15 hover:border-white/40 transition-all duration-200"
-            onClick={onPlay}
+            variant="secondary"
+            className={cn(
+              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg border-0',
+              isWatchPartyDisabled || isCreatingParty
+                ? 'bg-gray-500/50 cursor-not-allowed opacity-80'
+                : 'bg-teal-500 hover:bg-teal-600 text-white',
+            )}
+            onClick={
+              isWatchPartyDisabled || isCreatingParty ? undefined : onWatchParty
+            }
+            disabled={isWatchPartyDisabled || isCreatingParty}
           >
-            <Play className="w-4 h-4" />
-            Episodes
+            {isCreatingParty ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Users className="w-5 h-5" />
+            )}
+            {isCreatingParty
+              ? 'Creating...'
+              : isWatchPartyDisabled && watchPartyDisabledReason
+                ? watchPartyDisabledReason
+                : 'Watch Together'}
           </Button>
         )}
       </div>

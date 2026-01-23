@@ -1,5 +1,5 @@
 'use client';
-import { ArrowLeft, SkipBack, SkipForward } from 'lucide-react';
+import { ArrowLeft, SkipBack, SkipForward, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PlayerState } from '../player/types';
 import { AudioSelector } from './AudioSelector';
@@ -35,6 +35,7 @@ interface ControlBarProps {
   onMuteToggle: () => void;
   onFullscreenToggle: () => void;
   onBack: () => void;
+  onSidebarToggle?: () => void;
   onQualityChange?: (quality: string) => void;
   onPlaybackRateChange?: (rate: number) => void;
   onAudioChange?: (trackId: string) => void;
@@ -42,6 +43,7 @@ interface ControlBarProps {
   subtitleSettings?: SubtitleSettings;
   onSubtitleSettingsChange?: (settings: SubtitleSettings) => void;
   isMobile?: boolean;
+  readOnly?: boolean; // For watch party guests
 }
 
 // Format time helper
@@ -69,6 +71,7 @@ export function ControlBar({
   onMuteToggle,
   onFullscreenToggle,
   onBack,
+  onSidebarToggle,
   onQualityChange,
   onPlaybackRateChange,
   onAudioChange,
@@ -76,6 +79,7 @@ export function ControlBar({
   subtitleSettings,
   onSubtitleSettingsChange,
   isMobile = false,
+  readOnly = false,
 }: ControlBarProps) {
   // Convert audio tracks for selectors
   const audioTracksForMenu = state.audioTracks.map((track) => ({
@@ -122,6 +126,22 @@ export function ControlBar({
         >
           <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
         </button>
+
+        {onSidebarToggle && (
+          <button
+            type="button"
+            onClick={onSidebarToggle}
+            className="group flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2.5 2xl:px-5 2xl:py-3 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 transition-all duration-300 active:scale-95 backdrop-blur-sm border border-indigo-500/30 hover:border-indigo-400/50 flex-shrink-0 shadow-lg shadow-indigo-500/10"
+            title="Toggle Watch Party sidebar"
+          >
+            <Users className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-indigo-300 group-hover:text-indigo-200 transition-colors duration-300" />
+            <span className="hidden lg:inline text-sm 2xl:text-base font-medium text-indigo-200 group-hover:text-white transition-colors duration-300">
+              Party
+            </span>
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50" />
+          </button>
+        )}
+
         <div className="flex-1 min-w-0">
           <h1 className="text-white font-semibold text-lg md:text-2xl lg:text-3xl 2xl:text-4xl truncate drop-shadow-lg">
             {metadata.title}
@@ -146,36 +166,49 @@ export function ControlBar({
           onSeek={onSeek}
           spriteSheet={spriteSheet}
           spriteVtt={spriteVtt}
+          disabled={readOnly}
         />
 
         {/* Controls Row */}
         <div className="flex items-center justify-between">
           {/* Left Controls */}
           <div className="flex items-center gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
-            {/* Play/Pause */}
-            <PlayPause
-              isPlaying={state.isPlaying}
-              onToggle={onTogglePlay}
-              size="lg"
-            />
+            {/* Play/Pause - Disabled/Hidden based on readOnly? 
+                User said "only host can control overall playback".
+                So we should either disable it visually or hide it.
+                I'll make it disabled-looking and non-functional.
+            */}
+            <div
+              className={
+                readOnly ? 'opacity-50 pointer-events-none grayscale' : ''
+              }
+            >
+              <PlayPause
+                isPlaying={state.isPlaying}
+                onToggle={onTogglePlay}
+                size="lg"
+              />
+            </div>
 
             {/* Skip buttons - Desktop only */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-2">
-              <button
-                type="button"
-                onClick={() => onSkip(-10)}
-                className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
-              >
-                <SkipBack className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onSkip(10)}
-                className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
-              >
-                <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
-              </button>
-            </div>
+            {!readOnly && (
+              <div className="hidden md:flex items-center gap-1 lg:gap-2">
+                <button
+                  type="button"
+                  onClick={() => onSkip(-10)}
+                  className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
+                >
+                  <SkipBack className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSkip(10)}
+                  className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-all duration-200 active:scale-95 group"
+                >
+                  <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
+                </button>
+              </div>
+            )}
 
             {/* Volume - Desktop only */}
             <div className="hidden md:block">

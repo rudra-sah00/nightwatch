@@ -1,6 +1,6 @@
 'use client';
 
-import { Pause, Play } from 'lucide-react';
+import { Lock, Pause, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PlayPauseProps {
@@ -72,21 +72,40 @@ interface CenterPlayButtonProps {
     year?: string;
     posterUrl?: string;
   };
+  disabled?: boolean;
 }
 
 export function CenterPlayButton({
   isPlaying,
   onToggle,
   metadata,
+  disabled = false,
 }: CenterPlayButtonProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't propagate clicks to video element
+    e.stopPropagation();
+    if (!disabled) {
+      onToggle();
+    }
+  };
+
   return (
     <button
       type="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!disabled) onToggle();
+        }
+      }}
       className={cn(
-        'absolute inset-0 transition-all duration-500 z-20 w-full text-left',
+        'absolute inset-0 transition-all duration-500 z-20 w-full cursor-pointer border-none bg-transparent p-0 m-0',
         !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        disabled && 'cursor-default',
       )}
-      onClick={onToggle}
+      style={{ pointerEvents: isPlaying ? 'none' : 'auto' }}
+      onClick={handleClick}
     >
       {/* Dark overlay with gradients */}
       <div
@@ -103,7 +122,7 @@ export function CenterPlayButton({
       {metadata && (
         <div
           className={cn(
-            'absolute inset-0 flex flex-col items-center justify-center',
+            'absolute inset-0 flex flex-col items-center justify-center pointer-events-none',
             'px-4 py-8 sm:px-6 sm:py-10',
             'transition-all duration-500 transform overflow-hidden',
             !isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
@@ -154,9 +173,13 @@ export function CenterPlayButton({
             {/* Paused indicator - compact on mobile */}
             <div className="flex items-center gap-2 mt-2 sm:mt-4 flex-shrink-0">
               <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+                {disabled ? (
+                  <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-white/70" />
+                ) : (
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+                )}
                 <span className="text-white/90 text-xs sm:text-sm font-medium">
-                  Tap to resume
+                  {disabled ? 'Waiting for Host' : 'Tap to resume'}
                 </span>
               </div>
             </div>
@@ -166,11 +189,15 @@ export function CenterPlayButton({
 
       {/* Fallback for no metadata */}
       {!metadata && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none">
           <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+            {disabled ? (
+              <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-white/70" />
+            ) : (
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+            )}
             <span className="text-white/90 text-xs sm:text-sm font-medium">
-              Tap to resume
+              {disabled ? 'Waiting for Host' : 'Tap to resume'}
             </span>
           </div>
         </div>

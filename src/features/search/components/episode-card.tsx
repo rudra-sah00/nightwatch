@@ -35,7 +35,7 @@ export function EpisodeCard({
       type="button"
       className={cn(
         'group flex gap-4 p-3 rounded-xl cursor-pointer transition-all duration-300 w-full text-left',
-        'hover:bg-white/5 border border-transparent hover:border-white/10',
+        'hover:bg-muted/50 border border-transparent hover:border-border',
         isPlaying && 'bg-primary/10 border-primary/30 pointer-events-none',
         isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',
       )}
@@ -55,7 +55,7 @@ export function EpisodeCard({
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/10 flex items-center justify-center">
-            <span className="text-2xl font-bold text-white/20">
+            <span className="text-2xl font-bold text-muted-foreground/30">
               {episode.episodeNumber}
             </span>
           </div>

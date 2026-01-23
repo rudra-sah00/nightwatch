@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { type LoginInput, loginUser, logoutUser } from '@/features/auth';
-import { getProfile } from '@/features/profile/api';
+import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
 import {
   disconnectSocket,
@@ -64,6 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Fetch latest profile to get missing fields like createdAt
         try {
+          // Invalidate cache to ensure fresh data
+          invalidateProfileCache();
           const { user: profileData } = await getProfile({
             signal: controller.signal,
           });

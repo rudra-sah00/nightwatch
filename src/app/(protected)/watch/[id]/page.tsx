@@ -53,6 +53,27 @@ function WatchContent() {
   const [isRefetching, setIsRefetching] = useState(false);
   const [refetchError, setRefetchError] = useState<string | null>(null);
 
+  // CRITICAL: Sync state when URL params change (soft navigation for next episode)
+  useEffect(() => {
+    if (initialStreamUrl) {
+      setStreamUrl(initialStreamUrl);
+    }
+    if (initialCaptionUrl !== captionUrl) {
+      setCaptionUrl(initialCaptionUrl);
+    }
+    if (initialSpriteVtt !== spriteVtt) {
+      setSpriteVtt(initialSpriteVtt);
+    }
+    // Reset error state on navigation
+    setRefetchError(null);
+  }, [
+    initialStreamUrl,
+    initialCaptionUrl,
+    initialSpriteVtt,
+    captionUrl,
+    spriteVtt,
+  ]);
+
   const metadata: VideoMetadata = {
     title: decodeURIComponent(title),
     type,
@@ -157,8 +178,12 @@ function WatchContent() {
     );
   }
 
+  // Create a unique key that changes when episode changes to force WatchPage remount
+  const watchKey = `${movieId}-${season || 0}-${episode || 0}`;
+
   return (
     <WatchPage
+      key={watchKey}
       streamUrl={streamUrl}
       metadata={metadata}
       captionUrl={captionUrl}

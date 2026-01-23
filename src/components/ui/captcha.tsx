@@ -26,13 +26,14 @@ export function Captcha({ onVerify, onError }: CaptchaProps) {
     );
   }
 
+  const siteKey = (
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAACOOsd71Dq3XLJUk'
+  ).trim();
+
   return (
     <div className="w-full flex justify-center my-4">
       <Turnstile
-        siteKey={
-          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
-          '0x4AAAAAACOOsd71Dq3XLJUk'
-        }
+        siteKey={siteKey}
         onSuccess={onVerify}
         onError={onError}
         options={{
