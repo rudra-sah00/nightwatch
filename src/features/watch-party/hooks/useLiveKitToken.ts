@@ -43,6 +43,8 @@ export function useLiveKitToken(
 
         const data = await res.json();
         setToken(data.token);
+
+        // Use the URL provided by the backend (if any)
         if (data.url) {
           setLiveKitUrl(data.url);
         }
