@@ -1,10 +1,8 @@
 'use client';
-
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-// Controls
 import { ControlBar } from '../controls/ControlBar';
 import { CenterPlayButton } from '../controls/PlayPause';
 import {
@@ -15,7 +13,6 @@ import {
 } from '../controls/SubtitleSelector';
 import { BufferingOverlay } from '../overlays/BufferingOverlay';
 import { ErrorOverlay } from '../overlays/ErrorOverlay';
-// Overlays
 import { LoadingOverlay } from '../overlays/LoadingOverlay';
 import { NextEpisodeOverlay } from '../overlays/NextEpisodeOverlay';
 import {
@@ -36,6 +33,12 @@ interface WatchPageProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   captionUrl?: string | null;
+  subtitleTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    src: string;
+  }[];
   spriteVtt?: string;
   description?: string;
   onVideoRef?: (ref: HTMLVideoElement) => void;
@@ -50,6 +53,7 @@ export function WatchPage({
   streamUrl,
   metadata,
   captionUrl,
+  subtitleTracks,
   spriteVtt,
   description,
   onVideoRef,
@@ -103,19 +107,30 @@ export function WatchPage({
     dispatch,
   });
 
-  // Load subtitle tracks from captionUrl
+  // Load subtitle tracks
   useEffect(() => {
-    if (!captionUrl) return;
-
-    // Create subtitle track for state
-    const subtitleTrack: SubtitleTrack = {
-      id: 'en',
-      label: 'English',
-      language: 'en',
-      src: captionUrl,
-    };
-    dispatch({ type: 'SET_SUBTITLE_TRACKS', subtitleTracks: [subtitleTrack] });
-  }, [captionUrl]);
+    if (subtitleTracks && subtitleTracks.length > 0) {
+      const tracks: SubtitleTrack[] = subtitleTracks.map((t, index) => ({
+        id: t.id || `${t.language}-${index}`,
+        label: t.label,
+        language: t.language,
+        src: t.src,
+      }));
+      dispatch({ type: 'SET_SUBTITLE_TRACKS', subtitleTracks: tracks });
+    } else if (captionUrl) {
+      // Fallback to single caption
+      const subtitleTrack: SubtitleTrack = {
+        id: 'en',
+        label: 'English',
+        language: 'en',
+        src: captionUrl,
+      };
+      dispatch({
+        type: 'SET_SUBTITLE_TRACKS',
+        subtitleTracks: [subtitleTrack],
+      });
+    }
+  }, [captionUrl, subtitleTracks]);
 
   // Handle resume progress
   const handleProgressLoaded = useCallback((seconds: number) => {
@@ -424,6 +439,8 @@ export function WatchPage({
           dispatch={dispatch}
           onClick={handleVideoClick}
           captionUrl={captionUrl}
+          subtitleTracks={subtitleTracks}
+          currentTrackId={state.currentSubtitleTrack}
           controls={isMobile && state.isFullscreen}
         />
 

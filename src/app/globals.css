@@ -258,15 +258,15 @@
 
 /* Video subtitle/caption styling */
 video::cue {
-  font-size: var(--subtitle-font-size);
-  font-family: var(--subtitle-font-family);
-  background-color: var(--subtitle-bg-color);
-  color: var(--subtitle-text-color);
-  text-shadow: var(--subtitle-text-shadow);
-  opacity: var(--subtitle-opacity);
-  padding: 0.25em 0.5em;
-  border-radius: 4px;
-  line-height: 1.4;
+  font-size: var(--subtitle-font-size) !important;
+  font-family: var(--subtitle-font-family) !important;
+  background-color: var(--subtitle-bg-color) !important;
+  color: var(--subtitle-text-color) !important;
+  text-shadow: var(--subtitle-text-shadow) !important;
+  opacity: var(--subtitle-opacity) !important;
+  padding: 0.25em 0.5em !important;
+  border-radius: 4px !important;
+  line-height: 1.4 !important;
 }
 
 /* Optimize subtitle sizing for large screens */

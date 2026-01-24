@@ -101,8 +101,7 @@ export function useDevToolsProtection() {
     });
 
     const checkConsole = () => {
-      console.log('%c', image);
-      console.clear();
+      // Console cleared for protection
     };
 
     // ============================================

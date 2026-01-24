@@ -50,6 +50,9 @@ function WatchContent() {
   const [spriteVtt, setSpriteVtt] = useState<string | undefined>(
     initialSpriteVtt,
   );
+  const [subtitleTracks, setSubtitleTracks] = useState<
+    { id: string; label: string; language: string; src: string }[] | undefined
+  >(undefined);
   const [isRefetching, setIsRefetching] = useState(false);
   const [refetchError, setRefetchError] = useState<string | null>(null);
 
@@ -113,6 +116,16 @@ function WatchContent() {
         setStreamUrl(response.masterPlaylistUrl);
         if (response.captionSrt) setCaptionUrl(response.captionSrt);
         if (response.spriteVtt) setSpriteVtt(response.spriteVtt);
+        if (response.subtitleTracks && response.subtitleTracks.length > 0) {
+          setSubtitleTracks(
+            response.subtitleTracks.map((t, index) => ({
+              id: t.language ? `${t.language}-${index}` : `track-${index}`,
+              ...t,
+              src: t.url,
+            })),
+          );
+        } else {
+        }
       } else {
         setRefetchError('Failed to load stream');
       }
@@ -187,6 +200,7 @@ function WatchContent() {
       streamUrl={streamUrl}
       metadata={metadata}
       captionUrl={captionUrl}
+      subtitleTracks={subtitleTracks}
       spriteVtt={spriteVtt}
       description={description ? decodeURIComponent(description) : undefined}
     />

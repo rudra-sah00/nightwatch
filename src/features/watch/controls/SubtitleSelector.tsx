@@ -130,10 +130,6 @@ export function applySubtitleSettings(settings: SubtitleSettings) {
     settings.textColor,
   );
   document.documentElement.style.setProperty(
-    '--subtitle-text-shadow',
-    settings.textShadow,
-  );
-  document.documentElement.style.setProperty(
     '--subtitle-opacity',
     String(settings.opacity),
   );

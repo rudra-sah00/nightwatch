@@ -70,6 +70,7 @@ export interface PlayResponse {
   masterPlaylistUrl: string;
   streamUrls?: string[];
   spriteVtt?: string;
+  subtitleTracks?: { label: string; language: string; url: string }[];
   captionSrt?: string;
   spriteSheets?: SpriteSheet[];
 }
