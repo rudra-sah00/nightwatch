@@ -10,13 +10,29 @@ interface VideoElementProps {
   onDurationChange?: (duration: number) => void;
   onClick?: () => void;
   captionUrl?: string | null;
+  subtitleTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    src: string;
+  }[];
+  currentTrackId?: string | null;
   controls?: boolean;
 }
 
 // Memoized video element that should never re-render
 export const VideoElement = memo(
   forwardRef<HTMLVideoElement, VideoElementProps>(function VideoElement(
-    { dispatch, onTimeUpdate, onDurationChange, onClick, captionUrl, controls },
+    {
+      dispatch,
+      onTimeUpdate,
+      onDurationChange,
+      onClick,
+      captionUrl,
+      subtitleTracks = [],
+      currentTrackId,
+      controls,
+    },
     ref,
   ) {
     const videoRef = ref as React.MutableRefObject<HTMLVideoElement | null>;
@@ -88,6 +104,43 @@ export const VideoElement = memo(
       };
     }, [videoRef, dispatch, onTimeUpdate, onDurationChange]);
 
+    // Handle imperative subtitle switching
+    useEffect(() => {
+      const video = videoRef?.current;
+      if (!video || !video.textTracks) return;
+
+      const trackId = currentTrackId;
+      const textTracks = video.textTracks;
+
+      // Disable all tracks first (to ensure clean switch)
+      for (let i = 0; i < textTracks.length; i++) {
+        textTracks[i].mode = 'disabled';
+      }
+
+      if (trackId && trackId !== 'off') {
+        let found = false;
+        // Find and enable match
+        for (let i = 0; i < textTracks.length; i++) {
+          const track = textTracks[i];
+          // Match by language or label (since track element id isn't always exposed on TextTrack object)
+          // The <track> element's 'label' attribute maps to TextTrack.label
+          // Also check srcLang for language code match
+          if (
+            track.label === trackId || // Exact label match (if ID used label)
+            track.language === trackId || // Language code match
+            subtitleTracks.find((t) => t.id === trackId)?.label === track.label // ID lookup to label
+          ) {
+            track.mode = 'showing';
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          // Track not found
+        }
+      }
+    }, [currentTrackId, videoRef, subtitleTracks]);
+
     return (
       <video
         ref={ref}
@@ -102,15 +155,35 @@ export const VideoElement = memo(
         onClick={onClick}
         controls={controls}
       >
+        {/* Primary/Fallback Track - Statically rendered to satisfy linter */}
         <track
           kind="captions"
           src={
+            (subtitleTracks.length > 0 ? subtitleTracks[0].src : null) ||
             captionUrl ||
             'data:text/vtt;base64,V0VCVlRUCgowMDowMDowMC4wMDAgLS0+IDAwOjAwOjAwLjAwMQo='
           }
-          label="English"
-          srcLang="en"
+          label={
+            (subtitleTracks.length > 0 ? subtitleTracks[0].label : null) ||
+            'English'
+          }
+          srcLang={
+            (subtitleTracks.length > 0 ? subtitleTracks[0].language : null) ||
+            'en'
+          }
         />
+        {/* Additional Tracks */}
+        {subtitleTracks.slice(1).map((track) => {
+          return (
+            <track
+              key={track.id}
+              kind="captions"
+              src={track.src}
+              label={track.label}
+              srcLang={track.language}
+            />
+          );
+        })}
       </video>
     );
   }),

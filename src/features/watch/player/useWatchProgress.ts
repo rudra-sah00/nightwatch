@@ -78,7 +78,6 @@ export function useWatchProgress({
             // On failure, add time back to retry later
             accumulateSecondsRef.current += sentSeconds;
             // Fail silently or maybe toast debug in dev?
-            // console.error('Failed to record watch activity:', res?.error);
           }
         },
       );
