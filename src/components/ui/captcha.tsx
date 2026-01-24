@@ -2,6 +2,7 @@
 
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useEffect } from 'react';
+import { env } from '@/lib/env';
 
 interface CaptchaProps {
   onVerify: (token: string) => void;
@@ -26,9 +27,7 @@ export function Captcha({ onVerify, onError }: CaptchaProps) {
     );
   }
 
-  const siteKey = (
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAACOOsd71Dq3XLJUk'
-  ).trim();
+  const siteKey = env.TURNSTILE_SITE_KEY;
 
   return (
     <div className="w-full flex justify-center my-4">

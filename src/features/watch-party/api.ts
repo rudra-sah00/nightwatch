@@ -1,3 +1,4 @@
+import { env } from '@/lib/env';
 import { getSocket } from '@/lib/ws';
 import type {
   ChatMessage, // New
@@ -16,7 +17,7 @@ import type {
   WatchPartyRoom,
 } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const API_URL = env.BACKEND_URL;
 
 // ============ REST API ============
 

@@ -1,6 +1,5 @@
-'use client';
-
 import { useEffect, useState } from 'react';
+import { env } from '@/lib/env';
 
 interface UseLiveKitTokenOptions {
   roomId: string | undefined;
@@ -15,35 +14,23 @@ interface UseLiveKitTokenReturn {
   error: string | null;
 }
 
-/**
- * Hook to fetch LiveKit token for a watch party room
- * Extracted from WatchPartySidebar for better separation of concerns
- */
 export function useLiveKitToken(
   options: UseLiveKitTokenOptions,
 ): UseLiveKitTokenReturn {
   const { roomId, userId, userName } = options;
 
   const [token, setToken] = useState<string | null>(null);
-  const [liveKitUrl, setLiveKitUrl] = useState<string>(
-    process.env.NEXT_PUBLIC_LIVEKIT_URL || '',
-  );
+  const [liveKitUrl, setLiveKitUrl] = useState<string>(env.LIVEKIT_URL);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!roomId || !userId) {
-      return;
-    }
-
+    // ...
     const fetchToken = async () => {
-      setIsLoading(true);
-      setError(null);
-
+      // ...
       try {
         const guestName = userName || 'Guest';
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const backendUrl = env.BACKEND_URL;
 
         const res = await fetch(
           `${backendUrl}/api/livekit/token?roomName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`,
