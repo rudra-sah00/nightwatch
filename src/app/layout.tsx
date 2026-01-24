@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: 'Your personal streaming companion',
   icons: {
     icon: '/play.ico',
+    shortcut: '/play.ico',
+    apple: '/play.ico',
   },
 };
 

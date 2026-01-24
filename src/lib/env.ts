@@ -1,14 +1,21 @@
-const getEnv = (key: string): string => {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
+// Environment variables
+// Note: We must access process.env.NEXT_PUBLIC_* directly for Next.js to inline them at build time.
+// Dynamic access like process.env[key] returns undefined in the browser.
+
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+const turnstileKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+if (!backendUrl || !wsUrl || !liveKitUrl) {
+  throw new Error(
+    'Missing required environment variables. Check .env or CI/CD configuration.',
+  );
+}
 
 export const env = {
-  BACKEND_URL: getEnv('NEXT_PUBLIC_BACKEND_URL'),
-  WS_URL: getEnv('NEXT_PUBLIC_WS_URL'),
-  LIVEKIT_URL: getEnv('NEXT_PUBLIC_LIVEKIT_URL'),
-  TURNSTILE_SITE_KEY: getEnv('NEXT_PUBLIC_TURNSTILE_SITE_KEY'),
+  BACKEND_URL: backendUrl,
+  WS_URL: wsUrl,
+  LIVEKIT_URL: liveKitUrl,
+  TURNSTILE_SITE_KEY: turnstileKey || '',
 } as const;
