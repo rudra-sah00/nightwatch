@@ -1,23 +1,19 @@
 'use client';
 
 import { Loader2, X } from 'lucide-react';
-// import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-// Watch Party
 import { useWatchParty } from '@/features/watch-party';
-// Hook for data management
 import { useContentDetail } from '../hooks/use-content-detail';
-// Types
-// Types
-import { ContentType } from '../types';
-// Extracted components
+import { ContentType, type Episode } from '../types';
 import { ContentInfo } from './content-info';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
+
+import { WatchPartySetup } from './watch-party-setup';
 
 interface ContentDetailModalProps {
   contentId: string;
@@ -53,15 +49,29 @@ export function ContentDetailModal({
   // Local UI state
   const [imageError, setImageError] = useState(false);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
+  const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const [creatingEpisodeId, setCreatingEpisodeId] = useState<
+    string | number | null
+  >(null);
 
   // Handle Watch Party Creation
-  const handleWatchParty = async () => {
+  const handleWatchParty = async (episode?: Episode) => {
     if (!show) {
       toast.error('Unable to create party: Content details missing');
       return;
     }
 
+    // For series, require setup unless an episode is passed (e.g. from setup modal)
+    if (show.contentType === ContentType.Series && !episode) {
+      setIsSetupOpen(true);
+      return;
+    }
+
     try {
+      if (episode) {
+        setCreatingEpisodeId(episode.episodeId || episode.episodeNumber);
+      }
+
       const roomPayload = {
         contentId: show.id,
         title: show.title,
@@ -72,9 +82,12 @@ export function ContentDetailModal({
         posterUrl: show.posterUrl,
         season:
           show.contentType === ContentType.Series
-            ? selectedSeason?.seasonNumber || 1
+            ? episode?.seasonNumber || selectedSeason?.seasonNumber || 1
             : undefined,
-        episode: show.contentType === ContentType.Series ? 1 : undefined, // Default to ep 1 for now
+        episode:
+          show.contentType === ContentType.Series
+            ? episode?.episodeNumber || 1
+            : undefined,
       };
 
       const room = await createRoom(roomPayload);
@@ -90,6 +103,8 @@ export function ContentDetailModal({
       toast.error(
         'An unexpected error occurred while creating the watch party.',
       );
+    } finally {
+      setCreatingEpisodeId(null);
     }
   };
 
@@ -106,11 +121,13 @@ export function ContentDetailModal({
   // Handle escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
+      // Prevent closing if watch party is being created (modal is locked)
+      if (creatingEpisodeId) return;
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
+  }, [onClose, creatingEpisodeId]);
 
   // Loading state
   if (isLoading) {
@@ -178,7 +195,7 @@ export function ContentDetailModal({
             watchProgress={watchProgress}
             onPlay={() => handlePlay()}
             onResume={handleResume}
-            onWatchParty={handleWatchParty}
+            onWatchParty={() => handleWatchParty()}
           />
         </div>
       </div>
@@ -266,6 +283,20 @@ export function ContentDetailModal({
           />
         </div>
       )}
+      {/* Watch Party Setup Modal */}
+      <WatchPartySetup
+        isOpen={isSetupOpen}
+        show={show}
+        seasons={show.seasons || []}
+        selectedSeason={selectedSeason}
+        episodes={episodes}
+        isLoadingEpisodes={isLoadingEpisodes}
+        onClose={() => setIsSetupOpen(false)}
+        onSelectSeason={handleSeasonSelect}
+        onSelectEpisode={(episode) => handleWatchParty(episode)}
+        isCreating={isCreatingParty}
+        creatingEpisodeId={creatingEpisodeId}
+      />
     </div>
   );
 }

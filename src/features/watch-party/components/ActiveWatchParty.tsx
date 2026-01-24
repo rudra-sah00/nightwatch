@@ -103,7 +103,7 @@ export function ActiveWatchParty({
           episode: episode ? parseInt(episode, 10) : undefined,
         });
       }
-    } catch (error) {
+    } catch (_error) {
       // Ignore URL parsing errors
     }
   };

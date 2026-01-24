@@ -57,7 +57,7 @@ export async function checkRoomExists(roomId: string): Promise<{
       message:
         data.message || 'This watch party has ended or the code is invalid.',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       exists: false,
       reason: 'network_error',

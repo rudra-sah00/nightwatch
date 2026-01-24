@@ -92,7 +92,7 @@ export function loadSubtitleSettings(): SubtitleSettings {
       const parsed = JSON.parse(saved);
       return { ...defaultSubtitleSettings, ...parsed };
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore load error
   }
   return defaultSubtitleSettings;
@@ -104,7 +104,7 @@ function saveSubtitleSettings(settings: SubtitleSettings) {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch (e) {
+  } catch (_e) {
     // Ignore save error
   }
 }
