@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 // Hooks
@@ -33,7 +33,10 @@ interface WatchPartySidebarProps {
   onSendMessage: (content: string) => void;
   linkCopied: boolean;
   className?: string;
-  onClose?: () => void;
+  onLiveKitReady?: (data: {
+    room: import('livekit-client').Room | null;
+    participants: import('livekit-client').Participant[];
+  }) => void;
 }
 
 // ============================================
@@ -45,7 +48,6 @@ export function WatchPartySidebar({
   messages,
   currentUserId,
   isHost,
-
   onApprove,
   onReject,
   onCopyLink,
@@ -53,7 +55,7 @@ export function WatchPartySidebar({
   onSendMessage,
   linkCopied,
   className,
-  onClose,
+  onLiveKitReady,
 }: WatchPartySidebarProps) {
   // Tab state
   const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
@@ -71,6 +73,7 @@ export function WatchPartySidebar({
 
   // LiveKit connection and media controls
   const {
+    room: liveKitRoom,
     participants,
     audioEnabled,
     videoEnabled,
@@ -84,6 +87,11 @@ export function WatchPartySidebar({
     switchVideoDevice,
   } = useLiveKit(token, liveKitUrl);
 
+  // Notify parent about LiveKit state for audio ducking
+  useEffect(() => {
+    onLiveKitReady?.({ room: liveKitRoom, participants });
+  }, [liveKitRoom, participants, onLiveKitReady]);
+
   return (
     <div
       className={cn(
@@ -96,7 +104,6 @@ export function WatchPartySidebar({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         participantCount={room.members.length}
-        onClose={onClose}
       />
 
       {/* Content Area */}

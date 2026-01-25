@@ -44,6 +44,7 @@ interface ControlBarProps {
   onSubtitleSettingsChange?: (settings: SubtitleSettings) => void;
   isMobile?: boolean;
   readOnly?: boolean; // For watch party guests
+  hideBackButton?: boolean;
 }
 
 // Format time helper
@@ -80,6 +81,7 @@ export function ControlBar({
   onSubtitleSettingsChange,
   isMobile = false,
   readOnly = false,
+  hideBackButton = false,
 }: ControlBarProps) {
   // Convert audio tracks for selectors
   const audioTracksForMenu = state.audioTracks.map((track) => ({
@@ -102,7 +104,7 @@ export function ControlBar({
   return (
     <div
       className={cn(
-        'control-bar absolute inset-0 z-10 flex flex-col justify-end md:justify-between pointer-events-none transition-opacity duration-300',
+        'control-bar absolute inset-0 z-30 flex flex-col justify-end md:justify-between pointer-events-none transition-opacity duration-300',
         state.showControls || state.isLoading ? 'opacity-100' : 'opacity-0',
       )}
     >
@@ -119,13 +121,15 @@ export function ControlBar({
           state.isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100',
         )}
       >
-        <button
-          type="button"
-          onClick={onBack}
-          className="p-3 lg:p-4 2xl:p-5 rounded-full bg-white/5 hover:bg-white/20 transition-all duration-200 active:scale-95 backdrop-blur-sm border border-white/10 flex-shrink-0"
-        >
-          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
-        </button>
+        {!hideBackButton && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="p-3 lg:p-4 2xl:p-5 rounded-full bg-white/5 hover:bg-white/20 transition-all duration-200 active:scale-95 backdrop-blur-sm border border-white/10 flex-shrink-0"
+          >
+            <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
+          </button>
+        )}
 
         {onSidebarToggle && (
           <button

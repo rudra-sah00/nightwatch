@@ -1,8 +1,9 @@
-import { Fullscreen, Minimize } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import type { Participant, Room } from 'livekit-client';
+import { useCallback, useEffect, useState } from 'react';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
+import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, WatchPartyRoom } from '../types';
 import { WatchPartySidebar } from './WatchPartySidebar';
 
@@ -47,7 +48,37 @@ export function ActiveWatchParty({
   const [showDesktopSidebar, setShowDesktopSidebar] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, _setIsFullscreen] = useState(false);
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
+    null,
+  );
+
+  // LiveKit state for audio ducking
+  const [liveKitRoom, setLiveKitRoom] = useState<Room | null>(null);
+  const [liveKitParticipants, setLiveKitParticipants] = useState<Participant[]>(
+    [],
+  );
+
+  // Handle LiveKit data from sidebar
+  const handleLiveKitReady = useCallback(
+    (data: { room: Room | null; participants: Participant[] }) => {
+      setLiveKitRoom(data.room);
+      setLiveKitParticipants(data.participants);
+    },
+    [],
+  );
+
+  // Audio ducking - reduces movie volume when participants speak
+  // The hook handles volume transitions automatically
+  useAudioDucking({
+    videoRef,
+    room: liveKitRoom,
+    participants: liveKitParticipants,
+    normalVolume: 1,
+    duckedVolume: 0.25, // Reduce to 25% when someone speaks
+    transitionMs: 200,
+    enabled: true,
+  });
 
   // Detect mobile and portrait/landscape orientation
   useEffect(() => {
@@ -108,240 +139,103 @@ export function ActiveWatchParty({
     }
   };
 
-  const handleVideoRef = (ref: HTMLVideoElement | null) => {
-    videoRef.current = ref;
+  const handleVideoRef = useCallback(
+    (ref: HTMLVideoElement | null) => {
+      videoRef.current = ref;
+      setVideoElement(ref);
+    },
+    [videoRef],
+  );
 
-    // Guard against null ref (happens when component unmounts)
-    if (!ref) return;
+  // Handle Sync Listeners (Host Only)
+  useEffect(() => {
+    const ref = videoElement;
+    if (!ref || !isHost) return;
 
-    if (isHost) {
-      let lastSyncTime = 0;
-      const handleSync = () => {
-        if (!ref) return;
-        onSync(ref.currentTime, !ref.paused);
-        lastSyncTime = Date.now();
-      };
+    let lastSyncTime = 0;
+    const handleSync = () => {
+      onSync(ref.currentTime, !ref.paused);
+      lastSyncTime = Date.now();
+    };
 
-      const handleTimeUpdate = () => {
-        if (!ref) return;
-        const now = Date.now();
-        if (!ref.paused && now - lastSyncTime > 1000) {
-          handleSync();
-        }
-      };
+    const handleTimeUpdate = () => {
+      const now = Date.now();
+      if (!ref.paused && now - lastSyncTime > 1000) {
+        handleSync();
+      }
+    };
 
-      ref.addEventListener('play', handleSync);
-      ref.addEventListener('pause', handleSync);
-      ref.addEventListener('seeked', handleSync);
-      ref.addEventListener('timeupdate', handleTimeUpdate);
-    }
-  };
+    ref.addEventListener('play', handleSync);
+    ref.addEventListener('pause', handleSync);
+    ref.addEventListener('seeked', handleSync);
+    ref.addEventListener('timeupdate', handleTimeUpdate);
 
-  // Mobile Portrait Layout - YouTube Style (Video Top, Sidebar Below)
-  if (isMobile && isPortrait && !isFullscreen) {
-    return (
-      <div className="flex flex-col h-[100dvh] w-screen bg-black overflow-hidden">
-        {/* Video Player Section - Fixed aspect ratio at top */}
-        <div
-          className="relative w-full bg-black shrink-0"
-          style={{ aspectRatio: '16/9' }}
-        >
-          {/* Video Header Bar */}
-          <div className="absolute top-0 left-0 right-0 z-30 p-3 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-white truncate">
-                {metadata.title}
-              </h1>
-              {metadata.season && metadata.episode && (
-                <p className="text-[10px] text-white/60">
-                  S{metadata.season}:E{metadata.episode}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(true)}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors ml-2"
-              title="Fullscreen"
-            >
-              <Fullscreen className="w-4 h-4 text-white" />
-            </button>
-          </div>
+    return () => {
+      ref.removeEventListener('play', handleSync);
+      ref.removeEventListener('pause', handleSync);
+      ref.removeEventListener('seeked', handleSync);
+      ref.removeEventListener('timeupdate', handleTimeUpdate);
+    };
+  }, [videoElement, isHost, onSync]);
 
-          {/* Simple Video Element for Portrait Mode */}
-          {/* biome-ignore lint/a11y/useMediaCaption: Captions conditionally rendered */}
-          <video
-            ref={handleVideoRef}
-            className="w-full h-full object-contain bg-black"
-            src={room.streamUrl || undefined}
-            controls={isHost}
-            playsInline
-            crossOrigin="anonymous"
-          >
-            {room.captionUrl && (
-              <track
-                kind="captions"
-                src={room.captionUrl}
-                label="English"
-                srcLang="en"
-              />
-            )}
-            {room.captionUrl && (
-              <track
-                kind="subtitles"
-                src={room.captionUrl}
-                srcLang="en"
-                label="English"
-                default
-              />
-            )}
-          </video>
+  // Render Logic
+  // We use a unified layout structure with CSS flex-direction changes to preserve the Video Component instance
+  // This prevents unmounting/remounting on rotation, which causes auto-play glitches.
 
-          {/* Guest Waiting Overlay */}
-          {!isHost && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full border border-white/20 text-xs text-white/80">
-                Host controls playback
-              </div>
-            </div>
-          )}
-        </div>
+  const isMobilePortrait = isMobile && isPortrait && !isFullscreen;
+  const isMobileLandscape = isMobile && !isPortrait;
 
-        {/* Sidebar Content Below Video - Full Height Remaining */}
-        <div className="flex-1 overflow-hidden bg-gradient-to-b from-gray-900 to-black">
-          <WatchPartySidebar
-            room={room}
-            currentUserId={currentUserId}
-            isHost={isHost}
-            onKick={onKick}
-            onApprove={onApprove}
-            onReject={onReject}
-            onCopyLink={onCopyLink}
-            onLeave={onLeave}
-            linkCopied={copied}
-            messages={messages}
-            onSendMessage={onSendMessage}
-            className="h-full rounded-none border-0 bg-transparent shadow-none"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // Mobile Landscape Layout - Show sidebar like desktop (side by side)
-  if (isMobile && !isPortrait) {
-    return (
-      <div className="flex h-[100dvh] w-screen bg-black overflow-hidden">
-        {/* Sidebar - Always visible in landscape, smaller width */}
-        <div
-          className={cn(
-            'relative overflow-hidden h-full flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]',
-            showDesktopSidebar
-              ? 'w-64 border-r border-white/10'
-              : 'w-0 border-none',
-          )}
-        >
-          <div className="absolute top-0 left-0 w-64 h-full bg-black/40 backdrop-blur-xl">
-            <WatchPartySidebar
-              room={room}
-              currentUserId={currentUserId}
-              isHost={isHost}
-              onKick={onKick}
-              onApprove={onApprove}
-              onReject={onReject}
-              onCopyLink={onCopyLink}
-              onLeave={onLeave}
-              linkCopied={copied}
-              messages={messages}
-              onSendMessage={onSendMessage}
-              className="h-full rounded-none border-0 bg-transparent shadow-none"
-              onClose={() => setShowDesktopSidebar(false)}
-            />
-          </div>
-        </div>
-
-        {/* Video Player - Takes remaining space */}
-        <div className="flex-1 relative min-w-0 h-full bg-black">
-          <WatchPage
-            streamUrl={room.streamUrl}
-            metadata={metadata}
-            captionUrl={room.captionUrl || null}
-            spriteVtt={room.spriteVtt}
-            onVideoRef={handleVideoRef}
-            readOnly={!isHost}
-            isHost={isHost}
-            onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
-            onNavigate={handleNavigate}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // If mobile and in fullscreen portrait mode, show like landscape
-  if (isMobile && isPortrait && isFullscreen) {
-    return (
-      <div className="flex h-[100dvh] w-screen bg-black overflow-hidden">
-        {/* Full Video with Exit Button */}
-        <div className="flex-1 relative min-w-0 h-full bg-black">
-          {/* Exit Fullscreen Button */}
-          <button
-            type="button"
-            onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 z-50 p-2.5 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-sm transition-colors border border-white/20"
-            title="Exit Fullscreen"
-          >
-            <Minimize className="w-5 h-5 text-white" />
-          </button>
-
-          <WatchPage
-            streamUrl={room.streamUrl}
-            metadata={metadata}
-            captionUrl={room.captionUrl || null}
-            spriteVtt={room.spriteVtt}
-            onVideoRef={handleVideoRef}
-            readOnly={!isHost}
-            isHost={isHost}
-            onNavigate={handleNavigate}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop Layout - Sidebar on left, video on right
   return (
-    <div className="flex h-screen w-screen bg-black overflow-hidden">
-      {/* Desktop Party Sidebar - Resizes Video Area - Smooth Transition */}
+    <div
+      className={cn(
+        'flex h-[100dvh] w-screen bg-black overflow-hidden',
+        isMobilePortrait ? 'flex-col' : 'flex-row',
+      )}
+    >
+      {/* Sidebar Container */}
       <div
         className={cn(
-          'relative overflow-hidden h-full flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]',
-          showDesktopSidebar
-            ? 'w-80 lg:w-96 border-r border-white/10'
-            : 'w-0 border-none',
+          'relative overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-20',
+          // Mobile Portrait: Sidebar at bottom, fills remaining space
+          isMobilePortrait
+            ? 'w-full flex-1 order-2 border-t border-white/10'
+            : cn(
+                // Desktop / Mobile Landscape: Sidebar at left
+                'h-full order-1 border-r border-white/10',
+                showDesktopSidebar
+                  ? isMobile
+                    ? 'w-64'
+                    : 'w-80 lg:w-96'
+                  : 'w-0 border-none',
+              ),
         )}
       >
-        <div className="absolute top-0 left-0 w-80 lg:w-96 h-full bg-black/40 backdrop-blur-xl">
-          <WatchPartySidebar
-            room={room}
-            currentUserId={currentUserId}
-            isHost={isHost}
-            onKick={onKick}
-            onApprove={onApprove}
-            onReject={onReject}
-            onCopyLink={onCopyLink}
-            onLeave={onLeave}
-            linkCopied={copied}
-            messages={messages}
-            onSendMessage={onSendMessage}
-            className="h-full rounded-none border-0 bg-transparent shadow-none"
-            onClose={() => setShowDesktopSidebar(false)}
-          />
-        </div>
+        <WatchPartySidebar
+          room={room}
+          currentUserId={currentUserId}
+          isHost={isHost}
+          onKick={onKick}
+          onApprove={onApprove}
+          onReject={onReject}
+          onCopyLink={onCopyLink}
+          onLeave={onLeave}
+          linkCopied={copied}
+          messages={messages}
+          onSendMessage={onSendMessage}
+          className="h-full rounded-none border-0 bg-transparent shadow-none"
+          onLiveKitReady={handleLiveKitReady}
+        />
       </div>
 
       {/* Main Content Area (Video) */}
-      <div className="flex-1 relative min-w-0 h-full bg-black">
+      <div
+        className={cn(
+          'relative min-w-0 bg-black transition-all duration-500',
+          isMobilePortrait
+            ? 'w-full shrink-0 aspect-video order-1' // Portrait: Video top, fixed aspect
+            : 'flex-1 h-full order-2', // Landscape/Desktop: Video fills right side
+        )}
+      >
         <WatchPage
           streamUrl={room.streamUrl}
           metadata={metadata}
@@ -352,6 +246,22 @@ export function ActiveWatchParty({
           isHost={isHost}
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
           onNavigate={handleNavigate}
+          hideBackButton={true} // Always hide standard back button (handled by sidebar leave or custom header)
+          mobileHeaderContent={
+            isMobileLandscape ? (
+              <button
+                type="button"
+                onClick={() => setShowDesktopSidebar((prev) => !prev)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
+              >
+                {/* We use a simple icon for the mobile header toggle */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-white">Party</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                </div>
+              </button>
+            ) : undefined
+          }
         />
       </div>
     </div>

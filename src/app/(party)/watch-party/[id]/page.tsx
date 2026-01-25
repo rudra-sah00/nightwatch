@@ -65,19 +65,33 @@ export default function WatchPartyPage() {
   // Handle state updates from host (for guests)
   const handleStateUpdate = useCallback((state: PartyStateUpdate) => {
     if (videoRef.current) {
+      const video = videoRef.current;
+
+      // Robustness: If metadata not loaded (Duration 0/NaN), queue the seek
+      // This handles late joiners who receive Sync(10:00) before Manifest loads
+      if (!video.duration || Number.isNaN(video.duration)) {
+        const applySeek = () => {
+          video.currentTime = state.currentTime;
+          if (state.isPlaying) video.play().catch(() => {});
+        };
+        // Listen for duration to become available
+        video.addEventListener('durationchange', applySeek, { once: true });
+        // Fallback: loadedmetadata often fires before durationchange
+        video.addEventListener('loadedmetadata', applySeek, { once: true });
+        return;
+      }
+
       // Sync time if more than 0.5 seconds off
-      const timeDiff = Math.abs(
-        videoRef.current.currentTime - state.currentTime,
-      );
+      const timeDiff = Math.abs(video.currentTime - state.currentTime);
       if (timeDiff > 0.5) {
-        videoRef.current.currentTime = state.currentTime;
+        video.currentTime = state.currentTime;
       }
 
       // Sync play/pause
-      if (state.isPlaying && videoRef.current.paused) {
-        videoRef.current.play();
-      } else if (!state.isPlaying && !videoRef.current.paused) {
-        videoRef.current.pause();
+      if (state.isPlaying && video.paused) {
+        video.play().catch(() => {});
+      } else if (!state.isPlaying && !video.paused) {
+        video.pause();
       }
     }
   }, []);

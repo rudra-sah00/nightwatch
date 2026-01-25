@@ -11,7 +11,12 @@ export interface User {
 
 // Auth types
 export interface LoginResponse {
-  user: User;
+  user?: User; // Optional now because initiate step doesn't return user
+  requiresOtp?: boolean;
+  email?: string;
+  message?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export interface LogoutResponse {

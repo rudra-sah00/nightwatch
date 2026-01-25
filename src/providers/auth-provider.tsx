@@ -10,7 +10,13 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { type LoginInput, loginUser, logoutUser } from '@/features/auth';
+import {
+  type LoginInput,
+  loginUser,
+  logoutUser,
+  type RegisterInput,
+  registerUser,
+} from '@/features/auth';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
 import {
@@ -19,15 +25,22 @@ import {
   offForceLogout,
   onForceLogout,
 } from '@/lib/ws';
-import type { ForceLogoutPayload, User } from '@/types';
+import type { ForceLogoutPayload, LoginResponse, User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (data: LoginInput) => Promise<void>;
+  login: (data: LoginInput) => Promise<LoginResponse>;
+  register: (data: RegisterInput) => Promise<LoginResponse>;
+  verifyOtp: (
+    email: string,
+    otp: string,
+    context: 'login' | 'register',
+  ) => Promise<LoginResponse>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
+  resendOtp: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,16 +120,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [handleForceLogout]);
 
-  const login = useCallback(
-    async (data: LoginInput) => {
-      const response = await loginUser(data);
-      const { user: loggedInUser } = response;
-
-      // Store user
+  const onLoginSuccess = useCallback(
+    (loggedInUser: User) => {
       storeUser(loggedInUser);
       setUser(loggedInUser);
-
-      // Initialize WebSocket connection
       initSocket(loggedInUser.id, loggedInUser.sessionId);
       forceLogoutHandlerRef.current = handleForceLogout;
       onForceLogout(handleForceLogout);
@@ -124,11 +131,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [handleForceLogout],
   );
 
+  const login = useCallback(
+    async (data: LoginInput) => {
+      const response = await loginUser(data);
+
+      // If requires OTP, we don't set user yet
+      if (response.requiresOtp) {
+        return response;
+      }
+
+      if (response.user) {
+        onLoginSuccess(response.user);
+      }
+      return response;
+    },
+    [onLoginSuccess],
+  );
+
+  const register = useCallback(async (data: RegisterInput) => {
+    const response = await registerUser(data);
+    // Usually requires OTP now, so we just return response
+    return response;
+  }, []);
+
+  const verifyOtp = useCallback(
+    async (email: string, otp: string, context: 'login' | 'register') => {
+      // Import strictly to avoid circular deps if any, though imports up top are fine
+      const { verifyOtp: apiVerifyOtp } = await import('@/features/auth');
+      const response = await apiVerifyOtp(email, otp, context);
+
+      if (response.user) {
+        onLoginSuccess(response.user);
+      }
+      return response;
+    },
+    [onLoginSuccess],
+  );
+
   const logout = useCallback(async () => {
     try {
       await logoutUser();
     } catch {
-      // Silent fail - local session will be cleared regardless
+      // Silent fail
     } finally {
       clearStoredUser();
       disconnectSocket();
@@ -145,13 +189,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const resendOtp = useCallback(async (email: string) => {
+    const { resendOtp: apiResend } = await import('@/features/auth');
+    await apiResend(email);
+  }, []);
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
+    register,
+    verifyOtp,
     logout,
     updateUser,
+    resendOtp,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

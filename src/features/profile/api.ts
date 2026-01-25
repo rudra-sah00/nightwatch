@@ -14,10 +14,6 @@ interface CacheEntry<T> {
 let profileCache: CacheEntry<{ user: User }> | null = null;
 const PROFILE_CACHE_TTL = 5 * 60 * 1000;
 
-// Watch activity cache (5 minutes)
-let watchActivityCache: CacheEntry<WatchActivity[]> | null = null;
-const WATCH_ACTIVITY_CACHE_TTL = 5 * 60 * 1000;
-
 export async function getProfile(
   options?: RequestInit,
 ): Promise<{ user: User }> {
@@ -57,35 +53,25 @@ export async function checkUsername(
   return apiFetch(`/api/user/check-username/${username}`, options);
 }
 
+/**
+ * Get watch activity - always fresh from server (no client cache)
+ */
 export async function getWatchActivity(
   options?: RequestInit,
 ): Promise<WatchActivity[]> {
-  // Check cache first
-  if (watchActivityCache && watchActivityCache.expiry > Date.now()) {
-    return watchActivityCache.data;
-  }
-
   const { activity } = await apiFetch<{
     activity: { date: string; watchSeconds: number; level: number }[];
   }>('/api/watch/activity', options);
 
-  const mappedActivity = activity.map((a) => ({
+  return activity.map((a) => ({
     date: a.date,
     count: a.watchSeconds / 60,
     level: a.level as WatchActivity['level'],
   }));
-
-  watchActivityCache = {
-    data: mappedActivity,
-    expiry: Date.now() + WATCH_ACTIVITY_CACHE_TTL,
-  };
-  return mappedActivity;
 }
 
-// Invalidate watch activity cache (call after significant watch time)
-export function invalidateWatchActivityCache(): void {
-  watchActivityCache = null;
-}
+// Legacy function - kept for compatibility but does nothing now
+export function invalidateWatchActivityCache(): void {}
 
 export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const formData = new FormData();

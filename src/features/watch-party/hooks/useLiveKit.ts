@@ -97,6 +97,9 @@ export function useLiveKit(token: string | null, serverUrl: string) {
     const newRoom = new Room({
       adaptiveStream: true,
       dynacast: true,
+      publishDefaults: {
+        simulcast: true,
+      },
     });
 
     // Set up event listeners
@@ -115,11 +118,25 @@ export function useLiveKit(token: string | null, serverUrl: string) {
           prev.filter((p) => p.identity !== participant.identity),
         );
       })
-      .on(RoomEvent.LocalTrackPublished, (_pub, _participant) => {
-        // Force re-render by updating participants array
+      .on(RoomEvent.LocalTrackPublished, () => {
         setParticipants((prev) => [...prev]);
       })
-      .on(RoomEvent.LocalTrackUnpublished, (_pub, _participant) => {
+      .on(RoomEvent.LocalTrackUnpublished, () => {
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackSubscribed, () => {
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackUnsubscribed, () => {
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackMuted, () => {
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackUnmuted, () => {
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.ActiveSpeakersChanged, () => {
         setParticipants((prev) => [...prev]);
       })
       .on(RoomEvent.Disconnected, () => {

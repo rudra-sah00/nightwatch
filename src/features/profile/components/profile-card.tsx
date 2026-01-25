@@ -13,14 +13,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
-import {
-  getWatchActivity,
-  invalidateWatchActivityCache,
-  uploadProfileImage,
-} from '../api';
+import { getWatchActivity, uploadProfileImage } from '../api';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
 import { ChangePasswordForm } from './change-password-form';
@@ -78,12 +73,11 @@ export function ProfileCard() {
   const [activity, setActivity] = useState<WatchActivity[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadActivity = () => {
-      // Invalidate cache to ensure fresh data on mount
-      invalidateWatchActivityCache();
       getWatchActivity()
         .then(setActivity)
         .catch(() => toast.error('Failed to load activity'));
@@ -92,8 +86,6 @@ export function ProfileCard() {
     loadActivity();
 
     const handleFocus = () => {
-      // Invalidate cache before fetching fresh data
-      invalidateWatchActivityCache();
       getWatchActivity().then(setActivity);
     };
 
@@ -110,20 +102,37 @@ export function ProfileCard() {
       const file = e.target.files?.[0];
       if (!file) return;
 
+      // Create optimistic preview immediately
+      const localPreviewUrl = URL.createObjectURL(file);
+      setPreviewImage(localPreviewUrl);
+
       try {
         setIsUploading(true);
         const { url } = await uploadProfileImage(file);
         // Update user profile photo in auth context
         updateUser({ profilePhoto: url });
+        // Clear preview once real URL is set
+        setPreviewImage(null);
         toast.success('Profile image updated successfully');
       } catch {
+        // Revert preview on error
+        setPreviewImage(null);
         toast.error('Failed to upload profile image');
       } finally {
         setIsUploading(false);
+        // Clear file input for re-uploads
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        // Cleanup object URL
+        URL.revokeObjectURL(localPreviewUrl);
       }
     },
     [updateUser],
   );
+
+  // Use preview image if available, otherwise use user's profile photo
+  const displayImage = previewImage || user?.profilePhoto;
 
   const userCreatedAtDate = useMemo(
     () => (user?.createdAt ? new Date(user.createdAt) : undefined),
@@ -161,13 +170,19 @@ export function ProfileCard() {
               <div className="relative group">
                 <div className="w-32 h-32 lg:w-36 lg:h-36 rounded-full p-1 border-2 border-border/30 bg-background shadow-xl">
                   <Avatar
-                    src={user.profilePhoto}
+                    src={displayImage}
                     alt={user.name}
                     className="w-full h-full rounded-full object-cover"
                     fallback={
                       <UserIcon className="w-16 h-16 lg:w-20 lg:h-20 text-muted-foreground/50" />
                     }
                   />
+                  {/* Loading overlay during upload */}
+                  {isUploading && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-sm">
+                      <Loader2 className="w-8 h-8 animate-spin text-white" />
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -283,13 +298,6 @@ export function ProfileCard() {
 
               {activeTab === 'settings' && (
                 <div className="space-y-6 lg:space-y-8">
-                  <ProfileSection
-                    title="Appearance"
-                    description="Customize how Watch Rudra looks on your device"
-                  >
-                    <ThemeSwitcher />
-                  </ProfileSection>
-
                   <ProfileSection
                     title="Public Profile"
                     description="Manage how others see you on the platform"

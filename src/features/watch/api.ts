@@ -269,13 +269,24 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
       currentStart = parseVttTime(parts[0].trim());
       currentEnd = parseVttTime(parts[1].trim());
     } else if (line.includes('#xywh=')) {
-      const [url, hash] = line.split('#xywh=');
+      const [rawUrl, hash] = line.split('#xywh=');
       const coords = hash.split(',').map(Number);
+
+      // Resolve relative URL against VTT URL base
+      let absoluteUrl = rawUrl;
+      try {
+        if (!rawUrl.startsWith('http')) {
+          absoluteUrl = new URL(rawUrl, vttUrl).toString();
+        }
+      } catch (_e) {
+        // Fallback to original if resolution fails
+      }
+
       if (coords.length === 4) {
         sprites.push({
           start: currentStart,
           end: currentEnd,
-          url,
+          url: absoluteUrl,
           x: coords[0],
           y: coords[1],
           w: coords[2],

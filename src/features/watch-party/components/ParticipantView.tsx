@@ -54,6 +54,7 @@ export function ParticipantView({
       }
       if (track.kind === Track.Kind.Audio && audioRef.current && !isLocal) {
         track.attach(audioRef.current);
+        audioRef.current.play().catch(() => {});
       }
     };
 

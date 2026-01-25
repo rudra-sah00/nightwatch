@@ -1,22 +1,16 @@
-import { ChevronLeft, MessageSquare, Users } from 'lucide-react';
+import { MessageSquare, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidebarTabsProps {
   activeTab: 'chat' | 'participants';
   onTabChange: (tab: 'chat' | 'participants') => void;
   participantCount: number;
-  onClose?: () => void;
 }
 
-/**
- * Tab navigation header for the sidebar
- * Handles Chat/Participants tabs with animated indicator
- */
 export function SidebarTabs({
   activeTab,
   onTabChange,
   participantCount,
-  onClose,
 }: SidebarTabsProps) {
   return (
     <div className="relative bg-gradient-to-b from-black/80 to-black/40 border-b border-white/10 shrink-0">
@@ -116,18 +110,6 @@ export function SidebarTabs({
             </div>
           </button>
         </div>
-
-        {/* Close Button */}
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center w-12 bg-white/5 hover:bg-white/10 border-l border-white/10 transition-all duration-300 group"
-            title="Close sidebar"
-          >
-            <ChevronLeft className="w-5 h-5 text-white/50 group-hover:text-white transition-colors duration-300" />
-          </button>
-        )}
       </div>
     </div>
   );

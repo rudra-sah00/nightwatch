@@ -33,7 +33,7 @@ jobs:
         run: pnpm check
 
       - name: Run TypeScript check
-        run: pnpm tsc --noEmit
+        run: pnpm type-check
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

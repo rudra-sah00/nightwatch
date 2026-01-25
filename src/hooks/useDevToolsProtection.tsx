@@ -75,6 +75,14 @@ export function useDevToolsProtection() {
     const threshold = 160;
 
     const checkDevToolsSize = () => {
+      // Bypass on mobile/touch devices as zoom triggers false positives
+      const isMobile =
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        window.innerWidth < 768;
+
+      if (isMobile) return;
+
       const widthThreshold = window.outerWidth - window.innerWidth > threshold;
       const heightThreshold =
         window.outerHeight - window.innerHeight > threshold;

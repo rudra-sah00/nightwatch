@@ -66,8 +66,8 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
             }
           }
 
-          // Auto-play
-          video.play().catch(() => {});
+          // Auto-play: Removed to prevent unwanted playback on rotation/resize/fullscreen
+          // video.play().catch(() => {});
         });
 
         // Handle audio track changes from HLS
@@ -134,7 +134,7 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
         video.src = streamUrl;
         video.addEventListener('loadedmetadata', () => {
           dispatch({ type: 'SET_LOADING', isLoading: false });
-          video.play().catch(() => {});
+          // video.play().catch(() => {});
         });
       }
     };

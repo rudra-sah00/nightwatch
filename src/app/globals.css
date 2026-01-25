@@ -258,14 +258,23 @@
 
 /* Video subtitle/caption styling */
 video::cue {
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   font-size: var(--subtitle-font-size) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   font-family: var(--subtitle-font-family) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   background-color: var(--subtitle-bg-color) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   color: var(--subtitle-text-color) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   text-shadow: var(--subtitle-text-shadow) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   opacity: var(--subtitle-opacity) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   padding: 0.25em 0.5em !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   border-radius: 4px !important;
+  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   line-height: 1.4 !important;
 }
 

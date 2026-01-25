@@ -47,6 +47,7 @@ interface WatchPageProps {
   isHost?: boolean; // For watch party - controls watch history tracking
   onSidebarToggle?: () => void;
   onNavigate?: (url: string) => void;
+  hideBackButton?: boolean;
 }
 
 export function WatchPage({
@@ -62,6 +63,7 @@ export function WatchPage({
   isHost = true, // Default true for normal playback
   onSidebarToggle,
   onNavigate,
+  hideBackButton = false,
 }: WatchPageProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -411,13 +413,15 @@ export function WatchPage({
     >
       {/* Mobile Header - Solid Top Bar, pushes video down */}
       <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
+        {!hideBackButton && (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+        )}
         <div className="flex-1 min-w-0">
           <h1 className="text-base font-semibold text-white truncate">
             {metadata.title}
@@ -498,6 +502,7 @@ export function WatchPage({
           isMobile={isMobile}
           readOnly={readOnly}
           onSidebarToggle={onSidebarToggle}
+          hideBackButton={hideBackButton}
         />
       </div>
     </section>
