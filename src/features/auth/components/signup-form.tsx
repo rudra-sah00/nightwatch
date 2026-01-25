@@ -307,14 +307,14 @@ export function SignupForm() {
         />
       </div>
 
-      {/* Invite Code (Hidden/Read-Only if present) */}
+      {/* Invite Code (Read-Only) */}
       <div className="space-y-2">
-        <Label htmlFor="inviteCode">Invite Code (Optional)</Label>
+        <Label htmlFor="inviteCode">Invite Code</Label>
         <Input
           id="inviteCode"
           type="text"
           name="inviteCode"
-          placeholder="Enter invite code"
+          placeholder="Invite code required"
           value={formData.inviteCode}
           onChange={handleChange}
           error={fieldErrors.inviteCode}

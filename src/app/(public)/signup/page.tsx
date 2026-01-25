@@ -23,6 +23,12 @@ export default function SignupPage() {
       return;
     }
 
+    if (!isLoading && !inviteCode) {
+      toast.error('Registration requires a valid invite link');
+      router.replace('/login');
+      return;
+    }
+
     const checkInvite = async () => {
       // Prevent double execution in Strict Mode or re-renders
       if (didCheckInvite.current) return;
