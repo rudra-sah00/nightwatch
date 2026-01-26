@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # - name: Run Biome Check (Lint & Format)
-      #   run: pnpm check
+      - name: Run Biome Check (Lint & Format)
+        run: pnpm check
 
       - name: Run TypeScript check
         run: pnpm type-check
