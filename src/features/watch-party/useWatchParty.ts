@@ -95,6 +95,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           if (response.success) {
             if (response.room) {
               // Already approved
+              if (response.guestToken) {
+                sessionStorage.setItem('guest_token', response.guestToken);
+              }
               setRoom(response.room);
               setIsConnected(true);
               setRequestStatus('joined');
@@ -291,6 +294,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         setIsConnected(true);
         setRequestStatus('joined');
         toast.success('Join request accepted!');
+
+        // Store Guest Token
+        if (data.guestToken) {
+          sessionStorage.setItem('guest_token', data.guestToken);
+        }
 
         // Build proper stream URL for guest using their token
         let guestStreamUrl = data.room.streamUrl;

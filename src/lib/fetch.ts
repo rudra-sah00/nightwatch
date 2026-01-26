@@ -79,6 +79,10 @@ export async function apiFetch<T>(
       credentials: 'include', // Send cookies
       headers: {
         'Content-Type': 'application/json',
+        ...(typeof window !== 'undefined' &&
+        sessionStorage.getItem('guest_token')
+          ? { Authorization: `Bearer ${sessionStorage.getItem('guest_token')}` }
+          : {}),
         ...fetchOptions.headers,
       },
       signal: controller.signal,

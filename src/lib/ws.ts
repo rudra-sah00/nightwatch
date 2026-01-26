@@ -20,7 +20,14 @@ export function initSocket(
   const query: Record<string, string> = {};
   if (userId) query.userId = userId;
   if (sessionId) query.sessionId = sessionId;
-  if (isGuest) query.isGuest = 'true';
+  if (isGuest) {
+    query.isGuest = 'true';
+    // Check storage for existing guest token
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('guest_token');
+      if (token) query.guestToken = token;
+    }
+  }
 
   socket = io(env.WS_URL, {
     query,

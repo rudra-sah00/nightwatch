@@ -133,7 +133,11 @@ export function getPartyMessages(
  */
 export function requestJoinPartyRoom(
   payload: PartyJoinRequestPayload,
-  callback: Callback<{ status?: 'pending'; room?: WatchPartyRoom }>,
+  callback: Callback<{
+    status?: 'pending';
+    room?: WatchPartyRoom;
+    guestToken?: string;
+  }>,
 ): void {
   const socket = getSocket();
   if (!socket) {

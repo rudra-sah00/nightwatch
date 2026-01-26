@@ -74,6 +74,7 @@ export interface PartyAdminRequest {
 export interface PartyJoinApproved {
   room: WatchPartyRoom;
   streamToken: string;
+  guestToken?: string; // New: Guest Token
   initialState?: {
     currentTime: number;
     isPlaying: boolean;

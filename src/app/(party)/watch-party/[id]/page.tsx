@@ -12,7 +12,7 @@ import type {
   RoomPreview,
 } from '@/features/watch-party/types';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
-import { disconnectSocket, getSocket, initSocket } from '@/lib/ws';
+import { getSocket, initSocket } from '@/lib/ws';
 import { useAuth } from '@/providers/auth-provider';
 
 import type { User } from '@/types';
@@ -28,15 +28,17 @@ function useGuestSocket(user: User | null) {
     }
 
     const existingSocket = getSocket();
+    // Force re-init if guest token exists but socket has no query param for it (optional optimization)
+    // But initSocket handles it. We just need to ensure initSocket is called.
+
     if (!existingSocket?.connected) {
       initSocket(undefined, undefined, true); // Initialize as guest
     }
     setIsReady(true);
 
     return () => {
-      if (!user) {
-        disconnectSocket();
-      }
+      // Don't disconnect on unmount to prevent flickering on navigation
+      // But page refresh disconnects anyway.
     };
   }, [user]);
 
