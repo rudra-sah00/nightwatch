@@ -11,6 +11,8 @@ interface VideoGridProps {
  * Displays LiveKit participants in a single-column layout
  */
 export function VideoGrid({ participants, currentUserId }: VideoGridProps) {
+  console.log('[VideoGrid] Rendering participants:', participants.map(p => p.identity));
+
   if (participants.length === 0) {
     return (
       <div className="py-8 text-center text-white/30 text-xs italic">

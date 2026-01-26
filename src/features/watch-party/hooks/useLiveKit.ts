@@ -106,16 +106,49 @@ export function useLiveKit(token: string | null, serverUrl: string) {
     newRoom
       // ... listeners ...
       .on(RoomEvent.Connected, () => {
+        console.log('🔌 Room Connected:', newRoom.name);
         setParticipants([
           ...newRoom.remoteParticipants.values(),
           newRoom.localParticipant,
         ]);
       })
-      // ... (keep existing listeners) ...
-      .on(RoomEvent.Disconnected, () => {
-        setParticipants([]);
-        setRoom(null);
-      });
+      .on(RoomEvent.ParticipantConnected, (participant) => {
+        console.log('👤 Participant Connected:', participant.identity, participant);
+        setParticipants((prev) => [...prev, participant]);
+      })
+      .on(RoomEvent.ParticipantDisconnected, (participant) => {
+        console.log('✌️ Participant Disconnected:', participant.identity);
+        setParticipants((prev) =>
+          prev.filter((p) => p.identity !== participant.identity),
+        );
+      })
+      .on(RoomEvent.LocalTrackPublished, (pub) => {
+        console.log('📤 Local Track Published:', pub.kind, pub.trackSid);
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.LocalTrackUnpublished, (pub) => {
+        console.log('🚫 Local Track Unpublished:', pub.kind);
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackSubscribed, (track, pub, participant) => {
+        console.log('✅ Track Subscribed:', track.kind, 'from', participant.identity);
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
+        console.log('❌ Track Unsubscribed:', track.kind, 'from', participant.identity);
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackSubscriptionFailed, (sid, participant) => { // Catch errors!
+        console.error('⚠️ Track Subscription Failed:', sid, 'from', participant?.identity);
+      })
+      .on(RoomEvent.TrackMuted, (pub, participant) => {
+        console.log('Rx Track Muted:', pub.kind, 'from', participant.identity);
+        setParticipants((prev) => [...prev]);
+      })
+      .on(RoomEvent.TrackUnmuted, (pub, participant) => {
+        console.log('Rx Track Unmuted:', pub.kind, 'from', participant.identity);
+        setParticipants((prev) => [...prev]);
+      })
 
     newRoom
       .connect(serverUrl, token, {
