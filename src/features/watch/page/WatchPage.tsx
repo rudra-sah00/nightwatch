@@ -95,7 +95,11 @@ export function WatchPage({
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+      setIsMobile(
+        window.innerWidth < 768 ||
+          'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0,
+      );
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -399,13 +403,13 @@ export function WatchPage({
     <section
       ref={containerRef}
       className={cn(
-        'video-container relative w-full h-[100dvh] bg-black overflow-hidden select-none flex flex-col',
+        'video-container relative w-full h-full bg-black overflow-hidden select-none flex flex-col',
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
       style={{
         width: '100%',
-        height: '100dvh', // Explicit height for flex container
+        height: '100%', // Allow parent to control height
       }}
       onMouseMove={showControls}
       onMouseEnter={showControls}
@@ -443,9 +447,9 @@ export function WatchPage({
           dispatch={dispatch}
           onClick={handleVideoClick}
           captionUrl={captionUrl}
-          subtitleTracks={subtitleTracks}
+          subtitleTracks={state.subtitleTracks} // Use state tracks which have IDs matching selection
           currentTrackId={state.currentSubtitleTrack}
-          controls={isMobile && state.isFullscreen}
+          controls={isMobile}
         />
 
         {/* Loading Overlay */}

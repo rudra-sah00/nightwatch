@@ -97,16 +97,6 @@ export function SidebarTabs({
               >
                 Participants
               </span>
-              <span
-                className={cn(
-                  'text-[10px] px-1.5 py-0.5 rounded-full transition-all duration-300 font-medium',
-                  activeTab === 'participants'
-                    ? 'bg-primary/20 text-primary border border-primary/30 scale-110'
-                    : 'bg-white/10 text-white/50 scale-100',
-                )}
-              >
-                {participantCount}
-              </span>
             </div>
           </button>
         </div>

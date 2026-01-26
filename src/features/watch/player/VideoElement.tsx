@@ -35,7 +35,7 @@ export const VideoElement = memo(
     },
     ref,
   ) {
-    const videoRef = ref as React.MutableRefObject<HTMLVideoElement | null>;
+    const videoRef = ref as React.RefObject<HTMLVideoElement | null>;
 
     useEffect(() => {
       const video = videoRef?.current;
