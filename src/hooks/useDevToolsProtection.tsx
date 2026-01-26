@@ -18,7 +18,8 @@ const REDIRECT_URL = 'https://rudrasahoo.live';
 export function useDevToolsProtection() {
   useEffect(() => {
     // Skip in development mode
-    if (process.env.NODE_ENV === 'development') {
+    // biome-ignore lint/correctness/noConstantCondition: temp disable
+    if (true || process.env.NODE_ENV === 'development') {
       return;
     }
 
