@@ -114,10 +114,10 @@ export function ControlBar({
       {/* Bottom Gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-48 md:h-56 lg:h-64 2xl:h-72 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Top Bar - Hidden on mobile, shown on desktop (replaces old header) */}
+      {/* Top Bar - Hidden on mobile portrait, shown on landscape/desktop */}
       <div
         className={cn(
-          'relative p-4 md:p-6 lg:p-8 2xl:p-10 hidden md:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300',
+          'relative p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300',
           state.isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100',
         )}
       >
@@ -161,7 +161,7 @@ export function ControlBar({
       </div>
 
       {/* Bottom Controls */}
-      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto">
+      <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         {/* Progress Bar */}
         <SeekBar
           currentTime={state.currentTime}
@@ -214,15 +214,17 @@ export function ControlBar({
               </div>
             )}
 
-            {/* Volume - Desktop only */}
-            <div className="hidden md:block">
-              <Volume
-                volume={state.volume}
-                isMuted={state.isMuted}
-                onVolumeChange={onVolumeChange}
-                onMuteToggle={onMuteToggle}
-              />
-            </div>
+            {/* Volume - Desktop only (Hidden on Mobile) */}
+            {!isMobile && (
+              <div className="hidden md:block">
+                <Volume
+                  volume={state.volume}
+                  isMuted={state.isMuted}
+                  onVolumeChange={onVolumeChange}
+                  onMuteToggle={onMuteToggle}
+                />
+              </div>
+            )}
 
             {/* Time Display */}
             <div className="text-white text-sm md:text-base lg:text-lg 2xl:text-xl font-medium ml-2 md:ml-3 lg:ml-4 2xl:ml-5 tabular-nums">
@@ -247,12 +249,11 @@ export function ControlBar({
               onSubtitleSettingsChange={onSubtitleSettingsChange}
             />
 
-            {/* Audio Selector (desktop only - hidden on mobile via component) */}
+            {/* Audio Selector (always visible if available) */}
             <AudioSelector
               tracks={audioTracksForMenu}
               currentTrack={currentAudioId || undefined}
               onTrackChange={onAudioChange}
-              disabled={isMobile}
             />
 
             {/* Settings (Quality & Speed) */}
@@ -264,11 +265,13 @@ export function ControlBar({
               onPlaybackRateChange={onPlaybackRateChange || (() => {})}
             />
 
-            {/* Fullscreen */}
-            <Fullscreen
-              isFullscreen={state.isFullscreen}
-              onToggle={onFullscreenToggle}
-            />
+            {/* Fullscreen - Hidden on mobile if in Watch Party (sidebar exists), shown otherwise */}
+            {(!isMobile || !onSidebarToggle) && (
+              <Fullscreen
+                isFullscreen={state.isFullscreen}
+                onToggle={onFullscreenToggle}
+              />
+            )}
           </div>
         </div>
       </div>

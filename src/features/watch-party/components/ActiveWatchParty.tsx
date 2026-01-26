@@ -83,7 +83,10 @@ export function ActiveWatchParty({
   // Detect mobile and portrait/landscape orientation
   useEffect(() => {
     const checkLayout = () => {
-      const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      const mobile =
+        window.innerWidth < 768 ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0;
       const portrait = window.innerHeight > window.innerWidth;
       setIsMobile(mobile);
       setIsPortrait(portrait);
@@ -179,35 +182,40 @@ export function ActiveWatchParty({
   }, [videoElement, isHost, onSync]);
 
   // Render Logic
-  // We use a unified layout structure with CSS flex-direction changes to preserve the Video Component instance
-  // This prevents unmounting/remounting on rotation, which causes auto-play glitches.
-
+  // Layout handles both Mobile (Portrait/Landscape) and Desktop via CSS + Minimal JS
   const isMobilePortrait = isMobile && isPortrait && !isFullscreen;
+  // Note: We keep isMobilePortrait for specific specific sizing tweaks, but main layout is now CSS-first
   const isMobileLandscape = isMobile && !isPortrait;
 
   return (
     <div
       className={cn(
         'flex h-[100dvh] w-screen bg-black overflow-hidden',
-        isMobilePortrait ? 'flex-col' : 'flex-row',
+        // Default: Column (Mobile Portrait), Small+: Row (Landscape/Tablet/Desktop)
+        'flex-col sm:flex-row',
       )}
     >
       {/* Sidebar Container */}
+      {/* Mobile: Order 2 (Bottom). Desktop: Order 1 (Left) per original design? 
+          Wait, original desktop had sidebar on Left? 
+          Line 204 says 'order-1'. Video 'order-2'.
+          So Desktop: Sidebar Left, Video Right.
+          Mobile: Video Top (Order 1), Sidebar Bottom (Order 2).
+      */}
       <div
         className={cn(
           'relative overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-20',
-          // Mobile Portrait: Sidebar at bottom, fills remaining space
-          isMobilePortrait
-            ? 'w-full flex-1 order-2 border-t border-white/10'
-            : cn(
-                // Desktop / Mobile Landscape: Sidebar at left
-                'h-full order-1 border-r border-white/10',
-                showDesktopSidebar
-                  ? isMobile
-                    ? 'w-64'
-                    : 'w-80 lg:w-96'
-                  : 'w-0 border-none',
-              ),
+
+          // Mobile (Default): Width 100%, Order 2 (Bottom), Flex-1 (Fill rest of height)
+          'w-full order-2 flex-1 border-t border-white/10 sm:border-t-0',
+
+          // Desktop (sm+): Width variable, Order 1 (Left), Height 100%, Border Right
+          'sm:w-auto sm:h-full sm:order-1 sm:border-r sm:flex-none',
+
+          // Desktop Visibility Toggle
+          showDesktopSidebar
+            ? 'sm:w-64 lg:w-80 xl:w-96'
+            : 'sm:w-0 sm:border-none',
         )}
       >
         <WatchPartySidebar
@@ -231,9 +239,11 @@ export function ActiveWatchParty({
       <div
         className={cn(
           'relative min-w-0 bg-black transition-all duration-500',
-          isMobilePortrait
-            ? 'w-full shrink-0 aspect-video order-1' // Portrait: Video top, fixed aspect
-            : 'flex-1 h-full order-2', // Landscape/Desktop: Video fills right side
+          // Mobile: Order 1 (Top), Fixed Aspect Ratio
+          'w-full aspect-video order-1 shrink-0',
+
+          // Landscape/Desktop (sm+): Order 2 (Right), Fill Height & Width
+          'sm:w-auto sm:h-full sm:flex-1 sm:order-2 sm:aspect-auto',
         )}
       >
         <WatchPage
@@ -247,21 +257,6 @@ export function ActiveWatchParty({
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
           onNavigate={handleNavigate}
           hideBackButton={true} // Always hide standard back button (handled by sidebar leave or custom header)
-          mobileHeaderContent={
-            isMobileLandscape ? (
-              <button
-                type="button"
-                onClick={() => setShowDesktopSidebar((prev) => !prev)}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
-              >
-                {/* We use a simple icon for the mobile header toggle */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white">Party</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                </div>
-              </button>
-            ) : undefined
-          }
         />
       </div>
     </div>

@@ -13,11 +13,11 @@ const formatDate = (date: Date) => {
   });
 };
 
-// Helper to get ISO date string YYYY-MM-DD (UTC)
+// Helper to get ISO date string YYYY-MM-DD (Local)
 const toIso = (date: Date) => {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
 
@@ -103,7 +103,10 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
         const dateStr = toIso(currentDate);
 
         // Validation Logic
-        const isAfterCreation = createdAt ? currentDate >= createdAt : true;
+        const creationDay = createdAt ? new Date(createdAt) : null;
+        if (creationDay) creationDay.setHours(0, 0, 0, 0);
+
+        const isAfterCreation = creationDay ? currentDate >= creationDay : true;
 
         const checkDate = new Date(currentDate);
         checkDate.setHours(0, 0, 0, 0);
