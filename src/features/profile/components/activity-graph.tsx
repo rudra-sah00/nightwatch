@@ -23,43 +23,88 @@ const toIso = (date: Date) => {
 
 interface ActivityGraphProps {
   activity: WatchActivity[];
+  isLoading?: boolean;
 }
 
-export function ActivityGraph({
-  activity,
-  createdAt,
-}: ActivityGraphProps & { createdAt?: Date }) {
-  // Generate dataset
-  const { weeks, totalCount } = useMemo(() => {
+// Helper to generating stable skeleton IDs
+const SKELETON_MONTHS = Array.from({ length: 12 }, (_, i) => ({
+  id: `month-${i}`,
+  offset: i * 60,
+}));
+const SKELETON_WEEKS = Array.from({ length: 53 }, (_, i) => ({
+  id: `week-${i}`,
+  days: Array.from({ length: 7 }, (_, d) => ({ id: `day-${i}-${d}` })),
+}));
+
+function ActivityGraphSkeleton() {
+  return (
+    <div className="w-full overflow-hidden animate-pulse">
+      <div className="flex items-center justify-between mb-6">
+        <div className="h-5 w-48 bg-muted rounded" />
+      </div>
+      <div className="w-full overflow-x-auto pt-8 pb-2 scrollbar-hide">
+        <div className="min-w-fit">
+          <div className="flex flex-col gap-1">
+            {/* Fake Months */}
+            <div className="flex relative h-5 mb-1">
+              {SKELETON_MONTHS.map((month) => (
+                <div
+                  key={month.id}
+                  className="absolute h-2 w-6 bg-muted rounded"
+                  style={{ left: `${month.offset}px` }}
+                />
+              ))}
+            </div>
+            {/* Fake Grid */}
+            <div className="flex gap-[2px]">
+              {SKELETON_WEEKS.map((week) => (
+                <div key={week.id} className="flex flex-col gap-[2px]">
+                  {week.days.map((day) => (
+                    <div
+                      key={day.id}
+                      className="w-[10px] h-[10px] rounded-[2px] bg-muted/50"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
+  return useMemo(() => {
     // Strip time to ensure consistent comparisons
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // End of today to include today in calculations
+    today.setHours(23, 59, 59, 999);
 
     // Calculate start date: 52 weeks ago relative to today
-    // We want 53 columns to be safe and cover the full year view
-    const daysToSubtract = 52 * 7 + today.getDay();
+    // We align to the nearest Sunday to start the grid cleanly
+    const dayOfWeek = today.getDay();
+    const daysToSubtract = 52 * 7 + dayOfWeek;
+
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - daysToSubtract);
-    startDate.setHours(0, 0, 0, 0); // Start at midnight
-
-    // Ensure start date is aligned to Sunday
-    if (startDate.getDay() !== 0) {
-      startDate.setDate(startDate.getDate() - startDate.getDay());
-    }
+    startDate.setHours(0, 0, 0, 0);
 
     const weeksData = [];
-    const currentDate = new Date(startDate);
     let total = 0;
 
-    // Generate exactly 53 weeks
+    // We create a runner date to iterate day by day
+    const currentDate = new Date(startDate);
+
+    // Generate exactly 53 weeks to cover the full leap-year/edge-case visual range
     for (let w = 0; w < 53; w++) {
       const week = [];
       for (let d = 0; d < 7; d++) {
         const dateStr = toIso(currentDate);
-        // Check if this date is valid (after createdAt)
+
+        // Validation Logic
         const isAfterCreation = createdAt ? currentDate >= createdAt : true;
 
-        // Compare dates without time for future check
         const checkDate = new Date(currentDate);
         checkDate.setHours(0, 0, 0, 0);
         const todayMidnight = new Date(today);
@@ -70,13 +115,16 @@ export function ActivityGraph({
         let count = 0;
         let level = 0;
 
+        // Map Data
         if (isAfterCreation && !isFuture) {
           const dayActivity = activity?.find((a) => a.date === dateStr);
           count = dayActivity?.count || 0;
           total += count;
 
-          if (dayActivity?.level) level = dayActivity.level;
-          else if (count > 0) {
+          if (dayActivity?.level) {
+            level = dayActivity.level;
+          } else if (count > 0) {
+            // Fallback level calculation if backend doesn't provide it
             if (count > 120) level = 4;
             else if (count > 60) level = 3;
             else if (count > 30) level = 2;
@@ -89,8 +137,10 @@ export function ActivityGraph({
           dateStr,
           count,
           level,
-          isValid: !isFuture, // Show all non-future dates
+          isValid: !isFuture,
         });
+
+        // Advance to next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
       weeksData.push(week);
@@ -98,40 +148,53 @@ export function ActivityGraph({
 
     return { weeks: weeksData, totalCount: total };
   }, [activity, createdAt]);
+}
 
-  // Improve month labels logic
+export function ActivityGraph({
+  activity,
+  createdAt,
+  isLoading = false,
+}: ActivityGraphProps & { createdAt?: Date }) {
+  const { weeks, totalCount } = useActivityGraphData(activity, createdAt);
+
+  // Calculate Month Labels Positions
   const monthLabels = useMemo(() => {
     const labels: { name: string; weekIndex: number }[] = [];
 
     weeks.forEach((week, weekIndex) => {
       const firstDayOfWeek = week[0].date;
 
-      // Logic: Is this the first week of a new month?
-      // Check if the month of this week's first day is different from previous week's first day month
-      // Note: This matches visually if the column represents the start of the month approximately
-
       if (weekIndex === 0) {
         labels.push({
           name: firstDayOfWeek.toLocaleDateString('en-US', { month: 'short' }),
           weekIndex: 0,
         });
-      } else {
-        const prevWeekFirstDay = weeks[weekIndex - 1][0].date;
-        if (firstDayOfWeek.getMonth() !== prevWeekFirstDay.getMonth()) {
-          const lastLabel = labels[labels.length - 1];
-          if (weekIndex - lastLabel.weekIndex >= 2) {
-            labels.push({
-              name: firstDayOfWeek.toLocaleDateString('en-US', {
-                month: 'short',
-              }),
-              weekIndex,
-            });
-          }
+        return;
+      }
+
+      const prevWeekFirstDay = weeks[weekIndex - 1][0].date;
+      const isNewMonth =
+        firstDayOfWeek.getMonth() !== prevWeekFirstDay.getMonth();
+
+      if (isNewMonth) {
+        // Ensure labels don't overlap (minimum 2 weeks gap)
+        const lastLabel = labels[labels.length - 1];
+        if (weekIndex - lastLabel.weekIndex >= 2) {
+          labels.push({
+            name: firstDayOfWeek.toLocaleDateString('en-US', {
+              month: 'short',
+            }),
+            weekIndex,
+          });
         }
       }
     });
     return labels;
   }, [weeks]);
+
+  if (isLoading) {
+    return <ActivityGraphSkeleton />;
+  }
 
   return (
     <div className="w-full overflow-hidden">
@@ -156,12 +219,12 @@ export function ActivityGraph({
           <div className="flex flex-col gap-1">
             {/* Months Row */}
             <div className="flex relative h-5 mb-1">
-              {monthLabels.map((label, i) => (
+              {monthLabels.map((label) => (
                 <span
-                  key={`${label.name}-${i}`}
+                  key={`${label.name}-${label.weekIndex}`}
                   className="absolute text-[10px] text-muted-foreground font-medium"
                   style={{
-                    left: `${label.weekIndex * (10 + 2)}px`, // 10px width + 2px gap
+                    left: `${label.weekIndex * 12}px`, // 10px width + 2px gap = 12px
                   }}
                 >
                   {label.name}

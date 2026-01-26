@@ -70,9 +70,6 @@ export async function getWatchActivity(
   }));
 }
 
-// Legacy function - kept for compatibility but does nothing now
-export function invalidateWatchActivityCache(): void {}
-
 export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('image', file);
@@ -86,7 +83,7 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
       const error = await res.json().catch(() => ({}));
       throw new Error(error.error || error.message || 'Upload failed');
     }
-    return res.json();
+    return res.json().then((data) => ({ url: data.user.profilePhoto }));
   });
 
   // Invalidate profile cache so fresh data is fetched

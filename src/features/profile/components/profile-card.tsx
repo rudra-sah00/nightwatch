@@ -71,6 +71,7 @@ type TabType = 'overview' | 'settings';
 export function ProfileCard() {
   const { user, logout, updateUser } = useAuth();
   const [activity, setActivity] = useState<WatchActivity[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -78,9 +79,11 @@ export function ProfileCard() {
 
   useEffect(() => {
     const loadActivity = () => {
+      setLoadingActivity(true);
       getWatchActivity()
         .then(setActivity)
-        .catch(() => toast.error('Failed to load activity'));
+        .catch(() => toast.error('Failed to load activity'))
+        .finally(() => setLoadingActivity(false));
     };
 
     loadActivity();
@@ -291,6 +294,7 @@ export function ProfileCard() {
                     <ActivityGraph
                       activity={activity}
                       createdAt={userCreatedAtDate}
+                      isLoading={loadingActivity}
                     />
                   </ProfileSection>
                 </div>
