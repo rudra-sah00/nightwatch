@@ -25,12 +25,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; connect-src 'self' ws: wss: https: http:; img-src 'self' blob: data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src 'self' https://challenges.cloudflare.com;",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' blob: data: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' ws: wss: https: http:",
+              "frame-src 'self' https://challenges.cloudflare.com",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
+            ].join('; '),
           },
         ],
       },
