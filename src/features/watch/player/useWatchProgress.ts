@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { invalidateWatchActivityCache } from '@/features/profile/api';
+
 import {
   invalidateContinueWatchingCache,
   invalidateProgressCache,
@@ -72,8 +72,7 @@ export function useWatchProgress({
         },
         (res: SocketResponse) => {
           if (res?.success) {
-            // Invalidate watch activity cache to ensure Profile graph is live
-            invalidateWatchActivityCache();
+            // Function removed as it's no longer needed (profile fetches fresh data)
           } else {
             // On failure, add time back to retry later
             accumulateSecondsRef.current += sentSeconds;
