@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
               "connect-src 'self' ws: wss: https: http:",
               "frame-src 'self' https://challenges.cloudflare.com",
               "worker-src 'self' blob:",
+              "media-src 'self' blob: data:",
               "object-src 'none'",
             ].join('; '),
           },
