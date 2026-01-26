@@ -197,6 +197,7 @@ export function ParticipantView({
         autoPlay
         playsInline
         muted={isLocal}
+        style={{ transform: 'scaleX(1)' }} // Explicitly disable mirroring (user request)
       />
       <audio ref={audioRef} autoPlay>
         <track kind="captions" />
