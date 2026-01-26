@@ -72,7 +72,7 @@ export function LoginForm() {
 
       if (response.requiresOtp) {
         if (response.email) {
-          setFormData((prev) => ({ ...prev, email: response.email! }));
+          setFormData((prev) => ({ ...prev, email: response.email ?? '' }));
         }
         setStep('otp');
         setError(null);

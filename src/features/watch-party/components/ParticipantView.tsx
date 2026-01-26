@@ -44,21 +44,17 @@ export function ParticipantView({
 
   useEffect(() => {
     const handleTrackAttached = (track: Track) => {
-      console.log(`[ParticipantView] Attaching ${track.kind} for ${participant.identity}`);
-
       if (track.kind === Track.Kind.Video && videoRef.current) {
         try {
           track.attach(videoRef.current);
           setHasVideoTrack(true);
-          console.log(`[ParticipantView] Video Attached!`);
-        } catch (e) {
-          console.error(`[ParticipantView] Video Attach Error:`, e);
+        } catch (_e) {
+          // Ignore attach error
         }
       }
       if (track.kind === Track.Kind.Audio && audioRef.current && !isLocal) {
         track.attach(audioRef.current);
-        audioRef.current.play().catch((e) => console.warn("Audio Play Error:", e));
-        console.log(`[ParticipantView] Audio Attached!`);
+        audioRef.current.play().catch(() => {});
       }
     };
 
