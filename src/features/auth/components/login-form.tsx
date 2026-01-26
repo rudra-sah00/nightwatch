@@ -71,6 +71,9 @@ export function LoginForm() {
       const response = await login({ ...formData, captchaToken });
 
       if (response.requiresOtp) {
+        if (response.email) {
+          setFormData((prev) => ({ ...prev, email: response.email! }));
+        }
         setStep('otp');
         setError(null);
       }
