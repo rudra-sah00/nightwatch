@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.0.0...v1.0.1) (2026-01-26)
+
+
+### Bug Fixes
+
+* **video:** force disable local video mirroring ([f1a1ea6](https://github.com/rudra-sah00/watch-rudra/commit/f1a1ea6163e14ba86851ac70ee79240ba50f36b8))
+
 ## 1.0.0 (2026-01-26)
 
 
