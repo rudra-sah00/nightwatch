@@ -122,21 +122,36 @@ export const VideoElement = memo(
         // Find and enable match
         for (let i = 0; i < textTracks.length; i++) {
           const track = textTracks[i];
-          // Match by language or label (since track element id isn't always exposed on TextTrack object)
-          // The <track> element's 'label' attribute maps to TextTrack.label
-          // Also check srcLang for language code match
+          const targetTrack = subtitleTracks.find((t) => t.id === trackId);
+
           if (
-            track.label === trackId || // Exact label match (if ID used label)
-            track.language === trackId || // Language code match
-            subtitleTracks.find((t) => t.id === trackId)?.label === track.label // ID lookup to label
+            track.label === trackId || // ID is the label
+            track.language === trackId || // ID is the language code
+            (targetTrack && track.label === targetTrack.label) || // ID maps to this label
+            (targetTrack && track.language === targetTrack.language) // ID maps to this language
           ) {
             track.mode = 'showing';
             found = true;
             break;
           }
         }
+
+        // Fallback: if not found by exact match, try partial label match
         if (!found) {
-          // Track not found
+          for (let i = 0; i < textTracks.length; i++) {
+            const track = textTracks[i];
+            const targetTrack = subtitleTracks.find((t) => t.id === trackId);
+            if (
+              targetTrack &&
+              track.label
+                .toLowerCase()
+                .includes(targetTrack.label.toLowerCase())
+            ) {
+              track.mode = 'showing';
+              found = true;
+              break;
+            }
+          }
         }
       }
     }, [currentTrackId, videoRef, subtitleTracks]);

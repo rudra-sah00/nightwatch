@@ -348,31 +348,6 @@ export function WatchPage({
   // Subtitle track change handler
   const handleSubtitleChange = useCallback(
     (trackId: string | null) => {
-      if (videoRef.current?.textTracks) {
-        const textTracks = videoRef.current.textTracks;
-
-        // TextTrackList is not an array, use for loop
-        for (let i = 0; i < textTracks.length; i++) {
-          const track = textTracks[i];
-
-          if (trackId === null || trackId === 'off') {
-            // Turn off all subtitles
-            track.mode = 'disabled';
-          } else {
-            // Enable if matches - check various conditions
-            const matches =
-              track.language === trackId ||
-              track.label?.toLowerCase().includes(trackId.toLowerCase()) ||
-              trackId === 'en'; // Default English
-
-            if (matches) {
-              track.mode = 'showing';
-            } else {
-              track.mode = 'disabled';
-            }
-          }
-        }
-      }
       dispatch({ type: 'SET_CURRENT_SUBTITLE_TRACK', trackId });
       showControls();
     },
