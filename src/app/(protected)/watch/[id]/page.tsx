@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { playVideo } from '@/features/search/api';
 import type { PlayResponse } from '@/features/search/types';
+import { LoadingOverlay } from '@/features/watch/overlays/LoadingOverlay';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 
@@ -148,8 +149,20 @@ function WatchContent() {
   // Loading state while refetching
   if (isRefetching) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <Loader2 className="w-16 h-16 text-white animate-spin" />
+      <div className="relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col items-center justify-center">
+        {/* Aesthetic Background - Match WatchPage */}
+        {posterUrl && (
+          <div className="absolute inset-0 z-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-30 animate-pulse"
+              style={{ backgroundImage: `url(${posterUrl})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60" />
+          </div>
+        )}
+
+        {/* Reuse the LoadingOverlay for consistency */}
+        <LoadingOverlay isVisible={true} />
       </div>
     );
   }

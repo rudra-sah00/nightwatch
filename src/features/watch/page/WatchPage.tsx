@@ -378,19 +378,19 @@ export function WatchPage({
     <section
       ref={containerRef}
       className={cn(
-        'video-container relative w-full h-full bg-black overflow-hidden select-none flex flex-col',
+        'video-container relative w-full h-[100dvh] bg-black overflow-hidden select-none flex flex-col',
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
       style={{
         width: '100%',
-        height: '100%', // Allow parent to control height
+        height: '100dvh', // Force full height
       }}
       onMouseMove={showControls}
       onMouseEnter={showControls}
       aria-label="Video Player"
     >
-      {/* Mobile Header - Solid Top Bar, pushes video down */}
+      {/* Mobile Header - Solid Top Bar */}
       <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
         {!hideBackButton && (
           <button
@@ -416,6 +416,25 @@ export function WatchPage({
 
       {/* Main Player Area - Takes remaining space */}
       <div className="flex-1 relative w-full overflow-hidden bg-black flex items-center justify-center">
+        {/* Aesthetic Loading Layer - Absolutely centered in player area */}
+        {state.isLoading && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
+            {/* Poster Background with Drop Filter (Blur) */}
+            {metadata.posterUrl && (
+              <div className="absolute inset-0 z-0">
+                <div
+                  className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-40"
+                  style={{ backgroundImage: `url(${metadata.posterUrl})` }}
+                />
+                {/* Drop filter effect */}
+                <div className="absolute inset-0 backdrop-blur-[40px] bg-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/60" />
+              </div>
+            )}
+
+            <LoadingOverlay isVisible={true} />
+          </div>
+        )}
         {/* Video Element */}
         <VideoElement
           ref={videoRef}
@@ -426,9 +445,6 @@ export function WatchPage({
           currentTrackId={state.currentSubtitleTrack}
           controls={isMobile}
         />
-
-        {/* Loading Overlay */}
-        <LoadingOverlay isVisible={state.isLoading} />
 
         {/* Buffering Overlay */}
         <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />

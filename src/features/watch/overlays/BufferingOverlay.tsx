@@ -16,16 +16,10 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
       )}
     >
       <div className="relative flex items-center justify-center scale-75">
-        {/* Pulsing ring */}
-        <div className="absolute w-20 h-20 rounded-full border border-white/20 animate-[ping_2s_infinite]" />
-
-        {/* Spinner */}
+        {/* Simple Red Spinner */}
         <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-4 border-white/10" />
-          <Loader2 className="absolute top-0 left-0 w-16 h-16 text-indigo-500 animate-spin" />
-
-          {/* Subtle glow */}
-          <div className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.3)]" />
+          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+          <Loader2 className="absolute top-0 left-0 w-16 h-16 text-red-600 animate-spin" />
         </div>
       </div>
     </div>

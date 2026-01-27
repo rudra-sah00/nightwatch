@@ -1,6 +1,4 @@
 'use client';
-
-import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LoadingOverlayProps {
@@ -11,36 +9,29 @@ export function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
   return (
     <div
       className={cn(
-        'absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-700 ease-in-out',
-        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        'absolute inset-0 z-40 flex flex-col items-center justify-center transition-all duration-700 ease-in-out',
+        isVisible
+          ? 'opacity-100 scale-100'
+          : 'opacity-0 scale-95 pointer-events-none',
       )}
     >
       <div className="relative flex items-center justify-center">
-        {/* Layered Pulsing Rings */}
-        <div className="absolute w-24 h-24 rounded-full border border-indigo-500/30 animate-[ping_3s_infinite]" />
-        <div className="absolute w-32 h-32 rounded-full border border-purple-500/20 animate-[ping_4s_infinite]" />
+        {/* Single Proper Red Spinner */}
+        <div className="relative w-12 h-12 md:w-16 md:h-16">
+          {/* Static Track */}
+          <div className="absolute inset-0 rounded-full border-[2px] border-white/5" />
 
-        {/* Main Spinner Core */}
-        <div className="relative w-20 h-20">
-          {/* Static outer ring */}
-          <div className="absolute inset-0 rounded-full border-[3px] border-white/5" />
-
-          {/* Spinning dynamic ring */}
-          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-indigo-500 border-r-purple-500 animate-spin" />
-
-          {/* Center Glow */}
-          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-[0_0_30px_rgba(79,70,229,0.2)]">
-            <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_15px_white]" />
-          </div>
+          {/* Active Red Spinner Segment */}
+          <div className="absolute inset-0 rounded-full border-[2px] border-transparent border-t-red-600 animate-[spin_0.8s_linear_infinite]" />
         </div>
       </div>
 
-      {/* Loading Text */}
-      <div className="mt-8 flex flex-col items-center gap-1 animate-pulse">
-        <span className="text-white/90 text-sm font-medium tracking-[0.2em] uppercase">
-          Starting Stream
+      {/* Steady Loading Text */}
+      <div className="mt-8 flex flex-col items-center gap-2">
+        <span className="text-white/60 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">
+          Initializing secure connection...
         </span>
-        <div className="h-[2px] w-12 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+        <div className="h-[1px] w-12 bg-red-600/30" />
       </div>
     </div>
   );
