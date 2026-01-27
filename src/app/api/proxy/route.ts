@@ -26,7 +26,6 @@ async function fetchUpstream(url: string, headers: Headers) {
   try {
     const response = await fetch(url, {
       headers: upstreamHeaders,
-      // @ts-expect-error - next/server fetch supports this
       next: { revalidate: 0 }, // Disable Next.js caching for proxy
     });
     return response;
