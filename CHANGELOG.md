@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.0.0...v1.0.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* Captions ID mismatch, restore video events, activity graph timezone fix, and mobile player improvements ([05167cb](https://github.com/rudra-sah00/watch-rudra/commit/05167cb1952ebaf8066117b18501d5c472af70b6))
+* **video:** force disable local video mirroring ([f1a1ea6](https://github.com/rudra-sah00/watch-rudra/commit/f1a1ea6163e14ba86851ac70ee79240ba50f36b8))
+
 ## 1.0.0 (2026-01-26)
 
 
