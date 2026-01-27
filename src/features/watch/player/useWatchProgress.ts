@@ -64,11 +64,18 @@ export function useWatchProgress({
 
       if (sentSeconds === 0) return;
 
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const localDate = `${year}-${month}-${day}`;
+
       socket.emit(
         'watch:record_time',
         {
           seconds: sentSeconds,
           forceFlush,
+          date: localDate,
         },
         (res: SocketResponse) => {
           if (res?.success) {
