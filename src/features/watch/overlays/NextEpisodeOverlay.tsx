@@ -83,7 +83,7 @@ export function NextEpisodeOverlay({
   const isNextSeason = nextEpisode.episodeNumber === 1;
 
   return (
-    <div className="absolute bottom-24 right-6 z-20 animate-in slide-in-from-right-4 fade-in duration-300">
+    <div className="absolute bottom-36 md:bottom-48 right-6 z-50 animate-in slide-in-from-right-4 fade-in duration-300">
       <div
         className={cn(
           'w-80 bg-zinc-900/95 backdrop-blur-xl rounded-xl overflow-hidden',
