@@ -1,17 +1,17 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { playVideo } from '@/features/search/api';
 import type { PlayResponse } from '@/features/search/types';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
+import { getProxyUrl } from '@/lib/proxy';
 
 function WatchContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const _router = useRouter();
 
   const movieId = params.id as string;
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
@@ -39,16 +39,24 @@ function WatchContent() {
     ? decodeURIComponent(spriteParam)
     : undefined;
 
-  // Decode poster URL
-  const posterUrl = poster ? decodeURIComponent(poster) : undefined;
+  // Decode and proxy poster URL
+  const posterUrl = poster
+    ? getProxyUrl(decodeURIComponent(poster))
+    : undefined;
 
   // State for dynamically fetched stream (on page reload)
-  const [streamUrl, setStreamUrl] = useState<string | null>(initialStreamUrl);
+  // CRITICAL: We don't proxy initial params here because they might already be proxied or raw?
+  // Actually, if we navigated from standard page, they are likely raw. We should proxy them too?
+  // Let's assume passed params are raw and we proxy them when setting state.
+  // But wait, the state setters in useEffect below invoke this.
+  const [streamUrl, setStreamUrl] = useState<string | null>(
+    initialStreamUrl ? getProxyUrl(initialStreamUrl) || null : null,
+  );
   const [captionUrl, setCaptionUrl] = useState<string | null>(
-    initialCaptionUrl,
+    initialCaptionUrl ? getProxyUrl(initialCaptionUrl) || null : null,
   );
   const [spriteVtt, setSpriteVtt] = useState<string | undefined>(
-    initialSpriteVtt,
+    initialSpriteVtt ? getProxyUrl(initialSpriteVtt) : undefined,
   );
   const [subtitleTracks, setSubtitleTracks] = useState<
     { id: string; label: string; language: string; src: string }[] | undefined
@@ -58,24 +66,15 @@ function WatchContent() {
 
   // CRITICAL: Sync state when URL params change (soft navigation for next episode)
   useEffect(() => {
-    if (initialStreamUrl) {
-      setStreamUrl(initialStreamUrl);
-    }
-    if (initialCaptionUrl !== captionUrl) {
-      setCaptionUrl(initialCaptionUrl);
-    }
-    if (initialSpriteVtt !== spriteVtt) {
-      setSpriteVtt(initialSpriteVtt);
-    }
+    // Only update if the INITIAL (raw) values changed.
+    // React bails out automatically if set state is same as current.
+    setStreamUrl(getProxyUrl(initialStreamUrl) || null);
+    setCaptionUrl(getProxyUrl(initialCaptionUrl) || null);
+    setSpriteVtt(getProxyUrl(initialSpriteVtt));
+
     // Reset error state on navigation
     setRefetchError(null);
-  }, [
-    initialStreamUrl,
-    initialCaptionUrl,
-    initialSpriteVtt,
-    captionUrl,
-    spriteVtt,
-  ]);
+  }, [initialStreamUrl, initialCaptionUrl, initialSpriteVtt]);
 
   const metadata: VideoMetadata = {
     title: decodeURIComponent(title),
@@ -113,15 +112,16 @@ function WatchContent() {
       }
 
       if (response.success && response.masterPlaylistUrl) {
-        setStreamUrl(response.masterPlaylistUrl);
-        if (response.captionSrt) setCaptionUrl(response.captionSrt);
-        if (response.spriteVtt) setSpriteVtt(response.spriteVtt);
+        setStreamUrl(getProxyUrl(response.masterPlaylistUrl) || null);
+        if (response.captionSrt)
+          setCaptionUrl(getProxyUrl(response.captionSrt) || null);
+        if (response.spriteVtt) setSpriteVtt(getProxyUrl(response.spriteVtt));
         if (response.subtitleTracks && response.subtitleTracks.length > 0) {
           setSubtitleTracks(
             response.subtitleTracks.map((t, index) => ({
               id: t.language ? `${t.language}-${index}` : `track-${index}`,
               ...t,
-              src: t.url,
+              src: getProxyUrl(t.url) || '',
             })),
           );
         } else {
@@ -145,52 +145,6 @@ function WatchContent() {
     }
   }, [initialStreamUrl, title, refetchStream]);
 
-  // Loading state while refetching
-  if (isRefetching) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <Loader2 className="w-16 h-16 text-white animate-spin" />
-      </div>
-    );
-  }
-
-  // No stream URL and error
-  if (!streamUrl) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6">
-          <span className="text-4xl">⚠️</span>
-        </div>
-        <h2 className="text-white text-xl font-semibold mb-2">
-          {refetchError || 'No Stream Available'}
-        </h2>
-        <p className="text-white/60 mb-6">
-          {refetchError
-            ? 'There was an error loading the stream'
-            : 'Please start playback from the content page'}
-        </p>
-        <div className="flex gap-3">
-          {refetchError && (
-            <button
-              type="button"
-              onClick={refetchStream}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => router.push('/home')}
-            className="px-6 py-2 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
-          >
-            Go to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Create a unique key that changes when episode changes to force WatchPage remount
   const watchKey = `${movieId}-${season || 0}-${episode || 0}`;
 
@@ -203,6 +157,9 @@ function WatchContent() {
       subtitleTracks={subtitleTracks}
       spriteVtt={spriteVtt}
       description={description ? decodeURIComponent(description) : undefined}
+      externalLoading={isRefetching}
+      error={refetchError}
+      onRetry={refetchStream}
     />
   );
 }

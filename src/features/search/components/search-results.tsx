@@ -3,6 +3,7 @@
 import { ChevronRight, Film, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { getProxyUrl } from '@/lib/proxy';
 import type { SearchResult } from '../types';
 
 interface SearchResultsProps {
@@ -72,7 +73,7 @@ function SearchResultItem({ result, onSelect }: SearchResultItemProps) {
           </div>
         ) : (
           <Image
-            src={result.poster}
+            src={getProxyUrl(result.poster) || ''}
             alt={result.title}
             fill
             className="object-cover"

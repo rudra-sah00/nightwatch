@@ -48,6 +48,9 @@ interface WatchPageProps {
   onSidebarToggle?: () => void;
   onNavigate?: (url: string) => void;
   hideBackButton?: boolean;
+  externalLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
 export function WatchPage({
@@ -64,6 +67,9 @@ export function WatchPage({
   onSidebarToggle,
   onNavigate,
   hideBackButton = false,
+  externalLoading = false,
+  error = null,
+  onRetry,
 }: WatchPageProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -248,22 +254,22 @@ export function WatchPage({
   // Control handlers
   const handleSeek = useCallback(
     (time: number) => {
-      if (readOnly) return; // Prevent seek when readOnly
+      if (readOnly || externalLoading || !!error) return; // Prevent seek when loading or error
       if (videoRef.current) {
         videoRef.current.currentTime = time;
       }
       showControls();
     },
-    [showControls, readOnly],
+    [showControls, readOnly, externalLoading, error],
   );
 
   const handleSkip = useCallback(
     (seconds: number) => {
-      if (readOnly) return; // Prevent skip when readOnly
+      if (readOnly || externalLoading || !!error) return; // Prevent skip when loading or error
       seek(seconds);
       showControls();
     },
-    [seek, showControls, readOnly],
+    [seek, showControls, readOnly, externalLoading, error],
   );
 
   const handleVolumeChange = useCallback(
@@ -293,14 +299,18 @@ export function WatchPage({
   }, [togglePlay, showControls, readOnly]);
 
   const handleRetry = useCallback(() => {
-    dispatch({ type: 'SET_ERROR', error: null });
-    dispatch({ type: 'SET_LOADING', isLoading: true });
-  }, []);
+    if (onRetry) {
+      onRetry();
+    } else {
+      dispatch({ type: 'SET_ERROR', error: null });
+      dispatch({ type: 'SET_LOADING', isLoading: true });
+    }
+  }, [onRetry]);
 
   const handleVideoClick = useCallback(() => {
-    if (readOnly) return; // Prevent click toggle when readOnly
+    if (readOnly || externalLoading || !!error) return; // Prevent click when loading or error
     handleTogglePlay();
-  }, [handleTogglePlay, readOnly]);
+  }, [handleTogglePlay, readOnly, externalLoading, error]);
 
   // Quality change handler
   const handleQualityChange = useCallback(
@@ -403,20 +413,27 @@ export function WatchPage({
     <section
       ref={containerRef}
       className={cn(
-        'video-container relative w-full h-full bg-black overflow-hidden select-none flex flex-col',
+        'video-container relative w-full h-full min-h-[400px] bg-black overflow-hidden select-none flex flex-col flex-1',
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
       style={{
         width: '100%',
-        height: '100%', // Allow parent to control height
+        minHeight: '100dvh', // Use dynamic viewport height
       }}
       onMouseMove={showControls}
       onMouseEnter={showControls}
       aria-label="Video Player"
     >
-      {/* Mobile Header - Solid Top Bar, pushes video down */}
-      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      {/* Mobile Header - Solid Top Bar */}
+      <div
+        className={cn(
+          'relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5 transition-opacity duration-500',
+          state.isLoading || externalLoading
+            ? 'opacity-0 pointer-events-none'
+            : 'opacity-100',
+        )}
+      >
         {!hideBackButton && (
           <button
             type="button"
@@ -440,7 +457,13 @@ export function WatchPage({
       </div>
 
       {/* Main Player Area - Takes remaining space */}
-      <div className="flex-1 relative w-full overflow-hidden bg-black flex items-center justify-center">
+      <div className="flex-1 relative w-full min-h-0 overflow-hidden bg-black flex items-center justify-center">
+        {/* Loading Overlay - Now centered relative to video area */}
+        <LoadingOverlay
+          isVisible={state.isLoading || externalLoading}
+          metadata={metadata}
+        />
+
         {/* Video Element */}
         <VideoElement
           ref={videoRef}
@@ -452,16 +475,15 @@ export function WatchPage({
           controls={isMobile}
         />
 
-        {/* Loading Overlay */}
-        <LoadingOverlay isVisible={state.isLoading} />
-
         {/* Buffering Overlay */}
-        <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+        <BufferingOverlay
+          isVisible={state.isBuffering && !state.isLoading && !externalLoading}
+        />
 
         {/* Error Overlay */}
         <ErrorOverlay
-          isVisible={!!state.error}
-          message={state.error || 'An error occurred'}
+          isVisible={!!state.error || !!error}
+          message={error || state.error || 'An error occurred'}
           onRetry={handleRetry}
           onBack={handleBack}
         />

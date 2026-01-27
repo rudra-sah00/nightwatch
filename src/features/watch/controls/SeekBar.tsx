@@ -96,7 +96,7 @@ export function SeekBar({
           setVttSprites(sprites);
         }
       })
-      .catch(() => {});
+      .catch((_err) => {});
 
     return () => {
       cancelled = true;

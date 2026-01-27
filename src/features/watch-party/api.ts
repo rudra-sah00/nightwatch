@@ -251,20 +251,6 @@ export function updatePartyContent(
   socket.emit('party:update_content', payload, callback);
 }
 
-/**
- * Get a new stream token (for content updates)
- */
-export function getPartyStreamToken(
-  callback: Callback<{ token?: string }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:get_stream_token', {}, callback);
-}
-
 // ============ Event Listeners ============
 
 export function onPartyStateUpdate(

@@ -7,11 +7,7 @@ interface SidebarTabsProps {
   participantCount: number;
 }
 
-export function SidebarTabs({
-  activeTab,
-  onTabChange,
-  participantCount,
-}: SidebarTabsProps) {
+export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
   return (
     <div className="relative bg-gradient-to-b from-black/80 to-black/40 border-b border-white/10 shrink-0">
       <div className="flex relative items-stretch">

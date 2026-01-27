@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWatchParty } from '@/features/watch-party';
+import { getProxyUrl } from '@/lib/proxy';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';
 import { ContentInfo } from './content-info';
@@ -169,7 +170,7 @@ export function ContentDetailModal({
         <div className="absolute inset-0">
           {!imageError ? (
             <Image
-              src={show.posterHdUrl || show.posterUrl || ''}
+              src={getProxyUrl(show.posterHdUrl || show.posterUrl) || ''}
               alt={show.title}
               fill
               className="object-cover"
