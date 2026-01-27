@@ -5,6 +5,7 @@ import Image from 'next/image';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { getProxyUrl } from '@/lib/proxy';
 import { cn } from '@/lib/utils';
 import { getSocket } from '@/lib/ws';
 import {
@@ -179,7 +180,7 @@ export function ContinueWatching({
             <div className="relative z-10 pointer-events-none w-48 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-muted shadow-sm">
               {item.posterUrl ? (
                 <Image
-                  src={item.posterUrl}
+                  src={getProxyUrl(item.posterUrl) || ''}
                   alt={item.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"

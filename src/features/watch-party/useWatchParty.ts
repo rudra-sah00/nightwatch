@@ -7,7 +7,6 @@ import {
   approveJoinRequest,
   createPartyRoom,
   getPartyMessages, // New
-  getPartyStreamToken,
   kickMember,
   leavePartyRoom,
   onPartyAdminRequest,
@@ -300,13 +299,8 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           sessionStorage.setItem('guest_token', data.guestToken);
         }
 
-        // Build proper stream URL for guest using their token
-        let guestStreamUrl = data.room.streamUrl;
-        if (data.streamToken && guestStreamUrl) {
-          const urlObj = new URL(guestStreamUrl, window.location.origin);
-          urlObj.searchParams.set('st', data.streamToken);
-          guestStreamUrl = urlObj.toString();
-        }
+        // Stream URL is now shared and proxied by frontend
+        const guestStreamUrl = data.room.streamUrl;
 
         const tokenizedRoom = {
           ...data.room,
@@ -375,28 +369,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     // Content Updated
     cleanups.push(
       onPartyContentUpdated((data) => {
-        // Fetch new stream token for this user
-        getPartyStreamToken((response) => {
-          if (response.success && response.token) {
-            let finalUrl = data.room.streamUrl;
-            try {
-              const urlObj = new URL(finalUrl);
-              urlObj.searchParams.set('st', response.token);
-              finalUrl = urlObj.toString();
-            } catch (_e) {
-              // ignore
-            }
-
-            setRoom({
-              ...data.room,
-              streamUrl: finalUrl,
-            });
-            toast.success(`Now watching: ${data.room.title}`);
-          } else {
-            // Fallback: update room anyway, might fail to play if token invalid
-            setRoom(data.room);
-          }
-        });
+        // Stream URL is now shared
+        setRoom(data.room);
+        toast.success(`Now watching: ${data.room.title}`);
       }),
     );
 

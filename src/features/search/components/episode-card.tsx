@@ -4,6 +4,7 @@ import { Clock, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { toast } from 'sonner';
+import { getProxyUrl } from '@/lib/proxy';
 import { cn } from '@/lib/utils';
 import type { Episode } from '../types';
 
@@ -46,7 +47,7 @@ export function EpisodeCard({
       <div className="relative w-40 md:w-48 aspect-video rounded-lg overflow-hidden bg-muted flex-shrink-0">
         {!imageError && episode.thumbnailUrl ? (
           <Image
-            src={episode.thumbnailUrl}
+            src={getProxyUrl(episode.thumbnailUrl) || ''}
             alt={episode.title || `Episode ${episode.episodeNumber}`}
             fill
             className={cn('object-cover', isPlaying && 'opacity-70')}

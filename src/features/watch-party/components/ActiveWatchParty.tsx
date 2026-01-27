@@ -2,6 +2,7 @@ import type { Participant, Room } from 'livekit-client';
 import { useCallback, useEffect, useState } from 'react';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
+import { getProxyUrl } from '@/lib/proxy';
 import { cn } from '@/lib/utils';
 import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, WatchPartyRoom } from '../types';
@@ -46,9 +47,9 @@ export function ActiveWatchParty({
   onUpdateContent,
 }: ActiveWatchPartyProps) {
   const [showDesktopSidebar, setShowDesktopSidebar] = useState(true);
-  const [isPortrait, setIsPortrait] = useState(false);
+  const [_isPortrait, setIsPortrait] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isFullscreen, _setIsFullscreen] = useState(false);
+  const [_isFullscreen, _setIsFullscreen] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null,
   );
@@ -114,7 +115,7 @@ export function ActiveWatchParty({
     episode: room.episode,
     movieId: room.contentId,
     seriesId: room.type === 'series' ? room.contentId : undefined,
-    posterUrl: room.posterUrl || '', // Ensure posterUrl is passed
+    posterUrl: getProxyUrl(room.posterUrl) || '', // Ensure posterUrl is proxied
   };
 
   const handleNavigate = (url: string) => {
@@ -183,9 +184,6 @@ export function ActiveWatchParty({
 
   // Render Logic
   // Layout handles both Mobile (Portrait/Landscape) and Desktop via CSS + Minimal JS
-  const isMobilePortrait = isMobile && isPortrait && !isFullscreen;
-  // Note: We keep isMobilePortrait for specific specific sizing tweaks, but main layout is now CSS-first
-  const isMobileLandscape = isMobile && !isPortrait;
 
   return (
     <div
@@ -247,10 +245,10 @@ export function ActiveWatchParty({
         )}
       >
         <WatchPage
-          streamUrl={room.streamUrl}
+          streamUrl={getProxyUrl(room.streamUrl) || ''}
           metadata={metadata}
-          captionUrl={room.captionUrl || null}
-          spriteVtt={room.spriteVtt}
+          captionUrl={getProxyUrl(room.captionUrl) || null}
+          spriteVtt={getProxyUrl(room.spriteVtt)}
           onVideoRef={handleVideoRef}
           readOnly={!isHost}
           isHost={isHost}

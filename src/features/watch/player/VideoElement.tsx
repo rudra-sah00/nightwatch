@@ -138,6 +138,8 @@ export const VideoElement = memo(
         if (!found) {
           // Track not found
         }
+      } else {
+        // Subtitles turned off
       }
     }, [currentTrackId, videoRef, subtitleTracks]);
 
@@ -151,6 +153,7 @@ export const VideoElement = memo(
           display: 'block',
         }}
         playsInline
+        autoPlay
         crossOrigin="anonymous"
         onClick={onClick}
         controls={controls}
