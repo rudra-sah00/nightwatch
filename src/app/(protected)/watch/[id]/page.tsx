@@ -1,10 +1,10 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { playVideo } from '@/features/search/api';
 import type { PlayResponse } from '@/features/search/types';
+import { extractTokenFromUrl, normalizeWatchUrls } from '@/features/watch';
 import { LoadingOverlay } from '@/features/watch/overlays/LoadingOverlay';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
@@ -24,33 +24,56 @@ function WatchContent() {
   const poster = searchParams.get('poster');
   const seriesId = searchParams.get('seriesId');
 
-  // Get the stream URL from query params (passed from play response)
+  // 1. Extract and normalize initial URLs
   const streamParam = searchParams.get('stream');
-  const initialStreamUrl = streamParam ? decodeURIComponent(streamParam) : null;
+  const initialStreamUrlRaw = streamParam
+    ? decodeURIComponent(streamParam)
+    : null;
 
-  // Get the caption URL from query params
   const captionParam = searchParams.get('caption');
-  const initialCaptionUrl = captionParam
+  const initialCaptionUrlRaw = captionParam
     ? decodeURIComponent(captionParam)
     : null;
 
-  // Get the sprite URL from query params
   const spriteParam = searchParams.get('sprite');
-  const initialSpriteVtt = spriteParam
+  const initialSpriteVttRaw = spriteParam
     ? decodeURIComponent(spriteParam)
     : undefined;
 
   // Decode poster URL
   const posterUrl = poster ? decodeURIComponent(poster) : undefined;
 
-  // State for dynamically fetched stream (on page reload)
-  const [streamUrl, setStreamUrl] = useState<string | null>(initialStreamUrl);
-  const [captionUrl, setCaptionUrl] = useState<string | null>(
-    initialCaptionUrl,
+  // 2. Extract token to normalize everything synchronously
+  const streamToken = useMemo(
+    () => extractTokenFromUrl(initialStreamUrlRaw),
+    [initialStreamUrlRaw],
   );
-  const [spriteVtt, setSpriteVtt] = useState<string | undefined>(
-    initialSpriteVtt,
-  );
+
+  // 3. Initialize state with normalized (path-based) URLs if possible
+  const [streamUrl, setStreamUrl] = useState<string | null>(() => {
+    if (!initialStreamUrlRaw || !streamToken) return initialStreamUrlRaw;
+    return normalizeWatchUrls({ streamUrl: initialStreamUrlRaw }, streamToken)
+      .streamUrl;
+  });
+
+  const [captionUrl, setCaptionUrl] = useState<string | null>(() => {
+    if (!initialCaptionUrlRaw || !streamToken) return initialCaptionUrlRaw;
+    return (
+      normalizeWatchUrls(
+        { streamUrl: null, captionUrl: initialCaptionUrlRaw },
+        streamToken,
+      ).captionUrl ?? null
+    );
+  });
+
+  const [spriteVtt, setSpriteVtt] = useState<string | undefined>(() => {
+    if (!initialSpriteVttRaw || !streamToken) return initialSpriteVttRaw;
+    return normalizeWatchUrls(
+      { streamUrl: null, spriteVtt: initialSpriteVttRaw },
+      streamToken,
+    ).spriteVtt;
+  });
+
   const [subtitleTracks, setSubtitleTracks] = useState<
     { id: string; label: string; language: string; src: string }[] | undefined
   >(undefined);
@@ -59,24 +82,26 @@ function WatchContent() {
 
   // CRITICAL: Sync state when URL params change (soft navigation for next episode)
   useEffect(() => {
-    if (initialStreamUrl) {
-      setStreamUrl(initialStreamUrl);
+    const s = initialStreamUrlRaw;
+    const c = initialCaptionUrlRaw;
+    const v = initialSpriteVttRaw;
+
+    // We only need to sync if the raw values changed (ignoring our path-based transformation)
+    // But since we want to keep them normalized, we apply injection here too
+    const token = extractTokenFromUrl(s);
+
+    if (s) {
+      const normalized = normalizeWatchUrls(
+        { streamUrl: s, captionUrl: c, spriteVtt: v },
+        token || '',
+      );
+      setStreamUrl(normalized.streamUrl);
+      if (c) setCaptionUrl(normalized.captionUrl ?? null);
+      if (v) setSpriteVtt(normalized.spriteVtt);
     }
-    if (initialCaptionUrl !== captionUrl) {
-      setCaptionUrl(initialCaptionUrl);
-    }
-    if (initialSpriteVtt !== spriteVtt) {
-      setSpriteVtt(initialSpriteVtt);
-    }
-    // Reset error state on navigation
+
     setRefetchError(null);
-  }, [
-    initialStreamUrl,
-    initialCaptionUrl,
-    initialSpriteVtt,
-    captionUrl,
-    spriteVtt,
-  ]);
+  }, [initialStreamUrlRaw, initialCaptionUrlRaw, initialSpriteVttRaw]);
 
   const metadata: VideoMetadata = {
     title: decodeURIComponent(title),
@@ -114,9 +139,20 @@ function WatchContent() {
       }
 
       if (response.success && response.masterPlaylistUrl) {
-        setStreamUrl(response.masterPlaylistUrl);
-        if (response.captionSrt) setCaptionUrl(response.captionSrt);
-        if (response.spriteVtt) setSpriteVtt(response.spriteVtt);
+        const token = extractTokenFromUrl(response.masterPlaylistUrl) || '';
+
+        const normalized = normalizeWatchUrls(
+          {
+            streamUrl: response.masterPlaylistUrl,
+            captionUrl: response.captionSrt,
+            spriteVtt: response.spriteVtt,
+          },
+          token,
+        );
+
+        setStreamUrl(normalized.streamUrl);
+        if (response.captionSrt) setCaptionUrl(normalized.captionUrl ?? null);
+        if (response.spriteVtt) setSpriteVtt(normalized.spriteVtt);
         if (response.subtitleTracks && response.subtitleTracks.length > 0) {
           setSubtitleTracks(
             response.subtitleTracks.map((t, index) => ({
@@ -141,10 +177,10 @@ function WatchContent() {
 
   // Auto-refetch if no stream URL on mount (page reload scenario)
   useEffect(() => {
-    if (!initialStreamUrl && title) {
+    if (!initialStreamUrlRaw && title) {
       refetchStream();
     }
-  }, [initialStreamUrl, title, refetchStream]);
+  }, [initialStreamUrlRaw, title, refetchStream]);
 
   // Loading state while refetching
   if (isRefetching) {

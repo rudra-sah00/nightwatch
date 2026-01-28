@@ -183,9 +183,9 @@ export function ActiveWatchParty({
 
   // Render Logic
   // Layout handles both Mobile (Portrait/Landscape) and Desktop via CSS + Minimal JS
-  const isMobilePortrait = isMobile && isPortrait && !isFullscreen;
+  const _isMobilePortrait = isMobile && isPortrait && !isFullscreen;
   // Note: We keep isMobilePortrait for specific specific sizing tweaks, but main layout is now CSS-first
-  const isMobileLandscape = isMobile && !isPortrait;
+  const _isMobileLandscape = isMobile && !isPortrait;
 
   return (
     <div

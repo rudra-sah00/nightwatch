@@ -124,32 +124,40 @@ export default function WatchPartyPage() {
   // Check if room exists
   useEffect(() => {
     if (!roomId) return;
-    if (isNewParty) {
+
+    // If it's a brand new party being created by an authenticated user,
+    // we don't need to check existence yet as the room is still being established.
+    if (isNewParty && user) {
       setIsCheckingRoom(false);
       return;
     }
 
     const checkRoom = async () => {
       setIsCheckingRoom(true);
-      const result = await checkRoomExists(roomId);
-      if (result.exists && result.preview) {
-        setRoomPreview(result.preview);
-        // If room is full, show a toast but still allow to view lobby
-        if (result.preview.isFull) {
-          toast.warning('This watch party is currently full.');
+      try {
+        const result = await checkRoomExists(roomId);
+        if (result.exists && result.preview) {
+          setRoomPreview(result.preview);
+          // If room is full, show a toast but still allow to view lobby
+          if (result.preview.isFull) {
+            toast.warning('This watch party is currently full.');
+          }
+        } else {
+          setRoomNotFound(true);
+          // Show specific error message from backend
+          if (result.message) {
+            toast.error(result.message);
+          }
         }
-      } else {
-        setRoomNotFound(true);
-        // Show specific error message from backend
-        if (result.message) {
-          toast.error(result.message);
-        }
+      } catch (_err) {
+        // Silently fail or handle error if needed
+      } finally {
+        setIsCheckingRoom(false);
       }
-      setIsCheckingRoom(false);
     };
 
     checkRoom();
-  }, [roomId, isNewParty]);
+  }, [roomId, isNewParty, user]);
 
   // Host Auto-Sync for New Members
   useEffect(() => {
@@ -172,10 +180,11 @@ export default function WatchPartyPage() {
     prevMemberCount.current = room.members.length;
   }, [room?.members, isHost, sync, room]);
 
-  // Auto-join for Host
+  // Auto-join for Host (Only if authenticated)
   const hasAttemptedAutoJoin = useRef(false);
   useEffect(() => {
     if (
+      user && // Only auto-join if authenticated
       isNewParty &&
       roomId &&
       !room &&
@@ -189,7 +198,7 @@ export default function WatchPartyPage() {
         duration: 5000,
       });
     }
-  }, [isNewParty, roomId, room, isLoading, requestStatus, requestJoin]);
+  }, [isNewParty, roomId, room, isLoading, requestStatus, requestJoin, user]);
 
   const handleJoin = async () => {
     if (!user && !guestName.trim()) {
@@ -249,7 +258,20 @@ export default function WatchPartyPage() {
       <ActiveWatchParty
         room={room}
         currentUserId={
-          user?.id || (getSocket()?.id ? `guest:${getSocket()?.id}` : undefined)
+          user?.id ||
+          (() => {
+            const token =
+              typeof window !== 'undefined'
+                ? sessionStorage.getItem('guest_token')
+                : null;
+            if (token) {
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.sub;
+              } catch (_e) {}
+            }
+            return getSocket()?.id ? `guest:${getSocket()?.id}` : undefined;
+          })()
         }
         isHost={isHost}
         copied={copied}

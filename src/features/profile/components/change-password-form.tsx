@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInfo } from '@/components/ui/password-info';
 import { changePassword } from '../api';
 
 export function ChangePasswordForm() {
@@ -66,7 +67,10 @@ export function ChangePasswordForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="new">New Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="new">New Password</Label>
+            <PasswordInfo />
+          </div>
           <Input
             type="password"
             id="new"

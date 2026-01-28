@@ -42,3 +42,5 @@ export { useKeyboard } from './player/useKeyboard';
 export { useWatchProgress } from './player/useWatchProgress';
 // Player components
 export { VideoElement } from './player/VideoElement';
+// Utils
+export * from './utils';

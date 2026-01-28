@@ -10,7 +10,7 @@ interface SidebarTabsProps {
 export function SidebarTabs({
   activeTab,
   onTabChange,
-  participantCount,
+  participantCount: _participantCount,
 }: SidebarTabsProps) {
   return (
     <div className="relative bg-gradient-to-b from-black/80 to-black/40 border-b border-white/10 shrink-0">

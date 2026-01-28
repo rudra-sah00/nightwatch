@@ -25,20 +25,48 @@ export function useLiveKitToken(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // ...
     const fetchToken = async () => {
-      // ...
+      const guestToken = sessionStorage.getItem('guest_token');
+
+      // Prevent fetching with incomplete data or without approval
+      // If it's a guest ID (startsWith guest:), they MUST have a questToken (approval)
+      const isAuthenticatedAsUser = userId && !userId.startsWith('guest:');
+      const isApprovedGuest = userId?.startsWith('guest:') && guestToken;
+
+      if (
+        !roomId ||
+        !userId ||
+        userId.endsWith(':undefined') ||
+        (!isAuthenticatedAsUser && !isApprovedGuest)
+      ) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
       try {
         const guestName = userName || 'Guest';
         const backendUrl = env.BACKEND_URL;
 
+        const isGuest = userId?.startsWith('guest:');
+
         const res = await fetch(
           `${backendUrl}/api/livekit/token?roomName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`,
-          { credentials: 'include' },
+          {
+            credentials: 'include',
+            headers:
+              isGuest && guestToken
+                ? {
+                    Authorization: `Bearer ${guestToken}`,
+                  }
+                : undefined,
+          },
         );
 
         if (!res.ok) {
-          throw new Error('Failed to fetch LiveKit token');
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch LiveKit token');
         }
 
         const data = await res.json();

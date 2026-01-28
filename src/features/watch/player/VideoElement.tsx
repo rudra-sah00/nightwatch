@@ -156,6 +156,16 @@ export const VideoElement = memo(
       }
     }, [currentTrackId, videoRef, subtitleTracks]);
 
+    const tracks = [...subtitleTracks];
+    if (captionUrl && !tracks.some((t) => t.src === captionUrl)) {
+      tracks.push({
+        id: 'fallback-captions',
+        src: captionUrl,
+        label: 'English',
+        language: 'en',
+      });
+    }
+
     return (
       <video
         ref={ref}
@@ -170,35 +180,16 @@ export const VideoElement = memo(
         onClick={onClick}
         controls={controls}
       >
-        {/* Primary/Fallback Track - Statically rendered to satisfy linter */}
-        <track
-          kind="captions"
-          src={
-            (subtitleTracks.length > 0 ? subtitleTracks[0].src : null) ||
-            captionUrl ||
-            'data:text/vtt;base64,V0VCVlRUCgowMDowMDowMC4wMDAgLS0+IDAwOjAwOjAwLjAwMQo='
-          }
-          label={
-            (subtitleTracks.length > 0 ? subtitleTracks[0].label : null) ||
-            'English'
-          }
-          srcLang={
-            (subtitleTracks.length > 0 ? subtitleTracks[0].language : null) ||
-            'en'
-          }
-        />
-        {/* Additional Tracks */}
-        {subtitleTracks.slice(1).map((track) => {
-          return (
-            <track
-              key={track.id}
-              kind="captions"
-              src={track.src}
-              label={track.label}
-              srcLang={track.language}
-            />
-          );
-        })}
+        <track kind="captions" src="data:text/vtt," label="None" srcLang="en" />
+        {tracks.map((track) => (
+          <track
+            key={track.id}
+            kind="captions"
+            src={track.src}
+            label={track.label}
+            srcLang={track.language}
+          />
+        ))}
       </video>
     );
   }),

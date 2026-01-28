@@ -8,6 +8,7 @@ import type { z } from 'zod';
 import { Button, Input, Label } from '@/components/ui';
 import { Captcha } from '@/components/ui/captcha';
 import { OtpInput } from '@/components/ui/otp-input';
+import { PasswordInfo } from '@/components/ui/password-info';
 import { type RegisterInput, registerSchema } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
@@ -292,7 +293,10 @@ export function SignupForm() {
 
       {/* Password */}
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInfo />
+        </div>
         <Input
           id="password"
           type="password"

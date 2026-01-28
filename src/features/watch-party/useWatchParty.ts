@@ -3,10 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { injectTokenIntoUrl } from '../watch';
 import {
   approveJoinRequest,
   createPartyRoom,
-  getPartyMessages, // New
+  getPartyMessages,
   getPartyStreamToken,
   kickMember,
   leavePartyRoom,
@@ -18,11 +19,11 @@ import {
   onPartyKicked,
   onPartyMemberJoined,
   onPartyMemberLeft,
-  onPartyMessage, // New
+  onPartyMessage,
   onPartyStateUpdate,
   rejectJoinRequest,
   requestJoinPartyRoom,
-  sendPartyMessage, // New
+  sendPartyMessage,
   syncPartyState,
   updatePartyContent,
 } from './api';
@@ -301,16 +302,22 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         }
 
         // Build proper stream URL for guest using their token
-        let guestStreamUrl = data.room.streamUrl;
-        if (data.streamToken && guestStreamUrl) {
-          const urlObj = new URL(guestStreamUrl, window.location.origin);
-          urlObj.searchParams.set('st', data.streamToken);
-          guestStreamUrl = urlObj.toString();
-        }
+        // Helper to replace token in path
+        const guestStreamUrl =
+          injectTokenIntoUrl(data.room.streamUrl, data.streamToken || '') ||
+          data.room.streamUrl;
+        const guestSpriteVtt =
+          injectTokenIntoUrl(data.room.spriteVtt, data.streamToken || '') ||
+          data.room.spriteVtt;
+        const guestCaptionUrl =
+          injectTokenIntoUrl(data.room.captionUrl, data.streamToken || '') ||
+          data.room.captionUrl;
 
         const tokenizedRoom = {
           ...data.room,
           streamUrl: guestStreamUrl,
+          spriteVtt: guestSpriteVtt,
+          captionUrl: guestCaptionUrl,
         };
         setRoom(tokenizedRoom);
 
@@ -378,18 +385,21 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         // Fetch new stream token for this user
         getPartyStreamToken((response) => {
           if (response.success && response.token) {
-            let finalUrl = data.room.streamUrl;
-            try {
-              const urlObj = new URL(finalUrl);
-              urlObj.searchParams.set('st', response.token);
-              finalUrl = urlObj.toString();
-            } catch (_e) {
-              // ignore
-            }
+            const finalUrl =
+              injectTokenIntoUrl(data.room.streamUrl, response.token) ||
+              data.room.streamUrl;
+            const finalSpriteVtt =
+              injectTokenIntoUrl(data.room.spriteVtt, response.token) ||
+              data.room.spriteVtt;
+            const finalCaptionUrl =
+              injectTokenIntoUrl(data.room.captionUrl, response.token) ||
+              data.room.captionUrl;
 
             setRoom({
               ...data.room,
               streamUrl: finalUrl,
+              spriteVtt: finalSpriteVtt,
+              captionUrl: finalCaptionUrl,
             });
             toast.success(`Now watching: ${data.room.title}`);
           } else {

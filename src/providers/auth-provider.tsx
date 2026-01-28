@@ -127,6 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       initSocket(loggedInUser.id, loggedInUser.sessionId);
       forceLogoutHandlerRef.current = handleForceLogout;
       onForceLogout(handleForceLogout);
+      sessionStorage.removeItem('guest_token');
+      sessionStorage.removeItem('guest_refresh_token');
     },
     [handleForceLogout],
   );
@@ -177,6 +179,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearStoredUser();
       disconnectSocket();
       setUser(null);
+      sessionStorage.removeItem('guest_token');
+      sessionStorage.removeItem('guest_refresh_token');
     }
   }, []);
 
