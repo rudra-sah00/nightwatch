@@ -10,6 +10,42 @@ interface FetchOptions extends RequestInit {
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
+// Track token expiration for proactive refresh
+let tokenExpiresAt: number | null = null;
+let refreshTimerId: NodeJS.Timeout | null = null;
+
+/**
+ * Schedule proactive token refresh before expiration
+ * Big tech companies refresh tokens BEFORE they expire to avoid 401s
+ */
+function scheduleTokenRefresh() {
+  // Clear any existing timer
+  if (refreshTimerId) {
+    clearTimeout(refreshTimerId);
+    refreshTimerId = null;
+  }
+
+  if (!tokenExpiresAt) return;
+
+  const now = Date.now();
+  const timeUntilExpiry = tokenExpiresAt - now;
+
+  // Refresh 1 minute before expiration (or immediately if already expired)
+  const refreshIn = Math.max(0, timeUntilExpiry - 60000);
+
+  refreshTimerId = setTimeout(async () => {
+    await refreshAccessToken();
+  }, refreshIn);
+}
+
+/**
+ * Set token expiration time and schedule proactive refresh
+ */
+export function setTokenExpiration(expiresInSeconds: number) {
+  tokenExpiresAt = Date.now() + expiresInSeconds * 1000;
+  scheduleTokenRefresh();
+}
+
 /**
  * Attempt to refresh the access token
  * Returns true if refresh was successful, false otherwise
@@ -32,12 +68,22 @@ async function refreshAccessToken(): Promise<boolean> {
       });
 
       if (response.ok) {
+        // Extract new token expiration from response if available
+        const data = await response.json().catch(() => ({}));
+        if (data.expiresIn) {
+          setTokenExpiration(data.expiresIn);
+        } else {
+          // Default: assume 15 minute expiration
+          setTokenExpiration(15 * 60);
+        }
         return true;
       }
 
       // Refresh failed - session is invalid
+      tokenExpiresAt = null;
       return false;
     } catch {
+      tokenExpiresAt = null;
       return false;
     } finally {
       isRefreshing = false;

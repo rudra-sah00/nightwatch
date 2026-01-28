@@ -19,6 +19,7 @@ import {
 } from '@/features/auth';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
+import { setTokenExpiration } from '@/lib/fetch';
 import {
   disconnectSocket,
   initSocket,
@@ -74,6 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         initSocket(storedUser.id, storedUser.sessionId);
         forceLogoutHandlerRef.current = handleForceLogout;
         onForceLogout(handleForceLogout);
+
+        // Initialize proactive token refresh (15 minutes)
+        setTokenExpiration(15 * 60);
 
         // Fetch latest profile to get missing fields like createdAt
         try {
