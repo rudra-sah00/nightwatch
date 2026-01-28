@@ -23,9 +23,9 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: true,
-          backBufferLength: 90,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
+          backBufferLength: 120,
+          maxBufferLength: 120,
+          maxMaxBufferLength: 180,
         });
 
         hls.loadSource(streamUrl);
