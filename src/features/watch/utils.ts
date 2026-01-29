@@ -110,6 +110,20 @@ export function extractTokenFromUrl(
 }
 
 /**
+ * Wraps an external URL in the backend proxy.
+ */
+export function wrapInProxy(url: string, token: string): string {
+  if (!url || url.startsWith('data:')) return url;
+  if (url.includes('/api/stream/cdn')) return url;
+
+  const encoded =
+    typeof btoa !== 'undefined'
+      ? btoa(url).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+      : Buffer.from(url).toString('base64url');
+  return `/api/stream/cdn/${token}/${encoded}`;
+}
+
+/**
  * Normalizes a set of watch-related URLs using a provided token.
  */
 export function normalizeWatchUrls(
@@ -117,6 +131,12 @@ export function normalizeWatchUrls(
     streamUrl: string | null;
     captionUrl?: string | null;
     spriteVtt?: string;
+    subtitleTracks?: {
+      id: string;
+      label: string;
+      language: string;
+      src: string;
+    }[];
   },
   token: string,
 ) {
@@ -124,10 +144,14 @@ export function normalizeWatchUrls(
     streamUrl:
       injectTokenIntoUrl(urls.streamUrl || '', token) || urls.streamUrl,
     captionUrl: urls.captionUrl
-      ? injectTokenIntoUrl(urls.captionUrl, token) || urls.captionUrl
+      ? wrapInProxy(urls.captionUrl, token)
       : urls.captionUrl,
     spriteVtt: urls.spriteVtt
       ? injectTokenIntoUrl(urls.spriteVtt, token) || urls.spriteVtt
       : urls.spriteVtt,
+    subtitleTracks: urls.subtitleTracks?.map((track) => ({
+      ...track,
+      src: wrapInProxy(track.src, token),
+    })),
   };
 }

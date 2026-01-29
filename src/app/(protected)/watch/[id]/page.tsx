@@ -92,16 +92,22 @@ function WatchContent() {
 
     if (s) {
       const normalized = normalizeWatchUrls(
-        { streamUrl: s, captionUrl: c, spriteVtt: v },
+        { streamUrl: s, captionUrl: c, spriteVtt: v, subtitleTracks },
         token || '',
       );
       setStreamUrl(normalized.streamUrl);
       if (c) setCaptionUrl(normalized.captionUrl ?? null);
       if (v) setSpriteVtt(normalized.spriteVtt);
+      if (subtitleTracks) setSubtitleTracks(normalized.subtitleTracks);
     }
 
     setRefetchError(null);
-  }, [initialStreamUrlRaw, initialCaptionUrlRaw, initialSpriteVttRaw]);
+  }, [
+    initialStreamUrlRaw,
+    initialCaptionUrlRaw,
+    initialSpriteVttRaw,
+    subtitleTracks,
+  ]);
 
   const metadata: VideoMetadata = {
     title: decodeURIComponent(title),
@@ -146,6 +152,12 @@ function WatchContent() {
             streamUrl: response.masterPlaylistUrl,
             captionUrl: response.captionSrt,
             spriteVtt: response.spriteVtt,
+            subtitleTracks: response.subtitleTracks?.map((t, index) => ({
+              id: t.language ? `${t.language}-${index}` : `track-${index}`,
+              label: t.label,
+              language: t.language,
+              src: t.url,
+            })),
           },
           token,
         );
@@ -153,15 +165,8 @@ function WatchContent() {
         setStreamUrl(normalized.streamUrl);
         if (response.captionSrt) setCaptionUrl(normalized.captionUrl ?? null);
         if (response.spriteVtt) setSpriteVtt(normalized.spriteVtt);
-        if (response.subtitleTracks && response.subtitleTracks.length > 0) {
-          setSubtitleTracks(
-            response.subtitleTracks.map((t, index) => ({
-              id: t.language ? `${t.language}-${index}` : `track-${index}`,
-              ...t,
-              src: t.url,
-            })),
-          );
-        } else {
+        if (normalized.subtitleTracks && normalized.subtitleTracks.length > 0) {
+          setSubtitleTracks(normalized.subtitleTracks);
         }
       } else {
         setRefetchError('Failed to load stream');

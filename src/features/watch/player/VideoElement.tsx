@@ -180,7 +180,6 @@ export const VideoElement = memo(
         onClick={onClick}
         controls={controls}
       >
-        <track kind="captions" src="data:text/vtt," label="None" srcLang="en" />
         {tracks.map((track) => (
           <track
             key={track.id}
@@ -190,6 +189,7 @@ export const VideoElement = memo(
             srcLang={track.language}
           />
         ))}
+        <track kind="captions" src="data:text/vtt," label="None" srcLang="en" />
       </video>
     );
   }),
