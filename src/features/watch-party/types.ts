@@ -24,6 +24,12 @@ export interface WatchPartyRoom {
   streamUrl: string;
   posterUrl?: string; // New
   captionUrl?: string;
+  subtitleTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    src: string;
+  }[];
   spriteVtt?: string;
   members: RoomMember[];
   pendingMembers: RoomMember[]; // New
@@ -53,6 +59,12 @@ export interface PartyCreatePayload {
   season?: number;
   episode?: number;
   captionUrl?: string;
+  subtitleTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    src: string;
+  }[];
   spriteVtt?: string;
 }
 

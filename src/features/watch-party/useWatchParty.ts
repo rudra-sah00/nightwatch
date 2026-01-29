@@ -318,11 +318,21 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           injectTokenIntoUrl(data.room.captionUrl, data.streamToken || '') ||
           data.room.captionUrl;
 
+        const guestSubtitleTracks = (data.room.subtitleTracks || []).map(
+          (track) => ({
+            ...track,
+            src:
+              injectTokenIntoUrl(track.src, data.streamToken || '') ||
+              track.src,
+          }),
+        );
+
         const tokenizedRoom = {
           ...data.room,
           streamUrl: guestStreamUrl,
           spriteVtt: guestSpriteVtt,
           captionUrl: guestCaptionUrl,
+          subtitleTracks: guestSubtitleTracks,
         };
         setRoom(tokenizedRoom);
 
@@ -400,11 +410,21 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
               injectTokenIntoUrl(data.room.captionUrl, response.token) ||
               data.room.captionUrl;
 
+            const finalSubtitleTracks = (data.room.subtitleTracks || []).map(
+              (track) => ({
+                ...track,
+                src:
+                  injectTokenIntoUrl(track.src, response.token || '') ||
+                  track.src,
+              }),
+            );
+
             setRoom({
               ...data.room,
               streamUrl: finalUrl,
               spriteVtt: finalSpriteVtt,
               captionUrl: finalCaptionUrl,
+              subtitleTracks: finalSubtitleTracks,
             });
             toast.success(`Now watching: ${data.room.title}`);
           } else {

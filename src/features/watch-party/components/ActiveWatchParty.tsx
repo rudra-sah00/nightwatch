@@ -250,6 +250,7 @@ export function ActiveWatchParty({
           streamUrl={room.streamUrl}
           metadata={metadata}
           captionUrl={room.captionUrl || null}
+          subtitleTracks={room.subtitleTracks}
           spriteVtt={room.spriteVtt}
           onVideoRef={handleVideoRef}
           readOnly={!isHost}
