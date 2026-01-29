@@ -158,8 +158,12 @@ export async function apiFetch<T>(
       const errorData = await response.json().catch(() => ({}));
       const error: ApiError = {
         message:
-          errorData.error || errorData.message || `HTTP ${response.status}`,
+          errorData.error?.message ||
+          errorData.error ||
+          errorData.message ||
+          `HTTP ${response.status}`,
         status: response.status,
+        code: errorData.error?.code || errorData.code,
       };
       throw error;
     }

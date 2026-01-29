@@ -102,6 +102,7 @@ export default function WatchPartyPage() {
     room,
     isLoading,
     error: partyError,
+    errorCode: partyErrorCode,
     requestJoin,
     leaveRoom,
     sync,
@@ -295,6 +296,7 @@ export default function WatchPartyPage() {
       roomPreview={roomPreview}
       isLoading={isLoading}
       error={partyError}
+      errorCode={partyErrorCode}
       requestStatus={requestStatus}
       roomNotFound={false}
       user={user}

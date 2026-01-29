@@ -44,6 +44,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const [room, setRoom] = useState<WatchPartyRoom | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [requestStatus, setRequestStatus] = useState<
     'idle' | 'pending' | 'rejected' | 'joined'
@@ -59,6 +60,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     async (payload: Parameters<typeof createPartyRoom>[0]) => {
       setIsLoading(true);
       setError(null);
+      setErrorCode(null);
 
       return new Promise<WatchPartyRoom | null>((resolve) => {
         createPartyRoom(payload, (response) => {
@@ -71,6 +73,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
             resolve(response.room);
           } else {
             setError(response.error || 'Failed to create room');
+            setErrorCode(response.code || null);
             resolve(null);
           }
         });
@@ -84,6 +87,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     async (roomId: string, name?: string, captchaToken?: string) => {
       setIsLoading(true);
       setError(null);
+      setErrorCode(null);
       setRequestStatus('pending'); // Assume pending initially
 
       return new Promise<{
@@ -110,6 +114,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
             }
           } else {
             setError(response.error || 'Failed to join room');
+            setErrorCode(response.code || null);
             setRequestStatus('idle'); // Reset on failure
             resolve(null);
           }
@@ -448,6 +453,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     room,
     isLoading,
     error,
+    errorCode,
     isConnected,
     requestStatus,
     messages, // New

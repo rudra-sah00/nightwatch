@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button, Input, Label } from '@/components/ui';
 import { useAuth } from '@/providers/auth-provider';
+import type { ApiError } from '@/types';
 import { checkUsername, updateProfile } from '../api';
 
 export function UpdateProfileForm() {
@@ -55,10 +56,13 @@ export function UpdateProfileForm() {
       const result = await updateProfile({ name, username });
       updateUser(result.user);
       setSuccess(true);
+      toast.success('Profile updated successfully');
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to update profile');
+      const apiError = err as ApiError;
+      const msg = apiError.message || 'Failed to update profile';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

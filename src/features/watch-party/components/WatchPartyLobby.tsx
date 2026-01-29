@@ -8,6 +8,7 @@ interface WatchPartyLobbyProps {
   roomPreview: RoomPreview | null;
   isLoading: boolean;
   error: string | null;
+  errorCode?: string | null;
   requestStatus: 'idle' | 'pending' | 'rejected' | 'joined';
   roomNotFound: boolean;
   user: User | undefined | null;
@@ -24,6 +25,7 @@ export function WatchPartyLobby({
   roomPreview,
   isLoading,
   error,
+  errorCode,
   requestStatus,
   roomNotFound,
   user,
@@ -213,7 +215,14 @@ export function WatchPartyLobby({
           </button>
 
           {error && (
-            <p className="text-red-500 text-sm text-center mt-3">{error}</p>
+            <div className="mt-3 text-center">
+              <p className="text-red-500 text-sm">{error}</p>
+              {errorCode && (
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-50">
+                  Code: {errorCode}
+                </p>
+              )}
+            </div>
           )}
 
           <button

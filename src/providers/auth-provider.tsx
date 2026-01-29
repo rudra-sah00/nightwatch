@@ -98,7 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // If Unauthorized (401) or User not found (404), logout immediately
           // This happens if the session was cleared in Redis or user deleted
           if (err.status === 401 || err.status === 404) {
-            toast.error('Session expired. Please login again.');
+            toast.error(
+              (error as { message?: string }).message ||
+                'Session expired. Please login again.',
+            );
 
             clearStoredUser();
             disconnectSocket();

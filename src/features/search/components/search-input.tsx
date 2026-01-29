@@ -116,9 +116,14 @@ export function SearchInput() {
               <span>Recent Searches</span>
               <button
                 type="button"
-                onClick={() => {
-                  clearSearchHistory();
-                  setHistory([]);
+                onClick={async () => {
+                  try {
+                    await clearSearchHistory();
+                    setHistory([]);
+                    toast.success('Search history cleared');
+                  } catch {
+                    toast.error('Failed to clear search history');
+                  }
                 }}
                 className="text-xs hover:text-foreground transition-colors"
               >

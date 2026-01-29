@@ -3,6 +3,7 @@
 import { AlertCircle, Mail } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Button, Input, Label } from '@/components/ui';
 import { Captcha } from '@/components/ui/captcha';
@@ -80,7 +81,20 @@ export function LoginForm() {
       // If no OTP required (response.user exists), AuthProvider handles state update
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError.message || 'Login failed. Please try again.');
+      if (apiError.code === 'VALIDATION_ERROR' && apiError.details) {
+        const errors: typeof fieldErrors = {};
+        apiError.details.forEach((detail) => {
+          const field = detail.path as keyof typeof fieldErrors;
+          if (field) {
+            errors[field] = detail.message;
+          }
+        });
+        setFieldErrors(errors);
+      } else {
+        const msg = apiError.message || 'Login failed. Please try again.';
+        setError(msg);
+        toast.error(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +114,9 @@ export function LoginForm() {
       // AuthProvider handles redirect via auth state change
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError.message || 'Verification failed. Please try again.');
+      const msg = apiError.message || 'Verification failed. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -167,9 +183,11 @@ export function LoginForm() {
         <div
           className={cn(
             'flex items-center gap-2 rounded-lg p-3 text-sm border',
-            error.toLowerCase().includes('locked')
+            error.toLowerCase().includes('locked') ||
+              error.toLowerCase().includes('denied')
               ? 'bg-red-500/10 text-red-500 border-red-500/20'
-              : error.toLowerCase().includes('warning')
+              : error.toLowerCase().includes('warning') ||
+                  error.toLowerCase().includes('security')
                 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                 : 'bg-destructive/15 text-destructive border-destructive/20',
           )}

@@ -2,6 +2,7 @@
 
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,12 +23,16 @@ export function ChangePasswordForm() {
     setSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
+      const msg = 'New passwords do not match';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      const msg = 'Password must be at least 6 characters';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -35,12 +40,14 @@ export function ChangePasswordForm() {
       setIsLoading(true);
       await changePassword(currentPassword, newPassword);
       setSuccess(true);
+      toast.success('Password updated successfully');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
       const error = err as Error;
       setError(error.message || 'Failed to update password');
+      toast.error(error.message || 'Failed to update password');
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,8 @@ export {
   fetchSpriteVtt,
   getCachedContinueWatching,
   getCachedProgress,
+  getContentProgress,
+  getContinueWatching,
   invalidateContinueWatchingCache,
   invalidateProgressCache,
   type SpriteCue,

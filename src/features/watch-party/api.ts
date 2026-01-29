@@ -83,7 +83,9 @@ export async function getRoomDetails(
 
 // ============ WebSocket API ============
 
-type Callback<T> = (response: { success: boolean; error?: string } & T) => void;
+type Callback<T> = (
+  response: { success: boolean; error?: string; code?: string } & T,
+) => void;
 
 /**
  * Create a watch party room

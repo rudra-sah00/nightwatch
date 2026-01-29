@@ -57,6 +57,18 @@ export function removeFromContinueWatchingCache(itemId: string): void {
   }
 }
 
+// Fetch continue watching via HTTP (for SSR or fallback)
+export async function getContinueWatching(
+  limit = 10,
+  options?: RequestInit,
+): Promise<WatchProgress[]> {
+  const result = await apiFetch<{ items: WatchProgress[] }>(
+    `/api/watch/continue-watching?limit=${limit}`,
+    options,
+  );
+  return result.items;
+}
+
 // Fetch continue watching via WebSocket
 interface SocketResponse {
   success: boolean;
@@ -70,7 +82,10 @@ export function fetchContinueWatching(
 ): void {
   const socket = getSocket();
   if (!socket?.connected) {
-    callback(null, 'Not connected');
+    // If socket not connected, try HTTP fallback
+    getContinueWatching(limit)
+      .then((items) => callback(items))
+      .catch((err) => callback(null, err.message || 'Failed to load'));
     return;
   }
 
@@ -165,6 +180,25 @@ export function setProgressCache(
   });
 }
 
+// Fetch progress via HTTP (for SSR or fallback)
+export async function getContentProgress(
+  contentId: string,
+  options?: RequestInit,
+): Promise<ContentProgress | null> {
+  try {
+    const result = await apiFetch<{ progress: ContentProgress | null }>(
+      `/api/watch/progress/${contentId}`,
+      options,
+    );
+    const progress = result.progress;
+    const hasProgress = !!(progress && progress.progressSeconds > 0);
+    setProgressCache(contentId, progress, hasProgress);
+    return progress;
+  } catch (_e) {
+    return null;
+  }
+}
+
 // Fetch progress via WebSocket
 interface ProgressSocketResponse {
   success: boolean;
@@ -182,7 +216,10 @@ export function fetchContentProgress(
 ): void {
   const socket = getSocket();
   if (!socket?.connected) {
-    callback(null, false);
+    // If socket not connected, try HTTP fallback
+    getContentProgress(contentId)
+      .then((progress) => callback(progress, !!progress))
+      .catch(() => callback(null, false));
     return;
   }
 

@@ -4,6 +4,7 @@ import { AlertCircle, Mail, RefreshCw } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Button, Input, Label } from '@/components/ui';
 import { Captcha } from '@/components/ui/captcha';
@@ -92,7 +93,9 @@ export function SignupForm() {
       }
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError.message || 'Registration failed. Please try again.');
+      const msg = apiError.message || 'Registration failed. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +145,9 @@ export function SignupForm() {
       // Show success toast? Or inline message?
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError.message || 'Resend failed. Please wait.');
+      const msg = apiError.message || 'Resend failed. Please wait.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +167,9 @@ export function SignupForm() {
       // AuthProvider handles success redirect via User state
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError.message || 'Verification failed. Please try again.');
+      const msg = apiError.message || 'Verification failed. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

@@ -27,6 +27,7 @@ export interface ApiError {
   message: string;
   status?: number;
   code?: string; // e.g., 'SESSION_EXPIRED'
+  details?: Array<{ path: string; message: string }>;
 }
 
 // WebSocket types

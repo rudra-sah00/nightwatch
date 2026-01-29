@@ -22,10 +22,17 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
       if (Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 120,
-          maxBufferLength: 120,
-          maxMaxBufferLength: 180,
+          lowLatencyMode: false, // Performance: VOD should prefer stability over latency
+          backBufferLength: 90,
+          maxBufferLength: 60,
+          maxMaxBufferLength: 120,
+          // Optimization for VOD: better bandwidth estimation
+          abrEwmaFastVoD: 1.0,
+          abrEwmaSlowVoD: 3.0,
+          // Retry logic: more resilient to minor blips
+          manifestLoadingMaxRetry: 4,
+          levelLoadingMaxRetry: 4,
+          fragLoadingMaxRetry: 6,
         });
 
         hls.loadSource(streamUrl);
