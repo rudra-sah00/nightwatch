@@ -24,15 +24,16 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
           enableWorker: true,
           lowLatencyMode: false, // Performance: VOD should prefer stability over latency
           backBufferLength: 90,
-          maxBufferLength: 60,
-          maxMaxBufferLength: 120,
+          maxBufferLength: 120, // 2 minutes (matches aggressive backend prefetch)
+          maxMaxBufferLength: 300, // 5 minutes max
+          maxBufferSize: 200 * 1000 * 1000, // 200MB (crucial for 1080p)
           // Optimization for VOD: better bandwidth estimation
           abrEwmaFastVoD: 1.0,
           abrEwmaSlowVoD: 3.0,
           // Retry logic: more resilient to minor blips
-          manifestLoadingMaxRetry: 4,
-          levelLoadingMaxRetry: 4,
-          fragLoadingMaxRetry: 6,
+          manifestLoadingMaxRetry: 5,
+          levelLoadingMaxRetry: 5,
+          fragLoadingMaxRetry: 10,
         });
 
         hls.loadSource(streamUrl);
