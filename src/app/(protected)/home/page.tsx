@@ -138,7 +138,7 @@ function HomeContent() {
 
             {/* Prompt to search - only show when no continue watching items */}
             {continueWatchingCount === 0 && (
-              <div className="flex items-center justify-center min-h-[30vh] text-center">
+              <div className="flex items-center justify-center min-h-[70vh] text-center">
                 <div>
                   <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                   <p className="text-muted-foreground">
