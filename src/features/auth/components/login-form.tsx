@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertCircle, Mail } from 'lucide-react';
+import Link from 'next/link';
 import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -214,7 +215,16 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            tabIndex={-1}
+          >
+            Forgot password?
+          </Link>
+        </div>
         <Input
           id="password"
           type="password"
