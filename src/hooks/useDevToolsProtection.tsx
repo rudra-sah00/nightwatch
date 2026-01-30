@@ -18,10 +18,7 @@ const REDIRECT_URL = 'https://rudrasahoo.live';
 export function useDevToolsProtection() {
   useEffect(() => {
     // Skip in development mode
-    // biome-ignore lint/correctness/noConstantCondition: temp disable
-    if (true || process.env.NODE_ENV === 'development') {
-      return;
-    }
+    // DevTools Protection Activated
 
     const redirect = () => {
       window.location.href = REDIRECT_URL;
@@ -110,7 +107,22 @@ export function useDevToolsProtection() {
     });
 
     const checkConsole = () => {
-      // Console cleared for protection
+      // Trigger Method 2 (Image ID getter) and Method 7 (Div ID getter)
+      // These getters are only called when the objects are inspected in the console
+      // biome-ignore lint/suspicious/noConsole: used for devtools detection
+      console.log(image);
+      // biome-ignore lint/suspicious/noConsole: used for devtools detection
+      console.log(element);
+      // biome-ignore lint/suspicious/noConsole: used for devtools detection
+      console.clear();
+
+      // Method 8: Debugger timing check
+      const start = Date.now();
+      // biome-ignore lint/suspicious/noDebugger: used for devtools detection
+      debugger;
+      if (Date.now() - start > 100) {
+        redirect();
+      }
     };
 
     // ============================================
