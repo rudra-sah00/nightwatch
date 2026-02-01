@@ -96,8 +96,12 @@ export function useLiveKit(token: string | null, serverUrl: string) {
 
   useEffect(() => {
     if (!token) {
+      // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
+      console.log('[LiveKit] No token yet, waiting...');
       return;
     }
+    // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
+    console.log('[LiveKit] Token received, creating room and connecting...');
     const newRoom = new Room({
       adaptiveStream: true,
       dynacast: true,
@@ -145,6 +149,16 @@ export function useLiveKit(token: string | null, serverUrl: string) {
         setParticipants((prev) => [...prev]);
       });
 
+    // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
+    console.log('[LiveKit] Attempting to connect...', {
+      serverUrl,
+      tokenPrefix: token.substring(0, 20),
+      iceServers: [
+        'stun:livekit.rudrasahoo.live:3479',
+        'turn:livekit.rudrasahoo.live:3479',
+      ],
+    });
+
     newRoom
       .connect(serverUrl, token, {
         rtcConfig: {
@@ -162,6 +176,11 @@ export function useLiveKit(token: string | null, serverUrl: string) {
         },
       })
       .then(async () => {
+        // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
+        console.log(
+          '[LiveKit] Successfully connected! Room state:',
+          newRoom.state,
+        );
         setRoom(newRoom);
         setParticipants([
           ...newRoom.remoteParticipants.values(),
@@ -169,6 +188,13 @@ export function useLiveKit(token: string | null, serverUrl: string) {
         ]);
       })
       .catch((_error) => {
+        // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
+        console.error('[LiveKit] Connection failed:', {
+          error: _error,
+          message: _error instanceof Error ? _error.message : String(_error),
+          serverUrl,
+          tokenPrefix: token?.substring(0, 20),
+        });
         toast.error('Failed to connect to voice/video server');
       });
 
