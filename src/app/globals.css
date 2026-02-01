@@ -256,6 +256,20 @@
   }
 }
 
+/* Large widescreen displays: fill video on 2K+ monitors in watch party mode */
+@media (min-width: 2560px) {
+  .watch-party-video video {
+    object-fit: cover;
+  }
+}
+
+/* For aspect ratios wider than 21:9 (ultrawide), cover to fill */
+@media (min-aspect-ratio: 21 / 9) and (min-width: 2000px) {
+  .watch-party-video video {
+    object-fit: cover;
+  }
+}
+
 /* Video subtitle/caption styling */
 video::cue {
   /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */

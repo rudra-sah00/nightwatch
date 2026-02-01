@@ -262,7 +262,7 @@ export function useDevToolsProtection() {
     window.addEventListener('keydown', blockKeyboardShortcuts);
     document.addEventListener('contextmenu', blockContextMenu);
     document.addEventListener('dragstart', blockDrag);
-    window.addEventListener('resize', checkDevToolsSize);
+    window.addEventListener('resize', checkDevToolsSize, { passive: true });
 
     // Initial check
     checkDevToolsSize();

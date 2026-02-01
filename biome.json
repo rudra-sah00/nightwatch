@@ -19,6 +19,12 @@
       "recommended": true,
       "suspicious": {
         "noConsole": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     }
   },

@@ -1,12 +1,21 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { checkRoomExists } from '@/features/watch-party/api';
-import { ActiveWatchParty } from '@/features/watch-party/components/ActiveWatchParty';
-import { WatchPartyLobby } from '@/features/watch-party/components/WatchPartyLobby';
 import type {
   PartyStateUpdate,
   RoomPreview,
@@ -16,6 +25,23 @@ import { getSocket, initSocket } from '@/lib/ws';
 import { useAuth } from '@/providers/auth-provider';
 
 import type { User } from '@/types';
+
+// Dynamic imports for heavy watch party components
+const ActiveWatchParty = dynamic(
+  () =>
+    import('@/features/watch-party/components/ActiveWatchParty').then((m) => ({
+      default: m.ActiveWatchParty,
+    })),
+  { ssr: false },
+);
+
+const WatchPartyLobby = dynamic(
+  () =>
+    import('@/features/watch-party/components/WatchPartyLobby').then((m) => ({
+      default: m.WatchPartyLobby,
+    })),
+  { ssr: false },
+);
 
 // Hook to handle guest socket initialization
 function useGuestSocket(user: User | null) {
@@ -60,9 +86,12 @@ export default function WatchPartyPage() {
   const [guestName, setGuestName] = useState('');
   const [copied, setCopied] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [movieEndWarningShown, setMovieEndWarningShown] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isGuestSocketReady = useGuestSocket(user);
+  const roomCreationTimeRef = useRef<number>(0);
 
   // Handle state updates from host (for guests)
   const handleStateUpdate = useCallback((state: PartyStateUpdate) => {
@@ -75,6 +104,10 @@ export default function WatchPartyPage() {
         const applySeek = () => {
           video.currentTime = state.currentTime;
           if (state.isPlaying) video.play().catch(() => {});
+          // Apply playback rate
+          if (state.playbackRate !== undefined) {
+            video.playbackRate = state.playbackRate;
+          }
         };
         // Listen for duration to become available
         video.addEventListener('durationchange', applySeek, { once: true });
@@ -95,6 +128,14 @@ export default function WatchPartyPage() {
       } else if (!state.isPlaying && !video.paused) {
         video.pause();
       }
+
+      // Sync playback rate
+      if (
+        state.playbackRate !== undefined &&
+        video.playbackRate !== state.playbackRate
+      ) {
+        video.playbackRate = state.playbackRate;
+      }
     }
   }, []);
 
@@ -105,6 +146,7 @@ export default function WatchPartyPage() {
     errorCode: partyErrorCode,
     requestJoin,
     leaveRoom,
+    cancelRequest,
     sync,
     isConnected,
     requestStatus,
@@ -117,10 +159,104 @@ export default function WatchPartyPage() {
     updateContent,
   } = useWatchParty({
     onStateUpdate: handleStateUpdate,
+    userId: user?.id,
   });
 
   const isHost = user?.id === room?.hostId;
   const prevMemberCount = useRef(0);
+
+  // Store room creation time
+  useEffect(() => {
+    if (room && !roomCreationTimeRef.current) {
+      roomCreationTimeRef.current = room.createdAt;
+    }
+  }, [room]);
+
+  // Auto-end watch party after 3 hours
+  useEffect(() => {
+    if (!room || !isHost) return;
+
+    const checkDuration = () => {
+      const now = Date.now();
+      const duration = now - roomCreationTimeRef.current;
+      const threeHours = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+      if (duration >= threeHours) {
+        toast.info('Watch party has reached 3-hour limit and will now end.');
+        setTimeout(() => {
+          leaveRoom();
+          router.push('/home');
+        }, 3000);
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkDuration, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [room, isHost, leaveRoom, router]);
+
+  // Auto-end for movies when playback finishes + show warning 15 min before end
+  useEffect(() => {
+    if (!room || !isHost || room.type !== 'movie' || !videoRef.current) return;
+
+    const video = videoRef.current;
+
+    const checkMovieProgress = () => {
+      if (!video.duration || Number.isNaN(video.duration)) return;
+
+      const timeRemaining = video.duration - video.currentTime;
+
+      // Show warning at 15 minutes before end (once)
+      if (
+        timeRemaining <= 15 * 60 &&
+        timeRemaining > 14 * 60 &&
+        !movieEndWarningShown
+      ) {
+        setMovieEndWarningShown(true);
+        toast.warning(
+          'This watch party will automatically end when the movie finishes.',
+          {
+            duration: 8000,
+          },
+        );
+      }
+    };
+
+    const handleMovieEnd = () => {
+      toast.info('Movie has ended. Closing watch party...');
+      setTimeout(() => {
+        leaveRoom();
+        router.push('/home');
+      }, 3000);
+    };
+
+    video.addEventListener('timeupdate', checkMovieProgress, { passive: true });
+    video.addEventListener('ended', handleMovieEnd, { passive: true });
+
+    return () => {
+      video.removeEventListener('timeupdate', checkMovieProgress);
+      video.removeEventListener('ended', handleMovieEnd);
+    };
+  }, [room, isHost, leaveRoom, router, movieEndWarningShown]);
+
+  // Warn host before leaving/reloading page
+  useEffect(() => {
+    if (!isHost || !room) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const message =
+        'Are you sure you want to leave? The watch party room will be closed for all members.';
+      e.preventDefault();
+      e.returnValue = message;
+      return message;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isHost, room]);
 
   // Check if room exists
   useEffect(() => {
@@ -145,10 +281,8 @@ export default function WatchPartyPage() {
           }
         } else {
           setRoomNotFound(true);
-          // Show specific error message from backend
-          if (result.message) {
-            toast.error(result.message);
-          }
+          // Don't show toast here - the WatchPartyLobby component already displays
+          // the error message in the UI, and WebSocket events have their own toasts
         }
       } catch (_err) {
         // Silently fail or handle error if needed
@@ -214,7 +348,23 @@ export default function WatchPartyPage() {
     );
   };
 
+  const handleCancelRequest = () => {
+    cancelRequest(() => {
+      // Navigate to login for guests, home for users
+      if (!user) {
+        router.push('/login');
+      } else {
+        router.push('/home');
+      }
+    });
+  };
+
   const handleLeave = () => {
+    setShowLeaveDialog(true);
+  };
+
+  const confirmLeave = () => {
+    setShowLeaveDialog(false);
     leaveRoom();
     router.push('/home');
   };
@@ -256,37 +406,63 @@ export default function WatchPartyPage() {
 
   if (isConnected && room) {
     return (
-      <ActiveWatchParty
-        room={room}
-        currentUserId={
-          user?.id ||
-          (() => {
-            const token =
-              typeof window !== 'undefined'
-                ? sessionStorage.getItem('guest_token')
-                : null;
-            if (token) {
-              try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return payload.sub;
-              } catch (_e) {}
-            }
-            return getSocket()?.id ? `guest:${getSocket()?.id}` : undefined;
-          })()
-        }
-        isHost={isHost}
-        copied={copied}
-        onKick={kickUser}
-        onApprove={approveMember}
-        onReject={rejectMember}
-        onCopyLink={copyInviteLink}
-        onLeave={handleLeave}
-        onSync={sync}
-        videoRef={videoRef}
-        messages={messages}
-        onSendMessage={sendMessage}
-        onUpdateContent={updateContent}
-      />
+      <>
+        <ActiveWatchParty
+          room={room}
+          currentUserId={
+            user?.id ||
+            (() => {
+              const token =
+                typeof window !== 'undefined'
+                  ? sessionStorage.getItem('guest_token')
+                  : null;
+              if (token) {
+                try {
+                  const payload = JSON.parse(atob(token.split('.')[1]));
+                  return payload.sub;
+                } catch (_e) {}
+              }
+              return getSocket()?.id ? `guest:${getSocket()?.id}` : undefined;
+            })()
+          }
+          isHost={isHost}
+          copied={copied}
+          onKick={kickUser}
+          onApprove={approveMember}
+          onReject={rejectMember}
+          onCopyLink={copyInviteLink}
+          onLeave={handleLeave}
+          onSync={sync}
+          videoRef={videoRef}
+          messages={messages}
+          onSendMessage={sendMessage}
+          onUpdateContent={updateContent}
+        />
+
+        {/* Leave Confirmation Dialog */}
+        <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {isHost
+                  ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
+                  : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowLeaveDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmLeave}>
+                {isHost ? 'End Party' : 'Leave'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     );
   }
 
@@ -304,6 +480,7 @@ export default function WatchPartyPage() {
       onGuestNameChange={setGuestName}
       onJoin={handleJoin}
       onLeave={handleLeave}
+      onCancelRequest={handleCancelRequest}
       captchaToken={captchaToken}
       onCaptchaVerify={setCaptchaToken}
     />

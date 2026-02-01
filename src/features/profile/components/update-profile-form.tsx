@@ -1,7 +1,8 @@
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button, Input, Label } from '@/components/ui';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 import { checkUsername, updateProfile } from '../api';
@@ -10,39 +11,34 @@ export function UpdateProfileForm() {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const debouncedUsername = useDebounce(username, 500);
+  const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Real-time username check
+  // Real-time username check with debounced value
   useEffect(() => {
-    if (!username || username === user?.username) {
+    if (!debouncedUsername || debouncedUsername === user?.username) {
       setIsAvailable(null);
-      setIsCheckingUsername(false);
       return;
     }
 
-    if (username.length < 3) {
+    if (debouncedUsername.length < 3) {
       setIsAvailable(false);
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setIsCheckingUsername(true);
+    startCheckTransition(async () => {
       try {
-        const { available } = await checkUsername(username);
+        const { available } = await checkUsername(debouncedUsername);
         setIsAvailable(available);
       } catch {
         toast.error('Failed to check username availability');
-      } finally {
-        setIsCheckingUsername(false);
       }
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(timer);
-  }, [username, user?.username]);
+    });
+  }, [debouncedUsername, user?.username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

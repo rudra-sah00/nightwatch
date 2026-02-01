@@ -10,7 +10,7 @@ import {
   defaultSubtitleSettings,
   loadSubtitleSettings,
   type SubtitleSettings,
-} from '../controls/SubtitleSelector';
+} from '../controls/subtitle-settings';
 import { BufferingOverlay } from '../overlays/BufferingOverlay';
 import { ErrorOverlay } from '../overlays/ErrorOverlay';
 import { LoadingOverlay } from '../overlays/LoadingOverlay';
@@ -28,6 +28,9 @@ import { useNextEpisode } from '../player/useNextEpisode';
 import { useWatchProgress } from '../player/useWatchProgress';
 // Player components
 import { VideoElement } from '../player/VideoElement';
+// Extracted hooks for better code organization
+import { useMobileDetection } from './useMobileDetection';
+import { usePlayerHandlers } from './usePlayerHandlers';
 
 interface WatchPageProps {
   streamUrl: string | null;
@@ -68,7 +71,6 @@ export function WatchPage({
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
 
@@ -91,20 +93,8 @@ export function WatchPage({
     applySubtitleSettings(savedSettings);
   }, []);
 
-  // Mobile detection
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(
-        window.innerWidth < 768 ||
-          'ontouchstart' in window ||
-          navigator.maxTouchPoints > 0,
-      );
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Mobile detection - extracted to custom hook
+  const isMobile = useMobileDetection();
 
   // Initialize HLS
   const { setQuality, setAudioTrack } = useHls({
@@ -138,6 +128,33 @@ export function WatchPage({
     }
   }, [captionUrl, subtitleTracks]);
 
+  // Handle navigating to next episode
+  const handleNavigate = useCallback(
+    (url: string) => {
+      if (onNavigate) {
+        onNavigate(url);
+      } else {
+        router.push(url);
+      }
+    },
+    [router, onNavigate],
+  );
+
+  // Next episode for series - must be before useWatchProgress to determine hasMoreEpisodes
+  const {
+    showNextEpisode,
+    nextEpisodeInfo,
+    isLoadingNext,
+    playNextEpisode,
+    cancelNextEpisode,
+  } = useNextEpisode({
+    metadata,
+    currentTime: state.currentTime,
+    duration: state.duration,
+    isPlaying: state.isPlaying && !state.isPaused,
+    onNavigate: handleNavigate,
+  });
+
   // Handle resume progress
   const handleProgressLoaded = useCallback((seconds: number) => {
     if (seconds > 0 && videoRef.current) {
@@ -154,33 +171,9 @@ export function WatchPage({
     onProgressLoaded: isHost ? handleProgressLoaded : undefined,
     skipProgressHistory: !isHost, // Guests don't save progress
     enableProgressLoad: isHost, // Only host loads previous progress
-  });
-
-  // Handle navigating to next episode
-  const handleNavigate = useCallback(
-    (url: string) => {
-      if (onNavigate) {
-        onNavigate(url);
-      } else {
-        router.push(url);
-      }
-    },
-    [router, onNavigate],
-  );
-
-  // Next episode for series
-  const {
-    showNextEpisode,
-    nextEpisodeInfo,
-    isLoadingNext,
-    playNextEpisode,
-    cancelNextEpisode,
-  } = useNextEpisode({
-    metadata,
-    currentTime: state.currentTime,
-    duration: state.duration,
-    isPlaying: state.isPlaying && !state.isPaused,
-    onNavigate: handleNavigate,
+    // For series: nextEpisodeInfo being non-null means there are more episodes
+    hasMoreEpisodes:
+      metadata.type === 'series' ? nextEpisodeInfo !== null : undefined,
   });
 
   // Handle going back - always go to home (not browser history)
@@ -223,145 +216,34 @@ export function WatchPage({
     dispatch,
   });
 
-  // Auto-hide controls
-  const showControls = useCallback(() => {
-    dispatch({ type: 'SHOW_CONTROLS' });
-
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-
-    controlsTimeoutRef.current = setTimeout(() => {
-      if (state.isPlaying && !state.isPaused) {
-        dispatch({ type: 'HIDE_CONTROLS' });
-      }
-    }, 3000);
-  }, [state.isPlaying, state.isPaused]);
-
-  // Show controls on pause
-  useEffect(() => {
-    if (state.isPaused) {
-      dispatch({ type: 'SHOW_CONTROLS' });
-    }
-  }, [state.isPaused]);
-
-  // Control handlers
-  const handleSeek = useCallback(
-    (time: number) => {
-      if (readOnly) return; // Prevent seek when readOnly
-      if (videoRef.current) {
-        videoRef.current.currentTime = time;
-      }
-      showControls();
-    },
-    [showControls, readOnly],
-  );
-
-  const handleSkip = useCallback(
-    (seconds: number) => {
-      if (readOnly) return; // Prevent skip when readOnly
-      seek(seconds);
-      showControls();
-    },
-    [seek, showControls, readOnly],
-  );
-
-  const handleVolumeChange = useCallback(
-    (volume: number) => {
-      if (videoRef.current) {
-        videoRef.current.volume = volume;
-        videoRef.current.muted = volume === 0;
-      }
-      dispatch({ type: 'SET_VOLUME', volume });
-      showControls();
-    },
-    [showControls],
-  );
-
-  const handleMuteToggle = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-    }
-    toggleMute();
-    showControls();
-  }, [toggleMute, showControls]);
-
-  const handleTogglePlay = useCallback(() => {
-    if (readOnly) return; // Prevent toggle play when readOnly
-    togglePlay();
-    showControls();
-  }, [togglePlay, showControls, readOnly]);
-
-  const handleRetry = useCallback(() => {
-    dispatch({ type: 'SET_ERROR', error: null });
-    dispatch({ type: 'SET_LOADING', isLoading: true });
-  }, []);
-
-  const handleVideoClick = useCallback(() => {
-    if (readOnly) return; // Prevent click toggle when readOnly
-    handleTogglePlay();
-  }, [handleTogglePlay, readOnly]);
-
-  // Quality change handler
-  const handleQualityChange = useCallback(
-    (quality: string) => {
-      if (quality === 'auto') {
-        setQuality(-1); // Auto quality
-      } else {
-        // Find quality level index
-        const levelIndex = state.qualities.findIndex(
-          (q) => q.label === quality,
-        );
-        if (levelIndex !== -1) {
-          setQuality(levelIndex);
-        }
-      }
-      dispatch({ type: 'SET_CURRENT_QUALITY', quality });
-      showControls();
-    },
-    [setQuality, state.qualities, showControls],
-  );
-
-  // Playback rate handler
-  const handlePlaybackRateChange = useCallback(
-    (rate: number) => {
-      if (readOnly) return; // Prevent speed change when readOnly
-      if (videoRef.current) {
-        videoRef.current.playbackRate = rate;
-      }
-      dispatch({ type: 'SET_PLAYBACK_RATE', rate });
-      showControls();
-    },
-    [showControls, readOnly],
-  );
-
-  // Audio track change handler
-  const handleAudioChange = useCallback(
-    (trackId: string) => {
-      setAudioTrack(trackId);
-      dispatch({ type: 'SET_CURRENT_AUDIO_TRACK', trackId });
-      showControls();
-    },
-    [setAudioTrack, showControls],
-  );
-
-  // Subtitle track change handler
-  const handleSubtitleChange = useCallback(
-    (trackId: string | null) => {
-      dispatch({ type: 'SET_CURRENT_SUBTITLE_TRACK', trackId });
-      showControls();
-    },
-    [showControls],
-  );
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-    };
-  }, []);
+  // Player handlers - extracted to custom hook for better organization
+  const {
+    showControls,
+    handleSeek,
+    handleSkip,
+    handleVolumeChange,
+    handleMuteToggle,
+    handleTogglePlay,
+    handleVideoClick,
+    handleQualityChange,
+    handlePlaybackRateChange,
+    handleAudioChange,
+    handleSubtitleChange,
+    handleRetry,
+  } = usePlayerHandlers({
+    videoRef,
+    dispatch,
+    isPlaying: state.isPlaying,
+    isPaused: state.isPaused,
+    readOnly,
+    isLoading: state.isLoading,
+    togglePlay,
+    toggleMute,
+    seek,
+    setQuality,
+    setAudioTrack,
+    qualities: state.qualities,
+  });
 
   // Extended metadata for pause overlay
   const pauseOverlayMetadata = {
@@ -474,6 +356,7 @@ export function WatchPage({
           onToggle={handleTogglePlay}
           metadata={pauseOverlayMetadata}
           disabled={readOnly}
+          isLoading={state.isLoading}
         />
 
         {/* Control Bar */}

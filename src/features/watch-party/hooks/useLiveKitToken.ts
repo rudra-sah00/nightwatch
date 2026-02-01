@@ -24,9 +24,22 @@ export function useLiveKitToken(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Check for stale guest token on mount
+  useEffect(() => {
+    const guestToken =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('guest_token')
+        : null;
+    if (guestToken) {
+    }
+  }, []); // Run once on mount
+
   useEffect(() => {
     const fetchToken = async () => {
-      const guestToken = sessionStorage.getItem('guest_token');
+      const guestToken =
+        typeof window !== 'undefined'
+          ? sessionStorage.getItem('guest_token')
+          : null;
 
       // Prevent fetching with incomplete data or without approval
       // If it's a guest ID (startsWith guest:), they MUST have a questToken (approval)
@@ -41,7 +54,6 @@ export function useLiveKitToken(
       ) {
         return;
       }
-
       setIsLoading(true);
       setError(null);
 
@@ -51,18 +63,17 @@ export function useLiveKitToken(
 
         const isGuest = userId?.startsWith('guest:');
 
-        const res = await fetch(
-          `${backendUrl}/api/livekit/token?roomName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`,
-          {
-            credentials: 'include',
-            headers:
-              isGuest && guestToken
-                ? {
-                    Authorization: `Bearer ${guestToken}`,
-                  }
-                : undefined,
-          },
-        );
+        const url = `${backendUrl}/api/livekit/token?roomName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`;
+
+        const res = await fetch(url, {
+          credentials: 'include',
+          headers:
+            isGuest && guestToken
+              ? {
+                  Authorization: `Bearer ${guestToken}`,
+                }
+              : undefined,
+        });
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
@@ -70,6 +81,7 @@ export function useLiveKitToken(
         }
 
         const data = await res.json();
+
         setToken(data.token);
 
         // Use the URL provided by the backend (if any)

@@ -1,10 +1,25 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { LoginForm } from '@/features/auth/components';
 import { useAuth } from '@/providers/auth-provider';
+
+const LoginForm = dynamic(
+  () =>
+    import('@/features/auth/components').then((m) => ({
+      default: m.LoginForm,
+    })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    ),
+    ssr: false,
+  },
+);
 
 export default function LoginPage() {
   const router = useRouter();

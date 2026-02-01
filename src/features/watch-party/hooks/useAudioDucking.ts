@@ -11,14 +11,16 @@ interface UseAudioDuckingOptions {
   room: Room | null;
   /** All participants in the room */
   participants: Participant[];
-  /** Normal video volume (0-1), default 1 */
-  normalVolume?: number;
-  /** Ducked video volume when someone speaks (0-1), default 0.3 */
-  duckedVolume?: number;
+  /** User's desired volume level (0-1) from volume controls */
+  userVolume: number;
+  /** Ducking factor when someone speaks (0-1), default 0.25 - multiplies user volume */
+  duckingFactor?: number;
   /** Transition time in ms for volume changes, default 150 */
   transitionMs?: number;
   /** Enabled flag - set to false to disable ducking */
   enabled?: boolean;
+  /** Ref to track if ducking is currently active (prevents circular updates) */
+  isDuckingRef?: React.MutableRefObject<boolean>;
 }
 
 /**
@@ -29,15 +31,15 @@ export function useAudioDucking({
   videoRef,
   room,
   participants,
-  normalVolume = 1,
-  duckedVolume = 0.3,
+  userVolume,
+  duckingFactor = 0.25,
   transitionMs = 150,
   enabled = true,
+  isDuckingRef,
 }: UseAudioDuckingOptions) {
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
-  const [currentDuckedVolume, setCurrentDuckedVolume] = useState(normalVolume);
   const animationRef = useRef<number | null>(null);
-  const targetVolumeRef = useRef(normalVolume);
+  const targetVolumeRef = useRef(userVolume);
 
   // Smoothly transition volume
   const transitionVolume = useCallback(
@@ -49,6 +51,11 @@ export function useAudioDucking({
       const startVolume = video.volume;
       const volumeDiff = targetVolume - startVolume;
       const startTime = performance.now();
+
+      // Mark that ducking is active
+      if (isDuckingRef) {
+        isDuckingRef.current = true;
+      }
 
       // Cancel any existing animation
       if (animationRef.current) {
@@ -70,13 +77,16 @@ export function useAudioDucking({
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          setCurrentDuckedVolume(targetVolume);
+          // Ducking complete
+          if (isDuckingRef) {
+            isDuckingRef.current = false;
+          }
         }
       };
 
       animationRef.current = requestAnimationFrame(animate);
     },
-    [videoRef, transitionMs, enabled],
+    [videoRef, transitionMs, enabled, isDuckingRef],
   );
 
   // Check if any remote participant is speaking
@@ -117,22 +127,16 @@ export function useAudioDucking({
     checkSpeaking();
   }, [checkSpeaking]);
 
-  // Apply volume ducking when speaking state changes
+  // Apply volume ducking when speaking state changes or user volume changes
   useEffect(() => {
     if (!enabled) return;
 
-    if (isSomeoneSpeaking) {
-      transitionVolume(duckedVolume);
-    } else {
-      transitionVolume(normalVolume);
-    }
-  }, [
-    isSomeoneSpeaking,
-    duckedVolume,
-    normalVolume,
-    transitionVolume,
-    enabled,
-  ]);
+    // Apply ducking factor to user's volume when someone speaks
+    const targetVolume = isSomeoneSpeaking
+      ? userVolume * duckingFactor
+      : userVolume;
+    transitionVolume(targetVolume);
+  }, [isSomeoneSpeaking, userVolume, duckingFactor, transitionVolume, enabled]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -145,12 +149,11 @@ export function useAudioDucking({
 
   return {
     isSomeoneSpeaking,
-    currentVolume: currentDuckedVolume,
     /** Manually set ducking enabled/disabled */
     setDuckingEnabled: (value: boolean) => {
       if (!value && videoRef.current) {
-        // Restore normal volume when disabled
-        videoRef.current.volume = normalVolume;
+        // Restore user's volume when disabled
+        videoRef.current.volume = userVolume;
       }
     },
   };

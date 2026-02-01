@@ -90,7 +90,7 @@ export function ContinueWatching({
         fetchItems(); // Cache will prevent excessive refetch
       }
     };
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener('focus', handleFocus, { passive: true });
 
     return () => {
       window.removeEventListener('focus', handleFocus);
@@ -157,7 +157,7 @@ export function ContinueWatching({
 
       {/* Vertical List items */}
       <div className="flex flex-col gap-2">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div
             key={item.id}
             className={cn(
@@ -183,7 +183,10 @@ export function ContinueWatching({
                   alt={item.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  unoptimized
+                  unoptimized={item.posterUrl.includes('/api/stream/')}
+                  sizes="192px"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                  priority={index === 0}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10">

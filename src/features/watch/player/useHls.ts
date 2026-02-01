@@ -18,6 +18,10 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
 
     const video = videoRef.current;
 
+    // Clear any previous errors when loading new stream
+    dispatch({ type: 'SET_ERROR', error: null });
+    dispatch({ type: 'SET_LOADING', isLoading: true });
+
     const initHls = () => {
       if (Hls.isSupported()) {
         const hls = new Hls({

@@ -47,6 +47,7 @@ export interface VideoMetadata {
   type: 'movie' | 'series';
   season?: number;
   episode?: number;
+  episodeTitle?: string; // For series: the specific episode title
   movieId: string;
   seriesId?: string; // For series: the parent series ID (used as contentId for continue watching)
   posterUrl?: string;

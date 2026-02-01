@@ -32,12 +32,15 @@ export function SignupForm() {
     inviteCode: '',
   });
 
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const [otp, setOtp] = useState('');
 
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
     email?: string;
     password?: string;
+    confirmPassword?: string;
     inviteCode?: string;
   }>({});
 
@@ -65,6 +68,13 @@ export function SignupForm() {
 
     if (!captchaToken) {
       setError('Please complete the security verification.');
+      return;
+    }
+
+    // Check password confirmation
+    if (formData.password !== confirmPassword) {
+      setFieldErrors({ confirmPassword: 'Passwords do not match' });
+      setError('Please make sure both passwords match.');
       return;
     }
 
@@ -271,7 +281,7 @@ export function SignupForm() {
           id="name"
           type="text"
           name="name"
-          placeholder="John Doe"
+          placeholder="Enter your full name"
           value={formData.name}
           onChange={handleChange}
           error={fieldErrors.name}
@@ -279,6 +289,11 @@ export function SignupForm() {
           disabled={isLoading}
           className="bg-secondary/50"
         />
+        {!fieldErrors.name && (
+          <p className="text-xs text-muted-foreground">
+            Please enter your real name for a personalized experience
+          </p>
+        )}
       </div>
 
       {/* Email */}
@@ -288,7 +303,7 @@ export function SignupForm() {
           id="email"
           type="email"
           name="email"
-          placeholder="john@example.com"
+          placeholder="your.email@example.com"
           value={formData.email}
           onChange={handleChange}
           error={fieldErrors.email}
@@ -296,6 +311,11 @@ export function SignupForm() {
           disabled={isLoading}
           className="bg-secondary/50"
         />
+        {!fieldErrors.email && (
+          <p className="text-xs text-muted-foreground">
+            We'll send a verification code to this email
+          </p>
+        )}
       </div>
 
       {/* Password */}
@@ -308,7 +328,7 @@ export function SignupForm() {
           id="password"
           type="password"
           name="password"
-          placeholder="••••••••"
+          placeholder="Create a strong password"
           value={formData.password}
           onChange={handleChange}
           error={fieldErrors.password}
@@ -318,20 +338,44 @@ export function SignupForm() {
         />
       </div>
 
-      {/* Invite Code (Read-Only) */}
+      {/* Confirm Password */}
       <div className="space-y-2">
-        <Label htmlFor="inviteCode">Invite Code</Label>
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
         <Input
-          id="inviteCode"
-          type="text"
-          name="inviteCode"
-          placeholder="Invite code required"
-          value={formData.inviteCode}
-          onChange={handleChange}
-          error={fieldErrors.inviteCode}
-          disabled={isLoading || !!searchParams.get('invite')} // Disable if from URL
+          id="confirmPassword"
+          type="password"
+          name="confirmPassword"
+          placeholder="Re-enter your password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            if (fieldErrors.confirmPassword) {
+              setFieldErrors((prev) => ({
+                ...prev,
+                confirmPassword: undefined,
+              }));
+            }
+            if (error) setError(null);
+          }}
+          error={fieldErrors.confirmPassword}
+          autoComplete="new-password"
+          disabled={isLoading}
           className="bg-secondary/50"
         />
+        {!fieldErrors.confirmPassword && confirmPassword && (
+          <p
+            className={cn(
+              'text-xs',
+              formData.password === confirmPassword
+                ? 'text-green-600 dark:text-green-500'
+                : 'text-amber-600 dark:text-amber-500',
+            )}
+          >
+            {formData.password === confirmPassword
+              ? '✓ Passwords match'
+              : '⚠ Passwords do not match'}
+          </p>
+        )}
       </div>
 
       <Captcha
@@ -346,7 +390,7 @@ export function SignupForm() {
         disabled={!captchaToken || isLoading}
         className="w-full text-base font-semibold mt-2"
       >
-        Continue to Verification
+        {isLoading ? 'Creating Account...' : 'Create Account'}
       </Button>
     </form>
   );

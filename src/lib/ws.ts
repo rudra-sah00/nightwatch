@@ -12,6 +12,8 @@ export function initSocket(
   userId?: string,
   sessionId?: string,
   isGuest = false,
+  userName?: string,
+  profilePhoto?: string,
 ): Socket {
   if (socket?.connected) {
     socket.disconnect();
@@ -20,6 +22,8 @@ export function initSocket(
   const query: Record<string, string> = {};
   if (userId) query.userId = userId;
   if (sessionId) query.sessionId = sessionId;
+  if (userName) query.userName = userName;
+  if (profilePhoto) query.profilePhoto = profilePhoto;
   if (isGuest) {
     query.isGuest = 'true';
     // Check storage for existing guest token

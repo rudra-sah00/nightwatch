@@ -16,6 +16,7 @@ interface WatchPartyLobbyProps {
   onGuestNameChange: (name: string) => void;
   onJoin: () => void;
   onLeave: () => void;
+  onCancelRequest?: () => void;
   // Captcha for guest users
   captchaToken?: string | null;
   onCaptchaVerify?: (token: string) => void;
@@ -33,6 +34,7 @@ export function WatchPartyLobby({
   onGuestNameChange,
   onJoin,
   onLeave,
+  onCancelRequest,
   captchaToken,
   onCaptchaVerify,
 }: WatchPartyLobbyProps) {
@@ -75,7 +77,7 @@ export function WatchPartyLobby({
           </p>
           <button
             type="button"
-            onClick={onLeave}
+            onClick={onCancelRequest || onLeave}
             className="mt-6 text-sm text-red-500 hover:text-red-400"
           >
             Cancel Request

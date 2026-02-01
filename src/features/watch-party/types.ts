@@ -3,6 +3,7 @@
 export interface RoomMember {
   id: string;
   name: string;
+  profilePhoto?: string;
   isHost: boolean;
   joinedAt: number;
 }
@@ -10,6 +11,7 @@ export interface RoomMember {
 export interface RoomState {
   currentTime: number;
   isPlaying: boolean;
+  playbackRate: number;
   lastUpdated: number;
 }
 
@@ -100,11 +102,13 @@ export interface PartyKicked {
 export interface PartySyncPayload {
   currentTime: number;
   isPlaying: boolean;
+  playbackRate?: number;
 }
 
 export interface PartyStateUpdate {
   currentTime: number;
   isPlaying: boolean;
+  playbackRate?: number;
   timestamp: number;
 }
 

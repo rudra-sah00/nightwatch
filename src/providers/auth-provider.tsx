@@ -72,7 +72,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(storedUser);
 
         // Connect WebSocket with stored credentials
-        initSocket(storedUser.id, storedUser.sessionId);
+        initSocket(
+          storedUser.id,
+          storedUser.sessionId,
+          false,
+          storedUser.name,
+          storedUser.profilePhoto ?? undefined,
+        );
         forceLogoutHandlerRef.current = handleForceLogout;
         onForceLogout(handleForceLogout);
 
@@ -131,7 +137,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (loggedInUser: User) => {
       storeUser(loggedInUser);
       setUser(loggedInUser);
-      initSocket(loggedInUser.id, loggedInUser.sessionId);
+      initSocket(
+        loggedInUser.id,
+        loggedInUser.sessionId,
+        false,
+        loggedInUser.name,
+        loggedInUser.profilePhoto ?? undefined,
+      );
       forceLogoutHandlerRef.current = handleForceLogout;
       onForceLogout(handleForceLogout);
       sessionStorage.removeItem('guest_token');

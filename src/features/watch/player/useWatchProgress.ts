@@ -7,6 +7,15 @@ import {
 import { getSocket } from '@/lib/ws';
 import type { VideoMetadata } from './types';
 
+// Helper to get local date string in YYYY-MM-DD format
+function getLocalDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // How often to sync progress to backend (in ms)
 const PROGRESS_SYNC_INTERVAL = 10000;
 // How often to record accumulated watch time (in ms) - for activity graph
@@ -21,6 +30,8 @@ interface UseWatchProgressProps {
   skipProgressHistory?: boolean;
   /** Enable loading previous progress (only for host/normal playback) */
   enableProgressLoad?: boolean;
+  /** For series: whether there's a next episode available */
+  hasMoreEpisodes?: boolean;
 }
 
 interface SocketResponse {
@@ -41,6 +52,7 @@ export function useWatchProgress({
   onProgressLoaded,
   skipProgressHistory = false,
   enableProgressLoad = true,
+  hasMoreEpisodes,
 }: UseWatchProgressProps) {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -64,11 +76,7 @@ export function useWatchProgress({
 
       if (sentSeconds === 0) return;
 
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const localDate = `${year}-${month}-${day}`;
+      const localDate = getLocalDateString();
 
       socket.emit(
         'watch:record_time',
@@ -120,6 +128,7 @@ export function useWatchProgress({
         // Episode info for series
         seasonNumber: metadata.season,
         episodeNumber: metadata.episode,
+        episodeTitle: metadata.episodeTitle,
         episodeId:
           metadata.type === 'series' && metadata.season && metadata.episode
             ? `${metadata.season}-${metadata.episode}`
@@ -127,6 +136,11 @@ export function useWatchProgress({
 
         progressSeconds: Math.floor(currentTime),
         durationSeconds: Math.floor(duration),
+
+        // For series: tell backend if there are more episodes
+        // This prevents removing from continue watching until series is fully completed
+        hasMoreEpisodes:
+          metadata.type === 'series' ? (hasMoreEpisodes ?? true) : undefined,
       };
 
       socket.emit('watch:update_progress', payload, (res: SocketResponse) => {
@@ -137,7 +151,7 @@ export function useWatchProgress({
         }
       });
     }
-  }, [metadata, videoRef, skipProgressHistory]);
+  }, [metadata, videoRef, skipProgressHistory, hasMoreEpisodes]);
 
   // Initial load: Get previous progress (only if enableProgressLoad is true)
   useEffect(() => {

@@ -1,15 +1,24 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/layout/navbar';
 import { searchContent } from '@/features/search/api';
-import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 import { SearchResults } from '@/features/search/components/search-results';
 import type { SearchResult } from '@/features/search/types';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
+
+// Dynamic import for heavy modal component
+const ContentDetailModal = dynamic(
+  () =>
+    import('@/features/search/components/content-detail-modal').then(
+      (m) => m.ContentDetailModal,
+    ),
+  { ssr: false },
+);
 
 function HomeContent() {
   const searchParams = useSearchParams();

@@ -32,10 +32,25 @@ export function WatchPartyParticipants({
                 key={pending.id}
                 className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5"
               >
-                <span className="text-sm text-white/80 truncate max-w-[120px]">
-                  {pending.name}
-                </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                  {pending.profilePhoto ? (
+                    <img
+                      src={pending.profilePhoto}
+                      alt={pending.name}
+                      className="w-6 h-6 rounded-full border border-white/10 object-cover"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-medium text-white/70">
+                        {pending.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <span className="text-sm text-white/80 truncate">
+                    {pending.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => onApprove(pending.id)}
@@ -71,19 +86,33 @@ export function WatchPartyParticipants({
               <div className="flex items-center gap-3 overflow-hidden">
                 {member.isHost ? (
                   <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center border border-yellow-500/50">
-                      <span className="text-xs font-bold text-yellow-500">
-                        {member.name.charAt(0)}
-                      </span>
-                    </div>
+                    {member.profilePhoto ? (
+                      <img
+                        src={member.profilePhoto}
+                        alt={member.name}
+                        className="w-8 h-8 rounded-full border border-yellow-500/50 object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center border border-yellow-500/50">
+                        <span className="text-xs font-bold text-yellow-500">
+                          {member.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute -bottom-1 -right-1 bg-black rounded-full p-0.5">
                       <Crown className="w-3 h-3 text-yellow-500" />
                     </div>
                   </div>
+                ) : member.profilePhoto ? (
+                  <img
+                    src={member.profilePhoto}
+                    alt={member.name}
+                    className="w-8 h-8 rounded-full border border-white/10 object-cover"
+                  />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                    <span className="text-xs font-medium text-white/70">
-                      {member.name.charAt(0)}
+                    <span className="text-sm font-semibold text-white/70">
+                      {member.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
