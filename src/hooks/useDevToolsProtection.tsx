@@ -18,7 +18,9 @@ const REDIRECT_URL = 'https://rudrasahoo.live';
 export function useDevToolsProtection() {
   useEffect(() => {
     // Skip in development mode
-    // DevTools Protection Activated
+    if (process.env.NODE_ENV === 'development') {
+      return;
+    }
 
     const redirect = () => {
       window.location.href = REDIRECT_URL;

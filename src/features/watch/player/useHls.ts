@@ -41,11 +41,23 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
           dispatch({ type: 'SET_LOADING', isLoading: false });
 
           // Extract quality levels
-          const qualities: Quality[] = data.levels.map((level) => ({
-            label: `${level.height}p`,
-            height: level.height,
-            bandwidth: level.bitrate,
-          }));
+          const qualities: Quality[] = data.levels.map((level, index) => {
+            const hasDuplicateResolution = data.levels.some(
+              (l, i) => i !== index && l.height === level.height,
+            );
+
+            let label = `${level.height}p`;
+            if (hasDuplicateResolution) {
+              const mbps = (level.bitrate / 1000000).toFixed(1);
+              label = `${level.height}p (${mbps} Mbps)`;
+            }
+
+            return {
+              label,
+              height: level.height,
+              bandwidth: level.bitrate,
+            };
+          });
 
           dispatch({ type: 'SET_QUALITIES', qualities });
 
