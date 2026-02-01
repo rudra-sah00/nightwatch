@@ -19,7 +19,7 @@ export interface MediaDevice {
 }
 
 export function useLiveKit(token: string | null, serverUrl: string) {
-  // biome-ignore lint/suspicious/noConsole: Debug logging for production LiveKit issues
+  // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
   console.log('[LiveKit] useLiveKit initialized with serverUrl:', serverUrl);
 
   const [room, setRoom] = useState<Room | null>(null);

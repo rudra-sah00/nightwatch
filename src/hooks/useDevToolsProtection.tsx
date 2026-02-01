@@ -13,12 +13,11 @@ const _REDIRECT_URL = 'https://rudrasahoo.live';
 /**
  * DevTools Protection Hook
  * Detects various methods of opening DevTools and redirects
- * Currently disabled - will be re-enabled later
+ * Currently disabled for debugging
  */
 export function useDevToolsProtection() {
   useEffect(() => {
-    // Temporarily disabled - no DevTools protection
-    // All protection code commented out for development/debugging
+    // Temporarily disabled for debugging LiveKit issues
   }, []);
 }
 
