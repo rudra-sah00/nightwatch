@@ -3,65 +3,26 @@
 import { Check, ChevronRight, Subtitles, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import {
+  applySubtitleSettings,
+  BACKGROUND_COLORS,
+  defaultSubtitleSettings,
+  SUBTITLE_FONT_SIZES,
+  SUBTITLE_FONTS,
+  type SubtitleSettings,
+  saveSubtitleSettings,
+  TEXT_COLORS,
+  TEXT_SHADOWS,
+} from './subtitle-settings';
+
+// Re-export SubtitleSettings for backwards compatibility
+export type { SubtitleSettings } from './subtitle-settings';
 
 interface SubtitleTrack {
   id: string;
   label: string;
   language: string;
 }
-
-export interface SubtitleSettings {
-  fontSize: string;
-  fontFamily: string;
-  backgroundColor: string;
-  textColor: string;
-  textShadow: string;
-  opacity: number;
-}
-
-const SUBTITLE_FONT_SIZES = [
-  { label: 'Small', value: '1rem' },
-  { label: 'Medium', value: '1.25rem' },
-  { label: 'Large', value: '1.5rem' },
-  { label: 'Extra Large', value: '2rem' },
-];
-
-const SUBTITLE_FONTS = [
-  { label: 'System Default', value: 'system-ui, -apple-system, sans-serif' },
-  { label: 'Arial', value: 'Arial, sans-serif' },
-  { label: 'Verdana', value: 'Verdana, sans-serif' },
-  { label: 'Times New Roman', value: 'Times New Roman, serif' },
-  { label: 'Courier', value: 'Courier New, monospace' },
-];
-
-const BACKGROUND_COLORS = [
-  { label: 'Black', value: 'rgba(0, 0, 0, 0.75)' },
-  { label: 'Dark Gray', value: 'rgba(40, 40, 40, 0.85)' },
-  { label: 'Transparent', value: 'transparent' },
-  { label: 'Semi-Transparent', value: 'rgba(0, 0, 0, 0.5)' },
-];
-
-const TEXT_COLORS = [
-  { label: 'White', value: 'white' },
-  { label: 'Yellow', value: '#ffff00' },
-  { label: 'Cyan', value: '#00ffff' },
-  { label: 'Light Green', value: '#90ee90' },
-];
-
-const TEXT_SHADOWS = [
-  { label: 'None', value: 'none' },
-  { label: 'Drop Shadow', value: '2px 2px 4px rgba(0, 0, 0, 0.8)' },
-  {
-    label: 'Outline',
-    value: '1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
-  },
-  {
-    label: 'Glow',
-    value: '0 0 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(0, 0, 0, 0.6)',
-  },
-];
-
-const STORAGE_KEY = 'watch-subtitle-settings';
 
 interface SubtitleSelectorProps {
   tracks: SubtitleTrack[];
@@ -72,68 +33,6 @@ interface SubtitleSelectorProps {
 }
 
 type MenuScreen = 'tracks' | 'style';
-
-export const defaultSubtitleSettings: SubtitleSettings = {
-  fontSize: '1.25rem',
-  fontFamily: 'system-ui, -apple-system, sans-serif',
-  backgroundColor: 'rgba(0, 0, 0, 0.75)',
-  textColor: 'white',
-  textShadow: 'none',
-  opacity: 1,
-};
-
-// Load settings from localStorage
-export function loadSubtitleSettings(): SubtitleSettings {
-  if (typeof window === 'undefined') return defaultSubtitleSettings;
-
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...defaultSubtitleSettings, ...parsed };
-    }
-  } catch (_e) {
-    // Ignore load error
-  }
-  return defaultSubtitleSettings;
-}
-
-// Save settings to localStorage
-function saveSubtitleSettings(settings: SubtitleSettings) {
-  if (typeof window === 'undefined') return;
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch (_e) {
-    // Ignore save error
-  }
-}
-
-// Apply settings to CSS custom properties
-export function applySubtitleSettings(settings: SubtitleSettings) {
-  if (typeof document === 'undefined') return;
-
-  document.documentElement.style.setProperty(
-    '--subtitle-font-size',
-    settings.fontSize,
-  );
-  document.documentElement.style.setProperty(
-    '--subtitle-font-family',
-    settings.fontFamily,
-  );
-  document.documentElement.style.setProperty(
-    '--subtitle-bg-color',
-    settings.backgroundColor,
-  );
-  document.documentElement.style.setProperty(
-    '--subtitle-text-color',
-    settings.textColor,
-  );
-  document.documentElement.style.setProperty(
-    '--subtitle-opacity',
-    String(settings.opacity),
-  );
-}
 
 export function SubtitleSelector({
   tracks,
@@ -147,8 +46,10 @@ export function SubtitleSelector({
   const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside (with passive listener for better performance)
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -156,9 +57,9 @@ export function SubtitleSelector({
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside, {
+      passive: true,
+    });
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
@@ -197,11 +98,8 @@ export function SubtitleSelector({
 
   const handleTrackChange = (trackId: string | null) => {
     setIsLoading(true);
-    // Small delay to show loading state
-    setTimeout(() => {
-      onTrackChange?.(trackId);
-      setIsLoading(false);
-    }, 100);
+    onTrackChange?.(trackId);
+    setIsLoading(false);
   };
 
   const renderTracksScreen = () => (

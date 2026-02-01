@@ -1,4 +1,13 @@
-import { Check, ChevronUp, Mic, MicOff, Video, VideoOff } from 'lucide-react';
+import {
+  Check,
+  ChevronUp,
+  Copy,
+  LogOut,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { MediaDevice } from '../hooks/useLiveKit';
@@ -20,11 +29,17 @@ interface MediaControlsProps {
   videoInputDevices: MediaDevice[];
   selectedVideoDevice: string | null;
   onSwitchVideoDevice: (deviceId: string) => void;
+
+  // Party actions
+  isHost: boolean;
+  linkCopied: boolean;
+  onCopyLink: () => void;
+  onLeave: () => void;
 }
 
 /**
  * Media controls footer for the sidebar
- * Handles mic/camera toggle and device selection
+ * Handles mic/camera toggle, device selection, and party actions
  */
 export function MediaControls({
   userName,
@@ -38,123 +53,162 @@ export function MediaControls({
   videoInputDevices,
   selectedVideoDevice,
   onSwitchVideoDevice,
+  isHost,
+  linkCopied,
+  onCopyLink,
+  onLeave,
 }: MediaControlsProps) {
   const [showAudioDevices, setShowAudioDevices] = useState(false);
   const [showVideoDevices, setShowVideoDevices] = useState(false);
 
   return (
-    <div className="p-3 border-t border-white/10 bg-black/60 backdrop-blur-md space-y-2 relative">
-      {/* Device Selection Dropdowns */}
-      {showAudioDevices && (
-        <DeviceDropdown
-          title="Select Microphone"
-          devices={audioInputDevices}
-          selectedDevice={selectedAudioDevice}
-          onSelect={(deviceId) => {
-            onSwitchAudioDevice(deviceId);
-            setShowAudioDevices(false);
-          }}
-          onClose={() => setShowAudioDevices(false)}
-        />
-      )}
+    <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative">
+      {/* Party Actions - Copy Link & Leave/End Party */}
+      <div className="p-3 border-b border-white/5 space-y-2">
+        {isHost && (
+          <button
+            type="button"
+            onClick={onCopyLink}
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 border border-indigo-400/20 hover:border-indigo-400/40 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
+          >
+            {linkCopied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-green-400" />
+                <span className="text-green-400">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                Copy Invite Link
+              </>
+            )}
+          </button>
+        )}
 
-      {showVideoDevices && (
-        <DeviceDropdown
-          title="Select Camera"
-          devices={videoInputDevices}
-          selectedDevice={selectedVideoDevice}
-          onSelect={(deviceId) => {
-            onSwitchVideoDevice(deviceId);
-            setShowVideoDevices(false);
-          }}
-          onClose={() => setShowVideoDevices(false)}
-        />
-      )}
+        <button
+          type="button"
+          onClick={onLeave}
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-lg shadow-red-500/5"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          {isHost ? 'End Party' : 'Leave Party'}
+        </button>
+      </div>
 
-      {/* User Info & Controls */}
-      <div className="flex items-center justify-between">
-        {/* User Avatar & Status */}
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 rounded-full bg-indigo-500 shrink-0 flex items-center justify-center border border-indigo-400/30">
-            <span className="text-xs font-bold text-white">
-              {userName.charAt(0).toUpperCase()}
-            </span>
+      {/* Media Controls */}
+      <div className="p-3 space-y-3">
+        {/* Device Selection Dropdowns */}
+        {showAudioDevices && (
+          <DeviceDropdown
+            title="Select Microphone"
+            devices={audioInputDevices}
+            selectedDevice={selectedAudioDevice}
+            onSelect={(deviceId) => {
+              onSwitchAudioDevice(deviceId);
+              setShowAudioDevices(false);
+            }}
+            onClose={() => setShowAudioDevices(false)}
+          />
+        )}
+
+        {showVideoDevices && (
+          <DeviceDropdown
+            title="Select Camera"
+            devices={videoInputDevices}
+            selectedDevice={selectedVideoDevice}
+            onSelect={(deviceId) => {
+              onSwitchVideoDevice(deviceId);
+              setShowVideoDevices(false);
+            }}
+            onClose={() => setShowVideoDevices(false)}
+          />
+        )}
+
+        {/* User Info & Controls */}
+        <div className="flex items-center justify-between bg-white/5 rounded-xl p-2 border border-white/5">
+          {/* User Avatar & Status */}
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0 flex items-center justify-center border-2 border-indigo-400/30 shadow-lg shadow-indigo-500/20">
+              <span className="text-sm font-bold text-white">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-sm font-bold text-white truncate max-w-[100px]">
+                {userName}
+              </span>
+              <span className="text-[10px] text-green-400 flex items-center gap-1.5 font-medium">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50" />
+                Connected
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-xs font-bold text-white truncate max-w-[80px]">
-              {userName}
-            </span>
-            <span className="text-[10px] text-green-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              Connected
-            </span>
-          </div>
-        </div>
 
-        {/* Media Buttons */}
-        <div className="flex items-center gap-0.5">
-          {/* Mic Button with Arrow */}
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={onToggleAudio}
-              className={cn(
-                'p-2 rounded-l-lg transition-colors',
-                audioEnabled
-                  ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
-              )}
-              title={audioEnabled ? 'Mute' : 'Unmute'}
-            >
-              {audioEnabled ? (
-                <Mic className="w-4 h-4" />
-              ) : (
-                <MicOff className="w-4 h-4" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAudioDevices(!showAudioDevices);
-                setShowVideoDevices(false);
-              }}
-              className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
-              title="Select Microphone"
-            >
-              <ChevronUp className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Media Buttons */}
+          <div className="flex items-center gap-1">
+            {/* Mic Button with Arrow */}
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={onToggleAudio}
+                className={cn(
+                  'p-2 rounded-l-lg transition-colors',
+                  audioEnabled
+                    ? 'bg-white/10 text-white hover:bg-white/20'
+                    : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
+                )}
+                title={audioEnabled ? 'Mute' : 'Unmute'}
+              >
+                {audioEnabled ? (
+                  <Mic className="w-4 h-4" />
+                ) : (
+                  <MicOff className="w-4 h-4" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAudioDevices(!showAudioDevices);
+                  setShowVideoDevices(false);
+                }}
+                className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
+                title="Select Microphone"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+            </div>
 
-          {/* Video Button with Arrow */}
-          <div className="flex items-center ml-1">
-            <button
-              type="button"
-              onClick={onToggleVideo}
-              className={cn(
-                'p-2 rounded-l-lg transition-colors',
-                videoEnabled
-                  ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
-              )}
-              title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
-            >
-              {videoEnabled ? (
-                <Video className="w-4 h-4" />
-              ) : (
-                <VideoOff className="w-4 h-4" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowVideoDevices(!showVideoDevices);
-                setShowAudioDevices(false);
-              }}
-              className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
-              title="Select Camera"
-            >
-              <ChevronUp className="w-4 h-4" />
-            </button>
+            {/* Video Button with Arrow */}
+            <div className="flex items-center ml-1">
+              <button
+                type="button"
+                onClick={onToggleVideo}
+                className={cn(
+                  'p-2 rounded-l-lg transition-colors',
+                  videoEnabled
+                    ? 'bg-white/10 text-white hover:bg-white/20'
+                    : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
+                )}
+                title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
+              >
+                {videoEnabled ? (
+                  <Video className="w-4 h-4" />
+                ) : (
+                  <VideoOff className="w-4 h-4" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowVideoDevices(!showVideoDevices);
+                  setShowAudioDevices(false);
+                }}
+                className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
+                title="Select Camera"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -179,7 +233,7 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-800/95 backdrop-blur-md rounded-lg border border-white/10 shadow-xl overflow-hidden z-20">
+    <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-800/95 backdrop-blur-md rounded-lg border border-white/10 shadow-xl overflow-hidden z-50">
       <div className="p-2 border-b border-white/10 flex items-center justify-between">
         <span className="text-xs font-semibold text-white/70">{title}</span>
         <button

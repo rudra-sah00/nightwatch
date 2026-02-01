@@ -1,12 +1,27 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { validateInvite } from '@/features/auth';
-import { SignupForm } from '@/features/auth/components';
 import { useAuth } from '@/providers/auth-provider';
+
+const SignupForm = dynamic(
+  () =>
+    import('@/features/auth/components').then((m) => ({
+      default: m.SignupForm,
+    })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    ),
+    ssr: false,
+  },
+);
 
 export default function SignupPage() {
   const router = useRouter();

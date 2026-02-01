@@ -11,6 +11,19 @@ import type { SubtitleSettings } from './SubtitleSelector';
 import { SubtitleSelector } from './SubtitleSelector';
 import { Volume } from './Volume';
 
+// Format time helper - hoisted to module level to avoid recreation
+const formatTime = (seconds: number) => {
+  if (Number.isNaN(seconds) || !Number.isFinite(seconds)) return '0:00';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
 interface ControlBarProps {
   state: PlayerState;
   metadata: {
@@ -46,19 +59,6 @@ interface ControlBarProps {
   readOnly?: boolean; // For watch party guests
   hideBackButton?: boolean;
 }
-
-// Format time helper
-const formatTime = (seconds: number) => {
-  if (Number.isNaN(seconds) || !Number.isFinite(seconds)) return '0:00';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  }
-  return `${m}:${s.toString().padStart(2, '0')}`;
-};
 
 export function ControlBar({
   state,
@@ -162,7 +162,7 @@ export function ControlBar({
 
       {/* Bottom Controls */}
       <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        {/* Progress Bar */}
+        {/* Progress Bar - guests can preview on hover but not seek */}
         <SeekBar
           currentTime={state.currentTime}
           duration={state.duration}
@@ -171,28 +171,42 @@ export function ControlBar({
           spriteSheet={spriteSheet}
           spriteVtt={spriteVtt}
           disabled={readOnly}
+          allowPreview={true}
         />
 
         {/* Controls Row */}
         <div className="flex items-center justify-between">
           {/* Left Controls */}
           <div className="flex items-center gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
-            {/* Play/Pause - Disabled/Hidden based on readOnly? 
-                User said "only host can control overall playback".
-                So we should either disable it visually or hide it.
-                I'll make it disabled-looking and non-functional.
-            */}
-            <div
-              className={
-                readOnly ? 'opacity-50 pointer-events-none grayscale' : ''
-              }
-            >
+            {/* Play/Pause - Show lock for guests, normal for host */}
+            {readOnly ? (
+              <div className="relative group/lock">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-zinc-800/60 backdrop-blur-sm border border-zinc-700/50 cursor-not-allowed">
+                  <svg
+                    className="w-6 h-6 text-zinc-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-label="Locked - Host controls playback"
+                    role="img"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </div>
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-900/95 rounded text-xs text-zinc-300 whitespace-nowrap opacity-0 group-hover/lock:opacity-100 transition-opacity pointer-events-none border border-zinc-700/50">
+                  Host controls playback
+                </div>
+              </div>
+            ) : (
               <PlayPause
                 isPlaying={state.isPlaying}
                 onToggle={onTogglePlay}
                 size="lg"
               />
-            </div>
+            )}
 
             {/* Skip buttons - Desktop only */}
             {!readOnly && (
@@ -263,6 +277,7 @@ export function ControlBar({
               playbackRate={state.playbackRate}
               onQualityChange={onQualityChange || (() => {})}
               onPlaybackRateChange={onPlaybackRateChange || (() => {})}
+              disabled={readOnly}
             />
 
             {/* Fullscreen - Hidden on mobile if in Watch Party (sidebar exists), shown otherwise */}

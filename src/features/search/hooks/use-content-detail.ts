@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import {
   type ContentProgress,
@@ -26,20 +26,18 @@ interface UseContentDetailOptions {
   fromContinueWatching?: boolean;
 }
 
-// Use ContentProgress from watch/api.ts
-type WatchProgress = ContentProgress;
-
 interface UseContentDetailReturn {
   // State
   show: ShowDetails | null;
   episodes: Episode[];
   isLoading: boolean;
   isLoadingEpisodes: boolean;
+  isLoadingProgress: boolean;
   isPlaying: boolean;
   playingEpisodeId: string | number | null;
   selectedSeason: Season | null;
   hasWatchProgress: boolean;
-  watchProgress: WatchProgress | null;
+  watchProgress: ContentProgress | null;
 
   // Actions
   handleSeasonSelect: (season: Season) => void;
@@ -55,16 +53,18 @@ export function useContentDetail({
   const [show, setShow] = useState<ShowDetails | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
+  const [isLoadingEpisodes, startEpisodesTransition] = useTransition();
+  // Always start with loading progress state to check if user has watch history
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingEpisodeId, setPlayingEpisodeId] = useState<
     string | number | null
   >(null);
-  // Initialize hasWatchProgress to true if coming from Continue Watching
+  // Initialize hasWatchProgress to true if coming from Continue Watching (optimistic UI)
   const [hasWatchProgress, setHasWatchProgress] =
     useState(fromContinueWatching);
-  const [watchProgress, setWatchProgress] = useState<WatchProgress | null>(
+  const [watchProgress, setWatchProgress] = useState<ContentProgress | null>(
     null,
   );
   const progressCheckedRef = useRef(false);
@@ -137,41 +137,38 @@ export function useContentDetail({
       // Need to fetch from API
       const controller = new AbortController();
 
-      setIsLoadingEpisodes(true);
-      try {
-        const { episodes: seasonEpisodes } = await getSeriesEpisodes(
-          showData.id,
-          season.seasonId,
-          {
-            signal: controller.signal,
-          },
-        );
-        if (!controller.signal.aborted) {
-          setEpisodes(seasonEpisodes);
-        }
-      } catch (error: unknown) {
-        // Check for abort in multiple ways
-        const isAborted =
-          (error instanceof Error && error.name === 'AbortError') ||
-          controller.signal.aborted;
-
-        if (isAborted) return; // Silent return for aborted requests
-
-        toast.error(
-          'Failed to load episode list. Using cached data if available.',
-        );
-        if (showData.episodes && !controller.signal.aborted) {
-          setEpisodes(
-            showData.episodes.filter(
-              (ep) => ep.seasonNumber === season.seasonNumber,
-            ),
+      startEpisodesTransition(async () => {
+        try {
+          const { episodes: seasonEpisodes } = await getSeriesEpisodes(
+            showData.id,
+            season.seasonId,
+            {
+              signal: controller.signal,
+            },
           );
+          if (!controller.signal.aborted) {
+            setEpisodes(seasonEpisodes);
+          }
+        } catch (error: unknown) {
+          // Check for abort in multiple ways
+          const isAborted =
+            (error instanceof Error && error.name === 'AbortError') ||
+            controller.signal.aborted;
+
+          if (isAborted) return; // Silent return for aborted requests
+
+          toast.error(
+            'Failed to load episode list. Using cached data if available.',
+          );
+          if (showData.episodes && !controller.signal.aborted) {
+            setEpisodes(
+              showData.episodes.filter(
+                (ep) => ep.seasonNumber === season.seasonNumber,
+              ),
+            );
+          }
         }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingEpisodes(false);
-        }
-      }
+      });
     },
     [],
   );
@@ -186,9 +183,10 @@ export function useContentDetail({
     // Helper to process progress response (used for both cache hit and socket response)
     const processProgress = (
       hasProgress: boolean,
-      progress: WatchProgress | null,
+      progress: ContentProgress | null,
     ) => {
       progressCheckedRef.current = true;
+      setIsLoadingProgress(false);
 
       if (hasProgress && progress && progress.progressSeconds > 0) {
         setHasWatchProgress(true);
@@ -207,14 +205,14 @@ export function useContentDetail({
         }
       }
 
-      // No progress or no matching season - default to LAST season (highest number)
+      // No progress or no matching season - default to LATEST season
       if (isSeries && show.seasons && show.seasons.length > 0) {
-        const sortedSeasons = [...show.seasons].sort(
-          (a, b) => (b.seasonNumber || 0) - (a.seasonNumber || 0),
+        const sortedSeasons = show.seasons.toSorted(
+          (a, b) => (a.seasonNumber || 0) - (b.seasonNumber || 0),
         );
-        const lastSeason = sortedSeasons[0];
-        setSelectedSeason(lastSeason);
-        loadSeasonEpisodesInternal(show, lastSeason);
+        const latestSeason = sortedSeasons[sortedSeasons.length - 1];
+        setSelectedSeason(latestSeason);
+        loadSeasonEpisodesInternal(show, latestSeason);
       }
     };
 
@@ -231,15 +229,16 @@ export function useContentDetail({
         processProgress(hasProgress, progress);
       });
     } else {
-      // No socket - just set default season
+      // No socket - just set default season (latest season)
       progressCheckedRef.current = true;
+      setIsLoadingProgress(false);
       if (isSeries && show.seasons && show.seasons.length > 0) {
-        const sortedSeasons = [...show.seasons].sort(
-          (a, b) => (b.seasonNumber || 0) - (a.seasonNumber || 0),
+        const sortedSeasons = show.seasons.toSorted(
+          (a, b) => (a.seasonNumber || 0) - (b.seasonNumber || 0),
         );
-        const lastSeason = sortedSeasons[0];
-        setSelectedSeason(lastSeason);
-        loadSeasonEpisodesInternal(show, lastSeason);
+        const latestSeason = sortedSeasons[sortedSeasons.length - 1];
+        setSelectedSeason(latestSeason);
+        loadSeasonEpisodesInternal(show, latestSeason);
       }
     }
   }, [show, loadSeasonEpisodesInternal]);
@@ -291,15 +290,37 @@ export function useContentDetail({
 
           router.push(url);
           // Playing state will be reset when component unmounts or navigation completes
-        } else if (episode) {
+        } else {
+          // Series playback
+          let episodeToPlay = episode;
+
+          // If no episode provided, play first episode of selected/current season
+          if (!episodeToPlay && currentEpisodes.length > 0) {
+            // Sort by episode number and get first
+            const sortedEpisodes = currentEpisodes.toSorted(
+              (a, b) => (a.episodeNumber || 0) - (b.episodeNumber || 0),
+            );
+            episodeToPlay = sortedEpisodes[0];
+            setPlayingEpisodeId(
+              episodeToPlay.episodeId || episodeToPlay.episodeNumber,
+            );
+          }
+
+          if (!episodeToPlay) {
+            toast.error('No episodes available to play.');
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
+            return;
+          }
+
           // Cache series data before playing (for next episode feature)
-          const seasonNumber = episode.seasonNumber || 1;
+          const seasonNumber = episodeToPlay.seasonNumber || 1;
           cacheSeriesData(
             showData.id,
             showData,
             seasonNumber,
             currentEpisodes,
-            episode.duration,
+            episodeToPlay.duration,
           );
 
           const description = showData.description
@@ -309,11 +330,15 @@ export function useContentDetail({
           const posterUrl = showData.posterUrl
             ? encodeURIComponent(showData.posterUrl)
             : '';
+          const episodeTitle = episodeToPlay.title
+            ? encodeURIComponent(episodeToPlay.title)
+            : '';
 
-          let url = `/watch/${showData.id}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episode.episodeNumber}&seriesId=${showData.id}`;
+          let url = `/watch/${showData.id}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episodeToPlay.episodeNumber}&seriesId=${showData.id}`;
           if (description) url += `&description=${description}`;
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;
+          if (episodeTitle) url += `&episodeTitle=${episodeTitle}`;
 
           router.push(url);
         }
@@ -329,33 +354,46 @@ export function useContentDetail({
 
   // Resume from continue watching
   const handleResume = useCallback(async () => {
-    if (!show || !watchProgress) {
-      toast.error('Unable to resume - progress data not available.');
+    if (!show) {
+      toast.error('Unable to resume - content data not available.');
       return;
     }
 
     if (show.contentType === ContentType.Movie) {
-      // Movie resume
+      // Movie resume - doesn't require episode info
       await handlePlayInternal(show, [], undefined);
-    } else {
-      // Series resume - create episode object for playback
-      if (!watchProgress.seasonNumber || !watchProgress.episodeNumber) {
-        toast.error('Unable to resume - episode information missing.');
-        return;
-      }
-
-      const resumeEpisode: Episode = {
-        episodeId: `resume-${show.id}-S${watchProgress.seasonNumber}E${watchProgress.episodeNumber}`,
-        seriesId: show.id,
-        episodeNumber: watchProgress.episodeNumber,
-        seasonNumber: watchProgress.seasonNumber,
-        title: `Season ${watchProgress.seasonNumber} Episode ${watchProgress.episodeNumber}`,
-        thumbnailUrl: show.posterUrl || '',
-        duration: 0,
-      };
-      await handlePlayInternal(show, episodes, resumeEpisode);
+      return;
     }
-  }, [show, watchProgress, episodes, handlePlayInternal]);
+
+    // Series resume - requires watchProgress with episode information
+    // If watchProgress is not loaded yet but we're from continue watching, wait briefly
+    if (!watchProgress && fromContinueWatching) {
+      toast.error('Loading progress data, please wait...');
+      return;
+    }
+
+    if (!watchProgress) {
+      toast.error('Unable to resume - progress data not available.');
+      return;
+    }
+
+    if (!watchProgress.seasonNumber || !watchProgress.episodeNumber) {
+      toast.error('Unable to resume - episode information missing.');
+      return;
+    }
+
+    const resumeEpisode: Episode = {
+      episodeId: `resume-${show.id}-S${watchProgress.seasonNumber}E${watchProgress.episodeNumber}`,
+      seriesId: show.id,
+      episodeNumber: watchProgress.episodeNumber,
+      seasonNumber: watchProgress.seasonNumber,
+      title:
+        watchProgress.episodeTitle || `Episode ${watchProgress.episodeNumber}`,
+      thumbnailUrl: show.posterUrl || '',
+      duration: 0,
+    };
+    await handlePlayInternal(show, episodes, resumeEpisode);
+  }, [show, watchProgress, episodes, handlePlayInternal, fromContinueWatching]);
 
   const handlePlay = useCallback(
     async (episode?: Episode) => {
@@ -370,6 +408,7 @@ export function useContentDetail({
     episodes,
     isLoading,
     isLoadingEpisodes,
+    isLoadingProgress,
     isPlaying,
     playingEpisodeId,
     selectedSeason,

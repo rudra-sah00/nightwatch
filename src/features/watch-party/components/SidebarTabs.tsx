@@ -5,102 +5,89 @@ interface SidebarTabsProps {
   activeTab: 'chat' | 'participants';
   onTabChange: (tab: 'chat' | 'participants') => void;
   participantCount: number;
+  unreadMessages?: number;
 }
 
 export function SidebarTabs({
   activeTab,
   onTabChange,
-  participantCount: _participantCount,
+  participantCount,
+  unreadMessages = 0,
 }: SidebarTabsProps) {
+  const tabs = [
+    {
+      id: 'participants' as const,
+      label: 'People',
+      icon: Users,
+      count: participantCount,
+    },
+    {
+      id: 'chat' as const,
+      label: 'Chat',
+      icon: MessageSquare,
+      badge: unreadMessages,
+    },
+  ];
+
+  const activeIndex = tabs.findIndex((t) => t.id === activeTab);
+
   return (
-    <div className="relative bg-gradient-to-b from-black/80 to-black/40 border-b border-white/10 shrink-0">
-      <div className="flex relative items-stretch">
-        {/* Tabs Container */}
-        <div className="flex flex-1 relative">
-          {/* Animated sliding indicator */}
-          <div
-            className="absolute bottom-0 h-0.5 bg-primary transition-all duration-500 ease-out shadow-[0_0_12px_rgba(var(--primary),0.6)]"
-            style={{
-              left: activeTab === 'chat' ? '12.5%' : '62.5%',
-              width: '25%',
-            }}
-          />
+    <div className="bg-zinc-900/80 backdrop-blur-sm border-b border-white/5 shrink-0 px-2 pt-2">
+      <div className="flex relative">
+        {/* Animated pill background */}
+        <div
+          className="absolute top-0 bottom-0 bg-white/10 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          style={{
+            left: `${activeIndex * 50}%`,
+            width: '50%',
+          }}
+        />
 
-          {/* Chat Tab */}
-          <button
-            type="button"
-            onClick={() => onTabChange('chat')}
-            className={cn(
-              'flex-1 py-4 text-sm font-medium transition-all duration-300 relative overflow-hidden group',
-              activeTab === 'chat'
-                ? 'text-white'
-                : 'text-white/40 hover:text-white/70',
-            )}
-          >
-            <div
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTabChange(tab.id)}
               className={cn(
-                'absolute inset-0 bg-gradient-to-b from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300',
-                activeTab === 'chat' && 'opacity-100',
+                'flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 relative z-10 rounded-lg',
+                isActive ? 'text-white' : 'text-white/50 hover:text-white/80',
               )}
-            />
-
-            <div className="flex items-center justify-center gap-2 relative z-10">
-              <MessageSquare
-                className={cn(
-                  'w-4 h-4 transition-all duration-500',
-                  activeTab === 'chat' ? 'scale-110 text-primary' : 'scale-100',
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Icon
+                  className={cn(
+                    'w-4 h-4 transition-transform duration-200',
+                    isActive && 'scale-110',
+                  )}
+                />
+                <span>{tab.label}</span>
+                {'count' in tab && tab.count !== undefined && tab.count > 0 && (
+                  <span
+                    className={cn(
+                      'text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center transition-colors duration-200',
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-white/10 text-white/60',
+                    )}
+                  >
+                    {tab.count}
+                  </span>
                 )}
-              />
-              <span
-                className={cn(
-                  'transition-all duration-300',
-                  activeTab === 'chat' && 'font-semibold',
+                {'badge' in tab && tab.badge !== undefined && tab.badge > 0 && (
+                  <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 )}
-              >
-                Chat
-              </span>
-            </div>
-          </button>
-
-          {/* Participants Tab */}
-          <button
-            type="button"
-            onClick={() => onTabChange('participants')}
-            className={cn(
-              'flex-1 py-4 text-sm font-medium transition-all duration-300 relative overflow-hidden group',
-              activeTab === 'participants'
-                ? 'text-white'
-                : 'text-white/40 hover:text-white/70',
-            )}
-          >
-            <div
-              className={cn(
-                'absolute inset-0 bg-gradient-to-b from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300',
-                activeTab === 'participants' && 'opacity-100',
-              )}
-            />
-
-            <div className="flex items-center justify-center gap-2 relative z-10">
-              <Users
-                className={cn(
-                  'w-4 h-4 transition-all duration-500',
-                  activeTab === 'participants'
-                    ? 'scale-110 text-primary'
-                    : 'scale-100',
-                )}
-              />
-              <span
-                className={cn(
-                  'transition-all duration-300',
-                  activeTab === 'participants' && 'font-semibold',
-                )}
-              >
-                Participants
-              </span>
-            </div>
-          </button>
-        </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
+
+      {/* Bottom accent line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mt-2" />
     </div>
   );
 }

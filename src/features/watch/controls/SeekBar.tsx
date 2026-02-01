@@ -42,6 +42,8 @@ interface SeekBarProps {
   spriteVtt?: string;
   spriteSheet?: SpriteSheet;
   disabled?: boolean;
+  /** Allow hover preview even when disabled (for guests) */
+  allowPreview?: boolean;
 }
 
 export function SeekBar({
@@ -52,7 +54,10 @@ export function SeekBar({
   spriteVtt,
   spriteSheet,
   disabled = false,
+  allowPreview = false,
 }: SeekBarProps) {
+  // Guests can preview on hover but not seek
+  const canPreview = !disabled || allowPreview;
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const bufferedProgress = duration ? (buffered / duration) * 100 : 0;
 
@@ -105,14 +110,15 @@ export function SeekBar({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (disabled || !barRef.current || !duration) return;
+      // Allow preview hover even for guests (canPreview), just block seeking
+      if (!canPreview || !barRef.current || !duration) return;
       const rect = barRef.current.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const time = Math.max(0, Math.min(duration, percent * duration));
       setHoverTime(time);
       setHoverPosition(e.clientX - rect.left);
     },
-    [duration, disabled],
+    [duration, canPreview],
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -198,8 +204,8 @@ export function SeekBar({
     <div
       className={`relative group py-2 lg:py-3 2xl:py-4 ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
     >
-      {/* Time preview tooltip - only show when hovering and not disabled */}
-      {!disabled && hoverTime !== null && (
+      {/* Time preview tooltip - show when hovering (guests can preview but not seek) */}
+      {canPreview && hoverTime !== null && (
         <div
           className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={{
@@ -265,20 +271,22 @@ export function SeekBar({
       {/* Seek bar */}
       <div
         ref={barRef}
-        className={`relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full transition-all duration-200 ${!disabled ? 'group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4' : ''}`}
-        onClick={handleClick}
+        className={`relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full transition-all duration-200 ${canPreview ? 'group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4' : ''} ${disabled ? 'cursor-not-allowed' : ''}`}
+        onClick={disabled ? undefined : handleClick}
         onMouseMove={(e) => {
           handleMouseMove(e);
-          handleDrag(e);
+          if (!disabled) handleDrag(e);
         }}
         onMouseLeave={handleMouseLeave}
         role="slider"
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         aria-valuemin={0}
         aria-valuemax={duration}
         aria-valuenow={currentTime}
         aria-label="Seek time"
+        aria-disabled={disabled}
         onKeyDown={(e) => {
+          if (disabled) return;
           if (e.key === 'ArrowRight') {
             e.preventDefault();
             onSeek(Math.min(duration, currentTime + 10));
@@ -308,12 +316,31 @@ export function SeekBar({
           />
         )}
 
-        {/* Scrubber */}
+        {/* Scrubber - show lock icon for disabled guests */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 bg-red-600 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200 hover:scale-125"
+          className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200 ${disabled ? 'bg-zinc-500 cursor-not-allowed' : 'bg-red-600 hover:scale-125'}`}
           style={{ left: `calc(${progress}% - 8px)` }}
         />
       </div>
+
+      {/* Guest lock indicator */}
+      {disabled && (
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 backdrop-blur-sm rounded-full border border-zinc-700/50 text-[10px] lg:text-xs text-zinc-400">
+          <svg
+            className="w-3 h-3"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-label="Locked - Host controls"
+            role="img"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span className="hidden sm:inline">Host controls</span>
+        </div>
+      )}
     </div>
   );
 }

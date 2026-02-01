@@ -92,8 +92,9 @@ export function useLiveKit(token: string | null, serverUrl: string) {
   }, [refreshDevices]);
 
   useEffect(() => {
-    if (!token) return;
-
+    if (!token) {
+      return;
+    }
     const newRoom = new Room({
       adaptiveStream: true,
       dynacast: true,
@@ -101,8 +102,6 @@ export function useLiveKit(token: string | null, serverUrl: string) {
         simulcast: true,
       },
     });
-
-    // Set up event listeners
     newRoom
       // ... listeners ...
       .on(RoomEvent.Connected, () => {
@@ -111,6 +110,9 @@ export function useLiveKit(token: string | null, serverUrl: string) {
           newRoom.localParticipant,
         ]);
       })
+      .on(RoomEvent.Disconnected, (_reason) => {})
+      .on(RoomEvent.Reconnecting, () => {})
+      .on(RoomEvent.Reconnected, () => {})
       .on(RoomEvent.ParticipantConnected, (participant) => {
         setParticipants((prev) => [...prev, participant]);
       })
@@ -131,9 +133,8 @@ export function useLiveKit(token: string | null, serverUrl: string) {
       .on(RoomEvent.TrackUnsubscribed, () => {
         setParticipants((prev) => [...prev]);
       })
-      .on(RoomEvent.TrackSubscriptionFailed, () => {
-        // Silently fail or use toast if needed, but remove console.error
-      })
+      .on(RoomEvent.TrackSubscriptionFailed, (_error) => {})
+      .on(RoomEvent.ConnectionQualityChanged, (_quality, _participant) => {})
       .on(RoomEvent.TrackMuted, () => {
         setParticipants((prev) => [...prev]);
       })
@@ -164,12 +165,16 @@ export function useLiveKit(token: string | null, serverUrl: string) {
           newRoom.localParticipant,
         ]);
       })
-      .catch((_e) => {
+      .catch((_error) => {
         toast.error('Failed to connect to voice/video server');
       });
 
     return () => {
-      newRoom.disconnect();
+      // Only disconnect if room is in a valid state
+      if (newRoom.state !== 'disconnected') {
+        newRoom.disconnect();
+      } else {
+      }
     };
   }, [token, serverUrl]);
 
@@ -183,13 +188,13 @@ export function useLiveKit(token: string | null, serverUrl: string) {
       // This triggers the browser permission prompt if not already granted
       await room.localParticipant.setMicrophoneEnabled(newState);
       setAudioEnabled(newState);
-      // biome-ignore lint/suspicious/noExplicitAny: Error object handling
-    } catch (error: any) {
-      if (error.message?.includes('Permission denied')) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('Permission denied')) {
         toast.error(
           'Microphone permission denied. Click the lock icon in your browser address bar to allow access.',
         );
-      } else if (error.message?.includes('Device not found')) {
+      } else if (message.includes('Device not found')) {
         toast.error('No microphone found. Please connect a microphone.');
       } else {
         toast.error(
@@ -211,13 +216,13 @@ export function useLiveKit(token: string | null, serverUrl: string) {
       setVideoEnabled(newState);
       // Force participants update to trigger re-render
       setParticipants((prev) => [...prev]);
-      // biome-ignore lint/suspicious/noExplicitAny: Error object handling
-    } catch (error: any) {
-      if (error.message?.includes('Permission denied')) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('Permission denied')) {
         toast.error(
           'Camera permission denied. Click the lock icon in your browser address bar to allow access.',
         );
-      } else if (error.message?.includes('Device not found')) {
+      } else if (message.includes('Device not found')) {
         toast.error('No camera found. Please connect a camera.');
       } else {
         toast.error(

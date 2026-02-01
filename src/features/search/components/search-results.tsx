@@ -43,8 +43,13 @@ export function SearchResults({
 
   return (
     <div className="space-y-2">
-      {results.map((result) => (
-        <SearchResultItem key={result.id} result={result} onSelect={onSelect} />
+      {results.map((result, index) => (
+        <SearchResultItem
+          key={result.id}
+          result={result}
+          onSelect={onSelect}
+          index={index}
+        />
       ))}
     </div>
   );
@@ -53,9 +58,10 @@ export function SearchResults({
 interface SearchResultItemProps {
   result: SearchResult;
   onSelect: (result: SearchResult) => void;
+  index: number;
 }
 
-function SearchResultItem({ result, onSelect }: SearchResultItemProps) {
+function SearchResultItem({ result, onSelect, index }: SearchResultItemProps) {
   const [imageError, setImageError] = React.useState(false);
 
   return (
@@ -77,8 +83,10 @@ function SearchResultItem({ result, onSelect }: SearchResultItemProps) {
             fill
             className="object-cover"
             onError={() => setImageError(true)}
+            unoptimized={result.poster.includes('/api/stream/')}
             sizes="(max-width: 768px) 96px, 128px"
-            unoptimized
+            loading={index < 3 ? 'eager' : 'lazy'}
+            priority={index === 0}
           />
         )}
       </div>

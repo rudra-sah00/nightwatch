@@ -92,7 +92,7 @@ export function ProfileCard() {
       getWatchActivity().then(setActivity);
     };
 
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener('focus', handleFocus, { passive: true });
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
 

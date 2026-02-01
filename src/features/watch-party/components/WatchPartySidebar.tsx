@@ -10,7 +10,6 @@ import type { ChatMessage, WatchPartyRoom } from '../types';
 
 // Components
 import { MediaControls } from './MediaControls';
-import { PartyActions } from './PartyActions';
 import { PendingRequests } from './PendingRequests';
 import { SidebarTabs } from './SidebarTabs';
 import { VideoGrid } from './VideoGrid';
@@ -48,6 +47,7 @@ export function WatchPartySidebar({
   messages,
   currentUserId,
   isHost,
+  onKick,
   onApprove,
   onReject,
   onCopyLink,
@@ -57,8 +57,10 @@ export function WatchPartySidebar({
   className,
   onLiveKitReady,
 }: WatchPartySidebarProps) {
-  // Tab state
-  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
+  // Tab state - participants first
+  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>(
+    'participants',
+  );
 
   // Get current user's name for display
   const currentUserName =
@@ -95,7 +97,7 @@ export function WatchPartySidebar({
   return (
     <div
       className={cn(
-        'w-full bg-black/90 backdrop-blur-xl border-l border-white/10 shadow-2xl overflow-hidden flex flex-col h-full relative',
+        'w-full bg-zinc-950/95 backdrop-blur-xl border-l border-white/5 shadow-2xl overflow-hidden flex flex-col h-full relative',
         className,
       )}
     >
@@ -103,38 +105,22 @@ export function WatchPartySidebar({
       <SidebarTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        participantCount={room.members.length}
+        participantCount={participants.length}
       />
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Chat Tab */}
+        {/* Participants Tab - renders first */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-300 ease-out',
-            activeTab === 'chat'
-              ? 'opacity-100 translate-x-0'
-              : 'opacity-0 -translate-x-4 pointer-events-none',
-          )}
-        >
-          <WatchPartyChat
-            messages={messages}
-            currentUserId={currentUserId}
-            onSendMessage={onSendMessage}
-          />
-        </div>
-
-        {/* Participants Tab */}
-        <div
-          className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-300 ease-out',
+            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
             activeTab === 'participants'
-              ? 'opacity-100 translate-x-0'
-              : 'opacity-0 translate-x-4 pointer-events-none',
+              ? 'opacity-100 scale-100 z-10'
+              : 'opacity-0 scale-[0.98] pointer-events-none z-0',
           )}
         >
           {/* Pending Requests (Host Only) */}
-          {isHost && room.pendingMembers && (
+          {isHost && room.pendingMembers && room.pendingMembers.length > 0 && (
             <PendingRequests
               pendingMembers={room.pendingMembers}
               onApprove={onApprove}
@@ -142,18 +128,28 @@ export function WatchPartySidebar({
             />
           )}
 
-          {/* Video Grid */}
+          {/* Video Grid with profile photos */}
           <VideoGrid
             participants={participants}
             currentUserId={currentUserId}
-          />
-
-          {/* Party Actions */}
-          <PartyActions
             isHost={isHost}
-            linkCopied={linkCopied}
-            onCopyLink={onCopyLink}
-            onLeave={onLeave}
+            onKick={onKick}
+          />
+        </div>
+
+        {/* Chat Tab */}
+        <div
+          className={cn(
+            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
+            activeTab === 'chat'
+              ? 'opacity-100 scale-100 z-10'
+              : 'opacity-0 scale-[0.98] pointer-events-none z-0',
+          )}
+        >
+          <WatchPartyChat
+            messages={messages}
+            currentUserId={currentUserId}
+            onSendMessage={onSendMessage}
           />
         </div>
       </div>
@@ -171,6 +167,10 @@ export function WatchPartySidebar({
         videoInputDevices={videoInputDevices}
         selectedVideoDevice={selectedVideoDevice}
         onSwitchVideoDevice={switchVideoDevice}
+        isHost={isHost}
+        linkCopied={linkCopied}
+        onCopyLink={onCopyLink}
+        onLeave={onLeave}
       />
     </div>
   );

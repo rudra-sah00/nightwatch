@@ -1,5 +1,10 @@
 import type { User } from '@/types';
 import { STORAGE_KEYS } from './constants';
+import {
+  getCachedLocalStorage,
+  removeCachedLocalStorage,
+  setCachedLocalStorage,
+} from './storage-cache';
 
 /**
  * Get user from storage
@@ -7,7 +12,7 @@ import { STORAGE_KEYS } from './constants';
 export function getStoredUser(): User | null {
   if (typeof window === 'undefined') return null;
 
-  const stored = localStorage.getItem(STORAGE_KEYS.USER);
+  const stored = getCachedLocalStorage(STORAGE_KEYS.USER);
   if (!stored) return null;
 
   try {
@@ -22,7 +27,7 @@ export function getStoredUser(): User | null {
  */
 export function storeUser(user: User): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+  setCachedLocalStorage(STORAGE_KEYS.USER, JSON.stringify(user));
 }
 
 /**
@@ -30,5 +35,5 @@ export function storeUser(user: User): void {
  */
 export function clearStoredUser(): void {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEYS.USER);
+  removeCachedLocalStorage(STORAGE_KEYS.USER);
 }

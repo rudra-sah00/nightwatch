@@ -146,8 +146,9 @@ export function normalizeWatchUrls(
     captionUrl: urls.captionUrl
       ? wrapInProxy(urls.captionUrl, token)
       : urls.captionUrl,
+    // Sprite VTT is a CDN URL, use wrapInProxy like captions
     spriteVtt: urls.spriteVtt
-      ? injectTokenIntoUrl(urls.spriteVtt, token) || urls.spriteVtt
+      ? wrapInProxy(urls.spriteVtt, token)
       : urls.spriteVtt,
     subtitleTracks: urls.subtitleTracks?.map((track) => ({
       ...track,

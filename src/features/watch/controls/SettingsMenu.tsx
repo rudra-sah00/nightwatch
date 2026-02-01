@@ -24,6 +24,7 @@ interface SettingsMenuProps {
   currentAudio?: string;
   onSubtitleChange?: (id: string | null) => void;
   onAudioChange?: (id: string) => void;
+  disabled?: boolean;
 }
 
 type MenuScreen = 'main' | 'quality' | 'speed' | 'subtitles' | 'audio';
@@ -42,6 +43,7 @@ export function SettingsMenu({
   currentAudio,
   onSubtitleChange,
   onAudioChange,
+  disabled = false,
 }: SettingsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<MenuScreen>('main');
@@ -94,8 +96,12 @@ export function SettingsMenu({
       {/* Playback Speed */}
       <button
         type="button"
-        onClick={() => setCurrentScreen('speed')}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
+        onClick={() => !disabled && setCurrentScreen('speed')}
+        disabled={disabled}
+        className={cn(
+          'w-full flex items-center justify-between px-4 py-3 transition-colors',
+          disabled ? 'cursor-not-allowed opacity-60' : 'hover:bg-white/10',
+        )}
       >
         <div className="flex items-center gap-3">
           <Gauge className="w-5 h-5 text-white/70" />
@@ -103,7 +109,33 @@ export function SettingsMenu({
         </div>
         <div className="flex items-center gap-2 text-white/60 text-sm">
           <span>{playbackRate === 1 ? 'Normal' : `${playbackRate}x`}</span>
-          <ChevronRight className="w-4 h-4" />
+          {disabled ? (
+            <svg
+              className="w-4 h-4 text-white/70"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              role="img"
+              aria-label="Locked"
+            >
+              <title>Locked</title>
+              <rect
+                x="5"
+                y="11"
+                width="14"
+                height="10"
+                rx="2"
+                strokeWidth="2"
+              />
+              <path
+                d="M7 11V7a5 5 0 0110 0v4"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
         </div>
       </button>
 

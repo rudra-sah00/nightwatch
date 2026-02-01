@@ -140,6 +140,7 @@ interface ProgressCacheEntry {
 export interface ContentProgress {
   seasonNumber?: number;
   episodeNumber?: number;
+  episodeTitle?: string;
   progressSeconds: number;
   progressPercent: number;
 }

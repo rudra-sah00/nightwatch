@@ -33,6 +33,7 @@ export function ContentDetailModal({
     episodes,
     isLoading,
     isLoadingEpisodes,
+    isLoadingProgress,
     isPlaying,
     playingEpisodeId,
     selectedSeason,
@@ -174,7 +175,10 @@ export function ContentDetailModal({
               fill
               className="object-cover"
               priority
-              unoptimized
+              unoptimized={(show.posterHdUrl || show.posterUrl || '').includes(
+                '/api/stream/',
+              )}
+              sizes="100vw"
               onError={() => setImageError(true)}
             />
           ) : (
@@ -191,8 +195,10 @@ export function ContentDetailModal({
             show={show}
             isPlaying={isPlaying}
             isCreatingParty={isCreatingParty}
+            isLoadingProgress={isLoadingProgress}
             hasWatchProgress={hasWatchProgress}
             watchProgress={watchProgress}
+            selectedSeason={selectedSeason}
             onPlay={() => handlePlay()}
             onResume={handleResume}
             onWatchParty={() => handleWatchParty()}

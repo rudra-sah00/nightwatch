@@ -2,21 +2,17 @@
 
 import { Calendar, Clock, Film, Loader2, Play, Tv, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { ContentProgress } from '@/features/watch/api';
 import { cn } from '@/lib/utils';
 import { ContentType, type ShowDetails } from '../types';
-
-interface WatchProgress {
-  seasonNumber?: number;
-  episodeNumber?: number;
-  progressSeconds: number;
-  progressPercent: number;
-}
 
 interface ContentInfoProps {
   show: ShowDetails;
   isPlaying: boolean;
+  isLoadingProgress?: boolean;
   hasWatchProgress?: boolean;
-  watchProgress?: WatchProgress | null;
+  watchProgress?: ContentProgress | null;
+  selectedSeason?: { seasonNumber: number } | null;
   onPlay: () => void;
   onResume?: () => void;
   onWatchParty?: () => void;
@@ -28,8 +24,10 @@ interface ContentInfoProps {
 export function ContentInfo({
   show,
   isPlaying,
+  isLoadingProgress = false,
   hasWatchProgress,
   watchProgress,
+  selectedSeason,
   onPlay,
   onResume,
   onWatchParty,
@@ -107,6 +105,30 @@ export function ContentInfo({
         </p>
       )}
 
+      {/* Progress Indicator - Netflix style */}
+      {hasWatchProgress &&
+        watchProgress &&
+        watchProgress.progressPercent > 0 && (
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center justify-between text-xs text-white/70">
+              <span>
+                {isSeries &&
+                watchProgress.seasonNumber &&
+                watchProgress.episodeNumber
+                  ? `Continue watching S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                  : 'Continue watching'}
+              </span>
+              <span>{Math.round(watchProgress.progressPercent)}% watched</span>
+            </div>
+            <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white transition-all duration-300"
+                style={{ width: `${watchProgress.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
       {/* Play/Resume Button - Now for both Movies AND Series */}
       <div className="flex flex-wrap items-center gap-3">
         <Button
@@ -116,23 +138,35 @@ export function ContentInfo({
             'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
-          disabled={isPlaying || isCreatingParty}
+          disabled={
+            isPlaying ||
+            isCreatingParty ||
+            (hasWatchProgress && isLoadingProgress)
+          }
         >
           {isPlaying ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isLoadingProgress && hasWatchProgress ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <Play className="w-5 h-5 fill-current" />
           )}
           {isPlaying
             ? 'Loading...'
-            : hasWatchProgress &&
-                isSeries &&
-                watchProgress?.seasonNumber &&
-                watchProgress?.episodeNumber
-              ? `Resume S${watchProgress.seasonNumber} E${watchProgress.episodeNumber}`
-              : hasWatchProgress
-                ? 'Resume'
-                : 'Play'}
+            : isLoadingProgress && hasWatchProgress
+              ? 'Loading...'
+              : hasWatchProgress &&
+                  isSeries &&
+                  watchProgress?.seasonNumber &&
+                  watchProgress?.episodeNumber
+                ? `Resume S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                : hasWatchProgress && !isSeries
+                  ? `Resume (${Math.round(watchProgress?.progressPercent || 0)}%)`
+                  : isSeries && selectedSeason
+                    ? `Play S${selectedSeason.seasonNumber}:E1`
+                    : isSeries
+                      ? 'Play'
+                      : 'Play'}
         </Button>
 
         {/* Watch Together Button */}

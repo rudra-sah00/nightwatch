@@ -3,6 +3,19 @@
 import { Lock, Pause, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Static size configurations to avoid recreation
+const SIZE_CLASSES = {
+  sm: 'w-10 h-10',
+  md: 'w-12 h-12',
+  lg: 'w-14 h-14',
+} as const;
+
+const ICON_SIZES = {
+  sm: 'w-5 h-5',
+  md: 'w-6 h-6',
+  lg: 'w-7 h-7',
+} as const;
+
 interface PlayPauseProps {
   isPlaying: boolean;
   onToggle: () => void;
@@ -14,18 +27,6 @@ export function PlayPause({
   onToggle,
   size = 'md',
 }: PlayPauseProps) {
-  const sizeClasses = {
-    sm: 'w-10 h-10',
-    md: 'w-12 h-12',
-    lg: 'w-14 h-14',
-  };
-
-  const iconSizes = {
-    sm: 'w-5 h-5',
-    md: 'w-6 h-6',
-    lg: 'w-7 h-7',
-  };
-
   return (
     <button
       type="button"
@@ -37,21 +38,21 @@ export function PlayPause({
         'hover:bg-white/15 hover:border-white/20 hover:scale-105',
         'active:scale-95 active:bg-white/20',
         'shadow-lg shadow-black/20',
-        sizeClasses[size],
+        SIZE_CLASSES[size],
       )}
     >
       {isPlaying ? (
         <Pause
           className={cn(
             'text-white fill-white drop-shadow-sm',
-            iconSizes[size],
+            ICON_SIZES[size],
           )}
         />
       ) : (
         <Play
           className={cn(
             'text-white fill-white ml-0.5 drop-shadow-sm',
-            iconSizes[size],
+            ICON_SIZES[size],
           )}
         />
       )}
@@ -80,11 +81,13 @@ export function CenterPlayButton({
   onToggle,
   metadata,
   disabled = false,
-}: CenterPlayButtonProps) {
+  isLoading = false,
+}: CenterPlayButtonProps & { isLoading?: boolean }) {
   const handleClick = (e: React.MouseEvent) => {
     // Don't propagate clicks to video element
     e.stopPropagation();
-    if (!disabled) {
+    // Prevent toggle if disabled or still loading
+    if (!disabled && !isLoading) {
       onToggle();
     }
   };
@@ -96,15 +99,17 @@ export function CenterPlayButton({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          if (!disabled) onToggle();
+          if (!disabled && !isLoading) onToggle();
         }
       }}
       className={cn(
         'absolute inset-0 transition-all duration-500 z-20 w-full cursor-pointer border-none bg-transparent p-0 m-0',
-        !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none',
-        disabled && 'cursor-default',
+        !isPlaying && !isLoading
+          ? 'opacity-100'
+          : 'opacity-0 pointer-events-none',
+        (disabled || isLoading) && 'cursor-default',
       )}
-      style={{ pointerEvents: isPlaying ? 'none' : 'auto' }}
+      style={{ pointerEvents: isPlaying || isLoading ? 'none' : 'auto' }}
       onClick={handleClick}
     >
       {/* Dark overlay with gradients */}
@@ -170,36 +175,70 @@ export function CenterPlayButton({
               </p>
             )}
 
-            {/* Paused indicator - compact on mobile */}
+            {/* Paused indicator - enhanced for guests */}
             <div className="flex items-center gap-2 mt-2 sm:mt-4 flex-shrink-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                {disabled ? (
-                  <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-white/70" />
-                ) : (
+              {disabled ? (
+                /* Guest locked view - premium aesthetic */
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-zinc-800/90 to-zinc-900/90 backdrop-blur-md rounded-xl border border-zinc-700/50 shadow-xl">
+                    <div className="relative">
+                      <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-white text-xs sm:text-sm font-semibold">
+                        Host Controls Playback
+                      </span>
+                      <span className="text-zinc-400 text-[10px] sm:text-xs">
+                        Sit back and enjoy the show
+                      </span>
+                    </div>
+                  </div>
+                  {/* Decorative line */}
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-8 h-px bg-gradient-to-r from-transparent to-zinc-600" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                    <div className="w-8 h-px bg-gradient-to-l from-transparent to-zinc-600" />
+                  </div>
+                </div>
+              ) : (
+                /* Normal paused state for host */
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
-                )}
-                <span className="text-white/90 text-xs sm:text-sm font-medium">
-                  {disabled ? 'Waiting for Host' : 'Tap to resume'}
-                </span>
-              </div>
+                  <span className="text-white/90 text-xs sm:text-sm font-medium">
+                    Tap to resume
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Fallback for no metadata */}
+      {/* Fallback for no metadata - enhanced for guests */}
       {!metadata && (
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none">
-          <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-            {disabled ? (
-              <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-white/70" />
-            ) : (
+          {disabled ? (
+            /* Guest locked view */
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-zinc-800/90 to-zinc-900/90 backdrop-blur-md rounded-xl border border-zinc-700/50 shadow-xl">
+                <div className="relative">
+                  <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+                  <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                </div>
+                <span className="text-white text-xs sm:text-sm font-semibold">
+                  Host Controls Playback
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
-            )}
-            <span className="text-white/90 text-xs sm:text-sm font-medium">
-              {disabled ? 'Waiting for Host' : 'Tap to resume'}
-            </span>
-          </div>
+              <span className="text-white/90 text-xs sm:text-sm font-medium">
+                Tap to resume
+              </span>
+            </div>
+          )}
         </div>
       )}
     </button>

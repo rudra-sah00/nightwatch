@@ -267,6 +267,30 @@ export function getPartyStreamToken(
   socket.emit('party:get_stream_token', {}, callback);
 }
 
+/**
+ * Fetch pending join requests (Host only)
+ * Fallback for when WebSocket notifications are missed
+ */
+export function fetchPendingRequests(
+  roomId: string,
+  callback: Callback<{
+    pendingMembers?: Array<{
+      id: string;
+      name: string;
+      profilePhoto?: string | null;
+      isHost: boolean;
+      joinedAt: number;
+    }>;
+  }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('party:fetch_pending', { roomId }, callback);
+}
+
 // ============ Event Listeners ============
 
 export function onPartyStateUpdate(
@@ -359,6 +383,16 @@ export function onPartyKicked(
 
   socket.on('party:kicked', callback);
   return () => socket.off('party:kicked', callback);
+}
+
+export function onPartyMemberRejected(
+  callback: (data: { memberId: string }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:member_rejected', callback);
+  return () => socket.off('party:member_rejected', callback);
 }
 
 // ============ Chat API ============

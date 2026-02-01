@@ -19,6 +19,7 @@ function WatchContent() {
   const title = searchParams.get('title') || 'Unknown';
   const season = searchParams.get('season');
   const episode = searchParams.get('episode');
+  const episodeTitle = searchParams.get('episodeTitle');
   const description = searchParams.get('description');
   const year = searchParams.get('year');
   const poster = searchParams.get('poster');
@@ -114,6 +115,7 @@ function WatchContent() {
     type,
     season: season ? parseInt(season, 10) : undefined,
     episode: episode ? parseInt(episode, 10) : undefined,
+    episodeTitle: episodeTitle ? decodeURIComponent(episodeTitle) : undefined,
     movieId,
     seriesId: seriesId || undefined,
     description: description ? decodeURIComponent(description) : undefined,

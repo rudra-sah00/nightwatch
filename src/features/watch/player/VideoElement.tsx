@@ -73,8 +73,13 @@ export const VideoElement = memo(
         dispatch({ type: 'SET_BUFFERING', isBuffering: false });
       const handleCanPlay = () =>
         dispatch({ type: 'SET_LOADING', isLoading: false });
-      const handleError = () =>
-        dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+      const handleError = (e: Event) => {
+        // Only dispatch error if video has a source - prevents false errors during initialization
+        const target = e.target as HTMLVideoElement;
+        if (target?.src || target?.currentSrc) {
+          dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+        }
+      };
       const handleEnded = () => dispatch({ type: 'PAUSE' });
 
       video.addEventListener('play', handlePlay);
@@ -169,11 +174,12 @@ export const VideoElement = memo(
     return (
       <video
         ref={ref}
-        className="w-full h-full object-contain bg-black"
+        className="w-full h-full bg-black"
         style={{
           width: '100%',
           height: '100%',
           display: 'block',
+          objectFit: 'cover',
         }}
         playsInline
         crossOrigin="anonymous"

@@ -1,5 +1,5 @@
 import type { Participant, Room } from 'livekit-client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
@@ -16,7 +16,7 @@ interface ActiveWatchPartyProps {
   onReject: (id: string) => void;
   onCopyLink: () => void;
   onLeave: () => void;
-  onSync: (time: number, isPlaying: boolean) => void;
+  onSync: (time: number, isPlaying: boolean, playbackRate?: number) => void;
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
   messages: ChatMessage[];
   onSendMessage: (content: string) => void;
@@ -70,14 +70,41 @@ export function ActiveWatchParty({
 
   // Audio ducking - reduces movie volume when participants speak
   // The hook handles volume transitions automatically
+  const [userVolume, setUserVolume] = useState(1);
+  const isDuckingRef = useRef(false);
+
+  // Initialize user volume from video element when it becomes available
+  useEffect(() => {
+    if (videoElement && userVolume === 1) {
+      setUserVolume(videoElement.volume);
+    }
+  }, [videoElement, userVolume]);
+
+  // Track video volume changes from user controls (not from ducking)
+  useEffect(() => {
+    const video = videoElement;
+    if (!video) return;
+
+    const handleVolumeChange = () => {
+      // Only update userVolume if this isn't from audio ducking
+      if (!isDuckingRef.current) {
+        setUserVolume(video.volume);
+      }
+    };
+
+    video.addEventListener('volumechange', handleVolumeChange);
+    return () => video.removeEventListener('volumechange', handleVolumeChange);
+  }, [videoElement]);
+
   useAudioDucking({
     videoRef,
     room: liveKitRoom,
     participants: liveKitParticipants,
-    normalVolume: 1,
-    duckedVolume: 0.25, // Reduce to 25% when someone speaks
+    userVolume,
+    duckingFactor: 0.25, // Reduce to 25% when someone speaks
     transitionMs: 200,
     enabled: true,
+    isDuckingRef,
   });
 
   // Detect mobile and portrait/landscape orientation
@@ -92,8 +119,10 @@ export function ActiveWatchParty({
       setIsPortrait(portrait);
     };
     checkLayout();
-    window.addEventListener('resize', checkLayout);
-    window.addEventListener('orientationchange', checkLayout);
+    window.addEventListener('resize', checkLayout, { passive: true });
+    window.addEventListener('orientationchange', checkLayout, {
+      passive: true,
+    });
     return () => {
       window.removeEventListener('resize', checkLayout);
       window.removeEventListener('orientationchange', checkLayout);
@@ -157,7 +186,7 @@ export function ActiveWatchParty({
 
     let lastSyncTime = 0;
     const handleSync = () => {
-      onSync(ref.currentTime, !ref.paused);
+      onSync(ref.currentTime, !ref.paused, ref.playbackRate);
       lastSyncTime = Date.now();
     };
 
@@ -168,15 +197,21 @@ export function ActiveWatchParty({
       }
     };
 
+    const handleRateChange = () => {
+      handleSync();
+    };
+
     ref.addEventListener('play', handleSync);
     ref.addEventListener('pause', handleSync);
     ref.addEventListener('seeked', handleSync);
+    ref.addEventListener('ratechange', handleRateChange);
     ref.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
       ref.removeEventListener('play', handleSync);
       ref.removeEventListener('pause', handleSync);
       ref.removeEventListener('seeked', handleSync);
+      ref.removeEventListener('ratechange', handleRateChange);
       ref.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, [videoElement, isHost, onSync]);
@@ -238,7 +273,7 @@ export function ActiveWatchParty({
       {/* Main Content Area (Video) */}
       <div
         className={cn(
-          'relative min-w-0 bg-black transition-all duration-500',
+          'relative min-w-0 bg-black transition-all duration-500 watch-party-video',
           // Mobile: Order 1 (Top), Fixed Aspect Ratio
           'w-full aspect-video order-1 shrink-0',
 

@@ -38,7 +38,7 @@ export function useFullscreen({
       setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkMobile, { passive: true });
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 

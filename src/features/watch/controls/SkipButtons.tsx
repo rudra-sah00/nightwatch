@@ -2,6 +2,10 @@
 
 import { SkipBack, SkipForward } from 'lucide-react';
 
+// Static icons to avoid recreation
+const skipBackIcon = <SkipBack className="w-8 h-8 text-white" />;
+const skipForwardIcon = <SkipForward className="w-8 h-8 text-white" />;
+
 interface SkipButtonProps {
   direction: 'back' | 'forward';
   seconds?: number;
@@ -50,11 +54,7 @@ export function SeekIndicator({
                         flex flex-col items-center gap-1 animate-in fade-in zoom-in-50 duration-200`}
     >
       <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-        {direction === 'back' ? (
-          <SkipBack className="w-8 h-8 text-white" />
-        ) : (
-          <SkipForward className="w-8 h-8 text-white" />
-        )}
+        {direction === 'back' ? skipBackIcon : skipForwardIcon}
       </div>
       <span className="text-white font-medium text-sm">{seconds}s</span>
     </div>
