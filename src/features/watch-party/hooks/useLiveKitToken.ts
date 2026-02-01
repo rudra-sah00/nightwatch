@@ -81,7 +81,6 @@ export function useLiveKitToken(
         }
 
         const data = await res.json();
-
         setToken(data.token);
 
         // Use the URL provided by the backend (if any)
@@ -89,7 +88,9 @@ export function useLiveKitToken(
           setLiveKitUrl(data.url);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
