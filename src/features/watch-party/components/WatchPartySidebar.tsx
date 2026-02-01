@@ -73,14 +73,6 @@ export function WatchPartySidebar({
     userName: currentUserName,
   });
 
-  // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
-  console.log('[WatchPartySidebar] LiveKit state:', {
-    token: token?.substring(0, 20),
-    liveKitUrl,
-    roomId: room?.id,
-    userId: currentUserId,
-  });
-
   // LiveKit connection and media controls
   const {
     room: liveKitRoom,

@@ -24,9 +24,6 @@ export function useLiveKitToken(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // biome-ignore lint/suspicious/noConsole: Debug logging for LiveKit production issues
-  console.log('[LiveKit] Initial LIVEKIT_URL from env:', env.LIVEKIT_URL);
-
   // Check for stale guest token on mount
   useEffect(() => {
     const guestToken =
