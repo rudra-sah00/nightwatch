@@ -37,7 +37,9 @@ export function ParticipantView({
 
   // Get audio track from participant
   const typedParticipant = participant as TypedParticipant;
-  const audioTrackPub = Array.from(typedParticipant.audioTracks.values())[0];
+  const audioTrackPub = typedParticipant.audioTracks
+    ? Array.from(typedParticipant.audioTracks.values())[0]
+    : undefined;
   const audioTrack = audioTrackPub?.track;
 
   // Use audio stream hook for clean audio handling
@@ -126,7 +128,7 @@ export function ParticipantView({
 
     // Initial Attach (Check both Local and Remote logic)
     const p = participant as unknown as TypedParticipant;
-    if (p.videoTracks) {
+    if (p.videoTracks?.values) {
       let found = false;
       Array.from(p.videoTracks.values()).forEach((pub: TrackPublication) => {
         const track = pub.track;
@@ -171,7 +173,7 @@ export function ParticipantView({
       const p = participant as unknown as TypedParticipant;
       // Small timeout to allow track to be added to map if it was just published
       setTimeout(() => {
-        if (p.videoTracks) {
+        if (p.videoTracks?.values) {
           Array.from(p.videoTracks.values()).forEach(
             (pub: TrackPublication) => {
               const track = pub.track;

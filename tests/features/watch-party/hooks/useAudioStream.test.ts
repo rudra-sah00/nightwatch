@@ -3,6 +3,9 @@ import type { Track } from 'livekit-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAudioStream } from '@/features/watch-party/hooks/useAudioStream';
 
+// Type for hook props to ensure consistent typing across test cases
+type HookProps = { track: Track | undefined; isLocal: boolean };
+
 // Mock LiveKit Track
 class MockTrack {
   kind = 'audio';
@@ -83,20 +86,22 @@ describe('useAudioStream', () => {
       const mockTrack = new MockTrack();
 
       const { result, rerender } = renderHook(
-        ({ track, isLocal }: { track: Track | undefined; isLocal: boolean }) =>
-          useAudioStream(track, isLocal),
+        ({ track, isLocal }: HookProps) => useAudioStream(track, isLocal),
         {
           initialProps: {
             track: mockTrack as unknown as Track,
             isLocal: false,
-          },
+          } as HookProps,
         },
       );
 
       expect(result.current).toBeDefined();
 
       // Track becomes undefined
-      rerender({ track: undefined, isLocal: false } as any);
+      rerender({
+        track: undefined,
+        isLocal: false,
+      } as HookProps);
 
       expect(result.current).toBeDefined();
     });
@@ -105,10 +110,9 @@ describe('useAudioStream', () => {
       const mockTrack = new MockTrack();
 
       const { result, rerender } = renderHook(
-        ({ track, isLocal }: { track: Track | undefined; isLocal: boolean }) =>
-          useAudioStream(track, isLocal),
+        ({ track, isLocal }: HookProps) => useAudioStream(track, isLocal),
         {
-          initialProps: { track: undefined, isLocal: false },
+          initialProps: { track: undefined, isLocal: false } as HookProps,
         },
       );
 
@@ -118,7 +122,7 @@ describe('useAudioStream', () => {
       rerender({
         track: mockTrack as unknown as Track,
         isLocal: false,
-      } as any);
+      } as HookProps);
 
       expect(result.current).toBeDefined();
     });
@@ -266,10 +270,9 @@ describe('useAudioStream', () => {
   describe('Integration Scenarios', () => {
     it('should handle participant joining (track appears)', () => {
       const { result, rerender } = renderHook(
-        ({ track, isLocal }: { track: Track | undefined; isLocal: boolean }) =>
-          useAudioStream(track, isLocal),
+        ({ track, isLocal }: HookProps) => useAudioStream(track, isLocal),
         {
-          initialProps: { track: undefined, isLocal: false },
+          initialProps: { track: undefined, isLocal: false } as HookProps,
         },
       );
 
@@ -279,7 +282,7 @@ describe('useAudioStream', () => {
       rerender({
         track: mockTrack as unknown as Track,
         isLocal: false,
-      } as any);
+      } as HookProps);
 
       expect(result.current).toBeDefined();
     });
@@ -288,19 +291,21 @@ describe('useAudioStream', () => {
       const mockTrack = new MockTrack();
 
       const { result, rerender } = renderHook(
-        ({ track, isLocal }: { track: Track | undefined; isLocal: boolean }) =>
-          useAudioStream(track, isLocal),
+        ({ track, isLocal }: HookProps) => useAudioStream(track, isLocal),
         {
           initialProps: {
             track: mockTrack as unknown as Track,
             isLocal: false,
-          },
+          } as HookProps,
         },
       );
 
       expect(result.current).toBeDefined();
 
-      rerender({ track: undefined, isLocal: false } as any);
+      rerender({
+        track: undefined,
+        isLocal: false,
+      } as HookProps);
 
       expect(result.current).toBeDefined();
     });
@@ -309,15 +314,20 @@ describe('useAudioStream', () => {
       const track1 = new MockTrack();
 
       const { result, rerender } = renderHook(
-        ({ track, isLocal }: { track: Track | undefined; isLocal: boolean }) =>
-          useAudioStream(track, isLocal),
+        ({ track, isLocal }: HookProps) => useAudioStream(track, isLocal),
         {
-          initialProps: { track: track1 as unknown as Track, isLocal: false },
+          initialProps: {
+            track: track1 as unknown as Track,
+            isLocal: false,
+          } as HookProps,
         },
       );
 
       // Connection drops
-      rerender({ track: undefined, isLocal: false } as any);
+      rerender({
+        track: undefined,
+        isLocal: false,
+      } as HookProps);
       expect(result.current).toBeDefined();
 
       // Reconnect with new track
