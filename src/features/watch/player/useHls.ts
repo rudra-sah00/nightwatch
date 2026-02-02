@@ -1,11 +1,11 @@
 'use client';
 
 import Hls from 'hls.js';
-import { type MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import type { AudioTrack, PlayerAction, Quality } from './types';
 
 interface UseHlsOptions {
-  videoRef: MutableRefObject<HTMLVideoElement | null>;
+  videoRef: RefObject<HTMLVideoElement | null>;
   streamUrl: string | null;
   dispatch: React.Dispatch<PlayerAction>;
 }

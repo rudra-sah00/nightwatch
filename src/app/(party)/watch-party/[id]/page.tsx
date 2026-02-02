@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -16,10 +16,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { checkRoomExists } from '@/features/watch-party/api';
-import type {
-  PartyStateUpdate,
-  RoomPreview,
-} from '@/features/watch-party/types';
+import { useVideoSync } from '@/features/watch-party/hooks/useVideoSync';
+import type { RoomPreview } from '@/features/watch-party/types';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
 import { getSocket, initSocket } from '@/lib/ws';
 import { useAuth } from '@/providers/auth-provider';
@@ -93,51 +91,8 @@ export default function WatchPartyPage() {
   const isGuestSocketReady = useGuestSocket(user);
   const roomCreationTimeRef = useRef<number>(0);
 
-  // Handle state updates from host (for guests)
-  const handleStateUpdate = useCallback((state: PartyStateUpdate) => {
-    if (videoRef.current) {
-      const video = videoRef.current;
-
-      // Robustness: If metadata not loaded (Duration 0/NaN), queue the seek
-      // This handles late joiners who receive Sync(10:00) before Manifest loads
-      if (!video.duration || Number.isNaN(video.duration)) {
-        const applySeek = () => {
-          video.currentTime = state.currentTime;
-          if (state.isPlaying) video.play().catch(() => {});
-          // Apply playback rate
-          if (state.playbackRate !== undefined) {
-            video.playbackRate = state.playbackRate;
-          }
-        };
-        // Listen for duration to become available
-        video.addEventListener('durationchange', applySeek, { once: true });
-        // Fallback: loadedmetadata often fires before durationchange
-        video.addEventListener('loadedmetadata', applySeek, { once: true });
-        return;
-      }
-
-      // Sync time if more than 0.5 seconds off
-      const timeDiff = Math.abs(video.currentTime - state.currentTime);
-      if (timeDiff > 0.5) {
-        video.currentTime = state.currentTime;
-      }
-
-      // Sync play/pause
-      if (state.isPlaying && video.paused) {
-        video.play().catch(() => {});
-      } else if (!state.isPlaying && !video.paused) {
-        video.pause();
-      }
-
-      // Sync playback rate
-      if (
-        state.playbackRate !== undefined &&
-        video.playbackRate !== state.playbackRate
-      ) {
-        video.playbackRate = state.playbackRate;
-      }
-    }
-  }, []);
+  // Use video sync hook for clean separation of concerns
+  const { syncVideo } = useVideoSync(videoRef);
 
   const {
     room,
@@ -158,7 +113,7 @@ export default function WatchPartyPage() {
     sendMessage,
     updateContent,
   } = useWatchParty({
-    onStateUpdate: handleStateUpdate,
+    onStateUpdate: syncVideo,
     userId: user?.id,
   });
 
@@ -237,7 +192,7 @@ export default function WatchPartyPage() {
       video.removeEventListener('timeupdate', checkMovieProgress);
       video.removeEventListener('ended', handleMovieEnd);
     };
-  }, [room, isHost, leaveRoom, router, movieEndWarningShown]);
+  }, [room, isHost, movieEndWarningShown, leaveRoom, router]);
 
   // Warn host before leaving/reloading page
   useEffect(() => {

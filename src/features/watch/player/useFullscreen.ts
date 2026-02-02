@@ -1,12 +1,12 @@
 'use client';
 
-import { type MutableRefObject, useCallback, useEffect, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { PlayerAction } from './types';
 
 interface UseFullscreenOptions {
-  containerRef: MutableRefObject<HTMLDivElement | null>;
-  videoRef?: MutableRefObject<HTMLVideoElement | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
+  videoRef?: RefObject<HTMLVideoElement | null>;
   dispatch: React.Dispatch<PlayerAction>;
 }
 

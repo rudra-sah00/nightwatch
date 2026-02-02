@@ -7,6 +7,7 @@ import {
 import { Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { useAudioStream } from '@/features/watch-party/hooks/useAudioStream';
 import { cn } from '@/lib/utils';
 
 // Extended interface to handle LiveKit type inconsistencies
@@ -29,11 +30,18 @@ export function ParticipantView({
   onKick,
 }: ParticipantViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [isVideoMuted, setIsVideoMuted] = useState(
     !participant.isCameraEnabled,
   );
   const [hasVideoTrack, setHasVideoTrack] = useState(false);
+
+  // Get audio track from participant
+  const typedParticipant = participant as TypedParticipant;
+  const audioTrackPub = Array.from(typedParticipant.audioTracks.values())[0];
+  const audioTrack = audioTrackPub?.track;
+
+  // Use audio stream hook for clean audio handling
+  const audioRef = useAudioStream(audioTrack, isLocal);
 
   // Parse metadata for avatar
   let avatarUrl: string | null = null;
@@ -56,10 +64,7 @@ export function ParticipantView({
           // Ignore attach error
         }
       }
-      if (track.kind === Track.Kind.Audio && audioRef.current && !isLocal) {
-        track.attach(audioRef.current);
-        audioRef.current.play().catch(() => {});
-      }
+      // Audio is now handled by useAudioStream hook
     };
 
     // Remote: Subscribed
@@ -136,14 +141,7 @@ export function ParticipantView({
       }
     }
 
-    // Audio Initial
-    if (p.audioTracks && !isLocal) {
-      Array.from(p.audioTracks.values()).forEach((pub: TrackPublication) => {
-        if (pub.track) {
-          if (audioRef.current) pub.track.attach(audioRef.current);
-        }
-      });
-    }
+    // Audio is handled by useAudioStream hook - no manual attachment needed
 
     return () => {
       if (isLocal) {
@@ -203,7 +201,8 @@ export function ParticipantView({
         muted={isLocal}
         style={{ transform: 'scaleX(1)' }} // Explicitly disable mirroring (user request)
       />
-      <audio ref={audioRef} autoPlay>
+      {/* Audio element managed by useAudioStream hook */}
+      <audio ref={audioRef} autoPlay muted={false} playsInline>
         <track kind="captions" />
       </audio>
 

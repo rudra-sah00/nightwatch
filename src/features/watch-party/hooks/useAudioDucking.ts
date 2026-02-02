@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseAudioDuckingOptions {
   /** Video element reference to control volume */
-  videoRef: React.MutableRefObject<HTMLVideoElement | null>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   /** LiveKit room instance */
   room: Room | null;
   /** All participants in the room */
@@ -20,7 +20,7 @@ interface UseAudioDuckingOptions {
   /** Enabled flag - set to false to disable ducking */
   enabled?: boolean;
   /** Ref to track if ducking is currently active (prevents circular updates) */
-  isDuckingRef?: React.MutableRefObject<boolean>;
+  isDuckingRef?: { current: boolean };
 }
 
 /**

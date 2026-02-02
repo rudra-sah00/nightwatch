@@ -17,7 +17,7 @@ interface ActiveWatchPartyProps {
   onCopyLink: () => void;
   onLeave: () => void;
   onSync: (time: number, isPlaying: boolean, playbackRate?: number) => void;
-  videoRef: React.MutableRefObject<HTMLVideoElement | null>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   messages: ChatMessage[];
   onSendMessage: (content: string) => void;
   onUpdateContent: (content: {

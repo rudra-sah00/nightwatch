@@ -1,12 +1,12 @@
 'use client';
 
-import { type MutableRefObject, useCallback, useEffect } from 'react';
+import { type RefObject, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { PlayerAction } from './types';
 
 interface UseKeyboardOptions {
-  videoRef: MutableRefObject<HTMLVideoElement | null>;
-  containerRef: MutableRefObject<HTMLDivElement | null>;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
   dispatch: React.Dispatch<PlayerAction>;
   isFullscreen: boolean;
   onBack: () => void;
