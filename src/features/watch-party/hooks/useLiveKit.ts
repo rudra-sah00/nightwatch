@@ -185,8 +185,10 @@ export function useLiveKit(token: string | null, serverUrl: string) {
     }
     try {
       const newState = !audioEnabled;
+
       // This triggers the browser permission prompt if not already granted
       await room.localParticipant.setMicrophoneEnabled(newState);
+
       setAudioEnabled(newState);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

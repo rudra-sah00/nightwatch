@@ -77,10 +77,12 @@ export function useAudioDucking({
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          // Ducking complete
-          if (isDuckingRef) {
-            isDuckingRef.current = false;
-          }
+          // Ducking complete - keep isDuckingRef true for 100ms to ignore final volumechange event
+          setTimeout(() => {
+            if (isDuckingRef) {
+              isDuckingRef.current = false;
+            }
+          }, 100);
         }
       };
 
@@ -135,6 +137,7 @@ export function useAudioDucking({
     const targetVolume = isSomeoneSpeaking
       ? userVolume * duckingFactor
       : userVolume;
+
     transitionVolume(targetVolume);
   }, [isSomeoneSpeaking, userVolume, duckingFactor, transitionVolume, enabled]);
 

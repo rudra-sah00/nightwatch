@@ -72,11 +72,14 @@ export function ActiveWatchParty({
   // The hook handles volume transitions automatically
   const [userVolume, setUserVolume] = useState(1);
   const isDuckingRef = useRef(false);
+  const originalVolumeRef = useRef(1); // Store original volume before ducking
 
   // Initialize user volume from video element when it becomes available
   useEffect(() => {
     if (videoElement && userVolume === 1) {
-      setUserVolume(videoElement.volume);
+      const vol = videoElement.volume;
+      setUserVolume(vol);
+      originalVolumeRef.current = vol;
     }
   }, [videoElement, userVolume]);
 
@@ -85,16 +88,29 @@ export function ActiveWatchParty({
     const video = videoElement;
     if (!video) return;
 
+    let lastUserChange = Date.now();
+
     const handleVolumeChange = () => {
-      // Only update userVolume if this isn't from audio ducking
-      if (!isDuckingRef.current) {
-        setUserVolume(video.volume);
+      // Only update userVolume if:
+      // 1. Not currently ducking
+      // 2. Volume is significantly different (user manually changed it)
+      const volumeDiff = Math.abs(video.volume - userVolume);
+      const isUserChange = volumeDiff > 0.01 && !isDuckingRef.current;
+
+      if (isUserChange) {
+        const now = Date.now();
+        // Debounce: only if it's been > 500ms since last user change
+        if (now - lastUserChange > 500) {
+          setUserVolume(video.volume);
+          originalVolumeRef.current = video.volume;
+          lastUserChange = now;
+        }
       }
     };
 
     video.addEventListener('volumechange', handleVolumeChange);
     return () => video.removeEventListener('volumechange', handleVolumeChange);
-  }, [videoElement]);
+  }, [videoElement, userVolume]);
 
   useAudioDucking({
     videoRef,
