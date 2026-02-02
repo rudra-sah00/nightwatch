@@ -1,10 +1,16 @@
-name: Deploy Frontend to Vercel
+name: Manual Deploy to Vercel
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
 
 env:
   VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
