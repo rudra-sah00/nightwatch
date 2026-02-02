@@ -48,6 +48,7 @@ interface WatchPageProps {
   mobileHeaderContent?: React.ReactNode;
   readOnly?: boolean; // For watch party guests (controls disabled)
   isHost?: boolean; // For watch party - controls watch history tracking
+  isAuthenticated?: boolean; // Whether user is authenticated (vs unauthenticated guest)
   onSidebarToggle?: () => void;
   onNavigate?: (url: string) => void;
   hideBackButton?: boolean;
@@ -64,6 +65,7 @@ export function WatchPage({
   mobileHeaderContent,
   readOnly = false,
   isHost = true, // Default true for normal playback
+  isAuthenticated = true, // Default true for normal playback
   onSidebarToggle,
   onNavigate,
   hideBackButton = false,
@@ -163,14 +165,18 @@ export function WatchPage({
   }, []);
 
   // Track watch progress
-  // For watch party guests (isHost=false): track activity time but skip saving progress/history
+  // For watch party:
+  // - Host: tracks activity + saves progress/history
+  // - Authenticated members: track activity but skip progress/history
+  // - Unauthenticated guests: skip both activity and progress
   useWatchProgress({
     videoRef,
     metadata,
     isPlaying: state.isPlaying && !state.isPaused && !state.isBuffering,
     onProgressLoaded: isHost ? handleProgressLoaded : undefined,
-    skipProgressHistory: !isHost, // Guests don't save progress
+    skipProgressHistory: !isHost, // Non-host members/guests don't save progress
     enableProgressLoad: isHost, // Only host loads previous progress
+    skipActivityTracking: !isAuthenticated, // Only unauthenticated guests skip activity
     // For series: nextEpisodeInfo being non-null means there are more episodes
     hasMoreEpisodes:
       metadata.type === 'series' ? nextEpisodeInfo !== null : undefined,

@@ -306,6 +306,9 @@ export function ActiveWatchParty({
           onVideoRef={handleVideoRef}
           readOnly={!isHost}
           isHost={isHost}
+          isAuthenticated={
+            !!currentUserId && !currentUserId.startsWith('guest:')
+          }
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
           onNavigate={handleNavigate}
           hideBackButton={true} // Always hide standard back button (handled by sidebar leave or custom header)

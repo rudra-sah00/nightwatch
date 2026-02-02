@@ -26,10 +26,12 @@ interface UseWatchProgressProps {
   metadata: VideoMetadata;
   isPlaying: boolean;
   onProgressLoaded?: (seconds: number) => void;
-  /** Skip saving watch progress/history (for watch party guests) */
+  /** Skip saving watch progress/history (for watch party non-host members) */
   skipProgressHistory?: boolean;
   /** Enable loading previous progress (only for host/normal playback) */
   enableProgressLoad?: boolean;
+  /** Skip activity time tracking (for unauthenticated guests only) */
+  skipActivityTracking?: boolean;
   /** For series: whether there's a next episode available */
   hasMoreEpisodes?: boolean;
 }
@@ -52,6 +54,7 @@ export function useWatchProgress({
   onProgressLoaded,
   skipProgressHistory = false,
   enableProgressLoad = true,
+  skipActivityTracking = false,
   hasMoreEpisodes,
 }: UseWatchProgressProps) {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,42 +64,48 @@ export function useWatchProgress({
   const wasPlayingRef = useRef(false);
 
   // Helper to flush activity time
-  const flushActivity = useCallback((forceFlush: boolean = false) => {
-    const seconds = Math.floor(accumulateSecondsRef.current);
-    if (seconds < 1 && !forceFlush) return;
+  const flushActivity = useCallback(
+    (forceFlush: boolean = false) => {
+      // Skip activity tracking for unauthenticated guests
+      if (skipActivityTracking) return;
 
-    const socket = getSocket();
-    if (socket?.connected) {
-      // Optimistically decrement to prevent double-sending if interval fires fast
-      const sentSeconds = Math.max(seconds, 0);
-      accumulateSecondsRef.current = Math.max(
-        0,
-        accumulateSecondsRef.current - sentSeconds,
-      );
+      const seconds = Math.floor(accumulateSecondsRef.current);
+      if (seconds < 1 && !forceFlush) return;
 
-      if (sentSeconds === 0) return;
+      const socket = getSocket();
+      if (socket?.connected) {
+        // Optimistically decrement to prevent double-sending if interval fires fast
+        const sentSeconds = Math.max(seconds, 0);
+        accumulateSecondsRef.current = Math.max(
+          0,
+          accumulateSecondsRef.current - sentSeconds,
+        );
 
-      const localDate = getLocalDateString();
+        if (sentSeconds === 0) return;
 
-      socket.emit(
-        'watch:record_time',
-        {
-          seconds: sentSeconds,
-          forceFlush,
-          date: localDate,
-        },
-        (res: SocketResponse) => {
-          if (res?.success) {
-            // Function removed as it's no longer needed (profile fetches fresh data)
-          } else {
-            // On failure, add time back to retry later
-            accumulateSecondsRef.current += sentSeconds;
-            // Fail silently or maybe toast debug in dev?
-          }
-        },
-      );
-    }
-  }, []);
+        const localDate = getLocalDateString();
+
+        socket.emit(
+          'watch:record_time',
+          {
+            seconds: sentSeconds,
+            forceFlush,
+            date: localDate,
+          },
+          (res: SocketResponse) => {
+            if (res?.success) {
+              // Function removed as it's no longer needed (profile fetches fresh data)
+            } else {
+              // On failure, add time back to retry later
+              accumulateSecondsRef.current += sentSeconds;
+              // Fail silently or maybe toast debug in dev?
+            }
+          },
+        );
+      }
+    },
+    [skipActivityTracking],
+  );
 
   // Helper to update progress (skip if skipProgressHistory is true)
   const updateProgress = useCallback(() => {
