@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
-import { DevToolsProtection } from '@/hooks/useDevToolsProtection';
 import { AuthProvider } from '@/providers/auth-provider';
 
 const inter = Inter({
@@ -50,7 +49,7 @@ export default function RootLayout({
         className={`${inter.variable} antialiased bg-background text-foreground`}
       >
         <AuthProvider>
-          <DevToolsProtection>{children}</DevToolsProtection>
+          {children}
           <Toaster />
         </AuthProvider>
       </body>
