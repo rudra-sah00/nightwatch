@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.1.0...v1.2.0) (2026-02-03)
+
+
+### Features
+
+* add clickable links and typing indicators to watch party chat ([8ed86bc](https://github.com/rudra-sah00/watch-rudra/commit/8ed86bc507b388732c7532e754c92c35c2516667))
+
+
+### Bug Fixes
+
+* improve deployment verification in release workflow ([8e14cd4](https://github.com/rudra-sah00/watch-rudra/commit/8e14cd4959a8f4f3da1e321e8ff7a82a364c427e))
+
 ## [1.1.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.0.0...v1.1.0) (2026-02-02)
 
 
