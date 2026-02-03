@@ -62,7 +62,34 @@ export function MediaControls({
   const [showVideoDevices, setShowVideoDevices] = useState(false);
 
   return (
-    <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative">
+    <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative z-[60]">
+      {/* Device Selection Dropdowns - rendered at top level with high z-index */}
+      {showAudioDevices && (
+        <DeviceDropdown
+          title="Select Microphone"
+          devices={audioInputDevices}
+          selectedDevice={selectedAudioDevice}
+          onSelect={(deviceId) => {
+            onSwitchAudioDevice(deviceId);
+            setShowAudioDevices(false);
+          }}
+          onClose={() => setShowAudioDevices(false)}
+        />
+      )}
+
+      {showVideoDevices && (
+        <DeviceDropdown
+          title="Select Camera"
+          devices={videoInputDevices}
+          selectedDevice={selectedVideoDevice}
+          onSelect={(deviceId) => {
+            onSwitchVideoDevice(deviceId);
+            setShowVideoDevices(false);
+          }}
+          onClose={() => setShowVideoDevices(false)}
+        />
+      )}
+
       {/* Party Actions - Copy Link & Leave/End Party */}
       <div className="p-3 border-b border-white/5 space-y-2">
         {isHost && (
@@ -97,33 +124,6 @@ export function MediaControls({
 
       {/* Media Controls */}
       <div className="p-3 space-y-3">
-        {/* Device Selection Dropdowns */}
-        {showAudioDevices && (
-          <DeviceDropdown
-            title="Select Microphone"
-            devices={audioInputDevices}
-            selectedDevice={selectedAudioDevice}
-            onSelect={(deviceId) => {
-              onSwitchAudioDevice(deviceId);
-              setShowAudioDevices(false);
-            }}
-            onClose={() => setShowAudioDevices(false)}
-          />
-        )}
-
-        {showVideoDevices && (
-          <DeviceDropdown
-            title="Select Camera"
-            devices={videoInputDevices}
-            selectedDevice={selectedVideoDevice}
-            onSelect={(deviceId) => {
-              onSwitchVideoDevice(deviceId);
-              setShowVideoDevices(false);
-            }}
-            onClose={() => setShowVideoDevices(false)}
-          />
-        )}
-
         {/* User Info & Controls */}
         <div className="flex items-center justify-between bg-white/5 rounded-xl p-2 border border-white/5">
           {/* User Avatar & Status */}
@@ -233,18 +233,21 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-800/95 backdrop-blur-md rounded-lg border border-white/10 shadow-xl overflow-hidden z-50">
+    <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-900/98 backdrop-blur-xl rounded-lg border border-white/20 shadow-2xl overflow-hidden z-[100]">
       <div className="p-2 border-b border-white/10 flex items-center justify-between">
         <span className="text-xs font-semibold text-white/70">{title}</span>
         <button
           type="button"
-          onClick={onClose}
-          className="text-white/40 hover:text-white text-xs"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="text-white/40 hover:text-white text-xs px-1"
         >
           ✕
         </button>
       </div>
-      <div className="p-1 max-h-32 overflow-y-auto custom-scrollbar">
+      <div className="p-1 max-h-40 overflow-y-auto custom-scrollbar">
         {devices.length === 0 ? (
           <div className="text-xs text-white/30 p-2 text-center">
             No devices found
@@ -254,9 +257,12 @@ function DeviceDropdown({
             <button
               key={device.deviceId}
               type="button"
-              onClick={() => onSelect(device.deviceId)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(device.deviceId);
+              }}
               className={cn(
-                'w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs text-left transition-colors',
+                'w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-left transition-colors cursor-pointer',
                 selectedDevice === device.deviceId
                   ? 'bg-gray-600/50 text-white'
                   : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
