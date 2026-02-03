@@ -131,6 +131,24 @@ export function getPartyMessages(
 }
 
 /**
+ * Emit typing start event
+ */
+export function emitTypingStart(): void {
+  const socket = getSocket();
+  if (!socket) return;
+  socket.emit('party:typing_start');
+}
+
+/**
+ * Emit typing stop event
+ */
+export function emitTypingStop(): void {
+  const socket = getSocket();
+  if (!socket) return;
+  socket.emit('party:typing_stop');
+}
+
+/**
  * Request to join a watch party room
  */
 export function requestJoinPartyRoom(
@@ -405,4 +423,18 @@ export function onPartyMessage(
 
   socket.on('party:message', callback);
   return () => socket.off('party:message', callback);
+}
+
+export function onUserTyping(
+  callback: (data: {
+    userId: string;
+    userName: string;
+    isTyping: boolean;
+  }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:user_typing', callback);
+  return () => socket.off('party:user_typing', callback);
 }

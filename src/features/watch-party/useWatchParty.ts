@@ -7,6 +7,8 @@ import { injectTokenIntoUrl, wrapInProxy } from '../watch';
 import {
   approveJoinRequest,
   createPartyRoom,
+  emitTypingStart,
+  emitTypingStop,
   getPartyMessages,
   getPartyStreamToken,
   kickMember,
@@ -22,6 +24,7 @@ import {
   onPartyMemberRejected,
   onPartyMessage,
   onPartyStateUpdate,
+  onUserTyping,
   rejectJoinRequest,
   requestJoinPartyRoom,
   sendPartyMessage,
@@ -56,6 +59,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [typingUsers, setTypingUsers] = useState<
+    Array<{ userId: string; userName: string }>
+  >([]);
 
   // Check for stale guest token on mount and clear if found
   useEffect(() => {
@@ -501,6 +507,25 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       }),
     );
 
+    // Typing Indicator
+    cleanups.push(
+      onUserTyping((data) => {
+        if (data.isTyping) {
+          // Add user to typing list
+          setTypingUsers((prev) => {
+            const exists = prev.find((u) => u.userId === data.userId);
+            if (exists) return prev;
+            return [...prev, { userId: data.userId, userName: data.userName }];
+          });
+        } else {
+          // Remove user from typing list
+          setTypingUsers((prev) =>
+            prev.filter((u) => u.userId !== data.userId),
+          );
+        }
+      }),
+    );
+
     // Content Updated
     cleanups.push(
       onPartyContentUpdated((data) => {
@@ -601,7 +626,10 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     isConnected,
     requestStatus,
     messages, // New
+    typingUsers, // New
     sendMessage, // New
+    handleTypingStart: emitTypingStart, // New
+    handleTypingStop: emitTypingStop, // New
     createRoom,
     requestJoin,
     cancelRequest, // New

@@ -1,25 +1,38 @@
 import EmojiPicker, { EmojiStyle, Theme } from 'emoji-picker-react';
-import { Send, Smile } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ExternalLink, Send, Smile } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { parseLinks } from '@/lib/linkify';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../types';
+
+interface TypingUser {
+  userId: string;
+  userName: string;
+}
 
 interface WatchPartyChatProps {
   messages: ChatMessage[];
   onSendMessage: (content: string) => void;
   currentUserId?: string;
   isMobile?: boolean;
+  typingUsers?: TypingUser[];
+  onTypingStart?: () => void;
+  onTypingStop?: () => void;
 }
 
 export function WatchPartyChat({
   messages,
   onSendMessage,
   currentUserId,
+  typingUsers = [],
+  onTypingStart,
+  onTypingStop,
 }: WatchPartyChatProps) {
   const [input, setInput] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to bottom on new messages
   // biome-ignore lint/correctness/useExhaustiveDependencies: Scroll when message count changes
@@ -49,6 +62,16 @@ export function WatchPartyChat({
   const handleSend = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim()) return;
+
+    // Stop typing indicator when sending
+    if (onTypingStop) {
+      onTypingStop();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+    }
+
     onSendMessage(input);
     setInput('');
     setShowEmoji(false);
@@ -60,6 +83,45 @@ export function WatchPartyChat({
       handleSend();
     }
   };
+
+  // Handle typing indicator with throttling
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInput(value);
+
+      if (!onTypingStart || !onTypingStop) return;
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Emit typing start
+      if (value.trim()) {
+        onTypingStart();
+
+        // Auto-stop after 3 seconds
+        typingTimeoutRef.current = setTimeout(() => {
+          onTypingStop();
+        }, 3000);
+      } else {
+        onTypingStop();
+      }
+    },
+    [onTypingStart, onTypingStop],
+  );
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (onTypingStop) {
+        onTypingStop();
+      }
+    };
+  }, [onTypingStop]);
 
   const onEmojiClick = (emojiObject: { emoji: string }) => {
     setInput((prev) => prev + emojiObject.emoji);
@@ -133,7 +195,30 @@ export function WatchPartyChat({
                     : 'bg-white/10 text-white/90 rounded-bl-sm backdrop-blur-sm border border-white/5',
                 )}
               >
-                {msg.content}
+                {/* Render message with clickable links */}
+                {parseLinks(msg.content).map((segment, idx) => {
+                  if (segment.type === 'link') {
+                    return (
+                      <a
+                        key={`${msg.id}-link-${idx}`}
+                        href={segment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          'inline-flex items-center gap-1 underline hover:opacity-80 transition-opacity',
+                          isMe ? 'text-white' : 'text-blue-400',
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {segment.content}
+                        <ExternalLink className="w-3 h-3 inline" />
+                      </a>
+                    );
+                  }
+                  return (
+                    <span key={`${msg.id}-text-${idx}`}>{segment.content}</span>
+                  );
+                })}
 
                 {/* Timestamp for Me (standardized, overlaid on hover or distinct) */}
                 {isMe && (
@@ -148,6 +233,34 @@ export function WatchPartyChat({
             </div>
           );
         })}
+
+        {/* Typing Indicator */}
+        {typingUsers.length > 0 && (
+          <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center gap-1">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-[9px] font-bold text-white uppercase">
+                  {typingUsers[0].userName.charAt(0)}
+                </span>
+              </div>
+              <span className="text-xs text-white/70">
+                {typingUsers.length === 1
+                  ? `${typingUsers[0].userName} is typing`
+                  : typingUsers.length === 2
+                    ? `${typingUsers[0].userName} and ${typingUsers[1].userName} are typing`
+                    : typingUsers.length === 3
+                      ? `${typingUsers[0].userName}, ${typingUsers[1].userName}, and ${typingUsers[2].userName} are typing`
+                      : `${typingUsers.length} people are typing`}
+              </span>
+            </div>
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" />
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -192,7 +305,7 @@ export function WatchPartyChat({
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             className="flex-1 bg-white/5 text-white placeholder:text-white/30 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/10 transition-all"

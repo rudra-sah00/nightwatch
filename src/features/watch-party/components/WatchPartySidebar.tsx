@@ -19,6 +19,11 @@ import { WatchPartyChat } from './WatchPartyChat';
 // Props Interface
 // ============================================
 
+interface TypingUser {
+  userId: string;
+  userName: string;
+}
+
 interface WatchPartySidebarProps {
   room: WatchPartyRoom;
   messages: ChatMessage[];
@@ -36,6 +41,9 @@ interface WatchPartySidebarProps {
     room: import('livekit-client').Room | null;
     participants: import('livekit-client').Participant[];
   }) => void;
+  typingUsers?: TypingUser[];
+  onTypingStart?: () => void;
+  onTypingStop?: () => void;
 }
 
 // ============================================
@@ -56,6 +64,9 @@ export function WatchPartySidebar({
   linkCopied,
   className,
   onLiveKitReady,
+  typingUsers = [],
+  onTypingStart,
+  onTypingStop,
 }: WatchPartySidebarProps) {
   // Tab state - participants first
   const [activeTab, setActiveTab] = useState<'chat' | 'participants'>(
@@ -150,6 +161,9 @@ export function WatchPartySidebar({
             messages={messages}
             currentUserId={currentUserId}
             onSendMessage={onSendMessage}
+            typingUsers={typingUsers}
+            onTypingStart={onTypingStart}
+            onTypingStop={onTypingStop}
           />
         </div>
       </div>

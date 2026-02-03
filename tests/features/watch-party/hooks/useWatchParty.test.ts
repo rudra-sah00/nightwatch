@@ -30,6 +30,8 @@ vi.mock('@/features/watch-party/api', () => ({
   getPartyStreamToken: vi.fn(),
   syncPartyState: vi.fn(),
   updatePartyContent: vi.fn(),
+  emitTypingStart: vi.fn(),
+  emitTypingStop: vi.fn(),
   onPartyStateUpdate: vi.fn(() => vi.fn()),
   onPartyMemberJoined: vi.fn(() => vi.fn()),
   onPartyMemberLeft: vi.fn(() => vi.fn()),
@@ -41,6 +43,7 @@ vi.mock('@/features/watch-party/api', () => ({
   onPartyClosed: vi.fn(() => vi.fn()),
   onPartyMessage: vi.fn(() => vi.fn()),
   onPartyContentUpdated: vi.fn(() => vi.fn()),
+  onUserTyping: vi.fn(() => vi.fn()),
 }));
 
 vi.mock('sonner', () => ({

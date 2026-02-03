@@ -7,6 +7,11 @@ import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, WatchPartyRoom } from '../types';
 import { WatchPartySidebar } from './WatchPartySidebar';
 
+interface TypingUser {
+  userId: string;
+  userName: string;
+}
+
 interface ActiveWatchPartyProps {
   room: WatchPartyRoom;
   isHost: boolean;
@@ -27,6 +32,9 @@ interface ActiveWatchPartyProps {
     episode?: number;
   }) => void;
   currentUserId?: string;
+  typingUsers?: TypingUser[];
+  onTypingStart?: () => void;
+  onTypingStop?: () => void;
 }
 
 export function ActiveWatchParty({
@@ -44,6 +52,9 @@ export function ActiveWatchParty({
   messages,
   onSendMessage,
   onUpdateContent,
+  typingUsers = [],
+  onTypingStart,
+  onTypingStop,
 }: ActiveWatchPartyProps) {
   const [showDesktopSidebar, setShowDesktopSidebar] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -283,6 +294,9 @@ export function ActiveWatchParty({
           onSendMessage={onSendMessage}
           className="h-full rounded-none border-0 bg-transparent shadow-none"
           onLiveKitReady={handleLiveKitReady}
+          typingUsers={typingUsers}
+          onTypingStart={onTypingStart}
+          onTypingStop={onTypingStop}
         />
       </div>
 

@@ -110,7 +110,10 @@ export default function WatchPartyPage() {
     kickUser,
 
     messages,
+    typingUsers,
     sendMessage,
+    handleTypingStart,
+    handleTypingStop,
     updateContent,
   } = useWatchParty({
     onStateUpdate: syncVideo,
@@ -392,6 +395,9 @@ export default function WatchPartyPage() {
           messages={messages}
           onSendMessage={sendMessage}
           onUpdateContent={updateContent}
+          typingUsers={typingUsers}
+          onTypingStart={handleTypingStart}
+          onTypingStop={handleTypingStop}
         />
 
         {/* Leave Confirmation Dialog */}
