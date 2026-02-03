@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import type { Track } from 'livekit-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAudioStream } from '@/features/watch-party/hooks/useAudioStream';
@@ -22,6 +22,16 @@ class MockTrack {
     this.attached = false;
     element.srcObject = null;
   });
+}
+
+// Component wrapper to properly test the hook with a real audio element
+function AudioComponent({ track, isLocal }: HookProps) {
+  const audioRef = useAudioStream(track, isLocal);
+  return (
+    <audio data-testid="audio-element" ref={audioRef}>
+      <track kind="captions" />
+    </audio>
+  );
 }
 
 describe('useAudioStream', () => {
@@ -353,6 +363,147 @@ describe('useAudioStream', () => {
       rerender({ track: mockTrack as unknown as Track, isLocal: true });
 
       expect(result.current).toBeDefined();
+    });
+  });
+
+  describe('Audio Element Attachment', () => {
+    it('should attach track to audio element for remote participant', () => {
+      const mockTrack = new MockTrack();
+      render(
+        <AudioComponent
+          track={mockTrack as unknown as Track}
+          isLocal={false}
+        />,
+      );
+
+      const audioElement = screen.getByTestId('audio-element');
+      expect(mockTrack.attach).toHaveBeenCalledWith(audioElement);
+      expect(mockTrack.attached).toBe(true);
+    });
+
+    it('should NOT attach track for local participant', () => {
+      const mockTrack = new MockTrack();
+      render(
+        <AudioComponent track={mockTrack as unknown as Track} isLocal={true} />,
+      );
+
+      expect(mockTrack.attach).not.toHaveBeenCalled();
+      expect(mockTrack.attached).toBe(false);
+    });
+
+    it('should NOT attach when track is undefined', () => {
+      const { container } = render(
+        <AudioComponent track={undefined} isLocal={false} />,
+      );
+
+      // Audio element exists but no track attached
+      const audioElement = container.querySelector('audio');
+      expect(audioElement).toBeTruthy();
+    });
+
+    it('should configure audio element for remote playback', () => {
+      const mockTrack = new MockTrack();
+      render(
+        <AudioComponent
+          track={mockTrack as unknown as Track}
+          isLocal={false}
+        />,
+      );
+
+      const audioElement = screen.getByTestId(
+        'audio-element',
+      ) as HTMLAudioElement;
+      expect(audioElement.muted).toBe(false);
+      expect(audioElement.volume).toBe(1);
+    });
+
+    it('should attempt to play audio', () => {
+      const mockTrack = new MockTrack();
+      const playSpy = vi.fn().mockResolvedValue(undefined);
+      HTMLAudioElement.prototype.play = playSpy;
+
+      render(
+        <AudioComponent
+          track={mockTrack as unknown as Track}
+          isLocal={false}
+        />,
+      );
+
+      expect(playSpy).toHaveBeenCalled();
+    });
+
+    it('should handle play() rejection gracefully', () => {
+      const mockTrack = new MockTrack();
+      const playSpy = vi.fn().mockRejectedValue(new Error('Autoplay blocked'));
+      HTMLAudioElement.prototype.play = playSpy;
+
+      // Should not throw
+      expect(() => {
+        render(
+          <AudioComponent
+            track={mockTrack as unknown as Track}
+            isLocal={false}
+          />,
+        );
+      }).not.toThrow();
+    });
+
+    it('should detach track on unmount', () => {
+      const mockTrack = new MockTrack();
+      const { unmount } = render(
+        <AudioComponent
+          track={mockTrack as unknown as Track}
+          isLocal={false}
+        />,
+      );
+
+      const audioElement = screen.getByTestId('audio-element');
+      expect(mockTrack.attach).toHaveBeenCalledWith(audioElement);
+
+      unmount();
+
+      expect(mockTrack.detach).toHaveBeenCalledWith(audioElement);
+    });
+
+    it('should detach old track and attach new track when track changes', () => {
+      const track1 = new MockTrack();
+      const track2 = new MockTrack();
+
+      const { rerender } = render(
+        <AudioComponent track={track1 as unknown as Track} isLocal={false} />,
+      );
+
+      const audioElement = screen.getByTestId('audio-element');
+      expect(track1.attach).toHaveBeenCalledWith(audioElement);
+
+      // Change to new track
+      rerender(
+        <AudioComponent track={track2 as unknown as Track} isLocal={false} />,
+      );
+
+      expect(track1.detach).toHaveBeenCalledWith(audioElement);
+      expect(track2.attach).toHaveBeenCalledWith(audioElement);
+    });
+
+    it('should detach track when isLocal changes from false to true', () => {
+      const mockTrack = new MockTrack();
+
+      const { rerender } = render(
+        <AudioComponent
+          track={mockTrack as unknown as Track}
+          isLocal={false}
+        />,
+      );
+
+      const audioElement = screen.getByTestId('audio-element');
+      expect(mockTrack.attach).toHaveBeenCalledWith(audioElement);
+
+      // Become local participant
+      rerender(
+        <AudioComponent track={mockTrack as unknown as Track} isLocal={true} />,
+      );
+
+      expect(mockTrack.detach).toHaveBeenCalledWith(audioElement);
     });
   });
 });

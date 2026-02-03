@@ -592,5 +592,122 @@ describe('Watch Party WebSocket API', () => {
         cleanup();
       });
     });
+
+    describe('onPartyMemberRejected', () => {
+      it('should register listener and return cleanup', () => {
+        vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+        const callback = vi.fn();
+        const cleanup = api.onPartyMemberRejected(callback);
+
+        expect(mockSocket.on).toHaveBeenCalledWith(
+          'party:member_rejected',
+          callback,
+        );
+
+        cleanup();
+        expect(mockSocket.off).toHaveBeenCalledWith(
+          'party:member_rejected',
+          callback,
+        );
+      });
+
+      it('should return noop when no socket', () => {
+        vi.mocked(ws.getSocket).mockReturnValue(null);
+
+        const cleanup = api.onPartyMemberRejected(vi.fn());
+        cleanup();
+      });
+    });
+
+    describe('onUserTyping', () => {
+      it('should register listener and return cleanup', () => {
+        vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+        const callback = vi.fn();
+        const cleanup = api.onUserTyping(callback);
+
+        expect(mockSocket.on).toHaveBeenCalledWith(
+          'party:user_typing',
+          callback,
+        );
+
+        cleanup();
+        expect(mockSocket.off).toHaveBeenCalledWith(
+          'party:user_typing',
+          callback,
+        );
+      });
+
+      it('should return noop when no socket', () => {
+        vi.mocked(ws.getSocket).mockReturnValue(null);
+
+        const cleanup = api.onUserTyping(vi.fn());
+        cleanup();
+      });
+    });
+  });
+
+  describe('emitTypingStart', () => {
+    it('should emit typing start event', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+      api.emitTypingStart();
+
+      expect(mockSocket.emit).toHaveBeenCalledWith('party:typing_start');
+    });
+
+    it('should do nothing when no socket', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(null);
+
+      api.emitTypingStart();
+
+      expect(mockSocket.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('emitTypingStop', () => {
+    it('should emit typing stop event', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+      api.emitTypingStop();
+
+      expect(mockSocket.emit).toHaveBeenCalledWith('party:typing_stop');
+    });
+
+    it('should do nothing when no socket', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(null);
+
+      api.emitTypingStop();
+
+      expect(mockSocket.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fetchPendingRequests', () => {
+    it('should fetch pending requests via socket', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+      const callback = vi.fn();
+      api.fetchPendingRequests('room-123', callback);
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'party:fetch_pending',
+        { roomId: 'room-123' },
+        callback,
+      );
+    });
+
+    it('should call callback with error when no socket', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(null);
+
+      const callback = vi.fn();
+      api.fetchPendingRequests('room-123', callback);
+
+      expect(callback).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not connected',
+      });
+    });
   });
 });

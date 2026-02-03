@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '@/features/watch-party/api';
-import type { RoomMember } from '@/features/watch-party/types';
+import type { RoomMember, WatchPartyRoom } from '@/features/watch-party/types';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
 import * as ws from '@/lib/ws';
 
@@ -58,6 +58,10 @@ vi.mock('@/features/watch', () => ({
   injectTokenIntoUrl: vi.fn((url, token) => {
     if (!url || !token) return url;
     return url.replace('{token}', token).replace(/\{token\}/g, token);
+  }),
+  wrapInProxy: vi.fn((url, _token) => {
+    if (!url) return url;
+    return `proxied:${url}`;
   }),
 }));
 
@@ -906,6 +910,294 @@ describe('useWatchParty', () => {
         },
         expect.any(Function),
       );
+    });
+  });
+
+  describe('onPartyContentUpdated event handler', () => {
+    it('should update room when content is updated with token', async () => {
+      let contentUpdateHandler: (data: { room: WatchPartyRoom }) => void =
+        () => {};
+
+      vi.mocked(api.onPartyContentUpdated).mockImplementation((handler) => {
+        contentUpdateHandler = handler;
+        return vi.fn();
+      });
+
+      vi.mocked(api.getPartyStreamToken).mockImplementation((callback) => {
+        callback({ success: true, token: 'new-stream-token' });
+      });
+
+      const { result } = renderHook(() => useWatchParty({}));
+
+      // Trigger content update
+      await act(async () => {
+        contentUpdateHandler({
+          room: {
+            id: 'room-1',
+            contentId: 'new-content',
+            type: 'movie',
+            streamUrl: 'https://example.com/new-stream.m3u8',
+            title: 'New Movie',
+            hostId: 'user-1',
+            members: [],
+            pendingMembers: [],
+            state: {
+              currentTime: 0,
+              isPlaying: false,
+              lastUpdated: Date.now(),
+              playbackRate: 1,
+            },
+            createdAt: Date.now(),
+            spriteVtt: 'https://cdn.example.com/sprites.vtt',
+            captionUrl: 'https://cdn.example.com/captions.vtt',
+            subtitleTracks: [
+              {
+                id: 'sub-1',
+                src: 'https://cdn.example.com/sub.vtt',
+                label: 'English',
+                language: 'en',
+              },
+            ],
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(api.getPartyStreamToken).toHaveBeenCalled();
+        expect(result.current.room?.title).toBe('New Movie');
+      });
+    });
+
+    it('should fallback when token fetch fails', async () => {
+      let contentUpdateHandler: (data: { room: WatchPartyRoom }) => void =
+        () => {};
+
+      vi.mocked(api.onPartyContentUpdated).mockImplementation((handler) => {
+        contentUpdateHandler = handler;
+        return vi.fn();
+      });
+
+      vi.mocked(api.getPartyStreamToken).mockImplementation((callback) => {
+        callback({ success: false });
+      });
+
+      const { result } = renderHook(() => useWatchParty({}));
+
+      // Trigger content update with failed token fetch
+      await act(async () => {
+        contentUpdateHandler({
+          room: {
+            id: 'room-1',
+            contentId: 'content-1',
+            type: 'movie',
+            streamUrl: 'https://example.com/stream.m3u8',
+            title: 'Fallback Movie',
+            hostId: 'user-1',
+            members: [],
+            pendingMembers: [],
+            state: {
+              currentTime: 0,
+              isPlaying: false,
+              lastUpdated: Date.now(),
+              playbackRate: 1,
+            },
+            createdAt: Date.now(),
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.room?.title).toBe('Fallback Movie');
+      });
+    });
+  });
+
+  describe('onUserTyping event handler', () => {
+    it('should add user to typing list when typing starts', async () => {
+      let typingHandler: (data: {
+        userId: string;
+        userName: string;
+        isTyping: boolean;
+      }) => void = () => {};
+
+      vi.mocked(api.onUserTyping).mockImplementation((handler) => {
+        typingHandler = handler;
+        return vi.fn();
+      });
+
+      const { result } = renderHook(() => useWatchParty({}));
+
+      await act(async () => {
+        typingHandler({
+          userId: 'user-2',
+          userName: 'John',
+          isTyping: true,
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.typingUsers).toHaveLength(1);
+        expect(result.current.typingUsers[0]).toEqual({
+          userId: 'user-2',
+          userName: 'John',
+        });
+      });
+    });
+
+    it('should not add duplicate typing users', async () => {
+      let typingHandler: (data: {
+        userId: string;
+        userName: string;
+        isTyping: boolean;
+      }) => void = () => {};
+
+      vi.mocked(api.onUserTyping).mockImplementation((handler) => {
+        typingHandler = handler;
+        return vi.fn();
+      });
+
+      const { result } = renderHook(() => useWatchParty({}));
+
+      await act(async () => {
+        typingHandler({ userId: 'user-2', userName: 'John', isTyping: true });
+        typingHandler({ userId: 'user-2', userName: 'John', isTyping: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.typingUsers).toHaveLength(1);
+      });
+    });
+
+    it('should remove user from typing list when typing stops', async () => {
+      let typingHandler: (data: {
+        userId: string;
+        userName: string;
+        isTyping: boolean;
+      }) => void = () => {};
+
+      vi.mocked(api.onUserTyping).mockImplementation((handler) => {
+        typingHandler = handler;
+        return vi.fn();
+      });
+
+      const { result } = renderHook(() => useWatchParty({}));
+
+      // Add typing user
+      await act(async () => {
+        typingHandler({ userId: 'user-2', userName: 'John', isTyping: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.typingUsers).toHaveLength(1);
+      });
+
+      // Remove typing user
+      await act(async () => {
+        typingHandler({ userId: 'user-2', userName: 'John', isTyping: false });
+      });
+
+      await waitFor(() => {
+        expect(result.current.typingUsers).toHaveLength(0);
+      });
+    });
+  });
+
+  describe('requestJoin - already approved path', () => {
+    it('should handle immediate approval with room and guest token', async () => {
+      const { result } = renderHook(() => useWatchParty({}));
+
+      vi.mocked(api.requestJoinPartyRoom).mockImplementation(
+        (_payload, callback) => {
+          callback({
+            success: true,
+            room: {
+              id: 'room-1',
+              contentId: 'content-1',
+              type: 'movie' as const,
+              streamUrl: 'https://example.com/stream.m3u8',
+              title: 'Test Movie',
+              hostId: 'user-1',
+              members: [],
+              pendingMembers: [],
+              state: {
+                currentTime: 0,
+                isPlaying: false,
+                lastUpdated: Date.now(),
+                playbackRate: 1,
+              },
+              createdAt: Date.now(),
+            },
+            guestToken: 'guest-token-123',
+          });
+        },
+      );
+
+      await act(async () => {
+        result.current.requestJoin('room-1', 'Guest Name');
+      });
+
+      await waitFor(() => {
+        expect(result.current.requestStatus).toBe('joined');
+        expect(result.current.isConnected).toBe(true);
+        expect(result.current.room?.id).toBe('room-1');
+        expect(sessionStorage.getItem('guest_token')).toBe('guest-token-123');
+      });
+    });
+  });
+
+  describe('unmount cleanup', () => {
+    it('should clear guest token on unmount', async () => {
+      sessionStorage.setItem('guest_token', 'test-token');
+
+      const { unmount } = renderHook(() => useWatchParty({}));
+
+      unmount();
+
+      expect(sessionStorage.getItem('guest_token')).toBeNull();
+    });
+
+    it('should handle unmount gracefully when no guest token', async () => {
+      sessionStorage.clear();
+
+      const { unmount } = renderHook(() => useWatchParty({}));
+
+      expect(() => unmount()).not.toThrow();
+    });
+  });
+
+  describe('cancelRequest with callback', () => {
+    it('should call onComplete callback when request is cancelled', async () => {
+      const { result } = renderHook(() => useWatchParty({}));
+      const onComplete = vi.fn();
+
+      // First set status to pending
+      vi.mocked(api.requestJoinPartyRoom).mockImplementation(
+        (_payload, callback) => {
+          callback({ success: true });
+        },
+      );
+
+      await act(async () => {
+        result.current.requestJoin('room-1');
+      });
+
+      await waitFor(() => {
+        expect(result.current.requestStatus).toBe('pending');
+      });
+
+      // Now cancel the request with callback
+      vi.mocked(api.leavePartyRoom).mockImplementation((callback) => {
+        callback({ success: true });
+      });
+
+      await act(async () => {
+        result.current.cancelRequest(onComplete);
+      });
+
+      await waitFor(() => {
+        expect(result.current.requestStatus).toBe('idle');
+        expect(onComplete).toHaveBeenCalled();
+      });
     });
   });
 });

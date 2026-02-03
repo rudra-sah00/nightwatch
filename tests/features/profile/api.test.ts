@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  changePassword,
   checkUsername,
   getProfile,
   getWatchActivity,
@@ -336,6 +337,46 @@ describe('Profile API', () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
       await getProfile();
       expect(apiFetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('changePassword', () => {
+    it('should call apiFetch with correct parameters', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
+
+      await changePassword('oldPassword123', 'newPassword456');
+
+      expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          currentPassword: 'oldPassword123',
+          newPassword: 'newPassword456',
+        }),
+      });
+    });
+
+    it('should pass options to apiFetch', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
+
+      const options = { signal: new AbortController().signal };
+      await changePassword('old', 'new', options);
+
+      expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          currentPassword: 'old',
+          newPassword: 'new',
+        }),
+        signal: options.signal,
+      });
+    });
+
+    it('should throw error on failure', async () => {
+      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Invalid password'));
+
+      await expect(changePassword('wrong', 'new')).rejects.toThrow(
+        'Invalid password',
+      );
     });
   });
 });

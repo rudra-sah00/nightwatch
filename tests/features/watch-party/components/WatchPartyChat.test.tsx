@@ -4,9 +4,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WatchPartyChat } from '@/features/watch-party/components/WatchPartyChat';
 import type { ChatMessage } from '@/features/watch-party/types';
 
-// Mock emoji-picker-react
+// Mock emoji-picker-react with functional onEmojiClick support
 vi.mock('emoji-picker-react', () => ({
-  default: () => <div data-testid="emoji-picker" />,
+  default: ({
+    onEmojiClick,
+  }: {
+    onEmojiClick?: (emoji: { emoji: string }) => void;
+  }) => (
+    <div data-testid="emoji-picker">
+      <button
+        data-testid="emoji-😊"
+        onClick={() => onEmojiClick?.({ emoji: '😊' })}
+        type="button"
+      >
+        😊
+      </button>
+    </div>
+  ),
   EmojiStyle: {},
   Theme: {},
 }));
@@ -569,6 +583,20 @@ describe('WatchPartyChat', () => {
       await user.click(submitButton!);
 
       expect(screen.queryByTestId('emoji-picker')).not.toBeInTheDocument();
+    });
+
+    it('should add emoji to input when emoji is selected', async () => {
+      const user = userEvent.setup();
+      render(<WatchPartyChat {...defaultProps} />);
+
+      const emojiButton = screen.getByTitle('Add emoji');
+      await user.click(emojiButton);
+
+      const emojiToClick = screen.getByTestId('emoji-😊');
+      await user.click(emojiToClick);
+
+      const input = screen.getByPlaceholderText('Type a message...');
+      expect(input).toHaveValue('😊');
     });
   });
 });
