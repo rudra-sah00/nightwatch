@@ -34,7 +34,7 @@ export function ParticipantView({
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 group shadow-inner">
-      {/* Video Element */}
+      {/* Video Element - Mirror local video for natural self-view, keep remote non-mirrored */}
       <video
         ref={videoRef}
         className={cn(
@@ -44,7 +44,7 @@ export function ParticipantView({
         autoPlay
         playsInline
         muted={isLocal}
-        style={{ transform: 'scaleX(1)' }}
+        style={{ transform: isLocal ? 'scaleX(-1)' : 'scaleX(1)' }}
       />
 
       {/* Audio element for remote participant audio */}
