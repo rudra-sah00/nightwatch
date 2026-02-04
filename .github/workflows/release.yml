@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
+      - 'CHANGELOG.md'
+      - 'package.json'  # Skip when only version bump
 
 permissions:
   contents: write
@@ -24,10 +26,30 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
+
+  # Check if this is a release-please version bump commit (skip deploy)
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check if release-please commit
+        id: check
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          if [[ "$COMMIT_MSG" == "chore(main): release"* ]]; then
+            echo "Skipping deploy - this is a release-please version bump"
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          fi
           
   deploy:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created || github.event_name == 'push' }}
+    needs: [release-please, check-commit]
+    if: ${{ needs.check-commit.outputs.should_deploy == 'true' }}
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
