@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.0...v1.4.1) (2026-02-04)
+
+
+### Bug Fixes
+
+* activity graph tooltip positioning to prevent right-side overflow ([b7bdd66](https://github.com/rudra-sah00/watch-rudra/commit/b7bdd663d6281a4c5d5a104e6666782dc1114c0f))
+
 ## [1.4.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.3.0...v1.4.0) (2026-02-04)
 
 
