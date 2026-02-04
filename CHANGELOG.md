@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.3.0...v1.4.0) (2026-02-04)
+
+
+### Features
+
+* add GitHub deployment status tracking ([25cb5c0](https://github.com/rudra-sah00/watch-rudra/commit/25cb5c009b1cfdf81b0156680e8de212ada33498))
+
+
+### Bug Fixes
+
+* improve activity graph, password modal, and profile form ([08942d4](https://github.com/rudra-sah00/watch-rudra/commit/08942d430d620d66dba50f03897f988a708ff6ae))
+* prevent double deployment on release-please version bump ([ad57aa0](https://github.com/rudra-sah00/watch-rudra/commit/ad57aa02933acc5742d43187d183566dd65fa4ca))
+* skip both release-please and deploy on version bump commits ([8627e92](https://github.com/rudra-sah00/watch-rudra/commit/8627e928e50c6ea3fa0b30663c934e36a8b7621e))
+
 ## [1.3.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.2.0...v1.3.0) (2026-02-04)
 
 
