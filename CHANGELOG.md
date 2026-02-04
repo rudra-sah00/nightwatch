@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.2.0...v1.3.0) (2026-02-04)
+
+
+### Features
+
+* improve test coverage to meet all thresholds ([cb38b12](https://github.com/rudra-sah00/watch-rudra/commit/cb38b1286acd82a71ac6c16a81661e73c7e509ec))
+* redesign profile page UI with enhanced aesthetics ([b28cc35](https://github.com/rudra-sah00/watch-rudra/commit/b28cc356ea5ee47dc02c2429b44d18a422c9701d))
+
+
+### Bug Fixes
+
+* device selection dropdown now clickable with proper z-index ([091f92b](https://github.com/rudra-sah00/watch-rudra/commit/091f92b8b4ddebc0edc5065bb4b3179d2c9b69e9))
+* mirror local video preview for natural self-view experience ([af0c1ad](https://github.com/rudra-sah00/watch-rudra/commit/af0c1ade97a01a5df2abb6f599788afa4ec7d5fb))
+* properly extract Vercel deployment URL in CI/CD workflow ([2de3826](https://github.com/rudra-sah00/watch-rudra/commit/2de3826dbae62b35f6982f01b2ccd03b6c70df5f))
+
 ## [1.2.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.1.0...v1.2.0) (2026-02-03)
 
 
