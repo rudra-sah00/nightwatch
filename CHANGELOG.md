@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.3](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.2...v1.4.3) (2026-02-04)
+
+
+### Bug Fixes
+
+* activity graph tooltip vertical positioning for top rows ([98f3b21](https://github.com/rudra-sah00/watch-rudra/commit/98f3b216cc415abc6012a4868cc44b4a1faf209e))
+* normalize subtitle URLs in watch party for CORS compliance ([8a028f8](https://github.com/rudra-sah00/watch-rudra/commit/8a028f8521fd6534ea05007f248019ad6e2cd842))
+
 ## [1.4.2](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.1...v1.4.2) (2026-02-04)
 
 
