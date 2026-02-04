@@ -7,6 +7,7 @@ import type { WatchActivity } from '../types';
 // Helper to format date
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -26,57 +27,44 @@ interface ActivityGraphProps {
   isLoading?: boolean;
 }
 
-// Helper to generating stable skeleton IDs
-const SKELETON_MONTHS = Array.from({ length: 12 }, (_, i) => ({
-  id: `month-${i}`,
-  offset: i * 60,
-}));
-const SKELETON_WEEKS = Array.from({ length: 53 }, (_, i) => ({
-  id: `week-${i}`,
-  days: Array.from({ length: 7 }, (_, d) => ({ id: `day-${i}-${d}` })),
+// Day labels for the left side (GitHub style: Mon, Wed, Fri)
+const DAY_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const DAY_DISPLAY = ['', 'Mon', '', 'Wed', '', 'Fri', ''] as const;
+
+// Pre-generate skeleton keys for stable rendering
+const SKELETON_DAYS = DAY_LABELS.map((d) => `skel-day-${d}`);
+const SKELETON_WEEKS = Array.from({ length: 53 }, (_, w) => ({
+  key: `skel-week-${w}`,
+  days: Array.from({ length: 7 }, (_, d) => `skel-${w}-${d}`),
 }));
 
 function ActivityGraphSkeleton() {
   return (
-    <div className="w-full overflow-hidden animate-pulse">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-muted/50">
-            <div className="w-5 h-5 bg-muted rounded" />
-          </div>
-          <div className="space-y-2">
-            <div className="h-6 w-32 bg-muted rounded-lg" />
-            <div className="h-3 w-48 bg-muted/70 rounded" />
-          </div>
-        </div>
+    <div className="w-full animate-pulse">
+      {/* Header skeleton */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-4 w-48 bg-white/[0.06] rounded" />
       </div>
-      <div className="w-full overflow-x-auto pt-8 pb-2 scrollbar-hide">
-        <div className="min-w-fit">
-          <div className="flex flex-col gap-1">
-            {/* Fake Months */}
-            <div className="flex relative h-5 mb-1">
-              {SKELETON_MONTHS.map((month) => (
+      {/* Graph skeleton */}
+      <div className="flex gap-[2px]">
+        {/* Day labels skeleton */}
+        <div className="flex flex-col gap-[2px] pr-2">
+          {SKELETON_DAYS.map((key) => (
+            <div key={key} className="h-[10px] w-6" />
+          ))}
+        </div>
+        {/* Grid skeleton */}
+        <div className="flex gap-[2px]">
+          {SKELETON_WEEKS.map((week) => (
+            <div key={week.key} className="flex flex-col gap-[2px]">
+              {week.days.map((dayKey) => (
                 <div
-                  key={month.id}
-                  className="absolute h-2.5 w-8 bg-muted/50 rounded-full"
-                  style={{ left: `${month.offset}px` }}
+                  key={dayKey}
+                  className="w-[10px] h-[10px] rounded-sm bg-white/[0.04]"
                 />
               ))}
             </div>
-            {/* Fake Grid */}
-            <div className="flex gap-[3px]">
-              {SKELETON_WEEKS.map((week) => (
-                <div key={week.id} className="flex flex-col gap-[3px]">
-                  {week.days.map((day) => (
-                    <div
-                      key={day.id}
-                      className="w-[11px] h-[11px] rounded-[3px] bg-muted/30"
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -207,99 +195,99 @@ export function ActivityGraph({
     return <ActivityGraphSkeleton />;
   }
 
+  // Format total time for header
+  const hours = Math.floor(totalCount / 60);
+  const displayTime = hours > 0 ? hours : Math.ceil(totalCount);
+  const timeUnit = hours > 0 ? 'hours' : 'minutes';
+
   return (
-    <div className="w-full overflow-hidden">
-      {/* Stats Header */}
-      <div className="flex items-center gap-4 mb-6 pb-5 border-b border-white/[0.06]">
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 to-red-600/20 rounded-2xl blur-lg opacity-60" />
-          <div className="relative p-3 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20">
-            <svg
-              className="w-6 h-6 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-label="Video icon"
-              role="img"
-            >
-              <polygon points="23 7 16 12 23 17 23 7" />
-              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-            </svg>
-          </div>
-        </div>
-        <div className="space-y-1">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {totalCount < 60
-                ? Math.ceil(totalCount)
-                : Math.floor(totalCount / 60)}
-            </span>
-            <span className="text-lg text-muted-foreground font-medium">
-              {totalCount < 60 ? 'minutes' : 'hours'}
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground/70">
-            Total watch time in the last year
-          </p>
-        </div>
+    <div className="w-full">
+      {/* Header - GitHub style */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">
+            {displayTime} {timeUnit}
+          </span>{' '}
+          in the last year
+        </p>
       </div>
 
-      {/* Activity Grid */}
-      <div className="w-full overflow-x-auto pt-6 pb-3 scrollbar-hide">
-        <div className="min-w-fit">
-          <div className="flex flex-col gap-1.5">
-            {/* Months Row */}
-            <div className="flex relative h-5 mb-2">
+      {/* Graph Container */}
+      <div className="w-full overflow-x-auto pb-2">
+        <div className="inline-block min-w-fit">
+          {/* Month labels row */}
+          <div className="flex mb-1">
+            {/* Spacer for day labels column */}
+            <div className="w-7 shrink-0" />
+            {/* Month labels */}
+            <div className="relative flex-1" style={{ height: '15px' }}>
               {monthLabels.map((label) => (
                 <span
                   key={`${label.name}-${label.weekIndex}`}
-                  className="absolute text-[10px] text-muted-foreground/80 font-medium tracking-wide uppercase"
-                  style={{
-                    left: `${label.weekIndex * 14}px`, // 11px width + 3px gap = 14px
-                  }}
+                  className="absolute text-[11px] text-muted-foreground"
+                  style={{ left: `${label.weekIndex * 12}px` }}
                 >
                   {label.name}
                 </span>
               ))}
             </div>
+          </div>
 
-            {/* Weeks Grid */}
-            <div className="flex gap-[3px]">
+          {/* Graph with day labels */}
+          <div className="flex">
+            {/* Day labels column (Sun, Mon, Tue, ...) */}
+            <div className="flex flex-col gap-[2px] pr-1 shrink-0">
+              {DAY_LABELS.map((dayKey, i) => (
+                <div
+                  key={dayKey}
+                  className="h-[10px] w-6 flex items-center justify-end"
+                >
+                  <span className="text-[9px] text-muted-foreground leading-none">
+                    {DAY_DISPLAY[i]}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Weeks grid */}
+            <div className="flex gap-[2px]">
               {weeks.map((week) => (
-                <div key={week[0].dateStr} className="flex flex-col gap-[3px]">
+                <div key={week[0].dateStr} className="flex flex-col gap-[2px]">
                   {week.map((day) => {
-                    // Enhanced Red Theme Colors with better gradients
-                    const themeColors = [
-                      'bg-white/[0.04] hover:bg-white/[0.08]', // Empty
-                      'bg-gradient-to-br from-red-900/50 to-red-900/30 shadow-sm shadow-red-900/20', // L1
-                      'bg-gradient-to-br from-red-700/60 to-red-800/50 shadow-sm shadow-red-800/20', // L2
-                      'bg-gradient-to-br from-red-600/80 to-red-700/70 shadow-sm shadow-red-700/20', // L3
-                      'bg-gradient-to-br from-red-500 to-red-600 shadow-md shadow-red-500/30', // L4
+                    // GitHub-inspired colors (red theme)
+                    const colors = [
+                      'bg-white/[0.06]', // Level 0 - empty
+                      'bg-red-900/60', // Level 1
+                      'bg-red-700/80', // Level 2
+                      'bg-red-600', // Level 3
+                      'bg-red-500', // Level 4
                     ];
 
                     return (
                       <div
                         key={day.dateStr}
                         className={cn(
-                          'w-[11px] h-[11px] rounded-[3px] transition-all duration-300 relative group cursor-pointer hover:scale-125 hover:z-10',
-                          themeColors[day.level],
-                          !day.isValid && 'invisible opacity-0',
+                          'w-[10px] h-[10px] rounded-sm transition-colors relative group/cell',
+                          colors[day.level],
+                          day.isValid &&
+                            'cursor-pointer hover:ring-1 hover:ring-white/30',
+                          !day.isValid && 'opacity-0',
                         )}
                       >
-                        {/* Enhanced Tooltip */}
+                        {/* Tooltip */}
                         {day.isValid && (
-                          <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block z-[9999] whitespace-nowrap bg-gradient-to-br from-popover to-popover/95 backdrop-blur-xl text-popover-foreground text-xs px-4 py-2.5 rounded-xl shadow-2xl shadow-black/40 border border-white/10 pointer-events-none animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
-                            <div className="font-bold text-sm mb-0.5">
-                              {Math.ceil(day.count)} min
-                            </div>
-                            <div className="text-muted-foreground/80 text-[10px] font-medium">
-                              {formatDate(day.date)}
-                            </div>
-                            {/* Tooltip arrow */}
-                            <div className="absolute -bottom-1 right-3 w-2 h-2 bg-popover border-r border-b border-white/10 rotate-45" />
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none">
+                            <span className="font-medium">
+                              {day.count > 0
+                                ? `${Math.ceil(day.count)} min`
+                                : 'No activity'}
+                            </span>
+                            <span className="text-zinc-400">
+                              {' '}
+                              on {formatDate(day.date)}
+                            </span>
+                            {/* Arrow */}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-zinc-900" />
                           </div>
                         )}
                       </div>
@@ -309,23 +297,18 @@ export function ActivityGraph({
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Enhanced Legend */}
-        <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
-          <span className="text-xs text-muted-foreground/60">
-            Your watching patterns
-          </span>
-          <div className="flex items-center gap-2.5 text-xs text-muted-foreground/70">
-            <span className="font-medium">Less</span>
-            <div className="flex gap-[3px]">
-              <div className="w-[11px] h-[11px] rounded-[3px] bg-white/[0.04] border border-white/[0.06]" />
-              <div className="w-[11px] h-[11px] rounded-[3px] bg-gradient-to-br from-red-900/50 to-red-900/30" />
-              <div className="w-[11px] h-[11px] rounded-[3px] bg-gradient-to-br from-red-700/60 to-red-800/50" />
-              <div className="w-[11px] h-[11px] rounded-[3px] bg-gradient-to-br from-red-600/80 to-red-700/70" />
-              <div className="w-[11px] h-[11px] rounded-[3px] bg-gradient-to-br from-red-500 to-red-600" />
+          {/* Legend */}
+          <div className="flex items-center justify-end gap-1.5 mt-2 text-[11px] text-muted-foreground">
+            <span>Less</span>
+            <div className="flex gap-[2px]">
+              <div className="w-[10px] h-[10px] rounded-sm bg-white/[0.06]" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-red-900/60" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-red-700/80" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-red-600" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-red-500" />
             </div>
-            <span className="font-medium">More</span>
+            <span>More</span>
           </div>
         </div>
       </div>

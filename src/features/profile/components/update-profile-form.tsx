@@ -40,8 +40,19 @@ export function UpdateProfileForm() {
     });
   }, [debouncedUsername, user?.username]);
 
+  // Check if any changes were made
+  const hasChanges =
+    name.trim() !== (user?.name || '') || username !== (user?.username || '');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Don't call API if nothing changed
+    if (!hasChanges) {
+      toast.info('No changes to save');
+      return;
+    }
+
     if (username !== user?.username && isAvailable === false) return;
 
     setIsLoading(true);
@@ -168,6 +179,7 @@ export function UpdateProfileForm() {
         className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
         disabled={
           isLoading ||
+          !hasChanges ||
           (username !== user?.username && isAvailable === false) ||
           (username.length > 0 && username.length < 3)
         }

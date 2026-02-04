@@ -39,10 +39,10 @@ const ProfileSection = ({
   icon,
   children,
 }: ProfileSectionProps) => (
-  <section className="group">
+  <section className="group/section">
     <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-2xl shadow-2xl shadow-black/10">
       {/* Decorative gradient orb */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-red-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-red-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl opacity-0 group-hover/section:opacity-100 transition-opacity duration-700" />
 
       <div className="relative p-6 lg:p-8 space-y-5">
         {/* Section Header */}

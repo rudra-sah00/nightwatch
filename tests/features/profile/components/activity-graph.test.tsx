@@ -14,7 +14,7 @@ describe('ActivityGraph', () => {
   describe('rendering', () => {
     it('renders without crashing', () => {
       render(<ActivityGraph activity={[]} />);
-      expect(screen.getByText(/watched|minutes|hours/i)).toBeInTheDocument();
+      expect(screen.getByText(/minutes|hours/i)).toBeInTheDocument();
     });
 
     it('renders loading skeleton when isLoading is true', () => {
@@ -38,7 +38,7 @@ describe('ActivityGraph', () => {
         { date: '2026-01-15', count: 30, level: 1 },
       ];
       render(<ActivityGraph activity={lowActivity} />);
-      expect(screen.getByText('minutes')).toBeInTheDocument();
+      expect(screen.getByText(/30 minutes/i)).toBeInTheDocument();
     });
 
     it('displays total watch time in hours when 60 or more', () => {
@@ -46,14 +46,12 @@ describe('ActivityGraph', () => {
         { date: '2026-01-15', count: 120, level: 4 },
       ];
       render(<ActivityGraph activity={highActivity} />);
-      expect(screen.getByText('hours')).toBeInTheDocument();
+      expect(screen.getByText(/2 hours/i)).toBeInTheDocument();
     });
 
     it('shows descriptive text about watch time', () => {
       render(<ActivityGraph activity={mockActivity} />);
-      expect(
-        screen.getByText(/Total watch time in the last year/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/in the last year/i)).toBeInTheDocument();
     });
   });
 
@@ -64,28 +62,30 @@ describe('ActivityGraph', () => {
       expect(screen.getByText('More')).toBeInTheDocument();
     });
 
-    it('renders pattern description text', () => {
+    it('renders day labels for GitHub-style graph', () => {
       render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText('Your watching patterns')).toBeInTheDocument();
+      expect(screen.getByText('Mon')).toBeInTheDocument();
+      expect(screen.getByText('Wed')).toBeInTheDocument();
+      expect(screen.getByText('Fri')).toBeInTheDocument();
     });
   });
 
   describe('activity levels', () => {
     it('applies correct color classes based on activity level', () => {
       const { container } = render(<ActivityGraph activity={mockActivity} />);
-      // Check that gradient classes are applied for different levels
-      const gradientCells = container.querySelectorAll(
-        '[class*="bg-gradient-to-br"]',
-      );
-      expect(gradientCells.length).toBeGreaterThan(0);
+      // Check that red color classes are applied for different levels
+      const redCells = container.querySelectorAll('[class*="bg-red-"]');
+      expect(redCells.length).toBeGreaterThan(0);
     });
   });
 
   describe('tooltips', () => {
     it('has tooltip elements for activity cells', async () => {
       const { container } = render(<ActivityGraph activity={mockActivity} />);
-      // Tooltips are hidden by default but should exist in DOM
-      const tooltipContainers = container.querySelectorAll('.group');
+      // Tooltips are hidden by default but should exist in DOM (using group/cell now)
+      const tooltipContainers = container.querySelectorAll(
+        '[class*="group/cell"]',
+      );
       expect(tooltipContainers.length).toBeGreaterThan(0);
     });
   });
@@ -106,15 +106,7 @@ describe('ActivityGraph', () => {
     it('renders correctly with empty activity array', () => {
       render(<ActivityGraph activity={[]} />);
       // Should show 0 and minutes text
-      expect(screen.getByText('0')).toBeInTheDocument();
-      expect(screen.getByText('minutes')).toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has accessible video icon with aria-label', () => {
-      render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByLabelText('Video icon')).toBeInTheDocument();
+      expect(screen.getByText('0 minutes')).toBeInTheDocument();
     });
   });
 });
