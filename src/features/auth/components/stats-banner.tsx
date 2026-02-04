@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Play, Users } from 'lucide-react';
+import { Clock, Play } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlatformStats, type PlatformStats } from '@/features/auth/api';
 
@@ -112,14 +112,10 @@ export function StatsBanner() {
             </div>
           </div>
 
-          {/* Right: Secondary Stats */}
+          {/* Right: Live Status */}
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Users className="w-3.5 h-3.5" />
-              <span>{stats.totalUsers.toLocaleString()} users</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
-              <Clock className="w-3 h-3" />
+              <Clock className="w-3.5 h-3.5" />
               <span>Live stats</span>
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

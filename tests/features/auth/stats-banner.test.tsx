@@ -33,7 +33,6 @@ describe('StatsBanner', () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 36000,
       totalWatchTimeFormatted: '10h 0m',
-      totalUsers: 150,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
@@ -43,7 +42,6 @@ describe('StatsBanner', () => {
       expect(screen.getByText('10h 0m')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('150 users')).toBeInTheDocument();
     expect(screen.getByText('Content Streamed')).toBeInTheDocument();
     expect(screen.getByText('Live stats')).toBeInTheDocument();
   });
@@ -60,18 +58,17 @@ describe('StatsBanner', () => {
     });
   });
 
-  it('should format large user counts with locale string', async () => {
+  it('should format large watch times correctly', async () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 360000,
       totalWatchTimeFormatted: '100h 0m',
-      totalUsers: 1500,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
     render(<StatsBanner />);
 
     await waitFor(() => {
-      expect(screen.getByText('1,500 users')).toBeInTheDocument();
+      expect(screen.getByText('100h 0m')).toBeInTheDocument();
     });
   });
 
@@ -79,7 +76,6 @@ describe('StatsBanner', () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 3600,
       totalWatchTimeFormatted: '1h 0m',
-      totalUsers: 10,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
@@ -107,7 +103,6 @@ describe('StatsBanner', () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 3600,
       totalWatchTimeFormatted: '1h 0m',
-      totalUsers: 10,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
@@ -132,7 +127,6 @@ describe('StatsBanner', () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 3600,
       totalWatchTimeFormatted: '1h 0m',
-      totalUsers: 10,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
@@ -144,14 +138,13 @@ describe('StatsBanner', () => {
 
     // Check for SVG icons (lucide-react renders as SVG)
     const svgIcons = document.querySelectorAll('svg');
-    expect(svgIcons.length).toBeGreaterThanOrEqual(3); // Play, Users, Clock icons
+    expect(svgIcons.length).toBeGreaterThanOrEqual(2); // Play, Clock icons
   });
 
   it('should call getPlatformStats on mount', async () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 3600,
       totalWatchTimeFormatted: '1h 0m',
-      totalUsers: 10,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 
@@ -166,7 +159,6 @@ describe('StatsBanner', () => {
     vi.mocked(api.getPlatformStats).mockResolvedValue({
       totalWatchTimeSeconds: 3600,
       totalWatchTimeFormatted: '1h 0m',
-      totalUsers: 10,
       lastUpdated: '2026-02-04T12:00:00.000Z',
     });
 

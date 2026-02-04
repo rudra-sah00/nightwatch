@@ -98,7 +98,6 @@ export async function resetPassword(
 export interface PlatformStats {
   totalWatchTimeSeconds: number;
   totalWatchTimeFormatted: string;
-  totalUsers: number;
   lastUpdated: string;
 }
 
