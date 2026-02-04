@@ -21,6 +21,19 @@ const LoginForm = dynamic(
   },
 );
 
+const StatsBanner = dynamic(
+  () =>
+    import('@/features/auth/components').then((m) => ({
+      default: m.StatsBanner,
+    })),
+  {
+    loading: () => (
+      <div className="w-full max-w-md mx-auto mb-6 h-28 rounded-2xl bg-zinc-900/50 animate-pulse" />
+    ),
+    ssr: false,
+  },
+);
+
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +63,9 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative z-10">
+        {/* Stats Banner */}
+        <StatsBanner />
+
         {/* Brand */}
         <div className="flex flex-col items-center mb-8 text-center space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-gradient">

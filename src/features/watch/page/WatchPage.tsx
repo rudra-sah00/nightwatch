@@ -7,7 +7,6 @@ import { ControlBar } from '../controls/ControlBar';
 import { CenterPlayButton } from '../controls/PlayPause';
 import {
   applySubtitleSettings,
-  defaultSubtitleSettings,
   loadSubtitleSettings,
   type SubtitleSettings,
 } from '../controls/subtitle-settings';
