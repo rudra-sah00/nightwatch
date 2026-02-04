@@ -14,6 +14,14 @@ import {
 } from '../api';
 import type { WatchProgress } from '../types';
 
+// Hoisted to module level to avoid recreation on each render (rule 6.3)
+function formatRemainingTime(minutes: number) {
+  if (minutes < 60) return `${minutes}m left`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hours}h ${mins}m left` : `${hours}h left`;
+}
+
 interface ContinueWatchingProps {
   className?: string;
   onSelectContent?: (contentId: string) => void;
@@ -123,14 +131,6 @@ export function ContinueWatching({
     },
     [],
   );
-
-  // Format remaining time
-  const formatRemainingTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}m left`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m left` : `${hours}h left`;
-  };
 
   if (isLoading) {
     return (

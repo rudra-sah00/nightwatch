@@ -1,6 +1,7 @@
 import type { Participant } from 'livekit-client';
 import { Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
+import { useMemo } from 'react';
 import { useAudioStream } from '@/features/watch-party/hooks/useAudioStream';
 import { useParticipantTracks } from '@/features/watch-party/hooks/useParticipantTracks';
 import { cn } from '@/lib/utils';
@@ -32,6 +33,12 @@ export function ParticipantView({
   // Parse avatar from participant metadata
   const avatarUrl = parseAvatarFromMetadata(participant.metadata);
 
+  // Memoize video transform style to avoid inline object recreation (rule 5.4)
+  const videoStyle = useMemo(
+    () => ({ transform: isLocal ? 'scaleX(-1)' : 'scaleX(1)' }),
+    [isLocal],
+  );
+
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 group shadow-inner">
       {/* Video Element - Mirror local video for natural self-view, keep remote non-mirrored */}
@@ -44,7 +51,7 @@ export function ParticipantView({
         autoPlay
         playsInline
         muted={isLocal}
-        style={{ transform: isLocal ? 'scaleX(-1)' : 'scaleX(1)' }}
+        style={videoStyle}
       />
 
       {/* Audio element for remote participant audio */}

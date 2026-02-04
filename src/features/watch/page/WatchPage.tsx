@@ -83,17 +83,17 @@ export function WatchPage({
     }
   }, [onVideoRef]);
 
-  // Subtitle settings state - load from localStorage
+  // Subtitle settings state - lazy initialization from localStorage (rule 5.1)
   const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
-    defaultSubtitleSettings,
+    () => {
+      const saved = loadSubtitleSettings();
+      // Apply settings on initial load (client-side only)
+      if (typeof window !== 'undefined') {
+        applySubtitleSettings(saved);
+      }
+      return saved;
+    },
   );
-
-  // Load and apply saved subtitle settings on mount
-  useEffect(() => {
-    const savedSettings = loadSubtitleSettings();
-    setSubtitleSettings(savedSettings);
-    applySubtitleSettings(savedSettings);
-  }, []);
 
   // Mobile detection - extracted to custom hook
   const isMobile = useMobileDetection();

@@ -31,6 +31,9 @@ interface ActivityGraphProps {
 const DAY_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 const DAY_DISPLAY = ['', 'Mon', '', 'Wed', '', 'Fri', ''] as const;
 
+// Static style constant to avoid inline object recreation (rule 5.4)
+const MONTH_LABELS_STYLE = { height: '15px' } as const;
+
 // Pre-generate skeleton keys for stable rendering
 const SKELETON_DAYS = DAY_LABELS.map((d) => `skel-day-${d}`);
 const SKELETON_WEEKS = Array.from({ length: 53 }, (_, w) => ({
@@ -220,7 +223,7 @@ export function ActivityGraph({
             {/* Spacer for day labels column */}
             <div className="w-7 shrink-0" />
             {/* Month labels */}
-            <div className="relative flex-1" style={{ height: '15px' }}>
+            <div className="relative flex-1" style={MONTH_LABELS_STYLE}>
               {monthLabels.map((label) => (
                 <span
                   key={`${label.name}-${label.weekIndex}`}

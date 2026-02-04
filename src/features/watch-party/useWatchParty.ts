@@ -87,10 +87,27 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           setIsLoading(false);
 
           if (response.success && response.room) {
-            setRoom(response.room);
+            // Normalize URLs using streamToken to enable CORS-safe subtitle loading
+            const token = response.streamToken || '';
+            const normalizedRoom: WatchPartyRoom = {
+              ...response.room,
+              captionUrl: response.room.captionUrl
+                ? wrapInProxy(response.room.captionUrl, token)
+                : response.room.captionUrl,
+              spriteVtt: response.room.spriteVtt
+                ? wrapInProxy(response.room.spriteVtt, token)
+                : response.room.spriteVtt,
+              subtitleTracks: (response.room.subtitleTracks || []).map(
+                (track) => ({
+                  ...track,
+                  src: wrapInProxy(track.src, token),
+                }),
+              ),
+            };
+            setRoom(normalizedRoom);
             setIsConnected(true);
             setRequestStatus('joined');
-            resolve(response.room);
+            resolve(normalizedRoom);
           } else {
             setError(response.error || 'Failed to create room');
             setErrorCode(response.code || null);
@@ -134,10 +151,37 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
               if (response.guestToken && typeof window !== 'undefined') {
                 sessionStorage.setItem('guest_token', response.guestToken);
               }
-              setRoom(response.room);
-              setIsConnected(true);
-              setRequestStatus('joined');
-              resolve({ success: true, room: response.room });
+
+              // For hosts rejoining, fetch stream token to normalize URLs
+              // This enables CORS-safe subtitle loading
+              getPartyStreamToken((tokenResponse) => {
+                const token =
+                  tokenResponse.success && tokenResponse.token
+                    ? tokenResponse.token
+                    : '';
+
+                // Normalize URLs using the token
+                const normalizedRoom: WatchPartyRoom = {
+                  ...response.room!,
+                  captionUrl: response.room!.captionUrl
+                    ? wrapInProxy(response.room!.captionUrl, token)
+                    : response.room!.captionUrl,
+                  spriteVtt: response.room!.spriteVtt
+                    ? wrapInProxy(response.room!.spriteVtt, token)
+                    : response.room!.spriteVtt,
+                  subtitleTracks: (response.room!.subtitleTracks || []).map(
+                    (track) => ({
+                      ...track,
+                      src: wrapInProxy(track.src, token),
+                    }),
+                  ),
+                };
+
+                setRoom(normalizedRoom);
+                setIsConnected(true);
+                setRequestStatus('joined');
+                resolve({ success: true, room: normalizedRoom });
+              });
             } else {
               setRequestStatus('pending');
               resolve({ success: true, status: 'pending' });

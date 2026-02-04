@@ -92,7 +92,7 @@ type Callback<T> = (
  */
 export function createPartyRoom(
   payload: PartyCreatePayload,
-  callback: Callback<{ room?: WatchPartyRoom }>,
+  callback: Callback<{ room?: WatchPartyRoom; streamToken?: string }>,
 ): void {
   const socket = getSocket();
   if (!socket) {
@@ -157,6 +157,7 @@ export function requestJoinPartyRoom(
     status?: 'pending';
     room?: WatchPartyRoom;
     guestToken?: string;
+    streamToken?: string;
   }>,
 ): void {
   const socket = getSocket();

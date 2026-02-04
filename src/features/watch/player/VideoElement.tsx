@@ -1,8 +1,16 @@
 'use client';
 
 import type React from 'react';
-import { forwardRef, memo, useEffect } from 'react';
+import { forwardRef, memo, useEffect, useMemo } from 'react';
 import type { PlayerAction } from './types';
+
+// Hoisted style constant to prevent recreation on each render (rule 5.4)
+const VIDEO_STYLE = {
+  width: '100%',
+  height: '100%',
+  display: 'block',
+  objectFit: 'cover',
+} as const;
 
 interface VideoElementProps {
   dispatch: React.Dispatch<PlayerAction>;
@@ -161,26 +169,25 @@ export const VideoElement = memo(
       }
     }, [currentTrackId, videoRef, subtitleTracks]);
 
-    const tracks = [...subtitleTracks];
-    if (captionUrl && !tracks.some((t) => t.src === captionUrl)) {
-      tracks.push({
-        id: 'fallback-captions',
-        src: captionUrl,
-        label: 'English',
-        language: 'en',
-      });
-    }
+    // Memoize tracks to avoid array recreation on each render (rule 5.5)
+    const tracks = useMemo(() => {
+      const result = [...subtitleTracks];
+      if (captionUrl && !result.some((t) => t.src === captionUrl)) {
+        result.push({
+          id: 'fallback-captions',
+          src: captionUrl,
+          label: 'English',
+          language: 'en',
+        });
+      }
+      return result;
+    }, [subtitleTracks, captionUrl]);
 
     return (
       <video
         ref={ref}
         className="w-full h-full bg-black"
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          objectFit: 'cover',
-        }}
+        style={VIDEO_STYLE}
         playsInline
         crossOrigin="anonymous"
         onClick={onClick}
