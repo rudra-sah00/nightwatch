@@ -251,7 +251,7 @@ export function ActivityGraph({
 
             {/* Weeks grid */}
             <div className="flex gap-[2px]">
-              {weeks.map((week) => (
+              {weeks.map((week, weekIndex) => (
                 <div key={week[0].dateStr} className="flex flex-col gap-[2px]">
                   {week.map((day) => {
                     // GitHub-inspired colors (red theme)
@@ -262,6 +262,20 @@ export function ActivityGraph({
                       'bg-red-600', // Level 3
                       'bg-red-500', // Level 4
                     ];
+
+                    // Position tooltip based on week position to avoid overflow
+                    const isLeftSide = weekIndex < 10;
+                    const isRightSide = weekIndex > weeks.length - 10;
+                    const tooltipPosition = isLeftSide
+                      ? 'left-0'
+                      : isRightSide
+                        ? 'right-0'
+                        : 'left-1/2 -translate-x-1/2';
+                    const arrowPosition = isLeftSide
+                      ? 'left-1'
+                      : isRightSide
+                        ? 'right-1'
+                        : 'left-1/2 -translate-x-1/2';
 
                     return (
                       <div
@@ -276,7 +290,12 @@ export function ActivityGraph({
                       >
                         {/* Tooltip */}
                         {day.isValid && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none">
+                          <div
+                            className={cn(
+                              'absolute bottom-full mb-2 hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none',
+                              tooltipPosition,
+                            )}
+                          >
                             <span className="font-medium">
                               {day.count > 0
                                 ? `${Math.ceil(day.count)} min`
@@ -287,7 +306,12 @@ export function ActivityGraph({
                               on {formatDate(day.date)}
                             </span>
                             {/* Arrow */}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-zinc-900" />
+                            <div
+                              className={cn(
+                                'absolute top-full -mt-px border-4 border-transparent border-t-zinc-900',
+                                arrowPosition,
+                              )}
+                            />
                           </div>
                         )}
                       </div>
