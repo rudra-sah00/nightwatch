@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { getSocket } from '@/lib/ws';
 import { injectTokenIntoUrl, wrapInProxy } from '../watch';
 import {
   approveJoinRequest,
@@ -27,6 +28,7 @@ import {
   onUserTyping,
   rejectJoinRequest,
   requestJoinPartyRoom,
+  requestPartyState,
   sendPartyMessage,
   syncPartyState,
   updatePartyContent,
@@ -592,6 +594,64 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       hasFetchedMessages.current = false;
     }
   }, [isConnected]);
+
+  // Reconnection sync for guests - request state when socket reconnects
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !isConnected || !room) return;
+
+    const isHost = options.userId === room.hostId;
+    if (isHost) return; // Host doesn't need to sync from server
+
+    const handleReconnect = () => {
+      // Request current state from server after reconnection
+      requestPartyState((response) => {
+        if (response.success && response.state) {
+          options.onStateUpdate?.(response.state);
+        }
+      });
+    };
+
+    // Listen for reconnection events
+    socket.on('connect', handleReconnect);
+
+    // Also request state immediately when this effect runs (covers initial connection)
+    // Small delay to ensure socket room join is complete
+    const initialSyncTimer = setTimeout(() => {
+      requestPartyState((response) => {
+        if (response.success && response.state) {
+          options.onStateUpdate?.(response.state);
+        }
+      });
+    }, 500);
+
+    return () => {
+      socket.off('connect', handleReconnect);
+      clearTimeout(initialSyncTimer);
+    };
+  }, [isConnected, room, options]);
+
+  // Periodic state reconciliation for guests (every 5 seconds)
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !isConnected || !room) return;
+
+    const isHost = options.userId === room.hostId;
+    if (isHost) return; // Host doesn't need periodic sync
+
+    const reconciliationInterval = setInterval(() => {
+      requestPartyState((response) => {
+        if (response.success && response.state) {
+          // Only apply if state is significantly different (avoid constant micro-adjustments)
+          options.onStateUpdate?.(response.state);
+        }
+      });
+    }, 5000); // Every 5 seconds
+
+    return () => {
+      clearInterval(reconciliationInterval);
+    };
+  }, [isConnected, room, options]);
 
   // Cleanup on unmount (handles browser close, navigation, etc.)
   useEffect(() => {

@@ -65,22 +65,35 @@ export function UpdateProfileForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Display Name</Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your Name"
-          required
-        />
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+      <div className="space-y-3">
+        <Label
+          htmlFor="name"
+          className="text-sm font-medium text-foreground/90"
+        >
+          Display Name
+        </Label>
+        <div className="relative group">
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your Name"
+            required
+            className="h-12 pl-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+          />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+      <div className="space-y-3">
+        <Label
+          htmlFor="username"
+          className="text-sm font-medium text-foreground/90"
+        >
+          Username
+        </Label>
+        <div className="relative group">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">
             @
           </span>
           <Input
@@ -91,40 +104,44 @@ export function UpdateProfileForm() {
                 e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
               )
             }
-            className="pl-7 pr-10"
+            className="h-12 pl-9 pr-12 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
             placeholder="username"
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
             {isCheckingUsername ? (
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
             ) : (
               username !== user?.username &&
               username.length >= 3 &&
               (isAvailable ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <div className="p-1 rounded-full bg-emerald-500/20">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                </div>
               ) : (
-                <XCircle className="w-4 h-4 text-destructive" />
+                <div className="p-1 rounded-full bg-destructive/20">
+                  <XCircle className="w-4 h-4 text-destructive" />
+                </div>
               ))
             )}
           </div>
         </div>
         {username !== user?.username && (
-          <div className="flex flex-col gap-1">
-            <p className="text-[10px] text-muted-foreground">
+          <div className="flex flex-col gap-1.5 pl-1">
+            <p className="text-[11px] text-muted-foreground/60">
               Only lowercase letters, numbers, and underscores. (Min 3 chars)
             </p>
             {username.length > 0 && username.length < 3 && (
-              <p className="text-[10px] text-destructive flex items-center gap-1">
+              <p className="text-[11px] text-destructive/80 flex items-center gap-1.5">
                 <AlertCircle className="w-3 h-3" /> Too short
               </p>
             )}
             {isAvailable === false && username.length >= 3 && (
-              <p className="text-[10px] text-destructive flex items-center gap-1">
+              <p className="text-[11px] text-destructive/80 flex items-center gap-1.5">
                 <XCircle className="w-3 h-3" /> Username is already taken
               </p>
             )}
             {isAvailable === true && (
-              <p className="text-[10px] text-emerald-500 flex items-center gap-1">
+              <p className="text-[11px] text-emerald-400/80 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3 h-3" /> Username is available
               </p>
             )}
@@ -133,21 +150,22 @@ export function UpdateProfileForm() {
       </div>
 
       {error && (
-        <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-lg border border-destructive/20">
+        <div className="flex items-center gap-3 p-4 text-sm bg-destructive/10 text-destructive rounded-2xl border border-destructive/20">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
       )}
 
       {success && (
-        <div className="flex items-center gap-2 p-3 text-sm bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="flex items-center gap-3 p-4 text-sm bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           Profile updated successfully
         </div>
       )}
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
         disabled={
           isLoading ||
           (username !== user?.username && isAvailable === false) ||

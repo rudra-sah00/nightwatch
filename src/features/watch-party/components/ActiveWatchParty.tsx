@@ -212,34 +212,69 @@ export function ActiveWatchParty({
     if (!ref || !isHost) return;
 
     let lastSyncTime = 0;
-    const handleSync = () => {
-      onSync(ref.currentTime, !ref.paused, ref.playbackRate);
+    let syncDebounceTimer: NodeJS.Timeout | null = null;
+
+    // Immediate sync for critical state changes (play/pause)
+    const handleCriticalSync = () => {
+      const currentPlayState = !ref.paused;
+      // Always sync immediately for play/pause state changes
+      onSync(ref.currentTime, currentPlayState, ref.playbackRate);
       lastSyncTime = Date.now();
+
+      // Double-tap sync for pause to ensure delivery
+      // Pause is more critical - if guests miss it, experience is broken
+      if (!currentPlayState) {
+        // Schedule a confirmation sync after 100ms for pause events
+        setTimeout(() => {
+          if (ref.paused) {
+            onSync(ref.currentTime, false, ref.playbackRate);
+          }
+        }, 100);
+      }
     };
 
+    // Debounced sync for seek events (rapid seeking shouldn't spam)
+    const handleSeekSync = () => {
+      if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+      }
+      syncDebounceTimer = setTimeout(() => {
+        onSync(ref.currentTime, !ref.paused, ref.playbackRate);
+        lastSyncTime = Date.now();
+      }, 50);
+    };
+
+    // Periodic sync during playback
     const handleTimeUpdate = () => {
       const now = Date.now();
+      // Sync every second during playback for time drift correction
       if (!ref.paused && now - lastSyncTime > 1000) {
-        handleSync();
+        onSync(ref.currentTime, true, ref.playbackRate);
+        lastSyncTime = now;
       }
     };
 
     const handleRateChange = () => {
-      handleSync();
+      // Immediate sync for rate changes
+      onSync(ref.currentTime, !ref.paused, ref.playbackRate);
+      lastSyncTime = Date.now();
     };
 
-    ref.addEventListener('play', handleSync);
-    ref.addEventListener('pause', handleSync);
-    ref.addEventListener('seeked', handleSync);
+    ref.addEventListener('play', handleCriticalSync);
+    ref.addEventListener('pause', handleCriticalSync);
+    ref.addEventListener('seeked', handleSeekSync);
     ref.addEventListener('ratechange', handleRateChange);
     ref.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
-      ref.removeEventListener('play', handleSync);
-      ref.removeEventListener('pause', handleSync);
-      ref.removeEventListener('seeked', handleSync);
+      ref.removeEventListener('play', handleCriticalSync);
+      ref.removeEventListener('pause', handleCriticalSync);
+      ref.removeEventListener('seeked', handleSeekSync);
       ref.removeEventListener('ratechange', handleRateChange);
       ref.removeEventListener('timeupdate', handleTimeUpdate);
+      if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+      }
     };
   }, [videoElement, isHost, onSync]);
 

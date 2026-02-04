@@ -54,61 +54,108 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Change Password</h3>
-        <p className="text-sm text-muted-foreground">
-          Update your password to keep your account secure.
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+      <div className="space-y-3">
+        <Label
+          htmlFor="current"
+          className="text-sm font-medium text-foreground/90"
+        >
+          Current Password
+        </Label>
+        <Input
+          type="password"
+          id="current"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+        />
+      </div>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="new"
+            className="text-sm font-medium text-foreground/90"
+          >
+            New Password
+          </Label>
+          <PasswordInfo />
+        </div>
+        <Input
+          type="password"
+          id="new"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+        />
+      </div>
+      <div className="space-y-3">
+        <Label
+          htmlFor="confirm"
+          className="text-sm font-medium text-foreground/90"
+        >
+          Confirm New Password
+        </Label>
+        <Input
+          type="password"
+          id="confirm"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+        />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div className="space-y-2">
-          <Label htmlFor="current">Current Password</Label>
-          <Input
-            type="password"
-            id="current"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-          />
+      {error && (
+        <div className="flex items-center gap-3 p-4 text-sm text-destructive bg-destructive/10 rounded-2xl border border-destructive/20">
+          <span className="flex-shrink-0 p-1 rounded-full bg-destructive/20">
+            <svg
+              className="w-3 h-3"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-label="Error"
+              role="img"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </span>
+          {error}
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="new">New Password</Label>
-            <PasswordInfo />
-          </div>
-          <Input
-            type="password"
-            id="new"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
+      )}
+      {success && (
+        <div className="flex items-center gap-3 p-4 text-sm text-emerald-400 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+          <span className="flex-shrink-0 p-1 rounded-full bg-emerald-500/20">
+            <svg
+              className="w-3 h-3"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-label="Success"
+              role="img"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </span>
+          Password updated successfully
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm New Password</Label>
-          <Input
-            type="password"
-            id="confirm"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
+      )}
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        {success && (
-          <p className="text-sm text-green-500">
-            Password updated successfully
-          </p>
-        )}
-
-        <Button type="submit" disabled={isLoading}>
-          {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Update Password
-        </Button>
-      </form>
-    </div>
+      <Button
+        type="submit"
+        disabled={isLoading}
+        className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+      >
+        {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+        Update Password
+      </Button>
+    </form>
   );
 }

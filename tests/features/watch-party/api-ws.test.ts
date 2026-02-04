@@ -387,6 +387,33 @@ describe('Watch Party WebSocket API', () => {
     });
   });
 
+  describe('requestPartyState', () => {
+    it('should emit party:request_state', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as Socket);
+
+      const callback = vi.fn();
+      api.requestPartyState(callback);
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'party:request_state',
+        {},
+        callback,
+      );
+    });
+
+    it('should handle no socket connection', () => {
+      vi.mocked(ws.getSocket).mockReturnValue(null);
+
+      const callback = vi.fn();
+      api.requestPartyState(callback);
+
+      expect(callback).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not connected',
+      });
+    });
+  });
+
   describe('Event Listeners', () => {
     describe('onPartyStateUpdate', () => {
       it('should register listener and return cleanup function', () => {

@@ -237,6 +237,20 @@ export function syncPartyState(
 }
 
 /**
+ * Request current playback state from server (for guests/reconnection)
+ */
+export function requestPartyState(
+  callback: Callback<{ state?: PartyStateUpdate }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('party:request_state', {}, callback);
+}
+
+/**
  * Get room info via WebSocket
  */
 export function getPartyRoom(
