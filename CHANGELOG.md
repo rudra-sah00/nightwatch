@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.3...v1.5.0) (2026-02-04)
+
+
+### Features
+
+* add stats banner to login page ([be63ce1](https://github.com/rudra-sah00/watch-rudra/commit/be63ce10fe7532fb570d5e6316d9ade807217eb5))
+
 ## [1.4.3](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.2...v1.4.3) (2026-02-04)
 
 
