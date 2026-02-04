@@ -6,15 +6,35 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
-      - 'CHANGELOG.md'
-      - 'package.json'  # Skip when only version bump
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
+  # Check if this is a release-please version bump commit (skip everything)
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      is_release_commit: ${{ steps.check.outputs.is_release_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check if release-please commit
+        id: check
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          if [[ "$COMMIT_MSG" == "chore(main): release"* ]]; then
+            echo "This is a release-please version bump commit - skipping workflow"
+            echo "is_release_commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release_commit=false" >> $GITHUB_OUTPUT
+          fi
+
   release-please:
+    needs: check-commit
+    if: ${{ needs.check-commit.outputs.is_release_commit != 'true' }}
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
@@ -26,30 +46,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
-
-  # Check if this is a release-please version bump commit (skip deploy)
-  check-commit:
-    runs-on: ubuntu-latest
-    outputs:
-      should_deploy: ${{ steps.check.outputs.should_deploy }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      - name: Check if release-please commit
-        id: check
-        run: |
-          COMMIT_MSG=$(git log -1 --pretty=%s)
-          if [[ "$COMMIT_MSG" == "chore(main): release"* ]]; then
-            echo "Skipping deploy - this is a release-please version bump"
-            echo "should_deploy=false" >> $GITHUB_OUTPUT
-          else
-            echo "should_deploy=true" >> $GITHUB_OUTPUT
-          fi
           
   deploy:
-    needs: [release-please, check-commit]
-    if: ${{ needs.check-commit.outputs.should_deploy == 'true' }}
+    needs: [check-commit, release-please]
+    if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' }}
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
