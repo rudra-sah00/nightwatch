@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.1...v1.4.2) (2026-02-04)
+
+
+### Performance Improvements
+
+* apply React best practices from AGENTS.md ([c6ca9d5](https://github.com/rudra-sah00/watch-rudra/commit/c6ca9d5d2b868ecdea1fba26d2a08c14cfe072c9))
+
 ## [1.4.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.0...v1.4.1) (2026-02-04)
 
 
