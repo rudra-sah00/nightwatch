@@ -1,5 +1,6 @@
 'use client';
 import { ArrowLeft, SkipBack, SkipForward, Users } from 'lucide-react';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { PlayerState } from '../player/types';
 import { AudioSelector } from './AudioSelector';
@@ -83,19 +84,28 @@ export function ControlBar({
   readOnly = false,
   hideBackButton = false,
 }: ControlBarProps) {
-  // Convert audio tracks for selectors
-  const audioTracksForMenu = state.audioTracks.map((track) => ({
-    id: track.id,
-    label: track.label,
-    language: track.language,
-  }));
+  // Memoize track transforms to avoid re-creation on every render
+  // Per AGENTS.md 5.5: transforms like .map() should be memoized when passed to child components
+  const audioTracksForMenu = useMemo(
+    () =>
+      state.audioTracks.map((track) => ({
+        id: track.id,
+        label: track.label,
+        language: track.language,
+      })),
+    [state.audioTracks],
+  );
 
-  // Convert subtitle tracks for selectors
-  const subtitleTracksForMenu = state.subtitleTracks.map((track) => ({
-    id: track.id,
-    label: track.label,
-    language: track.language,
-  }));
+  // Memoize subtitle tracks transform
+  const subtitleTracksForMenu = useMemo(
+    () =>
+      state.subtitleTracks.map((track) => ({
+        id: track.id,
+        label: track.label,
+        language: track.language,
+      })),
+    [state.subtitleTracks],
+  );
 
   // Get current track IDs
   const currentAudioId = state.currentAudioTrack;

@@ -1,9 +1,18 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // CRITICAL: Optimize barrel imports for lucide-react (40% faster cold starts)
+  // CRITICAL: Optimize barrel imports for faster cold starts and builds
+  // Per AGENTS.md 2.1: Avoid Barrel File Imports - these packages have many re-exports
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: [
+      'lucide-react', // 1,500+ icons, ~200-800ms import savings
+      'sonner', // Toast library
+      'livekit-client', // WebRTC library with many exports
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+    ],
   },
   images: {
     remotePatterns: [
