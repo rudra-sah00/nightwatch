@@ -256,7 +256,7 @@ export function ActivityGraph({
             <div className="flex gap-[2px]">
               {weeks.map((week, weekIndex) => (
                 <div key={week[0].dateStr} className="flex flex-col gap-[2px]">
-                  {week.map((day) => {
+                  {week.map((day, dayIndex) => {
                     // GitHub-inspired colors (red theme)
                     const colors = [
                       'bg-white/[0.06]', // Level 0 - empty
@@ -266,19 +266,29 @@ export function ActivityGraph({
                       'bg-red-500', // Level 4
                     ];
 
-                    // Position tooltip based on week position to avoid overflow
+                    // Position tooltip based on week position to avoid horizontal overflow
                     const isLeftSide = weekIndex < 10;
                     const isRightSide = weekIndex > weeks.length - 10;
-                    const tooltipPosition = isLeftSide
+                    const tooltipHorizontal = isLeftSide
                       ? 'left-0'
                       : isRightSide
                         ? 'right-0'
                         : 'left-1/2 -translate-x-1/2';
-                    const arrowPosition = isLeftSide
+                    const arrowHorizontal = isLeftSide
                       ? 'left-1'
                       : isRightSide
                         ? 'right-1'
                         : 'left-1/2 -translate-x-1/2';
+
+                    // Position tooltip based on day position to avoid vertical overflow
+                    // Top rows (0-2) show tooltip below, bottom rows (3-6) show above
+                    const isTopRow = dayIndex < 3;
+                    const tooltipVertical = isTopRow
+                      ? 'top-full mt-2'
+                      : 'bottom-full mb-2';
+                    const arrowVertical = isTopRow
+                      ? 'bottom-full -mb-px border-b-zinc-900 border-t-transparent'
+                      : 'top-full -mt-px border-t-zinc-900 border-b-transparent';
 
                     return (
                       <div
@@ -295,8 +305,9 @@ export function ActivityGraph({
                         {day.isValid && (
                           <div
                             className={cn(
-                              'absolute bottom-full mb-2 hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none',
-                              tooltipPosition,
+                              'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none',
+                              tooltipHorizontal,
+                              tooltipVertical,
                             )}
                           >
                             <span className="font-medium">
@@ -311,8 +322,9 @@ export function ActivityGraph({
                             {/* Arrow */}
                             <div
                               className={cn(
-                                'absolute top-full -mt-px border-4 border-transparent border-t-zinc-900',
-                                arrowPosition,
+                                'absolute border-4 border-transparent',
+                                arrowHorizontal,
+                                arrowVertical,
                               )}
                             />
                           </div>
