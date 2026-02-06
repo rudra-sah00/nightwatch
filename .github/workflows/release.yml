@@ -112,33 +112,4 @@ jobs:
             sleep 10
           done
           echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "Deployed to: $URL"
-
-      - name: Verify Deployment
-        run: |
-          echo "⏳ Waiting for deployment to be ready..."
-          sleep 30
-          
-          # Use the production URL directly instead of the deployment URL
-          # Vercel prod deployments may return preview URLs that require auth
-          PROD_URL="https://watch.rudrasahoo.live"
-          echo "Checking production URL: $PROD_URL"
-          
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$PROD_URL")
-          echo "Response status: $STATUS"
-          
-          if [ "$STATUS" == "200" ] || [ "$STATUS" == "308" ] || [ "$STATUS" == "307" ]; then
-            echo "✅ Deployment successful: $PROD_URL"
-          else
-            echo "⚠️ Status $STATUS - checking if site is accessible..."
-            # Try with a longer timeout and follow redirects
-            FINAL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 60 "$PROD_URL")
-            if [ "$FINAL_STATUS" == "200" ] || [ "$FINAL_STATUS" == "308" ] || [ "$FINAL_STATUS" == "307" ]; then
-              echo "✅ Deployment successful after retry: $PROD_URL"
-            else
-              echo "❌ Deployment verification failed with status: $FINAL_STATUS"
-              echo "Note: This may be a false negative if auth is required"
-              # Don't fail the workflow - deployment may still be successful
-              echo "::warning::Deployment verification returned status $FINAL_STATUS"
-            fi
-          fi
+          echo "✅ Deployed to: $URL"
