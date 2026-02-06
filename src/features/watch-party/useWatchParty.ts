@@ -690,7 +690,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           options.onStateUpdate?.(response.state);
         }
       });
-    }, 5000); // Every 5 seconds
+    }, 10000); // Every 10 seconds - reduced to minimize unnecessary corrections
 
     return () => {
       clearInterval(reconciliationInterval);

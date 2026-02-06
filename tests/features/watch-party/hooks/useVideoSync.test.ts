@@ -40,12 +40,13 @@ describe('useVideoSync', () => {
     vi.useRealTimers();
   });
 
-  describe('syncVideo', () => {
-    it('should sync time when difference exceeds threshold', () => {
+  describe('syncVideo - drift correction', () => {
+    it('should hard seek when drift exceeds hard threshold (2.0s)', () => {
+      mockVideo.currentTime = 0;
       const { result } = renderHook(() => useVideoSync(videoRef));
 
       const state: PartyStateUpdate = {
-        currentTime: 10,
+        currentTime: 10, // 10s drift - well above 2.0s threshold
         isPlaying: false,
         timestamp: Date.now(),
       };
@@ -57,12 +58,12 @@ describe('useVideoSync', () => {
       expect(mockVideo.currentTime).toBe(10);
     });
 
-    it('should not sync time when difference is below threshold', () => {
-      mockVideo.currentTime = 10.3;
+    it('should not hard seek when drift is within soft threshold (0.3s)', () => {
+      mockVideo.currentTime = 10.2;
       const { result } = renderHook(() => useVideoSync(videoRef));
 
       const state: PartyStateUpdate = {
-        currentTime: 10.5,
+        currentTime: 10.4, // 0.2s drift - below 0.3s threshold
         isPlaying: false,
         timestamp: Date.now(),
       };
@@ -71,10 +72,98 @@ describe('useVideoSync', () => {
         result.current.syncVideo(state);
       });
 
-      // Should not change because difference (0.2) is below threshold (0.5)
-      expect(mockVideo.currentTime).toBe(10.3);
+      // Should not seek - drift is acceptable (below 0.3s)
+      expect(mockVideo.currentTime).toBe(10.2);
     });
 
+    it('should use gradual rate correction for medium drift (0.3s - 2.0s) when playing', () => {
+      mockVideo.currentTime = 0;
+      mockVideo.paused = false;
+      const { result } = renderHook(() => useVideoSync(videoRef));
+
+      const state: PartyStateUpdate = {
+        currentTime: 1.0, // 1.0s drift - in gradual correction zone
+        isPlaying: true,
+        timestamp: Date.now(),
+      };
+
+      act(() => {
+        result.current.syncVideo(state);
+      });
+
+      // Should NOT hard seek (drift < 2.0s)
+      expect(mockVideo.currentTime).toBe(0);
+      // Should apply catch-up rate (1.03x)
+      expect(mockVideo.playbackRate).toBe(1.03);
+    });
+
+    it('should slow down when guest is ahead of host', () => {
+      mockVideo.currentTime = 1.5;
+      mockVideo.paused = false;
+      const { result } = renderHook(() => useVideoSync(videoRef));
+
+      const state: PartyStateUpdate = {
+        currentTime: 0.5, // Guest is 1.0s ahead of host
+        isPlaying: true,
+        timestamp: Date.now(),
+      };
+
+      act(() => {
+        result.current.syncVideo(state);
+      });
+
+      // Should apply slow-down rate (0.97x)
+      expect(mockVideo.playbackRate).toBe(0.97);
+    });
+
+    it('should return to host rate after correction timeout', () => {
+      mockVideo.currentTime = 0;
+      mockVideo.paused = false;
+      const { result } = renderHook(() => useVideoSync(videoRef));
+
+      const state: PartyStateUpdate = {
+        currentTime: 0.5, // 0.5s drift - gradual correction zone
+        isPlaying: true,
+        playbackRate: 1.5, // Host is playing at 1.5x
+        timestamp: Date.now(),
+      };
+
+      act(() => {
+        result.current.syncVideo(state);
+      });
+
+      // Initially should be catch-up rate (1.5 * 1.03)
+      expect(mockVideo.playbackRate).toBeCloseTo(1.545, 2);
+
+      // After correction timeout, should return to host rate
+      act(() => {
+        vi.advanceTimersByTime(6000); // Advance past correction timeout
+      });
+
+      expect(mockVideo.playbackRate).toBe(1.5);
+    });
+
+    it('should hard seek when paused with significant drift', () => {
+      mockVideo.currentTime = 10;
+      mockVideo.paused = true;
+      const { result } = renderHook(() => useVideoSync(videoRef));
+
+      const state: PartyStateUpdate = {
+        currentTime: 15, // 5s drift while paused
+        isPlaying: false,
+        timestamp: Date.now(),
+      };
+
+      act(() => {
+        result.current.syncVideo(state);
+      });
+
+      // Should seek immediately when paused (no gradual correction for paused state)
+      expect(mockVideo.currentTime).toBe(15);
+    });
+  });
+
+  describe('syncVideo - play/pause state', () => {
     it('should play video when isPlaying is true and video is paused', () => {
       mockVideo.paused = true;
       const { result } = renderHook(() => useVideoSync(videoRef));
@@ -109,11 +198,12 @@ describe('useVideoSync', () => {
       expect(mockVideo.pause).toHaveBeenCalled();
     });
 
-    it('should sync playback rate', () => {
+    it('should sync playback rate from host', () => {
+      mockVideo.paused = true;
       const { result } = renderHook(() => useVideoSync(videoRef));
 
       const state: PartyStateUpdate = {
-        currentTime: 10,
+        currentTime: 0,
         isPlaying: false,
         playbackRate: 1.5,
         timestamp: Date.now(),
@@ -131,9 +221,9 @@ describe('useVideoSync', () => {
       const { result } = renderHook(() => useVideoSync(videoRef));
 
       const state: PartyStateUpdate = {
-        currentTime: 10,
+        currentTime: 0,
         isPlaying: false,
-        playbackRate: 5, // Invalid - above max
+        playbackRate: 5, // Invalid - above max (2.0)
         timestamp: Date.now(),
       };
 
@@ -143,8 +233,10 @@ describe('useVideoSync', () => {
 
       expect(mockVideo.playbackRate).toBe(1); // Should remain unchanged
     });
+  });
 
-    it('should handle metadata not loaded - wait for loadedmetadata event', () => {
+  describe('syncVideo - metadata not loaded', () => {
+    it('should wait for loadedmetadata event', () => {
       mockVideo.duration = Number.NaN;
       let loadedMetadataCallback: () => void;
       mockVideo.addEventListener = vi.fn((event, callback) => {
@@ -183,7 +275,6 @@ describe('useVideoSync', () => {
     it('should retry play on autoplay restriction', async () => {
       const playError = new Error('Autoplay blocked');
       playError.name = 'NotAllowedError';
-      // First call rejects, second call (muted) resolves
       mockVideo.play = vi
         .fn()
         .mockRejectedValueOnce(playError)
@@ -200,14 +291,12 @@ describe('useVideoSync', () => {
 
       await act(async () => {
         result.current.syncVideo(state);
-        // Wait for promises to settle
         await Promise.resolve();
         await Promise.resolve();
       });
 
       // Should have tried to play muted
       expect(mockVideo.muted).toBe(true);
-      // Play should have been called at least twice
       expect(mockVideo.play).toHaveBeenCalledTimes(2);
     });
   });
@@ -216,16 +305,13 @@ describe('useVideoSync', () => {
     it('should return true when video matches last applied state', () => {
       mockVideo.currentTime = 10;
       mockVideo.paused = false;
-      mockVideo.playbackRate = 1.5;
 
       const { result } = renderHook(() => useVideoSync(videoRef));
 
-      // First sync to set lastAppliedState
       act(() => {
         result.current.syncVideo({
           currentTime: 10,
           isPlaying: true,
-          playbackRate: 1.5,
           timestamp: Date.now(),
         });
       });
@@ -236,7 +322,6 @@ describe('useVideoSync', () => {
     it('should return false when play state does not match', () => {
       mockVideo.currentTime = 10;
       mockVideo.paused = true; // Mismatch - should be playing
-      mockVideo.playbackRate = 1.5;
 
       const { result } = renderHook(() => useVideoSync(videoRef));
 
@@ -244,12 +329,29 @@ describe('useVideoSync', () => {
         result.current.syncVideo({
           currentTime: 10,
           isPlaying: true,
-          playbackRate: 1.5,
           timestamp: Date.now(),
         });
       });
 
       expect(result.current.verifySyncState()).toBe(false);
+    });
+
+    it('should return true for drift within hard threshold', () => {
+      mockVideo.currentTime = 11.5; // 1.5s drift from applied state
+      mockVideo.paused = false;
+
+      const { result } = renderHook(() => useVideoSync(videoRef));
+
+      act(() => {
+        result.current.syncVideo({
+          currentTime: 10,
+          isPlaying: true,
+          timestamp: Date.now(),
+        });
+      });
+
+      // 1.5s drift is within 2.0s hard threshold, so should be considered synced
+      expect(result.current.verifySyncState()).toBe(true);
     });
 
     it('should return true when no state has been applied yet', () => {
@@ -262,7 +364,6 @@ describe('useVideoSync', () => {
     it('should re-apply last known state', () => {
       const { result } = renderHook(() => useVideoSync(videoRef));
 
-      // First sync
       act(() => {
         result.current.syncVideo({
           currentTime: 10,
@@ -274,7 +375,6 @@ describe('useVideoSync', () => {
       // Change video state manually
       mockVideo.currentTime = 50;
 
-      // Force resync
       act(() => {
         result.current.forceResync();
       });
@@ -309,7 +409,7 @@ describe('useVideoSync', () => {
       act(() => {
         result.current.syncVideo({
           currentTime: 20,
-          isPlaying: true,
+          isPlaying: false,
           timestamp: Date.now(),
         });
       });

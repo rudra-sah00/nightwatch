@@ -247,8 +247,8 @@ export function ActiveWatchParty({
     // Periodic sync during playback
     const handleTimeUpdate = () => {
       const now = Date.now();
-      // Sync every second during playback for time drift correction
-      if (!ref.paused && now - lastSyncTime > 1000) {
+      // Sync every 2 seconds during playback for time drift correction
+      if (!ref.paused && now - lastSyncTime > 2000) {
         onSync(ref.currentTime, true, ref.playbackRate);
         lastSyncTime = now;
       }
