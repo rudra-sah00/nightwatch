@@ -107,9 +107,24 @@ export interface PartySyncPayload {
 
 export interface PartyStateUpdate {
   currentTime: number;
+  videoTime?: number; // New: Current video time at serverTime
   isPlaying: boolean;
   playbackRate?: number;
   timestamp: number;
+  serverTime?: number; // New: Server timestamp for clock sync
+  eventType?: 'play' | 'pause' | 'seek' | 'rate' | 'init';
+  fromHost?: boolean;
+}
+
+export interface PartyPingPayload {
+  t1: number;
+}
+
+export interface PartyEvent {
+  eventType: 'play' | 'pause' | 'seek' | 'rate';
+  videoTime: number;
+  playbackRate?: number;
+  wasPlaying?: boolean;
 }
 
 export interface PartyMemberJoined {

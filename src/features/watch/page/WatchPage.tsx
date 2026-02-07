@@ -235,6 +235,7 @@ export function WatchPage({
     handleAudioChange,
     handleSubtitleChange,
     handleRetry,
+    handleInteraction,
   } = usePlayerHandlers({
     videoRef,
     dispatch,
@@ -386,6 +387,7 @@ export function WatchPage({
           readOnly={readOnly}
           onSidebarToggle={onSidebarToggle}
           hideBackButton={hideBackButton}
+          onInteraction={handleInteraction}
         />
       </div>
     </section>

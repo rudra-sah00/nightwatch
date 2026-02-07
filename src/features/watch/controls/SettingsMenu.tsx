@@ -25,6 +25,7 @@ interface SettingsMenuProps {
   onSubtitleChange?: (id: string | null) => void;
   onAudioChange?: (id: string) => void;
   disabled?: boolean;
+  onInteraction?: (isActive: boolean) => void;
 }
 
 type MenuScreen = 'main' | 'quality' | 'speed' | 'subtitles' | 'audio';
@@ -44,6 +45,7 @@ export function SettingsMenu({
   onSubtitleChange,
   onAudioChange,
   disabled = false,
+  onInteraction,
 }: SettingsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<MenuScreen>('main');
@@ -55,18 +57,28 @@ export function SettingsMenu({
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
         setCurrentScreen('main');
+        onInteraction?.(false);
       }
     };
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      onInteraction?.(true);
+    } else {
+      onInteraction?.(false);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      // Ensure we clear interaction on unmount/cleanup if open
+      if (isOpen) onInteraction?.(false);
+    };
+  }, [isOpen, onInteraction]);
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
+    const newState = !isOpen;
+    setIsOpen(newState);
+    // Interaction state handled by useEffect
+    if (!newState) {
       setCurrentScreen('main');
     }
   };
@@ -340,6 +352,7 @@ export function SettingsMenu({
       <button
         type="button"
         onClick={toggleMenu}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn(
           'p-3 rounded-full',
           'transition-all duration-300 ease-out',

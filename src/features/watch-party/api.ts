@@ -5,12 +5,14 @@ import type {
   PartyAdminRequest,
   PartyClosed,
   PartyCreatePayload,
+  PartyEvent, // New
   PartyJoinApproved,
   PartyJoinRejected,
   PartyJoinRequestPayload,
   PartyKicked,
   PartyMemberJoined,
   PartyMemberLeft,
+  PartyPingPayload, // New
   PartyStateUpdate,
   PartySyncPayload,
   RoomPreview,
@@ -86,6 +88,36 @@ export async function getRoomDetails(
 type Callback<T> = (
   response: { success: boolean; error?: string; code?: string } & T,
 ) => void;
+
+/**
+ * Emit ping for clock synchronization
+ */
+export function emitPing(
+  payload: PartyPingPayload,
+  callback?: Callback<{ t1: number; serverTime: number }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' } as any);
+    return;
+  }
+  socket.emit('party:ping', payload, callback);
+}
+
+/**
+ * Emit party event (play/pause/seek/rate)
+ */
+export function emitPartyEvent(
+  payload: PartyEvent,
+  callback?: Callback<{ serverTime: number }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' } as any);
+    return;
+  }
+  socket.emit('party:event', payload, callback);
+}
 
 /**
  * Create a watch party room

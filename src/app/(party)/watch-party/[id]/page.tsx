@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { checkRoomExists } from '@/features/watch-party/api';
-import { useVideoSync } from '@/features/watch-party/hooks/useVideoSync';
+import { usePredictiveSync } from '@/features/watch-party/hooks/usePredictiveSync'; // New
 import type { RoomPreview } from '@/features/watch-party/types';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
 import { getSocket, initSocket } from '@/lib/ws';
@@ -91,9 +91,6 @@ export default function WatchPartyPage() {
   const isGuestSocketReady = useGuestSocket(user);
   const roomCreationTimeRef = useRef<number>(0);
 
-  // Use video sync hook for clean separation of concerns
-  const { syncVideo } = useVideoSync(videoRef);
-
   const {
     room,
     isLoading,
@@ -102,7 +99,9 @@ export default function WatchPartyPage() {
     requestJoin,
     leaveRoom,
     cancelRequest,
-    sync,
+    emitEvent,
+    clockOffset,
+    isCalibrated,
     isConnected,
     requestStatus,
     approveMember,
@@ -116,9 +115,15 @@ export default function WatchPartyPage() {
     handleTypingStop,
     updateContent,
   } = useWatchParty({
-    onStateUpdate: syncVideo,
+    onStateUpdate: (state) => {
+      // Defer to predictive sync hook
+      applyState(state);
+    },
     userId: user?.id,
   });
+
+  // predictive sync hook
+  const { applyState } = usePredictiveSync(videoRef, clockOffset, isCalibrated);
 
   const isHost = user?.id === room?.hostId;
   const prevMemberCount = useRef(0);
@@ -262,7 +267,11 @@ export default function WatchPartyPage() {
         // Send sync multiple times to ensure new member receives it
         const sendSync = () => {
           if (currentRef) {
-            sync(currentRef.currentTime, !currentRef.paused);
+            emitEvent({
+              eventType: currentRef.paused ? 'pause' : 'play',
+              videoTime: currentRef.currentTime,
+              playbackRate: currentRef.playbackRate,
+            });
           }
         };
         setTimeout(sendSync, 500);
@@ -271,7 +280,7 @@ export default function WatchPartyPage() {
       }
     }
     prevMemberCount.current = room.members.length;
-  }, [room?.members, isHost, sync, room]);
+  }, [room?.members, isHost, room, emitEvent]);
 
   // Auto-join for Host (Only if authenticated)
   const hasAttemptedAutoJoin = useRef(false);
@@ -390,7 +399,7 @@ export default function WatchPartyPage() {
           onReject={rejectMember}
           onCopyLink={copyInviteLink}
           onLeave={handleLeave}
-          onSync={sync}
+          onPartyEvent={emitEvent}
           videoRef={videoRef}
           messages={messages}
           onSendMessage={sendMessage}

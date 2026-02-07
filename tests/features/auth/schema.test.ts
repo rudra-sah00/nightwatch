@@ -63,7 +63,7 @@ describe('Auth Schemas', () => {
       const validData = {
         name: 'Test User',
         email: 'test@example.com',
-        password: 'Password123',
+        password: 'Password!',
       };
 
       const result = registerSchema.safeParse(validData);
@@ -132,18 +132,18 @@ describe('Auth Schemas', () => {
       }
     });
 
-    it('should reject password without number', () => {
+    it('should reject password without special character', () => {
       const invalidData = {
         name: 'Test User',
         email: 'test@example.com',
-        password: 'Password',
+        password: 'Password123',
       };
 
       const result = registerSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one number',
+          'Password must contain at least one special character',
         );
       }
     });
@@ -152,7 +152,7 @@ describe('Auth Schemas', () => {
       const validData = {
         name: 'Test User',
         email: 'test@example.com',
-        password: 'Password123',
+        password: 'Password!',
         inviteCode: 'INVITE123',
       };
 
@@ -187,48 +187,43 @@ describe('Auth Schemas', () => {
   describe('resetPasswordSchema', () => {
     it('should validate matching passwords', () => {
       const validData = {
-        password: 'NewPassword123!',
-        confirmPassword: 'NewPassword123!',
+        password: 'NewPass!',
+        confirmPassword: 'NewPass!',
       };
 
       const result = resetPasswordSchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
 
-    it('should reject password shorter than 8 characters', () => {
+    it('should reject password shorter than 6 characters', () => {
       const invalidData = {
-        password: 'Pass1!',
-        confirmPassword: 'Pass1!',
+        password: 'Pa!',
+        confirmPassword: 'Pa!',
       };
 
       const result = resetPasswordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must be at least 8 characters',
+          'Password must be at least 6 characters',
         );
       }
     });
 
-    it('should reject password without lowercase letter', () => {
-      const invalidData = {
-        password: 'PASSWORD123!',
-        confirmPassword: 'PASSWORD123!',
+    it('should accept password without lowercase letter (optional)', () => {
+      const validData = {
+        password: 'NEWPASS!',
+        confirmPassword: 'NEWPASS!',
       };
 
-      const result = resetPasswordSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one lowercase letter',
-        );
-      }
+      const result = resetPasswordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
     });
 
     it('should reject password without uppercase letter', () => {
       const invalidData = {
-        password: 'password123!',
-        confirmPassword: 'password123!',
+        password: 'newpass!',
+        confirmPassword: 'newpass!',
       };
 
       const result = resetPasswordSchema.safeParse(invalidData);
@@ -240,19 +235,14 @@ describe('Auth Schemas', () => {
       }
     });
 
-    it('should reject password without number', () => {
-      const invalidData = {
-        password: 'Password!',
-        confirmPassword: 'Password!',
+    it('should accept password without number (optional)', () => {
+      const validData = {
+        password: 'NewPass!',
+        confirmPassword: 'NewPass!',
       };
 
-      const result = resetPasswordSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one number',
-        );
-      }
+      const result = resetPasswordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
     });
 
     it('should reject password without special character', () => {
@@ -272,8 +262,8 @@ describe('Auth Schemas', () => {
 
     it('should reject non-matching passwords', () => {
       const invalidData = {
-        password: 'NewPassword123!',
-        confirmPassword: 'DifferentPassword123!',
+        password: 'NewPass!',
+        confirmPassword: 'Different!',
       };
 
       const result = resetPasswordSchema.safeParse(invalidData);

@@ -82,6 +82,7 @@ export function Volume({
       <button
         type="button"
         onClick={onMuteToggle}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn(
           'p-3 rounded-full',
           'transition-all duration-200 ease-out',

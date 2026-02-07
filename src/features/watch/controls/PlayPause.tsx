@@ -31,6 +31,7 @@ export function PlayPause({
     <button
       type="button"
       onClick={onToggle}
+      onMouseDown={(e) => e.preventDefault()}
       className={cn(
         'rounded-full flex items-center justify-center',
         'transition-all duration-300 ease-out',
@@ -111,6 +112,7 @@ export function CenterPlayButton({
       )}
       style={{ pointerEvents: isPlaying || isLoading ? 'none' : 'auto' }}
       onClick={handleClick}
+      onMouseDown={(e) => e.preventDefault()}
     >
       {/* Dark overlay with gradients */}
       <div

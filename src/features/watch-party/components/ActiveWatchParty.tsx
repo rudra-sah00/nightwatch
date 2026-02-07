@@ -4,7 +4,7 @@ import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
 import { useAudioDucking } from '../hooks/useAudioDucking';
-import type { ChatMessage, WatchPartyRoom } from '../types';
+import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../types';
 import { WatchPartySidebar } from './WatchPartySidebar';
 
 interface TypingUser {
@@ -21,7 +21,7 @@ interface ActiveWatchPartyProps {
   onReject: (id: string) => void;
   onCopyLink: () => void;
   onLeave: () => void;
-  onSync: (time: number, isPlaying: boolean, playbackRate?: number) => void;
+  onPartyEvent: (event: PartyEvent) => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   messages: ChatMessage[];
   onSendMessage: (content: string) => void;
@@ -47,7 +47,7 @@ export function ActiveWatchParty({
   onReject,
   onCopyLink,
   onLeave,
-  onSync,
+  onPartyEvent,
   videoRef,
   messages,
   onSendMessage,
@@ -211,72 +211,67 @@ export function ActiveWatchParty({
     const ref = videoElement;
     if (!ref || !isHost) return;
 
-    let lastSyncTime = 0;
     let syncDebounceTimer: NodeJS.Timeout | null = null;
+    let lastSeekTime = 0;
 
-    // Immediate sync for critical state changes (play/pause)
-    const handleCriticalSync = () => {
-      const currentPlayState = !ref.paused;
-      // Always sync immediately for play/pause state changes
-      onSync(ref.currentTime, currentPlayState, ref.playbackRate);
-      lastSyncTime = Date.now();
-
-      // Double-tap sync for pause to ensure delivery
-      // Pause is more critical - if guests miss it, experience is broken
-      if (!currentPlayState) {
-        // Schedule a confirmation sync after 100ms for pause events
-        setTimeout(() => {
-          if (ref.paused) {
-            onSync(ref.currentTime, false, ref.playbackRate);
-          }
-        }, 100);
-      }
+    // Handle Play
+    const handlePlay = () => {
+      onPartyEvent({
+        eventType: 'play',
+        videoTime: ref.currentTime,
+        playbackRate: ref.playbackRate,
+      });
     };
 
-    // Debounced sync for seek events (rapid seeking shouldn't spam)
-    const handleSeekSync = () => {
-      if (syncDebounceTimer) {
-        clearTimeout(syncDebounceTimer);
-      }
+    // Handle Pause
+    const handlePause = () => {
+      onPartyEvent({
+        eventType: 'pause',
+        videoTime: ref.currentTime,
+      });
+    };
+
+    // Handle Seek
+    const handleSeek = () => {
+      const now = Date.now();
+      if (now - lastSeekTime < 50) return; // Debounce rapid seek events
+      lastSeekTime = now;
+
+      // Use timeout to coalesce rapid seeking (scrubbing)
+      if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+
       syncDebounceTimer = setTimeout(() => {
-        onSync(ref.currentTime, !ref.paused, ref.playbackRate);
-        lastSyncTime = Date.now();
+        onPartyEvent({
+          eventType: 'seek',
+          videoTime: ref.currentTime,
+          playbackRate: ref.playbackRate,
+          wasPlaying: !ref.paused,
+        });
       }, 50);
     };
 
-    // Periodic sync during playback
-    const handleTimeUpdate = () => {
-      const now = Date.now();
-      // Sync every 2 seconds during playback for time drift correction
-      if (!ref.paused && now - lastSyncTime > 2000) {
-        onSync(ref.currentTime, true, ref.playbackRate);
-        lastSyncTime = now;
-      }
-    };
-
+    // Handle Rate Change
     const handleRateChange = () => {
-      // Immediate sync for rate changes
-      onSync(ref.currentTime, !ref.paused, ref.playbackRate);
-      lastSyncTime = Date.now();
+      onPartyEvent({
+        eventType: 'rate',
+        videoTime: ref.currentTime,
+        playbackRate: ref.playbackRate,
+      });
     };
 
-    ref.addEventListener('play', handleCriticalSync);
-    ref.addEventListener('pause', handleCriticalSync);
-    ref.addEventListener('seeked', handleSeekSync);
+    ref.addEventListener('play', handlePlay);
+    ref.addEventListener('pause', handlePause);
+    ref.addEventListener('seeked', handleSeek);
     ref.addEventListener('ratechange', handleRateChange);
-    ref.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
-      ref.removeEventListener('play', handleCriticalSync);
-      ref.removeEventListener('pause', handleCriticalSync);
-      ref.removeEventListener('seeked', handleSeekSync);
+      ref.removeEventListener('play', handlePlay);
+      ref.removeEventListener('pause', handlePause);
+      ref.removeEventListener('seeked', handleSeek);
       ref.removeEventListener('ratechange', handleRateChange);
-      ref.removeEventListener('timeupdate', handleTimeUpdate);
-      if (syncDebounceTimer) {
-        clearTimeout(syncDebounceTimer);
-      }
+      if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     };
-  }, [videoElement, isHost, onSync]);
+  }, [videoElement, isHost, onPartyEvent]);
 
   // Render Logic
   // Layout handles both Mobile (Portrait/Landscape) and Desktop via CSS + Minimal JS

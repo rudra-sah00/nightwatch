@@ -36,6 +36,7 @@ export function usePlayerHandlers({
   qualities,
 }: UsePlayerHandlersProps) {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInteractingRef = useRef(false);
 
   // Auto-hide controls after 3 seconds of inactivity
   const showControls = useCallback(() => {
@@ -45,6 +46,8 @@ export function usePlayerHandlers({
       clearTimeout(controlsTimeoutRef.current);
     }
 
+    if (isInteractingRef.current) return;
+
     controlsTimeoutRef.current = setTimeout(() => {
       if (isPlaying && !isPaused) {
         dispatch({ type: 'HIDE_CONTROLS' });
@@ -52,12 +55,33 @@ export function usePlayerHandlers({
     }, 3000);
   }, [dispatch, isPlaying, isPaused]);
 
-  // Show controls when paused
+  // Handle user interaction (e.g. menu open)
+  const handleInteraction = useCallback(
+    (isInteracting: boolean) => {
+      isInteractingRef.current = isInteracting;
+      if (isInteracting) {
+        // Clear timeout and show controls
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current);
+        }
+        dispatch({ type: 'SHOW_CONTROLS' });
+      } else {
+        // Restart timer
+        showControls();
+      }
+    },
+    [dispatch, showControls],
+  );
+
+  // Show controls when paused, and sync timer when playing
   useEffect(() => {
     if (isPaused) {
       dispatch({ type: 'SHOW_CONTROLS' });
+    } else if (isPlaying) {
+      // When switching to playing, restart specific hide timer
+      showControls();
     }
-  }, [isPaused, dispatch]);
+  }, [isPaused, isPlaying, dispatch, showControls]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -182,6 +206,7 @@ export function usePlayerHandlers({
 
   return {
     showControls,
+    handleInteraction,
     handleSeek,
     handleSkip,
     handleVolumeChange,

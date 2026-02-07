@@ -13,6 +13,7 @@ export function Fullscreen({ isFullscreen, onToggle }: FullscreenProps) {
     <button
       type="button"
       onClick={onToggle}
+      onMouseDown={(e) => e.preventDefault()}
       className={cn(
         'p-3 rounded-full',
         'transition-all duration-300 ease-out',

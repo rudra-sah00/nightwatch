@@ -8,6 +8,7 @@ import { injectTokenIntoUrl, wrapInProxy } from '../watch';
 import {
   approveJoinRequest,
   createPartyRoom,
+  emitPartyEvent, // New
   emitTypingStart,
   emitTypingStop,
   getPartyMessages,
@@ -33,6 +34,7 @@ import {
   syncPartyState,
   updatePartyContent,
 } from './api';
+import { useClockSync } from './hooks/useClockSync';
 import type {
   ChatMessage,
   PartyStateUpdate,
@@ -313,15 +315,38 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     });
   }, []);
 
-  // Sync state (for host)
+  // Clock Synchronization
+  const { clockOffset, isCalibrated, calibrate } = useClockSync();
+
+  // Calibrate clock when connected and joined
+  useEffect(() => {
+    if (isConnected && requestStatus === 'joined' && !isCalibrated) {
+      calibrate();
+    }
+  }, [isConnected, requestStatus, isCalibrated, calibrate]);
+
+  // ... (rest of the file until sync function)
+
+  // Emit Event (for host) - Replaces sync function
+  const emitEvent = useCallback(
+    (event: Parameters<typeof emitPartyEvent>[0]) => {
+      // Throttle rapid seeks if needed, but for now we trust the component to debouce
+      // Ideally we don't throttle 'play'/'pause', only 'seek'/'rate'
+      emitPartyEvent(event);
+    },
+    [],
+  );
+
+  // Sync state (legacy wrapper for backward compatibility or direct usage)
   const sync = useCallback(
     (currentTime: number, isPlaying: boolean, playbackRate?: number) => {
-      // Throttle sync to max every 50ms (basically debounce rapid fire)
-      const now = Date.now();
-      if (now - lastSyncRef.current < 50) return;
-      lastSyncRef.current = now;
-
-      syncPartyState({ currentTime, isPlaying, playbackRate });
+      // Forward to event system if possible, or keep as legacy
+      // We'll deprecate this in favor of emitEvent
+      emitPartyEvent({
+        eventType: isPlaying ? 'play' : 'pause', // Approximate
+        videoTime: currentTime,
+        playbackRate,
+      });
     },
     [],
   );
@@ -331,10 +356,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     (contentPayload: Parameters<typeof updatePartyContent>[0]) => {
       updatePartyContent(contentPayload, (response) => {
         if (response.success && response.room) {
-          // We will receive the update via socket broadcast as well,
-          // but we can update optimistically/immediately here if we want.
-          // However, we need a valid token. The callback room has host token.
-          // If we are host (which we are if we called this), it works.
           setRoom(response.room);
         } else {
           toast.error(response.error || 'Failed to update content');
@@ -344,300 +365,202 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     [],
   );
 
-  // Set up event listeners
+  // Register event listeners
   useEffect(() => {
-    const cleanups: (() => void)[] = [];
+    const cleanupStateUpdate = onPartyStateUpdate((state) => {
+      setRoom((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            ...state,
+          },
+        };
+      });
+      options.onStateUpdate?.(state);
+    });
 
-    // State updates
-    cleanups.push(
-      onPartyStateUpdate((data) => {
-        options.onStateUpdate?.(data);
-      }),
-    );
+    const cleanupMemberJoined = onPartyMemberJoined(({ member }) => {
+      if (!member || !member.id) {
+        toast.info('Someone joined the party');
+        return;
+      }
+      toast.success(`${member.name || 'Someone'} joined!`);
+      setRoom((prev) => {
+        if (!prev) return null;
+        if (prev.members.some((m) => m.id === member.id)) return prev;
+        return {
+          ...prev,
+          members: [...prev.members, member],
+        };
+      });
+      options.onMemberJoined?.(member);
+    });
 
-    // Member joined
-    cleanups.push(
-      onPartyMemberJoined((data) => {
-        setRoom((prev) => {
-          if (!prev) return null;
-          // Prevent duplicates
-          if (prev.members.some((m) => m?.id === data.member?.id)) {
-            return prev;
-          }
-          return {
-            ...prev,
-            members: [...prev.members, data.member],
-            pendingMembers:
-              prev.pendingMembers?.filter((m) => m?.id !== data.member?.id) ||
-              [],
-          };
-        });
-        toast.info(`${data.member?.name || 'Someone'} joined the party`);
-        options.onMemberJoined?.(data.member);
-      }),
-    );
-
-    // Member left
-    cleanups.push(
-      onPartyMemberLeft((data) => {
-        setRoom((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            members: prev.members.filter((m) => m?.id !== data.userId),
-          };
-        });
-      }),
-    );
-
-    // Admin Request (Host receives this)
-    cleanups.push(
-      onPartyAdminRequest((data) => {
-        setRoom((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            pendingMembers: [...(prev.pendingMembers || []), data.member],
-          };
-        });
-        toast.info(`${data.member?.name || 'Someone'} requested to join`);
-      }),
-    );
-
-    // Member Rejected (Host receives this - syncs rejection across all host tabs)
-    cleanups.push(
-      onPartyMemberRejected((data) => {
-        setRoom((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            pendingMembers: prev.pendingMembers.filter(
-              (m) => m?.id !== data.memberId,
-            ),
-          };
-        });
-      }),
-    );
-
-    // Join Approved (Guest receives this)
-    cleanups.push(
-      onPartyJoinApproved((data) => {
-        setIsConnected(true);
-        setRequestStatus('joined');
-        toast.success('Join request accepted!');
-
-        // Store Guest Token
-        if (data.guestToken && typeof window !== 'undefined') {
-          sessionStorage.setItem('guest_token', data.guestToken);
+    const cleanupMemberLeft = onPartyMemberLeft(({ userId }) => {
+      setRoom((prev) => {
+        if (!prev) return null;
+        const member = prev.members.find((m) => m?.id === userId);
+        if (member?.name) {
+          toast.info(`${member.name} left`);
         }
+        return {
+          ...prev,
+          members: prev.members.filter((m) => m?.id !== userId),
+        };
+      });
+    });
 
-        // Fetch fresh stream token for this guest to ensure proper quality access
-        getPartyStreamToken((tokenResponse) => {
-          const streamToken =
-            tokenResponse.success && tokenResponse.token
-              ? tokenResponse.token
-              : data.streamToken;
+    const cleanupMemberRejected = onPartyMemberRejected(({ memberId }) => {
+      setRoom((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          pendingMembers: prev.pendingMembers.filter((m) => m?.id !== memberId),
+        };
+      });
+    });
 
-          // Build proper stream URL for guest using their token
-          const guestStreamUrl =
-            injectTokenIntoUrl(data.room.streamUrl, streamToken || '') ||
-            data.room.streamUrl;
-          // Use wrapInProxy for sprite VTT (external CDN URL)
-          const guestSpriteVtt = data.room.spriteVtt
-            ? wrapInProxy(data.room.spriteVtt, streamToken || '')
-            : data.room.spriteVtt;
-          // Use wrapInProxy for captions (external CDN URLs)
-          const guestCaptionUrl = data.room.captionUrl
-            ? wrapInProxy(data.room.captionUrl, streamToken || '')
-            : data.room.captionUrl;
+    const cleanupAdminRequest = onPartyAdminRequest(({ member }) => {
+      if (!member || !member.name) {
+        toast.info('Someone requested to join');
+      } else {
+        toast.info(`${member.name} requested to join`);
+      }
+      setRoom((prev) => {
+        if (!prev) return null;
+        if (prev.pendingMembers?.some((m) => m.id === member.id)) return prev;
+        return {
+          ...prev,
+          pendingMembers: [...(prev.pendingMembers || []), member],
+        };
+      });
+    });
 
-          // Use wrapInProxy for subtitle tracks (external CDN URLs)
-          const guestSubtitleTracks = (data.room.subtitleTracks || []).map(
-            (track) => ({
-              ...track,
-              src: wrapInProxy(track.src, streamToken || ''),
-            }),
-          );
-
-          const tokenizedRoom = {
-            ...data.room,
-            streamUrl: guestStreamUrl,
-            spriteVtt: guestSpriteVtt,
-            captionUrl: guestCaptionUrl,
-            subtitleTracks: guestSubtitleTracks,
-          };
-          setRoom(tokenizedRoom);
-
-          // Apply initial state for immediate sync (if provided)
-          // Retry multiple times to ensure video element is ready
-          const initState = data.initialState;
-          if (initState) {
-            const applyInitialState = () => {
-              options.onStateUpdate?.({
-                currentTime: initState.currentTime,
-                isPlaying: initState.isPlaying,
-                timestamp: Date.now(),
-              });
-            };
-            // Try multiple times with increasing delays
-            setTimeout(applyInitialState, 300);
-            setTimeout(applyInitialState, 800);
-            setTimeout(applyInitialState, 1500);
-          }
-        });
-      }),
-    );
-
-    // Rejected
-    cleanups.push(
-      onPartyJoinRejected((data) => {
-        toast.error(data.reason || 'Your request to join was rejected.');
-        setRoom(null);
-        setIsConnected(false);
-        setRequestStatus('rejected');
-
-        // CRITICAL: Clear guest token on rejection to allow re-requesting
-        if (
-          typeof window !== 'undefined' &&
-          sessionStorage.getItem('guest_token')
-        ) {
-          sessionStorage.removeItem('guest_token');
-        }
-      }),
-    );
-
-    // Kicked
-    cleanups.push(
-      onPartyKicked((data) => {
-        toast.error(data.reason || 'You have been removed from the party.');
-        setRoom(null);
-        setIsConnected(false);
-        setRequestStatus('idle'); // Changed to 'idle' so guest can re-request
-
-        // CRITICAL: Clear guest token if exists
-        if (
-          typeof window !== 'undefined' &&
-          sessionStorage.getItem('guest_token')
-        ) {
-          sessionStorage.removeItem('guest_token');
-        }
-
-        setTimeout(() => router.push('/home'), 2000);
-      }),
-    );
-
-    // Party closed
-    cleanups.push(
-      onPartyClosed((data) => {
-        toast.error(data.reason);
-        setRoom(null);
-        setIsConnected(false);
-        setRequestStatus('idle');
-
-        // CRITICAL: Clear guest token to allow re-joining
-        if (
-          typeof window !== 'undefined' &&
-          sessionStorage.getItem('guest_token')
-        ) {
-          sessionStorage.removeItem('guest_token');
-        }
-
-        router.push('/home');
-      }),
-    );
-
-    // Messages
-    cleanups.push(
-      onPartyMessage((msg) => {
-        setMessages((prev) => [...prev, msg]);
-      }),
-    );
-
-    // Typing Indicator
-    cleanups.push(
-      onUserTyping((data) => {
-        if (data.isTyping) {
-          // Add user to typing list
-          setTypingUsers((prev) => {
-            const exists = prev.find((u) => u.userId === data.userId);
-            if (exists) return prev;
-            return [...prev, { userId: data.userId, userName: data.userName }];
-          });
-        } else {
-          // Remove user from typing list
-          setTypingUsers((prev) =>
-            prev.filter((u) => u.userId !== data.userId),
-          );
-        }
-      }),
-    );
-
-    // Content Updated
-    cleanups.push(
-      onPartyContentUpdated((data) => {
-        // Fetch new stream token for this user
+    const cleanupJoinApproved = onPartyJoinApproved(
+      ({ room: approvedRoom, streamToken, initialState }) => {
+        // Fetch fresh token to ensure valid playback URLs
         getPartyStreamToken((response) => {
-          if (response.success && response.token) {
-            const finalUrl =
-              injectTokenIntoUrl(data.room.streamUrl, response.token) ||
-              data.room.streamUrl;
-            // Use wrapInProxy for sprite VTT (external CDN URL)
-            const finalSpriteVtt = data.room.spriteVtt
-              ? wrapInProxy(data.room.spriteVtt, response.token || '')
-              : data.room.spriteVtt;
-            // Use wrapInProxy for captions (external CDN URLs)
-            const finalCaptionUrl = data.room.captionUrl
-              ? wrapInProxy(data.room.captionUrl, response.token || '')
-              : data.room.captionUrl;
+          const token =
+            response.success && response.token ? response.token : streamToken;
 
-            // Use wrapInProxy for subtitle tracks (external CDN URLs)
-            const finalSubtitleTracks = (data.room.subtitleTracks || []).map(
+          const normalizedRoom: WatchPartyRoom = {
+            ...approvedRoom,
+            streamUrl:
+              injectTokenIntoUrl(approvedRoom.streamUrl, token) ||
+              approvedRoom.streamUrl,
+            captionUrl: approvedRoom.captionUrl
+              ? wrapInProxy(approvedRoom.captionUrl, token)
+              : approvedRoom.captionUrl,
+            spriteVtt: approvedRoom.spriteVtt
+              ? wrapInProxy(approvedRoom.spriteVtt, token)
+              : approvedRoom.spriteVtt,
+            subtitleTracks: (approvedRoom.subtitleTracks || []).map(
               (track) => ({
                 ...track,
-                src: wrapInProxy(track.src, response.token || ''),
+                src: wrapInProxy(track.src, token),
               }),
-            );
+            ),
+          };
 
-            setRoom({
-              ...data.room,
-              streamUrl: finalUrl,
-              spriteVtt: finalSpriteVtt,
-              captionUrl: finalCaptionUrl,
-              subtitleTracks: finalSubtitleTracks,
+          setRoom(normalizedRoom);
+          setIsConnected(true);
+          setRequestStatus('joined');
+
+          if (initialState) {
+            options.onStateUpdate?.({
+              ...initialState,
+              timestamp: Date.now(),
             });
-            toast.success(`Now watching: ${data.room.title}`);
-          } else {
-            // Fallback: update room anyway, might fail to play if token invalid
-            setRoom(data.room);
           }
         });
-      }),
+      },
     );
 
-    return () => {
-      for (const cleanup of cleanups) cleanup();
-    };
-  }, [router, options]); // Removed 'room' from dependency array
+    const cleanupJoinRejected = onPartyJoinRejected(() => {
+      if (requestStatus === 'pending') {
+        setRequestStatus('rejected');
+        setError('Host rejected your request');
+        setRoom(null);
+        setIsConnected(false);
+      }
+    });
 
-  // Fetch messages when connected
-  // Fetch messages when connected
-  const hasFetchedMessages = useRef(false);
-  useEffect(() => {
-    if (isConnected && room && !hasFetchedMessages.current) {
-      hasFetchedMessages.current = true;
-      getPartyMessages((response) => {
-        if (response.success && response.messages) {
-          setMessages(response.messages);
-        }
+    const cleanupKicked = onPartyKicked(({ reason }) => {
+      toast.error(`You were kicked: ${reason}`);
+      setRoom(null);
+      setIsConnected(false);
+      setRequestStatus('idle');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('guest_token');
+      }
+    });
+
+    const cleanupClosed = onPartyClosed(() => {
+      toast.info('Party finished');
+      setRoom(null);
+      setIsConnected(false);
+      setRequestStatus('idle');
+      router.push('/home');
+    });
+
+    const cleanupMessage = onPartyMessage((message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+
+    const cleanupContentUpdated = onPartyContentUpdated(({ room: newRoom }) => {
+      toast.info(`Content changed to: ${newRoom.title}`);
+
+      // Update with new content, ensuring we have a fresh token for URLs
+      getPartyStreamToken((response) => {
+        const token = response.success && response.token ? response.token : '';
+
+        const normalizedRoom: WatchPartyRoom = {
+          ...newRoom,
+          streamUrl:
+            injectTokenIntoUrl(newRoom.streamUrl, token) || newRoom.streamUrl,
+          captionUrl: newRoom.captionUrl
+            ? wrapInProxy(newRoom.captionUrl, token)
+            : newRoom.captionUrl,
+          spriteVtt: newRoom.spriteVtt
+            ? wrapInProxy(newRoom.spriteVtt, token)
+            : newRoom.spriteVtt,
+          subtitleTracks: (newRoom.subtitleTracks || []).map((track) => ({
+            ...track,
+            src: wrapInProxy(track.src, token),
+          })),
+        };
+
+        setRoom(normalizedRoom);
       });
-    }
-  }, [isConnected, room]);
+    });
 
-  useEffect(() => {
-    if (!isConnected) {
-      hasFetchedMessages.current = false;
-    }
-  }, [isConnected]);
+    const cleanupTyping = onUserTyping(({ userId, userName, isTyping }) => {
+      setTypingUsers((prev) => {
+        if (isTyping) {
+          if (prev.some((u) => u.userId === userId)) return prev;
+          return [...prev, { userId, userName }];
+        }
+        return prev.filter((u) => u.userId !== userId);
+      });
+    });
+
+    return () => {
+      cleanupStateUpdate();
+      cleanupMemberJoined();
+      cleanupMemberLeft();
+      cleanupMemberRejected();
+      cleanupAdminRequest();
+      cleanupJoinApproved();
+      cleanupJoinRejected();
+      cleanupKicked();
+      cleanupClosed();
+      cleanupMessage();
+      cleanupContentUpdated();
+      cleanupTyping();
+    };
+  }, [requestStatus, router, options]);
 
   // Reconnection sync for guests - request state when socket reconnects
   useEffect(() => {
@@ -667,6 +590,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           options.onStateUpdate?.(response.state);
         }
       });
+      getPartyMessages((response) => {
+        if (response.success && response.messages) {
+          setMessages(response.messages);
+        }
+      });
     }, 500);
 
     return () => {
@@ -675,27 +603,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     };
   }, [isConnected, room, options]);
 
-  // Periodic state reconciliation for guests (every 5 seconds)
-  useEffect(() => {
-    const socket = getSocket();
-    if (!socket || !isConnected || !room) return;
-
-    const isHost = options.userId === room.hostId;
-    if (isHost) return; // Host doesn't need periodic sync
-
-    const reconciliationInterval = setInterval(() => {
-      requestPartyState((response) => {
-        if (response.success && response.state) {
-          // Only apply if state is significantly different (avoid constant micro-adjustments)
-          options.onStateUpdate?.(response.state);
-        }
-      });
-    }, 10000); // Every 10 seconds - reduced to minimize unnecessary corrections
-
-    return () => {
-      clearInterval(reconciliationInterval);
-    };
-  }, [isConnected, room, options]);
+  // NOTE: Periodic polling removed in favor of WebSocket events
 
   // Cleanup on unmount (handles browser close, navigation, etc.)
   useEffect(() => {
@@ -706,11 +614,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       }
 
       // CRITICAL: Clear guest token on unmount to prevent stale token issues
-      // This handles:
-      // - Browser close
-      // - Tab close
-      // - Navigation away
-      // - Component unmount for any reason
       if (
         typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token')
@@ -720,8 +623,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     };
   }, []);
 
-  // Note: Polling removed - relying on WebSocket events only for better performance
-
   return {
     room,
     isLoading,
@@ -729,19 +630,22 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     errorCode,
     isConnected,
     requestStatus,
-    messages, // New
-    typingUsers, // New
-    sendMessage, // New
-    handleTypingStart: emitTypingStart, // New
-    handleTypingStop: emitTypingStop, // New
+    clockOffset, // New
+    isCalibrated, // New
+    messages,
+    typingUsers,
+    sendMessage,
+    handleTypingStart: emitTypingStart,
+    handleTypingStop: emitTypingStop,
     createRoom,
     requestJoin,
-    cancelRequest, // New
+    cancelRequest,
     leaveRoom,
     approveMember,
     rejectMember,
     kickUser,
-    sync,
+    sync, // Legacy support
+    emitEvent, // New: Use this for event-based sync
     updateContent,
   };
 }

@@ -28,10 +28,13 @@ vi.mock('@/features/watch-party/api', () => ({
   sendPartyMessage: vi.fn(),
   getPartyMessages: vi.fn(),
   getPartyStreamToken: vi.fn(),
+  requestPartyState: vi.fn(),
   syncPartyState: vi.fn(),
   updatePartyContent: vi.fn(),
   emitTypingStart: vi.fn(),
   emitTypingStop: vi.fn(),
+  emitPing: vi.fn(),
+  emitPartyEvent: vi.fn(),
   onPartyStateUpdate: vi.fn(() => vi.fn()),
   onPartyMemberJoined: vi.fn(() => vi.fn()),
   onPartyMemberLeft: vi.fn(() => vi.fn()),
@@ -881,9 +884,9 @@ describe('useWatchParty', () => {
         result.current.sync(100, true);
       });
 
-      expect(api.syncPartyState).toHaveBeenCalledWith({
-        currentTime: 100,
-        isPlaying: true,
+      expect(api.emitPartyEvent).toHaveBeenCalledWith({
+        eventType: 'play',
+        videoTime: 100,
       });
     });
 
@@ -1198,6 +1201,23 @@ describe('useWatchParty', () => {
         expect(result.current.requestStatus).toBe('idle');
         expect(onComplete).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('stale guest token cleanup on mount', () => {
+    it('should remove stale guest token on mount', () => {
+      sessionStorage.setItem('guest_token', 'stale-token');
+
+      renderHook(() => useWatchParty({}));
+
+      // The useEffect should clear stale token on mount
+      expect(sessionStorage.getItem('guest_token')).toBeNull();
+    });
+
+    it('should not throw when no guest token exists', () => {
+      sessionStorage.clear();
+
+      expect(() => renderHook(() => useWatchParty({}))).not.toThrow();
     });
   });
 });
