@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.5.0...v1.6.0) (2026-02-07)
+
+
+### Features
+
+* simplify password requirements and add predictive sync ([319367b](https://github.com/rudra-sah00/watch-rudra/commit/319367b6749992c57170df56251a00520c8f8c73))
+
+
+### Bug Fixes
+
+* **watch-party:** smooth drift correction to prevent audio cutting ([b2d56a1](https://github.com/rudra-sah00/watch-rudra/commit/b2d56a104371e1b65addee2dbd7ffcc66d74e710))
+
 ## [1.5.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.4.3...v1.5.0) (2026-02-04)
 
 
