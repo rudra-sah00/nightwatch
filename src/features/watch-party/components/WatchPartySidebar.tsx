@@ -15,9 +15,9 @@ import { SidebarTabs } from './SidebarTabs';
 import { VideoGrid } from './VideoGrid';
 import { WatchPartyChat } from './WatchPartyChat';
 
-// ============================================
-// Props Interface
-// ============================================
+/**
+ * Represents a user currently typing in the chat.
+ */
 
 interface TypingUser {
   userId: string;
@@ -43,9 +43,10 @@ interface WatchPartySidebarProps {
   onTypingStop?: () => void;
 }
 
-// ============================================
-// Main Component
-// ============================================
+/**
+ * Main sidebar component for the Watch Party feature.
+ * Handles tab navigation between chat and participants, as well as Agora media integration.
+ */
 
 export function WatchPartySidebar({
   room,

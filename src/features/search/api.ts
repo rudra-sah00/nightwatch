@@ -7,7 +7,9 @@ import type {
   ShowDetails,
 } from './types';
 
-// ===== CACHE UTILITIES =====
+/**
+ * Internal caching utilities for search requests.
+ */
 
 interface CacheEntry<T> {
   data: T;
@@ -31,7 +33,9 @@ function cleanupCache<T>(cache: Map<string, CacheEntry<T>>, maxSize: number) {
   }
 }
 
-// ===== SEARCH HISTORY =====
+/**
+ * Search history retrieval and management.
+ */
 
 // Search history cache (5 minutes)
 const searchHistoryCache = createCache<SearchHistory[]>();
@@ -81,7 +85,9 @@ export async function clearSearchHistory(options?: RequestInit): Promise<void> {
   invalidateSearchHistoryCache();
 }
 
-// ===== SEARCH CONTENT =====
+/**
+ * Content search with intelligent frontend caching.
+ */
 
 // Search results cache (5 minutes frontend, 15 minutes backend)
 const searchResultsCache = createCache<SearchResult[]>();
@@ -114,7 +120,9 @@ export async function searchContent(
   return results;
 }
 
-// ===== SHOW DETAILS =====
+/**
+ * Metadata retrieval for movies and series.
+ */
 
 // Show details cache (5 minutes)
 const showDetailsCache = createCache<ShowDetails>();
@@ -147,7 +155,9 @@ export function clearShowDetailsCache(id?: string): void {
   }
 }
 
-// ===== EPISODES =====
+/**
+ * Episode listing for series, with caching to minimize large requests.
+ */
 
 // Episodes cache (10 minutes - episodes rarely change)
 const episodesCache = createCache<{
@@ -199,7 +209,10 @@ export function clearEpisodesCache(seriesId?: string): void {
   }
 }
 
-// ===== PLAY VIDEO =====
+/**
+ * Video playback trigger and status monitoring.
+ * Note: Playback triggers external automation which may take 30+ seconds.
+ */
 
 export interface PlayMovieParams {
   type: 'movie';

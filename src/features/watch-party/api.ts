@@ -21,7 +21,9 @@ import type {
 
 const API_URL = env.BACKEND_URL;
 
-// ============ REST API ============
+/**
+ * REST API endpoints for room discovery and initial state retrieval.
+ */
 
 /**
  * Check if a room exists
@@ -81,7 +83,9 @@ export async function getRoomDetails(
   return res.json();
 }
 
-// ============ WebSocket API ============
+/**
+ * WebSocket API for real-time room management and playback synchronization.
+ */
 
 type Callback<T> = (
   response: { success: boolean; error?: string; code?: string } & T,
@@ -363,7 +367,9 @@ export function fetchPendingRequests(
   socket.emit('party:fetch_pending', { roomId }, callback);
 }
 
-// ============ Event Listeners ============
+/**
+ * WebSocket event listeners for room membership and playback updates.
+ */
 
 export function onPartyStateUpdate(
   callback: (data: PartyStateUpdate) => void,

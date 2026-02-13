@@ -93,7 +93,9 @@ export async function resetPassword(
   });
 }
 
-// ===== PUBLIC STATS (No Auth Required) =====
+/**
+ * Public platform statistics (auth not required).
+ */
 
 export interface PlatformStats {
   totalWatchTimeSeconds: number;

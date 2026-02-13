@@ -2,7 +2,9 @@ import { apiFetch } from '@/lib/fetch';
 import { getSocket } from '@/lib/socket';
 import type { WatchProgress } from './types';
 
-// ===== VIDEO DETAILS =====
+/**
+ * Video metadata and stream URL retrieval.
+ */
 
 export async function getVideoDetails(id: string, options?: RequestInit) {
   return apiFetch(`/api/video/${id}`, options);
@@ -12,7 +14,10 @@ export async function getStreamUrl(id: string, options?: RequestInit) {
   return apiFetch(`/api/stream/${id}`, options);
 }
 
-// ===== CONTINUE WATCHING =====
+/**
+ * User's "Continue Watching" list management, including optimistic caching
+ * and WebSocket data retrieval.
+ */
 
 // Cache for continue watching items (30 seconds stale time)
 interface ContinueWatchingCache {
@@ -128,7 +133,9 @@ export function deleteWatchProgress(
   );
 }
 
-// ===== WATCH PROGRESS =====
+/**
+ * Individual content progress tracking, including high-performance caching.
+ */
 
 // Cache for content progress (2 minutes TTL)
 interface ProgressCacheEntry {
@@ -251,7 +258,9 @@ export function fetchContentProgress(
   );
 }
 
-// ===== SPRITE VTT =====
+/**
+ * Video scrubbing preview support (Sprite VTT parsing and preloading).
+ */
 
 export interface SpriteCue {
   start: number;

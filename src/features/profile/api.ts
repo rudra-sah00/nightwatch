@@ -3,7 +3,9 @@ import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { WatchActivity } from './types';
 
-// ===== CACHE UTILITIES =====
+/**
+ * User profile management and caching.
+ */
 
 interface CacheEntry<T> {
   data: T;

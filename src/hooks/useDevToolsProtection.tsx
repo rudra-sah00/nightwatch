@@ -36,9 +36,9 @@ export function initDevToolsProtection(): (() => void) | undefined {
     window.location.href = REDIRECT_URL;
   };
 
-  // ============================================
-  // CSS Protection: Disable selection, drag, print
-  // ============================================
+  /**
+   * CSS-based protection: Disables text selection, dragging, and printing.
+   */
   const styleId = 'devtools-protection-styles';
   if (!document.getElementById(styleId)) {
     const style = document.createElement('style');
@@ -78,9 +78,10 @@ export function initDevToolsProtection(): (() => void) | undefined {
     document.head.appendChild(style);
   }
 
-  // ============================================
-  // Method 1: DevTools size detection
-  // ============================================
+  /**
+   * Method 1: Detects DevTools by monitoring the difference between
+   * window outer and inner dimensions.
+   */
   let devtoolsOpen = false;
   const threshold = 160;
 
@@ -106,9 +107,10 @@ export function initDevToolsProtection(): (() => void) | undefined {
     }
   };
 
-  // ============================================
-  // Method 2: Console timing detection
-  // ============================================
+  /**
+   * Method 2/7/8: Console and Debugger detection.
+   * Leverages getter-side-effects when objects are evaluated in the console.
+   */
   const image = new Image();
   Object.defineProperty(image, 'id', {
     get: () => {
@@ -132,9 +134,9 @@ export function initDevToolsProtection(): (() => void) | undefined {
     }
   };
 
-  // ============================================
-  // Method 3: Block keyboard shortcuts
-  // ============================================
+  /**
+   * Method 3: Blocks common DevTools keyboard shortcuts.
+   */
   const blockKeyboardShortcuts = (e: KeyboardEvent) => {
     // F12
     if (e.key === 'F12') {
@@ -221,34 +223,34 @@ export function initDevToolsProtection(): (() => void) | undefined {
     return true;
   };
 
-  // ============================================
-  // Method 4: Block right-click context menu
-  // ============================================
+  /**
+   * Method 4: Blocks the right-click context menu.
+   */
   const blockContextMenu = (e: MouseEvent) => {
     e.preventDefault();
     return false;
   };
 
-  // ============================================
-  // Method 5: Block drag and drop
-  // ============================================
+  /**
+   * Method 5: Blocks drag and drop operations.
+   */
   const blockDrag = (e: DragEvent) => {
     e.preventDefault();
     return false;
   };
 
-  // ============================================
-  // Method 6: Detect Firebug (legacy)
-  // ============================================
+  /**
+   * Method 6: Detects legacy Firebug extension.
+   */
   const checkFirebug = () => {
     if (window.Firebug?.chrome?.isInitialized) {
       redirect();
     }
   };
 
-  // ============================================
-  // Method 7: Console object property detection
-  // ============================================
+  /**
+   * Method 7 Helper: Creates an element with a getter on 'id' for console detection.
+   */
   const element = document.createElement('div');
   Object.defineProperty(element, 'id', {
     get: () => {
@@ -257,9 +259,9 @@ export function initDevToolsProtection(): (() => void) | undefined {
     },
   });
 
-  // ============================================
-  // Setup intervals and listeners
-  // ============================================
+  /**
+   * Initialization of all detection methods and event listeners.
+   */
   const sizeCheckInterval = setInterval(checkDevToolsSize, 500);
   const consoleCheckInterval = setInterval(checkConsole, 2000);
   const firebugCheckInterval = setInterval(checkFirebug, 1000);
