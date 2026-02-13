@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.6.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.6.0...v1.6.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* Agora video sync, name/avatar mapping, and test coverage ([55c8989](https://github.com/rudra-sah00/watch-rudra/commit/55c8989fb8ceb5e82ca5d17e12131c373be7bcc9))
+* biome cleanup, remove all biome-ignore, fix TS errors, LiveKit→Agora migration in tests ([a48f76f](https://github.com/rudra-sah00/watch-rudra/commit/a48f76f7a24000e8a002125e864b3e5a6927440b))
+* **frontend:** resolve redirect loop and standardize API proxying with passing tests ([70a5c6a](https://github.com/rudra-sah00/watch-rudra/commit/70a5c6a47499aa754ea55ba8b4cdc6d2143c0428))
+* **frontend:** standardize NEXT_PUBLIC_BACKEND_URL for proxy and fetch ([26fef34](https://github.com/rudra-sah00/watch-rudra/commit/26fef3405b6512eea5c141b3668d77b5f660daeb))
+* watch party participant visibility in sidebar ([0f0f40c](https://github.com/rudra-sah00/watch-rudra/commit/0f0f40c9ce777b3b39eb3ce1e2846a347c27db31))
+
 ## [1.6.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.5.0...v1.6.0) (2026-02-07)
 
 
