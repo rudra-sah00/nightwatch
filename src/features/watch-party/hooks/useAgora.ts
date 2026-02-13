@@ -119,6 +119,8 @@ interface UseAgoraOptions {
   uid: number;
   /** Room members — used to map Agora numeric UIDs back to real user IDs/names */
   members?: MemberInfo[];
+  /** Current user identity string */
+  userId?: string;
 }
 
 // ============================================
@@ -181,6 +183,7 @@ export function useAgora({
   channel,
   uid,
   members = [],
+  userId,
 }: UseAgoraOptions) {
   // --- Refs for mutable SDK objects (not state — avoids re-renders) ---
   const clientRef = useRef<IAgoraRTCClient | null>(null);
@@ -313,66 +316,55 @@ export function useAgora({
   // ============================================
 
   useEffect(() => {
-    // Build participant list from Agora remote users + local user.
-    // We always show the local user tile (even before isClientReady)
-    // so the host sees themselves immediately.
+    // Build participant list from room members.
+    // We use 'members' as the primary source of truth so everyone appears
+    // immediately in the sidebar, even before Agora connects.
     const uidMap = buildUidToMemberMap(members);
-
-    if (!isClientReady) {
-      // Not connected yet — show only local user tile
-      const localMember = uidMap.get(String(uid));
-      const local: AgoraParticipant = {
-        uid: String(uid),
-        identity: localMember?.id ?? String(uid),
-        name: 'You',
-        isSpeaking: false,
-        isMicrophoneEnabled: false,
-        isCameraEnabled: false,
-        isLocal: true,
-        audioLevel: 0,
-      };
-      // Only set if uid is valid (token fetched)
-      if (uid) setParticipants([local]);
-      return;
+    const remoteUserMap = new Map<string, IAgoraRTCRemoteUser>();
+    for (const user of remoteUsers) {
+      remoteUserMap.set(String(user.uid), user);
     }
 
-    const remote: AgoraParticipant[] = remoteUsers.map((user) => {
-      const member = uidMap.get(String(user.uid));
+    const nextParticipants: AgoraParticipant[] = members.map((member) => {
+      const isLocal = member.id === userId;
+      const numericUid = String(generateNumericUid(member.id));
+      const remoteUser = remoteUserMap.get(numericUid);
+
+      if (isLocal) {
+        return {
+          uid: String(uid),
+          identity: member.id,
+          name: 'You',
+          isSpeaking: false,
+          isMicrophoneEnabled: audioEnabled,
+          isCameraEnabled: videoEnabled,
+          isLocal: true,
+          audioLevel: 0,
+          videoTrack: localVideoTrackRef.current ?? undefined,
+          metadata: member.profilePhoto
+            ? JSON.stringify({ avatar: member.profilePhoto })
+            : undefined,
+        };
+      }
+
       return {
-        uid: String(user.uid),
-        identity: member?.id ?? String(user.uid),
-        name: member?.name ?? `User ${user.uid}`,
+        uid: numericUid,
+        identity: member.id,
+        name: member.name,
         isSpeaking: false,
-        isMicrophoneEnabled: user.hasAudio,
-        isCameraEnabled: user.hasVideo,
+        isMicrophoneEnabled: remoteUser?.hasAudio ?? false,
+        isCameraEnabled: remoteUser?.hasVideo ?? false,
         isLocal: false,
         audioLevel: 0,
-        videoTrack: user.videoTrack,
-        metadata: member?.profilePhoto
+        videoTrack: remoteUser?.videoTrack,
+        metadata: member.profilePhoto
           ? JSON.stringify({ avatar: member.profilePhoto })
           : undefined,
       };
     });
 
-    // Local user — find own member entry for consistent identity
-    const localMember = uidMap.get(String(uid));
-    const local: AgoraParticipant = {
-      uid: String(uid),
-      identity: localMember?.id ?? String(uid),
-      name: 'You',
-      isSpeaking: false,
-      isMicrophoneEnabled: audioEnabled,
-      isCameraEnabled: videoEnabled,
-      isLocal: true,
-      audioLevel: 0,
-      videoTrack: localVideoTrackRef.current ?? undefined,
-      metadata: localMember?.profilePhoto
-        ? JSON.stringify({ avatar: localMember.profilePhoto })
-        : undefined,
-    };
-
-    setParticipants([local, ...remote]);
-  }, [remoteUsers, uid, audioEnabled, videoEnabled, isClientReady, members]);
+    setParticipants(nextParticipants);
+  }, [remoteUsers, uid, userId, audioEnabled, videoEnabled, members]);
 
   // ============================================
   // Volume indicator → speaking detection

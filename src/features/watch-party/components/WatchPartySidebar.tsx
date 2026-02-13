@@ -106,7 +106,14 @@ export function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
-  } = useAgora({ token, appId, channel, uid, members: stableMembers });
+  } = useAgora({
+    token,
+    appId,
+    channel,
+    uid,
+    members: stableMembers,
+    userId: currentUserId,
+  });
 
   // Use ref for callback to avoid effect re-runs on parent re-renders
   const onAgoraReadyRef = useRef(onAgoraReady);

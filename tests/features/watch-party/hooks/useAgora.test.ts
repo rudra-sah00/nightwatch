@@ -57,30 +57,31 @@ describe('useAgora', () => {
     ],
   };
 
-  it('should initialize with local participant mapped from members', async () => {
+  it('should initialize with all participants mapped from members immediately', async () => {
     const { result } = renderHook(() =>
       useAgora({
         ...defaultOptions,
-        uid: 3550198, // Deterministic UID for user-1
+        userId: 'user-1',
+        uid: 3550198,
       }),
     );
 
     await waitFor(() => {
-      expect(result.current.participants).toHaveLength(1);
+      expect(result.current.participants).toHaveLength(2);
     });
 
-    const localPart = result.current.participants[0];
-    expect(localPart.name).toBe('You');
-    expect(localPart.isLocal).toBe(true);
+    const localPart = result.current.participants.find((p) => p.isLocal);
+    const remotePart = result.current.participants.find((p) => !p.isLocal);
 
-    // Check metadata for avatar
-    if (localPart.metadata) {
+    expect(localPart?.name).toBe('You');
+    expect(localPart?.identity).toBe('user-1');
+    expect(remotePart?.name).toBe('Guest Name');
+    expect(remotePart?.identity).toBe('user-2');
+
+    // Check metadata for local avatar
+    if (localPart?.metadata) {
       const metadata = JSON.parse(localPart.metadata);
       expect(metadata.avatar).toBe('https://host.com/photo.jpg');
-    } else {
-      // If metadata is undefined, the UID mapping might not have worked
-      // This is acceptable for this test - we're just verifying the hook doesn't crash
-      expect(localPart.metadata).toBeUndefined();
     }
   });
 
@@ -89,15 +90,17 @@ describe('useAgora', () => {
     const { result } = renderHook(() =>
       useAgora({
         ...defaultOptions,
-        uid: 3550199, // Deterministic UID for user-2
+        userId: 'user-2',
+        uid: 3550199,
       }),
     );
 
     await waitFor(() => {
-      expect(result.current.participants).toHaveLength(1);
+      expect(result.current.participants).toHaveLength(2);
     });
 
-    const localPart = result.current.participants[0];
-    expect(localPart.metadata).toBeUndefined();
+    const localPart = result.current.participants.find((p) => p.isLocal);
+    expect(localPart?.identity).toBe('user-2');
+    expect(localPart?.metadata).toBeUndefined();
   });
 });
