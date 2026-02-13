@@ -15,6 +15,19 @@ let tokenExpiresAt: number | null = null;
 let refreshTimerId: NodeJS.Timeout | null = null;
 
 /**
+ * Reset internal state for testing
+ */
+export function resetAuthFetchState() {
+  isRefreshing = false;
+  refreshPromise = null;
+  tokenExpiresAt = null;
+  if (refreshTimerId) {
+    clearTimeout(refreshTimerId);
+    refreshTimerId = null;
+  }
+}
+
+/**
  * Schedule proactive token refresh before expiration
  * Big tech companies refresh tokens BEFORE they expire to avoid 401s
  */
@@ -56,10 +69,15 @@ async function refreshAccessToken(): Promise<boolean> {
     return refreshPromise;
   }
 
+  const baseUrl =
+    typeof window === 'undefined'
+      ? process.env.BACKEND_URL || env.BACKEND_URL
+      : '';
+
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const response = await fetch(`${env.BACKEND_URL}/api/auth/refresh`, {
+      const response = await fetch(`${baseUrl}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -103,6 +121,12 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const { timeout = 10000, skipRefresh = false, ...fetchOptions } = options;
 
+  // Use absolute URL on server, relative on client (to leverage Next.js proxying)
+  const baseUrl =
+    typeof window === 'undefined'
+      ? process.env.BACKEND_URL || env.BACKEND_URL
+      : '';
+
   // Skip refresh for auth endpoints - they return 401 for invalid credentials, not expired session
   const isAuthEndpoint =
     endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
@@ -120,7 +144,7 @@ export async function apiFetch<T>(
   }
 
   try {
-    const response = await fetch(`${env.BACKEND_URL}${endpoint}`, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       ...fetchOptions,
       credentials: 'include', // Send cookies
       headers: {
@@ -155,7 +179,13 @@ export async function apiFetch<T>(
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData: any = {};
+      try {
+        errorData = await response.json();
+      } catch (_e) {
+        // Ignore JSON parse errors
+      }
+
       const error: ApiError = {
         message:
           errorData.error?.message ||

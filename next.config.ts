@@ -32,10 +32,11 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 3600, // Cache images for 1 hour
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:4000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

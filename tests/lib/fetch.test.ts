@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiFetch, setTokenExpiration } from '@/lib/fetch';
+import { apiFetch, resetAuthFetchState, setTokenExpiration } from '@/lib/fetch';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -9,8 +9,10 @@ vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 
 describe('apiFetch', () => {
   beforeEach(() => {
+    global.fetch = vi.fn();
     vi.clearAllMocks();
     vi.clearAllTimers();
+    resetAuthFetchState();
   });
 
   it('should make successful GET request', async () => {
@@ -24,7 +26,7 @@ describe('apiFetch', () => {
     const result = await apiFetch('/api/test');
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:4000/api/test',
+      '/api/test',
       expect.objectContaining({
         credentials: 'include',
         headers: expect.objectContaining({
@@ -51,7 +53,7 @@ describe('apiFetch', () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:4000/api/auth/login',
+      '/api/auth/login',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(requestData),
@@ -139,7 +141,14 @@ describe('apiFetch', () => {
 
     expect(result).toEqual(mockData);
     // Should have called: original request, refresh, retry
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/auth/refresh',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+      }),
+    );
+    expect(global.fetch).toHaveBeenCalledTimes(3);
   });
 
   it('should handle 401 with failed token refresh', async () => {
@@ -205,7 +214,7 @@ describe('apiFetch', () => {
     await apiFetch('/api/test');
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:4000/api/test',
+      '/api/test',
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: 'Bearer guest-token-123',
@@ -228,7 +237,7 @@ describe('apiFetch', () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:4000/api/test',
+      '/api/test',
       expect.objectContaining({
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
@@ -314,7 +323,7 @@ describe('setTokenExpiration', () => {
     await vi.runOnlyPendingTimersAsync();
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:4000/api/auth/refresh',
+      '/api/auth/refresh',
       expect.objectContaining({
         method: 'POST',
         credentials: 'include',

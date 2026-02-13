@@ -74,7 +74,7 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('image', file);
 
-  const result = await fetch(`${env.BACKEND_URL}/api/user/profile-image`, {
+  const result = await fetch('/api/user/profile-image', {
     method: 'POST',
     body: formData,
     credentials: 'include',

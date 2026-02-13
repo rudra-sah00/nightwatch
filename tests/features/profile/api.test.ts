@@ -260,7 +260,7 @@ describe('Profile API', () => {
       const result = await uploadProfileImage(mockFile);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:4000/api/user/profile-image',
+        '/api/user/profile-image',
         expect.objectContaining({
           method: 'POST',
           credentials: 'include',
