@@ -10,12 +10,14 @@ import AgoraRTC, {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-// ============================================
-// SDK Configuration
-// ============================================
+/**
+ * Agora SDK configuration and global handlers.
+ * Logs are suppressed in production.
+ */
 
-// Suppress excessive Agora logs — WARNING level only
-AgoraRTC.setLogLevel(3);
+// Set log level: 0 (DEBUG), 1 (INFO), 2 (WARNING), 3 (ERROR), 4 (NONE)
+const AGORA_LOG_LEVEL = process.env.NODE_ENV === 'production' ? 4 : 2;
+AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
 
 // Handle autoplay restrictions (browsers block audio before user interaction).
 // This fires once if any audio/video track fails to autoplay, prompting the user.
@@ -32,9 +34,9 @@ AgoraRTC.onAutoplayFailed = () => {
   });
 };
 
-// ============================================
-// Audio / Video Encoding Presets
-// ============================================
+/**
+ * Audio and Video encoding presets optimized for watch party sidebar tiles.
+ */
 
 /**
  * Voice-optimized audio config for watch party chat.
@@ -66,9 +68,9 @@ const VIDEO_ENCODER_CONFIG = {
  */
 const VIDEO_OPTIMIZATION_MODE = 'motion' as const;
 
-// ============================================
-// Types
-// ============================================
+/**
+ * Possible connection states with the project's Agora RTC client.
+ */
 
 export type ConnectionState =
   | 'DISCONNECTED'
@@ -118,8 +120,9 @@ interface UseAgoraOptions {
   channel: string;
   uid: number;
   /** Room members — used to map Agora numeric UIDs back to real user IDs/names */
+  /** Room members — used to map Agora numeric UIDs back to real user IDs/names */
   members?: MemberInfo[];
-  /** Current user identity string */
+  /** Current user identity string used to identify "You" in the participant list */
   userId?: string;
 }
 
@@ -173,9 +176,13 @@ function handleDeviceError(
   }
 }
 
-// ============================================
-// Hook
-// ============================================
+/**
+ * Main hook for managing Agora RTC lifecycle, including channel connection,
+ * media tracks, and participant state.
+ *
+ * @param options - Configuration for the Agora connection and room membership.
+ * @returns An object containing participant state, media controls, and device management.
+ */
 
 export function useAgora({
   token,
@@ -225,9 +232,10 @@ export function useAgora({
     selectedVideoDeviceRef.current = selectedVideoDevice;
   }, [selectedVideoDevice]);
 
-  // ============================================
-  // Device enumeration
-  // ============================================
+  /**
+   * Enumerates available media hardware (microphones, cameras) and updates state.
+   * Probes permissions if necessary.
+   */
 
   const refreshDevices = useCallback(async () => {
     try {
@@ -311,15 +319,15 @@ export function useAgora({
     };
   }, [refreshDevices]);
 
-  // ============================================
-  // Participant list builder
-  // ============================================
+  /**
+   * Rebuilds the internal participant list whenever remote users or local state changes.
+   * Uses room members as the authoritative list to ensure immediate visibility.
+   */
 
   useEffect(() => {
     // Build participant list from room members.
     // We use 'members' as the primary source of truth so everyone appears
     // immediately in the sidebar, even before Agora connects.
-    const uidMap = buildUidToMemberMap(members);
     const remoteUserMap = new Map<string, IAgoraRTCRemoteUser>();
     for (const user of remoteUsers) {
       remoteUserMap.set(String(user.uid), user);
@@ -366,9 +374,10 @@ export function useAgora({
     setParticipants(nextParticipants);
   }, [remoteUsers, uid, userId, audioEnabled, videoEnabled, members]);
 
-  // ============================================
-  // Volume indicator → speaking detection
-  // ============================================
+  /**
+   * Monitors audio volume indicators from Agora to drive the 'speaking' status
+   * in the participant list.
+   */
 
   useEffect(() => {
     const client = clientRef.current;
@@ -418,9 +427,10 @@ export function useAgora({
     };
   }, [isClientReady]);
 
-  // ============================================
-  // Connection state & network quality monitoring
-  // ============================================
+  /**
+   * Monitors connection state changes and network quality to provide feedback
+   * to the user via toasts and UI indicators.
+   */
 
   useEffect(() => {
     const client = clientRef.current;
@@ -488,9 +498,10 @@ export function useAgora({
     };
   }, [isClientReady]);
 
-  // ============================================
-  // Connect to Agora channel
-  // ============================================
+  /**
+   * Core effect that initializes the Agora RTC client, joins the channel,
+   * and manages remote user event listeners.
+   */
 
   useEffect(() => {
     if (!token || !appId || !channel) return;
@@ -584,9 +595,10 @@ export function useAgora({
     };
   }, [token, appId, channel, uid]);
 
-  // ============================================
-  // Media toggles — voice-optimized encoding
-  // ============================================
+  /**
+   * Toggles for local audio and video tracks.
+   * Optimized for voice chat in a watch party context.
+   */
 
   const toggleAudio = useCallback(async () => {
     const client = clientRef.current;
@@ -678,9 +690,9 @@ export function useAgora({
     }
   }, [refreshDevices]);
 
-  // ============================================
-  // Device switching
-  // ============================================
+  /**
+   * Low-level device switching without track reinitialization where possible.
+   */
 
   const switchAudioDevice = useCallback(async (deviceId: string) => {
     setSelectedAudioDevice(deviceId);
@@ -706,9 +718,9 @@ export function useAgora({
     }
   }, []);
 
-  // ============================================
-  // Return value
-  // ============================================
+  /**
+   * Exposed methods and states for UI components.
+   */
 
   return {
     client: clientRef.current,
