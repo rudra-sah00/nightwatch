@@ -5,6 +5,7 @@ import AgoraRTC, {
   type IAgoraRTCRemoteUser,
   type ICameraVideoTrack,
   type IMicrophoneAudioTrack,
+  type IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -98,7 +99,7 @@ export interface AgoraParticipant {
   isCameraEnabled: boolean;
   metadata?: string;
   /** Video track for rendering */
-  videoTrack?: ICameraVideoTrack;
+  videoTrack?: ICameraVideoTrack | IRemoteVideoTrack;
   /** True if this is the local user */
   isLocal: boolean;
   /** Audio level 0-1 */
@@ -346,6 +347,10 @@ export function useAgora({
         isCameraEnabled: user.hasVideo,
         isLocal: false,
         audioLevel: 0,
+        videoTrack: user.videoTrack,
+        metadata: member?.profilePhoto
+          ? JSON.stringify({ avatar: member.profilePhoto })
+          : undefined,
       };
     });
 
@@ -360,6 +365,10 @@ export function useAgora({
       isCameraEnabled: videoEnabled,
       isLocal: true,
       audioLevel: 0,
+      videoTrack: localVideoTrackRef.current ?? undefined,
+      metadata: localMember?.profilePhoto
+        ? JSON.stringify({ avatar: localMember.profilePhoto })
+        : undefined,
     };
 
     setParticipants([local, ...remote]);

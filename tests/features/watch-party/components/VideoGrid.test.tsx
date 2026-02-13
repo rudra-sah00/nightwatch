@@ -37,6 +37,7 @@ describe('VideoGrid', () => {
   const createMockParticipant = (
     identity: string,
     name: string,
+    isLocal = false,
   ): AgoraParticipant => {
     return {
       identity,
@@ -45,13 +46,16 @@ describe('VideoGrid', () => {
       isCameraEnabled: true,
       isSpeaking: false,
       metadata: undefined,
+      isLocal,
+      uid: identity,
+      audioLevel: 0,
     } as unknown as AgoraParticipant;
   };
 
   const mockParticipants: AgoraParticipant[] = [
-    createMockParticipant('user-1', 'John Doe'),
-    createMockParticipant('user-2', 'Jane Smith'),
-    createMockParticipant('user-3', 'Bob Wilson'),
+    createMockParticipant('user-1', 'John Doe', true), // isLocal=true
+    createMockParticipant('user-2', 'Jane Smith', false),
+    createMockParticipant('user-3', 'Bob Wilson', false),
   ];
 
   const defaultProps = {
@@ -172,7 +176,19 @@ describe('VideoGrid', () => {
 
   describe('edge cases', () => {
     it('should handle undefined currentUserId', () => {
-      render(<VideoGrid {...defaultProps} currentUserId={undefined} />);
+      const participantsWithoutLocal = [
+        createMockParticipant('user-1', 'John Doe', false),
+        createMockParticipant('user-2', 'Jane Smith', false),
+        createMockParticipant('user-3', 'Bob Wilson', false),
+      ];
+
+      render(
+        <VideoGrid
+          {...defaultProps}
+          participants={participantsWithoutLocal}
+          currentUserId={undefined}
+        />,
+      );
 
       // All should be remote since no current user
       const isLocalElements = screen.getAllByTestId('is-local');

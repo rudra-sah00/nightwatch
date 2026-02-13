@@ -54,7 +54,7 @@ export function VideoGrid({
           >
             <ParticipantView
               participant={participant}
-              isLocal={participant.identity === currentUserId}
+              isLocal={participant.isLocal}
               canKick={isHost && participant.identity !== currentUserId}
               onKick={onKick}
             />

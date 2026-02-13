@@ -83,8 +83,7 @@ export function WatchPartySidebar({
         name,
         profilePhoto,
       })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [room.members.map],
+    [room.members],
   );
 
   // Agora token fetch

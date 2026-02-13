@@ -10,8 +10,6 @@ interface ParticipantViewProps {
   isLocal: boolean;
   canKick?: boolean;
   onKick?: (userId: string) => void;
-  /** Remote user object for subscribing to video tracks */
-  remoteUser?: IAgoraRTCRemoteUser;
 }
 
 /**
@@ -23,27 +21,25 @@ export function ParticipantView({
   isLocal,
   canKick,
   onKick,
-  remoteUser,
 }: ParticipantViewProps) {
   const videoRef = useRef<HTMLDivElement>(null);
 
-  // Attach remote video track to container
+  // Attach video track to container
   useEffect(() => {
-    if (!remoteUser?.videoTrack || !videoRef.current) return;
-    remoteUser.videoTrack.play(videoRef.current);
+    const track = participant.videoTrack;
+    if (!track || !videoRef.current) return;
+
+    track.play(videoRef.current);
     return () => {
-      remoteUser.videoTrack?.stop();
+      track.stop();
     };
-  }, [remoteUser?.videoTrack]);
+  }, [participant.videoTrack]);
 
   // Parse avatar from participant metadata
   const avatarUrl = parseAvatarFromMetadata(participant.metadata);
 
-  // Memoize video transform style to avoid inline object recreation
-  const videoStyle = useMemo(
-    () => ({ transform: isLocal ? 'scaleX(-1)' : 'scaleX(1)' }),
-    [isLocal],
-  );
+  // No mirroring for video tracks
+  const videoStyle = useMemo(() => ({ transform: 'scaleX(1)' }), []);
 
   const isVideoMuted = !participant.isCameraEnabled;
 
