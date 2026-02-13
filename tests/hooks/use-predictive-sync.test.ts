@@ -2,19 +2,29 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePredictiveSync } from '@/features/watch-party/hooks/usePredictiveSync';
 
+interface MockVideoElement {
+  currentTime: number;
+  playbackRate: number;
+  paused: boolean;
+  play: ReturnType<typeof vi.fn>;
+  pause: ReturnType<typeof vi.fn>;
+}
+
 describe('usePredictiveSync', () => {
+  let mockVideo: MockVideoElement;
   let videoElement: HTMLVideoElement;
   let videoRef: { current: HTMLVideoElement | null };
 
   beforeEach(() => {
     // Mock Video Element
-    videoElement = {
+    mockVideo = {
       currentTime: 0,
       playbackRate: 1,
       paused: true,
       play: vi.fn().mockResolvedValue(undefined),
       pause: vi.fn(),
-    } as unknown as HTMLVideoElement;
+    };
+    videoElement = mockVideo as unknown as HTMLVideoElement;
 
     videoRef = { current: videoElement };
 
@@ -51,7 +61,7 @@ describe('usePredictiveSync', () => {
 
     // Video is at 10s, playing
     videoElement.currentTime = 10;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     // Server says: 10.5s (0.5s ahead) - Soft drift
     const now = Date.now();
@@ -76,7 +86,7 @@ describe('usePredictiveSync', () => {
 
     // Video is at 10.5s, playing
     videoElement.currentTime = 10.5;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     // Server says: 10.0s (0.5s behind) - Soft drift
     const now = Date.now();
@@ -98,7 +108,7 @@ describe('usePredictiveSync', () => {
     const { result } = renderHook(() => usePredictiveSync(videoRef, 0, true));
 
     videoElement.currentTime = 10;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     // Server says: 20s (10s ahead) - Large drift
     const now = Date.now();
@@ -177,7 +187,7 @@ describe('usePredictiveSync', () => {
     );
 
     videoElement.currentTime = 0;
-    (videoElement as any).paused = true;
+    mockVideo.paused = true;
 
     const now = Date.now();
     act(() => {
@@ -200,7 +210,7 @@ describe('usePredictiveSync', () => {
     const { result } = renderHook(() => usePredictiveSync(videoRef, 0, true));
 
     videoElement.currentTime = 10;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     const now = Date.now();
     act(() => {
@@ -221,7 +231,7 @@ describe('usePredictiveSync', () => {
 
     videoElement.currentTime = 10;
     videoElement.playbackRate = 1;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     const now = Date.now();
     act(() => {
@@ -254,7 +264,7 @@ describe('usePredictiveSync', () => {
 
     // Set video way behind
     videoElement.currentTime = 5;
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     // Advance to trigger periodic check (2s interval)
     act(() => {
@@ -282,7 +292,7 @@ describe('usePredictiveSync', () => {
 
     // Video is paused locally
     videoElement.currentTime = 10;
-    (videoElement as any).paused = true;
+    mockVideo.paused = true;
 
     act(() => {
       vi.advanceTimersByTime(2000);
@@ -309,7 +319,7 @@ describe('usePredictiveSync', () => {
     // Video is perfectly in sync but rate was adjusted
     videoElement.currentTime = 12; // 10 + 2s
     videoElement.playbackRate = 1.05; // Was adjusting
-    (videoElement as any).paused = false;
+    mockVideo.paused = false;
 
     act(() => {
       vi.advanceTimersByTime(2000);

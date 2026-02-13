@@ -54,7 +54,7 @@ describe('Register Schema', () => {
     const validData = {
       name: 'John Doe',
       email: 'john@example.com',
-      password: 'Password!',
+      password: 'Password!1',
     };
 
     const result = registerSchema.safeParse(validData);
@@ -65,7 +65,7 @@ describe('Register Schema', () => {
     const data = {
       name: 'John Doe',
       email: 'john@example.com',
-      password: 'password!',
+      password: 'password!1',
     };
 
     const result = registerSchema.safeParse(data);
@@ -79,7 +79,7 @@ describe('Register Schema', () => {
     const data = {
       name: 'John Doe',
       email: 'john@example.com',
-      password: 'Password123',
+      password: 'Password12',
     };
 
     const result = registerSchema.safeParse(data);
@@ -89,25 +89,47 @@ describe('Register Schema', () => {
     }
   });
 
-  it('rejects short password', () => {
+  it('rejects short password (under 8 chars)', () => {
     const data = {
       name: 'John Doe',
       email: 'john@example.com',
-      password: 'Pa!',
+      password: 'Pa!1xx',
     };
 
     const result = registerSchema.safeParse(data);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/at least 6/i);
+      expect(result.error.issues[0].message).toMatch(/at least 8/i);
     }
+  });
+
+  it('accepts password without lowercase (not required)', () => {
+    const data = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'ABCDEFGH!',
+    };
+
+    const result = registerSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts password without number (not required)', () => {
+    const data = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'Password!',
+    };
+
+    const result = registerSchema.safeParse(data);
+    expect(result.success).toBe(true);
   });
 
   it('rejects invalid email', () => {
     const data = {
       name: 'John Doe',
       email: 'notanemail',
-      password: 'Password123',
+      password: 'Password!1',
     };
 
     const result = registerSchema.safeParse(data);
@@ -118,7 +140,7 @@ describe('Register Schema', () => {
     const data = {
       name: 'J',
       email: 'john@example.com',
-      password: 'Password123',
+      password: 'Password!1',
     };
 
     const result = registerSchema.safeParse(data);
@@ -143,8 +165,8 @@ describe('Forgot Password Schema', () => {
 describe('Reset Password Schema', () => {
   it('accepts valid password reset', () => {
     const data = {
-      password: 'NewPass!',
-      confirmPassword: 'NewPass!',
+      password: 'NewPass1!',
+      confirmPassword: 'NewPass1!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
@@ -153,8 +175,8 @@ describe('Reset Password Schema', () => {
 
   it('rejects mismatched passwords', () => {
     const data = {
-      password: 'NewPass!',
-      confirmPassword: 'Different!',
+      password: 'NewPass1!',
+      confirmPassword: 'DiffPass1!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
@@ -166,8 +188,8 @@ describe('Reset Password Schema', () => {
 
   it('accepts passwords without lowercase (optional)', () => {
     const data = {
-      password: 'NEWPASS!',
-      confirmPassword: 'NEWPASS!',
+      password: 'NEWPASS1!',
+      confirmPassword: 'NEWPASS1!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
@@ -176,8 +198,8 @@ describe('Reset Password Schema', () => {
 
   it('requires uppercase letter', () => {
     const data = {
-      password: 'newpass!',
-      confirmPassword: 'newpass!',
+      password: 'newpass1!',
+      confirmPassword: 'newpass1!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
@@ -186,8 +208,8 @@ describe('Reset Password Schema', () => {
 
   it('accepts passwords without number (optional)', () => {
     const data = {
-      password: 'NewPass!',
-      confirmPassword: 'NewPass!',
+      password: 'NewPasss!',
+      confirmPassword: 'NewPasss!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
@@ -204,10 +226,10 @@ describe('Reset Password Schema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires minimum 6 characters', () => {
+  it('requires minimum 8 characters', () => {
     const data = {
-      password: 'Pa1!',
-      confirmPassword: 'Pa1!',
+      password: 'Pa1!xx',
+      confirmPassword: 'Pa1!xx',
     };
 
     const result = resetPasswordSchema.safeParse(data);

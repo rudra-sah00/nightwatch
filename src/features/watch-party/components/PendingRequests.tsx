@@ -1,4 +1,5 @@
 import { Check, UserPlus, X } from 'lucide-react';
+import Image from 'next/image';
 import type { RoomMember } from '../types';
 
 interface PendingRequestsProps {
@@ -36,10 +37,13 @@ export function PendingRequests({
           >
             {/* Avatar */}
             {pending.profilePhoto ? (
-              <img
+              <Image
                 src={pending.profilePhoto}
                 alt={pending.name}
+                width={28}
+                height={28}
                 className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                unoptimized
               />
             ) : (
               <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">

@@ -4,21 +4,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ChangePasswordForm } from '@/features/profile/components/change-password-form';
 
 // Mock the API
-vi.mock('@/features/profile/api', () => ({
-  changePassword: vi.fn(),
-}));
+vi.mock('@/features/profile/api', () => import('../__mocks__/profile-api'));
 
 // Mock sonner toast
-vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+vi.mock('sonner', () => import('../__mocks__/sonner'));
 
 // Mock PasswordInfo component
 vi.mock('@/components/ui/password-info', () => ({
   PasswordInfo: () => <span data-testid="password-info">Password Info</span>,
+}));
+
+// Mock PasswordStrengthIndicator component
+vi.mock('@/components/ui/password-strength', () => ({
+  PasswordStrengthIndicator: () => null,
 }));
 
 describe('ChangePasswordForm', () => {
@@ -68,8 +66,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'oldpass123');
-      await user.type(newPasswordInput, 'newpass123');
-      await user.type(confirmPasswordInput, 'differentpass');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'Different1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -91,8 +89,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'oldpass');
-      await user.type(newPasswordInput, '12345');
-      await user.type(confirmPasswordInput, '12345');
+      await user.type(newPasswordInput, 'Ab1!');
+      await user.type(confirmPasswordInput, 'Ab1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -101,7 +99,7 @@ describe('ChangePasswordForm', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Password must be at least 6 characters/i),
+          screen.getByText(/Password must be at least 8 characters/i),
         ).toBeInTheDocument();
       });
     });
@@ -120,8 +118,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'currentPass123');
-      await user.type(newPasswordInput, 'newPass123');
-      await user.type(confirmPasswordInput, 'newPass123');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'NewPass1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -131,7 +129,7 @@ describe('ChangePasswordForm', () => {
       await waitFor(() => {
         expect(mockChangePassword).toHaveBeenCalledWith(
           'currentPass123',
-          'newPass123',
+          'NewPass1!',
         );
       });
     });
@@ -148,8 +146,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'currentPass123');
-      await user.type(newPasswordInput, 'newPass123');
-      await user.type(confirmPasswordInput, 'newPass123');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'NewPass1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -175,8 +173,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'currentPass123');
-      await user.type(newPasswordInput, 'newPass123');
-      await user.type(confirmPasswordInput, 'newPass123');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'NewPass1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -204,8 +202,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'wrongPassword');
-      await user.type(newPasswordInput, 'newPass123');
-      await user.type(confirmPasswordInput, 'newPass123');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'NewPass1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -240,8 +238,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'currentPass123');
-      await user.type(newPasswordInput, 'newPass123');
-      await user.type(confirmPasswordInput, 'newPass123');
+      await user.type(newPasswordInput, 'NewPass1!');
+      await user.type(confirmPasswordInput, 'NewPass1!');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -289,8 +287,8 @@ describe('ChangePasswordForm', () => {
         getFormElements();
 
       await user.type(currentPasswordInput, 'oldpass');
-      await user.type(newPasswordInput, '12345');
-      await user.type(confirmPasswordInput, '12345');
+      await user.type(newPasswordInput, 'Ab1!xxx');
+      await user.type(confirmPasswordInput, 'Ab1!xxx');
 
       const submitButton = screen.getByRole('button', {
         name: /Update Password/i,
@@ -299,6 +297,60 @@ describe('ChangePasswordForm', () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText('Error')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('password validation - uppercase and special character', () => {
+    it('shows error when password has no uppercase letter', async () => {
+      const user = userEvent.setup();
+      render(<ChangePasswordForm />);
+
+      const { currentPasswordInput, newPasswordInput, confirmPasswordInput } =
+        getFormElements();
+
+      // Password with lowercase + digits + special but no uppercase
+      await user.type(currentPasswordInput, 'oldpassword');
+      await user.type(newPasswordInput, 'abcdefgh1!');
+      await user.type(confirmPasswordInput, 'abcdefgh1!');
+
+      const submitButton = screen.getByRole('button', {
+        name: /Update Password/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'Password must contain at least one uppercase letter',
+          ),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('shows error when password has no special character', async () => {
+      const user = userEvent.setup();
+      render(<ChangePasswordForm />);
+
+      const { currentPasswordInput, newPasswordInput, confirmPasswordInput } =
+        getFormElements();
+
+      // Password with uppercase + lowercase + digits but no special char
+      await user.type(currentPasswordInput, 'oldpassword');
+      await user.type(newPasswordInput, 'Abcdefgh123');
+      await user.type(confirmPasswordInput, 'Abcdefgh123');
+
+      const submitButton = screen.getByRole('button', {
+        name: /Update Password/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'Password must contain at least one special character',
+          ),
+        ).toBeInTheDocument();
       });
     });
   });

@@ -3,12 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { getSocket } from '@/lib/ws';
-import { injectTokenIntoUrl, wrapInProxy } from '../watch';
+import { useSocket } from '@/providers/socket-provider';
+import { injectTokenIntoUrl, wrapInProxy } from '../watch/utils';
+
 import {
   approveJoinRequest,
   createPartyRoom,
-  emitPartyEvent, // New
+  emitPartyEvent,
   emitTypingStart,
   emitTypingStop,
   getPartyMessages,
@@ -18,6 +19,8 @@ import {
   onPartyAdminRequest,
   onPartyClosed,
   onPartyContentUpdated,
+  onPartyHostDisconnected,
+  onPartyHostReconnected,
   onPartyJoinApproved,
   onPartyJoinRejected,
   onPartyKicked,
@@ -31,7 +34,6 @@ import {
   requestJoinPartyRoom,
   requestPartyState,
   sendPartyMessage,
-  syncPartyState,
   updatePartyContent,
 } from './api';
 import { useClockSync } from './hooks/useClockSync';
@@ -42,6 +44,33 @@ import type {
   WatchPartyRoom,
 } from './types';
 
+/**
+ * Normalize room URLs by wrapping captions, sprites, and subtitle tracks through proxy.
+ * Extracted to avoid duplicating this logic in every socket handler.
+ */
+function normalizeRoomUrls(
+  room: WatchPartyRoom,
+  token: string,
+  { injectStream = false }: { injectStream?: boolean } = {},
+): WatchPartyRoom {
+  return {
+    ...room,
+    ...(injectStream && {
+      streamUrl: injectTokenIntoUrl(room.streamUrl, token) || room.streamUrl,
+    }),
+    captionUrl: room.captionUrl
+      ? wrapInProxy(room.captionUrl, token)
+      : room.captionUrl,
+    spriteVtt: room.spriteVtt
+      ? wrapInProxy(room.spriteVtt, token)
+      : room.spriteVtt,
+    subtitleTracks: (room.subtitleTracks || []).map((track) => ({
+      ...track,
+      src: wrapInProxy(track.src, token),
+    })),
+  };
+}
+
 interface UseWatchPartyOptions {
   onStateUpdate?: (state: PartyStateUpdate) => void;
   onMemberJoined?: (member: RoomMember) => void;
@@ -50,6 +79,13 @@ interface UseWatchPartyOptions {
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const router = useRouter();
+  const { socket: contextSocket } = useSocket();
+
+  // Store options in a ref so callbacks always read fresh values
+  // without causing effect teardown/re-subscribe on every render
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   const [room, setRoom] = useState<WatchPartyRoom | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,24 +94,19 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const [requestStatus, setRequestStatus] = useState<
     'idle' | 'pending' | 'rejected' | 'joined'
   >('idle');
+  const [hostDisconnected, setHostDisconnected] = useState(false);
 
-  const lastSyncRef = useRef<number>(0);
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const requestStatusRef = useRef(requestStatus);
+  requestStatusRef.current = requestStatus;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
 
-  // Check for stale guest token on mount and clear if found
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const existingToken = sessionStorage.getItem('guest_token');
-      if (existingToken) {
-        sessionStorage.removeItem('guest_token');
-      }
-    }
-  }, []); // Run once on mount
+  // NOTE: Guest token cleanup is handled in requestJoin() before each new join attempt.
+  // Do NOT clear guest_token on mount — a page reload while in-room would wipe a valid token.
 
   // Create a new party room
   const createRoom = useCallback(
@@ -91,21 +122,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           if (response.success && response.room) {
             // Normalize URLs using streamToken to enable CORS-safe subtitle loading
             const token = response.streamToken || '';
-            const normalizedRoom: WatchPartyRoom = {
-              ...response.room,
-              captionUrl: response.room.captionUrl
-                ? wrapInProxy(response.room.captionUrl, token)
-                : response.room.captionUrl,
-              spriteVtt: response.room.spriteVtt
-                ? wrapInProxy(response.room.spriteVtt, token)
-                : response.room.spriteVtt,
-              subtitleTracks: (response.room.subtitleTracks || []).map(
-                (track) => ({
-                  ...track,
-                  src: wrapInProxy(track.src, token),
-                }),
-              ),
-            };
+            const normalizedRoom = normalizeRoomUrls(response.room, token);
             setRoom(normalizedRoom);
             setIsConnected(true);
             setRequestStatus('joined');
@@ -163,21 +180,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
                     : '';
 
                 // Normalize URLs using the token
-                const normalizedRoom: WatchPartyRoom = {
-                  ...response.room!,
-                  captionUrl: response.room!.captionUrl
-                    ? wrapInProxy(response.room!.captionUrl, token)
-                    : response.room!.captionUrl,
-                  spriteVtt: response.room!.spriteVtt
-                    ? wrapInProxy(response.room!.spriteVtt, token)
-                    : response.room!.spriteVtt,
-                  subtitleTracks: (response.room!.subtitleTracks || []).map(
-                    (track) => ({
-                      ...track,
-                      src: wrapInProxy(track.src, token),
-                    }),
-                  ),
-                };
+                const normalizedRoom = normalizeRoomUrls(response.room!, token);
 
                 setRoom(normalizedRoom);
                 setIsConnected(true);
@@ -378,15 +381,27 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           },
         };
       });
-      options.onStateUpdate?.(state);
+      optionsRef.current.onStateUpdate?.(state);
     });
 
     const cleanupMemberJoined = onPartyMemberJoined(({ member }) => {
-      if (!member || !member.id) {
-        toast.info('Someone joined the party');
-        return;
+      if (!member || !member.id) return;
+
+      // Skip toast/sound for our own join — we already know we joined.
+      const myId = optionsRef.current.userId;
+      const myGuestId = contextSocket?.id
+        ? `guest:${contextSocket.id}`
+        : undefined;
+      const isSelf =
+        (myId && member.id === myId) || (myGuestId && member.id === myGuestId);
+
+      if (!isSelf) {
+        new Audio('/room-join.mp3').play().catch(() => {});
+        toast.success(`${member.name || 'Someone'} joined!`, {
+          id: `member-joined-${member.id}`,
+        });
       }
-      toast.success(`${member.name || 'Someone'} joined!`);
+
       setRoom((prev) => {
         if (!prev) return null;
         if (prev.members.some((m) => m.id === member.id)) return prev;
@@ -395,15 +410,17 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           members: [...prev.members, member],
         };
       });
-      options.onMemberJoined?.(member);
+      optionsRef.current.onMemberJoined?.(member);
     });
 
     const cleanupMemberLeft = onPartyMemberLeft(({ userId }) => {
+      // Look up the member name before mutating state, then show toast outside updater.
       setRoom((prev) => {
         if (!prev) return null;
         const member = prev.members.find((m) => m?.id === userId);
         if (member?.name) {
-          toast.info(`${member.name} left`);
+          // Toast ID deduplicates in case React StrictMode runs updater twice
+          toast.info(`${member.name} left`, { id: `member-left-${userId}` });
         }
         return {
           ...prev,
@@ -423,6 +440,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     });
 
     const cleanupAdminRequest = onPartyAdminRequest(({ member }) => {
+      new Audio('/room-req.mp3').play().catch(() => {});
       if (!member || !member.name) {
         toast.info('Someone requested to join');
       } else {
@@ -439,39 +457,39 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     });
 
     const cleanupJoinApproved = onPartyJoinApproved(
-      ({ room: approvedRoom, streamToken, initialState }) => {
+      ({ room: approvedRoom, streamToken, guestToken, initialState }) => {
+        // Store guest token BEFORE any other async work —
+        // useAgoraToken and getPartyStreamToken both need it.
+        if (guestToken && typeof window !== 'undefined') {
+          sessionStorage.setItem('guest_token', guestToken);
+        }
+
         // Fetch fresh token to ensure valid playback URLs
         getPartyStreamToken((response) => {
           const token =
             response.success && response.token ? response.token : streamToken;
 
-          const normalizedRoom: WatchPartyRoom = {
-            ...approvedRoom,
-            streamUrl:
-              injectTokenIntoUrl(approvedRoom.streamUrl, token) ||
-              approvedRoom.streamUrl,
-            captionUrl: approvedRoom.captionUrl
-              ? wrapInProxy(approvedRoom.captionUrl, token)
-              : approvedRoom.captionUrl,
-            spriteVtt: approvedRoom.spriteVtt
-              ? wrapInProxy(approvedRoom.spriteVtt, token)
-              : approvedRoom.spriteVtt,
-            subtitleTracks: (approvedRoom.subtitleTracks || []).map(
-              (track) => ({
-                ...track,
-                src: wrapInProxy(track.src, token),
-              }),
-            ),
-          };
+          const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+            injectStream: true,
+          });
 
           setRoom(normalizedRoom);
           setIsConnected(true);
           setRequestStatus('joined');
 
-          if (initialState) {
-            options.onStateUpdate?.({
-              ...initialState,
-              timestamp: Date.now(),
+          // Pass initial state to predictive sync. The video element doesn't exist
+          // yet (ActiveWatchParty hasn't rendered), but usePredictiveSync will save
+          // it as a pending update and apply once the video mounts.
+          if (initialState && initialState.currentTime != null) {
+            optionsRef.current.onStateUpdate?.({
+              currentTime: initialState.currentTime,
+              videoTime: initialState.videoTime ?? initialState.currentTime,
+              isPlaying: initialState.isPlaying,
+              playbackRate: initialState.playbackRate ?? 1,
+              timestamp: initialState.timestamp ?? Date.now(),
+              serverTime: initialState.serverTime ?? Date.now(),
+              eventType: 'init',
+              fromHost: true,
             });
           }
         });
@@ -479,7 +497,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     );
 
     const cleanupJoinRejected = onPartyJoinRejected(() => {
-      if (requestStatus === 'pending') {
+      if (requestStatusRef.current === 'pending') {
         setRequestStatus('rejected');
         setError('Host rejected your request');
         setRoom(null);
@@ -502,7 +520,15 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       setRoom(null);
       setIsConnected(false);
       setRequestStatus('idle');
-      router.push('/home');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('guest_token');
+      }
+      // Guests are not authenticated — /home redirects to /login, so send them there directly
+      const isGuest =
+        typeof window !== 'undefined' &&
+        sessionStorage.getItem('guest_token') === null &&
+        !document.cookie.includes('accessToken');
+      router.push(isGuest ? '/login' : '/home');
     });
 
     const cleanupMessage = onPartyMessage((message) => {
@@ -516,21 +542,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       getPartyStreamToken((response) => {
         const token = response.success && response.token ? response.token : '';
 
-        const normalizedRoom: WatchPartyRoom = {
-          ...newRoom,
-          streamUrl:
-            injectTokenIntoUrl(newRoom.streamUrl, token) || newRoom.streamUrl,
-          captionUrl: newRoom.captionUrl
-            ? wrapInProxy(newRoom.captionUrl, token)
-            : newRoom.captionUrl,
-          spriteVtt: newRoom.spriteVtt
-            ? wrapInProxy(newRoom.spriteVtt, token)
-            : newRoom.spriteVtt,
-          subtitleTracks: (newRoom.subtitleTracks || []).map((track) => ({
-            ...track,
-            src: wrapInProxy(track.src, token),
-          })),
-        };
+        const normalizedRoom = normalizeRoomUrls(newRoom, token, {
+          injectStream: true,
+        });
 
         setRoom(normalizedRoom);
       });
@@ -543,6 +557,29 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           return [...prev, { userId, userName }];
         }
         return prev.filter((u) => u.userId !== userId);
+      });
+    });
+
+    const cleanupHostDisconnected = onPartyHostDisconnected(
+      ({ graceSeconds }) => {
+        setHostDisconnected(true);
+        toast.warning(
+          `Host disconnected. Party will close in ${graceSeconds}s if they don't return.`,
+          { id: 'host-disconnected', duration: graceSeconds * 1000 },
+        );
+      },
+    );
+
+    const cleanupHostReconnected = onPartyHostReconnected(() => {
+      // Only show the toast if we previously showed a disconnect warning.
+      // Without this guard, a brief socket reconnection (e.g. during page
+      // navigation) triggers host_reconnected even though the user never
+      // saw a disconnect message.
+      setHostDisconnected((prev) => {
+        if (prev) {
+          toast.success('Host reconnected!', { id: 'host-disconnected' });
+        }
+        return false;
       });
     });
 
@@ -559,62 +596,80 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       cleanupMessage();
       cleanupContentUpdated();
       cleanupTyping();
+      cleanupHostDisconnected();
+      cleanupHostReconnected();
     };
-  }, [requestStatus, router, options]);
+  }, [router, contextSocket?.id]);
 
   // Reconnection sync for guests - request state when socket reconnects
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket || !isConnected || !room) return;
+    if (!contextSocket || !isConnected || !room) return;
 
-    const isHost = options.userId === room.hostId;
+    const isHost = optionsRef.current.userId === room.hostId;
     if (isHost) return; // Host doesn't need to sync from server
 
     const handleReconnect = () => {
       // Request current state from server after reconnection
       requestPartyState((response) => {
         if (response.success && response.state) {
-          options.onStateUpdate?.(response.state);
+          optionsRef.current.onStateUpdate?.(response.state);
         }
       });
     };
 
     // Listen for reconnection events
-    socket.on('connect', handleReconnect);
+    contextSocket.on('connect', handleReconnect);
 
-    // Also request state immediately when this effect runs (covers initial connection)
-    // Small delay to ensure socket room join is complete
-    const initialSyncTimer = setTimeout(() => {
+    // Request state at staggered intervals after joining:
+    // - 500ms: video element should exist but clock may not be calibrated yet (fallback sync)
+    // - 1500ms: clock should be calibrated, predictive sync works accurately
+    // This covers the gap between join_approved (video not yet rendered) and
+    // the host Auto-Sync (which only fires when member count changes).
+    const syncTimers: NodeJS.Timeout[] = [];
+
+    const requestSync = () => {
       requestPartyState((response) => {
         if (response.success && response.state) {
-          options.onStateUpdate?.(response.state);
+          optionsRef.current.onStateUpdate?.(response.state);
         }
       });
-      getPartyMessages((response) => {
-        if (response.success && response.messages) {
-          setMessages(response.messages);
-        }
-      });
-    }, 500);
+    };
+
+    syncTimers.push(
+      setTimeout(() => {
+        requestSync();
+        getPartyMessages((response) => {
+          if (response.success && response.messages) {
+            setMessages(response.messages);
+          }
+        });
+      }, 500),
+    );
+
+    // Second sync after clock calibration (~600ms) should be complete
+    syncTimers.push(setTimeout(requestSync, 1500));
 
     return () => {
-      socket.off('connect', handleReconnect);
-      clearTimeout(initialSyncTimer);
+      contextSocket.off('connect', handleReconnect);
+      for (const t of syncTimers) clearTimeout(t);
     };
-  }, [isConnected, room, options]);
+  }, [isConnected, room?.id, contextSocket, room]);
 
   // NOTE: Periodic polling removed in favor of WebSocket events
 
   // Cleanup on unmount (handles browser close, navigation, etc.)
   useEffect(() => {
-    // Cleanup function runs when component unmounts
     return () => {
       if (syncIntervalRef.current) {
         clearInterval(syncIntervalRef.current);
       }
 
-      // CRITICAL: Clear guest token on unmount to prevent stale token issues
+      // Only clear guest token if NOT currently connected.
+      // If the user is refreshing while in a room, keep the token intact
+      // so they can reconnect with it.
+      // NOTE: requestStatusRef.current is 'joined' while actively in a room.
       if (
+        requestStatusRef.current !== 'joined' &&
         typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token')
       ) {
@@ -630,8 +685,8 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     errorCode,
     isConnected,
     requestStatus,
-    clockOffset, // New
-    isCalibrated, // New
+    clockOffset,
+    isCalibrated,
     messages,
     typingUsers,
     sendMessage,
@@ -644,8 +699,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     approveMember,
     rejectMember,
     kickUser,
-    sync, // Legacy support
-    emitEvent, // New: Use this for event-based sync
+    hostDisconnected,
+    sync,
+    emitEvent,
     updateContent,
   };
 }

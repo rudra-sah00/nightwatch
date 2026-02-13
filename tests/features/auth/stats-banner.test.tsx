@@ -4,9 +4,7 @@ import * as api from '@/features/auth/api';
 import { StatsBanner } from '@/features/auth/components/stats-banner';
 
 // Mock the API
-vi.mock('@/features/auth/api', () => ({
-  getPlatformStats: vi.fn(),
-}));
+vi.mock('@/features/auth/api', () => import('./__mocks__/auth-api'));
 
 describe('StatsBanner', () => {
   beforeEach(() => {

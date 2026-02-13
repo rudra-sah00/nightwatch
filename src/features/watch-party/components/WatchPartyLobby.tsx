@@ -109,9 +109,6 @@ export function WatchPartyLobby({
   }
 
   if (roomPreview) {
-    const isFull = roomPreview.isFull || false;
-    const maxMembers = roomPreview.maxMembers || 10;
-
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
         <div className="max-w-md w-full bg-card rounded-2xl p-6 shadow-lg border border-border">
@@ -137,22 +134,11 @@ export function WatchPartyLobby({
             </div>
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
               <Users className="w-4 h-4" />
-              <span>
-                {roomPreview.memberCount}/{maxMembers} watching
-                {isFull && <span className="text-red-400 ml-2">(Full)</span>}
-              </span>
+              <span>{roomPreview.memberCount} watching</span>
             </div>
           </div>
 
-          {isFull && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
-              <p className="text-sm text-red-400">
-                This watch party is currently full. Please try again later.
-              </p>
-            </div>
-          )}
-
-          {!user && !isFull && (
+          {!user && (
             <>
               <div className="mb-4">
                 <label
@@ -198,7 +184,6 @@ export function WatchPartyLobby({
             onClick={onJoin}
             disabled={
               isLoading ||
-              isFull ||
               (!user && !guestName.trim()) ||
               (!user && !captchaToken)
             }
@@ -209,8 +194,6 @@ export function WatchPartyLobby({
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Requesting...
               </>
-            ) : isFull ? (
-              'Room Full'
             ) : (
               'Request to Join'
             )}

@@ -34,7 +34,7 @@ export function EpisodeList({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" style={{ contentVisibility: 'auto' }}>
       {episodes.map((episode) => (
         <EpisodeCard
           key={episode.episodeId || episode.episodeNumber}

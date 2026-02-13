@@ -12,16 +12,10 @@ import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 
 // Mock apiFetch
-vi.mock('@/lib/fetch', () => ({
-  apiFetch: vi.fn(),
-}));
+vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 // Mock env
-vi.mock('@/lib/env', () => ({
-  env: {
-    BACKEND_URL: 'http://localhost:4000',
-  },
-}));
+vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 
 describe('Profile API', () => {
   beforeEach(() => {

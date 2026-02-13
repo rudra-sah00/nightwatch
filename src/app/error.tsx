@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 export default function ErrorPage({
   reset,

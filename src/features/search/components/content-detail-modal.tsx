@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { useWatchParty } from '@/features/watch-party';
+import { useWatchParty } from '@/features/watch-party/useWatchParty';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';
 import { ContentInfo } from './content-info';

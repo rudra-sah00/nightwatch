@@ -32,6 +32,35 @@ describe('Fullscreen', () => {
     });
   });
 
+  describe('accessibility', () => {
+    it('should have "Enter fullscreen" aria-label when not fullscreen', () => {
+      render(<Fullscreen {...defaultProps} isFullscreen={false} />);
+
+      expect(screen.getByRole('button')).toHaveAttribute(
+        'aria-label',
+        'Enter fullscreen',
+      );
+    });
+
+    it('should have "Exit fullscreen" aria-label when fullscreen', () => {
+      render(<Fullscreen {...defaultProps} isFullscreen={true} />);
+
+      expect(screen.getByRole('button')).toHaveAttribute(
+        'aria-label',
+        'Exit fullscreen',
+      );
+    });
+
+    it('should use custom label when provided', () => {
+      render(<Fullscreen {...defaultProps} label="Exit theater mode" />);
+
+      expect(screen.getByRole('button')).toHaveAttribute(
+        'aria-label',
+        'Exit theater mode',
+      );
+    });
+  });
+
   describe('interactions', () => {
     it('should call onToggle when clicked', () => {
       const onToggle = vi.fn();
@@ -39,6 +68,21 @@ describe('Fullscreen', () => {
 
       fireEvent.click(screen.getByRole('button'));
       expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent default on mouseDown to avoid focus steal', () => {
+      render(<Fullscreen {...defaultProps} />);
+      const button = screen.getByRole('button');
+
+      const event = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true,
+      });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      button.dispatchEvent(event);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
     });
 
     it('should toggle between states', () => {

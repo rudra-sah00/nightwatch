@@ -6,12 +6,14 @@ import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import type { z } from 'zod';
-import { Button, Input, Label } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { forgotPassword } from '@/features/auth/api';
 import {
   type ForgotPasswordInput,
-  forgotPassword,
   forgotPasswordSchema,
-} from '@/features/auth';
+} from '@/features/auth/schema';
 import { cn } from '@/lib/utils';
 import type { ApiError } from '@/types';
 

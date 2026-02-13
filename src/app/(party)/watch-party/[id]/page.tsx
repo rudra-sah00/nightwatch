@@ -3,26 +3,14 @@
 import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { checkRoomExists } from '@/features/watch-party/api';
 import { usePredictiveSync } from '@/features/watch-party/hooks/usePredictiveSync'; // New
 import type { RoomPreview } from '@/features/watch-party/types';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
-import { getSocket, initSocket } from '@/lib/ws';
 import { useAuth } from '@/providers/auth-provider';
-
-import type { User } from '@/types';
+import { useSocket } from '@/providers/socket-provider';
 
 // Dynamic imports for heavy watch party components
 const ActiveWatchParty = dynamic(
@@ -41,38 +29,25 @@ const WatchPartyLobby = dynamic(
   { ssr: false },
 );
 
-// Hook to handle guest socket initialization
-function useGuestSocket(user: User | null) {
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setIsReady(true);
-      return;
-    }
-
-    const existingSocket = getSocket();
-    // Force re-init if guest token exists but socket has no query param for it (optional optimization)
-    // But initSocket handles it. We just need to ensure initSocket is called.
-
-    if (!existingSocket?.connected) {
-      initSocket(undefined, undefined, true); // Initialize as guest
-    }
-    setIsReady(true);
-
-    return () => {
-      // Don't disconnect on unmount to prevent flickering on navigation
-      // But page refresh disconnects anyway.
-    };
-  }, [user]);
-
-  return isReady;
+export default function WatchPartyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <WatchPartyContent />
+    </Suspense>
+  );
 }
 
-export default function WatchPartyPage() {
+function WatchPartyContent() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { socket, isConnected: isSocketConnected, connectGuest } = useSocket();
   const searchParams = useSearchParams();
 
   const roomId = (params.id as string)?.toUpperCase();
@@ -88,8 +63,22 @@ export default function WatchPartyPage() {
   const [movieEndWarningShown, setMovieEndWarningShown] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const isGuestSocketReady = useGuestSocket(user);
   const roomCreationTimeRef = useRef<number>(0);
+  // Track host status in a ref so onStateUpdate closure always has the latest value
+  const isHostRef = useRef(false);
+
+  // Ensure guest socket is connected for unauthenticated users
+  // Only run once on mount — do NOT depend on `socket` (it changes after connectGuest,
+  // which would re-trigger this effect and cause an infinite loop).
+  const hasConnectedGuest = useRef(false);
+  useEffect(() => {
+    if (!user && !hasConnectedGuest.current) {
+      hasConnectedGuest.current = true;
+      connectGuest();
+    }
+  }, [user, connectGuest]);
+
+  const isGuestSocketReady = !!user || isSocketConnected;
 
   const {
     room,
@@ -116,7 +105,11 @@ export default function WatchPartyPage() {
     updateContent,
   } = useWatchParty({
     onStateUpdate: (state) => {
-      // Defer to predictive sync hook
+      // Host is source of truth — never adjust host playback from server echoes.
+      // Without this guard the host's own state_update echoes back, applyState
+      // tweaks playbackRate, which fires a native 'ratechange' event, which emits
+      // another party:event, creating an infinite loop.
+      if (isHostRef.current) return;
       applyState(state);
     },
     userId: user?.id,
@@ -126,7 +119,26 @@ export default function WatchPartyPage() {
   const { applyState } = usePredictiveSync(videoRef, clockOffset, isCalibrated);
 
   const isHost = user?.id === room?.hostId;
+  isHostRef.current = isHost;
   const prevMemberCount = useRef(0);
+
+  // Stable userId for guests — parse JWT once, not on every render
+  const currentUserId = useMemo(() => {
+    if (user?.id) return user.id;
+    const token =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('guest_token')
+        : null;
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.sub as string | undefined;
+      } catch (_e) {
+        /* invalid token */
+      }
+    }
+    return socket?.id ? `guest:${socket.id}` : undefined;
+  }, [user?.id, socket?.id]);
 
   // Store room creation time
   useEffect(() => {
@@ -202,35 +214,15 @@ export default function WatchPartyPage() {
     };
   }, [room, isHost, movieEndWarningShown, leaveRoom, router]);
 
-  // Warn host before leaving/reloading page
-  useEffect(() => {
-    if (!isHost || !room) return;
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const message =
-        'Are you sure you want to leave? The watch party room will be closed for all members.';
-      e.preventDefault();
-      e.returnValue = message;
-      return message;
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [isHost, room]);
-
-  // Check if room exists
+  // Check if room exists (and auto-rejoin for authenticated users) (and auto-rejoin for authenticated users)
   useEffect(() => {
     if (!roomId) return;
 
-    // If it's a brand new party being created by an authenticated user,
-    // we don't need to check existence yet as the room is still being established.
-    if (isNewParty && user) {
-      setIsCheckingRoom(false);
-      return;
-    }
+    // Already in the room — skip room existence checks.
+    // Without this guard, every `room` state update (play/pause/seek sync)
+    // re-runs this effect, sets isCheckingRoom=true, unmounts ActiveWatchParty,
+    // destroys HLS.js / Agora, and causes seekbar to reset to 0.
+    if (requestStatus === 'joined') return;
 
     const checkRoom = async () => {
       setIsCheckingRoom(true);
@@ -238,14 +230,20 @@ export default function WatchPartyPage() {
         const result = await checkRoomExists(roomId);
         if (result.exists && result.preview) {
           setRoomPreview(result.preview);
-          // If room is full, show a toast but still allow to view lobby
-          if (result.preview.isFull) {
-            toast.warning('This watch party is currently full.');
+
+          // Auto-rejoin: if authenticated user and not already in a room, silently rejoin.
+          // This covers page reload — the backend returns the room directly for existing members.
+          if (
+            user &&
+            !room &&
+            requestStatus === 'idle' &&
+            !hasAttemptedAutoJoin.current
+          ) {
+            hasAttemptedAutoJoin.current = true;
+            requestJoin(roomId);
           }
         } else {
           setRoomNotFound(true);
-          // Don't show toast here - the WatchPartyLobby component already displays
-          // the error message in the UI, and WebSocket events have their own toasts
         }
       } catch (_err) {
         // Silently fail or handle error if needed
@@ -255,7 +253,7 @@ export default function WatchPartyPage() {
     };
 
     checkRoom();
-  }, [roomId, isNewParty, user]);
+  }, [roomId, user, room, requestStatus, requestJoin]);
 
   // Host Auto-Sync for New Members
   useEffect(() => {
@@ -282,7 +280,7 @@ export default function WatchPartyPage() {
     prevMemberCount.current = room.members.length;
   }, [room?.members, isHost, room, emitEvent]);
 
-  // Auto-join for Host (Only if authenticated)
+  // Auto-join for Host (Only if authenticated — creating a new party)
   const hasAttemptedAutoJoin = useRef(false);
   useEffect(() => {
     if (
@@ -301,6 +299,16 @@ export default function WatchPartyPage() {
       });
     }
   }, [isNewParty, roomId, room, isLoading, requestStatus, requestJoin, user]);
+
+  // Strip ?new=true from URL once joined so page reloads go through the
+  // normal rejoin path instead of re-triggering the "party created" flow.
+  useEffect(() => {
+    if (isNewParty && requestStatus === 'joined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('new');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [isNewParty, requestStatus]);
 
   const handleJoin = async () => {
     if (!user && !guestName.trim()) {
@@ -373,66 +381,28 @@ export default function WatchPartyPage() {
 
   if (isConnected && room) {
     return (
-      <>
-        <ActiveWatchParty
-          room={room}
-          currentUserId={
-            user?.id ||
-            (() => {
-              const token =
-                typeof window !== 'undefined'
-                  ? sessionStorage.getItem('guest_token')
-                  : null;
-              if (token) {
-                try {
-                  const payload = JSON.parse(atob(token.split('.')[1]));
-                  return payload.sub;
-                } catch (_e) {}
-              }
-              return getSocket()?.id ? `guest:${getSocket()?.id}` : undefined;
-            })()
-          }
-          isHost={isHost}
-          copied={copied}
-          onKick={kickUser}
-          onApprove={approveMember}
-          onReject={rejectMember}
-          onCopyLink={copyInviteLink}
-          onLeave={handleLeave}
-          onPartyEvent={emitEvent}
-          videoRef={videoRef}
-          messages={messages}
-          onSendMessage={sendMessage}
-          onUpdateContent={updateContent}
-          typingUsers={typingUsers}
-          onTypingStart={handleTypingStart}
-          onTypingStop={handleTypingStop}
-        />
-
-        {/* Leave Confirmation Dialog */}
-        <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {isHost
-                  ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
-                  : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowLeaveDialog(false)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={confirmLeave}>
-                {isHost ? 'End Party' : 'Leave'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
+      <ActiveWatchParty
+        room={room}
+        currentUserId={currentUserId}
+        isHost={isHost}
+        copied={copied}
+        onKick={kickUser}
+        onApprove={approveMember}
+        onReject={rejectMember}
+        onCopyLink={copyInviteLink}
+        onLeave={handleLeave}
+        onConfirmLeave={confirmLeave}
+        showLeaveDialog={showLeaveDialog}
+        onShowLeaveDialog={setShowLeaveDialog}
+        onPartyEvent={emitEvent}
+        videoRef={videoRef}
+        messages={messages}
+        onSendMessage={sendMessage}
+        onUpdateContent={updateContent}
+        typingUsers={typingUsers}
+        onTypingStart={handleTypingStart}
+        onTypingStop={handleTypingStop}
+      />
     );
   }
 

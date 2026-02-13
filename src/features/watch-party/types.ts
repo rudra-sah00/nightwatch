@@ -47,8 +47,6 @@ export interface RoomPreview {
   episode?: number;
   hostName: string;
   memberCount: number;
-  maxMembers?: number;
-  isFull?: boolean;
 }
 
 // WebSocket Events
@@ -88,10 +86,15 @@ export interface PartyAdminRequest {
 export interface PartyJoinApproved {
   room: WatchPartyRoom;
   streamToken: string;
-  guestToken?: string; // New: Guest Token
+  guestToken?: string;
+  refreshToken?: string;
   initialState?: {
     currentTime: number;
+    videoTime?: number;
     isPlaying: boolean;
+    playbackRate?: number;
+    timestamp?: number;
+    serverTime?: number;
   };
 }
 

@@ -26,5 +26,5 @@ vi.mock('next/navigation', () => ({
 // Mock environment variables
 process.env.NEXT_PUBLIC_BACKEND_URL = 'http://localhost:4000';
 process.env.NEXT_PUBLIC_WS_URL = 'http://localhost:4000';
-process.env.NEXT_PUBLIC_LIVEKIT_URL = 'ws://localhost:7880';
+process.env.NEXT_PUBLIC_AGORA_APP_ID = 'test-agora-app-id';
 process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = 'test-key';

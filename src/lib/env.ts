@@ -4,10 +4,10 @@
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
-const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+const agoraAppId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
 const turnstileKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-if (!backendUrl || !wsUrl || !liveKitUrl) {
+if (!backendUrl || !wsUrl || !agoraAppId) {
   throw new Error(
     'Missing required environment variables. Check .env or CI/CD configuration.',
   );
@@ -16,6 +16,6 @@ if (!backendUrl || !wsUrl || !liveKitUrl) {
 export const env = {
   BACKEND_URL: backendUrl,
   WS_URL: wsUrl,
-  LIVEKIT_URL: liveKitUrl,
+  AGORA_APP_ID: agoraAppId,
   TURNSTILE_SITE_KEY: turnstileKey || '',
 } as const;

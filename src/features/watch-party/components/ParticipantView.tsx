@@ -1,66 +1,66 @@
-import type { Participant } from 'livekit-client';
+import type { IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng';
 import { Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo } from 'react';
-import { useAudioStream } from '@/features/watch-party/hooks/useAudioStream';
-import { useParticipantTracks } from '@/features/watch-party/hooks/useParticipantTracks';
+import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import type { AgoraParticipant } from '../hooks/useAgora';
 
 interface ParticipantViewProps {
-  participant: Participant;
+  participant: AgoraParticipant;
   isLocal: boolean;
   canKick?: boolean;
   onKick?: (userId: string) => void;
+  /** Remote user object for subscribing to video tracks */
+  remoteUser?: IAgoraRTCRemoteUser;
 }
 
 /**
  * Renders a single participant's video/audio stream with avatar fallback.
- * Uses useParticipantTracks for track management and useAudioStream for audio.
+ * Uses Agora remote user tracks for video rendering.
  */
 export function ParticipantView({
   participant,
   isLocal,
   canKick,
   onKick,
+  remoteUser,
 }: ParticipantViewProps) {
-  // Track management (video attachment, mute state)
-  const { videoRef, isVideoMuted, hasVideoTrack, audioTrack } =
-    useParticipantTracks({ participant, isLocal });
+  const videoRef = useRef<HTMLDivElement>(null);
 
-  // Audio stream for remote participants
-  const audioRef = useAudioStream(audioTrack, isLocal);
+  // Attach remote video track to container
+  useEffect(() => {
+    if (!remoteUser?.videoTrack || !videoRef.current) return;
+    remoteUser.videoTrack.play(videoRef.current);
+    return () => {
+      remoteUser.videoTrack?.stop();
+    };
+  }, [remoteUser?.videoTrack]);
 
   // Parse avatar from participant metadata
   const avatarUrl = parseAvatarFromMetadata(participant.metadata);
 
-  // Memoize video transform style to avoid inline object recreation (rule 5.4)
+  // Memoize video transform style to avoid inline object recreation
   const videoStyle = useMemo(
     () => ({ transform: isLocal ? 'scaleX(-1)' : 'scaleX(1)' }),
     [isLocal],
   );
 
+  const isVideoMuted = !participant.isCameraEnabled;
+
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 group shadow-inner">
-      {/* Video Element - Mirror local video for natural self-view, keep remote non-mirrored */}
-      <video
+      {/* Video Container — Agora renders into this div */}
+      <div
         ref={videoRef}
         className={cn(
-          'w-full h-full object-cover transition-opacity duration-300',
-          isVideoMuted || !hasVideoTrack ? 'opacity-0' : 'opacity-100',
+          'w-full h-full transition-opacity duration-300',
+          isVideoMuted ? 'opacity-0' : 'opacity-100',
         )}
-        autoPlay
-        playsInline
-        muted={isLocal}
         style={videoStyle}
       />
 
-      {/* Audio element for remote participant audio */}
-      <audio ref={audioRef} autoPlay muted={false} playsInline>
-        <track kind="captions" />
-      </audio>
-
       {/* Avatar Fallback (shown when video is muted/unavailable) */}
-      {(isVideoMuted || !hasVideoTrack) && (
+      {isVideoMuted && (
         <AvatarFallback
           avatarUrl={avatarUrl}
           name={participant.name || 'User'}

@@ -4,11 +4,12 @@ import { ShieldCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
 
 const LoginForm = dynamic(
   () =>
-    import('@/features/auth/components').then((m) => ({
+    import('@/features/auth/components/login-form').then((m) => ({
       default: m.LoginForm,
     })),
   {
@@ -23,7 +24,7 @@ const LoginForm = dynamic(
 
 const StatsBanner = dynamic(
   () =>
-    import('@/features/auth/components').then((m) => ({
+    import('@/features/auth/components/stats-banner').then((m) => ({
       default: m.StatsBanner,
     })),
   {
@@ -43,6 +44,15 @@ export default function LoginPage() {
       router.replace('/');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Show flash message from force-logout / session-expired redirect
+  useEffect(() => {
+    const flash = sessionStorage.getItem('auth_flash');
+    if (flash) {
+      sessionStorage.removeItem('auth_flash');
+      toast.error(flash);
+    }
+  }, []);
 
   // Loading State
   if (isLoading) {

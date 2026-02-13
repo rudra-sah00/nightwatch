@@ -112,11 +112,16 @@ export function saveSubtitleSettings(settings: SubtitleSettings): void {
   }
 }
 
+import { loadSubtitleFonts } from './load-subtitle-fonts';
+
 /**
  * Apply subtitle settings to CSS custom properties
  */
 export function applySubtitleSettings(settings: SubtitleSettings): void {
   if (typeof document === 'undefined') return;
+
+  // Lazy-load Google Fonts when subtitle settings are applied
+  loadSubtitleFonts();
 
   const root = document.documentElement;
   root.style.setProperty('--subtitle-font-size', settings.fontSize);

@@ -1,8 +1,11 @@
 'use client';
 
 import { Turnstile } from '@marsidev/react-turnstile';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { env } from '@/lib/env';
+
+// Hoisted to module level to prevent recreation on each render (rule 5.4)
+const TURNSTILE_OPTIONS = { theme: 'dark', size: 'flexible' } as const;
 
 interface CaptchaProps {
   onVerify: (token: string) => void;
@@ -11,13 +14,15 @@ interface CaptchaProps {
 
 export function Captcha({ onVerify, onError }: CaptchaProps) {
   const isDev = process.env.NODE_ENV === 'development';
+  const onVerifyRef = useRef(onVerify);
+  onVerifyRef.current = onVerify;
 
   useEffect(() => {
     if (isDev) {
       // Auto-verify in development
-      onVerify('dev-bypass-token');
+      onVerifyRef.current('dev-bypass-token');
     }
-  }, [isDev, onVerify]);
+  }, [isDev]);
 
   if (isDev) {
     return (
@@ -35,10 +40,7 @@ export function Captcha({ onVerify, onError }: CaptchaProps) {
         siteKey={siteKey}
         onSuccess={onVerify}
         onError={onError}
-        options={{
-          theme: 'dark',
-          size: 'flexible',
-        }}
+        options={TURNSTILE_OPTIONS}
         className="w-full"
       />
     </div>

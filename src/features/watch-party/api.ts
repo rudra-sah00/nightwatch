@@ -1,5 +1,5 @@
 import { env } from '@/lib/env';
-import { getSocket } from '@/lib/ws';
+import { getSocket } from '@/lib/socket';
 import type {
   ChatMessage, // New
   PartyAdminRequest,
@@ -48,8 +48,6 @@ export async function checkRoomExists(roomId: string): Promise<{
           episode: data.episode,
           hostName: data.hostName,
           memberCount: data.memberCount,
-          maxMembers: data.maxMembers || 10,
-          isFull: data.isFull || false,
         },
       };
     }
@@ -98,7 +96,12 @@ export function emitPing(
 ): void {
   const socket = getSocket();
   if (!socket) {
-    callback?.({ success: false, error: 'Not connected' } as any);
+    callback?.({
+      success: false,
+      error: 'Not connected',
+      t1: 0,
+      serverTime: 0,
+    });
     return;
   }
   socket.emit('party:ping', payload, callback);
@@ -113,7 +116,11 @@ export function emitPartyEvent(
 ): void {
   const socket = getSocket();
   if (!socket) {
-    callback?.({ success: false, error: 'Not connected' } as any);
+    callback?.({
+      success: false,
+      error: 'Not connected',
+      serverTime: 0,
+    });
     return;
   }
   socket.emit('party:event', payload, callback);
@@ -484,4 +491,22 @@ export function onUserTyping(
 
   socket.on('party:user_typing', callback);
   return () => socket.off('party:user_typing', callback);
+}
+
+export function onPartyHostDisconnected(
+  callback: (data: { graceSeconds: number; message: string }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:host_disconnected', callback);
+  return () => socket.off('party:host_disconnected', callback);
+}
+
+export function onPartyHostReconnected(callback: () => void): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:host_reconnected', callback);
+  return () => socket.off('party:host_reconnected', callback);
 }

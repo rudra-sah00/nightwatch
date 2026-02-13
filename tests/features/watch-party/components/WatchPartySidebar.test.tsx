@@ -3,24 +3,25 @@ import { describe, expect, it, vi } from 'vitest';
 import { WatchPartySidebar } from '@/features/watch-party/components/WatchPartySidebar';
 import type { ChatMessage, WatchPartyRoom } from '@/features/watch-party/types';
 
-// Mock LiveKit hooks to avoid complex LiveKit setup
+// Mock Agora hooks to avoid complex Agora setup
 const mockToggleAudio = vi.fn();
 const mockToggleVideo = vi.fn();
 const mockSwitchAudioDevice = vi.fn();
 const mockSwitchVideoDevice = vi.fn();
 
-vi.mock('@/features/watch-party/hooks/useLiveKitToken', () => ({
-  useLiveKitToken: vi.fn(() => ({
+vi.mock('@/features/watch-party/hooks/useAgoraToken', () => ({
+  useAgoraToken: vi.fn(() => ({
     token: 'mock-token',
-    liveKitUrl: 'wss://mock.livekit.cloud',
+    appId: 'mock-app-id',
+    channel: 'mock-channel',
+    uid: 1,
     isLoading: false,
     error: null,
   })),
 }));
 
-vi.mock('@/features/watch-party/hooks/useLiveKit', () => ({
-  useLiveKit: vi.fn(() => ({
-    room: null,
+vi.mock('@/features/watch-party/hooks/useAgora', () => ({
+  useAgora: vi.fn(() => ({
     participants: [],
     audioEnabled: true,
     videoEnabled: false,

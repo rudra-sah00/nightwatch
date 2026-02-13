@@ -310,10 +310,10 @@ export function ProfileCard() {
           {/* Main Content */}
           <main className="min-w-0 flex-1">
             {/* Tabs Navigation */}
-            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl py-4 mb-8">
+            <div className="sticky top-0 z-10 py-4 mb-8">
               <div className="flex items-center justify-between gap-4">
                 {/* Tab Buttons */}
-                <div className="inline-flex h-12 lg:h-14 items-center justify-center rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 p-1.5 backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/5 flex-1 lg:flex-none">
+                <div className="inline-flex items-center gap-2 flex-1 lg:flex-none">
                   <TabButton
                     isActive={activeTab === 'overview'}
                     onClick={() => setActiveTab('overview')}

@@ -3,22 +3,16 @@
 import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui';
-import { ResetPasswordForm } from '@/features/auth/components';
+import { Suspense, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { useAuth } from '@/providers/auth-provider';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth();
   const token = searchParams.get('token');
-
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -26,7 +20,7 @@ export default function ResetPasswordPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || !isClient) {
+  if (isLoading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
@@ -73,5 +67,19 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+        </main>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

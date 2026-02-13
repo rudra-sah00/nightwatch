@@ -21,12 +21,7 @@ export function parseLinks(text: string): TextSegment[] {
   const segments: TextSegment[] = [];
   let lastIndex = 0;
 
-  // Reset regex index
-  URL_REGEX.lastIndex = 0;
-
-  let match: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex pattern matching
-  while ((match = URL_REGEX.exec(text)) !== null) {
+  for (const match of text.matchAll(URL_REGEX)) {
     // Add text before the URL
     if (match.index > lastIndex) {
       segments.push({
@@ -81,11 +76,8 @@ export function containsLinks(text: string): boolean {
  */
 export function extractUrls(text: string): string[] {
   const urls: string[] = [];
-  URL_REGEX.lastIndex = 0;
 
-  let match: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex pattern matching
-  while ((match = URL_REGEX.exec(text)) !== null) {
+  for (const match of text.matchAll(URL_REGEX)) {
     urls.push(match[0]);
   }
 

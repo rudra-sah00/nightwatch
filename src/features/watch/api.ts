@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/fetch';
-import { getSocket } from '@/lib/ws';
+import { getSocket } from '@/lib/socket';
 import type { WatchProgress } from './types';
 
 // ===== VIDEO DETAILS =====

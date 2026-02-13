@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import {
   clearSearchHistory,
   deleteSearchHistoryItem,
@@ -15,17 +15,17 @@ import type { SearchHistory } from '@/features/search/types';
 
 export function SearchInput() {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [history, setHistory] = useState<SearchHistory[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') || '');
+  const [history, setHistory] = useState<SearchHistory[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Sync query with URL params
+  // Sync query when URL changes (e.g., browser back/forward)
+  const urlQuery = searchParams.get('q') || '';
   useEffect(() => {
-    const urlQuery = searchParams.get('q') || '';
     setQuery(urlQuery);
-  }, [searchParams]);
+  }, [urlQuery]);
 
   // Load history when focused
   const loadHistory = async () => {

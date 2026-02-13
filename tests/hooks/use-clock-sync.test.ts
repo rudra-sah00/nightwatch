@@ -1,12 +1,13 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { emitPing } from '@/features/watch-party/api';
 import { useClockSync } from '@/features/watch-party/hooks/useClockSync';
 
 // Mock the API
-vi.mock('@/features/watch-party/api', () => ({
-  emitPing: vi.fn(),
-}));
+vi.mock(
+  '@/features/watch-party/api',
+  () => import('./__mocks__/watch-party-api'),
+);
 
 describe('useClockSync', () => {
   beforeEach(() => {
@@ -85,9 +86,14 @@ describe('useClockSync', () => {
   });
 
   it('should handle ping failures gracefully', async () => {
-    vi.mocked(emitPing).mockImplementation((payload, callback) => {
+    vi.mocked(emitPing).mockImplementation((_payload, callback) => {
       if (callback) {
-        callback({ success: false, error: 'Network error' } as any);
+        callback({
+          success: false,
+          error: 'Network error',
+          t1: 0,
+          serverTime: 0,
+        });
       }
     });
 

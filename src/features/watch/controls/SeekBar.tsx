@@ -76,13 +76,21 @@ export function SeekBar({
 
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
-  const [previewScale, setPreviewScale] = useState(1);
+  const [previewScale, setPreviewScale] = useState(() => {
+    if (typeof window === 'undefined') return PREVIEW_SCALES.base;
+    const width = window.innerWidth;
+    if (width >= 3440) return PREVIEW_SCALES['3xl'];
+    if (width >= 2560) return PREVIEW_SCALES['2xl'];
+    if (width >= 1920) return PREVIEW_SCALES.xl;
+    if (width >= 1280) return PREVIEW_SCALES.lg;
+    return PREVIEW_SCALES.base;
+  });
   const barRef = useRef<HTMLDivElement>(null);
 
   // VTT Logic
   const [vttSprites, setVttSprites] = useState<SpriteCue[]>([]);
 
-  // Detect screen size for preview scaling
+  // Update preview scale on resize
   useEffect(() => {
     const updateScale = () => {
       const width = window.innerWidth;
@@ -98,8 +106,7 @@ export function SeekBar({
         setPreviewScale(PREVIEW_SCALES.base);
       }
     };
-    updateScale();
-    window.addEventListener('resize', updateScale);
+    window.addEventListener('resize', updateScale, { passive: true });
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 

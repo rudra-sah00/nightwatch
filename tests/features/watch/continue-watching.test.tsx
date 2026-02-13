@@ -1,17 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
 
 // Mock the watch API
-vi.mock('@/features/watch/api', () => ({
-  fetchContinueWatching: vi.fn(),
-  deleteWatchProgress: vi.fn(),
-  getCachedContinueWatching: vi.fn(() => null),
-}));
+vi.mock('@/features/watch/api', () => import('./__mocks__/watch-api'));
 
 // Mock the websocket
-vi.mock('@/lib/ws', () => ({
+vi.mock('@/lib/socket', () => ({
   getSocket: vi.fn(() => ({
     connected: true,
     on: vi.fn(),
@@ -21,9 +18,34 @@ vi.mock('@/lib/ws', () => ({
   })),
 }));
 
+// Mock SocketProvider
+vi.mock(
+  '@/providers/socket-provider',
+  () => import('./__mocks__/socket-provider'),
+);
+
 describe('ContinueWatching', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Always restore useSocket to default connected state (prevents pollution from tests that override it)
+    const { useSocket } = await import('@/providers/socket-provider');
+    vi.mocked(useSocket).mockReturnValue({
+      socket: {
+        connected: true,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      } as unknown as Socket,
+      isConnected: true,
+      connect: vi.fn(),
+      connectGuest: vi.fn(),
+      disconnect: vi.fn(),
+    });
+
+    // Always restore getCachedContinueWatching to return null (prevents pollution from cache tests)
+    const { getCachedContinueWatching } = await import('@/features/watch/api');
+    vi.mocked(getCachedContinueWatching).mockReturnValue(null);
   });
 
   it('displays series with correct season and episode numbers', async () => {
@@ -58,7 +80,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -123,7 +145,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -168,7 +190,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -217,7 +239,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -263,7 +285,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -308,7 +330,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -351,7 +373,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -394,7 +416,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -437,7 +459,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -485,7 +507,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -550,7 +572,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -614,14 +636,18 @@ describe('ContinueWatching', () => {
     expect(fetchContinueWatching).not.toHaveBeenCalled();
   });
 
-  it.skip('handles no socket connection gracefully', async () => {
+  it('handles no socket connection gracefully', async () => {
     const mockOnLoadComplete = vi.fn();
 
-    const { getSocket } = await import('@/lib/ws');
-    const mockGetSocket = getSocket as unknown as {
-      mockReturnValueOnce: (socket: null) => void;
-    };
-    mockGetSocket.mockReturnValueOnce(null);
+    // Socket is null — no connection at all
+    const { useSocket } = await import('@/providers/socket-provider');
+    vi.mocked(useSocket).mockReturnValue({
+      socket: null,
+      isConnected: false,
+      connect: vi.fn(),
+      connectGuest: vi.fn(),
+      disconnect: vi.fn(),
+    });
 
     render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
 
@@ -634,34 +660,36 @@ describe('ContinueWatching', () => {
     );
   });
 
-  it.skip('handles socket not connected state', async () => {
-    const { getSocket } = await import('@/lib/ws');
-    const onceMock = vi.fn();
-    const mockGetSocket = getSocket as unknown as {
-      mockReturnValueOnce: (
-        socket: {
-          connected: boolean;
-          once: (event: string, cb: () => void) => void;
-        } | null,
-      ) => void;
-    };
-    mockGetSocket.mockReturnValueOnce({
-      connected: false,
-      once: onceMock,
-    } as unknown as ReturnType<typeof getSocket>);
+  it('handles socket not connected state', async () => {
+    const mockOnLoadComplete = vi.fn();
 
-    render(<ContinueWatching />);
+    // Socket exists but is not connected
+    const { useSocket } = await import('@/providers/socket-provider');
+    vi.mocked(useSocket).mockReturnValue({
+      socket: {
+        connected: false,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      } as unknown as Socket,
+      isConnected: false,
+      connect: vi.fn(),
+      connectGuest: vi.fn(),
+      disconnect: vi.fn(),
+    });
 
-    // Wait for component to mount and call socket.once
+    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
+
+    // When not connected, component should report 0 items and stop loading
     await waitFor(
       () => {
-        expect(onceMock).toHaveBeenCalledWith('connect', expect.any(Function));
+        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
       },
       { timeout: 2000 },
     );
   });
 
-  it.skip('registers window focus handler', async () => {
+  it('registers window focus handler', async () => {
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
     const mockItems = [
@@ -683,19 +711,10 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
+    vi.mocked(fetchContinueWatching).mockImplementation(
       (
-        _limit: number,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
+        _limit: number | undefined,
+        callback: (items: typeof mockItems | null, error?: string) => void,
       ) => {
         callback(mockItems);
       },
@@ -712,21 +731,15 @@ describe('ContinueWatching', () => {
       );
       expect(focusCalls.length).toBeGreaterThan(0);
     });
+
+    addEventListenerSpy.mockRestore();
   });
 
-  it.skip('returns null when no items to display', async () => {
+  it('returns null when no items to display', async () => {
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          callback: (items: [] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
+    vi.mocked(fetchContinueWatching).mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: [] | null, error?: string) => void,
       ) => {
         callback([]); // Empty array means no items
@@ -746,27 +759,33 @@ describe('ContinueWatching', () => {
   });
 
   it('shows loading state initially', async () => {
-    vi.useFakeTimers();
+    // Socket connected but fetch hasn't resolved yet — component shows loading spinner
+    const { fetchContinueWatching, getCachedContinueWatching } = await import(
+      '@/features/watch/api'
+    );
 
-    // Don't mock fetchContinueWatching so it stays pending
+    // Reset to ensure no cached data and fetch hangs
+    vi.mocked(getCachedContinueWatching).mockReturnValue(null);
+    vi.mocked(fetchContinueWatching).mockImplementation(() => {
+      // intentionally don't call callback — simulates pending fetch
+    });
+
     const { container } = render(<ContinueWatching />);
 
     expect(screen.getByText('Continue Watching')).toBeInTheDocument();
     // Check for loading spinner
     const loader = container.querySelector('.animate-spin');
     expect(loader).toBeInTheDocument();
-
-    vi.useRealTimers();
   });
 
-  it.skip('displays items without posterUrl with fallback icon', async () => {
+  it('displays items without posterUrl with fallback icon', async () => {
     const mockItems = [
       {
         id: '1',
         contentId: 'show-1',
         contentType: 'Series' as const,
         title: 'No Poster Show',
-        posterUrl: null,
+        posterUrl: '',
         progressSeconds: 600,
         durationSeconds: 2400,
         progressPercent: 25,
@@ -779,19 +798,10 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
+    vi.mocked(fetchContinueWatching).mockImplementation(
       (
-        _limit: number,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
+        _limit: number | undefined,
+        callback: (items: typeof mockItems | null, error?: string) => void,
       ) => {
         callback(mockItems);
       },
@@ -806,8 +816,6 @@ describe('ContinueWatching', () => {
   });
 
   it('prevents duplicate fetches within 1 second', async () => {
-    vi.useFakeTimers();
-
     const mockItems = [
       {
         id: '1',
@@ -847,7 +855,7 @@ describe('ContinueWatching', () => {
     };
     mockFetch.mockImplementation(
       (
-        _limit: number,
+        _limit: number | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callCount++;
@@ -857,11 +865,67 @@ describe('ContinueWatching', () => {
 
     render(<ContinueWatching />);
 
-    await vi.runAllTimersAsync();
+    // Wait for initial effect-triggered fetch to complete
+    await waitFor(() => {
+      expect(callCount).toBeGreaterThanOrEqual(1);
+    });
 
-    // Should have called once
-    expect(callCount).toBe(1);
+    const initialCount = callCount;
 
-    vi.useRealTimers();
+    // Trigger a window focus event — should be blocked by 1s dedup
+    window.dispatchEvent(new Event('focus'));
+
+    // Count should not have increased (blocked by time guard)
+    expect(callCount).toBe(initialCount);
+  });
+
+  it('calls onLoadComplete(0) when fetchedItems is null (error case)', async () => {
+    const mockOnLoadComplete = vi.fn();
+
+    const { fetchContinueWatching } = await import('@/features/watch/api');
+    vi.mocked(fetchContinueWatching).mockImplementation(
+      (
+        _limit: number | undefined,
+        callback: (items: null, error?: string) => void,
+      ) => {
+        callback(null, 'Network error');
+      },
+    );
+
+    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
+
+    await waitFor(
+      () => {
+        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
+      },
+      { timeout: 2000 },
+    );
+  });
+
+  it('calls onLoadComplete(0) when socket.connected is false in fetchItems', async () => {
+    const mockOnLoadComplete = vi.fn();
+
+    const { useSocket } = await import('@/providers/socket-provider');
+    vi.mocked(useSocket).mockReturnValue({
+      socket: {
+        connected: false,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      } as unknown as Socket,
+      isConnected: true, // effect fires, but fetchItems checks socket.connected
+      connect: vi.fn(),
+      connectGuest: vi.fn(),
+      disconnect: vi.fn(),
+    });
+
+    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
+
+    await waitFor(
+      () => {
+        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
+      },
+      { timeout: 2000 },
+    );
   });
 });

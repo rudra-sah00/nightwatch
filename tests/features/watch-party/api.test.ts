@@ -1,17 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkRoomExists, getRoomDetails } from '@/features/watch-party/api';
 
-// Mock env
-vi.mock('@/lib/env', () => ({
-  env: {
-    BACKEND_URL: 'http://localhost:4000',
-  },
-}));
-
-// Mock websocket
-vi.mock('@/lib/ws', () => ({
-  getSocket: vi.fn(() => null),
-}));
+vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
+vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));
 
 describe('Watch Party API', () => {
   beforeEach(() => {
@@ -27,8 +18,6 @@ describe('Watch Party API', () => {
         type: 'movie',
         hostName: 'Test Host',
         memberCount: 3,
-        maxMembers: 10,
-        isFull: false,
       };
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
@@ -76,17 +65,15 @@ describe('Watch Party API', () => {
       expect(result.message).toContain('Unable to check room status');
     });
 
-    it('should handle full rooms', async () => {
+    it('should handle rooms with many members', async () => {
       const mockResponse = {
         exists: true,
-        title: 'Full Room',
+        title: 'Big Room',
         type: 'series',
         season: 1,
         episode: 5,
         hostName: 'Host',
-        memberCount: 10,
-        maxMembers: 10,
-        isFull: true,
+        memberCount: 50,
       };
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
@@ -94,11 +81,10 @@ describe('Watch Party API', () => {
         json: async () => mockResponse,
       } as Response);
 
-      const result = await checkRoomExists('FULL123');
+      const result = await checkRoomExists('BIG123');
 
       expect(result.exists).toBe(true);
-      expect(result.preview?.isFull).toBe(true);
-      expect(result.preview?.memberCount).toBe(10);
+      expect(result.preview?.memberCount).toBe(50);
     });
 
     it('should convert room ID to uppercase in preview', async () => {
@@ -143,7 +129,7 @@ describe('Watch Party API', () => {
       expect(result.preview?.episode).toBe(8);
     });
 
-    it('should set default maxMembers if not provided', async () => {
+    it('should return memberCount from response', async () => {
       const mockResponse = {
         exists: true,
         title: 'Test',
@@ -159,7 +145,7 @@ describe('Watch Party API', () => {
 
       const result = await checkRoomExists('TEST123');
 
-      expect(result.preview?.maxMembers).toBe(10);
+      expect(result.preview?.memberCount).toBe(3);
     });
   });
 

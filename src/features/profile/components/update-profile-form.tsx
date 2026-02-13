@@ -1,7 +1,11 @@
+'use client';
+
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Button, Input, Label } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';

@@ -3,7 +3,7 @@
 import { ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { ForgotPasswordForm } from '@/features/auth/components';
+import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function ForgotPasswordPage() {

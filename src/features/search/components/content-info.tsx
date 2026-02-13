@@ -113,8 +113,8 @@ export function ContentInfo({
             <div className="flex items-center justify-between text-xs text-white/70">
               <span>
                 {isSeries &&
-                watchProgress.seasonNumber &&
-                watchProgress.episodeNumber
+                watchProgress.seasonNumber != null &&
+                watchProgress.episodeNumber != null
                   ? `Continue watching S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
                   : 'Continue watching'}
               </span>
@@ -157,8 +157,8 @@ export function ContentInfo({
               ? 'Loading...'
               : hasWatchProgress &&
                   isSeries &&
-                  watchProgress?.seasonNumber &&
-                  watchProgress?.episodeNumber
+                  watchProgress?.seasonNumber != null &&
+                  watchProgress?.episodeNumber != null
                 ? `Resume S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
                 : hasWatchProgress && !isSeries
                   ? `Resume (${Math.round(watchProgress?.progressPercent || 0)}%)`

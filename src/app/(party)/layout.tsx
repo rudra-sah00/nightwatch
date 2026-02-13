@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Party Layout - Allows both authenticated users and guests
  * No authentication enforcement for watch party access

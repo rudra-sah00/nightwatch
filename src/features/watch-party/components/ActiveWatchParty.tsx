@@ -1,8 +1,20 @@
-import type { Participant, Room } from 'livekit-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useMobileDetection } from '@/features/watch/page/useMobileDetection';
 import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
+import type { AgoraParticipant } from '../hooks/useAgora';
 import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../types';
 import { WatchPartySidebar } from './WatchPartySidebar';
@@ -21,6 +33,9 @@ interface ActiveWatchPartyProps {
   onReject: (id: string) => void;
   onCopyLink: () => void;
   onLeave: () => void;
+  onConfirmLeave: () => void;
+  showLeaveDialog: boolean;
+  onShowLeaveDialog: (show: boolean) => void;
   onPartyEvent: (event: PartyEvent) => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   messages: ChatMessage[];
@@ -47,6 +62,9 @@ export function ActiveWatchParty({
   onReject,
   onCopyLink,
   onLeave,
+  onConfirmLeave,
+  showLeaveDialog,
+  onShowLeaveDialog,
   onPartyEvent,
   videoRef,
   messages,
@@ -58,23 +76,80 @@ export function ActiveWatchParty({
 }: ActiveWatchPartyProps) {
   const [showDesktopSidebar, setShowDesktopSidebar] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isFullscreen, _setIsFullscreen] = useState(false);
+  const isMobile = useMobileDetection();
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null,
   );
 
-  // LiveKit state for audio ducking
-  const [liveKitRoom, setLiveKitRoom] = useState<Room | null>(null);
-  const [liveKitParticipants, setLiveKitParticipants] = useState<Participant[]>(
-    [],
-  );
+  // Ref for the outer watch party container (fullscreen target)
+  const watchPartyContainerRef = useRef<HTMLDivElement>(null);
 
-  // Handle LiveKit data from sidebar
-  const handleLiveKitReady = useCallback(
-    (data: { room: Room | null; participants: Participant[] }) => {
-      setLiveKitRoom(data.room);
-      setLiveKitParticipants(data.participants);
+  // True browser fullscreen — hides URL bar, keeps sidebar & audio intact
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element;
+        webkitExitFullscreen?: () => Promise<void>;
+      };
+      const container = watchPartyContainerRef.current as
+        | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
+        | null;
+
+      // Exit if already fullscreen
+      if (document.fullscreenElement || doc.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        }
+        return;
+      }
+
+      // Enter fullscreen
+      if (container) {
+        if (container.requestFullscreen) {
+          await container.requestFullscreen({ navigationUI: 'hide' });
+        } else if (container.webkitRequestFullscreen) {
+          await container.webkitRequestFullscreen();
+        }
+      }
+    } catch {
+      toast.error('Failed to toggle fullscreen');
+    }
+  }, []);
+
+  // Track fullscreen state changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element;
+      };
+      setIsFullscreen(
+        !!document.fullscreenElement || !!doc.webkitFullscreenElement,
+      );
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange,
+      );
+    };
+  }, []);
+
+  // Agora state for audio ducking
+  const [agoraParticipants, setAgoraParticipants] = useState<
+    AgoraParticipant[]
+  >([]);
+
+  // Handle Agora data from sidebar
+  const handleAgoraReady = useCallback(
+    (data: { participants: AgoraParticipant[] }) => {
+      setAgoraParticipants(data.participants);
     },
     [],
   );
@@ -125,8 +200,7 @@ export function ActiveWatchParty({
 
   useAudioDucking({
     videoRef,
-    room: liveKitRoom,
-    participants: liveKitParticipants,
+    participants: agoraParticipants,
     userVolume,
     duckingFactor: 0.25, // Reduce to 25% when someone speaks
     transitionMs: 200,
@@ -134,34 +208,21 @@ export function ActiveWatchParty({
     isDuckingRef,
   });
 
-  // Detect mobile and portrait/landscape orientation
+  // Detect portrait/landscape orientation
   useEffect(() => {
-    const checkLayout = () => {
-      const mobile =
-        window.innerWidth < 768 ||
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0;
-      const portrait = window.innerHeight > window.innerWidth;
-      setIsMobile(mobile);
-      setIsPortrait(portrait);
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
     };
-    checkLayout();
-    window.addEventListener('resize', checkLayout, { passive: true });
-    window.addEventListener('orientationchange', checkLayout, {
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation, { passive: true });
+    window.addEventListener('orientationchange', checkOrientation, {
       passive: true,
     });
     return () => {
-      window.removeEventListener('resize', checkLayout);
-      window.removeEventListener('orientationchange', checkLayout);
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
     };
   }, []);
-
-  // Auto-show mobile members if new pending members (Host only)
-  useEffect(() => {
-    if (isHost && isMobile && room.pendingMembers?.length > 0) {
-      // Optional: Could auto-expand or show notification
-    }
-  }, [room.pendingMembers, isHost, isMobile]);
 
   const metadata: VideoMetadata = {
     title: room.title,
@@ -281,6 +342,7 @@ export function ActiveWatchParty({
 
   return (
     <div
+      ref={watchPartyContainerRef}
       className={cn(
         'flex h-[100dvh] w-screen bg-black overflow-hidden',
         // Default: Column (Mobile Portrait), Small+: Row (Landscape/Tablet/Desktop)
@@ -323,7 +385,7 @@ export function ActiveWatchParty({
           messages={messages}
           onSendMessage={onSendMessage}
           className="h-full rounded-none border-0 bg-transparent shadow-none"
-          onLiveKitReady={handleLiveKitReady}
+          onAgoraReady={handleAgoraReady}
           typingUsers={typingUsers}
           onTypingStart={onTypingStart}
           onTypingStop={onTypingStop}
@@ -355,9 +417,35 @@ export function ActiveWatchParty({
           }
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
           onNavigate={handleNavigate}
-          hideBackButton={true} // Always hide standard back button (handled by sidebar leave or custom header)
+          hideBackButton={true}
+          fullscreenToggleOverride={toggleFullscreen}
+          isFullscreenOverride={isFullscreen}
         />
       </div>
+
+      {/* Leave Confirmation Dialog — must be inside fullscreen container */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isHost
+                ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
+                : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => onShowLeaveDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmLeave}>
+              {isHost ? 'End Party' : 'Leave'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

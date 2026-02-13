@@ -3,6 +3,7 @@
 import { Check, ChevronRight, Subtitles, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { loadSubtitleFonts } from './load-subtitle-fonts';
 import {
   applySubtitleSettings,
   BACKGROUND_COLORS,
@@ -192,7 +193,10 @@ export function SubtitleSelector({
       {/* Style Settings Button */}
       <button
         type="button"
-        onClick={() => setCurrentScreen('style')}
+        onClick={() => {
+          loadSubtitleFonts();
+          setCurrentScreen('style');
+        }}
         className="w-full flex items-center justify-between px-4 py-3 border-t border-white/10 hover:bg-white/10 transition-colors"
       >
         <div className="flex items-center gap-2">

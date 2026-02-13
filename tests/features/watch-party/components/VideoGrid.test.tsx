@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { Participant } from 'livekit-client';
 import { describe, expect, it, vi } from 'vitest';
 import { VideoGrid } from '@/features/watch-party/components/VideoGrid';
+import type { AgoraParticipant } from '@/features/watch-party/hooks/useAgora';
 
-// Mock the ParticipantView component since it has complex LiveKit dependencies
+// Mock the ParticipantView component since it has complex Agora dependencies
 vi.mock('@/features/watch-party/components/ParticipantView', () => ({
   ParticipantView: ({
     participant,
@@ -11,7 +11,7 @@ vi.mock('@/features/watch-party/components/ParticipantView', () => ({
     canKick,
     onKick,
   }: {
-    participant: Participant;
+    participant: AgoraParticipant;
     isLocal: boolean;
     canKick?: boolean;
     onKick?: (userId: string) => void;
@@ -37,7 +37,7 @@ describe('VideoGrid', () => {
   const createMockParticipant = (
     identity: string,
     name: string,
-  ): Participant => {
+  ): AgoraParticipant => {
     return {
       identity,
       name,
@@ -45,10 +45,10 @@ describe('VideoGrid', () => {
       isCameraEnabled: true,
       isSpeaking: false,
       metadata: undefined,
-    } as unknown as Participant;
+    } as unknown as AgoraParticipant;
   };
 
-  const mockParticipants: Participant[] = [
+  const mockParticipants: AgoraParticipant[] = [
     createMockParticipant('user-1', 'John Doe'),
     createMockParticipant('user-2', 'Jane Smith'),
     createMockParticipant('user-3', 'Bob Wilson'),

@@ -1,25 +1,34 @@
-import type { Participant } from 'livekit-client';
 import { Video } from 'lucide-react';
+import type { AgoraParticipant } from '../hooks/useAgora';
 import { ParticipantView } from './ParticipantView';
 
 interface VideoGridProps {
-  participants: Participant[];
+  participants: AgoraParticipant[];
   currentUserId?: string;
+  hostId?: string;
   isHost?: boolean;
   onKick?: (userId: string) => void;
 }
 
 /**
  * Grid of participant video tiles
- * Displays LiveKit participants in a responsive grid layout
+ * Displays Agora participants in a responsive grid layout
  */
 export function VideoGrid({
   participants,
   currentUserId,
+  hostId,
   isHost,
   onKick,
 }: VideoGridProps) {
-  if (participants.length === 0) {
+  // Sort so the host is always first
+  const sorted = [...participants].sort((a, b) => {
+    if (a.identity === hostId) return -1;
+    if (b.identity === hostId) return 1;
+    return 0;
+  });
+
+  if (sorted.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-12 text-center px-4">
         <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mb-4">
@@ -38,7 +47,7 @@ export function VideoGrid({
   return (
     <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
       <div className="grid grid-cols-1 gap-2">
-        {participants.map((participant) => (
+        {sorted.map((participant) => (
           <div
             key={participant.identity}
             className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 ring-1 ring-white/5"

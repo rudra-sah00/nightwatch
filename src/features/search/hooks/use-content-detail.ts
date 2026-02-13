@@ -9,7 +9,7 @@ import {
   getCachedProgress,
 } from '@/features/watch/api';
 import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
-import { getSocket } from '@/lib/ws';
+import { useSocket } from '@/providers/socket-provider';
 import { getSeriesEpisodes, getShowDetails } from '../api';
 import {
   ContentType,
@@ -174,10 +174,12 @@ export function useContentDetail({
   );
 
   // Check for existing watch progress and set default season
+  // Re-runs reactively when socket connects (via isConnected from provider)
+  const { isConnected } = useSocket();
+
   useEffect(() => {
     if (!show || progressCheckedRef.current) return;
 
-    const socket = getSocket();
     const isSeries = show.contentType === ContentType.Series;
 
     // Helper to process progress response (used for both cache hit and socket response)
@@ -224,7 +226,7 @@ export function useContentDetail({
     }
 
     // Check if there's watch progress for this content via socket
-    if (socket?.connected) {
+    if (isConnected) {
       fetchContentProgress(show.id, (progress, hasProgress) => {
         processProgress(hasProgress, progress);
       });
@@ -241,7 +243,7 @@ export function useContentDetail({
         loadSeasonEpisodesInternal(show, latestSeason);
       }
     }
-  }, [show, loadSeasonEpisodesInternal]);
+  }, [show, loadSeasonEpisodesInternal, isConnected]);
 
   // Load episodes when season changes (user-triggered)
   const loadSeasonEpisodes = useCallback(

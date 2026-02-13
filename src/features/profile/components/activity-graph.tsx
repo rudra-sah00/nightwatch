@@ -216,7 +216,7 @@ export function ActivityGraph({
       </div>
 
       {/* Graph Container */}
-      <div className="w-full overflow-x-auto pb-2">
+      <div className="w-full pb-2">
         <div className="inline-block min-w-fit">
           {/* Month labels row */}
           <div className="flex mb-1">
@@ -297,7 +297,7 @@ export function ActivityGraph({
                           'w-[10px] h-[10px] rounded-sm transition-colors relative group/cell',
                           colors[day.level],
                           day.isValid &&
-                            'cursor-pointer hover:ring-1 hover:ring-white/30',
+                            'cursor-pointer hover:ring-1 hover:ring-white/30 hover:z-50',
                           !day.isValid && 'opacity-0',
                         )}
                       >

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-
+import type { AgoraParticipant } from '../hooks/useAgora';
 // Hooks
-import { useLiveKit } from '../hooks/useLiveKit';
-import { useLiveKitToken } from '../hooks/useLiveKitToken';
+import { useAgora } from '../hooks/useAgora';
+import { useAgoraToken } from '../hooks/useAgoraToken';
 
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../types';
@@ -37,10 +37,7 @@ interface WatchPartySidebarProps {
   onSendMessage: (content: string) => void;
   linkCopied: boolean;
   className?: string;
-  onLiveKitReady?: (data: {
-    room: import('livekit-client').Room | null;
-    participants: import('livekit-client').Participant[];
-  }) => void;
+  onAgoraReady?: (data: { participants: AgoraParticipant[] }) => void;
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
@@ -63,7 +60,7 @@ export function WatchPartySidebar({
   onSendMessage,
   linkCopied,
   className,
-  onLiveKitReady,
+  onAgoraReady,
   typingUsers = [],
   onTypingStart,
   onTypingStop,
@@ -77,16 +74,28 @@ export function WatchPartySidebar({
   const currentUserName =
     room.members.find((m) => m.id === currentUserId)?.name || 'You';
 
-  // LiveKit token fetch
-  const { token, liveKitUrl } = useLiveKitToken({
+  // Stabilise members reference — only rebuild when member IDs or names change,
+  // not on every room state update (playback position, etc.)
+  const stableMembers = useMemo(
+    () =>
+      room.members.map(({ id, name, profilePhoto }) => ({
+        id,
+        name,
+        profilePhoto,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [room.members.map],
+  );
+
+  // Agora token fetch
+  const { token, appId, channel, uid } = useAgoraToken({
     roomId: room?.id,
     userId: currentUserId,
     userName: currentUserName,
   });
 
-  // LiveKit connection and media controls
+  // Agora connection and media controls
   const {
-    room: liveKitRoom,
     participants,
     audioEnabled,
     videoEnabled,
@@ -98,12 +107,16 @@ export function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
-  } = useLiveKit(token, liveKitUrl);
+  } = useAgora({ token, appId, channel, uid, members: stableMembers });
 
-  // Notify parent about LiveKit state for audio ducking
+  // Use ref for callback to avoid effect re-runs on parent re-renders
+  const onAgoraReadyRef = useRef(onAgoraReady);
+  onAgoraReadyRef.current = onAgoraReady;
+
+  // Notify parent about Agora participants — only when the list identity changes
   useEffect(() => {
-    onLiveKitReady?.({ room: liveKitRoom, participants });
-  }, [liveKitRoom, participants, onLiveKitReady]);
+    onAgoraReadyRef.current?.({ participants });
+  }, [participants]);
 
   return (
     <div
@@ -143,6 +156,7 @@ export function WatchPartySidebar({
           <VideoGrid
             participants={participants}
             currentUserId={currentUserId}
+            hostId={room.hostId}
             isHost={isHost}
             onKick={onKick}
           />

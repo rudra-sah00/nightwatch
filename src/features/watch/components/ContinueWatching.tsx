@@ -6,7 +6,7 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { getSocket } from '@/lib/ws';
+import { useSocket } from '@/providers/socket-provider';
 import {
   fetchContinueWatching as apiFetchContinueWatching,
   deleteWatchProgress,
@@ -36,6 +36,7 @@ export function ContinueWatching({
   const [items, setItems] = useState<WatchProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const lastFetchRef = useRef<number>(0);
+  const { socket, isConnected } = useSocket();
 
   // Fetch continue watching items with stale-while-revalidate pattern
   const fetchItems = useCallback(
@@ -59,7 +60,6 @@ export function ContinueWatching({
       }
       lastFetchRef.current = now;
 
-      const socket = getSocket();
       if (!socket?.connected) {
         setIsLoading(false);
         onLoadComplete?.(0);
@@ -76,35 +76,31 @@ export function ContinueWatching({
         }
       });
     },
-    [onLoadComplete],
+    [onLoadComplete, socket],
   );
 
+  // Reactively fetch when socket connects (no polling needed)
   useEffect(() => {
-    const socket = getSocket();
-
-    if (socket?.connected) {
-      // Avoid sync state update in effect
-      setTimeout(() => fetchItems(), 0);
-    } else if (socket) {
-      socket.once('connect', () => fetchItems());
+    if (isConnected) {
+      fetchItems();
     } else {
-      // Avoid sync state update in effect
-      setTimeout(() => setIsLoading(false), 0);
+      // Not connected yet — mark not loading so we don't show spinner forever
+      setIsLoading(false);
+      onLoadComplete?.(0);
     }
 
     // Refresh on window focus (with debounce via cache)
     const handleFocus = () => {
-      if (getSocket()?.connected) {
-        fetchItems(); // Cache will prevent excessive refetch
+      if (socket?.connected) {
+        fetchItems();
       }
     };
     window.addEventListener('focus', handleFocus, { passive: true });
 
     return () => {
       window.removeEventListener('focus', handleFocus);
-      socket?.off('connect', fetchItems);
     };
-  }, [fetchItems]);
+  }, [fetchItems, isConnected, socket, onLoadComplete]);
 
   // Handle selecting content - opens modal
   const handleSelect = useCallback(
@@ -228,8 +224,8 @@ export function ContinueWatching({
 
               <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
                 {item.contentType === 'Series' &&
-                  item.seasonNumber &&
-                  item.episodeNumber && (
+                  item.seasonNumber != null &&
+                  item.episodeNumber != null && (
                     <span className="flex items-center gap-1.5">
                       <span className="text-foreground/80">
                         S{item.seasonNumber}:E{item.episodeNumber}

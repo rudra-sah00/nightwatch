@@ -157,14 +157,13 @@ describe('RoomPreview Type', () => {
       type: 'movie',
       hostName: 'John Doe',
       memberCount: 3,
-      maxMembers: 10,
     };
 
     expect(preview.id).toBe('room-1');
     expect(preview.memberCount).toBe(3);
   });
 
-  it('indicates full room', () => {
+  it('creates series room preview', () => {
     const preview: RoomPreview = {
       id: 'room-2',
       title: 'Breaking Bad',
@@ -173,11 +172,10 @@ describe('RoomPreview Type', () => {
       episode: 1,
       hostName: 'Jane Smith',
       memberCount: 10,
-      maxMembers: 10,
-      isFull: true,
     };
 
-    expect(preview.isFull).toBe(true);
+    expect(preview.type).toBe('series');
+    expect(preview.season).toBe(1);
   });
 });
 

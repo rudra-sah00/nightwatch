@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       'lucide-react', // 1,500+ icons, ~200-800ms import savings
       'sonner', // Toast library
-      'livekit-client', // WebRTC library with many exports
+      'agora-rtc-sdk-ng', // Agora WebRTC SDK
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-tabs',

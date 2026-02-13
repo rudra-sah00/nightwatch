@@ -1,6 +1,15 @@
-import EmojiPicker, { EmojiStyle, Theme } from 'emoji-picker-react';
+import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[350px] w-[300px] bg-zinc-900 rounded-xl animate-pulse" />
+  ),
+});
+
 import { parseLinks } from '@/lib/linkify';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../types';
@@ -33,12 +42,14 @@ export function WatchPartyChat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageCount = messages.length;
 
   // Auto-scroll to bottom on new messages
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Scroll when message count changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
+    if (messageCount > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messageCount]);
 
   // Handle click outside to close emoji picker
   useEffect(() => {
@@ -130,7 +141,10 @@ export function WatchPartyChat({
   return (
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+        style={{ contentVisibility: 'auto' }}
+      >
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-white/30 text-sm space-y-2">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">

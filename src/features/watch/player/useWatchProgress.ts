@@ -4,7 +4,7 @@ import {
   invalidateContinueWatchingCache,
   invalidateProgressCache,
 } from '@/features/watch/api';
-import { getSocket } from '@/lib/ws';
+import { useSocket } from '@/providers/socket-provider';
 import type { VideoMetadata } from './types';
 
 // Helper to get local date string in YYYY-MM-DD format
@@ -57,6 +57,7 @@ export function useWatchProgress({
   skipActivityTracking = false,
   hasMoreEpisodes,
 }: UseWatchProgressProps) {
+  const { socket: contextSocket, isConnected } = useSocket();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const accumulateSecondsRef = useRef(0);
@@ -72,8 +73,7 @@ export function useWatchProgress({
       const seconds = Math.floor(accumulateSecondsRef.current);
       if (seconds < 1 && !forceFlush) return;
 
-      const socket = getSocket();
-      if (socket?.connected) {
+      if (contextSocket?.connected) {
         // Optimistically decrement to prevent double-sending if interval fires fast
         const sentSeconds = Math.max(seconds, 0);
         accumulateSecondsRef.current = Math.max(
@@ -85,7 +85,7 @@ export function useWatchProgress({
 
         const localDate = getLocalDateString();
 
-        socket.emit(
+        contextSocket.emit(
           'watch:record_time',
           {
             seconds: sentSeconds,
@@ -104,7 +104,7 @@ export function useWatchProgress({
         );
       }
     },
-    [skipActivityTracking],
+    [skipActivityTracking, contextSocket],
   );
 
   // Helper to update progress (skip if skipProgressHistory is true)
@@ -119,8 +119,7 @@ export function useWatchProgress({
 
     if (!duration || Number.isNaN(duration) || currentTime === 0) return;
 
-    const socket = getSocket();
-    if (socket?.connected) {
+    if (contextSocket?.connected) {
       // CRITICAL: For series, use seriesId as contentId to ensure single entry per series
       // For movies, use movieId
       const contentId =
@@ -152,23 +151,27 @@ export function useWatchProgress({
           metadata.type === 'series' ? (hasMoreEpisodes ?? true) : undefined,
       };
 
-      socket.emit('watch:update_progress', payload, (res: SocketResponse) => {
-        if (res?.success) {
-          // Invalidate caches for real-time updates when user returns to home
-          invalidateProgressCache(contentId);
-          invalidateContinueWatchingCache();
-        }
-      });
+      contextSocket.emit(
+        'watch:update_progress',
+        payload,
+        (res: SocketResponse) => {
+          if (res?.success) {
+            // Invalidate caches for real-time updates when user returns to home
+            invalidateProgressCache(contentId);
+            invalidateContinueWatchingCache();
+          }
+        },
+      );
     }
-  }, [metadata, videoRef, skipProgressHistory, hasMoreEpisodes]);
+  }, [metadata, videoRef, skipProgressHistory, hasMoreEpisodes, contextSocket]);
 
   // Initial load: Get previous progress (only if enableProgressLoad is true)
+  // Reactively runs when socket connects (no polling needed)
   useEffect(() => {
     // Skip loading progress for watch party guests
     if (!enableProgressLoad) return;
-
-    const socket = getSocket();
-    if (!socket || !metadata.movieId) return;
+    if (!isConnected || !contextSocket) return;
+    if (!metadata.movieId) return;
 
     // Use seriesId for series, movieId for movies
     const contentId =
@@ -176,37 +179,24 @@ export function useWatchProgress({
         ? metadata.seriesId
         : metadata.movieId;
 
-    // Wait for socket to be connected
-    const loadProgress = () => {
-      socket.emit(
-        'watch:get_progress',
-        {
-          contentId,
-          episodeId:
-            metadata.type === 'series' && metadata.season && metadata.episode
-              ? `${metadata.season}-${metadata.episode}`
-              : undefined,
-        },
-        (response: SocketResponse) => {
-          if (response?.success && response.progress) {
-            const { progressSeconds, isCompleted } = response.progress;
-            if (progressSeconds > 0 && !isCompleted) {
-              onProgressLoaded?.(progressSeconds);
-            }
+    contextSocket.emit(
+      'watch:get_progress',
+      {
+        contentId,
+        episodeId:
+          metadata.type === 'series' && metadata.season && metadata.episode
+            ? `${metadata.season}-${metadata.episode}`
+            : undefined,
+      },
+      (response: SocketResponse) => {
+        if (response?.success && response.progress) {
+          const { progressSeconds, isCompleted } = response.progress;
+          if (progressSeconds > 0 && !isCompleted) {
+            onProgressLoaded?.(progressSeconds);
           }
-        },
-      );
-    };
-
-    if (socket.connected) {
-      loadProgress();
-    } else {
-      socket.once('connect', loadProgress);
-    }
-
-    return () => {
-      socket.off('connect', loadProgress);
-    };
+        }
+      },
+    );
   }, [
     metadata.movieId,
     metadata.seriesId,
@@ -215,6 +205,8 @@ export function useWatchProgress({
     metadata.type,
     onProgressLoaded,
     enableProgressLoad,
+    isConnected,
+    contextSocket,
   ]);
 
   // Monitor playback to accumulate "watch time"

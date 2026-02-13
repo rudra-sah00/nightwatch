@@ -34,14 +34,6 @@ export function NextEpisodeOverlay({
   const [countdown, setCountdown] = useState(autoPlayDelay);
   const [cancelled, setCancelled] = useState(false);
 
-  // Reset countdown when overlay becomes visible
-  useEffect(() => {
-    if (isVisible && nextEpisode) {
-      setCountdown(autoPlayDelay);
-      setCancelled(false);
-    }
-  }, [isVisible, nextEpisode, autoPlayDelay]);
-
   // Countdown timer
   useEffect(() => {
     if (

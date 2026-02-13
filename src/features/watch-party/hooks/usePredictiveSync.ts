@@ -14,6 +14,9 @@ export function usePredictiveSync(
   isCalibrated: boolean,
 ) {
   const stateRef = useRef<PartyPlaybackState | null>(null);
+  // Stores the last state update received before the video element was mounted.
+  // A polling interval applies it once the video becomes available.
+  const pendingUpdateRef = useRef<PartyStateUpdate | null>(null);
 
   // Calculate expected video position based on server time
   const getExpectedTime = useCallback(() => {
@@ -31,7 +34,13 @@ export function usePredictiveSync(
   const applyState = useCallback(
     (update: PartyStateUpdate) => {
       const video = videoRef.current;
-      if (!video) return;
+      if (!video) {
+        // Video element not mounted yet (e.g. join_approved before ActiveWatchParty renders).
+        // Save for later — the polling effect below will apply it once video is ready.
+        pendingUpdateRef.current = update;
+        return;
+      }
+      pendingUpdateRef.current = null;
 
       // Construct authoritative state
       // Use serverTime provided in update, or fallback to timestamp
@@ -45,11 +54,22 @@ export function usePredictiveSync(
 
       stateRef.current = newState;
 
-      // If clock not calibrated yet, we can't predict accurately
-      // Fall back to simple sync for now
+      // If clock not calibrated yet, we can't use NTP-style offset, but we can
+      // still compensate for elapsed playback time using serverTime vs timestamp.
+      // serverTime = when the server sent this response (Date.now() on server)
+      // timestamp  = when the state was last updated (lastUpdated in Redis)
+      // The video has been playing for (serverTime - timestamp) ms since the last event.
       if (!isCalibrated) {
-        if (Math.abs(video.currentTime - newState.videoTime) > 0.5) {
-          video.currentTime = newState.videoTime;
+        let targetTime = newState.videoTime;
+        if (newState.isPlaying && update.serverTime && update.timestamp) {
+          const elapsed = (update.serverTime - update.timestamp) / 1000;
+          if (elapsed > 0 && elapsed < 7200) {
+            // Sanity: max 2 hours
+            targetTime += elapsed * newState.playbackRate;
+          }
+        }
+        if (Math.abs(video.currentTime - targetTime) > 0.5) {
+          video.currentTime = targetTime;
         }
         if (newState.isPlaying && video.paused) video.play();
         if (!newState.isPlaying && !video.paused) video.pause();
@@ -91,6 +111,24 @@ export function usePredictiveSync(
     },
     [videoRef, getExpectedTime, isCalibrated],
   );
+
+  // Apply pending state once video element becomes available.
+  // This covers the gap between join_approved (video not yet rendered) and
+  // the first state_update that arrives after the video mounts.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (pendingUpdateRef.current && videoRef.current) {
+        applyState(pendingUpdateRef.current);
+        clearInterval(interval);
+      }
+    }, 250);
+    // Stop polling after 10s — reconnection sync timers will handle it by then
+    const timeout = setTimeout(() => clearInterval(interval), 10_000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [applyState, videoRef]);
 
   // Periodic drift check (every 2s)
   useEffect(() => {

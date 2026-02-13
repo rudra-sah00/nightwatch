@@ -15,7 +15,7 @@ on:
 env:
   VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
   VERCEL_PROJECT_ID: prj_GvurtLT1apyIWx5cvAa4BfLNQNni
-  NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+  NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
 
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
         env:
           NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
-          NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+          NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
 
       - name: Deploy Project Artifacts to Vercel

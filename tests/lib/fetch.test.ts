@@ -5,11 +5,7 @@ import { apiFetch, setTokenExpiration } from '@/lib/fetch';
 global.fetch = vi.fn();
 
 // Mock environment
-vi.mock('@/lib/env', () => ({
-  env: {
-    BACKEND_URL: 'http://localhost:4000',
-  },
-}));
+vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 
 describe('apiFetch', () => {
   beforeEach(() => {

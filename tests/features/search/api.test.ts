@@ -15,9 +15,7 @@ import {
 import { apiFetch } from '@/lib/fetch';
 
 // Mock apiFetch
-vi.mock('@/lib/fetch', () => ({
-  apiFetch: vi.fn(),
-}));
+vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 describe('Search API', () => {
   beforeEach(() => {

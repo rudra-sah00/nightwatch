@@ -35,8 +35,6 @@ describe('WatchPartyLobby', () => {
     episode: 3,
     hostName: 'Walter White',
     memberCount: 3,
-    maxMembers: 10,
-    isFull: false,
   };
 
   const mockUser: User = {
@@ -177,7 +175,7 @@ describe('WatchPartyLobby', () => {
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
       expect(screen.getByText('Season 1 Episode 3')).toBeInTheDocument();
       expect(screen.getByText('Hosted by Walter White')).toBeInTheDocument();
-      expect(screen.getByText('3/10 watching')).toBeInTheDocument();
+      expect(screen.getByText('3 watching')).toBeInTheDocument();
     });
 
     it('should show Request to Join button for authenticated user', () => {
@@ -199,47 +197,6 @@ describe('WatchPartyLobby', () => {
 
       fireEvent.click(screen.getByText('Cancel'));
       expect(mockPush).toHaveBeenCalledWith('/home');
-    });
-  });
-
-  describe('full room state', () => {
-    it('should show room full message', () => {
-      render(
-        <WatchPartyLobby
-          {...defaultProps}
-          roomPreview={{ ...mockRoomPreview, isFull: true }}
-        />,
-      );
-
-      expect(
-        screen.getByText(
-          'This watch party is currently full. Please try again later.',
-        ),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Room Full')).toBeInTheDocument();
-    });
-
-    it('should disable join button when room is full', () => {
-      render(
-        <WatchPartyLobby
-          {...defaultProps}
-          roomPreview={{ ...mockRoomPreview, isFull: true }}
-        />,
-      );
-
-      const joinButton = screen.getByText('Room Full');
-      expect(joinButton.closest('button')).toBeDisabled();
-    });
-
-    it('should show (Full) indicator in member count', () => {
-      render(
-        <WatchPartyLobby
-          {...defaultProps}
-          roomPreview={{ ...mockRoomPreview, isFull: true }}
-        />,
-      );
-
-      expect(screen.getByText('(Full)')).toBeInTheDocument();
     });
   });
 
@@ -379,19 +336,6 @@ describe('WatchPartyLobby', () => {
 
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
       expect(screen.queryByText(/Season/)).not.toBeInTheDocument();
-    });
-
-    it('should use default maxMembers when not provided', () => {
-      const roomWithoutMax: RoomPreview = {
-        ...mockRoomPreview,
-        maxMembers: undefined,
-      };
-
-      render(
-        <WatchPartyLobby {...defaultProps} roomPreview={roomWithoutMax} />,
-      );
-
-      expect(screen.getByText('3/10 watching')).toBeInTheDocument();
     });
 
     it('should return null when no room preview and not loading/not found', () => {

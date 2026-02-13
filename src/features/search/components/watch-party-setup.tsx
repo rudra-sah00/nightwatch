@@ -23,7 +23,6 @@ interface WatchPartySetupProps {
 
 export function WatchPartySetup({
   isOpen,
-  show: _show,
   seasons,
   selectedSeason,
   episodes,
@@ -31,7 +30,6 @@ export function WatchPartySetup({
   onClose,
   onSelectSeason,
   onSelectEpisode,
-  isCreating: _isCreating,
   creatingEpisodeId,
 }: WatchPartySetupProps) {
   const [isSeasonOpen, setIsSeasonOpen] = useState(false);

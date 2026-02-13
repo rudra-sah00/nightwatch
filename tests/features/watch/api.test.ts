@@ -19,17 +19,13 @@ import {
 } from '@/features/watch/api';
 import type { WatchProgress } from '@/features/watch/types';
 import { apiFetch } from '@/lib/fetch';
-import { getSocket } from '@/lib/ws';
+import { getSocket } from '@/lib/socket';
 
 // Mock apiFetch
-vi.mock('@/lib/fetch', () => ({
-  apiFetch: vi.fn(),
-}));
+vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 // Mock websocket
-vi.mock('@/lib/ws', () => ({
-  getSocket: vi.fn(() => null),
-}));
+vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));
 
 // Mock global fetch for sprite VTT tests
 global.fetch = vi.fn();

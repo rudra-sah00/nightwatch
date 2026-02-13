@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInfo } from '@/components/ui/password-info';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
 import { changePassword } from '../api';
 
 export function ChangePasswordForm() {
@@ -29,8 +30,22 @@ export function ChangePasswordForm() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      const msg = 'Password must be at least 6 characters';
+    if (newPassword.length < 8) {
+      const msg = 'Password must be at least 8 characters';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      const msg = 'Password must contain at least one uppercase letter';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
+      const msg = 'Password must contain at least one special character';
       setError(msg);
       toast.error(msg);
       return;
@@ -89,6 +104,7 @@ export function ChangePasswordForm() {
           required
           className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
         />
+        <PasswordStrengthIndicator password={newPassword} />
       </div>
       <div className="space-y-3">
         <Label

@@ -47,11 +47,12 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
 
       {isOpen && (
         <>
-          {/* Full screen backdrop - biome-ignore lint/a11y: backdrop overlay for modal */}
-          <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm cursor-pointer"
+          {/* Full screen backdrop */}
+          <button
+            type="button"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm cursor-pointer w-full h-full border-none"
             onClick={() => setIsOpen(false)}
-            aria-hidden="true"
+            aria-label="Close modal"
           />
 
           {/* Centered Modal */}
@@ -84,9 +85,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 {/* Requirements List */}
                 <div className="space-y-2.5">
                   <RequirementItem text="8+ characters" />
-                  <RequirementItem text="Lowercase (a-z)" />
                   <RequirementItem text="Uppercase (A-Z)" />
-                  <RequirementItem text="Number (0-9)" />
                   <RequirementItem text="Special char (!@#$%^&*)" />
                 </div>
 

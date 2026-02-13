@@ -2,9 +2,9 @@ import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '@/features/watch/api';
 import type { WatchProgress } from '@/features/watch/types';
-import * as ws from '@/lib/ws';
+import * as ws from '@/lib/socket';
 
-vi.mock('@/lib/ws');
+vi.mock('@/lib/socket');
 vi.mock('@/lib/fetch');
 
 // Helper to create complete WatchProgress objects

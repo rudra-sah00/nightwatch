@@ -25,23 +25,13 @@ vi.mock('@/providers/auth-provider', () => ({
 }));
 
 // Mock the API
-vi.mock('@/features/profile/api', () => ({
-  checkUsername: vi.fn(),
-  updateProfile: vi.fn(),
-}));
+vi.mock('@/features/profile/api', () => import('../__mocks__/profile-api'));
 
 // Mock sonner toast
-vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+vi.mock('sonner', () => import('../__mocks__/sonner'));
 
 // Mock useDebounce hook
-vi.mock('@/hooks/use-debounce', () => ({
-  useDebounce: (value: string) => value,
-}));
+vi.mock('@/hooks/use-debounce', () => import('../__mocks__/use-debounce'));
 
 describe('UpdateProfileForm', () => {
   beforeEach(() => {

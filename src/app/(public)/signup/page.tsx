@@ -3,14 +3,14 @@
 import { ShieldCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { validateInvite } from '@/features/auth';
+import { validateInvite } from '@/features/auth/api';
 import { useAuth } from '@/providers/auth-provider';
 
 const SignupForm = dynamic(
   () =>
-    import('@/features/auth/components').then((m) => ({
+    import('@/features/auth/components/signup-form').then((m) => ({
       default: m.SignupForm,
     })),
   {
@@ -23,7 +23,7 @@ const SignupForm = dynamic(
   },
 );
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -106,5 +106,19 @@ export default function SignupPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+        </main>
+      }
+    >
+      <SignupContent />
+    </Suspense>
   );
 }

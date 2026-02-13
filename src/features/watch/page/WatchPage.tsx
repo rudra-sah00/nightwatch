@@ -1,7 +1,14 @@
 'use client';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '@/lib/utils';
 import { ControlBar } from '../controls/ControlBar';
 import { CenterPlayButton } from '../controls/PlayPause';
@@ -31,6 +38,9 @@ import { VideoElement } from '../player/VideoElement';
 import { useMobileDetection } from './useMobileDetection';
 import { usePlayerHandlers } from './usePlayerHandlers';
 
+// Hoisted to module level to prevent recreation on each render (rule 5.4)
+const CONTAINER_STYLE = { width: '100%', height: '100dvh' } as const;
+
 interface WatchPageProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
@@ -51,6 +61,12 @@ interface WatchPageProps {
   onSidebarToggle?: () => void;
   onNavigate?: (url: string) => void;
   hideBackButton?: boolean;
+  /** Override default fullscreen toggle (e.g. for watch party theater mode) */
+  fullscreenToggleOverride?: () => void;
+  /** Override fullscreen state (for theater mode) */
+  isFullscreenOverride?: boolean;
+  /** Called when HLS gets a 401 (stream token expired). Parent can refetch a fresh stream URL. */
+  onStreamExpired?: () => void;
 }
 
 export function WatchPage({
@@ -68,6 +84,9 @@ export function WatchPage({
   onSidebarToggle,
   onNavigate,
   hideBackButton = false,
+  fullscreenToggleOverride,
+  isFullscreenOverride,
+  onStreamExpired,
 }: WatchPageProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -102,6 +121,7 @@ export function WatchPage({
     videoRef,
     streamUrl,
     dispatch,
+    onStreamExpired,
   });
 
   // Load subtitle tracks
@@ -215,11 +235,21 @@ export function WatchPage({
   });
 
   // Fullscreen (with mobile native video support)
-  const { toggleFullscreen } = useFullscreen({
+  const { toggleFullscreen: nativeToggleFullscreen } = useFullscreen({
     containerRef,
     videoRef,
     dispatch,
   });
+
+  // Use override if provided (watch party theater mode), otherwise native
+  const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
+
+  // Sync fullscreen override state into player state
+  useEffect(() => {
+    if (isFullscreenOverride !== undefined) {
+      dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFullscreenOverride });
+    }
+  }, [isFullscreenOverride]);
 
   // Player handlers - extracted to custom hook for better organization
   const {
@@ -252,15 +282,18 @@ export function WatchPage({
   });
 
   // Extended metadata for pause overlay
-  const pauseOverlayMetadata = {
-    title: metadata.title,
-    type: metadata.type,
-    season: metadata.season,
-    episode: metadata.episode,
-    description: description || metadata.description,
-    year: metadata.year,
-    posterUrl: metadata.posterUrl,
-  };
+  const pauseOverlayMetadata = useMemo(
+    () => ({
+      title: metadata.title,
+      type: metadata.type,
+      season: metadata.season,
+      episode: metadata.episode,
+      description: description || metadata.description,
+      year: metadata.year,
+      posterUrl: metadata.posterUrl,
+    }),
+    [metadata, description],
+  );
 
   return (
     <section
@@ -270,10 +303,7 @@ export function WatchPage({
         'cursor-none',
         state.showControls && 'cursor-auto',
       )}
-      style={{
-        width: '100%',
-        height: '100dvh', // Force full height
-      }}
+      style={CONTAINER_STYLE}
       onMouseMove={showControls}
       onMouseEnter={showControls}
       aria-label="Video Player"
@@ -293,7 +323,7 @@ export function WatchPage({
           <h1 className="text-base font-semibold text-white truncate">
             {metadata.title}
           </h1>
-          {metadata.season && metadata.episode && (
+          {metadata.season != null && metadata.episode != null && (
             <p className="text-xs text-white/70 truncate">
               S{metadata.season}:E{metadata.episode}
             </p>
@@ -348,6 +378,7 @@ export function WatchPage({
         {/* Next Episode Overlay - Netflix style */}
         {nextEpisodeInfo && (
           <NextEpisodeOverlay
+            key={showNextEpisode ? nextEpisodeInfo.episodeNumber : 'hidden'}
             isVisible={showNextEpisode}
             nextEpisode={nextEpisodeInfo}
             onPlayNext={playNextEpisode}

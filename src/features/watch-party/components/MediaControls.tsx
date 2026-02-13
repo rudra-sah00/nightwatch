@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { MediaDevice } from '../hooks/useLiveKit';
+import type { MediaDevice } from '../hooks/useAgora';
 
 interface MediaControlsProps {
   // User info

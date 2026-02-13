@@ -1,7 +1,8 @@
 'use client';
 
-import { type RefObject, useCallback, useEffect, useState } from 'react';
+import { type RefObject, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useMobileDetection } from '../page/useMobileDetection';
 import type { PlayerAction } from './types';
 
 interface UseFullscreenOptions {
@@ -30,17 +31,7 @@ export function useFullscreen({
   videoRef,
   dispatch,
 }: UseFullscreenOptions) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detect mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile, { passive: true });
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useMobileDetection();
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -106,14 +97,14 @@ export function useFullscreen({
       }
 
       // Desktop: use container fullscreen for custom controls
-      if (!containerRef.current) return;
+      const target = containerRef.current || document.documentElement;
 
-      if (containerRef.current.requestFullscreen) {
-        await containerRef.current.requestFullscreen();
+      if (target.requestFullscreen) {
+        await target.requestFullscreen({ navigationUI: 'hide' });
       } else {
-        const container = containerRef.current as HTMLElementWithWebkit;
-        if (container.webkitRequestFullscreen) {
-          await container.webkitRequestFullscreen();
+        const el = target as HTMLElementWithWebkit;
+        if (el.webkitRequestFullscreen) {
+          await el.webkitRequestFullscreen();
         }
       }
     } catch {

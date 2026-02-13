@@ -1,6 +1,6 @@
 'use client';
 
-import Hls from 'hls.js';
+import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import type { AudioTrack, PlayerAction, Quality } from './types';
 
@@ -8,21 +8,35 @@ interface UseHlsOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   streamUrl: string | null;
   dispatch: React.Dispatch<PlayerAction>;
+  /** Called when HLS gets a 401 (token expired). Parent can refetch a fresh stream URL. */
+  onStreamExpired?: () => void;
 }
 
-export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
-  const hlsRef = useRef<Hls | null>(null);
+export function useHls({
+  videoRef,
+  streamUrl,
+  dispatch,
+  onStreamExpired,
+}: UseHlsOptions) {
+  const hlsRef = useRef<HlsType | null>(null);
+  // Ref for callback to avoid HLS reinit when callback identity changes
+  const onStreamExpiredRef = useRef(onStreamExpired);
+  onStreamExpiredRef.current = onStreamExpired;
 
   useEffect(() => {
     if (!streamUrl || !videoRef.current) return;
 
     const video = videoRef.current;
+    let cancelled = false;
 
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
 
-    const initHls = () => {
+    const initHls = async () => {
+      const { default: Hls } = await import('hls.js');
+      if (cancelled) return;
+
       if (Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
@@ -126,9 +140,30 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
         });
 
         hls.on(Hls.Events.ERROR, (_, data) => {
+          const status =
+            (data.response as { code?: number } | undefined)?.code ??
+            (data as { response?: { code?: number } }).response?.code;
+
+          // 401 always means session expired — handle immediately regardless of fatal/non-fatal
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
+            hls.destroy();
+            // If parent can refetch a fresh stream, trigger it silently
+            if (onStreamExpiredRef.current) {
+              dispatch({ type: 'SET_LOADING', isLoading: true });
+              onStreamExpiredRef.current();
+            } else {
+              dispatch({
+                type: 'SET_ERROR',
+                error: 'Stream session expired. Please start playback again.',
+              });
+            }
+            return;
+          }
+
           if (data.fatal) {
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
+                // All other fatal network errors — retry
                 hls.startLoad();
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
@@ -146,11 +181,6 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
         });
 
         hlsRef.current = hls;
-
-        return () => {
-          hls.destroy();
-          hlsRef.current = null;
-        };
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         // Native HLS support (Safari)
         video.src = streamUrl;
@@ -161,8 +191,14 @@ export function useHls({ videoRef, streamUrl, dispatch }: UseHlsOptions) {
       }
     };
 
-    const cleanup = initHls();
-    return cleanup;
+    initHls();
+    return () => {
+      cancelled = true;
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
   }, [streamUrl, videoRef, dispatch]);
 
   const setQuality = useCallback((levelIndex: number) => {

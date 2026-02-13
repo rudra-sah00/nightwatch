@@ -6,27 +6,45 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
-import { toast } from 'sonner';
-import {
-  type LoginInput,
-  loginUser,
-  logoutUser,
-  type RegisterInput,
-  registerUser,
-} from '@/features/auth';
+import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
+import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
+import { env } from '@/lib/env';
 import { setTokenExpiration } from '@/lib/fetch';
-import {
-  disconnectSocket,
-  initSocket,
-  offForceLogout,
-  onForceLogout,
-} from '@/lib/ws';
+import { offForceLogout, onForceLogout } from '@/lib/socket';
+import { useSocket } from '@/providers/socket-provider';
 import type { ForceLogoutPayload, LoginResponse, User } from '@/types';
+
+/**
+ * Clear HTTP-only cookies by hitting the backend logout endpoint (fire-and-forget),
+ * then hard-redirect to /login so SSR ProtectedLayout won't let the user through.
+ */
+function clearCookiesAndRedirect(message?: string) {
+  // Persist a flash message so the login page can show it after redirect
+  if (message) {
+    try {
+      sessionStorage.setItem('auth_flash', message);
+    } catch {
+      // Storage might be unavailable
+    }
+  }
+
+  // Fire-and-forget: ask the backend to clear httpOnly cookies
+  fetch(`${env.BACKEND_URL}/api/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  }).catch(() => {
+    // Session may already be invalidated — ignore
+  });
+
+  // Hard redirect — wipes all React state and forces SSR cookie check
+  window.location.href = '/login';
+}
 
 interface AuthContextType {
   user: User | null;
@@ -49,17 +67,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { connect, disconnect } = useSocket();
   const forceLogoutHandlerRef = useRef<
     ((payload: ForceLogoutPayload) => void) | null
   >(null);
 
-  // Handle force logout from WebSocket
-  const handleForceLogout = useCallback((payload: ForceLogoutPayload) => {
-    toast.error(payload.message || 'You have been logged out');
-    clearStoredUser();
-    disconnectSocket();
-    setUser(null);
-  }, []);
+  // Handle force logout from WebSocket — must redirect immediately
+  const handleForceLogout = useCallback(
+    (payload: ForceLogoutPayload) => {
+      clearStoredUser();
+      disconnect();
+      setUser(null);
+      clearCookiesAndRedirect(
+        payload.message || 'You have been logged out from another device.',
+      );
+    },
+    [disconnect],
+  );
 
   // Initialize from localStorage on mount
   useEffect(() => {
@@ -72,10 +96,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(storedUser);
 
         // Connect WebSocket with stored credentials
-        initSocket(
+        connect(
           storedUser.id,
           storedUser.sessionId,
-          false,
           storedUser.name,
           storedUser.profilePhoto ?? undefined,
         );
@@ -104,16 +127,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // If Unauthorized (401) or User not found (404), logout immediately
           // This happens if the session was cleared in Redis or user deleted
           if (err.status === 401 || err.status === 404) {
-            toast.error(
-              (error as { message?: string }).message ||
-                'Session expired. Please login again.',
-            );
-
             clearStoredUser();
-            disconnectSocket();
+            disconnect();
             if (!controller.signal.aborted) {
               setUser(null);
             }
+            clearCookiesAndRedirect('Session expired. Please login again.');
+            return;
           }
         }
       }
@@ -129,18 +149,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (forceLogoutHandlerRef.current) {
         offForceLogout(forceLogoutHandlerRef.current);
       }
-      disconnectSocket();
+      disconnect();
     };
-  }, [handleForceLogout]);
+  }, [handleForceLogout, connect, disconnect]);
 
   const onLoginSuccess = useCallback(
     (loggedInUser: User) => {
       storeUser(loggedInUser);
       setUser(loggedInUser);
-      initSocket(
+      connect(
         loggedInUser.id,
         loggedInUser.sessionId,
-        false,
         loggedInUser.name,
         loggedInUser.profilePhoto ?? undefined,
       );
@@ -149,7 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.removeItem('guest_token');
       sessionStorage.removeItem('guest_refresh_token');
     },
-    [handleForceLogout],
+    [handleForceLogout, connect],
   );
 
   const login = useCallback(
@@ -178,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyOtp = useCallback(
     async (email: string, otp: string, context: 'login' | 'register') => {
       // Import strictly to avoid circular deps if any, though imports up top are fine
-      const { verifyOtp: apiVerifyOtp } = await import('@/features/auth');
+      const { verifyOtp: apiVerifyOtp } = await import('@/features/auth/api');
       const response = await apiVerifyOtp(email, otp, context);
 
       if (response.user) {
@@ -193,15 +212,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutUser();
     } catch {
-      // Silent fail
+      // Silent fail — backend may already have cleared the session
     } finally {
       clearStoredUser();
-      disconnectSocket();
+      disconnect();
       setUser(null);
       sessionStorage.removeItem('guest_token');
       sessionStorage.removeItem('guest_refresh_token');
+      // Hard redirect ensures cookies are cleared and SSR check fires
+      window.location.href = '/login';
     }
-  }, []);
+  }, [disconnect]);
 
   const updateUser = useCallback((data: Partial<User>) => {
     setUser((prev) => {
@@ -213,21 +234,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const resendOtp = useCallback(async (email: string) => {
-    const { resendOtp: apiResend } = await import('@/features/auth');
+    const { resendOtp: apiResend } = await import('@/features/auth/api');
     await apiResend(email);
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    login,
-    register,
-    verifyOtp,
-    logout,
-    updateUser,
-    resendOtp,
-  };
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated: !!user,
+      login,
+      register,
+      verifyOtp,
+      logout,
+      updateUser,
+      resendOtp,
+    }),
+    [
+      user,
+      isLoading,
+      login,
+      register,
+      verifyOtp,
+      logout,
+      updateUser,
+      resendOtp,
+    ],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -17,23 +17,33 @@ const REDIRECT_URL = 'https://rudrasahoo.live';
  */
 export function useDevToolsProtection() {
   useEffect(() => {
-    // Skip in development mode
-    if (process.env.NODE_ENV === 'development') {
-      return;
-    }
+    const cleanup = initDevToolsProtection();
+    return cleanup;
+  }, []);
+}
 
-    const redirect = () => {
-      window.location.href = REDIRECT_URL;
-    };
+/**
+ * Plain function that sets up devtools protection and returns a cleanup function.
+ * Can be dynamically imported to avoid loading 300+ lines in development.
+ */
+export function initDevToolsProtection(): (() => void) | undefined {
+  // Skip in development mode
+  if (process.env.NODE_ENV === 'development') {
+    return;
+  }
 
-    // ============================================
-    // CSS Protection: Disable selection, drag, print
-    // ============================================
-    const styleId = 'devtools-protection-styles';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
+  const redirect = () => {
+    window.location.href = REDIRECT_URL;
+  };
+
+  // ============================================
+  // CSS Protection: Disable selection, drag, print
+  // ============================================
+  const styleId = 'devtools-protection-styles';
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
         /* Disable text selection */
         body {
           -webkit-user-select: none !important;
@@ -65,237 +75,218 @@ export function useDevToolsProtection() {
           }
         }
       `;
-      document.head.appendChild(style);
+    document.head.appendChild(style);
+  }
+
+  // ============================================
+  // Method 1: DevTools size detection
+  // ============================================
+  let devtoolsOpen = false;
+  const threshold = 160;
+
+  const checkDevToolsSize = () => {
+    // Bypass on mobile/touch devices as zoom triggers false positives
+    const isMobile =
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth < 768;
+
+    if (isMobile) return;
+
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+    if (widthThreshold || heightThreshold) {
+      if (!devtoolsOpen) {
+        devtoolsOpen = true;
+        redirect();
+      }
+    } else {
+      devtoolsOpen = false;
+    }
+  };
+
+  // ============================================
+  // Method 2: Console timing detection
+  // ============================================
+  const image = new Image();
+  Object.defineProperty(image, 'id', {
+    get: () => {
+      redirect();
+      return '';
+    },
+  });
+
+  const checkConsole = () => {
+    // Trigger Method 2 (Image ID getter) and Method 7 (Div ID getter)
+    // These getters are only called when the objects are inspected in the console
+    console.log(image);
+    console.log(element);
+    console.clear();
+
+    // Method 8: Debugger timing check
+    const start = Date.now();
+    debugger;
+    if (Date.now() - start > 100) {
+      redirect();
+    }
+  };
+
+  // ============================================
+  // Method 3: Block keyboard shortcuts
+  // ============================================
+  const blockKeyboardShortcuts = (e: KeyboardEvent) => {
+    // F12
+    if (e.key === 'F12') {
+      e.preventDefault();
+      redirect();
+      return false;
     }
 
-    // ============================================
-    // Method 1: DevTools size detection
-    // ============================================
-    let devtoolsOpen = false;
-    const threshold = 160;
+    // Ctrl+Shift+I (DevTools)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
 
-    const checkDevToolsSize = () => {
-      // Bypass on mobile/touch devices as zoom triggers false positives
-      const isMobile =
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        window.innerWidth < 768;
+    // Ctrl+Shift+J (Console)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
 
-      if (isMobile) return;
+    // Ctrl+Shift+C (Element Inspector)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
 
-      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold =
-        window.outerHeight - window.innerHeight > threshold;
+    // Ctrl+U (View Source)
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
 
-      if (widthThreshold || heightThreshold) {
-        if (!devtoolsOpen) {
-          devtoolsOpen = true;
-          redirect();
-        }
-      } else {
-        devtoolsOpen = false;
-      }
-    };
-
-    // ============================================
-    // Method 2: Console timing detection
-    // ============================================
-    const image = new Image();
-    Object.defineProperty(image, 'id', {
-      get: () => {
-        redirect();
-        return '';
-      },
-    });
-
-    const checkConsole = () => {
-      // Trigger Method 2 (Image ID getter) and Method 7 (Div ID getter)
-      // These getters are only called when the objects are inspected in the console
-      // biome-ignore lint/suspicious/noConsole: used for devtools detection
-      console.log(image);
-      // biome-ignore lint/suspicious/noConsole: used for devtools detection
-      console.log(element);
-      // biome-ignore lint/suspicious/noConsole: used for devtools detection
-      console.clear();
-
-      // Method 8: Debugger timing check
-      const start = Date.now();
-      // biome-ignore lint/suspicious/noDebugger: used for devtools detection
-      debugger;
-      if (Date.now() - start > 100) {
-        redirect();
-      }
-    };
-
-    // ============================================
-    // Method 3: Block keyboard shortcuts
-    // ============================================
-    const blockKeyboardShortcuts = (e: KeyboardEvent) => {
-      // F12
-      if (e.key === 'F12') {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Ctrl+Shift+I (DevTools)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Ctrl+Shift+J (Console)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Ctrl+Shift+C (Element Inspector)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Ctrl+U (View Source)
-      if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Ctrl+S (Save As) - prevents saving HTML
-      if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        return false;
-      }
-
-      // Cmd+Option+I (Mac DevTools)
-      if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Cmd+Option+J (Mac Console)
-      if (e.metaKey && e.altKey && (e.key === 'j' || e.key === 'J')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Cmd+Option+C (Mac Element Inspector)
-      if (e.metaKey && e.altKey && (e.key === 'c' || e.key === 'C')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Cmd+Option+U (Mac View Source)
-      if (e.metaKey && e.altKey && (e.key === 'u' || e.key === 'U')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Cmd+U (Mac View Source)
-      if (e.metaKey && (e.key === 'u' || e.key === 'U')) {
-        e.preventDefault();
-        redirect();
-        return false;
-      }
-
-      // Cmd+S (Mac Save As)
-      if (e.metaKey && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        return false;
-      }
-
-      return true;
-    };
-
-    // ============================================
-    // Method 4: Block right-click context menu
-    // ============================================
-    const blockContextMenu = (e: MouseEvent) => {
+    // Ctrl+S (Save As) - prevents saving HTML
+    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
       e.preventDefault();
       return false;
-    };
+    }
 
-    // ============================================
-    // Method 5: Block drag and drop
-    // ============================================
-    const blockDrag = (e: DragEvent) => {
+    // Cmd+Option+I (Mac DevTools)
+    if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
+
+    // Cmd+Option+J (Mac Console)
+    if (e.metaKey && e.altKey && (e.key === 'j' || e.key === 'J')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
+
+    // Cmd+Option+C (Mac Element Inspector)
+    if (e.metaKey && e.altKey && (e.key === 'c' || e.key === 'C')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
+
+    // Cmd+Option+U (Mac View Source)
+    if (e.metaKey && e.altKey && (e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
+
+    // Cmd+U (Mac View Source)
+    if (e.metaKey && (e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+      redirect();
+      return false;
+    }
+
+    // Cmd+S (Mac Save As)
+    if (e.metaKey && (e.key === 's' || e.key === 'S')) {
       e.preventDefault();
       return false;
-    };
+    }
 
-    // ============================================
-    // Method 6: Detect Firebug (legacy)
-    // ============================================
-    const checkFirebug = () => {
-      if (window.Firebug?.chrome?.isInitialized) {
-        redirect();
-      }
-    };
+    return true;
+  };
 
-    // ============================================
-    // Method 7: Console object property detection
-    // ============================================
-    const element = document.createElement('div');
-    Object.defineProperty(element, 'id', {
-      get: () => {
-        redirect();
-        return '';
-      },
-    });
+  // ============================================
+  // Method 4: Block right-click context menu
+  // ============================================
+  const blockContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
 
-    // ============================================
-    // Setup intervals and listeners
-    // ============================================
-    const sizeCheckInterval = setInterval(checkDevToolsSize, 500);
-    const consoleCheckInterval = setInterval(checkConsole, 2000);
-    const firebugCheckInterval = setInterval(checkFirebug, 1000);
+  // ============================================
+  // Method 5: Block drag and drop
+  // ============================================
+  const blockDrag = (e: DragEvent) => {
+    e.preventDefault();
+    return false;
+  };
 
-    window.addEventListener('keydown', blockKeyboardShortcuts);
-    document.addEventListener('contextmenu', blockContextMenu);
-    document.addEventListener('dragstart', blockDrag);
-    window.addEventListener('resize', checkDevToolsSize, { passive: true });
+  // ============================================
+  // Method 6: Detect Firebug (legacy)
+  // ============================================
+  const checkFirebug = () => {
+    if (window.Firebug?.chrome?.isInitialized) {
+      redirect();
+    }
+  };
 
-    // Initial check
-    checkDevToolsSize();
-    checkFirebug();
+  // ============================================
+  // Method 7: Console object property detection
+  // ============================================
+  const element = document.createElement('div');
+  Object.defineProperty(element, 'id', {
+    get: () => {
+      redirect();
+      return '';
+    },
+  });
 
-    // Cleanup
-    return () => {
-      clearInterval(sizeCheckInterval);
-      clearInterval(consoleCheckInterval);
-      clearInterval(firebugCheckInterval);
-      window.removeEventListener('keydown', blockKeyboardShortcuts);
-      document.removeEventListener('contextmenu', blockContextMenu);
-      document.removeEventListener('dragstart', blockDrag);
-      window.removeEventListener('resize', checkDevToolsSize);
+  // ============================================
+  // Setup intervals and listeners
+  // ============================================
+  const sizeCheckInterval = setInterval(checkDevToolsSize, 500);
+  const consoleCheckInterval = setInterval(checkConsole, 2000);
+  const firebugCheckInterval = setInterval(checkFirebug, 1000);
 
-      // Remove injected styles
-      const styleEl = document.getElementById(styleId);
-      if (styleEl) {
-        styleEl.remove();
-      }
-    };
-  }, []);
-}
+  window.addEventListener('keydown', blockKeyboardShortcuts);
+  document.addEventListener('contextmenu', blockContextMenu);
+  document.addEventListener('dragstart', blockDrag);
+  window.addEventListener('resize', checkDevToolsSize, { passive: true });
 
-/**
- * DevTools Protection Provider Component
- * Wrap your app with this component to enable protection
- */
-export function DevToolsProtection({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  useDevToolsProtection();
-  return <>{children}</>;
+  // Initial check
+  checkDevToolsSize();
+  checkFirebug();
+
+  // Cleanup
+  return () => {
+    clearInterval(sizeCheckInterval);
+    clearInterval(consoleCheckInterval);
+    clearInterval(firebugCheckInterval);
+    window.removeEventListener('keydown', blockKeyboardShortcuts);
+    document.removeEventListener('contextmenu', blockContextMenu);
+    document.removeEventListener('dragstart', blockDrag);
+    window.removeEventListener('resize', checkDevToolsSize);
+
+    // Remove injected styles
+    const styleEl = document.getElementById(styleId);
+    if (styleEl) {
+      styleEl.remove();
+    }
+  };
 }

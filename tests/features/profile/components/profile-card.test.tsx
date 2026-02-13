@@ -27,21 +27,10 @@ vi.mock('@/providers/auth-provider', () => ({
 }));
 
 // Mock the API
-vi.mock('@/features/profile/api', () => ({
-  getWatchActivity: vi.fn().mockResolvedValue([]),
-  uploadProfileImage: vi.fn(),
-  checkUsername: vi.fn(),
-  updateProfile: vi.fn(),
-  changePassword: vi.fn(),
-}));
+vi.mock('@/features/profile/api', () => import('../__mocks__/profile-api'));
 
 // Mock sonner toast
-vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+vi.mock('sonner', () => import('../__mocks__/sonner'));
 
 // Mock next/link
 vi.mock('next/link', () => ({
@@ -74,9 +63,7 @@ vi.mock('@/features/profile/components/change-password-form', () => ({
 }));
 
 // Mock useDebounce hook
-vi.mock('@/hooks/use-debounce', () => ({
-  useDebounce: (value: string) => value,
-}));
+vi.mock('@/hooks/use-debounce', () => import('../__mocks__/use-debounce'));
 
 describe('ProfileCard', () => {
   beforeEach(() => {
@@ -266,6 +253,77 @@ describe('ProfileCard', () => {
 
       await waitFor(() => {
         expect(mockGetActivity).toHaveBeenCalled();
+      });
+    });
+
+    it('re-fetches activity on window focus', async () => {
+      const { getWatchActivity } = await import('@/features/profile/api');
+      const mockGetActivity = vi.mocked(getWatchActivity);
+      mockGetActivity.mockResolvedValue([
+        { date: '2026-01-15', count: 30, level: 1 },
+      ]);
+
+      render(<ProfileCard />);
+
+      // Wait for initial fetch
+      await waitFor(() => {
+        expect(mockGetActivity).toHaveBeenCalledTimes(1);
+      });
+
+      // Trigger window focus
+      window.dispatchEvent(new Event('focus'));
+
+      await waitFor(() => {
+        expect(mockGetActivity).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe('file upload', () => {
+    it('triggers file input click when avatar area is clicked', async () => {
+      render(<ProfileCard />);
+
+      // The camera/change button should exist in the avatar overlay
+      const changeButtons = screen.getAllByRole('button');
+      // Find the camera overlay button (has "Change" text)
+      const cameraButton = changeButtons.find((btn) =>
+        btn.textContent?.includes('Change'),
+      );
+
+      if (cameraButton) {
+        const clickSpy = vi.fn();
+        // The hidden file input
+        const fileInput = document.querySelector(
+          'input[type="file"]',
+        ) as HTMLInputElement;
+        if (fileInput) {
+          fileInput.click = clickSpy;
+          await userEvent.setup().click(cameraButton);
+          expect(clickSpy).toHaveBeenCalled();
+        }
+      }
+    });
+
+    it('shows error toast when upload fails', async () => {
+      const { uploadProfileImage } = await import('@/features/profile/api');
+      const mockUpload = vi.mocked(uploadProfileImage);
+      mockUpload.mockRejectedValueOnce(new Error('Upload failed'));
+
+      const { toast } = await import('sonner');
+
+      render(<ProfileCard />);
+
+      const fileInput = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
+
+      const file = new File(['test'], 'avatar.png', { type: 'image/png' });
+      await userEvent.setup().upload(fileInput, file);
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Failed to upload profile image',
+        );
       });
     });
   });

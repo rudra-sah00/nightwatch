@@ -4,6 +4,26 @@ import { Clock, Play } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlatformStats, type PlatformStats } from '@/features/auth/api';
 
+// Hoisted styles to module level to prevent recreation on each render (rule 5.4)
+const GRID_STYLE = {
+  backgroundImage: `
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+  `,
+  backgroundSize: '20px 20px',
+} as const;
+
+const PARTICLE_POSITIONS = [
+  { left: '10%', top: '20%', animationDelay: '0s' },
+  { left: '22%', top: '45%', animationDelay: '0.3s' },
+  { left: '34%', top: '70%', animationDelay: '0.6s' },
+  { left: '46%', top: '20%', animationDelay: '0.9s' },
+  { left: '58%', top: '45%', animationDelay: '1.2s' },
+  { left: '70%', top: '70%', animationDelay: '1.5s' },
+  { left: '82%', top: '20%', animationDelay: '1.8s' },
+  { left: '94%', top: '45%', animationDelay: '2.1s' },
+] as const;
+
 /**
  * Animated stats banner for login page
  * Shows platform-wide watch statistics with a cinematic aesthetic
@@ -30,16 +50,7 @@ export function StatsBanner() {
       <div className="relative h-28 rounded-2xl overflow-hidden border border-zinc-800/50 bg-gradient-to-br from-zinc-950 via-zinc-900/90 to-zinc-950">
         {/* Animated Background Grid */}
         <div className="absolute inset-0 opacity-20">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-              `,
-              backgroundSize: '20px 20px',
-            }}
-          />
+          <div className="absolute inset-0" style={GRID_STYLE} />
         </div>
 
         {/* Scanner Line Effect */}
@@ -49,38 +60,13 @@ export function StatsBanner() {
 
         {/* Floating Particles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '10%', top: '20%', animationDelay: '0s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '22%', top: '45%', animationDelay: '0.3s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '34%', top: '70%', animationDelay: '0.6s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '46%', top: '20%', animationDelay: '0.9s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '58%', top: '45%', animationDelay: '1.2s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '70%', top: '70%', animationDelay: '1.5s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '82%', top: '20%', animationDelay: '1.8s' }}
-          />
-          <div
-            className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
-            style={{ left: '94%', top: '45%', animationDelay: '2.1s' }}
-          />
+          {PARTICLE_POSITIONS.map((pos) => (
+            <div
+              key={pos.left}
+              className="absolute w-1 h-1 rounded-full bg-primary/40 animate-float"
+              style={pos}
+            />
+          ))}
         </div>
 
         {/* Glow Effects */}

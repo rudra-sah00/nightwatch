@@ -270,25 +270,48 @@
   }
 }
 
+/* The outer watch party wrapper when theater mode is active */
+.theater-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: black;
+}
+
+/* Ensure video fills available space in theater mode */
+.theater-mode .watch-party-video {
+  flex: 1;
+  height: 100%;
+}
+
+.theater-mode .watch-party-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Theater mode on large displays: cover to fill */
+@media (min-width: 2560px) {
+  .theater-mode .watch-party-video video {
+    object-fit: cover;
+  }
+}
+
+/* Theater mode subtitle scaling */
+.theater-mode video::cue {
+  font-size: clamp(1.25rem, 1.5vw, 2.5rem);
+}
+
 /* Video subtitle/caption styling */
 video::cue {
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   font-size: var(--subtitle-font-size) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   font-family: var(--subtitle-font-family) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   background-color: var(--subtitle-bg-color) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   color: var(--subtitle-text-color) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   text-shadow: var(--subtitle-text-shadow) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   opacity: var(--subtitle-opacity) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   padding: 0.25em 0.5em !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   border-radius: 4px !important;
-  /* biome-ignore lint/complexity/noImportantStyles: Mandatory subtitle override */
   line-height: 1.4 !important;
 }
 

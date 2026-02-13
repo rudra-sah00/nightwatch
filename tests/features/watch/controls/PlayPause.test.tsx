@@ -72,6 +72,21 @@ describe('PlayPause', () => {
       rerender(<PlayPause isPlaying={true} onToggle={onToggle} />);
       expect(container.querySelector('.ml-0\\.5')).not.toBeInTheDocument();
     });
+
+    it('should prevent default on mouseDown', () => {
+      render(<PlayPause {...defaultProps} />);
+
+      const button = screen.getByRole('button');
+      const event = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true,
+      });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      button.dispatchEvent(event);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
   });
 });
 
@@ -180,6 +195,21 @@ describe('CenterPlayButton', () => {
 
       fireEvent.keyDown(screen.getByRole('button'), { key: ' ' });
       expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent default on mouseDown', () => {
+      render(<CenterPlayButton {...defaultProps} />);
+
+      const button = screen.getByRole('button');
+      const event = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true,
+      });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      button.dispatchEvent(event);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
     });
   });
 

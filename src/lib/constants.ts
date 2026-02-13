@@ -17,6 +17,7 @@ export const STORAGE_KEYS = {
 // WebSocket Events
 export const WS_EVENTS = {
   FORCE_LOGOUT: 'force_logout',
+  STREAM_REVOKED: 'stream:revoked',
   WATCH_RECORD_TIME: 'watch:record_time',
   WATCH_UPDATE_PROGRESS: 'watch:update_progress',
   WATCH_GET_CONTINUE: 'watch:get_continue_watching',

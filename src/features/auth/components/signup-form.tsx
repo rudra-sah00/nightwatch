@@ -6,11 +6,14 @@ import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { z } from 'zod';
-import { Button, Input, Label } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import { PasswordInfo } from '@/components/ui/password-info';
-import { type RegisterInput, registerSchema } from '@/features/auth';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
+import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
@@ -336,6 +339,7 @@ export function SignupForm() {
           disabled={isLoading}
           className="bg-secondary/50"
         />
+        <PasswordStrengthIndicator password={formData.password} />
       </div>
 
       {/* Confirm Password */}

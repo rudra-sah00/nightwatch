@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MediaControls } from '@/features/watch-party/components/MediaControls';
-import type { MediaDevice } from '@/features/watch-party/hooks/useLiveKit';
+import type { MediaDevice } from '@/features/watch-party/hooks/useAgora';
 
 describe('MediaControls', () => {
   const mockAudioDevices: MediaDevice[] = [

@@ -7,12 +7,15 @@ import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import type { z } from 'zod';
-import { Button, Input, Label } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
+import { resetPassword } from '@/features/auth/api';
 import {
   type ResetPasswordInput,
-  resetPassword,
   resetPasswordSchema,
-} from '@/features/auth';
+} from '@/features/auth/schema';
 import { cn } from '@/lib/utils';
 import type { ApiError } from '@/types';
 
@@ -143,6 +146,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           disabled={isLoading}
           className="bg-secondary/50"
         />
+        <PasswordStrengthIndicator password={formData.password} />
       </div>
 
       <div className="space-y-2">

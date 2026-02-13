@@ -8,6 +8,10 @@ import { Fullscreen } from './Fullscreen';
 import { PlayPause } from './PlayPause';
 import { SeekBar } from './SeekBar';
 import { SettingsMenu } from './SettingsMenu';
+
+// Hoisted noop to prevent recreation on each render (rule 5.4)
+const NOOP = () => {};
+
 import type { SubtitleSettings } from './SubtitleSelector';
 import { SubtitleSelector } from './SubtitleSelector';
 import { Volume } from './Volume';
@@ -291,19 +295,24 @@ export function ControlBar({
               qualities={state.qualities}
               currentQuality={state.currentQuality}
               playbackRate={state.playbackRate}
-              onQualityChange={onQualityChange || (() => {})}
-              onPlaybackRateChange={onPlaybackRateChange || (() => {})}
+              onQualityChange={onQualityChange || NOOP}
+              onPlaybackRateChange={onPlaybackRateChange || NOOP}
               disabled={readOnly}
               onInteraction={onInteraction}
             />
 
-            {/* Fullscreen - Hidden on mobile if in Watch Party (sidebar exists), shown otherwise */}
-            {(!isMobile || !onSidebarToggle) && (
-              <Fullscreen
-                isFullscreen={state.isFullscreen}
-                onToggle={onFullscreenToggle}
-              />
-            )}
+            {/* Fullscreen / Theater Mode — always visible */}
+            <Fullscreen
+              isFullscreen={state.isFullscreen}
+              onToggle={onFullscreenToggle}
+              label={
+                onSidebarToggle
+                  ? state.isFullscreen
+                    ? 'Exit theater mode'
+                    : 'Enter theater mode'
+                  : undefined
+              }
+            />
           </div>
         </div>
       </div>

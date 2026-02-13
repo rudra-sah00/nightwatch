@@ -1,4 +1,5 @@
 import { MessageSquare, Users } from 'lucide-react';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SidebarTabsProps {
@@ -14,20 +15,23 @@ export function SidebarTabs({
   participantCount,
   unreadMessages = 0,
 }: SidebarTabsProps) {
-  const tabs = [
-    {
-      id: 'participants' as const,
-      label: 'People',
-      icon: Users,
-      count: participantCount,
-    },
-    {
-      id: 'chat' as const,
-      label: 'Chat',
-      icon: MessageSquare,
-      badge: unreadMessages,
-    },
-  ];
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'participants' as const,
+        label: 'People',
+        icon: Users,
+        count: participantCount,
+      },
+      {
+        id: 'chat' as const,
+        label: 'Chat',
+        icon: MessageSquare,
+        badge: unreadMessages,
+      },
+    ],
+    [participantCount, unreadMessages],
+  );
 
   const activeIndex = tabs.findIndex((t) => t.id === activeTab);
 

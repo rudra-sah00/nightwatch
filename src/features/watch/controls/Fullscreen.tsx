@@ -6,14 +6,20 @@ import { cn } from '@/lib/utils';
 interface FullscreenProps {
   isFullscreen: boolean;
   onToggle: () => void;
+  /** Label for accessibility — differs between native and theater mode */
+  label?: string;
 }
 
-export function Fullscreen({ isFullscreen, onToggle }: FullscreenProps) {
+export function Fullscreen({ isFullscreen, onToggle, label }: FullscreenProps) {
+  const ariaLabel =
+    label || (isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
+
   return (
     <button
       type="button"
       onClick={onToggle}
       onMouseDown={(e) => e.preventDefault()}
+      aria-label={ariaLabel}
       className={cn(
         'p-3 rounded-full',
         'transition-all duration-300 ease-out',

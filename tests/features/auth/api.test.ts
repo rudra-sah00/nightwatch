@@ -14,9 +14,7 @@ import * as fetchModule from '@/lib/fetch';
 import type { LoginResponse, LogoutResponse } from '@/types';
 
 // Mock apiFetch
-vi.mock('@/lib/fetch', () => ({
-  apiFetch: vi.fn(),
-}));
+vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 describe('Auth API', () => {
   beforeEach(() => {

@@ -1,14 +1,10 @@
 import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '@/features/watch-party/api';
-import * as ws from '@/lib/ws';
+import * as ws from '@/lib/socket';
 
-vi.mock('@/lib/ws');
-vi.mock('@/lib/env', () => ({
-  env: {
-    BACKEND_URL: 'http://localhost:4000',
-  },
-}));
+vi.mock('@/lib/socket');
+vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 
 describe('Watch Party WebSocket API', () => {
   let mockSocket: Partial<Socket>;
