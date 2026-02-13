@@ -71,7 +71,9 @@ async function refreshAccessToken(): Promise<boolean> {
 
   const baseUrl =
     typeof window === 'undefined'
-      ? process.env.BACKEND_URL || env.BACKEND_URL
+      ? process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.BACKEND_URL ||
+        env.BACKEND_URL
       : '';
 
   isRefreshing = true;
@@ -124,7 +126,9 @@ export async function apiFetch<T>(
   // Use absolute URL on server, relative on client (to leverage Next.js proxying)
   const baseUrl =
     typeof window === 'undefined'
-      ? process.env.BACKEND_URL || env.BACKEND_URL
+      ? process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.BACKEND_URL ||
+        env.BACKEND_URL
       : '';
 
   // Skip refresh for auth endpoints - they return 401 for invalid credentials, not expired session
