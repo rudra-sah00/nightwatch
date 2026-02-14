@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import type { AgoraParticipant } from '../hooks/useAgora';
 import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../types';
+import { FloatingEmojis } from './interactions/FloatingEmojis';
 import { WatchPartySidebar } from './WatchPartySidebar';
 
 interface TypingUser {
@@ -344,7 +345,7 @@ export function ActiveWatchParty({
     <div
       ref={watchPartyContainerRef}
       className={cn(
-        'flex h-[100dvh] w-screen bg-black overflow-hidden',
+        'flex h-[100dvh] w-screen bg-black overflow-hidden relative',
         // Default: Column (Mobile Portrait), Small+: Row (Landscape/Tablet/Desktop)
         'flex-col sm:flex-row',
       )}
@@ -403,6 +404,9 @@ export function ActiveWatchParty({
           'sm:w-auto sm:h-full sm:flex-1 sm:order-2 sm:aspect-auto',
         )}
       >
+        {/* Overlay for floating emojis - restricted to video area */}
+        <FloatingEmojis />
+
         <WatchPage
           streamUrl={room.streamUrl}
           metadata={metadata}

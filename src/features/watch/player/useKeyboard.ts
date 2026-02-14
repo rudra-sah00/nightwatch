@@ -24,7 +24,6 @@ export function useKeyboard({
   containerRef,
   dispatch,
   isFullscreen,
-  onBack,
   onToggleCaptions,
   hasNextEpisode,
   onNextEpisode,
@@ -138,9 +137,9 @@ export function useKeyboard({
         case 'Escape':
           if (isFullscreen) {
             document.exitFullscreen();
-          } else {
-            onBack();
           }
+          // Do not call onBack() here — user wants Escape to only exit fullscreen/modes,
+          // not close the player itself.
           break;
         case 'KeyC':
           e.preventDefault();
@@ -165,7 +164,6 @@ export function useKeyboard({
     toggleMute,
     toggleFullscreen,
     isFullscreen,
-    onBack,
     dispatch,
     onToggleCaptions,
     hasNextEpisode,

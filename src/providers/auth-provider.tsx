@@ -46,7 +46,7 @@ function clearCookiesAndRedirect(message?: string) {
   window.location.href = '/login';
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;

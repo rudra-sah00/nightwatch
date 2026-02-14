@@ -144,7 +144,7 @@ function generateNumericUid(userId: string): number {
 }
 
 /** Build a map from Agora numeric UID → member info. */
-function buildUidToMemberMap(members: MemberInfo[]): Map<string, MemberInfo> {
+function _buildUidToMemberMap(members: MemberInfo[]): Map<string, MemberInfo> {
   const map = new Map<string, MemberInfo>();
   for (const m of members) {
     map.set(String(generateNumericUid(m.id)), m);
@@ -570,6 +570,7 @@ export function useAgora({
     return () => {
       cleaned = true;
 
+      // Detach core listeners explicitly
       client.off('user-published', handleUserPublished);
       client.off('user-unpublished', handleUserUnpublished);
       client.off('user-joined', handleUserJoined);
@@ -577,10 +578,16 @@ export function useAgora({
 
       // Cleanup local tracks
       if (localAudioTrackRef.current) {
+        if (client.connectionState === 'CONNECTED') {
+          client.unpublish(localAudioTrackRef.current).catch(() => {});
+        }
         localAudioTrackRef.current.close();
         localAudioTrackRef.current = null;
       }
       if (localVideoTrackRef.current) {
+        if (client.connectionState === 'CONNECTED') {
+          client.unpublish(localVideoTrackRef.current).catch(() => {});
+        }
         localVideoTrackRef.current.close();
         localVideoTrackRef.current = null;
       }
@@ -602,7 +609,7 @@ export function useAgora({
 
   const toggleAudio = useCallback(async () => {
     const client = clientRef.current;
-    if (!client) {
+    if (!client || connectionState !== 'CONNECTED') {
       toast.error('Not connected to voice server yet. Please wait...');
       return;
     }
@@ -613,29 +620,23 @@ export function useAgora({
         localAudioTrackRef.current = null;
         setAudioEnabled(false);
       } else {
-        // Voice-optimized audio track:
-        // 'music_standard' = 48kHz mono @ 40kbps — clear voice with efficient bandwidth
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
           microphoneId: selectedAudioDeviceRef.current || undefined,
           encoderConfig: AUDIO_ENCODER_CONFIG,
-          // AEC (Acoustic Echo Cancellation), ANS (Auto Noise Suppression),
-          // and AGC (Auto Gain Control) are enabled by default in WebRTC
         });
         localAudioTrackRef.current = audioTrack;
         await client.publish(audioTrack);
         setAudioEnabled(true);
-
-        // Refresh device list — browser may expose more labels after track creation
         refreshDevices();
       }
     } catch (error) {
       handleDeviceError(error, 'Microphone');
     }
-  }, [refreshDevices]);
+  }, [refreshDevices, connectionState]);
 
   const toggleVideo = useCallback(async () => {
     const client = clientRef.current;
-    if (!client) {
+    if (!client || connectionState !== 'CONNECTED') {
       toast.error('Not connected to video server yet. Please wait...');
       return;
     }
@@ -646,7 +647,6 @@ export function useAgora({
         localVideoTrackRef.current = null;
         setVideoEnabled(false);
       } else {
-        // Re-enumerate devices to get current list before creating track
         const devices = await AgoraRTC.getDevices();
         const cameras = devices.filter(
           (d) => d.kind === 'videoinput' && d.deviceId,
@@ -659,7 +659,6 @@ export function useAgora({
           return;
         }
 
-        // Use selected device if it still exists, otherwise fall back to first available
         const targetDeviceId = cameras.some(
           (d) => d.deviceId === selectedVideoDeviceRef.current,
         )
@@ -670,9 +669,6 @@ export function useAgora({
           setSelectedVideoDevice(targetDeviceId);
         }
 
-        // Sidebar-optimized video track:
-        // 480×360 @ 15fps — sized for sidebar tile rendering
-        // 'motion' optimization mode → smooth video, SDK may drop resolution over framerate
         const videoTrack = await AgoraRTC.createCameraVideoTrack({
           cameraId: targetDeviceId || undefined,
           encoderConfig: VIDEO_ENCODER_CONFIG,
@@ -681,14 +677,12 @@ export function useAgora({
         localVideoTrackRef.current = videoTrack;
         await client.publish(videoTrack);
         setVideoEnabled(true);
-
-        // Refresh device list — browser may expose more labels after track creation
         refreshDevices();
       }
     } catch (error) {
       handleDeviceError(error, 'Camera');
     }
-  }, [refreshDevices]);
+  }, [refreshDevices, connectionState]);
 
   /**
    * Low-level device switching without track reinitialization where possible.

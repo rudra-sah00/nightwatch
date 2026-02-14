@@ -149,8 +149,6 @@ export function usePredictiveSync(
       const actual = video.currentTime;
       const drift = expected - actual;
 
-      // console.debug(`[PredictiveSync] drift=${drift.toFixed(3)}s rate=${video.playbackRate}`);
-
       if (Math.abs(drift) > 2.0) {
         // Hard seek if way off
         video.currentTime = expected;

@@ -151,3 +151,11 @@ export interface ChatMessage {
   isSystem: boolean;
   timestamp: number;
 }
+
+export interface InteractionPayload {
+  type: 'emoji' | 'sound' | 'animation';
+  value: string;
+  userId: string;
+  userName?: string;
+  timestamp: string | number;
+}

@@ -183,6 +183,7 @@ export async function apiFetch<T>(
     }
 
     if (!response.ok) {
+      // biome-ignore lint/suspicious/noExplicitAny: API error structure is dynamic
       let errorData: any = {};
       try {
         errorData = await response.json();

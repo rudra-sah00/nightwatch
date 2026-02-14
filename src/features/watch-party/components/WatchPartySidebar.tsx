@@ -4,10 +4,11 @@ import type { AgoraParticipant } from '../hooks/useAgora';
 // Hooks
 import { useAgora } from '../hooks/useAgora';
 import { useAgoraToken } from '../hooks/useAgoraToken';
+import { useGestureDetection } from '../hooks/useGestureDetection';
 
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../types';
-
+import { Soundboard } from './interactions/Soundboard';
 // Components
 import { MediaControls } from './MediaControls';
 import { PendingRequests } from './PendingRequests';
@@ -67,9 +68,9 @@ export function WatchPartySidebar({
   onTypingStop,
 }: WatchPartySidebarProps) {
   // Tab state - participants first
-  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>(
-    'participants',
-  );
+  const [activeTab, setActiveTab] = useState<
+    'chat' | 'participants' | 'interactions'
+  >('participants');
 
   // Get current user's name for display
   const currentUserName =
@@ -107,6 +108,7 @@ export function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
+    localVideoTrack,
   } = useAgora({
     token,
     appId,
@@ -115,6 +117,9 @@ export function WatchPartySidebar({
     members: stableMembers,
     userId: currentUserId,
   });
+
+  // Initialize gesture detection - now runs automatically when camera is on
+  useGestureDetection(localVideoTrack);
 
   // Use ref for callback to avoid effect re-runs on parent re-renders
   const onAgoraReadyRef = useRef(onAgoraReady);
@@ -186,6 +191,18 @@ export function WatchPartySidebar({
             onTypingStart={onTypingStart}
             onTypingStop={onTypingStop}
           />
+        </div>
+
+        {/* Interactions Tab */}
+        <div
+          className={cn(
+            'absolute inset-0 flex flex-col transition-all duration-250 ease-out p-4 overflow-y-auto custom-scrollbar',
+            activeTab === 'interactions'
+              ? 'opacity-100 scale-100 z-10'
+              : 'opacity-0 scale-[0.98] pointer-events-none z-0',
+          )}
+        >
+          <Soundboard />
         </div>
       </div>
 

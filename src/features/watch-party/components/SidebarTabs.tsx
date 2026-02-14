@@ -1,10 +1,10 @@
-import { MessageSquare, Users } from 'lucide-react';
+import { MessageSquare, Sparkles, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SidebarTabsProps {
-  activeTab: 'chat' | 'participants';
-  onTabChange: (tab: 'chat' | 'participants') => void;
+  activeTab: 'chat' | 'participants' | 'interactions';
+  onTabChange: (tab: 'chat' | 'participants' | 'interactions') => void;
   participantCount: number;
   unreadMessages?: number;
 }
@@ -29,6 +29,11 @@ export function SidebarTabs({
         icon: MessageSquare,
         badge: unreadMessages,
       },
+      {
+        id: 'interactions' as const,
+        label: 'Social',
+        icon: Sparkles,
+      },
     ],
     [participantCount, unreadMessages],
   );
@@ -42,8 +47,8 @@ export function SidebarTabs({
         <div
           className="absolute top-0 bottom-0 bg-white/10 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={{
-            left: `${activeIndex * 50}%`,
-            width: '50%',
+            left: `${activeIndex * 33.33}%`,
+            width: '33.33%',
           }}
         />
 
@@ -57,32 +62,37 @@ export function SidebarTabs({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 relative z-10 rounded-lg',
-                isActive ? 'text-white' : 'text-white/50 hover:text-white/80',
+                'flex-1 py-3 px-1 sm:px-4 text-sm font-medium transition-all duration-200 relative z-10 rounded-lg',
+                isActive ? 'text-white' : 'text-white/40 hover:text-white/80',
               )}
             >
-              <div className="flex items-center justify-center gap-2">
-                <Icon
-                  className={cn(
-                    'w-4 h-4 transition-transform duration-200',
-                    isActive && 'scale-110',
-                  )}
-                />
-                <span>{tab.label}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+                <div className="relative">
+                  <Icon
+                    className={cn(
+                      'w-5 h-5 sm:w-4 sm:h-4 transition-transform duration-200',
+                      isActive && 'scale-110',
+                    )}
+                  />
+                  {'badge' in tab &&
+                    tab.badge !== undefined &&
+                    tab.badge > 0 && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse ring-2 ring-zinc-900" />
+                    )}
+                </div>
+                <span className="max-sm:hidden">{tab.label}</span>
                 {'count' in tab && tab.count !== undefined && tab.count > 0 && (
                   <span
                     className={cn(
-                      'text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center transition-colors duration-200',
+                      'text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center transition-colors duration-200',
                       isActive
                         ? 'bg-white/20 text-white'
                         : 'bg-white/10 text-white/60',
+                      'max-sm:hidden',
                     )}
                   >
                     {tab.count}
                   </span>
-                )}
-                {'badge' in tab && tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 )}
               </div>
             </button>

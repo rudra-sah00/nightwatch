@@ -221,7 +221,19 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         // Optimistic update
         setRoom((prev) => {
           if (!prev) return null;
+          // Guard: If member already in list (via broadcast), just clean up pending
+          const isAlreadyMember = prev.members.some((m) => m?.id === memberId);
           const member = prev.pendingMembers?.find((m) => m?.id === memberId);
+
+          if (isAlreadyMember) {
+            return {
+              ...prev,
+              pendingMembers: prev.pendingMembers.filter(
+                (m) => m?.id !== memberId,
+              ),
+            };
+          }
+
           if (!member) return prev;
           return {
             ...prev,
@@ -404,10 +416,13 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
 
       setRoom((prev) => {
         if (!prev) return null;
-        if (prev.members.some((m) => m.id === member.id)) return prev;
+        const isAlreadyMember = prev.members.some((m) => m.id === member.id);
+
         return {
           ...prev,
-          members: [...prev.members, member],
+          // Always ensure they are removed from pending if they join correctly
+          pendingMembers: prev.pendingMembers.filter((m) => m.id !== member.id),
+          members: isAlreadyMember ? prev.members : [...prev.members, member],
         };
       });
       optionsRef.current.onMemberJoined?.(member);

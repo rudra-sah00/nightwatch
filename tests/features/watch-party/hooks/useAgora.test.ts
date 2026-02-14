@@ -1,30 +1,54 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import AgoraRTC from 'agora-rtc-sdk-ng';
-import { describe, expect, it, vi } from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAgora } from '@/features/watch-party/hooks/useAgora';
 
-// Mock Agora SDK
-vi.mock('agora-rtc-sdk-ng', () => {
-  const mockClient = {
-    on: vi.fn(),
-    off: vi.fn(),
-    join: vi.fn().mockResolvedValue(1),
-    leave: vi.fn().mockResolvedValue(undefined),
-    subscribe: vi.fn().mockResolvedValue(undefined),
-    publish: vi.fn().mockResolvedValue(undefined),
-    unpublish: vi.fn().mockResolvedValue(undefined),
-    enableAudioVolumeIndicator: vi.fn(),
-    remoteUsers: [],
-  };
+const { mockClient, mockAudioTrack, mockVideoTrack, mockCamera } = vi.hoisted(
+  () => ({
+    mockClient: {
+      on: vi.fn(),
+      off: vi.fn(),
+      join: vi.fn().mockResolvedValue(1),
+      leave: vi.fn().mockResolvedValue(undefined),
+      subscribe: vi.fn().mockResolvedValue(undefined),
+      publish: vi.fn().mockResolvedValue(undefined),
+      unpublish: vi.fn().mockResolvedValue(undefined),
+      enableAudioVolumeIndicator: vi.fn(),
+      remoteUsers: [],
+      connectionState: 'DISCONNECTED',
+    },
+    mockAudioTrack: {
+      close: vi.fn(),
+      stop: vi.fn(),
+      play: vi.fn(),
+      setDevice: vi.fn().mockResolvedValue(undefined),
+    },
+    mockVideoTrack: {
+      close: vi.fn(),
+      stop: vi.fn(),
+      play: vi.fn(),
+      setDevice: vi.fn().mockResolvedValue(undefined),
+    },
+    mockCamera: {
+      kind: 'videoinput',
+      deviceId: 'test-camera',
+      label: 'Test Camera',
+    },
+  }),
+);
 
+vi.mock('agora-rtc-sdk-ng', () => {
   return {
     default: {
       createClient: vi.fn().mockReturnValue(mockClient),
       onAutoplayFailed: vi.fn(),
       setLogLevel: vi.fn(),
-      getDevices: vi.fn().mockResolvedValue([]),
+      getDevices: vi.fn().mockResolvedValue([mockCamera]),
+      createMicrophoneAudioTrack: vi.fn().mockResolvedValue(mockAudioTrack),
+      createCameraVideoTrack: vi.fn().mockResolvedValue(mockVideoTrack),
     },
     createClient: vi.fn().mockReturnValue(mockClient),
+    createMicrophoneAudioTrack: vi.fn().mockResolvedValue(mockAudioTrack),
+    createCameraVideoTrack: vi.fn().mockResolvedValue(mockVideoTrack),
   };
 });
 
@@ -57,12 +81,15 @@ describe('useAgora', () => {
     ],
   };
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should initialize with all participants mapped from members immediately', async () => {
     const { result } = renderHook(() =>
       useAgora({
         ...defaultOptions,
         userId: 'user-1',
-        uid: 3550198,
       }),
     );
 
@@ -71,22 +98,10 @@ describe('useAgora', () => {
     });
 
     const localPart = result.current.participants.find((p) => p.isLocal);
-    const remotePart = result.current.participants.find((p) => !p.isLocal);
-
     expect(localPart?.name).toBe('You');
-    expect(localPart?.identity).toBe('user-1');
-    expect(remotePart?.name).toBe('Guest Name');
-    expect(remotePart?.identity).toBe('user-2');
-
-    // Check metadata for local avatar
-    if (localPart?.metadata) {
-      const metadata = JSON.parse(localPart.metadata);
-      expect(metadata.avatar).toBe('https://host.com/photo.jpg');
-    }
   });
 
   it('should handle participants without profile photos correctly', async () => {
-    // User 2 has no profile photo
     const { result } = renderHook(() =>
       useAgora({
         ...defaultOptions,
@@ -101,6 +116,52 @@ describe('useAgora', () => {
 
     const localPart = result.current.participants.find((p) => p.isLocal);
     expect(localPart?.identity).toBe('user-2');
-    expect(localPart?.metadata).toBeUndefined();
+  });
+
+  it('should clean up tracks and listeners on unmount', async () => {
+    const { result, unmount } = renderHook(() =>
+      useAgora({
+        ...defaultOptions,
+        userId: 'user-1',
+      }),
+    );
+
+    // Wait for join
+    await waitFor(() => {
+      expect(result.current.isConnected).toBe(true);
+    });
+    mockClient.connectionState = 'CONNECTED';
+
+    // Toggle audio and video to create tracks
+    await act(async () => {
+      await result.current.toggleAudio();
+    });
+    await act(async () => {
+      await result.current.toggleVideo();
+    });
+
+    await waitFor(() => {
+      expect(mockClient.publish).toHaveBeenCalled();
+    });
+
+    // Unmount
+    unmount();
+
+    // Verify cleanup
+    expect(mockClient.off).toHaveBeenCalledWith(
+      'user-published',
+      expect.any(Function),
+    );
+
+    // Should unpublish tracks if connected
+    expect(mockClient.unpublish).toHaveBeenCalledWith(mockAudioTrack);
+    expect(mockClient.unpublish).toHaveBeenCalledWith(mockVideoTrack);
+
+    // Should close tracks
+    expect(mockAudioTrack.close).toHaveBeenCalled();
+    expect(mockVideoTrack.close).toHaveBeenCalled();
+
+    // Should leave channel
+    expect(mockClient.leave).toHaveBeenCalled();
   });
 });

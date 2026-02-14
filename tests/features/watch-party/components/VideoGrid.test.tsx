@@ -7,18 +7,18 @@ import type { AgoraParticipant } from '@/features/watch-party/hooks/useAgora';
 vi.mock('@/features/watch-party/components/ParticipantView', () => ({
   ParticipantView: ({
     participant,
-    isLocal,
     canKick,
     onKick,
   }: {
     participant: AgoraParticipant;
-    isLocal: boolean;
     canKick?: boolean;
     onKick?: (userId: string) => void;
   }) => (
     <div data-testid={`participant-${participant.identity}`}>
       <span>{participant.name || 'User'}</span>
-      <span data-testid="is-local">{isLocal ? 'local' : 'remote'}</span>
+      <span data-testid="is-local">
+        {participant.isLocal ? 'local' : 'remote'}
+      </span>
       {canKick && onKick && (
         <button
           type="button"

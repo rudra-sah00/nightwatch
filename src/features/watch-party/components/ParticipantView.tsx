@@ -1,4 +1,3 @@
-import type { IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng';
 import { Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef } from 'react';
@@ -7,7 +6,6 @@ import type { AgoraParticipant } from '../hooks/useAgora';
 
 interface ParticipantViewProps {
   participant: AgoraParticipant;
-  isLocal: boolean;
   canKick?: boolean;
   onKick?: (userId: string) => void;
 }
@@ -18,7 +16,6 @@ interface ParticipantViewProps {
  */
 export function ParticipantView({
   participant,
-  isLocal,
   canKick,
   onKick,
 }: ParticipantViewProps) {

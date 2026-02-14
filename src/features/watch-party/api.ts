@@ -2,6 +2,7 @@ import { env } from '@/lib/env';
 import { getSocket } from '@/lib/socket';
 import type {
   ChatMessage, // New
+  InteractionPayload,
   PartyAdminRequest,
   PartyClosed,
   PartyCreatePayload,
@@ -189,6 +190,21 @@ export function emitTypingStop(): void {
   const socket = getSocket();
   if (!socket) return;
   socket.emit('party:typing_stop');
+}
+
+/**
+ * Emit social interaction (emoji, sound, animation)
+ */
+export function emitPartyInteraction(
+  payload: Omit<InteractionPayload, 'userId' | 'userName' | 'timestamp'>,
+  callback?: Callback<Partial<{ timestamp: string | number }>>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('party:interaction', payload, callback);
 }
 
 /**
@@ -515,4 +531,14 @@ export function onPartyHostReconnected(callback: () => void): () => void {
 
   socket.on('party:host_reconnected', callback);
   return () => socket.off('party:host_reconnected', callback);
+}
+
+export function onPartyInteraction(
+  callback: (data: InteractionPayload) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:interaction', callback);
+  return () => socket.off('party:interaction', callback);
 }

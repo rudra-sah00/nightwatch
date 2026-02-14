@@ -1,4 +1,3 @@
-import { env } from '@/lib/env';
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { WatchActivity } from './types';

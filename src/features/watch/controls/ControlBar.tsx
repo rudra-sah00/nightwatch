@@ -12,6 +12,7 @@ import { SettingsMenu } from './SettingsMenu';
 // Hoisted noop to prevent recreation on each render (rule 5.4)
 const NOOP = () => {};
 
+import { EmojiReactions } from '@/features/watch-party/components/interactions/EmojiReactions';
 import type { SubtitleSettings } from './SubtitleSelector';
 import { SubtitleSelector } from './SubtitleSelector';
 import { Volume } from './Volume';
@@ -270,6 +271,11 @@ export function ControlBar({
                 {formatTime(state.duration)}
               </span>
             </div>
+          </div>
+
+          {/* Center Content - Emoji Reactions (Responsive) */}
+          <div className="flex-1 flex justify-center px-4">
+            <EmojiReactions />
           </div>
 
           {/* Right Controls */}

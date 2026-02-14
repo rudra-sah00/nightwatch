@@ -75,33 +75,33 @@ describe('MediaControls', () => {
     it('should show Copy Invite Link button for host', () => {
       render(<MediaControls {...defaultProps} isHost={true} />);
 
-      expect(screen.getByText('Copy Invite Link')).toBeInTheDocument();
+      expect(screen.getByText('Invite')).toBeInTheDocument();
     });
 
     it('should not show Copy Invite Link button for non-host', () => {
       render(<MediaControls {...defaultProps} isHost={false} />);
 
-      expect(screen.queryByText('Copy Invite Link')).not.toBeInTheDocument();
+      expect(screen.queryByText('Invite')).not.toBeInTheDocument();
     });
 
     it('should call onCopyLink when copy button clicked', () => {
       const onCopyLink = vi.fn();
       render(<MediaControls {...defaultProps} onCopyLink={onCopyLink} />);
 
-      fireEvent.click(screen.getByText('Copy Invite Link'));
+      fireEvent.click(screen.getByText('Invite'));
       expect(onCopyLink).toHaveBeenCalled();
     });
 
     it('should show Copied! when linkCopied is true', () => {
       render(<MediaControls {...defaultProps} linkCopied={true} />);
 
-      expect(screen.getByText('Copied!')).toBeInTheDocument();
+      expect(screen.getByText('Copied')).toBeInTheDocument();
     });
 
     it('should show End Party for host', () => {
       render(<MediaControls {...defaultProps} isHost={true} />);
 
-      expect(screen.getByText('End Party')).toBeInTheDocument();
+      expect(screen.getByText('End')).toBeInTheDocument();
     });
 
     it('should show Leave Party for non-host', () => {
@@ -114,7 +114,7 @@ describe('MediaControls', () => {
       const onLeave = vi.fn();
       render(<MediaControls {...defaultProps} onLeave={onLeave} />);
 
-      fireEvent.click(screen.getByText('End Party'));
+      fireEvent.click(screen.getByText('End'));
       expect(onLeave).toHaveBeenCalled();
     });
   });

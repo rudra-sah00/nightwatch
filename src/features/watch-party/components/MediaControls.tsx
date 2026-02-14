@@ -91,34 +91,34 @@ export function MediaControls({
       )}
 
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="p-3 border-b border-white/5 space-y-2">
+      <div className="p-3 border-b border-white/5 flex gap-2">
         {isHost && (
           <button
             type="button"
             onClick={onCopyLink}
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 border border-indigo-400/20 hover:border-indigo-400/40 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
+            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all"
           >
             {linkCopied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-green-400">Copied!</span>
-              </>
+              <Check className="w-3.5 h-3.5 text-green-400" />
             ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                Copy Invite Link
-              </>
+              <Copy className="w-3.5 h-3.5" />
             )}
+            <span className="sm:inline">
+              {linkCopied ? 'Copied' : 'Invite'}
+            </span>
           </button>
         )}
 
         <button
           type="button"
           onClick={onLeave}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-lg shadow-red-500/5"
+          className={cn(
+            'flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl border border-red-500/20 transition-all',
+            isHost ? 'flex-1' : 'w-full',
+          )}
         >
           <LogOut className="w-3.5 h-3.5" />
-          {isHost ? 'End Party' : 'Leave Party'}
+          <span className="sm:inline">{isHost ? 'End' : 'Leave Party'}</span>
         </button>
       </div>
 
