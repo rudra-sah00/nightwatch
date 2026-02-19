@@ -275,7 +275,7 @@ export function ControlBar({
 
           {/* Center Content - Emoji Reactions (Responsive) */}
           <div className="flex-1 flex justify-center px-4">
-            <EmojiReactions />
+            {onSidebarToggle && <EmojiReactions />}
           </div>
 
           {/* Right Controls */}

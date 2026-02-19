@@ -184,9 +184,16 @@ export const VideoElement = memo(function VideoElement({
       ref={ref}
       className="w-full h-full bg-black"
       style={VIDEO_STYLE}
+      autoPlay
       playsInline
       crossOrigin="anonymous"
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       controls={controls}
     >
       {tracks.map((track) => (

@@ -3,10 +3,11 @@
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
+import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';
 import { ContentInfo } from './content-info';
@@ -17,14 +18,23 @@ import { WatchPartySetup } from './watch-party-setup';
 
 interface ContentDetailModalProps {
   contentId: string;
+  initialContext?: {
+    season?: number;
+    episode?: number;
+    episodeId?: string;
+    [key: string]: unknown;
+  };
   fromContinueWatching?: boolean;
   onClose: () => void;
+  autoPlay?: boolean;
 }
 
 export function ContentDetailModal({
   contentId,
+  initialContext,
   fromContinueWatching = false,
   onClose,
+  autoPlay = false,
 }: ContentDetailModalProps) {
   const router = useRouter();
   // State from custom hook
@@ -42,10 +52,76 @@ export function ContentDetailModal({
     handleSeasonSelect,
     handlePlay,
     handleResume,
-  } = useContentDetail({ contentId, fromContinueWatching });
+  } = useContentDetail({ contentId, initialContext, fromContinueWatching });
+
+  // Auto-play logic
+  useEffect(() => {
+    if (autoPlay && show && !isLoading && !isPlaying) {
+      const triggerPlay = async () => {
+        // If we have specific context (resume), use handleResume or handlePlay with context
+        if (initialContext?.episodeId || initialContext?.episode) {
+          // If we have explicit episode info in context (from AI resume), play specifically
+          // We need to find the episode object if possible, or construct a mock one if needed
+          // But handleResume handles "resume" logic.
+          // If fromContinueWatching is true, handleResume is best.
+          // Check if initialContext has specific episode mapping
+          if (initialContext.episode && episodes.length > 0) {
+            const ep = episodes.find(
+              (e) =>
+                e.episodeNumber === initialContext.episode &&
+                e.seasonNumber === initialContext.season,
+            );
+            if (ep) {
+              await handlePlay(ep);
+              return;
+            }
+          }
+          // Fallback to resume if context is vague or not found
+          await handleResume();
+        } else {
+          // General play (Movie or Start Series)
+          await handlePlay();
+        }
+      };
+      triggerPlay();
+    }
+  }, [
+    autoPlay,
+    show,
+    isLoading,
+    isPlaying,
+    initialContext,
+    handlePlay,
+    handleResume,
+    episodes,
+  ]);
 
   // Watch Party Hook
   const { createRoom, isLoading: isCreatingParty } = useWatchParty();
+
+  // Watchlist — direct API calls (no provider needed)
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+
+  // Check if content is in watchlist
+  useEffect(() => {
+    if (!show) return;
+    (async () => {
+      try {
+        const res = await fetch('/api/user/watchlist');
+        if (res.ok) {
+          const data = await res.json();
+          setInWatchlist(
+            (data.items || []).some(
+              (item: { contentId: string }) => item.contentId === show.id,
+            ),
+          );
+        }
+      } catch (_e) {
+        // ignore
+      }
+    })();
+  }, [show]);
 
   // Local UI state
   const [imageError, setImageError] = useState(false);
@@ -109,6 +185,46 @@ export function ContentDetailModal({
     }
   };
 
+  const handleWatchlistToggle = useCallback(async () => {
+    if (!show) return;
+    setWatchlistLoading(true);
+    try {
+      if (inWatchlist) {
+        const res = await fetch(`/api/user/watchlist/${show.id}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          setInWatchlist(false);
+          toast.success('Removed from watchlist');
+        } else {
+          toast.error('Failed to remove from watchlist');
+        }
+      } else {
+        const res = await fetch('/api/user/watchlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contentId: show.id,
+            contentType:
+              show.contentType === ContentType.Movie ? 'Movie' : 'Series',
+            title: show.title,
+            posterUrl: show.posterUrl,
+          }),
+        });
+        if (res.ok) {
+          setInWatchlist(true);
+          toast.success('Added to watchlist');
+        } else {
+          toast.error('Failed to add to watchlist');
+        }
+      }
+    } catch (_error) {
+      toast.error('Failed to update watchlist');
+    } finally {
+      setWatchlistLoading(false);
+    }
+  }, [show, inWatchlist]);
+
   // Block body scroll when modal is open
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -170,7 +286,9 @@ export function ContentDetailModal({
         <div className="absolute inset-0">
           {!imageError ? (
             <Image
-              src={show.posterHdUrl || show.posterUrl || ''}
+              src={getOptimizedImageUrl(
+                show.posterHdUrl || show.posterUrl || '',
+              )}
               alt={show.title}
               fill
               className="object-cover"
@@ -202,6 +320,9 @@ export function ContentDetailModal({
             onPlay={() => handlePlay()}
             onResume={handleResume}
             onWatchParty={() => handleWatchParty()}
+            onWatchlistToggle={handleWatchlistToggle}
+            isInWatchlist={inWatchlist}
+            isWatchlistLoading={watchlistLoading}
           />
         </div>
       </div>

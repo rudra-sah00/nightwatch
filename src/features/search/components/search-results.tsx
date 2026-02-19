@@ -3,6 +3,7 @@
 import { ChevronRight, Film, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { getOptimizedImageUrl } from '@/lib/utils';
 import type { SearchResult } from '../types';
 
 interface SearchResultsProps {
@@ -78,13 +79,13 @@ function SearchResultItem({ result, onSelect, index }: SearchResultItemProps) {
           </div>
         ) : (
           <Image
-            src={result.poster}
+            src={getOptimizedImageUrl(result.poster)}
             alt={result.title}
             fill
             className="object-cover"
             onError={() => setImageError(true)}
-            unoptimized={result.poster.includes('/api/stream/')}
-            sizes="(max-width: 768px) 96px, 128px"
+            unoptimized={result.poster?.includes('/api/stream/')}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             loading={index < 3 ? 'eager' : 'lazy'}
             priority={index === 0}
           />

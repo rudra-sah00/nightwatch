@@ -1,6 +1,16 @@
 'use client';
 
-import { Calendar, Clock, Film, Loader2, Play, Tv, Users } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  Film,
+  Loader2,
+  Play,
+  Plus,
+  Trash2,
+  Tv,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ContentProgress } from '@/features/watch/api';
 import { cn } from '@/lib/utils';
@@ -19,6 +29,9 @@ interface ContentInfoProps {
   isWatchPartyDisabled?: boolean;
   watchPartyDisabledReason?: string;
   isCreatingParty?: boolean;
+  onWatchlistToggle?: () => void;
+  isInWatchlist?: boolean;
+  isWatchlistLoading?: boolean;
 }
 
 export function ContentInfo({
@@ -34,6 +47,9 @@ export function ContentInfo({
   isWatchPartyDisabled,
   watchPartyDisabledReason,
   isCreatingParty = false,
+  onWatchlistToggle,
+  isInWatchlist = false,
+  isWatchlistLoading = false,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
 
@@ -195,6 +211,31 @@ export function ContentInfo({
               : isWatchPartyDisabled && watchPartyDisabledReason
                 ? watchPartyDisabledReason
                 : 'Watch Together'}
+          </Button>
+        )}
+
+        {/* Watchlist Action Button (Add or Remove) */}
+        {onWatchlistToggle && (
+          <Button
+            size="lg"
+            variant={isInWatchlist ? 'destructive' : 'outline'}
+            className={cn(
+              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg transition-all duration-200',
+              isInWatchlist
+                ? 'bg-red-500 hover:bg-red-600 text-white border-0'
+                : 'border-white/20 hover:bg-white/10 text-white',
+            )}
+            onClick={onWatchlistToggle}
+            disabled={isWatchlistLoading}
+          >
+            {isWatchlistLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : isInWatchlist ? (
+              <Trash2 className="w-5 h-5" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
+            {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
           </Button>
         )}
       </div>

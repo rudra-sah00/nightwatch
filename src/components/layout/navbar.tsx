@@ -1,6 +1,4 @@
-'use client';
-
-import { User } from 'lucide-react';
+import { Bookmark, User } from 'lucide-react';
 import Link from 'next/link';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -20,6 +18,15 @@ export function Navbar() {
 
         {/* User Actions */}
         <div className="flex items-center gap-4 min-w-fit">
+          {user && (
+            <Link
+              href="/watchlist"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group p-2 rounded-full hover:bg-white/5"
+              title="My Watchlist"
+            >
+              <Bookmark className="w-5 h-5 group-hover:text-primary transition-colors" />
+            </Link>
+          )}
           <Link
             href="/profile"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
