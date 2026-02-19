@@ -10,14 +10,14 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-center gap-4 md:gap-8 max-w-4xl">
         {/* Search Bar - Main Focus */}
-        <div className="flex-1 max-w-3xl mx-auto">
+        <div className="flex-1 min-w-0">
           <SearchInput />
         </div>
 
-        {/* User Actions */}
-        <div className="flex items-center gap-4 min-w-fit">
+        {/* User Actions - Grouped near search */}
+        <div className="flex items-center gap-3 md:gap-4 shrink-0">
           {user && (
             <Link
               href="/watchlist"
@@ -35,7 +35,7 @@ export function Navbar() {
               src={user?.profilePhoto}
               alt={user?.name}
               fallback={<User className="w-5 h-5" />}
-              className="w-9 h-9 border border-border group-hover:border-primary/30 transition-colors"
+              className="w-9 h-9 border border-border group-hover:border-primary/30 transition-colors shadow-sm"
             />
           </Link>
         </div>

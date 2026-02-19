@@ -107,6 +107,26 @@ describe('AiMessageBubble', () => {
     expect(content.textContent).toContain('Hello! How can I help you?');
   });
 
+  it('renders Lottie loading animation when streaming and content is empty', () => {
+    const message = {
+      id: 'loading-test',
+      role: 'assistant' as const,
+      content: '',
+      timestamp: new Date(),
+    };
+
+    render(
+      <AiMessageBubble
+        message={message}
+        currentUser={mockUser}
+        onSelectContent={vi.fn()}
+        isStreaming={true}
+      />,
+    );
+
+    expect(screen.getByTestId('ai-loading-dots')).toBeInTheDocument();
+  });
+
   it('displays recommendations only after typing is finished', async () => {
     const message = {
       id: '3',

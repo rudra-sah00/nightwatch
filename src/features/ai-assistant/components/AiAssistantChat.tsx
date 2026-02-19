@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, Sparkles } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -339,33 +339,6 @@ export function AiAssistantChat({
         className,
       )}
     >
-      {/* Header */}
-      <div className="shrink-0">
-        <div className="px-5 py-4 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-purple-600/80 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-white">
-                Watch Rudra AI
-              </h3>
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-emerald-400/80 font-medium">
-                  Online
-                </span>
-              </span>
-            </div>
-            <p className="text-[11px] text-white/40 mt-0.5">
-              Always ready to help
-            </p>
-          </div>
-        </div>
-        {/* Gradient divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      </div>
-
       {/* Media Modal */}
       <MediaModal
         url={mediaUrl}
@@ -395,35 +368,6 @@ export function AiAssistantChat({
           />
         ))}
 
-        {isLoading && !streamingMessageId && (
-          <div
-            data-testid="ai-loading-indicator"
-            className="flex gap-4 max-w-3xl mx-auto w-full justify-start"
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-purple-600/80 flex items-center justify-center shrink-0 mt-1">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <div className="space-y-2">
-              <span className="text-xs text-white/40 font-medium px-1">
-                Watch Rudra AI
-              </span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <div
-                  className="w-2 h-2 bg-primary/80 rounded-full animate-bounce"
-                  style={{ animationDelay: '0ms' }}
-                />
-                <div
-                  className="w-2 h-2 bg-purple-500/80 rounded-full animate-bounce"
-                  style={{ animationDelay: '150ms' }}
-                />
-                <div
-                  className="w-2 h-2 bg-blue-500/80 rounded-full animate-bounce"
-                  style={{ animationDelay: '300ms' }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
         <div ref={messagesEndRef} className="h-4" />
       </div>
 

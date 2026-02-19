@@ -101,77 +101,98 @@ export function AiMessageBubble({
           )}
         >
           <div data-testid="ai-message-content" className="flex-1 min-w-0">
-            <ReactMarkdown
-              components={{
-                a: ({ href, children }) => {
-                  const isYoutube =
-                    href?.includes('youtube.com') || href?.includes('youtu.be');
-                  const isImdbVideo = href?.includes('imdb-video');
+            {isStreaming && displayedContent.length === 0 ? (
+              <div
+                className="flex items-center gap-1.5 px-1 py-2"
+                data-testid="ai-loading-dots"
+              >
+                <div
+                  className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-pulse"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <div
+                  className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-pulse"
+                  style={{ animationDelay: '200ms' }}
+                />
+                <div
+                  className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-pulse"
+                  style={{ animationDelay: '400ms' }}
+                />
+              </div>
+            ) : (
+              <ReactMarkdown
+                components={{
+                  a: ({ href, children }) => {
+                    const isYoutube =
+                      href?.includes('youtube.com') ||
+                      href?.includes('youtu.be');
+                    const isImdbVideo = href?.includes('imdb-video');
 
-                  if (isYoutube || isImdbVideo) {
+                    if (isYoutube || isImdbVideo) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => onPlayMedia?.(href || '', 'video')}
+                          className="inline-flex items-center gap-2 px-3 py-2 mt-2 bg-red-900/30 border border-red-500/30 rounded-lg text-red-200 hover:bg-red-900/50 transition-colors group cursor-pointer"
+                        >
+                          <span className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
+                          </span>
+                          <span className="font-medium text-sm">
+                            {String(children).replace(/\[.*?\]/, '')}
+                          </span>
+                        </button>
+                      );
+                    }
                     return (
-                      <button
-                        type="button"
-                        onClick={() => onPlayMedia?.(href || '', 'video')}
-                        className="inline-flex items-center gap-2 px-3 py-2 mt-2 bg-red-900/30 border border-red-500/30 rounded-lg text-red-200 hover:bg-red-900/50 transition-colors group cursor-pointer"
+                      <a
+                        href={href}
+                        className="text-primary hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <span className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
-                        </span>
-                        <span className="font-medium text-sm">
-                          {String(children).replace(/\[.*?\]/, '')}
-                        </span>
-                      </button>
+                        {children}
+                      </a>
                     );
-                  }
-                  return (
-                    <a
-                      href={href}
-                      className="text-primary hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  },
+                  img: ({ src, alt }) => (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const srcString = typeof src === 'string' ? src : '';
+                        onPlayMedia?.(srcString, 'image');
+                      }}
+                      className="relative group mt-4 mb-2 rounded-xl overflow-hidden border border-white/10 hover:border-primary/40 transition-all block w-full aspect-video sm:aspect-[21/9]"
                     >
-                      {children}
-                    </a>
-                  );
-                },
-                img: ({ src, alt }) => (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const srcString = typeof src === 'string' ? src : '';
-                      onPlayMedia?.(srcString, 'image');
-                    }}
-                    className="relative group mt-4 mb-2 rounded-xl overflow-hidden border border-white/10 hover:border-primary/40 transition-all block w-full aspect-video sm:aspect-[21/9]"
-                  >
-                    <img
-                      src={src}
-                      alt={alt}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                      <span className="text-xs text-white/90 font-medium">
-                        {alt || 'View full size'}
-                      </span>
-                    </div>
-                  </button>
-                ),
-                p: ({ children }) => (
-                  <div className="mb-2 last:mb-0">{children}</div>
-                ),
-                ul: ({ children }) => (
-                  <ul className="space-y-1 mb-4">{children}</ul>
-                ),
-                li: ({ children }) => (
-                  <li className="flex gap-2">
-                    <span className="text-white/40 mt-1.5">•</span>
-                    <span>{children}</span>
-                  </li>
-                ),
-              }}
-            >
-              {displayedContent}
-            </ReactMarkdown>
+                      <img
+                        src={src}
+                        alt={alt}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                        <span className="text-xs text-white/90 font-medium">
+                          {alt || 'View full size'}
+                        </span>
+                      </div>
+                    </button>
+                  ),
+                  p: ({ children }) => (
+                    <div className="mb-2 last:mb-0">{children}</div>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="space-y-1 mb-4">{children}</ul>
+                  ),
+                  li: ({ children }) => (
+                    <li className="flex gap-2">
+                      <span className="text-white/40 mt-1.5">•</span>
+                      <span>{children}</span>
+                    </li>
+                  ),
+                }}
+              >
+                {displayedContent}
+              </ReactMarkdown>
+            )}
           </div>
 
           {/* Render Recommendations - Separated by type */}
