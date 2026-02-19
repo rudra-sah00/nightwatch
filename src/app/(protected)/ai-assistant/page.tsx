@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Navbar } from '@/components/layout/navbar';
 import { AiAssistantChat } from '@/features/ai-assistant/components/AiAssistantChat';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 
@@ -12,8 +13,9 @@ export default function AiAssistantPage() {
   } | null>(null);
 
   return (
-    <div className="h-screen bg-black flex flex-col overflow-hidden">
-      <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-6 relative z-10 min-h-0">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <Navbar />
+      <div className="flex-1 flex flex-col w-full relative z-10 min-h-0">
         {/* Main Chat Area - Minimalist focus */}
         <div className="flex-1 min-h-0 flex flex-col">
           <AiAssistantChat

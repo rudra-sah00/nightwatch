@@ -431,7 +431,7 @@ export function AiAssistantChat({
       <div className="shrink-0">
         {/* Top divider */}
         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="p-4 bg-black/40 backdrop-blur-md">
+        <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border/50">
           <div className="max-w-2xl mx-auto w-full relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <form onSubmit={(e) => handleSendMessage(e)} className="relative">
@@ -439,7 +439,7 @@ export function AiAssistantChat({
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Message Watch Rudra AI..."
-                className="w-full pl-6 pr-14 py-8 rounded-full bg-zinc-900 border-white/10 focus-visible:ring-primary/50 text-lg shadow-2xl"
+                className="w-full pl-6 pr-14 py-8 rounded-full bg-secondary border-border focus-visible:ring-primary/50 text-lg shadow-2xl"
                 disabled={isLoading}
               />
               <Button

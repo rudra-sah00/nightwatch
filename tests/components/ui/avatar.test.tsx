@@ -4,7 +4,7 @@ import { Avatar } from '@/components/ui/avatar';
 
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
-  default: ({ fill, unoptimized, ...props }: any) => {
+  default: ({ fill, unoptimized, ...props }: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element
     return <img alt="Avatar" {...props} />;
   },

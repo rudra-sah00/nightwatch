@@ -54,7 +54,7 @@ export function AiLandingView({
                 type="button"
                 data-testid="prompt-card"
                 onClick={() => onSendMessage(undefined, prompt.text)}
-                className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900/50 border border-white/5 hover:bg-zinc-800/80 hover:border-white/10 transition-all text-left group"
+                className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border transition-all text-left group"
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">
                   {prompt.icon}
@@ -71,7 +71,7 @@ export function AiLandingView({
       {/* Fixed bottom input - always visible */}
       <div className="shrink-0">
         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="p-4 bg-black/40 backdrop-blur-md">
+        <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border/50">
           <div className="w-full max-w-2xl mx-auto relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <form onSubmit={(e) => onSendMessage(e)} className="relative">
@@ -79,7 +79,7 @@ export function AiLandingView({
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Message Watch Rudra AI..."
-                className="w-full pl-6 pr-14 py-8 rounded-full bg-zinc-900 border-white/10 focus-visible:ring-primary/50 text-lg shadow-2xl"
+                className="w-full pl-6 pr-14 py-8 rounded-full bg-secondary border-border focus-visible:ring-primary/50 text-lg shadow-2xl"
                 autoFocus
               />
               <Button

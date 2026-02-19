@@ -17,8 +17,14 @@ vi.mock('lucide-react', () => ({
 
 // Mock Next/Image
 vi.mock('next/image', () => ({
-  default: ({ src, alt, fill, unoptimized, ...props }: any) => (
-    <img src={src} alt={alt} {...props} />
+  default: ({
+    src,
+    alt,
+    fill,
+    unoptimized,
+    ...props
+  }: Record<string, unknown>) => (
+    <img src={src as string} alt={alt as string} {...props} />
   ),
 }));
 

@@ -71,7 +71,7 @@ export default function WatchlistPage() {
 
         {watchlist.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center justify-center text-center space-y-4 border border-dashed border-white/10 rounded-xl bg-white/5 p-16 w-full">
+            <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
               <div className="p-4 rounded-full bg-white/10">
                 <Film className="w-8 h-8 opacity-50" />
               </div>
