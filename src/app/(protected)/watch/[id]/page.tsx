@@ -163,6 +163,7 @@ function WatchContent() {
         response = await playVideo({
           type: 'series',
           title: decodedTitle,
+          seriesId: seriesId || movieId || undefined, // Use available ID
           season: parseInt(season, 10),
           episode: parseInt(episode, 10),
         });
@@ -170,6 +171,7 @@ function WatchContent() {
         response = await playVideo({
           type: 'movie',
           title: decodedTitle,
+          movieId: movieId || undefined,
         });
       }
 
@@ -207,7 +209,7 @@ function WatchContent() {
     } finally {
       setIsRefetching(false);
     }
-  }, [title, type, season, episode]);
+  }, [title, type, season, episode, movieId, seriesId]);
 
   // Retry counter to prevent infinite refetch loops on persistent 401s
   const streamRetryCount = useRef(0);

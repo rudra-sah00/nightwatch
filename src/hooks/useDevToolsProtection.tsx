@@ -27,6 +27,10 @@ export function useDevToolsProtection() {
  * Can be dynamically imported to avoid loading 300+ lines in development.
  */
 export function initDevToolsProtection(): (() => void) | undefined {
+  // TEMPORARY: Disable devtools protection for debugging
+  return undefined;
+
+  /*
   // Skip in development mode
   if (process.env.NODE_ENV === 'development') {
     return;
@@ -36,15 +40,11 @@ export function initDevToolsProtection(): (() => void) | undefined {
     window.location.href = REDIRECT_URL;
   };
 
-  /**
-   * CSS-based protection: Disables text selection, dragging, and printing.
-   */
   const styleId = 'devtools-protection-styles';
   if (!document.getElementById(styleId)) {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
-        /* Disable text selection */
         body {
           -webkit-user-select: none !important;
           -moz-user-select: none !important;
@@ -52,7 +52,6 @@ export function initDevToolsProtection(): (() => void) | undefined {
           user-select: none !important;
         }
         
-        /* Allow selection in input fields */
         input, textarea, [contenteditable="true"] {
           -webkit-user-select: text !important;
           -moz-user-select: text !important;
@@ -60,7 +59,6 @@ export function initDevToolsProtection(): (() => void) | undefined {
           user-select: text !important;
         }
         
-        /* Disable drag */
         body * {
           -webkit-user-drag: none !important;
           -khtml-user-drag: none !important;
@@ -68,7 +66,6 @@ export function initDevToolsProtection(): (() => void) | undefined {
           -o-user-drag: none !important;
         }
         
-        /* Disable print */
         @media print {
           body {
             display: none !important;
@@ -78,15 +75,10 @@ export function initDevToolsProtection(): (() => void) | undefined {
     document.head.appendChild(style);
   }
 
-  /**
-   * Method 1: Detects DevTools by monitoring the difference between
-   * window outer and inner dimensions.
-   */
   let devtoolsOpen = false;
   const threshold = 160;
 
   const checkDevToolsSize = () => {
-    // Bypass on mobile/touch devices as zoom triggers false positives
     const isMobile =
       'ontouchstart' in window ||
       navigator.maxTouchPoints > 0 ||
@@ -107,10 +99,6 @@ export function initDevToolsProtection(): (() => void) | undefined {
     }
   };
 
-  /**
-   * Method 2/7/8: Console and Debugger detection.
-   * Leverages getter-side-effects when objects are evaluated in the console.
-   */
   const image = new Image();
   Object.defineProperty(image, 'id', {
     get: () => {
@@ -120,13 +108,10 @@ export function initDevToolsProtection(): (() => void) | undefined {
   });
 
   const checkConsole = () => {
-    // Trigger Method 2 (Image ID getter) and Method 7 (Div ID getter)
-    // These getters are only called when the objects are inspected in the console
     console.log(image);
     console.log(element);
     console.clear();
 
-    // Method 8: Debugger timing check
     const start = Date.now();
     debugger;
     if (Date.now() - start > 100) {
@@ -134,87 +119,72 @@ export function initDevToolsProtection(): (() => void) | undefined {
     }
   };
 
-  /**
-   * Method 3: Blocks common DevTools keyboard shortcuts.
-   */
   const blockKeyboardShortcuts = (e: KeyboardEvent) => {
-    // F12
     if (e.key === 'F12') {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Ctrl+Shift+I (DevTools)
     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Ctrl+Shift+J (Console)
     if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Ctrl+Shift+C (Element Inspector)
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Ctrl+U (View Source)
     if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Ctrl+S (Save As) - prevents saving HTML
     if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
       e.preventDefault();
       return false;
     }
 
-    // Cmd+Option+I (Mac DevTools)
     if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Cmd+Option+J (Mac Console)
     if (e.metaKey && e.altKey && (e.key === 'j' || e.key === 'J')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Cmd+Option+C (Mac Element Inspector)
     if (e.metaKey && e.altKey && (e.key === 'c' || e.key === 'C')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Cmd+Option+U (Mac View Source)
     if (e.metaKey && e.altKey && (e.key === 'u' || e.key === 'U')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Cmd+U (Mac View Source)
     if (e.metaKey && (e.key === 'u' || e.key === 'U')) {
       e.preventDefault();
       redirect();
       return false;
     }
 
-    // Cmd+S (Mac Save As)
     if (e.metaKey && (e.key === 's' || e.key === 'S')) {
       e.preventDefault();
       return false;
@@ -223,34 +193,22 @@ export function initDevToolsProtection(): (() => void) | undefined {
     return true;
   };
 
-  /**
-   * Method 4: Blocks the right-click context menu.
-   */
   const blockContextMenu = (e: MouseEvent) => {
     e.preventDefault();
     return false;
   };
 
-  /**
-   * Method 5: Blocks drag and drop operations.
-   */
   const blockDrag = (e: DragEvent) => {
     e.preventDefault();
     return false;
   };
 
-  /**
-   * Method 6: Detects legacy Firebug extension.
-   */
   const checkFirebug = () => {
     if (window.Firebug?.chrome?.isInitialized) {
       redirect();
     }
   };
 
-  /**
-   * Method 7 Helper: Creates an element with a getter on 'id' for console detection.
-   */
   const element = document.createElement('div');
   Object.defineProperty(element, 'id', {
     get: () => {
@@ -259,9 +217,6 @@ export function initDevToolsProtection(): (() => void) | undefined {
     },
   });
 
-  /**
-   * Initialization of all detection methods and event listeners.
-   */
   const sizeCheckInterval = setInterval(checkDevToolsSize, 500);
   const consoleCheckInterval = setInterval(checkConsole, 2000);
   const firebugCheckInterval = setInterval(checkFirebug, 1000);
@@ -271,11 +226,9 @@ export function initDevToolsProtection(): (() => void) | undefined {
   document.addEventListener('dragstart', blockDrag);
   window.addEventListener('resize', checkDevToolsSize, { passive: true });
 
-  // Initial check
   checkDevToolsSize();
   checkFirebug();
 
-  // Cleanup
   return () => {
     clearInterval(sizeCheckInterval);
     clearInterval(consoleCheckInterval);
@@ -285,10 +238,10 @@ export function initDevToolsProtection(): (() => void) | undefined {
     document.removeEventListener('dragstart', blockDrag);
     window.removeEventListener('resize', checkDevToolsSize);
 
-    // Remove injected styles
     const styleEl = document.getElementById(styleId);
     if (styleEl) {
       styleEl.remove();
     }
   };
+  */
 }

@@ -217,12 +217,14 @@ export function clearEpisodesCache(seriesId?: string): void {
 export interface PlayMovieParams {
   type: 'movie';
   title: string;
+  movieId?: string;
   duration?: number; // Duration in seconds for smart caching
 }
 
 export interface PlaySeriesParams {
   type: 'series';
   title: string;
+  seriesId?: string;
   season: number;
   episode: number;
   duration?: number; // Duration in seconds for smart caching
