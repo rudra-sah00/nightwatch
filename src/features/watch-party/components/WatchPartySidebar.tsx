@@ -196,7 +196,7 @@ export function WatchPartySidebar({
         {/* Interactions Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-250 ease-out p-4 overflow-y-auto custom-scrollbar',
+            'absolute inset-0 flex flex-col transition-all duration-250 ease-out p-4',
             activeTab === 'interactions'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',

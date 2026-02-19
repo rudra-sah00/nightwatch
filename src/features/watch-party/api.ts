@@ -542,3 +542,40 @@ export function onPartyInteraction(
   socket.on('party:interaction', callback);
   return () => socket.off('party:interaction', callback);
 }
+
+// ============ Soundboard API ============
+
+import { apiFetch } from '@/lib/fetch';
+
+export interface SoundItem {
+  name: string;
+  slug: string;
+  sound: string;
+  color: string;
+}
+
+export interface SoundboardResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: SoundItem[];
+}
+
+/**
+ * Fetch trending sounds from the backend
+ */
+export async function getTrendingSounds(page = 1): Promise<SoundboardResponse> {
+  return apiFetch<SoundboardResponse>(`/api/soundboard?page=${page}`);
+}
+
+/**
+ * Search sounds from the backend
+ */
+export async function searchSounds(
+  query: string,
+  page = 1,
+): Promise<SoundboardResponse> {
+  return apiFetch<SoundboardResponse>(
+    `/api/soundboard/search?q=${encodeURIComponent(query)}&page=${page}`,
+  );
+}

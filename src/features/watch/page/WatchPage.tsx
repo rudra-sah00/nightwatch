@@ -336,7 +336,7 @@ export function WatchPage({
       <div className="flex-1 relative w-full overflow-hidden bg-black flex items-center justify-center">
         {/* Aesthetic Loading Layer - Absolutely centered in player area */}
         {state.isLoading && (
-          <div className="absolute inset-0 z-[60] flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
+          <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
             {/* Poster Background with Drop Filter (Blur) */}
             {metadata.posterUrl && (
               <div className="absolute inset-0 z-0">

@@ -31,7 +31,7 @@ export function SidebarTabs({
       },
       {
         id: 'interactions' as const,
-        label: 'Social',
+        label: 'Soundboard',
         icon: Sparkles,
       },
     ],

@@ -359,7 +359,7 @@ export function ActiveWatchParty({
       */}
       <div
         className={cn(
-          'relative overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-20',
+          'relative overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-30',
 
           // Mobile (Default): Width 100%, Order 2 (Bottom), Flex-1 (Fill rest of height)
           'w-full order-2 flex-1 border-t border-white/10 sm:border-t-0',
