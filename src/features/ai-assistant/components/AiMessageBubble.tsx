@@ -8,6 +8,7 @@ import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 import type { Message, User } from '../types';
 import { AssistantMovieCard } from './AssistantMovieCard';
+import { LazyMediaGallery } from './LazyMediaGallery';
 
 interface AiMessageBubbleProps {
   message: Message;
@@ -50,9 +51,8 @@ export function AiMessageBubble({
     if (displayedContent.length < message.content.length) {
       setIsTyping(true);
       const gap = message.content.length - displayedContent.length;
-      // If way behind, speed up slightly but keep it readable (min 15ms)
-      // If close, keep it steady and natural (max 45ms)
-      const speed = gap > 150 ? 15 : gap > 50 ? 25 : 45;
+      // Fast typing animation
+      const speed = gap > 150 ? 5 : gap > 50 ? 10 : 20;
 
       const timeoutId = setTimeout(() => {
         setDisplayedContent(
@@ -202,11 +202,19 @@ export function AiMessageBubble({
               <div className="mt-6 space-y-5 pb-1">
                 {/* Movies & Series — full-width portrait cards */}
                 {message.recommendations.filter(
-                  (r) => r.type !== 'Photo' && r.type !== 'Trailer',
+                  (r) =>
+                    r.type !== 'Photo' &&
+                    r.type !== 'Trailer' &&
+                    r.type !== 'LazyMediaGallery',
                 ).length > 0 && (
                   <div className="space-y-3">
                     {message.recommendations
-                      .filter((r) => r.type !== 'Photo' && r.type !== 'Trailer')
+                      .filter(
+                        (r) =>
+                          r.type !== 'Photo' &&
+                          r.type !== 'Trailer' &&
+                          r.type !== 'LazyMediaGallery',
+                      )
                       .map((req, ridx) => (
                         <AssistantMovieCard
                           key={`movie-${req.id}-${req.season}-${req.episode}-${ridx}`}
@@ -281,6 +289,21 @@ export function AiMessageBubble({
                     </div>
                   </div>
                 )}
+
+                {/* Lazy Media Gallery */}
+                {message.recommendations
+                  .filter((r) => r.type === 'LazyMediaGallery')
+                  .map((req, ridx) => (
+                    <LazyMediaGallery
+                      key={`lazy-gallery-${req.id}-${ridx}`}
+                      id={
+                        (req as { imdbId?: string; id: string }).imdbId ||
+                        req.id
+                      }
+                      title={req.title}
+                      onPlayMedia={onPlayMedia}
+                    />
+                  ))}
               </div>
             )}
 
