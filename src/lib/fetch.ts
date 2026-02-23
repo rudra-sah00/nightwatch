@@ -121,7 +121,7 @@ export async function apiFetch<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<T> {
-  const { timeout = 10000, skipRefresh = false, ...fetchOptions } = options;
+  const { timeout = 30000, skipRefresh = false, ...fetchOptions } = options;
 
   // Use absolute URL on server, relative on client (to leverage Next.js proxying)
   const baseUrl =
@@ -174,11 +174,10 @@ export async function apiFetch<T>(
       }
 
       // Refresh failed - throw error to trigger logout
-      const error: ApiError = {
-        message: 'Session expired. Please login again.',
-        status: 401,
-        code: 'SESSION_EXPIRED',
-      };
+      const error = new Error('Session expired. Please login again.') as Error &
+        ApiError;
+      error.status = 401;
+      error.code = 'SESSION_EXPIRED';
       throw error;
     }
 
@@ -191,15 +190,14 @@ export async function apiFetch<T>(
         // Ignore JSON parse errors
       }
 
-      const error: ApiError = {
-        message:
-          errorData.error?.message ||
-          errorData.error ||
-          errorData.message ||
-          `HTTP ${response.status}`,
-        status: response.status,
-        code: errorData.error?.code || errorData.code,
-      };
+      const msg =
+        errorData.error?.message ||
+        errorData.error ||
+        errorData.message ||
+        `HTTP ${response.status}`;
+      const error = new Error(msg) as Error & ApiError;
+      error.status = response.status;
+      error.code = errorData.error?.code || errorData.code;
       throw error;
     }
 
@@ -208,11 +206,11 @@ export async function apiFetch<T>(
     clearTimeout(timeoutId);
 
     if (error instanceof Error && error.name === 'AbortError') {
-      throw {
-        message:
-          'Request timed out. Please check your connection and try again.',
-        status: 408,
-      } as ApiError;
+      const timeoutErr = new Error(
+        'Request timed out. Please check your connection and try again.',
+      ) as Error & ApiError;
+      timeoutErr.status = 408;
+      throw timeoutErr;
     }
 
     throw error;

@@ -20,7 +20,7 @@ export function LazyMediaGallery({
   const [data, setData] = useState<{ photos: any[]; trailers: any[] } | null>(
     null,
   );
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -31,6 +31,7 @@ export function LazyMediaGallery({
         // biome-ignore lint/suspicious/noExplicitAny: Required for arbitrary media gallery response
         const res = await apiFetch<{ photos: any[]; trailers: any[] }>(
           `/api/video/media/${id}`,
+          { timeout: 30000 },
         );
         if (mounted) {
           setData(res);
@@ -40,7 +41,7 @@ export function LazyMediaGallery({
         if (mounted) {
           // biome-ignore lint/suspicious/noConsole: Required to log fetch failures
           console.error('Failed to fetch media gallery', err);
-          setError(true);
+          setError((err as any)?.message || 'Unknown error');
           setLoading(false);
         }
       }
@@ -54,9 +55,18 @@ export function LazyMediaGallery({
   }, [id]);
 
   if (error) {
+    const isAuthError =
+      error.toLowerCase().includes('unauthorized') ||
+      error.toLowerCase().includes('session');
     return (
       <div className="text-xs text-white/50 italic px-2 py-4">
-        Unable to load media gallery for {title || 'this content'}.
+        {isAuthError ? (
+          <span>
+            Authentication required to view media for {title || 'this content'}.
+          </span>
+        ) : (
+          <span>Unable to load media gallery: {error}</span>
+        )}
       </div>
     );
   }
