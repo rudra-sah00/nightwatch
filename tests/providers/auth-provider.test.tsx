@@ -576,9 +576,9 @@ describe('AuthProvider', () => {
 
   describe('clearCookiesAndRedirect', () => {
     it('fires logout fetch even when session is already invalid (swallows error)', async () => {
-      const fetchSpy = vi
-        .spyOn(globalThis, 'fetch')
-        .mockRejectedValue(new Error('already invalidated'));
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(
+        new Error('already invalidated'),
+      );
 
       const { getStoredUser } = await import('@/lib/auth');
       vi.mocked(getStoredUser).mockReturnValue(mockUser);

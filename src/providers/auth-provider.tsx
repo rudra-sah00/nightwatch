@@ -14,7 +14,7 @@ import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import { clearStoredUser, getStoredUser, storeUser } from '@/lib/auth';
-import { apiFetch, setTokenExpiration } from '@/lib/fetch';
+import { setTokenExpiration } from '@/lib/fetch';
 import { offForceLogout, onForceLogout } from '@/lib/socket';
 import { useSocket } from '@/providers/socket-provider';
 import type { ForceLogoutPayload, LoginResponse, User } from '@/types';
@@ -36,7 +36,7 @@ function clearCookiesAndRedirect(message?: string) {
   // Fire-and-forget: ask the backend to clear httpOnly cookies
   logoutUser({
     skipRefresh: true,
-  } as any).catch(() => {
+  } as RequestInit).catch(() => {
     // Session may already be invalidated — ignore
   });
 

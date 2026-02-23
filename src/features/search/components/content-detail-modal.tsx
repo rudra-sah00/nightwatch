@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  AlertCircle,
-  Film,
-  Loader2,
-  Play,
-  Plus,
-  Trash2,
-  Tv,
-  X,
-} from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -21,7 +12,6 @@ import {
   checkInWatchlist,
   removeFromWatchlist,
 } from '@/features/watchlist/api';
-import { apiFetch } from '@/lib/fetch';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';

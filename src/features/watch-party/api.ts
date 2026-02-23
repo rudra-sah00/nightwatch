@@ -1,4 +1,3 @@
-import { env } from '@/lib/env';
 import { apiFetch } from '@/lib/fetch';
 import { getSocket } from '@/lib/socket';
 import type {
@@ -20,8 +19,6 @@ import type {
   RoomPreview,
   WatchPartyRoom,
 } from './types';
-
-const API_URL = env.BACKEND_URL;
 
 /**
  * REST API endpoints for room discovery and initial state retrieval.

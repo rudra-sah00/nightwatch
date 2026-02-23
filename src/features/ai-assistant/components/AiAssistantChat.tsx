@@ -6,7 +6,6 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { apiFetch } from '@/lib/fetch';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { streamAiResponse } from '../api';

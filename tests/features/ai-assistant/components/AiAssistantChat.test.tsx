@@ -165,7 +165,7 @@ describe('AiAssistantChat', () => {
       },
     };
 
-    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as unknown as Response);
 
     render(
       <AiAssistantChat
@@ -220,7 +220,7 @@ describe('AiAssistantChat', () => {
       },
     };
 
-    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as unknown as Response);
 
     render(
       <AiAssistantChat
@@ -269,7 +269,7 @@ describe('AiAssistantChat', () => {
         },
       },
     };
-    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as unknown as Response);
 
     render(
       <AiAssistantChat
@@ -340,7 +340,7 @@ describe('AiAssistantChat', () => {
         },
       },
     };
-    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as unknown as Response);
 
     render(
       <AiAssistantChat
@@ -388,7 +388,7 @@ describe('AiAssistantChat', () => {
     vi.mocked(apiFetch).mockResolvedValue({
       ok: true,
       body: { getReader: () => mockReader },
-    } as any);
+    } as unknown as Response);
 
     const onSelectContent = vi.fn();
     render(
