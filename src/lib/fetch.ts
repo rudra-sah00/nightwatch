@@ -1,4 +1,5 @@
 import type { ApiError } from '@/types';
+import { getCookie } from './cookies';
 import { env } from './env';
 
 interface FetchOptions extends RequestInit {
@@ -84,6 +85,9 @@ async function refreshAccessToken(): Promise<boolean> {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          ...(typeof window !== 'undefined'
+            ? { 'x-csrf-token': getCookie('csrfToken') }
+            : {}),
         },
       });
 
@@ -156,6 +160,13 @@ export async function apiFetch<T>(
         ...(typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token')
           ? { Authorization: `Bearer ${sessionStorage.getItem('guest_token')}` }
+          : {}),
+        ...(typeof window !== 'undefined' &&
+        ['POST', 'PATCH', 'DELETE', 'PUT'].includes(
+          fetchOptions.method || 'GET',
+        ) &&
+        getCookie('csrfToken')
+          ? { 'x-csrf-token': getCookie('csrfToken') }
           : {}),
         ...fetchOptions.headers,
       },

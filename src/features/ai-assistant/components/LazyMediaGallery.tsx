@@ -41,7 +41,7 @@ export function LazyMediaGallery({
         if (mounted) {
           // biome-ignore lint/suspicious/noConsole: Required to log fetch failures
           console.error('Failed to fetch media gallery', err);
-          setError((err as any)?.message || 'Unknown error');
+          setError(err instanceof Error ? err.message : 'Unknown error');
           setLoading(false);
         }
       }
