@@ -6,6 +6,7 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { apiFetch } from '@/lib/fetch';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import type { Message } from '../types';
@@ -120,21 +121,10 @@ export function AiAssistantChat({
           (m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`,
         );
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-
-      // Using fetch directly for streaming (apiFetch doesn't support streams well)
-      const response = await fetch(`${backendUrl}/api/ai/stream`, {
+      // Use apiFetch for automatic cookie inclusion and CSRF protection
+      const response = await apiFetch<Response>('/api/ai/stream', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(typeof window !== 'undefined' &&
-          sessionStorage.getItem('guest_token')
-            ? {
-                Authorization: `Bearer ${sessionStorage.getItem('guest_token')}`,
-              }
-            : {}),
-        },
+        rawResponse: true,
         body: JSON.stringify({
           message: newMessage.content,
           chatHistory: history,

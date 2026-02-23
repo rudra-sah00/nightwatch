@@ -1,12 +1,27 @@
 'use client';
 
-import { Loader2, X } from 'lucide-react';
+import {
+  AlertCircle,
+  Film,
+  Loader2,
+  Play,
+  Plus,
+  Trash2,
+  Tv,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
+import {
+  addToWatchlist,
+  checkInWatchlist,
+  removeFromWatchlist,
+} from '@/features/watchlist/api';
+import { apiFetch } from '@/lib/fetch';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';
@@ -108,15 +123,9 @@ export function ContentDetailModal({
     if (!show) return;
     (async () => {
       try {
-        const res = await fetch('/api/user/watchlist');
-        if (res.ok) {
-          const data = await res.json();
-          setInWatchlist(
-            (data.items || []).some(
-              (item: { contentId: string }) => item.contentId === show.id,
-            ),
-          );
-        }
+        // Check if in watchlist using standardized feature API
+        const inList = await checkInWatchlist(show.id);
+        setInWatchlist(inList);
       } catch (_e) {
         // ignore
       }
@@ -190,33 +199,19 @@ export function ContentDetailModal({
     setWatchlistLoading(true);
     try {
       if (inWatchlist) {
-        const res = await fetch(`/api/user/watchlist/${show.id}`, {
-          method: 'DELETE',
-        });
-        if (res.ok) {
-          setInWatchlist(false);
-          toast.success('Removed from watchlist');
-        } else {
-          toast.error('Failed to remove from watchlist');
-        }
+        await removeFromWatchlist(show.id);
+        setInWatchlist(false);
+        toast.success('Removed from watchlist');
       } else {
-        const res = await fetch('/api/user/watchlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contentId: show.id,
-            contentType:
-              show.contentType === ContentType.Movie ? 'Movie' : 'Series',
-            title: show.title,
-            posterUrl: show.posterUrl,
-          }),
+        await addToWatchlist({
+          contentId: show.id,
+          contentType:
+            show.contentType === ContentType.Movie ? 'Movie' : 'Series',
+          title: show.title,
+          posterUrl: show.posterUrl,
         });
-        if (res.ok) {
-          setInWatchlist(true);
-          toast.success('Added to watchlist');
-        } else {
-          toast.error('Failed to add to watchlist');
-        }
+        setInWatchlist(true);
+        toast.success('Added to watchlist');
       }
     } catch (_error) {
       toast.error('Failed to update watchlist');

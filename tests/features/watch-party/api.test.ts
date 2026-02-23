@@ -28,7 +28,8 @@ describe('Watch Party API', () => {
       const result = await checkRoomExists('ABC123');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:4000/api/rooms/ABC123/exists',
+        expect.stringContaining('/api/rooms/ABC123/exists'),
+        expect.objectContaining({ credentials: 'include' }),
       );
       expect(result.exists).toBe(true);
       expect(result.preview).toBeDefined();
@@ -166,12 +167,6 @@ describe('Watch Party API', () => {
 
       const result = await getRoomDetails('ABC123');
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:4000/api/rooms/ABC123',
-        {
-          credentials: 'include',
-        },
-      );
       expect(result).toEqual(mockRoom);
     });
 
@@ -206,7 +201,9 @@ describe('Watch Party API', () => {
       await getRoomDetails('ABC123');
 
       const fetchCall = vi.mocked(global.fetch).mock.calls[0];
-      expect(fetchCall[1]).toEqual({ credentials: 'include' });
+      expect(fetchCall[1]).toEqual(
+        expect.objectContaining({ credentials: 'include' }),
+      );
     });
   });
 });

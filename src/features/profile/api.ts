@@ -75,21 +75,17 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('image', file);
 
-  const result = await fetch('/api/user/profile-image', {
-    method: 'POST',
-    body: formData,
-    credentials: 'include',
-  }).then(async (res) => {
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.error || error.message || 'Upload failed');
-    }
-    return res.json().then((data) => ({ url: data.user.profilePhoto }));
-  });
+  const result = await apiFetch<{ user: { profilePhoto: string } }>(
+    '/api/user/profile-image',
+    {
+      method: 'POST',
+      body: formData,
+    },
+  );
 
   // Invalidate profile cache so fresh data is fetched
   invalidateProfileCache();
-  return result;
+  return { url: result.user.profilePhoto };
 }
 
 export async function changePassword(

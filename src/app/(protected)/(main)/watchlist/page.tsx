@@ -7,16 +7,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
+import { getWatchlist } from '@/features/watchlist/api';
+import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
-
-interface WatchlistItem {
-  id: string;
-  contentId: string;
-  contentType: string;
-  title: string;
-  posterUrl?: string;
-  addedAt: string;
-}
 
 export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
@@ -24,14 +17,11 @@ export default function WatchlistPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [_isIdModalOpen, setIsIdModalOpen] = useState(false);
 
-  // Fetch watchlist directly
+  // Fetch watchlist
   const fetchWatchlist = useCallback(async () => {
     try {
-      const res = await fetch('/api/user/watchlist');
-      if (res.ok) {
-        const data = await res.json();
-        setWatchlist(data.items || []);
-      }
+      const items = await getWatchlist();
+      setWatchlist(items);
     } catch (_e) {
       // ignore
     } finally {

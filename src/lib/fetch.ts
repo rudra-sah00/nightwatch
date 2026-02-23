@@ -5,6 +5,7 @@ import { env } from './env';
 interface FetchOptions extends RequestInit {
   timeout?: number;
   skipRefresh?: boolean; // Flag to prevent infinite refresh loops
+  rawResponse?: boolean; // Flag to return raw Response object
 }
 
 // Track if we're currently refreshing to prevent multiple simultaneous refresh calls
@@ -156,7 +157,9 @@ export async function apiFetch<T>(
       ...fetchOptions,
       credentials: 'include', // Send cookies
       headers: {
-        'Content-Type': 'application/json',
+        ...(fetchOptions.body instanceof FormData
+          ? {}
+          : { 'Content-Type': 'application/json' }),
         ...(typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token')
           ? { Authorization: `Bearer ${sessionStorage.getItem('guest_token')}` }
@@ -210,6 +213,10 @@ export async function apiFetch<T>(
       error.status = response.status;
       error.code = errorData.error?.code || errorData.code;
       throw error;
+    }
+
+    if (options.rawResponse) {
+      return response as unknown as T;
     }
 
     return await response.json();

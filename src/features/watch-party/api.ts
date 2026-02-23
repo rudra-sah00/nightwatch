@@ -1,4 +1,5 @@
 import { env } from '@/lib/env';
+import { apiFetch } from '@/lib/fetch';
 import { getSocket } from '@/lib/socket';
 import type {
   ChatMessage, // New
@@ -37,8 +38,17 @@ export async function checkRoomExists(roomId: string): Promise<{
   message?: string;
 }> {
   try {
-    const res = await fetch(`${API_URL}/api/rooms/${roomId}/exists`);
-    const data = await res.json();
+    const data = await apiFetch<{
+      exists: boolean;
+      title: string;
+      type: 'movie' | 'series';
+      season?: number;
+      episode?: number;
+      hostName: string;
+      memberCount: number;
+      reason?: string;
+      message?: string;
+    }>(`/api/rooms/${roomId}/exists`);
 
     if (data.exists) {
       return {
@@ -76,12 +86,7 @@ export async function checkRoomExists(roomId: string): Promise<{
 export async function getRoomDetails(
   roomId: string,
 ): Promise<WatchPartyRoom | null> {
-  const res = await fetch(`${API_URL}/api/rooms/${roomId}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) return null;
-  return res.json();
+  return apiFetch<WatchPartyRoom>(`/api/rooms/${roomId}`).catch(() => null);
 }
 
 /**
@@ -544,8 +549,6 @@ export function onPartyInteraction(
 }
 
 // ============ Soundboard API ============
-
-import { apiFetch } from '@/lib/fetch';
 
 export interface SoundItem {
   name: string;

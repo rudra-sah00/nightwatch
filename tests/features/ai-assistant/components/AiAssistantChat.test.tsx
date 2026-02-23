@@ -7,6 +7,12 @@ import {
 } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AiAssistantChat } from '@/features/ai-assistant/components/AiAssistantChat';
+import { apiFetch } from '@/lib/fetch';
+
+// Mock apiFetch
+vi.mock('@/lib/fetch', () => ({
+  apiFetch: vi.fn(),
+}));
 
 // Mock router
 const mockPush = vi.fn();
@@ -121,8 +127,6 @@ vi.mock('@/providers/auth-provider', () => ({
 describe('AiAssistantChat', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock global fetch
-    global.fetch = vi.fn();
   });
 
   it('renders landing view initially', () => {
@@ -161,9 +165,7 @@ describe('AiAssistantChat', () => {
       },
     };
 
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockResponse,
-    );
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
 
     render(
       <AiAssistantChat
@@ -218,9 +220,7 @@ describe('AiAssistantChat', () => {
       },
     };
 
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockResponse,
-    );
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
 
     render(
       <AiAssistantChat
@@ -269,9 +269,7 @@ describe('AiAssistantChat', () => {
         },
       },
     };
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockResponse,
-    );
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
 
     render(
       <AiAssistantChat
@@ -342,9 +340,7 @@ describe('AiAssistantChat', () => {
         },
       },
     };
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockResponse,
-    );
+    vi.mocked(apiFetch).mockResolvedValue(mockResponse as any);
 
     render(
       <AiAssistantChat
@@ -389,10 +385,10 @@ describe('AiAssistantChat', () => {
       }),
       releaseLock: vi.fn(),
     };
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+    vi.mocked(apiFetch).mockResolvedValue({
       ok: true,
       body: { getReader: () => mockReader },
-    });
+    } as any);
 
     const onSelectContent = vi.fn();
     render(
@@ -425,9 +421,7 @@ describe('AiAssistantChat', () => {
   });
 
   it('handles stream errors gracefully', async () => {
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Network error'),
-    );
+    vi.mocked(apiFetch).mockRejectedValue(new Error('Network error'));
 
     render(
       <AiAssistantChat

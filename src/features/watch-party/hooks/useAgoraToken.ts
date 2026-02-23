@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { env } from '@/lib/env';
+import { apiFetch } from '@/lib/fetch';
 
 interface UseAgoraTokenOptions {
   roomId: string | undefined;
@@ -57,24 +58,15 @@ export function useAgoraToken(
 
         const isGuest = userId?.startsWith('guest:');
 
-        const url = `${backendUrl}/api/agora/token?channelName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`;
+        const url = `/api/agora/token?channelName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`;
 
-        const res = await fetch(url, {
-          credentials: 'include',
-          headers:
-            isGuest && guestToken
-              ? {
-                  Authorization: `Bearer ${guestToken}`,
-                }
-              : undefined,
-        });
+        const data = await apiFetch<{
+          token: string;
+          appId: string;
+          channel: string;
+          uid: number;
+        }>(url);
 
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to fetch Agora token');
-        }
-
-        const data = await res.json();
         setToken(data.token);
         setAppId(data.appId);
         setChannel(data.channel);

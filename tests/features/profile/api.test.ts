@@ -21,7 +21,6 @@ describe('Profile API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     invalidateProfileCache();
-    global.fetch = vi.fn();
   });
 
   describe('getProfile', () => {
@@ -251,19 +250,16 @@ describe('Profile API', () => {
       });
       const mockProfilePhoto = 'https://example.com/avatar.jpg';
 
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({ user: { profilePhoto: mockProfilePhoto } }),
-      } as Response);
+      vi.mocked(apiFetch).mockResolvedValueOnce({
+        user: { profilePhoto: mockProfilePhoto },
+      });
 
       const result = await uploadProfileImage(mockFile);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(apiFetch).toHaveBeenCalledWith(
         '/api/user/profile-image',
         expect.objectContaining({
           method: 'POST',
-          credentials: 'include',
         }),
       );
       expect(result).toEqual({ url: mockProfilePhoto });
@@ -274,18 +270,14 @@ describe('Profile API', () => {
         type: 'image/jpeg',
       });
 
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          user: { profilePhoto: 'https://example.com/avatar.jpg' },
-        }),
-      } as Response);
+      vi.mocked(apiFetch).mockResolvedValueOnce({
+        user: { profilePhoto: 'https://example.com/avatar.jpg' },
+      });
 
       await uploadProfileImage(mockFile);
 
-      const fetchCall = vi.mocked(global.fetch).mock.calls[0];
-      const formData = fetchCall[1]?.body as FormData;
+      const apiFetchCall = vi.mocked(apiFetch).mock.calls[0];
+      const formData = apiFetchCall[1]?.body as FormData;
 
       expect(formData).toBeInstanceOf(FormData);
       expect(formData.get('image')).toBe(mockFile);
@@ -296,13 +288,11 @@ describe('Profile API', () => {
         type: 'image/jpeg',
       });
 
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => ({ message: 'Invalid file' }),
-      } as Response);
+      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Upload failed'));
 
-      await expect(uploadProfileImage(mockFile)).rejects.toThrow();
+      await expect(uploadProfileImage(mockFile)).rejects.toThrow(
+        'Upload failed',
+      );
     });
   });
 
