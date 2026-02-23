@@ -177,12 +177,13 @@ describe('AuthProvider', () => {
         'Logged in from another device.',
       );
 
-      // Should fire-and-forget POST to /api/auth/logout to clear cookies
-      const { apiFetch } = await import('@/lib/fetch');
-      expect(apiFetch).toHaveBeenCalledWith('/api/auth/logout', {
-        method: 'POST',
-        skipRefresh: true,
-      });
+      // Should fire-and-forget call to logoutUser to clear cookies
+      const { logoutUser } = await import('@/features/auth/api');
+      expect(logoutUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skipRefresh: true,
+        }),
+      );
 
       // Should hard-redirect to /login
       expect(window.location.href).toBe('/login');
@@ -600,8 +601,8 @@ describe('AuthProvider', () => {
         handler({ reason: 'new_login', message: 'Goodbye' });
       });
 
-      const { apiFetch } = await import('@/lib/fetch');
-      expect(apiFetch).toHaveBeenCalled();
+      const { logoutUser } = await import('@/features/auth/api');
+      expect(logoutUser).toHaveBeenCalled();
       // Still redirects despite fetch failure
       expect(window.location.href).toBe('/login');
     });

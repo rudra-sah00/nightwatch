@@ -34,10 +34,9 @@ function clearCookiesAndRedirect(message?: string) {
   }
 
   // Fire-and-forget: ask the backend to clear httpOnly cookies
-  apiFetch('/api/auth/logout', {
-    method: 'POST',
+  logoutUser({
     skipRefresh: true,
-  }).catch(() => {
+  } as any).catch(() => {
     // Session may already be invalidated — ignore
   });
 

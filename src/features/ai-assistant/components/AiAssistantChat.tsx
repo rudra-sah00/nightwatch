@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { apiFetch } from '@/lib/fetch';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
+import { streamAiResponse } from '../api';
 import type { Message } from '../types';
 import { AiLandingView } from './AiLandingView';
 import { AiMessageBubble } from './AiMessageBubble';
@@ -121,15 +122,8 @@ export function AiAssistantChat({
           (m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`,
         );
 
-      // Use apiFetch for automatic cookie inclusion and CSRF protection
-      const response = await apiFetch<Response>('/api/ai/stream', {
-        method: 'POST',
-        rawResponse: true,
-        body: JSON.stringify({
-          message: newMessage.content,
-          chatHistory: history,
-        }),
-      });
+      // Use feature API for streaming
+      const response = await streamAiResponse(newMessage.content, history);
 
       if (!response.ok) throw new Error('Failed to start stream');
 

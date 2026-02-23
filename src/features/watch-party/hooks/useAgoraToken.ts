@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { env } from '@/lib/env';
-import { apiFetch } from '@/lib/fetch';
+import { getAgoraToken } from '../agora-api';
 
 interface UseAgoraTokenOptions {
   roomId: string | undefined;
@@ -54,18 +54,11 @@ export function useAgoraToken(
 
       try {
         const guestName = userName || 'Guest';
-        const backendUrl = env.BACKEND_URL;
-
-        const isGuest = userId?.startsWith('guest:');
-
-        const url = `/api/agora/token?channelName=${roomId}&guestId=${userId}&guestName=${encodeURIComponent(guestName)}`;
-
-        const data = await apiFetch<{
-          token: string;
-          appId: string;
-          channel: string;
-          uid: number;
-        }>(url);
+        const data = await getAgoraToken({
+          channelName: roomId,
+          guestId: userId,
+          guestName,
+        });
 
         setToken(data.token);
         setAppId(data.appId);
