@@ -30,7 +30,7 @@ export function ErrorOverlay({
         </h2>
         <p className="text-white/70 text-sm mb-6">{message}</p>
         <div className="flex gap-3">
-          {onRetry && (
+          {onRetry ? (
             <Button
               type="button"
               onClick={onRetry}
@@ -39,8 +39,8 @@ export function ErrorOverlay({
               <RefreshCw className="w-4 h-4" />
               Try Again
             </Button>
-          )}
-          {onBack && (
+          ) : null}
+          {onBack ? (
             <Button
               variant="outline"
               onClick={onBack}
@@ -48,7 +48,7 @@ export function ErrorOverlay({
             >
               Go Back
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

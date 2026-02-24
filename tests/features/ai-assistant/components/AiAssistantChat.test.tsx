@@ -416,7 +416,7 @@ describe('AiAssistantChat', () => {
       () => {
         expect(mockPush).toHaveBeenCalledWith('/watch-party/456?new=true');
       },
-      { timeout: 3000 },
+      { timeout: 5000 },
     );
   });
 

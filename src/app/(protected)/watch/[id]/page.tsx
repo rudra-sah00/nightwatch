@@ -264,7 +264,7 @@ function WatchContent() {
     return (
       <div className="relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col items-center justify-center">
         {/* Aesthetic Background - Match WatchPage */}
-        {posterUrl && (
+        {posterUrl ? (
           <div className="absolute inset-0 z-0">
             <div
               className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-30 animate-pulse"
@@ -272,7 +272,7 @@ function WatchContent() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60" />
           </div>
-        )}
+        ) : null}
 
         {/* Reuse the LoadingOverlay for consistency */}
         <LoadingOverlay isVisible={true} />
@@ -296,7 +296,7 @@ function WatchContent() {
             : 'Please start playback from the content page'}
         </p>
         <div className="flex gap-3">
-          {refetchError && (
+          {refetchError ? (
             <button
               type="button"
               onClick={refetchStream}
@@ -304,7 +304,7 @@ function WatchContent() {
             >
               Try Again
             </button>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={() => router.push('/home')}

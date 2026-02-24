@@ -71,7 +71,7 @@ export function AudioSelector({
       </button>
 
       {/* Dropdown Card */}
-      {isOpen && (
+      {isOpen ? (
         <div
           className={cn(
             'absolute bottom-full right-0 mb-3',
@@ -125,22 +125,22 @@ export function AudioSelector({
                   >
                     {track.label}
                   </span>
-                  {track.language && track.language !== track.label && (
+                  {track.language && track.language !== track.label ? (
                     <span className="text-xs text-white/40">
                       {track.language}
                     </span>
-                  )}
+                  ) : null}
                 </div>
-                {currentTrack === track.id && (
+                {currentTrack === track.id ? (
                   <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                     <Check className="w-3.5 h-3.5 text-purple-400" />
                   </div>
-                )}
+                ) : null}
               </button>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

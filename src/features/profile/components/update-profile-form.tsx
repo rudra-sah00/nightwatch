@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ export function UpdateProfileForm() {
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, _setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -44,43 +44,60 @@ export function UpdateProfileForm() {
     });
   }, [debouncedUsername, user?.username]);
 
-  // Check if any changes were made
+  const [state, action, isPending] = React.useActionState(
+    async (
+      _prevState: { message: string; type: string } | null,
+      formData: FormData,
+    ) => {
+      const name = formData.get('name') as string;
+      const username = formData.get('username') as string;
+
+      if (
+        name.trim() === (user?.name || '') &&
+        username === (user?.username || '')
+      ) {
+        return { message: 'No changes to save', type: 'info' };
+      }
+
+      if (username !== user?.username && !isAvailable) {
+        return { message: 'Username not available', type: 'error' };
+      }
+
+      try {
+        const result = await updateProfile({ name, username });
+        updateUser(result.user);
+        return { message: 'Profile updated successfully', type: 'success' };
+      } catch (err) {
+        const apiError = err as ApiError;
+        return {
+          message: apiError.message || 'Failed to update profile',
+          type: 'error',
+        };
+      }
+    },
+    null,
+  );
+
+  useEffect(() => {
+    if (state) {
+      if (state.type === 'success') {
+        toast.success(state.message);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else if (state.type === 'error') {
+        setError(state.message);
+        toast.error(state.message);
+      } else if (state.type === 'info') {
+        toast.info(state.message);
+      }
+    }
+  }, [state]);
+
   const hasChanges =
     name.trim() !== (user?.name || '') || username !== (user?.username || '');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Don't call API if nothing changed
-    if (!hasChanges) {
-      toast.info('No changes to save');
-      return;
-    }
-
-    if (username !== user?.username && isAvailable === false) return;
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    try {
-      const result = await updateProfile({ name, username });
-      updateUser(result.user);
-      setSuccess(true);
-      toast.success('Profile updated successfully');
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      const apiError = err as ApiError;
-      const msg = apiError.message || 'Failed to update profile';
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+    <form action={action} className="space-y-6 max-w-md">
       <div className="space-y-3">
         <Label
           htmlFor="name"
@@ -96,6 +113,7 @@ export function UpdateProfileForm() {
             placeholder="Your Name"
             required
             className="h-12 pl-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+            name="name"
           />
         </div>
       </div>
@@ -121,6 +139,7 @@ export function UpdateProfileForm() {
             }
             className="h-12 pl-9 pr-12 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
             placeholder="username"
+            name="username"
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
             {isCheckingUsername ? (
@@ -140,55 +159,55 @@ export function UpdateProfileForm() {
             )}
           </div>
         </div>
-        {username !== user?.username && (
+        {username !== user?.username ? (
           <div className="flex flex-col gap-1.5 pl-1">
             <p className="text-[11px] text-muted-foreground/60">
               Only lowercase letters, numbers, and underscores. (Min 3 chars)
             </p>
-            {username.length > 0 && username.length < 3 && (
+            {username.length > 0 && username.length < 3 ? (
               <p className="text-[11px] text-destructive/80 flex items-center gap-1.5">
                 <AlertCircle className="w-3 h-3" /> Too short
               </p>
-            )}
-            {isAvailable === false && username.length >= 3 && (
+            ) : null}
+            {isAvailable === false && username.length >= 3 ? (
               <p className="text-[11px] text-destructive/80 flex items-center gap-1.5">
                 <XCircle className="w-3 h-3" /> Username is already taken
               </p>
-            )}
-            {isAvailable === true && (
+            ) : null}
+            {isAvailable === true ? (
               <p className="text-[11px] text-emerald-400/80 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3 h-3" /> Username is available
               </p>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {error && (
+      {error ? (
         <div className="flex items-center gap-3 p-4 text-sm bg-destructive/10 text-destructive rounded-2xl border border-destructive/20">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
-      )}
+      ) : null}
 
-      {success && (
+      {success ? (
         <div className="flex items-center gap-3 p-4 text-sm bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           Profile updated successfully
         </div>
-      )}
+      ) : null}
 
       <Button
         type="submit"
         className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+        isLoading={isPending}
         disabled={
-          isLoading ||
+          isPending ||
           !hasChanges ||
           (username !== user?.username && isAvailable === false) ||
           (username.length > 0 && username.length < 3)
         }
       >
-        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
         Save Changes
       </Button>
     </form>

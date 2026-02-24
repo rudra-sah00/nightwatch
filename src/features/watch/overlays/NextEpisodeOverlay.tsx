@@ -89,11 +89,11 @@ export function NextEpisodeOverlay({
             <span className="text-sm font-medium text-white">
               {isNextSeason ? 'Next Season' : 'Next Episode'}
             </span>
-            {!cancelled && autoPlayDelay > 0 && !isLoading && (
+            {!cancelled && autoPlayDelay > 0 && !isLoading ? (
               <span className="ml-auto text-xs text-white/50">
                 Playing in {countdown}s
               </span>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -127,11 +127,11 @@ export function NextEpisodeOverlay({
               <h4 className="text-sm font-medium text-white truncate">
                 {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
               </h4>
-              {nextEpisode.duration && (
+              {nextEpisode.duration ? (
                 <p className="text-xs text-white/40 mt-1">
                   {nextEpisode.duration}m
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
 
@@ -176,14 +176,14 @@ export function NextEpisodeOverlay({
           </div>
 
           {/* Progress bar for countdown */}
-          {!cancelled && autoPlayDelay > 0 && !isLoading && (
+          {!cancelled && autoPlayDelay > 0 && !isLoading ? (
             <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
               <div
                 className="h-full bg-white transition-all duration-1000 ease-linear"
                 style={{ width: `${(countdown / autoPlayDelay) * 100}%` }}
               />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

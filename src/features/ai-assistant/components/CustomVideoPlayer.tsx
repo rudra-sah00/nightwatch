@@ -158,20 +158,20 @@ export function CustomVideoPlayer({
       </video>
 
       {/* Loading Spinner */}
-      {isBuffering && (
+      {isBuffering ? (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20 pointer-events-none">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
         </div>
-      )}
+      ) : null}
 
       {/* Big Play Button (Center) */}
-      {!isPlaying && !isBuffering && (
+      {!isPlaying && !isBuffering ? (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center animate-in zoom-in-90 duration-200">
             <Play className="w-8 h-8 text-white fill-white ml-1" />
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Controls Overlay */}
       <div

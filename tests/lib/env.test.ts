@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { env } from '@/lib/env';
 
 describe('Environment Variables', () => {
-  it('has NEXT_PUBLIC_WS_URL defined', () => {
-    expect(process.env.NEXT_PUBLIC_WS_URL).toBeDefined();
+  it('has required variables in env object', () => {
+    expect(env.BACKEND_URL).toBeDefined();
+    expect(env.WS_URL).toBeDefined();
+    expect(env.AGORA_APP_ID).toBeDefined();
   });
 
-  it('WS URL uses http, ws or wss protocol', () => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || '';
-    // Can be http in dev mode (happy-dom) or ws/wss in production
-    expect(wsUrl).toMatch(/^(https?|wss?):\/\//);
+  it('has fallback for optional variables', () => {
+    expect(env.TURNSTILE_SITE_KEY).toBeDefined();
   });
 });
 

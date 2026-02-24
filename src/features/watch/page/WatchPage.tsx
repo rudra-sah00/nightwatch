@@ -2,6 +2,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -69,7 +70,7 @@ interface WatchPageProps {
   onStreamExpired?: () => void;
 }
 
-export function WatchPage({
+export const WatchPage = memo(function WatchPage({
   streamUrl,
   metadata,
   captionUrl,
@@ -310,7 +311,7 @@ export function WatchPage({
     >
       {/* Mobile Header - Solid Top Bar */}
       <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
-        {!hideBackButton && (
+        {!hideBackButton ? (
           <button
             type="button"
             onClick={handleBack}
@@ -318,16 +319,16 @@ export function WatchPage({
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-        )}
+        ) : null}
         <div className="flex-1 min-w-0">
           <h1 className="text-base font-semibold text-white truncate">
             {metadata.title}
           </h1>
-          {metadata.season != null && metadata.episode != null && (
+          {metadata.season != null && metadata.episode != null ? (
             <p className="text-xs text-white/70 truncate">
               S{metadata.season}:E{metadata.episode}
             </p>
-          )}
+          ) : null}
         </div>
         {mobileHeaderContent}
       </div>
@@ -335,10 +336,10 @@ export function WatchPage({
       {/* Main Player Area - Takes remaining space */}
       <div className="flex-1 relative w-full overflow-hidden bg-black flex items-center justify-center">
         {/* Aesthetic Loading Layer - Absolutely centered in player area */}
-        {state.isLoading && (
+        {state.isLoading ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
             {/* Poster Background with Drop Filter (Blur) */}
-            {metadata.posterUrl && (
+            {metadata.posterUrl ? (
               <div className="absolute inset-0 z-0">
                 <div
                   className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-40"
@@ -348,11 +349,11 @@ export function WatchPage({
                 <div className="absolute inset-0 backdrop-blur-[40px] bg-black/40" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/60" />
               </div>
-            )}
+            ) : null}
 
             <LoadingOverlay isVisible={true} />
           </div>
-        )}
+        ) : null}
         {/* Video Element */}
         <VideoElement
           ref={videoRef}
@@ -376,7 +377,7 @@ export function WatchPage({
         />
 
         {/* Next Episode Overlay - Netflix style */}
-        {nextEpisodeInfo && (
+        {nextEpisodeInfo ? (
           <NextEpisodeOverlay
             key={showNextEpisode ? nextEpisodeInfo.episodeNumber : 'hidden'}
             isVisible={showNextEpisode}
@@ -385,7 +386,7 @@ export function WatchPage({
             onCancel={cancelNextEpisode}
             isLoading={isLoadingNext}
           />
-        )}
+        ) : null}
 
         {/* Center Play Button - Netflix style pause overlay with movie info */}
         <CenterPlayButton
@@ -423,4 +424,4 @@ export function WatchPage({
       </div>
     </section>
   );
-}
+});

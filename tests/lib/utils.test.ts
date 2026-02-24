@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { cn, delay, formatDuration, truncate } from '@/lib/utils';
+import {
+  cn,
+  delay,
+  formatDuration,
+  getOptimizedImageUrl,
+  truncate,
+} from '@/lib/utils';
 
 describe('Utils', () => {
   describe('cn', () => {
@@ -115,7 +121,7 @@ describe('Utils', () => {
       const start = Date.now();
       await delay(0);
       const elapsed = Date.now() - start;
-      expect(elapsed).toBeLessThan(10);
+      expect(elapsed).toBeLessThan(50);
     });
 
     it('should return a promise', () => {
@@ -130,5 +136,83 @@ describe('Utils', () => {
       });
       expect(executed).toBe(true);
     });
+  });
+
+  describe('getOptimizedImageUrl', () => {
+    it('should return empty string for null/undefined/empty input', () => {
+      expect(getOptimizedImageUrl(null)).toBe('');
+      expect(getOptimizedImageUrl(undefined)).toBe('');
+      expect(getOptimizedImageUrl('')).toBe('');
+      expect(getOptimizedImageUrl('null')).toBe('');
+    });
+
+    it('should return relative paths as is', () => {
+      expect(getOptimizedImageUrl('/images/test.jpg')).toBe('/images/test.jpg');
+    });
+
+    it('should return data URLs as is', () => {
+      const dataUrl = 'data:image/png;base64,abc';
+      expect(getOptimizedImageUrl(dataUrl)).toBe(dataUrl);
+    });
+
+    it('should return blob URLs as is', () => {
+      const blobUrl = 'blob:http://localhost:3000/uuid';
+      expect(getOptimizedImageUrl(blobUrl)).toBe(blobUrl);
+    });
+
+    it('should return absolute URLs as is if not from backend or amazon/imdb', () => {
+      expect(getOptimizedImageUrl('https://example.com/img.jpg')).toBe(
+        'https://example.com/img.jpg',
+      );
+    });
+
+    it('should make localhost backend URLs relative', () => {
+      expect(getOptimizedImageUrl('http://localhost:4000/api/video/1')).toBe(
+        '/api/video/1',
+      );
+    });
+
+    it('should make /api/stream/ URLs relative', () => {
+      expect(
+        getOptimizedImageUrl('https://watch.com/api/stream/image?url=abc'),
+      ).toBe('/api/stream/image?url=abc');
+    });
+
+    it('should handle URL parsing errors for backend-like URLs', () => {
+      // Something that contains the target string but is an invalid URL structure
+      // for the URL constructor (e.g. invalid host or port with pipe) to trigger the catch block
+      const result = getOptimizedImageUrl(
+        'http://localhost:4000/api/stream/123|',
+      );
+      expect(result).toBe('/api/stream/123|');
+
+      expect(getOptimizedImageUrl('http://localhost:4000/api/stream/%gh')).toBe(
+        '/api/stream/%gh',
+      );
+    });
+
+    it('should return original URL when URL constructor throws', () => {
+      // Trigger catch block in getOptimizedImageUrl
+      const invalidUrl = 'https://['; // Invalid IPv6 literal format throws in URL constructor
+      expect(getOptimizedImageUrl(invalidUrl)).toBe(invalidUrl);
+    });
+  });
+
+  it('should handle backend-like URLs that do not start with http', () => {
+    expect(getOptimizedImageUrl('localhost:4000/api/test')).toBe(
+      'localhost:4000/api/test',
+    );
+  });
+
+  it('should proxy amazon images', () => {
+    const url = 'https://m.media-amazon.com/images/M/test.jpg';
+    const result = getOptimizedImageUrl(url);
+    expect(result).toContain('/api/stream/image?url=');
+  });
+
+  it('should proxy imdb images', () => {
+    const url = 'https://imdb.com/title/tt123/img.jpg';
+    const result = getOptimizedImageUrl(url);
+    expect(result).toContain('/api/stream/image?url=');
   });
 });

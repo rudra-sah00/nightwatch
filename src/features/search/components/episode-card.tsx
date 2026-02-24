@@ -93,19 +93,19 @@ export function EpisodeCard({
           </h4>
         </div>
 
-        {episode.description && (
+        {episode.description ? (
           <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
             {episode.description}
           </p>
-        )}
+        ) : null}
 
         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-          {episode.duration && (
+          {episode.duration ? (
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {episode.duration}m
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </button>

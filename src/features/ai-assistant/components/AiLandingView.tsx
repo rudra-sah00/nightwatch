@@ -73,7 +73,6 @@ export function AiLandingView({
         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border/50">
           <div className="w-full max-w-2xl mx-auto relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <form onSubmit={(e) => onSendMessage(e)} className="relative">
               <Input
                 value={inputValue}
@@ -97,7 +96,10 @@ export function AiLandingView({
                 <Send className="w-5 h-5" />
               </Button>
             </form>
-            <div className="text-center mt-2 text-[10px] text-white/30">
+            <div className="text-center mt-2 text-[10px] text-white/10 uppercase tracking-[0.2em] font-bold">
+              WATCH RUDRA AI • ELITE EXPERIENCE
+            </div>
+            <div className="text-center mt-1 text-[10px] text-zinc-500/50">
               Watch Rudra AI can make mistakes. Verify important information.
             </div>
           </div>

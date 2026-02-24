@@ -1,8 +1,19 @@
 'use client';
 
-import { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import type { ContentProgress } from '@/features/watch/api';
-import type { Episode, Season, ShowDetails } from '../types';
+import {
+  addToWatchlist,
+  checkInWatchlist,
+  removeFromWatchlist,
+} from '@/features/watchlist/api';
+import {
+  ContentType,
+  type Episode,
+  type Season,
+  type ShowDetails,
+} from '../types';
 import { useAutoPlay } from './use-auto-play';
 import { useContentProgress } from './use-content-progress';
 import { usePlaybackActions } from './use-playback-actions';
@@ -34,11 +45,14 @@ interface UseContentDetailReturn {
   selectedSeason: Season | null;
   hasWatchProgress: boolean;
   watchProgress: ContentProgress | null;
+  inWatchlist: boolean;
+  isWatchlistLoading: boolean;
 
   // Actions
   handleSeasonSelect: (season: Season) => void;
   handlePlay: (episode?: Episode) => Promise<void>;
   handleResume: () => Promise<void>;
+  toggleWatchlist: () => Promise<void>;
 }
 
 export function useContentDetail({
@@ -48,6 +62,71 @@ export function useContentDetail({
 }: UseContentDetailOptions): UseContentDetailReturn {
   // 1. Fetch Show Details
   const { show, isLoading } = useShowDetails(contentId);
+
+  // 1.1 Parallel Watchlist Check
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(true);
+
+  // Optimistic state for immediate UI feedback
+  const [optimisticInWatchlist, addOptimisticWatchlist] = React.useOptimistic(
+    inWatchlist,
+    (_state, newState: boolean) => newState,
+  );
+
+  // Start parallel fetch for isMounted tracking (standard pattern)
+  useEffect(() => {
+    let isMounted = true;
+
+    // Start fetching watchlist status immediately, don't wait for 'show'
+    const checkStatus = async () => {
+      try {
+        setIsWatchlistLoading(true);
+        const inList = await checkInWatchlist(contentId);
+        if (isMounted) setInWatchlist(inList);
+      } catch {
+        // ignore
+      } finally {
+        if (isMounted) setIsWatchlistLoading(false);
+      }
+    };
+
+    checkStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [contentId]);
+
+  const toggleWatchlist = async () => {
+    if (!show) return;
+
+    // Use transition for optimistic update
+    React.startTransition(async () => {
+      const nextState = !inWatchlist;
+      addOptimisticWatchlist(nextState);
+
+      try {
+        if (inWatchlist) {
+          await removeFromWatchlist(show.id);
+          setInWatchlist(false);
+          toast.success('Removed from watchlist');
+        } else {
+          await addToWatchlist({
+            contentId: show.id,
+            contentType:
+              show.contentType === ContentType.Movie ? 'Movie' : 'Series',
+            title: show.title,
+            posterUrl: show.posterUrl,
+          });
+          setInWatchlist(true);
+          toast.success('Added to watchlist');
+        }
+      } catch (_error) {
+        toast.error('Failed to update watchlist');
+        // State will automatically roll back on failure due to useOptimistic
+      }
+    });
+  };
 
   // 2. Manage Episodes & Season Selection
   const {
@@ -71,6 +150,7 @@ export function useContentDetail({
     isLoadingProgress,
     progressCheckedRef,
   } = useContentProgress({
+    contentId,
     show,
     fromContinueWatching,
     loadSeasonEpisodesInternal,
@@ -122,5 +202,8 @@ export function useContentDetail({
     handleSeasonSelect,
     handlePlay,
     handleResume,
+    inWatchlist: optimisticInWatchlist,
+    isWatchlistLoading,
+    toggleWatchlist,
   };
 }

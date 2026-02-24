@@ -47,11 +47,11 @@ const ProfileSection = ({
       <div className="relative p-6 lg:p-8 space-y-5">
         {/* Section Header */}
         <div className="flex items-start gap-4">
-          {icon && (
+          {icon ? (
             <div className="p-2.5 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20 shadow-lg shadow-red-500/5">
               {icon}
             </div>
-          )}
+          ) : null}
           <div className="space-y-1">
             <h2 className="text-xl font-semibold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
               {title}
@@ -91,9 +91,9 @@ const TabButton = ({ isActive, onClick, children, icon }: TabButtonProps) => (
   >
     {icon}
     {children}
-    {isActive && (
+    {isActive ? (
       <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/5 to-transparent pointer-events-none" />
-    )}
+    ) : null}
   </button>
 );
 
@@ -229,11 +229,11 @@ export function ProfileCard() {
                       />
                     </div>
                     {/* Loading overlay during upload */}
-                    {isUploading && (
+                    {isUploading ? (
                       <div className="absolute inset-1 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-sm">
                         <Loader2 className="w-8 h-8 animate-spin text-white" />
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -264,11 +264,11 @@ export function ProfileCard() {
                   <h1 className="text-2xl lg:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text truncate">
                     {user.name}
                   </h1>
-                  {user.username && (
+                  {user.username ? (
                     <p className="text-muted-foreground/80 font-medium text-sm">
                       @{user.username}
                     </p>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Separator */}
@@ -345,7 +345,7 @@ export function ProfileCard() {
               key={activeTab}
               className="animate-in fade-in duration-500 slide-in-from-bottom-4"
             >
-              {activeTab === 'overview' && (
+              {activeTab === 'overview' ? (
                 <div className="space-y-8">
                   <ProfileSection
                     title="Watch Activity"
@@ -359,9 +359,9 @@ export function ProfileCard() {
                     />
                   </ProfileSection>
                 </div>
-              )}
+              ) : null}
 
-              {activeTab === 'settings' && (
+              {activeTab === 'settings' ? (
                 <div className="space-y-8">
                   <ProfileSection
                     title="Public Profile"
@@ -379,7 +379,7 @@ export function ProfileCard() {
                     <ChangePasswordForm />
                   </ProfileSection>
                 </div>
-              )}
+              ) : null}
             </div>
           </main>
         </div>

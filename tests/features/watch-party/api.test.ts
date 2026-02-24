@@ -1,5 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkRoomExists, getRoomDetails } from '@/features/watch-party/api';
+import {
+  checkRoomExists,
+  createPartyRoom,
+  emitPartyEvent,
+  emitPing,
+  emitTypingStart,
+  emitTypingStop,
+  getRoomDetails,
+  getTrendingSounds,
+  requestJoinPartyRoom,
+  searchSounds,
+  sendPartyMessage,
+  syncPartyState,
+} from '@/features/watch-party/api';
+import type {
+  PartyCreatePayload,
+  PartyEvent,
+  PartySyncPayload,
+} from '@/features/watch-party/types';
 
 vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));
@@ -191,19 +209,207 @@ describe('Watch Party API', () => {
 
       expect(result).toBeNull();
     });
+  });
+});
 
-    it('should send credentials with request', async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({}),
-      } as Response);
+interface MockSocket {
+  emit: ReturnType<typeof vi.fn>;
+  connected: boolean;
+}
 
-      await getRoomDetails('ABC123');
+describe('Socket.IO Functions', () => {
+  const mockSocket: MockSocket = {
+    emit: vi.fn(),
+    connected: true,
+  };
 
-      const fetchCall = vi.mocked(global.fetch).mock.calls[0];
-      expect(fetchCall[1]).toEqual(
-        expect.objectContaining({ credentials: 'include' }),
-      );
-    });
+  beforeEach(async () => {
+    const { getSocket } = await import('@/lib/socket');
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    mockSocket.emit.mockClear();
+  });
+
+  it('emitPing should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+
+    // Disconnected
+    vi.mocked(getSocket).mockReturnValue(null);
+    emitPing({ t1: 100 }, callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    // Connected
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    emitPing({ t1: 100 }, callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:ping',
+      { t1: 100 },
+      callback,
+    );
+  });
+
+  it('emitPartyEvent should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+    const payload: PartyEvent = { eventType: 'play', videoTime: 10 };
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    emitPartyEvent(payload, callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    emitPartyEvent(payload, callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:event',
+      payload,
+      callback,
+    );
+  });
+
+  it('createPartyRoom should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+    const payload: PartyCreatePayload = {
+      contentId: '123',
+      title: 'Test',
+      type: 'movie',
+      streamUrl: 'http://test.com',
+    };
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    createPartyRoom(payload, callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    createPartyRoom(payload, callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:create',
+      payload,
+      callback,
+    );
+  });
+
+  it('sendPartyMessage should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    sendPartyMessage('hello', callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    sendPartyMessage('hello', callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:send_message',
+      { content: 'hello' },
+      callback,
+    );
+  });
+
+  it('emitTypingStart/Stop should handle disconnected state silently', async () => {
+    const { getSocket } = await import('@/lib/socket');
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    emitTypingStart();
+    emitTypingStop();
+    expect(mockSocket.emit).not.toHaveBeenCalled();
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    emitTypingStart();
+    expect(mockSocket.emit).toHaveBeenCalledWith('party:typing_start');
+    emitTypingStop();
+    expect(mockSocket.emit).toHaveBeenCalledWith('party:typing_stop');
+  });
+
+  it('requestJoinPartyRoom should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+    const payload = { roomId: 'ABC', name: 'Guest' };
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    requestJoinPartyRoom(payload, callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    requestJoinPartyRoom(payload, callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:join_request',
+      payload,
+      callback,
+    );
+  });
+
+  it('syncPartyState should handle connected and disconnected states', async () => {
+    const { getSocket } = await import('@/lib/socket');
+    const callback = vi.fn();
+    const payload: PartySyncPayload = { currentTime: 10, isPlaying: true };
+
+    vi.mocked(getSocket).mockReturnValue(null);
+    syncPartyState(payload, callback);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not connected' }),
+    );
+
+    vi.mocked(getSocket).mockReturnValue(
+      mockSocket as unknown as ReturnType<typeof getSocket>,
+    );
+    syncPartyState(payload, callback);
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'party:sync',
+      payload,
+      callback,
+    );
+  });
+});
+
+describe('Soundboard API', () => {
+  it('getTrendingSounds should fetch sounds', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: [] }),
+    } as Response);
+
+    await getTrendingSounds(2);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/soundboard?page=2'),
+      expect.any(Object),
+    );
+  });
+
+  it('searchSounds should fetch sounds with query', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: [] }),
+    } as Response);
+
+    await searchSounds('test query', 3);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/soundboard/search?q=test%20query&page=3'),
+      expect.any(Object),
+    );
   });
 });

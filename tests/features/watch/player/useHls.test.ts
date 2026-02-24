@@ -326,6 +326,32 @@ describe('useHls', () => {
     });
   });
 
+  it('should ignore LEVEL_SWITCHED event if level is not found', async () => {
+    const videoRef = createVideoRef();
+
+    renderHook(() =>
+      useHls({
+        videoRef,
+        streamUrl: 'https://example.com/stream.m3u8',
+        dispatch: mockDispatch,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(eventHandlers.has('hlsLevelSwitched')).toBe(true);
+    });
+
+    mockDispatch.mockClear();
+
+    act(() => {
+      triggerEvent('hlsLevelSwitched', { level: 999 }); // Invalid index
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'SET_CURRENT_QUALITY' }),
+    );
+  });
+
   it('should handle MEDIA_ERROR with recoverMediaError', async () => {
     const videoRef = createVideoRef();
 
@@ -567,6 +593,23 @@ describe('useHls', () => {
 
       expect(mockHls.currentLevel).toBe(1);
     });
+
+    it('should do nothing if HLS instance is null', () => {
+      const videoRef = createVideoRef();
+      const { result } = renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: null, // HLS won't initialize
+          dispatch: mockDispatch,
+        }),
+      );
+
+      act(() => {
+        result.current.setQuality(1);
+      });
+
+      // No error should occur
+    });
   });
 
   describe('setAudioTrack', () => {
@@ -638,6 +681,23 @@ describe('useHls', () => {
       });
 
       expect(mockHls.audioTrack).toBe(-1);
+    });
+
+    it('should do nothing if HLS instance is null', () => {
+      const videoRef = createVideoRef();
+      const { result } = renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: null, // HLS won't initialize
+          dispatch: mockDispatch,
+        }),
+      );
+
+      act(() => {
+        result.current.setAudioTrack('1');
+      });
+
+      // No error should occur
     });
   });
 

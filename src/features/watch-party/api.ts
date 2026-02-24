@@ -87,7 +87,7 @@ export async function getRoomDetails(
 }
 
 /**
- * WebSocket API for real-time room management and playback synchronization.
+ * Socket.IO API for real-time room management and playback synchronization.
  */
 
 type Callback<T> = (
@@ -313,7 +313,7 @@ export function requestPartyState(
 }
 
 /**
- * Get room info via WebSocket
+ * Get room info via Socket.IO
  */
 export function getPartyRoom(
   roomId: string,
@@ -386,7 +386,7 @@ export function fetchPendingRequests(
 }
 
 /**
- * WebSocket event listeners for room membership and playback updates.
+ * Socket.IO event listeners for room membership and playback updates.
  */
 
 export function onPartyStateUpdate(

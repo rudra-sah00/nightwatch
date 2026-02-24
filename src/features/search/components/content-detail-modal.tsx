@@ -6,12 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
 import { useWatchParty } from '@/features/watch-party/useWatchParty';
-import {
-  addToWatchlist,
-  checkInWatchlist,
-  removeFromWatchlist,
-} from '@/features/watchlist/api';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';
@@ -57,36 +53,37 @@ export function ContentDetailModal({
     handleSeasonSelect,
     handlePlay,
     handleResume,
+    inWatchlist,
+    isWatchlistLoading,
+    toggleWatchlist,
   } = useContentDetail({ contentId, initialContext, fromContinueWatching });
 
   // Auto-play logic
   useEffect(() => {
     if (autoPlay && show && !isLoading && !isPlaying) {
       const triggerPlay = async () => {
-        // If we have specific context (resume), use handleResume or handlePlay with context
-        if (initialContext?.episodeId || initialContext?.episode) {
-          // If we have explicit episode info in context (from AI resume), play specifically
-          // We need to find the episode object if possible, or construct a mock one if needed
-          // But handleResume handles "resume" logic.
-          // If fromContinueWatching is true, handleResume is best.
-          // Check if initialContext has specific episode mapping
-          if (initialContext.episode && episodes.length > 0) {
-            const ep = episodes.find(
-              (e) =>
-                e.episodeNumber === initialContext.episode &&
-                e.seasonNumber === initialContext.season,
-            );
-            if (ep) {
-              await handlePlay(ep);
-              return;
+        // Prepare the play function but don't execute yet
+        const executePlay = async () => {
+          if (initialContext?.episodeId || initialContext?.episode) {
+            if (initialContext.episode && episodes.length > 0) {
+              const ep = episodes.find(
+                (e) =>
+                  e.episodeNumber === initialContext.episode &&
+                  e.seasonNumber === initialContext.season,
+              );
+              if (ep) {
+                await handlePlay(ep);
+                return;
+              }
             }
+            await handleResume();
+          } else {
+            await handlePlay();
           }
-          // Fallback to resume if context is vague or not found
-          await handleResume();
-        } else {
-          // General play (Movie or Start Series)
-          await handlePlay();
-        }
+        };
+
+        setCountdownTarget(() => executePlay);
+        setShowCountdown(true);
       };
       triggerPlay();
     }
@@ -104,24 +101,6 @@ export function ContentDetailModal({
   // Watch Party Hook
   const { createRoom, isLoading: isCreatingParty } = useWatchParty();
 
-  // Watchlist — direct API calls (no provider needed)
-  const [inWatchlist, setInWatchlist] = useState(false);
-  const [watchlistLoading, setWatchlistLoading] = useState(false);
-
-  // Check if content is in watchlist
-  useEffect(() => {
-    if (!show) return;
-    (async () => {
-      try {
-        // Check if in watchlist using standardized feature API
-        const inList = await checkInWatchlist(show.id);
-        setInWatchlist(inList);
-      } catch (_e) {
-        // ignore
-      }
-    })();
-  }, [show]);
-
   // Local UI state
   const [imageError, setImageError] = useState(false);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
@@ -129,6 +108,8 @@ export function ContentDetailModal({
   const [creatingEpisodeId, setCreatingEpisodeId] = useState<
     string | number | null
   >(null);
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [countdownTarget, setCountdownTarget] = useState<() => Promise<void>>();
 
   // Handle Watch Party Creation
   const handleWatchParty = async (episode?: Episode) => {
@@ -185,40 +166,20 @@ export function ContentDetailModal({
   };
 
   const handleWatchlistToggle = useCallback(async () => {
-    if (!show) return;
-    setWatchlistLoading(true);
-    try {
-      if (inWatchlist) {
-        await removeFromWatchlist(show.id);
-        setInWatchlist(false);
-        toast.success('Removed from watchlist');
-      } else {
-        await addToWatchlist({
-          contentId: show.id,
-          contentType:
-            show.contentType === ContentType.Movie ? 'Movie' : 'Series',
-          title: show.title,
-          posterUrl: show.posterUrl,
-        });
-        setInWatchlist(true);
-        toast.success('Added to watchlist');
-      }
-    } catch (_error) {
-      toast.error('Failed to update watchlist');
-    } finally {
-      setWatchlistLoading(false);
-    }
-  }, [show, inWatchlist]);
+    await toggleWatchlist();
+  }, [toggleWatchlist]);
 
   // Block body scroll when modal is open
   useEffect(() => {
+    if (autoPlay) return; // Don't block scroll in headless mode
+
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
 
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, []);
+  }, [autoPlay]);
 
   // Handle escape key
   useEffect(() => {
@@ -242,6 +203,7 @@ export function ContentDetailModal({
 
   // Error state
   if (!show) {
+    if (autoPlay) return null; // Silently fail if autoplay
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
         <p className="text-foreground text-lg">Failed to load content</p>
@@ -252,15 +214,46 @@ export function ContentDetailModal({
     );
   }
 
+  // Headless mode for AI Auto-play
+  if (autoPlay && showCountdown) {
+    return (
+      <PlaybackCountdown
+        title="Experience Starting"
+        subtitle={`Preparing "${show.title}"...`}
+        onComplete={() => {
+          countdownTarget?.();
+          setShowCountdown(false);
+        }}
+      />
+    );
+  }
+
+  // Fallback loader if not ready
+  if (autoPlay) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/10 backdrop-blur-sm">
+        <div className="bg-background/40 p-10 rounded-full shadow-2xl border border-white/5 animate-pulse">
+          <Loader2 className="w-12 h-12 animate-spin text-primary/60" />
+        </div>
+      </div>
+    );
+  }
+
   const isSeries = show.contentType === ContentType.Series;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-xl">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       {/* Close Button */}
       <button
         type="button"
         onClick={onClose}
         className="fixed top-4 right-4 z-50 p-3 rounded-full bg-background/50 backdrop-blur-md hover:bg-muted transition-colors border border-border"
+        aria-label="Close modal"
       >
         <X className="w-6 h-6 text-foreground" />
       </button>
@@ -307,7 +300,7 @@ export function ContentDetailModal({
             onWatchParty={() => handleWatchParty()}
             onWatchlistToggle={handleWatchlistToggle}
             isInWatchlist={inWatchlist}
-            isWatchlistLoading={watchlistLoading}
+            isWatchlistLoading={isWatchlistLoading}
           />
         </div>
       </div>
@@ -316,16 +309,16 @@ export function ContentDetailModal({
       <div className="px-6 md:px-10 lg:px-16 py-8 bg-background">
         <div className="max-w-4xl space-y-6">
           {/* Description */}
-          {show.description && (
+          {show.description ? (
             <p className="text-muted-foreground text-sm md:text-lg leading-relaxed font-light">
               {show.description}
             </p>
-          )}
+          ) : null}
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border">
             {/* Genres */}
-            {show.genre && (
+            {show.genre ? (
               <div>
                 <span className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">
                   Genres
@@ -345,10 +338,10 @@ export function ContentDetailModal({
                     ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Additional Details (Series specific or other metadata) */}
-            {isSeries && show.seasons && (
+            {isSeries && show.seasons ? (
               <div>
                 <span className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">
                   Series Info
@@ -358,16 +351,16 @@ export function ContentDetailModal({
                     {show.seasons.length} Season
                     {show.seasons.length > 1 ? 's' : ''}
                   </span>
-                  {show.year && <span>• {show.year}</span>}
+                  {show.year ? <span>• {show.year}</span> : null}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
 
       {/* Series Episodes Listing */}
-      {isSeries && (
+      {isSeries ? (
         <div className="px-6 md:px-10 lg:px-16 py-8 bg-background border-t border-border">
           {/* Season Selector */}
           <div className="flex items-center justify-between mb-6">
@@ -394,7 +387,7 @@ export function ContentDetailModal({
             onPlayEpisode={(episode) => handlePlay(episode)}
           />
         </div>
-      )}
+      ) : null}
       {/* Watch Party Setup Modal */}
       <WatchPartySetup
         isOpen={isSetupOpen}

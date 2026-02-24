@@ -61,7 +61,9 @@ export function useWatchProgress({
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const accumulateSecondsRef = useRef(0);
+  const actualWatchSecondsRef = useRef(0);
   const lastTimeRef = useRef(0);
+  const lastProgressRef = useRef<number | null>(null);
   const wasPlayingRef = useRef(false);
 
   // Helper to flush activity time
@@ -127,6 +129,16 @@ export function useWatchProgress({
           ? metadata.seriesId
           : metadata.movieId;
 
+      const roundedCurrentTime = Math.floor(currentTime);
+      const actualSeconds = Math.floor(actualWatchSecondsRef.current);
+
+      // Calculate progress delta (space traversed)
+      // If first report, delta is 0
+      const progressDelta =
+        lastProgressRef.current !== null
+          ? Math.max(0, roundedCurrentTime - lastProgressRef.current)
+          : 0;
+
       const payload = {
         contentId,
         contentType: metadata.type === 'series' ? 'Series' : 'Movie',
@@ -142,8 +154,11 @@ export function useWatchProgress({
             ? `${metadata.season}-${metadata.episode}`
             : undefined,
 
-        progressSeconds: Math.floor(currentTime),
+        progressSeconds: roundedCurrentTime,
         durationSeconds: Math.floor(duration),
+        playbackRate: videoRef.current.playbackRate,
+        actualWatchSeconds: actualSeconds,
+        progressDelta,
 
         // For series: tell backend if there are more episodes
         // This prevents removing from continue watching until series is fully completed
@@ -156,6 +171,10 @@ export function useWatchProgress({
         payload,
         (res: SocketResponse) => {
           if (res?.success) {
+            // Reset after successful report
+            actualWatchSecondsRef.current -= actualSeconds;
+            lastProgressRef.current = roundedCurrentTime;
+
             // Invalidate caches for real-time updates when user returns to home
             invalidateProgressCache(contentId);
             invalidateContinueWatchingCache();
@@ -232,6 +251,7 @@ export function useWatchProgress({
       // Sanity check: ignore large jumps (>30s means tab was hidden/system sleep or resumed)
       if (delta > 0 && delta < 30) {
         accumulateSecondsRef.current += delta;
+        actualWatchSecondsRef.current += delta;
       }
       lastTimeRef.current = now;
     };

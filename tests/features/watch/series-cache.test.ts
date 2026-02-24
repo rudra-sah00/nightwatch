@@ -358,4 +358,36 @@ describe('Series Cache', () => {
       expect(cached2.expiryMs).toBe(2 * 60 * 60 * 1000);
     });
   });
+
+  describe('SSR Environment', () => {
+    it('should return null/none in SSR environment (window undefined)', () => {
+      const originalWindow = global.window;
+      // @ts-expect-error
+      delete global.window;
+
+      expect(getCachedSeriesData('test')).toBeNull();
+      expect(() =>
+        cacheSeriesData('test', mockShowDetails, 1, mockEpisodes),
+      ).not.toThrow();
+      expect(() => clearSeriesCache()).not.toThrow();
+
+      global.window = originalWindow;
+    });
+  });
+
+  describe('Branch Coverage Edge Cases', () => {
+    it('should use default expiry when data.expiryMs is missing', () => {
+      const cacheData = {
+        seriesId: 'test-series-123',
+        showDetails: mockShowDetails,
+        loadedSeasons: { 1: mockEpisodes },
+        timestamp: Date.now() - 1000,
+        // expiryMs missing
+      };
+      sessionStorage.setItem('watch_series_cache', JSON.stringify(cacheData));
+
+      const result = getCachedSeriesData('test-series-123');
+      expect(result).not.toBeNull();
+    });
+  });
 });

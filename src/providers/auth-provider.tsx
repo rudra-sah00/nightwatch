@@ -3,8 +3,8 @@
 import type React from 'react';
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ((payload: ForceLogoutPayload) => void) | null
   >(null);
 
-  // Handle force logout from WebSocket — must redirect immediately
+  // Handle force logout from Socket.IO — must redirect immediately
   const handleForceLogout = useCallback(
     (payload: ForceLogoutPayload) => {
       clearStoredUser();
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (controller.signal.aborted) return;
         setUser(storedUser);
 
-        // Connect WebSocket with stored credentials
+        // Connect Socket.IO with stored credentials
         connect(
           storedUser.id,
           storedUser.sessionId,
@@ -103,16 +103,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forceLogoutHandlerRef.current = handleForceLogout;
         onForceLogout(handleForceLogout);
 
-        // Initialize proactive token refresh (15 minutes)
-        setTokenExpiration(15 * 60);
-
-        // Fetch latest profile to get missing fields like createdAt
+        // Initialize security and profile in parallel
         try {
           // Invalidate cache to ensure fresh data
           invalidateProfileCache();
-          const { user: profileData } = await getProfile({
-            signal: controller.signal,
-          });
+
+          const [{ user: profileData }] = await Promise.all([
+            getProfile({ signal: controller.signal }),
+            // Initialize proactive token refresh (15 minutes) - moved into parallel block
+            Promise.resolve(setTokenExpiration(15 * 60)),
+          ]);
+
           if (!controller.signal.aborted) {
             const updatedUser = { ...storedUser, ...profileData };
             setUser(updatedUser);
@@ -133,6 +134,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             clearCookiesAndRedirect('Session expired. Please login again.');
             return;
           }
+        }
+      } else {
+        // Prime CSRF cookie for anonymous users
+        try {
+          const { getPlatformStats } = await import('@/features/auth/api');
+          await getPlatformStats();
+        } catch {
+          // Silent fail - stats banner and future POSTs handle missing cookie
         }
       }
       if (!controller.signal.aborted) {
@@ -218,13 +227,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.removeItem('guest_token');
       sessionStorage.removeItem('guest_refresh_token');
       // Hard redirect ensures cookies are cleared and SSR check fires
-      window.location.href = '/login';
+      clearCookiesAndRedirect();
     }
   }, [disconnect]);
 
   const updateUser = useCallback((data: Partial<User>) => {
     setUser((prev) => {
       if (!prev) return null;
+
+      // Shallow equality check to prevent redundant re-renders
+      const hasChanges = Object.entries(data).some(
+        ([key, value]) => prev[key as keyof User] !== value,
+      );
+
+      if (!hasChanges) return prev;
+
       const updated = { ...prev, ...data };
       storeUser(updated);
       return updated;
@@ -264,7 +281,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

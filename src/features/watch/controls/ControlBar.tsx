@@ -138,7 +138,7 @@ export function ControlBar({
           state.isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100',
         )}
       >
-        {!hideBackButton && (
+        {!hideBackButton ? (
           <button
             type="button"
             onClick={onBack}
@@ -147,9 +147,9 @@ export function ControlBar({
           >
             <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
           </button>
-        )}
+        ) : null}
 
-        {onSidebarToggle && (
+        {onSidebarToggle ? (
           <button
             type="button"
             onClick={onSidebarToggle}
@@ -163,19 +163,17 @@ export function ControlBar({
             </span>
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50" />
           </button>
-        )}
+        ) : null}
 
         <div className="flex-1 min-w-0">
           <h1 className="text-white font-semibold text-lg md:text-2xl lg:text-3xl 2xl:text-4xl truncate drop-shadow-lg">
             {metadata.title}
           </h1>
-          {metadata.type === 'series' &&
-            metadata.season &&
-            metadata.episode && (
-              <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
-                Season {metadata.season} · Episode {metadata.episode}
-              </p>
-            )}
+          {metadata.type === 'series' && metadata.season && metadata.episode ? (
+            <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
+              Season {metadata.season} · Episode {metadata.episode}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -228,7 +226,7 @@ export function ControlBar({
             )}
 
             {/* Skip buttons - Desktop only */}
-            {!readOnly && (
+            {!readOnly ? (
               <div className="hidden md:flex items-center gap-1 lg:gap-2">
                 <button
                   type="button"
@@ -247,10 +245,10 @@ export function ControlBar({
                   <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
                 </button>
               </div>
-            )}
+            ) : null}
 
             {/* Volume - Desktop only (Hidden on Mobile) */}
-            {!isMobile && (
+            {!isMobile ? (
               <div className="hidden md:block">
                 <Volume
                   volume={state.volume}
@@ -259,7 +257,7 @@ export function ControlBar({
                   onMuteToggle={onMuteToggle}
                 />
               </div>
-            )}
+            ) : null}
 
             {/* Time Display */}
             <div className="text-white text-sm md:text-base lg:text-lg 2xl:text-xl font-medium ml-2 md:ml-3 lg:ml-4 2xl:ml-5 tabular-nums">
@@ -275,7 +273,7 @@ export function ControlBar({
 
           {/* Center Content - Emoji Reactions (Responsive) */}
           <div className="flex-1 flex justify-center px-4">
-            {onSidebarToggle && <EmojiReactions />}
+            {onSidebarToggle ? <EmojiReactions /> : null}
           </div>
 
           {/* Right Controls */}

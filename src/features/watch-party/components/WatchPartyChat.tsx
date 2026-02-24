@@ -1,7 +1,7 @@
 import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,
@@ -29,7 +29,7 @@ interface WatchPartyChatProps {
   onTypingStop?: () => void;
 }
 
-export function WatchPartyChat({
+export const WatchPartyChat = memo(function WatchPartyChat({
   messages,
   onSendMessage,
   currentUserId,
@@ -145,7 +145,7 @@ export function WatchPartyChat({
         className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
         style={{ contentVisibility: 'auto' }}
       >
-        {messages.length === 0 && (
+        {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-white/30 text-sm space-y-2">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
               <Smile className="w-6 h-6 opacity-50" />
@@ -153,7 +153,7 @@ export function WatchPartyChat({
             <p>No messages yet.</p>
             <p className="text-xs opacity-70">Be the first to say hello! 👋</p>
           </div>
-        )}
+        ) : null}
 
         {messages.map((msg, index) => {
           const isMe = msg.userId === currentUserId;
@@ -162,94 +162,18 @@ export function WatchPartyChat({
             messages[index - 1].userId !== msg.userId ||
             msg.timestamp - messages[index - 1].timestamp > 60000;
 
-          if (msg.isSystem) {
-            return (
-              <div key={msg.id} className="flex justify-center my-3">
-                <span className="text-[10px] bg-white/5 text-white/50 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-                  {msg.content}
-                </span>
-              </div>
-            );
-          }
-
           return (
-            <div
+            <ChatMessageItem
               key={msg.id}
-              className={cn(
-                'flex flex-col w-full animate-in fade-in slide-in-from-bottom-2 duration-300',
-                isMe ? 'items-end' : 'items-start',
-              )}
-            >
-              {/* Avatar/Name Header */}
-              {!isMe && showHeader && (
-                <div className="flex items-center gap-2 mb-1 pl-1">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <span className="text-[9px] font-bold text-white uppercase">
-                      {msg.userName.charAt(0)}
-                    </span>
-                  </div>
-                  <span className="text-xs text-white/70 font-medium">
-                    {msg.userName}
-                  </span>
-                  <span className="text-[10px] text-white/30">
-                    {new Date(msg.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-              )}
-
-              {/* Message Bubble */}
-              <div
-                className={cn(
-                  'px-3.5 py-2 rounded-2xl text-sm max-w-[85%] break-words shadow-sm relative group',
-                  isMe
-                    ? 'bg-purple-600 text-white rounded-br-sm shadow-purple-500/10'
-                    : 'bg-white/10 text-white/90 rounded-bl-sm backdrop-blur-sm border border-white/5',
-                )}
-              >
-                {/* Render message with clickable links */}
-                {parseLinks(msg.content).map((segment, idx) => {
-                  if (segment.type === 'link') {
-                    return (
-                      <a
-                        key={`${msg.id}-link-${idx}`}
-                        href={segment.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cn(
-                          'inline-flex items-center gap-1 underline hover:opacity-80 transition-opacity',
-                          isMe ? 'text-white' : 'text-blue-400',
-                        )}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {segment.content}
-                        <ExternalLink className="w-3 h-3 inline" />
-                      </a>
-                    );
-                  }
-                  return (
-                    <span key={`${msg.id}-text-${idx}`}>{segment.content}</span>
-                  );
-                })}
-
-                {/* Timestamp for Me (standardized, overlaid on hover or distinct) */}
-                {isMe && (
-                  <span className="text-[9px] text-white/50 block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 -mb-5 bg-black/50 px-1 rounded">
-                    {new Date(msg.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                )}
-              </div>
-            </div>
+              message={msg}
+              isMe={isMe}
+              showHeader={showHeader}
+            />
           );
         })}
 
         {/* Typing Indicator */}
-        {typingUsers.length > 0 && (
+        {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-1">
               <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -273,13 +197,13 @@ export function WatchPartyChat({
               <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" />
             </div>
           </div>
-        )}
+        ) : null}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Emoji Picker Popover */}
-      {showEmoji && (
+      {showEmoji ? (
         <div
           ref={emojiRef}
           className="absolute bottom-16 left-4 z-50 shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
@@ -294,7 +218,7 @@ export function WatchPartyChat({
             previewConfig={{ showPreview: false }}
           />
         </div>
-      )}
+      ) : null}
 
       {/* Input Area */}
       <form
@@ -340,4 +264,100 @@ export function WatchPartyChat({
       </form>
     </div>
   );
+});
+
+interface ChatMessageItemProps {
+  message: ChatMessage;
+  isMe: boolean;
+  showHeader: boolean;
 }
+
+const ChatMessageItem = memo(function ChatMessageItem({
+  message,
+  isMe,
+  showHeader,
+}: ChatMessageItemProps) {
+  if (message.isSystem) {
+    return (
+      <div className="flex justify-center my-3">
+        <span className="text-[10px] bg-white/5 text-white/50 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+          {message.content}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex flex-col w-full animate-in fade-in slide-in-from-bottom-2 duration-300',
+        isMe ? 'items-end' : 'items-start',
+      )}
+    >
+      {/* Avatar/Name Header */}
+      {!isMe && showHeader ? (
+        <div className="flex items-center gap-2 mb-1 pl-1">
+          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <span className="text-[9px] font-bold text-white uppercase">
+              {message.userName.charAt(0)}
+            </span>
+          </div>
+          <span className="text-xs text-white/70 font-medium">
+            {message.userName}
+          </span>
+          <span className="text-[10px] text-white/30">
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+        </div>
+      ) : null}
+
+      {/* Message Bubble */}
+      <div
+        className={cn(
+          'px-3.5 py-2 rounded-2xl text-sm max-w-[85%] break-words shadow-sm relative group',
+          isMe
+            ? 'bg-purple-600 text-white rounded-br-sm shadow-purple-500/10'
+            : 'bg-white/10 text-white/90 rounded-bl-sm backdrop-blur-sm border border-white/5',
+        )}
+      >
+        {/* Render message with clickable links */}
+        {parseLinks(message.content).map((segment, idx) => {
+          if (segment.type === 'link') {
+            return (
+              <a
+                key={`${message.id}-link-${idx}`}
+                href={segment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  'inline-flex items-center gap-1 underline hover:opacity-80 transition-opacity',
+                  isMe ? 'text-white' : 'text-blue-400',
+                )}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {segment.url}
+                <ExternalLink className="w-3 h-3 inline" />
+              </a>
+            );
+          }
+          return (
+            <span key={`${message.id}-text-${idx}`}>{segment.content}</span>
+          );
+        })}
+
+        {/* Timestamp for Me */}
+        {isMe ? (
+          <span className="text-[9px] text-white/50 block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 -mb-5 bg-black/50 px-1 rounded">
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+});

@@ -70,7 +70,7 @@ export function SeasonSelector({
       </button>
 
       {/* Dropdown */}
-      {isOpen && (
+      {isOpen ? (
         <div className="absolute top-full right-0 mt-2 w-48 bg-popover backdrop-blur-xl rounded-lg border border-border shadow-2xl overflow-hidden z-50">
           {seasons.map((season) => (
             <button
@@ -89,15 +89,15 @@ export function SeasonSelector({
               )}
             >
               Season {season.seasonNumber}
-              {season.episodeCount && (
+              {season.episodeCount ? (
                 <span className="text-muted-foreground ml-2">
                   ({season.episodeCount} episodes)
                 </span>
-              )}
+              ) : null}
             </button>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

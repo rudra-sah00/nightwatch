@@ -4,6 +4,7 @@ import { Film, Play, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
+import styles from '../styles/AIAssistant.module.css';
 
 interface AssistantMovieCardProps {
   id: string;
@@ -61,9 +62,9 @@ export function AssistantMovieCard({
     <div
       data-testid="assistant-movie-card"
       className={cn(
-        'w-full bg-zinc-950/40 backdrop-blur-md rounded-xl overflow-hidden border border-white/5 group relative transition-all duration-300 min-w-0 flex text-left',
+        styles.glassCard,
+        'w-full overflow-hidden flex text-left relative group',
         isLandscape ? 'flex-col' : 'flex-row',
-        'hover:border-primary/40 hover:bg-zinc-900/60 hover:shadow-xl hover:shadow-primary/5',
         className,
       )}
     >
@@ -89,7 +90,7 @@ export function AssistantMovieCard({
             alt={title}
             fill
             sizes={isLandscape ? '100vw' : '(max-width: 640px) 80px, 112px'}
-            className="object-cover transition-all duration-700 group-hover:scale-105"
+            className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:-translate-y-2"
             unoptimized={true}
           />
         ) : (
@@ -100,7 +101,7 @@ export function AssistantMovieCard({
         )}
 
         {/* Overlay for Landscape (Title at bottom) */}
-        {isLandscape && (
+        {isLandscape ? (
           <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-[8px] font-black text-primary uppercase tracking-widest">
@@ -114,48 +115,48 @@ export function AssistantMovieCard({
               {title}
             </p>
           </div>
-        )}
+        ) : null}
 
-        {imdbRating && !isLandscape && (
+        {imdbRating && !isLandscape ? (
           <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-zinc-900/90 text-zinc-300 text-[10px] font-black rounded-sm flex items-center gap-0.5 shadow-lg border border-zinc-700/50 backdrop-blur-sm">
             <Sparkles className="w-2.5 h-2.5 text-zinc-500" />
             {imdbRating}
           </div>
-        )}
+        ) : null}
 
-        {type === 'Trailer' && (
+        {type === 'Trailer' ? (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
             <div className="w-10 h-10 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
               <Play className="w-4 h-4 text-white fill-white" />
             </div>
           </div>
-        )}
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
       </div>
 
-      {!isLandscape && (
+      {!isLandscape ? (
         <>
           <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[9px] font-black text-primary uppercase tracking-widest">
                 {type}
               </span>
-              {type !== 'Photo' && type !== 'Trailer' && (
+              {type !== 'Photo' && type !== 'Trailer' ? (
                 <>
                   <div className="w-1 h-1 rounded-full bg-white/10" />
                   <span className="text-[9px] text-white/40 font-medium">
                     Available
                   </span>
                 </>
-              )}
-              {(season || episode) && (
+              ) : null}
+              {season || episode ? (
                 <>
                   <div className="w-1 h-1 rounded-full bg-white/10" />
                   <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[8px] px-1 py-0 h-3.5">
                     {episode ? `S${season} E${episode}` : `Season ${season}`}
                   </Badge>
                 </>
-              )}
+              ) : null}
             </div>
 
             <p
@@ -165,18 +166,18 @@ export function AssistantMovieCard({
               {title}
             </p>
 
-            {subtitle && (
+            {subtitle ? (
               <p className="text-zinc-500 text-[10px] font-medium truncate mb-1">
                 {subtitle}
               </p>
-            )}
+            ) : null}
 
-            {awards && (
+            {awards ? (
               <p className="text-[10px] text-zinc-400 italic mb-2 flex items-center gap-1.5 bg-white/5 py-1 px-2 rounded-md border border-white/5 line-clamp-1">
                 <Sparkles className="w-3 h-3 text-zinc-500 shrink-0" />
                 {awards}
               </p>
-            )}
+            ) : null}
 
             {/* Watch Now Button - z-10 to be clickable above the main overlay */}
             <button
@@ -195,7 +196,7 @@ export function AssistantMovieCard({
             </div>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -2,9 +2,11 @@ export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  statusText?: string;
   timestamp: Date;
   recommendations?: {
     id: string;
+    imdbId?: string;
     type: string;
     title: string;
     subtitle?: string;

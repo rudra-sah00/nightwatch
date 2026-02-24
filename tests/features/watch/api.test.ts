@@ -24,7 +24,7 @@ import { getSocket } from '@/lib/socket';
 // Mock apiFetch
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
-// Mock websocket
+// Mock Socket.IO
 vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));
 
 // Mock global fetch for sprite VTT tests
@@ -367,7 +367,7 @@ describe('Watch API', () => {
   });
 
   describe('fetchContentProgress', () => {
-    it('should use WebSocket if available', () => {
+    it('should use Socket.IO if available', () => {
       return new Promise<void>((done) => {
         const mockWs = {
           connected: true,
@@ -400,7 +400,7 @@ describe('Watch API', () => {
       });
     });
 
-    it('should fallback to HTTP if WebSocket unavailable', () => {
+    it('should fallback to HTTP if Socket.IO unavailable', () => {
       return new Promise<void>((done) => {
         vi.mocked(getSocket).mockReturnValue(null);
 
@@ -498,7 +498,7 @@ describe('Watch API', () => {
       });
     });
 
-    it('should fallback to HTTP if WebSocket unavailable', () => {
+    it('should fallback to HTTP if Socket.IO unavailable', () => {
       return new Promise<void>((done) => {
         vi.mocked(getSocket).mockReturnValue(null);
 
@@ -517,12 +517,12 @@ describe('Watch API', () => {
       });
     });
 
-    it('should handle WebSocket errors', () => {
+    it('should handle Socket.IO errors', () => {
       return new Promise<void>((done) => {
         const mockWs = {
           connected: true,
           emit: vi.fn((_event, _data, callback) => {
-            callback({ success: false, error: 'WebSocket error' });
+            callback({ success: false, error: 'Socket.IO error' });
           }),
         };
 
@@ -532,7 +532,7 @@ describe('Watch API', () => {
 
         fetchContinueWatching(10, (result, error) => {
           expect(result).toBeNull();
-          expect(error).toBe('WebSocket error');
+          expect(error).toBe('Socket.IO error');
           done();
         });
       });
@@ -540,7 +540,7 @@ describe('Watch API', () => {
   });
 
   describe('deleteWatchProgress', () => {
-    it('should delete watch progress via WebSocket', () => {
+    it('should delete watch progress via Socket.IO', () => {
       return new Promise<void>((done) => {
         const mockWs = {
           connected: true,
@@ -565,7 +565,7 @@ describe('Watch API', () => {
       });
     });
 
-    it('should return false if WebSocket unavailable', () => {
+    it('should return false if Socket.IO unavailable', () => {
       return new Promise<void>((done) => {
         vi.mocked(getSocket).mockReturnValue(null);
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/fetch';
+import { cn } from '@/lib/utils';
+import styles from '../styles/AIAssistant.module.css';
 import { AssistantMovieCard } from './AssistantMovieCard';
 
 interface LazyMediaGalleryProps {
@@ -97,9 +99,11 @@ export function LazyMediaGallery({
   const { photos, trailers } = data;
 
   return (
-    <div className="space-y-5 pt-2">
+    <div
+      className={cn('space-y-5 pt-2 px-3 py-4 rounded-xl', styles.glassCard)}
+    >
       {/* Trailers Section */}
-      {trailers && trailers.length > 0 && (
+      {trailers && trailers.length > 0 ? (
         <div>
           <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2 px-1">
             Trailers & Clips
@@ -133,10 +137,10 @@ export function LazyMediaGallery({
             })}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Photos Section */}
-      {photos && photos.length > 0 && (
+      {photos && photos.length > 0 ? (
         <div>
           <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2 px-1">
             Photos
@@ -164,7 +168,7 @@ export function LazyMediaGallery({
             })}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

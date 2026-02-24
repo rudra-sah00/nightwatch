@@ -16,7 +16,7 @@ export async function getStreamUrl(id: string, options?: RequestInit) {
 
 /**
  * User's "Continue Watching" list management, including optimistic caching
- * and WebSocket data retrieval.
+ * and Socket.IO data retrieval.
  */
 
 // Cache for continue watching items (30 seconds stale time)
@@ -74,7 +74,7 @@ export async function getContinueWatching(
   return result.items;
 }
 
-// Fetch continue watching via WebSocket
+// Fetch continue watching via Socket.IO
 interface SocketResponse {
   success: boolean;
   items?: WatchProgress[];
@@ -108,7 +108,7 @@ export function fetchContinueWatching(
   );
 }
 
-// Delete progress via WebSocket
+// Delete progress via Socket.IO
 export function deleteWatchProgress(
   progressId: string,
   callback: (success: boolean) => void,
@@ -207,7 +207,7 @@ export async function getContentProgress(
   }
 }
 
-// Fetch progress via WebSocket
+// Fetch progress via Socket.IO
 interface ProgressSocketResponse {
   success: boolean;
   progress?: {
@@ -309,6 +309,8 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
   let currentStart = 0;
   let currentEnd = 0;
 
+  const preloadedUrls = new Set<string>();
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line.includes('-->')) {
@@ -339,19 +341,17 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
           w: coords[2],
           h: coords[3],
         });
+
+        // Preload unique images for instant hover - combined iteration (Rule 7.6)
+        if (!preloadedUrls.has(absoluteUrl)) {
+          preloadedUrls.add(absoluteUrl);
+          const img = new Image();
+          img.src = absoluteUrl;
+        }
       }
     }
   }
 
-  // Cache the result
   spriteVttCache.set(vttUrl, sprites);
-
-  // Preload unique images for instant hover
-  const uniqueUrls = new Set(sprites.map((s) => s.url));
-  uniqueUrls.forEach((url) => {
-    const img = new Image();
-    img.src = url;
-  });
-
   return sprites;
 }

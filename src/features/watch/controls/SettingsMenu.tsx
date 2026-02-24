@@ -152,7 +152,7 @@ export function SettingsMenu({
       </button>
 
       {/* Subtitles */}
-      {subtitleTracks.length > 0 && (
+      {subtitleTracks.length > 0 ? (
         <button
           type="button"
           onClick={() => setCurrentScreen('subtitles')}
@@ -167,10 +167,10 @@ export function SettingsMenu({
             <ChevronRight className="w-4 h-4" />
           </div>
         </button>
-      )}
+      ) : null}
 
       {/* Audio */}
-      {audioTracks.length > 1 && (
+      {audioTracks.length > 1 ? (
         <button
           type="button"
           onClick={() => setCurrentScreen('audio')}
@@ -185,7 +185,7 @@ export function SettingsMenu({
             <ChevronRight className="w-4 h-4" />
           </div>
         </button>
-      )}
+      ) : null}
     </div>
   );
 
@@ -213,7 +213,9 @@ export function SettingsMenu({
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
       >
         <span className="text-white text-sm">Auto</span>
-        {currentQuality === 'auto' && <Check className="w-4 h-4 text-white" />}
+        {currentQuality === 'auto' ? (
+          <Check className="w-4 h-4 text-white" />
+        ) : null}
       </button>
 
       {qualities.map((quality) => (
@@ -227,9 +229,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{quality.label}</span>
-          {currentQuality === quality.label && (
+          {currentQuality === quality.label ? (
             <Check className="w-4 h-4 text-white" />
-          )}
+          ) : null}
         </button>
       ))}
     </div>
@@ -262,7 +264,9 @@ export function SettingsMenu({
           <span className="text-white text-sm">
             {speed === 1 ? 'Normal' : `${speed}x`}
           </span>
-          {playbackRate === speed && <Check className="w-4 h-4 text-white" />}
+          {playbackRate === speed ? (
+            <Check className="w-4 h-4 text-white" />
+          ) : null}
         </button>
       ))}
     </div>
@@ -291,7 +295,7 @@ export function SettingsMenu({
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
       >
         <span className="text-white text-sm">Off</span>
-        {!currentSubtitle && <Check className="w-4 h-4 text-white" />}
+        {!currentSubtitle ? <Check className="w-4 h-4 text-white" /> : null}
       </button>
 
       {subtitleTracks.map((track) => (
@@ -305,9 +309,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{track.label}</span>
-          {currentSubtitle === track.id && (
+          {currentSubtitle === track.id ? (
             <Check className="w-4 h-4 text-white" />
-          )}
+          ) : null}
         </button>
       ))}
     </div>
@@ -338,9 +342,9 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 transition-colors"
         >
           <span className="text-white text-sm">{track.label}</span>
-          {currentAudio === track.id && (
+          {currentAudio === track.id ? (
             <Check className="w-4 h-4 text-white" />
-          )}
+          ) : null}
         </button>
       ))}
     </div>
@@ -372,7 +376,7 @@ export function SettingsMenu({
       </button>
 
       {/* Menu dropdown */}
-      {isOpen && (
+      {isOpen ? (
         <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto styled-scrollbar bg-zinc-900/98 backdrop-blur-2xl rounded-xl shadow-2xl shadow-black/40 border border-white/15 animate-in fade-in slide-in-from-bottom-2 duration-200">
           {currentScreen === 'main' && renderMainMenu()}
           {currentScreen === 'quality' && renderQualityMenu()}
@@ -380,7 +384,7 @@ export function SettingsMenu({
           {currentScreen === 'subtitles' && renderSubtitlesMenu()}
           {currentScreen === 'audio' && renderAudioMenu()}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

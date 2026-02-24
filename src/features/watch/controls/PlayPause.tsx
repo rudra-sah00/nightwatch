@@ -126,7 +126,7 @@ export function CenterPlayButton({
       </div>
 
       {/* Movie Info - CENTERED in the middle with mobile-optimized layout */}
-      {metadata && (
+      {metadata ? (
         <div
           className={cn(
             'absolute inset-0 flex flex-col items-center justify-center pointer-events-none',
@@ -156,26 +156,26 @@ export function CenterPlayButton({
 
             {/* Episode info for series */}
             {metadata.type === 'series' &&
-              metadata.season &&
-              metadata.episode && (
-                <p className="text-white/80 text-sm sm:text-lg md:text-xl mb-1.5 sm:mb-3 flex-shrink-0">
-                  S{metadata.season} · E{metadata.episode}
-                </p>
-              )}
+            metadata.season &&
+            metadata.episode ? (
+              <p className="text-white/80 text-sm sm:text-lg md:text-xl mb-1.5 sm:mb-3 flex-shrink-0">
+                S{metadata.season} · E{metadata.episode}
+              </p>
+            ) : null}
 
             {/* Year - hidden on very small mobile portrait */}
-            {metadata.year && (
+            {metadata.year ? (
               <p className="text-white/50 text-xs sm:text-sm mb-2 sm:mb-4 hidden portrait:sm:block landscape:block flex-shrink-0">
                 {metadata.year}
               </p>
-            )}
+            ) : null}
 
             {/* Description - hidden on mobile portrait, shown on landscape/larger */}
-            {metadata.description && (
+            {metadata.description ? (
               <p className="text-white/60 text-xs sm:text-sm md:text-base text-center max-w-2xl line-clamp-2 sm:line-clamp-3 leading-relaxed mb-3 sm:mb-6 px-2 hidden landscape:block sm:block flex-shrink-0">
                 {metadata.description}
               </p>
-            )}
+            ) : null}
 
             {/* Paused indicator - enhanced for guests */}
             <div className="flex items-center gap-2 mt-2 sm:mt-4 flex-shrink-0">
@@ -215,10 +215,10 @@ export function CenterPlayButton({
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Fallback for no metadata - enhanced for guests */}
-      {!metadata && (
+      {!metadata ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none">
           {disabled ? (
             /* Guest locked view */
@@ -242,7 +242,7 @@ export function CenterPlayButton({
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </button>
   );
 }

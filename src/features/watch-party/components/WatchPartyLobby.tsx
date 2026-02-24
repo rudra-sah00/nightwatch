@@ -123,11 +123,11 @@ export function WatchPartyLobby({
             <h2 className="font-semibold text-foreground">
               {roomPreview.title}
             </h2>
-            {roomPreview.season && (
+            {roomPreview.season ? (
               <p className="text-sm text-muted-foreground">
                 Season {roomPreview.season} Episode {roomPreview.episode}
               </p>
-            )}
+            ) : null}
             <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
               <Crown className="w-4 h-4 text-yellow-500" />
               <span>Hosted by {roomPreview.hostName}</span>
@@ -138,7 +138,7 @@ export function WatchPartyLobby({
             </div>
           </div>
 
-          {!user && (
+          {!user ? (
             <>
               <div className="mb-4">
                 <label
@@ -158,7 +158,7 @@ export function WatchPartyLobby({
               </div>
 
               {/* Captcha for guest users - only show after name is entered */}
-              {guestName.trim() && onCaptchaVerify && (
+              {guestName.trim() && onCaptchaVerify ? (
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-2 text-center">
                     Complete the security check to continue
@@ -169,15 +169,15 @@ export function WatchPartyLobby({
                       // Reset captcha on error
                     }}
                   />
-                  {captchaToken && (
+                  {captchaToken ? (
                     <p className="text-xs text-green-500 text-center mt-1">
                       ✓ Verified
                     </p>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
             </>
-          )}
+          ) : null}
 
           <button
             type="button"
@@ -199,16 +199,16 @@ export function WatchPartyLobby({
             )}
           </button>
 
-          {error && (
+          {error ? (
             <div className="mt-3 text-center">
               <p className="text-red-500 text-sm">{error}</p>
-              {errorCode && (
+              {errorCode ? (
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-50">
                   Code: {errorCode}
                 </p>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
 
           <button
             type="button"

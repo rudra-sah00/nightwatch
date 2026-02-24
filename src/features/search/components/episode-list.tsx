@@ -1,7 +1,7 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import type { Episode } from '../types';
+import { EpisodeSkeleton } from './EpisodeSkeleton';
 import { EpisodeCard } from './episode-card';
 
 interface EpisodeListProps {
@@ -19,9 +19,15 @@ export function EpisodeList({
 }: EpisodeListProps) {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
+      <output
+        className="space-y-2 block"
+        aria-busy="true"
+        aria-label="Loading episodes"
+      >
+        {['ep-sk-1', 'ep-sk-2', 'ep-sk-3'].map((id) => (
+          <EpisodeSkeleton key={id} />
+        ))}
+      </output>
     );
   }
 
@@ -34,7 +40,11 @@ export function EpisodeList({
   }
 
   return (
-    <div className="space-y-2" style={{ contentVisibility: 'auto' }}>
+    <ul
+      className="space-y-2"
+      style={{ contentVisibility: 'auto' }}
+      aria-label="Episodes"
+    >
       {episodes.map((episode) => (
         <EpisodeCard
           key={episode.episodeId || episode.episodeNumber}
@@ -47,6 +57,6 @@ export function EpisodeList({
           isAnyLoading={!!playingEpisodeId}
         />
       ))}
-    </div>
+    </ul>
   );
 }

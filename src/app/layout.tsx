@@ -8,7 +8,7 @@ import { SocketProvider } from '@/providers/socket-provider';
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-geist-sans',
+  variable: '--font-inter',
   display: 'swap',
 });
 

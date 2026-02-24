@@ -1,10 +1,11 @@
 'use client';
 
-import { ChevronRight, Film, Loader2 } from 'lucide-react';
+import { ChevronRight, Film } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import type { SearchResult } from '../types';
+import { SearchSkeleton } from './SearchSkeletons';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -12,17 +13,24 @@ interface SearchResultsProps {
   onSelect: (result: SearchResult) => void;
 }
 
-export function SearchResults({
+export const SearchResults = React.memo(function SearchResults({
   results,
   isLoading,
   onSelect,
 }: SearchResultsProps) {
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
-        <p className="mt-4 text-muted-foreground text-sm">Searching...</p>
-      </div>
+      <output
+        className="space-y-2 block"
+        aria-busy="true"
+        aria-label="Searching..."
+      >
+        {['res-sk-1', 'res-sk-2', 'res-sk-3', 'res-sk-4', 'res-sk-5'].map(
+          (id) => (
+            <SearchSkeleton key={id} />
+          ),
+        )}
+      </output>
     );
   }
 
@@ -43,7 +51,7 @@ export function SearchResults({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" style={{ contentVisibility: 'auto' }}>
       {results.map((result, index) => (
         <SearchResultItem
           key={result.id}
@@ -54,7 +62,7 @@ export function SearchResults({
       ))}
     </div>
   );
-}
+});
 
 interface SearchResultItemProps {
   result: SearchResult;
@@ -62,7 +70,11 @@ interface SearchResultItemProps {
   index: number;
 }
 
-function SearchResultItem({ result, onSelect, index }: SearchResultItemProps) {
+const SearchResultItem = React.memo(function SearchResultItem({
+  result,
+  onSelect,
+  index,
+}: SearchResultItemProps) {
   const [imageError, setImageError] = React.useState(false);
 
   return (
@@ -97,13 +109,13 @@ function SearchResultItem({ result, onSelect, index }: SearchResultItemProps) {
         <h3 className="text-foreground font-medium text-base group-hover:text-primary transition-colors line-clamp-2">
           {result.title}
         </h3>
-        {result.year && (
+        {result.year ? (
           <p className="text-muted-foreground text-sm mt-0.5">{result.year}</p>
-        )}
+        ) : null}
       </div>
 
       {/* Arrow */}
       <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all flex-shrink-0" />
     </button>
   );
-}
+});

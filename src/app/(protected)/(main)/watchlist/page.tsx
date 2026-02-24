@@ -3,7 +3,7 @@
 import { Film, Loader2, Tv } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
@@ -48,6 +48,8 @@ export default function WatchlistPage() {
     );
   }
 
+  const isEmpty = watchlist.length === 0;
+
   return (
     <>
       <Navbar />
@@ -59,76 +61,25 @@ export default function WatchlistPage() {
           </span>
         </div>
 
-        {watchlist.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
-              <div className="p-4 rounded-full bg-white/10">
-                <Film className="w-8 h-8 opacity-50" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-semibold">Your list is empty</h3>
-                <p className="text-muted-foreground">
-                  Movies and series you add to your watchlist will appear here.
-                  Ask Rudra AI to add something!
-                </p>
-              </div>
-              <Button asChild variant="secondary" className="mt-4">
-                <Link href="/">Browse Content</Link>
-              </Button>
-            </div>
-          </div>
+        {isEmpty ? (
+          <EmptyWatchlist />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
+            style={{ contentVisibility: 'auto' }}
+          >
             {watchlist.map((item) => (
-              <button
-                type="button"
+              <WatchlistItemCard
                 key={item.id}
-                className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 border border-white/10 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 cursor-pointer text-left"
+                item={item}
                 onClick={() => handleItemClick(item.contentId)}
-              >
-                {/* Poster Image or Fallback */}
-                {item.posterUrl ? (
-                  <Image
-                    src={getOptimizedImageUrl(item.posterUrl)}
-                    alt={item.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    unoptimized={item.posterUrl.includes('/api/stream/')}
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-zinc-800">
-                    {item.contentType === 'Series' ? (
-                      <Tv className="w-12 h-12 text-white/10" />
-                    ) : (
-                      <Film className="w-12 h-12 text-white/10" />
-                    )}
-                  </div>
-                )}
-
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                  <h3 className="font-semibold text-white line-clamp-1">
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs text-secondary-foreground bg-secondary/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                      {item.contentType}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 transform translate-y-2 group-hover:translate-y-0">
-                    <p className="text-xs text-white/70 italic">
-                      Click for details
-                    </p>
-                  </div>
-                </div>
-              </button>
+              />
             ))}
           </div>
         )}
       </div>
 
-      {selectedId && (
+      {selectedId ? (
         <ContentDetailModal
           contentId={selectedId}
           onClose={() => {
@@ -136,7 +87,77 @@ export default function WatchlistPage() {
             setSelectedId(null);
           }}
         />
-      )}
+      ) : null}
     </>
   );
 }
+
+// --- Helper Components ---
+
+const EmptyWatchlist = React.memo(function EmptyWatchlist() {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
+        <div className="p-4 rounded-full bg-white/10">
+          <Film className="w-8 h-8 opacity-50" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold">Your list is empty</h3>
+          <p className="text-muted-foreground">
+            Movies and series you add to your watchlist will appear here. Ask
+            Rudra AI to add something!
+          </p>
+        </div>
+        <Button asChild variant="secondary" className="mt-4">
+          <Link href="/">Browse Content</Link>
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+const WatchlistItemCard = React.memo(function WatchlistItemCard({
+  item,
+  onClick,
+}: {
+  item: WatchlistItem;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 border border-white/10 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 cursor-pointer text-left"
+      onClick={onClick}
+    >
+      {item.posterUrl ? (
+        <Image
+          src={getOptimizedImageUrl(item.posterUrl)}
+          alt={item.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          unoptimized={item.posterUrl.includes('/api/stream/')}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-800">
+          {item.contentType === 'Series' ? (
+            <Tv className="w-12 h-12 text-white/10" />
+          ) : (
+            <Film className="w-12 h-12 text-white/10" />
+          )}
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+        <h3 className="font-semibold text-white line-clamp-1">{item.title}</h3>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-xs text-secondary-foreground bg-secondary/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+            {item.contentType}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 transform translate-y-2 group-hover:translate-y-0">
+          <p className="text-xs text-white/70 italic">Click for details</p>
+        </div>
+      </div>
+    </button>
+  );
+});

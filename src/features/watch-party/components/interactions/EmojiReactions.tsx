@@ -53,6 +53,7 @@ export function EmojiReactions() {
             index > 2 && 'hidden md:block', // Show only 3 emojis on small screens
             index > 4 && 'hidden lg:block',
           )}
+          aria-label={`Send ${emoji} reaction`}
         >
           {emoji}
         </button>
@@ -70,12 +71,15 @@ export function EmojiReactions() {
             : 'text-white/40 hover:text-white hover:bg-white/10',
         )}
         title="Full Emoji Library"
+        aria-label="Open emoji picker"
+        aria-expanded={showPicker}
+        aria-haspopup="dialog"
       >
         <Plus className="w-3.5 h-3.5 md:w-4 h-4 lg:w-5 h-5" />
       </button>
 
       {/* Popover */}
-      {showPicker && (
+      {showPicker ? (
         <div
           ref={pickerRef}
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
@@ -89,7 +93,7 @@ export function EmojiReactions() {
             previewConfig={{ showPreview: false }}
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

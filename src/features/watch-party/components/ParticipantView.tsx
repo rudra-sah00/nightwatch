@@ -53,12 +53,12 @@ export function ParticipantView({
       />
 
       {/* Avatar Fallback (shown when video is muted/unavailable) */}
-      {isVideoMuted && (
+      {isVideoMuted ? (
         <AvatarFallback
           avatarUrl={avatarUrl}
           name={participant.name || 'User'}
         />
-      )}
+      ) : null}
 
       {/* Bottom Overlay: Name and Controls */}
       <ParticipantOverlay
@@ -69,7 +69,7 @@ export function ParticipantView({
       />
 
       {/* Speaking Indicator */}
-      {participant.isSpeaking && <SpeakingIndicator />}
+      {participant.isSpeaking ? <SpeakingIndicator /> : null}
     </div>
   );
 }
@@ -100,7 +100,7 @@ function AvatarFallback({
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Background blur effect */}
-      {avatarUrl && (
+      {avatarUrl ? (
         <div className="absolute inset-0">
           <Image
             src={avatarUrl}
@@ -110,7 +110,7 @@ function AvatarFallback({
             unoptimized
           />
         </div>
-      )}
+      ) : null}
 
       {/* Centered Avatar */}
       <div className="relative z-10 flex items-center justify-center">
@@ -163,7 +163,7 @@ function ParticipantOverlay({
             <MicOff className="w-3 h-3 text-red-400" />
           )}
         </div>
-        {canKick && onKick && (
+        {canKick && onKick ? (
           <button
             type="button"
             onClick={onKick}
@@ -172,7 +172,7 @@ function ParticipantOverlay({
           >
             Kick
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

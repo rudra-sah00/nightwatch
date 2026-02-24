@@ -154,9 +154,14 @@ export function Soundboard() {
       <div className="space-y-3 flex-none mb-4">
         <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-4 h-4" /> Soundboard
+            <Volume2 className="w-4 h-4" aria-hidden="true" /> Soundboard
           </div>
-          {isSearching && <Loader2 className="w-3 h-3 animate-spin" />}
+          {isSearching ? (
+            <output className="flex items-center gap-2" aria-live="polite">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span className="sr-only">Searching sounds...</span>
+            </output>
+          ) : null}
         </h4>
 
         <div className="relative">
@@ -179,29 +184,34 @@ export function Soundboard() {
               size="sm"
               onClick={() => handleTriggerSound(sound.sound, sound.name)}
               className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-white/5 hover:bg-white/10 border-white/5 hover:border-white/20 transition-all active:scale-[0.98] group relative overflow-hidden"
+              aria-label={`Play ${sound.name} sound`}
             >
               <div
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: `#${sound.color}` }}
+                aria-hidden="true"
               />
               <span className="font-medium text-xs truncate flex-1 text-left">
                 {sound.name}
               </span>
-              <Play className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2" />
+              <Play
+                className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2"
+                aria-hidden="true"
+              />
             </Button>
           ))}
 
-          {loading && (
+          {loading ? (
             <div className="col-span-2 py-4 flex justify-center">
               <Loader2 className="w-5 h-5 animate-spin text-primary" />
             </div>
-          )}
+          ) : null}
 
           <div
             ref={loadMoreRef}
             className="col-span-2 h-10 w-full flex items-center justify-center"
           >
-            {!loading && hasMore && (
+            {!loading && hasMore ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -210,19 +220,19 @@ export function Soundboard() {
               >
                 Load more
               </Button>
-            )}
-            {!loading && !hasMore && sounds.length > 0 && (
+            ) : null}
+            {!loading && !hasMore && sounds.length > 0 ? (
               <span className="text-[10px] text-white/20 uppercase tracking-widest">
                 End of results
               </span>
-            )}
+            ) : null}
           </div>
 
-          {!loading && sounds.length === 0 && (
+          {!loading && sounds.length === 0 ? (
             <div className="col-span-2 py-10 text-center text-sm text-muted-foreground">
               No sounds found
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

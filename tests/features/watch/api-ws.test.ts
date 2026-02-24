@@ -27,7 +27,7 @@ function createMockProgress(
   };
 }
 
-describe('Watch API WebSocket Functions', () => {
+describe('Watch API Socket.IO Functions', () => {
   let mockSocket: {
     emit: ReturnType<typeof vi.fn>;
     on: ReturnType<typeof vi.fn>;
@@ -137,7 +137,7 @@ describe('Watch API WebSocket Functions', () => {
   });
 
   describe('fetchContinueWatching', () => {
-    it('should emit watch:get_continue_watching via WebSocket', () => {
+    it('should emit watch:get_continue_watching via Socket.IO', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
@@ -199,7 +199,7 @@ describe('Watch API WebSocket Functions', () => {
   });
 
   describe('deleteWatchProgress', () => {
-    it('should emit watch:delete_progress via WebSocket', () => {
+    it('should emit watch:delete_progress via Socket.IO', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
@@ -265,7 +265,7 @@ describe('Watch API WebSocket Functions', () => {
   });
 
   describe('fetchContentProgress', () => {
-    it('should emit watch:get_progress via WebSocket', () => {
+    it('should emit watch:get_progress via Socket.IO', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();

@@ -45,7 +45,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         <span>Requirements</span>
       </button>
 
-      {isOpen && (
+      {isOpen ? (
         <>
           {/* Full screen backdrop */}
           <button
@@ -106,7 +106,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
             </div>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

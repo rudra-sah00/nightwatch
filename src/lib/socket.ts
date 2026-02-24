@@ -6,7 +6,7 @@ import { env } from './env';
 let socket: Socket | null = null;
 
 /**
- * Initialize WebSocket connection with user credentials or as guest
+ * Initialize Socket.IO connection with user credentials or as guest
  */
 export function initSocket(
   userId?: string,
@@ -47,7 +47,7 @@ export function initSocket(
 }
 
 /**
- * Disconnect WebSocket
+ * Disconnect Socket.IO
  */
 export function disconnectSocket(): void {
   if (socket) {

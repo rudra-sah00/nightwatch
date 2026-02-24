@@ -103,16 +103,16 @@ export function MediaModal({ url, type, isOpen, onClose }: MediaModalProps) {
 
         {type === 'image' ? (
           <div className="relative flex items-center justify-center w-full h-full">
-            {embedUrl && (
+            {embedUrl ? (
               <img
                 src={embedUrl}
                 alt="Full Preview"
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
               />
-            )}
+            ) : null}
           </div>
-        ) : // Video Player logic
-        embedUrl && (embedUrl.includes('.mp4') || embedUrl.includes('mp4')) ? (
+        ) : embedUrl &&
+          (embedUrl.includes('.mp4') || embedUrl.includes('mp4')) ? (
           <CustomVideoPlayer
             src={embedUrl}
             autoPlay
@@ -134,7 +134,7 @@ export function MediaModal({ url, type, isOpen, onClose }: MediaModalProps) {
               This video cannot be played directly here.
             </p>
             <a
-              href={url}
+              href={url || '#'}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-gray-200 transition-colors"

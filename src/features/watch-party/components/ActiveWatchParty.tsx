@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -11,14 +12,33 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useMobileDetection } from '@/features/watch/page/useMobileDetection';
-import { WatchPage } from '@/features/watch/page/WatchPage';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
 import type { AgoraParticipant } from '../hooks/useAgora';
 import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../types';
-import { FloatingEmojis } from './interactions/FloatingEmojis';
-import { WatchPartySidebar } from './WatchPartySidebar';
+
+const FloatingEmojis = dynamic(
+  () =>
+    import('./interactions/FloatingEmojis').then((mod) => mod.FloatingEmojis),
+  { ssr: false },
+);
+const WatchPartySidebar = dynamic(
+  () => import('./WatchPartySidebar').then((mod) => mod.WatchPartySidebar),
+  { ssr: false },
+);
+
+const WatchPage = dynamic(
+  () => import('@/features/watch/page/WatchPage').then((mod) => mod.WatchPage),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+      </div>
+    ),
+  },
+);
 
 interface TypingUser {
   userId: string;
@@ -225,15 +245,25 @@ export function ActiveWatchParty({
     };
   }, []);
 
-  const metadata: VideoMetadata = {
-    title: room.title,
-    type: room.type,
-    season: room.season,
-    episode: room.episode,
-    movieId: room.contentId,
-    seriesId: room.type === 'series' ? room.contentId : undefined,
-    posterUrl: room.posterUrl || '', // Ensure posterUrl is passed
-  };
+  const metadata: VideoMetadata = useMemo(
+    () => ({
+      title: room.title,
+      type: room.type,
+      season: room.season,
+      episode: room.episode,
+      movieId: room.contentId,
+      seriesId: room.type === 'series' ? room.contentId : undefined,
+      posterUrl: room.posterUrl || '', // Ensure posterUrl is passed
+    }),
+    [
+      room.title,
+      room.type,
+      room.season,
+      room.episode,
+      room.contentId,
+      room.posterUrl,
+    ],
+  );
 
   const handleNavigate = (url: string) => {
     if (!isHost) return;
@@ -428,28 +458,30 @@ export function ActiveWatchParty({
       </div>
 
       {/* Leave Confirmation Dialog — must be inside fullscreen container */}
-      <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {isHost
-                ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
-                : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => onShowLeaveDialog(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmLeave}>
-              {isHost ? 'End Party' : 'Leave'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showLeaveDialog ? (
+        <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {isHost
+                  ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
+                  : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => onShowLeaveDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={onConfirmLeave}>
+                {isHost ? 'End Party' : 'Leave'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : null}
     </div>
   );
 }

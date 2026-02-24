@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { AgoraParticipant } from '../hooks/useAgora';
 // Hooks
@@ -49,7 +49,7 @@ interface WatchPartySidebarProps {
  * Handles tab navigation between chat and participants, as well as Agora media integration.
  */
 
-export function WatchPartySidebar({
+export const WatchPartySidebar = memo(function WatchPartySidebar({
   room,
   messages,
   currentUserId,
@@ -156,13 +156,13 @@ export function WatchPartySidebar({
           )}
         >
           {/* Pending Requests (Host Only) */}
-          {isHost && room.pendingMembers && room.pendingMembers.length > 0 && (
+          {isHost && room.pendingMembers && room.pendingMembers.length > 0 ? (
             <PendingRequests
               pendingMembers={room.pendingMembers}
               onApprove={onApprove}
               onReject={onReject}
             />
-          )}
+          ) : null}
 
           {/* Video Grid with profile photos */}
           <VideoGrid
@@ -226,4 +226,4 @@ export function WatchPartySidebar({
       />
     </div>
   );
-}
+});

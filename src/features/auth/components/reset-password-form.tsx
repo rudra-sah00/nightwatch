@@ -121,7 +121,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+      {error ? (
         <div
           className={cn(
             'flex items-center gap-2 rounded-lg p-3 text-sm border bg-destructive/15 text-destructive border-destructive/20',
@@ -130,7 +130,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <AlertCircle className="h-4 w-4 shrink-0" />
           <p className="font-medium">{error}</p>
         </div>
-      )}
+      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="password">New Password</Label>

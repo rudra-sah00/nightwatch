@@ -302,7 +302,7 @@ export function ActivityGraph({
                         )}
                       >
                         {/* Tooltip */}
-                        {day.isValid && (
+                        {day.isValid ? (
                           <div
                             className={cn(
                               'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-zinc-900 text-white text-[11px] px-2 py-1 rounded shadow-lg pointer-events-none',
@@ -328,7 +328,7 @@ export function ActivityGraph({
                               )}
                             />
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     );
                   })}

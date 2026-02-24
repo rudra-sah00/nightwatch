@@ -49,7 +49,7 @@ export interface RoomPreview {
   memberCount: number;
 }
 
-// WebSocket Events
+// Socket.IO Events
 export interface PartyCreatePayload {
   contentId: string;
   title: string;

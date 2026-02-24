@@ -3,8 +3,8 @@
 import type React from 'react';
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -147,7 +147,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
  * Re-renders when the socket connects/disconnects/changes.
  */
 export function useSocket(): SocketContextType {
-  const context = useContext(SocketContext);
+  const context = use(SocketContext);
   if (context === undefined) {
     throw new Error('useSocket must be used within a SocketProvider');
   }

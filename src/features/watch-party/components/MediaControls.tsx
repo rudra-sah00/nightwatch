@@ -64,7 +64,7 @@ export function MediaControls({
   return (
     <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative z-[60]">
       {/* Device Selection Dropdowns - rendered at top level with high z-index */}
-      {showAudioDevices && (
+      {showAudioDevices ? (
         <DeviceDropdown
           title="Select Microphone"
           devices={audioInputDevices}
@@ -75,9 +75,9 @@ export function MediaControls({
           }}
           onClose={() => setShowAudioDevices(false)}
         />
-      )}
+      ) : null}
 
-      {showVideoDevices && (
+      {showVideoDevices ? (
         <DeviceDropdown
           title="Select Camera"
           devices={videoInputDevices}
@@ -88,11 +88,11 @@ export function MediaControls({
           }}
           onClose={() => setShowVideoDevices(false)}
         />
-      )}
+      ) : null}
 
       {/* Party Actions - Copy Link & Leave/End Party */}
       <div className="p-3 border-b border-white/5 flex gap-2">
-        {isHost && (
+        {isHost ? (
           <button
             type="button"
             onClick={onCopyLink}
@@ -107,7 +107,7 @@ export function MediaControls({
               {linkCopied ? 'Copied' : 'Invite'}
             </span>
           </button>
-        )}
+        ) : null}
 
         <button
           type="button"
@@ -268,9 +268,9 @@ function DeviceDropdown({
                   : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
               )}
             >
-              {selectedDevice === device.deviceId && (
+              {selectedDevice === device.deviceId ? (
                 <Check className="w-3.5 h-3.5 shrink-0 text-green-400" />
-              )}
+              ) : null}
               <span className="truncate">{device.label}</span>
             </button>
           ))

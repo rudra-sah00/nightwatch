@@ -34,7 +34,7 @@ describe('Constants', () => {
   });
 
   describe('WS_EVENTS', () => {
-    it('should have WebSocket events defined', () => {
+    it('should have Socket.IO events defined', () => {
       expect(WS_EVENTS.FORCE_LOGOUT).toBe('force_logout');
       expect(WS_EVENTS.WATCH_RECORD_TIME).toBe('watch:record_time');
       expect(WS_EVENTS.WATCH_UPDATE_PROGRESS).toBe('watch:update_progress');

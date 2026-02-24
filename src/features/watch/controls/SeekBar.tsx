@@ -213,7 +213,7 @@ export function SeekBar({
       className={`relative group py-2 lg:py-3 2xl:py-4 ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
     >
       {/* Time preview tooltip - show when hovering (guests can preview but not seek) */}
-      {canPreview && hoverTime !== null && (
+      {canPreview && hoverTime !== null ? (
         <div
           className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={{
@@ -274,7 +274,7 @@ export function SeekBar({
           {/* Tooltip Arrow */}
           <div className="w-0 h-0 border-l-[8px] lg:border-l-[10px] 2xl:border-l-[12px] border-l-transparent border-r-[8px] lg:border-r-[10px] 2xl:border-r-[12px] border-r-transparent border-t-[8px] lg:border-t-[10px] 2xl:border-t-[12px] border-t-zinc-900/95 -mt-[1px] drop-shadow-sm" />
         </div>
-      )}
+      ) : null}
 
       {/* Seek bar */}
       <div
@@ -291,6 +291,7 @@ export function SeekBar({
         aria-valuemin={0}
         aria-valuemax={duration}
         aria-valuenow={currentTime}
+        aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
         aria-label="Seek time"
         aria-disabled={disabled}
         onKeyDown={(e) => {
@@ -301,6 +302,12 @@ export function SeekBar({
           } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
             onSeek(Math.max(0, currentTime - 10));
+          } else if (e.key === 'Home') {
+            e.preventDefault();
+            onSeek(0);
+          } else if (e.key === 'End') {
+            e.preventDefault();
+            onSeek(duration);
           }
         }}
       >
@@ -317,12 +324,12 @@ export function SeekBar({
         />
 
         {/* Hover indicator */}
-        {hoverTime !== null && (
+        {hoverTime !== null ? (
           <div
             className="absolute h-full bg-white/20 rounded-full"
             style={{ width: `${(hoverTime / duration) * 100}%` }}
           />
-        )}
+        ) : null}
 
         {/* Scrubber - show lock icon for disabled guests */}
         <div
@@ -332,7 +339,7 @@ export function SeekBar({
       </div>
 
       {/* Guest lock indicator */}
-      {disabled && (
+      {disabled ? (
         <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 backdrop-blur-sm rounded-full border border-zinc-700/50 text-[10px] lg:text-xs text-zinc-400">
           <svg
             className="w-3 h-3"
@@ -348,7 +355,7 @@ export function SeekBar({
           </svg>
           <span className="hidden sm:inline">Host controls</span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

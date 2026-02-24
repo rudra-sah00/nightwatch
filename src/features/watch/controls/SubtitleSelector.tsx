@@ -144,11 +144,11 @@ export function SubtitleSelector({
           >
             Off
           </span>
-          {!currentTrack && !isLoading && (
+          {!currentTrack && !isLoading ? (
             <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
               <Check className="w-3.5 h-3.5 text-purple-400" />
             </div>
-          )}
+          ) : null}
         </button>
 
         {tracks.map((track, index) => (
@@ -177,15 +177,15 @@ export function SubtitleSelector({
               >
                 {track.label}
               </span>
-              {track.language && track.language !== track.label && (
+              {track.language && track.language !== track.label ? (
                 <span className="text-xs text-white/40">{track.language}</span>
-              )}
+              ) : null}
             </div>
-            {currentTrack === track.id && !isLoading && (
+            {currentTrack === track.id && !isLoading ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
       </div>
@@ -244,11 +244,11 @@ export function SubtitleSelector({
             className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 transition-colors"
           >
             <span className="text-white text-sm">{size.label}</span>
-            {subtitleSettings.fontSize === size.value && (
+            {subtitleSettings.fontSize === size.value ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
 
@@ -271,11 +271,11 @@ export function SubtitleSelector({
             >
               {font.label}
             </span>
-            {subtitleSettings.fontFamily === font.value && (
+            {subtitleSettings.fontFamily === font.value ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
 
@@ -302,11 +302,11 @@ export function SubtitleSelector({
               />
               <span className="text-white text-sm">{bg.label}</span>
             </div>
-            {subtitleSettings.backgroundColor === bg.value && (
+            {subtitleSettings.backgroundColor === bg.value ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
 
@@ -330,11 +330,11 @@ export function SubtitleSelector({
               />
               <span className="text-white text-sm">{color.label}</span>
             </div>
-            {subtitleSettings.textColor === color.value && (
+            {subtitleSettings.textColor === color.value ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
 
@@ -359,11 +359,11 @@ export function SubtitleSelector({
             >
               {shadow.label}
             </span>
-            {subtitleSettings.textShadow === shadow.value && (
+            {subtitleSettings.textShadow === shadow.value ? (
               <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                 <Check className="w-3.5 h-3.5 text-purple-400" />
               </div>
-            )}
+            ) : null}
           </button>
         ))}
       </div>
@@ -401,7 +401,7 @@ export function SubtitleSelector({
       </button>
 
       {/* Dropdown Card */}
-      {isOpen && (
+      {isOpen ? (
         <div
           className={cn(
             'absolute bottom-full right-0 mb-3',
@@ -411,10 +411,10 @@ export function SubtitleSelector({
             'animate-in fade-in slide-in-from-bottom-3 zoom-in-95 duration-200',
           )}
         >
-          {currentScreen === 'tracks' && renderTracksScreen()}
-          {currentScreen === 'style' && renderStyleScreen()}
+          {currentScreen === 'tracks' ? renderTracksScreen() : null}
+          {currentScreen === 'style' ? renderStyleScreen() : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

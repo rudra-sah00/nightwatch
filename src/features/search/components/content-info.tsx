@@ -11,6 +11,7 @@ import {
   Tv,
   Users,
 } from 'lucide-react';
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ContentProgress } from '@/features/watch/api';
 import { cn } from '@/lib/utils';
@@ -34,7 +35,7 @@ interface ContentInfoProps {
   isWatchlistLoading?: boolean;
 }
 
-export function ContentInfo({
+export const ContentInfo = memo(function ContentInfo({
   show,
   isPlaying,
   isLoadingProgress = false,
@@ -88,62 +89,67 @@ export function ContentInfo({
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
+      <h1
+        id="modal-title"
+        className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg"
+      >
         {show.title}
       </h1>
 
       {/* Metadata Row */}
       <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
-        {show.year && (
+        {show.year ? (
           <span className="flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
             {show.year}
           </span>
-        )}
-        {show.runtime && (
+        ) : null}
+        {show.runtime ? (
           <span className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
             {show.runtime} min
           </span>
-        )}
-        {isSeries && show.seasons && show.seasons.length > 0 && (
+        ) : null}
+        {isSeries && show.seasons && show.seasons.length > 0 ? (
           <span className="hidden md:inline">
             {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
           </span>
-        )}
-        {show.genre && <span className="hidden md:inline">{show.genre}</span>}
+        ) : null}
+        {show.genre ? (
+          <span className="hidden md:inline">{show.genre}</span>
+        ) : null}
       </div>
 
       {/* Description - Hidden in Hero for cleaner look (moved to body) */}
-      {show.description && (
+      {show.description ? (
         <p className="hidden text-white/80 text-sm md:text-base leading-relaxed max-w-2xl line-clamp-4">
           {show.description}
         </p>
-      )}
+      ) : null}
 
       {/* Progress Indicator - Netflix style */}
       {hasWatchProgress &&
-        watchProgress &&
-        watchProgress.progressPercent > 0 && (
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center justify-between text-xs text-white/70">
-              <span>
-                {isSeries &&
-                watchProgress.seasonNumber != null &&
-                watchProgress.episodeNumber != null
-                  ? `Continue watching S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
-                  : 'Continue watching'}
-              </span>
-              <span>{Math.round(watchProgress.progressPercent)}% watched</span>
-            </div>
-            <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white transition-all duration-300"
-                style={{ width: `${watchProgress.progressPercent}%` }}
-              />
-            </div>
+      watchProgress &&
+      watchProgress.progressPercent > 0 ? (
+        <div className="space-y-2 max-w-2xl">
+          <div className="flex items-center justify-between text-xs text-white/70">
+            <span>
+              {isSeries &&
+              watchProgress.seasonNumber != null &&
+              watchProgress.episodeNumber != null
+                ? `Continue watching S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                : 'Continue watching'}
+            </span>
+            <span>{Math.round(watchProgress.progressPercent)}% watched</span>
           </div>
-        )}
+          <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-300"
+              style={{ width: `${watchProgress.progressPercent}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {/* Play/Resume Button - Now for both Movies AND Series */}
       <div className="flex flex-wrap items-center gap-3">
@@ -186,7 +192,7 @@ export function ContentInfo({
         </Button>
 
         {/* Watch Together Button */}
-        {onWatchParty && (
+        {onWatchParty ? (
           <Button
             size="lg"
             variant="secondary"
@@ -212,10 +218,10 @@ export function ContentInfo({
                 ? watchPartyDisabledReason
                 : 'Watch Together'}
           </Button>
-        )}
+        ) : null}
 
         {/* Watchlist Action Button (Add or Remove) */}
-        {onWatchlistToggle && (
+        {onWatchlistToggle ? (
           <Button
             size="lg"
             variant={isInWatchlist ? 'destructive' : 'outline'}
@@ -237,8 +243,8 @@ export function ContentInfo({
             )}
             {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );
-}
+});

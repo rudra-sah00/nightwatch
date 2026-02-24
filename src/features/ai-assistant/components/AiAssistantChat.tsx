@@ -2,17 +2,78 @@
 
 import { Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { streamAiResponse } from '../api';
-import type { Message } from '../types';
+import styles from '../styles/AIAssistant.module.css';
+import type { Message, User } from '../types';
 import { AiLandingView } from './AiLandingView';
 import { AiMessageBubble } from './AiMessageBubble';
 import { MediaModal } from './MediaModal';
+
+// --- Context & Types ---
+
+interface AiChatState {
+  messages: Message[];
+  isLoading: boolean;
+  streamingMessageId: string | null;
+  hasStarted: boolean;
+  inputValue: string;
+  isFullPage: boolean;
+}
+
+interface AiChatActions {
+  sendMessage: (e?: React.FormEvent, overrideMsg?: string) => Promise<void>;
+  setInputValue: (value: string) => void;
+  onClose: () => void;
+  onSelectContent: (
+    id: string,
+    context?: Record<string, unknown>,
+    autoPlay?: boolean,
+  ) => void;
+}
+
+interface AiChatMeta {
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  currentUser: User | null;
+  media: {
+    url: string | null;
+    type: 'video' | 'image' | null;
+    isOpen: boolean;
+    set: (
+      url: string | null,
+      type: 'video' | 'image' | null,
+      open: boolean,
+    ) => void;
+  };
+}
+
+interface AiChatContextValue {
+  state: AiChatState;
+  actions: AiChatActions;
+  meta: AiChatMeta;
+}
+
+const AiChatContext = createContext<AiChatContextValue | null>(null);
+
+function useAiChat() {
+  const context = use(AiChatContext);
+  if (!context) {
+    throw new Error('AiChat components must be used within AiChat.Provider');
+  }
+  return context;
+}
 
 interface AiAssistantChatProps {
   isOpen: boolean;
@@ -25,12 +86,23 @@ interface AiAssistantChatProps {
   className?: string;
 }
 
-export function AiAssistantChat({
+export function AiAssistantChat(props: AiAssistantChatProps) {
+  return (
+    <AiChatProvider {...props}>
+      <AiChatContent className={props.className} />
+    </AiChatProvider>
+  );
+}
+
+// --- Provider Component ---
+
+function AiChatProvider({
+  children,
   isOpen,
   onClose,
   onSelectContent,
   className,
-}: AiAssistantChatProps) {
+}: AiAssistantChatProps & { children: React.ReactNode }) {
   const router = useRouter();
   const { user: currentUser } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
@@ -42,44 +114,44 @@ export function AiAssistantChat({
       timestamp: new Date(),
     },
   ]);
+
+  const [optimisticMessages, addOptimisticMessages] = React.useOptimistic(
+    messages,
+    (state, newMessages: Message | Message[]) => [
+      ...state,
+      ...(Array.isArray(newMessages) ? newMessages : [newMessages]),
+    ],
+  );
+
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null,
   );
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const [hasStarted, setHasStarted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isProcessing = useRef(false);
 
-  // Media Modal State
-  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'video' | 'image' | null>(null);
-  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [media, setMedia] = useState<{
+    url: string | null;
+    type: 'video' | 'image' | null;
+    isOpen: boolean;
+  }>({ url: null, type: null, isOpen: false });
+
+  const [countdownAction, setCountdownAction] = useState<{
+    type: 'play' | 'watch-party';
+    payload: Record<string, unknown>;
+  } | null>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Scroll on initial open
   useEffect(() => {
-    if (isOpen && hasStarted) {
+    if (isOpen && (hasStarted || streamingMessageId || messages.length > 1)) {
       scrollToBottom();
     }
-  }, [isOpen, hasStarted, scrollToBottom]);
-
-  // Scroll when new messages arrive (user sends or bot replies)
-  useEffect(() => {
-    if (hasStarted && messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages.length, hasStarted, scrollToBottom]);
-
-  // Scroll during streaming as content grows
-  useEffect(() => {
-    if (streamingMessageId && hasStarted) {
-      scrollToBottom();
-    }
-  }, [streamingMessageId, hasStarted, scrollToBottom]);
+  }, [isOpen, hasStarted, streamingMessageId, messages.length, scrollToBottom]);
 
   const handleSendMessage = async (
     e?: React.FormEvent,
@@ -87,93 +159,105 @@ export function AiAssistantChat({
   ) => {
     e?.preventDefault();
     const msgText = overrideMsg || inputValue.trim();
-    if (!msgText || isLoading) return;
+    if (!msgText || isLoading || streamingMessageId || isProcessing.current)
+      return;
+
+    isProcessing.current = true;
 
     if (!hasStarted) setHasStarted(true);
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: msgText,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
     setInputValue('');
     setIsLoading(true);
+    isProcessing.current = true;
 
-    // Add a placeholder message for the assistant
-    const botMessageId = (Date.now() + 1).toString();
+    const botMessageId = `bot-${Date.now()}`;
     setStreamingMessageId(botMessageId);
-    const initialBotMessage: Message = {
-      id: botMessageId,
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, initialBotMessage]);
 
-    try {
-      // Get last 6 messages for context (3 turns)
-      const history = messages
-        .slice(-6)
-        .map(
-          (m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`,
-        );
+    React.startTransition(async () => {
+      const newMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: msgText,
+        timestamp: new Date(),
+      };
 
-      // Use feature API for streaming
-      const response = await streamAiResponse(newMessage.content, history);
+      const assistantMessage: Message = {
+        id: botMessageId,
+        role: 'assistant',
+        content: '',
+        statusText: 'Neural Processing...',
+        timestamp: new Date(),
+      };
 
-      if (!response.ok) throw new Error('Failed to start stream');
+      addOptimisticMessages([newMessage, assistantMessage]);
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error('No reader found');
+      try {
+        setMessages((prev) => [
+          ...prev,
+          newMessage,
+          {
+            id: botMessageId,
+            role: 'assistant',
+            content: '',
+            statusText: 'Neural Processing...',
+            timestamp: new Date(),
+          },
+        ]);
+        const history = messages
+          .slice(-6)
+          .map(
+            (m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`,
+          );
+        const response = await streamAiResponse(newMessage.content, history);
+        if (!response.ok) throw new Error('Failed to start stream');
 
-      let fullContent = '';
-      let recommendations: Message['recommendations'] = [];
-      let buffer = '';
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) throw new Error('No reader found');
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        let fullContent = '';
+        let recommendations: Message['recommendations'] = [];
+        let buffer = '';
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        // Keep the last partial line in the buffer
-        buffer = lines.pop() || '';
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
 
-          const dataStr = trimmedLine.replace('data: ', '').trim();
-          if (dataStr === '[DONE]') break;
+            const dataStr = trimmedLine.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') break;
 
-          try {
-            const data = JSON.parse(dataStr);
-
-            // 1. Token Streaming (Text)
-            if (data.type === 'token' && data.text) {
-              fullContent += data.text;
-
-              // Update the bot message in real-time
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === botMessageId ? { ...m, content: fullContent } : m,
-                ),
-              );
-            }
-
-            // 2. State Updates (Recommendations, Play Signals, etc.)
-            if (data.type === 'update' && data.data) {
-              const update = data.data;
-
-              // Final response with signals from 'respond' node
-              if (data.node === 'respond' && update.response) {
-                const content = update.response;
-
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.type === 'progress' && data.text) {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === botMessageId ? { ...m, statusText: data.text } : m,
+                  ),
+                );
+              }
+              if (data.type === 'token' && data.text) {
+                fullContent += data.text;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === botMessageId
+                      ? { ...m, content: fullContent, statusText: undefined }
+                      : m,
+                  ),
+                );
+              }
+              if (
+                data.type === 'update' &&
+                data.data &&
+                data.node === 'respond'
+              ) {
+                const content = data.data.response;
                 // Extract signals
                 const recMatch = content.match(
                   /__RECOMMENDED_START__([\s\S]*?)__RECOMMENDED_END__/,
@@ -182,47 +266,36 @@ export function AiAssistantChat({
                   try {
                     const rawRecs = JSON.parse(recMatch[1]);
                     if (Array.isArray(rawRecs)) {
-                      recommendations = rawRecs.map(
-                        (item: {
-                          id?: string;
-                          contentId?: string;
-                          type?: string;
-                          contentType?: string;
-                          title?: string;
-                          t?: string;
-                          subtitle?: string;
-                          poster?: string;
-                          posterUrl?: string;
-                          thumbnail?: string;
-                          image?: string;
-                          img?: string;
-                          imdbRating?: string;
-                          awards?: string;
-                          season?: number;
-                          episode?: number;
-                          videoUrl?: string;
-                          [key: string]: unknown;
-                        }) => ({
-                          id: item.id || item.contentId || '',
+                      recommendations = (rawRecs as RawRecommendation[]).map(
+                        (item) => ({
+                          id: (item.id || item.contentId || '').toString(),
+                          imdbId: item.imdbId,
                           type: item.type || item.contentType || 'Movie',
-                          title: item.title || item.t || 'Unknown',
-                          subtitle: item.subtitle,
-                          poster:
+                          title: (item.title || item.t || 'Unknown').toString(),
+                          subtitle: item.subtitle?.toString(),
+                          poster: (
                             item.poster ||
                             item.posterUrl ||
                             item.thumbnail ||
                             item.image ||
                             item.img ||
-                            '',
-                          imdbRating: item.imdbRating,
-                          awards: item.awards,
-                          season: item.season,
-                          episode: item.episode,
-                          videoUrl: item.videoUrl,
+                            ''
+                          ).toString(),
+                          imdbRating: item.imdbRating?.toString(),
+                          awards: item.awards?.toString(),
+                          season:
+                            typeof item.season === 'number'
+                              ? item.season
+                              : undefined,
+                          episode:
+                            typeof item.episode === 'number'
+                              ? item.episode
+                              : undefined,
+                          videoUrl: item.videoUrl?.toString(),
                         }),
                       );
                     }
-                  } catch (_e) {}
+                  } catch {}
                 }
 
                 const playMatch = content.match(/__PLAY:(.*?)__/);
@@ -231,7 +304,7 @@ export function AiAssistantChat({
                     const playInfo = JSON.parse(playMatch[1]);
                     if (playInfo.id)
                       onSelectContent(playInfo.id, playInfo.context, true);
-                  } catch (_e) {}
+                  } catch {}
                 }
 
                 const wpMatch = content.match(/__WATCH_PARTY:(.*?)__/);
@@ -239,13 +312,14 @@ export function AiAssistantChat({
                   try {
                     const wpInfo = JSON.parse(wpMatch[1]);
                     if (wpInfo.id) {
-                      router.push(`/watch-party/${wpInfo.id}?new=true`);
-                      onClose();
+                      setCountdownAction({
+                        type: 'watch-party',
+                        payload: wpInfo,
+                      });
                     }
-                  } catch (_e) {}
+                  } catch {}
                 }
 
-                // Clean up signals for final display
                 const cleanContent = content
                   .replace(
                     /__RECOMMENDED_START__[\s\S]*?__RECOMMENDED_END__/,
@@ -256,7 +330,6 @@ export function AiAssistantChat({
                   .trim();
 
                 fullContent = cleanContent;
-
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === botMessageId
@@ -265,56 +338,122 @@ export function AiAssistantChat({
                   ),
                 );
               }
-            }
-          } catch (_e) {}
+            } catch {}
+          }
         }
+      } catch {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMessageId && !m.content
+              ? {
+                  ...m,
+                  content:
+                    "Sorry, I'm having trouble connecting to my brain right now. 🧠💥",
+                }
+              : m,
+          ),
+        );
+      } finally {
+        setIsLoading(false);
+        setStreamingMessageId(null);
+        isProcessing.current = false;
       }
-    } catch (_error) {
-      // If we have no content yet, show error message in the bubble
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === botMessageId && !m.content
-            ? {
-                ...m,
-                content:
-                  "Sorry, I'm having trouble connecting to my brain right now. 🧠💥",
-              }
-            : m,
-        ),
-      );
-    } finally {
-      setIsLoading(false);
-      setStreamingMessageId(null);
-    }
+    });
+  };
+
+  const contextValue: AiChatContextValue = {
+    state: {
+      messages: optimisticMessages,
+      isLoading: isLoading || !!streamingMessageId,
+      streamingMessageId,
+      hasStarted,
+      inputValue,
+      isFullPage: !!className?.includes('relative'),
+    },
+    actions: {
+      sendMessage: handleSendMessage,
+      setInputValue,
+      onClose,
+      onSelectContent,
+    },
+    meta: {
+      messagesEndRef,
+      currentUser,
+      media: {
+        ...media,
+        set: (url, type, isOpen) => setMedia({ url, type, isOpen }),
+      },
+    },
   };
 
   if (!isOpen) return null;
 
-  const isFullPage = !!className?.includes('relative');
+  return (
+    <AiChatContext.Provider value={contextValue}>
+      {children}
+      {countdownAction && (
+        <PlaybackCountdown
+          title={
+            countdownAction.type === 'watch-party'
+              ? 'Synchronizing Party'
+              : 'Starting Solo Session'
+          }
+          subtitle={
+            countdownAction.type === 'watch-party'
+              ? 'Preparing your synchronized room...'
+              : 'Get ready for cinematic excellence'
+          }
+          onComplete={() => {
+            if (countdownAction.type === 'watch-party') {
+              router.push(
+                `/watch-party/${countdownAction.payload.id}?new=true`,
+              );
+              onClose();
+            }
+            setCountdownAction(null);
+          }}
+        />
+      )}
+    </AiChatContext.Provider>
+  );
+}
 
-  // ------------------------------------------------------------------
-  // RENDER: Landing View (Centered)
-  // ------------------------------------------------------------------
-  if (!hasStarted) {
-    return (
-      <AiLandingView
-        className={className}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        onSendMessage={handleSendMessage}
-        isLoading={isLoading}
-      />
-    );
+interface RawRecommendation {
+  id?: string | number;
+  contentId?: string | number;
+  type?: string;
+  contentType?: string;
+  title?: string;
+  t?: string;
+  subtitle?: string | number;
+  poster?: string;
+  posterUrl?: string;
+  thumbnail?: string;
+  image?: string;
+  img?: string;
+  imdbRating?: string | number;
+  awards?: string | number;
+  season?: number;
+  episode?: number;
+  videoUrl?: string;
+  imdbId?: string;
+}
+
+// --- Internal Compound Components ---
+
+function AiChatContent({ className }: { className?: string }) {
+  const { state } = useAiChat();
+
+  if (!state.hasStarted) {
+    return <AiChatLanding className={className} />;
   }
 
-  // ------------------------------------------------------------------
-  // RENDER: Chat View (Bottom Input)
-  // ------------------------------------------------------------------
   return (
     <div
       className={cn(
         'flex flex-col z-50 transition-all duration-300 h-full',
-        !isFullPage && [
+        state.isLoading && 'pointer-events-none',
+        !state.isFullPage && [
           'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[60vh]',
           'md:left-auto md:top-auto md:bottom-24 md:right-6 md:w-96 md:h-[600px] md:max-h-[80vh] md:translate-x-0 md:translate-y-0',
           'bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl',
@@ -322,70 +461,116 @@ export function AiAssistantChat({
         className,
       )}
     >
-      {/* Media Modal */}
-      <MediaModal
-        url={mediaUrl}
-        type={mediaType}
-        isOpen={isMediaModalOpen}
-        onClose={() => {
-          setIsMediaModalOpen(false);
-          setMediaUrl(null);
-          setMediaType(null);
-        }}
-      />
+      <AiChatMedia />
+      <AiChatMessageList />
+      <AiChatInput />
+    </div>
+  );
+}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6 custom-scrollbar scroll-smooth">
-        {messages.slice(1).map((msg) => (
-          <AiMessageBubble
-            key={msg.id}
-            message={msg}
-            currentUser={currentUser}
-            onSelectContent={onSelectContent}
-            isStreaming={msg.id === streamingMessageId}
-            onPlayMedia={(url, type) => {
-              setMediaUrl(url);
-              setMediaType(type);
-              setIsMediaModalOpen(true);
-            }}
-          />
-        ))}
+function AiChatLanding({ className }: { className?: string }) {
+  const { state, actions } = useAiChat();
+  return (
+    <AiLandingView
+      className={className}
+      inputValue={state.inputValue}
+      setInputValue={actions.setInputValue}
+      onSendMessage={actions.sendMessage}
+      isLoading={state.isLoading}
+    />
+  );
+}
 
-        <div ref={messagesEndRef} className="h-4" />
-      </div>
+function AiChatMedia() {
+  const { meta } = useAiChat();
+  return (
+    <MediaModal
+      url={meta.media.url}
+      type={meta.media.type}
+      isOpen={meta.media.isOpen}
+      onClose={() => meta.media.set(null, null, false)}
+    />
+  );
+}
 
-      {/* Bottom Input Area - Always fixed at bottom */}
-      <div className="shrink-0">
-        {/* Top divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border/50">
-          <div className="max-w-2xl mx-auto w-full relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <form onSubmit={(e) => handleSendMessage(e)} className="relative">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Message Watch Rudra AI..."
-                className="w-full pl-6 pr-14 py-8 rounded-full bg-secondary border-border focus-visible:ring-primary/50 text-lg shadow-2xl"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className={cn(
-                  'absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full transition-all duration-200',
-                  inputValue.trim()
-                    ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105'
-                    : 'bg-white/5 text-white/20',
-                )}
-                disabled={!inputValue.trim() || isLoading}
-              >
-                <Send className="w-5 h-5" />
-              </Button>
-            </form>
-            <div className="text-center mt-2 text-[10px] text-white/30">
-              Watch Rudra AI can make mistakes. Verify important information.
-            </div>
+function AiChatMessageList() {
+  const { state, meta, actions } = useAiChat();
+  return (
+    <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6 custom-scrollbar scroll-smooth">
+      {state.messages.slice(1).map((msg) => (
+        <AiMessageBubble
+          key={msg.id}
+          message={msg}
+          currentUser={meta.currentUser}
+          onSelectContent={actions.onSelectContent}
+          isStreaming={msg.id === state.streamingMessageId}
+          onPlayMedia={(url, type) => meta.media.set(url, type, true)}
+        />
+      ))}
+      <div ref={meta.messagesEndRef} className="h-4" />
+    </div>
+  );
+}
+
+function AiChatInput() {
+  const { state, actions } = useAiChat();
+  const suggestions = [
+    'Show me something darker...',
+    'More like my recent watches',
+    'Feeling like a comedy tonight',
+    "What's trending in Sci-Fi?",
+  ];
+
+  return (
+    <div className="shrink-0">
+      {/* Dynamic Suggestion Pills - Only shown on landing */}
+      {!state.hasStarted && (
+        <div className="px-4 py-2 overflow-x-auto custom-scrollbar flex gap-2 no-scrollbar">
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => actions.sendMessage(undefined, suggestion)}
+              className={styles.suggestionPill}
+              disabled={state.isLoading}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border/50">
+        <div className="max-w-2xl mx-auto w-full relative group">
+          <form onSubmit={(e) => actions.sendMessage(e)} className="relative">
+            <Input
+              value={state.inputValue}
+              onChange={(e) => actions.setInputValue(e.target.value)}
+              placeholder={
+                state.isLoading
+                  ? 'AI is thinking...'
+                  : 'Message Watch Rudra AI...'
+              }
+              className="w-full pl-6 pr-14 py-8 rounded-full bg-zinc-900/50 backdrop-blur-xl border-white/5 focus-visible:ring-primary/50 text-lg shadow-2xl transition-all"
+              disabled={state.isLoading}
+            />
+            <Button
+              type="submit"
+              size="icon"
+              className={cn(
+                'absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full transition-all duration-300',
+                state.inputValue.trim()
+                  ? 'bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white shadow-md shadow-primary/20 hover:shadow-primary/40 hover:scale-105 active:scale-95'
+                  : 'bg-white/5 text-white/20',
+              )}
+              disabled={!state.inputValue.trim() || state.isLoading}
+            >
+              <Send className="w-5 h-5" />
+            </Button>
+          </form>
+          <div className="text-center mt-2 text-[10px] text-white/10 uppercase tracking-[0.2em] font-bold">
+            WATCH RUDRA AI • ELITE EXPERIENCE
           </div>
         </div>
       </div>

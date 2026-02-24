@@ -29,14 +29,14 @@ export default function AiAssistantPage() {
         </div>
       </div>
 
-      {selectedContent && (
+      {selectedContent ? (
         <ContentDetailModal
           contentId={selectedContent.id}
           initialContext={selectedContent.context}
           autoPlay={selectedContent.autoPlay}
           onClose={() => setSelectedContent(null)}
         />
-      )}
+      ) : null}
     </div>
   );
 }

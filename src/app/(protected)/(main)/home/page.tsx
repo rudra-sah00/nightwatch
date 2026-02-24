@@ -1,188 +1,63 @@
-'use client';
-
-import { Search } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { Navbar } from '@/components/layout/navbar';
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { searchContent } from '@/features/search/api';
-import { SearchResults } from '@/features/search/components/search-results';
+import { HomeClient } from '@/features/search/components/HomeClient';
+import {
+  SearchSkeleton,
+  WatchProgressSkeleton,
+} from '@/features/search/components/SearchSkeletons';
 import type { SearchResult } from '@/features/search/types';
-import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
 
-// Dynamic import for heavy modal component
-const ContentDetailModal = dynamic(
-  () =>
-    import('@/features/search/components/content-detail-modal').then(
-      (m) => m.ContentDetailModal,
-    ),
-  { ssr: false },
+export const metadata: Metadata = {
+  title: 'Home | Watch Rudra',
+  description: 'Search for movies and TV shows to start watching together.',
+};
+
+const LoadingFallback = () => (
+  <div className="container mx-auto px-4 py-8 space-y-8 max-w-4xl">
+    <div className="space-y-4">
+      <div className="h-8 w-48 bg-muted/60 rounded animate-pulse" />
+      <div className="space-y-2">
+        <WatchProgressSkeleton />
+        <WatchProgressSkeleton />
+      </div>
+    </div>
+    <div className="space-y-4">
+      <div className="h-8 w-32 bg-muted/60 rounded animate-pulse" />
+      <div className="space-y-2">
+        {['sk-1', 'sk-2', 'sk-3'].map((id) => (
+          <SearchSkeleton key={id} />
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
-function HomeContent() {
-  const searchParams = useSearchParams();
-  // const router = useRouter();
-  const query = searchParams.get('q') || '';
-
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
-    null,
-  );
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(
-    null,
-  );
-  const [fromContinueWatching, setFromContinueWatching] = useState(false);
-  const [continueWatchingCount, setContinueWatchingCount] = useState(0);
-
-  // Fetch search results when query changes
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchResults = async () => {
-      if (!query.trim()) {
-        setResults([]);
-        setHasSearched(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setHasSearched(true);
-
-      try {
-        const data = await searchContent(query, { signal: controller.signal });
-        if (!controller.signal.aborted) {
-          setResults(data);
-        }
-      } catch (error: unknown) {
-        // Check for abort in multiple ways - error name or signal aborted
-        const isAborted =
-          (error instanceof Error && error.name === 'AbortError') ||
-          controller.signal.aborted;
-
-        if (isAborted) return; // Silent return for aborted requests
-
-        toast.error('Search failed. Please try again.');
-        if (!controller.signal.aborted) {
-          setResults([]);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchResults();
-
-    return () => {
-      controller.abort();
-    };
-  }, [query]);
-
-  const handleSelectContent = useCallback((result: SearchResult) => {
-    setSelectedContent(result);
-    setSelectedContentId(null);
-    setFromContinueWatching(false);
-  }, []);
-
-  // Handler for continue watching selection - by contentId
-  const handleContinueWatchingSelect = useCallback((contentId: string) => {
-    setSelectedContent(null);
-    setSelectedContentId(contentId);
-    setFromContinueWatching(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedContent(null);
-    setSelectedContentId(null);
-    setFromContinueWatching(false);
-  }, []);
-
-  // Handle continue watching load
-  const handleContinueWatchingLoad = useCallback((count: number) => {
-    setContinueWatchingCount(count);
-  }, []);
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedParams = await searchParams;
+  const query = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 
   return (
-    <>
-      <Navbar />
-      <main className="container mx-auto px-4 py-6 md:py-8">
-        {/* Show search results if there's a query */}
-        {query.trim() ? (
-          <div className="space-y-6">
-            {/* Search Header */}
-            <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <h1 className="text-lg md:text-xl font-semibold text-foreground">
-                  {isLoading ? 'Searching...' : `Results for "${query}"`}
-                </h1>
-                {!isLoading && hasSearched && (
-                  <p className="text-sm text-muted-foreground">
-                    {results.length}{' '}
-                    {results.length === 1 ? 'result' : 'results'} found
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Results Grid */}
-            <SearchResults
-              results={results}
-              isLoading={isLoading}
-              onSelect={handleSelectContent}
-            />
-          </div>
-        ) : (
-          /* Home state - show Continue Watching and recommendation sections */
-          <div className="space-y-8">
-            {/* Continue Watching Section */}
-            <ContinueWatching
-              onSelectContent={handleContinueWatchingSelect}
-              onLoadComplete={handleContinueWatchingLoad}
-            />
-
-            {/* Prompt to search - only show when no continue watching items */}
-            {continueWatchingCount === 0 && (
-              <div className="flex items-center justify-center min-h-[70vh] text-center">
-                <div>
-                  <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Search for movies and TV shows to start watching
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Content Detail Modal */}
-      {(selectedContent || selectedContentId) && (
-        <ContentDetailModal
-          contentId={selectedContent?.id || selectedContentId || ''}
-          fromContinueWatching={fromContinueWatching}
-          onClose={handleCloseModal}
-        />
-      )}
-    </>
+    <Suspense fallback={<LoadingFallback />}>
+      <HomeLoader query={query} />
+    </Suspense>
   );
 }
 
-// Main export with Suspense boundary
-export default function HomePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-        </div>
-      }
-    >
-      <HomeContent />
-    </Suspense>
-  );
+async function HomeLoader({ query }: { query: string }) {
+  // Pre-fetch search results on the server if query exists
+  let initialResults: SearchResult[] = [];
+  if (query.trim()) {
+    try {
+      initialResults = await searchContent(query);
+    } catch (_e) {
+      // Gracefully handle server-side fetch errors
+    }
+  }
+
+  return <HomeClient initialResults={initialResults} initialQuery={query} />;
 }

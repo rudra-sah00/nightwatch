@@ -1,7 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,65 +10,78 @@ import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
 import { changePassword } from '../api';
 
 export function ChangePasswordForm() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, _setIsLoading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess(false);
+  const [state, action, isPending] = React.useActionState(
+    async (
+      _prevState: { message: string; type: string } | null,
+      formData: FormData,
+    ) => {
+      const currentPassword = formData.get('current') as string;
+      const newPassword = formData.get('new') as string;
+      const confirmPassword = formData.get('confirm') as string;
 
-    if (newPassword !== confirmPassword) {
-      const msg = 'New passwords do not match';
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+      if (newPassword !== confirmPassword) {
+        return { message: 'New passwords do not match', type: 'error' };
+      }
 
-    if (newPassword.length < 8) {
-      const msg = 'Password must be at least 8 characters';
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+      if (newPassword.length < 8) {
+        return {
+          message: 'Password must be at least 8 characters',
+          type: 'error',
+        };
+      }
 
-    if (!/[A-Z]/.test(newPassword)) {
-      const msg = 'Password must contain at least one uppercase letter';
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+      if (!/[A-Z]/.test(newPassword)) {
+        return {
+          message: 'Password must contain at least one uppercase letter',
+          type: 'error',
+        };
+      }
 
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
-      const msg = 'Password must contain at least one special character';
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+      if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
+        return {
+          message: 'Password must contain at least one special character',
+          type: 'error',
+        };
+      }
 
-    try {
-      setIsLoading(true);
-      await changePassword(currentPassword, newPassword);
-      setSuccess(true);
-      toast.success('Password updated successfully');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to update password');
-      toast.error(error.message || 'Failed to update password');
-    } finally {
-      setIsLoading(false);
+      try {
+        await changePassword(currentPassword, newPassword);
+        return { message: 'Password updated successfully', type: 'success' };
+      } catch (err) {
+        const error = err as Error;
+        return {
+          message: error.message || 'Failed to update password',
+          type: 'error',
+        };
+      }
+    },
+    null,
+  );
+
+  useEffect(() => {
+    if (state) {
+      if (state.type === 'success') {
+        toast.success(state.message);
+        setSuccess(true);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else if (state.type === 'error') {
+        setError(state.message);
+        toast.error(state.message);
+      }
     }
-  };
+  }, [state]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+    <form action={action} className="space-y-6 max-w-md">
       <div className="space-y-3">
         <Label
           htmlFor="current"
@@ -80,6 +92,7 @@ export function ChangePasswordForm() {
         <Input
           type="password"
           id="current"
+          name="current"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           required
@@ -99,6 +112,7 @@ export function ChangePasswordForm() {
         <Input
           type="password"
           id="new"
+          name="new"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
@@ -116,6 +130,7 @@ export function ChangePasswordForm() {
         <Input
           type="password"
           id="confirm"
+          name="confirm"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -123,7 +138,7 @@ export function ChangePasswordForm() {
         />
       </div>
 
-      {error && (
+      {error ? (
         <div className="flex items-center gap-3 p-4 text-sm text-destructive bg-destructive/10 rounded-2xl border border-destructive/20">
           <span className="flex-shrink-0 p-1 rounded-full bg-destructive/20">
             <svg
@@ -142,8 +157,8 @@ export function ChangePasswordForm() {
           </span>
           {error}
         </div>
-      )}
-      {success && (
+      ) : null}
+      {success ? (
         <div className="flex items-center gap-3 p-4 text-sm text-emerald-400 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
           <span className="flex-shrink-0 p-1 rounded-full bg-emerald-500/20">
             <svg
@@ -162,14 +177,14 @@ export function ChangePasswordForm() {
           </span>
           Password updated successfully
         </div>
-      )}
+      ) : null}
 
       <Button
         type="submit"
-        disabled={isLoading}
+        isLoading={isPending}
+        disabled={isPending}
         className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
       >
-        {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
         Update Password
       </Button>
     </form>

@@ -14,7 +14,7 @@ export const STORAGE_KEYS = {
   SESSION_ID: 'sessionId',
 } as const;
 
-// WebSocket Events
+// Socket.IO Events
 export const WS_EVENTS = {
   FORCE_LOGOUT: 'force_logout',
   STREAM_REVOKED: 'stream:revoked',

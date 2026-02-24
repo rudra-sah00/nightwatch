@@ -18,7 +18,7 @@ export function Navbar() {
 
         {/* User Actions - Grouped near search */}
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
-          {user && (
+          {user ? (
             <Link
               href="/watchlist"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group p-2 rounded-full hover:bg-white/5"
@@ -26,7 +26,7 @@ export function Navbar() {
             >
               <Bookmark className="w-5 h-5 group-hover:text-primary transition-colors" />
             </Link>
-          )}
+          ) : null}
           <Link
             href="/profile"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"

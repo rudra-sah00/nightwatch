@@ -17,6 +17,7 @@ interface UseContentProgressReturn {
 }
 
 interface UseContentProgressProps {
+  contentId: string;
   show: ShowDetails | null;
   fromContinueWatching: boolean;
   loadSeasonEpisodesInternal: (
@@ -29,6 +30,7 @@ interface UseContentProgressProps {
 }
 
 export function useContentProgress({
+  contentId,
   show,
   fromContinueWatching,
   loadSeasonEpisodesInternal,
@@ -42,18 +44,14 @@ export function useContentProgress({
   );
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const progressCheckedRef = useRef(false);
+  const hasSetSeasonRef = useRef(false);
 
   // Re-runs reactively when socket connects
   const { isConnected } = useSocket();
 
+  // 1. Fetching Logic - Start as soon as contentId/socket is ready
   useEffect(() => {
-    if (!show || progressCheckedRef.current) return;
-
-    // Check if auto-play context is present - if so, we might want to skip progress checking
-    // or let it run but NOT override season selection if auto-play handled it.
-    // However, the auto-play hook runs separately. Here we just respect the ref.
-
-    const isSeries = show.contentType === ContentType.Series;
+    if (progressCheckedRef.current) return;
 
     // Helper to process progress response
     const processProgress = (
@@ -66,68 +64,80 @@ export function useContentProgress({
       if (hasProgress && progress && progress.progressSeconds > 0) {
         setHasWatchProgress(true);
         setWatchProgress(progress);
-
-        // For series: Set season to the one from progress
-        // ONLY if auto-play hasn't already selected a season
-        if (
-          isSeries &&
-          show.seasons &&
-          show.seasons.length > 0 &&
-          !autoPlaySeasonSelectedRef.current
-        ) {
-          const progressSeason = show.seasons.find(
-            (s) => s.seasonNumber === progress?.seasonNumber,
-          );
-          if (progressSeason) {
-            setSelectedSeason(progressSeason);
-            loadSeasonEpisodesInternal(show, progressSeason);
-            return;
-          }
-        }
-      }
-
-      // No progress or no matching season - default to LATEST season
-      // ONLY if auto-play hasn't selected a season
-      if (
-        isSeries &&
-        show.seasons &&
-        show.seasons.length > 0 &&
-        !autoPlaySeasonSelectedRef.current
-      ) {
-        const sortedSeasons = show.seasons.toSorted(
-          (a, b) => (a.seasonNumber || 0) - (b.seasonNumber || 0),
-        );
-        const latestSeason = sortedSeasons[sortedSeasons.length - 1];
-        setSelectedSeason(latestSeason);
-        loadSeasonEpisodesInternal(show, latestSeason);
       }
     };
 
     // Check cache first
-    const cached = getCachedProgress(show.id);
+    const cached = getCachedProgress(contentId);
     if (cached) {
       processProgress(cached.hasProgress, cached.progress);
       return;
     }
 
-    // Check if there's watch progress for this content via socket
+    // Check if there's watch progress via socket
     if (isConnected) {
-      fetchContentProgress(show.id, (progress, hasProgress) => {
+      fetchContentProgress(contentId, (progress, hasProgress) => {
         processProgress(hasProgress, progress);
       });
     } else {
-      // No socket - just set default season logic inside processProgress (with false/null)
-      // or duplicate the default logic here.
-      // Reuse processProgress for consistency
-      processProgress(false, null);
+      // Fallback: if socket not connected after a delay, or if we want to default
+      // We'll let the socket connection trigger this later if it's currently connecting
+    }
+  }, [contentId, isConnected]);
+
+  // 2. Season Matching Logic - Runs once we have BOTH show details AND progress
+  useEffect(() => {
+    if (!show || hasSetSeasonRef.current || isLoadingProgress) return;
+
+    const isSeries = show.contentType === ContentType.Series;
+    if (!isSeries) {
+      hasSetSeasonRef.current = true;
+      return;
+    }
+
+    // Mark as checked so we don't repeat this logic
+    hasSetSeasonRef.current = true;
+
+    if (watchProgress && watchProgress.progressSeconds > 0) {
+      // ONLY if auto-play hasn't already selected a season
+      if (
+        show.seasons &&
+        show.seasons.length > 0 &&
+        !autoPlaySeasonSelectedRef.current
+      ) {
+        const progressSeason = show.seasons.find(
+          (s) => s.seasonNumber === watchProgress?.seasonNumber,
+        );
+        if (progressSeason) {
+          setSelectedSeason(progressSeason);
+          loadSeasonEpisodesInternal(show, progressSeason);
+          return;
+        }
+      }
+    }
+
+    // No progress or no matching season - default to LATEST season
+    // ONLY if auto-play hasn't selected a season
+    if (
+      show.seasons &&
+      show.seasons.length > 0 &&
+      !autoPlaySeasonSelectedRef.current
+    ) {
+      const sortedSeasons = show.seasons.toSorted(
+        (a, b) => (a.seasonNumber || 0) - (b.seasonNumber || 0),
+      );
+      const latestSeason = sortedSeasons[sortedSeasons.length - 1];
+      setSelectedSeason(latestSeason);
+      loadSeasonEpisodesInternal(show, latestSeason);
     }
   }, [
     show,
+    watchProgress,
+    isLoadingProgress,
     loadSeasonEpisodesInternal,
-    isConnected,
     setSelectedSeason,
     autoPlaySeasonSelectedRef,
-  ]); // Added dependencies
+  ]);
 
   return {
     watchProgress,

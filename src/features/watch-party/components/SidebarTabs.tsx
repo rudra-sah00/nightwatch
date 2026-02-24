@@ -75,13 +75,13 @@ export function SidebarTabs({
                     )}
                   />
                   {'badge' in tab &&
-                    tab.badge !== undefined &&
-                    tab.badge > 0 && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse ring-2 ring-zinc-900" />
-                    )}
+                  tab.badge !== undefined &&
+                  tab.badge > 0 ? (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse ring-2 ring-zinc-900" />
+                  ) : null}
                 </div>
                 <span className="max-sm:hidden">{tab.label}</span>
-                {'count' in tab && tab.count !== undefined && tab.count > 0 && (
+                {'count' in tab && tab.count !== undefined && tab.count > 0 ? (
                   <span
                     className={cn(
                       'text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center transition-colors duration-200',
@@ -93,7 +93,7 @@ export function SidebarTabs({
                   >
                     {tab.count}
                   </span>
-                )}
+                ) : null}
               </div>
             </button>
           );

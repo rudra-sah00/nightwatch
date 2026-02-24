@@ -20,7 +20,7 @@ function Input({ className, type, error, ref, ...props }: InputProps) {
         ref={ref}
         {...props}
       />
-      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+      {error ? <p className="mt-1 text-sm text-destructive">{error}</p> : null}
     </div>
   );
 }

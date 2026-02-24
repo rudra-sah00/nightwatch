@@ -5,14 +5,25 @@ const nextConfig: NextConfig = {
   // Per AGENTS.md 2.1: Avoid Barrel File Imports - these packages have many re-exports
   experimental: {
     optimizePackageImports: [
-      'lucide-react', // 1,500+ icons, ~200-800ms import savings
-      'sonner', // Toast library
-      'agora-rtc-sdk-ng', // Agora WebRTC SDK
+      'lucide-react',
+      'sonner',
+      'agora-rtc-sdk-ng',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-tabs',
       '@radix-ui/react-tooltip',
+      '@radix-ui/react-slot',
+      'clsx',
+      'tailwind-merge',
+      'class-variance-authority',
+      'emoji-picker-react',
     ],
+    cacheComponents: true,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
   images: {
     remotePatterns: [
@@ -27,11 +38,11 @@ const nextConfig: NextConfig = {
         search: '**',
       },
     ],
-    unoptimized: false, // Enable Next.js image optimization
-    formats: ['image/webp'], // Use efficient WebP format
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920], // Common device widths
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Common image sizes
-    minimumCacheTTL: 3600, // Cache images for 1 hour
+    unoptimized: false,
+    formats: ['image/webp'],
+    deviceSizes: [640, 1080, 1920], // Focused breakpoints for standard devices
+    imageSizes: [32, 64, 128, 256, 384],
+    minimumCacheTTL: 86400, // Extend cache to 24 hours for production stability
   },
   async rewrites() {
     const backendUrl =

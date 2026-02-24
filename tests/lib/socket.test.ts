@@ -14,7 +14,7 @@ vi.mock('socket.io-client', () => import('./__mocks__/socket-io-client'));
 // Mock env
 vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 
-describe('WebSocket Utils', () => {
+describe('Socket.IO Utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     disconnectSocket();
@@ -118,6 +118,17 @@ describe('WebSocket Utils', () => {
 
     it('should not throw when registering handler without socket', () => {
       expect(() => onForceLogout(vi.fn())).not.toThrow();
+    });
+
+    it('should handle SSR environment in initSocket', () => {
+      const originalWindow = global.window;
+      // @ts-expect-error
+      delete global.window;
+
+      const socket = initSocket(undefined, undefined, true);
+      expect(socket).toBeDefined();
+
+      global.window = originalWindow;
     });
 
     it('should remove specific force logout handler', () => {
