@@ -13,8 +13,53 @@ import { emitPartyInteraction } from '../api';
 let visionResolver: ReturnType<typeof FilesetResolver.forVisionTasks> | null =
   null;
 
+let consoleIntercepted = false;
+
+/**
+ * Emscripten (MediaPipe WASM) prints raw C++ logs to the browser console.
+ * We intercept console.log and console.info to suppress these noisy logs
+ * related to GL Context and missing custom gesture classifiers.
+ */
+function interceptMediaPipeLogs() {
+  if (consoleIntercepted || typeof window === 'undefined') return;
+  consoleIntercepted = true;
+
+  // biome-ignore lint/suspicious/noConsole: Override for WASM logs
+  const originalLog = console.log;
+  // biome-ignore lint/suspicious/noConsole: Override for WASM logs
+  const originalInfo = console.info;
+
+  // biome-ignore lint/suspicious/noExplicitAny: Intercepting variadic console arguments
+  const isMediaPipeWasmLog = (args: any[]) => {
+    if (args.length > 0 && typeof args[0] === 'string') {
+      const msg = args[0];
+      if (
+        msg.includes('Custom gesture classifier is not defined') ||
+        msg.includes('GL version:') ||
+        msg.includes('renderer: WebKit WebGL') ||
+        msg.includes('hand_gesture_recognizer_graph.cc') ||
+        msg.includes('gl_context.cc')
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  console.log = (...args) => {
+    if (isMediaPipeWasmLog(args)) return;
+    originalLog.apply(console, args);
+  };
+
+  console.info = (...args) => {
+    if (isMediaPipeWasmLog(args)) return;
+    originalInfo.apply(console, args);
+  };
+}
+
 function getVisionResolver() {
   if (!visionResolver) {
+    interceptMediaPipeLogs();
     visionResolver = FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm',
     );
