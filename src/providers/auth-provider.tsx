@@ -83,8 +83,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [disconnect],
   );
 
+  // Handle generic 401 session expiration from the fetch wrapper
+  const handleAuthExpired = useCallback(() => {
+    clearStoredUser();
+    disconnect();
+    setUser(null);
+    clearCookiesAndRedirect('Session expired. Please login again.');
+  }, [disconnect]);
+
   // Initialize from localStorage on mount
   useEffect(() => {
+    window.addEventListener('auth:expired', handleAuthExpired);
     const controller = new AbortController();
 
     const initAuth = async () => {
@@ -157,8 +166,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         offForceLogout(forceLogoutHandlerRef.current);
       }
       disconnect();
+      window.removeEventListener('auth:expired', handleAuthExpired);
     };
-  }, [handleForceLogout, connect, disconnect]);
+  }, [handleForceLogout, handleAuthExpired, connect, disconnect]);
 
   const onLoginSuccess = useCallback(
     (loggedInUser: User) => {

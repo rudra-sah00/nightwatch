@@ -95,6 +95,15 @@ async function refreshAccessToken(): Promise<boolean> {
       if (response.ok) {
         // Extract new token expiration from response if available
         const data = await response.json().catch(() => ({}));
+
+        if (
+          data.accessToken &&
+          typeof window !== 'undefined' &&
+          sessionStorage.getItem('guest_token')
+        ) {
+          sessionStorage.setItem('guest_token', data.accessToken);
+        }
+
         if (data.expiresIn) {
           setTokenExpiration(data.expiresIn);
         } else {
@@ -192,6 +201,12 @@ export async function apiFetch<T>(
         ApiError;
       error.status = 401;
       error.code = 'SESSION_EXPIRED';
+
+      if (typeof window !== 'undefined') {
+        // Fire custom event so AuthProvider can handle global logout + redirect
+        window.dispatchEvent(new CustomEvent('auth:expired'));
+      }
+
       throw error;
     }
 
