@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.7.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.6.1...v1.7.0) (2026-02-25)
+
+
+### Features
+
+* Add facial smile detection, update gesture delegate, fix UI tests ([764afff](https://github.com/rudra-sah00/watch-rudra/commit/764afff18133fbb4339f5e75295de1faf1bccc8c))
+* **ai-assistant:** remove lottie, implement css loading, and refine navbar layout ([b6dd6fc](https://github.com/rudra-sah00/watch-rudra/commit/b6dd6fc159cab528e28a662da8f01f6d44082ebc))
+* centralize watchlist logic and fix test regressions ([5d475f3](https://github.com/rudra-sah00/watch-rudra/commit/5d475f3a3657ea0342a144e708e2bdeab7659d74))
+* complete global API standardization and architectural cleanup ([b6065de](https://github.com/rudra-sah00/watch-rudra/commit/b6065de9b58a3a6b942527bb4f1f1bdf6fd93d17))
+* **frontend:** optimize AI performance, perceived latency, and UI stability ([6d2b4b4](https://github.com/rudra-sah00/watch-rudra/commit/6d2b4b4d2d47c9c9f807be880cabc715f17bedb5))
+* **frontend:** quality assurance house - biome cleanup, soundboard & emoji interaction tests ([e83db2e](https://github.com/rudra-sah00/watch-rudra/commit/e83db2e43593d2769377382cbf19b85eaf599883))
+* Implement AI Assistant trailer playback logic and fix frontend quality issues ([608d657](https://github.com/rudra-sah00/watch-rudra/commit/608d657409b879e5281c054f7b950048c718264a))
+* implement frontend CSRF protection and fix provider regressions ([f334c23](https://github.com/rudra-sah00/watch-rudra/commit/f334c23b3a051051a0fe59c5c55dbe7b704bd688))
+* Reactivate DevTools protection in frontend ([23d2f20](https://github.com/rudra-sah00/watch-rudra/commit/23d2f2098d539f8cedb778311da96709d06d2f97))
+* Sync watch party stream resolution with backend and temporarily disable DevTools protection ([8e2c4eb](https://github.com/rudra-sah00/watch-rudra/commit/8e2c4eb34fd9125bab10da2c2ce54e7e81fdd6c1))
+
+
+### Bug Fixes
+
+* **auth:** handle expired sessions globally and refresh guest tokens ([3473b20](https://github.com/rudra-sah00/watch-rudra/commit/3473b20c908ef353cb7cfb825a45afc24793f5a3))
+* **ci:** synchronize pnpm-lock.yaml with package.json ([28d1b3b](https://github.com/rudra-sah00/watch-rudra/commit/28d1b3ba3ba326bffdef712e4b25fad3ee2a87af))
+* **frontend:** remove console.logs, biome overrides, and strict types ([481cdaf](https://github.com/rudra-sah00/watch-rudra/commit/481cdaf4aab268cd8340c47ffb972872fe6b30fd))
+* standardize AI Assistant UI, cleanup globals.css, and resolve biome issues ([235d057](https://github.com/rudra-sah00/watch-rudra/commit/235d057e49e1370eca4dc56ee3ef47c3fc65236a))
+* **ui:** suppress noisy mediapipe wasm console logs ([b3c45df](https://github.com/rudra-sah00/watch-rudra/commit/b3c45dfef2da46403765c7f4cfbddd8bcdc39e64))
+
 ## [1.6.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.6.0...v1.6.1) (2026-02-13)
 
 
