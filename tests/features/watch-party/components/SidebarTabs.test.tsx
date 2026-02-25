@@ -6,43 +6,31 @@ describe('SidebarTabs', () => {
   const defaultProps = {
     activeTab: 'participants' as const,
     onTabChange: vi.fn(),
-    participantCount: 5,
     unreadMessages: 0,
   };
 
   describe('rendering', () => {
-    it('should render both tabs', () => {
+    it('should render all three tabs (participants, chat, soundboard)', () => {
       render(<SidebarTabs {...defaultProps} />);
 
-      expect(screen.getByText('People')).toBeInTheDocument();
-      expect(screen.getByText('Chat')).toBeInTheDocument();
-    });
-
-    it('should display participant count', () => {
-      render(<SidebarTabs {...defaultProps} participantCount={10} />);
-
-      expect(screen.getByText('10')).toBeInTheDocument();
-    });
-
-    it('should display participant count of 0 by not showing badge', () => {
-      render(<SidebarTabs {...defaultProps} participantCount={0} />);
-
-      // Count badge shouldn't be visible when 0
-      expect(screen.queryByText('0')).not.toBeInTheDocument();
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(3);
     });
 
     it('should highlight active participants tab', () => {
       render(<SidebarTabs {...defaultProps} activeTab="participants" />);
 
-      const participantsButton = screen.getByText('People').closest('button');
-      expect(participantsButton).toHaveClass('text-white');
+      const buttons = screen.getAllByRole('button');
+      // The first button is participants/people
+      expect(buttons[0]).toHaveClass('text-white');
     });
 
     it('should highlight active chat tab', () => {
       render(<SidebarTabs {...defaultProps} activeTab="chat" />);
 
-      const chatButton = screen.getByText('Chat').closest('button');
-      expect(chatButton).toHaveClass('text-white');
+      const buttons = screen.getAllByRole('button');
+      // The second button is chat
+      expect(buttons[1]).toHaveClass('text-white');
     });
   });
 
@@ -72,8 +60,8 @@ describe('SidebarTabs', () => {
       const onTabChange = vi.fn();
       render(<SidebarTabs {...defaultProps} onTabChange={onTabChange} />);
 
-      const chatButton = screen.getByText('Chat').closest('button');
-      fireEvent.click(chatButton!);
+      const buttons = screen.getAllByRole('button');
+      fireEvent.click(buttons[1]); // Chat is 2nd
 
       expect(onTabChange).toHaveBeenCalledWith('chat');
     });
@@ -88,8 +76,8 @@ describe('SidebarTabs', () => {
         />,
       );
 
-      const participantsButton = screen.getByText('People').closest('button');
-      fireEvent.click(participantsButton!);
+      const buttons = screen.getAllByRole('button');
+      fireEvent.click(buttons[0]); // Participants is 1st
 
       expect(onTabChange).toHaveBeenCalledWith('participants');
     });
@@ -104,26 +92,18 @@ describe('SidebarTabs', () => {
         />,
       );
 
-      const participantsButton = screen.getByText('People').closest('button');
-      fireEvent.click(participantsButton!);
+      const buttons = screen.getAllByRole('button');
+      fireEvent.click(buttons[0]);
 
       expect(onTabChange).toHaveBeenCalledWith('participants');
     });
   });
 
   describe('edge cases', () => {
-    it('should handle large participant counts', () => {
-      render(<SidebarTabs {...defaultProps} participantCount={999} />);
-
-      expect(screen.getByText('999')).toBeInTheDocument();
-    });
-
     it('should handle undefined unreadMessages', () => {
       render(<SidebarTabs {...defaultProps} unreadMessages={undefined} />);
-
-      // Should render without errors
-      expect(screen.getByText('People')).toBeInTheDocument();
-      expect(screen.getByText('Chat')).toBeInTheDocument();
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(3);
     });
   });
 });

@@ -1,6 +1,10 @@
 'use client';
 
-import { FilesetResolver, GestureRecognizer } from '@mediapipe/tasks-vision';
+import {
+  FaceLandmarker,
+  FilesetResolver,
+  GestureRecognizer,
+} from '@mediapipe/tasks-vision';
 import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef } from 'react';
 import { emitPartyInteraction } from '../api';
@@ -19,21 +23,22 @@ function getVisionResolver() {
 }
 
 export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
-  const recognizerRef = useRef<GestureRecognizer | null>(null);
+  const gestureRecognizerRef = useRef<GestureRecognizer | null>(null);
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const requestRef = useRef<number>(0);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   const initMediaPipe = useCallback(async (onInitialized?: () => void) => {
-    if (recognizerRef.current) {
+    if (gestureRecognizerRef.current && faceLandmarkerRef.current) {
       onInitialized?.();
       return;
     }
 
     try {
       const vision = await getVisionResolver();
-      const gestureRecognizer = await GestureRecognizer.createFromOptions(
-        vision,
-        {
+
+      const [gestureRecognizer, faceLandmarker] = await Promise.all([
+        GestureRecognizer.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath:
               'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
@@ -41,43 +46,73 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
           },
           runningMode: 'VIDEO',
           numHands: 1,
-        },
-      );
-      recognizerRef.current = gestureRecognizer;
+        }),
+        FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+            delegate: 'CPU',
+          },
+          outputFaceBlendshapes: true,
+          runningMode: 'VIDEO',
+          numFaces: 1,
+        }),
+      ]);
+
+      gestureRecognizerRef.current = gestureRecognizer;
+      faceLandmarkerRef.current = faceLandmarker;
       onInitialized?.();
     } catch (_err) {
-      // Failed to initialize MediaPipe silently
+      // biome-ignore lint/suspicious/noConsole: <needed for ML debugging>
+      console.error('[ML] Failed to initialize MediaPipe:', _err);
     }
   }, []);
 
   const lastTriggerRef = useRef<number>(0);
 
-  const triggerReaction = useCallback((gesture: string) => {
-    const now = Date.now();
-    // 2-second cooldown to prevent spamming from held gestures
-    if (now - lastTriggerRef.current < 2000) return;
+  const triggerReaction = useCallback(
+    (type: 'gesture' | 'smile', value: string) => {
+      const now = Date.now();
+      // 2-second cooldown to prevent spamming from held gestures/smiles
+      if (now - lastTriggerRef.current < 2000) return;
 
-    const GESTURE_TO_EMOJI: Record<string, string> = {
-      Thumb_Up: '👍',
-      Thumb_Down: '👎',
-      Victory: '✌️',
-      Pointing_Up: '☝️',
-      Open_Palm: '👋',
-      Closed_Fist: '👊',
-      ILoveYou: '🤟',
-    };
+      const GESTURE_TO_EMOJI: Record<string, string> = {
+        Thumb_Up: '👍',
+        Thumb_Down: '👎',
+        Victory: '✌️',
+        Pointing_Up: '☝️',
+        Open_Palm: '👋',
+        Closed_Fist: '👊',
+        ILoveYou: '🤟',
+      };
 
-    const emoji = GESTURE_TO_EMOJI[gesture];
-    if (emoji) {
-      lastTriggerRef.current = now;
-      emitPartyInteraction({ type: 'emoji', value: emoji });
-    }
-  }, []);
+      let emoji = '';
+      if (type === 'gesture') {
+        emoji = GESTURE_TO_EMOJI[value];
+      } else if (type === 'smile') {
+        emoji = '😊';
+      }
+
+      if (emoji) {
+        lastTriggerRef.current = now;
+        emitPartyInteraction({ type: 'emoji', value: emoji });
+      }
+    },
+    [],
+  );
 
   const GESTURE_SCORE_THRESHOLD = 0.8;
+  const SMILE_SCORE_THRESHOLD = 0.6; // Tune this: 0.0 to 1.0 depending on smile intensity
+
+  const lastGestureVideoTimeRef = useRef(-1);
+  const lastFaceVideoTimeRef = useRef(-1);
 
   const predict = useCallback(async () => {
-    if (!recognizerRef.current || !videoTrack) {
+    if (
+      !gestureRecognizerRef.current ||
+      !faceLandmarkerRef.current ||
+      !videoTrack
+    ) {
       requestRef.current = requestAnimationFrame(predict);
       return;
     }
@@ -92,27 +127,82 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
         video.height = settings.height || 480;
         video.srcObject = new MediaStream([mediaStreamTrack]);
         video.muted = true;
+        video.playsInline = true;
         await video.play();
         videoElementRef.current = video;
       }
 
+      const videoElement = videoElementRef.current;
       const nowInMs = Date.now();
-      const results = recognizerRef.current.recognizeForVideo(
-        videoElementRef.current,
+
+      // Ensure timestamp is monotonically increasing and unique for each task
+      const gestureTimeMs = Math.max(
         nowInMs,
+        lastGestureVideoTimeRef.current + 1,
+      );
+      lastGestureVideoTimeRef.current = gestureTimeMs;
+
+      const faceTimeMs = Math.max(
+        gestureTimeMs + 1,
+        lastFaceVideoTimeRef.current + 1,
+      );
+      lastFaceVideoTimeRef.current = faceTimeMs;
+
+      // We can run these in parallel or sequentially. Sequential is safer for the single video element.
+      const gestureResults = gestureRecognizerRef.current.recognizeForVideo(
+        videoElement,
+        gestureTimeMs,
       );
 
-      if (results.gestures.length > 0) {
-        const gestureData = results.gestures[0][0];
+      const faceResults = faceLandmarkerRef.current.detectForVideo(
+        videoElement,
+        faceTimeMs,
+      );
+
+      let triggered = false;
+
+      // Check Hand Gestures
+      if (gestureResults.gestures.length > 0) {
+        const gestureData = gestureResults.gestures[0][0];
         const gesture = gestureData.categoryName;
         const score = gestureData.score;
 
-        if (gesture !== 'None' && score >= GESTURE_SCORE_THRESHOLD) {
-          triggerReaction(gesture);
+        if (gesture !== 'None') {
+          if (score >= GESTURE_SCORE_THRESHOLD) {
+            triggerReaction('gesture', gesture);
+            triggered = true;
+          }
+        }
+      }
+
+      // Check Facial Expressions (Smile) if no gesture just triggered
+      // This prevents firing both simultaneously and hitting the cooldown oddly, though cooldown handles it mostly.
+      if (
+        !triggered &&
+        faceResults.faceBlendshapes &&
+        faceResults.faceBlendshapes.length > 0
+      ) {
+        const blendshapes = faceResults.faceBlendshapes[0].categories;
+
+        // Find mouthSmileLeft and mouthSmileRight
+        const smileLeft = blendshapes.find(
+          (b) => b.categoryName === 'mouthSmileLeft',
+        );
+        const smileRight = blendshapes.find(
+          (b) => b.categoryName === 'mouthSmileRight',
+        );
+
+        if (smileLeft && smileRight) {
+          const avgSmileScore = (smileLeft.score + smileRight.score) / 2;
+
+          if (avgSmileScore >= SMILE_SCORE_THRESHOLD) {
+            triggerReaction('smile', 'smile');
+          }
         }
       }
     } catch (_err) {
-      // Prediction error silently ignored
+      // biome-ignore lint/suspicious/noConsole: <needed for ML debugging>
+      console.error('[ML] Prediction error:', _err);
     }
 
     requestRef.current = requestAnimationFrame(predict);
@@ -131,9 +221,13 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
     return () => {
       cleaned = true;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (recognizerRef.current) {
-        recognizerRef.current.close();
-        recognizerRef.current = null;
+      if (gestureRecognizerRef.current) {
+        gestureRecognizerRef.current.close();
+        gestureRecognizerRef.current = null;
+      }
+      if (faceLandmarkerRef.current) {
+        faceLandmarkerRef.current.close();
+        faceLandmarkerRef.current = null;
       }
       if (videoElementRef.current) {
         videoElementRef.current.pause();

@@ -26,6 +26,7 @@ vi.stubGlobal('cancelAnimationFrame', mockCancelAnimationFrame);
 describe('useGestureDetection', () => {
   let mockVideoTrack: ICameraVideoTrack;
   let mockRecognizer: { recognizeForVideo: Mock; close: Mock };
+  let mockLandmarker: { detectForVideo: Mock; close: Mock };
   let useGestureDetection: typeof useGestureDetectionType;
   let emitPartyInteraction: (
     payload: Omit<InteractionPayload, 'userId' | 'userName' | 'timestamp'>,
@@ -43,6 +44,12 @@ describe('useGestureDetection', () => {
       close: vi.fn().mockResolvedValue(undefined),
     };
 
+    // Setup FaceLandmarker mock
+    mockLandmarker = {
+      detectForVideo: vi.fn().mockReturnValue({ faceBlendshapes: [] }),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+
     vi.doMock('@/features/watch-party/api', () => ({
       emitPartyInteraction: vi.fn(),
     }));
@@ -52,6 +59,11 @@ describe('useGestureDetection', () => {
         createFromOptions: vi
           .fn()
           .mockImplementation(() => Promise.resolve(mockRecognizer)),
+      },
+      FaceLandmarker: {
+        createFromOptions: vi
+          .fn()
+          .mockImplementation(() => Promise.resolve(mockLandmarker)),
       },
       FilesetResolver: {
         forVisionTasks: vi
@@ -114,6 +126,7 @@ describe('useGestureDetection', () => {
     await vi.advanceTimersByTimeAsync(16);
     await flushPromises();
     expect(mockRecognizer.recognizeForVideo).toHaveBeenCalled();
+    expect(mockLandmarker.detectForVideo).toHaveBeenCalled();
   });
 
   it('should trigger reaction for valid gesture', async () => {
@@ -182,6 +195,29 @@ describe('useGestureDetection', () => {
     }
   });
 
+  it('should trigger an emoji when a smile is detected', async () => {
+    mockLandmarker.detectForVideo.mockReturnValue({
+      faceBlendshapes: [
+        {
+          categories: [
+            { categoryName: 'mouthSmileLeft', score: 0.8 },
+            { categoryName: 'mouthSmileRight', score: 0.9 },
+          ],
+        },
+      ],
+    });
+
+    renderHook(() => useGestureDetection(mockVideoTrack));
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(16);
+    await flushPromises();
+
+    expect(emitPartyInteraction).toHaveBeenCalledWith({
+      type: 'emoji',
+      value: '😊',
+    });
+  });
+
   it('should use a singleton FilesetResolver across multiple mounts within one test', async () => {
     const { FilesetResolver } = await import('@mediapipe/tasks-vision');
 
@@ -209,10 +245,12 @@ describe('useGestureDetection', () => {
 
     unmount();
 
-    resolveInit({
-      recognizeForVideo: vi.fn(),
-      close: vi.fn(),
-    });
+    // Since Promise.all waits for both, resolving gesture is enough to let it proceed,
+    // but we didn't mock FaceLandmarker rejection, so let's just resolve to unblock.
+    resolveInit([
+      { recognizeForVideo: vi.fn(), close: vi.fn() },
+      { detectForVideo: vi.fn(), close: vi.fn() },
+    ]);
     await flushPromises();
 
     expect(mockRequestAnimationFrame).not.toHaveBeenCalled();

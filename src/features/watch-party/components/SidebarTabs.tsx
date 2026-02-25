@@ -1,18 +1,16 @@
-import { MessageSquare, Sparkles, Users } from 'lucide-react';
+import { MessageSquare, Users, Volume2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SidebarTabsProps {
   activeTab: 'chat' | 'participants' | 'interactions';
   onTabChange: (tab: 'chat' | 'participants' | 'interactions') => void;
-  participantCount: number;
   unreadMessages?: number;
 }
 
 export function SidebarTabs({
   activeTab,
   onTabChange,
-  participantCount,
   unreadMessages = 0,
 }: SidebarTabsProps) {
   const tabs = useMemo(
@@ -21,7 +19,6 @@ export function SidebarTabs({
         id: 'participants' as const,
         label: 'People',
         icon: Users,
-        count: participantCount,
       },
       {
         id: 'chat' as const,
@@ -32,10 +29,10 @@ export function SidebarTabs({
       {
         id: 'interactions' as const,
         label: 'Soundboard',
-        icon: Sparkles,
+        icon: Volume2,
       },
     ],
-    [participantCount, unreadMessages],
+    [unreadMessages],
   );
 
   const activeIndex = tabs.findIndex((t) => t.id === activeTab);
@@ -80,26 +77,11 @@ export function SidebarTabs({
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse ring-2 ring-zinc-900" />
                   ) : null}
                 </div>
-                <span className="max-sm:hidden">{tab.label}</span>
-                {'count' in tab && tab.count !== undefined && tab.count > 0 ? (
-                  <span
-                    className={cn(
-                      'text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center transition-colors duration-200',
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/10 text-white/60',
-                      'max-sm:hidden',
-                    )}
-                  >
-                    {tab.count}
-                  </span>
-                ) : null}
               </div>
             </button>
           );
         })}
       </div>
-
       {/* Bottom accent line */}
       <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mt-2" />
     </div>

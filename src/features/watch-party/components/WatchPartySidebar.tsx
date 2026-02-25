@@ -138,11 +138,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
       )}
     >
       {/* Tab Navigation */}
-      <SidebarTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        participantCount={participants.length}
-      />
+      <SidebarTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative">

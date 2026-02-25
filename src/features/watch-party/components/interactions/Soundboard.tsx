@@ -45,15 +45,6 @@ export function Soundboard() {
           ? await searchSounds(query, pageNum)
           : await getTrendingSounds(pageNum);
 
-        // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-        console.log('[Soundboard] Received sounds raw data:', data);
-
-        // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-        console.log('[Soundboard] Received sounds count:', {
-          count: data.results?.length ?? 0,
-          hasMore: !!data.next,
-        });
-
         setSounds((prev) =>
           append ? [...prev, ...data.results] : data.results,
         );
