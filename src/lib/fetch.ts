@@ -211,8 +211,7 @@ export async function apiFetch<T>(
     }
 
     if (!response.ok) {
-      // biome-ignore lint/suspicious/noExplicitAny: API error structure is dynamic
-      let errorData: any = {};
+      let errorData: unknown = {};
       try {
         errorData = await response.json();
       } catch (_e) {
@@ -220,13 +219,30 @@ export async function apiFetch<T>(
       }
 
       const msg =
-        errorData.error?.message ||
-        errorData.error ||
-        errorData.message ||
-        `HTTP ${response.status}`;
-      const error = new Error(msg) as Error & ApiError;
+        (errorData as Record<string, unknown>).error &&
+        typeof (errorData as Record<string, unknown>).error === 'object'
+          ? (
+              (errorData as Record<string, unknown>).error as Record<
+                string,
+                unknown
+              >
+            ).message
+          : (errorData as Record<string, unknown>).error ||
+            (errorData as Record<string, unknown>).message ||
+            `HTTP ${response.status}`;
+      const error = new Error(String(msg)) as Error & ApiError;
       error.status = response.status;
-      error.code = errorData.error?.code || errorData.code;
+      error.code = String(
+        ((errorData as Record<string, unknown>).error &&
+        typeof (errorData as Record<string, unknown>).error === 'object'
+          ? (
+              (errorData as Record<string, unknown>).error as Record<
+                string,
+                unknown
+              >
+            ).code
+          : undefined) || (errorData as Record<string, unknown>).code,
+      );
       throw error;
     }
 

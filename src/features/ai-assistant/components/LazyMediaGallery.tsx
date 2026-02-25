@@ -18,10 +18,17 @@ export function LazyMediaGallery({
   onPlayMedia,
 }: LazyMediaGalleryProps) {
   const [loading, setLoading] = useState(true);
-  // biome-ignore lint/suspicious/noExplicitAny: Required for arbitrary media gallery response
-  const [data, setData] = useState<{ photos: any[]; trailers: any[] } | null>(
-    null,
-  );
+  const [data, setData] = useState<{
+    photos: { url: string; caption?: string }[];
+    trailers: {
+      id: string;
+      url?: string;
+      playbackUrl?: string;
+      name?: string;
+      thumbnail?: string;
+      key?: string;
+    }[];
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,19 +37,23 @@ export function LazyMediaGallery({
     async function fetchMedia() {
       try {
         setLoading(true);
-        // biome-ignore lint/suspicious/noExplicitAny: Required for arbitrary media gallery response
-        const res = await apiFetch<{ photos: any[]; trailers: any[] }>(
-          `/api/video/media/${id}`,
-          { timeout: 30000 },
-        );
+        const res = await apiFetch<{
+          photos: { url: string; caption?: string }[];
+          trailers: {
+            id: string;
+            url?: string;
+            playbackUrl?: string;
+            name?: string;
+            thumbnail?: string;
+            key?: string;
+          }[];
+        }>(`/api/video/media/${id}`, { timeout: 30000 });
         if (mounted) {
           setData(res);
           setLoading(false);
         }
       } catch (err) {
         if (mounted) {
-          // biome-ignore lint/suspicious/noConsole: Required to log fetch failures
-          console.error('Failed to fetch media gallery', err);
           setError(err instanceof Error ? err.message : 'Unknown error');
           setLoading(false);
         }

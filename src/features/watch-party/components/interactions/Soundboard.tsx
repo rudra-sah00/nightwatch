@@ -17,7 +17,7 @@ import {
 export function Soundboard() {
   const [sounds, setSounds] = useState<SoundItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const loadingRef = useRef(false); // Added loadingRef
+  const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -34,13 +34,6 @@ export function Soundboard() {
       try {
         loadingRef.current = true; // Set loadingRef to true
         setLoading(true);
-
-        // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-        console.log('[Soundboard] Fetching sounds:', {
-          query,
-          pageNum,
-          append,
-        });
         const data: SoundboardResponse = query
           ? await searchSounds(query, pageNum)
           : await getTrendingSounds(pageNum);
@@ -49,9 +42,7 @@ export function Soundboard() {
           append ? [...prev, ...data.results] : data.results,
         );
         setHasMore(!!data.next);
-      } catch (error) {
-        // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-        console.error('[Soundboard] Failed to load sounds:', error);
+      } catch (_error) {
         toast.error('Failed to load sounds');
       } finally {
         loadingRef.current = false; // Set loadingRef to false
@@ -124,14 +115,17 @@ export function Soundboard() {
       currentAudioRef.current.currentTime = 0;
     }
 
-    // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-    console.log('[Soundboard] Playing sound:', soundUrl);
-    const audio = new Audio(soundUrl);
+    let finalUrl = soundUrl;
+    if (typeof window !== 'undefined') {
+      const guestToken = sessionStorage.getItem('guest_token');
+      // Append token to bypass auth middleware for browser-native media requests
+      if (guestToken && soundUrl.startsWith('/api/')) {
+        finalUrl = `${soundUrl}${soundUrl.includes('?') ? '&' : '?'}token=${guestToken}`;
+      }
+    }
+    const audio = new Audio(finalUrl);
     currentAudioRef.current = audio;
-    audio.play().catch((err) => {
-      // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-      console.error('[Soundboard] Playback failed:', err);
-    });
+    audio.play().catch((_err) => {});
 
     audio.onended = () => {
       if (currentAudioRef.current === audio) {
@@ -157,8 +151,6 @@ export function Soundboard() {
   }, [playSoundEffect]);
 
   const handleTriggerSound = (url: string, name: string) => {
-    // biome-ignore lint/suspicious/noConsole: <needed for production debugging>
-    console.log('[Soundboard] User triggered sound:', name);
     playSoundEffect(url);
     emitPartyInteraction({ type: 'sound', value: url });
     toast.success(`Played ${name}`, { duration: 1000 });

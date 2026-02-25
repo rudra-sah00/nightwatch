@@ -29,8 +29,7 @@ function interceptMediaPipeLogs() {
   // biome-ignore lint/suspicious/noConsole: Override for WASM logs
   const originalInfo = console.info;
 
-  // biome-ignore lint/suspicious/noExplicitAny: Intercepting variadic console arguments
-  const isMediaPipeWasmLog = (args: any[]) => {
+  const isMediaPipeWasmLog = (args: unknown[]) => {
     if (args.length > 0 && typeof args[0] === 'string') {
       const msg = args[0];
       if (
@@ -107,10 +106,7 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
       gestureRecognizerRef.current = gestureRecognizer;
       faceLandmarkerRef.current = faceLandmarker;
       onInitialized?.();
-    } catch (_err) {
-      // biome-ignore lint/suspicious/noConsole: <needed for ML debugging>
-      console.error('[ML] Failed to initialize MediaPipe:', _err);
-    }
+    } catch (_err) {}
   }, []);
 
   const lastTriggerRef = useRef<number>(0);
@@ -245,10 +241,7 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
           }
         }
       }
-    } catch (_err) {
-      // biome-ignore lint/suspicious/noConsole: <needed for ML debugging>
-      console.error('[ML] Prediction error:', _err);
-    }
+    } catch (_err) {}
 
     requestRef.current = requestAnimationFrame(predict);
   }, [videoTrack, triggerReaction]);
