@@ -83,7 +83,7 @@ export function WatchPartySketch() {
   const customColorInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col h-full bg-zinc-900/50">
+    <div className="flex flex-col h-full">
       <div className="p-4 border-b border-white/5 shrink-0 flex items-center justify-between">
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
           <PenTool className="w-4 h-4 text-indigo-400" />

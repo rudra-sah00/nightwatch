@@ -68,9 +68,11 @@ export function HomeClient({ initialResults, initialQuery }: HomeClientProps) {
       return;
     }
 
+    // INSTANT FEEDBACK: Immediately show loading state when query changes and we need to fetch
+    setIsLoading(true);
+
     const controller = new AbortController();
     const fetchResults = async () => {
-      setIsLoading(true);
       setHasSearched(true);
 
       try {
