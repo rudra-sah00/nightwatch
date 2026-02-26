@@ -122,7 +122,7 @@ export function HomeClient({ initialResults, initialQuery }: HomeClientProps) {
 
   return (
     <>
-      <Navbar />
+      <Navbar isLoading={isTransitioning} />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {query.trim() ? (
           <div className="space-y-6">

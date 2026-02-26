@@ -7,6 +7,7 @@ import {
   MicOff,
   Video,
   VideoOff,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -67,33 +68,6 @@ export function MediaControls({
 
   return (
     <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative z-[60]">
-      {/* Device Selection Dropdowns - rendered at top level with high z-index */}
-      {showAudioDevices ? (
-        <DeviceDropdown
-          title="Select Microphone"
-          devices={audioInputDevices}
-          selectedDevice={selectedAudioDevice}
-          onSelect={(deviceId) => {
-            onSwitchAudioDevice(deviceId);
-            setShowAudioDevices(false);
-          }}
-          onClose={() => setShowAudioDevices(false)}
-        />
-      ) : null}
-
-      {showVideoDevices ? (
-        <DeviceDropdown
-          title="Select Camera"
-          devices={videoInputDevices}
-          selectedDevice={selectedVideoDevice}
-          onSelect={(deviceId) => {
-            onSwitchVideoDevice(deviceId);
-            setShowVideoDevices(false);
-          }}
-          onClose={() => setShowVideoDevices(false)}
-        />
-      ) : null}
-
       {/* Party Actions - Copy Link & Leave/End Party */}
       <div className="p-3 border-b border-white/5 flex gap-2">
         {isHost ? (
@@ -154,7 +128,19 @@ export function MediaControls({
           {/* Media Buttons */}
           <div className="flex items-center gap-1">
             {/* Mic Button with Arrow */}
-            <div className="flex items-center">
+            <div className="flex items-center relative">
+              {showAudioDevices ? (
+                <DeviceDropdown
+                  title="Select Microphone"
+                  devices={audioInputDevices}
+                  selectedDevice={selectedAudioDevice}
+                  onSelect={(deviceId) => {
+                    onSwitchAudioDevice(deviceId);
+                    setShowAudioDevices(false);
+                  }}
+                  onClose={() => setShowAudioDevices(false)}
+                />
+              ) : null}
               <button
                 type="button"
                 onClick={onToggleAudio}
@@ -178,15 +164,36 @@ export function MediaControls({
                   setShowAudioDevices(!showAudioDevices);
                   setShowVideoDevices(false);
                 }}
-                className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
+                className={cn(
+                  'p-2 rounded-r-lg border-l border-black/30 transition-colors',
+                  showAudioDevices
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white',
+                )}
                 title="Select Microphone"
               >
-                <ChevronUp className="w-4 h-4" />
+                {showAudioDevices ? (
+                  <X className="w-4 h-4" />
+                ) : (
+                  <ChevronUp className="w-4 h-4" />
+                )}
               </button>
             </div>
 
             {/* Video Button with Arrow */}
-            <div className="flex items-center ml-1">
+            <div className="flex items-center ml-1 relative">
+              {showVideoDevices ? (
+                <DeviceDropdown
+                  title="Select Camera"
+                  devices={videoInputDevices}
+                  selectedDevice={selectedVideoDevice}
+                  onSelect={(deviceId) => {
+                    onSwitchVideoDevice(deviceId);
+                    setShowVideoDevices(false);
+                  }}
+                  onClose={() => setShowVideoDevices(false)}
+                />
+              ) : null}
               <button
                 type="button"
                 onClick={onToggleVideo}
@@ -210,10 +217,19 @@ export function MediaControls({
                   setShowVideoDevices(!showVideoDevices);
                   setShowAudioDevices(false);
                 }}
-                className="p-2 rounded-r-lg border-l border-black/30 transition-colors bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white"
+                className={cn(
+                  'p-2 rounded-r-lg border-l border-black/30 transition-colors',
+                  showVideoDevices
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white',
+                )}
                 title="Select Camera"
               >
-                <ChevronUp className="w-4 h-4" />
+                {showVideoDevices ? (
+                  <X className="w-4 h-4" />
+                ) : (
+                  <ChevronUp className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -240,9 +256,11 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-900/98 backdrop-blur-xl rounded-lg border border-white/20 shadow-2xl overflow-hidden z-[100]">
-      <div className="p-2 border-b border-white/10 flex items-center justify-between">
-        <span className="text-xs font-semibold text-white/70">{title}</span>
+    <div className="absolute bottom-full right-0 mb-3 w-[220px] bg-zinc-950/98 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
+      <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+          {title}
+        </span>
         <button
           type="button"
           onClick={(e) => {

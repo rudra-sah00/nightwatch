@@ -68,6 +68,7 @@ export function injectTokenIntoUrl(
       url.pathname = pathParts.join('/');
       return url.toString();
     }
+
     return url.toString();
   } catch (_e) {
     return urlStr;

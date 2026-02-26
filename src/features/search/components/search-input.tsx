@@ -14,7 +14,11 @@ import {
 import type { SearchHistory } from '@/features/search/types';
 import { cn } from '@/lib/utils';
 
-export function SearchInput() {
+interface SearchInputProps {
+  isLoading?: boolean;
+}
+
+export function SearchInput({ isLoading = false }: SearchInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -22,12 +26,44 @@ export function SearchInput() {
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [isPending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
+  const isDebouncingRef = useRef(false);
 
   // Sync query when URL changes (e.g., browser back/forward)
   const urlQuery = searchParams.get('q') || '';
   useEffect(() => {
-    setQuery(urlQuery);
+    if (!isDebouncingRef.current) {
+      setQuery(urlQuery);
+    }
   }, [urlQuery]);
+
+  // DEBOUNCED SEARCH: Automatically update URL as user types
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+    const currentQ = searchParams.get('q') || '';
+
+    // Don't search if it's the same as current URL or empty (unless it was previously non-empty)
+    if (trimmedQuery === currentQ) {
+      isDebouncingRef.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      isDebouncingRef.current = true;
+      startTransition(() => {
+        if (trimmedQuery) {
+          router.push(`/home?q=${encodeURIComponent(trimmedQuery)}`);
+        } else if (currentQ) {
+          router.push('/home');
+        }
+        // Reset ref after transition starts
+        setTimeout(() => {
+          isDebouncingRef.current = false;
+        }, 500);
+      });
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(timer);
+  }, [query, router, searchParams]);
 
   // Load history when focused
   const loadHistory = async () => {
@@ -105,12 +141,17 @@ export function SearchInput() {
         aria-haspopup="listbox"
         aria-controls="search-history-listbox"
       >
-        <Search
-          className={cn(
-            'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors',
-            isPending ? 'text-primary animate-pulse' : 'text-muted-foreground',
-          )}
-        />
+        {isPending || isLoading ? (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+            <div className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        ) : (
+          <Search
+            className={cn(
+              'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors text-muted-foreground',
+            )}
+          />
+        )}
         <Input
           placeholder="Search for movies, shows..."
           className="pl-10 pr-10 bg-secondary border-border focus-visible:ring-primary/50 h-10 w-full"
@@ -136,7 +177,7 @@ export function SearchInput() {
 
       {/* ARIA Live region for search status */}
       <div className="sr-only" aria-live="polite">
-        {isPending ? 'Searching...' : ''}
+        {isPending || isLoading ? 'Searching...' : ''}
       </div>
 
       {isOpen && history.length > 0 && !query ? (

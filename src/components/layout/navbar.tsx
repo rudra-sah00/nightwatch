@@ -5,7 +5,11 @@ import { Avatar } from '@/components/ui/avatar';
 import { SearchInput } from '@/features/search/components/search-input';
 import { useAuth } from '@/providers/auth-provider';
 
-export function Navbar() {
+interface NavbarProps {
+  isLoading?: boolean;
+}
+
+export function Navbar({ isLoading }: NavbarProps) {
   const { user } = useAuth();
 
   return (
@@ -13,7 +17,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-center gap-4 md:gap-8 max-w-4xl">
         {/* Search Bar - Main Focus */}
         <div className="flex-1 min-w-0">
-          <SearchInput />
+          <SearchInput isLoading={isLoading} />
         </div>
 
         {/* User Actions - Grouped near search */}
