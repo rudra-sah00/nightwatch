@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ContentProgress } from '@/features/watch/api';
 import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
@@ -32,6 +32,12 @@ export function usePlaybackActions({
   const [playingEpisodeId, setPlayingEpisodeId] = useState<
     string | number | null
   >(null);
+
+  // Reset loading state on mount (important for when returning from video player)
+  useEffect(() => {
+    setIsPlaying(false);
+    setPlayingEpisodeId(null);
+  }, []);
 
   // Internal play function
   const handlePlayInternal = useCallback(

@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
       'class-variance-authority',
       'emoji-picker-react',
     ],
-    cacheComponents: true,
   },
+  cacheComponents: true,
   logging: {
     fetches: {
       fullUrl: true,
