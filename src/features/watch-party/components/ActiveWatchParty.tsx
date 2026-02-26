@@ -14,6 +14,7 @@ import {
 import { useMobileDetection } from '@/features/watch/page/useMobileDetection';
 import type { VideoMetadata } from '@/features/watch/player/types';
 import { cn } from '@/lib/utils';
+import { useSketch } from '../context/SketchContext';
 import type { AgoraParticipant } from '../hooks/useAgora';
 import { useAudioDucking } from '../hooks/useAudioDucking';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../types';
@@ -25,6 +26,11 @@ const FloatingEmojis = dynamic(
 );
 const WatchPartySidebar = dynamic(
   () => import('./WatchPartySidebar').then((mod) => mod.WatchPartySidebar),
+  { ssr: false },
+);
+
+const SketchOverlay = dynamic(
+  () => import('./SketchOverlay').then((mod) => mod.SketchOverlay),
   { ssr: false },
 );
 
@@ -102,8 +108,35 @@ export function ActiveWatchParty({
     null,
   );
 
+  const {
+    isSketchMode,
+    setIsSketchMode,
+    setIsHost,
+    setCanDraw,
+    videoRef: contextVideoRef,
+  } = useSketch();
+
   // Ref for the outer watch party container (fullscreen target)
   const watchPartyContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentMember = room.members.find((m) => m.id === currentUserId);
+  const canDraw =
+    currentMember?.permissions?.canDraw ??
+    room.permissions?.canGuestsDraw ??
+    false;
+
+  // Sync permissions to context
+  useEffect(() => {
+    setIsHost(isHost);
+    setCanDraw(isHost || canDraw);
+  }, [isHost, canDraw, setIsHost, setCanDraw]);
+
+  // Sync videoRef to context
+  useEffect(() => {
+    if (contextVideoRef && videoRef.current) {
+      contextVideoRef.current = videoRef.current;
+    }
+  }, [videoRef, contextVideoRef]);
 
   // True browser fullscreen — hides URL bar, keeps sidebar & audio intact
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -420,6 +453,7 @@ export function ActiveWatchParty({
           typingUsers={typingUsers}
           onTypingStart={onTypingStart}
           onTypingStop={onTypingStop}
+          onTabChange={(tab) => setIsSketchMode(tab === 'sketch')}
         />
       </div>
 
@@ -436,6 +470,8 @@ export function ActiveWatchParty({
       >
         {/* Overlay for floating emojis - restricted to video area */}
         <FloatingEmojis />
+
+        <SketchOverlay />
 
         <WatchPage
           streamUrl={room.streamUrl}
@@ -454,6 +490,7 @@ export function ActiveWatchParty({
           hideBackButton={true}
           fullscreenToggleOverride={toggleFullscreen}
           isFullscreenOverride={isFullscreen}
+          hideControls={isSketchMode}
         />
       </div>
 

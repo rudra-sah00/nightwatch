@@ -8,7 +8,7 @@ import {
   onPartyMessage,
   onUserTyping,
   sendPartyMessage,
-} from '../api';
+} from '../services/watch-party.api';
 import type { ChatMessage } from '../types';
 
 export function useWatchPartyChat() {

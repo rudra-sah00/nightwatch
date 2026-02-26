@@ -8,13 +8,14 @@ import { useGestureDetection } from '../hooks/useGestureDetection';
 
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../types';
-import { Soundboard } from './interactions/Soundboard';
+import { Soundboard, SoundboardDisabled } from './interactions/Soundboard';
 // Components
 import { MediaControls } from './MediaControls';
 import { PendingRequests } from './PendingRequests';
 import { SidebarTabs } from './SidebarTabs';
 import { VideoGrid } from './VideoGrid';
-import { WatchPartyChat } from './WatchPartyChat';
+import { WatchPartyChat, WatchPartyChatDisabled } from './WatchPartyChat';
+import { WatchPartySketch, WatchPartySketchDisabled } from './WatchPartySketch';
 
 /**
  * Represents a user currently typing in the chat.
@@ -42,6 +43,9 @@ interface WatchPartySidebarProps {
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
+  onTabChange?: (
+    tab: 'chat' | 'participants' | 'soundboard' | 'sketch',
+  ) => void;
 }
 
 /**
@@ -66,15 +70,35 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   typingUsers = [],
   onTypingStart,
   onTypingStop,
+  onTabChange,
 }: WatchPartySidebarProps) {
   // Tab state - participants first
   const [activeTab, setActiveTab] = useState<
-    'chat' | 'participants' | 'interactions'
+    'chat' | 'participants' | 'soundboard' | 'sketch'
   >('participants');
 
+  useEffect(() => {
+    onTabChange?.(activeTab);
+  }, [activeTab, onTabChange]);
+
   // Get current user's name for display
-  const currentUserName =
-    room.members.find((m) => m.id === currentUserId)?.name || 'You';
+  const currentMember = room.members.find((m) => m.id === currentUserId);
+  const currentUserName = currentMember?.name || 'You';
+
+  const canDraw =
+    currentMember?.permissions?.canDraw ??
+    room.permissions?.canGuestsDraw ??
+    false;
+
+  const canPlaySound =
+    currentMember?.permissions?.canPlaySound ??
+    room.permissions?.canGuestsPlaySounds ??
+    true;
+
+  const canChat =
+    currentMember?.permissions?.canChat ??
+    room.permissions?.canGuestsChat ??
+    true;
 
   // Stabilise members reference — only rebuild when member IDs or names change,
   // not on every room state update (playback position, etc.)
@@ -179,31 +203,55 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
           )}
         >
-          <WatchPartyChat
-            messages={messages}
-            currentUserId={currentUserId}
-            onSendMessage={onSendMessage}
-            typingUsers={typingUsers}
-            onTypingStart={onTypingStart}
-            onTypingStop={onTypingStop}
-          />
+          {isHost || canChat ? (
+            <WatchPartyChat
+              messages={messages}
+              currentUserId={currentUserId}
+              onSendMessage={onSendMessage}
+              typingUsers={typingUsers}
+              onTypingStart={onTypingStart}
+              onTypingStop={onTypingStop}
+            />
+          ) : (
+            <WatchPartyChatDisabled
+              messages={messages}
+              currentUserId={currentUserId}
+            />
+          )}
         </div>
 
-        {/* Interactions Tab */}
+        {/* Soundboard Tab */}
         <div
           className={cn(
             'absolute inset-0 flex flex-col transition-all duration-250 ease-out p-4',
-            activeTab === 'interactions'
+            activeTab === 'soundboard'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
           )}
         >
-          <Soundboard />
+          {isHost || canPlaySound ? <Soundboard /> : <SoundboardDisabled />}
+        </div>
+
+        {/* Sketch Tab */}
+        <div
+          className={cn(
+            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
+            activeTab === 'sketch'
+              ? 'opacity-100 scale-100 z-10'
+              : 'opacity-0 scale-[0.98] pointer-events-none z-0',
+          )}
+        >
+          {isHost || canDraw ? (
+            <WatchPartySketch />
+          ) : (
+            <WatchPartySketchDisabled />
+          )}
         </div>
       </div>
 
       {/* Media Controls Footer */}
       <MediaControls
+        room={room}
         userName={currentUserName}
         audioEnabled={audioEnabled}
         onToggleAudio={toggleAudio}

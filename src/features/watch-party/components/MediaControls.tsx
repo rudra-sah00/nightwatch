@@ -11,6 +11,8 @@ import {
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { MediaDevice } from '../hooks/useAgora';
+import type { WatchPartyRoom } from '../types';
+import { WatchPartySettings } from './WatchPartySettings';
 
 interface MediaControlsProps {
   // User info
@@ -35,6 +37,7 @@ interface MediaControlsProps {
   linkCopied: boolean;
   onCopyLink: () => void;
   onLeave: () => void;
+  room: WatchPartyRoom;
 }
 
 /**
@@ -57,6 +60,7 @@ export function MediaControls({
   linkCopied,
   onCopyLink,
   onLeave,
+  room,
 }: MediaControlsProps) {
   const [showAudioDevices, setShowAudioDevices] = useState(false);
   const [showVideoDevices, setShowVideoDevices] = useState(false);
@@ -93,20 +97,23 @@ export function MediaControls({
       {/* Party Actions - Copy Link & Leave/End Party */}
       <div className="p-3 border-b border-white/5 flex gap-2">
         {isHost ? (
-          <button
-            type="button"
-            onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all"
-          >
-            {linkCopied ? (
-              <Check className="w-3.5 h-3.5 text-green-400" />
-            ) : (
-              <Copy className="w-3.5 h-3.5" />
-            )}
-            <span className="sm:inline">
-              {linkCopied ? 'Copied' : 'Invite'}
-            </span>
-          </button>
+          <>
+            <WatchPartySettings room={room} isHost={isHost} />
+            <button
+              type="button"
+              onClick={onCopyLink}
+              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all"
+            >
+              {linkCopied ? (
+                <Check className="w-3.5 h-3.5 text-green-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              <span className="sm:inline">
+                {linkCopied ? 'Copied' : 'Invite'}
+              </span>
+            </button>
+          </>
         ) : null}
 
         <button

@@ -1,6 +1,6 @@
 import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import * as api from '@/features/watch-party/api';
+import * as api from '@/features/watch-party/services/watch-party.api';
 import * as ws from '@/lib/socket';
 
 vi.mock('@/lib/socket');

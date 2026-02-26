@@ -7,7 +7,7 @@ import {
   getPartyStreamToken,
   leavePartyRoom,
   requestJoinPartyRoom,
-} from '../api';
+} from '../services/watch-party.api';
 import type { ChatMessage, WatchPartyRoom } from '../types';
 
 interface UseWatchPartyLifecycleProps {

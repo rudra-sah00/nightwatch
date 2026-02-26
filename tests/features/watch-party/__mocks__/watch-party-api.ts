@@ -12,10 +12,17 @@ export const getPartyStreamToken = vi.fn();
 export const requestPartyState = vi.fn();
 export const syncPartyState = vi.fn();
 export const updatePartyContent = vi.fn();
+export const updateMemberPermissions = vi.fn();
 export const emitTypingStart = vi.fn();
 export const emitTypingStop = vi.fn();
 export const emitPing = vi.fn();
 export const emitPartyEvent = vi.fn();
+
+// Sketch Emitters
+export const emitSketchDraw = vi.fn();
+export const emitSketchClear = vi.fn();
+export const emitSketchRequestSync = vi.fn();
+export const emitSketchSyncState = vi.fn();
 
 // Event listeners — return cleanup fn
 export const onPartyStateUpdate = vi.fn(() => vi.fn());
@@ -29,6 +36,14 @@ export const onPartyKicked = vi.fn(() => vi.fn());
 export const onPartyClosed = vi.fn(() => vi.fn());
 export const onPartyMessage = vi.fn(() => vi.fn());
 export const onPartyContentUpdated = vi.fn(() => vi.fn());
+export const onPartyPermissionsUpdated = vi.fn(() => vi.fn());
+export const onPartyMemberPermissionsUpdated = vi.fn(() => vi.fn());
 export const onUserTyping = vi.fn(() => vi.fn());
 export const onPartyHostDisconnected = vi.fn(() => vi.fn());
 export const onPartyHostReconnected = vi.fn(() => vi.fn());
+
+// Sketch Listeners
+export const onSketchDraw = vi.fn(() => vi.fn());
+export const onSketchClear = vi.fn(() => vi.fn());
+export const onSketchProvideSync = vi.fn(() => vi.fn());
+export const onSketchSyncState = vi.fn(() => vi.fn());

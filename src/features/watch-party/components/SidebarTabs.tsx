@@ -1,10 +1,10 @@
-import { MessageSquare, Users, Volume2 } from 'lucide-react';
+import { MessageSquare, PenTool, Users, Volume2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SidebarTabsProps {
-  activeTab: 'chat' | 'participants' | 'interactions';
-  onTabChange: (tab: 'chat' | 'participants' | 'interactions') => void;
+  activeTab: 'chat' | 'participants' | 'soundboard' | 'sketch';
+  onTabChange: (tab: 'chat' | 'participants' | 'soundboard' | 'sketch') => void;
   unreadMessages?: number;
 }
 
@@ -27,9 +27,14 @@ export function SidebarTabs({
         badge: unreadMessages,
       },
       {
-        id: 'interactions' as const,
+        id: 'soundboard' as const,
         label: 'Soundboard',
         icon: Volume2,
+      },
+      {
+        id: 'sketch' as const,
+        label: 'Sketch',
+        icon: PenTool,
       },
     ],
     [unreadMessages],
@@ -44,8 +49,8 @@ export function SidebarTabs({
         <div
           className="absolute top-0 bottom-0 bg-white/10 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={{
-            left: `${activeIndex * 33.33}%`,
-            width: '33.33%',
+            left: `${activeIndex * 25}%`,
+            width: '25%',
           }}
         />
 

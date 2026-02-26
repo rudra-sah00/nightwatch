@@ -14,18 +14,18 @@ import {
   it,
   vi,
 } from 'vitest';
+import { Soundboard } from '@/features/watch-party/components/interactions/Soundboard';
 import {
   emitPartyInteraction,
   getTrendingSounds,
   onPartyInteraction,
   searchSounds,
-} from '@/features/watch-party/api';
-import { Soundboard } from '@/features/watch-party/components/interactions/Soundboard';
+} from '@/features/watch-party/services/watch-party.api';
 import type { InteractionPayload } from '@/features/watch-party/types';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-vi.mock('@/features/watch-party/api', () => ({
+vi.mock('@/features/watch-party/services/watch-party.api', () => ({
   emitPartyInteraction: vi.fn(),
   onPartyInteraction: vi.fn(() => vi.fn()), // Returns a cleanup function
   getTrendingSounds: vi.fn(),

@@ -8,9 +8,11 @@ import {
   onPartyAdminRequest,
   onPartyMemberJoined,
   onPartyMemberLeft,
+  onPartyMemberPermissionsUpdated,
   onPartyMemberRejected,
+  onPartyPermissionsUpdated,
   rejectJoinRequest,
-} from '../api';
+} from '../services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../types';
 
 interface UseWatchPartyMembersProps {
@@ -126,10 +128,12 @@ export function useWatchPartyMembers({
 
       setRoom((prev) => {
         if (!prev) return null;
-        const isAlreadyMember = prev.members.some((m) => m.id === member.id);
+        const isAlreadyMember = prev.members.some((m) => m?.id === member.id);
         return {
           ...prev,
-          pendingMembers: prev.pendingMembers.filter((m) => m.id !== member.id),
+          pendingMembers: prev.pendingMembers.filter(
+            (m) => m?.id !== member.id,
+          ),
           members: isAlreadyMember ? prev.members : [...prev.members, member],
         };
       });
@@ -139,7 +143,7 @@ export function useWatchPartyMembers({
     const cleanupMemberLeft = onPartyMemberLeft(({ userId: leftId }) => {
       setRoom((prev) => {
         if (!prev) return null;
-        const member = prev.members.find((m) => m?.id === leftId);
+        const member = prev.members.find((m: RoomMember) => m?.id === leftId);
         if (member?.name) {
           toast.info(`${member.name} left`, { id: `member-left-${leftId}` });
         }
@@ -177,11 +181,50 @@ export function useWatchPartyMembers({
       });
     });
 
+    const cleanupPermissionsUpdate = onPartyPermissionsUpdated(
+      ({ permissions }) => {
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            permissions: {
+              ...prev.permissions,
+              ...permissions,
+            },
+          };
+        });
+      },
+    );
+
+    const cleanupMemberPermissionsUpdate = onPartyMemberPermissionsUpdated(
+      ({ memberId, permissions }) => {
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            members: prev.members.map((m) =>
+              m?.id === memberId
+                ? {
+                    ...m,
+                    permissions: {
+                      ...(m.permissions || {}),
+                      ...permissions,
+                    },
+                  }
+                : m,
+            ),
+          };
+        });
+      },
+    );
+
     return () => {
       cleanupMemberJoined();
       cleanupMemberLeft();
       cleanupMemberRejected();
       cleanupAdminRequest();
+      cleanupPermissionsUpdate();
+      cleanupMemberPermissionsUpdate();
     };
   }, [userId, socketId, onMemberJoined, setRoom]);
 

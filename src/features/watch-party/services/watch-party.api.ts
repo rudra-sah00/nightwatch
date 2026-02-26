@@ -3,6 +3,7 @@ import { getSocket } from '@/lib/socket';
 import type {
   ChatMessage, // New
   InteractionPayload,
+  MemberPermissionsUpdate,
   PartyAdminRequest,
   PartyClosed,
   PartyCreatePayload,
@@ -13,12 +14,15 @@ import type {
   PartyKicked,
   PartyMemberJoined,
   PartyMemberLeft,
+  PartyPermissionsUpdate,
   PartyPingPayload, // New
   PartyStateUpdate,
   PartySyncPayload,
+  RoomMember,
   RoomPreview,
+  SketchAction,
   WatchPartyRoom,
-} from './types';
+} from '../types';
 
 /**
  * REST API endpoints for room discovery and initial state retrieval.
@@ -578,4 +582,141 @@ export async function searchSounds(
   return apiFetch<SoundboardResponse>(
     `/api/soundboard/search?q=${encodeURIComponent(query)}&page=${page}`,
   );
+}
+
+// ============ Permissions & Sketch API ============
+
+export function updatePartyPermissions(
+  permissions: Partial<WatchPartyRoom['permissions']>,
+  callback?: Callback<{ permissions?: WatchPartyRoom['permissions'] }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('party:update_permissions', { permissions }, callback);
+}
+
+export function updateMemberPermissions(
+  memberId: string,
+  permissions: Partial<NonNullable<RoomMember['permissions']>>,
+  callback?: Callback<{
+    memberId?: string;
+    permissions?: RoomMember['permissions'];
+  }>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit(
+    'party:update_member_permissions',
+    { memberId, permissions },
+    callback,
+  );
+}
+
+export function onPartyPermissionsUpdated(
+  callback: (data: PartyPermissionsUpdate) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:permissions_updated', callback);
+  return () => socket.off('party:permissions_updated', callback);
+}
+
+export function onPartyMemberPermissionsUpdated(
+  callback: (data: MemberPermissionsUpdate) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('party:member_permissions_updated', callback);
+  return () => socket.off('party:member_permissions_updated', callback);
+}
+
+export function emitSketchDraw(
+  payload: SketchAction,
+  callback?: Callback<object>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('sketch:draw', payload, callback);
+}
+
+export function emitSketchClear(
+  payload: { type: 'all' | 'self' },
+  callback?: Callback<object>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('sketch:clear', payload, callback);
+}
+
+export function onSketchDraw(
+  callback: (data: SketchAction) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('sketch:draw', callback);
+  return () => socket.off('sketch:draw', callback);
+}
+
+export function onSketchClear(
+  callback: (data: { userId: string; type: 'all' | 'self' }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('sketch:clear', callback);
+  return () => socket.off('sketch:clear', callback);
+}
+
+// Emitted by a new user joining the room
+export function emitSketchRequestSync(): void {
+  const socket = getSocket();
+  if (!socket) return;
+  socket.emit('sketch:request_sync');
+}
+
+// Received by the Host when someone asks for sync
+export function onSketchProvideSync(
+  callback: (data: { requesterId: string }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('sketch:provide_sync', callback);
+  return () => socket.off('sketch:provide_sync', callback);
+}
+
+// Emitted by the Host with all current canvas elements
+export function emitSketchSyncState(
+  requesterId: string,
+  elements: SketchAction[],
+): void {
+  const socket = getSocket();
+  if (!socket) return;
+  socket.emit('sketch:sync_state', { requesterId, elements });
+}
+
+// Received by the requester with the current canvas elements
+export function onSketchSyncState(
+  callback: (data: { elements: SketchAction[] }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('sketch:sync_state', callback);
+  return () => socket.off('sketch:sync_state', callback);
 }

@@ -10,11 +10,11 @@ describe('SidebarTabs', () => {
   };
 
   describe('rendering', () => {
-    it('should render all three tabs (participants, chat, soundboard)', () => {
+    it('should render all four tabs (participants, chat, soundboard, sketch)', () => {
       render(<SidebarTabs {...defaultProps} />);
 
       const buttons = screen.getAllByRole('button');
-      expect(buttons).toHaveLength(3);
+      expect(buttons).toHaveLength(4);
     });
 
     it('should highlight active participants tab', () => {
@@ -103,7 +103,7 @@ describe('SidebarTabs', () => {
     it('should handle undefined unreadMessages', () => {
       render(<SidebarTabs {...defaultProps} unreadMessages={undefined} />);
       const buttons = screen.getAllByRole('button');
-      expect(buttons).toHaveLength(3);
+      expect(buttons).toHaveLength(4);
     });
   });
 });

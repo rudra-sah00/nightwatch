@@ -62,6 +62,8 @@ interface WatchPageProps {
   onSidebarToggle?: () => void;
   onNavigate?: (url: string) => void;
   hideBackButton?: boolean;
+  /** Hide all video controls and overlays (e.g. for sketch mode) */
+  hideControls?: boolean;
   /** Override default fullscreen toggle (e.g. for watch party theater mode) */
   fullscreenToggleOverride?: () => void;
   /** Override fullscreen state (for theater mode) */
@@ -85,6 +87,7 @@ export const WatchPage = memo(function WatchPage({
   onSidebarToggle,
   onNavigate,
   hideBackButton = false,
+  hideControls = false,
   fullscreenToggleOverride,
   isFullscreenOverride,
   onStreamExpired,
@@ -302,7 +305,7 @@ export const WatchPage = memo(function WatchPage({
       className={cn(
         'video-container relative w-full h-[100dvh] bg-black overflow-hidden select-none flex flex-col',
         'cursor-none',
-        state.showControls && 'cursor-auto',
+        state.showControls && !hideControls && 'cursor-auto',
       )}
       style={CONTAINER_STYLE}
       onMouseMove={showControls}
@@ -310,7 +313,12 @@ export const WatchPage = memo(function WatchPage({
       aria-label="Video Player"
     >
       {/* Mobile Header - Solid Top Bar */}
-      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <div
+        className={cn(
+          'relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5',
+          hideControls && 'hidden',
+        )}
+      >
         {!hideBackButton ? (
           <button
             type="button"
@@ -377,7 +385,7 @@ export const WatchPage = memo(function WatchPage({
         />
 
         {/* Next Episode Overlay - Netflix style */}
-        {nextEpisodeInfo ? (
+        {!hideControls && nextEpisodeInfo ? (
           <NextEpisodeOverlay
             key={showNextEpisode ? nextEpisodeInfo.episodeNumber : 'hidden'}
             isVisible={showNextEpisode}
@@ -389,38 +397,42 @@ export const WatchPage = memo(function WatchPage({
         ) : null}
 
         {/* Center Play Button - Netflix style pause overlay with movie info */}
-        <CenterPlayButton
-          isPlaying={state.isPlaying}
-          onToggle={handleTogglePlay}
-          metadata={pauseOverlayMetadata}
-          disabled={readOnly}
-          isLoading={state.isLoading}
-        />
+        {!hideControls && (
+          <CenterPlayButton
+            isPlaying={state.isPlaying}
+            onToggle={handleTogglePlay}
+            metadata={pauseOverlayMetadata}
+            disabled={readOnly}
+            isLoading={state.isLoading}
+          />
+        )}
 
         {/* Control Bar */}
-        <ControlBar
-          state={state}
-          metadata={metadata}
-          spriteVtt={spriteVtt}
-          onTogglePlay={handleTogglePlay}
-          onSeek={handleSeek}
-          onSkip={handleSkip}
-          onVolumeChange={handleVolumeChange}
-          onMuteToggle={handleMuteToggle}
-          onFullscreenToggle={toggleFullscreen}
-          onBack={handleBack}
-          onQualityChange={handleQualityChange}
-          onPlaybackRateChange={handlePlaybackRateChange}
-          onAudioChange={handleAudioChange}
-          onSubtitleChange={handleSubtitleChange}
-          subtitleSettings={subtitleSettings}
-          onSubtitleSettingsChange={setSubtitleSettings}
-          isMobile={isMobile}
-          readOnly={readOnly}
-          onSidebarToggle={onSidebarToggle}
-          hideBackButton={hideBackButton}
-          onInteraction={handleInteraction}
-        />
+        {!hideControls && (
+          <ControlBar
+            state={state}
+            metadata={metadata}
+            spriteVtt={spriteVtt}
+            onTogglePlay={handleTogglePlay}
+            onSeek={handleSeek}
+            onSkip={handleSkip}
+            onVolumeChange={handleVolumeChange}
+            onMuteToggle={handleMuteToggle}
+            onFullscreenToggle={toggleFullscreen}
+            onBack={handleBack}
+            onQualityChange={handleQualityChange}
+            onPlaybackRateChange={handlePlaybackRateChange}
+            onAudioChange={handleAudioChange}
+            onSubtitleChange={handleSubtitleChange}
+            subtitleSettings={subtitleSettings}
+            onSubtitleSettingsChange={setSubtitleSettings}
+            isMobile={isMobile}
+            readOnly={readOnly}
+            onSidebarToggle={onSidebarToggle}
+            hideBackButton={hideBackButton}
+            onInteraction={handleInteraction}
+          />
+        )}
       </div>
     </section>
   );

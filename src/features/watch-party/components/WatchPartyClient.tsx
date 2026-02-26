@@ -5,9 +5,10 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { SketchProvider } from '@/features/watch-party/context/SketchContext';
 import { usePredictiveSync } from '@/features/watch-party/hooks/usePredictiveSync';
+import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
 import type { RoomPreview } from '@/features/watch-party/types';
-import { useWatchParty } from '@/features/watch-party/useWatchParty';
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 
@@ -320,28 +321,30 @@ export function WatchPartyClient({
 
   if (isConnected && room) {
     return (
-      <ActiveWatchParty
-        room={room}
-        currentUserId={currentUserId}
-        isHost={isHost}
-        copied={copied}
-        onKick={kickUser}
-        onApprove={approveMember}
-        onReject={rejectMember}
-        onCopyLink={copyInviteLink}
-        onLeave={handleLeave}
-        onConfirmLeave={confirmLeave}
-        showLeaveDialog={showLeaveDialog}
-        onShowLeaveDialog={setShowLeaveDialog}
-        onPartyEvent={emitEvent}
-        videoRef={videoRef}
-        messages={messages}
-        onSendMessage={sendMessage}
-        onUpdateContent={updateContent}
-        typingUsers={typingUsers}
-        onTypingStart={handleTypingStart}
-        onTypingStop={handleTypingStop}
-      />
+      <SketchProvider>
+        <ActiveWatchParty
+          room={room}
+          currentUserId={currentUserId}
+          isHost={isHost}
+          copied={copied}
+          onKick={kickUser}
+          onApprove={approveMember}
+          onReject={rejectMember}
+          onCopyLink={copyInviteLink}
+          onLeave={handleLeave}
+          onConfirmLeave={confirmLeave}
+          showLeaveDialog={showLeaveDialog}
+          onShowLeaveDialog={setShowLeaveDialog}
+          onPartyEvent={emitEvent}
+          videoRef={videoRef}
+          messages={messages}
+          onSendMessage={sendMessage}
+          onUpdateContent={updateContent}
+          typingUsers={typingUsers}
+          onTypingStart={handleTypingStart}
+          onTypingStop={handleTypingStop}
+        />
+      </SketchProvider>
     );
   }
 

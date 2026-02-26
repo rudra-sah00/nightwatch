@@ -1,8 +1,8 @@
 import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { checkRoomExists } from '@/features/watch-party/api';
 import { WatchPartyClient } from '@/features/watch-party/components/WatchPartyClient';
+import { checkRoomExists } from '@/features/watch-party/services/watch-party.api';
 
 export const metadata: Metadata = {
   title: 'Watch Party | Watch Rudra',

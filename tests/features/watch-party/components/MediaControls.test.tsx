@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MediaControls } from '@/features/watch-party/components/MediaControls';
 import type { MediaDevice } from '@/features/watch-party/hooks/useAgora';
+import type { WatchPartyRoom } from '@/features/watch-party/types';
 
 describe('MediaControls', () => {
   const mockAudioDevices: MediaDevice[] = [
@@ -30,6 +31,28 @@ describe('MediaControls', () => {
     linkCopied: false,
     onCopyLink: vi.fn(),
     onLeave: vi.fn(),
+    room: {
+      id: 'test-room-1',
+      hostId: 'host-1',
+      contentId: 'content-1',
+      title: 'Test Content',
+      type: 'movie',
+      streamUrl: 'http://test.com/stream.m3u8',
+      members: [],
+      pendingMembers: [],
+      state: {
+        currentTime: 0,
+        isPlaying: false,
+        playbackRate: 1,
+        lastUpdated: 0,
+      },
+      permissions: {
+        canGuestsDraw: false,
+        canGuestsPlaySounds: true,
+        canGuestsChat: true,
+      },
+      createdAt: Date.now(),
+    } as WatchPartyRoom,
   };
 
   beforeEach(() => {

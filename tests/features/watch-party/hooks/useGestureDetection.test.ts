@@ -50,7 +50,7 @@ describe('useGestureDetection', () => {
       close: vi.fn().mockResolvedValue(undefined),
     };
 
-    vi.doMock('@/features/watch-party/api', () => ({
+    vi.doMock('@/features/watch-party/services/watch-party.api', () => ({
       emitPartyInteraction: vi.fn(),
     }));
 
@@ -73,7 +73,7 @@ describe('useGestureDetection', () => {
     }));
 
     // Re-import modules after reset
-    const api = await import('@/features/watch-party/api');
+    const api = await import('@/features/watch-party/services/watch-party.api');
     emitPartyInteraction = api.emitPartyInteraction;
 
     const hookModule = await import(

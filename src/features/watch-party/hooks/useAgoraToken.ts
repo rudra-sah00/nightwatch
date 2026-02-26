@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { env } from '@/lib/env';
-import { getAgoraToken } from '../agora-api';
+import { getAgoraToken } from '../services/agora.api';
 
 interface UseAgoraTokenOptions {
   roomId: string | undefined;

@@ -12,7 +12,19 @@ import {
   type SoundboardResponse,
   type SoundItem,
   searchSounds,
-} from '../../api';
+} from '../../services/watch-party.api';
+
+export function SoundboardDisabled() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/50 space-y-4">
+      <Volume2 className="w-12 h-12 opacity-50" />
+      <div className="space-y-1">
+        <h3 className="text-white font-medium">Soundboard Disabled</h3>
+        <p className="text-sm">The host has disabled soundboard for guests.</p>
+      </div>
+    </div>
+  );
+}
 
 export function Soundboard() {
   const [sounds, setSounds] = useState<SoundItem[]>([]);

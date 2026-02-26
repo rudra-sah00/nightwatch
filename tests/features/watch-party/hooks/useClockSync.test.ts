@@ -1,12 +1,12 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { emitPing } from '@/features/watch-party/api';
 import { useClockSync } from '@/features/watch-party/hooks/useClockSync';
+import { emitPing } from '@/features/watch-party/services/watch-party.api';
 
 // Mock the API
 vi.mock(
-  '@/features/watch-party/api',
-  () => import('./__mocks__/watch-party-api'),
+  '@/features/watch-party/services/watch-party.api',
+  () => import('../../../hooks/__mocks__/watch-party-api'),
 );
 
 describe('useClockSync', () => {

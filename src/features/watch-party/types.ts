@@ -5,6 +5,11 @@ export interface RoomMember {
   name: string;
   profilePhoto?: string;
   isHost: boolean;
+  permissions?: {
+    canDraw?: boolean;
+    canPlaySound?: boolean;
+    canChat?: boolean;
+  };
   joinedAt: number;
 }
 
@@ -36,6 +41,11 @@ export interface WatchPartyRoom {
   members: RoomMember[];
   pendingMembers: RoomMember[]; // New
   state: RoomState;
+  permissions: {
+    canGuestsDraw: boolean;
+    canGuestsPlaySounds: boolean;
+    canGuestsChat: boolean;
+  };
   createdAt: number;
 }
 
@@ -158,4 +168,34 @@ export interface InteractionPayload {
   userId: string;
   userName?: string;
   timestamp: string | number;
+}
+
+export interface SketchAction {
+  id: string;
+  type:
+    | 'freehand'
+    | 'pencil'
+    | 'arrow'
+    | 'line'
+    | 'circle'
+    | 'rectangle'
+    | 'triangle'
+    | 'star'
+    | 'text'
+    | 'laser';
+  color: string;
+  strokeWidth: number;
+  videoTimestamp: number;
+  data: number[];
+  text?: string;
+  userId?: string; // Added by server on broadcast
+}
+
+export interface PartyPermissionsUpdate {
+  permissions: Partial<WatchPartyRoom['permissions']>;
+}
+
+export interface MemberPermissionsUpdate {
+  memberId: string;
+  permissions: Partial<NonNullable<RoomMember['permissions']>>;
 }

@@ -77,6 +77,11 @@ describe('WatchPartyRoom Type', () => {
         lastUpdated: Date.now(),
         playbackRate: 1,
       },
+      permissions: {
+        canGuestsDraw: false,
+        canGuestsPlaySounds: true,
+        canGuestsChat: true,
+      },
       createdAt: Date.now(),
     };
 
@@ -102,6 +107,11 @@ describe('WatchPartyRoom Type', () => {
         isPlaying: false,
         lastUpdated: Date.now(),
         playbackRate: 1,
+      },
+      permissions: {
+        canGuestsDraw: false,
+        canGuestsPlaySounds: true,
+        canGuestsChat: true,
       },
       createdAt: Date.now(),
     };
@@ -140,6 +150,11 @@ describe('WatchPartyRoom Type', () => {
         isPlaying: false,
         lastUpdated: Date.now(),
         playbackRate: 1,
+      },
+      permissions: {
+        canGuestsDraw: false,
+        canGuestsPlaySounds: true,
+        canGuestsChat: true,
       },
       createdAt: Date.now(),
     };

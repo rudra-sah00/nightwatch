@@ -10,7 +10,7 @@ import {
   onPartyHostReconnected,
   onPartyStateUpdate,
   updatePartyContent,
-} from '../api';
+} from '../services/watch-party.api';
 import type { PartyStateUpdate, WatchPartyRoom } from '../types';
 
 interface UseWatchPartySyncProps {

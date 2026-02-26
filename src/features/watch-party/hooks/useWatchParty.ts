@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useSocket } from '@/providers/socket-provider';
-import { injectTokenIntoUrl, wrapInProxy } from '../watch/utils';
+import { injectTokenIntoUrl, wrapInProxy } from '../../watch/utils';
 
 import {
   getPartyMessages,
@@ -14,14 +14,14 @@ import {
   onPartyJoinRejected,
   onPartyKicked,
   requestPartyState,
-} from './api';
-import { useClockSync } from './hooks/useClockSync';
+} from '../services/watch-party.api';
+import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
+import { useClockSync } from './useClockSync';
 // Modular Hooks
-import { useWatchPartyChat } from './hooks/useWatchPartyChat';
-import { useWatchPartyLifecycle } from './hooks/useWatchPartyLifecycle';
-import { useWatchPartyMembers } from './hooks/useWatchPartyMembers';
-import { useWatchPartySync } from './hooks/useWatchPartySync';
-import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from './types';
+import { useWatchPartyChat } from './useWatchPartyChat';
+import { useWatchPartyLifecycle } from './useWatchPartyLifecycle';
+import { useWatchPartyMembers } from './useWatchPartyMembers';
+import { useWatchPartySync } from './useWatchPartySync';
 
 /**
  * Normalize room URLs by wrapping captions, sprites, and subtitle tracks through proxy.

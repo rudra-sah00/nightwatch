@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
-import { useWatchParty } from '@/features/watch-party/useWatchParty';
+import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetail } from '../hooks/use-content-detail';
 import { ContentType, type Episode } from '../types';

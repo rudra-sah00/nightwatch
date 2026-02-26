@@ -29,6 +29,48 @@ interface WatchPartyChatProps {
   onTypingStop?: () => void;
 }
 
+// Read-only variant for when chat is disabled
+export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
+  messages,
+  currentUserId,
+}: Pick<WatchPartyChatProps, 'messages' | 'currentUserId'>) {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  return (
+    <div className="flex flex-col h-full relative">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        {messages.map((msg, index) => {
+          const isMe = msg.userId === currentUserId;
+          const showHeader =
+            index === 0 ||
+            messages[index - 1].userId !== msg.userId ||
+            msg.timestamp - messages[index - 1].timestamp > 60000;
+
+          return (
+            <ChatMessageItem
+              key={msg.id}
+              message={msg}
+              isMe={isMe}
+              showHeader={showHeader}
+            />
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="p-4 bg-black/40 border-t border-white/10 backdrop-blur-md text-center">
+        <p className="text-xs text-white/30 italic">
+          Chat has been disabled by the host.
+        </p>
+      </div>
+    </div>
+  );
+});
+
 export const WatchPartyChat = memo(function WatchPartyChat({
   messages,
   onSendMessage,

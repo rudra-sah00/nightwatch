@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useCallback, useEffect, useState } from 'react';
-import { onPartyInteraction } from '../../api';
+import { onPartyInteraction } from '../../services/watch-party.api';
 
 interface FloatingEmoji {
   id: string;

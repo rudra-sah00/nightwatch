@@ -7,7 +7,7 @@ import {
 } from '@mediapipe/tasks-vision';
 import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef } from 'react';
-import { emitPartyInteraction } from '../api';
+import { emitPartyInteraction } from '../services/watch-party.api';
 
 // Singleton resolver promise to prevent redundant worker creation
 let visionResolver: ReturnType<typeof FilesetResolver.forVisionTasks> | null =

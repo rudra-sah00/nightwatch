@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { emitPing } from '../api';
+import { emitPing } from '../services/watch-party.api';
 
 /**
  * Hook to synchronize local clock with server time using NTP-style handshake

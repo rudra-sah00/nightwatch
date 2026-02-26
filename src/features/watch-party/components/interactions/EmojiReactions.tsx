@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { emitPartyInteraction } from '../../api';
+import { emitPartyInteraction } from '../../services/watch-party.api';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,

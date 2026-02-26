@@ -1,7 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { WatchPartySidebar } from '@/features/watch-party/components/WatchPartySidebar';
+import { SketchProvider } from '@/features/watch-party/context/SketchContext';
 import type { ChatMessage, WatchPartyRoom } from '@/features/watch-party/types';
+
+// Custom render to always include SketchProvider
+const render = (ui: ReactElement, options = {}) =>
+  rtlRender(<SketchProvider>{ui}</SketchProvider>, options);
 
 // Mock Agora hooks to avoid complex Agora setup
 const mockToggleAudio = vi.fn();
@@ -216,6 +222,11 @@ describe('WatchPartySidebar', () => {
       playbackRate: 1,
       lastUpdated: Date.now(),
     },
+    permissions: {
+      canGuestsDraw: false,
+      canGuestsPlaySounds: true,
+      canGuestsChat: true,
+    },
     createdAt: Date.now(),
   };
 
@@ -260,31 +271,26 @@ describe('WatchPartySidebar', () => {
   describe('rendering', () => {
     it('should render sidebar tabs', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       expect(screen.getByTestId('sidebar-tabs')).toBeInTheDocument();
     });
 
     it('should render video grid', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       expect(screen.getByTestId('video-grid')).toBeInTheDocument();
     });
 
     it('should render chat component', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       expect(screen.getByTestId('watch-party-chat')).toBeInTheDocument();
     });
 
     it('should render media controls', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       expect(screen.getByTestId('media-controls')).toBeInTheDocument();
     });
 
     it('should display current user name in media controls', () => {
       render(<WatchPartySidebar {...defaultProps} currentUserId="user-1" />);
-
       expect(screen.getByTestId('user-name')).toHaveTextContent('Host User');
     });
 
@@ -292,7 +298,6 @@ describe('WatchPartySidebar', () => {
       render(
         <WatchPartySidebar {...defaultProps} currentUserId="unknown-user" />,
       );
-
       expect(screen.getByTestId('user-name')).toHaveTextContent('You');
     });
   });
@@ -300,26 +305,21 @@ describe('WatchPartySidebar', () => {
   describe('tab switching', () => {
     it('should start on participants tab by default', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       const participantsTab = screen.getByTestId('tab-participants');
       expect(participantsTab).toHaveAttribute('data-active', 'true');
     });
 
     it('should switch to chat tab when clicked', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       fireEvent.click(screen.getByTestId('tab-chat'));
-
       const chatTab = screen.getByTestId('tab-chat');
       expect(chatTab).toHaveAttribute('data-active', 'true');
     });
 
     it('should switch back to participants tab', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       fireEvent.click(screen.getByTestId('tab-chat'));
       fireEvent.click(screen.getByTestId('tab-participants'));
-
       const participantsTab = screen.getByTestId('tab-participants');
       expect(participantsTab).toHaveAttribute('data-active', 'true');
     });
@@ -346,7 +346,6 @@ describe('WatchPartySidebar', () => {
           isHost={true}
         />,
       );
-
       expect(screen.getByTestId('pending-requests')).toBeInTheDocument();
     });
 
@@ -370,13 +369,11 @@ describe('WatchPartySidebar', () => {
           isHost={false}
         />,
       );
-
       expect(screen.queryByTestId('pending-requests')).not.toBeInTheDocument();
     });
 
     it('should not show pending requests when list is empty', () => {
       render(<WatchPartySidebar {...defaultProps} isHost={true} />);
-
       expect(screen.queryByTestId('pending-requests')).not.toBeInTheDocument();
     });
 
@@ -438,20 +435,17 @@ describe('WatchPartySidebar', () => {
   describe('video grid interactions', () => {
     it('should pass isHost to video grid', () => {
       render(<WatchPartySidebar {...defaultProps} isHost={true} />);
-
       expect(screen.getByTestId('is-host')).toHaveTextContent('host');
     });
 
     it('should pass currentUserId to video grid', () => {
       render(<WatchPartySidebar {...defaultProps} currentUserId="user-1" />);
-
       expect(screen.getByTestId('current-user-id')).toHaveTextContent('user-1');
     });
 
     it('should call onKick when kick is triggered', () => {
       const onKick = vi.fn();
       render(<WatchPartySidebar {...defaultProps} onKick={onKick} />);
-
       fireEvent.click(screen.getByTestId('kick-button'));
       expect(onKick).toHaveBeenCalledWith('user-2');
     });
@@ -460,14 +454,12 @@ describe('WatchPartySidebar', () => {
   describe('chat interactions', () => {
     it('should pass messages to chat', () => {
       render(<WatchPartySidebar {...defaultProps} />);
-
       expect(screen.getByTestId('message-count')).toHaveTextContent('2');
     });
 
     it('should pass typing users to chat', () => {
       const typingUsers = [{ userId: 'user-2', userName: 'Member User' }];
       render(<WatchPartySidebar {...defaultProps} typingUsers={typingUsers} />);
-
       expect(screen.getByTestId('typing-count')).toHaveTextContent('1');
     });
 
@@ -476,7 +468,6 @@ describe('WatchPartySidebar', () => {
       render(
         <WatchPartySidebar {...defaultProps} onSendMessage={onSendMessage} />,
       );
-
       fireEvent.click(screen.getByTestId('send-message'));
       expect(onSendMessage).toHaveBeenCalledWith('test');
     });
@@ -486,7 +477,6 @@ describe('WatchPartySidebar', () => {
       render(
         <WatchPartySidebar {...defaultProps} onTypingStart={onTypingStart} />,
       );
-
       fireEvent.click(screen.getByTestId('typing-start'));
       expect(onTypingStart).toHaveBeenCalled();
     });
@@ -496,7 +486,6 @@ describe('WatchPartySidebar', () => {
       render(
         <WatchPartySidebar {...defaultProps} onTypingStop={onTypingStop} />,
       );
-
       fireEvent.click(screen.getByTestId('typing-stop'));
       expect(onTypingStop).toHaveBeenCalled();
     });
@@ -506,7 +495,6 @@ describe('WatchPartySidebar', () => {
     it('should call onCopyLink when copy link is clicked', () => {
       const onCopyLink = vi.fn();
       render(<WatchPartySidebar {...defaultProps} onCopyLink={onCopyLink} />);
-
       fireEvent.click(screen.getByTestId('copy-link'));
       expect(onCopyLink).toHaveBeenCalled();
     });
@@ -514,14 +502,12 @@ describe('WatchPartySidebar', () => {
     it('should call onLeave when leave is clicked', () => {
       const onLeave = vi.fn();
       render(<WatchPartySidebar {...defaultProps} onLeave={onLeave} />);
-
       fireEvent.click(screen.getByTestId('leave-button'));
       expect(onLeave).toHaveBeenCalled();
     });
 
     it('should pass isHost to media controls', () => {
       render(<WatchPartySidebar {...defaultProps} isHost={true} />);
-
       expect(screen.getByTestId('media-is-host')).toHaveTextContent('host');
     });
   });
@@ -529,19 +515,16 @@ describe('WatchPartySidebar', () => {
   describe('edge cases', () => {
     it('should handle undefined currentUserId', () => {
       render(<WatchPartySidebar {...defaultProps} currentUserId={undefined} />);
-
       expect(screen.getByTestId('user-name')).toHaveTextContent('You');
     });
 
     it('should handle empty messages array', () => {
       render(<WatchPartySidebar {...defaultProps} messages={[]} />);
-
       expect(screen.getByTestId('message-count')).toHaveTextContent('0');
     });
 
     it('should handle undefined typingUsers', () => {
       render(<WatchPartySidebar {...defaultProps} typingUsers={undefined} />);
-
       expect(screen.getByTestId('typing-count')).toHaveTextContent('0');
     });
 
@@ -549,7 +532,6 @@ describe('WatchPartySidebar', () => {
       const { container } = render(
         <WatchPartySidebar {...defaultProps} className="custom-class" />,
       );
-
       expect(container.firstChild).toHaveClass('custom-class');
     });
   });

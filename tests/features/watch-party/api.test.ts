@@ -12,7 +12,7 @@ import {
   searchSounds,
   sendPartyMessage,
   syncPartyState,
-} from '@/features/watch-party/api';
+} from '@/features/watch-party/services/watch-party.api';
 import type {
   PartyCreatePayload,
   PartyEvent,

@@ -1,9 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { Socket } from 'socket.io-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
 import * as api from '@/features/watch-party/services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '@/features/watch-party/types';
+import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
 import * as ws from '@/lib/socket';
 
 // Mock dependencies
@@ -1160,7 +1160,7 @@ describe('useWatchParty', () => {
   describe('onPartyContentUpdated event handler', () => {
     it('should update room when content is updated with token', async () => {
       let contentUpdateHandler: (data: { room: WatchPartyRoom }) => void =
-        () => {};
+        () => { };
 
       vi.mocked(api.onPartyContentUpdated).mockImplementation((handler) => {
         contentUpdateHandler = handler;
@@ -1219,7 +1219,7 @@ describe('useWatchParty', () => {
 
     it('should fallback when token fetch fails', async () => {
       let contentUpdateHandler: (data: { room: WatchPartyRoom }) => void =
-        () => {};
+        () => { };
 
       vi.mocked(api.onPartyContentUpdated).mockImplementation((handler) => {
         contentUpdateHandler = handler;
@@ -1272,7 +1272,7 @@ describe('useWatchParty', () => {
         userId: string;
         userName: string;
         isTyping: boolean;
-      }) => void = () => {};
+      }) => void = () => { };
 
       vi.mocked(api.onUserTyping).mockImplementation((handler) => {
         typingHandler = handler;
@@ -1303,7 +1303,7 @@ describe('useWatchParty', () => {
         userId: string;
         userName: string;
         isTyping: boolean;
-      }) => void = () => {};
+      }) => void = () => { };
 
       vi.mocked(api.onUserTyping).mockImplementation((handler) => {
         typingHandler = handler;
@@ -1327,7 +1327,7 @@ describe('useWatchParty', () => {
         userId: string;
         userName: string;
         isTyping: boolean;
-      }) => void = () => {};
+      }) => void = () => { };
 
       vi.mocked(api.onUserTyping).mockImplementation((handler) => {
         typingHandler = handler;
@@ -2327,7 +2327,7 @@ describe('useWatchParty', () => {
     it('should show toast with member name when member leaves', async () => {
       const { toast } = await import('sonner');
 
-      let memberLeftHandler: (data: { userId: string }) => void = () => {};
+      let memberLeftHandler: (data: { userId: string }) => void = () => { };
       vi.mocked(api.onPartyMemberLeft).mockImplementation((handler) => {
         memberLeftHandler = handler;
         return vi.fn();
@@ -2398,7 +2398,7 @@ describe('useWatchParty', () => {
     it('should clear state and navigate to home for authenticated users', async () => {
       const { toast } = await import('sonner');
 
-      let closedHandler: (data: { reason: string }) => void = () => {};
+      let closedHandler: (data: { reason: string }) => void = () => { };
       vi.mocked(api.onPartyClosed).mockImplementation((handler) => {
         closedHandler = handler;
         return vi.fn();
@@ -2438,7 +2438,7 @@ describe('useWatchParty', () => {
       let disconnectHandler: (data: {
         graceSeconds: number;
         message: string;
-      }) => void = () => {};
+      }) => void = () => { };
       vi.mocked(api.onPartyHostDisconnected).mockImplementation((handler) => {
         disconnectHandler = handler;
         return vi.fn();
@@ -2465,8 +2465,8 @@ describe('useWatchParty', () => {
       let disconnectHandler: (data: {
         graceSeconds: number;
         message: string;
-      }) => void = () => {};
-      let reconnectHandler: () => void = () => {};
+      }) => void = () => { };
+      let reconnectHandler: () => void = () => { };
 
       vi.mocked(api.onPartyHostDisconnected).mockImplementation((handler) => {
         disconnectHandler = handler;
@@ -2502,7 +2502,7 @@ describe('useWatchParty', () => {
     it('should NOT show reconnected toast if not previously disconnected', async () => {
       const { toast } = await import('sonner');
 
-      let reconnectHandler: () => void = () => {};
+      let reconnectHandler: () => void = () => { };
       vi.mocked(api.onPartyHostReconnected).mockImplementation((handler) => {
         reconnectHandler = handler;
         return vi.fn();
@@ -2527,7 +2527,7 @@ describe('useWatchParty', () => {
   describe('onPartyJoinRejected', () => {
     it('should set rejected status and error when pending', async () => {
       let rejectedHandler: (data: { roomId: string; reason: string }) => void =
-        () => {};
+        () => { };
       vi.mocked(api.onPartyJoinRejected).mockImplementation((handler) => {
         rejectedHandler = handler;
         return vi.fn();
@@ -2636,7 +2636,7 @@ describe('useWatchParty', () => {
       const { toast } = await import('sonner');
 
       let memberJoinedHandler: (data: { member: RoomMember }) => void =
-        () => {};
+        () => { };
       vi.mocked(api.onPartyMemberJoined).mockImplementation((handler) => {
         memberJoinedHandler = handler;
         return vi.fn();
@@ -2665,7 +2665,7 @@ describe('useWatchParty', () => {
       const { toast } = await import('sonner');
 
       let memberJoinedHandler: (data: { member: RoomMember }) => void =
-        () => {};
+        () => { };
       vi.mocked(api.onPartyMemberJoined).mockImplementation((handler) => {
         memberJoinedHandler = handler;
         return vi.fn();
@@ -2779,190 +2779,3 @@ describe('useWatchParty', () => {
         });
       }
 
-      await waitFor(() => {
-        expect(api.requestPartyState).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('coverage gaps', () => {
-    it('should store guest token in sessionStorage on join approved', async () => {
-      renderHook(() => useWatchParty({}));
-
-      const handler = vi.mocked(api.onPartyJoinApproved).mock.calls[0][0];
-      await act(async () => {
-        handler({
-          room: {
-            id: '1',
-            members: [],
-            pendingMembers: [],
-            state: {
-              lastUpdated: Date.now(),
-              currentTime: 0,
-              isPlaying: false,
-              playbackRate: 1,
-            },
-            permissions: {
-              canGuestsDraw: true,
-              canGuestsPlaySounds: true,
-              canGuestsChat: true,
-            },
-          } as unknown as WatchPartyRoom,
-          streamToken: 'test-token',
-          guestToken: 'test-guest-token',
-        });
-      });
-
-      expect(sessionStorage.getItem('guest_token')).toBe('test-guest-token');
-    });
-
-    it('should retry requestPartyState on connection', async () => {
-      vi.useFakeTimers();
-
-      const initialRoom = {
-        id: 'room-1',
-        hostId: 'host-1',
-        members: [],
-        pendingMembers: [],
-        state: {
-          lastUpdated: Date.now(),
-          currentTime: 0,
-          isPlaying: false,
-          playbackRate: 1,
-        },
-        permissions: {
-          canGuestsDraw: true,
-          canGuestsPlaySounds: true,
-          canGuestsChat: true,
-        },
-      };
-      renderHook(() => useWatchParty({ userId: 'guest-1' }));
-
-      // Setup room state
-      act(() => {
-        const joinHandler = vi.mocked(api.onPartyJoinApproved).mock.calls[0][0];
-        joinHandler({
-          room: initialRoom as unknown as WatchPartyRoom,
-          streamToken: 'token',
-        });
-      });
-
-      await act(async () => {
-        vi.advanceTimersByTime(501);
-      });
-      expect(api.requestPartyState).toHaveBeenCalled();
-
-      await act(async () => {
-        vi.advanceTimersByTime(1001); // For timer2 (1500)
-      });
-      expect(api.requestPartyState).toHaveBeenCalledTimes(2);
-
-      vi.useRealTimers();
-    });
-
-    it('should show toast when someone else leaves', async () => {
-      const { toast } = await import('sonner');
-      const { getSocket } = await import('@/lib/socket');
-      vi.mocked(getSocket).mockReturnValue({
-        id: 'my-socket-id',
-        connected: true,
-      } as unknown as Socket);
-
-      renderHook(() => useWatchParty({ userId: 'host-1' }));
-
-      // Setup room with Alice
-      const mockRoom = {
-        id: 'r1',
-        members: [{ id: 'user-2', name: 'Alice', permissions: {} }],
-        pendingMembers: [],
-        state: {
-          lastUpdated: Date.now(),
-          currentTime: 0,
-          isPlaying: false,
-          playbackRate: 1,
-        },
-        permissions: {
-          canGuestsDraw: true,
-          canGuestsPlaySounds: true,
-          canGuestsChat: true,
-        },
-      };
-
-      const onJoinApproved = vi.mocked(api.onPartyJoinApproved).mock
-        .calls[0][0];
-      await act(async () => {
-        onJoinApproved({
-          room: mockRoom as unknown as WatchPartyRoom,
-          streamToken: 'token',
-        });
-      });
-
-      const onMemberLeft = vi.mocked(api.onPartyMemberLeft).mock.calls[0][0];
-      await act(async () => {
-        onMemberLeft({ userId: 'user-2' });
-      });
-
-      expect(toast.info).toHaveBeenCalledWith(
-        expect.stringContaining('Alice left'),
-        expect.any(Object),
-      );
-    });
-
-    it('should handle kickUser', async () => {
-      const { toast } = await import('sonner');
-      const { result } = renderHook(() => useWatchParty({}));
-
-      vi.mocked(api.kickMember).mockImplementation((_id, cb) =>
-        cb({ success: true }),
-      );
-
-      await act(async () => {
-        result.current.kickUser('user-2');
-      });
-      expect(api.kickMember).toHaveBeenCalledWith(
-        'user-2',
-        expect.any(Function),
-      );
-      expect(toast.success).toHaveBeenCalledWith('Member removed');
-    });
-
-    it('should update member permissions', async () => {
-      const { result } = renderHook(() => useWatchParty({}));
-
-      const onPerms = vi.mocked(api.onPartyMemberPermissionsUpdated).mock
-        .calls[0][0];
-
-      const mockRoom = {
-        id: 'r1',
-        members: [{ id: 'u2', name: 'A', permissions: { canDraw: false } }],
-        pendingMembers: [],
-        state: {
-          lastUpdated: Date.now(),
-          currentTime: 0,
-          isPlaying: false,
-          playbackRate: 1,
-        },
-        permissions: {
-          canGuestsDraw: true,
-          canGuestsPlaySounds: true,
-          canGuestsChat: true,
-        },
-      };
-
-      const onJoinApproved = vi.mocked(api.onPartyJoinApproved).mock
-        .calls[0][0];
-      await act(async () => {
-        onJoinApproved({
-          room: mockRoom as unknown as WatchPartyRoom,
-          streamToken: 'token',
-        });
-      });
-
-      await act(async () => {
-        onPerms({ memberId: 'u2', permissions: { canDraw: true } });
-      });
-
-      expect(result.current.room?.members?.[0].permissions?.canDraw).toBe(true);
-    });
-  });
-});
