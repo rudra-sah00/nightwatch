@@ -54,7 +54,7 @@ export function AiLandingView({
                 type="button"
                 data-testid="prompt-card"
                 onClick={() => onSendMessage(undefined, prompt.text)}
-                className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border transition-all text-left group"
+                className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border transition-colors text-left group"
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">
                   {prompt.icon}
@@ -86,7 +86,7 @@ export function AiLandingView({
                 size="icon"
                 data-testid="landing-send"
                 className={cn(
-                  'absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full transition-all duration-200',
+                  'absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full transition-[colors,transform] duration-200',
                   inputValue.trim()
                     ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105'
                     : 'bg-white/5 text-white/20',

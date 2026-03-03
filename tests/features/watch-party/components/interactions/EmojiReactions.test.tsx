@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EmojiReactions } from '@/features/watch-party/components/interactions/EmojiReactions';
-import { emitPartyInteraction } from '@/features/watch-party/services/watch-party.api';
+import { EmojiReactions } from '@/features/watch-party/interactions/components/EmojiReactions';
+import { emitPartyInteraction } from '@/features/watch-party/room/services/watch-party.api';
 
 // Mock the API
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   emitPartyInteraction: vi.fn(),
 }));
 

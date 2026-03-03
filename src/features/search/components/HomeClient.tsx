@@ -2,14 +2,11 @@
 
 import { Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/layout/navbar';
-import { searchContent } from '@/features/search/api';
 import { SearchResults } from '@/features/search/components/search-results';
 import type { SearchResult } from '@/features/search/types';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
+import { useHomeClient } from '../hooks/use-home-client';
 
 // Dynamic import for heavy modal component
 const ContentDetailModal = dynamic(
@@ -21,10 +18,15 @@ const ContentDetailModal = dynamic(
 );
 
 const EmptySearchPrompt = () => (
-  <div className="flex items-center justify-center min-h-[70vh] text-center">
-    <div>
-      <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-      <p className="text-muted-foreground">
+  <div className="flex flex-col items-center justify-center min-h-[400px] py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+    <div className="bg-muted/5 p-8 rounded-full mb-6 ring-1 ring-white/5 shadow-2xl">
+      <Search className="w-12 h-12 text-muted-foreground/20 mx-auto" />
+    </div>
+    <div className="space-y-2 max-w-[280px] mx-auto">
+      <h3 className="text-lg font-medium text-foreground/80">
+        Start Exploring
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
         Search for movies and TV shows to start watching
       </p>
     </div>
@@ -37,126 +39,65 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ initialResults, initialQuery }: HomeClientProps) {
-  const searchParams = useSearchParams();
-  const query = searchParams.get('q') || initialQuery;
-
-  const [results, setResults] = useState<SearchResult[]>(initialResults);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSearching, startTransition] = useTransition();
-  const [hasSearched, setHasSearched] = useState(!!initialQuery);
-  const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
-    null,
-  );
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(
-    null,
-  );
-  const [fromContinueWatching, setFromContinueWatching] = useState(false);
-  const [continueWatchingCount, setContinueWatchingCount] = useState(0);
-
-  useEffect(() => {
-    // Skip initial fetch if we already have results from server or no query
-    if (!query.trim()) {
-      startTransition(() => {
-        setResults([]);
-        setHasSearched(false);
-      });
-      return;
-    }
-
-    // If query matches initialQuery and we have initialResults, skip first fetch
-    if (query === initialQuery && initialResults.length > 0) {
-      return;
-    }
-
-    // INSTANT FEEDBACK: Immediately show loading state when query changes and we need to fetch
-    setIsLoading(true);
-
-    const controller = new AbortController();
-    const fetchResults = async () => {
-      setHasSearched(true);
-
-      try {
-        const data = await searchContent(query, { signal: controller.signal });
-        if (!controller.signal.aborted) {
-          startTransition(() => {
-            setResults(data);
-          });
-        }
-      } catch (_error: unknown) {
-        if (!controller.signal.aborted) {
-          toast.error('Search failed');
-          startTransition(() => setResults([]));
-        }
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
-      }
-    };
-
-    fetchResults();
-    return () => controller.abort();
-  }, [query, initialQuery, initialResults]);
-
-  const handleSelectContent = useCallback((result: SearchResult) => {
-    setSelectedContent(result);
-    setSelectedContentId(null);
-    setFromContinueWatching(false);
-  }, []);
-
-  const handleContinueWatchingSelect = useCallback((contentId: string) => {
-    setSelectedContent(null);
-    setSelectedContentId(contentId);
-    setFromContinueWatching(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedContent(null);
-    setSelectedContentId(null);
-    setFromContinueWatching(false);
-  }, []);
-
-  const handleContinueWatchingLoad = useCallback((count: number) => {
-    setContinueWatchingCount(count);
-  }, []);
-
-  const isTransitioning = isLoading || isSearching;
+  const {
+    query,
+    results,
+    isTransitioning,
+    hasSearched,
+    selectedContent,
+    selectedContentId,
+    fromContinueWatching,
+    continueWatchingCount,
+    isContinueWatchingLoading,
+    handleSelectContent,
+    handleContinueWatchingSelect,
+    handleCloseModal,
+    handleContinueWatchingLoad,
+  } = useHomeClient({ initialResults, initialQuery });
 
   return (
     <>
       <Navbar isLoading={isTransitioning} />
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {query.trim() ? (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">
-                  {isTransitioning ? 'Searching...' : `Results for "${query}"`}
-                </h1>
-                {!isTransitioning && hasSearched ? (
-                  <p className="text-sm text-muted-foreground">
-                    {results.length} results found
-                  </p>
-                ) : null}
+      <main className="container mx-auto px-4 py-8 max-w-4xl min-h-[calc(100vh-80px)] flex flex-col">
+        <div className="flex-1">
+          {query.trim() ? (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <Search className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <h1 className="text-xl font-semibold text-foreground">
+                    {isTransitioning
+                      ? 'Searching...'
+                      : `Results for "${query}"`}
+                  </h1>
+                  {!isTransitioning && hasSearched ? (
+                    <p className="text-sm text-muted-foreground">
+                      {results.length} results found
+                    </p>
+                  ) : null}
+                </div>
               </div>
-            </div>
 
-            <SearchResults
-              results={results}
-              isLoading={isTransitioning}
-              onSelect={handleSelectContent}
-            />
-          </div>
-        ) : (
-          <div className="space-y-8">
-            <ContinueWatching
-              onSelectContent={handleContinueWatchingSelect}
-              onLoadComplete={handleContinueWatchingLoad}
-            />
-            {continueWatchingCount === 0 && !isLoading ? (
-              <EmptySearchPrompt />
-            ) : null}
-          </div>
-        )}
+              <SearchResults
+                results={results}
+                isLoading={isTransitioning}
+                onSelect={handleSelectContent}
+              />
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <ContinueWatching
+                onSelectContent={handleContinueWatchingSelect}
+                onLoadComplete={handleContinueWatchingLoad}
+              />
+              {continueWatchingCount === 0 &&
+              !isTransitioning &&
+              !isContinueWatchingLoading ? (
+                <EmptySearchPrompt />
+              ) : null}
+            </div>
+          )}
+        </div>
       </main>
 
       {selectedContent || selectedContentId ? (

@@ -2,7 +2,7 @@ import { Crown, Loader2, UserMinus, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Captcha } from '@/components/ui/captcha';
 import type { User } from '@/types';
-import type { RoomPreview } from '../types';
+import type { RoomPreview } from '../room/types';
 
 interface WatchPartyLobbyProps {
   roomPreview: RoomPreview | null;
@@ -78,7 +78,7 @@ export function WatchPartyLobby({
           <button
             type="button"
             onClick={onCancelRequest || onLeave}
-            className="mt-6 text-sm text-red-500 hover:text-red-400"
+            className="mt-6 text-sm text-danger hover:opacity-80"
           >
             Cancel Request
           </button>
@@ -91,7 +91,7 @@ export function WatchPartyLobby({
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
         <div className="max-w-md w-full bg-card rounded-2xl p-8 shadow-lg border border-border text-center">
-          <UserMinus className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <UserMinus className="w-12 h-12 text-danger mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Request Rejected</h2>
           <p className="text-muted-foreground">
             The host has declined your request to join.
@@ -129,7 +129,7 @@ export function WatchPartyLobby({
               </p>
             ) : null}
             <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-              <Crown className="w-4 h-4 text-yellow-500" />
+              <Crown className="w-4 h-4 text-host" />
               <span>Hosted by {roomPreview.hostName}</span>
             </div>
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
@@ -170,7 +170,7 @@ export function WatchPartyLobby({
                     }}
                   />
                   {captchaToken ? (
-                    <p className="text-xs text-green-500 text-center mt-1">
+                    <p className="text-xs text-success text-center mt-1">
                       ✓ Verified
                     </p>
                   ) : null}
@@ -201,7 +201,7 @@ export function WatchPartyLobby({
 
           {error ? (
             <div className="mt-3 text-center">
-              <p className="text-red-500 text-sm">{error}</p>
+              <p className="text-danger text-sm">{error}</p>
               {errorCode ? (
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-50">
                   Code: {errorCode}

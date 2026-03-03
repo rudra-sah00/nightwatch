@@ -127,10 +127,10 @@ describe('ChangePasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockChangePassword).toHaveBeenCalledWith(
-          'currentPass123',
-          'NewPass1!',
-        );
+        expect(mockChangePassword).toHaveBeenCalledWith({
+          currentPassword: 'currentPass123',
+          newPassword: 'NewPass1!',
+        });
       });
     });
 

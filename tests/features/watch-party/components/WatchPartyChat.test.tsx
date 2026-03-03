@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { WatchPartyChat } from '@/features/watch-party/components/WatchPartyChat';
-import type { ChatMessage } from '@/features/watch-party/types';
+import { WatchPartyChat } from '@/features/watch-party/chat/components/WatchPartyChat';
+import type { ChatMessage } from '@/features/watch-party/room/types';
 
 // Mock emoji-picker-react with functional onEmojiClick support
 vi.mock('emoji-picker-react', () => ({
@@ -23,6 +23,29 @@ vi.mock('emoji-picker-react', () => ({
   ),
   EmojiStyle: {},
   Theme: {},
+}));
+
+// Mock next/dynamic to render components synchronously in tests
+vi.mock('next/dynamic', () => ({
+  default: (_importFn: unknown, _opts?: unknown) => {
+    return function EmojiPickerWrapper({
+      onEmojiClick,
+    }: {
+      onEmojiClick?: (emoji: { emoji: string }) => void;
+    }) {
+      return (
+        <div data-testid="emoji-picker">
+          <button
+            data-testid="emoji-😊"
+            onClick={() => onEmojiClick?.({ emoji: '😊' })}
+            type="button"
+          >
+            😊
+          </button>
+        </div>
+      );
+    };
+  },
 }));
 
 describe('WatchPartyChat', () => {

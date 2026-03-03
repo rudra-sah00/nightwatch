@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { updateProfileSchema } from '@/features/profile/schema';
+import {
+  changePasswordSchema,
+  updateProfileSchema,
+} from '@/features/profile/schema';
 import { searchQuerySchema } from '@/features/search/schema';
 
 describe('Search Schema', () => {
@@ -71,23 +74,27 @@ describe('Search Schema', () => {
 
 describe('Profile Schema', () => {
   describe('updateProfileSchema', () => {
-    it('should validate correct profile update', () => {
-      const validData = {
+    it('should validate with all fields', () => {
+      const result = updateProfileSchema.safeParse({
         name: 'Test User',
-        email: 'test@example.com',
-      };
+        username: 'testuser',
+        preferredServer: 's1',
+      });
+      expect(result.success).toBe(true);
+    });
 
-      const result = updateProfileSchema.safeParse(validData);
+    it('should accept empty object (all fields optional)', () => {
+      const result = updateProfileSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept partial update with only name', () => {
+      const result = updateProfileSchema.safeParse({ name: 'Jo' });
       expect(result.success).toBe(true);
     });
 
     it('should reject name shorter than 2 characters', () => {
-      const invalidData = {
-        name: 'T',
-        email: 'test@example.com',
-      };
-
-      const result = updateProfileSchema.safeParse(invalidData);
+      const result = updateProfileSchema.safeParse({ name: 'T' });
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
@@ -96,95 +103,105 @@ describe('Profile Schema', () => {
       }
     });
 
-    it('should accept name with exactly 2 characters', () => {
-      const validData = {
-        name: 'Jo',
-        email: 'test@example.com',
-      };
-
-      const result = updateProfileSchema.safeParse(validData);
-      expect(result.success).toBe(true);
-    });
-
-    it('should reject invalid email format', () => {
-      const invalidData = {
-        name: 'Test User',
-        email: 'invalid-email',
-      };
-
-      const result = updateProfileSchema.safeParse(invalidData);
+    it('should reject username shorter than 3 characters', () => {
+      const result = updateProfileSchema.safeParse({ username: 'ab' });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid email address');
+        expect(result.error.issues[0].message).toBe(
+          'Username must be at least 3 characters',
+        );
       }
     });
 
-    it('should accept email with plus addressing', () => {
-      const validData = {
-        name: 'Test User',
-        email: 'test+tag@example.com',
-      };
+    it('should reject username with special characters', () => {
+      const result = updateProfileSchema.safeParse({ username: 'test-user!' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'Username can only contain letters, numbers, and underscores',
+        );
+      }
+    });
 
-      const result = updateProfileSchema.safeParse(validData);
+    it('should accept username with underscores', () => {
+      const result = updateProfileSchema.safeParse({
+        username: 'test_user_123',
+      });
       expect(result.success).toBe(true);
     });
 
-    it('should accept email with subdomain', () => {
-      const validData = {
-        name: 'Test User',
-        email: 'test@mail.example.com',
-      };
-
-      const result = updateProfileSchema.safeParse(validData);
-      expect(result.success).toBe(true);
-    });
-
-    it('should reject email without @ symbol', () => {
-      const invalidData = {
-        name: 'Test User',
-        email: 'testexample.com',
-      };
-
-      const result = updateProfileSchema.safeParse(invalidData);
+    it('should reject invalid preferredServer value', () => {
+      const result = updateProfileSchema.safeParse({ preferredServer: 's3' });
       expect(result.success).toBe(false);
     });
 
-    it('should reject email without domain', () => {
-      const invalidData = {
-        name: 'Test User',
-        email: 'test@',
-      };
+    it('should accept preferredServer s1 and s2', () => {
+      expect(
+        updateProfileSchema.safeParse({ preferredServer: 's1' }).success,
+      ).toBe(true);
+      expect(
+        updateProfileSchema.safeParse({ preferredServer: 's2' }).success,
+      ).toBe(true);
+    });
+  });
 
-      const result = updateProfileSchema.safeParse(invalidData);
+  describe('changePasswordSchema', () => {
+    const valid = {
+      currentPassword: 'OldPass123!',
+      newPassword: 'NewPass123!',
+      confirmPassword: 'NewPass123!',
+    };
+
+    it('should validate a correct password change', () => {
+      expect(changePasswordSchema.safeParse(valid).success).toBe(true);
+    });
+
+    it('should reject when passwords do not match', () => {
+      const result = changePasswordSchema.safeParse({
+        ...valid,
+        confirmPassword: 'Different123!',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'New passwords do not match',
+        );
+      }
+    });
+
+    it('should reject newPassword shorter than 8 characters', () => {
+      const result = changePasswordSchema.safeParse({
+        ...valid,
+        newPassword: 'Ab1!',
+        confirmPassword: 'Ab1!',
+      });
       expect(result.success).toBe(false);
     });
 
-    it('should reject missing name field', () => {
-      const invalidData = {
-        email: 'test@example.com',
-      };
-
-      const result = updateProfileSchema.safeParse(invalidData);
+    it('should reject newPassword without uppercase letter', () => {
+      const result = changePasswordSchema.safeParse({
+        ...valid,
+        newPassword: 'newpass123!',
+        confirmPassword: 'newpass123!',
+      });
       expect(result.success).toBe(false);
     });
 
-    it('should reject missing email field', () => {
-      const invalidData = {
-        name: 'Test User',
-      };
-
-      const result = updateProfileSchema.safeParse(invalidData);
+    it('should reject newPassword without special character', () => {
+      const result = changePasswordSchema.safeParse({
+        ...valid,
+        newPassword: 'NewPass123',
+        confirmPassword: 'NewPass123',
+      });
       expect(result.success).toBe(false);
     });
 
-    it('should accept long names', () => {
-      const validData = {
-        name: 'This is a very long name with many characters',
-        email: 'test@example.com',
-      };
-
-      const result = updateProfileSchema.safeParse(validData);
-      expect(result.success).toBe(true);
+    it('should reject empty currentPassword', () => {
+      const result = changePasswordSchema.safeParse({
+        ...valid,
+        currentPassword: '',
+      });
+      expect(result.success).toBe(false);
     });
   });
 });

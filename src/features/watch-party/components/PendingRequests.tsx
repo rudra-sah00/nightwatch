@@ -1,6 +1,6 @@
 import { Check, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
-import type { RoomMember } from '../types';
+import type { RoomMember } from '../room/types';
 
 interface PendingRequestsProps {
   pendingMembers: RoomMember[];
@@ -63,18 +63,20 @@ export function PendingRequests({
               <button
                 type="button"
                 onClick={() => onApprove(pending.id)}
-                className="p-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 active:scale-95 transition-all"
+                className="p-1.5 rounded-lg hover:opacity-80 active:scale-95 transition-[opacity,transform] text-success"
+                style={{ backgroundColor: 'var(--success-bg)' }}
                 title="Approve"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check aria-hidden="true" className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => onReject(pending.id)}
-                className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 active:scale-95 transition-all"
+                className="p-1.5 rounded-lg hover:opacity-80 active:scale-95 transition-[opacity,transform] text-danger"
+                style={{ backgroundColor: 'var(--danger-bg)' }}
                 title="Reject"
               >
-                <X className="w-3.5 h-3.5" />
+                <X aria-hidden="true" className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

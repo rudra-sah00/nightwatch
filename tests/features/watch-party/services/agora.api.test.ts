@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getAgoraToken } from '@/features/watch-party/services/agora.api';
+import { getAgoraToken } from '@/features/watch-party/media/services/agora.api';
 
 vi.mock('@/lib/env', () => ({
   env: {

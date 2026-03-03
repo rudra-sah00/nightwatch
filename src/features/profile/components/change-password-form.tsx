@@ -1,84 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
-import { changePassword } from '../api';
+import { useChangePasswordForm } from '../hooks/use-change-password-form';
 
 export function ChangePasswordForm() {
-  const [_isLoading, _setIsLoading] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-
-  const [state, action, isPending] = React.useActionState(
-    async (
-      _prevState: { message: string; type: string } | null,
-      formData: FormData,
-    ) => {
-      const currentPassword = formData.get('current') as string;
-      const newPassword = formData.get('new') as string;
-      const confirmPassword = formData.get('confirm') as string;
-
-      if (newPassword !== confirmPassword) {
-        return { message: 'New passwords do not match', type: 'error' };
-      }
-
-      if (newPassword.length < 8) {
-        return {
-          message: 'Password must be at least 8 characters',
-          type: 'error',
-        };
-      }
-
-      if (!/[A-Z]/.test(newPassword)) {
-        return {
-          message: 'Password must contain at least one uppercase letter',
-          type: 'error',
-        };
-      }
-
-      if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
-        return {
-          message: 'Password must contain at least one special character',
-          type: 'error',
-        };
-      }
-
-      try {
-        await changePassword(currentPassword, newPassword);
-        return { message: 'Password updated successfully', type: 'success' };
-      } catch (err) {
-        const error = err as Error;
-        return {
-          message: error.message || 'Failed to update password',
-          type: 'error',
-        };
-      }
-    },
-    null,
-  );
-
-  useEffect(() => {
-    if (state) {
-      if (state.type === 'success') {
-        toast.success(state.message);
-        setSuccess(true);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else if (state.type === 'error') {
-        setError(state.message);
-        toast.error(state.message);
-      }
-    }
-  }, [state]);
+  const {
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    success,
+    action,
+    isPending,
+  } = useChangePasswordForm();
 
   return (
     <form action={action} className="space-y-6 max-w-md">
@@ -96,7 +37,7 @@ export function ChangePasswordForm() {
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           required
-          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20 transition-colors"
         />
       </div>
       <div className="space-y-3">
@@ -116,7 +57,7 @@ export function ChangePasswordForm() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
-          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20 transition-colors"
         />
         <PasswordStrengthIndicator password={newPassword} />
       </div>
@@ -134,7 +75,7 @@ export function ChangePasswordForm() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+          className="h-12 px-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20 transition-colors"
         />
       </div>
 
@@ -183,7 +124,7 @@ export function ChangePasswordForm() {
         type="submit"
         isLoading={isPending}
         disabled={isPending}
-        className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+        className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500/90 to-indigo-600/90 hover:from-indigo-500 hover:to-indigo-600 text-white font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-[colors,shadow] disabled:opacity-50 disabled:shadow-none"
       >
         Update Password
       </Button>

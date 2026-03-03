@@ -9,7 +9,7 @@ import {
   saveSubtitleSettings,
   TEXT_COLORS,
   TEXT_SHADOWS,
-} from '@/features/watch/controls/subtitle-settings';
+} from '@/features/watch/player/ui/controls/subtitle-settings';
 import { clearStorageCache } from '@/lib/storage-cache';
 
 // Mock localStorage

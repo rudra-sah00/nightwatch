@@ -19,7 +19,7 @@ export function AiAssistantButton({
       onClick={onClick}
       size="icon"
       className={cn(
-        'h-14 w-14 rounded-full shadow-2xl transition-all duration-300 z-50',
+        'h-14 w-14 rounded-full shadow-2xl transition-[colors,transform,shadow] duration-300 z-50',
         'bg-primary text-primary-foreground hover:bg-primary/90',
         // Rotate animation when toggling
         isOpen && 'rotate-90 bg-destructive text-white hover:bg-destructive/90',

@@ -1,6 +1,5 @@
-import { MessageSquare, PenTool, Users, Volume2 } from 'lucide-react';
-import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { useSidebarTabs } from '../hooks/use-sidebar-tabs';
 
 interface SidebarTabsProps {
   activeTab: 'chat' | 'participants' | 'soundboard' | 'sketch';
@@ -13,32 +12,7 @@ export function SidebarTabs({
   onTabChange,
   unreadMessages = 0,
 }: SidebarTabsProps) {
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'participants' as const,
-        label: 'People',
-        icon: Users,
-      },
-      {
-        id: 'chat' as const,
-        label: 'Chat',
-        icon: MessageSquare,
-        badge: unreadMessages,
-      },
-      {
-        id: 'soundboard' as const,
-        label: 'Soundboard',
-        icon: Volume2,
-      },
-      {
-        id: 'sketch' as const,
-        label: 'Sketch',
-        icon: PenTool,
-      },
-    ],
-    [unreadMessages],
-  );
+  const { tabs } = useSidebarTabs(unreadMessages);
 
   const activeIndex = tabs.findIndex((t) => t.id === activeTab);
 
@@ -47,7 +21,7 @@ export function SidebarTabs({
       <div className="flex relative">
         {/* Animated pill background */}
         <div
-          className="absolute top-0 bottom-0 bg-white/10 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          className="absolute top-0 bottom-0 bg-white/10 rounded-lg transition-[left,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={{
             left: `${activeIndex * 25}%`,
             width: '25%',
@@ -64,7 +38,7 @@ export function SidebarTabs({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'flex-1 py-3 px-1 sm:px-4 text-sm font-medium transition-all duration-200 relative z-10 rounded-lg',
+                'flex-1 py-3 px-1 sm:px-4 text-sm font-medium transition-colors duration-200 relative z-10 rounded-lg',
                 isActive ? 'text-white' : 'text-white/40 hover:text-white/80',
               )}
             >

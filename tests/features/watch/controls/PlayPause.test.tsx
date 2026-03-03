@@ -4,7 +4,7 @@ import {
   CenterPlayButton,
   PlayPause,
   TapIndicator,
-} from '@/features/watch/controls/PlayPause';
+} from '@/features/watch/player/ui/controls/PlayPause';
 
 describe('PlayPause', () => {
   const defaultProps = {

@@ -137,9 +137,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     [socket, isConnected, connect, connectGuest, disconnect],
   );
 
-  return (
-    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
-  );
+  return <SocketContext value={value}>{children}</SocketContext>;
 }
 
 /**

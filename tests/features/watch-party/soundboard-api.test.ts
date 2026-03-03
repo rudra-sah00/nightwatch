@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getTrendingSounds,
   searchSounds,
-} from '@/features/watch-party/services/watch-party.api';
+} from '@/features/watch-party/room/services/watch-party.api';
 import { apiFetch } from '@/lib/fetch';
 
 vi.mock('@/lib/fetch', () => ({

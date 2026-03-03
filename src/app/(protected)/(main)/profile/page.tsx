@@ -2,10 +2,10 @@
 
 import dynamic from 'next/dynamic';
 
-const ProfileCard = dynamic(
+const ProfileOverview = dynamic(
   () =>
-    import('@/features/profile/components/profile-card').then(
-      (m) => m.ProfileCard,
+    import('@/features/profile/components/profile-overview').then(
+      (m) => m.ProfileOverview,
     ),
   {
     loading: () => (
@@ -20,5 +20,5 @@ const ProfileCard = dynamic(
 );
 
 export default function ProfilePage() {
-  return <ProfileCard />;
+  return <ProfileOverview />;
 }

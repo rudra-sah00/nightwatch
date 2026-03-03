@@ -32,6 +32,7 @@ const mockUser = {
   username: 'testuser',
   email: 'test@example.com',
   profilePhoto: null,
+  preferredServer: 's1' as 's1' | 's2',
   sessionId: 'session-1',
   createdAt: '2025-01-01T00:00:00Z',
 };

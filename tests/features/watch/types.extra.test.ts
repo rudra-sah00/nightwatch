@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  StreamResponse,
-  WatchActivity,
-  WatchProgress,
-} from '@/features/watch/types';
+import type { WatchActivity } from '@/features/profile/types';
+import type { WatchProgress } from '@/features/watch/types';
 
 describe('Watch Types', () => {
   it('creates valid WatchProgress for series', () => {
@@ -82,17 +79,5 @@ describe('Watch Types', () => {
     expect(activity.date).toBe('2024-01-15');
     expect(activity.count).toBe(5);
     expect(activity.level).toBe(3);
-  });
-
-  it('creates valid StreamResponse', () => {
-    const response: StreamResponse = {
-      masterPlaylistUrl: 'https://example.com/playlist.m3u8',
-      movieId: 'movie-123',
-      token: 'auth-token-123',
-    };
-
-    expect(response.masterPlaylistUrl).toContain('.m3u8');
-    expect(response.movieId).toBe('movie-123');
-    expect(response.token).toBe('auth-token-123');
   });
 });

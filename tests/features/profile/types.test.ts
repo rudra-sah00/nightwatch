@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ProfileStats, WatchActivity } from '@/features/profile/types';
+import type { WatchActivity } from '@/features/profile/types';
 
 describe('Profile Types', () => {
   it('creates valid WatchActivity', () => {
@@ -27,29 +27,6 @@ describe('Profile Types', () => {
       expect(activity.level).toBeGreaterThanOrEqual(0);
       expect(activity.level).toBeLessThanOrEqual(4);
     });
-  });
-
-  it('creates valid ProfileStats', () => {
-    const stats: ProfileStats = {
-      totalWatchTime: 36000, // 10 hours in seconds
-      daysActive: 30,
-      longestStreak: 7,
-    };
-
-    expect(stats.totalWatchTime).toBe(36000);
-    expect(stats.daysActive).toBe(30);
-    expect(stats.longestStreak).toBe(7);
-  });
-
-  it('calculates watch time in hours', () => {
-    const stats: ProfileStats = {
-      totalWatchTime: 7200, // 2 hours
-      daysActive: 5,
-      longestStreak: 3,
-    };
-
-    const hours = stats.totalWatchTime / 3600;
-    expect(hours).toBe(2);
   });
 
   it('validates activity levels', () => {

@@ -1,14 +1,14 @@
 import { act, renderHook } from '@testing-library/react';
 import type { Dispatch, SetStateAction } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWatchPartySync } from '@/features/watch-party/hooks/useWatchPartySync';
-import * as api from '@/features/watch-party/services/watch-party.api';
+import { useWatchPartySync } from '@/features/watch-party/room/hooks/useWatchPartySync';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
 import type {
   PartyStateUpdate,
   WatchPartyRoom,
-} from '@/features/watch-party/types';
+} from '@/features/watch-party/room/types';
 
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   emitPartyEvent: vi.fn(),
   getPartyStreamToken: vi.fn(),
   onPartyContentUpdated: vi.fn(() => vi.fn()),

@@ -1,5 +1,6 @@
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
+import type { ChangePasswordInput, UpdateProfileInput } from './schema';
 import type { WatchActivity } from './types';
 
 /**
@@ -34,7 +35,7 @@ export function invalidateProfileCache(): void {
 }
 
 export async function updateProfile(
-  data: Partial<User>,
+  data: UpdateProfileInput,
   options?: RequestInit,
 ): Promise<{ user: User }> {
   const result = await apiFetch<{ user: User }>('/api/user/profile', {
@@ -89,8 +90,10 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
 }
 
 export async function changePassword(
-  currentPassword: string,
-  newPassword: string,
+  {
+    currentPassword,
+    newPassword,
+  }: Pick<ChangePasswordInput, 'currentPassword' | 'newPassword'>,
   options?: RequestInit,
 ): Promise<void> {
   await apiFetch('/api/auth/password', {

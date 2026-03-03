@@ -57,6 +57,13 @@ export interface ShowDetails {
   defaultLanguage?: string;
   posterUrl: string;
   posterHdUrl: string;
+  trailers?: {
+    key: string;
+    url?: string;
+    name?: string;
+    site?: string;
+    type?: string;
+  }[];
 }
 
 // Play response from backend
@@ -72,7 +79,12 @@ export interface PlayResponse {
   spriteVtt?: string;
   subtitleTracks?: { label: string; language: string; url: string }[];
   captionSrt?: string;
+  qualities?: { quality: string; url: string }[];
   spriteSheets?: SpriteSheet[];
+  /** Language dubs for server 2 — each entry is a separate MP4 URL */
+  audioTracks?: { language: string; label: string; streamUrl: string }[];
+  /** Provider-sourced content duration in seconds (S2 MP4 CDN omits Content-Length so video.duration is Infinity) */
+  durationSeconds?: number;
 }
 
 // Sprite sheet for video preview

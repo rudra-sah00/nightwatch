@@ -5,7 +5,6 @@ import {
   Shield,
   Volume2,
 } from 'lucide-react';
-import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,11 +13,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import {
   updateMemberPermissions,
   updatePartyPermissions,
-} from '../services/watch-party.api';
-import type { RoomMember, WatchPartyRoom } from '../types';
+} from '../room/services/watch-party.api';
+import type { RoomMember, WatchPartyRoom } from '../room/types';
 
 // Simple Toggle Switch built with Tailwind
 interface SwitchProps {
@@ -57,7 +57,7 @@ export interface WatchPartySettingsProps {
 }
 
 export function WatchPartySettings({ room, isHost }: WatchPartySettingsProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useWatchPartySettings();
 
   // If not host, maybe don't even render the button, or render it disabled (we'll just not render it in parent)
   if (!isHost) return null;
@@ -85,17 +85,17 @@ export function WatchPartySettings({ room, isHost }: WatchPartySettingsProps) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="px-3 flex items-center justify-center gap-2 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all"
+          className="px-3 flex items-center justify-center gap-2 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-colors"
           title="Room Settings"
         >
-          <Settings className="w-4 h-4" />
+          <Settings aria-hidden="true" className="w-4 h-4" />
         </button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md bg-zinc-950 border-white/10 text-white shadow-2xl overflow-hidden p-0">
         <DialogHeader className="p-6 border-b border-white/10 bg-zinc-900/50">
           <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-indigo-400" />
+            <Shield aria-hidden="true" className="w-5 h-5 text-indigo-400" />
             Watch Party Settings
           </DialogTitle>
         </DialogHeader>

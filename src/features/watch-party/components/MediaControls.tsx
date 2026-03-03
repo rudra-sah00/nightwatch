@@ -9,10 +9,10 @@ import {
   VideoOff,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { MediaDevice } from '../hooks/useAgora';
-import type { WatchPartyRoom } from '../types';
+import { useMediaControls } from '../hooks/use-media-controls';
+import type { MediaDevice } from '../media/hooks/useAgora';
+import type { WatchPartyRoom } from '../room/types';
 import { WatchPartySettings } from './WatchPartySettings';
 
 interface MediaControlsProps {
@@ -63,8 +63,12 @@ export function MediaControls({
   onLeave,
   room,
 }: MediaControlsProps) {
-  const [showAudioDevices, setShowAudioDevices] = useState(false);
-  const [showVideoDevices, setShowVideoDevices] = useState(false);
+  const {
+    showAudioDevices,
+    setShowAudioDevices,
+    showVideoDevices,
+    setShowVideoDevices,
+  } = useMediaControls();
 
   return (
     <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative z-[60]">
@@ -76,12 +80,15 @@ export function MediaControls({
             <button
               type="button"
               onClick={onCopyLink}
-              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all"
+              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-colors"
             >
               {linkCopied ? (
-                <Check className="w-3.5 h-3.5 text-green-400" />
+                <Check
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 text-success"
+                />
               ) : (
-                <Copy className="w-3.5 h-3.5" />
+                <Copy aria-hidden="true" className="w-3.5 h-3.5" />
               )}
               <span className="sm:inline">
                 {linkCopied ? 'Copied' : 'Invite'}
@@ -94,11 +101,16 @@ export function MediaControls({
           type="button"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl border border-red-500/20 transition-all',
+            'flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-xl border transition-colors',
             isHost ? 'flex-1' : 'w-full',
           )}
+          style={{
+            backgroundColor: 'var(--danger-bg)',
+            borderColor: 'var(--danger-bg-hover)',
+            color: 'var(--danger-color)',
+          }}
         >
-          <LogOut className="w-3.5 h-3.5" />
+          <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
           <span className="sm:inline">{isHost ? 'End' : 'Leave Party'}</span>
         </button>
       </div>
@@ -109,7 +121,13 @@ export function MediaControls({
         <div className="flex items-center justify-between bg-white/5 rounded-xl p-2 border border-white/5">
           {/* User Avatar & Status */}
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0 flex items-center justify-center border-2 border-indigo-400/30 shadow-lg shadow-indigo-500/20">
+            <div
+              className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center border-2 border-white/20 shadow-lg"
+              style={{
+                background:
+                  'linear-gradient(to bottom right, var(--party-color), var(--ai-color))',
+              }}
+            >
               <span className="text-sm font-bold text-white">
                 {userName.charAt(0).toUpperCase()}
               </span>
@@ -118,8 +136,14 @@ export function MediaControls({
               <span className="text-sm font-bold text-white truncate max-w-[100px]">
                 {userName}
               </span>
-              <span className="text-[10px] text-green-400 flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50" />
+              <span className="text-[10px] text-success flex items-center gap-1.5 font-medium">
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse shadow-lg"
+                  style={{
+                    backgroundColor: 'var(--success-color-strong)',
+                    boxShadow: '0 0 6px var(--success-glow)',
+                  }}
+                />
                 Connected
               </span>
             </div>
@@ -148,14 +172,14 @@ export function MediaControls({
                   'p-2 rounded-l-lg transition-colors',
                   audioEnabled
                     ? 'bg-white/10 text-white hover:bg-white/20'
-                    : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
+                    : 'text-danger',
                 )}
                 title={audioEnabled ? 'Mute' : 'Unmute'}
               >
                 {audioEnabled ? (
-                  <Mic className="w-4 h-4" />
+                  <Mic aria-hidden="true" className="w-4 h-4" />
                 ) : (
-                  <MicOff className="w-4 h-4" />
+                  <MicOff aria-hidden="true" className="w-4 h-4" />
                 )}
               </button>
               <button
@@ -201,14 +225,14 @@ export function MediaControls({
                   'p-2 rounded-l-lg transition-colors',
                   videoEnabled
                     ? 'bg-white/10 text-white hover:bg-white/20'
-                    : 'bg-red-500/20 text-red-500 hover:bg-red-500/30',
+                    : 'text-danger',
                 )}
                 title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
               >
                 {videoEnabled ? (
-                  <Video className="w-4 h-4" />
+                  <Video aria-hidden="true" className="w-4 h-4" />
                 ) : (
-                  <VideoOff className="w-4 h-4" />
+                  <VideoOff aria-hidden="true" className="w-4 h-4" />
                 )}
               </button>
               <button

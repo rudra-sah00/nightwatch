@@ -90,7 +90,7 @@ export function AssistantMovieCard({
             alt={title}
             fill
             sizes={isLandscape ? '100vw' : '(max-width: 640px) 80px, 112px'}
-            className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:-translate-y-2"
+            className="object-cover transition-transform duration-700 group-hover:scale-110 group-hover:-translate-y-2"
             unoptimized={true}
           />
         ) : (
@@ -184,7 +184,7 @@ export function AssistantMovieCard({
               type="button"
               data-testid="watch-now-button"
               onClick={handlePlay}
-              className="relative z-10 px-3 py-1 bg-primary/10 rounded-lg border border-primary/20 text-[10px] font-bold text-primary hover:bg-primary hover:text-black transition-all cursor-pointer mt-2 inline-block w-fit"
+              className="relative z-10 px-3 py-1 bg-primary/10 rounded-lg border border-primary/20 text-[10px] font-bold text-primary hover:bg-primary hover:text-black transition-colors cursor-pointer mt-2 inline-block w-fit"
             >
               WATCH NOW
             </button>

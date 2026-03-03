@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { VideoGrid } from '@/features/watch-party/components/VideoGrid';
-import type { AgoraParticipant } from '@/features/watch-party/hooks/useAgora';
+import type { AgoraParticipant } from '@/features/watch-party/media/hooks/useAgora';
 
 // Mock the ParticipantView component since it has complex Agora dependencies
 vi.mock('@/features/watch-party/components/ParticipantView', () => ({

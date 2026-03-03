@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { apiFetch } from '@/lib/fetch';
 import { cn } from '@/lib/utils';
+import { useLazyMediaGallery } from '../hooks/use-lazy-media-gallery';
 import styles from '../styles/AIAssistant.module.css';
 import { AssistantMovieCard } from './AssistantMovieCard';
 
@@ -17,55 +16,7 @@ export function LazyMediaGallery({
   title,
   onPlayMedia,
 }: LazyMediaGalleryProps) {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{
-    photos: { url: string; caption?: string }[];
-    trailers: {
-      id: string;
-      url?: string;
-      playbackUrl?: string;
-      name?: string;
-      thumbnail?: string;
-      key?: string;
-    }[];
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function fetchMedia() {
-      try {
-        setLoading(true);
-        const res = await apiFetch<{
-          photos: { url: string; caption?: string }[];
-          trailers: {
-            id: string;
-            url?: string;
-            playbackUrl?: string;
-            name?: string;
-            thumbnail?: string;
-            key?: string;
-          }[];
-        }>(`/api/video/media/${id}`, { timeout: 30000 });
-        if (mounted) {
-          setData(res);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchMedia();
-
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
+  const { loading, data, error } = useLazyMediaGallery(id);
 
   if (error) {
     const isAuthError =

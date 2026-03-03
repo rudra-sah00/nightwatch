@@ -2,9 +2,9 @@
 
 import { Clock, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
 import { toast } from 'sonner';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
+import { useEpisodeCard } from '../hooks/use-episode-card';
 import type { Episode } from '../types';
 
 interface EpisodeCardProps {
@@ -20,7 +20,7 @@ export function EpisodeCard({
   isPlaying,
   isAnyLoading = false,
 }: EpisodeCardProps) {
-  const [imageError, setImageError] = React.useState(false);
+  const { imageError, setImageError } = useEpisodeCard();
 
   const handleClick = () => {
     if (isAnyLoading && !isPlaying) {
@@ -34,7 +34,7 @@ export function EpisodeCard({
     <button
       type="button"
       className={cn(
-        'group flex gap-4 p-3 rounded-xl cursor-pointer transition-all duration-300 w-full text-left',
+        'group flex gap-4 p-3 rounded-xl cursor-pointer transition-[colors,opacity] duration-300 w-full text-left',
         'hover:bg-muted/50 border border-transparent hover:border-border',
         isPlaying && 'bg-primary/10 border-primary/30 pointer-events-none',
         isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',

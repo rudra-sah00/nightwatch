@@ -2,17 +2,17 @@ import { act, renderHook } from '@testing-library/react';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWatchPartyMembers } from '@/features/watch-party/hooks/useWatchPartyMembers';
-import * as api from '@/features/watch-party/services/watch-party.api';
+import { useWatchPartyMembers } from '@/features/watch-party/room/hooks/useWatchPartyMembers';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
 import type {
   MemberPermissionsUpdate,
   PartyMemberJoined,
   PartyMemberLeft,
   RoomMember,
   WatchPartyRoom,
-} from '@/features/watch-party/types';
+} from '@/features/watch-party/room/types';
 
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   approveJoinRequest: vi.fn(),
   kickMember: vi.fn(),
   onPartyAdminRequest: vi.fn(() => vi.fn()),

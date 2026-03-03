@@ -1,8 +1,8 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import React from 'react';
 import { cn } from '@/lib/utils';
+import { useSeasonSelector } from '../hooks/use-season-selector';
 import type { Season } from '../types';
 
 interface SeasonSelectorProps {
@@ -20,27 +20,7 @@ export function SeasonSelector({
   onToggle,
   onSelect,
 }: SeasonSelectorProps) {
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = () => {
-      if (isOpen) {
-        onToggle();
-      }
-    };
-
-    if (isOpen) {
-      // Delay to prevent immediate close on the same click
-      const timeout = setTimeout(() => {
-        document.addEventListener('click', handleClickOutside);
-      }, 0);
-      return () => {
-        clearTimeout(timeout);
-        document.removeEventListener('click', handleClickOutside);
-      };
-    }
-  }, [isOpen, onToggle]);
+  const { dropdownRef } = useSeasonSelector(isOpen, onToggle);
 
   if (seasons.length === 0) return null;
 

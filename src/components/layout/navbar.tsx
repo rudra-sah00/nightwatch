@@ -2,6 +2,7 @@ import { Bookmark, User } from 'lucide-react';
 import Link from 'next/link';
 
 import { Avatar } from '@/components/ui/avatar';
+
 import { SearchInput } from '@/features/search/components/search-input';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -20,8 +21,16 @@ export function Navbar({ isLoading }: NavbarProps) {
           <SearchInput isLoading={isLoading} />
         </div>
 
-        {/* User Actions - Grouped near search */}
+        {/* User Actions */}
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          <Link
+            href="/live?sportType=basketball"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-red-500 transition-colors group p-2 rounded-full hover:bg-white/5"
+            title="Live TV"
+          >
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse group-hover:bg-red-400" />
+            <span className="hidden sm:inline">Live TV</span>
+          </Link>
           {user ? (
             <Link
               href="/watchlist"

@@ -95,16 +95,18 @@ const SEARCH_CACHE_TTL = 5 * 60 * 1000;
 
 export async function searchContent(
   query: string,
+  server?: string,
   options?: RequestInit,
 ): Promise<SearchResult[]> {
-  const normalizedQuery = query.toLowerCase().trim();
+  const normalizedQuery = `${query.toLowerCase().trim()}:${server || 'default'}`;
   const cached = searchResultsCache.get(normalizedQuery);
   if (cached && cached.expiry > Date.now()) {
     return cached.data;
   }
 
+  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { results } = await apiFetch<{ results: SearchResult[] }>(
-    `/api/video/search?q=${encodeURIComponent(query)}`,
+    `/api/video/search?q=${encodeURIComponent(query)}${serverParam}`,
     options,
   );
 
@@ -118,6 +120,40 @@ export async function searchContent(
   invalidateSearchHistoryCache();
 
   return results;
+}
+
+/**
+ * Get search suggestions with frontend caching.
+ */
+const searchSuggestionsCache = createCache<string[]>();
+const SUGGEST_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+export async function getSearchSuggestions(
+  query: string,
+  server?: string,
+  options?: RequestInit,
+): Promise<string[]> {
+  if (!query || query.length < 2) return [];
+
+  const cacheKey = `${query.toLowerCase().trim()}:${server || 'default'}`;
+  const cached = searchSuggestionsCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.data;
+  }
+
+  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
+  const { suggestions } = await apiFetch<{ suggestions: string[] }>(
+    `/api/video/search/suggest?q=${encodeURIComponent(query)}${serverParam}`,
+    options,
+  );
+
+  searchSuggestionsCache.set(cacheKey, {
+    data: suggestions,
+    expiry: Date.now() + SUGGEST_CACHE_TTL,
+  });
+  cleanupCache(searchSuggestionsCache, 50);
+
+  return suggestions;
 }
 
 /**
@@ -219,6 +255,7 @@ export interface PlayMovieParams {
   title: string;
   movieId?: string;
   duration?: number; // Duration in seconds for smart caching
+  server?: string;
 }
 
 export interface PlaySeriesParams {
@@ -228,6 +265,7 @@ export interface PlaySeriesParams {
   season: number;
   episode: number;
   duration?: number; // Duration in seconds for smart caching
+  server?: string;
 }
 
 export type PlayParams = PlayMovieParams | PlaySeriesParams;

@@ -1,8 +1,8 @@
 'use client';
 
 import { Loader2, Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { useCustomVideoPlayer } from '../hooks/use-custom-video-player';
 
 interface CustomVideoPlayerProps {
   src: string;
@@ -17,118 +17,24 @@ export function CustomVideoPlayer({
   autoPlay = false,
   className,
 }: CustomVideoPlayerProps) {
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  // State
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [progress, setProgress] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
-  const [volume, setVolume] = React.useState(1);
-  const [isMuted, setIsMuted] = React.useState(false);
-
-  const [isBuffering, setIsBuffering] = React.useState(false);
-  const [showControls, setShowControls] = React.useState(true);
-
-  // Auto-hide controls timer
-  const controlsTimeoutRef = React.useRef<NodeJS.Timeout>(null);
-
-  React.useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (autoPlay) {
-      video.play().catch(() => {
-        // Autoplay might be blocked
-        setIsPlaying(false);
-      });
-    }
-
-    const handleTimeUpdate = () => {
-      setProgress((video.currentTime / video.duration) * 100);
-    };
-
-    const handleDurationChange = () => {
-      setDuration(video.duration);
-    };
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleWaiting = () => setIsBuffering(true);
-    const handleCanPlay = () => setIsBuffering(false);
-
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('durationchange', handleDurationChange);
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('waiting', handleWaiting);
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('playing', handleCanPlay);
-
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('durationchange', handleDurationChange);
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('waiting', handleWaiting);
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('playing', handleCanPlay);
-    };
-  }, [autoPlay]);
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      const newMuted = !isMuted;
-      videoRef.current.muted = newMuted;
-      setIsMuted(newMuted);
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = Number.parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-      setIsMuted(newVolume === 0);
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const seekTime = (Number.parseFloat(e.target.value) / 100) * duration;
-    if (videoRef.current) {
-      videoRef.current.currentTime = seekTime;
-      setProgress(Number.parseFloat(e.target.value));
-    }
-  };
-
-  const formatTime = (timeInSeconds: number) => {
-    if (Number.isNaN(timeInSeconds)) return '0:00';
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleMouseMove = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 2500);
-    }
-  };
+  const {
+    videoRef,
+    containerRef,
+    isPlaying,
+    progress,
+    duration,
+    volume,
+    isMuted,
+    isBuffering,
+    showControls,
+    setShowControls,
+    togglePlay,
+    toggleMute,
+    handleVolumeChange,
+    handleSeek,
+    formatTime,
+    handleMouseMove,
+  } = useCustomVideoPlayer(src, autoPlay);
 
   return (
     <section
@@ -204,7 +110,7 @@ export function CustomVideoPlayer({
             <button
               type="button"
               onClick={togglePlay}
-              className="text-white hover:text-primary transition-colors focus:outline-none"
+              className="text-white hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded focus:outline-none"
             >
               {isPlaying ? (
                 <Pause className="w-6 h-6 fill-current" />
@@ -218,7 +124,7 @@ export function CustomVideoPlayer({
               <button
                 type="button"
                 onClick={toggleMute}
-                className="text-white hover:text-primary transition-colors focus:outline-none"
+                className="text-white hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded focus:outline-none"
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-5 h-5" />
@@ -226,7 +132,7 @@ export function CustomVideoPlayer({
                   <Volume2 className="w-5 h-5" />
                 )}
               </button>
-              <div className="w-0 overflow-hidden group-hover/vol:w-20 transition-all duration-300">
+              <div className="w-0 overflow-hidden group-hover/vol:w-20 transition-[width] duration-300">
                 <input
                   type="range"
                   min="0"

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { ErrorOverlay } from '@/features/watch/overlays/ErrorOverlay';
+import { ErrorOverlay } from '@/features/watch/player/ui/overlays/ErrorOverlay';
 
 describe('ErrorOverlay', () => {
   const defaultProps = {

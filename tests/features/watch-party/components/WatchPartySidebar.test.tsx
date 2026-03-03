@@ -2,8 +2,11 @@ import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { WatchPartySidebar } from '@/features/watch-party/components/WatchPartySidebar';
-import { SketchProvider } from '@/features/watch-party/context/SketchContext';
-import type { ChatMessage, WatchPartyRoom } from '@/features/watch-party/types';
+import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
+import type {
+  ChatMessage,
+  WatchPartyRoom,
+} from '@/features/watch-party/room/types';
 
 // Custom render to always include SketchProvider
 const render = (ui: ReactElement, options = {}) =>
@@ -15,7 +18,7 @@ const mockToggleVideo = vi.fn();
 const mockSwitchAudioDevice = vi.fn();
 const mockSwitchVideoDevice = vi.fn();
 
-vi.mock('@/features/watch-party/hooks/useAgoraToken', () => ({
+vi.mock('@/features/watch-party/media/hooks/useAgoraToken', () => ({
   useAgoraToken: vi.fn(() => ({
     token: 'mock-token',
     appId: 'mock-app-id',
@@ -26,7 +29,7 @@ vi.mock('@/features/watch-party/hooks/useAgoraToken', () => ({
   })),
 }));
 
-vi.mock('@/features/watch-party/hooks/useAgora', () => ({
+vi.mock('@/features/watch-party/media/hooks/useAgora', () => ({
   useAgora: vi.fn(() => ({
     participants: [],
     audioEnabled: true,
@@ -125,7 +128,7 @@ vi.mock('@/features/watch-party/components/VideoGrid', () => ({
   ),
 }));
 
-vi.mock('@/features/watch-party/components/WatchPartyChat', () => ({
+vi.mock('@/features/watch-party/chat/components/WatchPartyChat', () => ({
   WatchPartyChat: ({
     messages,
     currentUserId,

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { AiAssistantWidgetClient } from '@/features/ai-assistant/AiAssistantWidgetClient';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
 import { SocketProvider } from '@/providers/socket-provider';
@@ -41,6 +42,7 @@ export default function RootLayout({
           <SocketProvider>
             <AuthProvider>
               {children}
+              <AiAssistantWidgetClient />
               <Toaster />
             </AuthProvider>
           </SocketProvider>

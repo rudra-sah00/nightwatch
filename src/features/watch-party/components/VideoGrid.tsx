@@ -1,5 +1,5 @@
 import { Video } from 'lucide-react';
-import type { AgoraParticipant } from '../hooks/useAgora';
+import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { ParticipantView } from './ParticipantView';
 
 interface VideoGridProps {

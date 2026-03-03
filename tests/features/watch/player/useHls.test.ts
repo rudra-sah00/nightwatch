@@ -75,7 +75,7 @@ vi.mock('hls.js', () => ({
 }));
 
 // Import AFTER mocks are set up
-import { useHls } from '@/features/watch/player/useHls';
+import { useHls } from '@/features/watch/player/hooks/useHls';
 
 function triggerEvent(eventName: string, data?: unknown) {
   const handlers = eventHandlers.get(eventName) || [];

@@ -1,6 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
+import type {
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+} from 'agora-rtc-sdk-ng';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useAgora } from '@/features/watch-party/hooks/useAgora';
+import { useAgora } from '@/features/watch-party/media/hooks/useAgora';
 
 const { mockClient, mockAudioTrack, mockVideoTrack, mockCamera } = vi.hoisted(
   () => ({
@@ -116,6 +120,154 @@ describe('useAgora', () => {
 
     const localPart = result.current.participants.find((p) => p.isLocal);
     expect(localPart?.identity).toBe('user-2');
+  });
+
+  it('should switch audio device and show success toast when track exists', async () => {
+    const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+    vi.mocked(AgoraRTC.createMicrophoneAudioTrack).mockResolvedValue(
+      mockAudioTrack as unknown as IMicrophoneAudioTrack,
+    );
+    mockClient.connectionState = 'CONNECTED';
+
+    const { result } = renderHook(() =>
+      useAgora({
+        ...defaultOptions,
+        userId: 'user-1',
+      }),
+    );
+
+    // Wait for join to complete
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+    // Enable audio first so localAudioTrackRef.current is set
+    await act(async () => {
+      await result.current.toggleAudio();
+    });
+
+    await waitFor(() => expect(result.current.audioEnabled).toBe(true));
+
+    // Now switch audio device — track exists so setDevice should be called
+    mockAudioTrack.setDevice.mockResolvedValueOnce(undefined);
+    await act(async () => {
+      await result.current.switchAudioDevice('new-audio-device-id');
+    });
+
+    expect(mockAudioTrack.setDevice).toHaveBeenCalledWith(
+      'new-audio-device-id',
+    );
+  });
+
+  it('should show error toast when audio device switch fails', async () => {
+    const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+    vi.mocked(AgoraRTC.createMicrophoneAudioTrack).mockResolvedValue(
+      mockAudioTrack as unknown as IMicrophoneAudioTrack,
+    );
+    mockClient.connectionState = 'CONNECTED';
+
+    const { result } = renderHook(() =>
+      useAgora({
+        ...defaultOptions,
+        userId: 'user-1',
+      }),
+    );
+
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+    // Enable audio
+    await act(async () => {
+      await result.current.toggleAudio();
+    });
+    await waitFor(() => expect(result.current.audioEnabled).toBe(true));
+
+    // Make setDevice fail
+    mockAudioTrack.setDevice.mockRejectedValueOnce(new Error('Device error'));
+    await act(async () => {
+      await result.current.switchAudioDevice('bad-device-id');
+    });
+
+    expect(mockAudioTrack.setDevice).toHaveBeenCalledWith('bad-device-id');
+  });
+
+  it('should switch video device and show success toast when track exists', async () => {
+    const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+    vi.mocked(AgoraRTC.createCameraVideoTrack).mockResolvedValue(
+      mockVideoTrack as unknown as ICameraVideoTrack,
+    );
+    const mockCameraDevice = {
+      kind: 'videoinput',
+      deviceId: 'test-camera',
+      label: 'Test Camera',
+    };
+    vi.mocked(AgoraRTC.getDevices).mockResolvedValue([
+      mockCameraDevice as unknown as MediaDeviceInfo,
+    ]);
+    mockClient.connectionState = 'CONNECTED';
+
+    const { result } = renderHook(() =>
+      useAgora({
+        ...defaultOptions,
+        userId: 'user-1',
+      }),
+    );
+
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+    // Enable video to set localVideoTrackRef
+    await act(async () => {
+      await result.current.toggleVideo();
+    });
+    await waitFor(() => expect(result.current.videoEnabled).toBe(true));
+
+    // Switch video device — track exists so setDevice should be called
+    mockVideoTrack.setDevice.mockResolvedValueOnce(undefined);
+    await act(async () => {
+      await result.current.switchVideoDevice('new-video-device-id');
+    });
+
+    expect(mockVideoTrack.setDevice).toHaveBeenCalledWith(
+      'new-video-device-id',
+    );
+  });
+
+  it('should show error toast when video device switch fails', async () => {
+    const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+    vi.mocked(AgoraRTC.createCameraVideoTrack).mockResolvedValue(
+      mockVideoTrack as unknown as ICameraVideoTrack,
+    );
+    const mockCameraDevice = {
+      kind: 'videoinput',
+      deviceId: 'test-camera',
+      label: 'Test Camera',
+    };
+    vi.mocked(AgoraRTC.getDevices).mockResolvedValue([
+      mockCameraDevice as unknown as MediaDeviceInfo,
+    ]);
+    mockClient.connectionState = 'CONNECTED';
+
+    const { result } = renderHook(() =>
+      useAgora({
+        ...defaultOptions,
+        userId: 'user-1',
+      }),
+    );
+
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+    // Enable video
+    await act(async () => {
+      await result.current.toggleVideo();
+    });
+    await waitFor(() => expect(result.current.videoEnabled).toBe(true));
+
+    // Make setDevice fail
+    mockVideoTrack.setDevice.mockRejectedValueOnce(new Error('Device error'));
+    await act(async () => {
+      await result.current.switchVideoDevice('bad-video-device-id');
+    });
+
+    expect(mockVideoTrack.setDevice).toHaveBeenCalledWith(
+      'bad-video-device-id',
+    );
   });
 
   it('should clean up tracks and listeners on unmount', async () => {

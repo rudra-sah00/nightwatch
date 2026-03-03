@@ -21,10 +21,4 @@ export interface Message {
   }[];
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email?: string | null;
-  image?: string | null;
-  profilePhoto?: string | null;
-}
+export type { User } from '@/types';

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Volume } from '@/features/watch/controls/Volume';
+import { Volume } from '@/features/watch/player/ui/controls/Volume';
 
 describe('Volume', () => {
   const defaultProps = {

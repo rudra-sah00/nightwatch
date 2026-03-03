@@ -1,7 +1,7 @@
 import { API_ROUTES } from '@/lib/constants';
 import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, LogoutResponse } from '@/types';
-import type { LoginInput, RegisterInput } from './schema';
+import type { ForgotPasswordInput, LoginInput, RegisterInput } from './schema';
 
 /**
  * Login user with email and password
@@ -74,9 +74,9 @@ export async function resendOtp(
   });
 }
 
-export async function forgotPassword(
-  email: string,
-): Promise<{ message: string }> {
+export async function forgotPassword({
+  email,
+}: ForgotPasswordInput): Promise<{ message: string }> {
   return apiFetch('/api/auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
@@ -85,11 +85,11 @@ export async function forgotPassword(
 
 export async function resetPassword(
   token: string,
-  newPassword: string,
+  password: string,
 ): Promise<{ message: string }> {
   return apiFetch('/api/auth/reset-password', {
     method: 'POST',
-    body: JSON.stringify({ token, newPassword }),
+    body: JSON.stringify({ token, newPassword: password }),
   });
 }
 

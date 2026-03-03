@@ -4,6 +4,10 @@ import { ChevronRight, Film } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { getOptimizedImageUrl } from '@/lib/utils';
+import {
+  useSearchResultItem,
+  useSearchResults,
+} from '../hooks/use-search-results';
 import type { SearchResult } from '../types';
 import { SearchSkeleton } from './SearchSkeletons';
 
@@ -18,6 +22,10 @@ export const SearchResults = React.memo(function SearchResults({
   isLoading,
   onSelect,
 }: SearchResultsProps) {
+  // Deduplicate results by id (API can return duplicates from different sources)
+  // Must be called before any early returns to satisfy rules of hooks.
+  const { uniqueResults } = useSearchResults(results);
+
   if (isLoading) {
     return (
       <output
@@ -52,7 +60,7 @@ export const SearchResults = React.memo(function SearchResults({
 
   return (
     <div className="space-y-2" style={{ contentVisibility: 'auto' }}>
-      {results.map((result, index) => (
+      {uniqueResults.map((result, index) => (
         <SearchResultItem
           key={result.id}
           result={result}
@@ -75,13 +83,13 @@ const SearchResultItem = React.memo(function SearchResultItem({
   onSelect,
   index,
 }: SearchResultItemProps) {
-  const [imageError, setImageError] = React.useState(false);
+  const { imageError, setImageError } = useSearchResultItem();
 
   return (
     <button
       type="button"
       onClick={() => onSelect(result)}
-      className="group flex items-center gap-4 p-3 rounded-xl bg-card/40 hover:bg-card/80 border border-border/30 hover:border-border/60 cursor-pointer transition-all duration-200 hover:shadow-lg w-full text-left"
+      className="group flex items-center gap-4 p-3 rounded-xl bg-card/40 hover:bg-card/80 border border-border/30 hover:border-border/60 cursor-pointer transition-[colors,shadow] duration-200 hover:shadow-lg w-full text-left"
     >
       {/* Landscape Thumbnail */}
       <div className="relative w-24 md:w-32 aspect-video flex-shrink-0 rounded-lg overflow-hidden bg-muted/30">
@@ -115,7 +123,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
       </div>
 
       {/* Arrow */}
-      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all flex-shrink-0" />
+      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-[colors,transform] flex-shrink-0" />
     </button>
   );
 });

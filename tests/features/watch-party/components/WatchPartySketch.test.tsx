@@ -3,20 +3,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   WatchPartySketch,
   WatchPartySketchDisabled,
-} from '@/features/watch-party/components/WatchPartySketch';
+} from '@/features/watch-party/interactions/components/WatchPartySketch';
 import {
   type SketchContextType,
   type ToolType,
   useSketch,
-} from '@/features/watch-party/context/SketchContext';
+} from '@/features/watch-party/interactions/context/SketchContext';
 
 // Mock useSketch to track calls
 vi.mock(
-  '@/features/watch-party/context/SketchContext',
+  '@/features/watch-party/interactions/context/SketchContext',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@/features/watch-party/context/SketchContext')
+        typeof import('@/features/watch-party/interactions/context/SketchContext')
       >();
     return {
       ...actual,

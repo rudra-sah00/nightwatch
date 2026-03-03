@@ -40,6 +40,45 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* ── App accent tokens (single source of truth) ──────────── */
+  /* Activity graph heatmap levels */
+  --color-activity-0: var(--activity-level-0);
+  --color-activity-1: var(--activity-level-1);
+  --color-activity-2: var(--activity-level-2);
+  --color-activity-3: var(--activity-level-3);
+  --color-activity-4: var(--activity-level-4);
+
+  /* Live indicator (red) */
+  --color-live: var(--live-color);
+  --color-live-strong: var(--live-color-strong);
+
+  /* Watch-party / sync accent (indigo) */
+  --color-party: var(--party-color);
+
+  /* Success / online / active (green) */
+  --color-success: var(--success-color);
+  --color-success-strong: var(--success-color-strong);
+
+  /* Host / crown (yellow) */
+  --color-host: var(--host-color);
+  --color-host-light: var(--host-color-light);
+
+  /* Danger / reject / kick (red) */
+  --color-danger: var(--danger-color);
+  --color-danger-light: var(--danger-color-light);
+
+  /* AI assistant accent (purple) */
+  --color-ai: var(--ai-color);
+  --color-ai-light: var(--ai-color-light);
+
+  /* Selected / active state (purple — subtitle, audio, sketch active item) */
+  --color-selected: var(--selected-color);
+  --color-selected-light: var(--selected-color-light);
+
+  /* Emerald (profile form success banners — distinct shade from green) */
+  --color-emerald: var(--emerald-color);
+  --color-emerald-light: var(--emerald-color-light);
 }
 
 @layer base {
@@ -83,6 +122,98 @@
     --ring: 0 0% 83.1%;
 
     --radius: 0.75rem;
+
+    /* ── App-wide accent tokens ──────────────────────────────── */
+    /* Activity graph level colors (GitHub-style heatmap) */
+    --activity-level-0: rgba(255, 255, 255, 0.06);
+    --activity-level-1: rgba(79, 70, 229, 0.6);
+    /* indigo-900/60 */
+    --activity-level-2: rgba(99, 102, 241, 0.8);
+    /* indigo-700/80 */
+    --activity-level-3: rgb(99, 102, 241);
+    /* indigo-600 */
+    --activity-level-4: rgb(129, 140, 248);
+    /* indigo-500 */
+
+    /* Live indicator */
+    --live-color: rgb(248, 113, 113);
+    /* red-400 */
+    --live-color-strong: rgb(239, 68, 68);
+    /* red-500 */
+    --live-bg: rgba(239, 68, 68, 0.1);
+    /* red-500/10 */
+    --live-bg-hover: rgba(239, 68, 68, 0.2);
+    /* red-500/20 */
+
+    /* Watch-party / sync indigo accent */
+    --party-color: rgb(129, 140, 248);
+    /* indigo-400 */
+    --party-bg: rgba(99, 102, 241, 0.1);
+    /* indigo-500/10 */
+    --party-bg-hover: rgba(99, 102, 241, 0.2);
+    /* indigo-500/20 */
+
+    /* Success / online / active state (green) */
+    --success-color: rgb(74, 222, 128);
+    /* green-400 */
+    --success-color-strong: rgb(34, 197, 94);
+    /* green-500 */
+    --success-bg: rgba(34, 197, 94, 0.1);
+    /* green-500/10 */
+    --success-bg-hover: rgba(34, 197, 94, 0.2);
+    /* green-500/20 */
+    --success-glow: rgba(34, 197, 94, 0.5);
+    /* green-500/50 */
+
+    /* Host / crown accent (yellow) */
+    --host-color: rgb(234, 179, 8);
+    /* yellow-500 */
+    --host-color-light: rgb(253, 224, 71);
+    /* yellow-300 */
+
+    /* Danger / reject / muted / kick (red — distinct from live-red) */
+    --danger-color: rgb(239, 68, 68);
+    /* red-500 */
+    --danger-color-light: rgb(252, 165, 165);
+    /* red-300 */
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    /* red-500/10 */
+    --danger-bg-hover: rgba(239, 68, 68, 0.2);
+    /* red-500/20 */
+    --danger-bg-strong: rgba(239, 68, 68, 0.8);
+    /* red-500/80 */
+
+    /* AI assistant accent (purple) */
+    --ai-color: rgb(147, 51, 234);
+    /* purple-600 */
+    --ai-color-light: rgb(192, 132, 252);
+    /* purple-400 */
+    --ai-bg: rgba(147, 51, 234, 0.2);
+    /* purple-600/20 */
+
+    /* Selected / active item state (purple — matches subtitle/audio/sketch active) */
+    --selected-color: rgb(168, 85, 247);
+    /* purple-500 */
+    --selected-color-light: rgb(192, 132, 252);
+    /* purple-400 */
+    --selected-bg: rgba(168, 85, 247, 0.1);
+    /* purple-500/10 */
+    --selected-bg-active: rgba(99, 102, 241, 0.1);
+    /* indigo-500/10 (settings toggle) */
+    --selected-bg-border: rgba(99, 102, 241, 0.2);
+    /* indigo-500/20 */
+    --selected-text: rgb(99, 102, 241);
+    /* indigo-500 (settings active text) */
+
+    /* Emerald success (profile forms — richer green than --success-color) */
+    --emerald-color: rgb(52, 211, 153);
+    /* emerald-400 */
+    --emerald-color-light: rgb(110, 231, 183);
+    /* emerald-300 */
+    --emerald-bg: rgba(16, 185, 129, 0.1);
+    /* emerald-500/10 */
+    --emerald-border: rgba(16, 185, 129, 0.2);
+    /* emerald-500/20 */
   }
 
   /* Light theme */
@@ -170,6 +301,25 @@
 }
 
 @layer utilities {
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Prevent double-tap zoom on interactive elements */
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+
   /* Hide scrollbar utility */
   .no-scrollbar {
     scrollbar-width: none;

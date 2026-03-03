@@ -80,8 +80,15 @@ export function useContentProgress({
         processProgress(hasProgress, progress);
       });
     } else {
-      // Fallback: if socket not connected after a delay, or if we want to default
-      // We'll let the socket connection trigger this later if it's currently connecting
+      // Fallback: if the socket hasn't connected within 5 seconds, unblock the UI
+      // so the content detail page doesn't spin forever on WebSocket delays.
+      const timer = setTimeout(() => {
+        if (!progressCheckedRef.current) {
+          progressCheckedRef.current = true;
+          setIsLoadingProgress(false);
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [contentId, isConnected]);
 

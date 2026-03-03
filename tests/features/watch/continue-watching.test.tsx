@@ -74,6 +74,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -81,6 +82,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -139,6 +141,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -146,6 +149,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -184,6 +188,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -191,6 +196,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -233,6 +239,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -240,6 +247,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -279,6 +287,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -286,6 +295,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -324,6 +334,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -331,6 +342,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -367,6 +379,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -374,6 +387,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -410,6 +424,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -417,6 +432,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -453,6 +469,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -460,6 +477,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -501,6 +519,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -508,6 +527,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -516,11 +536,15 @@ describe('ContinueWatching', () => {
 
     const mockDelete = deleteWatchProgress as unknown as {
       mockImplementation: (
-        impl: (id: string, callback: (success: boolean) => void) => void,
+        impl: (
+          id: string,
+          server: string,
+          callback: (success: boolean) => void,
+        ) => void,
       ) => void;
     };
     mockDelete.mockImplementation(
-      (_id: string, callback: (success: boolean) => void) => {
+      (_id: string, _server: string, callback: (success: boolean) => void) => {
         callback(true);
       },
     );
@@ -532,7 +556,11 @@ describe('ContinueWatching', () => {
     const removeButton = screen.getByTitle('Remove from list');
     await user.click(removeButton);
 
-    expect(mockDelete).toHaveBeenCalledWith('progress-1', expect.any(Function));
+    expect(mockDelete).toHaveBeenCalledWith(
+      'progress-1',
+      expect.any(String),
+      expect.any(Function),
+    );
   });
 
   it('shows error toast when remove fails', async () => {
@@ -566,6 +594,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -573,6 +602,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -581,11 +611,15 @@ describe('ContinueWatching', () => {
 
     const mockDelete = deleteWatchProgress as unknown as {
       mockImplementation: (
-        impl: (id: string, callback: (success: boolean) => void) => void,
+        impl: (
+          id: string,
+          server: string,
+          callback: (success: boolean) => void,
+        ) => void,
       ) => void;
     };
     mockDelete.mockImplementation(
-      (_id: string, callback: (success: boolean) => void) => {
+      (_id: string, _server: string, callback: (success: boolean) => void) => {
         callback(false); // Simulate failure
       },
     );
@@ -623,17 +657,27 @@ describe('ContinueWatching', () => {
       '@/features/watch/api'
     );
 
-    const mockGetCached = getCachedContinueWatching as unknown as {
-      mockReturnValue: (items: typeof mockItems) => void;
-    };
-    mockGetCached.mockReturnValue(mockItems);
+    // Hook always force-fetches on mount (bypasses cache for navigation-back freshness).
+    // Set up fetchContinueWatching to respond with the items.
+    vi.mocked(fetchContinueWatching).mockImplementation(
+      (
+        _limit: number | undefined,
+        _server: string | undefined,
+        callback: (items: typeof mockItems | null, error?: string) => void,
+      ) => {
+        callback(mockItems);
+      },
+    );
+
+    // Also return cached data so subsequent non-forced fetches (e.g. focus) use cache.
+    vi.mocked(getCachedContinueWatching).mockReturnValue(mockItems);
 
     render(<ContinueWatching />);
 
     await screen.findByText('Cached Show');
 
-    // Should not call fetchContinueWatching if cache is available
-    expect(fetchContinueWatching).not.toHaveBeenCalled();
+    // fetchContinueWatching is called once on mount (force=true bypasses cache)
+    expect(fetchContinueWatching).toHaveBeenCalledTimes(1);
   });
 
   it('handles no socket connection gracefully', async () => {
@@ -714,6 +758,7 @@ describe('ContinueWatching', () => {
     vi.mocked(fetchContinueWatching).mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: typeof mockItems | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -740,6 +785,7 @@ describe('ContinueWatching', () => {
     vi.mocked(fetchContinueWatching).mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: [] | null, error?: string) => void,
       ) => {
         callback([]); // Empty array means no items
@@ -801,6 +847,7 @@ describe('ContinueWatching', () => {
     vi.mocked(fetchContinueWatching).mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: typeof mockItems | null, error?: string) => void,
       ) => {
         callback(mockItems);
@@ -849,6 +896,7 @@ describe('ContinueWatching', () => {
       mockImplementation: (
         impl: (
           limit: number,
+          server: string,
           callback: (items: WatchProgress[] | null, error?: string) => void,
         ) => void,
       ) => void;
@@ -856,6 +904,7 @@ describe('ContinueWatching', () => {
     mockFetch.mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: WatchProgress[] | null, error?: string) => void,
       ) => {
         callCount++;
@@ -886,6 +935,7 @@ describe('ContinueWatching', () => {
     vi.mocked(fetchContinueWatching).mockImplementation(
       (
         _limit: number | undefined,
+        _server: string | undefined,
         callback: (items: null, error?: string) => void,
       ) => {
         callback(null, 'Network error');

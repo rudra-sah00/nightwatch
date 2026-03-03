@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { LoadingOverlay } from '@/features/watch/overlays/LoadingOverlay';
+import { LoadingOverlay } from '@/features/watch/player/ui/overlays/LoadingOverlay';
 
 describe('LoadingOverlay', () => {
   describe('visibility', () => {

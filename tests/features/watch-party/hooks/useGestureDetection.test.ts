@@ -10,8 +10,8 @@ import {
   type Mock,
   vi,
 } from 'vitest';
-import type { useGestureDetection as useGestureDetectionType } from '@/features/watch-party/hooks/useGestureDetection';
-import type { InteractionPayload } from '@/features/watch-party/types';
+import type { useGestureDetection as useGestureDetectionType } from '@/features/watch-party/interactions/hooks/useGestureDetection';
+import type { InteractionPayload } from '@/features/watch-party/room/types';
 
 // Mock requestAnimationFrame
 const mockRequestAnimationFrame = vi.fn((cb) => {
@@ -50,7 +50,7 @@ describe('useGestureDetection', () => {
       close: vi.fn().mockResolvedValue(undefined),
     };
 
-    vi.doMock('@/features/watch-party/services/watch-party.api', () => ({
+    vi.doMock('@/features/watch-party/room/services/watch-party.api', () => ({
       emitPartyInteraction: vi.fn(),
     }));
 
@@ -73,11 +73,13 @@ describe('useGestureDetection', () => {
     }));
 
     // Re-import modules after reset
-    const api = await import('@/features/watch-party/services/watch-party.api');
+    const api = await import(
+      '@/features/watch-party/room/services/watch-party.api'
+    );
     emitPartyInteraction = api.emitPartyInteraction;
 
     const hookModule = await import(
-      '@/features/watch-party/hooks/useGestureDetection'
+      '@/features/watch-party/interactions/hooks/useGestureDetection'
     );
     useGestureDetection = hookModule.useGestureDetection;
 

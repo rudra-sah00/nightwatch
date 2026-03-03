@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   type NextEpisodeInfo,
   NextEpisodeOverlay,
-} from '@/features/watch/overlays/NextEpisodeOverlay';
+} from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
 
 // Mock Next.js Image
 vi.mock('next/image', () => ({

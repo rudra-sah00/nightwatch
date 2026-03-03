@@ -44,7 +44,7 @@ describe('Watch API Socket.IO Functions', () => {
     };
     vi.clearAllMocks();
     // Clear all caches before each test
-    api.setContinueWatchingCache([]);
+    api.setContinueWatchingCache('s1', []);
   });
 
   describe('Cache Functions', () => {
@@ -59,8 +59,8 @@ describe('Watch API Socket.IO Functions', () => {
           }),
         ];
 
-        api.setContinueWatchingCache(mockData);
-        const cached = api.getCachedContinueWatching();
+        api.setContinueWatchingCache('s1', mockData);
+        const cached = api.getCachedContinueWatching('s1');
 
         expect(cached).toEqual(mockData);
       });
@@ -68,18 +68,18 @@ describe('Watch API Socket.IO Functions', () => {
       it('should return null if cache is expired', async () => {
         const mockData = [createMockProgress({ id: '1', title: 'Movie 1' })];
 
-        api.setContinueWatchingCache(mockData);
+        api.setContinueWatchingCache('s1', mockData);
 
         // Wait for cache to expire (cache TTL is 5 minutes in production, but we can test the logic)
         // In real scenario, we'd need to mock Date.now()
-        const cached = api.getCachedContinueWatching();
+        const cached = api.getCachedContinueWatching('s1');
         expect(cached).toEqual(mockData); // Should still be fresh
       });
 
       it('should return null if no cache exists', () => {
         // Clear cache by calling private method (module-level cache)
         // Since we set empty array in beforeEach, let's test with that
-        const cached = api.getCachedContinueWatching();
+        const cached = api.getCachedContinueWatching('s1');
         expect(cached).toEqual([]); // Empty cache returns empty array, not null
       });
     });
@@ -91,16 +91,16 @@ describe('Watch API Socket.IO Functions', () => {
           createMockProgress({ id: '2', title: 'Movie 2' }),
         ];
 
-        api.setContinueWatchingCache(mockData);
-        api.removeFromContinueWatchingCache('1');
+        api.setContinueWatchingCache('s1', mockData);
+        api.removeFromContinueWatchingCache('s1', '1');
 
-        const cached = api.getCachedContinueWatching();
+        const cached = api.getCachedContinueWatching('s1');
         expect(cached).toHaveLength(1);
         expect(cached?.[0].id).toBe('2');
       });
 
       it('should handle removal when cache is empty', () => {
-        api.removeFromContinueWatchingCache('1');
+        api.removeFromContinueWatchingCache('s1', '1');
         // Should not throw
       });
     });
@@ -141,11 +141,11 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
-      api.fetchContinueWatching(10, callback);
+      api.fetchContinueWatching(10, 's1', callback);
 
       expect(mockSocket.emit).toHaveBeenCalledWith(
         'watch:get_continue_watching',
-        { limit: 10 },
+        { limit: 10, providerId: 's1' },
         expect.any(Function),
       );
     });
@@ -159,7 +159,7 @@ describe('Watch API Socket.IO Functions', () => {
       });
 
       const callback = vi.fn();
-      api.fetchContinueWatching(10, callback);
+      api.fetchContinueWatching(10, 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(mockItems);
     });
@@ -172,7 +172,7 @@ describe('Watch API Socket.IO Functions', () => {
       });
 
       const callback = vi.fn();
-      api.fetchContinueWatching(10, callback);
+      api.fetchContinueWatching(10, 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(null, 'Database error');
     });
@@ -182,7 +182,7 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
-      api.fetchContinueWatching(10, callback);
+      api.fetchContinueWatching(10, 's1', callback);
 
       // Should attempt HTTP fallback (getContinueWatching)
       expect(mockSocket.emit).not.toHaveBeenCalled();
@@ -192,7 +192,7 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(null);
 
       const callback = vi.fn();
-      api.fetchContinueWatching(10, callback);
+      api.fetchContinueWatching(10, 's1', callback);
 
       expect(mockSocket.emit).not.toHaveBeenCalled();
     });
@@ -203,11 +203,11 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
-      api.deleteWatchProgress('progress-1', callback);
+      api.deleteWatchProgress('progress-1', 's1', callback);
 
       expect(mockSocket.emit).toHaveBeenCalledWith(
         'watch:delete_progress',
-        { progressId: 'progress-1' },
+        { progressId: 'progress-1', providerId: 's1' },
         expect.any(Function),
       );
     });
@@ -216,7 +216,7 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       // Set up cache to verify removal
-      api.setContinueWatchingCache([
+      api.setContinueWatchingCache('s1', [
         createMockProgress({ id: 'progress-1', title: 'Movie' }),
       ]);
 
@@ -225,7 +225,7 @@ describe('Watch API Socket.IO Functions', () => {
       });
 
       const callback = vi.fn();
-      api.deleteWatchProgress('progress-1', callback);
+      api.deleteWatchProgress('progress-1', 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(true);
     });
@@ -238,7 +238,7 @@ describe('Watch API Socket.IO Functions', () => {
       });
 
       const callback = vi.fn();
-      api.deleteWatchProgress('progress-1', callback);
+      api.deleteWatchProgress('progress-1', 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(false);
     });
@@ -248,7 +248,7 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
 
       const callback = vi.fn();
-      api.deleteWatchProgress('progress-1', callback);
+      api.deleteWatchProgress('progress-1', 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(false);
       expect(mockSocket.emit).not.toHaveBeenCalled();
@@ -258,7 +258,7 @@ describe('Watch API Socket.IO Functions', () => {
       vi.mocked(ws.getSocket).mockReturnValue(null);
 
       const callback = vi.fn();
-      api.deleteWatchProgress('progress-1', callback);
+      api.deleteWatchProgress('progress-1', 's1', callback);
 
       expect(callback).toHaveBeenCalledWith(false);
     });
@@ -273,7 +273,7 @@ describe('Watch API Socket.IO Functions', () => {
 
       expect(mockSocket.emit).toHaveBeenCalledWith(
         'watch:get_progress',
-        { contentId: 'content-1' },
+        { contentId: 'content-1', providerId: 's1' },
         expect.any(Function),
       );
     });

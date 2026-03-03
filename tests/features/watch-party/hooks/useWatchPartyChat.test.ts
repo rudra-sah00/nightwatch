@@ -1,9 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWatchPartyChat } from '@/features/watch-party/hooks/useWatchPartyChat';
-import * as api from '@/features/watch-party/services/watch-party.api';
-import type { ChatMessage } from '@/features/watch-party/types';
+import { useWatchPartyChat } from '@/features/watch-party/chat/hooks/useWatchPartyChat';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
+import type { ChatMessage } from '@/features/watch-party/room/types';
 
 interface UserTyping {
   userId: string;
@@ -11,7 +11,7 @@ interface UserTyping {
   isTyping: boolean;
 }
 
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   sendPartyMessage: vi.fn(),
   onPartyMessage: vi.fn(() => vi.fn()),
   onUserTyping: vi.fn(() => vi.fn()),

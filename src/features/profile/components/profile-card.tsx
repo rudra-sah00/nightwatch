@@ -13,14 +13,10 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/providers/auth-provider';
-import { getWatchActivity, uploadProfileImage } from '../api';
-import type { WatchActivity } from '../types';
+import { useProfileCard } from '../hooks/use-profile-card';
 import { ActivityGraph } from './activity-graph';
 import { ChangePasswordForm } from './change-password-form';
 import { UpdateProfileForm } from './update-profile-form';
@@ -83,7 +79,7 @@ const TabButton = ({ isActive, onClick, children, icon }: TabButtonProps) => (
     type="button"
     onClick={onClick}
     className={cn(
-      'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-6 lg:px-8 py-2.5 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+      'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-6 lg:px-8 py-2.5 text-sm font-medium transition-[colors,shadow] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
       isActive
         ? 'bg-gradient-to-r from-red-500/20 via-red-500/15 to-red-600/10 text-foreground shadow-lg shadow-red-500/10 border border-red-500/20'
         : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03] border border-transparent',
@@ -97,92 +93,22 @@ const TabButton = ({ isActive, onClick, children, icon }: TabButtonProps) => (
   </button>
 );
 
-type TabType = 'overview' | 'settings';
-
 export function ProfileCard() {
-  const { user, logout, updateUser } = useAuth();
-  const [activity, setActivity] = useState<WatchActivity[]>([]);
-  const [loadingActivity, setLoadingActivity] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const loadActivity = () => {
-      setLoadingActivity(true);
-      getWatchActivity()
-        .then(setActivity)
-        .catch(() => toast.error('Failed to load activity'))
-        .finally(() => setLoadingActivity(false));
-    };
-
-    loadActivity();
-
-    const handleFocus = () => {
-      getWatchActivity().then(setActivity);
-    };
-
-    window.addEventListener('focus', handleFocus, { passive: true });
-    return () => window.removeEventListener('focus', handleFocus);
-  }, []);
-
-  const handleFileClick = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // Create optimistic preview immediately
-      const localPreviewUrl = URL.createObjectURL(file);
-      setPreviewImage(localPreviewUrl);
-
-      try {
-        setIsUploading(true);
-        const { url } = await uploadProfileImage(file);
-        // Update user profile photo in auth context
-        updateUser({ profilePhoto: url });
-        // Clear preview once real URL is set
-        setPreviewImage(null);
-        toast.success('Profile image updated successfully');
-      } catch {
-        // Revert preview on error
-        setPreviewImage(null);
-        toast.error('Failed to upload profile image');
-      } finally {
-        setIsUploading(false);
-        // Clear file input for re-uploads
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        // Cleanup object URL
-        URL.revokeObjectURL(localPreviewUrl);
-      }
-    },
-    [updateUser],
-  );
-
-  // Use preview image if available, otherwise use user's profile photo
-  const displayImage = previewImage || user?.profilePhoto;
-
-  const userCreatedAtDate = useMemo(
-    () => (user?.createdAt ? new Date(user.createdAt) : undefined),
-    [user?.createdAt],
-  );
-
-  const formattedJoinDate = useMemo(
-    () =>
-      userCreatedAtDate
-        ? userCreatedAtDate.toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric',
-          })
-        : 'Unknown',
-    [userCreatedAtDate],
-  );
+  const {
+    user,
+    logout,
+    activity,
+    loadingActivity,
+    isUploading,
+    activeTab,
+    setActiveTab,
+    fileInputRef,
+    displayImage,
+    userCreatedAtDate,
+    formattedJoinDate,
+    handleFileClick,
+    handleFileChange,
+  } = useProfileCard();
 
   if (!user) return null;
 
@@ -238,7 +164,7 @@ export function ProfileCard() {
                   <button
                     type="button"
                     onClick={handleFileClick}
-                    className="absolute inset-1 flex items-center justify-center rounded-full bg-gradient-to-t from-black/80 via-black/60 to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer text-white"
+                    className="absolute inset-1 flex items-center justify-center rounded-full bg-gradient-to-t from-black/80 via-black/60 to-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer text-white"
                   >
                     <div className="flex flex-col items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform">
                       {isUploading ? (
@@ -297,7 +223,7 @@ export function ProfileCard() {
                 {/* Sign Out Button */}
                 <Button
                   variant="ghost"
-                  className="w-full mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl border border-destructive/20 hover:border-destructive/30 transition-all group/btn"
+                  className="w-full mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl border border-destructive/20 hover:border-destructive/30 transition-colors group/btn"
                   onClick={logout}
                 >
                   <LogOut className="w-4 h-4 mr-2 group-hover/btn:translate-x-0.5 transition-transform" />
@@ -333,9 +259,9 @@ export function ProfileCard() {
                 {/* Close Button */}
                 <Link
                   href="/home"
-                  className="hidden lg:flex p-3 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/5 hover:shadow-xl hover:from-muted/50 hover:to-muted/30 transition-all hover:scale-105 active:scale-95 group items-center justify-center"
+                  className="hidden lg:flex p-3 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/5 hover:shadow-xl hover:from-muted/50 hover:to-muted/30 transition-[colors,transform,shadow] hover:scale-105 active:scale-95 group items-center justify-center"
                 >
-                  <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:rotate-90 transition-all duration-300" />
+                  <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:rotate-90 transition-[colors,transform] duration-300" />
                 </Link>
               </div>
             </div>

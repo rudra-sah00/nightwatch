@@ -112,10 +112,20 @@ export function extractTokenFromUrl(
 
 /**
  * Wraps an external URL in the backend proxy.
+ *
+ * Pass-through rules (already in final form — do not re-wrap):
+ * - `data:` URIs
+ * - Backend CDN proxy paths  (`/api/stream/cdn/…`)
+ * - Absolute URLs (`http://` / `https://`): these are either CF Worker URLs,
+ *   absolute backend CDN proxy URLs, or direct CDN URLs that the browser can
+ *   fetch without an additional proxy hop.
  */
 export function wrapInProxy(url: string, token: string): string {
   if (!url || url.startsWith('data:')) return url;
   if (url.includes('/api/stream/cdn')) return url;
+  // Absolute URLs are already in their final form (Worker URL, absolute CDN
+  // proxy URL, or a direct-CDN URL that needs no proxying).
+  if (url.startsWith('http')) return url;
 
   const encoded =
     typeof btoa !== 'undefined'
@@ -138,6 +148,7 @@ export function normalizeWatchUrls(
       language: string;
       src: string;
     }[];
+    qualities?: { quality: string; url: string }[];
   },
   token: string,
 ) {
@@ -154,6 +165,10 @@ export function normalizeWatchUrls(
     subtitleTracks: urls.subtitleTracks?.map((track) => ({
       ...track,
       src: wrapInProxy(track.src, token),
+    })),
+    qualities: urls.qualities?.map((q: { quality: string; url: string }) => ({
+      ...q,
+      url: wrapInProxy(q.url, token),
     })),
   };
 }

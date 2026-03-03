@@ -6,6 +6,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
+import { useAiMessageBubble } from '../hooks/use-ai-message-bubble';
 import styles from '../styles/AIAssistant.module.css';
 import type { Message, User } from '../types';
 import { AssistantMovieCard } from './AssistantMovieCard';
@@ -31,44 +32,11 @@ export const AiMessageBubble = React.memo(function AiMessageBubble({
   isStreaming,
 }: AiMessageBubbleProps) {
   const isUser = message.role === 'user';
-  const [displayedContent, setDisplayedContent] = React.useState(
-    isUser || !isStreaming ? message.content : '',
-  );
-  const [isTyping, setIsTyping] = React.useState(false);
-
-  // Sync displayed content with message content slowly if assistant
-  React.useEffect(() => {
-    if (isUser) {
-      if (displayedContent !== message.content) {
-        setDisplayedContent(message.content);
-      }
-      return;
-    }
-
-    if (displayedContent.length < message.content.length) {
-      setIsTyping(true);
-      const gap = message.content.length - displayedContent.length;
-
-      // If we're way behind (e.g. after a buffer flush), catch up faster
-      const increment = gap > 100 ? 10 : gap > 20 ? 4 : 1;
-      const speed = gap > 100 ? 0 : gap > 50 ? 5 : 15;
-
-      const timeoutId = setTimeout(() => {
-        setDisplayedContent((prev) => {
-          const next = message.content.substring(0, prev.length + increment);
-          return next;
-        });
-      }, speed);
-
-      return () => clearTimeout(timeoutId);
-    } else {
-      if (isTyping) setIsTyping(false);
-      // Ensure final sync if stream stopped
-      if (!isStreaming && displayedContent !== message.content) {
-        setDisplayedContent(message.content);
-      }
-    }
-  }, [message.content, isUser, isStreaming, displayedContent, isTyping]);
+  const { displayedContent, isTyping } = useAiMessageBubble({
+    message,
+    isUser,
+    isStreaming,
+  });
 
   return (
     <div
@@ -79,7 +47,13 @@ export const AiMessageBubble = React.memo(function AiMessageBubble({
     >
       {/* Avatar (Left for Assistant) */}
       {!isUser ? (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-purple-600/80 flex items-center justify-center shrink-0 mt-1">
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1"
+          style={{
+            background:
+              'linear-gradient(to bottom right, var(--color-primary, rgba(255,255,255,0.8)), var(--ai-color))',
+          }}
+        >
           <Sparkles className="w-4 h-4 text-white" />
         </div>
       ) : null}
@@ -127,7 +101,13 @@ export const AiMessageBubble = React.memo(function AiMessageBubble({
           {!isUser &&
           message.content.includes('Added') &&
           message.content.includes('watchlist') ? (
-            <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-medium bg-green-900/10 px-2 py-1 rounded-md w-fit border border-green-500/20">
+            <div
+              className="mt-2 flex items-center gap-1.5 text-success text-xs font-medium px-2 py-1 rounded-md w-fit border"
+              style={{
+                backgroundColor: 'var(--success-bg)',
+                borderColor: 'var(--success-bg-hover)',
+              }}
+            >
               <CheckCircle2 className="w-3 h-3" />
               <span>Action Completed successfully</span>
             </div>
@@ -196,9 +176,16 @@ const AiMarkdownContent = React.memo(function AiMarkdownContent({
               <button
                 type="button"
                 onClick={() => onPlayMedia?.(href || '', 'video')}
-                className="inline-flex items-center gap-2 px-3 py-2 mt-2 bg-red-900/30 border border-red-500/30 rounded-lg text-red-200 hover:bg-red-900/50 transition-colors group cursor-pointer"
+                className="inline-flex items-center gap-2 px-3 py-2 mt-2 rounded-lg text-white/80 hover:opacity-90 transition-colors group cursor-pointer border"
+                style={{
+                  backgroundColor: 'var(--danger-bg)',
+                  borderColor: 'var(--danger-bg-hover)',
+                }}
               >
-                <span className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span
+                  className="w-6 h-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
+                  style={{ backgroundColor: 'var(--danger-color)' }}
+                >
                   <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
                 </span>
                 <span className="font-medium text-sm">
@@ -224,7 +211,7 @@ const AiMarkdownContent = React.memo(function AiMarkdownContent({
             onClick={() =>
               onPlayMedia?.(typeof src === 'string' ? src : '', 'image')
             }
-            className="relative group mt-4 mb-2 rounded-xl overflow-hidden border border-white/10 hover:border-primary/40 transition-all block w-full aspect-video sm:aspect-[21/9]"
+            className="relative group mt-4 mb-2 rounded-xl overflow-hidden border border-white/10 hover:border-primary/40 transition-[colors,shadow] block w-full aspect-video sm:aspect-[21/9]"
           >
             <img
               src={src}
