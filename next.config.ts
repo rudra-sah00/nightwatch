@@ -68,7 +68,7 @@ const nextConfig: NextConfig = {
     // production CSP headers (localhost is harmless in prod but noisy).
     const backendOrigin =
       process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-    // Dev-only: Worker URL for local wrangler dev (empty string in prod)
+    // CF Worker origin — localhost:8787 in dev, cdn.rudrasahoo.live in prod
     const cfWorkerOrigin = process.env.NEXT_PUBLIC_CF_WORKER_URL || '';
 
     return [

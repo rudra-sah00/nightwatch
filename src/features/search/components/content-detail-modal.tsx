@@ -8,6 +8,7 @@ import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
 import { ContentInfo } from './content-info';
+import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
 
@@ -212,6 +213,13 @@ export function ContentDetailModal({
             onWatchlistToggle={handleWatchlistToggle}
             isInWatchlist={inWatchlist}
             isWatchlistLoading={isWatchlistLoading}
+            extraActions={
+              <DownloadMenu
+                show={show}
+                selectedSeason={selectedSeason}
+                episodes={episodes}
+              />
+            }
           />
         </div>
       </div>

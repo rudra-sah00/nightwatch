@@ -33,6 +33,8 @@ interface ContentInfoProps {
   onWatchlistToggle?: () => void;
   isInWatchlist?: boolean;
   isWatchlistLoading?: boolean;
+  /** Additional action buttons rendered inside the main action row */
+  extraActions?: React.ReactNode;
 }
 
 export const ContentInfo = memo(function ContentInfo({
@@ -51,6 +53,7 @@ export const ContentInfo = memo(function ContentInfo({
   onWatchlistToggle,
   isInWatchlist = false,
   isWatchlistLoading = false,
+  extraActions,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
 
@@ -244,6 +247,8 @@ export const ContentInfo = memo(function ContentInfo({
             {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
           </Button>
         ) : null}
+
+        {extraActions}
       </div>
     </div>
   );
