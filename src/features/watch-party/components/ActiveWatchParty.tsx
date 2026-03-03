@@ -100,19 +100,15 @@ export function ActiveWatchParty({
     <div
       ref={watchPartyContainerRef}
       className={cn(
-        'flex h-[100dvh] w-screen bg-black overflow-hidden relative',
-        'flex-col sm:flex-row',
+        'flex flex-row h-[100dvh] w-screen bg-black overflow-hidden relative',
       )}
     >
       {/* Sidebar */}
       <div
         className={cn(
           'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-30',
-          'w-full order-2 flex-1 border-t border-white/10 sm:border-t-0',
-          'sm:w-auto sm:h-full sm:order-1 sm:border-r sm:flex-none',
-          showDesktopSidebar
-            ? 'sm:w-64 lg:w-80 xl:w-96'
-            : 'sm:w-0 sm:border-none',
+          'h-full order-1 flex-none border-r border-white/10',
+          showDesktopSidebar ? 'w-64 lg:w-80 xl:w-96' : 'w-0 border-none',
         )}
       >
         <WatchPartySidebar
@@ -140,8 +136,7 @@ export function ActiveWatchParty({
       <div
         className={cn(
           'relative min-w-0 bg-black transition-[width] duration-500 watch-party-video',
-          'w-full aspect-video order-1 shrink-0',
-          'sm:w-auto sm:h-full sm:flex-1 sm:order-2 sm:aspect-auto',
+          'h-full flex-1 order-2',
         )}
       >
         <WatchPartyVideoArea

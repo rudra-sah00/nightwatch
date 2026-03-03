@@ -1,15 +1,9 @@
 'use client';
 
-import { Clock, Loader2, Play, Tv, Users } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Clock, Play } from 'lucide-react';
 import type { LiveMatch } from '../api';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
+import { LiveMatchModal } from './LiveMatchModal';
 
 interface LiveMatchCardProps {
   match: LiveMatch;
@@ -35,58 +29,21 @@ export function LiveMatchCard({
     handleWatchParty,
   } = useLiveMatchCard(match);
 
-  const watchModeDialog = (
-    <Dialog open={showPrompt} onOpenChange={setShowPrompt}>
-      <DialogContent className="sm:max-w-sm bg-zinc-950 border-zinc-800/80">
-        <DialogHeader>
-          <DialogTitle className="text-center text-lg">
-            How do you want to watch?
-          </DialogTitle>
-          <DialogDescription className="text-center text-zinc-500 text-sm">
-            {match.team1.name} vs {match.team2.name}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleWatchSolo}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800/60 hover:border-zinc-700 transition-all duration-200 group"
-          >
-            <div className="w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-[var(--live-bg)] group-hover:bg-[var(--live-bg-hover)]">
-              <Tv className="w-5 h-5 text-live" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">Watch Solo</p>
-              <p className="text-[11px] text-zinc-500 mt-0.5">Just me</p>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={handleWatchParty}
-            disabled={isCreatingParty}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800/60 hover:border-indigo-500/50 transition-all duration-200 group disabled:opacity-60"
-          >
-            <div className="w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-[var(--party-bg)] group-hover:bg-[var(--party-bg-hover)]">
-              {isCreatingParty ? (
-                <Loader2 className="w-5 h-5 text-party animate-spin" />
-              ) : (
-                <Users className="w-5 h-5 text-party" />
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">Watch Party</p>
-              <p className="text-[11px] text-zinc-500 mt-0.5">With friends</p>
-            </div>
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
+  const matchModal = (
+    <LiveMatchModal
+      match={match}
+      isOpen={showPrompt}
+      isCreatingParty={isCreatingParty}
+      onClose={() => setShowPrompt(false)}
+      onWatchSolo={handleWatchSolo}
+      onWatchParty={handleWatchParty}
+    />
   );
 
   if (variant === 'featured') {
     return (
       <>
-        {watchModeDialog}
+        {matchModal}
         <button
           type="button"
           onClick={handleWatchClick}
@@ -230,7 +187,7 @@ export function LiveMatchCard({
   // Compact row variant — clean table-like row
   return (
     <>
-      {watchModeDialog}
+      {matchModal}
       <button
         type="button"
         onClick={handleWatchClick}

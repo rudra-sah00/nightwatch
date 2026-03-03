@@ -4,6 +4,7 @@ import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
@@ -72,6 +73,8 @@ export function ContentDetailModal({
     autoPlay,
     onClose,
   });
+
+  const isMobile = useIsMobile();
 
   // Loading state
   if (isLoading) {
@@ -210,6 +213,8 @@ export function ContentDetailModal({
               setShowTrailer(false);
               handleWatchParty();
             }}
+            isWatchPartyDisabled={isMobile}
+            watchPartyDisabledReason={isMobile ? 'Desktop only' : undefined}
             onWatchlistToggle={handleWatchlistToggle}
             isInWatchlist={inWatchlist}
             isWatchlistLoading={isWatchlistLoading}

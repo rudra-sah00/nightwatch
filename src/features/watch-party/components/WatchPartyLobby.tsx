@@ -1,4 +1,4 @@
-import { Crown, Loader2, UserMinus, Users } from 'lucide-react';
+import { Crown, Loader2, Monitor, UserMinus, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Captcha } from '@/components/ui/captcha';
 import type { User } from '@/types';
@@ -20,6 +20,8 @@ interface WatchPartyLobbyProps {
   // Captcha for guest users
   captchaToken?: string | null;
   onCaptchaVerify?: (token: string) => void;
+  /** Block access on mobile screens */
+  isMobile?: boolean;
 }
 
 export function WatchPartyLobby({
@@ -37,8 +39,29 @@ export function WatchPartyLobby({
   onCancelRequest,
   captchaToken,
   onCaptchaVerify,
+  isMobile = false,
 }: WatchPartyLobbyProps) {
   const router = useRouter();
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-6">
+        <Monitor className="w-16 h-16 text-muted-foreground" />
+        <h1 className="text-2xl font-bold text-foreground">Desktop Only</h1>
+        <p className="text-muted-foreground text-center max-w-sm">
+          Watch Party is only available on desktop. Please open this link on a
+          computer to watch together.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push('/home')}
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium"
+        >
+          Go Home
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading && !roomPreview && !roomNotFound) {
     return (

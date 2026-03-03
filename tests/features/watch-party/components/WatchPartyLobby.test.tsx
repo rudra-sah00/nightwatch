@@ -325,6 +325,46 @@ describe('WatchPartyLobby', () => {
     });
   });
 
+  describe('mobile block', () => {
+    it('should show Desktop Only screen when isMobile is true', () => {
+      render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
+
+      expect(screen.getByText('Desktop Only')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Watch Party is only available on desktop/i),
+      ).toBeInTheDocument();
+    });
+
+    it('should show Go Home button on mobile block screen', () => {
+      render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
+
+      expect(
+        screen.getByRole('button', { name: /go home/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('should navigate to home when Go Home clicked on mobile block', () => {
+      render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
+
+      fireEvent.click(screen.getByRole('button', { name: /go home/i }));
+      expect(mockPush).toHaveBeenCalledWith('/home');
+    });
+
+    it('should not show room preview content on mobile', () => {
+      render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
+
+      expect(screen.queryByText('Request to Join')).not.toBeInTheDocument();
+      expect(screen.queryByText('Breaking Bad')).not.toBeInTheDocument();
+    });
+
+    it('should render normally when isMobile is false', () => {
+      render(<WatchPartyLobby {...defaultProps} isMobile={false} />);
+
+      expect(screen.queryByText('Desktop Only')).not.toBeInTheDocument();
+      expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle room without season/episode info', () => {
       const simpleRoom: RoomPreview = {

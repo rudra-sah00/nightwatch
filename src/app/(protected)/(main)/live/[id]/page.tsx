@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useLiveMatchPlayer } from './use-live-match-player';
 
 export default function LiveMatchPlayerPage() {
@@ -18,6 +19,7 @@ export default function LiveMatchPlayerPage() {
     match ?? null,
     matchId,
   );
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -114,19 +116,21 @@ export default function LiveMatchPlayerPage() {
           className="w-5 h-5 rounded-full"
         />
       </div>
-      <Button
-        onClick={handleCreateParty}
-        disabled={isCreatingParty}
-        size="sm"
-        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1.5 border border-indigo-500/50"
-      >
-        {isCreatingParty ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Users className="w-3.5 h-3.5" />
-        )}
-        Party
-      </Button>
+      {!isMobile && (
+        <Button
+          onClick={handleCreateParty}
+          disabled={isCreatingParty}
+          size="sm"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1.5 border border-indigo-500/50"
+        >
+          {isCreatingParty ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Users className="w-3.5 h-3.5" />
+          )}
+          Party
+        </Button>
+      )}
     </div>
   );
 

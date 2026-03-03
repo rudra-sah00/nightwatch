@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useWatchPartyClient } from '../hooks/use-watch-party-client';
 
 // Dynamic imports for heavy watch party components
@@ -79,6 +80,8 @@ export function WatchPartyClient({
     initialRoomNotFound,
   });
 
+  const isMobile = useIsMobile();
+
   if (!isGuestSocketReady) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -100,6 +103,7 @@ export function WatchPartyClient({
         onGuestNameChange={() => {}}
         onJoin={() => {}}
         onLeave={() => {}}
+        isMobile={isMobile}
       />
     );
   }
@@ -149,6 +153,7 @@ export function WatchPartyClient({
       onCancelRequest={handleCancelRequest}
       captchaToken={captchaToken}
       onCaptchaVerify={setCaptchaToken}
+      isMobile={isMobile}
     />
   );
 }
