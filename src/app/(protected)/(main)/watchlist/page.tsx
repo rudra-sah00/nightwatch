@@ -4,7 +4,6 @@ import { Film, Loader2, Tv } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 import type { WatchlistItem } from '@/features/watchlist/types';
@@ -23,7 +22,6 @@ export default function WatchlistPage() {
 
   return (
     <>
-      <Navbar />
       <div className="container mx-auto px-4 py-8 flex flex-col min-h-[calc(100vh-80px)]">
         <div className="flex items-center justify-between mb-8 shrink-0">
           <div>

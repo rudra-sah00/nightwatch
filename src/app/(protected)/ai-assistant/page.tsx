@@ -1,18 +1,14 @@
 'use client';
 
-import { Navbar } from '@/components/layout/navbar';
 import { AiAssistantChat } from '@/features/ai-assistant/components/AiAssistantChat';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
-import { useAuth } from '@/providers/auth-provider';
-import { ServerProvider } from '@/providers/server-provider';
 import { useAiAssistantPage } from './use-ai-assistant-page';
 
-function AiAssistantPageInner() {
+export default function AiAssistantPage() {
   const { selectedContent, setSelectedContent } = useAiAssistantPage();
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      <Navbar />
+    <div className="h-[calc(100vh-80px)] bg-background flex flex-col overflow-hidden">
       <div className="flex-1 flex flex-col w-full relative z-10 min-h-0">
         <div className="flex-1 min-h-0 flex flex-col">
           <AiAssistantChat
@@ -35,14 +31,5 @@ function AiAssistantPageInner() {
         />
       ) : null}
     </div>
-  );
-}
-
-export default function AiAssistantPage() {
-  const { user } = useAuth();
-  return (
-    <ServerProvider defaultServer={user?.preferredServer}>
-      <AiAssistantPageInner />
-    </ServerProvider>
   );
 }

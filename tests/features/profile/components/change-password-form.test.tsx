@@ -28,7 +28,7 @@ describe('ChangePasswordForm', () => {
   const getFormElements = () => ({
     currentPasswordInput: screen.getByLabelText(/^Current Password$/i),
     newPasswordInput: screen.getByLabelText(/^New Password$/i),
-    confirmPasswordInput: screen.getByLabelText(/^Confirm New Password$/i),
+    confirmPasswordInput: screen.getByLabelText(/^Confirm Password$/i),
     submitButton: screen.getByRole('button', { name: /Update Password/i }),
   });
 
@@ -155,9 +155,7 @@ describe('ChangePasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Password updated successfully/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Password updated/i)).toBeInTheDocument();
       });
     });
 
@@ -296,7 +294,7 @@ describe('ChangePasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Error')).toBeInTheDocument();
+        expect(screen.getByLabelText('Error icon')).toBeInTheDocument();
       });
     });
   });

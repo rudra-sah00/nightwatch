@@ -2,7 +2,6 @@
 
 import { Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { Navbar } from '@/components/layout/navbar';
 import { SearchResults } from '@/features/search/components/search-results';
 import type { SearchResult } from '@/features/search/types';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
@@ -57,7 +56,6 @@ export function HomeClient({ initialResults, initialQuery }: HomeClientProps) {
 
   return (
     <>
-      <Navbar isLoading={isTransitioning} />
       <main className="container mx-auto px-4 py-8 max-w-4xl min-h-[calc(100vh-80px)] flex flex-col">
         <div className="flex-1">
           {query.trim() ? (

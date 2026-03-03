@@ -76,7 +76,7 @@ describe('UpdateProfileForm', () => {
       await user.clear(usernameInput);
       await user.type(usernameInput, 'ab');
 
-      expect(screen.getByText(/Too short/i)).toBeInTheDocument();
+      expect(screen.getByText(/Min 3 characters/i)).toBeInTheDocument();
     });
 
     it('shows username requirements when username is changed', async () => {
@@ -85,10 +85,10 @@ describe('UpdateProfileForm', () => {
 
       const usernameInput = screen.getByLabelText(/Username/i);
       await user.clear(usernameInput);
-      await user.type(usernameInput, 'newname');
+      await user.type(usernameInput, 'n');
 
       expect(
-        screen.getByText(/Only lowercase letters, numbers, and underscores/i),
+        screen.getByText(/letters, numbers, underscores/i),
       ).toBeInTheDocument();
     });
 
@@ -118,7 +118,7 @@ describe('UpdateProfileForm', () => {
       await user.type(usernameInput, 'newusername');
 
       await waitFor(() => {
-        expect(screen.getByText(/Username is available/i)).toBeInTheDocument();
+        expect(screen.getByText(/Available/i)).toBeInTheDocument();
       });
     });
 
@@ -136,9 +136,7 @@ describe('UpdateProfileForm', () => {
       await user.type(usernameInput, 'takenname');
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Username is already taken/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Already taken/i)).toBeInTheDocument();
       });
     });
   });
@@ -202,9 +200,7 @@ describe('UpdateProfileForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Profile updated successfully/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Profile updated/i)).toBeInTheDocument();
       });
     });
 
@@ -295,9 +291,7 @@ describe('UpdateProfileForm', () => {
       await user.type(usernameInput, 'takenname');
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Username is already taken/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Already taken/i)).toBeInTheDocument();
       });
 
       const submitButton = screen.getByRole('button', {

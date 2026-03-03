@@ -9,7 +9,6 @@ import {
   Server,
 } from 'lucide-react';
 import { Suspense } from 'react';
-import { Navbar } from '@/components/layout/navbar';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useServer } from '@/providers/server-provider';
@@ -279,38 +278,33 @@ function LiveContent() {
 
 export default function LivePage() {
   return (
-    <>
-      <Navbar />
-      <Suspense
-        fallback={
-          <div className="min-h-screen pb-32">
-            <div className="container mx-auto px-4 pt-10">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-red-500/20 rounded-full blur-md" />
-                  <Radio className="relative w-5 h-5 text-red-500" />
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  Live Sports
-                </h1>
+    <Suspense
+      fallback={
+        <div className="min-h-screen pb-32">
+          <div className="container mx-auto px-4 pt-10">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="relative">
+                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-md" />
+                <Radio className="relative w-5 h-5 text-red-500" />
               </div>
-              <div className="flex gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800/50 w-fit mb-10">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-9 w-24 rounded-lg bg-zinc-800/60 animate-pulse"
-                  />
-                ))}
-              </div>
-              <div className="flex items-center justify-center py-32">
-                <Loader2 className="w-7 h-7 text-zinc-500 animate-spin" />
-              </div>
+              <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
+            </div>
+            <div className="flex gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800/50 w-fit mb-10">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-9 w-24 rounded-lg bg-zinc-800/60 animate-pulse"
+                />
+              ))}
+            </div>
+            <div className="flex items-center justify-center py-32">
+              <Loader2 className="w-7 h-7 text-zinc-500 animate-spin" />
             </div>
           </div>
-        }
-      >
-        <LiveContent />
-      </Suspense>
-    </>
+        </div>
+      }
+    >
+      <LiveContent />
+    </Suspense>
   );
 }
