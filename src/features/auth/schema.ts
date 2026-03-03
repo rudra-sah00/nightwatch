@@ -13,7 +13,7 @@ const passwordSchema = z
 /**
  * Password strength states for UI feedback (3 states: weak / fair / strong)
  */
-export type PasswordStrength = 'weak' | 'fair' | 'strong';
+type PasswordStrength = 'weak' | 'fair' | 'strong';
 
 export interface PasswordStrengthResult {
   strength: PasswordStrength;

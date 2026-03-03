@@ -1,0 +1,153 @@
+import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { memo } from 'react';
+import { useVODPlayerState } from '../hooks/use-vod-player-state';
+import { Player } from '../player';
+// Removed NextEpisodeOverlay since we compose it via Player.NextEpisodeOverlay
+import type { VideoMetadata } from '../player/context/types';
+import { CenterPlayButton } from '../player/ui/controls/PlayPause';
+import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
+import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
+import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
+import { NextEpisodeOverlay } from '../player/ui/overlays/NextEpisodeOverlay';
+
+export interface WatchPlayerProps {
+  streamUrl: string | null;
+  metadata: VideoMetadata;
+  captionUrl?: string | null;
+  subtitleTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    src: string;
+  }[];
+  qualities?: { quality: string; url: string }[];
+  spriteVtt?: string;
+  description?: string;
+  onVideoRef?: (ref: HTMLVideoElement | null) => void;
+  mobileHeaderContent?: React.ReactNode;
+  isAuthenticated?: boolean;
+  onNavigate?: (url: string) => void;
+  onStreamExpired?: () => void;
+  /** Server 2 language dubs: seeded into the player so AudioSelector shows them */
+  initialAudioTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    streamUrl: string;
+  }[];
+  /** Called when the user selects a language dub on server 2 */
+  onAudioTrackChange?: (trackId: string) => void;
+}
+
+export const WatchVODPlayer = memo(function WatchVODPlayer(
+  props: WatchPlayerProps,
+) {
+  const router = useRouter();
+
+  // Handle going back - always go to home (not browser history)
+  const handleBack = () => {
+    router.push('/home');
+  };
+
+  return (
+    <Player.Root
+      {...props}
+      onNavigate={props.onNavigate || ((url) => router.push(url))}
+    >
+      {/* Mobile Header - Solid Top Bar */}
+      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base font-semibold text-white truncate">
+            {props.metadata.title}
+          </h1>
+          {props.metadata.season != null && props.metadata.episode != null ? (
+            <p className="text-xs text-white/70 truncate">
+              S{props.metadata.season}:E{props.metadata.episode}
+            </p>
+          ) : null}
+        </div>
+        {props.mobileHeaderContent}
+      </div>
+
+      <VODPlayerState />
+    </Player.Root>
+  );
+});
+
+function VODPlayerState() {
+  const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
+    useVODPlayerState();
+
+  return (
+    <>
+      {state.isLoading ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
+          {metadata.posterUrl ? (
+            <div className="absolute inset-0 z-0">
+              <div
+                className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-40"
+                style={{ backgroundImage: `url(${metadata.posterUrl})` }}
+              />
+              <div className="absolute inset-0 backdrop-blur-[40px] bg-black/40" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/60" />
+            </div>
+          ) : null}
+          <LoadingOverlay isVisible={true} />
+        </div>
+      ) : null}
+
+      <Player.Video />
+
+      <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+
+      <ErrorOverlay
+        isVisible={!!state.error}
+        message={state.error || 'An error occurred'}
+        onRetry={() => {
+          window.location.reload();
+        }}
+        onBack={playerHandlers.goBack}
+      />
+
+      <CenterPlayButton
+        isPlaying={state.isPlaying}
+        onToggle={playerHandlers.togglePlay}
+        metadata={pauseOverlayMetadata}
+        disabled={false}
+        isLoading={state.isLoading}
+      />
+
+      {/* Explicit VOD Composition */}
+      <Player.Controls>
+        <Player.Header />
+        <Player.SeekBar />
+        <Player.ControlRow>
+          <Player.PlayPause />
+          <Player.SkipButtons />
+          <Player.Volume />
+          <Player.TimeDisplay />
+          <Player.Spacer />
+          <Player.AudioSubtitleSelectors />
+          <Player.SettingsMenu />
+          <Player.Fullscreen />
+        </Player.ControlRow>
+      </Player.Controls>
+
+      <NextEpisodeOverlay
+        isVisible={nextEpisode.show}
+        nextEpisode={nextEpisode.info}
+        onPlayNext={nextEpisode.play}
+        onCancel={nextEpisode.cancel}
+        isLoading={nextEpisode.isLoading}
+      />
+    </>
+  );
+}

@@ -1,8 +1,8 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useWatchPartySetup } from '../hooks/use-watch-party-setup';
 import type { Episode, Season, ShowDetails } from '../types';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
@@ -32,7 +32,7 @@ export function WatchPartySetup({
   onSelectEpisode,
   creatingEpisodeId,
 }: WatchPartySetupProps) {
-  const [isSeasonOpen, setIsSeasonOpen] = useState(false);
+  const { isSeasonOpen, setIsSeasonOpen } = useWatchPartySetup();
 
   if (!isOpen) return null;
 

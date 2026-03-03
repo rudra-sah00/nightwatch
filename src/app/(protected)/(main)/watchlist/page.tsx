@@ -3,66 +3,50 @@
 import { Film, Loader2, Tv } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
-import { getWatchlist } from '@/features/watchlist/api';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
+import { useWatchlistPage } from './use-watchlist-page';
 
 export default function WatchlistPage() {
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [_isIdModalOpen, setIsIdModalOpen] = useState(false);
-
-  // Fetch watchlist
-  const fetchWatchlist = useCallback(async () => {
-    try {
-      const items = await getWatchlist();
-      setWatchlist(items);
-    } catch (_e) {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!selectedId) {
-      fetchWatchlist();
-    }
-  }, [selectedId, fetchWatchlist]);
-
-  const handleItemClick = (contentId: string) => {
-    setSelectedId(contentId);
-    setIsIdModalOpen(true);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const isEmpty = watchlist.length === 0;
+  const {
+    serverLabel,
+    watchlist,
+    loading,
+    selectedId,
+    setSelectedId,
+    isEmpty,
+  } = useWatchlistPage();
 
   return (
     <>
       <Navbar />
       <div className="container mx-auto px-4 py-8 flex flex-col min-h-[calc(100vh-80px)]">
         <div className="flex items-center justify-between mb-8 shrink-0">
-          <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
-          <span className="text-muted-foreground">
-            {watchlist.length} {watchlist.length === 1 ? 'item' : 'items'}
-          </span>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Showing items from{' '}
+              <span className="text-foreground font-medium">{serverLabel}</span>{' '}
+              — use the toggle in the navbar to switch
+            </p>
+          </div>
+          {!loading && (
+            <span className="text-muted-foreground">
+              {watchlist.length} {watchlist.length === 1 ? 'item' : 'items'}
+            </span>
+          )}
         </div>
 
-        {isEmpty ? (
-          <EmptyWatchlist />
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[30vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : isEmpty ? (
+          <EmptyWatchlist serverLabel={serverLabel} />
         ) : (
           <div
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
@@ -72,7 +56,7 @@ export default function WatchlistPage() {
               <WatchlistItemCard
                 key={item.id}
                 item={item}
-                onClick={() => handleItemClick(item.contentId)}
+                onClick={() => setSelectedId(item.contentId)}
               />
             ))}
           </div>
@@ -82,10 +66,7 @@ export default function WatchlistPage() {
       {selectedId ? (
         <ContentDetailModal
           contentId={selectedId}
-          onClose={() => {
-            setIsIdModalOpen(false);
-            setSelectedId(null);
-          }}
+          onClose={() => setSelectedId(null)}
         />
       ) : null}
     </>
@@ -94,7 +75,11 @@ export default function WatchlistPage() {
 
 // --- Helper Components ---
 
-const EmptyWatchlist = React.memo(function EmptyWatchlist() {
+const EmptyWatchlist = React.memo(function EmptyWatchlist({
+  serverLabel,
+}: {
+  serverLabel: string;
+}) {
   return (
     <div className="flex-1 flex items-center justify-center">
       <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
@@ -102,10 +87,10 @@ const EmptyWatchlist = React.memo(function EmptyWatchlist() {
           <Film className="w-8 h-8 opacity-50" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-semibold">Your list is empty</h3>
+          <h3 className="text-xl font-semibold">No items on {serverLabel}</h3>
           <p className="text-muted-foreground">
-            Movies and series you add to your watchlist will appear here. Ask
-            Rudra AI to add something!
+            Add movies or shows while browsing on {serverLabel} and they'll
+            appear here.
           </p>
         </div>
         <Button asChild variant="secondary" className="mt-4">
@@ -126,7 +111,7 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
   return (
     <button
       type="button"
-      className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 border border-white/10 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 cursor-pointer text-left"
+      className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 border border-white/10 transition-[colors,transform,shadow] hover:scale-105 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 cursor-pointer text-left"
       onClick={onClick}
     >
       {item.posterUrl ? (
@@ -134,6 +119,7 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
           src={getOptimizedImageUrl(item.posterUrl)}
           alt={item.title}
           fill
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
           className="object-cover transition-transform duration-500 group-hover:scale-110"
           unoptimized={item.posterUrl.includes('/api/stream/')}
         />
@@ -153,9 +139,6 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
           <span className="text-xs text-secondary-foreground bg-secondary/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
             {item.contentType}
           </span>
-        </div>
-        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 transform translate-y-2 group-hover:translate-y-0">
-          <p className="text-xs text-white/70 italic">Click for details</p>
         </div>
       </div>
     </button>

@@ -145,6 +145,7 @@ describe('Auth API', () => {
           username: 'testuser',
           name: 'Test User',
           profilePhoto: null,
+          preferredServer: 's1' as 's1' | 's2',
           sessionId: 'test-session-1',
           createdAt: new Date().toISOString(),
         },
@@ -176,6 +177,7 @@ describe('Auth API', () => {
           username: 'testuser',
           name: 'Test User',
           profilePhoto: null,
+          preferredServer: 's1' as 's1' | 's2',
           sessionId: 'test-session-2',
           createdAt: new Date().toISOString(),
         },
@@ -259,7 +261,7 @@ describe('Auth API', () => {
 
       vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
 
-      const result = await forgotPassword('test@example.com');
+      const result = await forgotPassword({ email: 'test@example.com' });
 
       expect(fetchModule.apiFetch).toHaveBeenCalledWith(
         '/api/auth/forgot-password',

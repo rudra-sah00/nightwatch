@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { PendingRequests } from '@/features/watch-party/components/PendingRequests';
-import type { RoomMember } from '@/features/watch-party/types';
+import type { RoomMember } from '@/features/watch-party/room/types';
 
 describe('PendingRequests', () => {
   const mockPendingMembers: RoomMember[] = [

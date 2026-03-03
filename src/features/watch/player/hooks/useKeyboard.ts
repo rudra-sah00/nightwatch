@@ -1,0 +1,202 @@
+'use client';
+
+import { type RefObject, useCallback, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import type { PlayerAction } from '../context/types';
+
+interface UseKeyboardOptions {
+  videoRef: RefObject<HTMLVideoElement | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
+  dispatch: React.Dispatch<PlayerAction>;
+  isFullscreen: boolean;
+  onBack: () => void;
+  // Caption toggle
+  currentSubtitleTrack: string | null;
+  onToggleCaptions: () => void;
+  // Next episode
+  hasNextEpisode: boolean;
+  onNextEpisode: () => void;
+  disabled?: boolean; // For watch party guests (disables playback controls)
+  isLive?: boolean; // Disables seek/skip shortcuts for live streams
+}
+
+export function useKeyboard({
+  videoRef,
+  containerRef,
+  dispatch,
+  isFullscreen,
+  onToggleCaptions,
+  hasNextEpisode,
+  onNextEpisode,
+  disabled = false,
+  isLive = false,
+}: UseKeyboardOptions) {
+  const seek = useCallback(
+    (seconds: number) => {
+      if (disabled) return;
+      const video = videoRef.current;
+      if (!video) return;
+      video.currentTime = Math.max(
+        0,
+        Math.min(video.duration, video.currentTime + seconds),
+      );
+    },
+    [videoRef, disabled],
+  );
+
+  const adjustVolume = useCallback(
+    (delta: number) => {
+      const video = videoRef.current;
+      if (!video) return;
+      const newVolume = Math.max(0, Math.min(1, video.volume + delta));
+      video.volume = newVolume;
+      dispatch({ type: 'SET_VOLUME', volume: newVolume });
+    },
+    [videoRef, dispatch],
+  );
+
+  const togglePlay = useCallback(() => {
+    if (disabled) return;
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }, [videoRef, disabled]);
+
+  const toggleMute = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    dispatch({ type: 'TOGGLE_MUTE' });
+  }, [videoRef, dispatch]);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!containerRef.current) return;
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch {
+      toast.error('Fullscreen toggle failed');
+    }
+  }, [containerRef]);
+
+  // ── useLatest pattern (rule: advanced-use-latest) ──────────────────────────
+  // Store all handler callbacks in a stable ref so the effect only registers
+  // once. Each keystroke reads from the ref — always current values, never
+  // stale closures. Prevents listener re-registration on every state change.
+  const handlersRef = useRef({
+    togglePlay,
+    seek,
+    adjustVolume,
+    toggleMute,
+    toggleFullscreen,
+    onToggleCaptions,
+    onNextEpisode,
+    dispatch,
+    isFullscreen,
+    hasNextEpisode,
+    disabled,
+    isLive,
+  });
+  useEffect(() => {
+    handlersRef.current = {
+      togglePlay,
+      seek,
+      adjustVolume,
+      toggleMute,
+      toggleFullscreen,
+      onToggleCaptions,
+      onNextEpisode,
+      dispatch,
+      isFullscreen,
+      hasNextEpisode,
+      disabled,
+      isLive,
+    };
+  });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      const h = handlersRef.current;
+
+      switch (e.code) {
+        case 'Space':
+        case 'KeyK':
+          if (h.disabled) break;
+          e.preventDefault();
+          h.togglePlay();
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'ArrowLeft':
+        case 'KeyJ':
+          if (h.disabled || h.isLive) break;
+          e.preventDefault();
+          h.seek(-10);
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'ArrowRight':
+        case 'KeyL':
+          if (h.disabled || h.isLive) break;
+          e.preventDefault();
+          h.seek(10);
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          h.adjustVolume(0.1);
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          h.adjustVolume(-0.1);
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'KeyM':
+          h.toggleMute();
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'KeyF':
+          h.toggleFullscreen();
+          break;
+        case 'Escape':
+          if (h.isFullscreen) {
+            document.exitFullscreen();
+          }
+          break;
+        case 'KeyC':
+          e.preventDefault();
+          h.onToggleCaptions();
+          h.dispatch({ type: 'SHOW_CONTROLS' });
+          break;
+        case 'KeyN':
+          if (h.hasNextEpisode && !h.disabled) {
+            e.preventDefault();
+            h.onNextEpisode();
+          }
+          break;
+      }
+    };
+
+    // Register once — no dependencies, reads via ref
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { togglePlay, toggleMute, toggleFullscreen, seek, adjustVolume };
+}

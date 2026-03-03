@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useMobileDetection } from '@/features/watch/page/useMobileDetection';
+import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
 
 describe('useMobileDetection', () => {
   beforeEach(() => {

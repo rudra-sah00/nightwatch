@@ -1,135 +1,33 @@
 'use client';
 
-import { Clock, Search, X } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import type React from 'react';
-import { useEffect, useRef, useState, useTransition } from 'react';
-import { toast } from 'sonner';
+import { Clock, Search, Sparkles, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import {
-  clearSearchHistory,
-  deleteSearchHistoryItem,
-  getSearchHistory,
-} from '@/features/search/api';
-import type { SearchHistory } from '@/features/search/types';
 import { cn } from '@/lib/utils';
+import { useSearchInput } from '../hooks/use-search-input';
 
 interface SearchInputProps {
   isLoading?: boolean;
 }
 
 export function SearchInput({ isLoading = false }: SearchInputProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [query, setQuery] = useState(() => searchParams.get('q') || '');
-  const [history, setHistory] = useState<SearchHistory[]>([]);
-  const [isPending, startTransition] = useTransition();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isDebouncingRef = useRef(false);
-
-  // Sync query when URL changes (e.g., browser back/forward)
-  const urlQuery = searchParams.get('q') || '';
-  useEffect(() => {
-    if (!isDebouncingRef.current) {
-      setQuery(urlQuery);
-    }
-  }, [urlQuery]);
-
-  // DEBOUNCED SEARCH: Automatically update URL as user types
-  useEffect(() => {
-    const trimmedQuery = query.trim();
-    const currentQ = searchParams.get('q') || '';
-
-    // Don't search if it's the same as current URL or empty (unless it was previously non-empty)
-    if (trimmedQuery === currentQ) {
-      isDebouncingRef.current = false;
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      isDebouncingRef.current = true;
-      startTransition(() => {
-        if (trimmedQuery) {
-          router.push(`/home?q=${encodeURIComponent(trimmedQuery)}`);
-        } else if (currentQ) {
-          router.push('/home');
-        }
-        // Reset ref after transition starts
-        setTimeout(() => {
-          isDebouncingRef.current = false;
-        }, 500);
-      });
-    }, 400); // 400ms debounce
-
-    return () => clearTimeout(timer);
-  }, [query, router, searchParams]);
-
-  // Load history when focused
-  const loadHistory = async () => {
-    try {
-      const data = await getSearchHistory();
-      setHistory(data);
-    } catch {
-      // Silently fail
-    }
-  };
-
-  const handleFocus = () => {
-    setIsOpen(true);
-    loadHistory();
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside, {
-      passive: true,
-    });
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleDeleteItem = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    try {
-      await deleteSearchHistoryItem(id);
-      setHistory((prev) => prev.filter((item) => item.id !== id));
-    } catch {
-      toast.error('Failed to clear item');
-    }
-  };
-
-  const handleSelect = (text: string) => {
-    setQuery(text);
-    setIsOpen(false);
-    startTransition(() => {
-      router.push(`/home?q=${encodeURIComponent(text)}`);
-    });
-  };
-
-  const handleSearch = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && query.trim()) {
-      setIsOpen(false);
-      startTransition(() => {
-        router.push(`/home?q=${encodeURIComponent(query)}`);
-      });
-    }
-  };
-
-  const handleClear = () => {
-    setQuery('');
-    setIsOpen(false);
-    startTransition(() => {
-      router.push('/home');
-    });
-  };
+  const {
+    containerRef,
+    query,
+    setQuery,
+    history,
+    suggestions,
+    isFetchingSuggestions,
+    isPending,
+    showSuggestions,
+    showHistory,
+    hasSuggestions,
+    handleFocus,
+    handleDeleteItem,
+    handleClearHistory,
+    handleSelect,
+    handleSearch,
+    handleClear,
+  } = useSearchInput();
 
   return (
     <div className="relative w-full" ref={containerRef}>
@@ -137,11 +35,11 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
         className="relative w-full"
         role="combobox"
         tabIndex={0}
-        aria-expanded={isOpen && history.length > 0 && !query}
+        aria-expanded={showSuggestions || showHistory}
         aria-haspopup="listbox"
-        aria-controls="search-history-listbox"
+        aria-controls="search-dropdown-listbox"
       >
-        {isPending || isLoading ? (
+        {isPending || isLoading || isFetchingSuggestions ? (
           <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
             <div className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           </div>
@@ -180,22 +78,47 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
         {isPending || isLoading ? 'Searching...' : ''}
       </div>
 
-      {isOpen && history.length > 0 && !query ? (
+      {/* Suggestions dropdown (when user is typing) */}
+      {showSuggestions && hasSuggestions ? (
+        <div
+          className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          id="search-dropdown-listbox"
+          role="listbox"
+          aria-label="Search suggestions"
+        >
+          <div className="py-2">
+            <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span>Suggestions</span>
+            </div>
+            <div className="max-h-[280px] overflow-y-auto">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  role="option"
+                  aria-selected="false"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  onClick={() => handleSelect(suggestion)}
+                >
+                  <Search className="w-3.5 h-3.5 text-muted-foreground/60 flex-shrink-0" />
+                  <span className="truncate">{suggestion}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* History dropdown (when input is empty/focused) */}
+      {showHistory ? (
         <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           <div className="py-2">
             <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-between items-center">
               <span>Recent Searches</span>
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    await clearSearchHistory();
-                    setHistory([]);
-                    toast.success('Search history cleared');
-                  } catch {
-                    toast.error('Failed to clear search history');
-                  }
-                }}
+                onClick={handleClearHistory}
                 className="text-xs hover:text-foreground transition-colors"
               >
                 Clear All
@@ -227,7 +150,7 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
                   <button
                     type="button"
                     onClick={(e) => handleDeleteItem(e, item.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-destructive transition-all flex-shrink-0 focus:opacity-100 focus-visible:opacity-100"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-destructive transition-opacity flex-shrink-0 focus:opacity-100 focus-visible:opacity-100"
                     aria-label="Remove from history"
                   >
                     <X className="w-4 h-4" />

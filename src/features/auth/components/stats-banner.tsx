@@ -1,8 +1,7 @@
 'use client';
 
 import { Clock, Play } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getPlatformStats, type PlatformStats } from '@/features/auth/api';
+import { useStatsBanner } from '@/features/auth/hooks/use-stats-banner';
 
 // Hoisted styles to module level to prevent recreation on each render (rule 5.4)
 const GRID_STYLE = {
@@ -29,14 +28,7 @@ const PARTICLE_POSITIONS = [
  * Shows platform-wide watch statistics with a cinematic aesthetic
  */
 export function StatsBanner() {
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    getPlatformStats()
-      .then(setStats)
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { stats, isLoading } = useStatsBanner();
 
   if (isLoading || !stats) {
     return (
@@ -91,7 +83,7 @@ export function StatsBanner() {
                 Content Streamed
               </p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-foreground tracking-tight animate-glow">
+                <span className="text-2xl font-bold text-foreground tracking-tight animate-glow tabular-nums">
                   {stats.totalWatchTimeFormatted}
                 </span>
               </div>
@@ -104,8 +96,14 @@ export function StatsBanner() {
               <Clock className="w-3.5 h-3.5" />
               <span>Live stats</span>
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ backgroundColor: 'var(--success-color)' }}
+                />
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ backgroundColor: 'var(--success-color-strong)' }}
+                />
               </span>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   SketchProvider,
   useSketch,
-} from '@/features/watch-party/context/SketchContext';
+} from '@/features/watch-party/interactions/context/SketchContext';
 
 const TestComponent = () => {
   const {

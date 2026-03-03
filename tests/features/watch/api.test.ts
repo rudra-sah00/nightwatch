@@ -130,7 +130,7 @@ describe('Watch API', () => {
       const result = await getContinueWatching();
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10',
+        '/api/watch/continue-watching?limit=10&server=s1',
         undefined,
       );
       expect(result).toEqual(mockItems);
@@ -142,7 +142,7 @@ describe('Watch API', () => {
       await getContinueWatching(20);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=20',
+        '/api/watch/continue-watching?limit=20&server=s1',
         undefined,
       );
     });
@@ -151,10 +151,10 @@ describe('Watch API', () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ items: [] });
 
       const options = { signal: new AbortController().signal };
-      await getContinueWatching(10, options);
+      await getContinueWatching(10, 's1', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10',
+        '/api/watch/continue-watching?limit=10&server=s1',
         options,
       );
     });
@@ -163,21 +163,21 @@ describe('Watch API', () => {
   describe('Continue watching cache', () => {
     it('should invalidate cache', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
-      setContinueWatchingCache(mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      expect(isContinueWatchingCacheFresh()).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
 
       invalidateContinueWatchingCache();
 
-      expect(isContinueWatchingCacheFresh()).toBe(false);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(false);
     });
 
     it('should set and check cache freshness', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
 
-      setContinueWatchingCache(mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      expect(isContinueWatchingCacheFresh()).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
     });
 
     it('should remove item from cache', () => {
@@ -186,11 +186,11 @@ describe('Watch API', () => {
         createMockProgress({ id: '2', title: 'Movie 2' }),
       ];
 
-      setContinueWatchingCache(mockItems);
-      removeFromContinueWatchingCache('1');
+      setContinueWatchingCache('s1', mockItems);
+      removeFromContinueWatchingCache('s1', '1');
 
       // Cache should only have item 2
-      expect(isContinueWatchingCacheFresh()).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
     });
   });
 
@@ -208,7 +208,7 @@ describe('Watch API', () => {
       const result = await getContentProgress('content-123');
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123',
+        '/api/watch/progress/content-123?server=s1',
         undefined,
       );
       expect(result).toEqual(mockProgress);
@@ -237,7 +237,7 @@ describe('Watch API', () => {
       await getContentProgress('content-123', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123',
+        '/api/watch/progress/content-123?server=s1',
         options,
       );
     });
@@ -352,16 +352,16 @@ describe('Watch API', () => {
     it('should return cached continue watching items', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
 
-      setContinueWatchingCache(mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      const result = getCachedContinueWatching();
+      const result = getCachedContinueWatching('s1');
       expect(result).toEqual(mockItems);
     });
 
     it('should return null if cache is empty', () => {
       invalidateContinueWatchingCache();
 
-      const result = getCachedContinueWatching();
+      const result = getCachedContinueWatching('s1');
       expect(result).toBeNull();
     });
   });
@@ -390,7 +390,7 @@ describe('Watch API', () => {
         fetchContentProgress('content-123', (progress, hasProgress) => {
           expect(mockWs.emit).toHaveBeenCalledWith(
             'watch:get_progress',
-            { contentId: 'content-123' },
+            { contentId: 'content-123', providerId: 's1' },
             expect.any(Function),
           );
           expect(progress).not.toBeNull();
@@ -413,7 +413,7 @@ describe('Watch API', () => {
 
         fetchContentProgress('content-123', (progress, hasProgress) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/progress/content-123',
+            '/api/watch/progress/content-123?server=s1',
             undefined,
           );
           expect(progress).toEqual(mockProgress);
@@ -461,10 +461,10 @@ describe('Watch API', () => {
           mockWs as unknown as ReturnType<typeof getSocket>,
         );
 
-        fetchContinueWatching(10, (result) => {
+        fetchContinueWatching(10, 's1', (result) => {
           expect(mockWs.emit).toHaveBeenCalledWith(
             'watch:get_continue_watching',
-            { limit: 10 },
+            { limit: 10, providerId: 's1' },
             expect.any(Function),
           );
           expect(result).toEqual(mockItems);
@@ -486,10 +486,10 @@ describe('Watch API', () => {
           mockWs as unknown as ReturnType<typeof getSocket>,
         );
 
-        fetchContinueWatching(20, (result) => {
+        fetchContinueWatching(20, 's1', (result) => {
           expect(mockWs.emit).toHaveBeenCalledWith(
             'watch:get_continue_watching',
-            { limit: 20 },
+            { limit: 20, providerId: 's1' },
             expect.any(Function),
           );
           expect(result).toEqual([]);
@@ -506,9 +506,9 @@ describe('Watch API', () => {
 
         vi.mocked(apiFetch).mockResolvedValueOnce({ items: mockItems });
 
-        fetchContinueWatching(10, (result) => {
+        fetchContinueWatching(10, 's1', (result) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/continue-watching?limit=10',
+            '/api/watch/continue-watching?limit=10&server=s1',
             undefined,
           );
           expect(result).toEqual(mockItems);
@@ -530,7 +530,7 @@ describe('Watch API', () => {
           mockWs as unknown as ReturnType<typeof getSocket>,
         );
 
-        fetchContinueWatching(10, (result, error) => {
+        fetchContinueWatching(10, 's1', (result, error) => {
           expect(result).toBeNull();
           expect(error).toBe('Socket.IO error');
           done();
@@ -553,10 +553,10 @@ describe('Watch API', () => {
           mockWs as unknown as ReturnType<typeof getSocket>,
         );
 
-        deleteWatchProgress('progress-123', (success) => {
+        deleteWatchProgress('progress-123', 's1', (success) => {
           expect(mockWs.emit).toHaveBeenCalledWith(
             'watch:delete_progress',
-            { progressId: 'progress-123' },
+            { progressId: 'progress-123', providerId: 's1' },
             expect.any(Function),
           );
           expect(success).toBe(true);
@@ -569,7 +569,7 @@ describe('Watch API', () => {
       return new Promise<void>((done) => {
         vi.mocked(getSocket).mockReturnValue(null);
 
-        deleteWatchProgress('progress-123', (success) => {
+        deleteWatchProgress('progress-123', 's1', (success) => {
           expect(success).toBe(false);
           done();
         });
@@ -589,7 +589,7 @@ describe('Watch API', () => {
           mockWs as unknown as ReturnType<typeof getSocket>,
         );
 
-        deleteWatchProgress('progress-123', (success) => {
+        deleteWatchProgress('progress-123', 's1', (success) => {
           expect(success).toBe(false);
           done();
         });

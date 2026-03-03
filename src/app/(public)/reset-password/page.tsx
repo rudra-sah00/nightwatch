@@ -2,23 +2,13 @@
 
 import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
-import { useAuth } from '@/providers/auth-provider';
+import { useResetPasswordPage } from './use-reset-password-page';
 
 function ResetPasswordContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading } = useAuth();
-  const token = searchParams.get('token');
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  const { isAuthenticated, isLoading, token } = useResetPasswordPage();
 
   if (isLoading) {
     return (

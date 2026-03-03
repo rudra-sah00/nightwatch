@@ -33,6 +33,8 @@ interface ContentInfoProps {
   onWatchlistToggle?: () => void;
   isInWatchlist?: boolean;
   isWatchlistLoading?: boolean;
+  /** Additional action buttons rendered inside the main action row */
+  extraActions?: React.ReactNode;
 }
 
 export const ContentInfo = memo(function ContentInfo({
@@ -51,6 +53,7 @@ export const ContentInfo = memo(function ContentInfo({
   onWatchlistToggle,
   isInWatchlist = false,
   isWatchlistLoading = false,
+  extraActions,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
 
@@ -144,7 +147,7 @@ export const ContentInfo = memo(function ContentInfo({
           </div>
           <div className="h-1 bg-white/20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white transition-all duration-300"
+              className="h-full bg-white transition-[width] duration-300"
               style={{ width: `${watchProgress.progressPercent}%` }}
             />
           </div>
@@ -156,7 +159,7 @@ export const ContentInfo = memo(function ContentInfo({
         <Button
           size="lg"
           className={cn(
-            'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-xl transition-all duration-200',
+            'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-xl transition-[colors,shadow] duration-200',
             'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
@@ -226,7 +229,7 @@ export const ContentInfo = memo(function ContentInfo({
             size="lg"
             variant={isInWatchlist ? 'destructive' : 'outline'}
             className={cn(
-              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg transition-all duration-200',
+              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg transition-[colors,shadow] duration-200',
               isInWatchlist
                 ? 'bg-red-500 hover:bg-red-600 text-white border-0'
                 : 'border-white/20 hover:bg-white/10 text-white',
@@ -244,6 +247,8 @@ export const ContentInfo = memo(function ContentInfo({
             {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
           </Button>
         ) : null}
+
+        {extraActions}
       </div>
     </div>
   );

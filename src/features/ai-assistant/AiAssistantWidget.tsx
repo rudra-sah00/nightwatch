@@ -8,8 +8,14 @@ export function AiAssistantWidget() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Don't show the floating button if we're already on the AI Assistant page
-  if (!user || pathname === '/ai-assistant') return null;
+  // Hide on AI page, watch/player pages, watch-party, and livestream player
+  const hidden =
+    !user ||
+    pathname === '/ai-assistant' ||
+    pathname.startsWith('/watch/') ||
+    pathname.startsWith('/watch-party/') ||
+    pathname.startsWith('/live/');
+  if (hidden) return null;
 
   const navigateToAi = () => {
     router.push('/ai-assistant');

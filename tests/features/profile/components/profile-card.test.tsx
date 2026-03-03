@@ -11,6 +11,7 @@ const mockUser: User = {
   name: 'Test User',
   username: 'testuser',
   profilePhoto: 'https://example.com/photo.jpg',
+  preferredServer: 's1' as 's1' | 's2',
   sessionId: 'session-123',
   createdAt: '2025-01-01T00:00:00.000Z',
 };
@@ -275,6 +276,20 @@ describe('ProfileCard', () => {
 
       await waitFor(() => {
         expect(mockGetActivity).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('shows error toast when getWatchActivity fails', async () => {
+      const { getWatchActivity } = await import('@/features/profile/api');
+      const { toast } = await import('sonner');
+      vi.mocked(getWatchActivity).mockRejectedValueOnce(
+        new Error('Network error'),
+      );
+
+      render(<ProfileCard />);
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Failed to load activity');
       });
     });
   });

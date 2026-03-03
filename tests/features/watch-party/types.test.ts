@@ -7,7 +7,7 @@ import type {
   RoomPreview,
   RoomState,
   WatchPartyRoom,
-} from '@/features/watch-party/types';
+} from '@/features/watch-party/room/types';
 
 describe('RoomMember Type', () => {
   it('creates valid room member', () => {

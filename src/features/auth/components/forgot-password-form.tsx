@@ -2,94 +2,28 @@
 
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import type React from 'react';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { forgotPassword } from '@/features/auth/api';
-import {
-  type ForgotPasswordInput,
-  forgotPasswordSchema,
-} from '@/features/auth/schema';
+import { useForgotPasswordForm } from '@/features/auth/hooks/use-forgot-password-form';
 import { cn } from '@/lib/utils';
-import type { ApiError } from '@/types';
 
 export function ForgotPasswordForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const [formData, setFormData] = useState<ForgotPasswordInput>({
-    email: '',
-  });
-
-  const [fieldErrors, setFieldErrors] = useState<{
-    email?: string;
-  }>({});
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev: ForgotPasswordInput) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name as keyof typeof fieldErrors]) {
-      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-    if (error) setError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setFieldErrors({});
-
-    const result = forgotPasswordSchema.safeParse(formData);
-    if (!result.success) {
-      const errors: typeof fieldErrors = {};
-      result.error.issues.forEach((err: z.ZodIssue) => {
-        const field = err.path[0] as keyof typeof fieldErrors;
-        if (field) {
-          errors[field] = err.message;
-        }
-      });
-      setFieldErrors(errors);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await forgotPassword(formData.email);
-      setSuccess(true);
-      toast.success('Reset link sent!');
-    } catch (err: unknown) {
-      const apiError = err as ApiError;
-      if (apiError.code === 'VALIDATION_ERROR' && apiError.details) {
-        const errors: typeof fieldErrors = {};
-        apiError.details.forEach((detail) => {
-          const field = detail.path as keyof typeof fieldErrors;
-          if (field) {
-            errors[field] = detail.message;
-          }
-        });
-        setFieldErrors(errors);
-      } else {
-        const msg =
-          apiError.message || 'Failed to send reset link. Please try again.';
-        setError(msg);
-        toast.error(msg);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    isLoading,
+    error,
+    success,
+    formData,
+    fieldErrors,
+    handleChange,
+    handleSubmit,
+  } = useForgotPasswordForm();
 
   if (success) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="text-center space-y-2">
-          <div className="h-12 w-12 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500">
+          <div className="h-12 w-12 rounded-full flex items-center justify-center mx-auto text-success">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <h2 className="text-xl font-semibold">Check your email</h2>

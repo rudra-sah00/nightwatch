@@ -12,12 +12,12 @@ import {
   searchSounds,
   sendPartyMessage,
   syncPartyState,
-} from '@/features/watch-party/services/watch-party.api';
+} from '@/features/watch-party/room/services/watch-party.api';
 import type {
   PartyCreatePayload,
   PartyEvent,
   PartySyncPayload,
-} from '@/features/watch-party/types';
+} from '@/features/watch-party/room/types';
 
 vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));

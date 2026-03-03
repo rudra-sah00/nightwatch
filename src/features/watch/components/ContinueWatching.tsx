@@ -2,16 +2,10 @@
 
 import { Clock, Film, Tv, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import React from 'react';
 import { WatchProgressSkeleton } from '@/features/search/components/SearchSkeletons';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
-import { useSocket } from '@/providers/socket-provider';
-import {
-  fetchContinueWatching as apiFetchContinueWatching,
-  deleteWatchProgress,
-  getCachedContinueWatching,
-} from '../api';
+import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
 
 function formatRemainingTime(minutes: number) {
@@ -32,89 +26,8 @@ export function ContinueWatching({
   onSelectContent,
   onLoadComplete,
 }: ContinueWatchingProps) {
-  const [items, setItems] = useState<WatchProgress[]>([]);
-  const [optimisticItems, addOptimisticItem] = React.useOptimistic(
-    items,
-    (state, idToRemove: string) =>
-      state.filter((item) => item.id !== idToRemove),
-  );
-
-  const [isLoading, setIsLoading] = useState(true);
-  const lastFetchRef = useRef<number>(0);
-  const { socket, isConnected } = useSocket();
-
-  const fetchItems = useCallback(
-    (force = false) => {
-      const now = Date.now();
-      if (!force) {
-        const cached = getCachedContinueWatching();
-        if (cached) {
-          setItems(cached);
-          setIsLoading(false);
-          onLoadComplete?.(cached.length);
-          return;
-        }
-      }
-
-      if (now - lastFetchRef.current < 1000) return;
-      lastFetchRef.current = now;
-
-      if (!socket?.connected) {
-        setIsLoading(false);
-        onLoadComplete?.(0);
-        return;
-      }
-
-      apiFetchContinueWatching(10, (fetchedItems) => {
-        setIsLoading(false);
-        if (fetchedItems) {
-          setItems(fetchedItems);
-          onLoadComplete?.(fetchedItems.length);
-        } else {
-          onLoadComplete?.(0);
-        }
-      });
-    },
-    [onLoadComplete, socket],
-  );
-
-  useEffect(() => {
-    if (isConnected) {
-      fetchItems();
-    } else {
-      setIsLoading(false);
-      onLoadComplete?.(0);
-    }
-    const handleFocus = () => {
-      if (socket?.connected) fetchItems();
-    };
-    window.addEventListener('focus', handleFocus, { passive: true });
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [fetchItems, isConnected, socket, onLoadComplete]);
-
-  const handleSelect = useCallback(
-    (item: WatchProgress) => {
-      if (onSelectContent) onSelectContent(item.contentId);
-    },
-    [onSelectContent],
-  );
-
-  const handleRemove = useCallback(
-    (item: WatchProgress, e: React.MouseEvent) => {
-      e.stopPropagation();
-      React.startTransition(() => {
-        addOptimisticItem(item.id);
-        deleteWatchProgress(item.id, (success) => {
-          if (success) {
-            setItems((prev) => prev.filter((i) => i.id !== item.id));
-          } else {
-            toast.error('Failed to remove from list');
-          }
-        });
-      });
-    },
-    [addOptimisticItem],
-  );
+  const { items, optimisticItems, isLoading, handleSelect, handleRemove } =
+    useContinueWatching({ onSelectContent, onLoadComplete });
 
   if (isLoading) {
     return (
@@ -176,7 +89,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
     <li
       className={cn(
         'group relative flex items-center gap-4 p-2 rounded-xl w-full text-left',
-        'hover:bg-accent/40 transition-all border border-transparent hover:border-border/50',
+        'hover:bg-accent/40 transition-colors border border-transparent hover:border-border/50',
       )}
     >
       <button
@@ -211,7 +124,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
         )}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50">
           <div
-            className="h-full bg-red-600 transition-all"
+            className="h-full bg-red-600 transition-[width]"
             style={{ width: `${item.progressPercent}%` }}
           />
         </div>

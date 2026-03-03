@@ -1,14 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SketchOverlay } from '@/features/watch-party/components/SketchOverlay';
+import { SketchOverlay } from '@/features/watch-party/interactions/components/SketchOverlay';
 import {
   type SketchContextType,
   type ToolType,
   useSketch,
-} from '@/features/watch-party/context/SketchContext';
-import * as api from '@/features/watch-party/services/watch-party.api';
-import type { SketchAction as SketchActionType } from '@/features/watch-party/types';
+} from '@/features/watch-party/interactions/context/SketchContext';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
+import type { SketchAction as SketchActionType } from '@/features/watch-party/room/types';
 
 // Mock window.prompt
 window.prompt = vi.fn();
@@ -94,12 +94,12 @@ vi.mock('react-konva', () => ({
 }));
 
 // Mock useSketch
-vi.mock('@/features/watch-party/context/SketchContext', () => ({
+vi.mock('@/features/watch-party/interactions/context/SketchContext', () => ({
   useSketch: vi.fn(),
 }));
 
 // Mock API
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   emitSketchDraw: vi.fn(),
   emitSketchClear: vi.fn(),
   emitSketchRequestSync: vi.fn(),

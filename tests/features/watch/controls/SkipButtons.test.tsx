@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   SeekIndicator,
   SkipButton,
-} from '@/features/watch/controls/SkipButtons';
+} from '@/features/watch/player/ui/controls/SkipButtons';
 
 describe('SkipButton', () => {
   const defaultProps = {

@@ -7,7 +7,7 @@ import {
   playerReducer,
   type Quality,
   type SubtitleTrack,
-} from '@/features/watch/player/types';
+} from '@/features/watch/player/context/types';
 
 describe('Player Types and Reducer', () => {
   describe('initialPlayerState', () => {

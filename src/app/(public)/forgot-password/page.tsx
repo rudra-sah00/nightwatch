@@ -1,20 +1,11 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
-import { useAuth } from '@/providers/auth-provider';
+import { useForgotPasswordPage } from './use-forgot-password-page';
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  const { isAuthenticated, isLoading } = useForgotPasswordPage();
 
   // Loading State (optional to show while checking auth)
   if (isLoading) {

@@ -31,6 +31,16 @@ interface ActivityGraphProps {
 const DAY_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 const DAY_DISPLAY = ['', 'Mon', '', 'Wed', '', 'Fri', ''] as const;
 
+// Pre-computed global color tokens — defined once in globals.css @theme as --color-activity-*
+// Use bg-activity-0 … bg-activity-4 so the palette has a single source of truth.
+const ACTIVITY_LEVEL_COLORS = [
+  'bg-activity-0', // Level 0 - empty
+  'bg-activity-1', // Level 1
+  'bg-activity-2', // Level 2
+  'bg-activity-3', // Level 3
+  'bg-activity-4', // Level 4
+] as const;
+
 // Static style constant to avoid inline object recreation (rule 5.4)
 const MONTH_LABELS_STYLE = { height: '15px' } as const;
 
@@ -75,10 +85,23 @@ function ActivityGraphSkeleton() {
 }
 
 function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
-  return useMemo(() => {
+  return useMemo<{
+    weeks: {
+      date: Date;
+      dateStr: string;
+      count: number;
+      level: number;
+      isValid: boolean;
+    }[][];
+    totalCount: number;
+    monthLabels: { name: string; weekIndex: number }[];
+  }>(() => {
     // Strip time to ensure consistent comparisons
     const today = new Date();
     today.setHours(23, 59, 59, 999);
+
+    // Build O(1) lookup map once instead of calling .find() per day cell (O(n²) → O(n))
+    const activityByDate = new Map(activity?.map((a) => [a.date, a]) ?? []);
 
     // Calculate start date: 52 weeks ago relative to today
     // We align to the nearest Sunday to start the grid cleanly
@@ -89,37 +112,45 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
     startDate.setDate(today.getDate() - daysToSubtract);
     startDate.setHours(0, 0, 0, 0);
 
-    const weeksData = [];
+    const weeksData: {
+      date: Date;
+      dateStr: string;
+      count: number;
+      level: number;
+      isValid: boolean;
+    }[][] = [];
     let total = 0;
 
     // We create a runner date to iterate day by day
     const currentDate = new Date(startDate);
 
     // Generate exactly 53 weeks to cover the full leap-year/edge-case visual range
+    // Pre-compute creationDay outside the loop (it doesn't change per iteration)
+    const creationDay = createdAt ? new Date(createdAt) : null;
+    if (creationDay) creationDay.setHours(0, 0, 0, 0);
+
+    const todayMidnight = new Date(today);
+    todayMidnight.setHours(0, 0, 0, 0);
+
     for (let w = 0; w < 53; w++) {
       const week = [];
       for (let d = 0; d < 7; d++) {
         const dateStr = toIso(currentDate);
 
         // Validation Logic
-        const creationDay = createdAt ? new Date(createdAt) : null;
-        if (creationDay) creationDay.setHours(0, 0, 0, 0);
-
         const isAfterCreation = creationDay ? currentDate >= creationDay : true;
 
         const checkDate = new Date(currentDate);
         checkDate.setHours(0, 0, 0, 0);
-        const todayMidnight = new Date(today);
-        todayMidnight.setHours(0, 0, 0, 0);
 
         const isFuture = checkDate > todayMidnight;
 
         let count = 0;
         let level = 0;
 
-        // Map Data
+        // O(1) Map lookup instead of O(n) .find() per cell
         if (isAfterCreation && !isFuture) {
-          const dayActivity = activity?.find((a) => a.date === dateStr);
+          const dayActivity = activityByDate.get(dateStr);
           count = dayActivity?.count || 0;
           total += count;
 
@@ -148,41 +179,24 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
       weeksData.push(week);
     }
 
-    return { weeks: weeksData, totalCount: total };
-  }, [activity, createdAt]);
-}
-
-export function ActivityGraph({
-  activity,
-  createdAt,
-  isLoading = false,
-}: ActivityGraphProps & { createdAt?: Date }) {
-  const { weeks, totalCount } = useActivityGraphData(activity, createdAt);
-
-  // Calculate Month Labels Positions
-  const monthLabels = useMemo(() => {
-    const labels: { name: string; weekIndex: number }[] = [];
-
-    weeks.forEach((week, weekIndex) => {
+    // Build month labels from computed weeks
+    const monthLabelsList: { name: string; weekIndex: number }[] = [];
+    weeksData.forEach((week, weekIndex) => {
       const firstDayOfWeek = week[0].date;
-
       if (weekIndex === 0) {
-        labels.push({
+        monthLabelsList.push({
           name: firstDayOfWeek.toLocaleDateString('en-US', { month: 'short' }),
           weekIndex: 0,
         });
         return;
       }
-
-      const prevWeekFirstDay = weeks[weekIndex - 1][0].date;
+      const prevWeekFirstDay = weeksData[weekIndex - 1][0].date;
       const isNewMonth =
         firstDayOfWeek.getMonth() !== prevWeekFirstDay.getMonth();
-
       if (isNewMonth) {
-        // Ensure labels don't overlap (minimum 2 weeks gap)
-        const lastLabel = labels[labels.length - 1];
+        const lastLabel = monthLabelsList[monthLabelsList.length - 1];
         if (weekIndex - lastLabel.weekIndex >= 2) {
-          labels.push({
+          monthLabelsList.push({
             name: firstDayOfWeek.toLocaleDateString('en-US', {
               month: 'short',
             }),
@@ -191,8 +205,24 @@ export function ActivityGraph({
         }
       }
     });
-    return labels;
-  }, [weeks]);
+
+    return {
+      weeks: weeksData,
+      totalCount: total,
+      monthLabels: monthLabelsList,
+    };
+  }, [activity, createdAt]);
+}
+
+export function ActivityGraph({
+  activity,
+  createdAt,
+  isLoading = false,
+}: ActivityGraphProps & { createdAt?: Date }) {
+  const { weeks, totalCount, monthLabels } = useActivityGraphData(
+    activity,
+    createdAt,
+  );
 
   if (isLoading) {
     return <ActivityGraphSkeleton />;
@@ -257,15 +287,7 @@ export function ActivityGraph({
               {weeks.map((week, weekIndex) => (
                 <div key={week[0].dateStr} className="flex flex-col gap-[2px]">
                   {week.map((day, dayIndex) => {
-                    // GitHub-inspired colors (red theme)
-                    const colors = [
-                      'bg-white/[0.06]', // Level 0 - empty
-                      'bg-red-900/60', // Level 1
-                      'bg-red-700/80', // Level 2
-                      'bg-red-600', // Level 3
-                      'bg-red-500', // Level 4
-                    ];
-
+                    // GitHub-inspired colors (indigo theme) — array hoisted to module level
                     // Position tooltip based on week position to avoid horizontal overflow
                     const isLeftSide = weekIndex < 10;
                     const isRightSide = weekIndex > weeks.length - 10;
@@ -295,10 +317,11 @@ export function ActivityGraph({
                         key={day.dateStr}
                         className={cn(
                           'w-[10px] h-[10px] rounded-sm transition-colors relative group/cell',
-                          colors[day.level],
-                          day.isValid &&
-                            'cursor-pointer hover:ring-1 hover:ring-white/30 hover:z-50',
-                          !day.isValid && 'opacity-0',
+                          ACTIVITY_LEVEL_COLORS[day.level],
+                          day.isValid
+                            ? 'cursor-pointer hover:ring-1 hover:ring-white/30 hover:z-50'
+                            : '',
+                          !day.isValid ? 'opacity-0' : '',
                         )}
                       >
                         {/* Tooltip */}
@@ -341,11 +364,11 @@ export function ActivityGraph({
           <div className="flex items-center justify-end gap-1.5 mt-2 text-[11px] text-muted-foreground">
             <span>Less</span>
             <div className="flex gap-[2px]">
-              <div className="w-[10px] h-[10px] rounded-sm bg-white/[0.06]" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-red-900/60" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-red-700/80" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-red-600" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-red-500" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-activity-0" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-activity-1" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-activity-2" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-activity-3" />
+              <div className="w-[10px] h-[10px] rounded-sm bg-activity-4" />
             </div>
             <span>More</span>
           </div>

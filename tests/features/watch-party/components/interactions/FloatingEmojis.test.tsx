@@ -1,11 +1,11 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FloatingEmojis } from '@/features/watch-party/components/interactions/FloatingEmojis';
-import { onPartyInteraction } from '@/features/watch-party/services/watch-party.api';
-import type { InteractionPayload } from '@/features/watch-party/types';
+import { FloatingEmojis } from '@/features/watch-party/interactions/components/FloatingEmojis';
+import { onPartyInteraction } from '@/features/watch-party/room/services/watch-party.api';
+import type { InteractionPayload } from '@/features/watch-party/room/types';
 
 // Mock the API
-vi.mock('@/features/watch-party/services/watch-party.api', () => ({
+vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   onPartyInteraction: vi.fn(),
 }));
 

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BufferingOverlay } from '@/features/watch/overlays/BufferingOverlay';
+import { BufferingOverlay } from '@/features/watch/player/ui/overlays/BufferingOverlay';
 
 describe('BufferingOverlay', () => {
   describe('visibility', () => {

@@ -46,9 +46,14 @@ vi.mock('next/image', () => ({
 
 describe('AiMessageBubble', () => {
   const mockUser = {
+    preferredServer: 's1' as const,
     id: 'user-1',
     name: 'Rudra',
+    username: 'rudra',
+    email: 'rudra@example.com',
     profilePhoto: '/profile.jpg',
+    sessionId: 'session-1',
+    createdAt: '2024-01-01T00:00:00Z',
   };
 
   beforeEach(() => {
@@ -264,5 +269,115 @@ describe('AiMessageBubble', () => {
     const img = screen.getByAltText('test alt');
     fireEvent.click(img.parentElement!); // The button is the parent
     expect(onPlayMedia).toHaveBeenCalledWith('/test.jpg', 'image');
+  });
+
+  it('renders YouTube link as play button', () => {
+    const onPlayMedia = vi.fn();
+    const message = {
+      id: '8',
+      role: 'assistant' as const,
+      content: 'Watch this: [Trailer](https://www.youtube.com/watch?v=abc123)',
+      timestamp: new Date(),
+    };
+
+    render(
+      <AiMessageBubble
+        message={message}
+        currentUser={mockUser}
+        onSelectContent={vi.fn()}
+        onPlayMedia={onPlayMedia}
+        isStreaming={false}
+      />,
+    );
+
+    // Should render a play button instead of a regular link
+    const playButton = screen.getByRole('button', { name: /trailer/i });
+    expect(playButton).toBeInTheDocument();
+
+    fireEvent.click(playButton);
+    expect(onPlayMedia).toHaveBeenCalledWith(
+      'https://www.youtube.com/watch?v=abc123',
+      'video',
+    );
+  });
+
+  it('renders youtu.be short link as play button', () => {
+    const onPlayMedia = vi.fn();
+    const message = {
+      id: '9',
+      role: 'assistant' as const,
+      content: '[Short video](https://youtu.be/xyz789)',
+      timestamp: new Date(),
+    };
+
+    render(
+      <AiMessageBubble
+        message={message}
+        currentUser={mockUser}
+        onSelectContent={vi.fn()}
+        onPlayMedia={onPlayMedia}
+        isStreaming={false}
+      />,
+    );
+
+    const playButton = screen.getByRole('button', { name: /short video/i });
+    expect(playButton).toBeInTheDocument();
+
+    fireEvent.click(playButton);
+    expect(onPlayMedia).toHaveBeenCalledWith(
+      'https://youtu.be/xyz789',
+      'video',
+    );
+  });
+
+  it('renders IMDB video link as play button', () => {
+    const onPlayMedia = vi.fn();
+    const message = {
+      id: '10',
+      role: 'assistant' as const,
+      content: '[IMDB Clip](https://example.com/imdb-video/abc)',
+      timestamp: new Date(),
+    };
+
+    render(
+      <AiMessageBubble
+        message={message}
+        currentUser={mockUser}
+        onSelectContent={vi.fn()}
+        onPlayMedia={onPlayMedia}
+        isStreaming={false}
+      />,
+    );
+
+    const playButton = screen.getByRole('button', { name: /imdb clip/i });
+    expect(playButton).toBeInTheDocument();
+    fireEvent.click(playButton);
+    expect(onPlayMedia).toHaveBeenCalledWith(
+      'https://example.com/imdb-video/abc',
+      'video',
+    );
+  });
+
+  it('renders regular links as anchor tags', () => {
+    const message = {
+      id: '11',
+      role: 'assistant' as const,
+      content: '[Regular link](https://example.com)',
+      timestamp: new Date(),
+    };
+
+    render(
+      <AiMessageBubble
+        message={message}
+        currentUser={mockUser}
+        onSelectContent={vi.fn()}
+        isStreaming={false}
+      />,
+    );
+
+    const link = screen.getByRole('link', { name: /regular link/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
   });
 });

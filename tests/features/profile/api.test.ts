@@ -31,6 +31,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -50,6 +51,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -69,6 +71,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -94,6 +97,7 @@ describe('Profile API', () => {
         name: 'Updated Name',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -117,6 +121,7 @@ describe('Profile API', () => {
         name: 'Updated Name',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -140,6 +145,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -304,6 +310,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
+        preferredServer: 's1' as 's1' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -328,7 +335,10 @@ describe('Profile API', () => {
     it('should call apiFetch with correct parameters', async () => {
       vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
 
-      await changePassword('oldPassword123', 'newPassword456');
+      await changePassword({
+        currentPassword: 'oldPassword123',
+        newPassword: 'newPassword456',
+      });
 
       expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
         method: 'PATCH',
@@ -343,7 +353,10 @@ describe('Profile API', () => {
       vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
 
       const options = { signal: new AbortController().signal };
-      await changePassword('old', 'new', options);
+      await changePassword(
+        { currentPassword: 'old', newPassword: 'new' },
+        options,
+      );
 
       expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
         method: 'PATCH',
@@ -358,9 +371,9 @@ describe('Profile API', () => {
     it('should throw error on failure', async () => {
       vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Invalid password'));
 
-      await expect(changePassword('wrong', 'new')).rejects.toThrow(
-        'Invalid password',
-      );
+      await expect(
+        changePassword({ currentPassword: 'wrong', newPassword: 'new' }),
+      ).rejects.toThrow('Invalid password');
     });
   });
 });

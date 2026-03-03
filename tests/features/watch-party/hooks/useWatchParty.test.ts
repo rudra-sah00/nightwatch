@@ -1,9 +1,12 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { Socket } from 'socket.io-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
-import * as api from '@/features/watch-party/services/watch-party.api';
-import type { RoomMember, WatchPartyRoom } from '@/features/watch-party/types';
+import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
+import type {
+  RoomMember,
+  WatchPartyRoom,
+} from '@/features/watch-party/room/types';
 import * as ws from '@/lib/socket';
 
 // Mock dependencies
@@ -21,7 +24,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 vi.mock(
-  '@/features/watch-party/services/watch-party.api',
+  '@/features/watch-party/room/services/watch-party.api',
   () => import('../__mocks__/watch-party-api'),
 );
 vi.mock('sonner', () => import('../__mocks__/sonner'));

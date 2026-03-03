@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { usePredictiveSync } from '@/features/watch-party/hooks/usePredictiveSync';
+import { usePredictiveSync } from '@/features/watch-party/room/hooks/usePredictiveSync';
 
 interface MockVideoElement {
   currentTime: number;

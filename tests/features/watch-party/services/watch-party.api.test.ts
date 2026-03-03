@@ -7,15 +7,17 @@ import {
   emitSketchRequestSync,
   emitSketchSyncState,
   getRoomDetails,
+  onSketchClear,
+  onSketchDraw,
   sendPartyMessage,
   updateMemberPermissions,
   updatePartyPermissions,
-} from '@/features/watch-party/services/watch-party.api';
+} from '@/features/watch-party/room/services/watch-party.api';
 import type {
   RoomMember,
   SketchAction,
   WatchPartyRoom,
-} from '@/features/watch-party/types';
+} from '@/features/watch-party/room/types';
 
 vi.mock('@/lib/env', () => ({
   env: {
@@ -169,7 +171,7 @@ describe('Watch Party API Service', () => {
       );
 
       const { onSketchProvideSync } = await import(
-        '@/features/watch-party/services/watch-party.api'
+        '@/features/watch-party/room/services/watch-party.api'
       );
       const cleanup = onSketchProvideSync(callback);
       expect(mockSocketWithOn.on).toHaveBeenCalledWith(
@@ -197,7 +199,7 @@ describe('Watch Party API Service', () => {
       );
 
       const { onSketchSyncState } = await import(
-        '@/features/watch-party/services/watch-party.api'
+        '@/features/watch-party/room/services/watch-party.api'
       );
       const cleanup = onSketchSyncState(callback);
       expect(mockSocketWithOn.on).toHaveBeenCalledWith(
@@ -245,6 +247,68 @@ describe('Watch Party API Service', () => {
         success: false,
         error: 'Not connected',
       });
+    });
+
+    it('onSketchDraw should return no-op cleanup when socket is null', async () => {
+      const { getSocket } = await import('@/lib/socket');
+      vi.mocked(getSocket).mockReturnValue(null);
+      const callback = vi.fn();
+      const cleanup = onSketchDraw(callback);
+      // Should return a cleanup function that does nothing
+      expect(typeof cleanup).toBe('function');
+      cleanup(); // Should not throw
+    });
+
+    it('onSketchDraw should register and unregister listener when socket exists', async () => {
+      const callback = vi.fn();
+      const mockSocketWithOn = {
+        ...mockSocket,
+        on: vi.fn(),
+        off: vi.fn(),
+      };
+      const { getSocket } = await import('@/lib/socket');
+      vi.mocked(getSocket).mockReturnValue(
+        mockSocketWithOn as unknown as ReturnType<typeof getSocket>,
+      );
+      const cleanup = onSketchDraw(callback);
+      expect(mockSocketWithOn.on).toHaveBeenCalledWith('sketch:draw', callback);
+      cleanup();
+      expect(mockSocketWithOn.off).toHaveBeenCalledWith(
+        'sketch:draw',
+        callback,
+      );
+    });
+
+    it('onSketchClear should return no-op cleanup when socket is null', async () => {
+      const { getSocket } = await import('@/lib/socket');
+      vi.mocked(getSocket).mockReturnValue(null);
+      const callback = vi.fn();
+      const cleanup = onSketchClear(callback);
+      expect(typeof cleanup).toBe('function');
+      cleanup(); // Should not throw
+    });
+
+    it('onSketchClear should register and unregister listener when socket exists', async () => {
+      const callback = vi.fn();
+      const mockSocketWithOn = {
+        ...mockSocket,
+        on: vi.fn(),
+        off: vi.fn(),
+      };
+      const { getSocket } = await import('@/lib/socket');
+      vi.mocked(getSocket).mockReturnValue(
+        mockSocketWithOn as unknown as ReturnType<typeof getSocket>,
+      );
+      const cleanup = onSketchClear(callback);
+      expect(mockSocketWithOn.on).toHaveBeenCalledWith(
+        'sketch:clear',
+        callback,
+      );
+      cleanup();
+      expect(mockSocketWithOn.off).toHaveBeenCalledWith(
+        'sketch:clear',
+        callback,
+      );
     });
   });
 });

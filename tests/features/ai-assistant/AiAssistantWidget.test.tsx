@@ -24,7 +24,11 @@ vi.mock('@/features/ai-assistant/components/AiAssistantButton', () => ({
 
 describe('AiAssistantWidget', () => {
   const mockPush = vi.fn();
-  const mockUser = { id: '1', name: 'Rudra' };
+  const mockUser = {
+    preferredServer: 's1',
+    id: '1',
+    name: 'Rudra',
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();

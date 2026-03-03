@@ -1,8 +1,8 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { usePlaybackCountdown } from '../hooks/use-playback-countdown';
 
 interface PlaybackCountdownProps {
   onComplete: () => void;
@@ -15,37 +15,7 @@ export function PlaybackCountdown({
   title = 'Starting Experience',
   subtitle = 'Get ready for cinematic excellence',
 }: PlaybackCountdownProps) {
-  const [count, setCount] = useState(3);
-  const [progress, setProgress] = useState(100);
-
-  useEffect(() => {
-    // Block body scroll
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-
-    if (count <= 0) {
-      // Small delay for the final "GO" or "1" to show
-      const finalTimeout = setTimeout(() => {
-        document.body.style.overflow = originalStyle;
-        onComplete();
-      }, 500);
-      return () => clearTimeout(finalTimeout);
-    }
-
-    const timer = setInterval(() => {
-      setCount((prev) => prev - 1);
-    }, 1000);
-
-    const progressTimer = setInterval(() => {
-      setProgress((p) => Math.max(0, p - 100 / 30)); // Smooth depletion over 3s
-    }, 100);
-
-    return () => {
-      clearInterval(timer);
-      clearInterval(progressTimer);
-      document.body.style.overflow = originalStyle;
-    };
-  }, [count, onComplete]);
+  const { count, progress } = usePlaybackCountdown(onComplete);
 
   return (
     <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl animate-in fade-in duration-700 pointer-events-auto select-none">
@@ -91,7 +61,7 @@ export function PlaybackCountdown({
               fill="transparent"
               strokeDasharray={653.45}
               strokeDashoffset={653.45 * (1 - progress / 100)}
-              className="text-primary transition-all duration-150 ease-linear drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]"
+              className="text-primary transition-[stroke-dashoffset] duration-150 ease-linear drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]"
               strokeLinecap="round"
             />
           </svg>
@@ -113,7 +83,7 @@ export function PlaybackCountdown({
             <div
               key={n}
               className={cn(
-                'h-1.5 rounded-full transition-all duration-500 shadow-sm',
+                'h-1.5 rounded-full transition-[width,background-color] duration-500 shadow-sm',
                 count === n ? 'bg-primary w-12' : 'bg-white/10 w-4',
               )}
             />

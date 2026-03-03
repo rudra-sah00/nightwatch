@@ -1,21 +1,27 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import type { AgoraParticipant } from '../hooks/useAgora';
+import {
+  WatchPartyChat,
+  WatchPartyChatDisabled,
+} from '../chat/components/WatchPartyChat';
 // Hooks
-import { useAgora } from '../hooks/useAgora';
-import { useAgoraToken } from '../hooks/useAgoraToken';
-import { useGestureDetection } from '../hooks/useGestureDetection';
-
+import { useWatchPartySidebar } from '../hooks/use-watch-party-sidebar';
+import {
+  Soundboard,
+  SoundboardDisabled,
+} from '../interactions/components/Soundboard';
+import {
+  WatchPartySketch,
+  WatchPartySketchDisabled,
+} from '../interactions/components/WatchPartySketch';
+import type { AgoraParticipant } from '../media/hooks/useAgora';
 // Types
-import type { ChatMessage, WatchPartyRoom } from '../types';
-import { Soundboard, SoundboardDisabled } from './interactions/Soundboard';
+import type { ChatMessage, WatchPartyRoom } from '../room/types';
 // Components
 import { MediaControls } from './MediaControls';
 import { PendingRequests } from './PendingRequests';
 import { SidebarTabs } from './SidebarTabs';
 import { VideoGrid } from './VideoGrid';
-import { WatchPartyChat, WatchPartyChatDisabled } from './WatchPartyChat';
-import { WatchPartySketch, WatchPartySketchDisabled } from './WatchPartySketch';
 
 /**
  * Represents a user currently typing in the chat.
@@ -72,55 +78,13 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   onTypingStop,
   onTabChange,
 }: WatchPartySidebarProps) {
-  // Tab state - participants first
-  const [activeTab, setActiveTab] = useState<
-    'chat' | 'participants' | 'soundboard' | 'sketch'
-  >('participants');
-
-  useEffect(() => {
-    onTabChange?.(activeTab);
-  }, [activeTab, onTabChange]);
-
-  // Get current user's name for display
-  const currentMember = room.members.find((m) => m.id === currentUserId);
-  const currentUserName = currentMember?.name || 'You';
-
-  const canDraw =
-    currentMember?.permissions?.canDraw ??
-    room.permissions?.canGuestsDraw ??
-    false;
-
-  const canPlaySound =
-    currentMember?.permissions?.canPlaySound ??
-    room.permissions?.canGuestsPlaySounds ??
-    true;
-
-  const canChat =
-    currentMember?.permissions?.canChat ??
-    room.permissions?.canGuestsChat ??
-    true;
-
-  // Stabilise members reference — only rebuild when member IDs or names change,
-  // not on every room state update (playback position, etc.)
-  const stableMembers = useMemo(
-    () =>
-      room.members.map(({ id, name, profilePhoto }) => ({
-        id,
-        name,
-        profilePhoto,
-      })),
-    [room.members],
-  );
-
-  // Agora token fetch
-  const { token, appId, channel, uid } = useAgoraToken({
-    roomId: room?.id,
-    userId: currentUserId,
-    userName: currentUserName,
-  });
-
-  // Agora connection and media controls
   const {
+    activeTab,
+    setActiveTab,
+    currentUserName,
+    canDraw,
+    canPlaySound,
+    canChat,
     participants,
     audioEnabled,
     videoEnabled,
@@ -132,27 +96,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
-    localVideoTrack,
-  } = useAgora({
-    token,
-    appId,
-    channel,
-    uid,
-    members: stableMembers,
-    userId: currentUserId,
-  });
-
-  // Initialize gesture detection - now runs automatically when camera is on
-  useGestureDetection(localVideoTrack);
-
-  // Use ref for callback to avoid effect re-runs on parent re-renders
-  const onAgoraReadyRef = useRef(onAgoraReady);
-  onAgoraReadyRef.current = onAgoraReady;
-
-  // Notify parent about Agora participants — only when the list identity changes
-  useEffect(() => {
-    onAgoraReadyRef.current?.({ participants });
-  }, [participants]);
+  } = useWatchPartySidebar({ room, currentUserId, onTabChange, onAgoraReady });
 
   return (
     <div
@@ -169,7 +113,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Participants Tab - renders first */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
             activeTab === 'participants'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -197,7 +141,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Chat Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
             activeTab === 'chat'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -223,7 +167,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Soundboard Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-250 ease-out p-4',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out p-4',
             activeTab === 'soundboard'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -235,7 +179,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Sketch Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-all duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
             activeTab === 'sketch'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',

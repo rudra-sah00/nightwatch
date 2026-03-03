@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Disable React Strict Mode to prevent double-invocation of effects in dev.
+  // Strict Mode mounts every component twice, causing duplicate API calls and
+  // session conflicts (e.g. stream:revoked on S2 playback).
+  reactStrictMode: false,
   // CRITICAL: Optimize barrel imports for faster cold starts and builds
   // Per AGENTS.md 2.1: Avoid Barrel File Imports - these packages have many re-exports
   experimental: {
@@ -28,6 +32,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        // WARNING: Wildcard hostname allows Next.js image optimization to fetch
+        // from any HTTPS domain. Required because content CDN hostnames vary
+        // across providers (TMDB, MovieBox, etc.). If a fixed set of CDN domains
+        // becomes known, replace this with explicit entries to eliminate
+        // the image-proxy SSRF surface.
         protocol: 'https',
         hostname: '**',
       },
@@ -55,6 +64,13 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    // Use the configured backend URL so localhost is never hardcoded in
+    // production CSP headers (localhost is harmless in prod but noisy).
+    const backendOrigin =
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    // CF Worker origin — localhost:8787 in dev, cdn.rudrasahoo.live in prod
+    const cfWorkerOrigin = process.env.NEXT_PUBLIC_CF_WORKER_URL || '';
+
     return [
       {
         source: '/(.*)',
@@ -65,18 +81,36 @@ const nextConfig: NextConfig = {
               "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: blob:",
               "style-src 'self' 'unsafe-inline' https:",
-              "img-src 'self' blob: data: https: http://localhost:4000",
+              `img-src 'self' blob: data: https: ${backendOrigin}`,
               "font-src 'self' data: https:",
-              "connect-src 'self' wss: ws: https: http: http://localhost:4000 ws://localhost:4000",
+              `connect-src 'self' wss: ws: https: http: ${backendOrigin} ${backendOrigin.replace('http', 'ws')}`,
               "frame-src 'self' https: blob: data:",
               "worker-src 'self' blob: https:",
-              "media-src 'self' blob: data: https:",
+              `media-src 'self' blob: data: https: ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
               "object-src 'none'",
+              // Prevent this page from being embedded in external iframes (clickjacking)
+              "frame-ancestors 'self'",
             ].join('; '),
           },
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          {
+            // Prevent browsers from MIME-sniffing a response away from the declared content-type
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            // Belt-and-suspenders clickjacking protection alongside frame-ancestors in CSP
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            // Restrict camera/microphone/geolocation to same-origin by default.
+            // Agora voice/video calls are allowed on the same origin — no external embeds needed.
+            key: 'Permissions-Policy',
+            value: 'camera=(self), microphone=(self), geolocation=()',
           },
         ],
       },

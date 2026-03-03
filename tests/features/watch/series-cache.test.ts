@@ -5,7 +5,7 @@ import {
   cacheSeriesData,
   clearSeriesCache,
   getCachedSeriesData,
-} from '@/features/watch/player/series-cache';
+} from '@/features/watch/player/hooks/series-cache';
 
 describe('Series Cache', () => {
   beforeEach(() => {

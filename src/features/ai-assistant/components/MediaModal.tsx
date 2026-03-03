@@ -1,8 +1,8 @@
 'use client';
 
 import { ExternalLink, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useMediaModal } from '../hooks/use-media-modal';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
 
 interface MediaModalProps {
@@ -13,63 +13,7 @@ interface MediaModalProps {
 }
 
 export function MediaModal({ url, type, isOpen, onClose }: MediaModalProps) {
-  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!url || !type) {
-      setEmbedUrl(null);
-      return;
-    }
-
-    if (type === 'image') {
-      setEmbedUrl(url);
-      return;
-    }
-
-    // VIDEO LOGIC
-    let newUrl = url;
-
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    if (
-      url.includes('youtube.com/watch') ||
-      url.includes('youtube.com/embed') ||
-      url.includes('youtu.be/')
-    ) {
-      let videoId = '';
-      if (url.includes('v=')) {
-        videoId = new URL(url).searchParams.get('v') || '';
-      } else {
-        videoId = url.split('/').pop()?.split('?')[0] || '';
-      }
-      if (videoId)
-        newUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&rel=0&origin=${origin}`;
-    }
-    // IMDb Trailers
-    else if (url.includes('imdb.com/video/')) {
-      const match = url.match(/(vi\d+)/);
-      if (match) {
-        newUrl = `https://www.imdb.com/video/embed/${match[1]}?autoplay=false`;
-      }
-    }
-
-    setEmbedUrl(newUrl);
-  }, [url, type]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
+  const { embedUrl, mounted } = useMediaModal({ url, type, isOpen });
 
   if (!isOpen || !url || !mounted) return null;
 
@@ -96,7 +40,7 @@ export function MediaModal({ url, type, isOpen, onClose }: MediaModalProps) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-md transition-all hover:scale-110 border border-white/10"
+          className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-md transition-[colors,transform] hover:scale-110 border border-white/10"
         >
           <X className="w-5 h-5" />
         </button>

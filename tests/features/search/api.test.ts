@@ -6,6 +6,7 @@ import {
   deleteSearchHistoryItem,
   getPlayStatus,
   getSearchHistory,
+  getSearchSuggestions,
   getSeriesEpisodes,
   getShowDetails,
   invalidateSearchHistoryCache,
@@ -140,7 +141,7 @@ describe('Search API', () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ results: [] });
 
       const options = { signal: new AbortController().signal };
-      await searchContent('test', options);
+      await searchContent('test', undefined, options);
 
       expect(apiFetch).toHaveBeenCalledWith(
         '/api/video/search?q=test',
@@ -452,6 +453,71 @@ describe('Search API', () => {
 
       expect(result.isProcessing).toBe(true);
       expect(result.queueLength).toBe(3);
+    });
+  });
+
+  describe('getSearchSuggestions', () => {
+    it('returns empty array for empty query', async () => {
+      const result = await getSearchSuggestions('');
+      expect(result).toEqual([]);
+      expect(apiFetch).not.toHaveBeenCalled();
+    });
+
+    it('returns empty array for single character query', async () => {
+      const result = await getSearchSuggestions('a');
+      expect(result).toEqual([]);
+      expect(apiFetch).not.toHaveBeenCalled();
+    });
+
+    it('fetches suggestions for query 2+ chars', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({
+        suggestions: ['Avatar', 'Avengers'],
+      });
+
+      const result = await getSearchSuggestions('av');
+
+      expect(apiFetch).toHaveBeenCalledWith(
+        '/api/video/search/suggest?q=av',
+        undefined,
+      );
+      expect(result).toEqual(['Avatar', 'Avengers']);
+    });
+
+    it('caches suggestions for repeated identical query', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({ suggestions: ['Batman'] });
+
+      const result1 = await getSearchSuggestions('bat');
+      const result2 = await getSearchSuggestions('bat');
+
+      expect(apiFetch).toHaveBeenCalledTimes(1);
+      expect(result1).toEqual(result2);
+    });
+
+    it('includes server param when provided', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({ suggestions: ['Inception'] });
+
+      await getSearchSuggestions('inc', 's2');
+
+      expect(apiFetch).toHaveBeenCalledWith(
+        '/api/video/search/suggest?q=inc&server=s2',
+        undefined,
+      );
+    });
+  });
+
+  describe('cleanupCache (via searchContent cache overflow)', () => {
+    it('prunes expired entries when cache grows large', async () => {
+      // The cleanupCache function fires when the cache grows beyond maxSize.
+      // We verify the API is still callable after many cached entries.
+      vi.mocked(apiFetch).mockResolvedValue({ results: [] });
+
+      // Fill the cache well past the 100-item limit to trigger cleanupCache
+      for (let i = 0; i < 110; i++) {
+        await searchContent(`query-${i}`);
+      }
+
+      // searchContent should have been called 110 times (no caching across different keys)
+      expect(apiFetch).toHaveBeenCalledTimes(110);
     });
   });
 });

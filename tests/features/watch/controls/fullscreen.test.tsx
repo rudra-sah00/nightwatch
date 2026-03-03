@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Fullscreen } from '@/features/watch/controls/Fullscreen';
+import { Fullscreen } from '@/features/watch/player/ui/controls/Fullscreen';
 
 describe('Fullscreen', () => {
   const defaultProps = {

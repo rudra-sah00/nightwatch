@@ -1,8 +1,8 @@
 import { Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import type { AgoraParticipant } from '../hooks/useAgora';
+import { useParticipantView } from '../hooks/use-participant-view';
+import type { AgoraParticipant } from '../media/hooks/useAgora';
 
 interface ParticipantViewProps {
   participant: AgoraParticipant;
@@ -19,24 +19,10 @@ export function ParticipantView({
   canKick,
   onKick,
 }: ParticipantViewProps) {
-  const videoRef = useRef<HTMLDivElement>(null);
-
-  // Attach video track to container
-  useEffect(() => {
-    const track = participant.videoTrack;
-    if (!track || !videoRef.current) return;
-
-    track.play(videoRef.current);
-    return () => {
-      track.stop();
-    };
-  }, [participant.videoTrack]);
+  const { videoRef, videoStyle } = useParticipantView(participant);
 
   // Parse avatar from participant metadata
   const avatarUrl = parseAvatarFromMetadata(participant.metadata);
-
-  // No mirroring for video tracks
-  const videoStyle = useMemo(() => ({ transform: 'scaleX(1)' }), []);
 
   const isVideoMuted = !participant.isCameraEnabled;
 
@@ -125,7 +111,13 @@ function AvatarFallback({
             />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl border-4 border-white/20">
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20"
+            style={{
+              background:
+                'linear-gradient(to bottom right, var(--party-color), var(--ai-color))',
+            }}
+          >
             <span className="text-3xl font-bold text-white">
               {name.charAt(0).toUpperCase()}
             </span>
@@ -158,16 +150,17 @@ function ParticipantOverlay({
       <div className="flex items-center gap-1.5">
         <div className="flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-1 backdrop-blur-sm border border-white/10">
           {isMicEnabled ? (
-            <Mic className="w-3 h-3 text-green-400" />
+            <Mic className="w-3 h-3 text-success" />
           ) : (
-            <MicOff className="w-3 h-3 text-red-400" />
+            <MicOff className="w-3 h-3 text-danger" />
           )}
         </div>
         {canKick && onKick ? (
           <button
             type="button"
             onClick={onKick}
-            className="bg-red-500/80 hover:bg-red-500 rounded-full px-2 py-1 backdrop-blur-sm border border-red-400/20 transition-colors text-[10px] font-medium text-white shadow-lg"
+            className="rounded-full px-2 py-1 backdrop-blur-sm border border-white/10 transition-colors text-[10px] font-medium text-white shadow-lg hover:opacity-90"
+            style={{ backgroundColor: 'var(--danger-bg-strong)' }}
             title="Kick user"
           >
             Kick
@@ -183,6 +176,12 @@ function ParticipantOverlay({
  */
 function SpeakingIndicator() {
   return (
-    <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
+    <div
+      className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse shadow-lg"
+      style={{
+        backgroundColor: 'var(--success-color-strong)',
+        boxShadow: '0 0 6px var(--success-glow)',
+      }}
+    />
   );
 }

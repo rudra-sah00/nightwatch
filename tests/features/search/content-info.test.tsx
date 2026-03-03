@@ -288,4 +288,187 @@ describe('ContentInfo', () => {
       screen.getByRole('button', { name: /resume s9:e10/i }),
     ).toBeInTheDocument();
   });
+
+  it('renders description when show has one', () => {
+    const showWithDescription = {
+      ...mockShow,
+      description: 'An amazing test show with a great storyline.',
+    };
+
+    render(
+      <ContentInfo
+        show={showWithDescription}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+      />,
+    );
+
+    // Description is rendered (even if hidden via CSS)
+    expect(
+      screen.getByText('An amazing test show with a great storyline.'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders Watch Together button when onWatchParty is provided', async () => {
+    const user = userEvent.setup();
+    const mockOnWatchParty = vi.fn();
+
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        selectedSeason={{ seasonNumber: 1 }}
+        onPlay={mockOnPlay}
+        onWatchParty={mockOnWatchParty}
+      />,
+    );
+
+    const watchTogetherBtn = screen.getByRole('button', {
+      name: /watch together/i,
+    });
+    expect(watchTogetherBtn).toBeInTheDocument();
+
+    await user.click(watchTogetherBtn);
+    expect(mockOnWatchParty).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows disabled watch party button with reason', () => {
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+        onWatchParty={vi.fn()}
+        isWatchPartyDisabled={true}
+        watchPartyDisabledReason="Series not supported"
+      />,
+    );
+
+    expect(screen.getByText('Series not supported')).toBeInTheDocument();
+  });
+
+  it('shows creating party state', () => {
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+        onWatchParty={vi.fn()}
+        isCreatingParty={true}
+      />,
+    );
+
+    expect(screen.getByText('Creating...')).toBeInTheDocument();
+  });
+
+  it('renders Add to Watchlist button when onWatchlistToggle provided', async () => {
+    const user = userEvent.setup();
+    const mockToggle = vi.fn();
+
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+        onWatchlistToggle={mockToggle}
+        isInWatchlist={false}
+      />,
+    );
+
+    const addBtn = screen.getByRole('button', { name: /add to watchlist/i });
+    expect(addBtn).toBeInTheDocument();
+
+    await user.click(addBtn);
+    expect(mockToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders Remove from Watchlist button when in watchlist', () => {
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+        onWatchlistToggle={vi.fn()}
+        isInWatchlist={true}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /remove from watchlist/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows watchlist loading state', () => {
+    render(
+      <ContentInfo
+        show={mockShow}
+        isPlaying={false}
+        hasWatchProgress={false}
+        onPlay={mockOnPlay}
+        onWatchlistToggle={vi.fn()}
+        isInWatchlist={false}
+        isWatchlistLoading={true}
+      />,
+    );
+
+    const addBtn = screen.getByRole('button', { name: /add to watchlist/i });
+    expect(addBtn).toBeDisabled();
+  });
+
+  it('shows genre and seasons count for series', () => {
+    const showWithGenre = {
+      ...mockShow,
+      genre: 'Drama',
+    };
+
+    render(
+      <ContentInfo
+        show={showWithGenre}
+        isPlaying={false}
+        hasWatchProgress={false}
+        selectedSeason={{ seasonNumber: 1 }}
+        onPlay={mockOnPlay}
+      />,
+    );
+
+    expect(screen.getByText('Drama')).toBeInTheDocument();
+  });
+
+  it('shows progress bar for movies with watch progress', () => {
+    const movieShow = { ...mockShow, contentType: ContentType.Movie };
+    const watchProgress = {
+      id: '1',
+      contentId: 'test-show',
+      contentType: 'Movie' as const,
+      title: 'Test Movie',
+      posterUrl: '',
+      progressSeconds: 600,
+      durationSeconds: 2000,
+      progressPercent: 30,
+      remainingSeconds: 1400,
+      remainingMinutes: 23,
+      lastWatchedAt: new Date().toISOString(),
+    };
+
+    render(
+      <ContentInfo
+        show={movieShow}
+        isPlaying={false}
+        hasWatchProgress={true}
+        watchProgress={watchProgress}
+        onPlay={mockOnPlay}
+        onResume={mockOnResume}
+      />,
+    );
+
+    // Progress bar shows "Continue watching" for a movie (no season/episode numbers)
+    expect(screen.getByText('Continue watching')).toBeInTheDocument();
+    expect(screen.getByText('30% watched')).toBeInTheDocument();
+  });
 });

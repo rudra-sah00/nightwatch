@@ -73,9 +73,11 @@ describe('ActivityGraph', () => {
   describe('activity levels', () => {
     it('applies correct color classes based on activity level', () => {
       const { container } = render(<ActivityGraph activity={mockActivity} />);
-      // Check that red color classes are applied for different levels
-      const redCells = container.querySelectorAll('[class*="bg-red-"]');
-      expect(redCells.length).toBeGreaterThan(0);
+      // Check that activity color classes are applied for different levels
+      const activityCells = container.querySelectorAll(
+        '[class*="bg-activity-"]',
+      );
+      expect(activityCells.length).toBeGreaterThan(0);
     });
   });
 

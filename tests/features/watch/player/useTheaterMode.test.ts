@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import type React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useTheaterMode } from '@/features/watch/player/useTheaterMode';
+import { useTheaterMode } from '@/features/watch/player/hooks/useTheaterMode';
 
 describe('useTheaterMode', () => {
   let containerDiv: HTMLDivElement;

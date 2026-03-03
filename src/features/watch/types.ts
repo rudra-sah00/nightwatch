@@ -1,12 +1,5 @@
 // Watch feature types - re-exports from player types
-export * from './player/types';
-
-// API types
-export interface StreamResponse {
-  masterPlaylistUrl: string;
-  movieId: string;
-  token?: string;
-}
+export * from './player/context/types';
 
 export interface WatchProgress {
   id: string;
@@ -20,15 +13,11 @@ export interface WatchProgress {
   remainingSeconds: number;
   remainingMinutes: number;
   lastWatchedAt: string;
+  /** Which server this progress entry was saved for ('s1' or 's2') */
+  providerId?: 's1' | 's2';
   // Series specific
   episodeId?: string;
   seasonNumber?: number;
   episodeNumber?: number;
   episodeTitle?: string;
-}
-
-export interface WatchActivity {
-  date: string;
-  count: number;
-  level: 0 | 1 | 2 | 3 | 4;
 }

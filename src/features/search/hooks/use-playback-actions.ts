@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ContentProgress } from '@/features/watch/api';
-import { cacheSeriesData } from '@/features/watch/player/useNextEpisode';
+import { cacheSeriesData } from '@/features/watch/player/hooks/useNextEpisode';
 import { ContentType, type Episode, type ShowDetails } from '../types';
 
 interface UsePlaybackActionsProps {
@@ -62,7 +62,8 @@ export function usePlaybackActions({
             ? encodeURIComponent(showData.posterUrl)
             : '';
 
-          let url = `/watch/${showData.id}?type=movie&title=${encodeURIComponent(showData.title)}`;
+          const providerId = showData.id.split(':')[0] || 's1';
+          let url = `/watch/${showData.id}?type=movie&title=${encodeURIComponent(showData.title)}&server=${providerId}`;
           if (description) url += `&description=${description}`;
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;
@@ -114,7 +115,8 @@ export function usePlaybackActions({
             ? encodeURIComponent(episodeToPlay.title)
             : '';
 
-          let url = `/watch/${showData.id}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episodeToPlay.episodeNumber}&seriesId=${showData.id}`;
+          const providerId = showData.id.split(':')[0] || 's1';
+          let url = `/watch/${showData.id}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episodeToPlay.episodeNumber}&seriesId=${showData.id}&server=${providerId}`;
           if (description) url += `&description=${description}`;
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;

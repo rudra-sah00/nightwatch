@@ -2,16 +2,13 @@
 
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
-import { useWatchParty } from '@/features/watch-party/hooks/useWatchParty';
 import { getOptimizedImageUrl } from '@/lib/utils';
-import { useContentDetail } from '../hooks/use-content-detail';
-import { ContentType, type Episode } from '../types';
+import { useContentDetailModal } from '../hooks/use-content-detail-modal';
+import { ContentType } from '../types';
 import { ContentInfo } from './content-info';
+import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
 
@@ -37,8 +34,6 @@ export function ContentDetailModal({
   onClose,
   autoPlay = false,
 }: ContentDetailModalProps) {
-  const router = useRouter();
-  // State from custom hook
   const {
     show,
     episodes,
@@ -55,142 +50,28 @@ export function ContentDetailModal({
     handleResume,
     inWatchlist,
     isWatchlistLoading,
-    toggleWatchlist,
-  } = useContentDetail({ contentId, initialContext, fromContinueWatching });
-
-  // Auto-play logic
-  useEffect(() => {
-    if (autoPlay && show && !isLoading && !isPlaying) {
-      const triggerPlay = async () => {
-        // Prepare the play function but don't execute yet
-        const executePlay = async () => {
-          if (initialContext?.episodeId || initialContext?.episode) {
-            if (initialContext.episode && episodes.length > 0) {
-              const ep = episodes.find(
-                (e) =>
-                  e.episodeNumber === initialContext.episode &&
-                  e.seasonNumber === initialContext.season,
-              );
-              if (ep) {
-                await handlePlay(ep);
-                return;
-              }
-            }
-            await handleResume();
-          } else {
-            await handlePlay();
-          }
-        };
-
-        setCountdownTarget(() => executePlay);
-        setShowCountdown(true);
-      };
-      triggerPlay();
-    }
-  }, [
-    autoPlay,
-    show,
-    isLoading,
-    isPlaying,
+    isCreatingParty,
+    handleWatchParty,
+    handleWatchlistToggle,
+    imageError,
+    setImageError,
+    seasonDropdownOpen,
+    setSeasonDropdownOpen,
+    isSetupOpen,
+    setIsSetupOpen,
+    creatingEpisodeId,
+    showCountdown,
+    setShowCountdown,
+    countdownTarget,
+    showTrailer,
+    setShowTrailer,
+  } = useContentDetailModal({
+    contentId,
     initialContext,
-    handlePlay,
-    handleResume,
-    episodes,
-  ]);
-
-  // Watch Party Hook
-  const { createRoom, isLoading: isCreatingParty } = useWatchParty();
-
-  // Local UI state
-  const [imageError, setImageError] = useState(false);
-  const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
-  const [isSetupOpen, setIsSetupOpen] = useState(false);
-  const [creatingEpisodeId, setCreatingEpisodeId] = useState<
-    string | number | null
-  >(null);
-  const [showCountdown, setShowCountdown] = useState(false);
-  const [countdownTarget, setCountdownTarget] = useState<() => Promise<void>>();
-
-  // Handle Watch Party Creation
-  const handleWatchParty = async (episode?: Episode) => {
-    if (!show) {
-      toast.error('Unable to create party: Content details missing');
-      return;
-    }
-
-    // For series, require setup unless an episode is passed (e.g. from setup modal)
-    if (show.contentType === ContentType.Series && !episode) {
-      setIsSetupOpen(true);
-      return;
-    }
-
-    try {
-      if (episode) {
-        setCreatingEpisodeId(episode.episodeId || episode.episodeNumber);
-      }
-
-      const roomPayload = {
-        contentId: show.id,
-        title: show.title,
-        type: (show.contentType === ContentType.Movie ? 'movie' : 'series') as
-          | 'movie'
-          | 'series',
-        streamUrl: '', // Stream URL will be fetched by backend or resolved later
-        posterUrl: show.posterUrl,
-        season:
-          show.contentType === ContentType.Series
-            ? episode?.seasonNumber || selectedSeason?.seasonNumber || 1
-            : undefined,
-        episode:
-          show.contentType === ContentType.Series
-            ? episode?.episodeNumber || 1
-            : undefined,
-      };
-
-      const room = await createRoom(roomPayload);
-
-      if (room) {
-        toast.success('Party room created! Redirecting...');
-        router.push(`/watch-party/${room.id}?new=true`);
-        onClose();
-      } else {
-        toast.error('Failed to create party room. Please try again.');
-      }
-    } catch (_err) {
-      toast.error(
-        'An unexpected error occurred while creating the watch party.',
-      );
-    } finally {
-      setCreatingEpisodeId(null);
-    }
-  };
-
-  const handleWatchlistToggle = useCallback(async () => {
-    await toggleWatchlist();
-  }, [toggleWatchlist]);
-
-  // Block body scroll when modal is open
-  useEffect(() => {
-    if (autoPlay) return; // Don't block scroll in headless mode
-
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, [autoPlay]);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      // Prevent closing if watch party is being created (modal is locked)
-      if (creatingEpisodeId) return;
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose, creatingEpisodeId]);
+    fromContinueWatching,
+    autoPlay,
+    onClose,
+  });
 
   // Loading state
   if (isLoading) {
@@ -259,10 +140,30 @@ export function ContentDetailModal({
       </button>
 
       {/* Hero Section */}
-      <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh]">
-        {/* Background Image */}
+      <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] bg-black">
+        {/* Background Image / Trailer Player */}
         <div className="absolute inset-0">
-          {!imageError ? (
+          {showTrailer && show.trailers && show.trailers.length > 0 ? (
+            <div className="relative w-full h-full group">
+              <video
+                src={show.trailers[0].url}
+                className="w-full h-full object-contain md:object-cover"
+                autoPlay
+                muted
+                controls
+                playsInline
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-4 left-4 z-10 bg-black/50 text-white hover:bg-black/70 backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => setShowTrailer(false)}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Close Preview
+              </Button>
+            </div>
+          ) : !imageError ? (
             <Image
               src={getOptimizedImageUrl(
                 show.posterHdUrl || show.posterUrl || '',
@@ -295,12 +196,30 @@ export function ContentDetailModal({
             hasWatchProgress={hasWatchProgress}
             watchProgress={watchProgress}
             selectedSeason={selectedSeason}
-            onPlay={() => handlePlay()}
-            onResume={handleResume}
-            onWatchParty={() => handleWatchParty()}
+            onPlay={() => {
+              setShowTrailer(false);
+              handlePlay();
+              onClose();
+            }}
+            onResume={async () => {
+              setShowTrailer(false);
+              await handleResume();
+              onClose();
+            }}
+            onWatchParty={() => {
+              setShowTrailer(false);
+              handleWatchParty();
+            }}
             onWatchlistToggle={handleWatchlistToggle}
             isInWatchlist={inWatchlist}
             isWatchlistLoading={isWatchlistLoading}
+            extraActions={
+              <DownloadMenu
+                show={show}
+                selectedSeason={selectedSeason}
+                episodes={episodes}
+              />
+            }
           />
         </div>
       </div>
@@ -384,7 +303,11 @@ export function ContentDetailModal({
             episodes={episodes}
             isLoading={isLoadingEpisodes}
             playingEpisodeId={playingEpisodeId}
-            onPlayEpisode={(episode) => handlePlay(episode)}
+            onPlayEpisode={(episode) => {
+              setShowTrailer(false);
+              handlePlay(episode);
+              onClose();
+            }}
           />
         </div>
       ) : null}

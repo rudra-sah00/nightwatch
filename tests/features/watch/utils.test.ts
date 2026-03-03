@@ -174,14 +174,24 @@ describe('Watch Utils', () => {
   });
 
   describe('wrapInProxy', () => {
-    it('should wrap external URL in proxy', () => {
-      const url = 'https://external.com/video.vtt';
+    it('should wrap relative URL in proxy', () => {
+      const url = '/relative/path/video.vtt';
       const token = 'token123';
 
       const result = wrapInProxy(url, token);
 
       expect(result).toContain('/api/stream/cdn/token123/');
       expect(result).toMatch(/^\/api\/stream\/cdn\/token123\/[A-Za-z0-9_-]+$/);
+    });
+
+    it('should return absolute URLs unchanged (already in final form)', () => {
+      const url = 'https://external.com/video.vtt';
+      const token = 'token123';
+
+      const result = wrapInProxy(url, token);
+
+      // Absolute URLs (CF Worker URLs, direct CDN URLs, etc.) pass through unchanged
+      expect(result).toBe(url);
     });
 
     it('should return data URLs unchanged', () => {
@@ -207,8 +217,8 @@ describe('Watch Utils', () => {
       expect(result).toBe('');
     });
 
-    it('should encode URL using base64url format', () => {
-      const url = 'https://example.com/file+with/special=chars';
+    it('should encode relative URL using base64url format', () => {
+      const url = '/file+with/special=chars';
       const token = 'token123';
 
       const result = wrapInProxy(url, token);
@@ -222,7 +232,7 @@ describe('Watch Utils', () => {
   });
 
   describe('normalizeWatchUrls', () => {
-    it('should normalize all watch URLs with token', () => {
+    it('should normalize all watch URLs with token (absolute URLs pass through)', () => {
       const urls = {
         streamUrl: 'https://example.com/stream.m3u8',
         captionUrl: 'https://example.com/caption.vtt',
@@ -241,8 +251,30 @@ describe('Watch Utils', () => {
       const result = normalizeWatchUrls(urls, token);
 
       expect(result.streamUrl).toBeDefined();
-      expect(result.captionUrl).toContain('/api/stream/cdn/token123/');
+      // Absolute URLs pass through unchanged (CF Worker / backend CDN proxy / direct CDN)
+      expect(result.captionUrl).toBe('https://example.com/caption.vtt');
       expect(result.spriteVtt).toBeDefined();
+      expect(result.subtitleTracks?.[0].src).toBe('https://example.com/en.vtt');
+    });
+
+    it('should wrap relative subtitle URLs in proxy', () => {
+      const urls = {
+        streamUrl: null,
+        captionUrl: '/relative/caption.vtt',
+        subtitleTracks: [
+          {
+            id: 'en',
+            label: 'English',
+            language: 'en',
+            src: '/relative/en.vtt',
+          },
+        ],
+      };
+      const token = 'token123';
+
+      const result = normalizeWatchUrls(urls, token);
+
+      expect(result.captionUrl).toContain('/api/stream/cdn/token123/');
       expect(result.subtitleTracks?.[0].src).toContain(
         '/api/stream/cdn/token123/',
       );
@@ -287,7 +319,7 @@ describe('Watch Utils', () => {
       expect(result.subtitleTracks).toEqual([]);
     });
 
-    it('should preserve all subtitle track properties', () => {
+    it('should preserve all subtitle track properties (absolute URLs pass through)', () => {
       const urls = {
         streamUrl: null,
         subtitleTracks: [
@@ -306,12 +338,11 @@ describe('Watch Utils', () => {
       expect(result.subtitleTracks?.[0].id).toBe('es');
       expect(result.subtitleTracks?.[0].label).toBe('Español');
       expect(result.subtitleTracks?.[0].language).toBe('es');
-      expect(result.subtitleTracks?.[0].src).toContain(
-        '/api/stream/cdn/token123/',
-      );
+      // Absolute URLs pass through unchanged
+      expect(result.subtitleTracks?.[0].src).toBe('https://example.com/es.vtt');
     });
 
-    it('should handle multiple subtitle tracks', () => {
+    it('should handle multiple subtitle tracks (absolute URLs pass through)', () => {
       const urls = {
         streamUrl: null,
         subtitleTracks: [
@@ -340,8 +371,9 @@ describe('Watch Utils', () => {
       const result = normalizeWatchUrls(urls, token);
 
       expect(result.subtitleTracks).toHaveLength(3);
+      // Absolute URLs pass through unchanged
       result.subtitleTracks?.forEach((track) => {
-        expect(track.src).toContain('/api/stream/cdn/token123/');
+        expect(track.src).toContain('example.com');
       });
     });
   });

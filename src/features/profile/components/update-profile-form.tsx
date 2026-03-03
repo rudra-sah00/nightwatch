@@ -1,100 +1,28 @@
 'use client';
 
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import React, { useEffect, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useDebounce } from '@/hooks/use-debounce';
-import { useAuth } from '@/providers/auth-provider';
-import type { ApiError } from '@/types';
-import { checkUsername, updateProfile } from '../api';
+import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
 
 export function UpdateProfileForm() {
-  const { user, updateUser } = useAuth();
-  const [name, setName] = useState(user?.name || '');
-  const [username, setUsername] = useState(user?.username || '');
-  const debouncedUsername = useDebounce(username, 500);
-  const [isCheckingUsername, startCheckTransition] = useTransition();
-  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-  const [_isLoading, _setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  // Real-time username check with debounced value
-  useEffect(() => {
-    if (!debouncedUsername || debouncedUsername === user?.username) {
-      setIsAvailable(null);
-      return;
-    }
-
-    if (debouncedUsername.length < 3) {
-      setIsAvailable(false);
-      return;
-    }
-
-    startCheckTransition(async () => {
-      try {
-        const { available } = await checkUsername(debouncedUsername);
-        setIsAvailable(available);
-      } catch {
-        toast.error('Failed to check username availability');
-      }
-    });
-  }, [debouncedUsername, user?.username]);
-
-  const [state, action, isPending] = React.useActionState(
-    async (
-      _prevState: { message: string; type: string } | null,
-      formData: FormData,
-    ) => {
-      const name = formData.get('name') as string;
-      const username = formData.get('username') as string;
-
-      if (
-        name.trim() === (user?.name || '') &&
-        username === (user?.username || '')
-      ) {
-        return { message: 'No changes to save', type: 'info' };
-      }
-
-      if (username !== user?.username && !isAvailable) {
-        return { message: 'Username not available', type: 'error' };
-      }
-
-      try {
-        const result = await updateProfile({ name, username });
-        updateUser(result.user);
-        return { message: 'Profile updated successfully', type: 'success' };
-      } catch (err) {
-        const apiError = err as ApiError;
-        return {
-          message: apiError.message || 'Failed to update profile',
-          type: 'error',
-        };
-      }
-    },
-    null,
-  );
-
-  useEffect(() => {
-    if (state) {
-      if (state.type === 'success') {
-        toast.success(state.message);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } else if (state.type === 'error') {
-        setError(state.message);
-        toast.error(state.message);
-      } else if (state.type === 'info') {
-        toast.info(state.message);
-      }
-    }
-  }, [state]);
-
-  const hasChanges =
-    name.trim() !== (user?.name || '') || username !== (user?.username || '');
+  const {
+    user,
+    name,
+    setName,
+    username,
+    setUsername,
+    preferredServer,
+    setPreferredServer,
+    isCheckingUsername,
+    isAvailable,
+    error,
+    success,
+    hasChanges,
+    action,
+    isPending,
+  } = useUpdateProfileForm();
 
   return (
     <form action={action} className="space-y-6 max-w-md">
@@ -112,7 +40,7 @@ export function UpdateProfileForm() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Name"
             required
-            className="h-12 pl-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+            className="h-12 pl-4 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20 transition-colors"
             name="name"
           />
         </div>
@@ -137,7 +65,7 @@ export function UpdateProfileForm() {
                 e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
               )
             }
-            className="h-12 pl-9 pr-12 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-red-500/30 focus:ring-red-500/20 transition-all"
+            className="h-12 pl-9 pr-12 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20 transition-colors"
             placeholder="username"
             name="username"
           />
@@ -183,6 +111,42 @@ export function UpdateProfileForm() {
         ) : null}
       </div>
 
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-foreground/90">
+          Default Streaming Server
+        </Label>
+        <div className="grid grid-cols-2 gap-3 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+          <button
+            type="button"
+            onClick={() => setPreferredServer('s1')}
+            className={`flex flex-col items-center gap-1 py-3 px-4 rounded-xl transition-colors ${
+              preferredServer === 's1'
+                ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 shadow-sm'
+                : 'text-muted-foreground/60 hover:text-muted-foreground'
+            }`}
+          >
+            <span className="text-sm font-semibold">Server 1</span>
+            <span className="text-[10px] opacity-60">Standard</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPreferredServer('s2')}
+            className={`flex flex-col items-center gap-1 py-3 px-4 rounded-xl transition-colors ${
+              preferredServer === 's2'
+                ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 shadow-sm'
+                : 'text-muted-foreground/60 hover:text-muted-foreground'
+            }`}
+          >
+            <span className="text-sm font-semibold">Server 2</span>
+            <span className="text-[10px] opacity-60">High Performance</span>
+          </button>
+        </div>
+        <input type="hidden" name="preferredServer" value={preferredServer} />
+        <p className="text-[10px] text-muted-foreground/50 pl-1 uppercase tracking-wider font-semibold">
+          Preferred server for searching and playback
+        </p>
+      </div>
+
       {error ? (
         <div className="flex items-center gap-3 p-4 text-sm bg-destructive/10 text-destructive rounded-2xl border border-destructive/20">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -199,7 +163,7 @@ export function UpdateProfileForm() {
 
       <Button
         type="submit"
-        className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-500 hover:to-red-600 text-white font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+        className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500/90 to-indigo-600/90 hover:from-indigo-500 hover:to-indigo-600 text-white font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-[colors,shadow] disabled:opacity-50 disabled:shadow-none"
         isLoading={isPending}
         disabled={
           isPending ||

@@ -19,56 +19,69 @@ export async function getStreamUrl(id: string, options?: RequestInit) {
  * and Socket.IO data retrieval.
  */
 
-// Cache for continue watching items (30 seconds stale time)
+// Cache for continue watching items (30 seconds stale time, per server)
 interface ContinueWatchingCache {
   data: WatchProgress[];
   timestamp: number;
 }
-let continueWatchingCache: ContinueWatchingCache | null = null;
+const continueWatchingCache: Record<string, ContinueWatchingCache> = {};
 const CONTINUE_WATCHING_STALE_TIME = 30 * 1000;
 
 // Invalidate continue watching cache (for real-time updates)
-export function invalidateContinueWatchingCache(): void {
-  continueWatchingCache = null;
+export function invalidateContinueWatchingCache(server?: string): void {
+  if (server) {
+    delete continueWatchingCache[server];
+  } else {
+    for (const key of Object.keys(continueWatchingCache)) {
+      delete continueWatchingCache[key];
+    }
+  }
 }
 
 // Check if cache is fresh
-export function isContinueWatchingCacheFresh(): boolean {
-  if (!continueWatchingCache) return false;
-  return (
-    Date.now() - continueWatchingCache.timestamp < CONTINUE_WATCHING_STALE_TIME
-  );
+export function isContinueWatchingCacheFresh(server: string): boolean {
+  const cache = continueWatchingCache[server];
+  if (!cache) return false;
+  return Date.now() - cache.timestamp < CONTINUE_WATCHING_STALE_TIME;
 }
 
 // Get cached continue watching data
-export function getCachedContinueWatching(): WatchProgress[] | null {
-  if (isContinueWatchingCacheFresh()) {
-    return continueWatchingCache?.data ?? null;
+export function getCachedContinueWatching(
+  server: string,
+): WatchProgress[] | null {
+  if (isContinueWatchingCacheFresh(server)) {
+    return continueWatchingCache[server].data;
   }
   return null;
 }
 
 // Update continue watching cache
-export function setContinueWatchingCache(data: WatchProgress[]): void {
-  continueWatchingCache = { data, timestamp: Date.now() };
+export function setContinueWatchingCache(
+  server: string,
+  data: WatchProgress[],
+): void {
+  continueWatchingCache[server] = { data, timestamp: Date.now() };
 }
 
 // Remove item from cache (optimistic update)
-export function removeFromContinueWatchingCache(itemId: string): void {
-  if (continueWatchingCache) {
-    continueWatchingCache.data = continueWatchingCache.data.filter(
-      (i) => i.id !== itemId,
-    );
+export function removeFromContinueWatchingCache(
+  server: string,
+  itemId: string,
+): void {
+  const cache = continueWatchingCache[server];
+  if (cache) {
+    cache.data = cache.data.filter((i) => i.id !== itemId);
   }
 }
 
 // Fetch continue watching via HTTP (for SSR or fallback)
 export async function getContinueWatching(
   limit = 10,
+  server = 's1',
   options?: RequestInit,
 ): Promise<WatchProgress[]> {
   const result = await apiFetch<{ items: WatchProgress[] }>(
-    `/api/watch/continue-watching?limit=${limit}`,
+    `/api/watch/continue-watching?limit=${limit}&server=${server}`,
     options,
   );
   return result.items;
@@ -83,12 +96,13 @@ interface SocketResponse {
 
 export function fetchContinueWatching(
   limit = 10,
+  server = 's1',
   callback: (items: WatchProgress[] | null, error?: string) => void,
 ): void {
   const socket = getSocket();
   if (!socket?.connected) {
     // If socket not connected, try HTTP fallback
-    getContinueWatching(limit)
+    getContinueWatching(limit, server)
       .then((items) => callback(items))
       .catch((err) => callback(null, err.message || 'Failed to load'));
     return;
@@ -96,10 +110,10 @@ export function fetchContinueWatching(
 
   socket.emit(
     'watch:get_continue_watching',
-    { limit },
+    { limit, providerId: server },
     (response: SocketResponse) => {
       if (response?.success && response.items) {
-        setContinueWatchingCache(response.items);
+        setContinueWatchingCache(server, response.items);
         callback(response.items);
       } else {
         callback(null, response?.error || 'Failed to load');
@@ -111,6 +125,7 @@ export function fetchContinueWatching(
 // Delete progress via Socket.IO
 export function deleteWatchProgress(
   progressId: string,
+  server = 's1',
   callback: (success: boolean) => void,
 ): void {
   const socket = getSocket();
@@ -121,10 +136,10 @@ export function deleteWatchProgress(
 
   socket.emit(
     'watch:delete_progress',
-    { progressId },
+    { progressId, providerId: server },
     (response: SocketResponse) => {
       if (response?.success) {
-        removeFromContinueWatchingCache(progressId);
+        removeFromContinueWatchingCache(server, progressId);
         callback(true);
       } else {
         callback(false);
@@ -188,14 +203,26 @@ export function setProgressCache(
   });
 }
 
+/** Infer the provider ('s1' or 's2') from a content/series ID prefix.
+ * Handles both decoded ('s2:...') and URL-encoded ('s2%3A...') IDs. */
+function inferProviderFromId(id: string): 's1' | 's2' {
+  try {
+    const decoded = decodeURIComponent(id);
+    return decoded.startsWith('s2:') ? 's2' : 's1';
+  } catch {
+    return id.startsWith('s2:') ? 's2' : 's1';
+  }
+}
+
 // Fetch progress via HTTP (for SSR or fallback)
 export async function getContentProgress(
   contentId: string,
   options?: RequestInit,
 ): Promise<ContentProgress | null> {
+  const server = inferProviderFromId(contentId);
   try {
     const result = await apiFetch<{ progress: ContentProgress | null }>(
-      `/api/watch/progress/${contentId}`,
+      `/api/watch/progress/${contentId}?server=${server}`,
       options,
     );
     const progress = result.progress;
@@ -222,6 +249,8 @@ export function fetchContentProgress(
   contentId: string,
   callback: (progress: ContentProgress | null, hasProgress: boolean) => void,
 ): void {
+  // Infer provider from contentId prefix so S2 records are correctly scoped.
+  const providerId = inferProviderFromId(contentId);
   const socket = getSocket();
   if (!socket?.connected) {
     // If socket not connected, try HTTP fallback
@@ -233,7 +262,7 @@ export function fetchContentProgress(
 
   socket.emit(
     'watch:get_progress',
-    { contentId },
+    { contentId, providerId },
     (response: ProgressSocketResponse) => {
       let progress: ContentProgress | null = null;
       let hasProgress = false;
@@ -292,6 +321,41 @@ function parseVttTime(timestamp: string): number {
 // Cache for sprite VTT data
 const spriteVttCache = new Map<string, SpriteCue[]>();
 
+// Parse a backend CDN proxy URL → { token, originalCdnUrl }
+// Format: /api/stream/cdn/TOKEN/BASE64_URL_MODIFIED
+function parseProxyCdnUrl(
+  url: string,
+): { token: string; cdnUrl: string } | null {
+  // Handle both absolute (https://...) and relative (/api/...) proxy URLs
+  const m = url.match(/\/api\/stream\/cdn\/([^/]+)\/(.+?)(?:\?.*)?$/);
+  if (!m) return null;
+  try {
+    // Reverse wrapInProxy's base64url encoding
+    const encoded = m[2].replace(/-/g, '+').replace(/_/g, '/');
+    const pad = (4 - (encoded.length % 4)) % 4;
+    const cdnUrl = atob(encoded + '='.repeat(pad));
+    return { token: m[1], cdnUrl };
+  } catch {
+    return null;
+  }
+}
+
+// Wrap an external URL in the CDN proxy (mirrors frontend wrapInProxy utility)
+function proxyCdnImage(rawUrl: string, token: string): string {
+  if (
+    !rawUrl ||
+    rawUrl.startsWith('data:') ||
+    rawUrl.includes('/api/stream/cdn')
+  ) {
+    return rawUrl;
+  }
+  const encoded = btoa(rawUrl)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `/api/stream/cdn/${token}/${encoded}`;
+}
+
 // Fetch and parse sprite VTT file
 export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
   // Check cache first
@@ -309,6 +373,13 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
   let currentStart = 0;
   let currentEnd = 0;
 
+  // If the VTT is served via the backend CDN proxy, extract token + original URL.
+  // We need the original CDN URL to correctly resolve relative image paths inside
+  // the VTT (resolving against the proxy URL would yield a broken path), and also
+  // to proxy the sprite images through the backend so CDN Referer restrictions
+  // don't prevent the browser from loading them.
+  const proxyInfo = parseProxyCdnUrl(vttUrl);
+
   const preloadedUrls = new Set<string>();
 
   for (let i = 0; i < lines.length; i++) {
@@ -321,14 +392,25 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
       const [rawUrl, hash] = line.split('#xywh=');
       const coords = hash.split(',').map(Number);
 
-      // Resolve relative URL against VTT URL base
-      let absoluteUrl = rawUrl;
-      try {
-        if (!rawUrl.startsWith('http')) {
-          absoluteUrl = new URL(rawUrl, vttUrl).toString();
+      // Resolve relative URL against the ACTUAL CDN URL (not the proxy URL).
+      // Resolving against the proxy URL produces paths like
+      // /api/stream/cdn/TOKEN/sprites.jpg which the backend can't decode.
+      let absoluteUrl = rawUrl.trim();
+      if (!absoluteUrl.startsWith('http')) {
+        const base = proxyInfo?.cdnUrl ?? vttUrl;
+        try {
+          absoluteUrl = new URL(absoluteUrl, base).toString();
+        } catch {
+          // keep as-is if resolution fails
         }
-      } catch (_e) {
-        // Fallback to original if resolution fails
+      }
+
+      // Proxy every image URL through the backend so the backend can add the
+      // correct Referer / auth headers that the CDN requires.
+      // CSS background-image doesn't support custom headers, so direct CDN
+      // access would be rejected by Referer-protected CDNs.
+      if (proxyInfo && absoluteUrl.startsWith('http')) {
+        absoluteUrl = proxyCdnImage(absoluteUrl, proxyInfo.token);
       }
 
       if (coords.length === 4) {

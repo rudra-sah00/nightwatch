@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WatchPartyLobby } from '@/features/watch-party/components/WatchPartyLobby';
-import type { RoomPreview } from '@/features/watch-party/types';
+import type { RoomPreview } from '@/features/watch-party/room/types';
 import type { User } from '@/types';
 
 // Mock next/navigation
@@ -43,6 +43,7 @@ describe('WatchPartyLobby', () => {
     name: 'Test User',
     username: 'testuser',
     profilePhoto: null,
+    preferredServer: 's1' as 's1' | 's2',
     sessionId: 'session-123',
     createdAt: new Date().toISOString(),
   };

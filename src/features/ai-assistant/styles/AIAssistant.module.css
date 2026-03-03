@@ -177,7 +177,9 @@
   animation: morphingGradient 15s ease infinite;
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition:
+    border-color,
+    box-shadow 0.3s ease;
 }
 
 .glassCard {
@@ -185,7 +187,10 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition:
+    background,
+    border-color,
+    box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
 }
 
@@ -203,7 +208,10 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background,
+    border-color,
+    color 0.2s ease;
   white-space: nowrap;
 }
 
