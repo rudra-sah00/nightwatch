@@ -89,7 +89,10 @@ function LivePlayerState() {
       <Player.Controls>
         <Player.Header />
 
-        {/* Bottom control row — no seek bar for live */}
+        {/* DVR seek bar — scrub within the live buffer window */}
+        <Player.SeekBar />
+
+        {/* Bottom control row */}
         <Player.ControlRow>
           <Player.PlayPause />
           <Player.Volume />
