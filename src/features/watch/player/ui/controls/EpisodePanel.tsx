@@ -42,6 +42,24 @@ export function EpisodePanel({
   const [seasonOpen, setSeasonOpen] = useState(false);
   const [padH, setPadH] = useState(0);
   const rafRef = useRef<number>(0);
+  // Track mount/unmount to animate out before removing from DOM
+  const [visible, setVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      // Next frame: trigger enter animation
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setVisible(true)),
+      );
+    } else {
+      setVisible(false);
+      // Wait for exit animation to finish before unmounting
+      const t = setTimeout(() => setShouldRender(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen]);
 
   const isCurrentSeason = selectedSeason === currentSeason;
 
@@ -87,7 +105,7 @@ export function EpisodePanel({
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const centerEp = episodes[centerIdx];
 
@@ -97,14 +115,19 @@ export function EpisodePanel({
       className={cn(
         'absolute inset-0 z-[60]',
         'pointer-events-auto',
-        'animate-in fade-in duration-300 ease-out',
         'flex',
+        'transition-opacity duration-300 ease-out',
+        visible ? 'opacity-100' : 'opacity-0',
       )}
     >
       {/* ── Left glass area — blur over video, click to close ── */}
       {/* biome-ignore lint/a11y/useSemanticElements: glass scrim acts as close target */}
       <div
-        className="flex-1 relative backdrop-blur-xl bg-black/20 cursor-pointer"
+        className={cn(
+          'flex-1 relative backdrop-blur-xl bg-black/20 cursor-pointer',
+          'transition-[backdrop-filter] duration-300 ease-out',
+          visible ? 'backdrop-blur-xl' : 'backdrop-blur-none',
+        )}
         onClick={onClose}
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
         role="button"
@@ -150,7 +173,14 @@ export function EpisodePanel({
       </div>
 
       {/* ── Right column — season dropdown + scroll wheel ── */}
-      <div className="w-[220px] md:w-[260px] lg:w-[290px] shrink-0 flex flex-col items-center relative py-2 bg-black/40 backdrop-blur-sm">
+      <div
+        className={cn(
+          'w-[220px] md:w-[260px] lg:w-[290px] shrink-0 flex flex-col items-center relative py-2',
+          'backdrop-blur-xl bg-black/20',
+          'transition-transform duration-300 ease-out',
+          visible ? 'translate-x-0' : 'translate-x-full',
+        )}
+      >
         {/* Custom season dropdown */}
         {seasons.length > 1 && (
           <div className="relative mb-1.5 shrink-0 z-10">
