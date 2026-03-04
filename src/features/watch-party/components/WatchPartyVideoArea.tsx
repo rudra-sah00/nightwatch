@@ -142,25 +142,30 @@ export function WatchPartyVideoArea({
       <FloatingEmojis />
       <SketchOverlay />
 
-      {/* Player controls — hidden in sketch mode */}
+      {/* Episode panel + controls — panel wraps controls to share context with trigger */}
       {!isSketchMode && (
-        <Player.Controls>
-          <Player.Header onSidebarToggle={onSidebarToggle} hideBackButton />
-          <Player.SeekBar />
-          <Player.ControlRow>
-            <Player.PlayPause />
-            <Player.Volume />
-            <Player.TimeDisplay />
-            <Player.Spacer />
-            <EmojiReactions />
-            <Player.Spacer />
-            <Player.AudioSubtitleSelectors />
-            <Player.SettingsMenu />
-            <Player.Fullscreen
-              label={isFullscreen ? 'Exit theater mode' : 'Enter theater mode'}
-            />
-          </Player.ControlRow>
-        </Player.Controls>
+        <Player.EpisodePanel>
+          <Player.Controls>
+            <Player.Header onSidebarToggle={onSidebarToggle} hideBackButton />
+            <Player.SeekBar />
+            <Player.ControlRow>
+              <Player.PlayPause />
+              <Player.Volume />
+              <Player.TimeDisplay />
+              <Player.Spacer />
+              <EmojiReactions />
+              <Player.Spacer />
+              <Player.EpisodePanelTrigger />
+              <Player.AudioSubtitleSelectors />
+              <Player.SettingsMenu />
+              <Player.Fullscreen
+                label={
+                  isFullscreen ? 'Exit theater mode' : 'Enter theater mode'
+                }
+              />
+            </Player.ControlRow>
+          </Player.Controls>
+        </Player.EpisodePanel>
       )}
     </Player.Root>
   );

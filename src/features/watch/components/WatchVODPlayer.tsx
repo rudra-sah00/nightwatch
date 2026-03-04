@@ -125,21 +125,24 @@ function VODPlayerState() {
         isLoading={state.isLoading}
       />
 
-      {/* Explicit VOD Composition */}
-      <Player.Controls>
-        <Player.Header />
-        <Player.SeekBar />
-        <Player.ControlRow>
-          <Player.PlayPause />
-          <Player.SkipButtons />
-          <Player.Volume />
-          <Player.TimeDisplay />
-          <Player.Spacer />
-          <Player.AudioSubtitleSelectors />
-          <Player.SettingsMenu />
-          <Player.Fullscreen />
-        </Player.ControlRow>
-      </Player.Controls>
+      {/* Episode panel + controls — panel wraps controls to share context with trigger */}
+      <Player.EpisodePanel>
+        <Player.Controls>
+          <Player.Header />
+          <Player.SeekBar />
+          <Player.ControlRow>
+            <Player.PlayPause />
+            <Player.SkipButtons />
+            <Player.Volume />
+            <Player.TimeDisplay />
+            <Player.Spacer />
+            <Player.EpisodePanelTrigger />
+            <Player.AudioSubtitleSelectors />
+            <Player.SettingsMenu />
+            <Player.Fullscreen />
+          </Player.ControlRow>
+        </Player.Controls>
+      </Player.EpisodePanel>
 
       <NextEpisodeOverlay
         isVisible={nextEpisode.show}

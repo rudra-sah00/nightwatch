@@ -1,6 +1,7 @@
 export * from './context/PlayerContext';
 export * from './ui/compound/PlayerAudioSubtitleSelectors';
 export * from './ui/compound/PlayerControls';
+export * from './ui/compound/PlayerEpisodePanel';
 export * from './ui/compound/PlayerFullscreen';
 export * from './ui/compound/PlayerHeader';
 export * from './ui/compound/PlayerLiveBadge';
@@ -19,6 +20,10 @@ import {
   PlayerControls,
   PlayerSpacer,
 } from './ui/compound/PlayerControls';
+import {
+  PlayerEpisodePanel,
+  PlayerEpisodePanelTrigger,
+} from './ui/compound/PlayerEpisodePanel';
 import { PlayerFullscreen } from './ui/compound/PlayerFullscreen';
 import { PlayerHeader } from './ui/compound/PlayerHeader';
 import { PlayerLiveBadge } from './ui/compound/PlayerLiveBadge';
@@ -48,4 +53,6 @@ export const Player = {
   LiveBadge: PlayerLiveBadge,
   Header: PlayerHeader,
   SkipButtons: PlayerSkipButtons,
+  EpisodePanel: PlayerEpisodePanel,
+  EpisodePanelTrigger: PlayerEpisodePanelTrigger,
 };
