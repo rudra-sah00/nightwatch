@@ -150,7 +150,7 @@ export function EpisodePanel({
       </div>
 
       {/* ── Right column — season dropdown + scroll wheel ── */}
-      <div className="w-[220px] md:w-[260px] lg:w-[290px] shrink-0 flex flex-col items-center relative py-2">
+      <div className="w-[220px] md:w-[260px] lg:w-[290px] shrink-0 flex flex-col items-center relative py-2 bg-black/40 backdrop-blur-sm">
         {/* Custom season dropdown */}
         {seasons.length > 1 && (
           <div className="relative mb-1.5 shrink-0 z-10">

@@ -37,9 +37,8 @@ interface EpisodePanelContextValue {
   panelNode: React.ReactNode;
 }
 
-const EpisodePanelContext = createContext<EpisodePanelContextValue | null>(
-  null,
-);
+export const EpisodePanelContext =
+  createContext<EpisodePanelContextValue | null>(null);
 
 export function PlayerEpisodePanel({
   children,

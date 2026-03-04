@@ -1,14 +1,22 @@
+import { use } from 'react';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
+import { EpisodePanelContext } from './PlayerEpisodePanel';
 
 export function PlayerControls({ children }: { children: React.ReactNode }) {
   const { state } = usePlayerContext();
+  const episodeCtx = use(EpisodePanelContext);
+  const hideForPanel = episodeCtx?.isOpen ?? false;
 
   return (
     <div
       className={cn(
         'control-bar absolute inset-0 z-30 flex flex-col justify-end pointer-events-none transition-opacity duration-300',
-        state.showControls || state.isLoading ? 'opacity-100' : 'opacity-0',
+        hideForPanel
+          ? 'opacity-0 pointer-events-none'
+          : state.showControls || state.isLoading
+            ? 'opacity-100'
+            : 'opacity-0',
       )}
     >
       <div className="absolute top-0 left-0 right-0 h-36 md:h-48 lg:h-56 2xl:h-64 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
