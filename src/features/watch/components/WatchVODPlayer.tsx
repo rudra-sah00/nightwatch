@@ -125,7 +125,7 @@ function VODPlayerState() {
         isLoading={state.isLoading}
       />
 
-      {/* Episode panel + controls — panel wraps controls to share context with trigger */}
+      {/* Episode panel provider wraps controls for shared context */}
       <Player.EpisodePanel>
         <Player.Controls>
           <Player.Header />
@@ -142,6 +142,9 @@ function VODPlayerState() {
             <Player.Fullscreen />
           </Player.ControlRow>
         </Player.Controls>
+
+        {/* Episode overlay — renders OUTSIDE controls, covers entire player */}
+        <Player.EpisodePanelOverlay />
       </Player.EpisodePanel>
 
       <NextEpisodeOverlay

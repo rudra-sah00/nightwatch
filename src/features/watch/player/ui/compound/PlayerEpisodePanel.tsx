@@ -34,6 +34,7 @@ import { createContext, use } from 'react';
 interface EpisodePanelContextValue {
   toggle: () => void;
   isOpen: boolean;
+  panelNode: React.ReactNode;
 }
 
 const EpisodePanelContext = createContext<EpisodePanelContextValue | null>(
@@ -116,23 +117,40 @@ export function PlayerEpisodePanel({
   if (!isSeries) return <>{children}</>;
 
   return (
-    <EpisodePanelContext value={{ toggle: panel.toggle, isOpen: panel.isOpen }}>
+    <EpisodePanelContext
+      value={{
+        toggle: panel.toggle,
+        isOpen: panel.isOpen,
+        panelNode: (
+          <EpisodePanel
+            isOpen={panel.isOpen}
+            episodes={panel.episodes}
+            seasons={panel.seasons}
+            selectedSeason={panel.selectedSeason}
+            currentEpisode={metadata.episode}
+            currentSeason={metadata.season}
+            isLoading={panel.isLoading}
+            onClose={panel.close}
+            onSeasonChange={panel.onSeasonChange}
+            onEpisodeSelect={handleEpisodeSelect}
+            panelRef={panel.panelRef}
+          />
+        ),
+      }}
+    >
       {children}
-      <EpisodePanel
-        isOpen={panel.isOpen}
-        episodes={panel.episodes}
-        seasons={panel.seasons}
-        selectedSeason={panel.selectedSeason}
-        currentEpisode={metadata.episode}
-        currentSeason={metadata.season}
-        isLoading={panel.isLoading}
-        onClose={panel.close}
-        onSeasonChange={panel.onSeasonChange}
-        onEpisodeSelect={handleEpisodeSelect}
-        panelRef={panel.panelRef}
-      />
     </EpisodePanelContext>
   );
+}
+
+/**
+ * Renders the episode panel overlay.
+ * Place as a sibling OUTSIDE Player.Controls so it layers independently.
+ */
+export function PlayerEpisodePanelOverlay() {
+  const ctx = use(EpisodePanelContext);
+  if (!ctx) return null;
+  return <>{ctx.panelNode}</>;
 }
 
 /**

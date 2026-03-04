@@ -142,7 +142,7 @@ export function WatchPartyVideoArea({
       <FloatingEmojis />
       <SketchOverlay />
 
-      {/* Episode panel + controls — panel wraps controls to share context with trigger */}
+      {/* Episode panel provider wraps controls for shared context */}
       {!isSketchMode && (
         <Player.EpisodePanel>
           <Player.Controls>
@@ -165,6 +165,9 @@ export function WatchPartyVideoArea({
               />
             </Player.ControlRow>
           </Player.Controls>
+
+          {/* Episode overlay — renders OUTSIDE controls, covers entire player */}
+          <Player.EpisodePanelOverlay />
         </Player.EpisodePanel>
       )}
     </Player.Root>

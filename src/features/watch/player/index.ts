@@ -22,6 +22,7 @@ import {
 } from './ui/compound/PlayerControls';
 import {
   PlayerEpisodePanel,
+  PlayerEpisodePanelOverlay,
   PlayerEpisodePanelTrigger,
 } from './ui/compound/PlayerEpisodePanel';
 import { PlayerFullscreen } from './ui/compound/PlayerFullscreen';
@@ -54,5 +55,6 @@ export const Player = {
   Header: PlayerHeader,
   SkipButtons: PlayerSkipButtons,
   EpisodePanel: PlayerEpisodePanel,
+  EpisodePanelOverlay: PlayerEpisodePanelOverlay,
   EpisodePanelTrigger: PlayerEpisodePanelTrigger,
 };
