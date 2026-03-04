@@ -183,14 +183,6 @@ export async function getShowDetails(
   return show;
 }
 
-export function clearShowDetailsCache(id?: string): void {
-  if (id) {
-    showDetailsCache.delete(id);
-  } else {
-    showDetailsCache.clear();
-  }
-}
-
 /**
  * Episode listing for series, with caching to minimize large requests.
  */
@@ -232,19 +224,6 @@ export async function getSeriesEpisodes(
   return result;
 }
 
-export function clearEpisodesCache(seriesId?: string): void {
-  if (seriesId) {
-    // Clear all entries for this series
-    for (const key of episodesCache.keys()) {
-      if (key.startsWith(seriesId)) {
-        episodesCache.delete(key);
-      }
-    }
-  } else {
-    episodesCache.clear();
-  }
-}
-
 /**
  * Video playback trigger and status monitoring.
  * Note: Playback triggers external automation which may take 30+ seconds.
@@ -281,12 +260,4 @@ export async function playVideo(
     timeout: 120000,
     ...options,
   });
-}
-
-export async function getPlayStatus(): Promise<{
-  status: string;
-  queueLength: number;
-  isProcessing: boolean;
-}> {
-  return apiFetch('/api/video/play/status');
 }

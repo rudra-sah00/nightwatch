@@ -60,7 +60,13 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-black/40 border-t border-white/10 backdrop-blur-md text-center">
+      <div
+        className="p-4 border-t backdrop-blur-md text-center"
+        style={{
+          background: 'var(--wp-footer-bg)',
+          borderColor: 'var(--wp-footer-border)',
+        }}
+      >
         <p className="text-xs text-white/30 italic">
           Chat has been disabled by the host.
         </p>
@@ -132,7 +138,10 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-1">
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
+                style={{ background: 'var(--wp-typing-avatar)' }}
+              >
                 <span className="text-[9px] font-bold text-white uppercase">
                   {typingUsers[0].userName.charAt(0)}
                 </span>
@@ -179,7 +188,11 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {/* Input Area */}
       <form
         onSubmit={handleSend}
-        className="p-3 bg-black/40 border-t border-white/10 backdrop-blur-md relative z-10"
+        className="p-3 border-t backdrop-blur-md relative z-10"
+        style={{
+          background: 'var(--wp-footer-bg)',
+          borderColor: 'var(--wp-footer-border)',
+        }}
       >
         <div className="relative flex items-center gap-2">
           <button
@@ -189,10 +202,11 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onFocus={() => void import('emoji-picker-react')}
             className={cn(
               'p-2 rounded-full transition-colors',
-              showEmoji
-                ? 'bg-white/10 text-yellow-400'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/5',
+              showEmoji ? 'text-white' : 'text-white/50 hover:text-white/80',
             )}
+            style={{
+              background: showEmoji ? 'var(--wp-accent-muted)' : undefined,
+            }}
             title="Add emoji"
           >
             <Smile className="w-5 h-5" />
@@ -204,7 +218,17 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="flex-1 bg-white/5 text-white placeholder:text-white/30 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/10 transition-colors"
+            className="flex-1 text-white placeholder:text-white/30 px-4 py-2.5 rounded-xl text-sm focus:outline-none transition-colors"
+            style={{ background: 'var(--wp-input-bg)' }}
+            onFocus={(e) => {
+              e.currentTarget.style.background = 'var(--wp-input-focus)';
+              e.currentTarget.style.boxShadow =
+                '0 0 0 1px var(--wp-input-ring)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.background = 'var(--wp-input-bg)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           <button
             type="submit"
@@ -212,9 +236,14 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             className={cn(
               'p-2.5 rounded-xl transition-[colors,transform] duration-200',
               input.trim()
-                ? 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-500/20'
-                : 'bg-white/5 text-white/20 cursor-not-allowed',
+                ? 'text-zinc-900'
+                : 'text-white/20 cursor-not-allowed',
             )}
+            style={{
+              background: input.trim()
+                ? 'var(--wp-send-btn)'
+                : 'var(--wp-accent-soft)',
+            }}
           >
             <Send className="w-4 h-4" />
           </button>

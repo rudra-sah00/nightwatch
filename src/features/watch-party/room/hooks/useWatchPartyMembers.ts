@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   approveJoinRequest,
+  fetchPendingRequests,
   kickMember,
   onPartyAdminRequest,
   onPartyMemberJoined,
@@ -24,7 +25,7 @@ interface UseWatchPartyMembersProps {
 }
 
 export function useWatchPartyMembers({
-  room: _room,
+  room,
   setRoom,
   userId,
   socketId,
@@ -109,6 +110,29 @@ export function useWatchPartyMembers({
     },
     [setRoom],
   );
+
+  // On mount: fetch any pending requests the host may have missed via WebSocket
+  useEffect(() => {
+    if (!room?.id || room.hostId !== userId) return;
+    fetchPendingRequests(room.id, (response) => {
+      if (!response.success || !response.pendingMembers?.length) return;
+      setRoom((prev) => {
+        if (!prev) return null;
+        const existingIds = new Set(prev.pendingMembers?.map((m) => m.id));
+        const newPending = response
+          .pendingMembers!.filter((m) => !existingIds.has(m.id))
+          .map((m) => ({
+            ...m,
+            profilePhoto: m.profilePhoto ?? undefined,
+          })) as RoomMember[];
+        if (!newPending.length) return prev;
+        return {
+          ...prev,
+          pendingMembers: [...(prev.pendingMembers || []), ...newPending],
+        };
+      });
+    });
+  }, [room?.id, room?.hostId, userId, setRoom]);
 
   useEffect(() => {
     const cleanupMemberJoined = onPartyMemberJoined(({ member }) => {

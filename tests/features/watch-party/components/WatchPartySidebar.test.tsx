@@ -8,6 +8,21 @@ import type {
   WatchPartyRoom,
 } from '@/features/watch-party/room/types';
 
+vi.mock('@/features/watch-party/hooks/use-sidebar-theme', () => ({
+  useSidebarTheme: vi.fn(() => ({
+    theme: 'default',
+    setTheme: vi.fn(),
+    customColor: '#6366f1',
+    setCustomColor: vi.fn(),
+    customVars: {},
+  })),
+}));
+
+vi.mock(
+  '@/features/watch-party/room/services/watch-party.api',
+  () => import('../__mocks__/watch-party-api'),
+);
+
 // Custom render to always include SketchProvider
 const render = (ui: ReactElement, options = {}) =>
   rtlRender(<SketchProvider>{ui}</SketchProvider>, options);

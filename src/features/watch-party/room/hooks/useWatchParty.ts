@@ -45,6 +45,9 @@ function normalizeRoomUrls(
       ...track,
       src: wrapInProxy(track.src, token),
     })),
+    // Quality URLs are CDN proxy URLs stored with the host token — pass through
+    // unchanged so each member can use the shared stream token to access them.
+    qualities: room.qualities,
   };
 }
 

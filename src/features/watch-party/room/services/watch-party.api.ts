@@ -18,6 +18,7 @@ import type {
   PartyPingPayload, // New
   PartyStateUpdate,
   PartySyncPayload,
+  PartyThemeUpdate,
   RoomMember,
   RoomPreview,
   SketchAction,
@@ -719,4 +720,33 @@ export function onSketchSyncState(
 
   socket.on('sketch:sync_state', callback);
   return () => socket.off('sketch:sync_state', callback);
+}
+
+// ============ Theme Sync API ============
+
+/**
+ * Host emits this to sync their sidebar colour theme to all members.
+ */
+export function updatePartyTheme(
+  payload: { theme: string; customColor: string },
+  callback?: Callback<object>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('party:update_theme', payload, callback);
+}
+
+/**
+ * Subscribe to theme updates broadcast by the host.
+ */
+export function onPartyThemeUpdated(
+  callback: (data: PartyThemeUpdate) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+  socket.on('party:theme_updated', callback);
+  return () => socket.off('party:theme_updated', callback);
 }

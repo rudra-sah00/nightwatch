@@ -14,6 +14,7 @@ import type {
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   approveJoinRequest: vi.fn(),
+  fetchPendingRequests: vi.fn(),
   kickMember: vi.fn(),
   onPartyAdminRequest: vi.fn(() => vi.fn()),
   onPartyMemberJoined: vi.fn(() => vi.fn()),

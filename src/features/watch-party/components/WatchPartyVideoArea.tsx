@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Player } from '@/features/watch/player';
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
+import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
 import type { WatchPartyRoom } from '../room/types';
@@ -19,6 +20,14 @@ const SketchOverlay = dynamic(
   () =>
     import('../interactions/components/SketchOverlay').then(
       (mod) => mod.SketchOverlay,
+    ),
+  { ssr: false },
+);
+
+const EmojiReactions = dynamic(
+  () =>
+    import('../interactions/components/EmojiReactions').then(
+      (mod) => mod.EmojiReactions,
     ),
   { ssr: false },
 );
@@ -93,6 +102,8 @@ export function WatchPartyVideoArea({
   onNextEpisode,
 }: WatchPartyVideoAreaProps) {
   const { metadata } = useWatchPartyVideoArea(room);
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
   return (
     <Player.Root
@@ -101,8 +112,11 @@ export function WatchPartyVideoArea({
       captionUrl={room.captionUrl || null}
       subtitleTracks={room.subtitleTracks}
       spriteVtt={room.spriteVtt}
+      qualities={room.qualities}
       onVideoRef={onVideoRef}
       readOnly={!isHost}
+      isHost={isHost}
+      isAuthenticated={isAuthenticated}
       onNavigate={onNavigate}
       fullscreenToggleOverride={toggleFullscreen}
       isFullscreenOverride={isFullscreen}
@@ -130,8 +144,11 @@ export function WatchPartyVideoArea({
       {/* Player controls — hidden in sketch mode */}
       {!isSketchMode && (
         <Player.Controls>
-          <Player.Header onSidebarToggle={onSidebarToggle} />
+          <Player.Header onSidebarToggle={onSidebarToggle} hideBackButton />
           <Player.SeekBar />
+          <div className="flex items-center justify-center px-2 py-1 pointer-events-auto">
+            <EmojiReactions />
+          </div>
           <Player.ControlRow>
             <Player.PlayPause />
             <Player.Volume />

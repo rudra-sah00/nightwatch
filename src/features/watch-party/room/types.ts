@@ -38,6 +38,8 @@ export interface WatchPartyRoom {
     src: string;
   }[];
   spriteVtt?: string;
+  /** Quality options for local playback switching (Server 1 HLS variants / Server 2 MP4 resolutions) */
+  qualities?: { quality: string; url: string }[];
   members: RoomMember[];
   pendingMembers: RoomMember[]; // New
   state: RoomState;
@@ -76,6 +78,7 @@ export interface PartyCreatePayload {
     src: string;
   }[];
   spriteVtt?: string;
+  qualities?: { quality: string; url: string }[];
 }
 
 export interface PartyJoinRequestPayload {
@@ -198,4 +201,9 @@ export interface PartyPermissionsUpdate {
 export interface MemberPermissionsUpdate {
   memberId: string;
   permissions: Partial<NonNullable<RoomMember['permissions']>>;
+}
+
+export interface PartyThemeUpdate {
+  theme: string;
+  customColor: string;
 }

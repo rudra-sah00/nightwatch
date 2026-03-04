@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  clearEpisodesCache,
   clearSearchHistory,
-  clearShowDetailsCache,
   deleteSearchHistoryItem,
-  getPlayStatus,
   getSearchHistory,
   getSearchSuggestions,
   getSeriesEpisodes,
@@ -23,7 +20,6 @@ describe('Search API', () => {
     vi.clearAllMocks();
     // Clear all caches
     invalidateSearchHistoryCache();
-    clearShowDetailsCache();
   });
 
   describe('getSearchHistory', () => {
@@ -168,53 +164,18 @@ describe('Search API', () => {
     });
 
     it('should cache show details', async () => {
-      const mockShow = { id: '123', title: 'Test Show' };
+      // Use a unique ID to avoid cross-test cache pollution (module-level cache persists)
+      const mockShow = { id: 'cache-test-999', title: 'Test Show' };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ show: mockShow });
 
       // First call
-      await getShowDetails('123');
+      await getShowDetails('cache-test-999');
       expect(apiFetch).toHaveBeenCalledTimes(1);
 
       // Second call should use cache
-      await getShowDetails('123');
+      await getShowDetails('cache-test-999');
       expect(apiFetch).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('clearShowDetailsCache', () => {
-    it('should clear specific show from cache', async () => {
-      const mockShow = { id: '123', title: 'Test Show' };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: mockShow });
-      await getShowDetails('123');
-
-      clearShowDetailsCache('123');
-
-      // Should fetch again after cache clear
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: mockShow });
-      await getShowDetails('123');
-
-      expect(apiFetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should clear all show cache when no id provided', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: { id: '123' } });
-      await getShowDetails('123');
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: { id: '456' } });
-      await getShowDetails('456');
-
-      clearShowDetailsCache();
-
-      // Both should fetch again
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: { id: '123' } });
-      await getShowDetails('123');
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ show: { id: '456' } });
-      await getShowDetails('456');
-
-      expect(apiFetch).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -270,58 +231,6 @@ describe('Search API', () => {
       await getSearchHistory();
 
       expect(apiFetch).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('clearEpisodesCache', () => {
-    it('should clear all episodes cache when no seriesId provided', async () => {
-      // Populate cache
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series1', '1');
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series2', '1');
-
-      clearEpisodesCache();
-
-      // Should fetch again after cache clear
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series1', '1');
-
-      expect(apiFetch).toHaveBeenCalledTimes(3); // 2 initial + 1 after clear (series2 still cached)
-    });
-
-    it('should clear only episodes for specific series', async () => {
-      // Populate cache for series1
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series1', '1');
-
-      // Populate cache for series2
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series2', '1');
-
-      clearEpisodesCache('series1');
-
-      // series1 should refetch
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        episodes: [{ season: 1, episode: 1 }],
-      });
-      await getSeriesEpisodes('series1', '1');
-
-      // series2 should use cache (no new fetch)
-      await getSeriesEpisodes('series2', '1');
-
-      expect(apiFetch).toHaveBeenCalledTimes(2); // 2 initial calls, series2 cached (no refetch)
     });
   });
 
@@ -416,43 +325,6 @@ describe('Search API', () => {
         timeout: 120000,
         signal: expect.any(AbortSignal),
       });
-    });
-  });
-
-  describe('getPlayStatus', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-      vi.mocked(apiFetch).mockReset();
-    });
-
-    it('should fetch play status', async () => {
-      const mockStatus = {
-        status: 'idle',
-        queueLength: 0,
-        isProcessing: false,
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce(mockStatus);
-
-      const result = await getPlayStatus();
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/play/status');
-      expect(result).toEqual(mockStatus);
-    });
-
-    it('should handle processing status', async () => {
-      const mockStatus = {
-        status: 'processing',
-        queueLength: 3,
-        isProcessing: true,
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce(mockStatus);
-
-      const result = await getPlayStatus();
-
-      expect(result.isProcessing).toBe(true);
-      expect(result.queueLength).toBe(3);
     });
   });
 

@@ -31,6 +31,10 @@ describe('MediaControls', () => {
     linkCopied: false,
     onCopyLink: vi.fn(),
     onLeave: vi.fn(),
+    sidebarTheme: 'default' as const,
+    onSidebarThemeChange: vi.fn(),
+    customColor: '#6366f1',
+    onCustomColorChange: vi.fn(),
     room: {
       id: 'test-room-1',
       hostId: 'host-1',

@@ -214,6 +214,136 @@
     /* emerald-500/10 */
     --emerald-border: rgba(16, 185, 129, 0.2);
     /* emerald-500/20 */
+
+    /* Watch party sidebar — default (zinc/black) theme */
+    --wp-sidebar-bg: rgba(9, 9, 11, 0.95);
+    --wp-sidebar-border: rgba(255, 255, 255, 0.05);
+    --wp-tab-bg: rgba(24, 24, 27, 0.8);
+    --wp-tab-border: rgba(255, 255, 255, 0.05);
+    --wp-tab-pill: rgba(255, 255, 255, 0.1);
+    --wp-accent: rgb(255, 255, 255);
+    --wp-accent-soft: rgba(255, 255, 255, 0.05);
+    --wp-accent-subtle: rgba(255, 255, 255, 0.1);
+    --wp-accent-muted: rgba(255, 255, 255, 0.1);
+    --wp-footer-bg: rgba(0, 0, 0, 0.4);
+    --wp-footer-border: rgba(255, 255, 255, 0.1);
+    --wp-divider: rgba(255, 255, 255, 0.05);
+    --wp-input-bg: rgba(255, 255, 255, 0.05);
+    --wp-input-focus: rgba(255, 255, 255, 0.1);
+    --wp-input-ring: rgba(255, 255, 255, 0.2);
+    --wp-badge: rgb(99, 102, 241);
+    --wp-badge-ring: rgb(24, 24, 27);
+    --wp-btn-bg: rgba(255, 255, 255, 0.05);
+    --wp-btn-hover: rgba(255, 255, 255, 0.1);
+    --wp-btn-border: rgba(255, 255, 255, 0.1);
+    --wp-btn-device-bg: rgba(63, 63, 70, 0.5);
+    --wp-btn-device-active: rgba(255, 255, 255, 0.2);
+    --wp-send-btn: rgb(147, 51, 234);
+    --wp-send-btn-hover: rgb(168, 85, 247);
+    --wp-typing-avatar: linear-gradient(
+      135deg,
+      rgb(99, 102, 241),
+      rgb(168, 85, 247)
+    );
+  }
+
+  /* Watch party sidebar — pink theme */
+  [data-wp-theme="pink"] {
+    --wp-sidebar-bg: rgba(30, 8, 17, 0.97);
+    --wp-sidebar-border: rgba(249, 168, 212, 0.2);
+    --wp-tab-bg: rgba(50, 12, 28, 0.65);
+    --wp-tab-border: rgba(249, 168, 212, 0.18);
+    --wp-tab-pill: rgba(249, 168, 212, 0.18);
+    --wp-accent: rgb(249, 168, 212);
+    --wp-accent-soft: rgba(249, 168, 212, 0.08);
+    --wp-accent-subtle: rgba(249, 168, 212, 0.15);
+    --wp-accent-muted: rgba(249, 168, 212, 0.26);
+    --wp-footer-bg: rgba(22, 5, 12, 0.95);
+    --wp-footer-border: rgba(249, 168, 212, 0.12);
+    --wp-divider: rgba(249, 168, 212, 0.12);
+    --wp-input-bg: rgba(249, 168, 212, 0.07);
+    --wp-input-focus: rgba(249, 168, 212, 0.18);
+    --wp-input-ring: rgba(249, 168, 212, 0.4);
+    --wp-badge: rgb(249, 168, 212);
+    --wp-badge-ring: rgba(30, 8, 17, 1);
+    --wp-btn-bg: rgba(249, 168, 212, 0.08);
+    --wp-btn-hover: rgba(249, 168, 212, 0.16);
+    --wp-btn-border: rgba(249, 168, 212, 0.18);
+    --wp-btn-device-bg: rgba(55, 13, 30, 0.8);
+    --wp-btn-device-active: rgba(249, 168, 212, 0.28);
+    --wp-send-btn: rgb(236, 72, 153);
+    --wp-send-btn-hover: rgb(244, 114, 182);
+    --wp-typing-avatar: linear-gradient(
+      135deg,
+      rgb(249, 168, 212),
+      rgb(244, 114, 182)
+    );
+  }
+
+  /* Watch party sidebar — purple theme */
+  [data-wp-theme="purple"] {
+    --wp-sidebar-bg: rgba(15, 5, 30, 0.97);
+    --wp-sidebar-border: rgba(192, 132, 252, 0.2);
+    --wp-tab-bg: rgba(30, 10, 55, 0.7);
+    --wp-tab-border: rgba(192, 132, 252, 0.18);
+    --wp-tab-pill: rgba(192, 132, 252, 0.18);
+    --wp-accent: rgb(192, 132, 252);
+    --wp-accent-soft: rgba(192, 132, 252, 0.08);
+    --wp-accent-subtle: rgba(192, 132, 252, 0.15);
+    --wp-accent-muted: rgba(192, 132, 252, 0.26);
+    --wp-footer-bg: rgba(10, 3, 20, 0.95);
+    --wp-footer-border: rgba(192, 132, 252, 0.12);
+    --wp-divider: rgba(192, 132, 252, 0.12);
+    --wp-input-bg: rgba(192, 132, 252, 0.07);
+    --wp-input-focus: rgba(192, 132, 252, 0.18);
+    --wp-input-ring: rgba(192, 132, 252, 0.4);
+    --wp-badge: rgb(192, 132, 252);
+    --wp-badge-ring: rgba(15, 5, 30, 1);
+    --wp-btn-bg: rgba(192, 132, 252, 0.08);
+    --wp-btn-hover: rgba(192, 132, 252, 0.16);
+    --wp-btn-border: rgba(192, 132, 252, 0.18);
+    --wp-btn-device-bg: rgba(40, 10, 70, 0.8);
+    --wp-btn-device-active: rgba(192, 132, 252, 0.28);
+    --wp-send-btn: rgb(147, 51, 234);
+    --wp-send-btn-hover: rgb(168, 85, 247);
+    --wp-typing-avatar: linear-gradient(
+      135deg,
+      rgb(192, 132, 252),
+      rgb(147, 51, 234)
+    );
+  }
+
+  /* Watch party sidebar — ocean theme */
+  [data-wp-theme="ocean"] {
+    --wp-sidebar-bg: rgba(3, 17, 35, 0.97);
+    --wp-sidebar-border: rgba(125, 211, 252, 0.2);
+    --wp-tab-bg: rgba(5, 30, 60, 0.7);
+    --wp-tab-border: rgba(125, 211, 252, 0.18);
+    --wp-tab-pill: rgba(125, 211, 252, 0.18);
+    --wp-accent: rgb(125, 211, 252);
+    --wp-accent-soft: rgba(125, 211, 252, 0.08);
+    --wp-accent-subtle: rgba(125, 211, 252, 0.15);
+    --wp-accent-muted: rgba(125, 211, 252, 0.26);
+    --wp-footer-bg: rgba(2, 12, 25, 0.95);
+    --wp-footer-border: rgba(125, 211, 252, 0.12);
+    --wp-divider: rgba(125, 211, 252, 0.12);
+    --wp-input-bg: rgba(125, 211, 252, 0.07);
+    --wp-input-focus: rgba(125, 211, 252, 0.18);
+    --wp-input-ring: rgba(125, 211, 252, 0.4);
+    --wp-badge: rgb(125, 211, 252);
+    --wp-badge-ring: rgba(3, 17, 35, 1);
+    --wp-btn-bg: rgba(125, 211, 252, 0.08);
+    --wp-btn-hover: rgba(125, 211, 252, 0.16);
+    --wp-btn-border: rgba(125, 211, 252, 0.18);
+    --wp-btn-device-bg: rgba(5, 35, 70, 0.8);
+    --wp-btn-device-active: rgba(125, 211, 252, 0.28);
+    --wp-send-btn: rgb(14, 165, 233);
+    --wp-send-btn-hover: rgb(56, 189, 248);
+    --wp-typing-avatar: linear-gradient(
+      135deg,
+      rgb(125, 211, 252),
+      rgb(14, 165, 233)
+    );
   }
 
   /* Light theme */

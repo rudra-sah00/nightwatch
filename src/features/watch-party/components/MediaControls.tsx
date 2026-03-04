@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
+import type { SidebarTheme } from '../hooks/use-sidebar-theme';
 import type { MediaDevice } from '../media/hooks/useAgora';
 import type { WatchPartyRoom } from '../room/types';
 import { WatchPartySettings } from './WatchPartySettings';
@@ -39,6 +40,10 @@ interface MediaControlsProps {
   onCopyLink: () => void;
   onLeave: () => void;
   room: WatchPartyRoom;
+  sidebarTheme: SidebarTheme;
+  onSidebarThemeChange: (theme: SidebarTheme) => void;
+  customColor: string;
+  onCustomColorChange: (color: string) => void;
 }
 
 /**
@@ -62,6 +67,10 @@ export function MediaControls({
   onCopyLink,
   onLeave,
   room,
+  sidebarTheme,
+  onSidebarThemeChange,
+  customColor,
+  onCustomColorChange,
 }: MediaControlsProps) {
   const {
     showAudioDevices,
@@ -71,16 +80,42 @@ export function MediaControls({
   } = useMediaControls();
 
   return (
-    <div className="border-t border-white/10 bg-gradient-to-t from-black via-black/90 to-black/80 backdrop-blur-xl relative z-[60]">
+    <div
+      className="border-t backdrop-blur-xl relative z-[60]"
+      style={{
+        background: 'var(--wp-footer-bg)',
+        borderColor: 'var(--wp-footer-border)',
+      }}
+    >
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="p-3 border-b border-white/5 flex gap-2">
+      <div
+        className="p-3 flex gap-2 border-b"
+        style={{ borderColor: 'var(--wp-divider)' }}
+      >
         {isHost ? (
           <>
-            <WatchPartySettings room={room} isHost={isHost} />
+            <WatchPartySettings
+              room={room}
+              isHost={isHost}
+              sidebarTheme={sidebarTheme}
+              onSidebarThemeChange={onSidebarThemeChange}
+              customColor={customColor}
+              onCustomColorChange={onCustomColorChange}
+            />
             <button
               type="button"
               onClick={onCopyLink}
-              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold border text-white rounded-xl transition-colors"
+              style={{
+                background: 'var(--wp-btn-bg)',
+                borderColor: 'var(--wp-btn-border)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--wp-btn-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--wp-btn-bg)';
+              }}
             >
               {linkCopied ? (
                 <Check
@@ -118,7 +153,13 @@ export function MediaControls({
       {/* Media Controls */}
       <div className="p-3 space-y-3">
         {/* User Info & Controls */}
-        <div className="flex items-center justify-between bg-white/5 rounded-xl p-2 border border-white/5">
+        <div
+          className="flex items-center justify-between rounded-xl p-2 border"
+          style={{
+            background: 'var(--wp-accent-soft)',
+            borderColor: 'var(--wp-divider)',
+          }}
+        >
           {/* User Avatar & Status */}
           <div className="flex items-center gap-3 overflow-hidden">
             <div
@@ -170,9 +211,7 @@ export function MediaControls({
                 onClick={onToggleAudio}
                 className={cn(
                   'p-2 rounded-l-lg transition-colors',
-                  audioEnabled
-                    ? 'bg-white/10 text-white hover:bg-white/20'
-                    : 'text-danger',
+                  audioEnabled ? 'text-white' : 'text-danger',
                 )}
                 title={audioEnabled ? 'Mute' : 'Unmute'}
               >
@@ -191,9 +230,14 @@ export function MediaControls({
                 className={cn(
                   'p-2 rounded-r-lg border-l border-black/30 transition-colors',
                   showAudioDevices
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white',
+                    ? 'text-white'
+                    : 'text-white/40 hover:text-white',
                 )}
+                style={{
+                  background: showAudioDevices
+                    ? 'var(--wp-btn-device-active)'
+                    : 'var(--wp-btn-device-bg)',
+                }}
                 title="Select Microphone"
               >
                 {showAudioDevices ? (
@@ -223,9 +267,7 @@ export function MediaControls({
                 onClick={onToggleVideo}
                 className={cn(
                   'p-2 rounded-l-lg transition-colors',
-                  videoEnabled
-                    ? 'bg-white/10 text-white hover:bg-white/20'
-                    : 'text-danger',
+                  videoEnabled ? 'text-white' : 'text-danger',
                 )}
                 title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
               >
@@ -244,9 +286,14 @@ export function MediaControls({
                 className={cn(
                   'p-2 rounded-r-lg border-l border-black/30 transition-colors',
                   showVideoDevices
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gray-700/50 text-white/60 hover:bg-gray-600/50 hover:text-white',
+                    ? 'text-white'
+                    : 'text-white/40 hover:text-white',
                 )}
+                style={{
+                  background: showVideoDevices
+                    ? 'var(--wp-btn-device-active)'
+                    : 'var(--wp-btn-device-bg)',
+                }}
                 title="Select Camera"
               >
                 {showVideoDevices ? (

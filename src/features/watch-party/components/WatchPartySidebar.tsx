@@ -1,9 +1,11 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
   WatchPartyChat,
   WatchPartyChatDisabled,
 } from '../chat/components/WatchPartyChat';
+import type { SidebarTheme } from '../hooks/use-sidebar-theme';
+import { useSidebarTheme } from '../hooks/use-sidebar-theme';
 // Hooks
 import { useWatchPartySidebar } from '../hooks/use-watch-party-sidebar';
 import {
@@ -15,6 +17,7 @@ import {
   WatchPartySketchDisabled,
 } from '../interactions/components/WatchPartySketch';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
+import { onPartyThemeUpdated } from '../room/services/watch-party.api';
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../room/types';
 // Components
@@ -97,13 +100,32 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     switchAudioDevice,
     switchVideoDevice,
   } = useWatchPartySidebar({ room, currentUserId, onTabChange, onAgoraReady });
+  const { theme, setTheme, customColor, setCustomColor, customVars } =
+    useSidebarTheme();
+
+  // Sync theme broadcast from host to all members
+  useEffect(() => {
+    const cleanup = onPartyThemeUpdated(({ theme: t, customColor: c }) => {
+      setTheme(t as SidebarTheme);
+      setCustomColor(c);
+    });
+    return cleanup;
+  }, [setTheme, setCustomColor]);
 
   return (
     <div
+      data-wp-theme={
+        theme === 'default' || theme === 'custom' ? undefined : theme
+      }
       className={cn(
-        'w-full bg-zinc-950/95 backdrop-blur-xl border-l border-white/5 shadow-2xl overflow-hidden flex flex-col h-full relative',
+        'w-full backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col h-full relative border-l',
         className,
       )}
+      style={{
+        background: 'var(--wp-sidebar-bg)',
+        borderColor: 'var(--wp-sidebar-border)',
+        ...customVars,
+      }}
     >
       {/* Tab Navigation */}
       <SidebarTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -211,6 +233,10 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         linkCopied={linkCopied}
         onCopyLink={onCopyLink}
         onLeave={onLeave}
+        sidebarTheme={theme}
+        onSidebarThemeChange={setTheme}
+        customColor={customColor}
+        onCustomColorChange={setCustomColor}
       />
     </div>
   );
