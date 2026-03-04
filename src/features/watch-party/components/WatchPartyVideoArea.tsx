@@ -153,6 +153,7 @@ export function WatchPartyVideoArea({
             <Player.TimeDisplay />
             <Player.Spacer />
             <EmojiReactions />
+            <Player.Spacer />
             <Player.AudioSubtitleSelectors />
             <Player.SettingsMenu />
             <Player.Fullscreen
