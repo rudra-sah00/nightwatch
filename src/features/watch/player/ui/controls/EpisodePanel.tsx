@@ -69,12 +69,12 @@ export function EpisodePanel({
   );
 
   // Compute padding so first & last items can scroll to center
-  // biome-ignore lint/correctness/useExhaustiveDependencies: recalc on open/episodes change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: recalc on open/mount/episodes change
   useEffect(() => {
-    if (!isOpen || !scrollRef.current) return;
+    if (!isOpen || !shouldRender || !scrollRef.current) return;
     const viewH = scrollRef.current.clientHeight;
     setPadH(Math.floor(viewH / 2 - ITEM_H / 2));
-  }, [isOpen, episodes.length]);
+  }, [isOpen, shouldRender, episodes.length]);
 
   // Track which item is closest to the vertical center
   const handleScroll = useCallback(() => {
@@ -115,90 +115,95 @@ export function EpisodePanel({
       className={cn(
         'absolute inset-0 z-[60]',
         'pointer-events-auto',
-        'flex',
         'transition-opacity duration-300 ease-out',
         visible ? 'opacity-100' : 'opacity-0',
       )}
     >
-      {/* ── Left glass area — blur over video, click to close ── */}
-      {/* biome-ignore lint/a11y/useSemanticElements: glass scrim acts as close target */}
+      {/* ── Single unified glass backdrop ── */}
       <div
         className={cn(
-          'flex-1 relative backdrop-blur-xl bg-black/20 cursor-pointer',
+          'absolute inset-0 backdrop-blur-xl bg-black/20',
           'transition-[backdrop-filter] duration-300 ease-out',
           visible ? 'backdrop-blur-xl' : 'backdrop-blur-none',
         )}
+      />
+
+      {/* ── Close target — covers everything except the right column ── */}
+      {/* biome-ignore lint/a11y/useSemanticElements: glass scrim acts as close target */}
+      <div
+        className="absolute inset-0 cursor-pointer"
         onClick={onClose}
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
         role="button"
         tabIndex={-1}
         aria-label="Close episodes"
-      >
-        {/* ── Info panel — appears to the left of the center thumbnail on hover ── */}
-        {centerEp && isHoveringCenter && (
-          <div
-            className={cn(
-              'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
-              'max-w-[260px] md:max-w-[320px]',
-              'pointer-events-none',
-              'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
+      />
+
+      {/* ── Info panel — appears to the left of the scroll column on hover ── */}
+      {centerEp && isHoveringCenter && (
+        <div
+          className={cn(
+            'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
+            'max-w-[260px] md:max-w-[320px]',
+            'pointer-events-none z-10',
+            'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
+          )}
+        >
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-medium text-white/35 uppercase tracking-widest">
+              Episode {centerEp.episodeNumber}
+            </span>
+            <h3 className="text-base md:text-lg font-semibold text-white leading-tight">
+              {centerEp.title || `Episode ${centerEp.episodeNumber}`}
+            </h3>
+            {centerEp.description && (
+              <p className="text-[11px] md:text-xs text-white/45 line-clamp-3 leading-relaxed">
+                {centerEp.description}
+              </p>
             )}
-          >
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-medium text-white/35 uppercase tracking-widest">
-                Episode {centerEp.episodeNumber}
+            {centerEp.duration && (
+              <span className="text-[10px] text-white/25 font-medium">
+                {centerEp.duration} min
               </span>
-              <h3 className="text-base md:text-lg font-semibold text-white leading-tight">
-                {centerEp.title || `Episode ${centerEp.episodeNumber}`}
-              </h3>
-              {centerEp.description && (
-                <p className="text-[11px] md:text-xs text-white/45 line-clamp-3 leading-relaxed">
-                  {centerEp.description}
-                </p>
-              )}
-              {centerEp.duration && (
-                <span className="text-[10px] text-white/25 font-medium">
-                  {centerEp.duration} min
-                </span>
-              )}
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <Play className="w-2.5 h-2.5 text-white/35 fill-current" />
-                <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium">
-                  Click to play
-                </span>
-              </div>
+            )}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Play className="w-2.5 h-2.5 text-white/35 fill-current" />
+              <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium">
+                Click to play
+              </span>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* ── Right column — season dropdown + scroll wheel ── */}
+      {/* ── Right column — season dropdown + scroll wheel (full height, center via spacers) ── */}
       <div
         className={cn(
-          'w-[220px] md:w-[260px] lg:w-[290px] shrink-0 flex flex-col items-center relative py-2',
-          'backdrop-blur-xl bg-black/20',
+          'absolute right-0 top-0 bottom-0',
+          'w-[220px] md:w-[260px] lg:w-[290px]',
+          'flex flex-col items-center',
           'transition-transform duration-300 ease-out',
           visible ? 'translate-x-0' : 'translate-x-full',
         )}
       >
         {/* Custom season dropdown */}
         {seasons.length > 1 && (
-          <div className="relative mb-1.5 shrink-0 z-10">
+          <div className="relative mb-2 shrink-0 z-10">
             <button
               type="button"
               onClick={() => setSeasonOpen((p) => !p)}
               className={cn(
-                'flex items-center gap-1.5',
+                'flex items-center gap-2',
                 'bg-white/6 hover:bg-white/10 border border-white/8',
-                'rounded-full px-4 py-1.5',
-                'text-[11px] font-medium text-white/55',
+                'rounded-full px-5 py-2',
+                'text-[13px] font-medium text-white/60',
                 'transition-colors',
               )}
             >
               S{selectedSeason}
               <ChevronDown
                 className={cn(
-                  'w-2.5 h-2.5 text-white/30 transition-transform duration-200',
+                  'w-3 h-3 text-white/30 transition-transform duration-200',
                   seasonOpen && 'rotate-180',
                 )}
               />
@@ -209,8 +214,8 @@ export function EpisodePanel({
               <div
                 className={cn(
                   'absolute top-full left-1/2 -translate-x-1/2 mt-1',
-                  'bg-black/80 backdrop-blur-xl border border-white/10 rounded-lg',
-                  'py-1 min-w-[100px]',
+                  'bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl',
+                  'py-1.5 min-w-[120px]',
                   'animate-in fade-in slide-in-from-top-2 duration-200',
                   'shadow-xl shadow-black/40',
                 )}
@@ -224,7 +229,7 @@ export function EpisodePanel({
                       setSeasonOpen(false);
                     }}
                     className={cn(
-                      'w-full px-3 py-1.5 text-left text-[11px] font-medium',
+                      'w-full px-4 py-2 text-left text-[12px] font-medium',
                       'transition-colors',
                       s.seasonNumber === selectedSeason
                         ? 'text-white bg-white/10'
@@ -259,7 +264,7 @@ export function EpisodePanel({
             ref={scrollRef}
             onScroll={handleScroll}
             className={cn(
-              'flex-1 w-full overflow-y-auto overflow-x-visible',
+              'flex-1 min-h-0 w-full overflow-y-auto',
               'snap-y snap-mandatory',
               'no-scrollbar',
             )}

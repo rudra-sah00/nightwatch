@@ -5,10 +5,12 @@ import {
   emitSketchDraw,
   emitSketchRequestSync,
   emitSketchSyncState,
+  emitSketchUndo,
   onSketchClear,
   onSketchDraw,
   onSketchProvideSync,
   onSketchSyncState,
+  onSketchUndo,
 } from '../../room/services/watch-party.api';
 import type { SketchAction } from '../../room/types';
 import { useSketch } from '../context/SketchContext';
@@ -72,6 +74,22 @@ export function useSketchOverlay() {
       },
     );
 
+    const cleanupUndo = onSketchUndo(
+      ({ userId, actionId }: { userId: string; actionId: string }) => {
+        if (actionId) {
+          // Remove specific action by ID
+          setActions((prev) => prev.filter((a) => a.id !== actionId));
+        } else if (userId) {
+          // Fallback: remove last action from that user
+          setActions((prev) => {
+            const idx = prev.findLastIndex((a) => a.userId === userId);
+            if (idx === -1) return prev;
+            return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+          });
+        }
+      },
+    );
+
     const cleanupProvideSync = onSketchProvideSync(
       (data: { requesterId: string }) => {
         if (isHost) {
@@ -89,6 +107,7 @@ export function useSketchOverlay() {
     return () => {
       cleanupDraw();
       cleanupClear();
+      cleanupUndo();
       cleanupProvideSync();
       cleanupSyncState();
     };
@@ -109,10 +128,21 @@ export function useSketchOverlay() {
     }
   }, [clearSelfTrigger, canDraw]);
 
-  // Handle local undo trigger
+  // Handle local undo trigger — only undo the current user's last action.
+  // Local actions have no userId (server injects userId on broadcast to others).
   useEffect(() => {
     if (undoTrigger > 0 && canDraw) {
-      setActions((prev) => prev.slice(0, -1));
+      setActions((prev) => {
+        // Find the last action drawn locally (no userId = own action)
+        const idx = prev.findLastIndex((a) => !a.userId);
+        if (idx === -1) return prev;
+
+        const undoneAction = prev[idx];
+        // Broadcast the undo so other users remove this action too
+        emitSketchUndo({ actionId: undoneAction.id });
+
+        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+      });
     }
   }, [undoTrigger, canDraw]);
 

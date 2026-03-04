@@ -113,30 +113,54 @@ export function usePlayerRoot({
     isLive,
   });
 
+  // Stabilise the initialAudioTracks reference — the parent may create a
+  // new array every render. We serialise to a key so the effect only fires
+  // when the actual track ids change, and read via ref to satisfy deps.
+  const audioTracksRef = useRef(initialAudioTracks);
+  audioTracksRef.current = initialAudioTracks;
+
+  const audioTracksKey = initialAudioTracks
+    ? JSON.stringify(initialAudioTracks.map((t) => t.id))
+    : '';
+
   useEffect(() => {
-    if (!initialAudioTracks || initialAudioTracks.length === 0) return;
+    if (!audioTracksKey) return; // no tracks to process
+    const tracks = audioTracksRef.current;
+    if (!tracks || tracks.length === 0) return;
     if (state.audioTracks.length > 0) return;
     dispatch({
       type: 'SET_AUDIO_TRACKS',
-      audioTracks: initialAudioTracks.map((t) => ({
+      audioTracks: tracks.map((t) => ({
         id: t.id,
         label: t.label,
         language: t.language,
         isDefault: false,
       })),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialAudioTracks, state.audioTracks.length]);
+  }, [audioTracksKey, state.audioTracks.length]);
+
+  // Stabilise the subtitleTracks reference — the parent often creates a new
+  // array on every render which would cause an infinite dispatch loop.
+  // Read via ref so the effect body doesn't reference the unstable prop.
+  const subtitleTracksRef = useRef(subtitleTracks);
+  subtitleTracksRef.current = subtitleTracks;
+
+  const subtitleTracksKey = subtitleTracks
+    ? JSON.stringify(subtitleTracks.map((t) => t.id + t.src))
+    : '';
 
   useEffect(() => {
-    if (subtitleTracks && subtitleTracks.length > 0) {
-      const tracks: SubtitleTrack[] = subtitleTracks.map((t, index) => ({
-        id: t.id || `${t.language}-${index}`,
-        label: t.label,
-        language: t.language,
-        src: t.src,
-      }));
-      dispatch({ type: 'SET_SUBTITLE_TRACKS', subtitleTracks: tracks });
+    if (subtitleTracksKey) {
+      const tracks = subtitleTracksRef.current;
+      if (tracks && tracks.length > 0) {
+        const mapped: SubtitleTrack[] = tracks.map((t, index) => ({
+          id: t.id || `${t.language}-${index}`,
+          label: t.label,
+          language: t.language,
+          src: t.src,
+        }));
+        dispatch({ type: 'SET_SUBTITLE_TRACKS', subtitleTracks: mapped });
+      }
     } else if (captionUrl) {
       const subtitleTrack: SubtitleTrack = {
         id: 'en',
@@ -149,7 +173,7 @@ export function usePlayerRoot({
         subtitleTracks: [subtitleTrack],
       });
     }
-  }, [captionUrl, subtitleTracks]);
+  }, [captionUrl, subtitleTracksKey]);
 
   useEffect(() => {
     return () => {

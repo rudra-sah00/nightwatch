@@ -58,6 +58,10 @@ export function PlayerEpisodePanel({
     onInteraction: playerHandlers.handleInteraction,
   });
 
+  // Destructure stable primitives / callbacks so handleEpisodeSelect doesn't
+  // depend on the whole panel object (recreated every render).
+  const { selectedSeason, close: closePanel } = panel;
+
   const handleEpisodeSelect = useCallback(
     async (episode: Episode) => {
       if (!onNavigate || !seriesId) return;
@@ -65,7 +69,7 @@ export function PlayerEpisodePanel({
       const params = new URLSearchParams({
         type: 'series',
         title: metadata.title,
-        season: String(episode.seasonNumber ?? panel.selectedSeason),
+        season: String(episode.seasonNumber ?? selectedSeason),
         episode: String(episode.episodeNumber),
         ...(metadata.posterUrl && {
           poster: encodeURIComponent(metadata.posterUrl),
@@ -80,7 +84,7 @@ export function PlayerEpisodePanel({
           type: 'series',
           title: metadata.title,
           seriesId,
-          season: episode.seasonNumber ?? panel.selectedSeason,
+          season: episode.seasonNumber ?? selectedSeason,
           episode: episode.episodeNumber,
           server: metadata.providerId,
         });
@@ -107,10 +111,10 @@ export function PlayerEpisodePanel({
         // watch page will refetchStream on mount
       }
 
-      panel.close();
+      closePanel();
       onNavigate(`/watch/${encodeURIComponent(seriesId)}?${params.toString()}`);
     },
-    [onNavigate, seriesId, metadata, panel],
+    [onNavigate, seriesId, metadata, selectedSeason, closePanel],
   );
 
   if (!isSeries) return <>{children}</>;

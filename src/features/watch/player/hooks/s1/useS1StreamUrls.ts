@@ -28,7 +28,7 @@
 
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlayResponse } from '@/features/search/types';
 import {
   extractTokenFromUrl,
@@ -146,6 +146,12 @@ export function useS1StreamUrls({
     SubtitleTrack[] | undefined
   >(undefined);
 
+  // Keep a ref so the sync effect can read the latest subtitle tracks
+  // without including them in its dependency array (which would cause an
+  // infinite loop because normalizeWatchUrls returns a new array every time).
+  const subtitleTracksRef = useRef(subtitleTracks);
+  subtitleTracksRef.current = subtitleTracks;
+
   const [apiDurationSeconds, setApiDurationSeconds] = useState<
     number | undefined
   >(undefined);
@@ -163,7 +169,7 @@ export function useS1StreamUrls({
         captionUrl: initialCaptionUrlRaw,
         spriteVtt: initialSpriteVttRaw,
         qualities: initialQualitiesRaw,
-        subtitleTracks,
+        subtitleTracks: subtitleTracksRef.current,
       },
       token || '',
     );
@@ -178,7 +184,6 @@ export function useS1StreamUrls({
     initialCaptionUrlRaw,
     initialSpriteVttRaw,
     initialQualitiesRaw,
-    subtitleTracks,
   ]);
 
   // ── applyResponse: S1-only — normalise a fresh play response ─────────────

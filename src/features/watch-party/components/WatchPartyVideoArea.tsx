@@ -2,6 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { Player } from '@/features/watch/player';
+import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
+import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
@@ -47,6 +49,17 @@ function PlayerOverlays({
     isHost,
     onNextEpisode,
   );
+  const { metadata, playerHandlers } = usePlayerContext();
+
+  const pauseOverlayMetadata = {
+    title: metadata.title,
+    type: metadata.type,
+    season: metadata.season,
+    episode: metadata.episode,
+    description: metadata.description,
+    year: metadata.year,
+    posterUrl: metadata.posterUrl,
+  };
 
   return (
     <>
@@ -60,6 +73,15 @@ function PlayerOverlays({
           <p className="text-white text-sm font-medium">{state.error}</p>
         </div>
       )}
+
+      <CenterPlayButton
+        isPlaying={state.isPlaying}
+        onToggle={playerHandlers.togglePlay}
+        metadata={pauseOverlayMetadata}
+        disabled={!isHost}
+        isLoading={state.isLoading}
+      />
+
       {/* Next episode overlay — host triggers party content update; guests see it read-only */}
       <NextEpisodeOverlay
         isVisible={nextEpisode.show}

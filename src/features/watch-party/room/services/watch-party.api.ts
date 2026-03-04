@@ -722,6 +722,30 @@ export function onSketchSyncState(
   return () => socket.off('sketch:sync_state', callback);
 }
 
+// Undo the user's last drawing action and broadcast to the room
+export function emitSketchUndo(
+  payload: { actionId: string },
+  callback?: Callback<object>,
+): void {
+  const socket = getSocket();
+  if (!socket) {
+    callback?.({ success: false, error: 'Not connected' });
+    return;
+  }
+  socket.emit('sketch:undo', payload, callback);
+}
+
+// Received when another user undoes one of their actions
+export function onSketchUndo(
+  callback: (data: { userId: string; actionId: string }) => void,
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  socket.on('sketch:undo', callback);
+  return () => socket.off('sketch:undo', callback);
+}
+
 // ============ Theme Sync API ============
 
 /**

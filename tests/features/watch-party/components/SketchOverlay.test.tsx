@@ -102,10 +102,12 @@ vi.mock('@/features/watch-party/interactions/context/SketchContext', () => ({
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   emitSketchDraw: vi.fn(),
   emitSketchClear: vi.fn(),
+  emitSketchUndo: vi.fn(),
   emitSketchRequestSync: vi.fn(),
   emitSketchSyncState: vi.fn(),
   onSketchDraw: vi.fn((cb) => cb),
   onSketchClear: vi.fn((cb) => cb),
+  onSketchUndo: vi.fn((cb) => cb),
   onSketchProvideSync: vi.fn((cb) => cb),
   onSketchSyncState: vi.fn((cb) => cb),
 }));
@@ -129,6 +131,7 @@ describe('SketchOverlay', () => {
     userId: string;
     type: 'all' | 'self';
   }) => void;
+  let sketchUndoHandler: (data: { userId: string; actionId: string }) => void;
   let sketchProvideSyncHandler: (data: { requesterId: string }) => void;
   let sketchSyncStateHandler: (data: { elements: SketchActionType[] }) => void;
 
@@ -146,6 +149,13 @@ describe('SketchOverlay', () => {
       sketchClearHandler = cb as (data: {
         userId: string;
         type: 'all' | 'self';
+      }) => void;
+      return vi.fn();
+    });
+    vi.mocked(api.onSketchUndo).mockImplementation((cb) => {
+      sketchUndoHandler = cb as (data: {
+        userId: string;
+        actionId: string;
       }) => void;
       return vi.fn();
     });
@@ -436,25 +446,118 @@ describe('SketchOverlay', () => {
     expect(textElement).toHaveAttribute('data-text', 'Hello World');
   });
 
-  it('should handle undoTrigger', () => {
+  it('should handle undoTrigger — only undoes own action, not remote', () => {
     const { rerender } = render(<SketchOverlay />);
-    const stage = screen.getByTestId('konva-stage');
 
-    // Add an action
+    // Add a remote action from another user
+    act(() => {
+      sketchDrawHandler({
+        id: 'remote-1',
+        type: 'freehand',
+        data: [5, 5, 15, 15],
+        color: 'blue',
+        strokeWidth: 2,
+        videoTimestamp: 10,
+        userId: 'other-user',
+      });
+    });
+
+    // Add a local action (no userId)
+    const stage = screen.getByTestId('konva-stage');
     act(() => {
       fireEvent.mouseDown(stage);
       fireEvent.mouseUp(stage);
     });
-    expect(screen.getAllByTestId('konva-line')).toHaveLength(1);
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(2);
 
-    // Trigger undo
+    // Trigger undo — should only remove local action, not the remote one
     vi.mocked(useSketch).mockReturnValue({
       ...mockContext,
       undoTrigger: 1,
     } as unknown as SketchContextType);
 
     rerender(<SketchOverlay />);
-    expect(screen.queryByTestId('konva-line')).not.toBeInTheDocument();
+
+    // Remote action still present
+    const remaining = screen.getAllByTestId('konva-line');
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]).toHaveAttribute('data-stroke', 'blue');
+
+    // Should have emitted undo to server
+    expect(api.emitSketchUndo).toHaveBeenCalledWith(
+      expect.objectContaining({ actionId: expect.any(String) }),
+    );
+  });
+
+  it('should handle remote undo by actionId', () => {
+    render(<SketchOverlay />);
+
+    // Add two remote actions from different users
+    act(() => {
+      sketchDrawHandler({
+        id: 'action-A',
+        type: 'freehand',
+        data: [0, 0, 10, 10],
+        color: 'red',
+        strokeWidth: 2,
+        videoTimestamp: 10,
+        userId: 'user-1',
+      });
+      sketchDrawHandler({
+        id: 'action-B',
+        type: 'freehand',
+        data: [20, 20, 30, 30],
+        color: 'green',
+        strokeWidth: 2,
+        videoTimestamp: 10,
+        userId: 'user-2',
+      });
+    });
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(2);
+
+    // Remote undo for action-A only
+    act(() => {
+      sketchUndoHandler({ userId: 'user-1', actionId: 'action-A' });
+    });
+
+    const remaining = screen.getAllByTestId('konva-line');
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]).toHaveAttribute('data-stroke', 'green');
+  });
+
+  it('should handle remote undo fallback by userId when no actionId', () => {
+    render(<SketchOverlay />);
+
+    act(() => {
+      sketchDrawHandler({
+        id: 'a1',
+        type: 'freehand',
+        data: [0, 0, 5, 5],
+        color: 'red',
+        strokeWidth: 2,
+        videoTimestamp: 10,
+        userId: 'user-1',
+      });
+      sketchDrawHandler({
+        id: 'a2',
+        type: 'freehand',
+        data: [10, 10, 15, 15],
+        color: 'blue',
+        strokeWidth: 2,
+        videoTimestamp: 10,
+        userId: 'user-1',
+      });
+    });
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(2);
+
+    // Undo with no actionId — should remove user-1's LAST action (a2)
+    act(() => {
+      sketchUndoHandler({ userId: 'user-1', actionId: '' });
+    });
+
+    const remaining = screen.getAllByTestId('konva-line');
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]).toHaveAttribute('data-stroke', 'red');
   });
 
   it('should respond to window resize', () => {
