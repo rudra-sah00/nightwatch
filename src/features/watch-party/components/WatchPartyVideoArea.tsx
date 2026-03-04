@@ -147,14 +147,12 @@ export function WatchPartyVideoArea({
         <Player.Controls>
           <Player.Header onSidebarToggle={onSidebarToggle} hideBackButton />
           <Player.SeekBar />
-          <div className="flex items-center justify-center px-2 py-1 pointer-events-auto">
-            <EmojiReactions />
-          </div>
           <Player.ControlRow>
             <Player.PlayPause />
             <Player.Volume />
             <Player.TimeDisplay />
             <Player.Spacer />
+            <EmojiReactions />
             <Player.AudioSubtitleSelectors />
             <Player.SettingsMenu />
             <Player.Fullscreen
