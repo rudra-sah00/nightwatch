@@ -49,6 +49,8 @@ interface PlayerRootProps {
   onBack?: () => void;
   /** Pass true for live streams — uses a low-latency HLS config that stays at the live edge */
   isLive?: boolean;
+  /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
+  containerStyle?: React.CSSProperties;
 }
 
 const CONTAINER_STYLE = { width: '100%', height: '100dvh' } as const;
@@ -76,6 +78,7 @@ export function PlayerRoot({
   onAudioTrackChange,
   onBack: onBackProp,
   isLive = false,
+  containerStyle,
 }: PlayerRootProps) {
   const { state, containerRef, contextValue, showControls } = usePlayerRoot({
     streamUrl,
@@ -109,7 +112,7 @@ export function PlayerRoot({
           state.showControls && !hideControls && 'cursor-auto',
           className,
         )}
-        style={CONTAINER_STYLE}
+        style={containerStyle ?? CONTAINER_STYLE}
         onMouseMove={showControls}
         onMouseEnter={showControls}
         aria-label="Video Player"

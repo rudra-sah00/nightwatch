@@ -120,6 +120,7 @@ export function WatchPartyVideoArea({
       onNavigate={onNavigate}
       fullscreenToggleOverride={toggleFullscreen}
       isFullscreenOverride={isFullscreen}
+      isLive={room.type === 'livestream'}
     >
       {/* Blurred poster background */}
       {metadata.posterUrl ? (
