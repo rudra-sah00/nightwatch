@@ -66,11 +66,22 @@ export function LiveSeekBar() {
   const dvrDuration = Math.max(dvr.end - dvr.start, 1);
   const currentTime = state.currentTime;
 
+  /**
+   * Are we within 15 s of the live edge?  Computed first so the progress
+   * bar can be pinned to 100 % when the viewer is "at live".  Without this
+   * pin, every time a new HLS segment lands `dvr.end` jumps forward while
+   * `currentTime` hasn't caught up yet, causing the red bar to visually
+   * snap backward — the exact jitter the user reported.
+   */
+  const isAtLiveEdge = dvr.end - currentTime <= 15;
+
   /** 0–100: how far through the DVR window the current position is */
   const displayFraction =
     dragFraction !== null
       ? dragFraction
-      : Math.min(1, Math.max(0, (currentTime - dvr.start) / dvrDuration));
+      : isAtLiveEdge
+        ? 1 // pin to right edge — no jitter
+        : Math.min(1, Math.max(0, (currentTime - dvr.start) / dvrDuration));
   const progress = displayFraction * 100;
 
   /** Seconds behind the live edge at the hover position */
@@ -239,8 +250,6 @@ export function LiveSeekBar() {
   );
 
   if (dvr.end === 0) return null; // Not loaded yet
-
-  const isAtLiveEdge = dvr.end - currentTime <= 15;
 
   return (
     <div className="px-4 md:px-6 lg:px-8 2xl:px-10 pointer-events-auto">
