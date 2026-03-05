@@ -44,6 +44,9 @@ interface MediaControlsProps {
   onSidebarThemeChange: (theme: SidebarTheme) => void;
   customColor: string;
   onCustomColorChange: (color: string) => void;
+  /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
+  floatingChatEnabled?: boolean;
+  onToggleFloatingChat?: () => void;
 }
 
 /**
@@ -71,6 +74,8 @@ export function MediaControls({
   onSidebarThemeChange,
   customColor,
   onCustomColorChange,
+  floatingChatEnabled = false,
+  onToggleFloatingChat,
 }: MediaControlsProps) {
   const {
     showAudioDevices,
@@ -92,44 +97,43 @@ export function MediaControls({
         className="p-3 flex gap-2 border-b"
         style={{ borderColor: 'var(--wp-divider)' }}
       >
+        {/* Settings — visible to all users; host sees full settings, guests see personal prefs only */}
+        <WatchPartySettings
+          room={room}
+          isHost={isHost}
+          sidebarTheme={sidebarTheme}
+          onSidebarThemeChange={onSidebarThemeChange}
+          customColor={customColor}
+          onCustomColorChange={onCustomColorChange}
+          floatingChatEnabled={floatingChatEnabled}
+          onToggleFloatingChat={onToggleFloatingChat}
+        />
+
         {isHost ? (
-          <>
-            <WatchPartySettings
-              room={room}
-              isHost={isHost}
-              sidebarTheme={sidebarTheme}
-              onSidebarThemeChange={onSidebarThemeChange}
-              customColor={customColor}
-              onCustomColorChange={onCustomColorChange}
-            />
-            <button
-              type="button"
-              onClick={onCopyLink}
-              className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold border text-white rounded-xl transition-colors"
-              style={{
-                background: 'var(--wp-btn-bg)',
-                borderColor: 'var(--wp-btn-border)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--wp-btn-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--wp-btn-bg)';
-              }}
-            >
-              {linkCopied ? (
-                <Check
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 text-success"
-                />
-              ) : (
-                <Copy aria-hidden="true" className="w-3.5 h-3.5" />
-              )}
-              <span className="sm:inline">
-                {linkCopied ? 'Copied' : 'Invite'}
-              </span>
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={onCopyLink}
+            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold border text-white rounded-xl transition-colors"
+            style={{
+              background: 'var(--wp-btn-bg)',
+              borderColor: 'var(--wp-btn-border)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--wp-btn-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--wp-btn-bg)';
+            }}
+          >
+            {linkCopied ? (
+              <Check aria-hidden="true" className="w-3.5 h-3.5 text-success" />
+            ) : (
+              <Copy aria-hidden="true" className="w-3.5 h-3.5" />
+            )}
+            <span className="sm:inline">
+              {linkCopied ? 'Copied' : 'Invite'}
+            </span>
+          </button>
         ) : null}
 
         <button

@@ -169,6 +169,9 @@ export interface WatchPartySettingsProps {
   onSidebarThemeChange: (theme: SidebarTheme) => void;
   customColor: string;
   onCustomColorChange: (color: string) => void;
+  /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
+  floatingChatEnabled?: boolean;
+  onToggleFloatingChat?: () => void;
 }
 
 export function WatchPartySettings({
@@ -178,10 +181,10 @@ export function WatchPartySettings({
   onSidebarThemeChange,
   customColor,
   onCustomColorChange,
+  floatingChatEnabled = false,
+  onToggleFloatingChat,
 }: WatchPartySettingsProps) {
   const { isOpen, setIsOpen } = useWatchPartySettings();
-  // If not host, maybe don't even render the button, or render it disabled (we'll just not render it in parent)
-  if (!isHost) return null;
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
@@ -222,213 +225,257 @@ export function WatchPartySettings({
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-6 space-y-8">
-          {/* Appearance */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
-              <Palette className="w-3.5 h-3.5" />
-              Sidebar Theme
-            </h3>
+          {/* Personal Preferences — visible to all users */}
+          {onToggleFloatingChat !== undefined ? (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
+                <MessageSquare className="w-3.5 h-3.5" />
+                Personal
+              </h3>
+              <div className="bg-zinc-900/50 rounded-xl p-4 border border-white/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-4 h-4 text-white/70" />
+                    <div>
+                      <p className="text-sm font-medium">Floating chat</p>
+                      <p className="text-xs text-white/40">
+                        Show chat overlay when sidebar is closed
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={floatingChatEnabled}
+                    onCheckedChange={() => onToggleFloatingChat?.()}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
 
-            {/* Custom dropdown */}
-            <ThemeDropdown
-              value={sidebarTheme}
-              customColor={customColor}
-              onChange={(t) => {
-                onSidebarThemeChange(t);
-                updatePartyTheme({ theme: t, customColor });
-              }}
-            />
+          {isHost ? (
+            <div className="space-y-8">
+              {/* Appearance */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
+                  <Palette className="w-3.5 h-3.5" />
+                  Sidebar Theme
+                </h3>
 
-            {/* Custom colour picker — shown only when custom is selected */}
-            {sidebarTheme === 'custom' && (
-              <div className="flex items-center gap-3 bg-zinc-900/50 rounded-xl p-3 border border-white/5">
-                <label
-                  htmlFor="wp-custom-color"
-                  className="flex items-center gap-3 cursor-pointer flex-1"
-                >
-                  {/* Clickable colour circle */}
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg flex-shrink-0 relative overflow-hidden"
-                    style={{ backgroundColor: customColor }}
-                  >
+                {/* Custom dropdown */}
+                <ThemeDropdown
+                  value={sidebarTheme}
+                  customColor={customColor}
+                  onChange={(t) => {
+                    onSidebarThemeChange(t);
+                    updatePartyTheme({ theme: t, customColor });
+                  }}
+                />
+
+                {/* Custom colour picker — shown only when custom is selected */}
+                {sidebarTheme === 'custom' && (
+                  <div className="flex items-center gap-3 bg-zinc-900/50 rounded-xl p-3 border border-white/5">
+                    <label
+                      htmlFor="wp-custom-color"
+                      className="flex items-center gap-3 cursor-pointer flex-1"
+                    >
+                      {/* Clickable colour circle */}
+                      <div
+                        className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg flex-shrink-0 relative overflow-hidden"
+                        style={{ backgroundColor: customColor }}
+                      >
+                        <input
+                          id="wp-custom-color"
+                          type="color"
+                          value={customColor}
+                          onChange={(e) => {
+                            onCustomColorChange(e.target.value);
+                            updatePartyTheme({
+                              theme: sidebarTheme,
+                              customColor: e.target.value,
+                            });
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">
+                          Accent colour
+                        </p>
+                        <p className="text-xs text-white/40 font-mono">
+                          {customColor.toUpperCase()}
+                        </p>
+                      </div>
+                    </label>
+                    {/* Hex input */}
                     <input
-                      id="wp-custom-color"
-                      type="color"
+                      type="text"
+                      maxLength={7}
                       value={customColor}
                       onChange={(e) => {
-                        onCustomColorChange(e.target.value);
-                        updatePartyTheme({
-                          theme: sidebarTheme,
-                          customColor: e.target.value,
-                        });
+                        const v = e.target.value;
+                        if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                          onCustomColorChange(v);
+                          if (v.length === 7)
+                            updatePartyTheme({
+                              theme: sidebarTheme,
+                              customColor: v,
+                            });
+                        }
                       }}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      className="w-24 bg-black/30 border border-white/10 text-white/80 font-mono text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20"
                     />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      Accent colour
-                    </p>
-                    <p className="text-xs text-white/40 font-mono">
-                      {customColor.toUpperCase()}
-                    </p>
-                  </div>
-                </label>
-                {/* Hex input */}
-                <input
-                  type="text"
-                  maxLength={7}
-                  value={customColor}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
-                      onCustomColorChange(v);
-                      if (v.length === 7)
-                        updatePartyTheme({
-                          theme: sidebarTheme,
-                          customColor: v,
-                        });
-                    }
-                  }}
-                  className="w-24 bg-black/30 border border-white/10 text-white/80 font-mono text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20"
-                />
-              </div>
-            )}
-          </div>
-          {/* Global Permissions */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
-              Global Permissions for Guests
-            </h3>
-
-            <div className="space-y-3 bg-zinc-900/50 rounded-xl p-4 border border-white/5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <PenTool className="w-4 h-4 text-white/70" />
-                  <div>
-                    <p className="text-sm font-medium">Sketch Board</p>
-                    <p className="text-xs text-white/40">
-                      Allow guests to draw on the video overlay
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={room.permissions.canGuestsDraw}
-                  onCheckedChange={(v) =>
-                    handleGlobalPermissionToggle('canGuestsDraw', v)
-                  }
-                />
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Volume2 className="w-4 h-4 text-white/70" />
-                  <div>
-                    <p className="text-sm font-medium">Soundboard</p>
-                    <p className="text-xs text-white/40">
-                      Allow guests to play trending sounds
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={room.permissions.canGuestsPlaySounds}
-                  onCheckedChange={(v) =>
-                    handleGlobalPermissionToggle('canGuestsPlaySounds', v)
-                  }
-                />
-              </div>
+              {/* Global Permissions */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
+                  Global Permissions for Guests
+                </h3>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="w-4 h-4 text-white/70" />
-                  <div>
-                    <p className="text-sm font-medium">Live Chat</p>
-                    <p className="text-xs text-white/40">
-                      Allow guests to send chat messages
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={room.permissions.canGuestsChat}
-                  onCheckedChange={(v) =>
-                    handleGlobalPermissionToggle('canGuestsChat', v)
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Individual Overrides */}
-          {guests.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
-                Individual Guest Overrides
-              </h3>
-
-              <div className="space-y-2">
-                {guests.map((guest) => (
-                  <div
-                    key={guest.id}
-                    className="bg-zinc-900/50 rounded-xl p-4 border border-white/5 flex flex-col gap-4"
-                  >
-                    <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-white">
-                          {guest.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="text-sm font-medium pr-2 truncate text-white">
-                        {guest.name}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-xs text-white/50">Sketch</span>
-                        <Switch
-                          checked={
-                            guest.permissions?.canDraw ??
-                            room.permissions.canGuestsDraw
-                          }
-                          onCheckedChange={(v) =>
-                            handleUserPermissionToggle(guest.id, 'canDraw', v)
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-xs text-white/50">Sounds</span>
-                        <Switch
-                          checked={
-                            guest.permissions?.canPlaySound ??
-                            room.permissions.canGuestsPlaySounds
-                          }
-                          onCheckedChange={(v) =>
-                            handleUserPermissionToggle(
-                              guest.id,
-                              'canPlaySound',
-                              v,
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-xs text-white/50">Chat</span>
-                        <Switch
-                          checked={
-                            guest.permissions?.canChat ??
-                            room.permissions.canGuestsChat
-                          }
-                          onCheckedChange={(v) =>
-                            handleUserPermissionToggle(guest.id, 'canChat', v)
-                          }
-                        />
+                <div className="space-y-3 bg-zinc-900/50 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <PenTool className="w-4 h-4 text-white/70" />
+                      <div>
+                        <p className="text-sm font-medium">Sketch Board</p>
+                        <p className="text-xs text-white/40">
+                          Allow guests to draw on the video overlay
+                        </p>
                       </div>
                     </div>
+                    <Switch
+                      checked={room.permissions.canGuestsDraw}
+                      onCheckedChange={(v) =>
+                        handleGlobalPermissionToggle('canGuestsDraw', v)
+                      }
+                    />
                   </div>
-                ))}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Volume2 className="w-4 h-4 text-white/70" />
+                      <div>
+                        <p className="text-sm font-medium">Soundboard</p>
+                        <p className="text-xs text-white/40">
+                          Allow guests to play trending sounds
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={room.permissions.canGuestsPlaySounds}
+                      onCheckedChange={(v) =>
+                        handleGlobalPermissionToggle('canGuestsPlaySounds', v)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-4 h-4 text-white/70" />
+                      <div>
+                        <p className="text-sm font-medium">Live Chat</p>
+                        <p className="text-xs text-white/40">
+                          Allow guests to send chat messages
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={room.permissions.canGuestsChat}
+                      onCheckedChange={(v) =>
+                        handleGlobalPermissionToggle('canGuestsChat', v)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* Individual Overrides */}
+              {guests.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
+                    Individual Guest Overrides
+                  </h3>
+
+                  <div className="space-y-2">
+                    {guests.map((guest) => (
+                      <div
+                        key={guest.id}
+                        className="bg-zinc-900/50 rounded-xl p-4 border border-white/5 flex flex-col gap-4"
+                      >
+                        <div className="flex items-center gap-3 border-b border-white/5 pb-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-white">
+                              {guest.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium pr-2 truncate text-white">
+                            {guest.name}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-xs text-white/50">
+                              Sketch
+                            </span>
+                            <Switch
+                              checked={
+                                guest.permissions?.canDraw ??
+                                room.permissions.canGuestsDraw
+                              }
+                              onCheckedChange={(v) =>
+                                handleUserPermissionToggle(
+                                  guest.id,
+                                  'canDraw',
+                                  v,
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-xs text-white/50">
+                              Sounds
+                            </span>
+                            <Switch
+                              checked={
+                                guest.permissions?.canPlaySound ??
+                                room.permissions.canGuestsPlaySounds
+                              }
+                              onCheckedChange={(v) =>
+                                handleUserPermissionToggle(
+                                  guest.id,
+                                  'canPlaySound',
+                                  v,
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-xs text-white/50">Chat</span>
+                            <Switch
+                              checked={
+                                guest.permissions?.canChat ??
+                                room.permissions.canGuestsChat
+                              }
+                              onCheckedChange={(v) =>
+                                handleUserPermissionToggle(
+                                  guest.id,
+                                  'canChat',
+                                  v,
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +17,12 @@ import { WatchPartyVideoArea } from './WatchPartyVideoArea';
 
 const WatchPartySidebar = dynamic(
   () => import('./WatchPartySidebar').then((mod) => mod.WatchPartySidebar),
+  { ssr: false },
+);
+
+const FloatingChat = dynamic(
+  () =>
+    import('../chat/components/FloatingChat').then((mod) => mod.FloatingChat),
   { ssr: false },
 );
 
@@ -95,6 +102,38 @@ export function ActiveWatchParty({
     onUpdateContent,
   });
 
+  // ── Floating chat toggle (personal preference, persisted) ──────────────
+  const [floatingChatEnabled, setFloatingChatEnabled] = useState(false);
+
+  useEffect(() => {
+    try {
+      setFloatingChatEnabled(
+        localStorage.getItem('wp:floatingChat') === 'true',
+      );
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const handleToggleFloatingChat = () => {
+    setFloatingChatEnabled((prev) => {
+      try {
+        localStorage.setItem('wp:floatingChat', String(!prev));
+      } catch {
+        /* ignore */
+      }
+      return !prev;
+    });
+  };
+
+  // Whether the current user is permitted to send chat messages
+  const currentMember = room.members.find((m) => m.id === currentUserId);
+  const canChatInParty =
+    isHost ||
+    (currentMember?.permissions?.canChat ??
+      room.permissions?.canGuestsChat ??
+      true);
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
@@ -129,6 +168,8 @@ export function ActiveWatchParty({
           onTypingStart={onTypingStart}
           onTypingStop={onTypingStop}
           onTabChange={(tab) => setIsSketchMode(tab === 'sketch')}
+          floatingChatEnabled={floatingChatEnabled}
+          onToggleFloatingChat={handleToggleFloatingChat}
         />
       </div>
 
@@ -153,6 +194,16 @@ export function ActiveWatchParty({
           }
         />
       </div>
+
+      {/* Floating chat overlay — text-only, no background, bottom-right */}
+      {!showDesktopSidebar && floatingChatEnabled ? (
+        <FloatingChat
+          messages={messages}
+          currentUserId={currentUserId}
+          onSendMessage={onSendMessage}
+          canChat={canChatInParty}
+        />
+      ) : null}
 
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (

@@ -55,6 +55,9 @@ interface WatchPartySidebarProps {
   onTabChange?: (
     tab: 'chat' | 'participants' | 'soundboard' | 'sketch',
   ) => void;
+  /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
+  floatingChatEnabled?: boolean;
+  onToggleFloatingChat?: () => void;
 }
 
 /**
@@ -80,6 +83,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   onTypingStart,
   onTypingStop,
   onTabChange,
+  floatingChatEnabled = false,
+  onToggleFloatingChat,
 }: WatchPartySidebarProps) {
   const {
     activeTab,
@@ -237,6 +242,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         onSidebarThemeChange={setTheme}
         customColor={customColor}
         onCustomColorChange={setCustomColor}
+        floatingChatEnabled={floatingChatEnabled}
+        onToggleFloatingChat={onToggleFloatingChat}
       />
     </div>
   );
