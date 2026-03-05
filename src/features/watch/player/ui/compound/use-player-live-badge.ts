@@ -1,23 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
 
 const LIVE_EDGE_THRESHOLD_S = 15;
 
 export function usePlayerLiveBadge() {
-  const { metadata } = usePlayerContext();
+  const { metadata, videoRef } = usePlayerContext();
   const [isAtLiveEdge, setIsAtLiveEdge] = useState(true);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (metadata.type !== 'livestream') return;
 
-    const video = document.querySelector<HTMLVideoElement>('video');
+    const video = videoRef.current;
     if (!video) return;
-    videoRef.current = video;
 
     const checkEdge = () => {
-      if (!video.buffered.length) return;
-      const liveEdge = video.buffered.end(video.buffered.length - 1);
+      // Prefer seekable (HLS DVR window), fall back to buffered
+      const src = video.seekable.length > 0 ? video.seekable : video.buffered;
+      if (!src.length) return;
+      const liveEdge = src.end(src.length - 1);
       const behind = liveEdge - video.currentTime;
       setIsAtLiveEdge(behind <= LIVE_EDGE_THRESHOLD_S);
     };
@@ -25,14 +25,17 @@ export function usePlayerLiveBadge() {
     video.addEventListener('timeupdate', checkEdge);
     checkEdge();
     return () => video.removeEventListener('timeupdate', checkEdge);
-  }, [metadata.type]);
+  }, [metadata.type, videoRef]);
 
   const handleGoLive = useCallback(() => {
     const video = videoRef.current;
-    if (!video || !video.buffered.length) return;
-    video.currentTime = video.buffered.end(video.buffered.length - 1);
+    if (!video) return;
+    // Jump to the live edge using seekable range
+    const src = video.seekable.length > 0 ? video.seekable : video.buffered;
+    if (!src.length) return;
+    video.currentTime = src.end(src.length - 1);
     video.play().catch(() => {});
-  }, []);
+  }, [videoRef]);
 
   return { metadata, isAtLiveEdge, handleGoLive };
 }

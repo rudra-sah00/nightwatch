@@ -36,12 +36,25 @@ export function useKeyboard({
       if (disabled) return;
       const video = videoRef.current;
       if (!video) return;
-      video.currentTime = Math.max(
-        0,
-        Math.min(video.duration, video.currentTime + seconds),
-      );
+
+      if (isLive) {
+        // DVR seek: clamp within the seekable/buffered range
+        const src = video.seekable.length > 0 ? video.seekable : video.buffered;
+        if (!src.length) return;
+        const start = src.start(0);
+        const end = src.end(src.length - 1);
+        video.currentTime = Math.max(
+          start,
+          Math.min(end, video.currentTime + seconds),
+        );
+      } else {
+        video.currentTime = Math.max(
+          0,
+          Math.min(video.duration, video.currentTime + seconds),
+        );
+      }
     },
-    [videoRef, disabled],
+    [videoRef, disabled, isLive],
   );
 
   const adjustVolume = useCallback(
@@ -144,14 +157,14 @@ export function useKeyboard({
           break;
         case 'ArrowLeft':
         case 'KeyJ':
-          if (h.disabled || h.isLive) break;
+          if (h.disabled) break;
           e.preventDefault();
           h.seek(-10);
           h.dispatch({ type: 'SHOW_CONTROLS' });
           break;
         case 'ArrowRight':
         case 'KeyL':
-          if (h.disabled || h.isLive) break;
+          if (h.disabled) break;
           e.preventDefault();
           h.seek(10);
           h.dispatch({ type: 'SHOW_CONTROLS' });

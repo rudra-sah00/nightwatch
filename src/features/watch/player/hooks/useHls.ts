@@ -61,11 +61,11 @@ export function useHls({
               // Allow up to 5 segments of drift before the player catches up;
               // aggressive low values here (3) caused constant catch-up buffering.
               liveMaxLatencyDurationCount: 5,
-              // Small buffers — enough headroom to absorb a network hiccup without
-              // drifting far from live.
-              maxBufferLength: 15,
-              maxMaxBufferLength: 30,
-              backBufferLength: 5,
+              // Generous buffers for DVR — keep 60s of back-buffer so seeking
+              // backward doesn't re-download everything (YouTube-style).
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60,
+              backBufferLength: 60,
               // Don't hammer the CDN on 404s — back off before retrying
               fragLoadingRetryDelay: 1000,
               fragLoadingMaxRetryTimeout: 8000,
