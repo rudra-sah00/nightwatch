@@ -1,9 +1,29 @@
 'use client';
 
 import { Clock, Play } from 'lucide-react';
-import type { LiveMatch } from '../api';
+import type { CricketMatchInfo, LiveMatch } from '../api';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
 import { LiveMatchModal } from './LiveMatchModal';
+
+/** Format cricket innings score e.g. "212/5 (17.3 ov)" */
+function formatCricketScore(info: CricketMatchInfo | undefined): string {
+  if (!info || !info.crtRunsScored) return '-';
+  const runs = info.crtRunsScored;
+  const wickets = info.crtWicketsLost;
+  const overs = info.crtOvers;
+  const balls = info.crtOversExtraBalls;
+  let score = wickets ? `${runs}/${wickets}` : runs;
+  if (overs) {
+    const ballStr = balls && balls !== '0' ? `.${balls}` : '';
+    score += ` (${overs}${ballStr} ov)`;
+  }
+  return score;
+}
+
+function getCricketScore(match: LiveMatch, team: 1 | 2): string {
+  const info = team === 1 ? match.teamMatchInfo1 : match.teamMatchInfo2;
+  return formatCricketScore(info);
+}
 
 interface LiveMatchCardProps {
   match: LiveMatch;
@@ -116,10 +136,10 @@ export function LiveMatchCard({
                 {match.team1.name}
               </span>
               {!isUpcoming && (
-                <span
-                  className={`text-xl font-bold tabular-nums tracking-tight ${Number(match.team1.score) > Number(match.team2.score) ? 'text-white' : 'text-zinc-500'}`}
-                >
-                  {match.team1.score}
+                <span className="text-xl font-bold tabular-nums tracking-tight text-white">
+                  {match.type === 'cricket'
+                    ? getCricketScore(match, 1)
+                    : match.team1.score}
                 </span>
               )}
             </div>
@@ -151,10 +171,10 @@ export function LiveMatchCard({
                 {match.team2.name}
               </span>
               {!isUpcoming && (
-                <span
-                  className={`text-xl font-bold tabular-nums tracking-tight ${Number(match.team2.score) > Number(match.team1.score) ? 'text-white' : 'text-zinc-500'}`}
-                >
-                  {match.team2.score}
+                <span className="text-xl font-bold tabular-nums tracking-tight text-white">
+                  {match.type === 'cricket'
+                    ? getCricketScore(match, 2)
+                    : match.team2.score}
                 </span>
               )}
             </div>
@@ -239,9 +259,7 @@ export function LiveMatchCard({
                 />
               ) : null}
             </div>
-            <span
-              className={`text-sm truncate ${!isUpcoming && Number(match.team1.score) > Number(match.team2.score) ? 'text-white font-semibold' : 'text-zinc-300'}`}
-            >
+            <span className="text-sm truncate text-zinc-300">
               {match.team1.name}
             </span>
           </div>
@@ -255,9 +273,7 @@ export function LiveMatchCard({
                 />
               ) : null}
             </div>
-            <span
-              className={`text-sm truncate ${!isUpcoming && Number(match.team2.score) > Number(match.team1.score) ? 'text-white font-semibold' : 'text-zinc-300'}`}
-            >
+            <span className="text-sm truncate text-zinc-300">
               {match.team2.name}
             </span>
           </div>
@@ -266,15 +282,15 @@ export function LiveMatchCard({
         {/* Score column */}
         {(isLive || isEnded) && (
           <div className="flex-shrink-0 text-right space-y-2 min-w-[32px]">
-            <p
-              className={`text-sm tabular-nums ${Number(match.team1.score) > Number(match.team2.score) ? 'text-white font-bold' : 'text-zinc-500'}`}
-            >
-              {match.team1.score || '-'}
+            <p className="text-sm tabular-nums text-white font-bold">
+              {match.type === 'cricket'
+                ? getCricketScore(match, 1)
+                : match.team1.score || '-'}
             </p>
-            <p
-              className={`text-sm tabular-nums ${Number(match.team2.score) > Number(match.team1.score) ? 'text-white font-bold' : 'text-zinc-500'}`}
-            >
-              {match.team2.score || '-'}
+            <p className="text-sm tabular-nums text-zinc-400">
+              {match.type === 'cricket'
+                ? getCricketScore(match, 2)
+                : match.team2.score || '-'}
             </p>
           </div>
         )}

@@ -6,6 +6,7 @@ import type {
 } from './types';
 
 export type {
+  CricketMatchInfo,
   LiveMatch,
   LivestreamMatchResponse,
   LivestreamScheduleResponse,

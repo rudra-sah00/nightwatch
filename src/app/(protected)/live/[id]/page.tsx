@@ -107,9 +107,17 @@ export default function LiveMatchPlayerPage() {
           alt="T1"
           className="w-5 h-5 rounded-full"
         />
-        <span className="font-bold">{match.team1.score}</span>
-        <span className="text-zinc-500">-</span>
-        <span className="font-bold">{match.team2.score}</span>
+        {match.type === 'cricket' ? (
+          <span className="font-medium text-xs max-w-[140px] truncate">
+            {match.matchResult || `${match.team1.name} vs ${match.team2.name}`}
+          </span>
+        ) : (
+          <>
+            <span className="font-bold">{match.team1.score}</span>
+            <span className="text-zinc-500">-</span>
+            <span className="font-bold">{match.team2.score}</span>
+          </>
+        )}
         <img
           src={match.team2.avatar}
           alt="T2"
