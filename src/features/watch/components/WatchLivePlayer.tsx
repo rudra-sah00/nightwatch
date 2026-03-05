@@ -6,6 +6,7 @@ import { useLiveClock } from '../hooks/use-live-clock';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
+import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
@@ -63,7 +64,7 @@ function _LiveClock() {
 }
 
 function LivePlayerState() {
-  const { state, playerHandlers } = usePlayerContext();
+  const { state, playerHandlers, metadata } = usePlayerContext();
 
   return (
     <>
@@ -74,6 +75,14 @@ function LivePlayerState() {
       ) : null}
 
       <Player.Video />
+
+      <CenterPlayButton
+        isPlaying={state.isPlaying}
+        onToggle={playerHandlers.togglePlay}
+        metadata={metadata}
+        disabled={false}
+        isLoading={state.isLoading}
+      />
 
       <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 

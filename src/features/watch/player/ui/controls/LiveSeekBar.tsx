@@ -15,7 +15,7 @@ import { usePlayerContext } from '../../context/PlayerContext';
  * - Click **or drag** to seek within the DVR window (touch supported).
  */
 export function LiveSeekBar() {
-  const { videoRef, state, playerHandlers, readOnly } = usePlayerContext();
+  const { videoRef, playerHandlers, readOnly } = usePlayerContext();
   const barRef = useRef<HTMLDivElement>(null);
 
   /** Absolute time (s) of the DVR window start and live edge */
@@ -31,40 +31,56 @@ export function LiveSeekBar() {
   /** Whether the video was playing before the drag started (to resume after) */
   const wasPlayingRef = useRef(false);
 
+  /**
+   * Local currentTime tracked from the same timeupdate handler that updates
+   * dvr — ensures they're always in sync and avoids the initial flash where
+   * a `progress` event updates dvr before the first `timeupdate` fires,
+   * causing the bar to briefly snap to 0 % (left edge).
+   */
+  const [localCurrentTime, setLocalCurrentTime] = useState(0);
+
   // Track DVR range + buffered from video.seekable / video.buffered
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const update = () => {
-      // Prefer seekable (more accurate for HLS DVR) over buffered
+    // timeupdate: update dvr window AND currentTime atomically so they
+    // are always in the same React render — prevents bar flash on load.
+    const onTimeUpdate = () => {
+      setLocalCurrentTime(video.currentTime);
       const seekSrc =
         video.seekable.length > 0 ? video.seekable : video.buffered;
       if (seekSrc.length > 0) {
         const start = seekSrc.start(0);
         const end = seekSrc.end(seekSrc.length - 1);
         setDvr({ start, end });
-
-        // Buffered fraction relative to the DVR window
-        if (video.buffered.length > 0) {
-          const bEnd = video.buffered.end(video.buffered.length - 1);
-          const dur = Math.max(end - start, 1);
-          setBufferedFraction(Math.min(1, Math.max(0, (bEnd - start) / dur)));
-        }
       }
     };
 
-    video.addEventListener('timeupdate', update);
-    video.addEventListener('progress', update);
-    update();
+    // progress: only update the buffered fill, never touch dvr or currentTime
+    const onProgress = () => {
+      const seekSrc =
+        video.seekable.length > 0 ? video.seekable : video.buffered;
+      if (seekSrc.length > 0 && video.buffered.length > 0) {
+        const start = seekSrc.start(0);
+        const end = seekSrc.end(seekSrc.length - 1);
+        const bEnd = video.buffered.end(video.buffered.length - 1);
+        const dur = Math.max(end - start, 1);
+        setBufferedFraction(Math.min(1, Math.max(0, (bEnd - start) / dur)));
+      }
+    };
+
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('progress', onProgress);
+    onTimeUpdate();
     return () => {
-      video.removeEventListener('timeupdate', update);
-      video.removeEventListener('progress', update);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('progress', onProgress);
     };
   }, [videoRef]);
 
   const dvrDuration = Math.max(dvr.end - dvr.start, 1);
-  const currentTime = state.currentTime;
+  const currentTime = localCurrentTime;
 
   /**
    * Are we within 15 s of the live edge?  Computed first so the progress

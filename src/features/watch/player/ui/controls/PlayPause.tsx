@@ -146,7 +146,11 @@ export function CenterPlayButton({
                   : 'bg-red-600 text-white',
               )}
             >
-              {metadata.type === 'series' ? 'TV Series' : 'Movie'}
+              {metadata.type === 'series'
+                ? 'TV Series'
+                : metadata.type === 'livestream'
+                  ? 'Live'
+                  : 'Movie'}
             </div>
 
             {/* Title - responsive sizing */}
