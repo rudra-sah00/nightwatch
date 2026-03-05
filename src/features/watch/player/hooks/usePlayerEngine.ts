@@ -43,16 +43,17 @@ export function usePlayerEngine({
   const engineType = useMemo(() => {
     if (!streamUrl) return 'none';
 
-    // Prioritize provider from props, then global context
-    const effectiveProvider = providerIdProp || activeServer;
-
-    if (effectiveProvider === 's2') return 'mp4';
-    if (effectiveProvider === 's1') return 'hls';
-
-    // Fallback to extension guessing if for some reason context/props are missing
+    // URL extension takes priority — .m3u8 is always HLS regardless of the active
+    // server preference. This prevents the 's2' (MP4) default from breaking
+    // livestream watch parties where the stream is an HLS playlist.
     const lowerUrl = streamUrl.toLowerCase();
     if (lowerUrl.includes('.m3u8')) return 'hls';
     if (lowerUrl.includes('.mp4')) return 'mp4';
+
+    // Fall back to provider preference for streams without a clear extension
+    const effectiveProvider = providerIdProp || activeServer;
+    if (effectiveProvider === 's2') return 'mp4';
+    if (effectiveProvider === 's1') return 'hls';
 
     return 'hls';
   }, [streamUrl, providerIdProp, activeServer]);

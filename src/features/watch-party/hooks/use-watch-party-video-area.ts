@@ -14,6 +14,9 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       movieId: room.contentId,
       seriesId: room.type === 'series' ? room.contentId : undefined,
       posterUrl: room.posterUrl || '',
+      // Livestreams are always HLS — force 's1' so the player never falls back to
+      // the user's activeServer preference ('s2'/MP4) and shows a blank screen.
+      providerId: room.type === 'livestream' ? ('s1' as const) : undefined,
     }),
     [
       room.title,
