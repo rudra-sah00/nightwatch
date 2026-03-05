@@ -156,7 +156,6 @@ export function useAiChatProvider({
     if (!hasStarted) setHasStarted(true);
     setInputValue('');
     setIsLoading(true);
-    isProcessing.current = true;
 
     const botMessageId = `bot-${Date.now()}`;
     setStreamingMessageId(botMessageId);
