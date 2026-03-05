@@ -119,19 +119,20 @@ export function EpisodePanel({
         visible ? 'opacity-100' : 'opacity-0',
       )}
     >
-      {/* ── Single unified glass backdrop ── */}
+      {/* ── Single unified glass backdrop ── covers full viewport so the
+           watch-party sidebar is also blurred when the panel opens ── */}
       <div
         className={cn(
-          'absolute inset-0 backdrop-blur-xl bg-black/20',
+          'fixed inset-0 backdrop-blur-xl bg-black/20',
           'transition-[backdrop-filter] duration-300 ease-out',
           visible ? 'backdrop-blur-xl' : 'backdrop-blur-none',
         )}
       />
 
-      {/* ── Close target — covers everything except the right column ── */}
+      {/* ── Close target — fixed so clicks anywhere (incl. sidebar) close the panel ── */}
       {/* biome-ignore lint/a11y/useSemanticElements: glass scrim acts as close target */}
       <div
-        className="absolute inset-0 cursor-pointer"
+        className="fixed inset-0 cursor-pointer"
         onClick={onClose}
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
         role="button"
