@@ -72,15 +72,15 @@ export function useContentDetailModal({
               );
               if (ep) {
                 await handlePlay(ep);
-                onClose();
+                // Navigation will unmount the modal — no explicit onClose() needed
                 return;
               }
             }
             await handleResume();
-            onClose();
+            // Navigation will unmount the modal — no explicit onClose() needed
           } else {
             await handlePlay();
-            onClose();
+            // Navigation will unmount the modal — no explicit onClose() needed
           }
         };
 
@@ -98,7 +98,6 @@ export function useContentDetailModal({
     handlePlay,
     handleResume,
     episodes,
-    onClose,
   ]);
 
   // Auto-play trailer if available
@@ -172,7 +171,9 @@ export function useContentDetailModal({
       if (room) {
         toast.success('Party room created! Redirecting...');
         router.push(`/watch-party/${room.id}?new=true`);
-        onClose();
+        // Do NOT call onClose() here — navigation unmounts the modal naturally.
+        // Calling onClose() first causes a visible flash where the modal
+        // disappears before the new page has loaded.
       } else {
         toast.error('Failed to create party room. Please try again.');
       }
