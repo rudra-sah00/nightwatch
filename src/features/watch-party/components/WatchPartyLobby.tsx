@@ -1,7 +1,6 @@
 import {
   Check,
   Crown,
-  Loader2,
   Monitor,
   UserCircle,
   UserMinus,

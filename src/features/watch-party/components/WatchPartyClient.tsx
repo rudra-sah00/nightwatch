@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
