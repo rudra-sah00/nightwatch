@@ -47,6 +47,7 @@ export function WatchPartyClient({
     requestStatus,
     isGuestSocketReady,
     isHost,
+    isCreator,
     currentUserId,
     roomPreview,
     roomNotFound,
@@ -101,18 +102,39 @@ export function WatchPartyClient({
   if (roomNotFound) {
     return (
       <WatchPartyLobby
-        roomPreview={null}
-        isLoading={false}
-        error={null}
-        requestStatus="idle"
+        roomPreview={roomPreview}
+        isLoading={isLoading}
+        error={partyError}
+        errorCode={partyErrorCode}
+        requestStatus={requestStatus}
         roomNotFound={true}
         user={user}
-        guestName=""
-        onGuestNameChange={() => {}}
-        onJoin={() => {}}
-        onLeave={() => {}}
+        guestName={guestName}
+        onGuestNameChange={setGuestName}
+        onJoin={handleJoin}
+        onLeave={handleLeave}
+        onCancelRequest={handleCancelRequest}
+        captchaToken={captchaToken}
+        onCaptchaVerify={setCaptchaToken}
         isMobile={isMobile}
       />
+    );
+  }
+
+  // Creator (host) is setting up — skip the lobby pending state entirely
+  if (isCreator && !isConnected) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-5">
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Users className="w-7 h-7 text-primary" />
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          <span className="text-white/50 text-sm font-medium tracking-wide">
+            Setting up your party…
+          </span>
+        </div>
+      </div>
     );
   }
 

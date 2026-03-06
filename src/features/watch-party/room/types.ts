@@ -57,6 +57,7 @@ export interface RoomPreview {
   type: 'movie' | 'series' | 'livestream';
   season?: number;
   episode?: number;
+  hostId?: string;
   hostName: string;
   memberCount: number;
 }

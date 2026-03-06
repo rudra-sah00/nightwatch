@@ -91,14 +91,16 @@ describe('WatchPartyLobby', () => {
 
       expect(screen.getByText('Room Not Found')).toBeInTheDocument();
       expect(
-        screen.getByText("This watch party room doesn't exist or has ended."),
+        screen.getByText(
+          'This watch party has ended or the link is no longer valid.',
+        ),
       ).toBeInTheDocument();
     });
 
     it('should navigate to home when Go Home clicked', () => {
       render(<WatchPartyLobby {...defaultProps} roomNotFound={true} />);
 
-      fireEvent.click(screen.getByText('Go Home'));
+      fireEvent.click(screen.getByText('Back to Home'));
       expect(mockPush).toHaveBeenCalledWith('/home');
     });
   });
@@ -107,9 +109,11 @@ describe('WatchPartyLobby', () => {
     it('should show waiting for approval message', () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="pending" />);
 
-      expect(screen.getByText('Waiting for Host Approval')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for Approval')).toBeInTheDocument();
       expect(
-        screen.getByText('The host has been notified of your request.'),
+        screen.getByText(
+          "The host has been notified. You'll join automatically once approved.",
+        ),
       ).toBeInTheDocument();
     });
 
@@ -153,9 +157,11 @@ describe('WatchPartyLobby', () => {
     it('should show rejection message', () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="rejected" />);
 
-      expect(screen.getByText('Request Rejected')).toBeInTheDocument();
+      expect(screen.getByText('Request Declined')).toBeInTheDocument();
       expect(
-        screen.getByText('The host has declined your request to join.'),
+        screen.getByText(
+          'The host has declined your request to join this party.',
+        ),
       ).toBeInTheDocument();
     });
 
@@ -174,8 +180,16 @@ describe('WatchPartyLobby', () => {
       render(<WatchPartyLobby {...defaultProps} />);
 
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
-      expect(screen.getByText('Season 1 Episode 3')).toBeInTheDocument();
-      expect(screen.getByText('Hosted by Walter White')).toBeInTheDocument();
+      // Season/episode rendered with middot entity — target the <p> element directly
+      expect(
+        screen.getByText(
+          (_, el) =>
+            el?.tagName === 'P' &&
+            (el?.textContent?.includes('Season 1') ?? false) &&
+            (el?.textContent?.includes('Episode 3') ?? false),
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Walter White')).toBeInTheDocument();
       expect(screen.getByText('3 watching')).toBeInTheDocument();
     });
 
@@ -205,7 +219,7 @@ describe('WatchPartyLobby', () => {
     it('should show guest name input when not authenticated', () => {
       render(<WatchPartyLobby {...defaultProps} user={null} />);
 
-      expect(screen.getByLabelText('Your Name')).toBeInTheDocument();
+      expect(screen.getByLabelText('Your Display Name')).toBeInTheDocument();
       expect(
         screen.getByPlaceholderText('Enter your display name'),
       ).toBeInTheDocument();
@@ -251,7 +265,14 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      expect(screen.getByText('✓ Verified')).toBeInTheDocument();
+      // Rendered as <Check icon /> + " Verified" inside a <p> element
+      expect(
+        screen.getByText(
+          (_, el) =>
+            el?.tagName === 'P' &&
+            (el?.textContent?.includes('Verified') ?? false),
+        ),
+      ).toBeInTheDocument();
     });
 
     it('should disable join for guest without name', () => {
@@ -294,13 +315,14 @@ describe('WatchPartyLobby', () => {
     it('should show loading spinner when joining', () => {
       render(<WatchPartyLobby {...defaultProps} isLoading={true} />);
 
-      expect(screen.getByText('Requesting...')).toBeInTheDocument();
+      // The ellipsis is a unicode character, not "..."
+      expect(screen.getByText('Requesting\u2026')).toBeInTheDocument();
     });
 
     it('should disable join button when loading', () => {
       render(<WatchPartyLobby {...defaultProps} isLoading={true} />);
 
-      const button = screen.getByText('Requesting...').closest('button');
+      const button = screen.getByText('Requesting\u2026').closest('button');
       expect(button).toBeDisabled();
     });
   });

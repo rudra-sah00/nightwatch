@@ -34,6 +34,13 @@ export function useWatchPartyClient({
 
   const [roomPreview] = useState<RoomPreview | null>(initialRoomPreview);
   const [roomNotFound] = useState(initialRoomNotFound);
+
+  // Data-driven: reliable for initial load AND page refresh (no URL param dependency)
+  const isCreator = !!(
+    roomPreview?.hostId &&
+    user?.id &&
+    roomPreview.hostId === user.id
+  );
   const [guestName, setGuestName] = useState('');
   const [copied, setCopied] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -214,7 +221,7 @@ export function useWatchPartyClient({
   useEffect(() => {
     if (
       user &&
-      isNewParty &&
+      (isNewParty || isCreator) &&
       roomId &&
       !room &&
       !isLoading &&
@@ -223,11 +230,22 @@ export function useWatchPartyClient({
     ) {
       hasAttemptedAutoJoin.current = true;
       requestJoin(roomId);
-      toast.success('Party created! Invite friends via the sidebar.', {
-        duration: 5000,
-      });
+      if (isNewParty) {
+        toast.success('Party created! Invite friends via the sidebar.', {
+          duration: 5000,
+        });
+      }
     }
-  }, [isNewParty, roomId, room, isLoading, requestStatus, requestJoin, user]);
+  }, [
+    isNewParty,
+    isCreator,
+    roomId,
+    room,
+    isLoading,
+    requestStatus,
+    requestJoin,
+    user,
+  ]);
 
   useEffect(() => {
     if (isNewParty && requestStatus === 'joined') {
@@ -286,6 +304,7 @@ export function useWatchPartyClient({
     requestStatus,
     isGuestSocketReady,
     isHost,
+    isCreator,
     currentUserId,
     roomPreview,
     roomNotFound,

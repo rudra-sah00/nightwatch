@@ -46,6 +46,7 @@ export async function checkRoomExists(roomId: string): Promise<{
       type: 'movie' | 'series';
       season?: number;
       episode?: number;
+      hostId?: string;
       hostName: string;
       memberCount: number;
       reason?: string;
@@ -61,6 +62,7 @@ export async function checkRoomExists(roomId: string): Promise<{
           type: data.type,
           season: data.season,
           episode: data.episode,
+          hostId: data.hostId,
           hostName: data.hostName,
           memberCount: data.memberCount,
         },
