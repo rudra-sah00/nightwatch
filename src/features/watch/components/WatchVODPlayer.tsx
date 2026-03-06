@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
-// Removed NextEpisodeOverlay since we compose it via Player.NextEpisodeOverlay
 import type { VideoMetadata } from '../player/context/types';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';

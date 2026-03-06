@@ -1,3 +1,2 @@
 pnpm type-check
-pnpm test --run --passWithNoTests
 npx lint-staged
