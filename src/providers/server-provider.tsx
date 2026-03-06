@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { createContext, use, useEffect, useState } from 'react';
+import { createContext, use, useState } from 'react';
 
 export type ServerId = 's1' | 's2';
 
@@ -36,12 +36,14 @@ export function ServerProvider({
     defaultServer ?? 's2',
   );
 
-  // Sync when user updates preferredServer in Settings (updateUser changes defaultServer prop)
-  useEffect(() => {
-    if (defaultServer) {
-      setActiveServer(defaultServer);
-    }
-  }, [defaultServer]);
+  // Sync defaultServer prop changes during render instead of an effect (rule 5.1).
+  // "setState during render" causes React to immediately re-render this component
+  // without committing the intermediate state to the DOM — one cycle instead of two.
+  const [prevDefaultServer, setPrevDefaultServer] = useState(defaultServer);
+  if (prevDefaultServer !== defaultServer && defaultServer) {
+    setPrevDefaultServer(defaultServer);
+    setActiveServer(defaultServer);
+  }
 
   return (
     <ServerContext

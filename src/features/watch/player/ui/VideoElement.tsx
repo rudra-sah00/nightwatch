@@ -30,6 +30,9 @@ interface VideoElementProps {
   ref?: React.Ref<HTMLVideoElement>;
 }
 
+// Stable empty array — prevents new reference on every parent render (rule 5.4)
+const EMPTY_SUBTITLE_TRACKS: VideoElementProps['subtitleTracks'] = [];
+
 // Memoized video element that should never re-render
 export const VideoElement = memo(function VideoElement({
   dispatch,
@@ -37,7 +40,7 @@ export const VideoElement = memo(function VideoElement({
   onDurationChange,
   onClick,
   captionUrl,
-  subtitleTracks = [],
+  subtitleTracks = EMPTY_SUBTITLE_TRACKS,
   currentTrackId,
   controls,
   ref,

@@ -40,22 +40,25 @@ export function EpisodeList({
   }
 
   return (
-    <ul
-      className="space-y-2"
-      style={{ contentVisibility: 'auto' }}
-      aria-label="Episodes"
-    >
+    <ul className="space-y-2" aria-label="Episodes">
       {episodes.map((episode) => (
-        <EpisodeCard
+        <li
           key={episode.episodeId || episode.episodeNumber}
-          episode={episode}
-          onPlay={() => onPlayEpisode(episode)}
-          isPlaying={
-            playingEpisodeId === episode.episodeId ||
-            playingEpisodeId === episode.episodeNumber
-          }
-          isAnyLoading={!!playingEpisodeId}
-        />
+          style={{
+            contentVisibility: 'auto',
+            containIntrinsicSize: 'auto 100px',
+          }}
+        >
+          <EpisodeCard
+            episode={episode}
+            onPlay={() => onPlayEpisode(episode)}
+            isPlaying={
+              playingEpisodeId === episode.episodeId ||
+              playingEpisodeId === episode.episodeNumber
+            }
+            isAnyLoading={!!playingEpisodeId}
+          />
+        </li>
       ))}
     </ul>
   );

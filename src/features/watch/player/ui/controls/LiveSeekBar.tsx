@@ -3,6 +3,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
 
+// Pure formatter — hoisted to module level (rule 6.3, no hook deps)
+function formatBehind(s: number): string {
+  if (s < 5) return 'LIVE';
+  if (s >= 3600) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return `-${h}:${String(m).padStart(2, '0')}h`;
+  }
+  if (s >= 60) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `-${m}:${String(sec).padStart(2, '0')}`;
+  }
+  return `-${Math.floor(s)}s`;
+}
+
 /**
  * YouTube-style DVR seek bar for live streams.
  *
@@ -105,21 +121,6 @@ export function LiveSeekBar() {
     hoverFraction !== null
       ? Math.max(0, dvr.end - (dvr.start + hoverFraction * dvrDuration))
       : null;
-
-  const formatBehind = (s: number) => {
-    if (s < 5) return 'LIVE';
-    if (s >= 3600) {
-      const h = Math.floor(s / 3600);
-      const m = Math.floor((s % 3600) / 60);
-      return `-${h}:${String(m).padStart(2, '0')}h`;
-    }
-    if (s >= 60) {
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return `-${m}:${String(sec).padStart(2, '0')}`;
-    }
-    return `-${Math.floor(s)}s`;
-  };
 
   const getTimeFromFraction = useCallback(
     (fraction: number) =>

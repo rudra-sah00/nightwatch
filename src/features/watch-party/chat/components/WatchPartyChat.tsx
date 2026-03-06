@@ -75,11 +75,14 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
   );
 });
 
+// Stable empty array — prevents new reference on every parent render (rule 5.4)
+const EMPTY_TYPING_USERS: TypingUser[] = [];
+
 export const WatchPartyChat = memo(function WatchPartyChat({
   messages,
   onSendMessage,
   currentUserId,
-  typingUsers = [],
+  typingUsers = EMPTY_TYPING_USERS,
   onTypingStart,
   onTypingStop,
 }: WatchPartyChatProps) {

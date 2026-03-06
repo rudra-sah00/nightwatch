@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { formatTime } from '../../utils/format-time';
 import { useSeekBar } from './use-seek-bar';
 
 // Sprite sheet configuration (keep interface here as it's UI-specific)
@@ -12,28 +13,6 @@ interface SpriteSheet {
   rows: number; // Number of rows in sprite
   interval: number; // Seconds between each thumbnail
 }
-
-// Preview size scales for different screen sizes
-const _PREVIEW_SCALES = {
-  base: 1, // Mobile/default
-  lg: 1.3, // Large screens
-  xl: 1.5, // Extra large
-  '2xl': 1.8, // 2K+
-  '3xl': 2.2, // Ultrawide/4K
-};
-
-// Format time helper - hoisted to module level to avoid recreation (rule 6.3)
-const formatTime = (seconds: number) => {
-  if (Number.isNaN(seconds) || !Number.isFinite(seconds)) return '0:00';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  }
-  return `${m}:${s.toString().padStart(2, '0')}`;
-};
 
 interface SeekBarProps {
   currentTime: number;

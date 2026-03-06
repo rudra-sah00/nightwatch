@@ -35,6 +35,9 @@ interface TypingUser {
   userName: string;
 }
 
+// Stable empty array — prevents new reference on every parent render (rule 5.4)
+const EMPTY_TYPING_USERS: TypingUser[] = [];
+
 interface WatchPartySidebarProps {
   room: WatchPartyRoom;
   messages: ChatMessage[];
@@ -79,7 +82,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   linkCopied,
   className,
   onAgoraReady,
-  typingUsers = [],
+  typingUsers = EMPTY_TYPING_USERS,
   onTypingStart,
   onTypingStop,
   onTabChange,

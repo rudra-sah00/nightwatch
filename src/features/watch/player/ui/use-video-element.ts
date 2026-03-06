@@ -19,12 +19,15 @@ interface UseVideoElementOptions {
   ref?: React.Ref<HTMLVideoElement>;
 }
 
+// Stable empty array — prevents new reference on every parent render (rule 5.4)
+const EMPTY_SUBTITLE_TRACKS: SubtitleTrackDef[] = [];
+
 export function useVideoElement({
   dispatch,
   onTimeUpdate,
   onDurationChange,
   captionUrl,
-  subtitleTracks = [],
+  subtitleTracks = EMPTY_SUBTITLE_TRACKS,
   currentTrackId,
   ref,
 }: UseVideoElementOptions) {

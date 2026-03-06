@@ -31,6 +31,9 @@ interface TypingUser {
   userName: string;
 }
 
+// Stable empty array — prevents new reference on every parent render (rule 5.4)
+const EMPTY_TYPING_USERS: TypingUser[] = [];
+
 interface ActiveWatchPartyProps {
   room: WatchPartyRoom;
   isHost: boolean;
@@ -77,7 +80,7 @@ export function ActiveWatchParty({
   messages,
   onSendMessage,
   onUpdateContent,
-  typingUsers = [],
+  typingUsers = EMPTY_TYPING_USERS,
   onTypingStart,
   onTypingStop,
 }: ActiveWatchPartyProps) {
