@@ -175,10 +175,12 @@ interface DownloadMenuProps {
   episodes?: Episode[];
 }
 
+const EMPTY_EPISODES: Episode[] = [];
+
 export function DownloadMenu({
   show,
   selectedSeason,
-  episodes = [],
+  episodes = EMPTY_EPISODES,
 }: DownloadMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 

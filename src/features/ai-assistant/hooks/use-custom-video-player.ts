@@ -1,5 +1,12 @@
 import * as React from 'react';
 
+function formatTime(timeInSeconds: number): string {
+  if (Number.isNaN(timeInSeconds)) return '0:00';
+  const minutes = Math.floor(timeInSeconds / 60);
+  const seconds = Math.floor(timeInSeconds % 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 export function useCustomVideoPlayer(_src: string, autoPlay: boolean) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -81,13 +88,6 @@ export function useCustomVideoPlayer(_src: string, autoPlay: boolean) {
       videoRef.current.currentTime = seekTime;
       setProgress(Number.parseFloat(e.target.value));
     }
-  };
-
-  const formatTime = (timeInSeconds: number) => {
-    if (Number.isNaN(timeInSeconds)) return '0:00';
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const handleMouseMove = () => {
