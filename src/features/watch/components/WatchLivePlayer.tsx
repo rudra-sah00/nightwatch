@@ -29,6 +29,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   return (
     <Player.Root
       {...props}
+      containerStyle={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      }}
       isLive
       onBack={handleBack}
       onNavigate={(url) => router.push(url)}
