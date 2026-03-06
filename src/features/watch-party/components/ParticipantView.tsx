@@ -1,5 +1,6 @@
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, X } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useParticipantView } from '../hooks/use-participant-view';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
@@ -8,6 +9,7 @@ interface ParticipantViewProps {
   participant: AgoraParticipant;
   canKick?: boolean;
   onKick?: (userId: string) => void;
+  isCurrentUser?: boolean;
 }
 
 /**
@@ -18,6 +20,7 @@ export function ParticipantView({
   participant,
   canKick,
   onKick,
+  isCurrentUser = false,
 }: ParticipantViewProps) {
   const { videoRef, videoStyle } = useParticipantView(participant);
 
@@ -56,6 +59,13 @@ export function ParticipantView({
 
       {/* Speaking Indicator */}
       {participant.isSpeaking ? <SpeakingIndicator /> : null}
+
+      {/* You badge */}
+      {isCurrentUser ? (
+        <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm border border-white/20 text-[9px] font-semibold text-white/70 uppercase tracking-wide">
+          You
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -142,6 +152,8 @@ function ParticipantOverlay({
   canKick?: boolean;
   onKick?: () => void;
 }) {
+  const [confirmKick, setConfirmKick] = useState(false);
+
   return (
     <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex items-center justify-between">
       <span className="text-xs text-white font-semibold truncate max-w-[120px] drop-shadow-lg">
@@ -156,15 +168,36 @@ function ParticipantOverlay({
           )}
         </div>
         {canKick && onKick ? (
-          <button
-            type="button"
-            onClick={onKick}
-            className="rounded-full px-2 py-1 backdrop-blur-sm border border-white/10 transition-colors text-[10px] font-medium text-white shadow-lg hover:opacity-90"
-            style={{ backgroundColor: 'var(--danger-bg-strong)' }}
-            title="Kick user"
-          >
-            Kick
-          </button>
+          confirmKick ? (
+            <div className="flex items-center gap-1 animate-in fade-in duration-150">
+              <button
+                type="button"
+                onClick={onKick}
+                className="rounded-full px-2 py-1 backdrop-blur-sm border border-danger/40 text-[10px] font-semibold text-danger bg-black/60 hover:bg-danger/20 transition-colors"
+                title="Confirm remove"
+              >
+                Remove
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmKick(false)}
+                className="rounded-full p-1 bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+                title="Cancel"
+              >
+                <X className="w-2.5 h-2.5 text-white/60" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmKick(true)}
+              className="rounded-full px-2 py-1 backdrop-blur-sm border border-white/10 transition-colors text-[10px] font-medium text-white shadow-lg hover:opacity-90"
+              style={{ backgroundColor: 'var(--danger-bg-strong)' }}
+              title="Kick user"
+            >
+              Kick
+            </button>
+          )
         ) : null}
       </div>
     </div>

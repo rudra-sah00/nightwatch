@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -106,17 +106,14 @@ export function ActiveWatchParty({
   });
 
   // ── Floating chat toggle (personal preference, persisted) ──────────────
-  const [floatingChatEnabled, setFloatingChatEnabled] = useState(false);
-
-  useEffect(() => {
+  // Lazy initializer reads localStorage before first paint — no flicker
+  const [floatingChatEnabled, setFloatingChatEnabled] = useState(() => {
     try {
-      setFloatingChatEnabled(
-        localStorage.getItem('wp:floatingChat') === 'true',
-      );
+      return localStorage.getItem('wp:floatingChat') === 'true';
     } catch {
-      /* ignore */
+      return false;
     }
-  }, []);
+  });
 
   const handleToggleFloatingChat = () => {
     setFloatingChatEnabled((prev) => {

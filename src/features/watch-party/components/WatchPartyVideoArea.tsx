@@ -64,8 +64,11 @@ function PlayerOverlays({
   return (
     <>
       {state.isBuffering && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-sm pointer-events-none">
-          <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-white animate-spin" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 bg-black/30 backdrop-blur-sm pointer-events-none">
+          <div className="w-10 h-10 rounded-full border-[3px] border-white/20 border-t-white animate-spin" />
+          <p className="text-white/50 text-xs font-medium tracking-wide select-none">
+            {isHost ? 'Buffering\u2026' : 'Syncing stream\u2026'}
+          </p>
         </div>
       )}
       {state.error && (

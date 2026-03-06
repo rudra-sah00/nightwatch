@@ -45,15 +45,15 @@ export function SidebarTabs({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'flex-1 py-3 px-1 sm:px-4 text-sm font-medium transition-colors duration-200 relative z-10 rounded-lg',
+                'flex-1 py-2.5 px-1 text-xs font-medium transition-colors duration-200 relative z-10 rounded-lg',
                 isActive ? 'text-white' : 'text-white/40 hover:text-white/80',
               )}
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+              <div className="flex flex-col items-center justify-center gap-1">
                 <div className="relative">
                   <Icon
                     className={cn(
-                      'w-5 h-5 sm:w-4 sm:h-4 transition-transform duration-200',
+                      'w-4 h-4 transition-transform duration-200',
                       isActive && 'scale-110',
                     )}
                   />
@@ -61,14 +61,14 @@ export function SidebarTabs({
                   tab.badge !== undefined &&
                   tab.badge > 0 ? (
                     <span
-                      className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse"
-                      style={{
-                        backgroundColor: 'var(--wp-badge)',
-                        outline: '2px solid var(--wp-badge-ring)',
-                      }}
-                    />
+                      className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 px-0.5 rounded-full text-[9px] font-bold text-white flex items-center justify-center leading-none"
+                      style={{ backgroundColor: 'var(--wp-badge)' }}
+                    >
+                      {tab.badge > 99 ? '99+' : tab.badge}
+                    </span>
                   ) : null}
                 </div>
+                <span className="leading-none">{tab.label}</span>
               </div>
             </button>
           );
