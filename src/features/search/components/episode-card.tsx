@@ -21,6 +21,7 @@ export function EpisodeCard({
   isAnyLoading = false,
 }: EpisodeCardProps) {
   const { imageError, setImageError } = useEpisodeCard();
+  const thumbnailSrc = getOptimizedImageUrl(episode.thumbnailUrl);
 
   const handleClick = () => {
     if (isAnyLoading && !isPlaying) {
@@ -46,11 +47,11 @@ export function EpisodeCard({
       <div className="relative w-40 md:w-48 aspect-video rounded-lg overflow-hidden bg-muted flex-shrink-0">
         {!imageError && episode.thumbnailUrl ? (
           <Image
-            src={getOptimizedImageUrl(episode.thumbnailUrl)}
+            src={thumbnailSrc}
             alt={episode.title || `Episode ${episode.episodeNumber}`}
             fill
             className={cn('object-cover', isPlaying && 'opacity-70')}
-            unoptimized={episode.thumbnailUrl.includes('/api/stream/')}
+            unoptimized={thumbnailSrc.startsWith('/api/stream/')}
             onError={() => setImageError(true)}
           />
         ) : (

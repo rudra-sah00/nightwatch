@@ -14,6 +14,7 @@ interface EpisodePanelProps {
   currentEpisode?: number;
   currentSeason?: number;
   isLoading: boolean;
+  selectingEpisodeId?: string | number | null;
   onClose: () => void;
   onSeasonChange: (seasonNumber: number) => void;
   onEpisodeSelect: (episode: Episode) => void;
@@ -31,6 +32,7 @@ export function EpisodePanel({
   currentEpisode = 1,
   currentSeason = 1,
   isLoading,
+  selectingEpisodeId = null,
   onClose,
   onSeasonChange,
   onEpisodeSelect,
@@ -287,6 +289,10 @@ export function EpisodePanel({
                   episode={ep}
                   isCenter={isCenter}
                   isPlaying={isPlaying}
+                  isSelecting={
+                    selectingEpisodeId !== null &&
+                    selectingEpisodeId === (ep.episodeId ?? ep.episodeNumber)
+                  }
                   scale={scale}
                   opacity={opacity}
                   onSelect={() => onEpisodeSelect(ep)}
@@ -314,6 +320,7 @@ interface EpisodeThumbProps {
   episode: Episode;
   isCenter: boolean;
   isPlaying: boolean;
+  isSelecting?: boolean;
   scale: number;
   opacity: number;
   onSelect: () => void;
@@ -322,7 +329,16 @@ interface EpisodeThumbProps {
 
 const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
   function EpisodeThumb(
-    { episode, isCenter, isPlaying, scale, opacity, onSelect, onHoverCenter },
+    {
+      episode,
+      isCenter,
+      isPlaying,
+      isSelecting,
+      scale,
+      opacity,
+      onSelect,
+      onHoverCenter,
+    },
     ref,
   ) {
     return (
@@ -411,8 +427,15 @@ const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
             </div>
           )}
 
+          {/* Loading overlay — shown while playVideo is fetching the stream */}
+          {isSelecting && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            </div>
+          )}
+
           {/* Play icon overlay on hover (center only) */}
-          {isCenter && !isPlaying && (
+          {isCenter && !isPlaying && !isSelecting && (
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg shadow-black/30">
                 <Play className="w-3.5 h-3.5 text-black fill-current ml-0.5" />

@@ -147,10 +147,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         // Prime CSRF cookie for anonymous users
         try {
-          const { getPlatformStats } = await import('@/features/auth/api');
-          await getPlatformStats();
+          await fetch('/health');
         } catch {
-          // Silent fail - stats banner and future POSTs handle missing cookie
+          // Silent fail - future POSTs handle missing cookie
         }
       }
       if (!controller.signal.aborted) {

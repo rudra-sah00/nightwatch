@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   forgotPassword,
-  getPlatformStats,
   loginUser,
   logoutUser,
   registerUser,
@@ -293,45 +292,6 @@ describe('Auth API', () => {
         },
       );
       expect(result).toEqual(mockResponse);
-    });
-  });
-
-  describe('getPlatformStats', () => {
-    it('should call apiFetch and return stats', async () => {
-      const mockStats = {
-        totalWatchTimeSeconds: 36000,
-        totalWatchTimeFormatted: '10h 0m',
-        totalUsers: 150,
-        lastUpdated: '2026-02-04T12:00:00.000Z',
-      };
-
-      vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockStats);
-
-      const result = await getPlatformStats();
-
-      expect(fetchModule.apiFetch).toHaveBeenCalledWith('/api/stats');
-      expect(result).toEqual(mockStats);
-    });
-
-    it('should return null on error', async () => {
-      vi.mocked(fetchModule.apiFetch).mockRejectedValue(
-        new Error('Network error'),
-      );
-
-      const result = await getPlatformStats();
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null on API error', async () => {
-      vi.mocked(fetchModule.apiFetch).mockRejectedValue({
-        status: 500,
-        message: 'Internal Server Error',
-      });
-
-      const result = await getPlatformStats();
-
-      expect(result).toBeNull();
     });
   });
 });

@@ -44,7 +44,6 @@ const nextConfig: NextConfig = {
     localPatterns: [
       {
         pathname: '/api/stream/image',
-        search: '**',
       },
     ],
     unoptimized: false,

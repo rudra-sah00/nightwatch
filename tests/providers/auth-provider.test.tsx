@@ -117,7 +117,6 @@ describe('AuthProvider', () => {
   });
 
   it('primes CSRF cookie for anonymous users on init', async () => {
-    const { getPlatformStats } = await import('@/features/auth/api');
     const { getStoredUser } = await import('@/lib/auth');
     vi.mocked(getStoredUser).mockReturnValue(null);
 
@@ -127,14 +126,15 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    expect(getPlatformStats).toHaveBeenCalled();
+    expect(globalThis.fetch).toHaveBeenCalledWith('/health');
   });
 
   it('handles errors during CSRF priming silently', async () => {
-    const { getPlatformStats } = await import('@/features/auth/api');
     const { getStoredUser } = await import('@/lib/auth');
     vi.mocked(getStoredUser).mockReturnValue(null);
-    vi.mocked(getPlatformStats).mockRejectedValue(new Error('Stats failed'));
+    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(
+      new Error('Network failed'),
+    );
 
     renderAuthProvider();
 
@@ -142,7 +142,7 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    expect(getPlatformStats).toHaveBeenCalled();
+    expect(globalThis.fetch).toHaveBeenCalledWith('/health');
     // No error should be thrown or visible
   });
 

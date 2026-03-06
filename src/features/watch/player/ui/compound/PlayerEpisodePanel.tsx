@@ -2,7 +2,7 @@
 
 import { Library } from 'lucide-react';
 import type React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { playVideo } from '@/features/search/api';
 import type { Episode } from '@/features/search/types';
 import { cn } from '@/lib/utils';
@@ -62,9 +62,17 @@ export function PlayerEpisodePanel({
   // depend on the whole panel object (recreated every render).
   const { selectedSeason, close: closePanel } = panel;
 
+  // Track which episode is currently being fetched (playVideo in-flight)
+  const [selectingEpisodeId, setSelectingEpisodeId] = useState<
+    string | number | null
+  >(null);
+
   const handleEpisodeSelect = useCallback(
     async (episode: Episode) => {
       if (!onNavigate || !seriesId) return;
+
+      const episodeKey = episode.episodeId ?? episode.episodeNumber;
+      setSelectingEpisodeId(episodeKey);
 
       const params = new URLSearchParams({
         type: 'series',
@@ -109,6 +117,8 @@ export function PlayerEpisodePanel({
         }
       } catch {
         // watch page will refetchStream on mount
+      } finally {
+        setSelectingEpisodeId(null);
       }
 
       closePanel();
@@ -133,6 +143,7 @@ export function PlayerEpisodePanel({
             currentEpisode={metadata.episode}
             currentSeason={metadata.season}
             isLoading={panel.isLoading}
+            selectingEpisodeId={selectingEpisodeId}
             onClose={panel.close}
             onSeasonChange={panel.onSeasonChange}
             onEpisodeSelect={handleEpisodeSelect}

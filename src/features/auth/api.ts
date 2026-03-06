@@ -92,25 +92,3 @@ export async function resetPassword(
     body: JSON.stringify({ token, newPassword: password }),
   });
 }
-
-/**
- * Public platform statistics (auth not required).
- */
-
-export interface PlatformStats {
-  totalWatchTimeSeconds: number;
-  totalWatchTimeFormatted: string;
-  lastUpdated: string;
-}
-
-/**
- * Fetch public platform stats (no auth required)
- * Used for login page banner to show total content served
- */
-export async function getPlatformStats(): Promise<PlatformStats | null> {
-  try {
-    return await apiFetch<PlatformStats>('/api/stats');
-  } catch {
-    return null;
-  }
-}
