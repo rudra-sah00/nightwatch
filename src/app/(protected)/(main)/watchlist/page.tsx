@@ -26,11 +26,6 @@ export default function WatchlistPage() {
         <div className="flex items-center justify-between mb-8 shrink-0">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Showing items from{' '}
-              <span className="text-foreground font-medium">{serverLabel}</span>{' '}
-              — use the toggle in the navbar to switch
-            </p>
           </div>
           {!loading && (
             <span className="text-muted-foreground">

@@ -1,5 +1,6 @@
-import { Bookmark, User } from 'lucide-react';
+import { Bookmark, Home, User } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { Avatar } from '@/components/ui/avatar';
 
@@ -12,10 +13,30 @@ interface NavbarProps {
 
 export function Navbar({ isLoading }: NavbarProps) {
   const { user } = useAuth();
+  const pathname = usePathname();
+  const isHome = pathname === '/home';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto px-4 h-20 flex items-center justify-center gap-4 md:gap-8 max-w-4xl">
+        {/* Home Button - not clickable when already on /home */}
+        {isHome ? (
+          <span
+            className="shrink-0 p-2 rounded-full text-foreground"
+            title="Home"
+          >
+            <Home className="w-5 h-5" />
+          </span>
+        ) : (
+          <Link
+            href="/home"
+            className="shrink-0 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+            title="Home"
+          >
+            <Home className="w-5 h-5" />
+          </Link>
+        )}
+
         {/* Search Bar - Main Focus */}
         <div className="flex-1 min-w-0">
           <SearchInput isLoading={isLoading} />
