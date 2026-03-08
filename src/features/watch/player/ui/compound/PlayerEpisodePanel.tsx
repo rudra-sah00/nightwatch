@@ -2,8 +2,7 @@
 
 import { Library } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useState } from 'react';
-import { playVideo } from '@/features/search/api';
+import { useCallback } from 'react';
 import type { Episode } from '@/features/search/types';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
@@ -62,17 +61,9 @@ export function PlayerEpisodePanel({
   // depend on the whole panel object (recreated every render).
   const { selectedSeason, close: closePanel } = panel;
 
-  // Track which episode is currently being fetched (playVideo in-flight)
-  const [selectingEpisodeId, setSelectingEpisodeId] = useState<
-    string | number | null
-  >(null);
-
   const handleEpisodeSelect = useCallback(
-    async (episode: Episode) => {
+    (episode: Episode) => {
       if (!onNavigate || !seriesId) return;
-
-      const episodeKey = episode.episodeId ?? episode.episodeNumber;
-      setSelectingEpisodeId(episodeKey);
 
       const params = new URLSearchParams({
         type: 'series',
@@ -85,42 +76,15 @@ export function PlayerEpisodePanel({
         ...(metadata.year && { year: metadata.year }),
         ...(metadata.providerId && { server: metadata.providerId }),
         seriesId,
+        ...(episode.title && { episodeTitle: episode.title }),
       });
 
-      try {
-        const response = await playVideo({
-          type: 'series',
-          title: metadata.title,
-          seriesId,
-          season: episode.seasonNumber ?? selectedSeason,
-          episode: episode.episodeNumber,
-          server: metadata.providerId,
-        });
-
-        if (response.success && response.masterPlaylistUrl) {
-          params.set('stream', encodeURIComponent(response.masterPlaylistUrl));
-          if (response.captionSrt) {
-            params.set('caption', encodeURIComponent(response.captionSrt));
-          }
-          if (response.spriteVtt) {
-            params.set('sprite', encodeURIComponent(response.spriteVtt));
-          }
-          if (response.qualities?.length) {
-            params.set(
-              'qualities',
-              encodeURIComponent(JSON.stringify(response.qualities)),
-            );
-          }
-          if (episode.title) {
-            params.set('episodeTitle', episode.title);
-          }
-        }
-      } catch {
-        // watch page will refetchStream on mount
-      } finally {
-        setSelectingEpisodeId(null);
-      }
-
+      // Navigate immediately WITHOUT pre-fetching the stream URL.
+      // Calling playVideo() here would call StreamService.createSessionWithToken
+      // on the backend which immediately invalidates the current session token —
+      // causing 401 errors on the still-playing HLS stream and the subtitle
+      // track, and triggering a brief error flash before navigation completes.
+      // useWatchContent handles stream fetching on mount via refetchStream().
       closePanel();
       onNavigate(`/watch/${encodeURIComponent(seriesId)}?${params.toString()}`);
     },
@@ -143,7 +107,6 @@ export function PlayerEpisodePanel({
             currentEpisode={metadata.episode}
             currentSeason={metadata.season}
             isLoading={panel.isLoading}
-            selectingEpisodeId={selectingEpisodeId}
             onClose={panel.close}
             onSeasonChange={panel.onSeasonChange}
             onEpisodeSelect={handleEpisodeSelect}

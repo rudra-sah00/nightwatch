@@ -94,13 +94,18 @@ export function EpisodePanel({
   }, [episodes.length]);
 
   // Initial scroll to current episode
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on open + season change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on open/mount + season change
   useEffect(() => {
-    if (!isOpen || !scrollRef.current || padH === 0) return;
+    // shouldRender is included so this fires when the div is actually in the
+    // DOM on re-open. Without it: isOpen fires first (div not rendered yet →
+    // scrollRef.current is null → bails). When shouldRender later becomes true
+    // the div mounts, but no other dep changed so the effect never re-ran →
+    // scroll position stayed wherever the user left it.
+    if (!isOpen || !shouldRender || !scrollRef.current || padH === 0) return;
     const targetIdx = currentIdx >= 0 ? currentIdx : 0;
     scrollRef.current.scrollTop = targetIdx * ITEM_H;
     setCenterIdx(targetIdx);
-  }, [isOpen, selectedSeason, currentIdx, padH]);
+  }, [isOpen, shouldRender, selectedSeason, currentIdx, padH]);
 
   // Cleanup raf on unmount
   useEffect(() => {

@@ -55,57 +55,53 @@ export function LiveSeekBar() {
    */
   const [localCurrentTime, setLocalCurrentTime] = useState(0);
 
-  // Track DVR range + buffered from video.seekable / video.buffered
+  // rAF-based polling at 60 fps — eliminates choppy 4-fps timeupdate steps
+  // and ensures dvr/currentTime/buffered are always read atomically in the
+  // same frame so bars never drift apart.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // timeupdate: update dvr window AND currentTime atomically so they
-    // are always in the same React render — prevents bar flash on load.
-    const onTimeUpdate = () => {
-      setLocalCurrentTime(video.currentTime);
+    let rafId: number;
+
+    const tick = () => {
       const seekSrc =
         video.seekable.length > 0 ? video.seekable : video.buffered;
       if (seekSrc.length > 0) {
         const start = seekSrc.start(0);
         const end = seekSrc.end(seekSrc.length - 1);
-        setDvr({ start, end });
+        // Skip setState if nothing changed to avoid unnecessary re-renders
+        setDvr((prev) =>
+          prev.start === start && prev.end === end ? prev : { start, end },
+        );
+
+        if (video.buffered.length > 0) {
+          const bEnd = video.buffered.end(video.buffered.length - 1);
+          const dur = Math.max(end - start, 1);
+          setBufferedFraction(Math.min(1, Math.max(0, (bEnd - start) / dur)));
+        }
       }
+      setLocalCurrentTime(video.currentTime);
+      rafId = requestAnimationFrame(tick);
     };
 
-    // progress: only update the buffered fill, never touch dvr or currentTime
-    const onProgress = () => {
-      const seekSrc =
-        video.seekable.length > 0 ? video.seekable : video.buffered;
-      if (seekSrc.length > 0 && video.buffered.length > 0) {
-        const start = seekSrc.start(0);
-        const end = seekSrc.end(seekSrc.length - 1);
-        const bEnd = video.buffered.end(video.buffered.length - 1);
-        const dur = Math.max(end - start, 1);
-        setBufferedFraction(Math.min(1, Math.max(0, (bEnd - start) / dur)));
-      }
-    };
-
-    video.addEventListener('timeupdate', onTimeUpdate);
-    video.addEventListener('progress', onProgress);
-    onTimeUpdate();
-    return () => {
-      video.removeEventListener('timeupdate', onTimeUpdate);
-      video.removeEventListener('progress', onProgress);
-    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, [videoRef]);
 
   const dvrDuration = Math.max(dvr.end - dvr.start, 1);
   const currentTime = localCurrentTime;
 
   /**
-   * Are we within 15 s of the live edge?  Computed first so the progress
+   * Are we within 45 s of the live edge?  Computed first so the progress
    * bar can be pinned to 100 % when the viewer is "at live".  Without this
-   * pin, every time a new HLS segment lands `dvr.end` jumps forward while
-   * `currentTime` hasn't caught up yet, causing the red bar to visually
-   * snap backward — the exact jitter the user reported.
+   * pin, every time a new HLS segment lands `dvr.end` jumps forward by the
+   * segment duration (typically 6-10 s). If the threshold is too small the
+   * viewer briefly appears behind live and the red bar snaps backward,
+   * showing a gray gap.  45 s covers segments up to ~10 s with up to 4 in
+   * the manifest before HLS.js designates them as "near live".
    */
-  const isAtLiveEdge = dvr.end - currentTime <= 15;
+  const isAtLiveEdge = dvr.end - currentTime <= 45;
 
   /** 0–100: how far through the DVR window the current position is */
   const displayFraction =
@@ -122,10 +118,20 @@ export function LiveSeekBar() {
       ? Math.max(0, dvr.end - (dvr.start + hoverFraction * dvrDuration))
       : null;
 
+  // Read seekable directly from the video element (always fresh, no stale state).
+  // Using stale dvr.start could seek to a position that has already slid out of
+  // the DVR window, causing HLS to snap the bar to an unexpected location.
   const getTimeFromFraction = useCallback(
-    (fraction: number) =>
-      dvr.start + Math.min(1, Math.max(0, fraction)) * dvrDuration,
-    [dvr.start, dvrDuration],
+    (fraction: number) => {
+      const video = videoRef.current;
+      const seekSrc =
+        video && video.seekable.length > 0 ? video.seekable : null;
+      const start = seekSrc ? seekSrc.start(0) : dvr.start;
+      const end = seekSrc ? seekSrc.end(seekSrc.length - 1) : dvr.end;
+      const dur = Math.max(end - start, 1);
+      return start + Math.min(1, Math.max(0, fraction)) * dur;
+    },
+    [videoRef, dvr.start, dvr.end],
   );
 
   const getFractionFromEvent = useCallback(
@@ -327,7 +333,7 @@ export function LiveSeekBar() {
         >
           {/* Buffered region within DVR window */}
           <div
-            className="absolute h-full bg-white/30 rounded-full transition-[width] duration-150"
+            className="absolute h-full bg-white/30 rounded-full"
             style={{ width: `${bufferedFraction * 100}%` }}
           />
 
@@ -339,16 +345,16 @@ export function LiveSeekBar() {
             />
           ) : null}
 
-          {/* DVR progress fill */}
+          {/* DVR progress fill — no CSS transition; rAF gives 60 fps smoothness */}
           <div
-            className="absolute h-full bg-red-600 rounded-full transition-[width] duration-75"
+            className="absolute h-full bg-red-600 rounded-full"
             style={{ width: `${progress}%` }}
           />
 
           {/* Scrubber knob — always visible while dragging */}
           <div
             className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 rounded-full bg-red-600 shadow-lg transition-transform duration-200 pointer-events-none ${isDragging ? 'scale-125' : 'scale-0 group-hover:scale-100 hover:scale-125'}`}
-            style={{ left: `calc(${progress}% - 8px)` }}
+            style={{ left: `calc(${progress}% - 10px)` }}
           />
 
           {/* LIVE edge dot — always at 100 % right */}

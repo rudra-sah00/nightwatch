@@ -180,6 +180,10 @@ export function useHls({
         });
 
         hls.on(Hls.Events.ERROR, (_, data) => {
+          // Ignore all errors after cleanup has started (cancelled flag is set
+          // synchronously at the top of the effect cleanup function).
+          if (cancelled) return;
+
           const status =
             (data.response as { code?: number } | undefined)?.code ??
             (data as { response?: { code?: number } }).response?.code;

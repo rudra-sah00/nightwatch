@@ -41,7 +41,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       onNavigate={(url) => router.push(url)}
     >
       {/* Mobile Header - Solid Top Bar */}
-      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
         <button
           type="button"
           onClick={handleBack}
@@ -112,10 +112,6 @@ function LivePlayerState() {
         <Player.ControlRow>
           <Player.PlayPause />
           <Player.Volume />
-          {/* LIVE badge:
-                        • Solid red + non-clickable when at the live edge
-                        • Dim border + clickable "jump to live" when player has fallen behind */}
-          <Player.LiveBadge />
           <Player.Spacer />
           <Player.SettingsMenu />
           <Player.Fullscreen />

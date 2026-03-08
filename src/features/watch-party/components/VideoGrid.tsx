@@ -1,5 +1,4 @@
 import { Video } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { ParticipantView } from './ParticipantView';
 
@@ -47,19 +46,11 @@ export function VideoGrid({
 
   return (
     <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-      <div
-        className={cn(
-          'grid gap-2',
-          sorted.length === 1 ? 'grid-cols-1' : 'grid-cols-2',
-        )}
-      >
+      <div className="grid grid-cols-1 gap-2">
         {sorted.map((participant) => (
           <div
             key={participant.identity}
-            className={cn(
-              'w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 ring-1 ring-white/5',
-              sorted.length === 1 && 'aspect-video',
-            )}
+            className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 ring-1 ring-white/5"
           >
             <ParticipantView
               participant={participant}

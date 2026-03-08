@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { LiveMatch } from '@/features/livestream/types';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
+import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 
 export function useLiveMatchPlayer(match: LiveMatch | null, matchId: string) {
@@ -24,9 +25,7 @@ export function useLiveMatchPlayer(match: LiveMatch | null, matchId: string) {
     }
 
     setIsCreatingParty(true);
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-    const proxyUrl = `${backendUrl}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath)}&token=LIVESTREAM`;
+    const proxyUrl = `${env.BACKEND_URL}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath)}&token=LIVESTREAM`;
 
     createPartyRoom(
       {

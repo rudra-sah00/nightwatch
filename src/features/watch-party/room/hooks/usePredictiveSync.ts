@@ -12,6 +12,7 @@ export function usePredictiveSync(
   videoRef: RefObject<HTMLVideoElement | null>,
   clockOffset: number,
   isCalibrated: boolean,
+  isLive = false,
 ) {
   const stateRef = useRef<PartyPlaybackState | null>(null);
   // Stores the last state update received before the video element was mounted.
@@ -53,6 +54,14 @@ export function usePredictiveSync(
       };
 
       stateRef.current = newState;
+
+      // Livestreams: never seek — HLS live buffer is per-client and seeking
+      // to a remote currentTime causes stalls/buffering. Only sync play/pause.
+      if (isLive) {
+        if (newState.isPlaying && video.paused) video.play().catch(() => {});
+        if (!newState.isPlaying && !video.paused) video.pause();
+        return;
+      }
 
       // If clock not calibrated yet, we can't use NTP-style offset, but we can
       // still compensate for elapsed playback time using serverTime vs timestamp.
@@ -114,7 +123,7 @@ export function usePredictiveSync(
         }
       }
     },
-    [videoRef, getExpectedTime, isCalibrated],
+    [videoRef, getExpectedTime, isCalibrated, isLive],
   );
 
   // Apply pending state once video element becomes available.
@@ -135,9 +144,9 @@ export function usePredictiveSync(
     };
   }, [applyState, videoRef]);
 
-  // Periodic drift check (every 2s)
+  // Periodic drift check (every 2s) — skipped for livestreams
   useEffect(() => {
-    if (!isCalibrated) return;
+    if (!isCalibrated || isLive) return;
 
     const interval = setInterval(() => {
       const video = videoRef.current;
@@ -177,7 +186,7 @@ export function usePredictiveSync(
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [videoRef, getExpectedTime, isCalibrated]);
+  }, [videoRef, getExpectedTime, isCalibrated, isLive]);
 
   return { applyState, getExpectedTime };
 }

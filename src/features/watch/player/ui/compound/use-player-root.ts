@@ -8,6 +8,7 @@ import {
 } from '../../context/types';
 import { useFullscreen } from '../../hooks/useFullscreen';
 import { useKeyboard } from '../../hooks/useKeyboard';
+import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useNextEpisode } from '../../hooks/useNextEpisode';
 import { usePlayerEngine } from '../../hooks/usePlayerEngine';
 import { usePlayerHandlers } from '../../hooks/usePlayerHandlers';
@@ -276,11 +277,13 @@ export function usePlayerRoot({
     isLive,
   });
 
-  const { toggleFullscreen: nativeToggleFullscreen } = useFullscreen({
-    containerRef,
-    videoRef,
-    dispatch,
-  });
+  const { enterFullscreen, toggleFullscreen: nativeToggleFullscreen } =
+    useFullscreen({
+      containerRef,
+      videoRef,
+      dispatch,
+      playerIsFullscreen: state.isFullscreen,
+    });
 
   const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
 
@@ -289,6 +292,25 @@ export function usePlayerRoot({
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFullscreenOverride });
     }
   }, [isFullscreenOverride]);
+
+  // On mobile, automatically lock to landscape the moment playback starts.
+  // This handles all player types (HLS, MP4, livestream) uniformly.
+  const isMobileForLock = useMobileDetection();
+  const wasPlayingRef = useRef(false);
+  useEffect(() => {
+    if (!isMobileForLock) return;
+    const justStarted = state.isPlaying && !wasPlayingRef.current;
+    wasPlayingRef.current = state.isPlaying;
+    if (justStarted && !state.isFullscreen && !fullscreenToggleOverride) {
+      enterFullscreen();
+    }
+  }, [
+    state.isPlaying,
+    state.isFullscreen,
+    isMobileForLock,
+    enterFullscreen,
+    fullscreenToggleOverride,
+  ]);
 
   const {
     showControls,

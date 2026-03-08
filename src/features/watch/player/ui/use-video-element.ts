@@ -85,9 +85,21 @@ export function useVideoElement({
       dispatch({ type: 'SET_LOADING', isLoading: false });
     const handleError = (e: Event) => {
       const target = e.target as HTMLVideoElement;
-      if (target?.src || target?.currentSrc) {
-        dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
-      }
+      // Only handle genuine decode errors (MEDIA_ERR_DECODE = 3): corrupt or
+      // unsupported codec that the engine-specific hooks (useHls / useMp4) do
+      // not already catch.
+      //
+      // MEDIA_ERR_ABORTED (1) and MEDIA_ERR_NETWORK (2): fired when HLS.js
+      // calls hls.destroy() mid-stream (e.g. during 401 / session expiry).
+      // useHls already handles those and dispatches the correct state — letting
+      // this handler also fire causes a double SET_ERROR that overrides the
+      // loading-state the 401 handler just set, producing the error-flash.
+      //
+      // MEDIA_ERR_SRC_NOT_SUPPORTED (4): fired when src is set to '' during
+      // cleanup. Not a real playback failure.
+      if (!target?.error) return;
+      if (target.error.code !== MediaError.MEDIA_ERR_DECODE) return;
+      dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
     };
     const handleEnded = () => dispatch({ type: 'PAUSE' });
     const handleLoadStart = () => {};

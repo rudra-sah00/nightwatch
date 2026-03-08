@@ -99,7 +99,9 @@ export function useLiveMatch(id: string | null) {
   useEffect(() => {
     loadMatch();
 
-    // Poll every minute if the match is about to start or is live
+    // Poll every 15 s while live or waiting for the stream URL to appear.
+    // 60 s was too slow — users would be stuck on "Waiting for Feed" for up
+    // to a minute after the source starts broadcasting.
     const interval = setInterval(() => {
       const current = matchRef.current;
       if (
@@ -108,7 +110,7 @@ export function useLiveMatch(id: string | null) {
       ) {
         loadMatch(true); // isPoll=true — never clears an active stream on 404
       }
-    }, 60 * 1000);
+    }, 15_000);
 
     return () => clearInterval(interval);
   }, [loadMatch]);

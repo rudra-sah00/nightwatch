@@ -97,7 +97,12 @@ export function useWatchPartyClient({
     userId: user?.id,
   });
 
-  const { applyState } = usePredictiveSync(videoRef, clockOffset, isCalibrated);
+  const { applyState } = usePredictiveSync(
+    videoRef,
+    clockOffset,
+    isCalibrated,
+    room?.type === 'livestream',
+  );
 
   const isHost = user?.id === room?.hostId;
   isHostRef.current = isHost;

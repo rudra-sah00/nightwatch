@@ -62,7 +62,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
       onNavigate={props.onNavigate || ((url) => router.push(url))}
     >
       {/* Mobile Header - Solid Top Bar */}
-      <div className="relative z-50 p-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
         <button
           type="button"
           onClick={handleBack}

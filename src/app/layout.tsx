@@ -26,6 +26,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: '#000000',
   colorScheme: 'dark',
+  // Extend layout into the notch/Dynamic Island so safe-area-inset-* values
+  // are non-zero on iOS — required for the player's bottom controls and mobile
+  // header to correctly clear the home indicator and the notch.
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({

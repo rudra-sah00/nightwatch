@@ -9,6 +9,9 @@ interface UseFullscreenOptions {
   containerRef: RefObject<HTMLDivElement | null>;
   videoRef?: RefObject<HTMLVideoElement | null>;
   dispatch: React.Dispatch<PlayerAction>;
+  /** Current isFullscreen value from player state — used on mobile where
+   *  document.fullscreenElement may be null (iOS manual-state path). */
+  playerIsFullscreen?: boolean;
 }
 
 interface DocumentWithWebkit extends Document {
@@ -30,33 +33,30 @@ export function useFullscreen({
   containerRef,
   videoRef,
   dispatch,
+  playerIsFullscreen,
 }: UseFullscreenOptions) {
   const isMobile = useMobileDetection();
 
-  // Listen for fullscreen changes
+  // Listen for fullscreen changes (covers Android container-fullscreen path)
   useEffect(() => {
-    const videoElem = videoRef?.current;
     const handleFullscreenChange = () => {
       const doc = document as DocumentWithWebkit;
-      const video = videoElem as VideoElementWithWebkit | undefined;
       const isFullscreen =
-        !!document.fullscreenElement ||
-        !!doc.webkitFullscreenElement ||
-        !!video?.webkitDisplayingFullscreen;
+        !!document.fullscreenElement || !!doc.webkitFullscreenElement;
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen });
+      // Release orientation lock when fullscreen is exited externally
+      // (e.g. user presses back button on Android)
+      if (!isFullscreen && 'orientation' in screen) {
+        try {
+          screen.orientation.unlock();
+        } catch {
+          /* not supported on this platform */
+        }
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-
-    // iOS Safari video fullscreen events
-    if (videoElem) {
-      videoElem.addEventListener(
-        'webkitbeginfullscreen',
-        handleFullscreenChange,
-      );
-      videoElem.addEventListener('webkitendfullscreen', handleFullscreenChange);
-    }
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -64,41 +64,60 @@ export function useFullscreen({
         'webkitfullscreenchange',
         handleFullscreenChange,
       );
-      if (videoElem) {
-        videoElem.removeEventListener(
-          'webkitbeginfullscreen',
-          handleFullscreenChange,
-        );
-        videoElem.removeEventListener(
-          'webkitendfullscreen',
-          handleFullscreenChange,
-        );
-      }
     };
-  }, [dispatch, videoRef]);
+  }, [dispatch]);
 
   const enterFullscreen = useCallback(async () => {
     try {
-      // On mobile, use video element fullscreen (native player)
-      if (isMobile && videoRef?.current) {
-        const video = videoRef.current as VideoElementWithWebkit;
-
-        // iOS Safari uses webkitEnterFullscreen on video element
-        if (video.webkitEnterFullscreen) {
-          await video.webkitEnterFullscreen();
-          return;
+      if (isMobile) {
+        // Step 1: Lock orientation to landscape (Android Chrome + installed PWA).
+        // iOS Safari does not support screen.orientation.lock in browser mode.
+        // The lock() method is not in the TypeScript DOM lib types yet, so cast.
+        const orientation = screen.orientation as ScreenOrientation & {
+          lock?: (orientation: string) => Promise<void>;
+        };
+        if (orientation?.lock) {
+          try {
+            await orientation.lock('landscape-primary');
+          } catch {
+            /* not supported — fall through */
+          }
         }
 
-        // Android Chrome - try video fullscreen first
-        if (video.requestFullscreen) {
-          await video.requestFullscreen();
-          return;
+        // Step 2: Try container requestFullscreen (Android Chrome).
+        // This keeps our custom controls visible; we never use
+        // video.webkitEnterFullscreen which hands control to the native player.
+        const container = containerRef.current;
+        if (container) {
+          if (container.requestFullscreen) {
+            try {
+              await container.requestFullscreen({ navigationUI: 'hide' });
+              return; // fullscreenchange event will dispatch SET_FULLSCREEN:true
+            } catch {
+              /* not available (iOS) */
+            }
+          } else {
+            const el = container as HTMLElementWithWebkit;
+            if (el.webkitRequestFullscreen) {
+              try {
+                await el.webkitRequestFullscreen();
+                return;
+              } catch {
+                /* not available */
+              }
+            }
+          }
         }
+
+        // Step 3: iOS fallback — manually update state so the UI enters
+        // "fullscreen mode" visually; user rotates the device to get landscape.
+        dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
+        toast('Rotate your device for best experience', { icon: '📱' });
+        return;
       }
 
-      // Desktop: use container fullscreen for custom controls
+      // Desktop: use container fullscreen so custom controls remain visible.
       const target = containerRef.current || document.documentElement;
-
       if (target.requestFullscreen) {
         await target.requestFullscreen({ navigationUI: 'hide' });
       } else {
@@ -110,40 +129,60 @@ export function useFullscreen({
     } catch {
       toast.error('Failed to enter fullscreen');
     }
-  }, [isMobile, containerRef, videoRef]);
+  }, [isMobile, containerRef, dispatch]);
 
   const exitFullscreen = useCallback(async () => {
     try {
-      const doc = document as DocumentWithWebkit;
-      const video = videoRef?.current as VideoElementWithWebkit | undefined;
+      if (isMobile) {
+        // Always attempt to release the orientation lock first.
+        if ('orientation' in screen) {
+          try {
+            screen.orientation.unlock();
+          } catch {
+            /* not supported */
+          }
+        }
 
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+          return; // fullscreenchange event dispatches SET_FULLSCREEN:false
+        }
+
+        // iOS manual-state path: no real fullscreen was entered.
+        dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+        return;
+      }
+
+      const doc = document as DocumentWithWebkit;
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       } else if (doc.webkitExitFullscreen) {
         await doc.webkitExitFullscreen();
-      } else if (video?.webkitExitFullscreen) {
-        await video.webkitExitFullscreen();
       }
     } catch {
       toast.error('Failed to exit fullscreen');
     }
-  }, [videoRef]);
+  }, [isMobile, dispatch]);
 
   const toggleFullscreen = useCallback(async () => {
     const doc = document as DocumentWithWebkit;
     const video = videoRef?.current as VideoElementWithWebkit | undefined;
 
-    const isCurrentlyFullscreen =
-      !!document.fullscreenElement ||
-      !!doc.webkitFullscreenElement ||
-      !!video?.webkitDisplayingFullscreen;
+    // On mobile document.fullscreenElement may be null even when the player
+    // is in its "fullscreen" state (iOS manual path).  Use the player state
+    // value so the toggle always works correctly on all platforms.
+    const isCurrentlyFullscreen = isMobile
+      ? (playerIsFullscreen ?? false)
+      : !!document.fullscreenElement ||
+        !!doc.webkitFullscreenElement ||
+        !!video?.webkitDisplayingFullscreen;
 
     if (isCurrentlyFullscreen) {
       await exitFullscreen();
     } else {
       await enterFullscreen();
     }
-  }, [enterFullscreen, exitFullscreen, videoRef]);
+  }, [enterFullscreen, exitFullscreen, isMobile, playerIsFullscreen, videoRef]);
 
   return { enterFullscreen, exitFullscreen, toggleFullscreen, isMobile };
 }

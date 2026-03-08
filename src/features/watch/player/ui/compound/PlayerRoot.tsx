@@ -1,8 +1,11 @@
 'use client';
+import { RotateCw } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerContext } from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
+import { useMobileDetection } from '../../hooks/useMobileDetection';
+import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { usePlayerRoot } from './use-player-root';
 
 interface PlayerRootProps {
@@ -102,6 +105,13 @@ export function PlayerRoot({
     isLive,
   });
 
+  const isMobile = useMobileDetection();
+  const isPortrait = useMobileOrientation();
+  // Android: orientation lock + real fullscreen kick in automatically so this
+  // only triggers on iOS Safari where the OS won't rotate programmatically.
+  const showRotateWall =
+    isMobile && isPortrait && state.isPlaying && !isFullscreenOverride;
+
   return (
     <PlayerContext value={contextValue}>
       <section
@@ -118,6 +128,19 @@ export function PlayerRoot({
         aria-label="Video Player"
       >
         {children}
+
+        {/* iOS portrait wall: blocks playback UI until user physically rotates device */}
+        {showRotateWall && (
+          <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center gap-6 pointer-events-auto select-none">
+            <RotateCw className="w-16 h-16 text-white animate-spin [animation-duration:2s]" />
+            <p className="text-white text-lg font-semibold tracking-wide">
+              Rotate to landscape
+            </p>
+            <p className="text-white/50 text-sm text-center px-8">
+              This player is only available in landscape mode
+            </p>
+          </div>
+        )}
       </section>
     </PlayerContext>
   );
