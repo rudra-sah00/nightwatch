@@ -36,6 +36,7 @@ export function useContinueWatching({
   // Track current items in a ref so fetchItems can report count without
   // needing items in its dependency array (would cause re-renders on every change).
   const itemsRef = useRef<WatchProgress[]>([]);
+  const fetchingForServerRef = useRef<string>('');
   const { socket, isConnected } = useSocket();
 
   const fetchItems = useCallback(
@@ -69,10 +70,19 @@ export function useContinueWatching({
         return;
       }
 
-      // Show skeleton immediately if server changed
-      if (serverChanged) setIsLoading(true);
+      // Clear stale items and show skeleton immediately when server changes
+      if (serverChanged) {
+        setItems([]);
+        itemsRef.current = [];
+        setIsLoading(true);
+      }
+
+      const fetchingServer = activeServer;
+      fetchingForServerRef.current = fetchingServer;
 
       apiFetchContinueWatching(10, activeServer, (fetchedItems) => {
+        // Discard stale response if server changed while request was in flight
+        if (fetchingForServerRef.current !== fetchingServer) return;
         setIsLoading(false);
         if (fetchedItems) {
           setItems(fetchedItems);

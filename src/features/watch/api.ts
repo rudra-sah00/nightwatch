@@ -108,10 +108,23 @@ export function fetchContinueWatching(
     return;
   }
 
+  const TIMEOUT_MS = 10_000;
+  let settled = false;
+
+  const timer = setTimeout(() => {
+    if (!settled) {
+      settled = true;
+      callback(null, 'Request timed out');
+    }
+  }, TIMEOUT_MS);
+
   socket.emit(
     'watch:get_continue_watching',
     { limit, providerId: server },
     (response: SocketResponse) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
       if (response?.success && response.items) {
         setContinueWatchingCache(server, response.items);
         callback(response.items);
