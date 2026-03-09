@@ -55,13 +55,13 @@ export function useUpdateProfileForm() {
         return { message: 'No changes to save', type: 'info' };
       }
 
-      if (usernameVal !== user?.username && !isAvailable) {
+      if (usernameVal !== (user?.username || '') && !isAvailable) {
         return { message: 'Username not available', type: 'error' };
       }
 
       const parsed = updateProfileSchema.safeParse({
         name: nameVal,
-        username: usernameVal,
+        username: usernameVal || undefined,
         preferredServer: preferredServerVal,
       });
       if (!parsed.success) {

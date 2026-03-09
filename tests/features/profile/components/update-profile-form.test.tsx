@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
+import { useAuth } from '@/providers/auth-provider';
 import type { User } from '@/types';
 
 // Mock user
@@ -19,10 +20,7 @@ const mockUser: User = {
 // Mock useAuth hook
 const mockUpdateUser = vi.fn();
 vi.mock('@/providers/auth-provider', () => ({
-  useAuth: () => ({
-    user: mockUser,
-    updateUser: mockUpdateUser,
-  }),
+  useAuth: vi.fn(),
 }));
 
 // Mock the API
@@ -37,6 +35,10 @@ vi.mock('@/hooks/use-debounce', () => import('../__mocks__/use-debounce'));
 describe('UpdateProfileForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      updateUser: mockUpdateUser,
+    } as unknown as ReturnType<typeof useAuth>);
   });
 
   describe('rendering', () => {
@@ -229,6 +231,44 @@ describe('UpdateProfileForm', () => {
 
       await waitFor(() => {
         expect(mockUpdateUser).toHaveBeenCalledWith(updatedUser);
+      });
+    });
+
+    it('allows server change when user has no username set', async () => {
+      const { updateProfile } = await import('@/features/profile/api');
+      const mockUpdateProfile = vi.mocked(updateProfile);
+
+      const noUsernameUser: User = {
+        ...mockUser,
+        username: null as unknown as string,
+        preferredServer: 's1',
+      };
+      vi.mocked(useAuth).mockReturnValue({
+        user: noUsernameUser,
+        updateUser: mockUpdateUser,
+      } as unknown as ReturnType<typeof useAuth>);
+
+      mockUpdateProfile.mockResolvedValueOnce({
+        user: { ...noUsernameUser, preferredServer: 's2' },
+      });
+
+      const user = userEvent.setup();
+      render(<UpdateProfileForm />);
+
+      const server2Button = screen.getByRole('button', { name: /Server 2/i });
+      await user.click(server2Button);
+
+      const submitButton = screen.getByRole('button', {
+        name: /Save Changes/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockUpdateProfile).toHaveBeenCalledWith({
+          name: 'Test User',
+          username: undefined,
+          preferredServer: 's2',
+        });
       });
     });
 

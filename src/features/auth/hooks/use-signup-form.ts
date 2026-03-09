@@ -1,6 +1,7 @@
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import type { CaptchaHandle } from '@/components/ui/captcha';
 import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
@@ -20,6 +21,7 @@ export function useSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   const [formData, setFormData] = useState<RegisterInput>({
     name: '',
@@ -105,6 +107,12 @@ export function useSignupForm() {
         }
         return { success: true };
       } catch (err: unknown) {
+        // Reset the captcha widget so the consumed/expired token cannot be reused.
+        // Turnstile tokens are single-use; if the backend consumed the token before
+        // another error occurred (e.g. email already taken), the next submission
+        // would fail with "Security verification failed" without this reset.
+        setCaptchaToken(null);
+        captchaRef.current?.reset();
         return {
           error:
             err instanceof Error
@@ -203,6 +211,7 @@ export function useSignupForm() {
     error,
     captchaToken,
     setCaptchaToken,
+    captchaRef,
     formData,
     confirmPassword,
     setConfirmPassword,

@@ -1,7 +1,7 @@
 import { AlertCircle, Mail, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Captcha } from '@/components/ui/captcha';
+import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
@@ -18,6 +18,7 @@ export function SignupForm() {
     error,
     captchaToken,
     setCaptchaToken,
+    captchaRef,
     formData,
     confirmPassword,
     setConfirmPassword,
@@ -61,6 +62,7 @@ export function SignupForm() {
           isLoading={isPending}
           captchaToken={captchaToken}
           setCaptchaToken={setCaptchaToken}
+          captchaRef={captchaRef}
           handleChange={handleChange}
           action={action}
         />
@@ -182,6 +184,7 @@ interface InitialStepProps {
   isLoading: boolean;
   captchaToken: string | null;
   setCaptchaToken: (val: string | null) => void;
+  captchaRef: React.RefObject<CaptchaHandle | null>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   action: (formData: FormData) => void;
 }
@@ -196,6 +199,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   isLoading,
   captchaToken,
   setCaptchaToken,
+  captchaRef,
   handleChange,
   action,
 }: InitialStepProps) {
@@ -310,8 +314,10 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
         value={formData.inviteCode || ''}
       />
       <Captcha
+        ref={captchaRef}
         onVerify={setCaptchaToken}
         onError={() => setCaptchaToken(null)}
+        onExpire={() => setCaptchaToken(null)}
       />
 
       <Button
