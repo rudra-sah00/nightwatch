@@ -1,4 +1,5 @@
 import { usePlayerContext } from '../../context/PlayerContext';
+import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { VideoElement } from '../VideoElement';
 import { SubtitleOverlay } from './SubtitleOverlay';
 
@@ -12,14 +13,16 @@ export function PlayerVideo() {
     playerHandlers,
   } = usePlayerContext();
 
+  // On mobile the tap-to-pause gesture is confusing and causes accidental
+  // pauses. Controls are always reachable via the play/pause button instead.
+  const isMobile = useMobileDetection();
+
   return (
     <div className="absolute inset-0 z-0">
       <VideoElement
         ref={videoCallbackRef}
         dispatch={dispatch}
-        onClick={() => {
-          playerHandlers.togglePlay();
-        }}
+        onClick={isMobile ? undefined : () => playerHandlers.togglePlay()}
         captionUrl={captionUrl || undefined}
         subtitleTracks={state.subtitleTracks}
         currentTrackId={state.currentSubtitleTrack}

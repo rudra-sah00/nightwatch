@@ -132,18 +132,22 @@ export function ContentDetailModal({
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      {/* Close Button */}
+      {/* Close Button — respects safe-area-inset on notched phones */}
       <button
         type="button"
         onClick={onClose}
-        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-background/50 backdrop-blur-md hover:bg-muted transition-colors border border-border"
+        className="fixed z-[60] p-2.5 rounded-full bg-background/60 backdrop-blur-md hover:bg-muted transition-colors border border-border"
+        style={{
+          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 12px)',
+        }}
         aria-label="Close modal"
       >
-        <X className="w-6 h-6 text-foreground" />
+        <X className="w-5 h-5 text-foreground" />
       </button>
 
-      {/* Hero Section */}
-      <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] bg-black">
+      {/* Hero Section — shorter on mobile so the action buttons don't clip */}
+      <div className="relative w-full h-[42vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] bg-black">
         {/* Background Image / Trailer Player */}
         <div className="absolute inset-0">
           {showTrailer && show.trailers && show.trailers.length > 0 ? (
@@ -189,8 +193,8 @@ export function ContentDetailModal({
           <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
         </div>
 
-        {/* Content Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 lg:p-16">
+        {/* Content Info Overlay — tighter padding on mobile */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-10 lg:p-16">
           <ContentInfo
             show={show}
             isPlaying={isPlaying}
@@ -214,7 +218,7 @@ export function ContentDetailModal({
               handleWatchParty();
             }}
             isWatchPartyDisabled={isMobile}
-            watchPartyDisabledReason={isMobile ? 'Desktop only' : undefined}
+            watchPartyDisabledReason={undefined}
             onWatchlistToggle={handleWatchlistToggle}
             isInWatchlist={inWatchlist}
             isWatchlistLoading={isWatchlistLoading}
@@ -229,12 +233,12 @@ export function ContentDetailModal({
         </div>
       </div>
 
-      {/* Details Section (Description & Metadata) - Below Hero for all screens */}
-      <div className="px-6 md:px-10 lg:px-16 py-8 bg-background">
+      {/* Details Section */}
+      <div className="px-4 sm:px-6 md:px-10 lg:px-16 py-5 sm:py-6 md:py-8 bg-background">
         <div className="max-w-4xl space-y-6">
           {/* Description */}
           {show.description ? (
-            <p className="text-muted-foreground text-sm md:text-lg leading-relaxed font-light">
+            <p className="text-muted-foreground text-sm md:text-base lg:text-lg leading-relaxed font-light line-clamp-4 md:line-clamp-none">
               {show.description}
             </p>
           ) : null}
@@ -285,10 +289,10 @@ export function ContentDetailModal({
 
       {/* Series Episodes Listing */}
       {isSeries ? (
-        <div className="px-6 md:px-10 lg:px-16 py-8 bg-background border-t border-border">
+        <div className="px-4 sm:px-6 md:px-10 lg:px-16 py-5 sm:py-6 md:py-8 bg-background border-t border-border">
           {/* Season Selector */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl md:text-2xl font-semibold text-foreground">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-lg md:text-2xl font-semibold text-foreground">
               Episodes
             </h2>
             <SeasonSelector

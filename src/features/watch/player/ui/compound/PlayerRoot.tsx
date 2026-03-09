@@ -109,8 +109,15 @@ export function PlayerRoot({
   const isPortrait = useMobileOrientation();
   // Android: orientation lock + real fullscreen kick in automatically so this
   // only triggers on iOS Safari where the OS won't rotate programmatically.
+  // Also suppress the wall when the player is already in fullscreen (either
+  // real browser fullscreen on Android, or the manual iOS state) — in that
+  // case the video IS covering the screen and the wall just blocks content.
   const showRotateWall =
-    isMobile && isPortrait && state.isPlaying && !isFullscreenOverride;
+    isMobile &&
+    isPortrait &&
+    state.isPlaying &&
+    !isFullscreenOverride &&
+    !state.isFullscreen;
 
   return (
     <PlayerContext value={contextValue}>

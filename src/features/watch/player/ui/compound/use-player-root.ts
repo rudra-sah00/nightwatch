@@ -128,7 +128,9 @@ export function usePlayerRoot({
     if (!audioTracksKey) return; // no tracks to process
     const tracks = audioTracksRef.current;
     if (!tracks || tracks.length === 0) return;
-    if (state.audioTracks.length > 0) return;
+    // Always re-seed when the key changes (e.g. after a language switch on S2).
+    // The audioTracksKey dep already guards against spurious re-runs — we only
+    // reach here when the actual track IDs have changed.
     dispatch({
       type: 'SET_AUDIO_TRACKS',
       audioTracks: tracks.map((t) => ({
@@ -138,7 +140,7 @@ export function usePlayerRoot({
         isDefault: false,
       })),
     });
-  }, [audioTracksKey, state.audioTracks.length]);
+  }, [audioTracksKey]); // intentionally excludes state.audioTracks — dispatching it is sufficient
 
   // Stabilise the subtitleTracks reference — the parent often creates a new
   // array on every render which would cause an infinite dispatch loop.

@@ -94,13 +94,13 @@ export const ContentInfo = memo(function ContentInfo({
       {/* Title */}
       <h1
         id="modal-title"
-        className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg"
+        className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg leading-tight"
       >
         {show.title}
       </h1>
 
       {/* Metadata Row */}
-      <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm text-white/70">
         {show.year ? (
           <span className="flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
@@ -155,11 +155,11 @@ export const ContentInfo = memo(function ContentInfo({
       ) : null}
 
       {/* Play/Resume Button - Now for both Movies AND Series */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3">
         <Button
           size="lg"
           className={cn(
-            'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-xl transition-[colors,shadow] duration-200',
+            'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-xl transition-[colors,shadow] duration-200',
             'bg-white text-black hover:bg-white/90',
           )}
           onClick={handleButtonClick}
@@ -194,32 +194,26 @@ export const ContentInfo = memo(function ContentInfo({
                       : 'Play'}
         </Button>
 
-        {/* Watch Together Button */}
-        {onWatchParty ? (
+        {/* Watch Together Button — hidden on mobile when disabled to save space */}
+        {onWatchParty && !isWatchPartyDisabled ? (
           <Button
             size="lg"
             variant="secondary"
             className={cn(
-              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg border-0',
-              isWatchPartyDisabled || isCreatingParty
+              'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-lg border-0',
+              isCreatingParty
                 ? 'bg-gray-500/50 cursor-not-allowed opacity-80'
                 : 'bg-teal-500 hover:bg-teal-600 text-white',
             )}
-            onClick={
-              isWatchPartyDisabled || isCreatingParty ? undefined : onWatchParty
-            }
-            disabled={isWatchPartyDisabled || isCreatingParty}
+            onClick={isCreatingParty ? undefined : onWatchParty}
+            disabled={isCreatingParty}
           >
             {isCreatingParty ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <Users className="w-5 h-5" />
             )}
-            {isCreatingParty
-              ? 'Creating...'
-              : isWatchPartyDisabled && watchPartyDisabledReason
-                ? watchPartyDisabledReason
-                : 'Watch Together'}
+            {isCreatingParty ? 'Creating...' : 'Watch Together'}
           </Button>
         ) : null}
 
@@ -229,7 +223,7 @@ export const ContentInfo = memo(function ContentInfo({
             size="lg"
             variant={isInWatchlist ? 'destructive' : 'outline'}
             className={cn(
-              'gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg transition-[colors,shadow] duration-200',
+              'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-lg transition-[colors,shadow] duration-200',
               isInWatchlist
                 ? 'bg-red-500 hover:bg-red-600 text-white border-0'
                 : 'border-white/20 hover:bg-white/10 text-white',
@@ -238,13 +232,18 @@ export const ContentInfo = memo(function ContentInfo({
             disabled={isWatchlistLoading}
           >
             {isWatchlistLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : isInWatchlist ? (
-              <Trash2 className="w-5 h-5" />
+              <Trash2 className="w-4 h-4" />
             ) : (
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
             )}
-            {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+            <span className="hidden sm:inline">
+              {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+            </span>
+            <span className="sm:hidden">
+              {isInWatchlist ? 'Remove' : 'Watchlist'}
+            </span>
           </Button>
         ) : null}
 

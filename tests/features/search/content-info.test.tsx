@@ -334,7 +334,7 @@ describe('ContentInfo', () => {
     expect(mockOnWatchParty).toHaveBeenCalledTimes(1);
   });
 
-  it('shows disabled watch party button with reason', () => {
+  it('hides watch party button when disabled', () => {
     render(
       <ContentInfo
         show={mockShow}
@@ -347,7 +347,9 @@ describe('ContentInfo', () => {
       />,
     );
 
-    expect(screen.getByText('Series not supported')).toBeInTheDocument();
+    // Button is hidden entirely when disabled to keep mobile UI clean
+    expect(screen.queryByText('Watch Together')).not.toBeInTheDocument();
+    expect(screen.queryByText('Series not supported')).not.toBeInTheDocument();
   });
 
   it('shows creating party state', () => {
