@@ -48,7 +48,6 @@ export const ContentInfo = memo(function ContentInfo({
   onResume,
   onWatchParty,
   isWatchPartyDisabled,
-  watchPartyDisabledReason,
   isCreatingParty = false,
   onWatchlistToggle,
   isInWatchlist = false,

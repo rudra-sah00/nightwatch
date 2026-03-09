@@ -24,12 +24,12 @@ export function useSearchInput() {
   const [isPending, startTransition] = useTransition();
   const { activeServer } = useServer();
   const containerRef = useRef<HTMLDivElement>(null);
-  const isDebouncingRef = useRef(false);
+  const isFocusedRef = useRef(false);
 
-  // Sync query when URL changes (e.g., browser back/forward)
+  // Sync query when URL changes (e.g., browser back/forward) — only when not typing
   const urlQuery = searchParams.get('q') || '';
   useEffect(() => {
-    if (!isDebouncingRef.current) {
+    if (!isFocusedRef.current) {
       setQuery(urlQuery);
     }
   }, [urlQuery]);
@@ -39,22 +39,15 @@ export function useSearchInput() {
     const trimmedQuery = query.trim();
     const currentQ = searchParams.get('q') || '';
 
-    if (trimmedQuery === currentQ) {
-      isDebouncingRef.current = false;
-      return;
-    }
+    if (trimmedQuery === currentQ) return;
 
     const timer = setTimeout(() => {
-      isDebouncingRef.current = true;
       startTransition(() => {
         if (trimmedQuery) {
           router.push(`/home?q=${encodeURIComponent(trimmedQuery)}`);
         } else if (currentQ) {
           router.push('/home');
         }
-        setTimeout(() => {
-          isDebouncingRef.current = false;
-        }, 500);
       });
     }, 400);
 
@@ -86,7 +79,7 @@ export function useSearchInput() {
       } finally {
         setIsFetchingSuggestions(false);
       }
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [query, activeServer]);
@@ -117,8 +110,13 @@ export function useSearchInput() {
   };
 
   const handleFocus = () => {
+    isFocusedRef.current = true;
     setIsOpen(true);
     if (!query) loadHistory();
+  };
+
+  const handleBlur = () => {
+    isFocusedRef.current = false;
   };
 
   const handleDeleteItem = async (e: React.MouseEvent, id: string) => {
@@ -189,6 +187,7 @@ export function useSearchInput() {
     showHistory,
     hasSuggestions,
     handleFocus,
+    handleBlur,
     handleDeleteItem,
     handleClearHistory,
     handleSelect,

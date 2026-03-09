@@ -22,6 +22,7 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
     showHistory,
     hasSuggestions,
     handleFocus,
+    handleBlur,
     handleDeleteItem,
     handleClearHistory,
     handleSelect,
@@ -54,9 +55,14 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
           placeholder="Search for movies, shows..."
           className="pl-10 pr-10 bg-secondary border-border focus-visible:ring-primary/50 h-10 w-full"
           onFocus={handleFocus}
+          onBlur={handleBlur}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleSearch}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           aria-autocomplete="list"
           aria-label="Search content"
         />
@@ -98,6 +104,7 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
                   type="button"
                   role="option"
                   aria-selected="false"
+                  tabIndex={-1}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                   onClick={() => handleSelect(suggestion)}
                 >
