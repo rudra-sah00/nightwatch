@@ -126,13 +126,18 @@ export function WatchPartyVideoArea({
   toggleFullscreen,
   onNextEpisode,
 }: WatchPartyVideoAreaProps) {
-  const { metadata } = useWatchPartyVideoArea(room);
+  const {
+    metadata,
+    streamUrlOverride,
+    initialAudioTracks,
+    handleAudioTrackChange,
+  } = useWatchPartyVideoArea(room);
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
   return (
     <Player.Root
-      streamUrl={room.streamUrl || null}
+      streamUrl={streamUrlOverride || room.streamUrl || null}
       metadata={metadata}
       captionUrl={room.captionUrl || null}
       subtitleTracks={room.subtitleTracks}
@@ -146,6 +151,10 @@ export function WatchPartyVideoArea({
       fullscreenToggleOverride={toggleFullscreen}
       isFullscreenOverride={isFullscreen}
       isLive={room.type === 'livestream'}
+      initialAudioTracks={
+        initialAudioTracks.length > 0 ? initialAudioTracks : undefined
+      }
+      onAudioTrackChange={isHost ? handleAudioTrackChange : undefined}
     >
       {/* Blurred poster background */}
       {metadata.posterUrl ? (

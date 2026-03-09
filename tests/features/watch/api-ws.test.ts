@@ -196,6 +196,49 @@ describe('Watch API Socket.IO Functions', () => {
 
       expect(mockSocket.emit).not.toHaveBeenCalled();
     });
+
+    it('calls callback with null after 10s timeout when socket never responds', () => {
+      vi.useFakeTimers();
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
+      // emit registered but never calls the ack — simulates a hung socket
+      mockSocket.emit.mockImplementation(() => {});
+
+      const callback = vi.fn();
+      api.fetchContinueWatching(10, 's1', callback);
+
+      expect(callback).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(10_000);
+
+      expect(callback).toHaveBeenCalledWith(null, 'Request timed out');
+      vi.useRealTimers();
+    });
+
+    it('does not call callback twice when response arrives after timeout', () => {
+      vi.useFakeTimers();
+      vi.mocked(ws.getSocket).mockReturnValue(mockSocket as unknown as Socket);
+
+      let capturedAck: ((r: unknown) => void) | null = null;
+      const ackHolder = { fn: null as ((r: unknown) => void) | null };
+      mockSocket.emit.mockImplementation((_e, _p, ack) => {
+        capturedAck = ack as (r: unknown) => void;
+        ackHolder.fn = capturedAck;
+      });
+
+      const callback = vi.fn();
+      api.fetchContinueWatching(10, 's1', callback);
+
+      // Trigger timeout first
+      vi.advanceTimersByTime(10_000);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(null, 'Request timed out');
+
+      // Late socket response — should be ignored (settled=true guard)
+      ackHolder.fn?.({ success: true, items: [{ id: '1' }] });
+
+      expect(callback).toHaveBeenCalledTimes(1); // still only called once
+      vi.useRealTimers();
+    });
   });
 
   describe('deleteWatchProgress', () => {
