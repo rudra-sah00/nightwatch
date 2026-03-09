@@ -134,8 +134,9 @@ describe('ChangePasswordForm', () => {
       });
     });
 
-    it('shows success message after successful password change', async () => {
+    it('shows toast notification after successful password change', async () => {
       const { changePassword } = await import('@/features/profile/api');
+      const { toast } = await import('sonner');
       const mockChangePassword = vi.mocked(changePassword);
       mockChangePassword.mockResolvedValueOnce(undefined);
 
@@ -155,8 +156,11 @@ describe('ChangePasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Password updated/i)).toBeInTheDocument();
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+          'Password updated successfully',
+        );
       });
+      expect(screen.queryByText(/Password updated/i)).not.toBeInTheDocument();
     });
 
     it('clears form fields after successful submission', async () => {

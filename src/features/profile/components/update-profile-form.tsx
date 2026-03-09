@@ -19,7 +19,6 @@ export function UpdateProfileForm() {
     isCheckingUsername,
     isAvailable,
     error,
-    success,
     hasChanges,
     action,
     isPending,
@@ -144,13 +143,6 @@ export function UpdateProfileForm() {
           {error}
         </div>
       ) : null}
-      {success ? (
-        <div className="flex items-center gap-2.5 p-3.5 text-sm bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/15">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          Profile updated
-        </div>
-      ) : null}
-
       <Button
         type="submit"
         className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-colors disabled:opacity-40"

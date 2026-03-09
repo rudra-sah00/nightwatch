@@ -177,10 +177,11 @@ describe('UpdateProfileForm', () => {
       });
     });
 
-    it('shows success message after successful update', async () => {
+    it('shows toast notification after successful update', async () => {
       const { updateProfile, checkUsername } = await import(
         '@/features/profile/api'
       );
+      const { toast } = await import('sonner');
       const mockUpdateProfile = vi.mocked(updateProfile);
       const mockCheckUsername = vi.mocked(checkUsername);
 
@@ -202,8 +203,11 @@ describe('UpdateProfileForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Profile updated/i)).toBeInTheDocument();
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+          'Profile updated successfully',
+        );
       });
+      expect(screen.queryByText(/Profile updated/i)).not.toBeInTheDocument();
     });
 
     it('calls updateUser after successful submission', async () => {

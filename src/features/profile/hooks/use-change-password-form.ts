@@ -10,7 +10,6 @@ export function useChangePasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const [state, action, isPending] = React.useActionState(
     async (
@@ -52,7 +51,6 @@ export function useChangePasswordForm() {
     if (state) {
       if (state.type === 'success') {
         toast.success(state.message);
-        setSuccess(true);
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -71,7 +69,6 @@ export function useChangePasswordForm() {
     confirmPassword,
     setConfirmPassword,
     error,
-    success,
     action,
     isPending,
   };

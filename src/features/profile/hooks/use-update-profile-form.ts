@@ -17,7 +17,6 @@ export function useUpdateProfileForm() {
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!debouncedUsername || debouncedUsername === user?.username) {
@@ -90,8 +89,6 @@ export function useUpdateProfileForm() {
     if (state) {
       if (state.type === 'success') {
         toast.success(state.message);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
       } else if (state.type === 'error') {
         setError(state.message);
         toast.error(state.message);
@@ -117,7 +114,6 @@ export function useUpdateProfileForm() {
     isCheckingUsername,
     isAvailable,
     error,
-    success,
     hasChanges,
     action,
     isPending,

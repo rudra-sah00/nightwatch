@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,6 @@ export function ChangePasswordForm() {
     confirmPassword,
     setConfirmPassword,
     error,
-    success,
     action,
     isPending,
   } = useChangePasswordForm();
@@ -92,13 +91,6 @@ export function ChangePasswordForm() {
           {error}
         </div>
       ) : null}
-      {success ? (
-        <div className="flex items-center gap-2.5 p-3.5 text-sm bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/15">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          Password updated
-        </div>
-      ) : null}
-
       <Button
         type="submit"
         isLoading={isPending}
