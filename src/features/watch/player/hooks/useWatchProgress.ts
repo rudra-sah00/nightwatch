@@ -62,6 +62,7 @@ export function useWatchProgress({
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const accumulateSecondsRef = useRef(0);
   const lastTimeRef = useRef(0);
+  const lastDateRef = useRef<string>(getLocalDateString());
   const lastProgressRef = useRef<number | null>(null);
   const wasPlayingRef = useRef(false);
 
@@ -90,7 +91,7 @@ export function useWatchProgress({
 
   // Helper to flush activity time
   const flushActivity = useCallback(
-    (forceFlush: boolean = false) => {
+    (forceFlush: boolean = false, dateOverride?: string) => {
       // Skip activity tracking for unauthenticated guests
       if (skipActivityTrackingRef.current) return;
 
@@ -107,7 +108,7 @@ export function useWatchProgress({
 
         if (sentSeconds === 0) return;
 
-        const localDate = getLocalDateString();
+        const localDate = dateOverride ?? getLocalDateString();
 
         socket.emit(
           'watch:record_time',
@@ -276,15 +277,26 @@ export function useWatchProgress({
 
     // Reset accumulation logic when Play starts/Resumes
     lastTimeRef.current = Date.now();
+    lastDateRef.current = getLocalDateString();
 
     const updateAccumulation = () => {
       const now = Date.now();
       const delta = (now - lastTimeRef.current) / 1000;
+      // Always advance the clock reference, even when we skip accumulation
+      lastTimeRef.current = now;
       // Sanity check: ignore large jumps (>30s means tab was hidden/system sleep or resumed)
       if (delta > 0 && delta < 30) {
+        const currentDate = getLocalDateString();
+        if (currentDate !== lastDateRef.current) {
+          // Midnight just crossed — flush pre-midnight seconds under the old date
+          // so they aren't credited to the new calendar day.
+          flushActivity(true, lastDateRef.current);
+          lastDateRef.current = currentDate;
+          // Skip accumulating this straddle-tick; next tick starts cleanly
+          return;
+        }
         accumulateSecondsRef.current += delta;
       }
-      lastTimeRef.current = now;
     };
 
     const interval = setInterval(updateAccumulation, 1000);
