@@ -2,7 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { playVideo } from '@/features/search/api';
+import { playVideo, stopVideo } from '@/features/search/api';
 import type { PlayResponse } from '@/features/search/types';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import { useS1StreamUrls } from '@/features/watch/player/hooks/s1/useS1StreamUrls';
@@ -98,6 +98,14 @@ export function useWatchContent() {
   const [refetchError, setRefetchError] = useState<string | null>(null);
   // Tracks whether we've already done one silent cold-start retry for S2.
   const s2ColdStartRetried = useRef(false);
+  // Set to true for the duration of an active playVideo() call plus a short
+  // grace window afterwards.  Any stream:revoked event arriving while this is
+  // true was caused by OUR OWN new session displacing the old one in Redis —
+  // it is NOT another tab stealing the stream and must be silently ignored.
+  const replacingSessionRef = useRef(false);
+  const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   // Audio tracks extracted from the initial S2 refetchStream response.
   // Passed to useS2AudioTracks so it can skip its own playVideo() call,
   // which would otherwise create a second session and revoke the first.
@@ -114,6 +122,14 @@ export function useWatchContent() {
     async (overrideMovieId?: string) => {
       setIsRefetching(true);
       setRefetchError(null);
+
+      // Any stream:revoked that arrives while we are calling playVideo() is
+      // our OLD session being evicted by the new one on the SAME device.
+      // Mark the suppression window before the request goes out.
+      if (replacingSessionTimerRef.current) {
+        clearTimeout(replacingSessionTimerRef.current);
+      }
+      replacingSessionRef.current = true;
 
       try {
         const decodedTitle = decodeURIComponent(title);
@@ -183,6 +199,13 @@ export function useWatchContent() {
         }
       } finally {
         setIsRefetching(false);
+        // Keep the suppression window open for a short grace period so that
+        // a stream:revoked event that arrives slightly after the API response
+        // (network reorder) is still swallowed correctly.
+        replacingSessionTimerRef.current = setTimeout(() => {
+          replacingSessionRef.current = false;
+          replacingSessionTimerRef.current = null;
+        }, 2000);
       }
     },
     [
@@ -275,6 +298,11 @@ export function useWatchContent() {
     if (!socket) return;
 
     const handleStreamRevoked = () => {
+      // Swallow revocations that were triggered by our own playVideo() call
+      // replacing the previous Redis session.  These are NOT another device
+      // stealing the stream — showing the error would be a false positive.
+      if (replacingSessionRef.current) return;
+
       setStreamUrl(null);
       setRefetchError(
         'Playback stopped — you started playing on another tab or device.',
@@ -286,6 +314,29 @@ export function useWatchContent() {
       socket.off(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
     };
   }, [socket, setStreamUrl]);
+
+  // Tell the backend to clear the Redis stream session when the user leaves
+  // the watch page.  This prevents stale sessions that would later cause
+  // the false "playing in another tab" revocation on reconnect.
+  useEffect(() => {
+    const handleUnload = () => stopVideo();
+    window.addEventListener('pagehide', handleUnload);
+
+    return () => {
+      window.removeEventListener('pagehide', handleUnload);
+      // Clear any pending suppression timer to avoid memory leaks.
+      if (replacingSessionTimerRef.current) {
+        clearTimeout(replacingSessionTimerRef.current);
+      }
+      // Emit a clean stop over the socket so the backend clears Redis
+      // immediately (covers SPA navigation where pagehide doesn't fire).
+      if (socket?.connected) {
+        socket.emit(WS_EVENTS.STREAM_STOP);
+      }
+      // Best-effort HTTP beacon as a fallback for tab close.
+      stopVideo();
+    };
+  }, [socket]);
 
   // Guard against React 18 Strict Mode double-invocation of the mount effect.
   // Without this, two concurrent playVideo() calls are made: the second one

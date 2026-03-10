@@ -261,3 +261,21 @@ export async function playVideo(
     ...options,
   });
 }
+
+/**
+ * Notify the backend that this client has stopped playback so it can
+ * immediately remove the Redis stream session.  Uses sendBeacon so the
+ * request survives page-unload and does not block navigation.
+ *
+ * Falls back to a fire-and-forget fetch when sendBeacon is unavailable
+ * (e.g. in Node/test environments).
+ */
+export function stopVideo(): void {
+  const url = '/api/video/stop';
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    navigator.sendBeacon(url);
+  } else {
+    // Non-blocking fallback
+    fetch(url, { method: 'POST', keepalive: true }).catch(() => undefined);
+  }
+}
