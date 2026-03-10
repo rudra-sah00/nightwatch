@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,6 @@ export function UpdateProfileForm() {
     setPreferredServer,
     isCheckingUsername,
     isAvailable,
-    error,
     hasChanges,
     action,
     isPending,
@@ -137,12 +136,6 @@ export function UpdateProfileForm() {
       </div>
 
       {/* Feedback */}
-      {error ? (
-        <div className="flex items-center gap-2.5 p-3.5 text-sm bg-destructive/10 text-destructive rounded-xl border border-destructive/15">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          {error}
-        </div>
-      ) : null}
       <Button
         type="submit"
         className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-colors disabled:opacity-40"

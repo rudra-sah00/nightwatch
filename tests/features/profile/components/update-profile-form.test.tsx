@@ -280,6 +280,7 @@ describe('UpdateProfileForm', () => {
       const { updateProfile, checkUsername } = await import(
         '@/features/profile/api'
       );
+      const { toast } = await import('sonner');
       const mockUpdateProfile = vi.mocked(updateProfile);
       const mockCheckUsername = vi.mocked(checkUsername);
 
@@ -301,9 +302,9 @@ describe('UpdateProfileForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Failed to update profile/i),
-        ).toBeInTheDocument();
+        expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
+          'Failed to update profile',
+        );
       });
     });
 

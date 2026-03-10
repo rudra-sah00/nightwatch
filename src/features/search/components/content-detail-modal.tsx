@@ -1,19 +1,18 @@
 'use client';
 
-import { Loader2, X } from 'lucide-react';
+import { Loader2, Users, X } from 'lucide-react';
 import Image from 'next/image';
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { getOptimizedImageUrl } from '@/lib/utils';
+import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
 import { ContentInfo } from './content-info';
 import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
-
-import { WatchPartySetup } from './watch-party-setup';
 
 interface ContentDetailModalProps {
   contentId: string;
@@ -75,6 +74,17 @@ export function ContentDetailModal({
   });
 
   const isMobile = useIsMobile();
+  const episodesSectionRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to episodes when party mode activates
+  useEffect(() => {
+    if (isSetupOpen && episodesSectionRef.current) {
+      episodesSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [isSetupOpen]);
 
   // Loading state
   if (isLoading) {
@@ -206,12 +216,10 @@ export function ContentDetailModal({
             onPlay={() => {
               setShowTrailer(false);
               handlePlay();
-              onClose();
             }}
             onResume={async () => {
               setShowTrailer(false);
               await handleResume();
-              onClose();
             }}
             onWatchParty={() => {
               setShowTrailer(false);
@@ -289,10 +297,50 @@ export function ContentDetailModal({
 
       {/* Series Episodes Listing */}
       {isSeries ? (
-        <div className="px-4 sm:px-6 md:px-10 lg:px-16 py-5 sm:py-6 md:py-8 bg-background border-t border-border">
+        <div
+          ref={episodesSectionRef}
+          className={cn(
+            'px-4 sm:px-6 md:px-10 lg:px-16 py-5 sm:py-6 md:py-8 border-t transition-colors duration-300',
+            isSetupOpen
+              ? 'bg-violet-950/20 border-violet-500/15'
+              : 'bg-background border-border',
+          )}
+        >
+          {/* Party Mode Banner */}
+          {isSetupOpen ? (
+            <div className="flex items-center justify-between gap-3 mb-5 p-3.5 rounded-xl bg-violet-500/10 border border-violet-500/20 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-4 h-4 text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-violet-300 leading-tight">
+                    Watch Party — pick an episode
+                  </p>
+                  <p className="text-[11px] text-violet-400/50 mt-0.5">
+                    Everyone joins once you select
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSetupOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+                aria-label="Cancel watch party"
+              >
+                <X className="w-4 h-4 text-violet-400/60" />
+              </button>
+            </div>
+          ) : null}
+
           {/* Season Selector */}
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-2xl font-semibold text-foreground">
+            <h2
+              className={cn(
+                'text-lg md:text-2xl font-semibold transition-colors',
+                isSetupOpen ? 'text-violet-200' : 'text-foreground',
+              )}
+            >
               Episodes
             </h2>
             <SeasonSelector
@@ -307,33 +355,24 @@ export function ContentDetailModal({
             />
           </div>
 
-          {/* Episodes List */}
+          {/* Episodes List — doubles as party episode picker when isSetupOpen */}
           <EpisodeList
             episodes={episodes}
             isLoading={isLoadingEpisodes}
-            playingEpisodeId={playingEpisodeId}
+            playingEpisodeId={
+              isSetupOpen ? creatingEpisodeId : playingEpisodeId
+            }
             onPlayEpisode={(episode) => {
-              setShowTrailer(false);
-              handlePlay(episode);
-              onClose();
+              if (isSetupOpen) {
+                handleWatchParty(episode);
+              } else {
+                setShowTrailer(false);
+                handlePlay(episode);
+              }
             }}
           />
         </div>
       ) : null}
-      {/* Watch Party Setup Modal */}
-      <WatchPartySetup
-        isOpen={isSetupOpen}
-        show={show}
-        seasons={show.seasons || []}
-        selectedSeason={selectedSeason}
-        episodes={episodes}
-        isLoadingEpisodes={isLoadingEpisodes}
-        onClose={() => setIsSetupOpen(false)}
-        onSelectSeason={handleSeasonSelect}
-        onSelectEpisode={(episode) => handleWatchParty(episode)}
-        isCreating={isCreatingParty}
-        creatingEpisodeId={creatingEpisodeId}
-      />
     </div>
   );
 }

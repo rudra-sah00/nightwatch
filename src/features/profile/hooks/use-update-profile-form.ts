@@ -16,8 +16,6 @@ export function useUpdateProfileForm() {
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     if (!debouncedUsername || debouncedUsername === user?.username) {
       setIsAvailable(null);
@@ -91,7 +89,6 @@ export function useUpdateProfileForm() {
   useEffect(() => {
     if (isPending) {
       wasPending.current = true;
-      setError(null);
       return;
     }
     if (!wasPending.current) return;
@@ -100,7 +97,7 @@ export function useUpdateProfileForm() {
     if (state.type === 'success') {
       toast.success(state.message);
     } else if (state.type === 'error') {
-      setError(state.message);
+      toast.error(state.message);
     } else if (state.type === 'info') {
       toast.info(state.message);
     }
@@ -121,7 +118,6 @@ export function useUpdateProfileForm() {
     setPreferredServer,
     isCheckingUsername,
     isAvailable,
-    error,
     hasChanges,
     action,
     isPending,
