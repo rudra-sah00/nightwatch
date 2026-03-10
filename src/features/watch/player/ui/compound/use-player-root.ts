@@ -54,6 +54,9 @@ interface PlayerRootHookProps {
     streamUrl: string;
   }[];
   onAudioTrackChange?: (trackId: string) => void;
+  /** When provided the matching track is pre-selected on initial load so the
+   * AudioSelector highlights the currently-playing dub without user interaction. */
+  initialAudioTrackId?: string;
   onBack?: () => void;
   isLive?: boolean;
 }
@@ -76,6 +79,7 @@ export function usePlayerRoot({
   onVideoRef,
   initialAudioTracks,
   onAudioTrackChange,
+  initialAudioTrackId,
   onBack: onBackProp,
   isLive = false,
 }: PlayerRootHookProps) {
@@ -120,6 +124,9 @@ export function usePlayerRoot({
   const audioTracksRef = useRef(initialAudioTracks);
   audioTracksRef.current = initialAudioTracks;
 
+  const initialAudioTrackIdRef = useRef(initialAudioTrackId);
+  initialAudioTrackIdRef.current = initialAudioTrackId;
+
   const audioTracksKey = initialAudioTracks
     ? JSON.stringify(initialAudioTracks.map((t) => t.id))
     : '';
@@ -140,6 +147,11 @@ export function usePlayerRoot({
         isDefault: false,
       })),
     });
+    // Pre-select the active dub so AudioSelector highlights it on first render.
+    const activeId = initialAudioTrackIdRef.current;
+    if (activeId && tracks.some((t) => t.id === activeId)) {
+      dispatch({ type: 'SET_CURRENT_AUDIO_TRACK', trackId: activeId });
+    }
   }, [audioTracksKey]); // intentionally excludes state.audioTracks — dispatching it is sufficient
 
   // Stabilise the subtitleTracks reference — the parent often creates a new

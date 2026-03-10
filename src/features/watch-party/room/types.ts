@@ -41,6 +41,13 @@ export interface WatchPartyRoom {
   spriteVtt?: string;
   /** Quality options for local playback switching (Server 1 HLS variants / Server 2 MP4 resolutions) */
   qualities?: { quality: string; url: string }[];
+  /** S2 audio dub tracks pre-fetched when the room was created */
+  audioTracks?: {
+    id: string;
+    label: string;
+    language: string;
+    streamUrl: string;
+  }[];
   members: RoomMember[];
   pendingMembers: RoomMember[]; // New
   state: RoomState;

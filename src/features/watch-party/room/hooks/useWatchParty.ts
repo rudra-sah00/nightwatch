@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { WS_EVENTS } from '@/lib/constants';
 import { useSocket } from '@/providers/socket-provider';
 import { injectTokenIntoUrl, wrapInProxy } from '../../../watch/utils';
 // Modular Hooks
@@ -265,6 +266,25 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       clearTimeout(timer2);
     };
   }, [isConnected, room?.id, contextSocket, room, chat.setMessages]);
+
+  // Clear the party stream if it is revoked by another tab or device starting
+  // playback.  Applies to both host and members — the WP room continues
+  // server-side, only the local stream state is cleared.
+  useEffect(() => {
+    if (!contextSocket || requestStatus !== 'joined') return;
+
+    const handleStreamRevoked = () => {
+      setRoom((prev) => (prev ? { ...prev, streamUrl: '' } : null));
+      toast.error(
+        'Playback stopped — you started playing on another tab or device.',
+      );
+    };
+
+    contextSocket.on(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
+    return () => {
+      contextSocket.off(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
+    };
+  }, [contextSocket, requestStatus]);
 
   return {
     room,

@@ -104,6 +104,11 @@ export function useWatchContent() {
   const [s2InitialAudioTracks, setS2InitialAudioTracks] = useState<
     S2AudioTrack[]
   >([]);
+  // The currently-active S2 dub ID — used to pre-highlight the matching entry
+  // in the AudioSelector on initial load (before the user has picked anything).
+  const [s2ActiveTrackId, setS2ActiveTrackId] = useState<string | null>(() =>
+    server === 's2' ? movieId : null,
+  );
 
   const refetchStream = useCallback(
     async (overrideMovieId?: string) => {
@@ -148,6 +153,8 @@ export function useWatchContent() {
                 })),
               );
             }
+            // Track the currently-playing dub so AudioSelector can highlight it.
+            setS2ActiveTrackId(overrideMovieId || movieId || null);
           }
         } else {
           setRefetchError('Failed to load stream');
@@ -311,6 +318,7 @@ export function useWatchContent() {
     qualities,
     s2AudioTracks,
     handleS2AudioTrackChange,
+    s2ActiveTrackId,
     handleStreamExpired,
     refetchStream,
   };

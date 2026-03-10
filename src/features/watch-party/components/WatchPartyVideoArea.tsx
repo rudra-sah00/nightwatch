@@ -130,6 +130,7 @@ export function WatchPartyVideoArea({
     metadata,
     streamUrlOverride,
     initialAudioTracks,
+    initialAudioTrackId,
     handleAudioTrackChange,
   } = useWatchPartyVideoArea(room);
   const { user } = useAuth();
@@ -154,6 +155,7 @@ export function WatchPartyVideoArea({
       initialAudioTracks={
         initialAudioTracks.length > 0 ? initialAudioTracks : undefined
       }
+      initialAudioTrackId={initialAudioTrackId}
       onAudioTrackChange={isHost ? handleAudioTrackChange : undefined}
     >
       {/* Blurred poster background */}

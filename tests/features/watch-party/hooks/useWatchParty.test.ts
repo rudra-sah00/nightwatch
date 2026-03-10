@@ -2968,4 +2968,111 @@ describe('useWatchParty', () => {
       expect(result.current.room?.members?.[0].permissions?.canDraw).toBe(true);
     });
   });
+
+  describe('stream:revoked while in watch party', () => {
+    it('clears room streamUrl and shows toast when stream is revoked on another tab', async () => {
+      const { toast } = await import('sonner');
+      const { useSocket } = await import('@/providers/socket-provider');
+
+      const onHandlers: Record<string, (...args: unknown[]) => void> = {};
+      const mockSocketWithHandlers = {
+        connected: true,
+        on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+          onHandlers[event] = handler;
+        }),
+        off: vi.fn(),
+        emit: vi.fn(),
+        id: 'socket-revoke-1',
+      };
+
+      vi.mocked(useSocket).mockReturnValue({
+        socket: mockSocketWithHandlers as unknown as Socket,
+        isConnected: true,
+        connect: vi.fn(),
+        connectGuest: vi.fn(),
+        disconnect: vi.fn(),
+      });
+
+      const mockRoom = {
+        id: 'room-revoke',
+        contentId: 'c1',
+        type: 'movie' as const,
+        streamUrl: 'https://cdn.example.com/s.m3u8',
+        title: 'T',
+        hostId: 'user-1',
+        members: [],
+        pendingMembers: [],
+        state: {
+          currentTime: 0,
+          isPlaying: false,
+          lastUpdated: Date.now(),
+          playbackRate: 1,
+        },
+        permissions: {
+          canGuestsDraw: false,
+          canGuestsPlaySounds: true,
+          canGuestsChat: true,
+        },
+        createdAt: Date.now(),
+      };
+
+      vi.mocked(api.createPartyRoom).mockImplementation(
+        (_payload, callback) => {
+          callback({
+            success: true,
+            room: mockRoom,
+            streamToken: 'tok-1',
+          });
+        },
+      );
+
+      const { result } = renderHook(() => useWatchParty({ userId: 'user-1' }));
+
+      await act(async () => {
+        result.current.createRoom({
+          contentId: 'c1',
+          streamUrl: 'https://cdn.example.com/s.m3u8',
+          title: 'T',
+          type: 'movie',
+        });
+      });
+
+      // Simulate stream:revoked arriving on the socket
+      await act(async () => {
+        onHandlers['stream:revoked']?.();
+      });
+
+      await waitFor(() => {
+        expect(result.current.room?.streamUrl).toBe('');
+      });
+
+      expect(toast.error).toHaveBeenCalledWith(
+        'Playback stopped — you started playing on another tab or device.',
+      );
+    });
+
+    it('does not attach stream:revoked listener when not joined', async () => {
+      const { useSocket } = await import('@/providers/socket-provider');
+      const mockSock = {
+        connected: true,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      };
+      vi.mocked(useSocket).mockReturnValue({
+        socket: mockSock as unknown as Socket,
+        isConnected: false,
+        connect: vi.fn(),
+        connectGuest: vi.fn(),
+        disconnect: vi.fn(),
+      });
+
+      renderHook(() => useWatchParty({}));
+
+      const streamRevokedCalls = (
+        mockSock.on as ReturnType<typeof vi.fn>
+      ).mock.calls.filter((call: unknown[]) => call[0] === 'stream:revoked');
+      expect(streamRevokedCalls).toHaveLength(0);
+    });
+  });
 });

@@ -2,15 +2,10 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import {
-  type S2AudioTrack,
-  useS2AudioTracks,
-} from '@/features/watch/player/hooks/s2/useS2AudioTracks';
+import type { S2AudioTrack } from '@/features/watch/player/hooks/s2/useS2AudioTracks';
 import type { WatchPartyRoom } from '../room/types';
 
 export function useWatchPartyVideoArea(room: WatchPartyRoom) {
-  const server = room.providerId ?? 's1';
-
   // Local stream URL override — when the host switches to a direct-URL audio
   // dub, we update this so the player reloads the stream without touching the
   // room state (which would affect all members).
@@ -65,28 +60,41 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   // (party:update_stream) would propagate the new URL to all members.
   const handleRefetch = useCallback((_overrideId: string) => {}, []);
 
-  const { audioTracks, handleAudioTrackChange } = useS2AudioTracks({
-    server,
-    type: room.type === 'series' ? 'series' : 'movie',
-    title: room.title,
-    movieId: room.type !== 'series' ? room.contentId : undefined,
-    seriesId: room.type === 'series' ? room.contentId : undefined,
-    season: room.season?.toString() ?? null,
-    episode: room.episode?.toString() ?? null,
-    onStreamChange: handleStreamChange,
-    onRefetch: handleRefetch,
-    // Skip if not S2 — useS2AudioTracks already guards internally but this
-    // avoids the unnecessary playVideo() call on S1/livestream rooms.
-    skipDiscovery: server !== 's2' || room.type === 'livestream',
-  });
+  // Audio tracks come from the room object (stored by the backend when the
+  // host created/updated the room). We never call playVideo() here — doing so
+  // would trigger createSessionWithToken → GETSET → replace the party sentinel
+  // → emit stream:revoked → kill the party stream for everyone.
+  const initialAudioTracks: S2AudioTrack[] = useMemo(
+    () => room.audioTracks ?? [],
+    [room.audioTracks],
+  );
 
-  // Cast to the shape Player.Root expects
-  const initialAudioTracks: S2AudioTrack[] = audioTracks;
+  // The active track is the current content ID — one of the audio track IDs
+  // will equal room.contentId when it's an S2 dub room.
+  const initialAudioTrackId =
+    room.providerId === 's2' && initialAudioTracks.length > 1
+      ? room.contentId
+      : undefined;
+
+  // For direct-URL (non-s2:) dub tracks, allow local stream swaps.
+  const handleAudioTrackChange = useCallback(
+    (trackId: string) => {
+      const track = initialAudioTracks.find((t) => t.id === trackId);
+      if (!track) return;
+      if (track.streamUrl.startsWith('s2:')) {
+        handleRefetch(track.streamUrl);
+      } else {
+        handleStreamChange(track.streamUrl);
+      }
+    },
+    [initialAudioTracks, handleRefetch, handleStreamChange],
+  );
 
   return {
     metadata,
     streamUrlOverride,
     initialAudioTracks,
+    initialAudioTrackId,
     handleAudioTrackChange,
   };
 }

@@ -23,6 +23,7 @@ function WatchContent() {
     qualities,
     s2AudioTracks,
     handleS2AudioTrackChange,
+    s2ActiveTrackId,
     handleStreamExpired,
     refetchStream,
   } = useWatchContent();
@@ -100,6 +101,7 @@ function WatchContent() {
       description={description ? decodeURIComponent(description) : undefined}
       onStreamExpired={handleStreamExpired}
       initialAudioTracks={s2AudioTracks.length > 0 ? s2AudioTracks : undefined}
+      initialAudioTrackId={s2ActiveTrackId || undefined}
       onAudioTrackChange={
         s2AudioTracks.length > 0 ? handleS2AudioTrackChange : undefined
       }

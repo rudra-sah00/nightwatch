@@ -46,6 +46,8 @@ interface PlayerRootProps {
     language: string;
     streamUrl: string;
   }[];
+  /** Pre-selected track ID — highlights the currently-playing dub in the AudioSelector on load */
+  initialAudioTrackId?: string;
   /** Callback fired when the user picks a dub; parent swaps streamUrl */
   onAudioTrackChange?: (trackId: string) => void;
   /** Override the back button destination (defaults to /home) */
@@ -78,6 +80,7 @@ export function PlayerRoot({
   hideControls = false,
   onVideoRef,
   initialAudioTracks,
+  initialAudioTrackId,
   onAudioTrackChange,
   onBack: onBackProp,
   isLive = false,
@@ -101,6 +104,7 @@ export function PlayerRoot({
     onVideoRef,
     initialAudioTracks,
     onAudioTrackChange,
+    initialAudioTrackId,
     onBack: onBackProp,
     isLive,
   });

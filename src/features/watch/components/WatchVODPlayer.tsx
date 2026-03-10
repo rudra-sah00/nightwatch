@@ -35,6 +35,8 @@ export interface WatchPlayerProps {
     language: string;
     streamUrl: string;
   }[];
+  /** Pre-selected track ID — highlights the currently-playing dub in AudioSelector on load */
+  initialAudioTrackId?: string;
   /** Called when the user selects a language dub on server 2 */
   onAudioTrackChange?: (trackId: string) => void;
 }
