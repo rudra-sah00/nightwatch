@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { changePassword } from '../api';
 import { changePasswordSchema } from '../schema';
@@ -47,19 +47,27 @@ export function useChangePasswordForm() {
     null,
   );
 
+  // Guard: only react to state produced by an actual submit, not a cached
+  // state restored when Next.js remounts the page after a tab switch.
+  const wasPending = useRef(false);
   useEffect(() => {
-    if (state) {
-      if (state.type === 'success') {
-        toast.success(state.message);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else if (state.type === 'error') {
-        setError(state.message);
-        toast.error(state.message);
-      }
+    if (isPending) {
+      wasPending.current = true;
+      setError('');
+      return;
     }
-  }, [state]);
+    if (!wasPending.current) return;
+    wasPending.current = false;
+    if (!state) return;
+    if (state.type === 'success') {
+      toast.success(state.message);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else if (state.type === 'error') {
+      setError(state.message);
+    }
+  }, [state, isPending]);
 
   return {
     currentPassword,

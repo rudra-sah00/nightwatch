@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useAuth } from '@/providers/auth-provider';
@@ -85,18 +85,26 @@ export function useUpdateProfileForm() {
     null,
   );
 
+  // Guard: only react to state produced by an actual submit, not a cached
+  // state restored when Next.js remounts the page after a tab switch.
+  const wasPending = useRef(false);
   useEffect(() => {
-    if (state) {
-      if (state.type === 'success') {
-        toast.success(state.message);
-      } else if (state.type === 'error') {
-        setError(state.message);
-        toast.error(state.message);
-      } else if (state.type === 'info') {
-        toast.info(state.message);
-      }
+    if (isPending) {
+      wasPending.current = true;
+      setError(null);
+      return;
     }
-  }, [state]);
+    if (!wasPending.current) return;
+    wasPending.current = false;
+    if (!state) return;
+    if (state.type === 'success') {
+      toast.success(state.message);
+    } else if (state.type === 'error') {
+      setError(state.message);
+    } else if (state.type === 'info') {
+      toast.info(state.message);
+    }
+  }, [state, isPending]);
 
   const hasChanges =
     name.trim() !== (user?.name || '') ||
