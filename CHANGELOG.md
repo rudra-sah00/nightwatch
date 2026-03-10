@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.8.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.7.0...v1.8.0) (2026-03-10)
+
+
+### Features
+
+* add home button to navbar; remove watchlist server subtitle ([bf1247a](https://github.com/rudra-sah00/watch-rudra/commit/bf1247a4c1490a9b1100bf57a8e1f7a4bbe006f8))
+* add YouTube-style DVR seek bar for livestream player ([1bea68f](https://github.com/rudra-sah00/watch-rudra/commit/1bea68f5d0d011df1a897026a174412095037f5c))
+* **download:** per-episode quality downloads via CF Worker ([741d4d9](https://github.com/rudra-sah00/watch-rudra/commit/741d4d951785cd38d974357e256665d69ad4c63c))
+* implement debounced search and fix sidebar device modal UI ([c01d9e1](https://github.com/rudra-sah00/watch-rudra/commit/c01d9e1ab8cc46d5d87545c45cc839bd3345293d))
+* **livestream:** update live page, card UI, types and API ([3d6b4c1](https://github.com/rudra-sah00/watch-rudra/commit/3d6b4c10fb0e03d6756b69c1830085efc73aee3c))
+* **player:** glass effect on right column, open/close animation, tests ([a640a42](https://github.com/rudra-sah00/watch-rudra/commit/a640a420cdc42b7ba82ae26072f453b756bce3c3))
+* **player:** Netflix-style episode panel for series playback ([fa13801](https://github.com/rudra-sah00/watch-rudra/commit/fa13801146e4e79491518354ce0872dd013bb834))
+* **player:** separate episode panel from controls + bigger thumbnails ([5f034c3](https://github.com/rudra-sah00/watch-rudra/commit/5f034c3aa11ac3f36023c847da0c7276f4b7c782))
+* **player:** YouTube-style DVR seekbar for live streams ([573f295](https://github.com/rudra-sah00/watch-rudra/commit/573f29504e1ab69ccfbe835f4fa6462b82dae6dd))
+* remove AI assistant feature entirely ([c92d06c](https://github.com/rudra-sah00/watch-rudra/commit/c92d06c848f401cbcbabf6921848396029519822))
+* remove stats banner, add episode loading state, fix S2 highest quality playback ([2a1a38c](https://github.com/rudra-sah00/watch-rudra/commit/2a1a38cc9c53a457011be4ce1ac00e46c17e3ce9))
+* S2 provider, Biome fixes, test updates, and all frontend improvements ([59dc757](https://github.com/rudra-sah00/watch-rudra/commit/59dc757b3ba5720f3ef02b40b6db774591479689))
+* watch party mobile disable, live match modal redesign ([43b4c06](https://github.com/rudra-sah00/watch-rudra/commit/43b4c06f5224ec627bf07ea8ff437f7500d9609b))
+* watch-party sidebar theming, remove CloudFront, fix tests & biome ([27045b5](https://github.com/rudra-sah00/watch-rudra/commit/27045b53b41dc5d5b19a7c0b3df79a6342f0e7a0))
+* **watch-party:** floating chat overlay toggle inside settings dialog ([4c8c8e0](https://github.com/rudra-sah00/watch-rudra/commit/4c8c8e04b0aa0a655cfc047d997cf701124cf9ec))
+* **watch-party:** overhaul UX — loading states, lobby, grid, kick confirm ([ee566c5](https://github.com/rudra-sah00/watch-rudra/commit/ee566c5ff0c0bdc7151d83e68bea2cfba9fc3a68))
+
+
+### Bug Fixes
+
+* **ai-assistant:** remove duplicate isProcessing assignment ([8188cc4](https://github.com/rudra-sah00/watch-rudra/commit/8188cc467fb3a7a6c042506004fc1c55b47a1419))
+* **continue-watching:** prevent server content mixing and infinite loading ([e7e972b](https://github.com/rudra-sah00/watch-rudra/commit/e7e972b179767586b79b0f7a0c02dede067bf160))
+* episode change infinite loop, pause overlay in watch party, sketch undo isolation ([5cd4876](https://github.com/rudra-sah00/watch-rudra/commit/5cd48765d651c25e3224fd2e647856e33fd2c505))
+* force HLS engine for livestream watch party guests ([8468587](https://github.com/rudra-sah00/watch-rudra/commit/846858786b56aaaf67e6a706332b99ab409d89a4))
+* **frontend:** next config warning and content modal loading reset ([2910773](https://github.com/rudra-sah00/watch-rudra/commit/291077343b6798f2e6edc47309ea5f081dfbc280))
+* improve search loading feedback and align sidebar backgrounds ([8fc438b](https://github.com/rudra-sah00/watch-rudra/commit/8fc438b07f2e79a06ff08fb143925a8ca6c5124b))
+* **livestream:** add paused overlay and fix seekbar initial flash ([fa1c92c](https://github.com/rudra-sah00/watch-rudra/commit/fa1c92c6862445c48007825aab220b6ca38da287))
+* mobile UX and player improvements ([2a138f9](https://github.com/rudra-sah00/watch-rudra/commit/2a138f9df2c5ddccbb9048ff8235ecc3b9df3f59))
+* pass isLive to watch party player for livestream rooms, contain objectFit, add containerStyle prop ([1807918](https://github.com/rudra-sah00/watch-rudra/commit/180791893a70562710539021501ed00f589160e6))
+* **player:** episode panel re-open scroll, error flash, mobile fullscreen ([e30a612](https://github.com/rudra-sah00/watch-rudra/commit/e30a612acef61ccdda0046eb7711880ae9c0a4d8))
+* **player:** fill full viewport on all screen sizes ([897b765](https://github.com/rudra-sah00/watch-rudra/commit/897b76550d928d89c6ee0ad44ae3b5eff2b94b9a))
+* **player:** hide controls when episode panel is open ([8730913](https://github.com/rudra-sah00/watch-rudra/commit/8730913830cc220dfc1eb6b2283fdef84fd41886))
+* **player:** pin live seekbar to 100% at live edge to prevent jitter ([ef74b34](https://github.com/rudra-sah00/watch-rudra/commit/ef74b349165e8eeac4d471ce49d0237b62de8110))
+* **profile:** remove duplicate inline success messages, use toast only ([81ef226](https://github.com/rudra-sah00/watch-rudra/commit/81ef226c1d22478013588a64cc15711f866712fb))
+* remove premature onClose() before navigation in watch party and auto-play ([9416c32](https://github.com/rudra-sah00/watch-rudra/commit/9416c32d950d6d69583801e71f5875d83c26986a))
+* reset captcha token on error and add expire handler for signup ([bf43e11](https://github.com/rudra-sah00/watch-rudra/commit/bf43e114ed4d189b9f7b33355d3c0fc0c44c695e))
+* **search:** prevent URL sync overwriting typed input; disable browser autocomplete; fix unused param ([5b3e3ce](https://github.com/rudra-sah00/watch-rudra/commit/5b3e3ce634a93d4568e2810b94eac74ebeccca8e))
+* **stream+audio+wp:** S2 audio tracks in watch party + solo active track highlight ([d05e18b](https://github.com/rudra-sah00/watch-rudra/commit/d05e18ba4b74fff230d9080adfc98e86b62f3d4d))
+* **watch-party:** align emoji reactions with player controls row ([3e36e0b](https://github.com/rudra-sah00/watch-rudra/commit/3e36e0bd1e58588cf33d5cf1797f3d9ce025707b))
+* **watch-party:** blur sidebar when episode panel opens ([d7b12bc](https://github.com/rudra-sah00/watch-rudra/commit/d7b12bc4ee8832f1598d702512d6b49f8c7a2087))
+* **watch-party:** center emoji reactions in controls row ([5dc623d](https://github.com/rudra-sah00/watch-rudra/commit/5dc623d7c09d78542269f86ea4fb0f9a9c653b9f))
+* **watch-party:** S2 audio tracks, lifecycle bugs, missing test coverage ([9e3e07e](https://github.com/rudra-sah00/watch-rudra/commit/9e3e07ee5272291d9b5b716ef886b0dc5ff1acfd))
+* **watch-party:** use hostId to identify creator, skip lobby pending state ([d497920](https://github.com/rudra-sah00/watch-rudra/commit/d4979201d399859f9674a683742754b42f04f905))
+* **watch:** correct midnight activity attribution and durationSeconds=0 guard ([041a796](https://github.com/rudra-sah00/watch-rudra/commit/041a7967802876b7670b0186aa059f487577051e))
+
+
+### Performance Improvements
+
+* apply React best practices from AGENTS.md skill file ([6362a56](https://github.com/rudra-sah00/watch-rudra/commit/6362a5663ed2487f9b1b04f852e26d2d9473eb25))
+* hoist inline defaults and formatTime in download-menu and video-player hook ([314464b](https://github.com/rudra-sah00/watch-rudra/commit/314464b8a450f6d22c37ec0804afe1167e071e18))
+
 ## [1.7.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.6.1...v1.7.0) (2026-02-25)
 
 
