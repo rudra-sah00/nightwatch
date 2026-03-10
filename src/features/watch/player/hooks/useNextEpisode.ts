@@ -316,7 +316,7 @@ export function useNextEpisode({
           ? encodeURIComponent(nextEpisodeInfo.title)
           : '';
 
-        let url = `/watch/${response.movieId}?type=series&title=${encodeURIComponent(metadata.title)}&season=${nextEpisodeInfo.seasonNumber}&episode=${nextEpisodeInfo.episodeNumber}&seriesId=${metadata.seriesId}&server=${server}&stream=${streamUrl}`;
+        let url = `/watch/${encodeURIComponent(response.movieId)}?type=series&title=${encodeURIComponent(metadata.title)}&season=${nextEpisodeInfo.seasonNumber}&episode=${nextEpisodeInfo.episodeNumber}&seriesId=${encodeURIComponent(metadata.seriesId ?? response.movieId)}&server=${server}&stream=${streamUrl}`;
         if (captionUrl) url += `&caption=${captionUrl}`;
         if (response.spriteVtt)
           url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;
