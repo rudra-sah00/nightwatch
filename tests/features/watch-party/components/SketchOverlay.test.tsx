@@ -10,10 +10,6 @@ import {
 import * as api from '@/features/watch-party/room/services/watch-party.api';
 import type { SketchAction as SketchActionType } from '@/features/watch-party/room/types';
 
-// Mock window.prompt
-window.prompt = vi.fn();
-const mockPrompt = vi.mocked(window.prompt);
-
 // Mock react-konva
 vi.mock('react-konva', () => ({
   Stage: ({
@@ -404,35 +400,43 @@ describe('SketchOverlay', () => {
     expect(remainingLines[0]).toHaveAttribute('data-stroke', 'blue');
   });
 
-  it('should handle text tool cancellation', () => {
-    mockPrompt.mockReturnValue(null);
+  it('should show custom text input at click position when text tool is active', () => {
     vi.mocked(useSketch).mockReturnValue({
       ...mockContext,
       currentTool: 'text' as ToolType,
     } as unknown as SketchContextType);
 
-    const { getByTestId } = render(<SketchOverlay />);
-    const stage = getByTestId('konva-stage');
+    render(<SketchOverlay />);
+    const stage = screen.getByTestId('konva-stage');
 
     act(() => {
       fireEvent.mouseDown(stage);
     });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    expect(input).toBeInTheDocument();
+    // No text drawn yet — just the input shown
     expect(screen.queryByTestId('konva-text')).not.toBeInTheDocument();
+    // No prompt called
+    expect(api.emitSketchDraw).not.toHaveBeenCalled();
   });
 
-  it('should handle text tool success', async () => {
-    mockPrompt.mockReturnValue('Hello World');
+  it('should confirm text and draw on Enter key press', async () => {
     vi.mocked(useSketch).mockReturnValue({
       ...mockContext,
       currentTool: 'text' as ToolType,
     } as unknown as SketchContextType);
 
-    const { getByTestId, findByTestId } = render(<SketchOverlay />);
-    const stage = getByTestId('konva-stage');
+    render(<SketchOverlay />);
+    const stage = screen.getByTestId('konva-stage');
 
     act(() => {
       fireEvent.mouseDown(stage);
     });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    fireEvent.change(input, { target: { value: 'Hello World' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
 
     expect(api.emitSketchDraw).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -441,9 +445,103 @@ describe('SketchOverlay', () => {
       }),
     );
 
-    const textElement = await findByTestId('konva-text');
-    expect(textElement).toBeInTheDocument();
-    expect(textElement).toHaveAttribute('data-text', 'Hello World');
+    const textEl = await screen.findByTestId('konva-text');
+    expect(textEl).toHaveAttribute('data-text', 'Hello World');
+    // Input dismissed
+    expect(
+      screen.queryByPlaceholderText('Type text...'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('should dismiss input without drawing on Escape', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+    } as unknown as SketchContextType);
+
+    render(<SketchOverlay />);
+    const stage = screen.getByTestId('konva-stage');
+
+    act(() => {
+      fireEvent.mouseDown(stage);
+    });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    fireEvent.change(input, { target: { value: 'discard me' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(api.emitSketchDraw).not.toHaveBeenCalled();
+    expect(
+      screen.queryByPlaceholderText('Type text...'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not draw if Enter is pressed with empty input', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+    } as unknown as SketchContextType);
+
+    render(<SketchOverlay />);
+    const stage = screen.getByTestId('konva-stage');
+
+    act(() => {
+      fireEvent.mouseDown(stage);
+    });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(api.emitSketchDraw).not.toHaveBeenCalled();
+    expect(
+      screen.queryByPlaceholderText('Type text...'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('should apply active color and font size to the text input style', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+      color: '#00ff00',
+      strokeWidth: 5,
+    } as unknown as SketchContextType);
+
+    render(<SketchOverlay />);
+    const stage = screen.getByTestId('konva-stage');
+
+    act(() => {
+      fireEvent.mouseDown(stage);
+    });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    expect(input).toHaveStyle({
+      color: '#00ff00',
+      borderColor: '#00ff00',
+      fontSize: '20px',
+    });
+  });
+
+  it('should show crosshair cursor for non-text sketch tools', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'freehand' as ToolType,
+    } as unknown as SketchContextType);
+
+    const { container } = render(<SketchOverlay />);
+    // The outer wrapper div carries the cursor
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.style.cursor).toBe('crosshair');
+  });
+
+  it('should show text cursor when text tool is active', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+    } as unknown as SketchContextType);
+
+    const { container } = render(<SketchOverlay />);
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.style.cursor).toBe('text');
   });
 
   it('should handle undoTrigger — only undoes own action, not remote', () => {

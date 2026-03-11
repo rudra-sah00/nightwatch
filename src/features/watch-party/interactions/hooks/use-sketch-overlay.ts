@@ -15,6 +15,14 @@ import {
 import type { SketchAction } from '../../room/types';
 import { useSketch } from '../context/SketchContext';
 
+interface PendingTextInput {
+  id: string;
+  x: number;
+  y: number;
+  data: number[];
+  videoTimestamp: number;
+}
+
 export function useSketchOverlay() {
   const {
     currentTool,
@@ -30,6 +38,7 @@ export function useSketchOverlay() {
   } = useSketch();
 
   const [actions, setActions] = useState<SketchAction[]>([]);
+  const [pendingText, setPendingText] = useState<PendingTextInput | null>(null);
   const isDrawing = useRef(false);
   const currentActionRef = useRef<SketchAction | null>(null);
 
@@ -190,14 +199,13 @@ export function useSketchOverlay() {
       };
 
       if (currentTool === 'text') {
-        const text = prompt('Enter text:');
-        if (!text) {
-          isDrawing.current = false;
-          return;
-        }
-        newAction.text = text;
-        emitSketchDraw(newAction);
-        setActions((prev) => [...prev, newAction]);
+        setPendingText({
+          id,
+          x: pos.x,
+          y: pos.y,
+          data: [pos.x, pos.y],
+          videoTimestamp: videoTime,
+        });
         isDrawing.current = false;
         return;
       }
@@ -254,6 +262,27 @@ export function useSketchOverlay() {
     currentActionRef.current = null;
   }, [canDraw, isSketchMode]);
 
+  const confirmText = useCallback(
+    (text: string) => {
+      if (!pendingText) return;
+      const action: SketchAction = {
+        id: pendingText.id,
+        type: 'text',
+        color,
+        strokeWidth,
+        videoTimestamp: pendingText.videoTimestamp,
+        data: pendingText.data,
+        text: text.trim(),
+      };
+      emitSketchDraw(action);
+      setActions((prev) => [...prev, action]);
+      setPendingText(null);
+    },
+    [pendingText, color, strokeWidth],
+  );
+
+  const cancelText = useCallback(() => setPendingText(null), []);
+
   return {
     actions,
     containerRef,
@@ -262,5 +291,8 @@ export function useSketchOverlay() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    pendingText,
+    confirmText,
+    cancelText,
   };
 }

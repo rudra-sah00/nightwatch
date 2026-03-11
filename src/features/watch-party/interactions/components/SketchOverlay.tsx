@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import {
   Arrow,
   Circle,
@@ -9,9 +10,13 @@ import {
   Star,
   Text,
 } from 'react-konva';
+import { useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 
 export function SketchOverlay() {
+  const [inputValue, setInputValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const {
     actions,
     containerRef,
@@ -20,16 +25,61 @@ export function SketchOverlay() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    pendingText,
+    confirmText,
+    cancelText,
   } = useSketchOverlay();
+
+  const { color, strokeWidth, currentTool } = useSketch();
+
+  useEffect(() => {
+    if (pendingText) {
+      setInputValue('');
+      // Defer focus so the element is painted first
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [pendingText]);
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        confirmText(inputValue.trim());
+      } else {
+        cancelText();
+      }
+      setInputValue('');
+    } else if (e.key === 'Escape') {
+      cancelText();
+      setInputValue('');
+    }
+  };
+
+  const handleInputBlur = () => {
+    // Small delay so Enter keydown can fire confirmText before blur dismisses
+    setTimeout(() => {
+      cancelText();
+      setInputValue('');
+    }, 120);
+  };
+
+  const canvasCursor =
+    isSketchMode && !pendingText
+      ? currentTool === 'text'
+        ? 'text'
+        : 'crosshair'
+      : 'default';
 
   return (
     <div
       ref={containerRef}
       className={`absolute inset-0 z-40 ${isSketchMode ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      style={{ cursor: canvasCursor }}
     >
       <Stage
         width={stageSize.width}
         height={stageSize.height}
+        listening={!pendingText}
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
         onMouseup={handleMouseUp}
@@ -197,6 +247,40 @@ export function SketchOverlay() {
           })}
         </Layer>
       </Stage>
+
+      {/* Custom text input — replaces native browser prompt() */}
+      {pendingText && (
+        <div
+          className="absolute z-50 pointer-events-auto"
+          style={{ left: pendingText.x, top: pendingText.y }}
+        >
+          <div className="flex flex-col gap-1.5 -translate-y-1/2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              onBlur={handleInputBlur}
+              placeholder="Type text..."
+              className="bg-black/85 backdrop-blur-sm placeholder-white/30 outline-none px-3 py-1.5 min-w-[140px] max-w-[260px] rounded-lg border-2 shadow-xl shadow-black/60 font-bold"
+              style={{
+                borderColor: color,
+                color: color,
+                fontSize: `${Math.max(14, strokeWidth * 4)}px`,
+              }}
+            />
+            <div className="flex gap-1.5 px-0.5">
+              <span className="bg-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-medium">
+                ↵ place
+              </span>
+              <span className="bg-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-medium">
+                Esc cancel
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

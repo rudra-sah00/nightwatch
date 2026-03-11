@@ -200,13 +200,17 @@ export function WatchPartySketch() {
           </div>
         )}
 
-        {/* Stroke Width Slider */}
+        {/* Stroke Width / Font Size Slider */}
         <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
-              Thickness
+              {currentTool === 'text' ? 'Font Size' : 'Thickness'}
             </h4>
-            <span className="text-xs text-white/40">{strokeWidth}px</span>
+            <span className="text-xs text-white/40">
+              {currentTool === 'text'
+                ? `${strokeWidth * 4}px`
+                : `${strokeWidth}px`}
+            </span>
           </div>
           <input
             type="range"

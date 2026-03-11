@@ -119,4 +119,41 @@ describe('WatchPartySketch', () => {
       screen.getByText('The host has disabled drawing for guests.'),
     ).toBeInTheDocument();
   });
+
+  it('should show "Font Size" label when text tool is active', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+    });
+    render(<WatchPartySketch />);
+    expect(screen.getByText('Font Size')).toBeInTheDocument();
+    expect(screen.queryByText('Thickness')).not.toBeInTheDocument();
+  });
+
+  it('should show "Thickness" label for non-text tools', () => {
+    render(<WatchPartySketch />);
+    expect(screen.getByText('Thickness')).toBeInTheDocument();
+    expect(screen.queryByText('Font Size')).not.toBeInTheDocument();
+  });
+
+  it('should display font size as strokeWidth * 4 when text tool is active', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text' as ToolType,
+      strokeWidth: 5,
+    });
+    render(<WatchPartySketch />);
+    // font size = 5 * 4 = 20px
+    expect(screen.getByText('20px')).toBeInTheDocument();
+  });
+
+  it('should display raw strokeWidth when non-text tool is active', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'freehand' as ToolType,
+      strokeWidth: 8,
+    });
+    render(<WatchPartySketch />);
+    expect(screen.getByText('8px')).toBeInTheDocument();
+  });
 });
