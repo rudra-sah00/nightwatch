@@ -6,25 +6,42 @@ export function useLivestreams(sportType = 'basketball') {
   const [schedule, setSchedule] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  // Cancels in-flight requests when sportType changes or the component unmounts
+  // so stale responses don't arrive after navigation to another page.
+  const abortRef = useRef<AbortController | null>(null);
 
   const loadSchedule = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       setIsLoading(true);
       setError(null);
-      const data = await fetchLivestreamSchedule(sportType);
+      const data = await fetchLivestreamSchedule(
+        sportType,
+        0,
+        3,
+        controller.signal,
+      );
 
+      if (controller.signal.aborted) return;
       // Sort by start time (ascending) without mutating the API response
       const sortedData = data.toSorted((a, b) => a.startTime - b.startTime);
       setSchedule(sortedData);
     } catch (err: unknown) {
+      if (controller.signal.aborted) return;
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted) setIsLoading(false);
     }
   }, [sportType]);
 
   useEffect(() => {
     loadSchedule();
+    return () => {
+      abortRef.current?.abort();
+    };
   }, [loadSchedule]);
 
   return {

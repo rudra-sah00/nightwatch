@@ -6,11 +6,12 @@ import type { WatchlistItem } from './types';
  */
 export async function getWatchlist(
   providerId?: string,
+  signal?: AbortSignal,
 ): Promise<WatchlistItem[]> {
   const url = providerId
     ? `/api/user/watchlist?providerId=${providerId}`
     : '/api/user/watchlist';
-  const data = await apiFetch<{ items: WatchlistItem[] }>(url);
+  const data = await apiFetch<{ items: WatchlistItem[] }>(url, { signal });
   return data.items || [];
 }
 

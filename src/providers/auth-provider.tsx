@@ -145,12 +145,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } else {
-        // Prime CSRF cookie for anonymous users
-        try {
-          await fetch('/health');
-        } catch {
-          // Silent fail - future POSTs handle missing cookie
-        }
+        // No stored user — nothing to initialize for anonymous visitors.
+        // All auth endpoints (/api/auth/login, register, verify-otp …) are
+        // in the CSRF skip list so no pre-seeding of the CSRF cookie is needed.
       }
       if (!controller.signal.aborted) {
         setIsLoading(false);

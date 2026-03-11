@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getWatchlist } from '@/features/watchlist/api';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { useServer } from '@/providers/server-provider';
@@ -10,17 +10,26 @@ export function useWatchlistPage() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Cancels in-flight watchlist requests when the server changes or the
+  // component unmounts (navigating away) so stale responses don't arrive
+  // after the user has already moved to another page.
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchWatchlist = useCallback(
     async (providerId: typeof activeServer) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       setLoading(true);
       try {
-        const items = await getWatchlist(providerId);
+        const items = await getWatchlist(providerId, controller.signal);
+        if (controller.signal.aborted) return;
         setWatchlist(items);
       } catch {
-        // ignore
+        // Ignore — includes AbortError from intentional cancellation
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     },
     [],
@@ -30,6 +39,9 @@ export function useWatchlistPage() {
     if (!selectedId) {
       fetchWatchlist(activeServer);
     }
+    return () => {
+      abortRef.current?.abort();
+    };
   }, [selectedId, activeServer, fetchWatchlist]);
 
   const isEmpty = !loading && watchlist.length === 0;
