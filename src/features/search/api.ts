@@ -270,12 +270,32 @@ export async function playVideo(
  * Falls back to a fire-and-forget fetch when sendBeacon is unavailable
  * (e.g. in Node/test environments).
  */
+/**
+ * Read a cookie value by name from document.cookie.
+ * Returns undefined when running outside a browser (e.g. SSR / tests).
+ */
+function getCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(
+    new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'),
+  );
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 export function stopVideo(): void {
-  const url = '/api/video/stop';
+  // Append the CSRF token as a query param because sendBeacon cannot set
+  // custom request headers.  The token comes from the csrfToken cookie
+  // (httpOnly: false), so a cross-origin attacker cannot read it — the
+  // double-submit guarantee is preserved.
+  const csrfToken = getCookie('csrfToken');
+  const url = csrfToken
+    ? `/api/video/stop?_csrf=${encodeURIComponent(csrfToken)}`
+    : '/api/video/stop';
+
   if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
     navigator.sendBeacon(url);
   } else {
-    // Non-blocking fallback
+    // Non-blocking fallback (SSR / environments without sendBeacon)
     fetch(url, { method: 'POST', keepalive: true }).catch(() => undefined);
   }
 }
