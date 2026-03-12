@@ -221,6 +221,35 @@ export function useWatchContent() {
     ],
   );
 
+  // Called by useS2AudioTracks just before it sends the discovery playVideo().
+  // Sets the same suppression flag as refetchStream() so the inevitable
+  // stream:revoked — caused by our own session swap — is silently ignored.
+  const handleBeforeS2Discovery = useCallback(() => {
+    if (replacingSessionTimerRef.current)
+      clearTimeout(replacingSessionTimerRef.current);
+    replacingSessionRef.current = true;
+    // Fallback: auto-reset if the discovery call fails and onDiscovered never fires.
+    replacingSessionTimerRef.current = setTimeout(() => {
+      replacingSessionRef.current = false;
+      replacingSessionTimerRef.current = null;
+    }, 90_000);
+  }, []);
+
+  // Wraps applyS2Subtitles and also resets the suppression window to the
+  // standard 2 s grace period once discovery has successfully completed.
+  const handleS2Discovered = useCallback(
+    (response: PlayResponse) => {
+      applyS2Subtitles(response);
+      if (replacingSessionTimerRef.current)
+        clearTimeout(replacingSessionTimerRef.current);
+      replacingSessionTimerRef.current = setTimeout(() => {
+        replacingSessionRef.current = false;
+        replacingSessionTimerRef.current = null;
+      }, 2000);
+    },
+    [applyS2Subtitles],
+  );
+
   const {
     audioTracks: s2AudioTracks,
     handleAudioTrackChange: handleS2AudioTrackChange,
@@ -234,7 +263,8 @@ export function useWatchContent() {
     episode,
     onStreamChange: setStreamUrl,
     onRefetch: (overrideMovieId) => refetchStream(overrideMovieId),
-    onDiscovered: applyS2Subtitles,
+    onDiscovered: handleS2Discovered,
+    onBeforeDiscovery: handleBeforeS2Discovery,
     initialTracks: s2InitialAudioTracks,
     // Skip the discovery playVideo() call when refetchStream() is already being
     // called on mount (no stream param). Both would create sessions; the second

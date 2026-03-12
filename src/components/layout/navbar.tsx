@@ -46,10 +46,10 @@ export function Navbar({ isLoading }: NavbarProps) {
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
           <Link
             href="/live?sportType=basketball"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-red-500 transition-colors group p-2 rounded-full hover:bg-white/5"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-live transition-colors group p-2 rounded-full hover:bg-white/5"
             title="Live TV"
           >
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse group-hover:bg-red-400" />
+            <span className="w-2 h-2 rounded-full bg-live-strong animate-pulse group-hover:bg-live" />
             <span className="hidden sm:inline">Live TV</span>
           </Link>
           {user ? (

@@ -116,7 +116,9 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('user').textContent).toBe('none');
   });
 
-  it('primes CSRF cookie for anonymous users on init', async () => {
+  it('does not make any fetch calls for anonymous users on init', async () => {
+    // All auth endpoints (/api/auth/login, register, verify-otp …) are in the
+    // CSRF skip list, so no /health pre-seeding is needed for anonymous visitors.
     const { getStoredUser } = await import('@/lib/auth');
     vi.mocked(getStoredUser).mockReturnValue(null);
 
@@ -126,15 +128,12 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith('/health');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
-  it('handles errors during CSRF priming silently', async () => {
+  it('finishes loading cleanly when anonymous and no network errors occur', async () => {
     const { getStoredUser } = await import('@/lib/auth');
     vi.mocked(getStoredUser).mockReturnValue(null);
-    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(
-      new Error('Network failed'),
-    );
 
     renderAuthProvider();
 
@@ -142,8 +141,9 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith('/health');
-    // No error should be thrown or visible
+    // No error state — user remains unauthenticated and UI is ready
+    expect(screen.getByTestId('authenticated').textContent).toBe('false');
+    expect(screen.getByTestId('user').textContent).toBe('none');
   });
 
   it('restores user from localStorage and connects socket', async () => {

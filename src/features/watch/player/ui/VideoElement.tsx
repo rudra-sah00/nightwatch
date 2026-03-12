@@ -6,12 +6,12 @@ import type { PlayerAction } from '../context/types';
 import { useVideoElement } from './use-video-element';
 
 // Hoisted style constant to prevent recreation on each render (rule 5.4)
-const VIDEO_STYLE = {
+const VIDEO_STYLE: React.CSSProperties = {
   width: '100%',
   height: '100%',
   display: 'block',
-  objectFit: 'cover',
-} as const;
+  objectFit: 'contain',
+};
 
 interface VideoElementProps {
   dispatch: React.Dispatch<PlayerAction>;
@@ -27,6 +27,8 @@ interface VideoElementProps {
   }[];
   currentTrackId?: string | null;
   controls?: boolean;
+  /** @deprecated No longer used — objectFit is always contain. */
+  isUltrawide?: boolean;
   ref?: React.Ref<HTMLVideoElement>;
 }
 

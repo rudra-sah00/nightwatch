@@ -73,6 +73,13 @@ interface UseS2AudioTracksProps {
    */
   onDiscovered?: (response: PlayResponse) => void;
   /**
+   * Called just before the discovery playVideo() request is sent.
+   * Use this to suppress stream:revoked events that would otherwise incorrectly
+   * stop playback — the revocation is caused by our own session swap, not
+   * another device stealing the stream.
+   */
+  onBeforeDiscovery?: () => void;
+  /**
    * Pre-populated audio tracks from a prior playVideo() call (e.g. refetchStream).
    * When provided, the internal discovery playVideo() call is skipped entirely —
    * preventing a second session creation that would revoke the active stream.
@@ -109,6 +116,7 @@ export function useS2AudioTracks({
   onStreamChange,
   onRefetch,
   onDiscovered,
+  onBeforeDiscovery,
   initialTracks,
   skipDiscovery,
 }: UseS2AudioTracksProps): UseS2AudioTracksResult {
@@ -138,6 +146,7 @@ export function useS2AudioTracks({
     let cancelled = false;
 
     const discover = async () => {
+      onBeforeDiscovery?.();
       try {
         const decodedTitle = decodeURIComponent(title);
         let response: PlayResponse;
@@ -193,6 +202,7 @@ export function useS2AudioTracks({
     movieId, // Propagate subtitle tracks / caption URL back to the parent page so
     // they are displayed even when the page loaded with a stream URL param
     // (in which case refetchStream does not fire on mount).
+    onBeforeDiscovery,
     onDiscovered,
     season,
     seriesId,

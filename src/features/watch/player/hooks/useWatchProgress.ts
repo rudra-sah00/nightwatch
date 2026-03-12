@@ -335,6 +335,23 @@ export function useWatchProgress({
     };
   }, [isPlaying, updateProgress]);
 
+  // Save progress immediately when the video reaches its natural end.
+  // This closes the race window where the last periodic save was at < 85%
+  // but the user watched the remaining clip in < 10s (one interval tick).
+  // The 'ended' event fires with currentTime === duration, so the backend
+  // receives 100% and marks the row as isCompleted=true, removing it from
+  // the continue watching rail on the next page load.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleEnded = () => {
+      flushActivity(true);
+      updateProgress();
+    };
+    video.addEventListener('ended', handleEnded);
+    return () => video.removeEventListener('ended', handleEnded);
+  }, [videoRef, flushActivity, updateProgress]);
+
   // Cleanup on unmount - flush everything
   useEffect(() => {
     return () => {

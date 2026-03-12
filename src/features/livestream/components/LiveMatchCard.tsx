@@ -72,8 +72,8 @@ export function LiveMatchCard({
           {/* Subtle animated glow for live matches */}
           {isLive && (
             <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-600/8 via-transparent to-transparent" />
-              <div className="absolute -inset-px rounded-xl border border-red-500/10" />
+              <div className="absolute inset-0 bg-gradient-to-br from-live-strong/8 via-transparent to-transparent" />
+              <div className="absolute -inset-px rounded-xl border border-live/10" />
             </div>
           )}
 

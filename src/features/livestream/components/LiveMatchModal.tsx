@@ -120,7 +120,7 @@ export function LiveMatchModal({
         {/* Ambient glows behind each team */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute left-0 inset-y-0 w-1/2 bg-gradient-to-r from-blue-900/10 via-transparent to-transparent" />
-          <div className="absolute right-0 inset-y-0 w-1/2 bg-gradient-to-l from-red-900/10 via-transparent to-transparent" />
+          <div className="absolute right-0 inset-y-0 w-1/2 bg-gradient-to-l from-live/10 via-transparent to-transparent" />
         </div>
         {/* Bottom gradient fade into content */}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
@@ -139,9 +139,9 @@ export function LiveMatchModal({
           <div className="flex-shrink-0 w-24 md:w-36 flex flex-col items-center justify-center gap-3 relative z-10">
             {/* LIVE badge */}
             {isLive && (
-              <div className="flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 px-2.5 py-1 rounded-full">
-                <Radio className="w-3 h-3 text-red-400 animate-pulse" />
-                <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">
+              <div className="flex items-center gap-1.5 bg-live-strong/15 border border-live-strong/30 px-2.5 py-1 rounded-full">
+                <Radio className="w-3 h-3 text-live animate-pulse" />
+                <span className="text-[10px] font-bold text-live uppercase tracking-widest">
                   Live
                 </span>
               </div>

@@ -53,18 +53,11 @@ function LiveContent() {
       {/* Hero Header */}
       {activeServer !== 's1' && (
         <div className="relative overflow-hidden">
-          {/* Layered gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-red-950/8 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(220,38,38,0.06),transparent)] pointer-events-none" />
-
           <div className="container mx-auto px-4 pt-10 pb-8">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-red-500/20 rounded-full blur-md" />
-                    <Radio className="relative w-5 h-5 text-red-500" />
-                  </div>
+                  <Radio className="w-5 h-5 text-zinc-400" />
                   <h1 className="text-3xl font-bold tracking-tight text-white">
                     Live Sports
                   </h1>
@@ -130,17 +123,17 @@ function LiveContent() {
           </div>
         ) : error ? (
           <div className="py-20 text-center">
-            <div className="inline-flex flex-col items-center bg-red-950/15 border border-red-900/20 rounded-2xl px-10 py-8 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-xl bg-red-950/40 flex items-center justify-center mb-4">
-                <Radio className="w-4 h-4 text-red-400" />
+            <div className="inline-flex flex-col items-center bg-zinc-900/60 border border-zinc-800/50 rounded-2xl px-10 py-8 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-xl bg-zinc-800/80 flex items-center justify-center mb-4 border border-zinc-700/40">
+                <Radio className="w-4 h-4 text-zinc-500" />
               </div>
-              <p className="text-red-400/90 text-sm font-medium mb-4">
+              <p className="text-zinc-400 text-sm font-medium mb-4">
                 Failed to load schedule
               </p>
               <button
                 type="button"
                 onClick={refresh}
-                className="text-xs text-red-400/70 hover:text-red-300 underline underline-offset-4 transition-colors"
+                className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors"
               >
                 Try again
               </button>
@@ -169,13 +162,13 @@ function LiveContent() {
               <section>
                 <div className="flex items-center gap-3 mb-5">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-live-strong" />
                   </span>
-                  <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-red-400">
+                  <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-live">
                     Live Now
                   </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-red-900/30 to-transparent" />
+                  <div className="flex-1 h-px bg-gradient-to-r from-live-strong/20 to-transparent" />
                   <span className="text-[11px] text-zinc-600 tabular-nums font-medium">
                     {liveMatches.length}{' '}
                     {liveMatches.length === 1 ? 'match' : 'matches'}
@@ -283,10 +276,7 @@ export default function LivePage() {
         <div className="min-h-screen pb-32">
           <div className="container mx-auto px-4 pt-10">
             <div className="flex items-center gap-3 mb-8">
-              <div className="relative">
-                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-md" />
-                <Radio className="relative w-5 h-5 text-red-500" />
-              </div>
+              <Radio className="w-5 h-5 text-zinc-400" />
               <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
             </div>
             <div className="flex gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800/50 w-fit mb-10">

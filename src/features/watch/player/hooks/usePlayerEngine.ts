@@ -73,6 +73,7 @@ export function usePlayerEngine({
     streamUrl: engineType === 'mp4' ? streamUrl : null,
     dispatch,
     manualQualities: qualities,
+    onStreamExpired,
   });
 
   const setQuality = useCallback(

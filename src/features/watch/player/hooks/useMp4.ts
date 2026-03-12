@@ -8,6 +8,7 @@ interface UseMp4Options {
   streamUrl: string | null;
   dispatch: React.Dispatch<PlayerAction>;
   manualQualities?: { quality: string; url: string }[];
+  onStreamExpired?: () => void;
 }
 
 export function useMp4({
@@ -15,6 +16,7 @@ export function useMp4({
   streamUrl,
   dispatch,
   manualQualities,
+  onStreamExpired,
 }: UseMp4Options) {
   // 1. Initial Source Setup & Event Listeners
   useEffect(() => {
@@ -33,8 +35,9 @@ export function useMp4({
     };
 
     const handleError = (e: Event) => {
-      const _error = (e.target as HTMLVideoElement).error;
+      const _mediaError = (e.target as HTMLVideoElement).error;
       dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+      onStreamExpired?.();
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -46,7 +49,7 @@ export function useMp4({
       video.pause();
       video.removeAttribute('src'); // Better than src='' which can cause network requests
     };
-  }, [streamUrl, videoRef, dispatch]);
+  }, [streamUrl, videoRef, dispatch, onStreamExpired]);
 
   // 2. Separate effect to sync manual qualities when they change
   useEffect(() => {
