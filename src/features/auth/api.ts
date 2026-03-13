@@ -47,11 +47,12 @@ export async function verifyOtp(
   email: string,
   otp: string,
   context: 'login' | 'register',
+  mobileState?: string,
   options?: RequestInit,
 ): Promise<LoginResponse> {
   return apiFetch<LoginResponse>('/api/auth/verify-otp', {
     method: 'POST',
-    body: JSON.stringify({ email, otp, context }),
+    body: JSON.stringify({ email, otp, context, mobileState }),
     ...options,
   });
 }

@@ -54,6 +54,7 @@ export interface AuthContextType {
     email: string,
     otp: string,
     context: 'login' | 'register',
+    mobileState?: string,
   ) => Promise<LoginResponse>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
@@ -208,10 +209,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const verifyOtp = useCallback(
-    async (email: string, otp: string, context: 'login' | 'register') => {
+    async (
+      email: string,
+      otp: string,
+      context: 'login' | 'register',
+      mobileState?: string,
+    ) => {
       // Import strictly to avoid circular deps if any, though imports up top are fine
       const { verifyOtp: apiVerifyOtp } = await import('@/features/auth/api');
-      const response = await apiVerifyOtp(email, otp, context);
+      const response = await apiVerifyOtp(email, otp, context, mobileState);
 
       if (response.user) {
         onLoginSuccess(response.user);

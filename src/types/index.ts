@@ -18,6 +18,7 @@ export interface LoginResponse {
   message?: string;
   accessToken?: string;
   refreshToken?: string;
+  mobileAuthRedirectUrl?: string;
 }
 
 export interface LogoutResponse {

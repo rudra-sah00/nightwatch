@@ -170,7 +170,20 @@ export function useLoginForm() {
 
     setIsLoading(true);
     try {
-      await verifyOtp(formData.email, otp, 'login');
+      const searchParams = new URLSearchParams(window.location.search);
+      const mobileMode = searchParams.get('mobile') === '1';
+      const mobileState = searchParams.get('state');
+
+      const response = await verifyOtp(
+        formData.email,
+        otp,
+        'login',
+        mobileMode && mobileState ? mobileState : undefined,
+      );
+
+      if (response.mobileAuthRedirectUrl) {
+        window.location.href = response.mobileAuthRedirectUrl;
+      }
     } catch (err: unknown) {
       const apiError = err as ApiError;
       const msg = apiError.message || 'Verification failed. Please try again.';
