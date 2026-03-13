@@ -5,6 +5,7 @@ import {
   getSeriesEpisodes,
   getShowDetails,
   playVideo,
+  stopVideo,
 } from '@/features/search/api';
 import type { Episode, ShowDetails } from '@/features/search/types';
 import type { VideoMetadata } from '../context/types';
@@ -283,6 +284,7 @@ export function useNextEpisode({
     if (!nextEpisodeInfo || !metadata.seriesId || isLoadingNext) return;
 
     setIsLoadingNext(true);
+    stopVideo();
     try {
       // Use explicit server prop (from metadata.providerId via PlayerRoot) — most reliable source
       const server = serverProp || metadata.providerId || 's1';
