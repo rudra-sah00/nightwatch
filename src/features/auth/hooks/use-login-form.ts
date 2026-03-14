@@ -12,6 +12,8 @@ interface FormState {
   success?: boolean;
 }
 
+const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
+
 export function useLoginForm() {
   const { login, verifyOtp, resendOtp } = useAuth();
   const [step, setStep] = useState<Step>('initial');
@@ -29,6 +31,18 @@ export function useLoginForm() {
   const [fieldErrors, setFieldErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const mobileMode = searchParams.get('mobile') === '1';
+    const mobileState = searchParams.get('state');
+
+    if (mobileMode && mobileState) {
+      sessionStorage.setItem(MOBILE_LOGIN_STATE_KEY, mobileState);
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -172,7 +186,17 @@ export function useLoginForm() {
     try {
       const searchParams = new URLSearchParams(window.location.search);
       const mobileMode = searchParams.get('mobile') === '1';
-      const mobileState = searchParams.get('state');
+      const mobileState =
+        searchParams.get('state') ||
+        sessionStorage.getItem(MOBILE_LOGIN_STATE_KEY);
+
+      if (mobileMode && !mobileState) {
+        const msg =
+          'Mobile login session expired on web. Please restart login from the app.';
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
 
       const response = await verifyOtp(
         formData.email,
@@ -182,7 +206,16 @@ export function useLoginForm() {
       );
 
       if (response.mobileAuthRedirectUrl) {
-        window.location.href = response.mobileAuthRedirectUrl;
+        sessionStorage.removeItem(MOBILE_LOGIN_STATE_KEY);
+        window.location.assign(response.mobileAuthRedirectUrl);
+        return;
+      }
+
+      if (mobileMode) {
+        const msg =
+          'Login verified, but app redirect was missing. Please restart from the app.';
+        setError(msg);
+        toast.error(msg);
       }
     } catch (err: unknown) {
       const apiError = err as ApiError;
