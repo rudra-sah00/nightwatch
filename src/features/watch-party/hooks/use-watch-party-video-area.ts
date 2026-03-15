@@ -38,7 +38,14 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       // records progress with the correct providerId and useNextEpisode fetches
       // from the right API.
       providerId:
-        room.type === 'livestream' ? ('s1' as const) : room.providerId,
+        room.type === 'livestream'
+          ? ('s1' as const)
+          : room.providerId ||
+            (room.contentId.startsWith('s3:')
+              ? 's3'
+              : room.contentId.startsWith('s2:')
+                ? 's2'
+                : 's1'),
     }),
     [
       room.title,

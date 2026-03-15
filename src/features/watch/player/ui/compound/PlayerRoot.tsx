@@ -56,6 +56,8 @@ interface PlayerRootProps {
   isLive?: boolean;
   /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
   containerStyle?: React.CSSProperties;
+  /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
+  providerId?: 's1' | 's2' | 's3';
 }
 
 const CONTAINER_STYLE = { width: '100%', height: '100dvh' } as const;
@@ -85,6 +87,7 @@ export function PlayerRoot({
   onBack: onBackProp,
   isLive = false,
   containerStyle,
+  providerId,
 }: PlayerRootProps) {
   const { state, containerRef, contextValue, showControls } = usePlayerRoot({
     streamUrl,
@@ -107,6 +110,7 @@ export function PlayerRoot({
     initialAudioTrackId,
     onBack: onBackProp,
     isLive,
+    providerId,
   });
 
   const isMobile = useMobileDetection();
