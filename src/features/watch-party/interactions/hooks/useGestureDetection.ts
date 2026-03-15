@@ -44,7 +44,8 @@ function interceptMediaPipeLogs() {
         msg.includes('GL version:') ||
         msg.includes('renderer: WebKit WebGL') ||
         msg.includes('hand_gesture_recognizer_graph.cc') ||
-        msg.includes('gl_context.cc')
+        msg.includes('gl_context.cc') ||
+        msg.includes('Created TensorFlow Lite XNNPACK delegate for CPU')
       ) {
         return true;
       }
@@ -163,6 +164,15 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
   const lastGestureVideoTimeRef = useRef(-1);
   const lastFaceVideoTimeRef = useRef(-1);
 
+  const safeClose = useCallback((closer: { close: () => void } | null) => {
+    if (!closer) return;
+    try {
+      closer.close();
+    } catch {
+      // MediaPipe resources may already be disposed during rapid unmount/remount.
+    }
+  }, []);
+
   const predict = useCallback(async () => {
     if (
       !gestureRecognizerRef.current ||
@@ -274,21 +284,23 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
     return () => {
       cleaned = true;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (gestureRecognizerRef.current) {
-        gestureRecognizerRef.current.close();
-        gestureRecognizerRef.current = null;
-      }
-      if (faceLandmarkerRef.current) {
-        faceLandmarkerRef.current.close();
-        faceLandmarkerRef.current = null;
-      }
+
+      // Detach refs first so repeated cleanups are idempotent.
+      const gestureRecognizer = gestureRecognizerRef.current;
+      const faceLandmarker = faceLandmarkerRef.current;
+      gestureRecognizerRef.current = null;
+      faceLandmarkerRef.current = null;
+
+      safeClose(gestureRecognizer);
+      safeClose(faceLandmarker);
+
       if (videoElementRef.current) {
         videoElementRef.current.pause();
         videoElementRef.current.srcObject = null;
         videoElementRef.current = null;
       }
     };
-  }, [videoTrack, initMediaPipe, predict]);
+  }, [videoTrack, initMediaPipe, predict, safeClose]);
 
   return { isSupported: true };
 }
