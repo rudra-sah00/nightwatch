@@ -265,10 +265,10 @@ describe('useWatchPartyVideoArea', () => {
     expect(result.current.metadata.providerId).toBe('s2');
   });
 
-  it('metadata providerId is undefined when room.providerId is undefined', () => {
+  it('metadata providerId defaults to s1 when room.providerId is undefined and no prefix matches', () => {
     const room = makeRoom({ providerId: undefined, type: 'movie' });
     const { result } = renderHook(() => useWatchPartyVideoArea(room));
 
-    expect(result.current.metadata.providerId).toBeUndefined();
+    expect(result.current.metadata.providerId).toBe('s1');
   });
 });

@@ -12,14 +12,14 @@ interface ServerContextValue {
 }
 
 const SERVER_LABELS: Record<ServerId, string> = {
-  s1: 'Server 1',
-  s2: 'Server 2',
-  s3: 'Server 3',
+  s1: 'Netflix',
+  s2: 'Balanced',
+  s3: 'High Quality Stream',
 };
 
 const ServerContext = createContext<ServerContextValue>({
   activeServer: 's2',
-  serverLabel: 'Server 2',
+  serverLabel: 'Balanced',
   setActiveServer: () => {},
 });
 

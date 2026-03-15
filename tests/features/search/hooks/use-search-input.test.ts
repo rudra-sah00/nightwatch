@@ -22,7 +22,7 @@ vi.mock('@/features/search/api', () => ({
 vi.mock('@/providers/server-provider', () => ({
   useServer: vi.fn(() => ({
     activeServer: 's2',
-    serverLabel: 'Server 2',
+    serverLabel: 'Balanced',
     setActiveServer: vi.fn(),
   })),
 }));
@@ -42,7 +42,7 @@ describe('useSearchInput', () => {
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
       activeServer: 's2',
-      serverLabel: 'Server 2',
+      serverLabel: 'Balanced',
       setActiveServer: vi.fn(),
     });
     vi.mocked(searchApi.getSearchSuggestions).mockResolvedValue([]);
@@ -225,7 +225,7 @@ describe('useSearchInput', () => {
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
       activeServer: 's1',
-      serverLabel: 'Server 1',
+      serverLabel: 'Netflix',
       setActiveServer: vi.fn(),
     });
 

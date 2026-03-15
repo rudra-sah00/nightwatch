@@ -259,7 +259,7 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const server2Button = screen.getByRole('button', { name: /Server 2/i });
+      const server2Button = screen.getByRole('button', { name: /Balanced/i });
       await user.click(server2Button);
 
       const submitButton = screen.getByRole('button', {

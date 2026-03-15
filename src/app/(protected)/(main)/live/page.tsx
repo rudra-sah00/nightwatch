@@ -103,10 +103,10 @@ function LiveContent() {
               </div>
             </div>
             <h3 className="text-lg font-semibold text-zinc-300 mb-1.5">
-              Server 2 Required
+              Balanced Server Required
             </h3>
             <p className="text-sm text-zinc-600 max-w-xs leading-relaxed">
-              Select Server 2 to watch live streaming.
+              Select the Balanced server to watch live streaming.
             </p>
           </div>
         ) : isLoading || isPending ? (
