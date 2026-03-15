@@ -83,7 +83,7 @@ export function usePlayerRoot({
   initialAudioTrackId,
   onBack: onBackProp,
   isLive = false,
-  providerId,
+  providerId: _providerId,
 }: PlayerRootHookProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);

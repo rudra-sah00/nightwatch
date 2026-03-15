@@ -73,6 +73,7 @@ export function useWatchPartySidebar({
     switchAudioDevice,
     switchVideoDevice,
     localVideoTrack,
+    isConnected: isAgoraConnected,
   } = useAgora({
     token,
     appId,
@@ -111,5 +112,6 @@ export function useWatchPartySidebar({
     switchAudioDevice,
     switchVideoDevice,
     localVideoTrack,
+    isAgoraConnected,
   };
 }

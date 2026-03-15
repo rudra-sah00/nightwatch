@@ -195,8 +195,10 @@ export function ActiveWatchParty({
         />
       </div>
 
-      {/* Floating chat overlay — text-only, no background, bottom-right */}
-      {!showDesktopSidebar && floatingChatEnabled ? (
+      {/* Floating chat overlay — text-only, no background, bottom-right.
+           Always shown in theater mode so chat remains accessible without
+           a sidebar; also respects the user's personal floatingChat pref. */}
+      {isFullscreen || (!showDesktopSidebar && floatingChatEnabled) ? (
         <FloatingChat
           messages={messages}
           currentUserId={currentUserId}

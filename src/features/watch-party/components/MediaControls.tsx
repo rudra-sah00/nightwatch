@@ -47,6 +47,8 @@ interface MediaControlsProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  /** Actual Agora RTC connection state — used to show real status in the badge */
+  isAgoraConnected?: boolean;
 }
 
 /**
@@ -76,6 +78,7 @@ export function MediaControls({
   onCustomColorChange,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  isAgoraConnected = false,
 }: MediaControlsProps) {
   const {
     showAudioDevices,
@@ -181,15 +184,21 @@ export function MediaControls({
               <span className="text-sm font-bold text-white truncate max-w-[100px]">
                 {userName}
               </span>
-              <span className="text-[10px] text-success flex items-center gap-1.5 font-medium">
+              <span
+                className={`text-[10px] flex items-center gap-1.5 font-medium ${isAgoraConnected ? 'text-success' : 'text-white/40'}`}
+              >
                 <span
-                  className="w-2 h-2 rounded-full animate-pulse shadow-lg"
-                  style={{
-                    backgroundColor: 'var(--success-color-strong)',
-                    boxShadow: '0 0 6px var(--success-glow)',
-                  }}
+                  className={`w-2 h-2 rounded-full shadow-lg ${isAgoraConnected ? 'animate-pulse' : 'animate-[pulse_1.5s_ease-in-out_infinite]'}`}
+                  style={
+                    isAgoraConnected
+                      ? {
+                          backgroundColor: 'var(--success-color-strong)',
+                          boxShadow: '0 0 6px var(--success-glow)',
+                        }
+                      : { backgroundColor: 'rgba(255,255,255,0.25)' }
+                  }
                 />
-                Connected
+                {isAgoraConnected ? 'Connected' : 'Connecting…'}
               </span>
             </div>
           </div>

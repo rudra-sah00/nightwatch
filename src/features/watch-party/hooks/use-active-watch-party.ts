@@ -65,6 +65,20 @@ export function useActiveWatchParty({
     containerRef: watchPartyContainerRef,
   });
 
+  // When entering theater mode: collapse the sidebar so the video fills the
+  // screen. Save the previous state so we can restore it on exit.
+  const prevSidebarRef = useRef(true);
+  useEffect(() => {
+    if (isFullscreen) {
+      setShowDesktopSidebar((prev) => {
+        prevSidebarRef.current = prev;
+        return false;
+      });
+    } else {
+      setShowDesktopSidebar(prevSidebarRef.current);
+    }
+  }, [isFullscreen]);
+
   useWatchPartyHostSync({ videoElement, isHost, onPartyEvent });
 
   useEffect(() => {

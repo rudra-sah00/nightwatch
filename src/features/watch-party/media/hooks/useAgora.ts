@@ -613,6 +613,9 @@ export function useAgora({
       toast.error('Not connected to voice server yet. Please wait...');
       return;
     }
+    // Snapshot whether audio was enabled AT CALL TIME (ref value is live).
+    // Used in the catch block to distinguish enable-failure from disable-failure.
+    const wasEnabled = !!localAudioTrackRef.current;
     try {
       if (localAudioTrackRef.current) {
         await client.unpublish(localAudioTrackRef.current);
@@ -630,6 +633,12 @@ export function useAgora({
         refreshDevices();
       }
     } catch (error) {
+      // If we were ENABLING audio and the track was created but publish failed,
+      // close and clear the leaked track so the next toggle starts fresh.
+      if (!wasEnabled && localAudioTrackRef.current) {
+        localAudioTrackRef.current.close();
+        localAudioTrackRef.current = null;
+      }
       handleDeviceError(error, 'Microphone');
     }
   }, [refreshDevices, connectionState]);
@@ -640,6 +649,8 @@ export function useAgora({
       toast.error('Not connected to video server yet. Please wait...');
       return;
     }
+    // Snapshot whether video was enabled AT CALL TIME (ref value is live).
+    const wasEnabled = !!localVideoTrackRef.current;
     try {
       if (localVideoTrackRef.current) {
         await client.unpublish(localVideoTrackRef.current);
@@ -680,6 +691,12 @@ export function useAgora({
         refreshDevices();
       }
     } catch (error) {
+      // If we were ENABLING video and the track was created but publish failed,
+      // close and clear the leaked track so the next toggle starts fresh.
+      if (!wasEnabled && localVideoTrackRef.current) {
+        localVideoTrackRef.current.close();
+        localVideoTrackRef.current = null;
+      }
       handleDeviceError(error, 'Camera');
     }
   }, [refreshDevices, connectionState]);

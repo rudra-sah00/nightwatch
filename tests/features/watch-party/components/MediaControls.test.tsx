@@ -57,6 +57,7 @@ describe('MediaControls', () => {
       },
       createdAt: Date.now(),
     } as WatchPartyRoom,
+    isAgoraConnected: true,
   };
 
   beforeEach(() => {
@@ -76,10 +77,16 @@ describe('MediaControls', () => {
       expect(screen.getByText('J')).toBeInTheDocument();
     });
 
-    it('should show connected status', () => {
-      render(<MediaControls {...defaultProps} />);
+    it('should show connected status when Agora is connected', () => {
+      render(<MediaControls {...defaultProps} isAgoraConnected={true} />);
 
       expect(screen.getByText('Connected')).toBeInTheDocument();
+    });
+
+    it('should show connecting status when Agora is not yet connected', () => {
+      render(<MediaControls {...defaultProps} isAgoraConnected={false} />);
+
+      expect(screen.getByText('Connecting…')).toBeInTheDocument();
     });
 
     it('should truncate long user names', () => {
@@ -325,7 +332,7 @@ describe('MediaControls', () => {
     it('should handle empty username', () => {
       render(<MediaControls {...defaultProps} userName="" />);
 
-      // Should render without crashing
+      // Should render without crashing (isAgoraConnected: true in defaultProps)
       expect(screen.getByText('Connected')).toBeInTheDocument();
     });
   });

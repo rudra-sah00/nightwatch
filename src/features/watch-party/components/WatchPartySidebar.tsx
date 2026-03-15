@@ -107,6 +107,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
+    isAgoraConnected,
   } = useWatchPartySidebar({ room, currentUserId, onTabChange, onAgoraReady });
   const { theme, setTheme, customColor, setCustomColor, customVars } =
     useSidebarTheme();
@@ -247,6 +248,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         onCustomColorChange={setCustomColor}
         floatingChatEnabled={floatingChatEnabled}
         onToggleFloatingChat={onToggleFloatingChat}
+        isAgoraConnected={isAgoraConnected}
       />
     </div>
   );
