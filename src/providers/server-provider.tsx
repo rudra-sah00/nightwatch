@@ -3,7 +3,7 @@
 import type React from 'react';
 import { createContext, use, useState } from 'react';
 
-export type ServerId = 's1' | 's2';
+export type ServerId = 's1' | 's2' | 's3';
 
 interface ServerContextValue {
   activeServer: ServerId;
@@ -14,6 +14,7 @@ interface ServerContextValue {
 const SERVER_LABELS: Record<ServerId, string> = {
   s1: 'Server 1',
   s2: 'Server 2',
+  s3: 'Server 3',
 };
 
 const ServerContext = createContext<ServerContextValue>({

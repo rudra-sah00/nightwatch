@@ -53,7 +53,7 @@ export interface VideoMetadata {
   posterUrl?: string;
   description?: string;
   year?: string;
-  providerId?: 's1' | 's2';
+  providerId?: 's1' | 's2' | 's3';
   /** API-sourced duration in seconds used as fallback when video.duration is Infinity (S2 MP4). */
   apiDurationSeconds?: number;
 }

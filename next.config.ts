@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https:",
               `img-src 'self' blob: data: https: ${backendOrigin}`,
               "font-src 'self' data: https:",
-              `connect-src 'self' wss: ws: https: http: ${backendOrigin} ${backendOrigin.replace('http', 'ws')}`,
+              `connect-src 'self' data: wss: ws: https: http: ${backendOrigin} ${backendOrigin.replace('http', 'ws')}`,
               "frame-src 'self' https: blob: data:",
               "worker-src 'self' blob: https:",
               `media-src 'self' blob: data: https: ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,

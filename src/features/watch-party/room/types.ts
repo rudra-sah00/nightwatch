@@ -31,7 +31,7 @@ export interface WatchPartyRoom {
   streamUrl: string;
   posterUrl?: string;
   captionUrl?: string;
-  providerId?: 's1' | 's2';
+  providerId?: 's1' | 's2' | 's3';
   subtitleTracks?: {
     id: string;
     label: string;
@@ -81,7 +81,7 @@ export interface PartyCreatePayload {
   episode?: number;
   captionUrl?: string;
   /** Server used when the room was created — drives S2 audio track discovery */
-  providerId?: 's1' | 's2';
+  providerId?: 's1' | 's2' | 's3';
   subtitleTracks?: {
     id: string;
     label: string;

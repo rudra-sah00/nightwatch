@@ -111,10 +111,11 @@ export function UpdateProfileForm() {
         <Label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider">
           Default Server
         </Label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {[
             { id: 's1' as const, label: 'Server 1', sub: 'Standard' },
-            { id: 's2' as const, label: 'Server 2', sub: 'High Performance' },
+            { id: 's2' as const, label: 'Server 2', sub: 'Performance' },
+            { id: 's3' as const, label: 'Server 3', sub: 'HLS 4K' },
           ].map((s) => (
             <button
               key={s.id}

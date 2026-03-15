@@ -10,7 +10,7 @@ export function useUpdateProfileForm() {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
-  const [preferredServer, setPreferredServer] = useState<'s1' | 's2'>(
+  const [preferredServer, setPreferredServer] = useState<'s1' | 's2' | 's3'>(
     user?.preferredServer || 's2',
   );
   const debouncedUsername = useDebounce(username, 500);
@@ -42,7 +42,10 @@ export function useUpdateProfileForm() {
     ) => {
       const nameVal = formData.get('name') as string;
       const usernameVal = formData.get('username') as string;
-      const preferredServerVal = formData.get('preferredServer') as 's1' | 's2';
+      const preferredServerVal = formData.get('preferredServer') as
+        | 's1'
+        | 's2'
+        | 's3';
 
       if (
         nameVal.trim() === (user?.name || '') &&

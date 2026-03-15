@@ -51,7 +51,7 @@ function LiveContent() {
   return (
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
-      {activeServer !== 's1' && (
+      {activeServer === 's2' && (
         <div className="relative overflow-hidden">
           <div className="container mx-auto px-4 pt-10 pb-8">
             <div className="flex items-center justify-between mb-8">
@@ -94,7 +94,7 @@ function LiveContent() {
 
       {/* Content */}
       <div className="container mx-auto px-4 mt-2">
-        {activeServer === 's1' ? (
+        {activeServer !== 's2' ? (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <div className="relative">
               <div className="absolute inset-0 bg-zinc-700/10 rounded-2xl blur-xl" />

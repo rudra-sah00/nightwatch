@@ -571,6 +571,7 @@ describe('AuthProvider', () => {
         'test@example.com',
         '123456',
         'login',
+        undefined,
       );
 
       await waitFor(() => {

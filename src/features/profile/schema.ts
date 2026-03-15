@@ -11,7 +11,7 @@ export const updateProfileSchema = z.object({
       'Username can only contain letters, numbers, and underscores',
     )
     .optional(),
-  preferredServer: z.enum(['s1', 's2']).optional(),
+  preferredServer: z.enum(['s1', 's2', 's3']).optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

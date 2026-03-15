@@ -33,7 +33,7 @@ export function useWatchContent() {
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
-    's1') as 's1' | 's2';
+    's1') as 's1' | 's2' | 's3';
   const { setActiveServer } = useServer();
 
   useEffect(() => {
@@ -157,7 +157,10 @@ export function useWatchContent() {
           if (server === 's1') {
             applyS1Response(response);
           } else {
+            // Both S2 and S3 use absolute URLs directly without S1's local CDN token injection.
             applyS2Response(response);
+
+            // S2 Audio tracks handling
             // Propagate audio tracks so useS2AudioTracks skips its own playVideo() call.
             if (response.audioTracks && response.audioTracks.length > 0) {
               setS2InitialAudioTracks(

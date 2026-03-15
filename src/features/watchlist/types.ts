@@ -5,5 +5,5 @@ export interface WatchlistItem {
   title: string;
   posterUrl?: string;
   addedAt: string;
-  providerId?: 's1' | 's2';
+  providerId?: 's1' | 's2' | 's3';
 }

@@ -74,7 +74,7 @@ export function useContentDetail({
   useEffect(() => {
     let isMounted = true;
 
-    const providerId = (contentId.split(':')[0] || 's1') as 's1' | 's2';
+    const providerId = (contentId.split(':')[0] || 's1') as 's1' | 's2' | 's3';
 
     // Start fetching watchlist status immediately, don't wait for 'show'
     const checkStatus = async () => {
@@ -99,7 +99,7 @@ export function useContentDetail({
   const toggleWatchlist = async () => {
     if (!show) return;
 
-    const providerId = (show.id.split(':')[0] || 's1') as 's1' | 's2';
+    const providerId = (show.id.split(':')[0] || 's1') as 's1' | 's2' | 's3';
 
     // Use transition for optimistic update
     React.startTransition(async () => {

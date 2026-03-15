@@ -46,7 +46,7 @@ describe('Update Profile Schema', () => {
     ).toBe(true);
   });
 
-  it('accepts preferredServer s1 and s2 only', () => {
+  it('accepts preferredServer s1, s2, and s3 only', () => {
     expect(
       updateProfileSchema.safeParse({ preferredServer: 's1' }).success,
     ).toBe(true);
@@ -55,6 +55,9 @@ describe('Update Profile Schema', () => {
     ).toBe(true);
     expect(
       updateProfileSchema.safeParse({ preferredServer: 's3' }).success,
+    ).toBe(true);
+    expect(
+      updateProfileSchema.safeParse({ preferredServer: 's4' }).success,
     ).toBe(false);
   });
 

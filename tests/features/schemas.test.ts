@@ -131,16 +131,19 @@ describe('Profile Schema', () => {
     });
 
     it('should reject invalid preferredServer value', () => {
-      const result = updateProfileSchema.safeParse({ preferredServer: 's3' });
+      const result = updateProfileSchema.safeParse({ preferredServer: 's4' });
       expect(result.success).toBe(false);
     });
 
-    it('should accept preferredServer s1 and s2', () => {
+    it('should accept preferredServer s1, s2, and s3', () => {
       expect(
         updateProfileSchema.safeParse({ preferredServer: 's1' }).success,
       ).toBe(true);
       expect(
         updateProfileSchema.safeParse({ preferredServer: 's2' }).success,
+      ).toBe(true);
+      expect(
+        updateProfileSchema.safeParse({ preferredServer: 's3' }).success,
       ).toBe(true);
     });
   });

@@ -216,13 +216,15 @@ export function setProgressCache(
   });
 }
 
-/** Infer the provider ('s1' or 's2') from a content/series ID prefix.
+/** Infer the provider ('s1', 's2', or 's3') from a content/series ID prefix.
  * Handles both decoded ('s2:...') and URL-encoded ('s2%3A...') IDs. */
-function inferProviderFromId(id: string): 's1' | 's2' {
+function inferProviderFromId(id: string): 's1' | 's2' | 's3' {
   try {
     const decoded = decodeURIComponent(id);
+    if (decoded.startsWith('s3:')) return 's3';
     return decoded.startsWith('s2:') ? 's2' : 's1';
   } catch {
+    if (id.startsWith('s3:')) return 's3';
     return id.startsWith('s2:') ? 's2' : 's1';
   }
 }

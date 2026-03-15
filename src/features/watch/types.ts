@@ -13,8 +13,8 @@ export interface WatchProgress {
   remainingSeconds: number;
   remainingMinutes: number;
   lastWatchedAt: string;
-  /** Which server this progress entry was saved for ('s1' or 's2') */
-  providerId?: 's1' | 's2';
+  /** Which server this progress entry was saved for ('s1', 's2', or 's3') */
+  providerId?: 's1' | 's2' | 's3';
   // Series specific
   episodeId?: string;
   seasonNumber?: number;

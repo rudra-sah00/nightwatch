@@ -41,10 +41,24 @@ export function useSubtitleOverlay({
         const textTracks = video.textTracks;
         let targetTrack: TextTrack | undefined;
 
+        // Try to find exact match by ID first
         for (let i = 0; i < textTracks.length; i++) {
-          if (textTracks[i].id === currentTrackId) {
-            targetTrack = textTracks[i];
+          const t = textTracks[i];
+          if (t.id === currentTrackId) {
+            targetTrack = t;
             break;
+          }
+        }
+
+        // Fallback: search by tracking state order or label if ID was stripped (Chromium bug)
+        if (!targetTrack && currentTrackId && currentTrackId !== 'off') {
+          for (let i = 0; i < textTracks.length; i++) {
+            const t = textTracks[i];
+            // If a track's mode became 'hidden', it's the one use-video-element activated!
+            if (t.mode === 'hidden') {
+              targetTrack = t;
+              break;
+            }
           }
         }
 

@@ -26,7 +26,7 @@ interface UseNextEpisodeOptions {
   isPlaying: boolean;
   onNavigate: (url: string) => void;
   /** Explicit server ID — pass metadata.providerId from PlayerRoot for reliability */
-  server?: 's1' | 's2';
+  server?: 's1' | 's2' | 's3';
 }
 
 interface UseNextEpisodeReturn {

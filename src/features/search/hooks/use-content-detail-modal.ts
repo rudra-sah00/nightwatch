@@ -103,14 +103,23 @@ export function useContentDetailModal({
   // Auto-play trailer if available
   useEffect(() => {
     let stopped = false;
-    if (show?.trailers && show.trailers.length > 0 && !isPlaying && !stopped) {
+    const isServer3 = contentId.startsWith('s3:');
+
+    // For Server 3, we show the photo poster instead of playing the video/trailer in the modal background.
+    if (
+      !isServer3 &&
+      show?.trailers &&
+      show.trailers.length > 0 &&
+      !isPlaying &&
+      !stopped
+    ) {
       setShowTrailer(true);
     }
     return () => {
       stopped = true;
       setShowTrailer(false);
     };
-  }, [show, isPlaying]);
+  }, [show, isPlaying, contentId]);
 
   // Block body scroll when modal is open
   useEffect(() => {
