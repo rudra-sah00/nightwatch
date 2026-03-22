@@ -4,7 +4,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getSearchSuggestions } from '@/features/search/api';
-// Search history removed per user request
 import { useServer } from '@/providers/server-provider';
 
 export function useSearchInput() {
@@ -167,7 +166,6 @@ export function useSearchInput() {
   // Derived display state
   const hasSuggestions = suggestions.length > 0 && !isSearchPage;
   const showSuggestions = isOpen && hasSuggestions;
-  const showHistory = false; // Disabled
 
   return {
     containerRef,
@@ -178,7 +176,6 @@ export function useSearchInput() {
     isPending,
     isOpen,
     showSuggestions,
-    showHistory,
     hasSuggestions,
     handleFocus,
     handleBlur,

@@ -1,10 +1,5 @@
 import { apiFetch } from '@/lib/fetch';
-import type {
-  Episode,
-  SearchHistory,
-  SearchResult,
-  ShowDetails,
-} from './types';
+import type { Episode, SearchResult, ShowDetails } from './types';
 
 /**
  * Internal caching utilities for search requests.
@@ -30,58 +25,6 @@ function cleanupCache<T>(cache: Map<string, CacheEntry<T>>, maxSize: number) {
       }
     }
   }
-}
-
-/**
- * Search history retrieval and management.
- */
-
-// Search history cache (5 minutes)
-const searchHistoryCache = createCache<SearchHistory[]>();
-const SEARCH_HISTORY_CACHE_TTL = 5 * 60 * 1000;
-
-export async function getSearchHistory(
-  options?: RequestInit,
-): Promise<SearchHistory[]> {
-  const cacheKey = 'history';
-  const cached = searchHistoryCache.get(cacheKey);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.data;
-  }
-
-  const { history } = await apiFetch<{ history: SearchHistory[] }>(
-    '/api/video/history',
-    options,
-  );
-  searchHistoryCache.set(cacheKey, {
-    data: history,
-    expiry: Date.now() + SEARCH_HISTORY_CACHE_TTL,
-  });
-  return history;
-}
-
-// Invalidate search history cache (call after search or delete)
-export function invalidateSearchHistoryCache(): void {
-  searchHistoryCache.clear();
-}
-
-export async function deleteSearchHistoryItem(
-  id: string,
-  options?: RequestInit,
-): Promise<void> {
-  await apiFetch(`/api/video/history/${id}`, {
-    method: 'DELETE',
-    ...options,
-  });
-  invalidateSearchHistoryCache();
-}
-
-export async function clearSearchHistory(options?: RequestInit): Promise<void> {
-  await apiFetch('/api/video/history', {
-    method: 'DELETE',
-    ...options,
-  });
-  invalidateSearchHistoryCache();
 }
 
 /**
@@ -114,9 +57,6 @@ export async function searchContent(
     expiry: Date.now() + SEARCH_CACHE_TTL,
   });
   cleanupCache(searchResultsCache, 100);
-
-  // Invalidate search history as new search was made
-  invalidateSearchHistoryCache();
 
   return results;
 }

@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  clearSearchHistory,
-  deleteSearchHistoryItem,
-  getSearchHistory,
   getSearchSuggestions,
   getSeriesEpisodes,
   getShowDetails,
-  invalidateSearchHistoryCache,
   searchContent,
 } from '@/features/search/api';
 import { apiFetch } from '@/lib/fetch';
@@ -18,100 +14,6 @@ describe('Search API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Clear all caches
-    invalidateSearchHistoryCache();
-  });
-
-  describe('getSearchHistory', () => {
-    it('should fetch search history', async () => {
-      const mockHistory = [
-        { id: '1', query: 'test', timestamp: '2024-01-01' },
-        { id: '2', query: 'movie', timestamp: '2024-01-02' },
-      ];
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: mockHistory });
-
-      const result = await getSearchHistory();
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/history', undefined);
-      expect(result).toEqual(mockHistory);
-    });
-
-    it('should cache search history', async () => {
-      const mockHistory = [{ id: '1', query: 'test', timestamp: '2024-01-01' }];
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: mockHistory });
-
-      // First call
-      await getSearchHistory();
-      expect(apiFetch).toHaveBeenCalledTimes(1);
-
-      // Second call should use cache
-      await getSearchHistory();
-      expect(apiFetch).toHaveBeenCalledTimes(1);
-    });
-
-    it('should pass options to apiFetch', async () => {
-      const mockHistory: unknown[] = [];
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: mockHistory });
-
-      const options = { signal: new AbortController().signal };
-      await getSearchHistory(options);
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/history', options);
-    });
-  });
-
-  describe('deleteSearchHistoryItem', () => {
-    it('should delete search history item', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-
-      await deleteSearchHistoryItem('123');
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/history/123', {
-        method: 'DELETE',
-      });
-    });
-
-    it('should invalidate cache after delete', async () => {
-      const mockHistory = [{ id: '1', query: 'test', timestamp: '2024-01-01' }];
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: mockHistory });
-      await getSearchHistory();
-
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-      await deleteSearchHistoryItem('1');
-
-      // Cache should be invalidated, so next call fetches again
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: [] });
-      await getSearchHistory();
-
-      expect(apiFetch).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('clearSearchHistory', () => {
-    it('should clear all search history', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-
-      await clearSearchHistory();
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/history', {
-        method: 'DELETE',
-      });
-    });
-
-    it('should pass options', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-
-      const options = { signal: new AbortController().signal };
-      await clearSearchHistory(options);
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/history', {
-        method: 'DELETE',
-        signal: options.signal,
-      });
-    });
   });
 
   describe('searchContent', () => {
@@ -213,23 +115,6 @@ describe('Search API', () => {
         '/api/video/episodes/series-123?start_season_id=season-2',
         undefined,
       );
-    });
-  });
-
-  describe('invalidateSearchHistoryCache', () => {
-    it('should clear search history cache', async () => {
-      const mockHistory = [{ id: '1', query: 'test', timestamp: '2024-01-01' }];
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: mockHistory });
-      await getSearchHistory();
-
-      invalidateSearchHistoryCache();
-
-      // Should fetch again after invalidation
-      vi.mocked(apiFetch).mockResolvedValueOnce({ history: [] });
-      await getSearchHistory();
-
-      expect(apiFetch).toHaveBeenCalledTimes(2);
     });
   });
 
