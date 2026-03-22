@@ -23,8 +23,10 @@ describe('BufferingOverlay', () => {
     it('should render spinner', () => {
       const { container } = render(<BufferingOverlay isVisible={true} />);
 
-      // Loader2 icon should be present with animate-spin
-      expect(container.querySelector('.animate-spin')).toBeInTheDocument();
+      // Loader icon should be present with animation
+      expect(
+        container.querySelector('[class*="animate-"]'),
+      ).toBeInTheDocument();
     });
 
     it('should have pointer-events-none', () => {

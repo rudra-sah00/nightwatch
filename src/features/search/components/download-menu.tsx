@@ -1,15 +1,16 @@
 'use client';
 
-import { Check, ChevronDown, Download, Loader2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Check, ChevronDown, Download, Loader2, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { apiFetch } from '@/lib/fetch';
+import { cn } from '@/lib/utils';
 import {
   ContentType,
   type Episode,
@@ -58,9 +59,14 @@ function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 
 function qualityColor(q: string): string {
   if (q === '1080p')
-    return 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10';
-  if (q === '720p') return 'text-blue-400 border-blue-500/40 bg-blue-500/10';
-  return 'text-zinc-400 border-zinc-700/50 bg-zinc-800/40';
+    return 'bg-[#ffcc00] text-[#1a1a1a] border-[#1a1a1a] neo-shadow-sm';
+  if (q === '720p')
+    return 'bg-[#0055ff] text-white border-[#1a1a1a] neo-shadow-sm';
+  return 'bg-white text-[#1a1a1a] border-[#1a1a1a] neo-shadow-sm';
+}
+
+function sanitizeFilename(name: string): string {
+  return name.replace(/[^a-z0-9]/gi, '_').replace(/_{2,}/g, '_');
 }
 
 // ─── Episode Item ────────────────────────────────────────────────────────────
@@ -69,12 +75,14 @@ interface EpisodeDownloadItemProps {
   episode: Episode;
   contentId: string;
   seasonNumber: number;
+  showTitle: string;
 }
 
 function EpisodeDownloadItem({
   episode,
   contentId,
   seasonNumber,
+  showTitle,
 }: EpisodeDownloadItemProps) {
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -105,56 +113,68 @@ function EpisodeDownloadItem({
     }
   }, [isExpanded, qualities, contentId, seasonNumber, episode.episodeNumber]);
 
+  useEffect(() => {
+    // Reset qualities when contentId or isExpanded changes
+    if (contentId || isExpanded) {
+      setQualities(null);
+      setDownloaded(null);
+    }
+  }, [contentId, isExpanded]);
+
   const triggerDownload = (quality: string) => {
     setDownloaded(quality);
+    setTimeout(() => setDownloaded(null), 3000);
   };
 
   return (
-    <div className="border border-zinc-800/50 rounded-lg overflow-hidden">
+    <div className="border border-transparent mb-2">
       <button
         type="button"
         onClick={handleExpand}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-800/30 transition-colors text-left"
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-[#f5f0e8] transition-all duration-200 text-left border-[3px] border-[#1a1a1a] bg-white"
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-zinc-500 w-6 tabular-nums">
-            E{episode.episodeNumber}
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-black font-headline uppercase tracking-tighter text-[#1a1a1a] bg-[#ffe066] px-2 py-0.5 border-2 border-[#1a1a1a]">
+            EP {episode.episodeNumber}
           </span>
-          <span className="text-sm text-zinc-200 truncate max-w-[240px]">
-            {episode.title || `Episode ${episode.episodeNumber}`}
+          <span className="text-sm font-headline font-black uppercase text-[#1a1a1a] truncate">
+            {episode.title || `EPISODE ${episode.episodeNumber}`}
           </span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-[#1a1a1a] flex-shrink-0 transition-transform duration-200 stroke-[3px] ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-3 pt-1 border-t border-zinc-800/30 bg-zinc-900/30">
+        <div className="px-6 pb-4 pt-2 border-x-[3px] border-b-[3px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow-sm ml-2 mr-2 -mt-1 relative z-0">
           {isLoading ? (
-            <div className="flex items-center gap-2 py-2 text-zinc-500 text-xs">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Fetching links…
+            <div className="flex items-center gap-2 py-2 text-[#1a1a1a] text-xs font-headline font-black uppercase">
+              <Loader2 className="w-4 h-4 animate-spin stroke-[3px]" />
+              FETCHING LINKS…
             </div>
           ) : !qualities || qualities.length === 0 ? (
-            <p className="text-xs text-zinc-600 py-2">
-              No download links available.
+            <p className="text-xs font-headline font-black uppercase text-[#e63b2e] py-2">
+              NO DOWNLOAD LINKS AVAILABLE.
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap gap-3 pt-2">
               {qualities.map((q) => (
                 <a
                   key={q.quality}
                   href={q.url}
-                  download
+                  download={`${sanitizeFilename(showTitle)}_S${seasonNumber}E${episode.episodeNumber}_${q.quality}.mp4`}
                   referrerPolicy="no-referrer"
                   onClick={() => triggerDownload(q.quality)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-semibold transition-all duration-150 hover:opacity-80 active:scale-95 ${qualityColor(q.quality)}`}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-4 py-2 border-[2px] text-xs font-headline font-black uppercase transition-all duration-150 active:scale-95 no-underline',
+                    qualityColor(q.quality),
+                  )}
                 >
                   {downloaded === q.quality ? (
-                    <Check className="w-3 h-3" />
+                    <Check className="w-3.5 h-3.5 stroke-[3px]" />
                   ) : (
-                    <Download className="w-3 h-3" />
+                    <Download className="w-3.5 h-3.5 stroke-[3px]" />
                   )}
                   {q.quality}
                 </a>
@@ -183,12 +203,16 @@ export function DownloadMenu({
   episodes = EMPTY_EPISODES,
 }: DownloadMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedDubId, setSelectedDubId] = useState<string>(show.id);
+  const [selectedDubType, setSelectedDubType] = useState<ContentType>(
+    show.contentType,
+  );
 
   // Only Server 2 content supports downloads
   const isS2 = show.id.startsWith('s2:') || show.id.includes('::');
   if (!isS2) return null;
 
-  const isSeries = show.contentType === ContentType.Series;
+  const isSeries = selectedDubType === ContentType.Series;
   const seasonNumber = selectedSeason?.seasonNumber ?? 1;
   const seasonEpisodes = episodes.filter(
     (e) => !e.seasonNumber || e.seasonNumber === seasonNumber,
@@ -196,35 +220,90 @@ export function DownloadMenu({
 
   return (
     <>
-      <Button
-        size="lg"
-        variant="outline"
-        className="gap-2.5 px-6 py-4 md:px-8 md:py-6 text-base md:text-lg font-semibold shadow-lg border-zinc-700/60 hover:bg-zinc-800/60 text-zinc-200 transition-colors"
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
+        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
       >
-        <Download className="w-5 h-5" />
-        Download
-      </Button>
+        <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+        DOWNLOAD
+      </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-zinc-950 border-zinc-800/80 max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-white text-lg flex items-center gap-2.5">
-              <Download className="w-5 h-5 text-zinc-400" />
-              Download
-            </DialogTitle>
-            <p className="text-zinc-500 text-sm mt-1 truncate">{show.title}</p>
+        <DialogContent
+          showCloseButton={false}
+          className="fixed z-[150] bg-white border-[4px] border-[#1a1a1a] neo-shadow-yellow max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0"
+        >
+          <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 bg-[#f5f0e8] border-b-[4px] border-[#1a1a1a] flex-row items-center justify-between space-y-0">
+            <div className="flex flex-col gap-0.5 truncate pr-4 text-left">
+              <DialogTitle className="text-[#1a1a1a] text-lg sm:text-xl font-headline font-black uppercase tracking-widest flex items-center gap-3 leading-none">
+                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-[#1a1a1a] stroke-[3px]" />
+                DOWNLOAD
+              </DialogTitle>
+              <p className="text-[#4a4a4a] text-[10px] sm:text-xs font-headline font-bold uppercase tracking-widest truncate opacity-80">
+                {show.title}
+              </p>
+            </div>
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="p-2 border-[4px] border-[#1a1a1a] bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5 stroke-[3px]" />
+              </button>
+            </DialogClose>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto -mx-6 px-6 pb-2">
+          <div className="flex-1 overflow-y-auto p-6 bg-white no-scrollbar">
+            {/* Dub/Language Selector */}
+            {show.dubs && show.dubs.length > 1 && (
+              <div className="mb-8 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-6 bg-[#0055ff] border-2 border-[#1a1a1a]" />
+                  <span className="text-xs font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+                    SELECT LANGUAGE
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {show.dubs.map((dub) => {
+                    const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
+                    const isSelected = selectedDubId === dubId;
+                    return (
+                      <button
+                        key={dubId}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDubId(dubId);
+                          setSelectedDubType(dub.contentType);
+                        }}
+                        className={cn(
+                          'px-4 py-2 border-[2px] border-[#1a1a1a] font-headline font-black uppercase text-xs tracking-widest transition-all duration-150 active:scale-95',
+                          isSelected
+                            ? 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm'
+                            : 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]',
+                        )}
+                      >
+                        {dub.lanName}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {!isSeries ? (
-              <MovieDownloadSection contentId={show.id} />
+              <MovieDownloadSection
+                contentId={selectedDubId}
+                showTitle={show.title}
+              />
             ) : (
               <SeriesDownloadSection
-                contentId={show.id}
+                contentId={selectedDubId}
                 seasonNumber={seasonNumber}
                 seasonEpisodes={seasonEpisodes}
                 allSeasonEpisodes={episodes}
+                showTitle={show.title}
               />
             )}
           </div>
@@ -236,10 +315,23 @@ export function DownloadMenu({
 
 // ─── Movie Download Section ──────────────────────────────────────────────────
 
-function MovieDownloadSection({ contentId }: { contentId: string }) {
+function MovieDownloadSection({
+  contentId,
+  showTitle,
+}: {
+  contentId: string;
+  showTitle: string;
+}) {
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (contentId) {
+      setQualities(null);
+      setDownloaded(null);
+    }
+  }, [contentId]);
 
   const loadQualities = useCallback(async () => {
     if (qualities !== null) return;
@@ -254,77 +346,81 @@ function MovieDownloadSection({ contentId }: { contentId: string }) {
     }
   }, [contentId, qualities]);
 
-  // Load on mount
+  // Load on mount or when reset
   if (qualities === null && !isLoading) {
     loadQualities();
   }
 
   const triggerDownload = (quality: string) => {
     setDownloaded(quality);
+    setTimeout(() => setDownloaded(null), 3000);
   };
 
   return (
-    <div className="pt-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="w-1 h-4 rounded-full bg-zinc-600" />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-          Select Quality
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-6 bg-[#ffcc00] border-2 border-[#1a1a1a]" />
+        <span className="text-xs font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+          SELECT QUALITY
         </span>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center gap-3 py-6 justify-center">
-          <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
-          <span className="text-sm text-zinc-500">
-            Fetching download links…
+        <div className="flex flex-col items-center gap-4 py-12 justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-[#1a1a1a] stroke-[3px]" />
+          <span className="text-sm font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+            FETCHING DOWNLOAD LINKS…
           </span>
         </div>
       ) : !qualities || qualities.length === 0 ? (
-        <div className="py-8 text-center">
-          <p className="text-sm text-zinc-600">
-            No download links available for this title.
+        <div className="py-8 text-center border-[3px] border-dashed border-[#1a1a1a]/20">
+          <p className="text-sm font-headline font-black uppercase text-[#4a4a4a]">
+            NO DOWNLOAD LINKS AVAILABLE FOR THIS TITLE.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-4">
           {qualities.map((q) => (
             <a
               key={q.quality}
               href={q.url}
-              download
+              download={`${sanitizeFilename(showTitle)}_${q.quality}.mp4`}
               referrerPolicy="no-referrer"
               onClick={() => triggerDownload(q.quality)}
-              className={`flex items-center justify-between w-full px-5 py-3.5 rounded-xl border transition-all duration-150 hover:opacity-90 active:scale-[0.98] no-underline ${qualityColor(q.quality)}`}
+              className={cn(
+                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-[#1a1a1a] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:neo-shadow active:scale-[0.98] no-underline',
+                qualityColor(q.quality),
+              )}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {downloaded === q.quality ? (
-                  <Check className="w-4 h-4" />
+                  <Check className="w-5 h-5 stroke-[4px]" />
                 ) : (
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5 stroke-[4px]" />
                 )}
-                <span className="text-sm font-semibold">
+                <span className="text-lg font-headline font-black uppercase tracking-tight">
                   {q.quality}
-                  <span className="ml-2 text-xs font-normal opacity-60">
+                  <span className="ml-3 text-xs font-bold opacity-60">
                     {q.quality === '1080p'
-                      ? 'Full HD'
+                      ? 'FULL HD'
                       : q.quality === '720p'
                         ? 'HD'
                         : q.quality === '480p'
                           ? 'SD'
-                          : 'Low'}
+                          : 'LOW'}
                   </span>
                 </span>
               </div>
-              <span className="text-[11px] opacity-50">
-                {downloaded === q.quality ? 'Downloading…' : 'MP4'}
+              <span className="text-xs font-black font-headline uppercase tracking-widest opacity-80">
+                {downloaded === q.quality ? 'DOWNLOADING…' : 'MP4'}
               </span>
             </a>
           ))}
         </div>
       )}
 
-      <p className="text-[11px] text-zinc-700 leading-relaxed pt-2">
-        Downloads are served directly from the content CDN.
+      <p className="text-[10px] text-[#4a4a4a] font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-[#1a1a1a]/10">
+        DOWNLOADS ARE SERVED DIRECTLY FROM THE CONTENT CDN.
       </p>
     </div>
   );
@@ -337,18 +433,20 @@ interface SeriesDownloadSectionProps {
   seasonNumber: number;
   seasonEpisodes: Episode[];
   allSeasonEpisodes: Episode[];
+  showTitle: string;
 }
 
 function SeriesDownloadSection({
   contentId,
   seasonNumber,
   seasonEpisodes,
+  showTitle,
 }: SeriesDownloadSectionProps) {
   return (
-    <div className="pt-4 space-y-1.5">
+    <div className="space-y-3">
       {seasonEpisodes.length === 0 ? (
-        <p className="text-sm text-zinc-600 py-4 text-center">
-          No episodes found.
+        <p className="text-sm font-headline font-black uppercase text-[#4a4a4a] py-8 text-center border-[3px] border-dashed border-[#1a1a1a]/10">
+          NO EPISODES FOUND.
         </p>
       ) : (
         seasonEpisodes.map((ep) => (
@@ -357,6 +455,7 @@ function SeriesDownloadSection({
             episode={ep}
             contentId={contentId}
             seasonNumber={seasonNumber}
+            showTitle={showTitle}
           />
         ))
       )}

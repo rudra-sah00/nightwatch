@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useLiveMatchPlayer } from '@/features/livestream/hooks/use-live-match-player';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import { env } from '@/lib/env';
-import { useLiveMatchPlayer } from './use-live-match-player';
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();

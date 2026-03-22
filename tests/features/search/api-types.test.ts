@@ -3,7 +3,7 @@ import type {
   PlayMovieParams,
   PlayParams,
   PlaySeriesParams,
-} from '@/features/search/api';
+} from '@/types/content';
 
 describe('PlayMovieParams Type', () => {
   it('creates valid movie play params', () => {

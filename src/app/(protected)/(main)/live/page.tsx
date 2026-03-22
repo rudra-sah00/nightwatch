@@ -1,17 +1,9 @@
 'use client';
 
-import {
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Loader2,
-  Radio,
-  Server,
-} from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, Loader2, Radio } from 'lucide-react';
 import { Suspense } from 'react';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
-import { useServer } from '@/providers/server-provider';
 import { useLiveContent } from './use-live-content';
 
 const SPORTS = [
@@ -22,7 +14,6 @@ const SPORTS = [
 
 function LiveContent() {
   const { activeTab, isPending, handleTabChange } = useLiveContent();
-  const { activeServer } = useServer();
 
   const { schedule, isLoading, error, refresh } = useLivestreams(activeTab);
 
@@ -49,36 +40,39 @@ function LiveContent() {
   const activeSport = SPORTS.find((s) => s.id === activeTab);
 
   return (
-    <div className="min-h-screen pb-32">
+    <div className="min-h-[calc(100vh-80px)] bg-[#f5f0e8] pb-32">
       {/* Hero Header */}
-      {activeServer === 's2' && (
-        <div className="relative overflow-hidden">
-          <div className="container mx-auto px-4 pt-10 pb-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Radio className="w-5 h-5 text-zinc-400" />
-                  <h1 className="text-3xl font-bold tracking-tight text-white">
-                    Live Sports
-                  </h1>
-                </div>
-                <p className="text-sm text-zinc-500 pl-8">
-                  Watch live matches and upcoming schedules
-                </p>
-              </div>
+      <div className="border-b-[4px] border-[#1a1a1a] mb-12 bg-[#ffcc00] relative overflow-hidden">
+        {/* Abstract background shapes */}
+        <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-[#1a1a1a] rounded-full opacity-20" />
+        <div className="absolute top-10 left-1/4 w-24 h-24 bg-[#e63b2e] border-[4px] border-[#1a1a1a] opacity-30 rotate-12" />
+
+        <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
+          <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+            <div>
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-[#1a1a1a] font-headline uppercase leading-none mb-4">
+                LIVE
+                <br />
+                <span className="bg-white px-4 inline-block border-[4px] border-[#1a1a1a] neo-shadow-sm -rotate-1 ml-2 mt-2">
+                  STYLE
+                </span>
+              </h1>
+              <p className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a] bg-white inline-block px-4 py-2 border-[3px] border-[#1a1a1a]">
+                Form Follows Action
+              </p>
             </div>
 
             {/* Sport Selector Tabs */}
-            <div className="flex gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800/50 w-fit backdrop-blur-sm">
+            <div className="flex flex-wrap gap-3 bg-white border-[4px] border-[#1a1a1a] p-3 neo-shadow-sm h-fit">
               {SPORTS.map((sport) => (
                 <button
                   type="button"
                   key={sport.id}
                   onClick={() => handleTabChange(sport.id)}
-                  className={`relative px-5 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`px-6 py-3 font-headline font-black text-sm md:text-base uppercase tracking-widest transition-all duration-200 border-[3px] border-[#1a1a1a] ${
                     activeTab === sport.id
-                      ? 'bg-white text-black shadow-lg shadow-white/5'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
+                      ? 'bg-[#1a1a1a] text-[#ffcc00] translate-x-[2px] translate-y-[2px] shadow-none'
+                      : 'bg-white text-[#1a1a1a] neo-shadow-hover hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
                   }`}
                 >
                   {sport.label}
@@ -86,95 +80,63 @@ function LiveContent() {
               ))}
             </div>
           </div>
-
-          {/* Subtle divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent" />
         </div>
-      )}
+      </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 mt-2">
-        {activeServer !== 's2' ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-zinc-700/10 rounded-2xl blur-xl" />
-              <div className="relative w-16 h-16 rounded-2xl bg-zinc-900/80 flex items-center justify-center mb-5 border border-zinc-800/80 backdrop-blur-sm">
-                <Server className="w-7 h-7 text-zinc-600" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-300 mb-1.5">
-              Balanced Server Required
-            </h3>
-            <p className="text-sm text-zinc-600 max-w-xs leading-relaxed">
-              Select the Balanced server to watch live streaming.
+      <div className="container mx-auto px-6 md:px-10">
+        {isLoading || isPending ? (
+          <div className="flex flex-col items-center justify-center py-32">
+            <Loader2 className="w-16 h-16 text-[#1a1a1a] animate-spin mb-6" />
+            <p className="font-headline font-black uppercase text-2xl tracking-widest text-[#1a1a1a]">
+              Loading {activeSport?.label || 'matches'}...
             </p>
           </div>
-        ) : isLoading || isPending ? (
-          <div className="flex items-center justify-center py-32">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-zinc-500/10 rounded-full blur-lg" />
-                <Loader2 className="relative w-7 h-7 text-zinc-500 animate-spin" />
-              </div>
-              <p className="text-sm text-zinc-500">
-                Loading {activeSport?.label || 'matches'}...
-              </p>
-            </div>
-          </div>
         ) : error ? (
-          <div className="py-20 text-center">
-            <div className="inline-flex flex-col items-center bg-zinc-900/60 border border-zinc-800/50 rounded-2xl px-10 py-8 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800/80 flex items-center justify-center mb-4 border border-zinc-700/40">
-                <Radio className="w-4 h-4 text-zinc-500" />
-              </div>
-              <p className="text-zinc-400 text-sm font-medium mb-4">
-                Failed to load schedule
+          <div className="py-20 text-center flex flex-col items-center">
+            <div className="bg-[#e63b2e] border-[4px] border-[#1a1a1a] neo-shadow px-10 py-12 max-w-lg w-full flex flex-col items-center">
+              <Radio className="w-12 h-12 text-[#1a1a1a] mb-6" />
+              <p className="font-headline font-black text-2xl uppercase tracking-tighter text-[#1a1a1a] mb-8 bg-white px-4 py-2 border-[4px] border-[#1a1a1a]">
+                Failed to Load Schedule
               </p>
               <button
                 type="button"
                 onClick={refresh}
-                className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors"
+                className="bg-white text-[#1a1a1a] border-[4px] border-[#1a1a1a] px-8 py-4 font-headline text-xl font-black uppercase tracking-widest neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
               >
-                Try again
+                Try Again
               </button>
             </div>
           </div>
         ) : schedule.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-zinc-700/10 rounded-2xl blur-xl" />
-              <div className="relative w-16 h-16 rounded-2xl bg-zinc-900/80 flex items-center justify-center mb-5 border border-zinc-800/80">
-                <Calendar className="w-7 h-7 text-zinc-600" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-300 mb-1.5">
+          <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-[#1a1a1a] neo-shadow text-center max-w-2xl mx-auto">
+            <Calendar className="w-20 h-20 text-[#0055ff] mb-6" />
+            <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] mb-4">
               No Matches Found
             </h3>
-            <p className="text-sm text-zinc-600 max-w-xs leading-relaxed">
+            <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a] max-w-md">
               No {activeSport?.label?.toLowerCase()} matches scheduled for the
               upcoming days.
             </p>
           </div>
         ) : (
-          <div className="space-y-12 pt-4">
+          <div className="space-y-16">
             {/* LIVE NOW Section */}
             {liveMatches.length > 0 && (
               <section>
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-live-strong" />
+                <div className="flex items-center gap-4 mb-8 bg-[#e63b2e] border-[4px] border-[#1a1a1a] px-5 py-3 inline-flex bg-opacity-100 neo-shadow-sm">
+                  <span className="relative flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full bg-white opacity-75" />
+                    <span className="relative inline-flex h-4 w-4 bg-[#f5f0e8] border-[3px] border-[#1a1a1a]" />
                   </span>
-                  <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-live">
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
                     Live Now
                   </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-live-strong/20 to-transparent" />
-                  <span className="text-[11px] text-zinc-600 tabular-nums font-medium">
-                    {liveMatches.length}{' '}
-                    {liveMatches.length === 1 ? 'match' : 'matches'}
+                  <span className="bg-white text-[#1a1a1a] px-2 py-0.5 border-[3px] border-[#1a1a1a] text-lg font-black font-headline">
+                    {liveMatches.length}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                   {liveMatches.map((match) => (
                     <LiveMatchCard
                       key={match.id}
@@ -189,14 +151,13 @@ function LiveContent() {
             {/* UPCOMING Section */}
             {Object.keys(upcomingByDate).length > 0 && (
               <section>
-                <div className="flex items-center gap-3 mb-5">
-                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                  <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-zinc-400">
+                <div className="flex items-center gap-4 mb-8 bg-[#0055ff] border-[4px] border-[#1a1a1a] px-5 py-3 inline-flex neo-shadow-sm">
+                  <Clock className="w-6 h-6 text-white stroke-[3px]" />
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
                     Upcoming
                   </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-zinc-800/60 to-transparent" />
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-8">
                   {Object.entries(upcomingByDate).map(([date, matches]) => {
                     const isToday =
                       new Date().toLocaleDateString([], {
@@ -207,19 +168,21 @@ function LiveContent() {
                     return (
                       <div
                         key={date}
-                        className="rounded-xl border border-zinc-800/50 bg-zinc-900/20 overflow-hidden"
+                        className="bg-white border-[4px] border-[#1a1a1a] neo-shadow"
                       >
-                        <div className="px-5 py-3 bg-zinc-900/50 border-b border-zinc-800/30 flex items-center gap-2">
-                          <Calendar className="w-3 h-3 text-zinc-600" />
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                            {isToday ? 'Today' : date}
-                          </span>
-                          <span className="text-[10px] text-zinc-700 ml-auto tabular-nums">
+                        <div className="px-6 py-4 bg-[#f5f0e8] border-b-[4px] border-[#1a1a1a] flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-6 h-6 text-[#1a1a1a] stroke-[3px]" />
+                            <span className="text-xl md:text-2xl font-black uppercase tracking-widest text-[#1a1a1a] font-headline mt-1">
+                              {isToday ? 'Today' : date}
+                            </span>
+                          </div>
+                          <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
                             {matches.length}{' '}
-                            {matches.length === 1 ? 'match' : 'matches'}
+                            {matches.length === 1 ? 'Match' : 'Matches'}
                           </span>
                         </div>
-                        <div className="divide-y divide-zinc-800/20">
+                        <div className="divide-y-[3px] divide-[#1a1a1a]">
                           {matches.map((match) => (
                             <LiveMatchCard
                               key={match.id}
@@ -238,19 +201,18 @@ function LiveContent() {
             {/* ENDED Section */}
             {endedMatches.length > 0 && (
               <section>
-                <div className="flex items-center gap-3 mb-5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-zinc-600">
+                <div className="flex items-center gap-4 mb-8 bg-[#1a1a1a] border-[4px] border-[#1a1a1a] px-5 py-3 inline-flex neo-shadow-sm">
+                  <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
                     Completed
                   </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-zinc-800/40 to-transparent" />
-                  <span className="text-[11px] text-zinc-700 tabular-nums font-medium">
+                  <span className="bg-[#4a4a4a] text-white px-3 py-1 border-[3px] border-[#f5f0e8] text-sm font-black font-headline uppercase tracking-widest">
                     {endedMatches.length}{' '}
-                    {endedMatches.length === 1 ? 'match' : 'matches'}
+                    {endedMatches.length === 1 ? 'Match' : 'Matches'}
                   </span>
                 </div>
-                <div className="rounded-xl border border-zinc-800/30 bg-zinc-900/15 overflow-hidden">
-                  <div className="divide-y divide-zinc-800/15">
+                <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow">
+                  <div className="divide-y-[3px] divide-[#1a1a1a]">
                     {endedMatches.map((match) => (
                       <LiveMatchCard
                         key={match.id}
@@ -273,24 +235,11 @@ export default function LivePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen pb-32">
-          <div className="container mx-auto px-4 pt-10">
-            <div className="flex items-center gap-3 mb-8">
-              <Radio className="w-5 h-5 text-zinc-400" />
-              <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
-            </div>
-            <div className="flex gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800/50 w-fit mb-10">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-9 w-24 rounded-lg bg-zinc-800/60 animate-pulse"
-                />
-              ))}
-            </div>
-            <div className="flex items-center justify-center py-32">
-              <Loader2 className="w-7 h-7 text-zinc-500 animate-spin" />
-            </div>
-          </div>
+        <div className="min-h-[calc(100vh-80px)] bg-[#f5f0e8] pb-32 flex flex-col items-center justify-center">
+          <Loader2 className="w-16 h-16 text-[#1a1a1a] animate-spin mb-6" />
+          <p className="font-headline font-black uppercase text-2xl tracking-widest text-[#1a1a1a]">
+            Loading Live Hub...
+          </p>
         </div>
       }
     >

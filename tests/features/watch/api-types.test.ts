@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ContentProgress, SpriteCue } from '@/features/watch/api';
+import type { SpriteCue } from '@/features/watch/api';
+import type { ContentProgress } from '@/features/watch/types';
 
 describe('ContentProgress Type', () => {
   it('creates valid movie progress', () => {

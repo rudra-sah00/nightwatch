@@ -1,6 +1,11 @@
 import { apiFetch } from '@/lib/fetch';
 import { getSocket } from '@/lib/socket';
-import type { WatchProgress } from './types';
+import type {
+  ContentProgress,
+  PlayParams,
+  PlayResponse,
+  WatchProgress,
+} from './types';
 
 /**
  * Video metadata and stream URL retrieval.
@@ -170,14 +175,6 @@ interface ProgressCacheEntry {
   progress: ContentProgress | null;
   hasProgress: boolean;
   expiry: number;
-}
-
-export interface ContentProgress {
-  seasonNumber?: number;
-  episodeNumber?: number;
-  episodeTitle?: string;
-  progressSeconds: number;
-  progressPercent: number;
 }
 
 const progressCache = new Map<string, ProgressCacheEntry>();
@@ -451,4 +448,44 @@ export async function fetchSpriteVtt(vttUrl: string): Promise<SpriteCue[]> {
 
   spriteVttCache.set(vttUrl, sprites);
   return sprites;
+}
+
+/**
+ * Video playback trigger and status monitoring.
+ */
+export async function playVideo(
+  params: PlayParams,
+  options?: RequestInit,
+): Promise<PlayResponse> {
+  return apiFetch<PlayResponse>('/api/video/play', {
+    method: 'POST',
+    body: JSON.stringify(params),
+    timeout: 120_000,
+    ...options,
+  });
+}
+
+/**
+ * Read a cookie value by name from document.cookie.
+ */
+export function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Notify the backend that this client has stopped playback.
+ */
+export function stopVideo(): void {
+  const csrfToken = getCookie('csrfToken');
+  const url = csrfToken
+    ? `/api/video/stop?_csrf=${encodeURIComponent(csrfToken)}`
+    : '/api/video/stop';
+
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    navigator.sendBeacon(url);
+  } else {
+    fetch(url, { method: 'POST', keepalive: true }).catch(() => undefined);
+  }
 }

@@ -33,17 +33,16 @@ export function SeasonSelector({
           onToggle();
         }}
         className={cn(
-          'flex items-center gap-2 px-4 py-2 rounded-lg',
-          'bg-secondary hover:bg-secondary/80 border border-border',
-          'text-foreground font-medium transition-colors',
+          'flex items-center gap-3 px-6 py-3 border-[3px] border-[#1a1a1a] neo-shadow bg-[#f5f0e8] hover:bg-[#ffcc00] transition-all duration-200',
+          'text-[#1a1a1a] font-headline font-black uppercase tracking-widest text-sm sm:text-base',
         )}
       >
         {selectedSeason
-          ? `Season ${selectedSeason.seasonNumber}`
-          : 'Select Season'}
+          ? `SEASON ${selectedSeason.seasonNumber}`
+          : 'SELECT SEASON'}
         <ChevronDown
           className={cn(
-            'w-4 h-4 transition-transform duration-200',
+            'w-5 h-5 transition-transform duration-200 stroke-[3px]',
             isOpen && 'rotate-180',
           )}
         />
@@ -51,7 +50,7 @@ export function SeasonSelector({
 
       {/* Dropdown */}
       {isOpen ? (
-        <div className="absolute top-full right-0 mt-2 w-48 bg-popover backdrop-blur-xl rounded-lg border border-border shadow-2xl overflow-hidden z-50">
+        <div className="absolute top-full right-0 mt-4 w-56 bg-white border-[3px] border-[#1a1a1a] neo-shadow-yellow overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {seasons.map((season) => (
             <button
               type="button"
@@ -61,17 +60,24 @@ export function SeasonSelector({
                 onSelect(season);
               }}
               className={cn(
-                'w-full px-4 py-3 text-left text-sm transition-colors',
-                'hover:bg-muted',
+                'w-full px-6 py-4 text-left transition-all duration-150 border-b-[3px] last:border-b-0 border-[#1a1a1a]',
+                'font-headline font-bold uppercase tracking-wider text-sm',
                 selectedSeason?.seasonId === season.seasonId
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground',
+                  ? 'bg-[#0055ff] text-white'
+                  : 'bg-white text-[#1a1a1a] hover:bg-[#ffcc00]',
               )}
             >
-              Season {season.seasonNumber}
+              SEASON {season.seasonNumber}
               {season.episodeCount ? (
-                <span className="text-muted-foreground ml-2">
-                  ({season.episodeCount} episodes)
+                <span
+                  className={cn(
+                    'ml-2 text-[10px] font-black',
+                    selectedSeason?.seasonId === season.seasonId
+                      ? 'text-white/70'
+                      : 'text-[#4a4a4a]',
+                  )}
+                >
+                  ({season.episodeCount} EP)
                 </span>
               ) : null}
             </button>

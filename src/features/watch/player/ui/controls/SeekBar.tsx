@@ -82,14 +82,14 @@ export function SeekBar({
         >
           <div
             className={cn(
-              'relative bg-zinc-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)] ring-1 ring-white/5',
-              getSpriteStyle ? 'p-1.5 lg:p-2 2xl:p-2.5' : 'px-3 py-1.5',
+              'relative bg-white border-[3px] border-[#1a1a1a] neo-shadow',
+              getSpriteStyle ? 'p-2 lg:p-3 2xl:p-3' : 'px-3 py-1.5',
             )}
           >
             {/* Sprite thumbnail preview container */}
             {getSpriteStyle && (
               <div
-                className="relative overflow-hidden rounded-lg bg-black"
+                className="relative overflow-hidden bg-black border-[2px] border-[#1a1a1a]"
                 style={{
                   width: `${getSpriteStyle.w * previewScale}px`,
                   height: `${getSpriteStyle.h * previewScale}px`,
@@ -115,9 +115,9 @@ export function SeekBar({
             {/* Time display pill */}
             <div
               className={cn(
-                'text-[11px] lg:text-xs 2xl:text-sm font-medium text-white/90 tabular-nums tracking-wide text-center',
+                'text-[11px] lg:text-xs 2xl:text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] tabular-nums text-center',
                 getSpriteStyle
-                  ? 'absolute bottom-3 left-1/2 -translate-x-1/2 px-2.5 lg:px-3 2xl:px-4 py-1 lg:py-1.5 2xl:py-2 bg-black/80 backdrop-blur-md rounded-md border border-white/10 shadow-sm'
+                  ? 'absolute bottom-4 left-1/2 -translate-x-1/2 px-3 lg:px-4 2xl:px-5 py-1.5 bg-[#ffcc00] border-[2px] border-[#1a1a1a] neo-shadow-sm'
                   : '',
               )}
             >
@@ -125,14 +125,14 @@ export function SeekBar({
             </div>
           </div>
           {/* Tooltip Arrow */}
-          <div className="w-0 h-0 border-l-[8px] lg:border-l-[10px] 2xl:border-l-[12px] border-l-transparent border-r-[8px] lg:border-r-[10px] 2xl:border-r-[12px] border-r-transparent border-t-[8px] lg:border-t-[10px] 2xl:border-t-[12px] border-t-zinc-900/95 -mt-[1px] drop-shadow-sm" />
+          <div className="w-0 h-0 border-l-[10px] lg:border-l-[12px] 2xl:border-l-[14px] border-l-transparent border-r-[10px] lg:border-r-[12px] 2xl:border-r-[14px] border-r-transparent border-t-[10px] lg:border-t-[12px] 2xl:border-t-[14px] border-t-[#1a1a1a] drop-shadow-sm" />
         </div>
       ) : null}
 
       {/* Seek bar */}
       <div
         ref={barRef}
-        className={`relative h-1.5 lg:h-2 2xl:h-3 bg-white/20 rounded-full transition-[height] duration-200 ${canPreview ? 'group-hover:h-2.5 lg:group-hover:h-3 2xl:group-hover:h-4' : ''} ${disabled ? 'cursor-not-allowed' : ''}`}
+        className={`relative h-3 lg:h-4 2xl:h-5 bg-white border-[2px] border-[#1a1a1a] transition-[height] duration-200 ${canPreview ? 'group-hover:h-4 lg:group-hover:h-5 2xl:group-hover:h-6' : ''} ${disabled ? 'cursor-not-allowed bg-white/50' : ''}`}
         onClick={disabled ? undefined : handleClick}
         onMouseMove={(e) => {
           handleMouseMove(e);
@@ -166,40 +166,39 @@ export function SeekBar({
       >
         {/* Buffered */}
         <div
-          className="absolute h-full bg-white/30 rounded-full transition-[width] duration-150"
+          className="absolute h-full bg-zinc-400 border-r-[2px] border-[#1a1a1a] transition-[width] duration-150"
           style={{ width: `${bufferedProgress}%` }}
         />
 
         {/* Progress */}
         <div
-          className="absolute h-full bg-red-600 rounded-full transition-[width] duration-75"
+          className="absolute h-full bg-[#ffcc00] border-r-[2px] border-[#1a1a1a] outline outline-2 outline-transparent transition-[width] duration-75"
           style={{ width: `${progress}%` }}
         />
 
         {/* Hover indicator */}
         {hoverTime !== null ? (
           <div
-            className="absolute h-full bg-white/20 rounded-full"
+            className="absolute h-full bg-[#1a1a1a]/20 border-r-[2px] border-[#1a1a1a]"
             style={{ width: `${(hoverTime / duration) * 100}%` }}
           />
         ) : null}
 
         {/* Scrubber - show lock icon for disabled guests */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200 ${disabled ? 'bg-zinc-500 cursor-not-allowed' : 'bg-red-600 hover:scale-125'}`}
+          className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-6 lg:h-8 2xl:h-10 border-[3px] border-[#1a1a1a] scale-0 group-hover:scale-100 transition-transform duration-200 ${disabled ? 'bg-zinc-500 cursor-not-allowed' : 'bg-[#fff] hover:scale-110'}`}
           style={{ left: `calc(${progress}% - 8px)` }}
         />
       </div>
 
       {/* Guest lock indicator */}
       {disabled ? (
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 backdrop-blur-sm rounded-full border border-zinc-700/50 text-[10px] lg:text-xs text-zinc-400">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] text-[10px] lg:text-xs text-[#1a1a1a] font-black font-headline uppercase tracking-widest neo-shadow-sm">
           <svg
-            className="w-3 h-3"
+            className="w-4 h-4 stroke-[3px]"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
             aria-label="Locked - Host controls"
             role="img"
           >

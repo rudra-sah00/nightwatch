@@ -145,8 +145,8 @@ export function ActiveWatchParty({
       {/* Sidebar */}
       <div
         className={cn(
-          'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-black/40 backdrop-blur-xl z-30',
-          'h-full order-1 flex-none border-r border-white/10',
+          'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-[#f5f0e8] z-30',
+          'h-full order-1 flex-none border-r-4 border-[#1a1a1a]',
           showDesktopSidebar ? 'w-64 lg:w-80 xl:w-96' : 'w-0 border-none',
         )}
       >
@@ -162,7 +162,7 @@ export function ActiveWatchParty({
           linkCopied={copied}
           messages={messages}
           onSendMessage={onSendMessage}
-          className="h-full rounded-none border-0 bg-transparent shadow-none"
+          className="h-full rounded-none border-0 shadow-none"
           onAgoraReady={handleAgoraReady}
           typingUsers={typingUsers}
           onTypingStart={onTypingStart}
@@ -208,22 +208,28 @@ export function ActiveWatchParty({
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (
         <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
+          <AlertDialogContent className="bg-white border-[4px] border-[#1a1a1a] rounded-none neo-shadow sm:max-w-[425px] p-6">
+            <AlertDialogHeader className="space-y-3">
+              <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-[#1a1a1a]">
                 {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
               </AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogDescription className="font-bold font-headline tracking-wide text-[#1a1a1a]/70 text-base">
                 {isHost
                   ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
                   : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => onShowLeaveDialog(false)}>
+            <AlertDialogFooter className="mt-6 sm:space-x-4">
+              <AlertDialogCancel
+                onClick={() => onShowLeaveDialog(false)}
+                className="bg-white text-[#1a1a1a] border-[3px] border-[#1a1a1a] hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none hover:-translate-y-[2px] hover:shadow-none transition-all neo-shadow-sm py-6"
+              >
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction onClick={onConfirmLeave}>
+              <AlertDialogAction
+                onClick={onConfirmLeave}
+                className="bg-[#e63b2e] text-white border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none hover:-translate-y-[2px] transition-all neo-shadow-sm sm:mt-0 py-6"
+              >
                 {isHost ? 'End Party' : 'Leave'}
               </AlertDialogAction>
             </AlertDialogFooter>

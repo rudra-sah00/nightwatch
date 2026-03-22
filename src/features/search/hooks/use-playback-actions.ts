@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import type { ContentProgress } from '@/features/watch/api';
 import { cacheSeriesData } from '@/features/watch/player/hooks/useNextEpisode';
+import type { ContentProgress } from '@/types/content';
 import { ContentType, type Episode, type ShowDetails } from '../types';
 
 interface UsePlaybackActionsProps {
@@ -68,8 +68,20 @@ export function usePlaybackActions({
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;
 
-          router.push(url);
-          // Playing state will be reset when component unmounts or navigation completes
+          // Navigate to watch page with timeout protection
+          const navigationPromise = router.push(url);
+
+          // Set 8-second timeout to reset loading state if navigation fails
+          const timeoutId = setTimeout(() => {
+            toast.error('Playback failed to start. Please try again.');
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
+          }, 8000);
+
+          // Clear timeout when navigation completes
+          Promise.resolve(navigationPromise).finally(() => {
+            clearTimeout(timeoutId);
+          });
         } else {
           // Series playback
           let episodeToPlay = episode;
@@ -122,7 +134,20 @@ export function usePlaybackActions({
           if (posterUrl) url += `&poster=${posterUrl}`;
           if (episodeTitle) url += `&episodeTitle=${episodeTitle}`;
 
-          router.push(url);
+          // Navigate to watch page with timeout protection
+          const navigationPromise = router.push(url);
+
+          // Set 8-second timeout to reset loading state if navigation fails
+          const timeoutId = setTimeout(() => {
+            toast.error('Playback failed to start. Please try again.');
+            setIsPlaying(false);
+            setPlayingEpisodeId(null);
+          }, 8000);
+
+          // Clear timeout when navigation completes
+          Promise.resolve(navigationPromise).finally(() => {
+            clearTimeout(timeoutId);
+          });
         }
       } catch {
         // Navigation error

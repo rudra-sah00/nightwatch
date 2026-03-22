@@ -19,9 +19,6 @@ export function PlayerControls({ children }: { children: React.ReactNode }) {
             : 'opacity-0',
       )}
     >
-      <div className="absolute top-0 left-0 right-0 h-36 md:h-48 lg:h-56 2xl:h-64 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-48 md:h-56 lg:h-64 2xl:h-72 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
-
       {children}
     </div>
   );

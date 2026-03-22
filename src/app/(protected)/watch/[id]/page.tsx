@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
+import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 import { LoadingOverlay } from '@/features/watch/player/ui/overlays/LoadingOverlay';
-import { useWatchContent } from './use-watch-content';
 
 function WatchContent() {
   const {

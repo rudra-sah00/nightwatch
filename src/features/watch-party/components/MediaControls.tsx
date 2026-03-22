@@ -88,19 +88,10 @@ export function MediaControls({
   } = useMediaControls();
 
   return (
-    <div
-      className="border-t backdrop-blur-xl relative z-[60]"
-      style={{
-        background: 'var(--wp-footer-bg)',
-        borderColor: 'var(--wp-footer-border)',
-      }}
-    >
+    <div className="border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div
-        className="p-3 flex gap-2 border-b"
-        style={{ borderColor: 'var(--wp-divider)' }}
-      >
-        {/* Settings — visible to all users; host sees full settings, guests see personal prefs only */}
+      <div className="p-4 flex gap-3 border-b-[4px] border-[#1a1a1a] bg-white">
+        {/* Settings */}
         <WatchPartySettings
           room={room}
           isHost={isHost}
@@ -116,22 +107,12 @@ export function MediaControls({
           <button
             type="button"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold border text-white rounded-xl transition-colors"
-            style={{
-              background: 'var(--wp-btn-bg)',
-              borderColor: 'var(--wp-btn-border)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--wp-btn-hover)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--wp-btn-bg)';
-            }}
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] transition-all hover:bg-[#1a1a1a] hover:text-[#ffcc00]"
           >
             {linkCopied ? (
-              <Check aria-hidden="true" className="w-3.5 h-3.5 text-success" />
+              <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
             ) : (
-              <Copy aria-hidden="true" className="w-3.5 h-3.5" />
+              <Copy aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
             )}
             <span className="sm:inline">
               {linkCopied ? 'Copied' : 'Invite'}
@@ -143,60 +124,40 @@ export function MediaControls({
           type="button"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-xl border transition-colors',
+            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] bg-[#e63b2e] text-white transition-all hover:bg-[#1a1a1a]',
             isHost ? 'flex-1' : 'w-full',
           )}
-          style={{
-            backgroundColor: 'var(--danger-bg)',
-            borderColor: 'var(--danger-bg-hover)',
-            color: 'var(--danger-color)',
-          }}
         >
-          <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
-          <span className="sm:inline">{isHost ? 'End' : 'Leave Party'}</span>
+          <LogOut aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
+          <span className="sm:inline">{isHost ? 'End' : 'Leave'}</span>
         </button>
       </div>
 
       {/* Media Controls */}
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-4">
         {/* User Info & Controls */}
-        <div
-          className="flex items-center justify-between rounded-xl p-2 border"
-          style={{
-            background: 'var(--wp-accent-soft)',
-            borderColor: 'var(--wp-divider)',
-          }}
-        >
+        <div className="flex items-center justify-between bg-white border-[3px] border-[#1a1a1a] p-3 neo-shadow-sm">
           {/* User Avatar & Status */}
           <div className="flex items-center gap-3 overflow-hidden">
-            <div
-              className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center border-2 border-white/20 shadow-lg"
-              style={{
-                background:
-                  'linear-gradient(to bottom right, var(--party-color), var(--ai-color))',
-              }}
-            >
-              <span className="text-sm font-bold text-white">
-                {userName.charAt(0).toUpperCase()}
+            <div className="w-12 h-12 shrink-0 flex items-center justify-center border-[3px] border-[#1a1a1a] bg-[#ffcc00]">
+              <span className="text-xl font-black font-headline text-[#1a1a1a] uppercase">
+                {userName.charAt(0)}
               </span>
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-bold text-white truncate max-w-[100px]">
+              <span className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[100px]">
                 {userName}
               </span>
               <span
-                className={`text-[10px] flex items-center gap-1.5 font-medium ${isAgoraConnected ? 'text-success' : 'text-white/40'}`}
+                className={`text-[10px] sm:text-xs flex items-center gap-1.5 font-bold font-headline uppercase tracking-widest ${isAgoraConnected ? 'text-[#0055ff]' : 'text-[#e63b2e]'}`}
               >
                 <span
-                  className={`w-2 h-2 rounded-full shadow-lg ${isAgoraConnected ? 'animate-pulse' : 'animate-[pulse_1.5s_ease-in-out_infinite]'}`}
-                  style={
+                  className={cn(
+                    'w-2.5 h-2.5 border-2 border-[#1a1a1a]',
                     isAgoraConnected
-                      ? {
-                          backgroundColor: 'var(--success-color-strong)',
-                          boxShadow: '0 0 6px var(--success-glow)',
-                        }
-                      : { backgroundColor: 'rgba(255,255,255,0.25)' }
-                  }
+                      ? 'bg-[#0055ff] animate-pulse'
+                      : 'bg-[#e63b2e] animate-[pulse_1.5s_ease-in-out_infinite]',
+                  )}
                 />
                 {isAgoraConnected ? 'Connected' : 'Connecting…'}
               </span>
@@ -204,7 +165,7 @@ export function MediaControls({
           </div>
 
           {/* Media Buttons */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {/* Mic Button with Arrow */}
             <div className="flex items-center relative">
               {showAudioDevices ? (
@@ -223,15 +184,23 @@ export function MediaControls({
                 type="button"
                 onClick={onToggleAudio}
                 className={cn(
-                  'p-2 rounded-l-lg transition-colors',
-                  audioEnabled ? 'text-white' : 'text-danger',
+                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-colors',
+                  audioEnabled
+                    ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
+                    : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
                 )}
                 title={audioEnabled ? 'Mute' : 'Unmute'}
               >
                 {audioEnabled ? (
-                  <Mic aria-hidden="true" className="w-4 h-4" />
+                  <Mic
+                    aria-hidden="true"
+                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                  />
                 ) : (
-                  <MicOff aria-hidden="true" className="w-4 h-4" />
+                  <MicOff
+                    aria-hidden="true"
+                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                  />
                 )}
               </button>
               <button
@@ -241,28 +210,23 @@ export function MediaControls({
                   setShowVideoDevices(false);
                 }}
                 className={cn(
-                  'p-2 rounded-r-lg border-l border-black/30 transition-colors',
+                  'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
                   showAudioDevices
-                    ? 'text-white'
-                    : 'text-white/40 hover:text-white',
+                    ? 'bg-[#1a1a1a] text-white'
+                    : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
                 )}
-                style={{
-                  background: showAudioDevices
-                    ? 'var(--wp-btn-device-active)'
-                    : 'var(--wp-btn-device-bg)',
-                }}
                 title="Select Microphone"
               >
                 {showAudioDevices ? (
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 ) : (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 )}
               </button>
             </div>
 
             {/* Video Button with Arrow */}
-            <div className="flex items-center ml-1 relative">
+            <div className="flex items-center relative">
               {showVideoDevices ? (
                 <DeviceDropdown
                   title="Select Camera"
@@ -279,15 +243,23 @@ export function MediaControls({
                 type="button"
                 onClick={onToggleVideo}
                 className={cn(
-                  'p-2 rounded-l-lg transition-colors',
-                  videoEnabled ? 'text-white' : 'text-danger',
+                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-colors',
+                  videoEnabled
+                    ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
+                    : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
                 )}
                 title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
               >
                 {videoEnabled ? (
-                  <Video aria-hidden="true" className="w-4 h-4" />
+                  <Video
+                    aria-hidden="true"
+                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                  />
                 ) : (
-                  <VideoOff aria-hidden="true" className="w-4 h-4" />
+                  <VideoOff
+                    aria-hidden="true"
+                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                  />
                 )}
               </button>
               <button
@@ -297,22 +269,17 @@ export function MediaControls({
                   setShowAudioDevices(false);
                 }}
                 className={cn(
-                  'p-2 rounded-r-lg border-l border-black/30 transition-colors',
+                  'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
                   showVideoDevices
-                    ? 'text-white'
-                    : 'text-white/40 hover:text-white',
+                    ? 'bg-[#1a1a1a] text-white'
+                    : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
                 )}
-                style={{
-                  background: showVideoDevices
-                    ? 'var(--wp-btn-device-active)'
-                    : 'var(--wp-btn-device-bg)',
-                }}
                 title="Select Camera"
               >
                 {showVideoDevices ? (
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 ) : (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 )}
               </button>
             </div>
@@ -340,9 +307,9 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full right-0 mb-3 w-[220px] bg-zinc-950/98 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
-      <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/5">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-[#1a1a1a] neo-shadow z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 flex flex-col">
+      <div className="p-3 border-b-[4px] border-[#1a1a1a] flex items-center justify-between bg-[#f5f0e8]">
+        <span className="text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
           {title}
         </span>
         <button
@@ -351,14 +318,14 @@ function DeviceDropdown({
             e.stopPropagation();
             onClose();
           }}
-          className="text-white/40 hover:text-white text-xs px-1"
+          className="text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-[#1a1a1a] px-1"
         >
           ✕
         </button>
       </div>
-      <div className="p-1 max-h-40 overflow-y-auto custom-scrollbar">
+      <div className="p-2 max-h-48 overflow-y-auto no-scrollbar flex flex-col gap-2">
         {devices.length === 0 ? (
-          <div className="text-xs text-white/30 p-2 text-center">
+          <div className="text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] p-4 text-center border-[2px] border-transparent">
             No devices found
           </div>
         ) : (
@@ -371,14 +338,14 @@ function DeviceDropdown({
                 onSelect(device.deviceId);
               }}
               className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-left transition-colors cursor-pointer',
+                'w-full flex items-center gap-2 px-3 py-2 border-[2px] text-xs font-bold font-headline uppercase tracking-widest text-left transition-colors cursor-pointer',
                 selectedDevice === device.deviceId
-                  ? 'bg-gray-600/50 text-white'
-                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
+                  ? 'bg-[#ffe066] border-[#1a1a1a] text-[#1a1a1a]'
+                  : 'bg-white border-transparent text-[#1a1a1a] hover:border-[#1a1a1a] hover:bg-[#f5f0e8]',
               )}
             >
               {selectedDevice === device.deviceId ? (
-                <Check className="w-3.5 h-3.5 shrink-0 text-green-400" />
+                <Check className="w-4 h-4 shrink-0 stroke-[3px]" />
               ) : null}
               <span className="truncate">{device.label}</span>
             </button>

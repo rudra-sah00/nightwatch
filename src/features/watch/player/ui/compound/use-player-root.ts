@@ -263,6 +263,8 @@ export function usePlayerRoot({
   const handleBack = useCallback(() => {
     if (onBackProp) {
       onBackProp();
+    } else if (typeof window !== 'undefined' && window.history.length > 2) {
+      router.back();
     } else {
       router.push('/home');
     }

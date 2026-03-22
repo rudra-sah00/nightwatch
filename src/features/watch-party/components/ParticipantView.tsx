@@ -30,7 +30,7 @@ export function ParticipantView({
   const isVideoMuted = !participant.isCameraEnabled;
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 group shadow-inner">
+    <div className="relative w-full h-full bg-[#f5f0e8] group">
       {/* Video Container — Agora renders into this div */}
       <div
         ref={videoRef}
@@ -62,7 +62,7 @@ export function ParticipantView({
 
       {/* You badge */}
       {isCurrentUser ? (
-        <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm border border-white/20 text-[9px] font-semibold text-white/70 uppercase tracking-wide">
+        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-[var(--wp-send-btn,#0055ff)] border-[2px] border-[#1a1a1a] text-[9px] font-black font-headline text-white uppercase tracking-widest neo-shadow-sm">
           You
         </div>
       ) : null}
@@ -94,7 +94,7 @@ function AvatarFallback({
   name: string;
 }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="absolute inset-0 flex items-center justify-center bg-[#f5f0e8]">
       {/* Background blur effect */}
       {avatarUrl ? (
         <div className="absolute inset-0">
@@ -111,7 +111,7 @@ function AvatarFallback({
       {/* Centered Avatar */}
       <div className="relative z-10 flex items-center justify-center">
         {avatarUrl ? (
-          <div className="w-20 h-20 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl relative">
+          <div className="w-20 h-20 rounded-full border-[3px] border-[#1a1a1a] overflow-hidden neo-shadow-sm relative">
             <Image
               src={avatarUrl}
               alt={name}
@@ -121,14 +121,8 @@ function AvatarFallback({
             />
           </div>
         ) : (
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20"
-            style={{
-              background:
-                'linear-gradient(to bottom right, var(--party-color), var(--ai-color))',
-            }}
-          >
-            <span className="text-3xl font-bold text-white">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center neo-shadow-sm border-[3px] border-[#1a1a1a] bg-[var(--wp-send-btn,#ffcc00)]">
+            <span className="text-3xl font-black font-headline text-[#1a1a1a]">
               {name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -155,12 +149,12 @@ function ParticipantOverlay({
   const [confirmKick, setConfirmKick] = useState(false);
 
   return (
-    <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex items-center justify-between">
-      <span className="text-xs text-white font-semibold truncate max-w-[120px] drop-shadow-lg">
+    <div className="absolute bottom-0 left-0 w-full p-2 bg-white border-t-[3px] border-[#1a1a1a] flex items-center justify-between">
+      <span className="text-[10px] font-black font-headline tracking-widest uppercase text-[#1a1a1a] truncate max-w-[120px]">
         {name}
       </span>
       <div className="flex items-center gap-1.5">
-        <div className="flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-1 backdrop-blur-sm border border-white/10">
+        <div className="flex items-center gap-1.5 bg-white border-[2px] border-[#1a1a1a] neo-shadow-sm px-2 py-0.5">
           {isMicEnabled ? (
             <Mic className="w-3 h-3 text-success" />
           ) : (
@@ -173,7 +167,7 @@ function ParticipantOverlay({
               <button
                 type="button"
                 onClick={onKick}
-                className="rounded-full px-2 py-1 backdrop-blur-sm border border-danger/40 text-[10px] font-semibold text-danger bg-black/60 hover:bg-danger/20 transition-colors"
+                className="px-2 py-0.5 border-[2px] border-[#1a1a1a] text-[9px] font-black font-headline uppercase tracking-widest text-white bg-[#e63b2e] hover:bg-[#1a1a1a] transition-colors neo-shadow-sm"
                 title="Confirm remove"
               >
                 Remove
@@ -181,18 +175,17 @@ function ParticipantOverlay({
               <button
                 type="button"
                 onClick={() => setConfirmKick(false)}
-                className="rounded-full p-1 bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+                className="p-1 px-1.5 bg-white border-[2px] border-[#1a1a1a] hover:bg-[#ffe066] transition-colors neo-shadow-sm"
                 title="Cancel"
               >
-                <X className="w-2.5 h-2.5 text-white/60" />
+                <X className="w-2.5 h-2.5 text-[#1a1a1a] stroke-[3px]" />
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setConfirmKick(true)}
-              className="rounded-full px-2 py-1 backdrop-blur-sm border border-white/10 transition-colors text-[10px] font-medium text-white shadow-lg hover:opacity-90"
-              style={{ backgroundColor: 'var(--danger-bg-strong)' }}
+              className="px-2 py-0.5 border-[2px] border-[#1a1a1a] transition-colors text-[9px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] bg-white hover:bg-[#ffe066] neo-shadow-sm"
               title="Kick user"
             >
               Kick

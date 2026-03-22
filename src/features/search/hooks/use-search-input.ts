@@ -1,30 +1,27 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { toast } from 'sonner';
-import {
-  clearSearchHistory,
-  deleteSearchHistoryItem,
-  getSearchHistory,
-  getSearchSuggestions,
-} from '@/features/search/api';
-import type { SearchHistory } from '@/features/search/types';
+import { getSearchSuggestions } from '@/features/search/api';
+// Search history removed per user request
 import { useServer } from '@/providers/server-provider';
 
 export function useSearchInput() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState(() => searchParams.get('q') || '');
-  const [history, setHistory] = useState<SearchHistory[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { activeServer } = useServer();
   const containerRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
+
+  // Suggestions are disabled on the search results page per user request
+  const isSearchPage = pathname === '/search';
 
   // Sync query when URL changes (e.g., browser back/forward) — only when not typing
   const urlQuery = searchParams.get('q') || '';
@@ -34,37 +31,14 @@ export function useSearchInput() {
     }
   }, [urlQuery]);
 
-  // DEBOUNCED SEARCH: Automatically update URL as user types
-  useEffect(() => {
-    const trimmedQuery = query.trim();
-    const currentQ = searchParams.get('q') || '';
+  // Auto-search is disabled per user request. We only fetch suggestions.
+  // The user must explicitly press Enter or select a suggestion to search.
 
-    if (trimmedQuery === currentQ) return;
-
-    const timer = setTimeout(() => {
-      startTransition(() => {
-        if (trimmedQuery) {
-          router.push(`/home?q=${encodeURIComponent(trimmedQuery)}`);
-        } else if (currentQ) {
-          router.push('/home');
-        }
-      });
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [query, router, searchParams]);
-
-  // DEBOUNCED SUGGESTIONS: Fetch suggestions as user types
+  // SUGGESTIONS: Fetch top suggestion as user types
   useEffect(() => {
     const trimmedQuery = query.trim();
 
-    if (trimmedQuery.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-
-    // Suggestions are only available on Server 2
-    if (activeServer !== 's2') {
+    if (activeServer !== 's2' || isSearchPage) {
       setSuggestions([]);
       return;
     }
@@ -72,17 +46,41 @@ export function useSearchInput() {
     const timer = setTimeout(async () => {
       setIsFetchingSuggestions(true);
       try {
-        const results = await getSearchSuggestions(trimmedQuery, activeServer);
-        setSuggestions(results.slice(0, 8));
+        const results = await getSearchSuggestions(
+          trimmedQuery || 'trending',
+          activeServer,
+        );
+        // Only keep the first suggestion for inline typeahead
+        setSuggestions(results.slice(0, 1));
       } catch {
         setSuggestions([]);
       } finally {
         setIsFetchingSuggestions(false);
       }
-    }, 500);
+    }, 200);
 
     return () => clearTimeout(timer);
-  }, [query, activeServer]);
+  }, [query, activeServer, isSearchPage]);
+
+  const fetchSuggestions = async (searchTerm: string) => {
+    if (activeServer !== 's2' || isSearchPage) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsFetchingSuggestions(true);
+    try {
+      const results = await getSearchSuggestions(
+        searchTerm.trim() || 'trending',
+        activeServer,
+      );
+      setSuggestions(results.slice(0, 1));
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setIsFetchingSuggestions(false);
+    }
+  };
 
   // Close on click outside
   useEffect(() => {
@@ -100,43 +98,19 @@ export function useSearchInput() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadHistory = async () => {
-    try {
-      const data = await getSearchHistory();
-      setHistory(data);
-    } catch {
-      // Silently fail
-    }
-  };
-
   const handleFocus = () => {
     isFocusedRef.current = true;
     setIsOpen(true);
-    if (!query) loadHistory();
+    if (!isSearchPage) {
+      fetchSuggestions(query);
+    }
   };
 
   const handleBlur = () => {
     isFocusedRef.current = false;
-  };
-
-  const handleDeleteItem = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    try {
-      await deleteSearchHistoryItem(id);
-      setHistory((prev) => prev.filter((item) => item.id !== id));
-    } catch {
-      toast.error('Failed to clear item');
-    }
-  };
-
-  const handleClearHistory = async () => {
-    try {
-      await clearSearchHistory();
-      setHistory([]);
-      toast.success('Search history cleared');
-    } catch {
-      toast.error('Failed to clear search history');
-    }
+    // Keep suggestions open briefly for click handling if needed
+    // or close immediately if preferred. User said "when user tab click then"
+    // so we keep isOpen true until click outside handles it.
   };
 
   const handleSelect = (text: string) => {
@@ -144,16 +118,37 @@ export function useSearchInput() {
     setIsOpen(false);
     setSuggestions([]);
     startTransition(() => {
-      router.push(`/home?q=${encodeURIComponent(text)}`);
+      router.push(`/search?q=${encodeURIComponent(text)}`);
     });
   };
 
-  const handleSearch = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && query.trim()) {
+  const handleManualSearch = () => {
+    if (query.trim()) {
       setIsOpen(false);
       startTransition(() => {
-        router.push(`/home?q=${encodeURIComponent(query)}`);
+        router.push(`/search?q=${encodeURIComponent(query)}`);
       });
+    }
+  };
+
+  const completeSuggestion = () => {
+    if (suggestions[0] && !isSearchPage) {
+      setQuery(suggestions[0]);
+    }
+  };
+
+  const handleSearch = (e: React.KeyboardEvent) => {
+    if (
+      e.key === 'Tab' &&
+      suggestions[0] &&
+      suggestions[0].toLowerCase().startsWith(query.toLowerCase()) &&
+      !isSearchPage
+    ) {
+      e.preventDefault();
+      completeSuggestion();
+    }
+    if (e.key === 'Enter') {
+      handleManualSearch();
     }
     if (e.key === 'Escape') {
       setIsOpen(false);
@@ -170,15 +165,14 @@ export function useSearchInput() {
   };
 
   // Derived display state
-  const showSuggestions = isOpen && query.trim().length >= 2;
-  const showHistory = isOpen && !query && history.length > 0;
-  const hasSuggestions = suggestions.length > 0;
+  const hasSuggestions = suggestions.length > 0 && !isSearchPage;
+  const showSuggestions = isOpen && hasSuggestions;
+  const showHistory = false; // Disabled
 
   return {
     containerRef,
     query,
     setQuery,
-    history,
     suggestions,
     isFetchingSuggestions,
     isPending,
@@ -188,10 +182,11 @@ export function useSearchInput() {
     hasSuggestions,
     handleFocus,
     handleBlur,
-    handleDeleteItem,
-    handleClearHistory,
+    suggestion: (!isSearchPage && suggestions[0]) || '',
     handleSelect,
     handleSearch,
+    handleManualSearch,
     handleClear,
+    completeSuggestion,
   };
 }

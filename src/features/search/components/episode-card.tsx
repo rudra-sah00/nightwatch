@@ -35,16 +35,17 @@ export function EpisodeCard({
     <button
       type="button"
       className={cn(
-        'group flex gap-4 p-3 rounded-xl cursor-pointer transition-[colors,opacity] duration-300 w-full text-left',
-        'hover:bg-muted/50 border border-transparent hover:border-border',
-        isPlaying && 'bg-primary/10 border-primary/30 pointer-events-none',
+        'group flex gap-4 p-4 cursor-pointer transition-all duration-200 w-full text-left border-[3px] border-[#1a1a1a] neo-shadow-sm',
+        'bg-white hover:bg-[#f5f0e8] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:neo-shadow',
+        isPlaying &&
+          'bg-[#ffe066] border-[#1a1a1a] neo-shadow pointer-events-none translate-x-[-4px] translate-y-[-4px]',
         isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',
       )}
       onClick={handleClick}
       disabled={isPlaying}
     >
       {/* Episode Thumbnail */}
-      <div className="relative w-40 md:w-48 aspect-video rounded-lg overflow-hidden bg-muted flex-shrink-0">
+      <div className="relative w-40 md:w-56 aspect-video bg-[#1a1a1a] flex-shrink-0 border-r-[3px] border-[#1a1a1a] -m-4 mr-0">
         {!imageError && episode.thumbnailUrl ? (
           <Image
             src={thumbnailSrc}
@@ -65,46 +66,48 @@ export function EpisodeCard({
         {/* Play/Loading Overlay */}
         <div
           className={cn(
-            'absolute inset-0 flex items-center justify-center bg-black/40',
+            'absolute inset-0 flex items-center justify-center bg-[#0055ff]/40',
             isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-            'transition-opacity',
+            'transition-opacity duration-200',
           )}
         >
           {isPlaying ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
-              <span className="text-xs text-white font-medium">Loading...</span>
+              <Loader2 className="w-10 h-10 text-white animate-spin stroke-[3px]" />
+              <span className="text-[10px] text-white font-black font-headline uppercase tracking-widest">
+                LOADING...
+              </span>
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-              <Play className="w-5 h-5 text-black fill-current ml-0.5" />
+            <div className="w-12 h-12 bg-white border-[3px] border-[#1a1a1a] flex items-center justify-center neo-shadow-sm group-hover:scale-110 transition-transform">
+              <Play className="w-6 h-6 text-[#1a1a1a] fill-[#1a1a1a] ml-1" />
             </div>
           )}
         </div>
       </div>
 
       {/* Episode Info */}
-      <div className="flex-1 min-w-0 py-1">
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
-            E{episode.episodeNumber}
+      <div className="flex-1 min-w-0 py-1 pr-2">
+        <div className="flex items-center gap-3 mb-1">
+          <span className="px-2 py-0.5 bg-[#1a1a1a] text-white text-[10px] font-black font-headline uppercase tracking-tighter shrink-0">
+            EP {episode.episodeNumber}
           </span>
-          <h4 className="font-semibold text-foreground truncate">
-            {episode.title || `Episode ${episode.episodeNumber}`}
+          <h4 className="font-headline font-black text-lg md:text-xl uppercase tracking-tighter text-[#1a1a1a] truncate leading-none">
+            {episode.title || `EPISODE ${episode.episodeNumber}`}
           </h4>
         </div>
 
         {episode.description ? (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
+          <p className="text-sm font-medium text-[#4a4a4a] line-clamp-2 mt-2 leading-tight uppercase font-headline tracking-tight opacity-80">
             {episode.description}
           </p>
         ) : null}
 
-        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 mt-3">
           {episode.duration ? (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {episode.duration}m
+            <span className="flex items-center gap-1.5 text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a]/60">
+              <Clock className="w-3.5 h-3.5 stroke-[3px]" />
+              {episode.duration} MIN
             </span>
           ) : null}
         </div>

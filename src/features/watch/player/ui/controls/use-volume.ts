@@ -33,7 +33,6 @@ export function useVolume({ onVolumeChange }: UseVolumeOptions) {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      e.preventDefault();
       calculateVolume(e.clientX);
     };
 
@@ -41,8 +40,8 @@ export function useVolume({ onVolumeChange }: UseVolumeOptions) {
       setIsDragging(false);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mouseup', handleMouseUp, { passive: true });
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);

@@ -38,29 +38,25 @@ export function Volume({
         onClick={onMuteToggle}
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
-          'p-3 rounded-full',
-          'transition-[colors,transform] duration-200 ease-out',
-          'bg-white/5 backdrop-blur-sm border border-white/10',
-          'hover:bg-white/15 hover:border-white/20 hover:scale-105',
-          'active:scale-95 active:bg-white/20',
-          'shadow-lg shadow-black/20',
+          'p-2.5 transition-all duration-200',
+          'bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm',
+          'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
+          'active:bg-[#ffcc00]',
         )}
       >
-        <VolumeIcon className="w-5 h-5 text-white drop-shadow-sm" />
+        <VolumeIcon className="w-5 h-5 stroke-[3px]" />
       </button>
 
-      {/* Slider - expands on hover with smooth styling */}
       <div
         className={cn(
-          'overflow-hidden transition-[width,opacity] duration-200 ease-out',
+          'overflow-hidden transition-[width,opacity] duration-200 ease-out flex items-center',
           isHovered || isDragging ? 'w-24 opacity-100' : 'w-0 opacity-0',
         )}
       >
         <div
           ref={sliderRef}
           className={cn(
-            'relative h-1 w-24 bg-white/15 rounded-full cursor-pointer',
-            'transition-colors duration-100',
+            'relative h-3 w-24 bg-white border-[2px] border-[#1a1a1a] cursor-pointer',
           )}
           onMouseDown={handleMouseDown}
           role="slider"
@@ -79,12 +75,9 @@ export function Volume({
             }
           }}
         >
-          {/* Track background glow */}
-          <div className="absolute inset-0 rounded-full bg-white/5" />
-
-          {/* Volume fill - no transition for instant response */}
+          {/* Volume fill */}
           <div
-            className="absolute h-full rounded-full bg-white"
+            className="absolute top-0 bottom-0 left-0 bg-[#0055ff] border-r-[2px] border-[#1a1a1a]"
             style={{
               width: `${displayVolume * 100}%`,
               transition: isDragging ? 'none' : 'width 50ms ease-out',
@@ -94,13 +87,12 @@ export function Volume({
           {/* Slider handle */}
           <div
             className={cn(
-              'absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full',
-              'shadow-md shadow-black/30',
+              'absolute top-1/2 -translate-y-1/2 w-4 h-5 bg-[#ffcc00] border-[2px] border-[#1a1a1a]',
               'transition-transform duration-100',
-              (isHovered || isDragging) && 'scale-110',
+              isHovered || isDragging ? 'scale-110' : 'scale-100',
             )}
             style={{
-              left: `calc(${displayVolume * 100}% - 6px)`,
+              left: `calc(${displayVolume * 100}% - 8px)`,
               transition: isDragging
                 ? 'transform 100ms'
                 : 'left 50ms ease-out, transform 100ms',

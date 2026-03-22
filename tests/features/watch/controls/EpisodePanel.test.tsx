@@ -174,8 +174,8 @@ describe('EpisodePanel', () => {
       fireEvent.click(screen.getByText('S1'));
 
       await waitFor(() => {
-        expect(screen.getByText('8 ep')).toBeInTheDocument();
-        expect(screen.getByText('10 ep')).toBeInTheDocument();
+        expect(screen.getByText('(8)')).toBeInTheDocument();
+        expect(screen.getByText('(10)')).toBeInTheDocument();
       });
     });
 
@@ -287,6 +287,56 @@ describe('EpisodePanel', () => {
       fireEvent.click(episodeButton);
 
       expect(onEpisodeSelect).toHaveBeenCalledWith(mockEpisodes[0]);
+    });
+
+    it('should handle scroll events and update center index', async () => {
+      render(<EpisodePanel {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('E1')).toBeInTheDocument();
+      });
+
+      const scrollContainer = document.querySelector('.overflow-y-auto');
+      if (scrollContainer) {
+        // Mock dimensions
+        Object.defineProperty(scrollContainer, 'clientHeight', { value: 600 });
+        Object.defineProperty(scrollContainer, 'scrollTop', { value: 100 });
+
+        fireEvent.scroll(scrollContainer);
+
+        // Wait for requestAnimationFrame
+        await act(async () => {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        });
+      }
+    });
+
+    it('should close season dropdown when a season is selected', async () => {
+      const onSeasonChange = vi.fn();
+      render(
+        <EpisodePanel {...defaultProps} onSeasonChange={onSeasonChange} />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('S1')).toBeInTheDocument();
+      });
+
+      // Open dropdown
+      fireEvent.click(screen.getByText('S1'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Season 2')).toBeInTheDocument();
+      });
+
+      // Select season
+      fireEvent.click(screen.getByText('Season 2'));
+
+      expect(onSeasonChange).toHaveBeenCalledWith(2);
+
+      // Should close dropdown
+      await waitFor(() => {
+        expect(screen.queryByText('Season 1')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -414,5 +464,23 @@ describe('EpisodePanel', () => {
       // Should show fallback number instead of image
       expect(screen.queryAllByRole('img')).toHaveLength(0);
     });
+  });
+
+  it('should handle hovering over the centered episode', () => {
+    // Mock getBoundingClientRect for layout calculations
+    Element.prototype.getBoundingClientRect = vi.fn().mockReturnValue({
+      top: 0,
+      height: 480, // Container H
+    });
+
+    render(<EpisodePanel {...defaultProps} isOpen={true} />);
+
+    const ep1Button = screen.getByRole('button', { name: /Pilot/i });
+
+    fireEvent.mouseEnter(ep1Button);
+    // This should trigger setIsHoveringCenter(true)
+
+    fireEvent.mouseLeave(ep1Button);
+    // This should trigger setIsHoveringCenter(false)
   });
 });

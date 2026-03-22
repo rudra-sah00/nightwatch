@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '@/features/watch/api';
 import type { WatchProgress } from '@/features/watch/types';
 import * as ws from '@/lib/socket';
+import { ContentType } from '@/types/content';
 
 vi.mock('@/lib/socket');
 vi.mock('@/lib/fetch');
@@ -14,7 +15,7 @@ function createMockProgress(
   return {
     id: 'test-id',
     contentId: 'test-content',
-    contentType: 'Movie',
+    contentType: ContentType.Movie,
     title: 'Test Title',
     posterUrl: 'https://example.com/poster.jpg',
     progressSeconds: 0,

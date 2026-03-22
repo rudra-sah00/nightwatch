@@ -1,12 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  type ContentProgress,
-  fetchContentProgress,
-  getCachedProgress,
-} from '@/features/watch/api';
-import { useSocket } from '@/providers/socket-provider';
+import { fetchContentProgress, getCachedProgress } from '@/features/watch/api';
+import type { ContentProgress } from '@/types/content';
 import { ContentType, type Season, type ShowDetails } from '../types';
 
 interface UseContentProgressReturn {
@@ -32,13 +28,12 @@ interface UseContentProgressProps {
 export function useContentProgress({
   contentId,
   show,
-  fromContinueWatching,
+  fromContinueWatching: _fromContinueWatching,
   loadSeasonEpisodesInternal,
   setSelectedSeason,
   autoPlaySeasonSelectedRef,
 }: UseContentProgressProps): UseContentProgressReturn {
-  const [hasWatchProgress, setHasWatchProgress] =
-    useState(fromContinueWatching);
+  const [hasWatchProgress, setHasWatchProgress] = useState(false);
   const [watchProgress, setWatchProgress] = useState<ContentProgress | null>(
     null,
   );
@@ -46,10 +41,7 @@ export function useContentProgress({
   const progressCheckedRef = useRef(false);
   const hasSetSeasonRef = useRef(false);
 
-  // Re-runs reactively when socket connects
-  const { isConnected } = useSocket();
-
-  // 1. Fetching Logic - Start as soon as contentId/socket is ready
+  // 1. Fetching Logic - API-only (no socket dependency)
   useEffect(() => {
     if (progressCheckedRef.current) return;
 
@@ -74,23 +66,21 @@ export function useContentProgress({
       return;
     }
 
-    // Check if there's watch progress via socket
-    if (isConnected) {
-      fetchContentProgress(contentId, (progress, hasProgress) => {
-        processProgress(hasProgress, progress);
-      });
-    } else {
-      // Fallback: if the socket hasn't connected within 5 seconds, unblock the UI
-      // so the content detail page doesn't spin forever on WebSocket delays.
-      const timer = setTimeout(() => {
-        if (!progressCheckedRef.current) {
-          progressCheckedRef.current = true;
-          setIsLoadingProgress(false);
-        }
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [contentId, isConnected]);
+    // Keep UI responsive while still allowing late HTTP responses to update Resume state.
+    const timer = setTimeout(() => {
+      if (!progressCheckedRef.current) {
+        setIsLoadingProgress(false);
+      }
+    }, 5000);
+
+    fetchContentProgress(contentId, (progress, hasProgress) => {
+      if (progressCheckedRef.current) return;
+      clearTimeout(timer);
+      processProgress(hasProgress, progress);
+    });
+
+    return () => clearTimeout(timer);
+  }, [contentId]);
 
   // 2. Season Matching Logic - Runs once we have BOTH show details AND progress
   useEffect(() => {

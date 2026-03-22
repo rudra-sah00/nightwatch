@@ -219,9 +219,8 @@ describe('WatchPartyLobby', () => {
     it('should show guest name input when not authenticated', () => {
       render(<WatchPartyLobby {...defaultProps} user={null} />);
 
-      expect(screen.getByLabelText('Your Display Name')).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText('Enter your display name'),
+        screen.getByPlaceholderText('ENTER YOUR NAME'),
       ).toBeInTheDocument();
     });
 
@@ -235,7 +234,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      const input = screen.getByPlaceholderText('Enter your display name');
+      const input = screen.getByPlaceholderText('ENTER YOUR NAME');
       fireEvent.change(input, { target: { value: 'John' } });
 
       expect(onGuestNameChange).toHaveBeenCalledWith('John');
@@ -249,10 +248,10 @@ describe('WatchPartyLobby', () => {
       expect(screen.getByTestId('captcha-button')).toBeInTheDocument();
     });
 
-    it('should not show captcha when guest name is empty', () => {
+    it('should show captcha even when guest name is empty', () => {
       render(<WatchPartyLobby {...defaultProps} user={null} guestName="" />);
 
-      expect(screen.queryByTestId('captcha-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('captcha-button')).toBeInTheDocument();
     });
 
     it('should show verified message when captcha is complete', () => {

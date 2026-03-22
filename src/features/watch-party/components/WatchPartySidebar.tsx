@@ -123,28 +123,22 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
 
   return (
     <div
-      data-wp-theme={
-        theme === 'default' || theme === 'custom' ? undefined : theme
-      }
+      data-wp-theme={theme !== 'custom' ? theme : undefined}
+      style={theme === 'custom' ? customVars : undefined}
       className={cn(
-        'w-full backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col h-full relative border-l',
+        'w-full bg-[#f5f0e8] overflow-hidden flex flex-col h-full relative border-l-[4px] border-[#1a1a1a] theme-wp-sidebar',
         className,
       )}
-      style={{
-        background: 'var(--wp-sidebar-bg)',
-        borderColor: 'var(--wp-sidebar-border)',
-        ...customVars,
-      }}
     >
       {/* Tab Navigation */}
       <SidebarTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative bg-[#f5f0e8]">
         {/* Participants Tab - renders first */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out bg-[#f5f0e8]',
             activeTab === 'participants'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -172,7 +166,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Chat Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out bg-[#f5f0e8]',
             activeTab === 'chat'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -198,7 +192,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Soundboard Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out p-4',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out p-4 bg-[#f5f0e8]',
             activeTab === 'soundboard'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
@@ -210,7 +204,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         {/* Sketch Tab */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out',
+            'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out bg-[#f5f0e8]',
             activeTab === 'sketch'
               ? 'opacity-100 scale-100 z-10'
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',

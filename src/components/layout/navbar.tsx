@@ -1,79 +1,83 @@
-import { Bookmark, Home, User } from 'lucide-react';
+import { History, Plus, Radio, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Avatar } from '@/components/ui/avatar';
-
-import { SearchInput } from '@/features/search/components/search-input';
 import { useAuth } from '@/providers/auth-provider';
 
-interface NavbarProps {
-  isLoading?: boolean;
-}
-
-export function Navbar({ isLoading }: NavbarProps) {
+export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
-  const isHome = pathname === '/home';
+  const _isHome = pathname === '/home';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-center gap-4 md:gap-8 max-w-4xl">
-        {/* Home Button - not clickable when already on /home */}
-        {isHome ? (
-          <span
-            className="shrink-0 p-2 rounded-full text-foreground"
-            title="Home"
-          >
-            <Home className="w-5 h-5" />
-          </span>
-        ) : (
+    <nav className="sticky top-0 z-50 w-full bg-[#f5f0e8] text-[#1a1a1a] border-b-[3px] border-[#1a1a1a]">
+      <div className="flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4">
+        {/* Left Side: Brand Logo */}
+        <div className="flex-1 flex justify-start items-center">
           <Link
             href="/home"
-            className="shrink-0 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+            className="text-lg sm:text-2xl md:text-3xl font-black italic tracking-tighter text-[#1a1a1a] font-headline uppercase whitespace-nowrap"
             title="Home"
           >
-            <Home className="w-5 h-5" />
+            WATCH RUDRA
           </Link>
-        )}
-
-        {/* Search Bar - Main Focus */}
-        <div className="flex-1 min-w-0">
-          <SearchInput isLoading={isLoading} />
         </div>
 
-        {/* User Actions */}
-        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+        {/* Middle: Global Navigation - Icons only on mobile, text only on desktop */}
+        <div className="flex items-center justify-center gap-4 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
           <Link
-            href="/live?sportType=basketball"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-live transition-colors group p-2 rounded-full hover:bg-white/5"
-            title="Live TV"
+            href="/continue-watching"
+            className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
+            title="Continue Watching"
           >
-            <span className="w-2 h-2 rounded-full bg-live-strong animate-pulse group-hover:bg-live" />
-            <span className="hidden sm:inline">Live TV</span>
+            <History className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
+            <span className="hidden md:inline">Continue</span>
+          </Link>
+          <Link
+            href="/live"
+            className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
+            title="Live Matches"
+          >
+            <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
+            <span className="hidden md:inline">Live</span>
           </Link>
           {user ? (
             <Link
               href="/watchlist"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group p-2 rounded-full hover:bg-white/5"
-              title="My Watchlist"
+              className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
+              title="Watchlist"
             >
-              <Bookmark className="w-5 h-5 group-hover:text-primary transition-colors" />
+              <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
+              <span className="hidden md:inline">Watchlist</span>
             </Link>
           ) : null}
+        </div>
+
+        {/* Right Side: Profile */}
+        <div className="flex-1 flex justify-end items-center shrink-0">
           <Link
             href="/profile"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            className="flex flex-col items-center justify-center gap-1 bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-[3px] border-[#1a1a1a] px-3 py-1.5 neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all min-w-[72px]"
+            title="Profile"
           >
-            <Avatar
-              src={user?.profilePhoto}
-              alt={user?.name}
-              fallback={<User className="w-5 h-5" />}
-              className="w-9 h-9 border border-border group-hover:border-primary/30 transition-colors shadow-sm"
-            />
+            <div className="w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
+              {user?.profilePhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.profilePhoto}
+                  alt={user?.name || 'Profile'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-5 h-5 text-[#1a1a1a]" />
+              )}
+            </div>
+            <span className="font-headline font-black uppercase text-[10px] hidden sm:block tracking-widest leading-none mt-0.5">
+              Profile
+            </span>
           </Link>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }

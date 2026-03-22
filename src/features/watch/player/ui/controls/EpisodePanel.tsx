@@ -130,9 +130,8 @@ export function EpisodePanel({
            watch-party sidebar is also blurred when the panel opens ── */}
       <div
         className={cn(
-          'fixed inset-0 backdrop-blur-xl bg-black/20',
-          'transition-[backdrop-filter] duration-300 ease-out',
-          visible ? 'backdrop-blur-xl' : 'backdrop-blur-none',
+          'fixed inset-0 bg-[#ffcc00]/95',
+          'transition-all duration-300 ease-out',
         )}
       />
 
@@ -153,30 +152,33 @@ export function EpisodePanel({
           className={cn(
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
-            'pointer-events-none z-10',
+            'pointer-events-none z-10 bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow',
             'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
           )}
         >
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-medium text-white/35 uppercase tracking-widest">
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black font-headline text-[#4a4a4a] uppercase tracking-widest">
               Episode {centerEp.episodeNumber}
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-white leading-tight">
+            <h3
+              className="text-xl md:text-2xl font-black font-headline uppercase text-[#1a1a1a] leading-tight"
+              style={{ textShadow: '2px 2px 0px #ffe066' }}
+            >
               {centerEp.title || `Episode ${centerEp.episodeNumber}`}
             </h3>
             {centerEp.description && (
-              <p className="text-[11px] md:text-xs text-white/45 line-clamp-3 leading-relaxed">
+              <p className="text-xs md:text-sm text-[#1a1a1a] font-bold md:line-clamp-3 leading-relaxed border-l-[3px] border-[#1a1a1a] pl-2">
                 {centerEp.description}
               </p>
             )}
             {centerEp.duration && (
-              <span className="text-[10px] text-white/25 font-medium">
+              <span className="text-xs text-[#1a1a1a] font-bold font-headline uppercase px-2 py-0.5 border-[2px] border-[#1a1a1a] bg-[#f5f0e8] inline-block self-start mt-1">
                 {centerEp.duration} min
               </span>
             )}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <Play className="w-2.5 h-2.5 text-white/35 fill-current" />
-              <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium">
+            <div className="flex items-center gap-2 mt-2">
+              <Play className="w-4 h-4 text-[#e63b2e] fill-current" />
+              <span className="text-[10px] text-[#e63b2e] uppercase tracking-widest font-black font-headline">
                 Click to play
               </span>
             </div>
@@ -196,22 +198,22 @@ export function EpisodePanel({
       >
         {/* Custom season dropdown */}
         {seasons.length > 1 && (
-          <div className="relative mb-2 shrink-0 z-10">
+          <div className="relative mb-2 shrink-0 z-10 mt-4">
             <button
               type="button"
               onClick={() => setSeasonOpen((p) => !p)}
               className={cn(
-                'flex items-center gap-2',
-                'bg-white/6 hover:bg-white/10 border border-white/8',
-                'rounded-full px-5 py-2',
-                'text-[13px] font-medium text-white/60',
-                'transition-colors',
+                'flex items-center gap-3',
+                'bg-white border-[3px] border-[#1a1a1a] hover:bg-[#ffe066]',
+                'px-5 py-2.5 neo-shadow-sm',
+                'text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a]',
+                'transition-all duration-200',
               )}
             >
               S{selectedSeason}
               <ChevronDown
                 className={cn(
-                  'w-3 h-3 text-white/30 transition-transform duration-200',
+                  'w-4 h-4 stroke-[3px] transition-transform duration-200',
                   seasonOpen && 'rotate-180',
                 )}
               />
@@ -221,11 +223,10 @@ export function EpisodePanel({
             {seasonOpen && (
               <div
                 className={cn(
-                  'absolute top-full left-1/2 -translate-x-1/2 mt-1',
-                  'bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl',
-                  'py-1.5 min-w-[120px]',
+                  'absolute top-full left-1/2 -translate-x-1/2 mt-2',
+                  'bg-white border-[4px] border-[#1a1a1a] neo-shadow',
+                  'flex flex-col min-w-[140px]',
                   'animate-in fade-in slide-in-from-top-2 duration-200',
-                  'shadow-xl shadow-black/40',
                 )}
               >
                 {seasons.map((s) => (
@@ -237,17 +238,17 @@ export function EpisodePanel({
                       setSeasonOpen(false);
                     }}
                     className={cn(
-                      'w-full px-4 py-2 text-left text-[12px] font-medium',
-                      'transition-colors',
+                      'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-[#1a1a1a]',
+                      'transition-colors border-b-[3px] border-[#1a1a1a] last:border-b-0',
                       s.seasonNumber === selectedSeason
-                        ? 'text-white bg-white/10'
-                        : 'text-white/50 hover:text-white/80 hover:bg-white/5',
+                        ? 'bg-[#ffcc00]'
+                        : 'hover:bg-[#ffe066]',
                     )}
                   >
                     Season {s.seasonNumber}
                     {s.episodeCount ? (
-                      <span className="text-white/25 ml-1.5">
-                        {s.episodeCount} ep
+                      <span className="text-[#4a4a4a] ml-1.5 text-xs">
+                        ({s.episodeCount})
                       </span>
                     ) : null}
                   </button>
@@ -358,12 +359,12 @@ const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
           onMouseEnter={() => onHoverCenter?.(true)}
           onMouseLeave={() => onHoverCenter?.(false)}
           className={cn(
-            'group relative rounded-lg overflow-hidden',
+            'group relative overflow-hidden',
             'transition-all duration-500 ease-out',
             'focus:outline-none',
             isCenter
-              ? 'ring-1 ring-white/20 shadow-[0_0_25px_rgba(255,255,255,0.05)]'
-              : '',
+              ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow'
+              : 'border-[2px] border-[#1a1a1a] bg-[#f5f0e8]',
           )}
           style={{
             width: isCenter ? 220 : 170,
@@ -416,10 +417,10 @@ const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
           {/* Episode number badge */}
           <div
             className={cn(
-              'absolute bottom-1 left-1',
-              'px-1 py-0.5 rounded',
-              'bg-black/60 backdrop-blur-sm',
-              'text-[9px] font-semibold text-white/80 tabular-nums',
+              'absolute bottom-2 left-2',
+              'px-2 py-1',
+              'bg-white border-[2px] border-[#1a1a1a]',
+              'text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] tabular-nums',
             )}
           >
             E{episode.episodeNumber}
@@ -427,7 +428,7 @@ const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
 
           {/* Duration badge */}
           {episode.duration && (
-            <div className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/60 text-[8px] text-white/55 font-medium">
+            <div className="absolute top-2 right-2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-white font-bold font-headline uppercase tracking-widest">
               {episode.duration}m
             </div>
           )}

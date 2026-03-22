@@ -74,7 +74,7 @@ describe('ContentInfo', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows "Play" for series without selected season', () => {
+  it('shows "Watch Solo" for series without selected season', () => {
     render(
       <ContentInfo
         show={mockShow}
@@ -85,10 +85,12 @@ describe('ContentInfo', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /watch solo/i }),
+    ).toBeInTheDocument();
   });
 
-  it('shows "Play" for movies without watch progress', () => {
+  it('shows "Watch Solo" for movies without watch progress', () => {
     const movieShow = { ...mockShow, contentType: ContentType.Movie };
 
     render(
@@ -100,7 +102,9 @@ describe('ContentInfo', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /watch solo/i }),
+    ).toBeInTheDocument();
   });
 
   it('shows "Resume (X%)" for movies with watch progress', () => {
@@ -249,8 +253,12 @@ describe('ContentInfo', () => {
       />,
     );
 
-    expect(screen.getByText(/continue watching s3:e7/i)).toBeInTheDocument();
-    expect(screen.getByText(/45% watched/i)).toBeInTheDocument();
+    // Use within to find the text in the progress indicator specifically
+    const progressIndicator = screen.getByText(/45%/i).closest('.space-y-3');
+    expect(progressIndicator).toHaveTextContent(/s3:e7/i);
+    expect(
+      screen.getByRole('button', { name: /resume s3:e7/i }),
+    ).toBeInTheDocument();
   });
 
   it('prioritizes watch progress over selected season', () => {
@@ -326,7 +334,7 @@ describe('ContentInfo', () => {
     );
 
     const watchTogetherBtn = screen.getByRole('button', {
-      name: /watch together/i,
+      name: /start party/i,
     });
     expect(watchTogetherBtn).toBeInTheDocument();
 
@@ -348,7 +356,7 @@ describe('ContentInfo', () => {
     );
 
     // Button is hidden entirely when disabled to keep mobile UI clean
-    expect(screen.queryByText('Watch Together')).not.toBeInTheDocument();
+    expect(screen.queryByText('Start Party')).not.toBeInTheDocument();
     expect(screen.queryByText('Series not supported')).not.toBeInTheDocument();
   });
 
@@ -382,7 +390,7 @@ describe('ContentInfo', () => {
       />,
     );
 
-    const addBtn = screen.getByRole('button', { name: /add to watchlist/i });
+    const addBtn = screen.getByRole('button', { name: /^watchlist$/i });
     expect(addBtn).toBeInTheDocument();
 
     await user.click(addBtn);
@@ -402,7 +410,7 @@ describe('ContentInfo', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: /remove from watchlist/i }),
+      screen.getByRole('button', { name: /^remove$/i }),
     ).toBeInTheDocument();
   });
 
@@ -419,7 +427,7 @@ describe('ContentInfo', () => {
       />,
     );
 
-    const addBtn = screen.getByRole('button', { name: /add to watchlist/i });
+    const addBtn = screen.getByRole('button', { name: /^watchlist$/i });
     expect(addBtn).toBeDisabled();
   });
 
@@ -458,7 +466,7 @@ describe('ContentInfo', () => {
       lastWatchedAt: new Date().toISOString(),
     };
 
-    render(
+    const { container } = render(
       <ContentInfo
         show={movieShow}
         isPlaying={false}
@@ -469,8 +477,17 @@ describe('ContentInfo', () => {
       />,
     );
 
-    // Progress bar shows "Continue watching" for a movie (no season/episode numbers)
-    expect(screen.getByText('Continue watching')).toBeInTheDocument();
-    expect(screen.getByText('30% watched')).toBeInTheDocument();
+    // Progress bar shows "Continue" for a movie (no season/episode numbers)
+    expect(screen.getByText('Continue')).toBeInTheDocument();
+
+    // The progress percentage appears in both the bar and the resume button
+    // We check that the progress bar container has it
+    const progressContainer = container.querySelector('.space-y-3');
+    expect(progressContainer).toHaveTextContent(/30%/);
+
+    // And the button has it
+    expect(
+      screen.getByRole('button', { name: /resume \(30%\)/i }),
+    ).toBeInTheDocument();
   });
 });

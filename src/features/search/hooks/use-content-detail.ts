@@ -2,12 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { ContentProgress } from '@/features/watch/api';
 import {
   addToWatchlist,
   checkInWatchlist,
   removeFromWatchlist,
 } from '@/features/watchlist/api';
+import type { ContentProgress } from '@/types/content';
 import {
   ContentType,
   type Episode,

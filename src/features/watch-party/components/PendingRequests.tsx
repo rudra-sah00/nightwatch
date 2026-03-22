@@ -22,18 +22,18 @@ export function PendingRequests({
   }
 
   return (
-    <div className="mx-3 mt-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/20 overflow-hidden flex-shrink-0">
-      <div className="px-3 py-2 flex items-center gap-2 border-b border-amber-500/10">
-        <UserPlus className="w-3.5 h-3.5 text-amber-500" />
-        <span className="text-xs font-medium text-amber-400">
+    <div className="mx-3 mt-3 mb-2 bg-[#ffcc00] border-[4px] border-[#1a1a1a] overflow-hidden flex-shrink-0 neo-shadow">
+      <div className="px-3 py-2 flex items-center gap-2 border-b-[4px] border-[#1a1a1a] bg-white">
+        <UserPlus className="w-4 h-4 text-[#1a1a1a] stroke-[3px]" />
+        <span className="text-[10px] font-black font-headline text-[#1a1a1a] uppercase tracking-widest">
           {pendingMembers.length} waiting to join
         </span>
       </div>
-      <div className="p-2 space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
+      <div className="p-3 space-y-3 max-h-40 overflow-y-auto custom-scrollbar bg-[#ffcc00]">
         {pendingMembers.map((pending) => (
           <div
             key={pending.id}
-            className="flex items-center gap-2 p-2 rounded-lg bg-black/30 hover:bg-black/40 transition-colors"
+            className="flex items-center gap-2 p-2 bg-white border-[3px] border-[#1a1a1a] neo-shadow-sm hover:-translate-y-[1px] transition-transform"
           >
             {/* Avatar */}
             {pending.profilePhoto ? (
@@ -42,41 +42,39 @@ export function PendingRequests({
                 alt={pending.name}
                 width={28}
                 height={28}
-                className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                className="w-7 h-7 border-[2px] border-[#1a1a1a] object-cover flex-shrink-0"
                 unoptimized
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-medium text-white/70">
-                  {pending.name.charAt(0).toUpperCase()}
+              <div className="w-7 h-7 border-[2px] border-[#1a1a1a] bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-black font-headline text-white uppercase tracking-widest">
+                  {pending.name.charAt(0)}
                 </span>
               </div>
             )}
 
             {/* Name */}
-            <span className="flex-1 text-sm text-white/90 truncate">
+            <span className="flex-1 text-[11px] font-black font-headline text-[#1a1a1a] uppercase tracking-widest truncate">
               {pending.name}
             </span>
 
             {/* Actions */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => onApprove(pending.id)}
-                className="p-1.5 rounded-lg hover:opacity-80 active:scale-95 transition-[opacity,transform] text-success"
-                style={{ backgroundColor: 'var(--success-bg)' }}
+                className="p-1 border-[2px] border-[#1a1a1a] hover:bg-success hover:text-white transition-colors bg-white text-success neo-shadow-sm"
                 title="Approve"
               >
-                <Check aria-hidden="true" className="w-3.5 h-3.5" />
+                <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
               </button>
               <button
                 type="button"
                 onClick={() => onReject(pending.id)}
-                className="p-1.5 rounded-lg hover:opacity-80 active:scale-95 transition-[opacity,transform] text-danger"
-                style={{ backgroundColor: 'var(--danger-bg)' }}
+                className="p-1 border-[2px] border-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-colors bg-white text-[#e63b2e] neo-shadow-sm"
                 title="Reject"
               >
-                <X aria-hidden="true" className="w-3.5 h-3.5" />
+                <X aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
               </button>
             </div>
           </div>

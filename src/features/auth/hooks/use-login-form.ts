@@ -121,6 +121,9 @@ export function useLoginForm() {
       }
       if (state.fieldErrors) {
         setFieldErrors(state.fieldErrors);
+        Object.values(state.fieldErrors).forEach((msg) => {
+          if (msg) toast.error(msg);
+        });
       }
     }
   }, [state]);

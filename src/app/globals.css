@@ -9,6 +9,9 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-headline: var(--font-space-grotesk), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+  --font-label: var(--font-space-grotesk), sans-serif;
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -448,6 +451,21 @@
   [role="button"],
   a {
     touch-action: manipulation;
+  }
+
+  .neo-shadow {
+    box-shadow: 8px 8px 0px 0px #1a1a1a;
+  }
+  .neo-shadow-sm {
+    box-shadow: 4px 4px 0px 0px #1a1a1a;
+  }
+  .neo-shadow-hover:hover {
+    box-shadow: 2px 2px 0px 0px #1a1a1a;
+    transform: translate(2px, 2px);
+  }
+  .neo-shadow-active:active {
+    box-shadow: 0px 0px 0px 0px #1a1a1a;
+    transform: translate(4px, 4px);
   }
 
   /* Hide scrollbar utility */

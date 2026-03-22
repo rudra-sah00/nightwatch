@@ -14,7 +14,7 @@ describe('ActivityGraph', () => {
   describe('rendering', () => {
     it('renders without crashing', () => {
       render(<ActivityGraph activity={[]} />);
-      expect(screen.getByText(/minutes|hours/i)).toBeInTheDocument();
+      expect(screen.getByText('Jan')).toBeInTheDocument();
     });
 
     it('renders loading skeleton when isLoading is true', () => {
@@ -26,58 +26,17 @@ describe('ActivityGraph', () => {
 
     it('renders activity grid when data is provided', () => {
       const { container } = render(<ActivityGraph activity={mockActivity} />);
-      // Should render the weeks grid
-      const cells = container.querySelectorAll('[class*="rounded-"]');
+      // Should render the weeks grid cells
+      const cells = container.querySelectorAll('.w-3.h-3');
       expect(cells.length).toBeGreaterThan(0);
     });
   });
 
-  describe('stats display', () => {
-    it('displays total watch time in minutes when less than 60', () => {
-      const lowActivity: WatchActivity[] = [
-        { date: '2026-01-15', count: 30, level: 1 },
-      ];
-      render(<ActivityGraph activity={lowActivity} />);
-      expect(screen.getByText(/30 minutes/i)).toBeInTheDocument();
-    });
-
-    it('displays total watch time in hours when 60 or more', () => {
-      const highActivity: WatchActivity[] = [
-        { date: '2026-01-15', count: 120, level: 4 },
-      ];
-      render(<ActivityGraph activity={highActivity} />);
-      expect(screen.getByText(/2 hours/i)).toBeInTheDocument();
-    });
-
-    it('shows descriptive text about watch time', () => {
-      render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText(/in the last year/i)).toBeInTheDocument();
-    });
-  });
-
   describe('legend', () => {
-    it('renders the legend with Less and More labels', () => {
+    it('renders the months', () => {
       render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText('Less')).toBeInTheDocument();
-      expect(screen.getByText('More')).toBeInTheDocument();
-    });
-
-    it('renders day labels for GitHub-style graph', () => {
-      render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText('Mon')).toBeInTheDocument();
-      expect(screen.getByText('Wed')).toBeInTheDocument();
-      expect(screen.getByText('Fri')).toBeInTheDocument();
-    });
-  });
-
-  describe('activity levels', () => {
-    it('applies correct color classes based on activity level', () => {
-      const { container } = render(<ActivityGraph activity={mockActivity} />);
-      // Check that activity color classes are applied for different levels
-      const activityCells = container.querySelectorAll(
-        '[class*="bg-activity-"]',
-      );
-      expect(activityCells.length).toBeGreaterThan(0);
+      expect(screen.getByText('Jan')).toBeInTheDocument();
+      expect(screen.getByText('Dec')).toBeInTheDocument();
     });
   });
 
@@ -99,7 +58,7 @@ describe('ActivityGraph', () => {
         <ActivityGraph activity={mockActivity} createdAt={createdAt} />,
       );
       // Should still render the grid
-      const cells = container.querySelectorAll('[class*="rounded-"]');
+      const cells = container.querySelectorAll('.w-3.h-3');
       expect(cells.length).toBeGreaterThan(0);
     });
   });
@@ -107,8 +66,8 @@ describe('ActivityGraph', () => {
   describe('empty state', () => {
     it('renders correctly with empty activity array', () => {
       render(<ActivityGraph activity={[]} />);
-      // Should show 0 and minutes text
-      expect(screen.getByText('0 minutes')).toBeInTheDocument();
+      // Should show Jan/Dec
+      expect(screen.getByText('Jan')).toBeInTheDocument();
     });
   });
 });

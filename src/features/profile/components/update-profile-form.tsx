@@ -1,155 +1,298 @@
 'use client';
 
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Camera, Loader2, LogOut } from 'lucide-react';
+import { useRef } from 'react';
+import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
 
 export function UpdateProfileForm() {
   const {
     user,
-    name,
-    setName,
-    username,
-    setUsername,
-    preferredServer,
-    setPreferredServer,
-    isCheckingUsername,
-    isAvailable,
-    hasChanges,
-    action,
-    isPending,
-  } = useUpdateProfileForm();
+    logout,
+    isUploading,
+    displayImage,
+    fileInputRef,
+    formattedJoinDate,
+    handleFileClick,
+    handleFileChange,
+  } = useProfileOverview();
+
+  const profileForm = useUpdateProfileForm();
+  const profileFormRef = useRef<HTMLFormElement>(null);
+
+  if (!user) return null;
 
   return (
-    <form action={action} className="space-y-5">
-      {/* Name */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="name"
-          className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider"
-        >
-          Display Name
-        </Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your Name"
-          required
-          name="name"
-          className="h-11 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20"
-        />
-      </div>
-
-      {/* Username */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="username"
-          className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider"
-        >
-          Username
-        </Label>
-        <div className="relative">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-sm">
-            @
-          </span>
-          <Input
-            id="username"
-            value={username}
-            onChange={(e) =>
-              setUsername(
-                e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-              )
-            }
-            className="h-11 pl-8 pr-10 rounded-xl bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/30 focus:ring-indigo-500/20"
-            placeholder="username"
-            name="username"
-          />
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {isCheckingUsername ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/50" />
+    <form
+      action={profileForm.action}
+      ref={profileFormRef}
+      className="space-y-16"
+    >
+      {/* Main Profile Info Section */}
+      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow relative flex flex-col items-center md:items-start md:flex-row gap-8 min-h-[320px]">
+        {/* Avatar Section */}
+        <div className="relative group shrink-0">
+          <Avatar className="w-48 h-48 md:w-56 md:h-56 border-4 border-[#1a1a1a] rounded-none neo-shadow-sm transition-transform group-hover:-translate-y-1">
+            {displayImage ? (
+              <img
+                src={displayImage}
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
             ) : (
-              username !== user?.username &&
-              username.length >= 3 &&
-              (isAvailable ? (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <XCircle className="w-3.5 h-3.5 text-destructive" />
-              ))
+              <div className="w-full h-full bg-[#f1ece4] flex items-center justify-center">
+                <span className="text-4xl md:text-5xl font-black font-headline uppercase text-[#1a1a1a]/20">
+                  {user.name.charAt(0)}
+                </span>
+              </div>
             )}
+          </Avatar>
+
+          <button
+            type="button"
+            onClick={handleFileClick}
+            disabled={isUploading}
+            className="absolute -bottom-2 -right-2 p-4 bg-[#ffcc00] border-4 border-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-50 group/btn"
+            title="Update Photo"
+          >
+            {isUploading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-[#1a1a1a]" />
+            ) : (
+              <Camera className="w-6 h-6 text-[#1a1a1a]" />
+            )}
+          </button>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+
+        {/* User Info & Quick Actions */}
+        <div className="flex-1 flex flex-col gap-6 w-full text-center md:text-left mt-4 md:mt-0">
+          <div className="space-y-2">
+            {/* Display Name - Mobile position (under photo) */}
+            <div className="md:hidden text-2xl font-headline font-black text-[#1a1a1a] uppercase">
+              <div className="min-w-0 grid grid-cols-1 items-baseline relative group">
+                <span className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible">
+                  {profileForm.name || user.name}
+                </span>
+                <input
+                  name="name_mobile"
+                  required
+                  value={profileForm.name}
+                  onChange={(e) => profileForm.setName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      profileFormRef.current?.requestSubmit();
+                    }
+                  }}
+                  onBlur={() => {
+                    if (profileForm.hasChanges) {
+                      profileFormRef.current?.requestSubmit();
+                    }
+                  }}
+                  className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100"
+                />
+              </div>
+            </div>
+
+            {/* Username Selection Header */}
+            <h1 className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 text-4xl md:text-7xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-none mb-2 justify-center md:justify-start">
+              <span className="inline-flex items-center gap-1.5 md:gap-3 justify-center md:justify-start">
+                <span className="text-[#0055ff] leading-none translate-y-[-2px] md:translate-y-[-4px]">
+                  @
+                </span>
+                <div className="min-w-0 flex-1 grid grid-cols-1 items-baseline relative group">
+                  <span className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 md:decoration-8 underline-offset-[6px] md:underline-offset-8 font-black font-headline uppercase truncate group-focus-within:invisible">
+                    {profileForm.username ||
+                      (profileForm.isPending ? '' : user.username)}
+                  </span>
+                  <input
+                    name="username"
+                    id="username"
+                    value={profileForm.username}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      profileForm.setUsername(
+                        val.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+                      );
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        profileFormRef.current?.requestSubmit();
+                      }
+                    }}
+                    onBlur={() => {
+                      if (
+                        profileForm.hasChanges &&
+                        profileForm.isAvailable !== false
+                      ) {
+                        profileFormRef.current?.requestSubmit();
+                      }
+                    }}
+                    className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 md:focus:decoration-8 underline-offset-[6px] md:underline-offset-8 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                    aria-label="Username"
+                  />
+                </div>
+              </span>
+            </h1>
+            <input type="hidden" name="username" value={profileForm.username} />
+
+            {/* Display Name - Desktop position (grouped with username) */}
+            <div className="hidden md:block text-xl md:text-2xl font-headline font-bold text-[#1a1a1a] w-full max-w-lg uppercase">
+              <div className="min-w-0 grid grid-cols-1 items-baseline relative group">
+                <label
+                  htmlFor="name"
+                  className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible"
+                >
+                  {profileForm.name || user.name}
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  required
+                  value={profileForm.name}
+                  onChange={(e) => profileForm.setName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      profileFormRef.current?.requestSubmit();
+                    }
+                  }}
+                  onBlur={() => {
+                    if (profileForm.hasChanges) {
+                      profileFormRef.current?.requestSubmit();
+                    }
+                  }}
+                  className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                  aria-label="Display Name"
+                />
+                <input type="hidden" name="name" value={profileForm.name} />
+              </div>
+            </div>
+
+            <div className="text-base md:text-lg font-headline font-medium text-[#1a1a1a] max-w-lg border-l-4 border-[#0055ff] pl-3 uppercase">
+              <span className="opacity-80">
+                {user.email} • JOINED {formattedJoinDate}
+              </span>
+            </div>
+
+            {/* Username Check Feedback */}
+            {profileForm.username !== user?.username &&
+              profileForm.username.length > 0 && (
+                <p
+                  className={cn(
+                    'text-sm font-bold uppercase font-headline flex items-center gap-2',
+                    profileForm.isAvailable === false
+                      ? 'text-[#e63b2e]'
+                      : profileForm.isAvailable
+                        ? 'text-emerald-600'
+                        : 'text-[#1a1a1a]/50',
+                  )}
+                >
+                  {profileForm.isPending && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  )}
+                  {profileForm.username.length < 3
+                    ? 'Min 3 chars'
+                    : profileForm.isAvailable === false
+                      ? 'Already taken'
+                      : profileForm.isAvailable
+                        ? 'Available'
+                        : 'Checking...'}
+                </p>
+              )}
+          </div>
+
+          <div className="md:absolute md:top-8 md:right-8 flex flex-col items-center md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0">
+            {profileForm.isPending && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#ffcc00] text-[#1a1a1a] font-headline font-bold uppercase border-2 border-[#1a1a1a] neo-shadow-sm animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving...</span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                logout();
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-[#e63b2e] text-white font-headline font-bold uppercase border-2 border-[#1a1a1a] hover:bg-[#cc0000] neo-shadow-sm transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none min-w-[120px] justify-center md:justify-end"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
+            <button
+              type="submit"
+              className="hidden pointer-events-none"
+              disabled={
+                profileForm.isPending ||
+                (profileForm.username.length > 0 &&
+                  profileForm.username.length < 3) ||
+                profileForm.isAvailable === false
+              }
+            >
+              Save Changes
+            </button>
           </div>
         </div>
-        {username !== user?.username && username.length > 0 ? (
-          <p
-            className={cn(
-              'text-[11px] pl-0.5',
-              username.length < 3
-                ? 'text-muted-foreground/50'
-                : isAvailable === false
-                  ? 'text-destructive/70'
-                  : isAvailable === true
-                    ? 'text-emerald-400/70'
-                    : 'text-muted-foreground/50',
-            )}
-          >
-            {username.length < 3
-              ? 'Min 3 characters — letters, numbers, underscores'
-              : isAvailable === false
-                ? 'Already taken'
-                : isAvailable === true
-                  ? 'Available'
-                  : 'Checking...'}
-          </p>
-        ) : null}
-      </div>
+      </section>
 
-      {/* Server Preference */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider">
-          Default Server
-        </Label>
-        <div className="grid grid-cols-3 gap-2">
+      {/* Server Selection */}
+      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+            Server Selection
+          </h2>
+          {profileForm.isPending && (
+            <Loader2 className="w-8 h-8 animate-spin text-[#1a1a1a]" />
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { id: 's1' as const, label: 'Netflix', sub: 'Standard' },
             { id: 's2' as const, label: 'Balanced', sub: 'Performance' },
-            { id: 's3' as const, label: 'High Quality Stream', sub: 'HLS 4K' },
-          ].map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setPreferredServer(s.id)}
-              className={cn(
-                'flex flex-col items-center gap-0.5 py-3 rounded-xl text-sm transition-colors border',
-                preferredServer === s.id
-                  ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
-                  : 'bg-white/[0.02] border-white/[0.06] text-muted-foreground/60 hover:text-muted-foreground',
-              )}
-            >
-              <span className="font-semibold text-[13px]">{s.label}</span>
-              <span className="text-[10px] opacity-60">{s.sub}</span>
-            </button>
-          ))}
+            { id: 's3' as const, label: 'High Quality', sub: 'HLS 4K' },
+          ].map((s) => {
+            const isSelected = profileForm.preferredServer === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  profileForm.setPreferredServer(s.id);
+                  // Immediate save for server selection
+                  setTimeout(() => profileFormRef.current?.requestSubmit(), 0);
+                }}
+                className={cn(
+                  'flex flex-col items-start gap-2 p-6 border-4 border-[#1a1a1a] transition-all active:translate-x-[2px] active:translate-y-[2px]',
+                  isSelected
+                    ? 'bg-[#0055ff] text-white neo-shadow-yellow -translate-y-1'
+                    : 'bg-[#f5f0e8] hover:bg-white text-[#1a1a1a] neo-shadow-sm',
+                )}
+              >
+                <span className="font-black text-2xl font-headline tracking-tighter uppercase">
+                  {s.label}
+                </span>
+                <span className="text-sm uppercase opacity-90 font-body font-bold">
+                  {s.sub}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <input type="hidden" name="preferredServer" value={preferredServer} />
-      </div>
-
-      {/* Feedback */}
-      <Button
-        type="submit"
-        className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-colors disabled:opacity-40"
-        isLoading={isPending}
-        disabled={
-          isPending ||
-          !hasChanges ||
-          (username !== user?.username && isAvailable === false) ||
-          (username.length > 0 && username.length < 3)
-        }
-      >
-        Save Changes
-      </Button>
+        <input
+          type="hidden"
+          name="preferredServer"
+          value={profileForm.preferredServer}
+        />
+      </section>
     </form>
   );
 }

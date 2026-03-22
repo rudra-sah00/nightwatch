@@ -18,8 +18,8 @@ describe('PlayPause', () => {
         <PlayPause {...defaultProps} isPlaying={false} />,
       );
 
-      // Play icon has ml-0.5 class
-      expect(container.querySelector('.ml-0\\.5')).toBeInTheDocument();
+      // Play icon has ml-1 class
+      expect(container.querySelector('.ml-1')).toBeInTheDocument();
     });
 
     it('should render pause button when playing', () => {
@@ -27,8 +27,8 @@ describe('PlayPause', () => {
         <PlayPause {...defaultProps} isPlaying={true} />,
       );
 
-      // Pause icon doesn't have ml-0.5
-      expect(container.querySelector('.ml-0\\.5')).not.toBeInTheDocument();
+      // Pause icon doesn't have ml-1
+      expect(container.querySelector('.ml-1')).not.toBeInTheDocument();
     });
 
     it('should render with small size', () => {
@@ -66,11 +66,11 @@ describe('PlayPause', () => {
       );
 
       // Initially shows play
-      expect(container.querySelector('.ml-0\\.5')).toBeInTheDocument();
+      expect(container.querySelector('.ml-1')).toBeInTheDocument();
 
       // After rerender with playing, shows pause
       rerender(<PlayPause isPlaying={true} onToggle={onToggle} />);
-      expect(container.querySelector('.ml-0\\.5')).not.toBeInTheDocument();
+      expect(container.querySelector('.ml-1')).not.toBeInTheDocument();
     });
 
     it('should prevent default on mouseDown', () => {

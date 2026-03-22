@@ -78,20 +78,7 @@ describe('UpdateProfileForm', () => {
       await user.clear(usernameInput);
       await user.type(usernameInput, 'ab');
 
-      expect(screen.getByText(/Min 3 characters/i)).toBeInTheDocument();
-    });
-
-    it('shows username requirements when username is changed', async () => {
-      const user = userEvent.setup();
-      render(<UpdateProfileForm />);
-
-      const usernameInput = screen.getByLabelText(/Username/i);
-      await user.clear(usernameInput);
-      await user.type(usernameInput, 'n');
-
-      expect(
-        screen.getByText(/letters, numbers, underscores/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Min 3 chars/i)).toBeInTheDocument();
     });
 
     it('filters invalid characters from username', async () => {

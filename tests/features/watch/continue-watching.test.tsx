@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
+import { ContentType } from '@/types/content';
 
 // Mock the watch API
 vi.mock('@/features/watch/api', () => import('./__mocks__/watch-api'));
@@ -53,7 +54,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Stranger Things',
         posterUrl: 'https://example.com/poster.jpg',
         progressSeconds: 600,
@@ -104,7 +105,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Show One',
         posterUrl: '',
         progressSeconds: 600,
@@ -120,7 +121,7 @@ describe('ContinueWatching', () => {
       {
         id: '2',
         contentId: 'show-2',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Show Two',
         posterUrl: '',
         progressSeconds: 300,
@@ -170,7 +171,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'movie-1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'Test Movie',
         posterUrl: '',
         progressSeconds: 1200,
@@ -219,7 +220,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-123',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Test Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -267,7 +268,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Test Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -314,7 +315,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Test Series',
         posterUrl: '',
         progressSeconds: 600,
@@ -361,7 +362,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'movie-1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'Test Movie',
         posterUrl: '',
         progressSeconds: 600,
@@ -406,7 +407,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'movie-1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'Long Movie',
         posterUrl: '',
         progressSeconds: 600,
@@ -451,7 +452,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'movie-1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'Exactly Two Hours',
         posterUrl: '',
         progressSeconds: 600,
@@ -497,7 +498,7 @@ describe('ContinueWatching', () => {
       {
         id: 'progress-1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Show to Remove',
         posterUrl: '',
         progressSeconds: 600,
@@ -572,7 +573,7 @@ describe('ContinueWatching', () => {
       {
         id: 'progress-1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -639,7 +640,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'cached-show',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Cached Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -740,7 +741,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Test Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -829,7 +830,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'No Poster Show',
         posterUrl: '',
         progressSeconds: 600,
@@ -867,7 +868,7 @@ describe('ContinueWatching', () => {
       {
         id: '1',
         contentId: 'show-1',
-        contentType: 'Series' as const,
+        contentType: ContentType.Series,
         title: 'Test Show',
         posterUrl: '',
         progressSeconds: 600,

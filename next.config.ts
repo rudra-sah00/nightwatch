@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-tabs',
       '@radix-ui/react-tooltip',
       '@radix-ui/react-slot',
+      '@radix-ui/react-label',
+      '@radix-ui/react-alert-dialog',
       'clsx',
       'tailwind-merge',
       'class-variance-authority',

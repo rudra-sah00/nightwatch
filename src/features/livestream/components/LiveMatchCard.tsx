@@ -67,76 +67,63 @@ export function LiveMatchCard({
         <button
           type="button"
           onClick={handleWatchClick}
-          className={`group relative rounded-xl overflow-hidden bg-zinc-900/80 border border-zinc-800/50 hover:border-zinc-700/70 transition-all duration-300 w-full text-left ${canWatch ? 'cursor-pointer' : ''}`}
+          className={`group bg-white border-[4px] border-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200 w-full text-left flex flex-col ${
+            canWatch ? 'cursor-pointer' : 'cursor-default'
+          }`}
         >
-          {/* Subtle animated glow for live matches */}
-          {isLive && (
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-live-strong/8 via-transparent to-transparent" />
-              <div className="absolute -inset-px rounded-xl border border-live/10" />
-            </div>
-          )}
-
           {/* Top header bar */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-2.5">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between px-5 py-3 border-b-[4px] border-[#1a1a1a] bg-[#f5f0e8]">
+            <div className="flex items-center gap-3">
               {isLive && (
-                <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-live">
-                  <span className="relative flex h-2 w-2">
-                    <span
-                      className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                      style={{ backgroundColor: 'var(--live-color)' }}
-                    />
-                    <span
-                      className="relative inline-flex rounded-full h-2 w-2"
-                      style={{ backgroundColor: 'var(--live-color-strong)' }}
-                    />
+                <span className="flex items-center gap-2 text-sm font-black font-headline uppercase tracking-widest text-[#e63b2e]">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full bg-[#e63b2e] opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 bg-[#e63b2e] border-2 border-[#1a1a1a]" />
                   </span>
                   Live
                 </span>
               )}
               {isUpcoming && (
-                <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
-                  <Clock className="w-3 h-3" />
+                <span className="flex items-center gap-2 text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
+                  <Clock className="w-4 h-4 stroke-[3px]" />
                   {formattedTime}
                 </span>
               )}
               {isEnded && (
-                <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-[0.12em]">
+                <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a]">
                   Final
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-wider truncate max-w-[140px] bg-zinc-800/40 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[140px]">
               {match.league || match.type}
             </span>
           </div>
 
-          {/* Separator */}
-          <div className="mx-5 h-px bg-zinc-800/40" />
-
           {/* Teams */}
-          <div className="px-5 py-4 space-y-3">
+          <div className="px-5 py-6 space-y-5">
             {/* Team 1 */}
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800/60 flex-shrink-0 flex items-center justify-center overflow-hidden border border-zinc-700/30">
-                {match.team1.avatar ? (
-                  <img
-                    src={match.team1.avatar}
-                    alt={match.team1.name}
-                    className="w-full h-full object-contain p-0.5"
-                  />
-                ) : (
-                  <span className="text-[10px] text-zinc-500 font-bold">
-                    T1
-                  </span>
-                )}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white border-[3px] border-[#1a1a1a]">
+                  {match.team1.avatar ? (
+                    <img
+                      src={match.team1.avatar}
+                      alt={match.team1.name}
+                      className="w-full h-full object-contain p-1"
+                    />
+                  ) : (
+                    <span className="text-sm text-[#1a1a1a] font-black font-headline uppercase">
+                      T1
+                    </span>
+                  )}
+                </div>
+                <span className="text-lg md:text-xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] truncate">
+                  {match.team1.name}
+                </span>
               </div>
-              <span className="flex-1 text-sm font-medium text-zinc-200 truncate">
-                {match.team1.name}
-              </span>
               {!isUpcoming && (
-                <span className="text-xl font-bold tabular-nums tracking-tight text-white">
+                <span className="text-3xl font-black font-headline tracking-tighter text-[#1a1a1a] tabular-nums">
                   {match.type === 'cricket'
                     ? getCricketScore(match, 1)
                     : match.team1.score}
@@ -145,33 +132,37 @@ export function LiveMatchCard({
             </div>
 
             {/* VS divider */}
-            <div className="flex items-center gap-3 pl-[3.25rem]">
-              <span className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">
-                vs
-              </span>
-              <div className="flex-1 h-px bg-zinc-800/30" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-black font-headline text-[#1a1a1a] uppercase bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a]">
+                  VS
+                </span>
+              </div>
+              <div className="flex-1 h-1 bg-[#1a1a1a]" />
             </div>
 
             {/* Team 2 */}
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800/60 flex-shrink-0 flex items-center justify-center overflow-hidden border border-zinc-700/30">
-                {match.team2.avatar ? (
-                  <img
-                    src={match.team2.avatar}
-                    alt={match.team2.name}
-                    className="w-full h-full object-contain p-0.5"
-                  />
-                ) : (
-                  <span className="text-[10px] text-zinc-500 font-bold">
-                    T2
-                  </span>
-                )}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white border-[3px] border-[#1a1a1a]">
+                  {match.team2.avatar ? (
+                    <img
+                      src={match.team2.avatar}
+                      alt={match.team2.name}
+                      className="w-full h-full object-contain p-1"
+                    />
+                  ) : (
+                    <span className="text-sm text-[#1a1a1a] font-black font-headline uppercase">
+                      T2
+                    </span>
+                  )}
+                </div>
+                <span className="text-lg md:text-xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] truncate">
+                  {match.team2.name}
+                </span>
               </div>
-              <span className="flex-1 text-sm font-medium text-zinc-200 truncate">
-                {match.team2.name}
-              </span>
               {!isUpcoming && (
-                <span className="text-xl font-bold tabular-nums tracking-tight text-white">
+                <span className="text-3xl font-black font-headline tracking-tighter text-[#1a1a1a] tabular-nums">
                   {match.type === 'cricket'
                     ? getCricketScore(match, 2)
                     : match.team2.score}
@@ -182,20 +173,20 @@ export function LiveMatchCard({
 
           {/* Bottom bar */}
           {canWatch && (
-            <div className="border-t border-zinc-800/40 px-5 py-3 flex items-center justify-between bg-zinc-800/15">
-              <span className="text-[11px] text-zinc-500">
+            <div className="border-t-[4px] border-[#1a1a1a] px-5 py-4 flex items-center justify-between bg-[#1a1a1a] mt-auto">
+              <span className="text-xs font-black font-headline uppercase tracking-widest text-[#f5f0e8]">
                 {match.timeDesc || 'In Progress'}
               </span>
-              <span className="flex items-center gap-2 text-xs font-semibold text-live group-hover:translate-x-0.5 transition-transform duration-200">
-                <Play className="w-3 h-3 fill-current" />
-                Watch Live
+              <span className="flex items-center gap-2 text-sm font-black font-headline uppercase tracking-widest text-[#0055ff] bg-white px-3 py-1 border-[3px] border-[#1a1a1a] group-hover:bg-[#ffcc00] group-hover:text-[#1a1a1a] transition-colors">
+                <Play className="w-4 h-4 fill-current stroke-[3px]" />
+                Watch
               </span>
             </div>
           )}
           {isUpcoming && (
-            <div className="border-t border-zinc-800/40 px-5 py-3 bg-zinc-800/15">
-              <span className="text-[11px] text-zinc-500">
-                {formattedDate} · {formattedTime}
+            <div className="border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] px-5 py-4 mt-auto">
+              <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
+                {formattedDate} • {formattedTime}
               </span>
             </div>
           )}
@@ -211,69 +202,57 @@ export function LiveMatchCard({
       <button
         type="button"
         onClick={handleWatchClick}
-        className={`group flex items-center gap-4 px-5 py-4 transition-all duration-200 w-full text-left ${
-          isLive
-            ? 'bg-zinc-900/30 hover:bg-zinc-800/40'
-            : 'hover:bg-zinc-800/20'
-        } ${canWatch ? 'cursor-pointer' : 'cursor-default'}`}
+        className={`group flex items-center gap-4 px-6 py-4 transition-all duration-200 w-full text-left bg-white hover:bg-[#ffcc00] ${
+          canWatch ? 'cursor-pointer' : 'cursor-default'
+        }`}
       >
         {/* Time / Status column */}
-        <div className="w-14 flex-shrink-0 text-center">
+        <div className="w-16 flex-shrink-0 text-center">
           {isLive ? (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-live">
-              <span className="relative flex h-1.5 w-1.5">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: 'var(--live-color)' }}
-                />
-                <span
-                  className="relative inline-flex rounded-full h-1.5 w-1.5"
-                  style={{ backgroundColor: 'var(--live-color-strong)' }}
-                />
-              </span>
-              Live
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#e63b2e] font-headline bg-white px-2 py-0.5 border-2 border-[#1a1a1a]">
+              Liv
             </span>
           ) : isEnded ? (
-            <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">
-              FT
+            <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a]">
+              Fin
             </span>
           ) : (
-            <span className="text-[11px] font-medium text-zinc-500 tabular-nums">
+            <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline tabular-nums">
               {formattedTime}
             </span>
           )}
         </div>
 
         {/* Vertical separator */}
-        <div className="w-px h-8 bg-zinc-800/40 flex-shrink-0" />
+        <div className="w-[3px] h-10 bg-[#1a1a1a] flex-shrink-0" />
 
         {/* Teams column */}
         <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 rounded bg-zinc-800/60 flex-shrink-0 overflow-hidden border border-zinc-700/30">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center">
               {match.team1.avatar ? (
                 <img
                   src={match.team1.avatar}
                   alt=""
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain p-0.5"
                 />
               ) : null}
             </div>
-            <span className="text-sm truncate text-zinc-300">
+            <span className="text-sm font-black uppercase tracking-widest text-[#1a1a1a] font-headline truncate">
               {match.team1.name}
             </span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 rounded bg-zinc-800/60 flex-shrink-0 overflow-hidden border border-zinc-700/30">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center">
               {match.team2.avatar ? (
                 <img
                   src={match.team2.avatar}
                   alt=""
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain p-0.5"
                 />
               ) : null}
             </div>
-            <span className="text-sm truncate text-zinc-300">
+            <span className="text-sm font-black uppercase tracking-widest text-[#1a1a1a] font-headline truncate">
               {match.team2.name}
             </span>
           </div>
@@ -282,12 +261,12 @@ export function LiveMatchCard({
         {/* Score column */}
         {(isLive || isEnded) && (
           <div className="flex-shrink-0 text-right space-y-2 min-w-[32px]">
-            <p className="text-sm tabular-nums text-white font-bold">
+            <p className="text-sm tabular-nums text-[#1a1a1a] font-headline font-black">
               {match.type === 'cricket'
                 ? getCricketScore(match, 1)
                 : match.team1.score || '-'}
             </p>
-            <p className="text-sm tabular-nums text-zinc-400">
+            <p className="text-sm tabular-nums text-[#1a1a1a] font-headline font-black">
               {match.type === 'cricket'
                 ? getCricketScore(match, 2)
                 : match.team2.score || '-'}
@@ -297,16 +276,16 @@ export function LiveMatchCard({
 
         {/* League tag */}
         <div className="w-24 flex-shrink-0 hidden md:block">
-          <span className="text-[10px] text-zinc-600 uppercase tracking-wider truncate block text-right">
+          <span className="text-[10px] text-[#4a4a4a] bg-white border-2 border-[#1a1a1a] px-2 py-0.5 uppercase tracking-widest font-headline font-black truncate block text-center">
             {match.league || match.type}
           </span>
         </div>
 
         {/* Action */}
         {canWatch && (
-          <div className="flex-shrink-0">
-            <span className="flex items-center gap-1 text-xs font-semibold text-live opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
-              <Play className="w-3 h-3 fill-current" />
+          <div className="flex-shrink-0 pl-2">
+            <span className="flex items-center justify-center w-8 h-8 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] group-hover:bg-[#1a1a1a] group-hover:text-white transition-colors">
+              <Play className="w-4 h-4 fill-current stroke-[3px]" />
             </span>
           </div>
         )}

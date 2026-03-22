@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { WatchActivity } from '@/features/profile/types';
 import type { WatchProgress } from '@/features/watch/types';
+import { ContentType } from '@/types/content';
 
 describe('Watch Types', () => {
   it('creates valid WatchProgress for series', () => {
     const progress: WatchProgress = {
       id: 'progress-1',
       contentId: 'show-1',
-      contentType: 'Series',
+      contentType: ContentType.Series,
       title: 'Breaking Bad',
       posterUrl: 'https://example.com/poster.jpg',
       progressSeconds: 1200,
@@ -22,7 +23,7 @@ describe('Watch Types', () => {
       episodeTitle: 'Pilot',
     };
 
-    expect(progress.contentType).toBe('Series');
+    expect(progress.contentType).toBe(ContentType.Series);
     expect(progress.seasonNumber).toBe(1);
     expect(progress.episodeNumber).toBe(1);
     expect(progress.episodeId).toBe('ep-1');
@@ -32,7 +33,7 @@ describe('Watch Types', () => {
     const progress: WatchProgress = {
       id: 'progress-2',
       contentId: 'movie-1',
-      contentType: 'Movie',
+      contentType: ContentType.Movie,
       title: 'The Dark Knight',
       posterUrl: 'https://example.com/poster.jpg',
       progressSeconds: 3600,
@@ -43,7 +44,7 @@ describe('Watch Types', () => {
       lastWatchedAt: '2024-01-15T10:30:00Z',
     };
 
-    expect(progress.contentType).toBe('Movie');
+    expect(progress.contentType).toBe(ContentType.Movie);
     expect(progress.seasonNumber).toBeUndefined();
     expect(progress.episodeNumber).toBeUndefined();
     expect(progress.episodeId).toBeUndefined();
@@ -53,7 +54,7 @@ describe('Watch Types', () => {
     const progress: WatchProgress = {
       id: 'progress-3',
       contentId: 'movie-1',
-      contentType: 'Movie',
+      contentType: ContentType.Movie,
       title: 'Test Movie',
       posterUrl: 'https://example.com/poster.jpg',
       progressSeconds: 1800,

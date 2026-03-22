@@ -6,6 +6,7 @@ import {
   PenTool,
   Settings,
   Shield,
+  Subtitles,
   Volume2,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -16,6 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { loadSubtitleFonts } from '@/features/watch/player/ui/controls/load-subtitle-fonts';
+import {
+  applySubtitleSettings,
+  BACKGROUND_COLORS,
+  loadSubtitleSettings,
+  SUBTITLE_FONT_SIZES,
+  SUBTITLE_FONTS,
+  type SubtitleSettings,
+  saveSubtitleSettings,
+  TEXT_COLORS,
+  TEXT_SHADOWS,
+} from '@/features/watch/player/ui/controls/subtitle-settings';
 import { cn } from '@/lib/utils';
 import type { SidebarTheme } from '../hooks/use-sidebar-theme';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
@@ -66,23 +79,23 @@ function ThemeDropdown({ value, customColor, onChange }: ThemeDropdownProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-2.5 bg-zinc-900/70 border border-white/10 hover:border-white/20 text-white text-sm rounded-xl transition-colors focus:outline-none focus:ring-1 focus:ring-white/25"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm transition-all focus:outline-none neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none focus:ring-0 active:bg-[#f5f0e8]"
       >
         {/* Dot / colour preview */}
         {value === 'custom' ? (
           <span
-            className="w-3 h-3 rounded-full border border-white/20 flex-shrink-0"
+            className="w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0"
             style={{ backgroundColor: customColor }}
           />
         ) : (
           <span
-            className={`w-3 h-3 rounded-full flex-shrink-0 ${selected.dot}`}
+            className={`w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0 ${selected.dot}`}
           />
         )}
         <span className="flex-1 text-left">{selected.label}</span>
         <ChevronDown
           className={cn(
-            'w-4 h-4 text-white/40 transition-transform duration-200',
+            'w-5 h-5 text-[#1a1a1a] stroke-[3px] transition-transform duration-200',
             open && 'rotate-180',
           )}
         />
@@ -90,7 +103,7 @@ function ThemeDropdown({ value, customColor, onChange }: ThemeDropdownProps) {
 
       {/* Panel */}
       {open && (
-        <div className="absolute z-50 mt-2 w-full bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute z-50 mt-2 w-full bg-white border-[4px] border-[#1a1a1a] border-b-[6px] border-r-[6px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {THEME_OPTIONS.map((opt) => {
             const isActive = value === opt.id;
             return (
@@ -102,26 +115,28 @@ function ThemeDropdown({ value, customColor, onChange }: ThemeDropdownProps) {
                   setOpen(false);
                 }}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors',
+                  'w-full flex items-center gap-3 px-4 py-3 text-sm font-black font-headline uppercase tracking-widest transition-colors border-b-[2px] border-[#1a1a1a] last:border-b-0',
                   isActive
-                    ? 'bg-white/8 text-white'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white',
+                    ? 'bg-[#ffcc00] text-[#1a1a1a]'
+                    : 'text-[#1a1a1a] hover:bg-[#f5f0e8]',
                 )}
               >
                 {opt.id === 'custom' ? (
                   <span
-                    className="w-3 h-3 rounded-full border border-white/20 flex-shrink-0"
+                    className="w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0"
                     style={{
                       backgroundColor: isActive ? customColor : '#6b7280',
                     }}
                   />
                 ) : (
                   <span
-                    className={`w-3 h-3 rounded-full flex-shrink-0 ${opt.dot}`}
+                    className={`w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0 ${opt.dot}`}
                   />
                 )}
                 <span className="flex-1 text-left">{opt.label}</span>
-                {isActive && <Check className="w-3.5 h-3.5 text-white/60" />}
+                {isActive && (
+                  <Check className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                )}
               </button>
             );
           })}
@@ -147,15 +162,15 @@ function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-[outline]:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ring-indigo-500',
-        checked ? 'bg-indigo-500' : 'bg-zinc-700',
+        'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border-[3px] border-[#1a1a1a] transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0',
+        checked ? 'bg-[#ffcc00]' : 'bg-[#f5f0e8]',
       )}
     >
       <span
         data-state={checked ? 'checked' : 'unchecked'}
         className={cn(
-          'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform',
-          checked ? 'translate-x-4' : 'translate-x-0',
+          'pointer-events-none block h-4 w-4 bg-[#1a1a1a] transition-transform',
+          checked ? 'translate-x-[22px]' : 'translate-x-[2px]',
         )}
       />
     </button>
@@ -185,6 +200,23 @@ export function WatchPartySettings({
   onToggleFloatingChat,
 }: WatchPartySettingsProps) {
   const { isOpen, setIsOpen } = useWatchPartySettings();
+  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
+    () => loadSubtitleSettings(),
+  );
+
+  // Sync subtitle settings when opening modal
+  useEffect(() => {
+    if (isOpen) {
+      setSubtitleSettings(loadSubtitleSettings());
+      loadSubtitleFonts();
+    }
+  }, [isOpen]);
+
+  const updateSubtitleSettings = (newSettings: SubtitleSettings) => {
+    setSubtitleSettings(newSettings);
+    applySubtitleSettings(newSettings);
+    saveSubtitleSettings(newSettings);
+  };
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
@@ -209,37 +241,39 @@ export function WatchPartySettings({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="px-3 flex items-center justify-center gap-2 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-colors"
+          className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-[#1a1a1a] border-[3px] border-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:bg-[#f5f0e8]"
           title="Room Settings"
         >
-          <Settings aria-hidden="true" className="w-4 h-4" />
+          <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
         </button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md bg-zinc-950 border-white/10 text-white shadow-2xl overflow-hidden p-0">
-        <DialogHeader className="p-6 border-b border-white/10 bg-zinc-900/50">
-          <DialogTitle className="flex items-center gap-2">
-            <Shield aria-hidden="true" className="w-5 h-5 text-indigo-400" />
+      <DialogContent className="max-w-md bg-white border-[4px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]">
+        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-[#1a1a1a] bg-[#ffcc00] m-0">
+          <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl">
+            <Shield aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
             Watch Party Settings
           </DialogTitle>
         </DialogHeader>
 
-        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-6 space-y-8">
+        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-8 bg-white">
           {/* Personal Preferences — visible to all users */}
           {onToggleFloatingChat !== undefined ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
-                <MessageSquare className="w-3.5 h-3.5" />
+              <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] flex items-center gap-2 border-b-[3px] border-[#1a1a1a] pb-2">
+                <MessageSquare className="w-5 h-5 stroke-[3px]" />
                 Personal
               </h3>
-              <div className="bg-zinc-900/50 rounded-xl p-4 border border-white/5">
+              <div className="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <MessageSquare className="w-4 h-4 text-white/70" />
-                    <div>
-                      <p className="text-sm font-medium">Floating chat</p>
-                      <p className="text-xs text-white/40">
-                        Show chat overlay when sidebar is closed
+                    <MessageSquare className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                    <div className="flex flex-col">
+                      <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                        Floating chat
+                      </p>
+                      <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                        Show chat overlay when closed
                       </p>
                     </div>
                   </div>
@@ -247,6 +281,93 @@ export function WatchPartySettings({
                     checked={floatingChatEnabled}
                     onCheckedChange={() => onToggleFloatingChat?.()}
                   />
+                </div>
+
+                <div className="border-t-[2px] border-[#1a1a1a]/10 pt-4">
+                  <h4 className="text-[10px] md:text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]/60 mb-3 flex items-center gap-2">
+                    <Subtitles className="w-3 h-3" />
+                    Subtitle Style
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Font Size */}
+                    <Dropdown
+                      label="Size"
+                      value={subtitleSettings.fontSize}
+                      options={SUBTITLE_FONT_SIZES}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          fontSize: v,
+                        })
+                      }
+                    />
+                    {/* Font Family */}
+                    <Dropdown
+                      label="Font"
+                      value={subtitleSettings.fontFamily}
+                      options={SUBTITLE_FONTS}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          fontFamily: v,
+                        })
+                      }
+                    />
+                    {/* Text Color */}
+                    <Dropdown
+                      label="Text Color"
+                      value={subtitleSettings.textColor}
+                      options={TEXT_COLORS}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          textColor: v,
+                        })
+                      }
+                      isColor
+                    />
+                    {/* Background */}
+                    <Dropdown
+                      label="Background"
+                      value={subtitleSettings.backgroundColor}
+                      options={BACKGROUND_COLORS}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          backgroundColor: v,
+                        })
+                      }
+                      isColor
+                    />
+                    {/* Text Effect */}
+                    <Dropdown
+                      label="Effect"
+                      value={subtitleSettings.textShadow}
+                      options={TEXT_SHADOWS}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          textShadow: v,
+                        })
+                      }
+                    />
+                    {/* Opacity */}
+                    <Dropdown
+                      label="Opacity"
+                      value={String(subtitleSettings.opacity)}
+                      options={[
+                        { label: 'Opaque', value: '1' },
+                        { label: 'Semi-Transparent', value: '0.5' },
+                        { label: 'Transparent', value: '0' },
+                      ]}
+                      onChange={(v) =>
+                        updateSubtitleSettings({
+                          ...subtitleSettings,
+                          opacity: Number(v),
+                        })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -256,8 +377,8 @@ export function WatchPartySettings({
             <div className="space-y-8">
               {/* Appearance */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
-                  <Palette className="w-3.5 h-3.5" />
+                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] flex items-center gap-2 border-b-[3px] border-[#1a1a1a] pb-2">
+                  <Palette className="w-5 h-5 stroke-[3px]" />
                   Sidebar Theme
                 </h3>
 
@@ -273,14 +394,14 @@ export function WatchPartySettings({
 
                 {/* Custom colour picker — shown only when custom is selected */}
                 {sidebarTheme === 'custom' && (
-                  <div className="flex items-center gap-3 bg-zinc-900/50 rounded-xl p-3 border border-white/5">
+                  <div className="flex items-center gap-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-3 justify-between">
                     <label
                       htmlFor="wp-custom-color"
                       className="flex items-center gap-3 cursor-pointer flex-1"
                     >
                       {/* Clickable colour circle */}
                       <div
-                        className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg flex-shrink-0 relative overflow-hidden"
+                        className="w-10 h-10 border-[3px] border-[#1a1a1a] flex-shrink-0 relative overflow-hidden bg-white"
                         style={{ backgroundColor: customColor }}
                       >
                         <input
@@ -294,14 +415,14 @@ export function WatchPartySettings({
                               customColor: e.target.value,
                             });
                           }}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 opacity-0 cursor-pointer"
                         />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">
+                      <div className="flex flex-col">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
                           Accent colour
                         </p>
-                        <p className="text-xs text-white/40 font-mono">
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
                           {customColor.toUpperCase()}
                         </p>
                       </div>
@@ -322,7 +443,7 @@ export function WatchPartySettings({
                             });
                         }
                       }}
-                      className="w-24 bg-black/30 border border-white/10 text-white/80 font-mono text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      className="w-24 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] font-headline font-black uppercase text-xs rounded-none px-2 py-1.5 focus:outline-none focus:ring-0 text-center"
                     />
                   </div>
                 )}
@@ -330,18 +451,20 @@ export function WatchPartySettings({
 
               {/* Global Permissions */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
+                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] border-b-[3px] border-[#1a1a1a] pb-2">
                   Global Permissions for Guests
                 </h3>
 
-                <div className="space-y-3 bg-zinc-900/50 rounded-xl p-4 border border-white/5">
+                <div className="space-y-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <PenTool className="w-4 h-4 text-white/70" />
-                      <div>
-                        <p className="text-sm font-medium">Sketch Board</p>
-                        <p className="text-xs text-white/40">
-                          Allow guests to draw on the video overlay
+                      <PenTool className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <div className="flex flex-col">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                          Sketch Board
+                        </p>
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                          Allow guests to draw on video
                         </p>
                       </div>
                     </div>
@@ -353,12 +476,14 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t-[2px] border-[#1a1a1a]/10 pt-3">
                     <div className="flex items-center gap-3">
-                      <Volume2 className="w-4 h-4 text-white/70" />
-                      <div>
-                        <p className="text-sm font-medium">Soundboard</p>
-                        <p className="text-xs text-white/40">
+                      <Volume2 className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <div className="flex flex-col">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                          Soundboard
+                        </p>
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
                           Allow guests to play trending sounds
                         </p>
                       </div>
@@ -371,12 +496,14 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t-[2px] border-[#1a1a1a]/10 pt-3">
                     <div className="flex items-center gap-3">
-                      <MessageSquare className="w-4 h-4 text-white/70" />
-                      <div>
-                        <p className="text-sm font-medium">Live Chat</p>
-                        <p className="text-xs text-white/40">
+                      <MessageSquare className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <div className="flex flex-col">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                          Live Chat
+                        </p>
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
                           Allow guests to send chat messages
                         </p>
                       </div>
@@ -394,30 +521,30 @@ export function WatchPartySettings({
               {/* Individual Overrides */}
               {guests.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white/50">
+                  <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] border-b-[3px] border-[#1a1a1a] pb-2">
                     Individual Guest Overrides
                   </h3>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {guests.map((guest) => (
                       <div
                         key={guest.id}
-                        className="bg-zinc-900/50 rounded-xl p-4 border border-white/5 flex flex-col gap-4"
+                        className="bg-white border-[3px] border-[#1a1a1a] p-4 flex flex-col gap-4 neo-shadow-sm"
                       >
-                        <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-white">
+                        <div className="flex items-center gap-3 border-b-[3px] border-[#1a1a1a] pb-3">
+                          <div className="w-8 h-8 bg-[#0055ff] border-[2px] border-[#1a1a1a] flex items-center justify-center shrink-0">
+                            <span className="text-xs font-black font-headline uppercase tracking-widest text-white">
                               {guest.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
-                          <span className="text-sm font-medium pr-2 truncate text-white">
+                          <span className="text-sm font-black font-headline uppercase tracking-widest pr-2 truncate text-[#1a1a1a]">
                             {guest.name}
                           </span>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2">
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-xs text-white/50">
+                          <div className="flex flex-col items-center gap-3">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
                               Sketch
                             </span>
                             <Switch
@@ -434,8 +561,8 @@ export function WatchPartySettings({
                               }
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-xs text-white/50">
+                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-[#1a1a1a]/10">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
                               Sounds
                             </span>
                             <Switch
@@ -452,8 +579,10 @@ export function WatchPartySettings({
                               }
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-xs text-white/50">Chat</span>
+                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-[#1a1a1a]/10">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
+                              Chat
+                            </span>
                             <Switch
                               checked={
                                 guest.permissions?.canChat ??
@@ -479,5 +608,95 @@ export function WatchPartySettings({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Reusable Dropdown for Settings
+interface DropdownProps {
+  label: string;
+  value: string;
+  options: readonly { label: string; value: string }[];
+  onChange: (value: string) => void;
+  isColor?: boolean;
+}
+
+function Dropdown({ label, value, options, onChange, isColor }: DropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [open]);
+
+  const selected = options.find((o) => o.value === value) ?? options[0];
+
+  return (
+    <div ref={ref} className="relative flex-1">
+      <p className="text-[10px] md:text-[8px] font-black font-headline uppercase tracking-widest text-[#1a1a1a]/40 mb-1 pl-1">
+        {label}
+      </p>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2 px-3 py-2 bg-white border-[2px] border-[#1a1a1a] text-[#1a1a1a] font-bold font-headline uppercase tracking-widest text-[10px] transition-all focus:outline-none hover:bg-[#ffe066] active:bg-[#f5f0e8] truncate"
+      >
+        {isColor && (
+          <span
+            className="w-3 h-3 border border-[#1a1a1a] flex-shrink-0"
+            style={{
+              backgroundColor: value === 'transparent' ? 'transparent' : value,
+            }}
+          />
+        )}
+        <span className="flex-1 text-left truncate">{selected.label}</span>
+        <ChevronDown
+          className={cn(
+            'w-3 h-3 text-[#1a1a1a] stroke-[3px] transition-transform duration-200 shrink-0',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute z-[100] mt-1 w-full bg-white border-[3px] border-[#1a1a1a] neo-shadow-sm max-h-48 overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-100">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={cn(
+                'w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold font-headline uppercase tracking-widest transition-colors border-b border-[#1a1a1a]/10 last:border-b-0',
+                value === opt.value
+                  ? 'bg-[#ffcc00] text-[#1a1a1a]'
+                  : 'text-[#1a1a1a] hover:bg-[#f5f0e8]',
+              )}
+            >
+              {isColor && (
+                <span
+                  className="w-3 h-3 border border-[#1a1a1a] flex-shrink-0"
+                  style={{
+                    backgroundColor:
+                      opt.value === 'transparent' ? 'transparent' : opt.value,
+                  }}
+                />
+              )}
+              <span className="flex-1 text-left truncate">{opt.label}</span>
+              {value === opt.value && (
+                <Check className="w-3 h-3 text-[#1a1a1a] stroke-[3px]" />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

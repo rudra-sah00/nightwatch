@@ -95,7 +95,18 @@ vi.mock('@/features/watch/player/ui/controls/use-episode-panel', () => ({
 
 // Mock playVideo
 vi.mock('@/features/search/api', () => ({
-  playVideo: vi.fn().mockResolvedValue({ success: false }),
+  getShowDetails: vi.fn().mockResolvedValue({
+    id: 's1:123',
+    title: 'Test Movie',
+    contentType: 'movie',
+    posterUrl: 'https://example.com/poster.jpg',
+  }),
+  getSeriesEpisodes: vi.fn().mockResolvedValue({ episodes: [] }),
+}));
+
+vi.mock('@/features/watch/api', () => ({
+  stopVideo: vi.fn(),
+  playVideo: vi.fn(),
 }));
 
 // Mock EpisodePanel presentational component
@@ -169,6 +180,24 @@ describe('PlayerEpisodePanel', () => {
       );
 
       expect(screen.queryByTestId('episode-panel')).not.toBeInTheDocument();
+    });
+
+    it('should navigate to the selected episode', () => {
+      mockPanel.isOpen = true;
+
+      render(
+        <PlayerEpisodePanel>
+          <PlayerEpisodePanelOverlay />
+        </PlayerEpisodePanel>,
+      );
+
+      fireEvent.click(screen.getByTestId('select-ep-btn'));
+
+      expect(mockPlayerContext.onNavigate).toHaveBeenCalled();
+      const navUrl = mockPlayerContext.onNavigate.mock.calls[0][0];
+      expect(navUrl).toContain('/watch/st-id');
+      expect(navUrl).toContain('episode=1');
+      expect(navUrl).toContain('season=1');
     });
   });
 });

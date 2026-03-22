@@ -1,27 +1,21 @@
-import { AlertCircle, Mail, RefreshCw } from 'lucide-react';
-import Link from 'next/link';
+import { RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Captcha } from '@/components/ui/captcha';
+import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
-import type { LoginInput } from '@/features/auth/schema';
-import { cn } from '@/lib/utils';
 import { useLoginForm } from '../hooks/use-login-form';
 
 export function LoginForm() {
   const {
     setStep,
     isLoading,
-    error,
     captchaToken,
     setCaptchaToken,
     formData,
     otp,
     setOtp,
-    fieldErrors,
-    countdown,
     isPending,
     action,
     handleChange,
@@ -30,63 +24,47 @@ export function LoginForm() {
     isOtpStep,
   } = useLoginForm();
 
-  return (
-    <div className="w-full">
-      {error ? <FormError message={error} /> : null}
+  const captchaRef = React.useRef<CaptchaHandle>(null);
 
-      {isOtpStep ? (
-        <OtpStep
-          email={formData.email}
-          otp={otp}
-          setOtp={setOtp}
-          onSubmit={handleOtpSubmit}
-          onResend={handleResend}
-          onBack={() => setStep('initial')}
-          isLoading={isLoading}
-          countdown={countdown}
-        />
-      ) : (
-        <InitialLoginStep
-          formData={formData}
-          fieldErrors={fieldErrors}
-          isLoading={isPending}
-          captchaToken={captchaToken}
-          setCaptchaToken={setCaptchaToken}
-          handleChange={handleChange}
-          action={action}
-        />
-      )}
+  return (
+    <div className="w-full h-full flex flex-col justify-start">
+      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-3 shrink-0">
+        <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+          {isOtpStep ? 'Verify' : 'Enter'}
+        </h2>
+        <p className="font-body font-semibold text-[10px] text-[#1a1a1a] uppercase">
+          {isOtpStep ? 'ACCESS VERIFICATION' : 'ACCESS YOUR LOUNGE'}
+        </p>
+      </div>
+
+      <div className="flex-grow flex flex-col justify-center">
+        {isOtpStep ? (
+          <OtpStep
+            email={formData.email}
+            otp={otp}
+            setOtp={setOtp}
+            onSubmit={handleOtpSubmit}
+            onResend={handleResend}
+            onBack={() => setStep('initial')}
+            isLoading={isLoading}
+          />
+        ) : (
+          <InitialLoginStep
+            formData={formData}
+            isLoading={isPending}
+            captchaToken={captchaToken}
+            setCaptchaToken={setCaptchaToken}
+            captchaRef={captchaRef}
+            handleChange={handleChange}
+            action={action}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
 // --- Memoized Helper Components ---
-
-const FormError = React.memo(function FormError({
-  message,
-}: {
-  message: string;
-}) {
-  const isSecurity =
-    message.toLowerCase().includes('locked') ||
-    message.toLowerCase().includes('denied') ||
-    message.toLowerCase().includes('warning') ||
-    message.toLowerCase().includes('security');
-
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-2 rounded-lg p-3 text-sm border mb-4 animate-in fade-in duration-200',
-        isSecurity
-          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-          : 'bg-destructive/15 text-destructive border-destructive/20',
-      )}
-    >
-      <AlertCircle className="h-4 w-4 shrink-0" />
-      <p className="font-medium">{message}</p>
-    </div>
-  );
-});
 
 interface OtpStepProps {
   email: string;
@@ -96,7 +74,6 @@ interface OtpStepProps {
   onResend: () => void;
   onBack: () => void;
   isLoading: boolean;
-  countdown: number;
 }
 
 const OtpStep = React.memo(function OtpStep({
@@ -107,63 +84,53 @@ const OtpStep = React.memo(function OtpStep({
   onResend,
   onBack,
   isLoading,
-  countdown,
 }: OtpStepProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300"
+      className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full"
     >
-      <div className="text-center space-y-2">
-        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
-          <Mail className="h-6 w-6" />
-        </div>
-        <h2 className="text-xl font-semibold">Verification Code</h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="space-y-1 mb-3">
+        <p className="text-[10px] md:text-xs font-body font-medium text-[#1a1a1a]">
           We sent a code to{' '}
-          <span className="font-medium text-foreground">{email}</span>. Please
-          check your spam folder.
+          <span className="font-bold underline decoration-2">{email}</span>.
+          Please check your spam folder.
         </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1 pb-1">
         <Label className="sr-only">One-Time Password</Label>
-        <OtpInput value={otp} onChange={(e) => setOtp(e.target.value)} />
+        <OtpInput
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[44px]"
+        />
       </div>
 
       <Button
         type="submit"
-        size="lg"
         isLoading={isLoading}
         disabled={isLoading || otp.length !== 6}
-        className="w-full text-base font-semibold"
+        className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
       >
         Verify & Sign In
       </Button>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-2 pt-3 border-t-4 border-[#1a1a1a]">
         <Button
           type="button"
-          variant="outline"
-          className="w-full gap-2"
           onClick={onResend}
-          disabled={isLoading || countdown > 0}
+          disabled={isLoading}
+          className="w-full bg-transparent hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2"
         >
-          {countdown > 0 ? (
-            <>Resend Code in {countdown}s</>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4" /> Resend Verification Code
-            </>
-          )}
+          <RefreshCw className="h-3 w-3" /> Resend Code
         </Button>
 
         <Button
           type="button"
-          variant="ghost"
-          className="w-full"
           onClick={onBack}
           disabled={isLoading}
+          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
         >
           Back to Login
         </Button>
@@ -173,80 +140,86 @@ const OtpStep = React.memo(function OtpStep({
 });
 
 interface InitialStepProps {
-  formData: LoginInput;
-  fieldErrors: Record<string, string | undefined>;
+  formData: Record<string, string>;
   isLoading: boolean;
   captchaToken: string | null;
   setCaptchaToken: (val: string | null) => void;
+  captchaRef: React.RefObject<CaptchaHandle | null>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   action: (formData: FormData) => void;
 }
 
 const InitialLoginStep = React.memo(function InitialLoginStep({
   formData,
-  fieldErrors,
   isLoading,
   captchaToken,
   setCaptchaToken,
+  captchaRef,
   handleChange,
   action,
 }: InitialStepProps) {
   return (
-    <form action={action} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email or Username</Label>
-        <Input
-          id="email"
-          name="email"
-          placeholder="Email or username"
-          value={formData.email}
-          onChange={handleChange}
-          error={fieldErrors.email}
-          autoComplete="username"
-          disabled={isLoading}
-          className="bg-secondary/50"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            tabIndex={-1}
+    <form action={action} className="space-y-4 w-full">
+      <div className="space-y-3">
+        <div>
+          <Label
+            htmlFor="email"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
           >
-            Forgot password?
-          </Link>
+            Email Address
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="mies@bauhaus.de"
+            value={formData.email}
+            onChange={handleChange}
+            autoComplete="username"
+            disabled={isLoading}
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+          />
         </div>
-        <Input
-          id="password"
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          error={fieldErrors.password}
-          autoComplete="current-password"
-          disabled={isLoading}
-          className="bg-secondary/50"
-        />
+
+        <div>
+          <Label
+            htmlFor="password"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+          >
+            Password
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+            disabled={isLoading}
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+          />
+        </div>
       </div>
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
-      <Captcha
-        onVerify={setCaptchaToken}
-        onError={() => setCaptchaToken(null)}
-      />
+
+      <div className="pt-2">
+        <Captcha
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onError={() => setCaptchaToken(null)}
+          onExpire={() => setCaptchaToken(null)}
+        />
+      </div>
 
       <Button
         type="submit"
-        size="lg"
         isLoading={isLoading}
         disabled={!captchaToken || isLoading}
-        className="w-full text-base font-semibold mt-2"
+        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 md:py-5 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
       >
-        Sign In
+        {isLoading ? 'Verifying...' : 'Launch Sync'}
       </Button>
     </form>
   );

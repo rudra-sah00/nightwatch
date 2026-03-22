@@ -36,20 +36,19 @@ export function AudioSelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'p-2.5 md:p-3 rounded-full',
-          'transition-[colors,transform] duration-300 ease-out',
-          'bg-white/5 backdrop-blur-sm border border-white/10',
-          'hover:bg-white/15 hover:border-white/20 hover:scale-105',
-          'active:scale-95 active:bg-white/20',
-          'shadow-lg shadow-black/20',
+          'p-2.5 md:p-3 transition-all duration-200',
+          'bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm',
+          'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#f5f0e8]',
+          'active:bg-[#e0e0e0]',
           'flex items-center justify-center',
-          isOpen && 'bg-white/15 border-white/20',
+          isOpen &&
+            'bg-[#f5f0e8] translate-x-[2px] translate-y-[2px] shadow-none',
         )}
         title="Audio Language"
       >
         <Languages
           className={cn(
-            'w-5 h-5 text-white drop-shadow-sm transition-transform duration-200',
+            'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-200',
             isOpen && 'scale-110',
           )}
         />
@@ -60,29 +59,30 @@ export function AudioSelector({
         <div
           className={cn(
             'absolute bottom-full right-0 mb-3',
-            'w-52 max-h-64 overflow-hidden',
-            'bg-zinc-900/98 backdrop-blur-2xl rounded-xl',
-            'shadow-2xl shadow-black/40 border border-white/15',
+            'w-64 max-h-80 overflow-hidden',
+            'bg-white border-[4px] border-[#1a1a1a]',
+            'neo-shadow',
             'animate-in fade-in slide-in-from-bottom-3 zoom-in-95 duration-200',
+            'flex flex-col',
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
-            <span className="text-white font-medium text-sm flex items-center gap-2">
-              <Languages className="w-4 h-4 text-white/70" />
-              Audio Language
+          <div className="flex items-center justify-between px-4 py-4 border-b-[3px] border-[#1a1a1a] bg-[#f5f0e8]">
+            <span className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
+              <Languages className="w-5 h-5 stroke-[3px]" />
+              Audio
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-full hover:bg-white/10 transition-colors"
+              className="p-1 border-[2px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] transition-colors"
             >
-              <X className="w-4 h-4 text-white/60" />
+              <X className="w-4 h-4 stroke-[3px]" />
             </button>
           </div>
 
           {/* Scrollable Track List */}
-          <div className="overflow-y-auto max-h-48 overscroll-contain styled-scrollbar">
+          <div className="overflow-y-auto max-h-56 overscroll-contain no-scrollbar bg-white">
             {tracks.map((track, index) => (
               <button
                 type="button"
@@ -92,34 +92,27 @@ export function AudioSelector({
                   setIsOpen(false);
                 }}
                 className={cn(
-                  'w-full flex items-center justify-between px-4 py-3',
+                  'w-full flex items-center justify-between px-4 py-4',
                   'transition-colors duration-150',
-                  'hover:bg-white/10',
-                  currentTrack === track.id && 'bg-white/5',
-                  index !== tracks.length - 1 && 'border-b border-white/5',
+                  currentTrack === track.id
+                    ? 'bg-[#ffcc00]'
+                    : 'bg-white hover:bg-[#ffe066]',
+                  index !== tracks.length - 1 &&
+                    'border-b-[3px] border-[#1a1a1a]',
                 )}
               >
                 <div className="flex flex-col items-start">
-                  <span
-                    className={cn(
-                      'text-sm',
-                      currentTrack === track.id
-                        ? 'text-white font-medium'
-                        : 'text-white/80',
-                    )}
-                  >
+                  <span className="text-sm font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
                     {track.label}
                   </span>
                   {track.language && track.language !== track.label ? (
-                    <span className="text-xs text-white/40">
+                    <span className="text-[10px] font-bold font-headline uppercase text-[#4a4a4a] tracking-widest mt-0.5">
                       {track.language}
                     </span>
                   ) : null}
                 </div>
                 {currentTrack === track.id ? (
-                  <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <Check className="w-3.5 h-3.5 text-purple-400" />
-                  </div>
+                  <Check className="w-5 h-5 text-[#1a1a1a] stroke-[3.5px]" />
                 ) : null}
               </button>
             ))}

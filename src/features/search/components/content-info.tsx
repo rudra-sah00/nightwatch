@@ -12,9 +12,8 @@ import {
   Users,
 } from 'lucide-react';
 import { memo } from 'react';
-import { Button } from '@/components/ui/button';
-import type { ContentProgress } from '@/features/watch/api';
 import { cn } from '@/lib/utils';
+import type { ContentProgress } from '@/types/content';
 import { ContentType, type ShowDetails } from '../types';
 
 interface ContentInfoProps {
@@ -70,20 +69,18 @@ export const ContentInfo = memo(function ContentInfo({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider',
-            isSeries
-              ? 'bg-purple-600/80 text-white'
-              : 'bg-blue-600/80 text-white',
+            'px-3 py-1 bg-white border-2 border-[#1a1a1a] text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]',
+            isSeries ? '' : '',
           )}
         >
           {isSeries ? (
-            <span className="flex items-center gap-1.5">
-              <Tv className="w-3 h-3" />
-              TV Series
+            <span className="flex items-center gap-2">
+              <Tv className="w-4 h-4 stroke-[3px]" />
+              Series
             </span>
           ) : (
-            <span className="flex items-center gap-1.5">
-              <Film className="w-3 h-3" />
+            <span className="flex items-center gap-2">
+              <Film className="w-4 h-4 stroke-[3px]" />
               Movie
             </span>
           )}
@@ -93,73 +90,79 @@ export const ContentInfo = memo(function ContentInfo({
       {/* Title */}
       <h1
         id="modal-title"
-        className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg leading-tight"
+        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-tight"
       >
         {show.title}
       </h1>
 
       {/* Metadata Row */}
-      <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm text-white/70">
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
         {show.year ? (
-          <span className="flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
+          <span className="flex items-center gap-1.5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-3 py-1">
+            <Calendar className="w-4 h-4 stroke-[3px]" />
             {show.year}
           </span>
         ) : null}
         {show.runtime ? (
-          <span className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
-            {show.runtime} min
+          <span className="flex items-center gap-1.5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-3 py-1">
+            <Clock className="w-4 h-4 stroke-[3px]" />
+            {show.runtime} M
           </span>
         ) : null}
         {isSeries && show.seasons && show.seasons.length > 0 ? (
-          <span className="hidden md:inline">
+          <span className="hidden md:inline bg-[#ffcc00] border-[3px] border-[#1a1a1a] px-3 py-1">
             {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
           </span>
         ) : null}
         {show.genre ? (
-          <span className="hidden md:inline">{show.genre}</span>
+          <span className="hidden md:inline bg-white border-[3px] border-[#1a1a1a] px-3 py-1">
+            {show.genre}
+          </span>
         ) : null}
       </div>
 
-      {/* Description - Hidden in Hero for cleaner look (moved to body) */}
+      {/* Description */}
       {show.description ? (
-        <p className="hidden text-white/80 text-sm md:text-base leading-relaxed max-w-2xl line-clamp-4">
+        <p className="text-[#4a4a4a] text-sm md:text-base leading-relaxed max-w-2xl border-l-[4px] border-[#1a1a1a] pl-4 my-6">
           {show.description}
         </p>
       ) : null}
 
-      {/* Progress Indicator - Netflix style */}
+      {/* Progress Indicator */}
       {hasWatchProgress &&
       watchProgress &&
       watchProgress.progressPercent > 0 ? (
-        <div className="space-y-2 max-w-2xl">
-          <div className="flex items-center justify-between text-xs text-white/70">
+        <div className="space-y-3 max-w-xl bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow-sm">
+          <div className="flex items-center justify-between text-xs font-black font-headline tracking-widest uppercase text-[#1a1a1a]">
             <span>
               {isSeries &&
-              watchProgress.seasonNumber != null &&
-              watchProgress.episodeNumber != null
-                ? `Continue watching S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
-                : 'Continue watching'}
+              watchProgress?.seasonNumber != null &&
+              watchProgress?.episodeNumber != null
+                ? `S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                : 'Continue'}
             </span>
-            <span>{Math.round(watchProgress.progressPercent)}% watched</span>
+            <span>{Math.round(watchProgress?.progressPercent || 0)}%</span>
           </div>
-          <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-3 bg-[#f5f0e8] border-2 border-[#1a1a1a] overflow-hidden">
             <div
-              className="h-full bg-white transition-[width] duration-300"
-              style={{ width: `${watchProgress.progressPercent}%` }}
+              className="h-full bg-[#1a1a1a] transition-[width] duration-300"
+              style={{ width: `${watchProgress?.progressPercent || 0}%` }}
             />
           </div>
         </div>
       ) : null}
 
-      {/* Play/Resume Button - Now for both Movies AND Series */}
-      <div className="flex flex-wrap items-center gap-2 md:gap-3">
-        <Button
-          size="lg"
+      {/* Play/Resume Button */}
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 md:gap-4 mt-6">
+        <button
+          type="button"
           className={cn(
-            'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-xl transition-[colors,shadow] duration-200',
-            'bg-white text-black hover:bg-white/90',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
+            isPlaying ||
+              isCreatingParty ||
+              (hasWatchProgress && isLoadingProgress)
+              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+              : 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
           )}
           onClick={handleButtonClick}
           disabled={
@@ -173,7 +176,7 @@ export const ContentInfo = memo(function ContentInfo({
           ) : isLoadingProgress && hasWatchProgress ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
-            <Play className="w-5 h-5 fill-current" />
+            <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
           )}
           {isPlaying
             ? 'Loading...'
@@ -188,21 +191,18 @@ export const ContentInfo = memo(function ContentInfo({
                   ? `Resume (${Math.round(watchProgress?.progressPercent || 0)}%)`
                   : isSeries && selectedSeason
                     ? `Play S${selectedSeason.seasonNumber}:E1`
-                    : isSeries
-                      ? 'Play'
-                      : 'Play'}
-        </Button>
+                    : 'Watch Solo'}
+        </button>
 
-        {/* Watch Together Button — hidden on mobile when disabled to save space */}
+        {/* Watch Together Button */}
         {onWatchParty && !isWatchPartyDisabled ? (
-          <Button
-            size="lg"
-            variant="secondary"
+          <button
+            type="button"
             className={cn(
-              'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-lg border-0',
+              'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
               isCreatingParty
-                ? 'bg-gray-500/50 cursor-not-allowed opacity-80'
-                : 'bg-teal-500 hover:bg-teal-600 text-white',
+                ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+                : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
             )}
             onClick={isCreatingParty ? undefined : onWatchParty}
             disabled={isCreatingParty}
@@ -210,40 +210,38 @@ export const ContentInfo = memo(function ContentInfo({
             {isCreatingParty ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Users className="w-5 h-5" />
+              <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
             )}
-            {isCreatingParty ? 'Creating...' : 'Watch Together'}
-          </Button>
+            {isCreatingParty ? 'Creating...' : 'Start Party'}
+          </button>
         ) : null}
 
-        {/* Watchlist Action Button (Add or Remove) */}
+        {/* Watchlist Action Button */}
         {onWatchlistToggle ? (
-          <Button
-            size="lg"
-            variant={isInWatchlist ? 'destructive' : 'outline'}
+          <button
+            type="button"
             className={cn(
-              'gap-2 px-4 py-2.5 md:px-8 md:py-6 text-sm md:text-lg font-semibold shadow-lg transition-[colors,shadow] duration-200',
-              isInWatchlist
-                ? 'bg-red-500 hover:bg-red-600 text-white border-0'
-                : 'border-white/20 hover:bg-white/10 text-white',
+              'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group',
+              isWatchlistLoading
+                ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+                : isInWatchlist
+                  ? 'bg-[#e63b2e] text-white neo-shadow-sm hover:bg-[#1a1a1a]'
+                  : 'bg-white text-[#1a1a1a] neo-shadow-sm hover:bg-[#1a1a1a] hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
             )}
             onClick={onWatchlistToggle}
             disabled={isWatchlistLoading}
           >
             {isWatchlistLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : isInWatchlist ? (
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
             ) : (
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
             )}
             <span className="hidden sm:inline">
-              {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
-            </span>
-            <span className="sm:hidden">
               {isInWatchlist ? 'Remove' : 'Watchlist'}
             </span>
-          </Button>
+          </button>
         ) : null}
 
         {extraActions}

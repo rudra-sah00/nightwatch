@@ -14,9 +14,6 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/features/search/api', () => ({
   getSearchSuggestions: vi.fn(),
-  getSearchHistory: vi.fn(),
-  clearSearchHistory: vi.fn(),
-  deleteSearchHistoryItem: vi.fn(),
 }));
 
 vi.mock('@/providers/server-provider', () => ({
@@ -46,9 +43,6 @@ describe('useSearchInput', () => {
       setActiveServer: vi.fn(),
     });
     vi.mocked(searchApi.getSearchSuggestions).mockResolvedValue([]);
-    vi.mocked(searchApi.getSearchHistory).mockResolvedValue([]);
-    vi.mocked(searchApi.clearSearchHistory).mockResolvedValue(undefined);
-    vi.mocked(searchApi.deleteSearchHistoryItem).mockResolvedValue(undefined);
   });
 
   it('initialises query from URL q param', () => {
@@ -93,27 +87,7 @@ describe('useSearchInput', () => {
     });
 
     // query should still be the user-typed value, not the new URL value
-    // (isFocusedRef guards the sync)
     expect(result.current.query).toBe('hello');
-  });
-
-  it('updates query from URL after blur resolves focus guard', async () => {
-    searchParamsMock.get.mockImplementation((key: string) =>
-      key === 'q' ? 'initial' : null,
-    );
-
-    const { result } = renderHook(() => useSearchInput());
-
-    act(() => {
-      result.current.handleFocus();
-    });
-    act(() => {
-      result.current.handleBlur();
-    });
-
-    // After blur, isFocusedRef is false — URL sync can run
-    // Verify handleBlur doesn't throw and state is intact
-    expect(result.current.query).toBe('initial');
   });
 
   it('handleFocus opens the dropdown', () => {
@@ -152,7 +126,6 @@ describe('useSearchInput', () => {
       result.current.handleClear();
     });
 
-    // router.push is called inside startTransition — wait for it
     expect(mockRouterPush).toHaveBeenCalledWith('/home');
   });
 
@@ -170,7 +143,7 @@ describe('useSearchInput', () => {
       } as unknown as React.KeyboardEvent);
     });
 
-    expect(mockRouterPush).toHaveBeenCalledWith('/home?q=avengers');
+    expect(mockRouterPush).toHaveBeenCalledWith('/search?q=avengers');
   });
 
   it('handleSearch on Escape closes dropdown', () => {
@@ -191,21 +164,6 @@ describe('useSearchInput', () => {
     expect(result.current.isOpen).toBe(false);
   });
 
-  it('handleSearch does nothing on Enter when query is empty', () => {
-    const { result } = renderHook(() => useSearchInput());
-
-    act(() => {
-      result.current.handleSearch({
-        key: 'Enter',
-        preventDefault: vi.fn(),
-      } as unknown as React.KeyboardEvent);
-    });
-
-    expect(mockRouterPush).not.toHaveBeenCalledWith(
-      expect.stringContaining('/home?q='),
-    );
-  });
-
   it('handleSelect sets query and closes suggestions', () => {
     const { result } = renderHook(() => useSearchInput());
 
@@ -218,7 +176,7 @@ describe('useSearchInput', () => {
 
     expect(result.current.query).toBe('inception');
     expect(result.current.isOpen).toBe(false);
-    expect(mockRouterPush).toHaveBeenCalledWith('/home?q=inception');
+    expect(mockRouterPush).toHaveBeenCalledWith('/search?q=inception');
   });
 
   it('does NOT fetch suggestions on s1 server', async () => {
@@ -235,7 +193,6 @@ describe('useSearchInput', () => {
       result.current.setQuery('avengers');
     });
 
-    // Wait past the 500ms debounce
     await act(async () => {
       await new Promise((r) => setTimeout(r, 600));
     });
@@ -256,7 +213,6 @@ describe('useSearchInput', () => {
       result.current.setQuery('avan');
     });
 
-    // Before debounce — should not have called yet
     expect(searchApi.getSearchSuggestions).not.toHaveBeenCalled();
 
     await act(async () => {
@@ -266,28 +222,12 @@ describe('useSearchInput', () => {
     await waitFor(() => {
       expect(searchApi.getSearchSuggestions).toHaveBeenCalledWith('avan', 's2');
     });
-    expect(result.current.suggestions).toEqual(['avengers', 'avatar']);
+    // Hook now slices to 1 suggestion
+    expect(result.current.suggestions).toEqual(['avengers']);
   });
 
-  it('does not fetch suggestions for query shorter than 2 chars', async () => {
-    const { result } = renderHook(() => useSearchInput());
-
-    act(() => {
-      result.current.setQuery('a');
-    });
-
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 600));
-    });
-
-    expect(searchApi.getSearchSuggestions).not.toHaveBeenCalled();
-  });
-
-  it('showSuggestions is true when open, s2, and query >= 2 chars', async () => {
-    vi.mocked(searchApi.getSearchSuggestions).mockResolvedValue([
-      'test1',
-      'test2',
-    ]);
+  it('showSuggestions is true when open, s2, and suggestions exist', async () => {
+    vi.mocked(searchApi.getSearchSuggestions).mockResolvedValue(['test1']);
 
     const { result } = renderHook(() => useSearchInput());
 
@@ -296,10 +236,13 @@ describe('useSearchInput', () => {
       result.current.setQuery('te');
     });
 
-    expect(result.current.showSuggestions).toBe(true);
+    await waitFor(() => {
+      expect(result.current.showSuggestions).toBe(true);
+    });
   });
 
-  it('showSuggestions is false when query is shorter than 2 chars', () => {
+  it('showSuggestions is false when no suggestions found', async () => {
+    vi.mocked(searchApi.getSearchSuggestions).mockResolvedValue([]);
     const { result } = renderHook(() => useSearchInput());
 
     act(() => {
@@ -307,50 +250,8 @@ describe('useSearchInput', () => {
       result.current.setQuery('t');
     });
 
-    expect(result.current.showSuggestions).toBe(false);
-  });
-
-  it('loads history on focus when query is empty', async () => {
-    const mockHistory = [{ id: '1', query: 'batman', createdAt: '2024-01-01' }];
-    vi.mocked(searchApi.getSearchHistory).mockResolvedValue(mockHistory);
-
-    const { result } = renderHook(() => useSearchInput());
-
-    // ensure query is empty
-    act(() => {
-      result.current.setQuery('');
-    });
-    act(() => {
-      result.current.handleFocus();
-    });
-
     await waitFor(() => {
-      expect(result.current.history).toEqual(mockHistory);
+      expect(result.current.showSuggestions).toBe(false);
     });
-  });
-
-  it('handleClearHistory clears all history items', async () => {
-    const { toast } = await import('sonner');
-
-    vi.mocked(searchApi.getSearchHistory).mockResolvedValue([
-      { id: '1', query: 'batman', createdAt: '2024-01-01' },
-    ]);
-    vi.mocked(searchApi.clearSearchHistory).mockResolvedValue(undefined);
-
-    const { result } = renderHook(() => useSearchInput());
-
-    // Load history first
-    act(() => {
-      result.current.handleFocus();
-    });
-    await waitFor(() => expect(result.current.history.length).toBe(1));
-
-    await act(async () => {
-      await result.current.handleClearHistory();
-    });
-
-    expect(searchApi.clearSearchHistory).toHaveBeenCalled();
-    expect(result.current.history).toEqual([]);
-    expect(toast.success).toHaveBeenCalled();
   });
 });

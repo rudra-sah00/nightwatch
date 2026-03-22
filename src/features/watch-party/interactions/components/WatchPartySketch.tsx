@@ -56,10 +56,12 @@ const TOOLS: { id: ToolType; label: string; icon: React.ElementType }[] = [
 
 export function WatchPartySketchDisabled() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/50 space-y-4">
-      <PenTool className="w-12 h-12 opacity-50" />
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-[#1a1a1a]/50 space-y-4">
+      <PenTool className="w-12 h-12 opacity-50 stroke-[3px]" />
       <div className="space-y-1">
-        <h3 className="text-white font-medium">Sketching Disabled</h3>
+        <h3 className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest">
+          Sketching Disabled
+        </h3>
         <p className="text-sm">The host has disabled drawing for guests.</p>
       </div>
     </div>
@@ -83,30 +85,30 @@ export function WatchPartySketch() {
   const customColorInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-white/5 shrink-0 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white flex items-center gap-2">
-          <PenTool className="w-4 h-4 text-indigo-400" />
+    <div className="flex flex-col h-full bg-[#f5f0e8]">
+      <div className="p-4 border-b-[4px] border-[#1a1a1a] shrink-0 flex items-center justify-between bg-white">
+        <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] flex items-center gap-2">
+          <PenTool className="w-4 h-4 text-[#1a1a1a] stroke-[3px]" />
           Sketch Tools
         </h3>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={triggerUndo}
-            className="text-[10px] flex items-center gap-1 px-2 py-1 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 rounded-md transition-colors font-medium border border-white/5"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#1a1a1a] hover:bg-[#ffe066] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
             title="Undo last action"
           >
-            <Undo2 className="w-3 h-3" />
+            <Undo2 className="w-3 h-3 stroke-[3px]" />
             Undo
           </button>
 
           <button
             type="button"
             onClick={triggerClearSelf}
-            className="text-[10px] flex items-center gap-1 px-2 py-1 bg-white/5 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors font-medium border border-blue-500/20"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#0055ff] hover:bg-[#0055ff] hover:text-white transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
             title="Clear only your drawings"
           >
-            <Eraser className="w-3 h-3" />
+            <Eraser className="w-3 h-3 stroke-[3px]" />
             Clear Mine
           </button>
 
@@ -114,10 +116,10 @@ export function WatchPartySketch() {
             <button
               type="button"
               onClick={triggerClear}
-              className="text-[10px] flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors font-medium border border-red-500/20"
+              className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-[#e63b2e] text-white hover:bg-[#1a1a1a] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
               title="Host only: Clear everything"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-3 h-3 stroke-[3px]" />
               Clear All
             </button>
           )}
@@ -127,7 +129,7 @@ export function WatchPartySketch() {
       <div className="flex-1 overflow-y-auto p-4 space-y-8 custom-scrollbar">
         {/* Tool Selection */}
         <div className="space-y-3">
-          <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+          <h4 className="text-xs font-black text-[#1a1a1a]/50 uppercase tracking-widest font-headline">
             Tools
           </h4>
           <div className="grid grid-cols-5 gap-2">
@@ -141,13 +143,13 @@ export function WatchPartySketch() {
                   title={tool.label}
                   onClick={() => setCurrentTool(tool.id)}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl transition-colors',
+                    'flex flex-col items-center justify-center gap-1.5 p-3 transition-colors border-[3px]',
                     isActive
-                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 border-transparent'
-                      : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/5',
+                      ? 'bg-[var(--wp-send-btn,#ffcc00)] text-[#1a1a1a] border-[#1a1a1a] neo-shadow-sm'
+                      : 'bg-white text-[#1a1a1a] hover:bg-[#ffe066] border-[#1a1a1a]',
                   )}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 stroke-[3px]" />
                 </button>
               );
             })}
@@ -157,7 +159,7 @@ export function WatchPartySketch() {
         {/* Color Selection (hide when eraser is active) */}
         {currentTool !== 'eraser' && (
           <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
-            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+            <h4 className="text-xs font-black text-[#1a1a1a]/50 uppercase tracking-widest font-headline">
               Color
             </h4>
             <div className="flex flex-wrap gap-3">
@@ -167,10 +169,8 @@ export function WatchPartySketch() {
                   type="button"
                   onClick={() => setColor(c)}
                   className={cn(
-                    'w-8 h-8 rounded-full transition-transform',
-                    color === c
-                      ? 'scale-125 shadow-lg ring-2 ring-white/20'
-                      : 'hover:scale-110 shadow-md',
+                    'w-8 h-8 transition-transform border-[3px] border-[#1a1a1a]',
+                    color === c ? 'scale-125 neo-shadow-sm' : 'hover:scale-110',
                   )}
                   style={{ backgroundColor: c }}
                   aria-label={`Select color ${c}`}
@@ -180,14 +180,14 @@ export function WatchPartySketch() {
                 type="button"
                 onClick={() => customColorInputRef.current?.click()}
                 className={cn(
-                  'w-8 h-8 rounded-full transition-transform flex items-center justify-center bg-gradient-to-br from-red-500 via-green-500 to-blue-500',
+                  'w-8 h-8 transition-transform flex items-center justify-center border-[3px] border-[#1a1a1a] bg-gradient-to-br from-red-500 via-green-500 to-blue-500',
                   !COLORS.includes(color) && color !== 'eraser'
-                    ? 'scale-125 shadow-lg ring-2 ring-white/20'
-                    : 'hover:scale-110 shadow-md',
+                    ? 'scale-125 neo-shadow-sm'
+                    : 'hover:scale-110',
                 )}
                 title="Custom Color"
               >
-                <Pipette className="w-4 h-4 text-white drop-shadow-md" />
+                <Pipette className="w-4 h-4 text-white drop-shadow-md stroke-[3px]" />
                 <input
                   ref={customColorInputRef}
                   type="color"
@@ -203,10 +203,10 @@ export function WatchPartySketch() {
         {/* Stroke Width / Font Size Slider */}
         <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+            <h4 className="text-xs font-black font-headline text-[#1a1a1a]/50 uppercase tracking-widest">
               {currentTool === 'text' ? 'Font Size' : 'Thickness'}
             </h4>
-            <span className="text-xs text-white/40">
+            <span className="text-xs font-bold font-headline text-[#1a1a1a]/60 tracking-widest">
               {currentTool === 'text'
                 ? `${strokeWidth * 4}px`
                 : `${strokeWidth}px`}
@@ -219,7 +219,7 @@ export function WatchPartySketch() {
             step="1"
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            className="w-full accent-indigo-500 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 border-[2px] border-[#1a1a1a] bg-white accent-[#0055ff] appearance-none cursor-pointer"
           />
         </div>
       </div>

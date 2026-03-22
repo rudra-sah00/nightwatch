@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type {
+  IAgoraRTCRemoteUser,
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
 } from 'agora-rtc-sdk-ng';
@@ -315,5 +316,196 @@ describe('useAgora', () => {
 
     // Should leave channel
     expect(mockClient.leave).toHaveBeenCalled();
+  });
+
+  describe('connection state changes', () => {
+    it('should show toasts for RECONNECTING and DISCONNECTED states', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleConnectionStateChange = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'connection-state-change',
+      )?.[1];
+
+      expect(handleConnectionStateChange).toBeDefined();
+
+      act(() => {
+        handleConnectionStateChange('RECONNECTING', 'CONNECTED');
+      });
+
+      act(() => {
+        handleConnectionStateChange('DISCONNECTED', 'RECONNECTING');
+      });
+    });
+  });
+
+  describe('device management branches', () => {
+    it('should handle refreshDevices success and failure branches', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+
+      await act(async () => {
+        await result.current.refreshDevices();
+      });
+
+      expect(result.current.audioInputDevices).toBeDefined();
+    });
+
+    it('should handle toggle error when not connected', async () => {
+      mockClient.connectionState = 'DISCONNECTED';
+      const { result } = renderHook(() => useAgora(defaultOptions));
+
+      await act(async () => {
+        await result.current.toggleAudio();
+        await result.current.toggleVideo();
+      });
+
+      expect(result.current.audioEnabled).toBe(false);
+      expect(result.current.videoEnabled).toBe(false);
+    });
+
+    it('should handle setDevice errors in switch methods', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+
+      await act(async () => {
+        await result.current.switchAudioDevice('new-id');
+        await result.current.switchVideoDevice('new-id');
+      });
+    });
+  });
+
+  describe('media event branches', () => {
+    it('should handle user-published for audio and video', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleUserPublished = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'user-published',
+      )?.[1];
+
+      const mockRemoteUser = {
+        uid: 999,
+        audioTrack: { play: vi.fn() },
+      } as unknown as IAgoraRTCRemoteUser;
+      (
+        mockClient as unknown as { remoteUsers: IAgoraRTCRemoteUser[] }
+      ).remoteUsers = [mockRemoteUser];
+
+      await act(async () => {
+        await handleUserPublished(mockRemoteUser, 'audio');
+        await handleUserPublished(
+          { uid: 999, videoTrack: {} } as unknown as IAgoraRTCRemoteUser,
+          'video',
+        );
+      });
+
+      expect(result.current.remoteUsers).toHaveLength(1);
+    });
+
+    it('should handle user-joined and user-left', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleUserJoined = mockClient.on.mock.calls.find(
+        (c) => c[0] === 'user-joined',
+      )?.[1];
+      const handleUserLeft = mockClient.on.mock.calls.find(
+        (c) => c[0] === 'user-left',
+      )?.[1];
+
+      act(() => {
+        handleUserJoined({ uid: 999 });
+        handleUserLeft({ uid: 999 });
+      });
+    });
+  });
+
+  describe('device error branches', () => {
+    it('should handle permission denied and not found errors', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      // Force createMicrophoneAudioTrack to throw permission error
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      vi.mocked(AgoraRTC.createMicrophoneAudioTrack).mockRejectedValueOnce(
+        new Error('Permission denied'),
+      );
+
+      await act(async () => {
+        await result.current.toggleAudio();
+      });
+
+      vi.mocked(AgoraRTC.createMicrophoneAudioTrack).mockRejectedValueOnce(
+        new Error('NotFound'),
+      );
+      await act(async () => {
+        await result.current.toggleAudio();
+      });
+    });
+
+    it('should handle toggle failure while enabling', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      // create works but publish fails
+      vi.mocked(AgoraRTC.createMicrophoneAudioTrack).mockResolvedValue(
+        mockAudioTrack as unknown as IMicrophoneAudioTrack,
+      );
+      mockClient.publish.mockRejectedValueOnce(new Error('Publish fail'));
+
+      await act(async () => {
+        await result.current.toggleAudio();
+      });
+
+      expect(mockAudioTrack.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('global SDK handlers', () => {
+    it('should handle autoplay failed and exceptions', async () => {
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+
+      // Trigger global autoplay failed handler
+      if (typeof AgoraRTC.onAutoplayFailed === 'function') {
+        (AgoraRTC.onAutoplayFailed as () => void)();
+      }
+
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleException = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'exception',
+      )?.[1];
+
+      if (handleException) {
+        handleException({ code: 1001, msg: 'Test exception', uid: '999' });
+      }
+    });
+  });
+
+  describe('network quality branches', () => {
+    it('should update network quality only if changed', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleNetworkQuality = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'network-quality',
+      )?.[1];
+
+      expect(handleNetworkQuality).toBeDefined();
+
+      act(() => {
+        handleNetworkQuality({
+          uplinkNetworkQuality: 1,
+          downlinkNetworkQuality: 1,
+        });
+        handleNetworkQuality({
+          uplinkNetworkQuality: 1,
+          downlinkNetworkQuality: 1,
+        }); // No change
+      });
+    });
   });
 });

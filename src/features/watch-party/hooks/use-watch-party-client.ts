@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { usePredictiveSync } from '@/features/watch-party/room/hooks/usePredictiveSync';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
@@ -24,6 +24,15 @@ export function useWatchPartyClient({
   initialRoomNotFound,
 }: UseWatchPartyClientOptions) {
   const router = useRouter();
+
+  const goBackOrHome = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.length > 2) {
+      router.back();
+    } else {
+      router.push('/home');
+    }
+  }, [router]);
+
   const { user } = useAuth();
   const {
     socket,
@@ -141,13 +150,13 @@ export function useWatchPartyClient({
         toast.info('Watch party has reached 3-hour limit and will now end.');
         setTimeout(() => {
           leaveRoom();
-          router.push('/home');
+          goBackOrHome();
         }, 3000);
       }
     };
     const interval = setInterval(checkDuration, 60 * 1000);
     return () => clearInterval(interval);
-  }, [room, isHost, leaveRoom, router]);
+  }, [room, isHost, leaveRoom, goBackOrHome]);
 
   useEffect(() => {
     if (!room || !isHost || room.type !== 'movie' || !videoRef.current) return;
@@ -175,7 +184,7 @@ export function useWatchPartyClient({
       toast.info('Movie has ended. Closing watch party...');
       setTimeout(() => {
         leaveRoom();
-        router.push('/home');
+        goBackOrHome();
       }, 3000);
     };
 
@@ -185,7 +194,7 @@ export function useWatchPartyClient({
       video.removeEventListener('timeupdate', checkMovieProgress);
       video.removeEventListener('ended', handleMovieEnd);
     };
-  }, [room, isHost, movieEndWarningShown, leaveRoom, router]);
+  }, [room, isHost, movieEndWarningShown, leaveRoom, goBackOrHome]);
 
   const hasAttemptedAutoJoin = useRef(false);
   useEffect(() => {
@@ -277,7 +286,7 @@ export function useWatchPartyClient({
       if (!user) {
         router.push('/login');
       } else {
-        router.push('/home');
+        goBackOrHome();
       }
     });
   };
@@ -287,7 +296,7 @@ export function useWatchPartyClient({
   const confirmLeave = () => {
     setShowLeaveDialog(false);
     leaveRoom();
-    router.push('/home');
+    goBackOrHome();
   };
 
   const copyInviteLink = () => {

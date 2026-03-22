@@ -14,74 +14,37 @@ export function SidebarTabs({
 }: SidebarTabsProps) {
   const { tabs } = useSidebarTabs(unreadMessages);
 
-  const activeIndex = tabs.findIndex((t) => t.id === activeTab);
+  const _activeIndex = tabs.findIndex((t) => t.id === activeTab);
 
   return (
-    <div
-      className="backdrop-blur-sm border-b shrink-0 px-2 pt-2"
-      style={{
-        background: 'var(--wp-tab-bg)',
-        borderColor: 'var(--wp-tab-border)',
-      }}
-    >
-      <div className="flex relative">
-        {/* Animated pill background */}
-        <div
-          className="absolute top-0 bottom-0 rounded-lg transition-[left,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-          style={{
-            background: 'var(--wp-tab-pill)',
-            left: `${activeIndex * 25}%`,
-            width: '25%',
-          }}
-        />
+    <div className="flex border-b-[4px] border-[#1a1a1a] bg-white shrink-0">
+      {tabs.map((tab, _idx) => {
+        const Icon = tab.icon;
+        const isActive = activeTab === tab.id;
 
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onTabChange(tab.id)}
-              className={cn(
-                'flex-1 py-2.5 px-1 text-xs font-medium transition-colors duration-200 relative z-10 rounded-lg',
-                isActive ? 'text-white' : 'text-white/40 hover:text-white/80',
-              )}
-            >
-              <div className="flex flex-col items-center justify-center gap-1">
-                <div className="relative">
-                  <Icon
-                    className={cn(
-                      'w-4 h-4 transition-transform duration-200',
-                      isActive && 'scale-110',
-                    )}
-                  />
-                  {'badge' in tab &&
-                  tab.badge !== undefined &&
-                  tab.badge > 0 ? (
-                    <span
-                      className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 px-0.5 rounded-full text-[9px] font-bold text-white flex items-center justify-center leading-none"
-                      style={{ backgroundColor: 'var(--wp-badge)' }}
-                    >
-                      {tab.badge > 99 ? '99+' : tab.badge}
-                    </span>
-                  ) : null}
-                </div>
-                <span className="leading-none">{tab.label}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      {/* Bottom accent line */}
-      <div
-        className="h-px mt-2"
-        style={{
-          background:
-            'linear-gradient(to right, transparent, var(--wp-divider), transparent)',
-        }}
-      />
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onTabChange(tab.id)}
+            className={cn(
+              'flex-1 py-3 px-1 transition-colors relative border-r-[4px] border-[#1a1a1a] last:border-r-0 flex flex-col items-center justify-center gap-1.5',
+              isActive
+                ? 'bg-[#ffcc00] text-[#1a1a1a]'
+                : 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]',
+            )}
+          >
+            <div className="relative">
+              <Icon className="w-5 h-5 stroke-[3px]" />
+              {'badge' in tab && tab.badge !== undefined && tab.badge > 0 ? (
+                <span className="absolute -top-2 -right-3 min-w-[20px] h-5 px-1 bg-[#e63b2e] border-[2px] border-[#1a1a1a] text-[10px] font-black font-headline text-white flex items-center justify-center leading-none neo-shadow-sm">
+                  {tab.badge > 99 ? '99+' : tab.badge}
+                </span>
+              ) : null}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

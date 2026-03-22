@@ -34,8 +34,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { playVideo } from '@/features/search/api';
-import type { PlayResponse } from '@/features/search/types';
+import { playVideo } from '@/features/watch/api';
+import type { PlayResponse } from '@/types/content';
 
 export interface S2AudioTrack {
   id: string;

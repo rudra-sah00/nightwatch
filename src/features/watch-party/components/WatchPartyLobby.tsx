@@ -1,6 +1,7 @@
 import {
   Check,
   Crown,
+  Loader2,
   Monitor,
   UserCircle,
   UserMinus,
@@ -52,50 +53,56 @@ export function WatchPartyLobby({
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-6">
-        <Monitor className="w-16 h-16 text-muted-foreground" />
-        <h1 className="text-2xl font-bold text-foreground">Desktop Only</h1>
-        <p className="text-muted-foreground text-center max-w-sm">
-          Watch Party is only available on desktop. Please open this link on a
-          computer to watch together.
-        </p>
-        <button
-          type="button"
-          onClick={() => router.push('/home')}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium"
-        >
-          Go Home
-        </button>
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center space-y-6">
+          <Monitor className="w-16 h-16 text-[#1a1a1a] mx-auto" />
+          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+            Desktop Only
+          </h1>
+          <p className="text-[#1a1a1a] font-medium leading-relaxed uppercase text-sm">
+            Watch Party is only available on desktop. Please open this link on a
+            computer to watch together.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push('/home')}
+            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
+          >
+            Go Home
+          </button>
+        </div>
       </div>
     );
   }
 
   if (isLoading && !roomPreview && !roomNotFound) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
-        <div className="w-6 h-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        <p className="text-muted-foreground text-sm">Loading room…</p>
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-[#0055ff]" />
+        <p className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm">
+          Loading room…
+        </p>
       </div>
     );
   }
 
   if (roomNotFound) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
-        <div className="max-w-sm w-full text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-muted-foreground" />
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-[#1a1a1a] flex items-center justify-center mx-auto neo-shadow-sm">
+            <Users className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">
+          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
             Room Not Found
           </h1>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <p className="text-[#1a1a1a] font-medium uppercase text-sm leading-relaxed">
             This watch party has ended or the link is no longer valid.
           </p>
           <button
             type="button"
             onClick={() => router.push('/home')}
-            className="mt-6 w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
+            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
           >
             Back to Home
           </button>
@@ -106,46 +113,48 @@ export function WatchPartyLobby({
 
   if (requestStatus === 'pending') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl p-8 shadow-lg border border-border animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* 3-step indicator */}
-          <div className="flex items-center justify-center gap-2 mb-7">
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center">
-                <Check className="w-4 h-4 text-primary" />
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow animate-in fade-in zoom-in-95 duration-500">
+          {/* 3-step indicator - Neobrutalist style */}
+          <div className="flex items-center justify-center gap-2 mb-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 bg-emerald-500 border-2 border-[#1a1a1a] flex items-center justify-center neo-shadow-sm">
+                <Check className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] text-primary font-medium">Sent</span>
+              <span className="text-[10px] text-[#1a1a1a] font-black font-headline uppercase">
+                Sent
+              </span>
             </div>
-            <div className="w-10 h-px bg-primary/30 mb-3" />
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <div className="w-3 h-3 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+            <div className="w-12 h-1 bg-[#1a1a1a] mb-6" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-[#1a1a1a] flex items-center justify-center animate-pulse neo-shadow-sm">
+                <Loader2 className="w-6 h-6 animate-spin text-[#1a1a1a]" />
               </div>
-              <span className="text-[10px] text-primary font-medium">
+              <span className="text-[10px] text-[#1a1a1a] font-black font-headline uppercase">
                 Waiting
               </span>
             </div>
-            <div className="w-10 h-px bg-border mb-3" />
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center">
-                <Users className="w-4 h-4 text-muted-foreground" />
+            <div className="w-12 h-1 bg-[#1a1a1a]/20 mb-6" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 bg-[#f5f0e8] border-2 border-[#1a1a1a] flex items-center justify-center">
+                <Users className="w-5 h-5 text-[#1a1a1a]/40" />
               </div>
-              <span className="text-[10px] text-muted-foreground font-medium">
+              <span className="text-[10px] text-[#1a1a1a]/40 font-black font-headline uppercase">
                 Joining
               </span>
             </div>
           </div>
 
-          <h2 className="text-xl font-bold mb-2 text-center">
+          <h2 className="text-2xl font-black font-headline uppercase tracking-tighter text-center mb-2">
             Waiting for Approval
           </h2>
-          <p className="text-muted-foreground text-sm text-center leading-relaxed">
+          <p className="text-[#1a1a1a] font-medium uppercase text-xs text-center leading-relaxed mb-8">
             The host has been notified. You'll join automatically once approved.
           </p>
           <button
             type="button"
             onClick={onCancelRequest || onLeave}
-            className="mt-6 w-full py-2.5 text-sm text-danger/80 hover:text-danger border border-danger/20 hover:border-danger/40 rounded-xl transition-colors"
+            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-[#1a1a1a] font-bold font-headline uppercase text-sm hover:bg-[#e63b2e] hover:text-white transition-colors active:translate-x-[1px] active:translate-y-[1px]"
           >
             Cancel Request
           </button>
@@ -156,27 +165,29 @@ export function WatchPartyLobby({
 
   if (requestStatus === 'rejected') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl p-8 shadow-lg border border-border text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center mx-auto mb-4">
-            <UserMinus className="w-7 h-7 text-danger" />
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-[#1a1a1a] flex items-center justify-center mx-auto mb-6 neo-shadow-sm">
+            <UserMinus className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Request Declined</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
+            Request Declined
+          </h2>
+          <p className="text-[#1a1a1a] font-medium uppercase text-sm leading-relaxed mb-8">
             The host has declined your request to join this party.
           </p>
-          <div className="flex flex-col gap-2 mt-6">
+          <div className="flex flex-col gap-3">
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
+              className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
             >
               Try Again
             </button>
             <button
               type="button"
               onClick={() => router.push('/home')}
-              className="w-full py-2.5 text-muted-foreground hover:text-foreground transition-colors text-sm"
+              className="w-full py-2 font-headline font-bold uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors text-xs"
             >
               Go Home
             </button>
@@ -188,127 +199,130 @@ export function WatchPartyLobby({
 
   if (roomPreview) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl p-6 shadow-xl border border-border animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] neo-shadow animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <div className="bg-[#ffcc00] border-b-4 border-[#1a1a1a] p-6 text-center">
+            <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-[#1a1a1a] border-2 border-[#1a1a1a] bg-white px-3 py-1 mb-4">
+              <div className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse" />
               Live Watch Party
             </div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
               You're Invited
             </h1>
           </div>
 
-          {/* Content info */}
-          <div className="bg-secondary/30 rounded-xl p-4 mb-5 border border-border/50">
-            <h2 className="font-semibold text-foreground text-lg leading-tight">
-              {roomPreview.title}
-            </h2>
-            {roomPreview.season ? (
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Season {roomPreview.season} &middot; Episode{' '}
-                {roomPreview.episode}
-              </p>
-            ) : null}
-            <div className="flex items-center gap-4 mt-3">
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Crown className="w-3.5 h-3.5 text-host flex-shrink-0" />
-                <span className="truncate max-w-[120px]">
-                  {roomPreview.hostName}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Users className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{roomPreview.memberCount} watching</span>
-              </div>
-            </div>
-          </div>
-
-          {!user ? (
-            <>
-              <div className="mb-4">
-                <label
-                  htmlFor="guestName"
-                  className="block text-sm font-medium mb-1.5"
-                >
-                  Your Display Name
-                </label>
-                <div className="relative">
-                  <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                  <input
-                    id="guestName"
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => onGuestNameChange(e.target.value)}
-                    placeholder="Enter your display name"
-                    maxLength={30}
-                    className="w-full pl-9 pr-3 py-2.5 bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
-                  />
-                </div>
-              </div>
-
-              {/* Captcha for guest users — animates in after name is entered */}
-              {guestName.trim() && onCaptchaVerify ? (
-                <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <p className="text-xs text-muted-foreground mb-2 text-center">
-                    Complete the security check to continue
-                  </p>
-                  <Captcha
-                    onVerify={onCaptchaVerify}
-                    onError={() => {
-                      // Reset captcha on error
-                    }}
-                  />
-                  {captchaToken ? (
-                    <p className="text-xs text-success text-center mt-1 flex items-center justify-center gap-1">
-                      <Check className="w-3 h-3" /> Verified
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={onJoin}
-            disabled={
-              isLoading ||
-              (!user && !guestName.trim()) ||
-              (!user && !captchaToken)
-            }
-            className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-primary/90 transition-colors"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                Requesting…
-              </>
-            ) : (
-              'Request to Join'
-            )}
-          </button>
-
-          {error ? (
-            <div className="mt-3 rounded-lg bg-danger/10 border border-danger/20 p-3 text-center">
-              <p className="text-danger text-sm">{error}</p>
-              {errorCode ? (
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-50">
-                  Code: {errorCode}
+          <div className="p-6 space-y-6">
+            {/* Content info */}
+            <div className="bg-[#f5f0e8] border-4 border-[#1a1a1a] p-5 neo-shadow-sm">
+              <h2 className="font-black font-headline uppercase text-xl leading-tight text-[#1a1a1a]">
+                {roomPreview.title}
+              </h2>
+              {roomPreview.season ? (
+                <p className="text-xs font-bold font-headline uppercase text-[#1a1a1a]/60 mt-1">
+                  Season {roomPreview.season} &middot; Episode{' '}
+                  {roomPreview.episode}
                 </p>
               ) : null}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-4">
+                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-[#1a1a1a]">
+                  <Crown className="w-4 h-4 text-[#0055ff]" />
+                  <span className="truncate max-w-[120px]">
+                    {roomPreview.hostName}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-[#1a1a1a]">
+                  <Users className="w-4 h-4 text-[#0055ff]" />
+                  <span>{roomPreview.memberCount} watching</span>
+                </div>
+              </div>
             </div>
-          ) : null}
 
-          <button
-            type="button"
-            onClick={() => router.push('/home')}
-            className="w-full py-2 text-muted-foreground mt-3 hover:text-foreground transition-colors text-sm"
-          >
-            Cancel
-          </button>
+            {!user ? (
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="guestName"
+                    className="block text-xs font-black font-headline uppercase mb-2 text-[#1a1a1a]"
+                  >
+                    Your Display Name
+                  </label>
+                  <div className="relative">
+                    <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#1a1a1a]/40 pointer-events-none" />
+                    <input
+                      id="guestName"
+                      type="text"
+                      value={guestName}
+                      onChange={(e) => onGuestNameChange(e.target.value)}
+                      placeholder="ENTER YOUR NAME"
+                      maxLength={30}
+                      className="w-full pl-10 pr-4 py-3 bg-white border-4 border-[#1a1a1a] text-[#1a1a1a] outline-none font-bold placeholder:text-[#1a1a1a]/40 transition-colors focus:bg-[#ffcc00] relative"
+                    />
+                  </div>
+                </div>
+
+                {/* Captcha for guest users */}
+                {onCaptchaVerify ? (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <p className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]/60 mb-2 text-center">
+                      Security Check
+                    </p>
+                    <div className="border-4 border-[#1a1a1a] p-2 bg-[#f5f0e8]">
+                      <Captcha onVerify={onCaptchaVerify} onError={() => {}} />
+                    </div>
+                    {captchaToken ? (
+                      <p className="text-xs text-emerald-600 font-black font-headline uppercase text-center mt-2 flex items-center justify-center gap-1">
+                        <Check className="w-4 h-4" /> Verified
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={onJoin}
+                disabled={
+                  isLoading ||
+                  (!user && !guestName.trim()) ||
+                  (!user && !captchaToken)
+                }
+                className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm disabled:opacity-50 disabled:grayscale disabled:shadow-none"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Requesting…
+                  </div>
+                ) : (
+                  'Request to Join'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push('/home')}
+                className="w-full py-2 font-headline font-bold uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {error ? (
+              <div className="p-4 bg-[#e63b2e] border-4 border-[#1a1a1a] text-white">
+                <p className="text-sm font-black font-headline uppercase leading-tight">
+                  {error}
+                </p>
+                {errorCode ? (
+                  <p className="text-[8px] uppercase tracking-widest mt-1 opacity-80">
+                    Code: {errorCode}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     );

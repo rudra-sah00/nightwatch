@@ -81,13 +81,13 @@ describe('NextEpisodeOverlay', () => {
     it('should display season and episode number', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText('S1 E4')).toBeInTheDocument();
+      expect(screen.getByText(/S1.*E4/)).toBeInTheDocument();
     });
 
     it('should display duration', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText('47m')).toBeInTheDocument();
+      expect(screen.getByText(/47.*MIN/i)).toBeInTheDocument();
     });
 
     it('should display thumbnail when available', () => {
@@ -152,13 +152,13 @@ describe('NextEpisodeOverlay', () => {
     it('should show countdown when autoPlayDelay is set', () => {
       render(<NextEpisodeOverlay {...defaultProps} autoPlayDelay={10} />);
 
-      expect(screen.getByText('Playing in 10s')).toBeInTheDocument();
+      expect(screen.getByText(/in 10s/)).toBeInTheDocument();
     });
 
     it('should not show countdown when autoPlayDelay is 0', () => {
       render(<NextEpisodeOverlay {...defaultProps} autoPlayDelay={0} />);
 
-      expect(screen.queryByText(/Playing in/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/in \d+s/)).not.toBeInTheDocument();
     });
 
     it('should countdown and call onPlayNext', async () => {
@@ -171,17 +171,17 @@ describe('NextEpisodeOverlay', () => {
         />,
       );
 
-      expect(screen.getByText('Playing in 3s')).toBeInTheDocument();
+      expect(screen.getByText(/in 3s/)).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      expect(screen.getByText('Playing in 2s')).toBeInTheDocument();
+      expect(screen.getByText(/in 2s/)).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      expect(screen.getByText('Playing in 1s')).toBeInTheDocument();
+      expect(screen.getByText(/in 1s/)).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
@@ -201,7 +201,7 @@ describe('NextEpisodeOverlay', () => {
         />,
       );
 
-      expect(screen.getByText('Playing in 5s')).toBeInTheDocument();
+      expect(screen.getByText(/in 5s/)).toBeInTheDocument();
 
       fireEvent.click(screen.getByText('Cancel'));
 

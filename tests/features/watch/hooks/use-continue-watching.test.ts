@@ -4,6 +4,7 @@ import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useContinueWatching } from '@/features/watch/hooks/use-continue-watching';
 import { ServerProvider } from '@/providers/server-provider';
+import { ContentType } from '@/types/content';
 
 // Mock API
 vi.mock('@/features/watch/api', () => ({
@@ -63,7 +64,7 @@ describe('useContinueWatching — race condition and stale response guards', () 
       {
         id: '1',
         contentId: 'c1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'S1 Movie',
         posterUrl: '',
         progressSeconds: 0,
@@ -123,7 +124,7 @@ describe('useContinueWatching — race condition and stale response guards', () 
       {
         id: '1',
         contentId: 'c1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'S1 Movie',
         posterUrl: '',
         progressSeconds: 0,
@@ -138,7 +139,7 @@ describe('useContinueWatching — race condition and stale response guards', () 
       {
         id: '2',
         contentId: 'c2',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'S2 Movie',
         posterUrl: '',
         progressSeconds: 0,
@@ -237,7 +238,7 @@ describe('useContinueWatching — race condition and stale response guards', () 
       {
         id: 'cached-1',
         contentId: 'cc1',
-        contentType: 'Movie' as const,
+        contentType: ContentType.Movie,
         title: 'Cached Movie',
         posterUrl: '',
         progressSeconds: 0,

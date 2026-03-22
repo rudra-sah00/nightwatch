@@ -5,35 +5,37 @@ import { getWatchlist } from '@/features/watchlist/api';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { useServer } from '@/providers/server-provider';
 
-export function useWatchlistPage() {
+/**
+ * Hook for managing the watchlist page state.
+ * Moved from app/ layer to features/ layer for better organization.
+ */
+export function useWatchlist() {
   const { activeServer, serverLabel } = useServer();
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
   // Cancels in-flight watchlist requests when the server changes or the
   // component unmounts (navigating away) so stale responses don't arrive
   // after the user has already moved to another page.
   const abortRef = useRef<AbortController | null>(null);
 
-  const fetchWatchlist = useCallback(
-    async (providerId: typeof activeServer) => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
+  const fetchWatchlist = useCallback(async (providerId: string) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-      setLoading(true);
-      try {
-        const items = await getWatchlist(providerId, controller.signal);
-        if (controller.signal.aborted) return;
-        setWatchlist(items);
-      } catch {
-        // Ignore — includes AbortError from intentional cancellation
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    },
-    [],
-  );
+    setLoading(true);
+    try {
+      const items = await getWatchlist(providerId, controller.signal);
+      if (controller.signal.aborted) return;
+      setWatchlist(items);
+    } catch {
+      // Ignore — includes AbortError from intentional cancellation
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!selectedId) {

@@ -16,6 +16,20 @@ export function useUpdateProfileForm() {
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+
+  const isInitialized = useRef(false);
+
+  // Sync state when user becomes available (fixes initial load empty state)
+  // Only sync ONCE to avoid clearing inputs when the user is typing
+  useEffect(() => {
+    if (user && !isInitialized.current) {
+      setName(user.name || '');
+      setUsername(user.username || '');
+      setPreferredServer(user.preferredServer || 's2');
+      isInitialized.current = true;
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!debouncedUsername || debouncedUsername === user?.username) {
       setIsAvailable(null);

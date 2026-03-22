@@ -1,4 +1,4 @@
-import { AlertCircle, Mail, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
@@ -15,7 +15,6 @@ export function SignupForm() {
   const {
     setStep,
     isLoading,
-    error,
     captchaToken,
     setCaptchaToken,
     captchaRef,
@@ -37,54 +36,50 @@ export function SignupForm() {
   } = useSignupForm();
 
   return (
-    <div className="w-full">
-      {error ? <FormError message={error} /> : null}
+    <div className="w-full h-full flex flex-col justify-start">
+      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-3 shrink-0">
+        <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+          {isOtpStep ? 'Verify' : 'Join'}
+        </h2>
+        <p className="font-body font-semibold text-[10px] text-[#1a1a1a] uppercase">
+          {isOtpStep ? 'VERIFY YOUR ACCOUNT' : 'CREATE YOUR ACCOUNT'}
+        </p>
+      </div>
 
-      {isOtpStep ? (
-        <OtpStep
-          email={formData.email}
-          otp={otp}
-          setOtp={setOtp}
-          onSubmit={handleOtpSubmit}
-          onResend={handleResend}
-          onBack={() => setStep('initial')}
-          isLoading={isLoading}
-          countdown={countdown}
-        />
-      ) : (
-        <InitialRegistrationStep
-          formData={formData}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
-          fieldErrors={fieldErrors}
-          setFieldErrors={setFieldErrors}
-          setError={setError}
-          isLoading={isPending}
-          captchaToken={captchaToken}
-          setCaptchaToken={setCaptchaToken}
-          captchaRef={captchaRef}
-          handleChange={handleChange}
-          action={action}
-        />
-      )}
+      <div className="flex-grow flex flex-col justify-center max-h-full overflow-hidden">
+        {isOtpStep ? (
+          <OtpStep
+            email={formData.email}
+            otp={otp}
+            setOtp={setOtp}
+            onSubmit={handleOtpSubmit}
+            onResend={handleResend}
+            onBack={() => setStep('initial')}
+            isLoading={isLoading}
+            countdown={countdown}
+          />
+        ) : (
+          <InitialRegistrationStep
+            formData={formData}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
+            setError={setError}
+            isLoading={isPending}
+            captchaToken={captchaToken}
+            setCaptchaToken={setCaptchaToken}
+            captchaRef={captchaRef}
+            handleChange={handleChange}
+            action={action}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
 // --- Memoized Helper Components ---
-
-const FormError = React.memo(function FormError({
-  message,
-}: {
-  message: string;
-}) {
-  return (
-    <div className="flex items-center gap-2 rounded-lg p-3 text-sm border bg-destructive/15 text-destructive border-destructive/20 mb-4 animate-in fade-in duration-200">
-      <AlertCircle className="h-4 w-4 shrink-0" />
-      <p className="font-medium">{message}</p>
-    </div>
-  );
-});
 
 interface OtpStepProps {
   email: string;
@@ -108,67 +103,62 @@ const OtpStep = React.memo(function OtpStep({
   countdown,
 }: OtpStepProps) {
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="text-center space-y-2">
-        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
-          <Mail className="h-6 w-6" />
-        </div>
-        <h2 className="text-xl font-semibold">Verification Code</h2>
-        <p className="text-sm text-muted-foreground">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full"
+    >
+      <div className="space-y-1 mb-3">
+        <p className="text-[10px] md:text-xs font-body font-medium text-[#1a1a1a]">
           We sent a code to{' '}
-          <span className="font-medium text-foreground">{email}</span>
-          <br />
-          <span className="text-xs text-yellow-600 dark:text-yellow-500 font-medium">
-            Please check your spam folder if not found.
-          </span>
+          <span className="font-bold underline decoration-2">{email}</span>.
+          Please check your spam folder.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label className="sr-only">One-Time Password</Label>
-          <OtpInput value={otp} onChange={(e) => setOtp(e.target.value)} />
-        </div>
+      <div className="space-y-1 pb-1">
+        <Label className="sr-only">One-Time Password</Label>
+        <OtpInput
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[44px]"
+        />
+      </div>
 
-        <Button
-          type="submit"
-          size="lg"
-          isLoading={isLoading}
-          disabled={isLoading || otp.length !== 6}
-          className="w-full text-base font-semibold"
-        >
-          Verify & Complete Signup
-        </Button>
-      </form>
+      <Button
+        type="submit"
+        isLoading={isLoading}
+        disabled={isLoading || otp.length !== 6}
+        className="w-full bg-[#e63b2e] hover:bg-[#ff5544] text-[#ffffff] border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+      >
+        Verify & Complete Signup
+      </Button>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-2 pt-3 border-t-4 border-[#1a1a1a]">
         <Button
           type="button"
-          variant="outline"
-          className="w-full gap-2"
           onClick={onResend}
           disabled={isLoading || countdown > 0}
+          className="w-full bg-white hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] sm:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {countdown > 0 ? (
             <>Resend Code in {countdown}s</>
           ) : (
             <>
-              <RefreshCw className="h-4 w-4" /> Resend Verification Code
+              <RefreshCw className="h-3 w-3" /> Resend Verification Code
             </>
           )}
         </Button>
 
         <Button
           type="button"
-          variant="ghost"
-          className="w-full"
           onClick={onBack}
           disabled={isLoading}
+          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] sm:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
         >
           Back to Details
         </Button>
       </div>
-    </div>
+    </form>
   );
 });
 
@@ -206,79 +196,101 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   const isMatch = formData.password === confirmPassword;
 
   return (
-    <form action={action} className="space-y-4">
+    <form
+      action={action}
+      className="space-y-4 lg:max-h-[60vh] lg:overflow-y-auto lg:pr-2 hide-scroll w-full"
+    >
       {/* Name */}
-      <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
+      <div>
+        <Label
+          htmlFor="name"
+          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+        >
+          Full Name
+        </Label>
         <Input
           id="name"
           name="name"
-          placeholder="Enter your full name"
+          placeholder="Mies van der Rohe"
           value={formData.name}
           onChange={handleChange}
           error={fieldErrors.name}
           autoComplete="name"
           disabled={isLoading}
-          className="bg-secondary/50"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
         />
         {!fieldErrors.name ? (
-          <p className="text-xs text-muted-foreground">
-            Please enter your real name for a personalized experience
+          <p className="text-[10px] uppercase font-bold tracking-widest text-[#1a1a1a]/60 mt-1 hidden sm:block">
+            Used for personalized experience
           </p>
         ) : null}
       </div>
 
       {/* Email */}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
+      <div>
+        <Label
+          htmlFor="email"
+          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+        >
+          Email Address
+        </Label>
         <Input
           id="email"
           type="email"
           name="email"
-          placeholder="your.email@example.com"
+          placeholder="mies@bauhaus.de"
           value={formData.email}
           onChange={handleChange}
           error={fieldErrors.email}
           autoComplete="email"
           disabled={isLoading}
-          className="bg-secondary/50"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
         />
-        {!fieldErrors.email ? (
-          <p className="text-xs text-muted-foreground">
-            We'll send a verification code to this email
-          </p>
-        ) : null}
       </div>
 
-      {/* Password */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <PasswordInfo />
+      {/* Password space-y reduced to save height */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <Label
+            htmlFor="password"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]"
+          >
+            Password
+          </Label>
+          <div className="scale-75 md:scale-90 origin-right">
+            <PasswordInfo />
+          </div>
         </div>
         <Input
           id="password"
           type="password"
           name="password"
-          placeholder="Create a strong password"
+          placeholder="••••••••"
           value={formData.password}
           onChange={handleChange}
           error={fieldErrors.password}
           autoComplete="new-password"
           disabled={isLoading}
-          className="bg-secondary/50"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base mb-1 !h-[44px]"
         />
-        <PasswordStrengthIndicator password={formData.password} />
+        <div className="scale-90 origin-left">
+          <PasswordStrengthIndicator password={formData.password} />
+        </div>
       </div>
 
       {/* Confirm Password */}
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
+      <div>
+        <Label
+          htmlFor="confirmPassword"
+          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+        >
+          Confirm Password
+        </Label>
         <Input
           id="confirmPassword"
           type="password"
           name="confirmPassword"
-          placeholder="Re-enter your password"
+          placeholder="••••••••"
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
@@ -293,16 +305,16 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.confirmPassword}
           autoComplete="new-password"
           disabled={isLoading}
-          className="bg-secondary/50"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
         />
         {!fieldErrors.confirmPassword && confirmPassword ? (
           <p
             className={cn(
-              'text-xs',
-              isMatch ? 'text-green-600' : 'text-amber-600',
+              'text-[10px] uppercase font-bold tracking-widest mt-1',
+              isMatch ? 'text-green-600' : 'text-[#cc0000]',
             )}
           >
-            {isMatch ? '✓ Passwords match' : '⚠ Passwords do not match'}
+            {isMatch ? '✓ PASSWORDS MATCH' : '⚠ PASSWORDS DO NOT MATCH'}
           </p>
         ) : null}
       </div>
@@ -313,22 +325,26 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
         name="inviteCode"
         value={formData.inviteCode || ''}
       />
-      <Captcha
-        ref={captchaRef}
-        onVerify={setCaptchaToken}
-        onError={() => setCaptchaToken(null)}
-        onExpire={() => setCaptchaToken(null)}
-      />
 
-      <Button
-        type="submit"
-        size="lg"
-        isLoading={isLoading}
-        disabled={!captchaToken || isLoading}
-        className="w-full text-base font-semibold mt-2"
-      >
-        {isLoading ? 'Creating Account...' : 'Create Account'}
-      </Button>
+      <div className="pt-2 scale-95 origin-left">
+        <Captcha
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onError={() => setCaptchaToken(null)}
+          onExpire={() => setCaptchaToken(null)}
+        />
+      </div>
+
+      <div className="pt-2">
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          disabled={!captchaToken || isLoading}
+          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+        >
+          {isLoading ? 'Creating...' : 'Create Account'}
+        </Button>
+      </div>
     </form>
   );
 });

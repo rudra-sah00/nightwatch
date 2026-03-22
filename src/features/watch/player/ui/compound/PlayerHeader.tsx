@@ -25,9 +25,9 @@ export function PlayerHeader({
           type="button"
           onClick={playerHandlers.goBack}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-3 lg:p-4 2xl:p-5 rounded-full bg-white/5 hover:bg-white/20 transition-[colors,transform] duration-200 active:scale-95 backdrop-blur-sm border border-white/10 flex-shrink-0"
+          className="p-3 lg:p-4 bg-white border-[3px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] active:bg-[#ffcc00] transition-all duration-200 flex-shrink-0 text-[#1a1a1a]"
         >
-          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 2xl:w-9 2xl:h-9 text-white" />
+          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 stroke-[3px]" />
         </button>
       ) : null}
 
@@ -36,23 +36,29 @@ export function PlayerHeader({
           type="button"
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="group flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2.5 2xl:px-5 2xl:py-3 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 transition-[colors,transform] duration-300 active:scale-95 backdrop-blur-sm border border-indigo-500/30 hover:border-indigo-400/50 flex-shrink-0 shadow-lg shadow-indigo-500/10"
+          className="group flex items-center gap-3 px-4 py-2 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer"
           title="Toggle Watch Party sidebar"
         >
-          <Users className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-indigo-300 group-hover:text-indigo-200 transition-colors duration-300" />
-          <span className="hidden lg:inline text-sm 2xl:text-base font-medium text-indigo-200 group-hover:text-white transition-colors duration-300">
+          <Users className="w-5 h-5 md:w-6 md:h-6 text-white stroke-[3px]" />
+          <span className="hidden lg:inline text-sm 2xl:text-base font-black font-headline uppercase tracking-widest text-white">
             Party
           </span>
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50" />
+          <div className="w-3 h-3 bg-[#ffcc00] border-[2px] border-[#1a1a1a] animate-pulse" />
         </button>
       ) : null}
 
       <div className="flex-1 min-w-0">
-        <h1 className="text-white font-semibold text-lg md:text-2xl lg:text-3xl 2xl:text-4xl truncate drop-shadow-lg">
+        <h1
+          className="text-white font-black font-headline uppercase tracking-wider text-xl md:text-3xl lg:text-4xl 2xl:text-5xl truncate"
+          style={{ textShadow: '4px 4px 0px #1a1a1a' }}
+        >
           {metadata.title}
         </h1>
         {metadata.type === 'series' && metadata.season && metadata.episode ? (
-          <p className="text-white/60 text-sm md:text-base lg:text-lg 2xl:text-xl">
+          <p
+            className="text-[#ffcc00] font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1"
+            style={{ textShadow: '2px 2px 0px #1a1a1a' }}
+          >
             Season {metadata.season} · Episode {metadata.episode}
           </p>
         ) : null}

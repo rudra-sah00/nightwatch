@@ -1,4 +1,3 @@
-import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BufferingOverlayProps {
@@ -13,11 +12,11 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
         isVisible ? 'opacity-100' : 'opacity-0',
       )}
     >
-      <div className="relative flex items-center justify-center scale-75">
-        {/* Simple Red Spinner */}
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
-          <Loader2 className="absolute top-0 left-0 w-16 h-16 text-red-600 animate-spin" />
+      <div className="relative flex items-center justify-center">
+        {/* Brutalist Square Loader */}
+        <div className="relative w-12 h-12 md:w-16 md:h-16">
+          <div className="absolute inset-0 border-[4px] border-[#1a1a1a] bg-[#ffcc00] animate-[spin_2s_steps(4)_infinite]" />
+          <div className="absolute inset-2 bg-[#e63b2e] border-[3px] border-[#1a1a1a] animate-[spin_2s_steps(4)_infinite_reverse]" />
         </div>
       </div>
     </div>

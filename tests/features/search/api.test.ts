@@ -7,7 +7,6 @@ import {
   getSeriesEpisodes,
   getShowDetails,
   invalidateSearchHistoryCache,
-  playVideo,
   searchContent,
 } from '@/features/search/api';
 import { apiFetch } from '@/lib/fetch';
@@ -231,100 +230,6 @@ describe('Search API', () => {
       await getSearchHistory();
 
       expect(apiFetch).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('playVideo', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-      vi.mocked(apiFetch).mockReset();
-    });
-
-    it('should play a movie', async () => {
-      const mockResponse = {
-        success: true,
-        streamUrl: 'https://example.com/stream.m3u8',
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce(mockResponse);
-
-      const result = await playVideo({
-        type: 'movie',
-        title: 'Test Movie',
-        duration: 7200,
-      });
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/play', {
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'movie',
-          title: 'Test Movie',
-          duration: 7200,
-        }),
-        timeout: 120000,
-      });
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('should play a series episode', async () => {
-      const mockResponse = {
-        success: true,
-        streamUrl: 'https://example.com/stream.m3u8',
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce(mockResponse);
-
-      const result = await playVideo({
-        type: 'series',
-        title: 'Test Series',
-        season: 1,
-        episode: 5,
-        duration: 3600,
-      });
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/play', {
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'series',
-          title: 'Test Series',
-          season: 1,
-          episode: 5,
-          duration: 3600,
-        }),
-        timeout: 120000,
-      });
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('should handle play errors', async () => {
-      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Automation failed'));
-
-      await expect(
-        playVideo({
-          type: 'movie',
-          title: 'Test Movie',
-        }),
-      ).rejects.toThrow('Automation failed');
-    });
-
-    it('should support custom options', async () => {
-      const mockResponse = { success: true };
-      vi.mocked(apiFetch).mockResolvedValueOnce(mockResponse);
-
-      await playVideo(
-        {
-          type: 'movie',
-          title: 'Test',
-        },
-        { signal: new AbortController().signal },
-      );
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/video/play', {
-        method: 'POST',
-        body: expect.any(String),
-        timeout: 120000,
-        signal: expect.any(AbortSignal),
-      });
     });
   });
 

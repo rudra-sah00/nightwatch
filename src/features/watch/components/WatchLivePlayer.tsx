@@ -23,7 +23,11 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   const router = useRouter();
 
   const handleBack = () => {
-    router.push('/live');
+    if (typeof window !== 'undefined' && window.history.length > 2) {
+      router.back();
+    } else {
+      router.push('/live');
+    }
   };
 
   return (

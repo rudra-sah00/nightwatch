@@ -8,18 +8,21 @@ import {
   getCachedProgress,
   getContentProgress,
   getContinueWatching,
+  getCookie,
   getStreamUrl,
   getVideoDetails,
   invalidateContinueWatchingCache,
   invalidateProgressCache,
   isContinueWatchingCacheFresh,
+  playVideo,
   removeFromContinueWatchingCache,
   setContinueWatchingCache,
   setProgressCache,
+  stopVideo,
 } from '@/features/watch/api';
-import type { WatchProgress } from '@/features/watch/types';
 import { apiFetch } from '@/lib/fetch';
 import { getSocket } from '@/lib/socket';
+import { ContentType, type WatchProgress } from '@/types/content';
 
 // Mock apiFetch
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
@@ -27,8 +30,21 @@ vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 // Mock Socket.IO
 vi.mock('@/lib/socket', () => import('./__mocks__/lib-socket'));
 
-// Mock global fetch for sprite VTT tests
+// Mock global fetch
 global.fetch = vi.fn();
+
+// Mock global navigator/sendBeacon
+if (typeof navigator === 'undefined') {
+  Object.defineProperty(global, 'navigator', {
+    value: { sendBeacon: vi.fn() },
+    writable: true,
+  });
+} else if (!navigator.sendBeacon) {
+  Object.defineProperty(navigator, 'sendBeacon', {
+    value: vi.fn(),
+    writable: true,
+  });
+}
 
 // Helper to create complete WatchProgress objects
 function createMockProgress(
@@ -37,7 +53,7 @@ function createMockProgress(
   return {
     id: 'test-id',
     contentId: 'test-content',
-    contentType: 'Movie',
+    contentType: ContentType.Movie,
     title: 'Test Title',
     posterUrl: 'https://example.com/poster.jpg',
     progressSeconds: 0,
@@ -799,6 +815,149 @@ https://example.com/sprite2.jpg#xywh=0,0,160,90
       // Should create Image objects for unique URLs (sprite1 and sprite2)
       // We can't easily test Image creation in Node, but we verify it doesn't throw
       expect(true).toBe(true);
+    });
+  });
+
+  describe('playVideo', () => {
+    it('should play a movie', async () => {
+      const mockResponse = {
+        success: true,
+        streamUrl: 'https://example.com/stream.m3u8',
+      };
+
+      vi.mocked(apiFetch).mockResolvedValueOnce(mockResponse);
+
+      const result = await playVideo({
+        type: 'movie',
+        title: 'Test Movie',
+        duration: 7200,
+      });
+
+      expect(apiFetch).toHaveBeenCalledWith('/api/video/play', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'movie',
+          title: 'Test Movie',
+          duration: 7200,
+        }),
+        timeout: 120000,
+      });
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should play a series episode', async () => {
+      const mockResponse = {
+        success: true,
+        streamUrl: 'https://example.com/stream.m3u8',
+      };
+
+      vi.mocked(apiFetch).mockResolvedValueOnce(mockResponse);
+
+      const result = await playVideo({
+        type: 'series',
+        title: 'Test Series',
+        season: 1,
+        episode: 5,
+        duration: 3600,
+      });
+
+      expect(apiFetch).toHaveBeenCalledWith('/api/video/play', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'series',
+          title: 'Test Series',
+          season: 1,
+          episode: 5,
+          duration: 3600,
+        }),
+        timeout: 120000,
+      });
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle play errors', async () => {
+      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Automation failed'));
+
+      await expect(
+        playVideo({
+          type: 'movie',
+          title: 'Test Movie',
+        }),
+      ).rejects.toThrow('Automation failed');
+    });
+  });
+
+  describe('stopVideo', () => {
+    it('should stop video playback using sendBeacon when available', () => {
+      const mockSendBeacon = vi.fn().mockReturnValue(true);
+      const originalSendBeacon = navigator.sendBeacon;
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: mockSendBeacon,
+        writable: true,
+        configurable: true,
+      });
+
+      const csrfToken = 'test-csrf';
+      const cookieSpy = vi
+        .spyOn(document, 'cookie', 'get')
+        .mockReturnValue(`csrfToken=${csrfToken}`);
+
+      stopVideo();
+
+      expect(mockSendBeacon).toHaveBeenCalledWith(
+        `/api/video/stop?_csrf=${encodeURIComponent(csrfToken)}`,
+      );
+
+      // Restore
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: originalSendBeacon,
+        writable: true,
+        configurable: true,
+      });
+      cookieSpy.mockRestore();
+    });
+
+    it('should fallback to fetch if sendBeacon is unavailable', () => {
+      const originalSendBeacon = navigator.sendBeacon;
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true });
+      const originalFetch = global.fetch;
+      global.fetch = mockFetch;
+
+      stopVideo();
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/video/stop', {
+        method: 'POST',
+        keepalive: true,
+      });
+
+      // Restore
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: originalSendBeacon,
+        writable: true,
+        configurable: true,
+      });
+      global.fetch = originalFetch;
+    });
+  });
+
+  describe('getCookie', () => {
+    it('should retrieve a cookie value', () => {
+      vi.spyOn(document, 'cookie', 'get').mockReturnValue(
+        'test_cookie=hello_world',
+      );
+      expect(getCookie('test_cookie')).toBe('hello_world');
+      vi.restoreAllMocks();
+    });
+
+    it('should return null if cookie does not exist', () => {
+      vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
+      expect(getCookie('non_existent')).toBeNull();
+      vi.restoreAllMocks();
     });
   });
 });

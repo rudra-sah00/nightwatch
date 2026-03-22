@@ -64,7 +64,9 @@ describe('LoginPage', () => {
     const { default: LoginPage } = await import('@/app/(public)/login/page');
     render(<LoginPage />);
 
-    expect(screen.getByText('Welcome Back')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /watch rudra/i }),
+    ).toBeInTheDocument();
 
     // Check that our mock exercised the loading paths
     const loadingElements = screen.getAllByTestId('dynamic-loading');

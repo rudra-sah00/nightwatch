@@ -1,37 +1,17 @@
 'use client';
 
-import {
-  Calendar,
-  Camera,
-  ChevronRight,
-  KeyRound,
-  Loader2,
-  LogOut,
-  Mail,
-  Settings,
-  User as UserIcon,
-} from 'lucide-react';
-import Link from 'next/link';
-import { Avatar } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { PasswordInfo } from '@/components/ui/password-info';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
+import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { ActivityGraph } from './activity-graph';
-
-// ─── Profile Overview ────────────────────────────────────────────────────────
+import { UpdateProfileForm } from './update-profile-form';
 
 export function ProfileOverview() {
-  const {
-    user,
-    logout,
-    activity,
-    loadingActivity,
-    isUploading,
-    displayImage,
-    fileInputRef,
-    formattedJoinDate,
-    handleFileClick,
-    handleFileChange,
-  } = useProfileOverview();
+  const { user, activity, loadingActivity } = useProfileOverview();
+
+  const passwordForm = useChangePasswordForm();
 
   const userCreatedAtDate = user?.createdAt
     ? new Date(user.createdAt)
@@ -40,134 +20,124 @@ export function ProfileOverview() {
   if (!user) return null;
 
   return (
-    <div className="pb-16">
-      <div className="mx-auto max-w-2xl px-4 pt-6 sm:pt-10 space-y-6 sm:space-y-8">
-        {/* ── Profile Card ── */}
-        <section className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
-            {/* Avatar */}
-            <div className="relative group shrink-0">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-0.5 bg-gradient-to-br from-indigo-500/30 to-indigo-600/20">
-                <div className="w-full h-full rounded-full bg-background p-0.5">
-                  <Avatar
-                    src={displayImage}
-                    alt={user.name}
-                    className="w-full h-full rounded-full object-cover"
-                    fallback={
-                      <UserIcon className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground/40" />
-                    }
-                  />
-                </div>
-                {isUploading ? (
-                  <div className="absolute inset-0.5 flex items-center justify-center rounded-full bg-black/70">
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
-                  </div>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={handleFileClick}
-                className="absolute inset-0.5 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer"
-              >
-                <Camera className="w-4 h-4 text-white/80" />
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-            </div>
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-12 animate-in fade-in zoom-in-95 duration-300 w-full overflow-x-hidden md:overflow-x-visible">
+      <UpdateProfileForm />
 
-            {/* Info */}
-            <div className="flex-1 min-w-0 text-center sm:text-left space-y-1.5">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate">
-                {user.name}
-              </h1>
-              {user.username ? (
-                <p className="text-sm text-muted-foreground font-medium">
-                  @{user.username}
-                </p>
-              ) : null}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-muted-foreground/60 pt-1">
-                <span className="flex items-center gap-1.5">
-                  <Mail className="w-3 h-3" />
-                  <span className="truncate max-w-[180px]">{user.email}</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3 h-3" />
-                  Joined {formattedJoinDate}
-                </span>
-              </div>
+      {/* Password Update */}
+      <form
+        action={passwordForm.action}
+        className="bg-white text-[#1a1a1a] border-4 border-[#1a1a1a] p-8 neo-shadow"
+      >
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8 text-[#1a1a1a]">
+          Security / Password
+        </h2>
+
+        <div className="space-y-8 max-w-2xl">
+          {/* Current */}
+          <div className="flex flex-col gap-2">
+            <span className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 text-sm">
+              Target Authorization
+            </span>
+            <input
+              type="password"
+              name="current"
+              value={passwordForm.currentPassword}
+              onChange={(e) => passwordForm.setCurrentPassword(e.target.value)}
+              placeholder="CURRENT PASSWORD"
+              required
+              className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-[#1a1a1a] placeholder:text-[#1a1a1a]/20 border-b-8 border-[#1a1a1a]/20 focus:border-[#0055ff] focus:bg-[#0055ff] focus:text-white transition-colors py-2"
+            />
+          </div>
+
+          {/* New */}
+          <div className="flex flex-col gap-2 relative">
+            <div className="flex justify-between items-center">
+              <span className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 text-sm">
+                New Key
+              </span>
+              <PasswordInfo className="text-[#1a1a1a] fill-[#1a1a1a]" />
+            </div>
+            <input
+              type="password"
+              name="new"
+              value={passwordForm.newPassword}
+              onChange={(e) => passwordForm.setNewPassword(e.target.value)}
+              placeholder="NEW PASSWORD"
+              required
+              className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-[#1a1a1a] placeholder:text-[#1a1a1a]/20 border-b-8 border-[#1a1a1a]/20 focus:border-[#e63b2e] focus:bg-[#e63b2e] focus:text-white transition-colors py-2"
+            />
+            <div className="mt-2">
+              <PasswordStrengthIndicator password={passwordForm.newPassword} />
             </div>
           </div>
-        </section>
 
-        {/* ── Activity Graph ── */}
-        <section className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-6">
-          <div className="flex items-baseline gap-2 mb-4">
-            <h2 className="text-sm font-semibold text-foreground/90">
-              Watch Activity
-            </h2>
-            <span className="text-[11px] text-muted-foreground/40">
-              past year
+          {/* Confirm */}
+          <div className="flex flex-col gap-2 relative">
+            <span className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 text-sm">
+              Verify Key
+            </span>
+            <input
+              type="password"
+              name="confirm"
+              value={passwordForm.confirmPassword}
+              onChange={(e) => passwordForm.setConfirmPassword(e.target.value)}
+              placeholder="CONFIRM NEW PASSWORD"
+              required
+              className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-[#1a1a1a] placeholder:text-[#1a1a1a]/20 border-b-8 border-[#1a1a1a]/20 focus:border-[#e63b2e] focus:bg-[#e63b2e] focus:text-white transition-colors py-2"
+            />
+          </div>
+
+          {passwordForm.error && (
+            <div className="bg-[#e63b2e] p-4 border-4 border-[#1a1a1a] text-white font-bold font-headline uppercase flex gap-2 items-center">
+              <AlertCircle /> {passwordForm.error}
+            </div>
+          )}
+
+          {passwordForm.newPassword && (
+            <div className="pt-4 animate-in fade-in slide-in-from-bottom-2">
+              <button
+                type="submit"
+                disabled={passwordForm.isPending}
+                className="w-full py-6 bg-[#1a1a1a] text-[#ffcc00] font-headline font-black uppercase border-4 border-[#1a1a1a] hover:bg-white hover:text-[#1a1a1a] transition-colors neo-shadow-sm active:translate-x-[2px] active:translate-y-[2px] text-2xl sm:text-3xl"
+              >
+                {passwordForm.isPending ? (
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+                ) : (
+                  'OVERRIDE PASSWORD'
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </form>
+
+      {/* Watch Activity Heatmap */}
+      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow overflow-x-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+            Watch Activity
+          </h2>
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold uppercase font-headline text-[#1a1a1a]">
+              Less
+            </span>
+            <div className="w-4 h-4 bg-[#f1ece4]"></div>
+            <div className="w-4 h-4 bg-[#b3ccff]"></div>
+            <div className="w-4 h-4 bg-[#0055ff]"></div>
+            <div className="w-4 h-4 bg-[#ffcc00]"></div>
+            <div className="w-4 h-4 bg-[#e63b2e]"></div>
+            <span className="text-xs font-bold uppercase font-headline text-[#1a1a1a]">
+              More
             </span>
           </div>
-          <ActivityGraph
-            activity={activity}
-            createdAt={userCreatedAtDate}
-            isLoading={loadingActivity}
-          />
-        </section>
+        </div>
 
-        {/* ── Settings Links ── */}
-        <section className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden divide-y divide-white/[0.04]">
-          <Link
-            href="/settings/profile"
-            className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors"
-          >
-            <div className="p-2 rounded-xl bg-indigo-500/10">
-              <Settings className="w-4 h-4 text-indigo-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                Edit Profile
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                Name, username, server
-              </p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
-          </Link>
-          <Link
-            href="/settings/security"
-            className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors"
-          >
-            <div className="p-2 rounded-xl bg-amber-500/10">
-              <KeyRound className="w-4 h-4 text-amber-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Security</p>
-              <p className="text-xs text-muted-foreground/60">
-                Change password
-              </p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
-          </Link>
-        </section>
-
-        {/* ── Sign Out ── */}
-        <Button
-          variant="ghost"
-          className="w-full text-destructive/70 hover:text-destructive hover:bg-destructive/5 rounded-xl border border-white/[0.06] h-11 text-sm"
-          onClick={logout}
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
-    </div>
+        <ActivityGraph
+          activity={activity}
+          createdAt={userCreatedAtDate}
+          isLoading={loadingActivity}
+        />
+      </section>
+    </main>
   );
 }

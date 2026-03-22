@@ -141,7 +141,7 @@ describe('MediaControls', () => {
     it('should show Leave Party for non-host', () => {
       render(<MediaControls {...defaultProps} isHost={false} />);
 
-      expect(screen.getByText('Leave Party')).toBeInTheDocument();
+      expect(screen.getByText('Leave')).toBeInTheDocument();
     });
 
     it('should call onLeave when leave button clicked', () => {
@@ -310,7 +310,7 @@ describe('MediaControls', () => {
       const micOption = screen
         .getByText('Built-in Microphone')
         .closest('button');
-      expect(micOption).toHaveClass('bg-gray-600/50');
+      expect(micOption).toHaveClass('bg-[#ffe066]');
     });
   });
 

@@ -40,7 +40,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
         {messages.map((msg, index) => {
           const isMe = msg.userId === currentUserId;
           const showHeader =
@@ -60,15 +60,9 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
         <div ref={messagesEndRef} />
       </div>
 
-      <div
-        className="p-4 border-t backdrop-blur-md text-center"
-        style={{
-          background: 'var(--wp-footer-bg)',
-          borderColor: 'var(--wp-footer-border)',
-        }}
-      >
-        <p className="text-xs text-white/30 italic">
-          Chat has been disabled by the host.
+      <div className="p-4 border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] text-center shrink-0">
+        <p className="text-xs font-black font-headline uppercase tracking-widest text-[#e63b2e]">
+          Chat has been disabled by the host
         </p>
       </div>
     </div>
@@ -107,16 +101,22 @@ export const WatchPartyChat = memo(function WatchPartyChat({
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
       <div
-        className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-[#f5f0e8]"
         style={{ contentVisibility: 'auto' }}
       >
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-white/30 text-sm space-y-2">
-            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-              <Smile className="w-6 h-6 opacity-50" />
+          <div className="flex flex-col items-center justify-center h-full text-[#1a1a1a] text-sm space-y-3">
+            <div className="w-16 h-16 bg-white border-[4px] border-[#1a1a1a] flex items-center justify-center neo-shadow">
+              <Smile className="w-8 h-8 stroke-[3px]" />
             </div>
-            <p>No messages yet.</p>
-            <p className="text-xs opacity-70">Be the first to say hello! 👋</p>
+            <div className="text-center">
+              <p className="font-black font-headline uppercase tracking-widest text-lg">
+                No messages yet
+              </p>
+              <p className="text-xs font-headline uppercase tracking-widest font-bold text-[#4a4a4a] mt-1">
+                Be the first to say hello! 👋
+              </p>
+            </div>
           </div>
         ) : null}
 
@@ -140,16 +140,13 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         {/* Typing Indicator */}
         {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="flex items-center gap-1">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
-                style={{ background: 'var(--wp-typing-avatar)' }}
-              >
-                <span className="text-[9px] font-bold text-white uppercase">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 border-[2px] border-[#1a1a1a] bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+                <span className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]">
                   {typingUsers[0].userName.charAt(0)}
                 </span>
               </div>
-              <span className="text-xs text-white/70">
+              <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
                 {typingUsers.length === 1
                   ? `${typingUsers[0].userName} is typing`
                   : typingUsers.length === 2
@@ -160,9 +157,9 @@ export const WatchPartyChat = memo(function WatchPartyChat({
               </span>
             </div>
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce" />
             </div>
           </div>
         ) : null}
@@ -191,11 +188,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {/* Input Area */}
       <form
         onSubmit={handleSend}
-        className="p-3 border-t backdrop-blur-md relative z-10"
-        style={{
-          background: 'var(--wp-footer-bg)',
-          borderColor: 'var(--wp-footer-border)',
-        }}
+        className="p-3 border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] relative z-10"
       >
         <div className="relative flex items-center gap-2">
           <button
@@ -204,15 +197,14 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onMouseEnter={() => void import('emoji-picker-react')}
             onFocus={() => void import('emoji-picker-react')}
             className={cn(
-              'p-2 rounded-full transition-colors',
-              showEmoji ? 'text-white' : 'text-white/50 hover:text-white/80',
+              'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
+              showEmoji
+                ? 'bg-[#1a1a1a] text-[var(--wp-accent,#ffcc00)]'
+                : 'bg-white text-[#1a1a1a] hover:bg-[#ffe066]',
             )}
-            style={{
-              background: showEmoji ? 'var(--wp-accent-muted)' : undefined,
-            }}
             title="Add emoji"
           >
-            <Smile className="w-5 h-5" />
+            <Smile className="w-5 h-5 stroke-[3px]" />
           </button>
 
           <input
@@ -221,34 +213,19 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="flex-1 text-white placeholder:text-white/30 px-4 py-2.5 rounded-xl text-sm focus:outline-none transition-colors"
-            style={{ background: 'var(--wp-input-bg)' }}
-            onFocus={(e) => {
-              e.currentTarget.style.background = 'var(--wp-input-focus)';
-              e.currentTarget.style.boxShadow =
-                '0 0 0 1px var(--wp-input-ring)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.background = 'var(--wp-input-bg)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="flex-1 text-[#1a1a1a] placeholder:text-[#1a1a1a]/50 px-4 py-2.5 border-[3px] border-[#1a1a1a] bg-white text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,#0055ff)] transition-colors"
           />
           <button
             type="submit"
             disabled={!input.trim()}
             className={cn(
-              'p-2.5 rounded-xl transition-[colors,transform] duration-200',
+              'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
               input.trim()
-                ? 'text-zinc-900'
-                : 'text-white/20 cursor-not-allowed',
+                ? 'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none'
+                : 'bg-[#f5f0e8] text-[#1a1a1a]/30 cursor-not-allowed',
             )}
-            style={{
-              background: input.trim()
-                ? 'var(--wp-send-btn)'
-                : 'var(--wp-accent-soft)',
-            }}
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5 stroke-[3px]" />
           </button>
         </div>
       </form>
@@ -269,8 +246,8 @@ const ChatMessageItem = memo(function ChatMessageItem({
 }: ChatMessageItemProps) {
   if (message.isSystem) {
     return (
-      <div className="flex justify-center my-3">
-        <span className="text-[10px] bg-white/5 text-white/50 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+      <div className="flex justify-center my-4">
+        <span className="text-[10px] bg-white border-[2px] border-[#1a1a1a] text-[#1a1a1a] font-black font-headline uppercase tracking-widest px-3 py-1 neo-shadow-sm">
           {message.content}
         </span>
       </div>
@@ -287,15 +264,15 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Avatar/Name Header */}
       {!isMe && showHeader ? (
         <div className="flex items-center gap-2 mb-1 pl-1">
-          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <span className="text-[9px] font-bold text-white uppercase">
+          <div className="w-6 h-6 border-[2px] border-[#1a1a1a] bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+            <span className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]">
               {message.userName.charAt(0)}
             </span>
           </div>
-          <span className="text-xs text-white/70 font-medium">
+          <span className="text-xs text-[#1a1a1a] font-black font-headline uppercase tracking-widest">
             {message.userName}
           </span>
-          <span className="text-[10px] text-white/30">
+          <span className="text-[10px] text-[#4a4a4a] font-bold font-headline uppercase tracking-widest">
             {new Date(message.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -307,10 +284,10 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Message Bubble */}
       <div
         className={cn(
-          'px-3.5 py-2 rounded-2xl text-sm max-w-[85%] break-words shadow-sm relative group',
+          'px-4 py-2 border-[3px] border-[#1a1a1a] text-sm max-w-[85%] break-words relative group',
           isMe
-            ? 'bg-purple-600 text-white rounded-br-sm shadow-purple-500/10'
-            : 'bg-white/10 text-white/90 rounded-bl-sm backdrop-blur-sm border border-white/5',
+            ? 'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm mr-1'
+            : 'bg-white text-[#1a1a1a] neo-shadow-sm ml-1',
         )}
       >
         {/* Render message with clickable links */}
@@ -323,24 +300,29 @@ const ChatMessageItem = memo(function ChatMessageItem({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  'inline-flex items-center gap-1 underline hover:opacity-80 transition-opacity',
-                  isMe ? 'text-white' : 'text-blue-400',
+                  'inline-flex items-center gap-1 underline font-bold hover:bg-[#1a1a1a] hover:text-white px-1 transition-colors',
+                  isMe ? 'text-white' : 'text-[var(--wp-send-btn,#0055ff)]',
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
                 {segment.url}
-                <ExternalLink className="w-3 h-3 inline" />
+                <ExternalLink className="w-3 h-3 inline stroke-[3px]" />
               </a>
             );
           }
           return (
-            <span key={`${message.id}-text-${idx}`}>{segment.content}</span>
+            <span
+              key={`${message.id}-text-${idx}`}
+              className="font-medium whitespace-pre-wrap"
+            >
+              {segment.content}
+            </span>
           );
         })}
 
         {/* Timestamp for Me */}
         {isMe ? (
-          <span className="text-[9px] text-white/50 block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 -mb-5 bg-black/50 px-1 rounded">
+          <span className="text-[9px] font-bold font-headline uppercase tracking-widest text-[#1a1a1a] block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 -mb-6 bg-white border-[2px] border-[#1a1a1a] px-1 neo-shadow-sm z-10 w-max">
             {new Date(message.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',

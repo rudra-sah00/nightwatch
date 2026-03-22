@@ -1,13 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  getSeriesEpisodes,
-  getShowDetails,
-  playVideo,
-  stopVideo,
-} from '@/features/search/api';
+import { getSeriesEpisodes, getShowDetails } from '@/features/search/api';
 import type { Episode, ShowDetails } from '@/features/search/types';
+import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '../context/types';
 import type { NextEpisodeInfo } from '../ui/overlays/NextEpisodeOverlay';
 import {

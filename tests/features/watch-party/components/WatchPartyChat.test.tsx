@@ -367,7 +367,7 @@ describe('WatchPartyChat', () => {
     it('should render empty state when no messages', () => {
       render(<WatchPartyChat {...defaultProps} messages={[]} />);
 
-      expect(screen.getByText('No messages yet.')).toBeInTheDocument();
+      expect(screen.getByText('No messages yet')).toBeInTheDocument();
       expect(
         screen.getByText(/Be the first to say hello!/),
       ).toBeInTheDocument();

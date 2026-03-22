@@ -8,6 +8,10 @@ import { createPartyRoom } from '@/features/watch-party/room/services/watch-part
 import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 
+/**
+ * Hook for live match playback actions.
+ * Extracted from the app layer to the livestream feature.
+ */
 export function useLiveMatchPlayer(match: LiveMatch | null, matchId: string) {
   const router = useRouter();
   const { user } = useAuth();

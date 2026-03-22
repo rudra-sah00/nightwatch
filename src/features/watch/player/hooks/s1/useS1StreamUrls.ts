@@ -29,11 +29,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PlayResponse } from '@/features/search/types';
 import {
   extractTokenFromUrl,
   normalizeWatchUrls,
 } from '@/features/watch/utils';
+import type { PlayResponse } from '@/types/content';
 
 export interface SubtitleTrack {
   id: string;

@@ -1,7 +1,6 @@
 import { apiFetch } from '@/lib/fetch';
 import type {
   Episode,
-  PlayResponse,
   SearchHistory,
   SearchResult,
   ShowDetails,
@@ -224,76 +223,4 @@ export async function getSeriesEpisodes(
   return result;
 }
 
-/**
- * Video playback trigger and status monitoring.
- * Note: Playback triggers external automation which may take 30+ seconds.
- */
-
-export interface PlayMovieParams {
-  type: 'movie';
-  title: string;
-  movieId?: string;
-  duration?: number; // Duration in seconds for smart caching
-  server?: string;
-}
-
-export interface PlaySeriesParams {
-  type: 'series';
-  title: string;
-  seriesId?: string;
-  season: number;
-  episode: number;
-  duration?: number; // Duration in seconds for smart caching
-  server?: string;
-}
-
-export type PlayParams = PlayMovieParams | PlaySeriesParams;
-
-export async function playVideo(
-  params: PlayParams,
-  options?: RequestInit,
-): Promise<PlayResponse> {
-  // Longer timeout since Playwright automation takes ~30+ seconds
-  return apiFetch<PlayResponse>('/api/video/play', {
-    method: 'POST',
-    body: JSON.stringify(params),
-    timeout: 120000,
-    ...options,
-  });
-}
-
-/**
- * Notify the backend that this client has stopped playback so it can
- * immediately remove the Redis stream session.  Uses sendBeacon so the
- * request survives page-unload and does not block navigation.
- *
- * Falls back to a fire-and-forget fetch when sendBeacon is unavailable
- * (e.g. in Node/test environments).
- */
-/**
- * Read a cookie value by name from document.cookie.
- * Returns undefined when running outside a browser (e.g. SSR / tests).
- */
-function getCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
-}
-
-export function stopVideo(): void {
-  // Append the CSRF token as a query param because sendBeacon cannot set
-  // custom request headers.  The token comes from the csrfToken cookie
-  // (httpOnly: false), so a cross-origin attacker cannot read it — the
-  // double-submit guarantee is preserved.
-  const csrfToken = getCookie('csrfToken');
-  const url = csrfToken
-    ? `/api/video/stop?_csrf=${encodeURIComponent(csrfToken)}`
-    : '/api/video/stop';
-
-  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-    navigator.sendBeacon(url);
-  } else {
-    // Non-blocking fallback (SSR / environments without sendBeacon)
-    fetch(url, { method: 'POST', keepalive: true }).catch(() => undefined);
-  }
-}
+// Metadata retrieval for movies and series... (keeping getSeriesEpisodes)

@@ -2,8 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { playVideo, stopVideo } from '@/features/search/api';
-import type { PlayResponse } from '@/features/search/types';
+import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import { useS1StreamUrls } from '@/features/watch/player/hooks/s1/useS1StreamUrls';
 import {
@@ -13,11 +12,13 @@ import {
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
+import type { PlayResponse } from '@/types/content';
 
+/**
+ * Core hook for VOD playback page logic.
+ * Handles metadata derivation, stream fetching, and session revoked events.
+ */
 const MAX_STREAM_RETRIES = 2;
-// S2 streams require a browser-service session. On cold starts the first
-// request may fail with 500/503 while the session is being initialised.
-// Silently retry once after a short pause before surfacing an error.
 const S2_COLD_START_RETRY_DELAY_MS = 3000;
 
 export function useWatchContent() {
@@ -26,9 +27,6 @@ export function useWatchContent() {
   const router = useRouter();
   const { socket } = useSocket();
 
-  // Decode the ID — Next.js may leave %3A-encoded colons in dynamic segments
-  // (e.g. 's2%3Aslug::id' instead of 's2:slug::id'). Normalise here so that
-  // all downstream code and the DB always receive the plain decoded form.
   const movieId = decodeURIComponent(params.id as string);
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
@@ -53,7 +51,6 @@ export function useWatchContent() {
   const initialStreamUrlRaw = streamParam
     ? decodeURIComponent(streamParam)
     : null;
-
   const captionParam = searchParams.get('caption');
   const spriteParam = searchParams.get('sprite');
 
@@ -91,29 +88,17 @@ export function useWatchContent() {
     initialQualitiesRaw,
   });
 
-  // Start in loading state when there's no stream param — we'll immediately
-  // call refetchStream() from the mount effect, so skip the error-UI flash
-  // that would otherwise appear on the first render before the effect fires.
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
-  // Tracks whether we've already done one silent cold-start retry for S2.
   const s2ColdStartRetried = useRef(false);
-  // Set to true for the duration of an active playVideo() call plus a short
-  // grace window afterwards.  Any stream:revoked event arriving while this is
-  // true was caused by OUR OWN new session displacing the old one in Redis —
-  // it is NOT another tab stealing the stream and must be silently ignored.
   const replacingSessionRef = useRef(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  // Audio tracks extracted from the initial S2 refetchStream response.
-  // Passed to useS2AudioTracks so it can skip its own playVideo() call,
-  // which would otherwise create a second session and revoke the first.
+
   const [s2InitialAudioTracks, setS2InitialAudioTracks] = useState<
     S2AudioTrack[]
   >([]);
-  // The currently-active S2 dub ID — used to pre-highlight the matching entry
-  // in the AudioSelector on initial load (before the user has picked anything).
   const [s2ActiveTrackId, setS2ActiveTrackId] = useState<string | null>(() =>
     server === 's2' ? movieId : null,
   );
@@ -123,9 +108,6 @@ export function useWatchContent() {
       setIsRefetching(true);
       setRefetchError(null);
 
-      // Any stream:revoked that arrives while we are calling playVideo() is
-      // our OLD session being evicted by the new one on the SAME device.
-      // Mark the suppression window before the request goes out.
       if (replacingSessionTimerRef.current) {
         clearTimeout(replacingSessionTimerRef.current);
       }
@@ -157,11 +139,7 @@ export function useWatchContent() {
           if (server === 's1') {
             applyS1Response(response);
           } else {
-            // Both S2 and S3 use absolute URLs directly without S1's local CDN token injection.
             applyS2Response(response);
-
-            // S2 Audio tracks handling
-            // Propagate audio tracks so useS2AudioTracks skips its own playVideo() call.
             if (response.audioTracks && response.audioTracks.length > 0) {
               setS2InitialAudioTracks(
                 response.audioTracks.map((t) => ({
@@ -172,7 +150,6 @@ export function useWatchContent() {
                 })),
               );
             }
-            // Track the currently-playing dub so AudioSelector can highlight it.
             setS2ActiveTrackId(overrideMovieId || movieId || null);
           }
         } else {
@@ -180,17 +157,12 @@ export function useWatchContent() {
         }
       } catch (err) {
         const httpStatus = (err as { status?: number })?.status;
-        // S2 cold-start: browser service session may not be ready on the first
-        // play call. Retry silently once after a short delay instead of
-        // immediately surfacing an error to the user.
         if (
           server === 's2' &&
           (httpStatus === 500 || httpStatus === 503) &&
           !s2ColdStartRetried.current
         ) {
           s2ColdStartRetried.current = true;
-          // Schedule the retry — finally will briefly clear isRefetching, then
-          // refetchStream() will set it true again.
           setTimeout(
             () => refetchStream(overrideMovieId),
             S2_COLD_START_RETRY_DELAY_MS,
@@ -202,9 +174,6 @@ export function useWatchContent() {
         }
       } finally {
         setIsRefetching(false);
-        // Keep the suppression window open for a short grace period so that
-        // a stream:revoked event that arrives slightly after the API response
-        // (network reorder) is still swallowed correctly.
         replacingSessionTimerRef.current = setTimeout(() => {
           replacingSessionRef.current = false;
           replacingSessionTimerRef.current = null;
@@ -224,22 +193,16 @@ export function useWatchContent() {
     ],
   );
 
-  // Called by useS2AudioTracks just before it sends the discovery playVideo().
-  // Sets the same suppression flag as refetchStream() so the inevitable
-  // stream:revoked — caused by our own session swap — is silently ignored.
   const handleBeforeS2Discovery = useCallback(() => {
     if (replacingSessionTimerRef.current)
       clearTimeout(replacingSessionTimerRef.current);
     replacingSessionRef.current = true;
-    // Fallback: auto-reset if the discovery call fails and onDiscovered never fires.
     replacingSessionTimerRef.current = setTimeout(() => {
       replacingSessionRef.current = false;
       replacingSessionTimerRef.current = null;
     }, 90_000);
   }, []);
 
-  // Wraps applyS2Subtitles and also resets the suppression window to the
-  // standard 2 s grace period once discovery has successfully completed.
   const handleS2Discovered = useCallback(
     (response: PlayResponse) => {
       applyS2Subtitles(response);
@@ -269,9 +232,6 @@ export function useWatchContent() {
     onDiscovered: handleS2Discovered,
     onBeforeDiscovery: handleBeforeS2Discovery,
     initialTracks: s2InitialAudioTracks,
-    // Skip the discovery playVideo() call when refetchStream() is already being
-    // called on mount (no stream param). Both would create sessions; the second
-    // would revoke the first via stream:revoked. Tracks come back via initialTracks.
     skipDiscovery: !streamParam,
   });
 
@@ -288,8 +248,6 @@ export function useWatchContent() {
       year: year ? decodeURIComponent(year) : undefined,
       posterUrl,
       providerId: server,
-      // Provider-sourced duration for S2 MP4 streams (video.duration reports Infinity
-      // because the CDN omits Content-Length). useWatchProgress uses this as fallback.
       apiDurationSeconds: apiDurationSeconds ?? undefined,
     }),
     [
@@ -331,9 +289,6 @@ export function useWatchContent() {
     if (!socket) return;
 
     const handleStreamRevoked = () => {
-      // Swallow revocations that were triggered by our own playVideo() call
-      // replacing the previous Redis session.  These are NOT another device
-      // stealing the stream — showing the error would be a false positive.
       if (replacingSessionRef.current) return;
 
       setStreamUrl(null);
@@ -348,33 +303,22 @@ export function useWatchContent() {
     };
   }, [socket, setStreamUrl]);
 
-  // Tell the backend to clear the Redis stream session when the user leaves
-  // the watch page.  This prevents stale sessions that would later cause
-  // the false "playing in another tab" revocation on reconnect.
   useEffect(() => {
     const handleUnload = () => stopVideo();
     window.addEventListener('pagehide', handleUnload);
 
     return () => {
       window.removeEventListener('pagehide', handleUnload);
-      // Clear any pending suppression timer to avoid memory leaks.
       if (replacingSessionTimerRef.current) {
         clearTimeout(replacingSessionTimerRef.current);
       }
-      // Emit a clean stop over the socket so the backend clears Redis
-      // immediately (covers SPA navigation where pagehide doesn't fire).
       if (socket?.connected) {
         socket.emit(WS_EVENTS.STREAM_STOP);
       }
-      // Best-effort HTTP beacon as a fallback for tab close.
       stopVideo();
     };
   }, [socket]);
 
-  // Guard against React 18 Strict Mode double-invocation of the mount effect.
-  // Without this, two concurrent playVideo() calls are made: the second one
-  // calls invalidateUserStream() which revokes the first session, causing the
-  // video element to get a 502 from the worker (session not found in Redis).
   const mountFetchedRef = useRef(false);
 
   useEffect(() => {

@@ -46,9 +46,13 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 ) {
   const router = useRouter();
 
-  // Handle going back - always go to home (not browser history)
+  // Handle going back
   const handleBack = () => {
-    router.push('/home');
+    if (typeof window !== 'undefined' && window.history.length > 2) {
+      router.back();
+    } else {
+      router.push('/home');
+    }
   };
 
   return (
