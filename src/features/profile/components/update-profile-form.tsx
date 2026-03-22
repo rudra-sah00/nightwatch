@@ -2,7 +2,6 @@
 
 import { Camera, Loader2, LogOut } from 'lucide-react';
 import { useRef } from 'react';
-import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
@@ -34,7 +33,7 @@ export function UpdateProfileForm() {
       <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow relative flex flex-col items-center md:items-start md:flex-row gap-8 min-h-[320px]">
         {/* Avatar Section */}
         <div className="relative group shrink-0">
-          <Avatar className="w-48 h-48 md:w-56 md:h-56 border-4 border-[#1a1a1a] rounded-none neo-shadow-sm transition-transform group-hover:-translate-y-1">
+          <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border-4 border-[#1a1a1a] rounded-none neo-shadow-sm transition-transform group-hover:-translate-y-1">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -43,12 +42,12 @@ export function UpdateProfileForm() {
               />
             ) : (
               <div className="w-full h-full bg-[#f1ece4] flex items-center justify-center">
-                <span className="text-4xl md:text-5xl font-black font-headline uppercase text-[#1a1a1a]/20">
+                <span className="text-4xl md:text-5xl font-black font-headline uppercase text-[#1a1a1a]">
                   {user.name.charAt(0)}
                 </span>
               </div>
             )}
-          </Avatar>
+          </div>
 
           <button
             type="button"
