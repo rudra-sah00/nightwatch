@@ -1,11 +1,7 @@
 import type Konva from 'konva';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
-  emitSketchClear,
-  emitSketchDraw,
-  emitSketchRequestSync,
-  emitSketchSyncState,
-  emitSketchUndo,
   onSketchClear,
   onSketchDraw,
   onSketchProvideSync,
@@ -23,7 +19,17 @@ interface PendingTextInput {
   videoTimestamp: number;
 }
 
-export function useSketchOverlay() {
+interface UseSketchOverlayOptions {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  userId?: string;
+}
+
+export function useSketchOverlay({
+  rtmSendMessage,
+  rtmSendMessageToPeer,
+  userId,
+}: UseSketchOverlayOptions = {}) {
   const {
     currentTool,
     color,
@@ -62,54 +68,45 @@ export function useSketchOverlay() {
 
   // Sync with host on mount
   useEffect(() => {
-    if (!isHost) {
-      emitSketchRequestSync();
+    if (!isHost && userId) {
+      rtmSendMessage?.({
+        type: 'SKETCH_REQUEST_SYNC',
+        requesterId: userId,
+      });
     }
-  }, [isHost]);
+  }, [isHost, userId, rtmSendMessage]);
 
-  // Handle Socket Events
+  // Listen for RTM events via the bridged on* API
   useEffect(() => {
     const cleanupDraw = onSketchDraw((action: SketchAction) => {
       setActions((prev) => [...prev.filter((a) => a.id !== action.id), action]);
     });
 
-    const cleanupClear = onSketchClear(
-      ({ userId, type }: { userId: string; type: 'all' | 'self' }) => {
-        if (type === 'all') {
-          setActions([]);
-        } else if (type === 'self' && userId) {
-          setActions((prev) => prev.filter((a) => a.userId !== userId));
-        }
-      },
-    );
+    const cleanupClear = onSketchClear(({ userId: clearUserId, type }) => {
+      if (type === 'all') {
+        setActions([]);
+      } else if (type === 'self' && clearUserId) {
+        setActions((prev) => prev.filter((a) => a.userId !== clearUserId));
+      }
+    });
 
-    const cleanupUndo = onSketchUndo(
-      ({ userId, actionId }: { userId: string; actionId: string }) => {
-        if (actionId) {
-          // Remove specific action by ID
-          setActions((prev) => prev.filter((a) => a.id !== actionId));
-        } else if (userId) {
-          // Fallback: remove last action from that user
-          setActions((prev) => {
-            const idx = prev.findLastIndex((a) => a.userId === userId);
-            if (idx === -1) return prev;
-            return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-          });
-        }
-      },
-    );
+    const cleanupUndo = onSketchUndo(({ actionId }) => {
+      setActions((prev) => prev.filter((a) => a.id !== actionId));
+    });
 
-    const cleanupProvideSync = onSketchProvideSync(
-      (data: { requesterId: string }) => {
-        if (isHost) {
-          emitSketchSyncState(data.requesterId, actions);
-        }
-      },
-    );
+    const cleanupProvideSync = onSketchProvideSync(({ requesterId }) => {
+      if (isHost && requesterId) {
+        rtmSendMessageToPeer?.(requesterId, {
+          type: 'SKETCH_SYNC_STATE',
+          elements: actions,
+          targetId: requesterId,
+        });
+      }
+    });
 
-    const cleanupSyncState = onSketchSyncState(
-      (data: { elements: SketchAction[] }) => {
-        setActions(data.elements);
+    const cleanupSyncState = onSketchSyncState<SketchAction[]>(
+      ({ elements }) => {
+        setActions(elements);
       },
     );
 
@@ -120,40 +117,49 @@ export function useSketchOverlay() {
       cleanupProvideSync();
       cleanupSyncState();
     };
-  }, [isHost, actions]);
+  }, [isHost, actions, rtmSendMessageToPeer]);
 
   // Handle local clear triggers
   useEffect(() => {
-    if (clearTrigger > 0 && canDraw) {
+    if (clearTrigger > 0 && canDraw && userId) {
       setActions([]);
-      emitSketchClear({ type: 'all' });
+      rtmSendMessage?.({
+        type: 'SKETCH_CLEAR',
+        mode: 'all',
+        userId: userId,
+      });
     }
-  }, [clearTrigger, canDraw]);
+  }, [clearTrigger, canDraw, userId, rtmSendMessage]);
 
   useEffect(() => {
-    if (clearSelfTrigger > 0 && canDraw) {
+    if (clearSelfTrigger > 0 && canDraw && userId) {
       setActions((prev) => prev.filter((a) => !!a.userId));
-      emitSketchClear({ type: 'self' });
+      rtmSendMessage?.({
+        type: 'SKETCH_CLEAR',
+        mode: 'self',
+        userId: userId,
+      });
     }
-  }, [clearSelfTrigger, canDraw]);
+  }, [clearSelfTrigger, canDraw, userId, rtmSendMessage]);
 
-  // Handle local undo trigger — only undo the current user's last action.
-  // Local actions have no userId (server injects userId on broadcast to others).
+  // Handle local undo trigger
   useEffect(() => {
-    if (undoTrigger > 0 && canDraw) {
+    if (undoTrigger > 0 && canDraw && userId) {
       setActions((prev) => {
-        // Find the last action drawn locally (no userId = own action)
-        const idx = prev.findLastIndex((a) => !a.userId);
+        const idx = prev.findLastIndex((a) => !a.userId || a.userId === userId);
         if (idx === -1) return prev;
 
         const undoneAction = prev[idx];
-        // Broadcast the undo so other users remove this action too
-        emitSketchUndo({ actionId: undoneAction.id });
+        rtmSendMessage?.({
+          type: 'SKETCH_UNDO',
+          actionId: undoneAction.id,
+          userId: userId,
+        });
 
         return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
       });
     }
-  }, [undoTrigger, canDraw]);
+  }, [undoTrigger, canDraw, userId, rtmSendMessage]);
 
   // Automatically clear laser pointer actions after 2 seconds
   useEffect(() => {
@@ -255,16 +261,19 @@ export function useSketchOverlay() {
     isDrawing.current = false;
 
     const action = currentActionRef.current;
-    if (action) {
-      emitSketchDraw(action);
+    if (action && userId) {
+      rtmSendMessage?.({
+        type: 'SKETCH_DRAW',
+        action: { ...action, userId },
+      });
     }
 
     currentActionRef.current = null;
-  }, [canDraw, isSketchMode]);
+  }, [canDraw, isSketchMode, userId, rtmSendMessage]);
 
   const confirmText = useCallback(
     (text: string) => {
-      if (!pendingText) return;
+      if (!pendingText || !userId) return;
       const action: SketchAction = {
         id: pendingText.id,
         type: 'text',
@@ -273,12 +282,16 @@ export function useSketchOverlay() {
         videoTimestamp: pendingText.videoTimestamp,
         data: pendingText.data,
         text: text.trim(),
+        userId,
       };
-      emitSketchDraw(action);
+      rtmSendMessage?.({
+        type: 'SKETCH_DRAW',
+        action,
+      });
       setActions((prev) => [...prev, action]);
       setPendingText(null);
     },
-    [pendingText, color, strokeWidth],
+    [pendingText, color, strokeWidth, userId, rtmSendMessage],
   );
 
   const cancelText = useCallback(() => setPendingText(null), []);

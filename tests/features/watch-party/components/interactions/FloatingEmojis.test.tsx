@@ -37,12 +37,13 @@ describe('FloatingEmojis', () => {
     // Trigger the interaction callback
     await act(async () => {
       interactionCallback({
-        type: 'emoji',
-        value: '🔥',
+        type: 'INTERACTION',
+        kind: 'emoji',
+        emoji: '🔥',
         userId: 'u1',
         userName: 'TestUser',
         timestamp: Date.now(),
-      });
+      } as unknown as Parameters<typeof interactionCallback>[0]);
     });
 
     // We use a small delay in FloatingEmojis (Math.random() based)
@@ -62,12 +63,13 @@ describe('FloatingEmojis', () => {
 
     await act(async () => {
       interactionCallback({
-        type: 'emoji',
-        value: '😂',
+        type: 'INTERACTION',
+        kind: 'emoji',
+        emoji: '😂',
         userId: 'u1',
         userName: 'TestUser',
         timestamp: Date.now(),
-      });
+      } as unknown as Parameters<typeof interactionCallback>[0]);
     });
 
     await act(async () => {
@@ -76,9 +78,9 @@ describe('FloatingEmojis', () => {
 
     expect(screen.getAllByText('😂').length).toBeGreaterThan(0);
 
-    // After ~3 seconds (max duration is 2s + 100ms + spawn delays)
+    // After 4.5 seconds (max duration is 4.5s)
     await act(async () => {
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(screen.queryByText('😂')).not.toBeInTheDocument();

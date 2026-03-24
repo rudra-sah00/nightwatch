@@ -8,6 +8,7 @@ import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpis
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
 
 const FloatingEmojis = dynamic(
@@ -108,6 +109,9 @@ interface WatchPartyVideoAreaProps {
   toggleFullscreen: () => Promise<void>;
   /** Host-only: called when next episode should start for the whole party */
   onNextEpisode?: (season: number, episode: number) => void;
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  userId?: string;
 }
 
 /**
@@ -125,6 +129,9 @@ export function WatchPartyVideoArea({
   onSidebarToggle,
   toggleFullscreen,
   onNextEpisode,
+  rtmSendMessage,
+  rtmSendMessageToPeer,
+  userId,
 }: WatchPartyVideoAreaProps) {
   const {
     metadata,
@@ -176,7 +183,11 @@ export function WatchPartyVideoArea({
 
       {/* Watch party overlays */}
       <FloatingEmojis />
-      <SketchOverlay />
+      <SketchOverlay
+        rtmSendMessage={rtmSendMessage}
+        rtmSendMessageToPeer={rtmSendMessageToPeer}
+        userId={userId}
+      />
 
       {/* Episode panel provider wraps controls for shared context */}
       {!isSketchMode && (
@@ -189,7 +200,11 @@ export function WatchPartyVideoArea({
               <Player.Volume />
               <Player.TimeDisplay />
               <Player.Spacer />
-              <EmojiReactions />
+              <EmojiReactions
+                rtmSendMessage={rtmSendMessage}
+                userId={userId}
+                userName={user?.name || 'User'}
+              />
               <Player.Spacer />
               <Player.EpisodePanelTrigger />
               <Player.AudioSubtitleSelectors />

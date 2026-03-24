@@ -1,6 +1,6 @@
 'use client';
 
-import { Users } from 'lucide-react';
+import { Users } from 'lucide-react'; // Re-adding this import as it's used in the component
 import dynamic from 'next/dynamic';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
@@ -69,6 +69,8 @@ export function WatchPartyClient({
     approveMember,
     rejectMember,
     kickUser,
+    rtmSendMessage,
+    rtmSendMessageToPeer,
     handleJoin,
     handleCancelRequest,
     handleLeave,
@@ -162,6 +164,8 @@ export function WatchPartyClient({
           typingUsers={typingUsers}
           onTypingStart={handleTypingStart}
           onTypingStop={handleTypingStop}
+          rtmSendMessage={rtmSendMessage}
+          rtmSendMessageToPeer={rtmSendMessageToPeer}
         />
       </SketchProvider>
     );

@@ -31,6 +31,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@types/video.js": "^7.3.58",
     "agora-rtc-sdk-ng": "^4.24.2",
+    "agora-rtm-sdk": "2.2.3-1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.17.1",

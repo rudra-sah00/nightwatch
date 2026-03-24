@@ -7,7 +7,7 @@ import {
 } from '@mediapipe/tasks-vision';
 import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef } from 'react';
-import { emitPartyInteraction } from '../../room/services/watch-party.api';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
 // Singleton resolver promise to prevent redundant worker creation
 let visionResolver: ReturnType<typeof FilesetResolver.forVisionTasks> | null =
@@ -82,7 +82,17 @@ function getVisionResolver() {
   return visionResolver;
 }
 
-export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
+interface UseGestureDetectionOptions {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+  userName?: string;
+}
+
+export function useGestureDetection(
+  videoTrack: ICameraVideoTrack | null,
+  options: UseGestureDetectionOptions = {},
+) {
+  const { rtmSendMessage, userId, userName } = options;
   const gestureRecognizerRef = useRef<GestureRecognizer | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const requestRef = useRef<number>(0);
@@ -152,10 +162,16 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
 
       if (emoji) {
         lastTriggerRef.current = now;
-        emitPartyInteraction({ type: 'emoji', value: emoji });
+        rtmSendMessage?.({
+          type: 'INTERACTION',
+          kind: 'emoji',
+          emoji,
+          userId: userId || 'unknown',
+          userName: userName || 'User',
+        });
       }
     },
-    [],
+    [rtmSendMessage, userId, userName],
   );
 
   const GESTURE_SCORE_THRESHOLD = 0.8;
@@ -194,7 +210,7 @@ export function useGestureDetection(videoTrack: ICameraVideoTrack | null) {
         video.srcObject = new MediaStream([mediaStreamTrack]);
         video.muted = true;
         video.playsInline = true;
-        await video.play();
+        await video.play().catch(() => {});
         videoElementRef.current = video;
       }
 

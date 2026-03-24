@@ -1,28 +1,15 @@
-import { act, renderHook } from '@testing-library/react';
-import { type Dispatch, type SetStateAction, useState } from 'react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWatchPartyMembers } from '@/features/watch-party/room/hooks/useWatchPartyMembers';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
-import type {
-  MemberPermissionsUpdate,
-  PartyMemberJoined,
-  PartyMemberLeft,
-  RoomMember,
-  WatchPartyRoom,
-} from '@/features/watch-party/room/types';
+import type { RoomMember } from '@/features/watch-party/room/types';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   approveJoinRequest: vi.fn(),
-  fetchPendingRequests: vi.fn(),
-  kickMember: vi.fn(),
-  onPartyAdminRequest: vi.fn(() => vi.fn()),
-  onPartyMemberJoined: vi.fn(() => vi.fn()),
-  onPartyMemberLeft: vi.fn(() => vi.fn()),
-  onPartyMemberPermissionsUpdated: vi.fn(() => vi.fn()),
-  onPartyMemberRejected: vi.fn(() => vi.fn()),
-  onPartyPermissionsUpdated: vi.fn(() => vi.fn()),
   rejectJoinRequest: vi.fn(),
+  kickMember: vi.fn(),
+  fetchPendingRequests: vi.fn().mockResolvedValue({ pendingMembers: [] }),
 }));
 
 vi.mock('sonner', () => ({
@@ -36,142 +23,150 @@ vi.mock('sonner', () => ({
 // Mock Audio
 global.Audio = class {
   play = vi.fn().mockResolvedValue(undefined);
-  catch = vi.fn();
-} as unknown as typeof Audio;
+} as unknown as new (
+  src?: string,
+) => HTMLAudioElement;
 
 describe('useWatchPartyMembers', () => {
-  let memberJoinedHandler: (data: PartyMemberJoined) => void;
-  let memberLeftHandler: (data: PartyMemberLeft) => void;
-  let permHandler: (data: MemberPermissionsUpdate) => void;
+  const mockSetRoom = vi.fn((updater) => {
+    if (typeof updater === 'function') {
+      const roomWithPending = {
+        ...mockRoom,
+        pendingMembers: [
+          {
+            id: 'user-2',
+            name: 'Guest',
+          } as unknown as import('@/features/watch-party/room/types').RoomMember,
+        ],
+      };
+      updater(roomWithPending as unknown);
+    }
+  });
+  const mockRtmSendMessage = vi.fn();
+  const mockRtmSendMessageToPeer = vi.fn();
 
-  const createMockRoom = (overrides = {}): WatchPartyRoom =>
-    ({
-      id: 'room-1',
-      hostId: 'host-1',
-      contentId: 'content-1',
-      title: 'Test',
-      type: 'movie',
-      streamUrl: 'http://example.com',
-      members: [],
-      pendingMembers: [],
-      state: {
-        lastUpdated: Date.now(),
-        currentTime: 0,
-        isPlaying: false,
-        playbackRate: 1,
-      },
-      permissions: {
-        canGuestsDraw: true,
-        canGuestsPlaySounds: true,
-        canGuestsChat: true,
-      },
-      createdAt: Date.now(),
-      ...overrides,
-    }) as unknown as WatchPartyRoom;
+  const mockRoom = {
+    id: 'room-1',
+    hostId: 'host-1',
+    members: [],
+    pendingMembers: [],
+    state: {
+      currentTime: 0,
+      isPlaying: false,
+      lastUpdated: Date.now(),
+      playbackRate: 1,
+    },
+  } as unknown as import('@/features/watch-party/room/types').WatchPartyRoom;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.onPartyMemberJoined).mockImplementation((cb) => {
-      memberJoinedHandler = cb;
-      return vi.fn();
+  });
+
+  const defaultProps = {
+    room: mockRoom,
+    setRoom: mockSetRoom,
+    userId: 'host-1',
+    rtmSendMessage: mockRtmSendMessage,
+    rtmSendMessageToPeer: mockRtmSendMessageToPeer,
+  };
+
+  it('should fetch pending requests on mount for host', async () => {
+    vi.mocked(api.fetchPendingRequests).mockResolvedValue({
+      pendingMembers: [
+        { id: 'user-2', name: 'Guest', isHost: false, joinedAt: Date.now() },
+      ],
     });
-    vi.mocked(api.onPartyMemberLeft).mockImplementation((cb) => {
-      memberLeftHandler = cb;
-      return vi.fn();
-    });
-    vi.mocked(api.onPartyMemberPermissionsUpdated).mockImplementation((cb) => {
-      permHandler = cb;
-      return vi.fn();
+
+    renderHook(() => useWatchPartyMembers(defaultProps));
+
+    await waitFor(() => {
+      expect(api.fetchPendingRequests).toHaveBeenCalledWith('room-1');
+      expect(mockSetRoom).toHaveBeenCalled();
     });
   });
 
-  it('should correctly handle member join', () => {
-    const initialRoom = createMockRoom();
+  it('approveMember should call REST and notify via RTM', async () => {
+    vi.mocked(api.approveJoinRequest).mockResolvedValue({ success: true });
+    // Mock room with a pending member for the setRoom updater
+    const roomWithPending = {
+      ...mockRoom,
+      pendingMembers: [{ id: 'user-2', name: 'Guest' }],
+    };
 
-    const { result } = renderHook(() => {
-      const [room, setRoom] = useState<WatchPartyRoom | null>(initialRoom);
-      return {
-        hook: useWatchPartyMembers({ room, setRoom, userId: 'host-1' }),
-        room,
-      };
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithPending as unknown as import('@/features/watch-party/room/types').WatchPartyRoom,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.approveMember('user-2');
     });
 
+    expect(api.approveJoinRequest).toHaveBeenCalledWith('room-1', 'user-2');
+    expect(mockRtmSendMessageToPeer).toHaveBeenCalledWith(
+      'user-2',
+      expect.objectContaining({ type: 'JOIN_APPROVED' }),
+    );
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'MEMBER_JOINED' }),
+    );
+  });
+
+  it('handleIncomingRtmMessage should update room state for MEMBER_JOINED', () => {
+    const { result } = renderHook(() => useWatchPartyMembers(defaultProps));
     const newMember: RoomMember = {
-      id: 'user-3',
-      name: 'User 3',
+      id: 'user-2',
+      name: 'Alice',
       isHost: false,
       joinedAt: Date.now(),
-      permissions: {},
     };
+
     act(() => {
-      memberJoinedHandler({ member: newMember });
+      result.current.handleIncomingRtmMessage({
+        type: 'MEMBER_JOINED',
+        member: newMember,
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
 
-    expect(result.current.room?.members).toBeDefined();
+    expect(mockSetRoom).toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith(
+      'Alice joined!',
+      expect.any(Object),
+    );
   });
 
-  it('should handle member left safely', () => {
-    const initialRoom = createMockRoom({
-      members: [
-        {
-          id: 'user-2',
-          name: 'Guest',
-          isHost: false,
-          joinedAt: Date.now(),
-          permissions: {},
-        },
-      ],
-    });
-    const setRoom = vi.fn().mockImplementation((updater) => {
-      if (typeof updater === 'function') updater(initialRoom);
-    });
-
-    renderHook(() =>
-      useWatchPartyMembers({
-        room: initialRoom,
-        setRoom: setRoom as unknown as Dispatch<
-          SetStateAction<WatchPartyRoom | null>
-        >,
-      }),
+  it('handleIncomingRtmMessage should handle MEMBER_LEFT', () => {
+    const localMockSetRoom = vi.fn();
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({ ...defaultProps, setRoom: localMockSetRoom }),
     );
 
     act(() => {
-      memberLeftHandler({ userId: 'user-2' });
+      result.current.handleIncomingRtmMessage({
+        type: 'MEMBER_LEFT',
+        userId: 'user-2',
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
 
-    expect(toast.info).toHaveBeenCalledWith('Guest left', expect.any(Object));
-    expect(setRoom).toHaveBeenCalled();
+    expect(localMockSetRoom).toHaveBeenCalled();
   });
 
-  it('should handle permissions update faithfully', () => {
-    const initialRoom = createMockRoom({
-      members: [
-        {
-          id: 'user-2',
-          name: 'Guest',
-          isHost: false,
-          joinedAt: Date.now(),
-          permissions: {},
-        },
-      ],
-    });
-    const setRoom = vi.fn().mockImplementation((updater) => {
-      if (typeof updater === 'function') updater(initialRoom);
+  it('kickUser should call REST and notify via RTM', async () => {
+    vi.mocked(api.kickMember).mockResolvedValue({ success: true });
+    const { result } = renderHook(() => useWatchPartyMembers(defaultProps));
+
+    await act(async () => {
+      await result.current.kickUser('user-2');
     });
 
-    renderHook(() =>
-      useWatchPartyMembers({
-        room: initialRoom,
-        setRoom: setRoom as unknown as Dispatch<
-          SetStateAction<WatchPartyRoom | null>
-        >,
+    expect(api.kickMember).toHaveBeenCalledWith('room-1', 'user-2');
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'KICK',
+        targetUserId: 'user-2',
       }),
     );
-
-    act(() => {
-      permHandler({ memberId: 'user-2', permissions: { canDraw: true } });
-    });
-
-    expect(setRoom).toHaveBeenCalled();
   });
 });

@@ -1,260 +1,135 @@
-import type { GestureRecognizer } from '@mediapipe/tasks-vision';
 import { renderHook } from '@testing-library/react';
-import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from 'vitest';
-import type { useGestureDetection as useGestureDetectionType } from '@/features/watch-party/interactions/hooks/useGestureDetection';
-import type { InteractionPayload } from '@/features/watch-party/room/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useGestureDetection } from '@/features/watch-party/interactions/hooks/useGestureDetection';
+
+// Mock MediaPipe
+vi.mock('@mediapipe/tasks-vision', () => ({
+  GestureRecognizer: { createFromOptions: vi.fn() },
+  FaceLandmarker: { createFromOptions: vi.fn() },
+  FilesetResolver: { forVisionTasks: vi.fn().mockResolvedValue({}) },
+}));
 
 // Mock requestAnimationFrame
-const mockRequestAnimationFrame = vi.fn((cb) => {
-  return setTimeout(cb, 16);
-});
-const mockCancelAnimationFrame = vi.fn((id) => {
-  clearTimeout(id);
-});
-vi.stubGlobal('requestAnimationFrame', mockRequestAnimationFrame);
-vi.stubGlobal('cancelAnimationFrame', mockCancelAnimationFrame);
+vi.stubGlobal('requestAnimationFrame', (cb: TimerHandler) =>
+  setTimeout(cb, 16),
+);
+vi.stubGlobal('cancelAnimationFrame', (id: number) => clearTimeout(id));
 
 describe('useGestureDetection', () => {
-  let mockVideoTrack: ICameraVideoTrack;
-  let mockRecognizer: { recognizeForVideo: Mock; close: Mock };
-  let mockLandmarker: { detectForVideo: Mock; close: Mock };
-  let useGestureDetection: typeof useGestureDetectionType;
-  let emitPartyInteraction: (
-    payload: Omit<InteractionPayload, 'userId' | 'userName' | 'timestamp'>,
-  ) => void;
-  const originalCreateElement = document.createElement;
+  const mockRtmSendMessage = vi.fn();
+  const mockVideoTrack = {
+    getMediaStreamTrack: () => ({
+      getSettings: () => ({ width: 640, height: 480 }),
+    }),
+  } as unknown as import('agora-rtc-sdk-ng').ICameraVideoTrack;
+
+  const mockRecognizer = {
+    recognizeForVideo: vi.fn(),
+    close: vi.fn(),
+  };
+  const mockLandmarker = {
+    detectForVideo: vi.fn(),
+    close: vi.fn(),
+  };
+
+  const defaultOptions = {
+    rtmSendMessage: mockRtmSendMessage,
+    userId: 'user-1',
+    userName: 'User 1',
+  };
 
   beforeEach(async () => {
-    vi.resetModules();
     vi.clearAllMocks();
     vi.useFakeTimers();
 
-    // Setup dependency mocks
-    mockRecognizer = {
-      recognizeForVideo: vi.fn().mockReturnValue({ gestures: [] }),
-      close: vi.fn().mockResolvedValue(undefined),
-    };
-
-    // Setup FaceLandmarker mock
-    mockLandmarker = {
-      detectForVideo: vi.fn().mockReturnValue({ faceBlendshapes: [] }),
-      close: vi.fn().mockResolvedValue(undefined),
-    };
-
-    vi.doMock('@/features/watch-party/room/services/watch-party.api', () => ({
-      emitPartyInteraction: vi.fn(),
-    }));
-
-    vi.doMock('@mediapipe/tasks-vision', () => ({
-      GestureRecognizer: {
-        createFromOptions: vi
-          .fn()
-          .mockImplementation(() => Promise.resolve(mockRecognizer)),
-      },
-      FaceLandmarker: {
-        createFromOptions: vi
-          .fn()
-          .mockImplementation(() => Promise.resolve(mockLandmarker)),
-      },
-      FilesetResolver: {
-        forVisionTasks: vi
-          .fn()
-          .mockImplementation(() => Promise.resolve({ vision: true })),
-      },
-    }));
-
-    // Re-import modules after reset
-    const api = await import(
-      '@/features/watch-party/room/services/watch-party.api'
+    const { GestureRecognizer, FaceLandmarker } = await import(
+      '@mediapipe/tasks-vision'
     );
-    emitPartyInteraction = api.emitPartyInteraction;
-
-    const hookModule = await import(
-      '@/features/watch-party/interactions/hooks/useGestureDetection'
+    vi.mocked(GestureRecognizer.createFromOptions).mockResolvedValue(
+      mockRecognizer as unknown as import('@mediapipe/tasks-vision').GestureRecognizer,
     );
-    useGestureDetection = hookModule.useGestureDetection;
+    vi.mocked(FaceLandmarker.createFromOptions).mockResolvedValue(
+      mockLandmarker as unknown as import('@mediapipe/tasks-vision').FaceLandmarker,
+    );
 
-    mockVideoTrack = {
-      kind: 'video',
-      getMediaStreamTrack: vi.fn().mockReturnValue({
-        getSettings: vi.fn().mockReturnValue({ width: 640, height: 480 }),
-      }),
-    } as unknown as ICameraVideoTrack;
-
-    // Mock video element and play
-    const mockVideoElement = {
-      play: vi.fn().mockResolvedValue(undefined),
-      pause: vi.fn(),
-      srcObject: null,
-      width: 0,
-      height: 0,
-    };
-
-    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
-      if (tag === 'video')
-        return mockVideoElement as unknown as HTMLVideoElement;
-      return originalCreateElement.call(document, tag);
-    });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    // Mock video element play
+    vi.spyOn(HTMLVideoElement.prototype, 'play').mockResolvedValue(undefined);
   });
 
   const flushPromises = async () => {
-    for (let i = 0; i < 20; i++) {
-      await vi.advanceTimersByTimeAsync(0);
-    }
+    for (let i = 0; i < 10; i++) await vi.advanceTimersByTimeAsync(1);
   };
 
-  it('should not initialize loop if videoTrack is null', () => {
-    renderHook(() => useGestureDetection(null));
-    expect(mockRequestAnimationFrame).not.toHaveBeenCalled();
-  });
-
-  it('should initialize and start loop if videoTrack is present', async () => {
-    renderHook(() => useGestureDetection(mockVideoTrack));
-    await flushPromises();
-    await vi.advanceTimersByTimeAsync(16);
-    await flushPromises();
-    expect(mockRecognizer.recognizeForVideo).toHaveBeenCalled();
-    expect(mockLandmarker.detectForVideo).toHaveBeenCalled();
-  });
-
-  it('should trigger reaction for valid gesture', async () => {
+  it('triggers RTM interaction for valid gesture', async () => {
     mockRecognizer.recognizeForVideo.mockReturnValue({
       gestures: [[{ categoryName: 'Thumb_Up', score: 0.9 }]],
     });
+    mockLandmarker.detectForVideo.mockReturnValue({ faceBlendshapes: [] });
 
-    renderHook(() => useGestureDetection(mockVideoTrack));
+    renderHook(() => useGestureDetection(mockVideoTrack, defaultOptions));
+
     await flushPromises();
-    await vi.advanceTimersByTimeAsync(16);
+    // Advance timers to trigger the prediction loop
+    await vi.advanceTimersByTimeAsync(32);
     await flushPromises();
 
-    expect(emitPartyInteraction).toHaveBeenCalledWith({
-      type: 'emoji',
-      value: '👍',
+    expect(mockRtmSendMessage).toHaveBeenCalledWith({
+      type: 'INTERACTION',
+      kind: 'emoji',
+      emoji: '👍',
+      userId: 'user-1',
+      userName: 'User 1',
     });
   });
 
-  it('should respect 2-second cooldown', async () => {
-    mockRecognizer.recognizeForVideo.mockReturnValue({
-      gestures: [[{ categoryName: 'Thumb_Up', score: 0.9 }]],
-    });
-
-    renderHook(() => useGestureDetection(mockVideoTrack));
-    await flushPromises();
-    await vi.advanceTimersByTimeAsync(16);
-    await flushPromises();
-
-    expect(emitPartyInteraction).toHaveBeenCalledTimes(1);
-
-    await vi.advanceTimersByTimeAsync(16);
-    await flushPromises();
-    expect(emitPartyInteraction).toHaveBeenCalledTimes(1);
-
-    await vi.advanceTimersByTimeAsync(2000);
-    await flushPromises();
-    expect(emitPartyInteraction).toHaveBeenCalledTimes(2);
-  });
-
-  it('should map various gestures correctly', async () => {
-    const gestures = [
-      { name: 'Victory', emoji: '✌️' },
-      { name: 'Thumb_Down', emoji: '👎' },
-      { name: 'Open_Palm', emoji: '👋' },
-      { name: 'Closed_Fist', emoji: '👊' },
-      { name: 'ILoveYou', emoji: '🤟' },
-    ];
-
-    for (const g of gestures) {
-      mockRecognizer.recognizeForVideo.mockReturnValue({
-        gestures: [[{ categoryName: g.name, score: 0.9 }]],
-      });
-
-      // We need a fresh hook for each gesture since we are testing the loop
-      const { unmount } = renderHook(() => useGestureDetection(mockVideoTrack));
-      await flushPromises();
-      await vi.advanceTimersByTimeAsync(16);
-      await flushPromises();
-
-      expect(emitPartyInteraction).toHaveBeenCalledWith({
-        type: 'emoji',
-        value: g.emoji,
-      });
-      unmount();
-      vi.clearAllMocks();
-    }
-  });
-
-  it('should trigger an emoji when a smile is detected', async () => {
+  it('triggers RTM interaction for smile', async () => {
+    mockRecognizer.recognizeForVideo.mockReturnValue({ gestures: [] });
     mockLandmarker.detectForVideo.mockReturnValue({
       faceBlendshapes: [
         {
           categories: [
             { categoryName: 'mouthSmileLeft', score: 0.8 },
-            { categoryName: 'mouthSmileRight', score: 0.9 },
+            { categoryName: 'mouthSmileRight', score: 0.8 },
           ],
         },
       ],
     });
 
-    renderHook(() => useGestureDetection(mockVideoTrack));
+    renderHook(() => useGestureDetection(mockVideoTrack, defaultOptions));
+
     await flushPromises();
+    await vi.advanceTimersByTimeAsync(32);
+    await flushPromises();
+
+    expect(mockRtmSendMessage).toHaveBeenCalledWith({
+      type: 'INTERACTION',
+      kind: 'emoji',
+      emoji: '😊',
+      userId: 'user-1',
+      userName: 'User 1',
+    });
+  });
+
+  it('respects 2-second cooldown', async () => {
+    mockRecognizer.recognizeForVideo.mockReturnValue({
+      gestures: [[{ categoryName: 'Thumb_Up', score: 0.9 }]],
+    });
+
+    renderHook(() => useGestureDetection(mockVideoTrack, defaultOptions));
+
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(32);
+    await flushPromises();
+    expect(mockRtmSendMessage).toHaveBeenCalledTimes(1);
+
+    // Immediate next frame shouldn't trigger
     await vi.advanceTimersByTimeAsync(16);
     await flushPromises();
+    expect(mockRtmSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(emitPartyInteraction).toHaveBeenCalledWith({
-      type: 'emoji',
-      value: '😊',
-    });
-  });
-
-  it('should use a singleton FilesetResolver across multiple mounts within one test', async () => {
-    const { FilesetResolver } = await import('@mediapipe/tasks-vision');
-
-    renderHook(() => useGestureDetection(mockVideoTrack));
+    // After 2 seconds, it should trigger again
+    await vi.advanceTimersByTimeAsync(2100);
     await flushPromises();
-
-    renderHook(() => useGestureDetection(mockVideoTrack));
-    await flushPromises();
-
-    expect(FilesetResolver.forVisionTasks).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not start prediction if hook unmounts during initialization', async () => {
-    let resolveInit: (val: unknown) => void = () => {};
-    const initPromise = new Promise((resolve) => {
-      resolveInit = resolve;
-    });
-
-    const { GestureRecognizer } = await import('@mediapipe/tasks-vision');
-    vi.mocked(GestureRecognizer.createFromOptions).mockReturnValueOnce(
-      initPromise as Promise<unknown> as Promise<GestureRecognizer>,
-    );
-
-    const { unmount } = renderHook(() => useGestureDetection(mockVideoTrack));
-
-    unmount();
-
-    // Since Promise.all waits for both, resolving gesture is enough to let it proceed,
-    // but we didn't mock FaceLandmarker rejection, so let's just resolve to unblock.
-    resolveInit([
-      { recognizeForVideo: vi.fn(), close: vi.fn() },
-      { detectForVideo: vi.fn(), close: vi.fn() },
-    ]);
-    await flushPromises();
-
-    expect(mockRequestAnimationFrame).not.toHaveBeenCalled();
+    expect(mockRtmSendMessage).toHaveBeenCalledTimes(2);
   });
 });

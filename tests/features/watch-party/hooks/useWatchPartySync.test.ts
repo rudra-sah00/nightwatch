@@ -1,21 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
-import type { Dispatch, SetStateAction } from 'react';
+import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWatchPartySync } from '@/features/watch-party/room/hooks/useWatchPartySync';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
-import type {
-  PartyStateUpdate,
-  WatchPartyRoom,
-} from '@/features/watch-party/room/types';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
-  emitPartyEvent: vi.fn(),
-  getPartyStreamToken: vi.fn(),
-  onPartyContentUpdated: vi.fn(() => vi.fn()),
-  onPartyHostDisconnected: vi.fn(() => vi.fn()),
-  onPartyHostReconnected: vi.fn(() => vi.fn()),
-  onPartyStateUpdate: vi.fn(() => vi.fn()),
+  syncPartyState: vi.fn(),
   updatePartyContent: vi.fn(),
+  getPartyStreamToken: vi.fn().mockResolvedValue({ token: 'abc' }),
 }));
 
 vi.mock('sonner', () => ({
@@ -28,75 +20,103 @@ vi.mock('sonner', () => ({
 }));
 
 describe('useWatchPartySync', () => {
-  let stateUpdateHandler: (data: PartyStateUpdate) => void;
-  let room: WatchPartyRoom;
-  let setRoom: Dispatch<SetStateAction<WatchPartyRoom | null>>;
-  const normalizeRoomUrls = vi.fn((r) => r);
+  const mockSetRoom = vi.fn();
+  const mockRtmSendMessage = vi.fn();
+  const mockNormalizeRoomUrls = vi.fn((r) => r);
+
+  const mockRoom = {
+    id: 'room-1',
+    title: 'Movie',
+    state: {
+      currentTime: 0,
+      isPlaying: false,
+      lastUpdated: Date.now(),
+      playbackRate: 1,
+    },
+  } as unknown as import('@/features/watch-party/room/types').WatchPartyRoom;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    room = {
-      id: 'room-1',
-      title: 'Old Title',
-      state: {
-        currentTime: 0,
-        isPlaying: false,
-        lastUpdated: Date.now(),
-        playbackRate: 1,
-      },
-    } as unknown as WatchPartyRoom;
-    setRoom = vi.fn();
-
-    vi.mocked(api.onPartyStateUpdate).mockImplementation((cb) => {
-      stateUpdateHandler = cb;
-      return vi.fn();
-    });
   });
 
-  it('should handle state update event', () => {
-    renderHook(() => useWatchPartySync({ room, setRoom, normalizeRoomUrls }));
+  const defaultProps = {
+    room: mockRoom,
+    setRoom: mockSetRoom,
+    userId: 'user-1',
+    rtmSendMessage: mockRtmSendMessage,
+    normalizeRoomUrls: mockNormalizeRoomUrls,
+  };
 
-    const newState: PartyStateUpdate = {
-      currentTime: 100,
-      isPlaying: true,
-      timestamp: Date.now(),
-    };
+  it('emitEvent should broadcast RTM and sync to REST', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
     act(() => {
-      stateUpdateHandler(newState);
+      result.current.emitEvent({ eventType: 'play', videoTime: 120 });
     });
 
-    expect(setRoom).toHaveBeenCalled();
-  });
-
-  it('should emit party event', () => {
-    const { result } = renderHook(() =>
-      useWatchPartySync({ room, setRoom, normalizeRoomUrls }),
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'PLAY_EVENT',
+        videoTime: 120,
+      }),
     );
-
-    act(() => {
-      result.current.emitEvent({ eventType: 'play', videoTime: 10 });
-    });
-
-    expect(api.emitPartyEvent).toHaveBeenCalledWith({
-      eventType: 'play',
-      videoTime: 10,
-    });
+    expect(api.syncPartyState).toHaveBeenCalledWith(
+      'room-1',
+      expect.objectContaining({
+        currentTime: 120,
+        isPlaying: true,
+      }),
+    );
   });
 
-  it('should handle content update', () => {
-    vi.mocked(api.updatePartyContent).mockImplementation((_payload, cb) => {
-      cb({ success: true, room: { ...room, title: _payload.title } });
+  it('updateContent should call REST and then RTM broadcast', async () => {
+    const updatedRoom = { ...mockRoom, title: 'New Movie' };
+    vi.mocked(api.updatePartyContent).mockResolvedValue({ room: updatedRoom });
+
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    await act(async () => {
+      await result.current.updateContent({ title: 'New Movie', type: 'movie' });
     });
 
-    const { result } = renderHook(() =>
-      useWatchPartySync({ room, setRoom, normalizeRoomUrls }),
+    expect(api.updatePartyContent).toHaveBeenCalledWith(
+      'room-1',
+      expect.any(Object),
     );
+    expect(mockSetRoom).toHaveBeenCalledWith(updatedRoom);
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'CONTENT_UPDATED',
+        room: updatedRoom,
+      }),
+    );
+  });
+
+  it('handleIncomingRtmMessage should update room for PLAY_EVENT', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
 
     act(() => {
-      result.current.updateContent({ title: 'New Title', type: 'movie' });
+      result.current.handleIncomingRtmMessage({
+        type: 'PLAY_EVENT',
+        videoTime: 300,
+        serverTime: Date.now(),
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
 
-    expect(api.updatePartyContent).toHaveBeenCalled();
-    expect(setRoom).toHaveBeenCalled();
+    expect(mockSetRoom).toHaveBeenCalled();
+  });
+
+  it('handleIncomingRtmMessage should handle HOST_DISCONNECTED', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'HOST_DISCONNECTED',
+        graceSeconds: 30,
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
+    });
+
+    expect(result.current.hostDisconnected).toBe(true);
+    expect(toast.warning).toHaveBeenCalled();
   });
 });

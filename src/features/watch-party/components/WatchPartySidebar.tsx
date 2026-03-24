@@ -1,11 +1,9 @@
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   WatchPartyChat,
   WatchPartyChatDisabled,
 } from '../chat/components/WatchPartyChat';
-import type { SidebarTheme } from '../hooks/use-sidebar-theme';
-import { useSidebarTheme } from '../hooks/use-sidebar-theme';
 // Hooks
 import { useWatchPartySidebar } from '../hooks/use-watch-party-sidebar';
 import {
@@ -17,7 +15,7 @@ import {
   WatchPartySketchDisabled,
 } from '../interactions/components/WatchPartySketch';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
-import { onPartyThemeUpdated } from '../room/services/watch-party.api';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../room/types';
 // Components
@@ -61,6 +59,9 @@ interface WatchPartySidebarProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  // Theme sync from RTM
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
 }
 
 /**
@@ -88,6 +89,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   onTabChange,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  rtmSendMessage,
 }: WatchPartySidebarProps) {
   const {
     activeTab,
@@ -108,23 +110,16 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     switchAudioDevice,
     switchVideoDevice,
     isAgoraConnected,
-  } = useWatchPartySidebar({ room, currentUserId, onTabChange, onAgoraReady });
-  const { theme, setTheme, customColor, setCustomColor, customVars } =
-    useSidebarTheme();
-
-  // Sync theme broadcast from host to all members
-  useEffect(() => {
-    const cleanup = onPartyThemeUpdated(({ theme: t, customColor: c }) => {
-      setTheme(t as SidebarTheme);
-      setCustomColor(c);
-    });
-    return cleanup;
-  }, [setTheme, setCustomColor]);
+  } = useWatchPartySidebar({
+    room,
+    currentUserId,
+    onTabChange,
+    onAgoraReady,
+    rtmSendMessage,
+  });
 
   return (
     <div
-      data-wp-theme={theme !== 'custom' ? theme : undefined}
-      style={theme === 'custom' ? customVars : undefined}
       className={cn(
         'w-full bg-[#f5f0e8] overflow-hidden flex flex-col h-full relative border-l-[4px] border-[#1a1a1a] theme-wp-sidebar',
         className,
@@ -198,7 +193,15 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
               : 'opacity-0 scale-[0.98] pointer-events-none z-0',
           )}
         >
-          {isHost || canPlaySound ? <Soundboard /> : <SoundboardDisabled />}
+          {isHost || canPlaySound ? (
+            <Soundboard
+              rtmSendMessage={rtmSendMessage}
+              userId={currentUserId}
+              userName={currentUserName}
+            />
+          ) : (
+            <SoundboardDisabled />
+          )}
         </div>
 
         {/* Sketch Tab */}
@@ -236,10 +239,6 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         linkCopied={linkCopied}
         onCopyLink={onCopyLink}
         onLeave={onLeave}
-        sidebarTheme={theme}
-        onSidebarThemeChange={setTheme}
-        customColor={customColor}
-        onCustomColorChange={setCustomColor}
         floatingChatEnabled={floatingChatEnabled}
         onToggleFloatingChat={onToggleFloatingChat}
         isAgoraConnected={isAgoraConnected}

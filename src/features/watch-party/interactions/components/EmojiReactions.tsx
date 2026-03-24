@@ -4,6 +4,7 @@ import { Theme } from 'emoji-picker-react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useEmojiReactions } from '../hooks/use-emoji-reactions';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
@@ -15,9 +16,19 @@ const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
 
 const QUICK_EMOJIS = ['❤️', '😂', '😠', '🔥', '👏', '😮'];
 
-export function EmojiReactions() {
+interface EmojiReactionsProps {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+  userName?: string;
+}
+
+export function EmojiReactions({
+  rtmSendMessage,
+  userId,
+  userName,
+}: EmojiReactionsProps) {
   const { showPicker, setShowPicker, pickerRef, handleTriggerEmoji } =
-    useEmojiReactions();
+    useEmojiReactions({ rtmSendMessage, userId, userName });
 
   return (
     <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">

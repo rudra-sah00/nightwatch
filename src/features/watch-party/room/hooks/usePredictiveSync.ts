@@ -80,7 +80,7 @@ export function usePredictiveSync(
         if (Math.abs(video.currentTime - targetTime) > 0.5) {
           video.currentTime = targetTime;
         }
-        if (newState.isPlaying && video.paused) video.play();
+        if (newState.isPlaying && video.paused) video.play().catch(() => {});
         if (!newState.isPlaying && !video.paused) video.pause();
         video.playbackRate = newState.playbackRate;
         return;

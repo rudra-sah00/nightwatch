@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGestureDetection } from '../interactions/hooks/useGestureDetection';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { useAgora } from '../media/hooks/useAgora';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { useAgoraToken } from '../media/hooks/useAgoraToken';
 import type { WatchPartyRoom } from '../room/types';
 
@@ -12,6 +13,7 @@ interface UseWatchPartySidebarProps {
   currentUserId?: string;
   onTabChange?: (tab: SidebarTab) => void;
   onAgoraReady?: (data: { participants: AgoraParticipant[] }) => void;
+  rtmSendMessage?: (msg: RTMMessage) => void;
 }
 
 export function useWatchPartySidebar({
@@ -19,6 +21,7 @@ export function useWatchPartySidebar({
   currentUserId,
   onTabChange,
   onAgoraReady,
+  rtmSendMessage,
 }: UseWatchPartySidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('participants');
 
@@ -27,7 +30,8 @@ export function useWatchPartySidebar({
   }, [activeTab, onTabChange]);
 
   const currentMember = room.members.find((m) => m.id === currentUserId);
-  const currentUserName = currentMember?.name || 'You';
+  const currentUserName =
+    currentMember?.name || (room.hostId === currentUserId ? 'Host' : 'You');
 
   const canDraw =
     currentMember?.permissions?.canDraw ??
@@ -83,7 +87,11 @@ export function useWatchPartySidebar({
     userId: currentUserId,
   });
 
-  useGestureDetection(localVideoTrack);
+  useGestureDetection(localVideoTrack, {
+    rtmSendMessage,
+    userId: currentUserId,
+    userName: currentUserName,
+  });
 
   const onAgoraReadyRef = useRef(onAgoraReady);
   onAgoraReadyRef.current = onAgoraReady;

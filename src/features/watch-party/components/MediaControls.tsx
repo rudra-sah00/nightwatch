@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
-import type { SidebarTheme } from '../hooks/use-sidebar-theme';
 import type { MediaDevice } from '../media/hooks/useAgora';
 import type { WatchPartyRoom } from '../room/types';
 import { WatchPartySettings } from './WatchPartySettings';
@@ -40,10 +39,6 @@ interface MediaControlsProps {
   onCopyLink: () => void;
   onLeave: () => void;
   room: WatchPartyRoom;
-  sidebarTheme: SidebarTheme;
-  onSidebarThemeChange: (theme: SidebarTheme) => void;
-  customColor: string;
-  onCustomColorChange: (color: string) => void;
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
@@ -72,10 +67,6 @@ export function MediaControls({
   onCopyLink,
   onLeave,
   room,
-  sidebarTheme,
-  onSidebarThemeChange,
-  customColor,
-  onCustomColorChange,
   floatingChatEnabled = false,
   onToggleFloatingChat,
   isAgoraConnected = false,
@@ -95,10 +86,6 @@ export function MediaControls({
         <WatchPartySettings
           room={room}
           isHost={isHost}
-          sidebarTheme={sidebarTheme}
-          onSidebarThemeChange={onSidebarThemeChange}
-          customColor={customColor}
-          onCustomColorChange={onCustomColorChange}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={onToggleFloatingChat}
         />
@@ -145,7 +132,10 @@ export function MediaControls({
               </span>
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[100px]">
+              <span
+                className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[100px]"
+                title={userName}
+              >
                 {userName}
               </span>
               <span

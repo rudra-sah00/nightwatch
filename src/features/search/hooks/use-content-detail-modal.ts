@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
+import { generateRoomId } from '@/features/watch-party/room/utils';
 import { ContentType, type Episode } from '../types';
 import { useContentDetail } from './use-content-detail';
 
@@ -72,15 +73,12 @@ export function useContentDetailModal({
               );
               if (ep) {
                 await handlePlay(ep);
-                // Navigation will unmount the modal — no explicit onClose() needed
                 return;
               }
             }
             await handleResume();
-            // Navigation will unmount the modal — no explicit onClose() needed
           } else {
             await handlePlay();
-            // Navigation will unmount the modal — no explicit onClose() needed
           }
         };
 
@@ -105,7 +103,6 @@ export function useContentDetailModal({
     let stopped = false;
     const isServer3 = contentId.startsWith('s3:');
 
-    // For Server 3, we show the photo poster instead of playing the video/trailer in the modal background.
     if (
       !isServer3 &&
       show?.trailers &&
@@ -121,7 +118,7 @@ export function useContentDetailModal({
     };
   }, [show, isPlaying, contentId]);
 
-  // Block body scroll when modal is open
+  // Block body scroll
   useEffect(() => {
     if (autoPlay) return;
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -175,14 +172,12 @@ export function useContentDetailModal({
             : undefined,
       };
 
-      const room = await createRoom(roomPayload);
+      const roomId = generateRoomId();
+      const room = await createRoom(roomId, roomPayload);
 
       if (room) {
         toast.success('Party room created! Redirecting...');
         router.push(`/watch-party/${room.id}?new=true`);
-        // Do NOT call onClose() here — navigation unmounts the modal naturally.
-        // Calling onClose() first causes a visible flash where the modal
-        // disappears before the new page has loaded.
       } else {
         toast.error('Failed to create party room. Please try again.');
       }
@@ -200,7 +195,6 @@ export function useContentDetailModal({
   }, [toggleWatchlist]);
 
   return {
-    // from useContentDetail
     show,
     episodes,
     isLoading,
@@ -216,11 +210,9 @@ export function useContentDetailModal({
     handleResume,
     inWatchlist,
     isWatchlistLoading,
-    // watch party
     isCreatingParty,
     handleWatchParty,
     handleWatchlistToggle,
-    // local UI state
     imageError,
     setImageError,
     seasonDropdownOpen,

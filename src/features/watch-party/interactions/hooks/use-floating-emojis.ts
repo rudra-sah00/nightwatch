@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect, useState } from 'react';
 import { onPartyInteraction } from '../../room/services/watch-party.api';
 
@@ -16,47 +14,48 @@ export interface FloatingEmoji {
 export function useFloatingEmojis() {
   const [activeEmojis, setActiveEmojis] = useState<FloatingEmoji[]>([]);
 
-  const spawnEmoji = useCallback((emoji: string, userName: string) => {
-    const burstCount = 4 + Math.floor(Math.random() * 3); // 4 to 6 emojis
+  const spawnEmoji = useCallback((emoji: string, userName = 'Someone') => {
+    const id = Math.random().toString(36).substring(2, 9);
 
-    for (let i = 0; i < burstCount; i++) {
-      const id = Math.random().toString(36).substring(2, 11);
-      const delay = i * 80 + Math.random() * 50;
+    // Premium animation parameters
+    const left = 5 + Math.random() * 90; // 5% to 95% width
+    const duration = 2 + Math.random() * 2; // 2s to 4s
+    const rotation = -20 + Math.random() * 40; // -20deg to 20deg
+    const wiggleOffsets = [
+      -20 + Math.random() * 40,
+      -40 + Math.random() * 80,
+      -60 + Math.random() * 120,
+    ];
 
-      setTimeout(() => {
-        const newEmoji: FloatingEmoji = {
-          id,
-          emoji,
-          userName,
-          left: Math.random() * 80 + 10,
-          duration: 1.2 + Math.random() * 0.8,
-          rotation: Math.random() * 60 - 30,
-          wiggleOffsets: [
-            Math.random() * 40 - 20,
-            Math.random() * 80 - 40,
-            Math.random() * 120 - 60,
-          ],
-        };
+    setActiveEmojis((current) => [
+      ...current,
+      { id, emoji, userName, left, duration, rotation, wiggleOffsets },
+    ]);
 
-        setActiveEmojis((prev) => [...prev, newEmoji]);
-
-        setTimeout(
-          () => {
-            setActiveEmojis((prev) => prev.filter((e) => e.id !== id));
-          },
-          newEmoji.duration * 1000 + 100,
-        );
-      }, delay);
-    }
+    // Remove emoji after animation (4s max)
+    setTimeout(() => {
+      setActiveEmojis((current) => current.filter((e) => e.id !== id));
+    }, 4500);
   }, []);
 
   useEffect(() => {
-    return onPartyInteraction((data) => {
-      if (data.type === 'emoji') {
-        spawnEmoji(data.value, data.userName || 'Guest');
-      }
-    });
+    const cleanup = onPartyInteraction(
+      (msg: {
+        type?: string;
+        kind?: string;
+        emoji?: string;
+        userName?: string;
+      }) => {
+        if (msg.type === 'INTERACTION' && msg.kind === 'emoji' && msg.emoji) {
+          spawnEmoji(msg.emoji, msg.userName || 'Someone');
+        }
+      },
+    );
+    return cleanup;
   }, [spawnEmoji]);
 
-  return { activeEmojis, spawnEmoji };
+  return {
+    activeEmojis,
+    spawnEmoji,
+  };
 }

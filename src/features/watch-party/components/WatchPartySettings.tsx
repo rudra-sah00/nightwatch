@@ -2,7 +2,6 @@ import {
   Check,
   ChevronDown,
   MessageSquare,
-  Palette,
   PenTool,
   Settings,
   Shield,
@@ -30,121 +29,12 @@ import {
   TEXT_SHADOWS,
 } from '@/features/watch/player/ui/controls/subtitle-settings';
 import { cn } from '@/lib/utils';
-import type { SidebarTheme } from '../hooks/use-sidebar-theme';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import {
   updateMemberPermissions,
   updatePartyPermissions,
-  updatePartyTheme,
 } from '../room/services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../room/types';
-
-// ---------------------------------------------------------------------------
-// Theme options
-// ---------------------------------------------------------------------------
-const THEME_OPTIONS: { id: SidebarTheme; label: string; dot: string }[] = [
-  { id: 'default', label: 'Default (Dark)', dot: 'bg-zinc-400' },
-  { id: 'pink', label: 'Pink', dot: 'bg-pink-300' },
-  { id: 'purple', label: 'Purple', dot: 'bg-purple-300' },
-  { id: 'ocean', label: 'Ocean', dot: 'bg-sky-300' },
-  { id: 'custom', label: 'Custom colour…', dot: '' },
-];
-
-interface ThemeDropdownProps {
-  value: SidebarTheme;
-  customColor: string;
-  onChange: (t: SidebarTheme) => void;
-}
-
-function ThemeDropdown({ value, customColor, onChange }: ThemeDropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [open]);
-
-  const selected =
-    THEME_OPTIONS.find((o) => o.id === value) ?? THEME_OPTIONS[0];
-
-  return (
-    <div ref={ref} className="relative">
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm transition-all focus:outline-none neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none focus:ring-0 active:bg-[#f5f0e8]"
-      >
-        {/* Dot / colour preview */}
-        {value === 'custom' ? (
-          <span
-            className="w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0"
-            style={{ backgroundColor: customColor }}
-          />
-        ) : (
-          <span
-            className={`w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0 ${selected.dot}`}
-          />
-        )}
-        <span className="flex-1 text-left">{selected.label}</span>
-        <ChevronDown
-          className={cn(
-            'w-5 h-5 text-[#1a1a1a] stroke-[3px] transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {/* Panel */}
-      {open && (
-        <div className="absolute z-50 mt-2 w-full bg-white border-[4px] border-[#1a1a1a] border-b-[6px] border-r-[6px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-          {THEME_OPTIONS.map((opt) => {
-            const isActive = value === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => {
-                  onChange(opt.id);
-                  setOpen(false);
-                }}
-                className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3 text-sm font-black font-headline uppercase tracking-widest transition-colors border-b-[2px] border-[#1a1a1a] last:border-b-0',
-                  isActive
-                    ? 'bg-[#ffcc00] text-[#1a1a1a]'
-                    : 'text-[#1a1a1a] hover:bg-[#f5f0e8]',
-                )}
-              >
-                {opt.id === 'custom' ? (
-                  <span
-                    className="w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0"
-                    style={{
-                      backgroundColor: isActive ? customColor : '#6b7280',
-                    }}
-                  />
-                ) : (
-                  <span
-                    className={`w-4 h-4 border-[2px] border-[#1a1a1a] flex-shrink-0 ${opt.dot}`}
-                  />
-                )}
-                <span className="flex-1 text-left">{opt.label}</span>
-                {isActive && (
-                  <Check className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Simple Toggle Switch built with Tailwind
 interface SwitchProps {
@@ -180,10 +70,6 @@ function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
 export interface WatchPartySettingsProps {
   room: WatchPartyRoom;
   isHost: boolean;
-  sidebarTheme: SidebarTheme;
-  onSidebarThemeChange: (theme: SidebarTheme) => void;
-  customColor: string;
-  onCustomColorChange: (color: string) => void;
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
@@ -192,10 +78,6 @@ export interface WatchPartySettingsProps {
 export function WatchPartySettings({
   room,
   isHost,
-  sidebarTheme,
-  onSidebarThemeChange,
-  customColor,
-  onCustomColorChange,
   floatingChatEnabled = false,
   onToggleFloatingChat,
 }: WatchPartySettingsProps) {
@@ -222,7 +104,7 @@ export function WatchPartySettings({
     key: keyof WatchPartyRoom['permissions'],
     value: boolean,
   ) => {
-    updatePartyPermissions({ [key]: value });
+    updatePartyPermissions(room.id, { [key]: value });
   };
 
   const handleUserPermissionToggle = (
@@ -230,7 +112,7 @@ export function WatchPartySettings({
     key: keyof NonNullable<RoomMember['permissions']>,
     value: boolean,
   ) => {
-    updateMemberPermissions(memberId, { [key]: value });
+    updateMemberPermissions(room.id, memberId, { [key]: value });
   };
 
   // Only guests should be listed in individual overrides (don't list the host)
@@ -375,80 +257,6 @@ export function WatchPartySettings({
 
           {isHost ? (
             <div className="space-y-8">
-              {/* Appearance */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] flex items-center gap-2 border-b-[3px] border-[#1a1a1a] pb-2">
-                  <Palette className="w-5 h-5 stroke-[3px]" />
-                  Sidebar Theme
-                </h3>
-
-                {/* Custom dropdown */}
-                <ThemeDropdown
-                  value={sidebarTheme}
-                  customColor={customColor}
-                  onChange={(t) => {
-                    onSidebarThemeChange(t);
-                    updatePartyTheme({ theme: t, customColor });
-                  }}
-                />
-
-                {/* Custom colour picker — shown only when custom is selected */}
-                {sidebarTheme === 'custom' && (
-                  <div className="flex items-center gap-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-3 justify-between">
-                    <label
-                      htmlFor="wp-custom-color"
-                      className="flex items-center gap-3 cursor-pointer flex-1"
-                    >
-                      {/* Clickable colour circle */}
-                      <div
-                        className="w-10 h-10 border-[3px] border-[#1a1a1a] flex-shrink-0 relative overflow-hidden bg-white"
-                        style={{ backgroundColor: customColor }}
-                      >
-                        <input
-                          id="wp-custom-color"
-                          type="color"
-                          value={customColor}
-                          onChange={(e) => {
-                            onCustomColorChange(e.target.value);
-                            updatePartyTheme({
-                              theme: sidebarTheme,
-                              customColor: e.target.value,
-                            });
-                          }}
-                          className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 opacity-0 cursor-pointer"
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
-                          Accent colour
-                        </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
-                          {customColor.toUpperCase()}
-                        </p>
-                      </div>
-                    </label>
-                    {/* Hex input */}
-                    <input
-                      type="text"
-                      maxLength={7}
-                      value={customColor}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
-                          onCustomColorChange(v);
-                          if (v.length === 7)
-                            updatePartyTheme({
-                              theme: sidebarTheme,
-                              customColor: v,
-                            });
-                        }
-                      }}
-                      className="w-24 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] font-headline font-black uppercase text-xs rounded-none px-2 py-1.5 focus:outline-none focus:ring-0 text-center"
-                    />
-                  </div>
-                )}
-              </div>
-
               {/* Global Permissions */}
               <div className="space-y-4">
                 <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] border-b-[3px] border-[#1a1a1a] pb-2">

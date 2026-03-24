@@ -7,6 +7,13 @@ interface AgoraTokenResponse {
   uid: number;
 }
 
+interface AgoraRtmTokenResponse {
+  token: string;
+  appId: string;
+  /** Raw string user ID — RTM does not use a numeric hash */
+  uid: string;
+}
+
 /**
  * Retrieve an Agora token for a specific channel/room.
  */
@@ -19,4 +26,18 @@ export async function getAgoraToken(params: {
   const url = `/api/agora/token?channelName=${channelName}&guestId=${guestId}&guestName=${encodeURIComponent(guestName)}`;
 
   return apiFetch<AgoraTokenResponse>(url);
+}
+
+/**
+ * Retrieve an Agora RTM signaling token for a specific room.
+ * RTM tokens are scoped to the user (not the channel) and allow
+ * joining the Agora RTM signaling channel for watch party events.
+ */
+export async function getAgoraRtmToken(params: {
+  channelName: string;
+}): Promise<AgoraRtmTokenResponse> {
+  const { channelName } = params;
+  return apiFetch<AgoraRtmTokenResponse>(
+    `/api/agora/rtm-token?channelName=${channelName}`,
+  );
 }

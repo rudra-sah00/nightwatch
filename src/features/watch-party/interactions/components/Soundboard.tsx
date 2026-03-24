@@ -3,6 +3,7 @@
 import { Loader2, Play, Search, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useSoundboard } from '../hooks/use-soundboard';
 
 export function SoundboardDisabled() {
@@ -21,7 +22,17 @@ export function SoundboardDisabled() {
   );
 }
 
-export function Soundboard() {
+interface SoundboardProps {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+  userName?: string;
+}
+
+export function Soundboard({
+  rtmSendMessage,
+  userId,
+  userName,
+}: SoundboardProps) {
   const {
     sounds,
     loading,
@@ -32,7 +43,7 @@ export function Soundboard() {
     loadMoreRef,
     loadMore,
     handleTriggerSound,
-  } = useSoundboard();
+  } = useSoundboard({ rtmSendMessage, userId, userName });
 
   return (
     <div className="flex flex-col h-full max-h-full overflow-hidden bg-[#f5f0e8]">

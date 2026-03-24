@@ -10,10 +10,21 @@ import {
   Star,
   Text,
 } from 'react-konva';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 
-export function SketchOverlay() {
+interface SketchOverlayProps {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  userId?: string;
+}
+
+export function SketchOverlay({
+  rtmSendMessage,
+  rtmSendMessageToPeer,
+  userId,
+}: SketchOverlayProps) {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,7 +39,7 @@ export function SketchOverlay() {
     pendingText,
     confirmText,
     cancelText,
-  } = useSketchOverlay();
+  } = useSketchOverlay({ rtmSendMessage, rtmSendMessageToPeer, userId });
 
   const { color, strokeWidth, currentTool } = useSketch();
 

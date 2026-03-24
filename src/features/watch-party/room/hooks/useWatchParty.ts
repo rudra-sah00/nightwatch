@@ -3,19 +3,15 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { WS_EVENTS } from '@/lib/constants';
-import { useSocket } from '@/providers/socket-provider';
 import { injectTokenIntoUrl, wrapInProxy } from '../../../watch/utils';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
+import { useAgoraRtm } from '../../media/hooks/useAgoraRtm';
+import { useAgoraRtmToken } from '../../media/hooks/useAgoraRtmToken';
 import {
+  dispatchRtmMessage,
   getPartyMessages,
   getPartyStreamToken,
-  onPartyClosed,
-  onPartyJoinApproved,
-  onPartyJoinRejected,
-  onPartyKicked,
-  requestPartyState,
 } from '../services/watch-party.api';
 import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
 import { useClockSync } from './useClockSync';
@@ -60,7 +56,7 @@ interface UseWatchPartyOptions {
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const router = useRouter();
-  const { socket: contextSocket } = useSocket();
+  const { userId } = options;
 
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -77,8 +73,115 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const requestStatusRef = useRef(requestStatus);
   requestStatusRef.current = requestStatus;
 
+  // 0. Agora RTM Signaling
+  const rtmToken = useAgoraRtmToken({
+    roomId: room?.id,
+    userId: userId,
+  });
+
+  const {
+    isConnected: isRtmConnected,
+    sendMessage: rtmSendMessage,
+    sendMessageToPeer: rtmSendMessageToPeer,
+  } = useAgoraRtm({
+    appId: rtmToken.appId,
+    token: rtmToken.token || '',
+    channel: rtmToken.channel,
+    userId: rtmToken.uid,
+    onMessage: (msg) => {
+      // Route messages to sub-hooks
+      chat.handleIncomingRtmMessage(msg);
+      members.handleIncomingRtmMessage(msg);
+      sync.handleIncomingRtmMessage(msg);
+
+      // Calibrate clock if message contains serverTime
+      if ('serverTime' in msg && msg.serverTime) {
+        calibrate(msg.serverTime);
+      }
+
+      dispatchRtmMessage(msg as unknown as Record<string, unknown>);
+
+      // Handle main lifecycle messages
+      switch (msg.type) {
+        case 'JOIN_APPROVED': {
+          const { room: approvedRoom, initialState } = msg;
+
+          getPartyStreamToken(approvedRoom.id).then((response) => {
+            const token = response.token || msg.streamToken || '';
+            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+              injectStream: true,
+            });
+
+            setRoom(normalizedRoom);
+            setIsConnected(true);
+            setRequestStatus('joined');
+
+            if (initialState) {
+              // Perform initial clock calibration
+              if (initialState.serverTime) {
+                calibrate(initialState.serverTime);
+              }
+
+              optionsRef.current.onStateUpdate?.({
+                currentTime: initialState.currentTime ?? 0,
+                videoTime:
+                  initialState.videoTime ?? initialState.currentTime ?? 0,
+                isPlaying: initialState.isPlaying,
+                playbackRate: initialState.playbackRate ?? 1,
+                timestamp: initialState.timestamp ?? Date.now(),
+                serverTime: initialState.serverTime || Date.now(),
+                eventType: 'init',
+              });
+            }
+          });
+          break;
+        }
+
+        case 'JOIN_REJECTED': {
+          if (requestStatusRef.current === 'pending') {
+            setRequestStatus('rejected');
+            setError(msg.reason || 'Host rejected your request');
+            setRoom(null);
+            setIsConnected(false);
+          }
+          break;
+        }
+
+        case 'KICK': {
+          if (msg.targetUserId === userId) {
+            toast.error(`You were kicked: ${msg.reason}`);
+            setRoom(null);
+            setIsConnected(false);
+            setRequestStatus('idle');
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('guest_token');
+            }
+          }
+          break;
+        }
+
+        case 'PARTY_CLOSED': {
+          toast.info('Party finished');
+          setRoom(null);
+          setIsConnected(false);
+          setRequestStatus('idle');
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('guest_token');
+          }
+          router.push(userId ? '/home' : '/login');
+          break;
+        }
+      }
+    },
+  });
+
   // 1. Chat Hook
-  const chat = useWatchPartyChat();
+  const chat = useWatchPartyChat({
+    room,
+    userId,
+    rtmSendMessage,
+    currentUserName: room?.members.find((m) => m.id === userId)?.name || 'User',
+  });
 
   // 2. Lifecycle Hook
   const lifecycle = useWatchPartyLifecycle({
@@ -91,6 +194,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     setIsLoading,
     requestStatus,
     normalizeRoomUrls,
+    room,
   });
 
   // 3. Members Hook
@@ -98,14 +202,18 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     room,
     setRoom,
     userId: options.userId,
-    socketId: contextSocket?.id,
+    rtmSendMessage,
+    rtmSendMessageToPeer,
     onMemberJoined: options.onMemberJoined,
+    streamToken: room?.streamToken,
   });
 
   // 4. Sync Hook
   const sync = useWatchPartySync({
     room,
     setRoom,
+    userId: options.userId,
+    rtmSendMessage,
     onStateUpdate: options.onStateUpdate,
     normalizeRoomUrls,
   });
@@ -113,107 +221,25 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
 
+  // Note: Calibration now happens dynamically via initial state and RTM messages
   useEffect(() => {
     if (isConnected && requestStatus === 'joined' && !isCalibrated) {
-      calibrate();
+      // Initial calibration if needed - though JOIN_APPROVED should have handled it
     }
-  }, [isConnected, requestStatus, isCalibrated, calibrate]);
+  }, [isConnected, requestStatus, isCalibrated]);
 
-  // Periodic clock recalibration — NTP offset drifts over long sessions.
-  // Re-sync every 5 minutes while the party is active to keep offset fresh.
+  // On connect/reconnect: fetch initial messages
   useEffect(() => {
-    if (!isCalibrated || requestStatus !== 'joined') return;
-    const id = setInterval(
-      () => {
-        if (isConnected) calibrate();
-      },
-      5 * 60 * 1000,
-    );
-    return () => clearInterval(id);
-  }, [isCalibrated, isConnected, requestStatus, calibrate]);
-
-  // General Lifecycle Listeners (Approved, Rejected, Kicked, Closed)
-  useEffect(() => {
-    const cleanupJoinApproved = onPartyJoinApproved(
-      ({ room: approvedRoom, streamToken, guestToken, initialState }) => {
-        if (guestToken && typeof window !== 'undefined') {
-          sessionStorage.setItem('guest_token', guestToken);
+    if (isRtmConnected && requestStatus === 'joined' && room?.id) {
+      getPartyMessages(room.id).then((response) => {
+        if (response.messages) {
+          chat.setMessages(response.messages);
         }
+      });
+    }
+  }, [isRtmConnected, requestStatus, room?.id, chat.setMessages]);
 
-        // Fetch fresh token for the guest if possible (Phase 8 requirement)
-        getPartyStreamToken(
-          (response: { success: boolean; token?: string }) => {
-            const token =
-              response.success && response.token
-                ? response.token
-                : streamToken || '';
-
-            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
-              injectStream: true,
-            });
-
-            setRoom(normalizedRoom);
-            setIsConnected(true);
-            setRequestStatus('joined');
-
-            if (initialState && initialState.currentTime != null) {
-              optionsRef.current.onStateUpdate?.({
-                currentTime: initialState.currentTime,
-                videoTime: initialState.videoTime ?? initialState.currentTime,
-                isPlaying: initialState.isPlaying,
-                playbackRate: initialState.playbackRate ?? 1,
-                timestamp: initialState.timestamp ?? Date.now(),
-                serverTime: initialState.serverTime ?? Date.now(),
-                eventType: 'init',
-                fromHost: true,
-              });
-            }
-          },
-        );
-      },
-    );
-
-    const cleanupJoinRejected = onPartyJoinRejected(() => {
-      if (requestStatusRef.current === 'pending') {
-        setRequestStatus('rejected');
-        setError('Host rejected your request');
-        setRoom(null);
-        setIsConnected(false);
-      }
-    });
-
-    const cleanupKicked = onPartyKicked(({ reason }) => {
-      toast.error(`You were kicked: ${reason}`);
-      setRoom(null);
-      setIsConnected(false);
-      setRequestStatus('idle');
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('guest_token');
-      }
-    });
-
-    const cleanupClosed = onPartyClosed(() => {
-      toast.info('Party finished');
-      setRoom(null);
-      setIsConnected(false);
-      setRequestStatus('idle');
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('guest_token');
-      }
-      // isGuest: no userId means the user is not authenticated
-      const isGuest = !optionsRef.current.userId;
-      router.push(isGuest ? '/login' : '/home');
-    });
-
-    return () => {
-      cleanupJoinApproved();
-      cleanupJoinRejected();
-      cleanupKicked();
-      cleanupClosed();
-    };
-  }, [router]);
-
-  // Handle session cleanup on unmount
+  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (typeof window !== 'undefined') {
@@ -221,70 +247,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       }
     };
   }, []);
-
-  // Reconnection and Initial State Sync
-  useEffect(() => {
-    if (!contextSocket || !isConnected || !room) return;
-
-    const isHost = optionsRef.current.userId === room.hostId;
-    if (isHost) return;
-
-    const handleReconnect = () => {
-      requestPartyState((response) => {
-        if (response.success && response.state) {
-          optionsRef.current.onStateUpdate?.(response.state);
-        }
-      });
-    };
-
-    contextSocket.on('connect', handleReconnect);
-
-    const timer1 = setTimeout(() => {
-      requestPartyState((response) => {
-        if (response.success && response.state) {
-          optionsRef.current.onStateUpdate?.(response.state);
-        }
-      });
-      getPartyMessages((response) => {
-        if (response.success && response.messages) {
-          chat.setMessages(response.messages);
-        }
-      });
-    }, 500);
-
-    const timer2 = setTimeout(() => {
-      requestPartyState((response) => {
-        if (response.success && response.state) {
-          optionsRef.current.onStateUpdate?.(response.state);
-        }
-      });
-    }, 1500);
-
-    return () => {
-      contextSocket.off('connect', handleReconnect);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [isConnected, room?.id, contextSocket, room, chat.setMessages]);
-
-  // Clear the party stream if it is revoked by another tab or device starting
-  // playback.  Applies to both host and members — the WP room continues
-  // server-side, only the local stream state is cleared.
-  useEffect(() => {
-    if (!contextSocket || requestStatus !== 'joined') return;
-
-    const handleStreamRevoked = () => {
-      setRoom((prev) => (prev ? { ...prev, streamUrl: '' } : null));
-      toast.error(
-        'Playback stopped — you started playing on another tab or device.',
-      );
-    };
-
-    contextSocket.on(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
-    return () => {
-      contextSocket.off(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
-    };
-  }, [contextSocket, requestStatus]);
 
   return {
     room,
@@ -310,6 +272,8 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     hostDisconnected: sync.hostDisconnected,
     emitEvent: sync.emitEvent,
     updateContent: sync.updateContent,
+    rtmSendMessage,
+    rtmSendMessageToPeer,
     sync: (currentTime: number, isPlaying: boolean, playbackRate?: number) => {
       sync.emitEvent({
         eventType: isPlaying ? 'play' : 'pause',

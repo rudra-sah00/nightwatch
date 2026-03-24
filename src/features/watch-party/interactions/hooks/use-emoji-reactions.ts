@@ -1,14 +1,33 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { emitPartyInteraction } from '../../room/services/watch-party.api';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
-export function useEmojiReactions() {
+interface UseEmojiReactionsOptions {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+  userName?: string;
+}
+
+export function useEmojiReactions({
+  rtmSendMessage,
+  userId,
+  userName,
+}: UseEmojiReactionsOptions = {}) {
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   const handleTriggerEmoji = (emoji: string) => {
-    emitPartyInteraction({ type: 'emoji', value: emoji });
+    if (!userId) return;
+
+    rtmSendMessage?.({
+      type: 'INTERACTION',
+      kind: 'emoji',
+      emoji: emoji,
+      userId: userId,
+      userName: userName,
+    });
+
     if (showPicker) setShowPicker(false);
   };
 

@@ -56,6 +56,7 @@ export interface WatchPartyRoom {
     canGuestsPlaySounds: boolean;
     canGuestsChat: boolean;
   };
+  streamToken?: string; // New: Shared stream token for members
   createdAt: number;
 }
 
@@ -212,9 +213,4 @@ export interface PartyPermissionsUpdate {
 export interface MemberPermissionsUpdate {
   memberId: string;
   permissions: Partial<NonNullable<RoomMember['permissions']>>;
-}
-
-export interface PartyThemeUpdate {
-  theme: string;
-  customColor: string;
 }

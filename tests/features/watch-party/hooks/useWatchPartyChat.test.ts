@@ -3,20 +3,13 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWatchPartyChat } from '@/features/watch-party/chat/hooks/useWatchPartyChat';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
-import type { ChatMessage } from '@/features/watch-party/room/types';
-
-interface UserTyping {
-  userId: string;
-  userName: string;
-  isTyping: boolean;
-}
+import type {
+  ChatMessage,
+  WatchPartyRoom,
+} from '@/features/watch-party/room/types';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   sendPartyMessage: vi.fn(),
-  onPartyMessage: vi.fn(() => vi.fn()),
-  onUserTyping: vi.fn(() => vi.fn()),
-  emitTypingStart: vi.fn(),
-  emitTypingStop: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
@@ -26,93 +19,104 @@ vi.mock('sonner', () => ({
 }));
 
 describe('useWatchPartyChat', () => {
-  let messageHandler: (message: ChatMessage) => void;
-  let typingHandler: (data: UserTyping) => void;
+  const mockRoom = { id: 'room-1' } as WatchPartyRoom;
+  const mockRtmSendMessage = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.onPartyMessage).mockImplementation((cb) => {
-      messageHandler = cb;
-      return vi.fn();
-    });
-    vi.mocked(api.onUserTyping).mockImplementation((cb) => {
-      typingHandler = cb;
-      return vi.fn();
-    });
   });
 
+  const defaultProps = {
+    room: mockRoom,
+    rtmSendMessage: mockRtmSendMessage,
+    userId: 'user-1',
+    currentUserName: 'User 1',
+  };
+
   it('should initialize with empty messages and typing users', () => {
-    const { result } = renderHook(() => useWatchPartyChat());
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
     expect(result.current.messages).toEqual([]);
     expect(result.current.typingUsers).toEqual([]);
   });
 
-  it('should add message when received via socket', () => {
-    const { result } = renderHook(() => useWatchPartyChat());
-    const mockMessage: ChatMessage = {
-      id: '1',
-      roomId: 'room-1',
+  it('should handle incoming CHAT RTM message', () => {
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
+    const mockMsg = {
+      type: 'CHAT' as const,
+      messageId: 'msg-1',
+      userId: 'user-2',
+      userName: 'User 2',
       content: 'Hello',
-      userId: 'user-1',
-      userName: 'User 1',
       isSystem: false,
       timestamp: Date.now(),
     };
 
     act(() => {
-      messageHandler(mockMessage);
+      result.current.handleIncomingRtmMessage(
+        mockMsg as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage,
+      );
     });
 
-    expect(result.current.messages).toContainEqual(mockMessage);
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0].content).toBe('Hello');
   });
 
-  it('should update typing users and ignore duplicates', () => {
-    const { result } = renderHook(() => useWatchPartyChat());
+  it('should handle TYPING_START and TYPING_STOP RTM messages', () => {
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
 
     act(() => {
-      typingHandler({ userId: 'user-1', userName: 'User 1', isTyping: true });
+      result.current.handleIncomingRtmMessage({
+        type: 'TYPING_START',
+        userId: 'user-2',
+        userName: 'User 2',
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
-    expect(result.current.typingUsers).toHaveLength(1);
-
-    act(() => {
-      typingHandler({ userId: 'user-1', userName: 'User 1', isTyping: true }); // Duplicate
+    expect(result.current.typingUsers).toContainEqual({
+      userId: 'user-2',
+      userName: 'User 2',
     });
-    expect(result.current.typingUsers).toHaveLength(1);
 
     act(() => {
-      typingHandler({ userId: 'user-1', userName: 'User 1', isTyping: false });
+      result.current.handleIncomingRtmMessage({
+        type: 'TYPING_STOP',
+        userId: 'user-2',
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
     expect(result.current.typingUsers).toHaveLength(0);
   });
 
-  it('should handle message success', () => {
-    vi.mocked(api.sendPartyMessage).mockImplementation((_content, cb) => {
-      cb?.({ success: true });
+  it('should send message via RTM and REST', async () => {
+    vi.mocked(api.sendPartyMessage).mockResolvedValue({
+      message: { id: 'real-id', content: 'Hi' } as ChatMessage,
     });
 
-    const { result } = renderHook(() => useWatchPartyChat());
-    act(() => {
-      result.current.sendMessage('Hello');
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
+
+    await act(async () => {
+      await result.current.sendMessage('Hi');
     });
 
-    expect(api.sendPartyMessage).toHaveBeenCalled();
-    expect(toast.error).not.toHaveBeenCalled();
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'CHAT',
+        content: 'Hi',
+      }),
+    );
+    expect(api.sendPartyMessage).toHaveBeenCalledWith('room-1', 'Hi');
   });
 
-  it('should call sendPartyMessage and handle error', () => {
-    vi.mocked(api.sendPartyMessage).mockImplementation((_content, cb) => {
-      cb?.({ success: false, error: 'Failed' });
+  it('should handle send failure and rollback optimistic update', async () => {
+    vi.mocked(api.sendPartyMessage).mockResolvedValue({
+      error: 'Failed',
     });
 
-    const { result } = renderHook(() => useWatchPartyChat());
-    act(() => {
-      result.current.sendMessage('Hello');
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
+
+    await act(async () => {
+      await result.current.sendMessage('Hi');
     });
 
-    expect(api.sendPartyMessage).toHaveBeenCalledWith(
-      'Hello',
-      expect.any(Function),
-    );
     expect(toast.error).toHaveBeenCalledWith('Failed to send message');
+    expect(result.current.messages).toHaveLength(0); // Rolled back
   });
 });

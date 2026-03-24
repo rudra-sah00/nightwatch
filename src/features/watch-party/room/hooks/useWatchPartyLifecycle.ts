@@ -8,7 +8,7 @@ import {
   leavePartyRoom,
   requestJoinPartyRoom,
 } from '../services/watch-party.api';
-import type { ChatMessage, WatchPartyRoom } from '../types';
+import type { ChatMessage, PartyCreatePayload, WatchPartyRoom } from '../types';
 
 interface UseWatchPartyLifecycleProps {
   setRoom: React.Dispatch<React.SetStateAction<WatchPartyRoom | null>>;
@@ -26,8 +26,8 @@ interface UseWatchPartyLifecycleProps {
     token: string,
     options?: { injectStream?: boolean },
   ) => WatchPartyRoom;
+  room?: WatchPartyRoom | null;
 }
-
 export function useWatchPartyLifecycle({
   setRoom,
   setIsConnected,
@@ -38,31 +38,28 @@ export function useWatchPartyLifecycle({
   setIsLoading,
   requestStatus,
   normalizeRoomUrls,
+  room,
 }: UseWatchPartyLifecycleProps) {
   const createRoom = useCallback(
-    async (payload: Parameters<typeof createPartyRoom>[0]) => {
+    async (roomId: string, payload: PartyCreatePayload) => {
       setIsLoading(true);
       setError(null);
       setErrorCode(null);
 
-      return new Promise<WatchPartyRoom | null>((resolve) => {
-        createPartyRoom(payload, (response) => {
-          setIsLoading(false);
+      const response = await createPartyRoom(roomId, payload);
+      setIsLoading(false);
 
-          if (response.success && response.room) {
-            const token = response.streamToken || '';
-            const normalizedRoom = normalizeRoomUrls(response.room, token);
-            setRoom(normalizedRoom);
-            setIsConnected(true);
-            setRequestStatus('joined');
-            resolve(normalizedRoom);
-          } else {
-            setError(response.error || 'Failed to create room');
-            setErrorCode(response.code || null);
-            resolve(null);
-          }
-        });
-      });
+      if (response.room) {
+        const token = response.streamToken || '';
+        const normalizedRoom = normalizeRoomUrls(response.room, token);
+        setRoom(normalizedRoom);
+        setIsConnected(true);
+        setRequestStatus('joined');
+        return normalizedRoom;
+      } else {
+        setError(response.error || 'Failed to create room');
+        return null;
+      }
     },
     [
       setIsLoading,
@@ -86,44 +83,40 @@ export function useWatchPartyLifecycle({
       setErrorCode(null);
       setRequestStatus('pending');
 
-      return new Promise<{
-        success: boolean;
-        status?: 'pending';
-        room?: WatchPartyRoom;
-      } | null>((resolve) => {
-        requestJoinPartyRoom({ roomId, name, captchaToken }, (response) => {
-          setIsLoading(false);
-          if (response.success) {
-            if (response.room) {
-              if (response.guestToken && typeof window !== 'undefined') {
-                sessionStorage.setItem('guest_token', response.guestToken);
-              }
-
-              getPartyStreamToken((tokenResponse) => {
-                const token =
-                  tokenResponse.success && tokenResponse.token
-                    ? tokenResponse.token
-                    : '';
-
-                const normalizedRoom = normalizeRoomUrls(response.room!, token);
-
-                setRoom(normalizedRoom);
-                setIsConnected(true);
-                setRequestStatus('joined');
-                resolve({ success: true, room: normalizedRoom });
-              });
-            } else {
-              setRequestStatus('pending');
-              resolve({ success: true, status: 'pending' });
-            }
-          } else {
-            setError(response.error || 'Failed to join room');
-            setErrorCode(response.code || null);
-            setRequestStatus('idle');
-            resolve(null);
-          }
-        });
+      const response = await requestJoinPartyRoom(roomId, {
+        roomId,
+        name,
+        captchaToken,
       });
+      setIsLoading(false);
+
+      if (response.error) {
+        setError(response.error);
+        setRequestStatus('idle');
+        return null;
+      }
+
+      if (response.status === 'pending') {
+        setRequestStatus('pending');
+        return { success: true, status: 'pending' };
+      }
+
+      if (response.room) {
+        if (response.guestToken && typeof window !== 'undefined') {
+          sessionStorage.setItem('guest_token', response.guestToken);
+        }
+
+        const streamRes = await getPartyStreamToken(roomId);
+        const token = streamRes.token || '';
+        const normalizedRoom = normalizeRoomUrls(response.room, token);
+
+        setRoom(normalizedRoom);
+        setIsConnected(true);
+        setRequestStatus('joined');
+        return { success: true, room: normalizedRoom };
+      }
+
+      return null;
     },
     [
       setIsLoading,
@@ -136,8 +129,10 @@ export function useWatchPartyLifecycle({
     ],
   );
 
-  const leaveRoom = useCallback(() => {
-    leavePartyRoom(() => {
+  const leaveRoom = useCallback(async () => {
+    if (!room?.id) return;
+    const response = await leavePartyRoom(room.id);
+    if (response.success) {
       setRoom(null);
       setIsConnected(false);
       setRequestStatus('idle');
@@ -146,14 +141,15 @@ export function useWatchPartyLifecycle({
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('guest_token');
       }
-    });
-  }, [setRoom, setIsConnected, setRequestStatus, setMessages]);
+    }
+  }, [room?.id, setRoom, setIsConnected, setRequestStatus, setMessages]);
 
   const cancelRequest = useCallback(
-    (onComplete?: () => void) => {
+    async (roomId: string, onComplete?: () => void) => {
       if (requestStatus !== 'pending') return;
 
-      leavePartyRoom(() => {
+      const response = await leavePartyRoom(roomId);
+      if (response.success) {
         setRoom(null);
         setIsConnected(false);
         setRequestStatus('idle');
@@ -163,7 +159,7 @@ export function useWatchPartyLifecycle({
         }
         toast.info('Join request cancelled');
         onComplete?.();
-      });
+      }
     },
     [requestStatus, setRoom, setIsConnected, setRequestStatus, setMessages],
   );

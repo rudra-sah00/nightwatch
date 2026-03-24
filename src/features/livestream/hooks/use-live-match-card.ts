@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
+import { generateRoomId } from '@/features/watch-party/room/utils';
 import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 import type { LiveMatch } from '../types';
@@ -52,25 +53,24 @@ export function useLiveMatchCard(match: LiveMatch) {
     setIsCreatingParty(true);
     const proxyUrl = `${env.BACKEND_URL}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
 
-    createPartyRoom(
-      {
-        contentId: match.id,
-        title: `${match.team1.name} vs ${match.team2.name}`,
-        type: 'livestream',
-        streamUrl: proxyUrl,
-        posterUrl: match.team1.avatar,
-      },
-      (response) => {
-        setIsCreatingParty(false);
-        setShowPrompt(false);
-        if (response.success && response.room) {
-          toast.success('Party room created! Redirecting...');
-          router.push(`/watch-party/${response.room.id}?new=true`);
-        } else {
-          toast.error(response.error || 'Failed to create party room');
-        }
-      },
-    );
+    const roomId = generateRoomId();
+
+    createPartyRoom(roomId, {
+      contentId: match.id,
+      title: `${match.team1.name} vs ${match.team2.name}`,
+      type: 'livestream',
+      streamUrl: proxyUrl,
+      posterUrl: match.team1.avatar,
+    }).then((response) => {
+      setIsCreatingParty(false);
+      setShowPrompt(false);
+      if (response.room) {
+        toast.success('Party room created! Redirecting...');
+        router.push(`/watch-party/${response.room.id}?new=true`);
+      } else {
+        toast.error(response.error || 'Failed to create party room');
+      }
+    });
   };
 
   return {

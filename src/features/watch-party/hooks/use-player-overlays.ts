@@ -16,7 +16,7 @@ export function usePlayerOverlays(
         nextEpisode.info.episodeNumber,
       );
     } else {
-      await nextEpisode.play();
+      nextEpisode.play().catch(() => {});
     }
   }, [isHost, onNextEpisode, nextEpisode]);
 

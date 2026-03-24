@@ -98,6 +98,8 @@ export function useWatchPartyClient({
     handleTypingStart,
     handleTypingStop,
     updateContent,
+    rtmSendMessage,
+    rtmSendMessageToPeer,
   } = useWatchParty({
     onStateUpdate: (state: PartyStateUpdate) => {
       if (isHostRef.current) return;
@@ -281,14 +283,13 @@ export function useWatchPartyClient({
     );
   };
 
-  const handleCancelRequest = () => {
-    cancelRequest(() => {
-      if (!user) {
-        router.push('/login');
-      } else {
-        goBackOrHome();
-      }
-    });
+  const handleCancelRequest = async () => {
+    await cancelRequest(roomId);
+    if (!user) {
+      router.push('/login');
+    } else {
+      goBackOrHome();
+    }
   };
 
   const handleLeave = () => setShowLeaveDialog(true);
@@ -340,6 +341,8 @@ export function useWatchPartyClient({
     approveMember,
     rejectMember,
     kickUser,
+    rtmSendMessage,
+    rtmSendMessageToPeer,
     handleJoin,
     handleCancelRequest,
     handleLeave,

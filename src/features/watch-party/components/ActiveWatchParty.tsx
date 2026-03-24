@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
 import { WatchPartyVideoArea } from './WatchPartyVideoArea';
 
@@ -60,6 +61,8 @@ interface ActiveWatchPartyProps {
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
+  rtmSendMessage?: (msg: RTMMessage) => Promise<void>;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => Promise<void>;
 }
 
 export function ActiveWatchParty({
@@ -83,6 +86,8 @@ export function ActiveWatchParty({
   typingUsers = EMPTY_TYPING_USERS,
   onTypingStart,
   onTypingStop,
+  rtmSendMessage,
+  rtmSendMessageToPeer,
 }: ActiveWatchPartyProps) {
   const {
     watchPartyContainerRef,
@@ -170,6 +175,8 @@ export function ActiveWatchParty({
           onTabChange={(tab) => setIsSketchMode(tab === 'sketch')}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={handleToggleFloatingChat}
+          rtmSendMessage={rtmSendMessage}
+          rtmSendMessageToPeer={rtmSendMessageToPeer}
         />
       </div>
 
@@ -192,6 +199,9 @@ export function ActiveWatchParty({
           onNextEpisode={
             isHost && room.type === 'series' ? handleNextEpisode : undefined
           }
+          rtmSendMessage={rtmSendMessage}
+          rtmSendMessageToPeer={rtmSendMessageToPeer}
+          userId={currentUserId}
         />
       </div>
 

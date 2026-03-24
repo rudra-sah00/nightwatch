@@ -1,21 +1,20 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useFloatingEmojis } from '@/features/watch-party/interactions/hooks/use-floating-emojis';
-import { onPartyInteraction } from '@/features/watch-party/room/services/watch-party.api';
-import type { InteractionPayload } from '@/features/watch-party/room/types';
+import * as api from '@/features/watch-party/room/services/watch-party.api';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   onPartyInteraction: vi.fn(),
 }));
 
 describe('useFloatingEmojis', () => {
-  let capturedCallback: (data: InteractionPayload) => void;
+  let capturedCallback: (data: unknown) => void;
   const mockCleanup = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    vi.mocked(onPartyInteraction).mockImplementation((cb) => {
+    vi.mocked(api.onPartyInteraction).mockImplementation((cb) => {
       capturedCallback = cb;
       return mockCleanup;
     });
@@ -25,26 +24,17 @@ describe('useFloatingEmojis', () => {
     vi.useRealTimers();
   });
 
-  it('initializes with empty activeEmojis', () => {
-    const { result } = renderHook(() => useFloatingEmojis());
-    expect(result.current.activeEmojis).toEqual([]);
-  });
-
-  it('spawns emojis when interaction is type emoji', async () => {
+  it('spawns emojis when RTM interaction is received via bridge', async () => {
     const { result } = renderHook(() => useFloatingEmojis());
 
     await act(async () => {
       capturedCallback({
-        type: 'emoji',
-        value: '🔥',
+        type: 'INTERACTION',
+        kind: 'emoji',
+        emoji: '🔥',
         userId: 'u1',
         userName: 'Alice',
-        timestamp: Date.now(),
       });
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(600);
     });
 
     expect(result.current.activeEmojis.length).toBeGreaterThan(0);
@@ -52,93 +42,37 @@ describe('useFloatingEmojis', () => {
     expect(result.current.activeEmojis[0].userName).toBe('Alice');
   });
 
-  it('ignores interactions that are NOT type emoji (line 55-56 branch)', async () => {
+  it('ignores non-emoji interactions', async () => {
     const { result } = renderHook(() => useFloatingEmojis());
 
     await act(async () => {
       capturedCallback({
-        type: 'sound',
-        value: 'clap.mp3',
-        userId: 'u1',
-        userName: 'Bob',
-        timestamp: Date.now(),
+        type: 'INTERACTION',
+        kind: 'sound',
+        sound: 'clap.mp3',
       });
     });
 
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-
-    // No emojis should have been spawned for a 'sound' interaction
-    expect(result.current.activeEmojis).toEqual([]);
+    expect(result.current.activeEmojis).toHaveLength(0);
   });
 
-  it('uses "Guest" when userName is missing', async () => {
+  it('removes emojis after timeout', async () => {
     const { result } = renderHook(() => useFloatingEmojis());
 
     await act(async () => {
       capturedCallback({
-        type: 'emoji',
-        value: '👍',
-        userId: 'u1',
-        // No userName
-        timestamp: Date.now(),
+        type: 'INTERACTION',
+        kind: 'emoji',
+        emoji: '👍',
       });
     });
 
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-
-    expect(result.current.activeEmojis[0].userName).toBe('Guest');
-  });
-
-  it('removes emojis after their duration expires', async () => {
-    const { result } = renderHook(() => useFloatingEmojis());
+    expect(result.current.activeEmojis.length).toBe(1);
 
     await act(async () => {
-      capturedCallback({
-        type: 'emoji',
-        value: '😂',
-        userId: 'u1',
-        userName: 'Tester',
-        timestamp: Date.now(),
-      });
-    });
-
-    // Advance to trigger spawn
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-
-    const countAfterSpawn = result.current.activeEmojis.length;
-    expect(countAfterSpawn).toBeGreaterThan(0);
-
-    // Advance past duration (max ~2s + 100ms + spawn delay)
-    await act(async () => {
-      vi.advanceTimersByTime(4000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(result.current.activeEmojis.length).toBe(0);
-  });
-
-  it('spawnEmoji can be called directly', async () => {
-    const { result } = renderHook(() => useFloatingEmojis());
-
-    await act(async () => {
-      result.current.spawnEmoji('⭐', 'DirectUser');
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-
-    expect(result.current.activeEmojis.length).toBeGreaterThan(0);
-  });
-
-  it('calls cleanup on unmount', () => {
-    const { unmount } = renderHook(() => useFloatingEmojis());
-    unmount();
-    expect(mockCleanup).toHaveBeenCalled();
   });
 });

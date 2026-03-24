@@ -237,23 +237,20 @@ export function useAgora({
    * Probes permissions if necessary.
    */
 
-  const refreshDevices = useCallback(async () => {
+  const refreshDevices = useCallback(async (probePermissions = false) => {
     try {
-      // Request audio and video permissions SEPARATELY.
-      // Bundling { audio: true, video: true } in one getUserMedia call
-      // fails entirely if either device type is missing (e.g. no camera),
-      // which blocks permission for the device that IS available.
-      const streams: MediaStream[] = [];
-      const [audioStream, videoStream] = await Promise.allSettled([
-        navigator.mediaDevices.getUserMedia({ audio: true }),
-        navigator.mediaDevices.getUserMedia({ video: true }),
-      ]);
-      if (audioStream.status === 'fulfilled') streams.push(audioStream.value);
-      if (videoStream.status === 'fulfilled') streams.push(videoStream.value);
+      if (probePermissions) {
+        const streams: MediaStream[] = [];
+        const [audioStream, videoStream] = await Promise.allSettled([
+          navigator.mediaDevices.getUserMedia({ audio: true }),
+          navigator.mediaDevices.getUserMedia({ video: true }),
+        ]);
+        if (audioStream.status === 'fulfilled') streams.push(audioStream.value);
+        if (videoStream.status === 'fulfilled') streams.push(videoStream.value);
 
-      // Stop all permission-probe tracks immediately
-      for (const stream of streams) {
-        for (const track of stream.getTracks()) track.stop();
+        for (const stream of streams) {
+          for (const track of stream.getTracks()) track.stop();
+        }
       }
 
       const devices = await AgoraRTC.getDevices();
@@ -307,14 +304,14 @@ export function useAgora({
     }
   }, []); // stable: no deps — uses refs internally
 
-  // Listen for device hot-plug
   useEffect(() => {
-    refreshDevices();
-    navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
+    refreshDevices(false);
+    const handleDeviceChange = () => refreshDevices(false);
+    navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
     return () => {
       navigator.mediaDevices.removeEventListener(
         'devicechange',
-        refreshDevices,
+        handleDeviceChange,
       );
     };
   }, [refreshDevices]);
@@ -623,6 +620,17 @@ export function useAgora({
         localAudioTrackRef.current = null;
         setAudioEnabled(false);
       } else {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          stream.getTracks().forEach((t) => {
+            t.stop();
+          });
+        } catch {
+          // Fall through, handleDeviceError will catch
+        }
+
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
           microphoneId: selectedAudioDeviceRef.current || undefined,
           encoderConfig: AUDIO_ENCODER_CONFIG,
@@ -658,30 +666,19 @@ export function useAgora({
         localVideoTrackRef.current = null;
         setVideoEnabled(false);
       } else {
-        const devices = await AgoraRTC.getDevices();
-        const cameras = devices.filter(
-          (d) => d.kind === 'videoinput' && d.deviceId,
-        );
-
-        if (cameras.length === 0) {
-          toast.error(
-            'No camera found. Please connect a camera and try again.',
-          );
-          return;
-        }
-
-        const targetDeviceId = cameras.some(
-          (d) => d.deviceId === selectedVideoDeviceRef.current,
-        )
-          ? selectedVideoDeviceRef.current
-          : cameras[0].deviceId;
-
-        if (targetDeviceId !== selectedVideoDeviceRef.current) {
-          setSelectedVideoDevice(targetDeviceId);
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          stream.getTracks().forEach((t) => {
+            t.stop();
+          });
+        } catch {
+          // Fall through, handleDeviceError will catch
         }
 
         const videoTrack = await AgoraRTC.createCameraVideoTrack({
-          cameraId: targetDeviceId || undefined,
+          cameraId: selectedVideoDeviceRef.current || undefined,
           encoderConfig: VIDEO_ENCODER_CONFIG,
           optimizationMode: VIDEO_OPTIMIZATION_MODE,
         });

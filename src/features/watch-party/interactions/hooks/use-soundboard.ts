@@ -1,16 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
+import type {
+  SoundboardResponse,
+  SoundItem,
+} from '../../room/services/watch-party.api';
 import {
-  emitPartyInteraction,
   getTrendingSounds,
   onPartyInteraction,
-  type SoundboardResponse,
-  type SoundItem,
   searchSounds,
 } from '../../room/services/watch-party.api';
-import type { InteractionPayload } from '../../room/types';
 
-export function useSoundboard() {
+interface UseSoundboardOptions {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+  userName?: string;
+}
+
+export function useSoundboard({
+  rtmSendMessage,
+  userId,
+  userName,
+}: UseSoundboardOptions = {}) {
   const [sounds, setSounds] = useState<SoundItem[]>([]);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(false);
@@ -70,66 +81,71 @@ export function useSoundboard() {
     };
   }, [searchQuery, fetchSoundsData]);
 
-  const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchSoundsData(searchQuery, nextPage, true);
-  }, [loading, hasMore, page, fetchSoundsData, searchQuery]);
-
   useEffect(() => {
+    if (!hasMore || loading || !loadMoreRef.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          loadMore();
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchSoundsData(searchQuery, nextPage, true);
         }
       },
       { threshold: 0.1 },
     );
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+
+    observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [loadMore, hasMore, loading]);
+  }, [hasMore, loading, page, searchQuery, fetchSoundsData]);
 
   const playSoundEffect = useCallback((soundUrl: string) => {
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
     }
 
-    let finalUrl = soundUrl;
-    if (typeof window !== 'undefined') {
-      const guestToken = sessionStorage.getItem('guest_token');
-      if (guestToken && soundUrl.startsWith('/api/')) {
-        finalUrl = `${soundUrl}${soundUrl.includes('?') ? '&' : '?'}token=${guestToken}`;
-      }
-    }
-
-    const audio = new Audio(finalUrl);
+    const audio = new Audio(soundUrl);
     currentAudioRef.current = audio;
-    audio.play().catch((_err) => {});
-    audio.onended = () => {
-      if (currentAudioRef.current === audio) currentAudioRef.current = null;
-    };
+    audio.volume = 0.5;
+    audio.play().catch(() => {
+      /* ignore play errors */
+    });
   }, []);
 
-  useEffect(() => {
-    const cleanup = onPartyInteraction((data: InteractionPayload) => {
-      if (data.type === 'sound') playSoundEffect(data.value);
-    });
-    return () => {
-      cleanup();
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current.currentTime = 0;
+  const handleTriggerSound = useCallback(
+    (soundUrl: string, name: string) => {
+      if (!rtmSendMessage || !userId) {
+        toast.error('You must be in the party to use the soundboard');
+        return;
       }
-    };
-  }, [playSoundEffect]);
 
-  const handleTriggerSound = (url: string, name: string) => {
-    playSoundEffect(url);
-    emitPartyInteraction({ type: 'sound', value: url });
-    toast.success(`Played ${name}`, { duration: 1000 });
-  };
+      // 1. Play locally
+      playSoundEffect(soundUrl);
+
+      // 2. Broadcast via RTM
+      rtmSendMessage({
+        type: 'INTERACTION',
+        kind: 'sound',
+        sound: soundUrl,
+        name: name,
+        userId,
+        userName: userName || 'User',
+      });
+    },
+    [rtmSendMessage, userId, userName, playSoundEffect],
+  );
+
+  useEffect(() => {
+    const cleanup = onPartyInteraction(
+      (msg: { type?: string; kind?: string; sound?: string }) => {
+        if (msg.type === 'INTERACTION' && msg.kind === 'sound' && msg.sound) {
+          playSoundEffect(msg.sound);
+        }
+      },
+    );
+    return cleanup;
+  }, [playSoundEffect]);
 
   return {
     sounds,
@@ -139,7 +155,11 @@ export function useSoundboard() {
     hasMore,
     isSearching,
     loadMoreRef,
-    loadMore,
+    loadMore: () => {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchSoundsData(searchQuery, nextPage, true);
+    },
     handleTriggerSound,
   };
 }

@@ -1,33 +1,11 @@
 import { apiFetch } from '@/lib/fetch';
-import { getSocket } from '@/lib/socket';
 import type {
-  ChatMessage, // New
-  InteractionPayload,
-  MemberPermissionsUpdate,
-  PartyAdminRequest,
-  PartyClosed,
+  ChatMessage,
   PartyCreatePayload,
-  PartyEvent, // New
-  PartyJoinApproved,
-  PartyJoinRejected,
   PartyJoinRequestPayload,
-  PartyKicked,
-  PartyMemberJoined,
-  PartyMemberLeft,
-  PartyPermissionsUpdate,
-  PartyPingPayload, // New
-  PartyStateUpdate,
-  PartySyncPayload,
-  PartyThemeUpdate,
-  RoomMember,
   RoomPreview,
-  SketchAction,
   WatchPartyRoom,
 } from '../types';
-
-/**
- * REST API endpoints for room discovery and initial state retrieval.
- */
 
 /**
  * Check if a room exists
@@ -93,463 +71,349 @@ export async function getRoomDetails(
   return apiFetch<WatchPartyRoom>(`/api/rooms/${roomId}`).catch(() => null);
 }
 
-/**
- * Socket.IO API for real-time room management and playback synchronization.
- */
-
-type Callback<T> = (
-  response: { success: boolean; error?: string; code?: string } & T,
-) => void;
-
-/**
- * Emit ping for clock synchronization
- */
-export function emitPing(
-  payload: PartyPingPayload,
-  callback?: Callback<{ t1: number; serverTime: number }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({
-      success: false,
-      error: 'Not connected',
-      t1: 0,
-      serverTime: 0,
-    });
-    return;
-  }
-  socket.emit('party:ping', payload, callback);
-}
-
-/**
- * Emit party event (play/pause/seek/rate)
- */
-export function emitPartyEvent(
-  payload: PartyEvent,
-  callback?: Callback<{ serverTime: number }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({
-      success: false,
-      error: 'Not connected',
-      serverTime: 0,
-    });
-    return;
-  }
-  socket.emit('party:event', payload, callback);
-}
+// =========================================================================
+// WATCH PARTY REST EXPORTS
+// These replace the old Socket.IO emit-with-callback functions.
+// All real-time delivery happens via RTM messages (fired from the hook),
+// but state mutations that require backend validation use these REST calls.
+// =========================================================================
 
 /**
  * Create a watch party room
  */
-export function createPartyRoom(
+export async function createPartyRoom(
+  roomId: string,
   payload: PartyCreatePayload,
-  callback: Callback<{ room?: WatchPartyRoom; streamToken?: string }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+): Promise<{ room?: WatchPartyRoom; streamToken?: string; error?: string }> {
+  try {
+    const data = await apiFetch<{ room: WatchPartyRoom; streamToken: string }>(
+      `/api/rooms/${roomId}/create`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    );
+    return data;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-
-  socket.emit('party:create', payload, callback);
-}
-
-// ... (skipping other functions unchanged) ...
-
-// ============ Chat API ============
-
-export function sendPartyMessage(
-  content: string,
-  callback?: Callback<{ message?: ChatMessage }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:send_message', { content }, callback);
-}
-
-export function getPartyMessages(
-  callback: Callback<{ messages?: ChatMessage[] }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:get_messages', {}, callback);
-}
-
-/**
- * Emit typing start event
- */
-export function emitTypingStart(): void {
-  const socket = getSocket();
-  if (!socket) return;
-  socket.emit('party:typing_start');
-}
-
-/**
- * Emit typing stop event
- */
-export function emitTypingStop(): void {
-  const socket = getSocket();
-  if (!socket) return;
-  socket.emit('party:typing_stop');
-}
-
-/**
- * Emit social interaction (emoji, sound, animation)
- */
-export function emitPartyInteraction(
-  payload: Omit<InteractionPayload, 'userId' | 'userName' | 'timestamp'>,
-  callback?: Callback<Partial<{ timestamp: string | number }>>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:interaction', payload, callback);
 }
 
 /**
  * Request to join a watch party room
  */
-export function requestJoinPartyRoom(
+export async function requestJoinPartyRoom(
+  roomId: string,
   payload: PartyJoinRequestPayload,
-  callback: Callback<{
-    status?: 'pending';
-    room?: WatchPartyRoom;
-    guestToken?: string;
-    streamToken?: string;
-  }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+): Promise<{
+  status?: 'pending';
+  room?: WatchPartyRoom;
+  guestToken?: string;
+  streamToken?: string;
+  error?: string;
+}> {
+  try {
+    const data = await apiFetch<Record<string, unknown>>(
+      `/api/rooms/${roomId}/join`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    );
+    return data;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-  socket.emit('party:join_request', payload, callback);
 }
 
 /**
  * Approve a join request (Host only)
  */
-export function approveJoinRequest(
+export async function approveJoinRequest(
+  roomId: string,
   memberId: string,
-  callback: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await apiFetch(`/api/rooms/${roomId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ memberId }),
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
-  socket.emit('party:approve_request', { memberId }, callback);
 }
 
 /**
  * Reject a join request (Host only)
  */
-export function rejectJoinRequest(
+export async function rejectJoinRequest(
+  roomId: string,
   memberId: string,
-  callback: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await apiFetch(`/api/rooms/${roomId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ memberId }),
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
-  socket.emit('party:reject_request', { memberId }, callback);
 }
 
 /**
  * Kick a member (Host only)
  */
-export function kickMember(memberId: string, callback: Callback<object>): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+export async function kickMember(
+  roomId: string,
+  memberId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await apiFetch(`/api/rooms/${roomId}/kick`, {
+      method: 'POST',
+      body: JSON.stringify({ memberId }),
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
-  socket.emit('party:kick_member', { memberId }, callback);
 }
 
 /**
  * Leave the current watch party
  */
-export function leavePartyRoom(callback: Callback<object>): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+export async function leavePartyRoom(
+  roomId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const guestToken =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('guest_token')
+        : undefined;
+    await apiFetch(`/api/rooms/${roomId}/leave`, {
+      method: 'POST',
+      body: guestToken ? JSON.stringify({ guestId: guestToken }) : undefined,
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
-  socket.emit('party:leave', callback);
-}
-
-/**
- * Sync playback state (host only)
- */
-export function syncPartyState(
-  payload: PartySyncPayload,
-  callback?: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:sync', payload, callback);
 }
 
 /**
  * Request current playback state from server (for guests/reconnection)
  */
-export function requestPartyState(
-  callback: Callback<{ state?: PartyStateUpdate }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+export async function requestPartyState(
+  roomId: string,
+): Promise<{ state?: Record<string, unknown>; error?: string }> {
+  try {
+    const data = await apiFetch<Record<string, unknown>>(
+      `/api/rooms/${roomId}/state`,
+    );
+    return { state: data };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-  socket.emit('party:request_state', {}, callback);
 }
 
 /**
- * Get room info via Socket.IO
+ * Sync playback state (host only)
  */
-export function getPartyRoom(
+export async function syncPartyState(
   roomId: string,
-  callback: Callback<{ room?: WatchPartyRoom }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+  payload: Record<string, unknown>,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await apiFetch(`/api/rooms/${roomId}/state`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
-  socket.emit('party:get_room', { roomId }, callback);
+}
+
+/**
+ * Get room info via REST
+ */
+export async function getPartyRoom(
+  roomId: string,
+): Promise<{ room?: WatchPartyRoom; error?: string }> {
+  try {
+    const room = await getRoomDetails(roomId);
+    if (!room) return { error: 'Not found' };
+    return { room };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }
 
 /**
  * Update room content (Host only)
  */
-export function updatePartyContent(
+export async function updatePartyContent(
+  roomId: string,
   payload: {
     title: string;
     type: 'movie' | 'series';
     season?: number;
     episode?: number;
   },
-  callback: Callback<{ room?: WatchPartyRoom }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+): Promise<{ room?: WatchPartyRoom; error?: string }> {
+  try {
+    const data = await apiFetch<{ room: WatchPartyRoom }>(
+      `/api/rooms/${roomId}/content`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    );
+    return { room: data.room };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-  socket.emit('party:update_content', payload, callback);
 }
 
 /**
  * Get a new stream token (for content updates)
  */
-export function getPartyStreamToken(
-  callback: Callback<{ token?: string }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+export async function getPartyStreamToken(
+  roomId: string,
+): Promise<{ token?: string; error?: string }> {
+  try {
+    const data = await apiFetch<{ token: string }>(
+      `/api/rooms/${roomId}/stream-token`,
+    );
+    return { token: data.token };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-  socket.emit('party:get_stream_token', {}, callback);
 }
 
 /**
  * Fetch pending join requests (Host only)
- * Fallback for when WebSocket notifications are missed
  */
-export function fetchPendingRequests(
-  roomId: string,
-  callback: Callback<{
-    pendingMembers?: Array<{
-      id: string;
-      name: string;
-      profilePhoto?: string | null;
-      isHost: boolean;
-      joinedAt: number;
-    }>;
-  }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback({ success: false, error: 'Not connected' });
-    return;
+export async function fetchPendingRequests(roomId: string): Promise<{
+  pendingMembers?: Array<{
+    id: string;
+    name: string;
+    profilePhoto?: string | null;
+    isHost: boolean;
+    joinedAt: number;
+  }>;
+  error?: string;
+}> {
+  try {
+    const data = await apiFetch<{
+      pendingMembers: Array<{
+        id: string;
+        name: string;
+        profilePhoto?: string | null;
+        isHost: boolean;
+        joinedAt: number;
+      }>;
+    }>(`/api/rooms/${roomId}/pending`);
+    return { pendingMembers: data.pendingMembers };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
-  socket.emit('party:fetch_pending', { roomId }, callback);
 }
 
 /**
- * Socket.IO event listeners for room membership and playback updates.
+ * Update room global permissions
  */
-
-export function onPartyStateUpdate(
-  callback: (data: PartyStateUpdate) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:state_update', callback);
-  return () => socket.off('party:state_update', callback);
+export async function updatePartyPermissions(
+  roomId: string,
+  permissions: Partial<WatchPartyRoom['permissions']>,
+): Promise<{ permissions?: WatchPartyRoom['permissions']; error?: string }> {
+  try {
+    const data = await apiFetch<{ permissions: WatchPartyRoom['permissions'] }>(
+      `/api/rooms/${roomId}/permissions`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ permissions }),
+      },
+    );
+    return { permissions: data.permissions };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }
 
-export function onPartyMemberJoined(
-  callback: (data: PartyMemberJoined) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:member_joined', callback);
-  return () => socket.off('party:member_joined', callback);
+/**
+ * Update individual member permissions
+ */
+export async function updateMemberPermissions(
+  roomId: string,
+  memberId: string,
+  permissions: Record<string, unknown>,
+): Promise<{
+  memberId?: string;
+  permissions?: Record<string, unknown>;
+  error?: string;
+}> {
+  try {
+    const data = await apiFetch<Record<string, unknown>>(
+      `/api/rooms/${roomId}/members/${memberId}/permissions`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ permissions }),
+      },
+    );
+    return data;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }
 
-export function onPartyMemberLeft(
-  callback: (data: PartyMemberLeft) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
+// ============ Chat REST API ============
 
-  socket.on('party:member_left', callback);
-  return () => socket.off('party:member_left', callback);
+export async function sendPartyMessage(
+  roomId: string,
+  content: string,
+): Promise<{ message?: ChatMessage; error?: string }> {
+  try {
+    const data = await apiFetch<{ message: ChatMessage }>(
+      `/api/rooms/${roomId}/messages`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      },
+    );
+    return { message: data.message };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }
 
-export function onPartyClosed(
-  callback: (data: PartyClosed) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:closed', callback);
-  return () => socket.off('party:closed', callback);
-}
-
-export function onPartyContentUpdated(
-  callback: (data: { room: WatchPartyRoom }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:content_updated', callback);
-  return () => socket.off('party:content_updated', callback);
-}
-
-// New Admin/Guest Listeners
-
-export function onPartyAdminRequest(
-  callback: (data: PartyAdminRequest) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:admin_request', callback);
-  return () => socket.off('party:admin_request', callback);
-}
-
-export function onPartyJoinApproved(
-  callback: (data: PartyJoinApproved) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:join_approved', callback);
-  return () => socket.off('party:join_approved', callback);
-}
-
-export function onPartyJoinRejected(
-  callback: (data: PartyJoinRejected) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:join_rejected', callback);
-  return () => socket.off('party:join_rejected', callback);
-}
-
-export function onPartyKicked(
-  callback: (data: PartyKicked) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:kicked', callback);
-  return () => socket.off('party:kicked', callback);
-}
-
-export function onPartyMemberRejected(
-  callback: (data: { memberId: string }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:member_rejected', callback);
-  return () => socket.off('party:member_rejected', callback);
-}
-
-// ============ Chat API ============
-
-export function onPartyMessage(
-  callback: (message: ChatMessage) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:message', callback);
-  return () => socket.off('party:message', callback);
-}
-
-export function onUserTyping(
-  callback: (data: {
-    userId: string;
-    userName: string;
-    isTyping: boolean;
-  }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:user_typing', callback);
-  return () => socket.off('party:user_typing', callback);
-}
-
-export function onPartyHostDisconnected(
-  callback: (data: { graceSeconds: number; message: string }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:host_disconnected', callback);
-  return () => socket.off('party:host_disconnected', callback);
-}
-
-export function onPartyHostReconnected(callback: () => void): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:host_reconnected', callback);
-  return () => socket.off('party:host_reconnected', callback);
-}
-
-export function onPartyInteraction(
-  callback: (data: InteractionPayload) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('party:interaction', callback);
-  return () => socket.off('party:interaction', callback);
+export async function getPartyMessages(
+  roomId: string,
+): Promise<{ messages?: ChatMessage[]; error?: string }> {
+  try {
+    const data = await apiFetch<{ messages: ChatMessage[] }>(
+      `/api/rooms/${roomId}/messages`,
+    );
+    return { messages: data.messages };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }
 
 // ============ Soundboard API ============
@@ -587,192 +451,90 @@ export async function searchSounds(
   );
 }
 
-// ============ Permissions & Sketch API ============
+// =========================================================================
+// RTM EVENT DISPATCHER & LISTENERS
+// These restore the old Socket.IO "on" API by bridging RTM messages
+// to a local event emitter. This minimizes refactoring in UI components.
+// =========================================================================
 
-export function updatePartyPermissions(
-  permissions: Partial<WatchPartyRoom['permissions']>,
-  callback?: Callback<{ permissions?: WatchPartyRoom['permissions'] }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
+type RtmListener = (data: Record<string, unknown>) => void;
+const rtmListeners: Record<string, Set<RtmListener>> = {};
+
+/**
+ * Internal: Dispatch an incoming RTM message to all local subscribers
+ */
+export function dispatchRtmMessage(msg: Record<string, unknown>) {
+  const eventType = msg.type as string;
+  if (rtmListeners[eventType]) {
+    rtmListeners[eventType].forEach((cb) => {
+      cb(msg);
+    });
   }
-  socket.emit('party:update_permissions', { permissions }, callback);
+  // Also dispatch to the generic "INTERACTION" listener if it's an interaction
+  if (eventType === 'INTERACTION' && rtmListeners.INTERACTION) {
+    rtmListeners.INTERACTION.forEach((cb) => {
+      cb(msg);
+    });
+  }
 }
 
-export function updateMemberPermissions(
-  memberId: string,
-  permissions: Partial<NonNullable<RoomMember['permissions']>>,
-  callback?: Callback<{
-    memberId?: string;
-    permissions?: RoomMember['permissions'];
-  }>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit(
-    'party:update_member_permissions',
-    { memberId, permissions },
-    callback,
+function subscribe(event: string, callback: RtmListener) {
+  if (!rtmListeners[event]) rtmListeners[event] = new Set();
+  rtmListeners[event].add(callback);
+  return () => {
+    rtmListeners[event].delete(callback);
+  };
+}
+
+export const onSketchDraw = <T = unknown>(callback: (action: T) => void) =>
+  subscribe('SKETCH_DRAW', (msg) => callback(msg.action as unknown as T));
+
+export const onSketchClear = <
+  T extends { userId: string; type: 'all' | 'self' } = {
+    userId: string;
+    type: 'all' | 'self';
+  },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_CLEAR', (msg) =>
+    callback({
+      userId: msg.userId as string,
+      type: msg.mode as 'all' | 'self',
+    } as unknown as T),
   );
-}
 
-export function onPartyPermissionsUpdated(
-  callback: (data: PartyPermissionsUpdate) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
+export const onSketchUndo = <
+  T extends { userId: string; actionId: string } = {
+    userId: string;
+    actionId: string;
+  },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_UNDO', (msg) =>
+    callback({
+      userId: msg.userId as string,
+      actionId: msg.actionId as string,
+    } as unknown as T),
+  );
 
-  socket.on('party:permissions_updated', callback);
-  return () => socket.off('party:permissions_updated', callback);
-}
+export const onSketchProvideSync = <
+  T extends { requesterId: string } = { requesterId: string },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_REQUEST_SYNC', (msg) =>
+    callback({ requesterId: msg.requesterId as string } as unknown as T),
+  );
 
-export function onPartyMemberPermissionsUpdated(
-  callback: (data: MemberPermissionsUpdate) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
+export const onSketchSyncState = <T = unknown[]>(
+  callback: (data: { elements: T }) => void,
+) =>
+  subscribe('SKETCH_SYNC_STATE', (msg) =>
+    callback({ elements: msg.elements as T }),
+  );
 
-  socket.on('party:member_permissions_updated', callback);
-  return () => socket.off('party:member_permissions_updated', callback);
-}
-
-export function emitSketchDraw(
-  payload: SketchAction,
-  callback?: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('sketch:draw', payload, callback);
-}
-
-export function emitSketchClear(
-  payload: { type: 'all' | 'self' },
-  callback?: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('sketch:clear', payload, callback);
-}
-
-export function onSketchDraw(
-  callback: (data: SketchAction) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('sketch:draw', callback);
-  return () => socket.off('sketch:draw', callback);
-}
-
-export function onSketchClear(
-  callback: (data: { userId: string; type: 'all' | 'self' }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('sketch:clear', callback);
-  return () => socket.off('sketch:clear', callback);
-}
-
-// Emitted by a new user joining the room
-export function emitSketchRequestSync(): void {
-  const socket = getSocket();
-  if (!socket) return;
-  socket.emit('sketch:request_sync');
-}
-
-// Received by the Host when someone asks for sync
-export function onSketchProvideSync(
-  callback: (data: { requesterId: string }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('sketch:provide_sync', callback);
-  return () => socket.off('sketch:provide_sync', callback);
-}
-
-// Emitted by the Host with all current canvas elements
-export function emitSketchSyncState(
-  requesterId: string,
-  elements: SketchAction[],
-): void {
-  const socket = getSocket();
-  if (!socket) return;
-  socket.emit('sketch:sync_state', { requesterId, elements });
-}
-
-// Received by the requester with the current canvas elements
-export function onSketchSyncState(
-  callback: (data: { elements: SketchAction[] }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('sketch:sync_state', callback);
-  return () => socket.off('sketch:sync_state', callback);
-}
-
-// Undo the user's last drawing action and broadcast to the room
-export function emitSketchUndo(
-  payload: { actionId: string },
-  callback?: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('sketch:undo', payload, callback);
-}
-
-// Received when another user undoes one of their actions
-export function onSketchUndo(
-  callback: (data: { userId: string; actionId: string }) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-
-  socket.on('sketch:undo', callback);
-  return () => socket.off('sketch:undo', callback);
-}
-
-// ============ Theme Sync API ============
-
-/**
- * Host emits this to sync their sidebar colour theme to all members.
- */
-export function updatePartyTheme(
-  payload: { theme: string; customColor: string },
-  callback?: Callback<object>,
-): void {
-  const socket = getSocket();
-  if (!socket) {
-    callback?.({ success: false, error: 'Not connected' });
-    return;
-  }
-  socket.emit('party:update_theme', payload, callback);
-}
-
-/**
- * Subscribe to theme updates broadcast by the host.
- */
-export function onPartyThemeUpdated(
-  callback: (data: PartyThemeUpdate) => void,
-): () => void {
-  const socket = getSocket();
-  if (!socket) return () => {};
-  socket.on('party:theme_updated', callback);
-  return () => socket.off('party:theme_updated', callback);
-}
+export const onPartyInteraction = <T = unknown>(
+  callback: (interaction: T) => void,
+) => subscribe('INTERACTION', (msg) => callback(msg as unknown as T));
