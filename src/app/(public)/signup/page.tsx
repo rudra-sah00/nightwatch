@@ -53,6 +53,15 @@ export default function SignupPage() {
       className={`bg-white text-[#1a1a1a] h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99] ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
+        {/* Brand Identity Hero */}
+        <div className="mb-1 text-center">
+          <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0.5 font-headline">
+            Watch Rudra
+          </h1>
+          <p className="font-headline font-bold text-[10px] uppercase tracking-widest text-[#e63b2e]">
+            Form Follows Function
+          </p>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-center pb-2 md:pb-0 shrink-0">
           {/* Features Bento Box - Reduced padding and text */}
           <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:h-[640px]">
