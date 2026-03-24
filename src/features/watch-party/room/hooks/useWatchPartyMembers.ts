@@ -194,11 +194,7 @@ export function useWatchPartyMembers({
         }
       };
 
-      eventSource.onerror = (e) => {
-        // biome-ignore lint/suspicious/noConsole: Necessary for debugging join request SSE issues
-        console.error('Watch Party SSE Error:', e);
-        // biome-ignore lint/suspicious/noConsole: Necessary for debugging join request SSE issues
-        console.log('SSE readyState:', eventSource?.readyState);
+      eventSource.onerror = () => {
         eventSource?.close();
         if (active) {
           // Retry connection after 5 seconds to reduce server load on failure
