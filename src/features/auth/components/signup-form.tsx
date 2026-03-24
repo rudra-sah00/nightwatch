@@ -332,9 +332,9 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           type="submit"
           isLoading={isLoading}
           disabled={!captchaToken || isLoading}
-          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-2.5 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 md:py-5 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
         >
-          {isLoading ? 'Creating...' : 'Create Account'}
+          {isLoading ? 'Creating...' : 'Begin Story'}
         </Button>
       </div>
     </form>
