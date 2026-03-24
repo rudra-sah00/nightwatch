@@ -37,7 +37,12 @@ export function SearchClient({
     query: searchInputQuery,
     setQuery: setSearchInputQuery,
     handleSearch,
+    isPending,
   } = useSearchInput();
+
+  // isPending goes true the instant the user presses Enter (router transition
+  // fires) and stays true until the new page renders — giving immediate
+  // skeleton feedback without reacting to every character typed.
 
   return (
     <div className="w-full">
@@ -46,7 +51,7 @@ export function SearchClient({
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 mb-4">
               <h1 className="font-headline text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-[#1a1a1a] flex flex-wrap gap-x-4">
-                {isTransitioning ? 'Searching:' : 'Results:'}
+                {isTransitioning || isPending ? 'Searching:' : 'Results:'}
                 {/* Real Input Layer */}
                 <input
                   value={searchInputQuery}
@@ -63,7 +68,7 @@ export function SearchClient({
                 />
               </h1>
             </div>
-            {!isTransitioning && (
+            {!isTransitioning && !isPending && (
               <p className="font-headline font-bold text-xl uppercase tracking-widest text-[#4a4a4a]">
                 {results.length} Films Found in the Archives
               </p>
@@ -73,7 +78,7 @@ export function SearchClient({
           <div className="space-y-6">
             <SearchResults
               results={results}
-              isLoading={isTransitioning}
+              isLoading={isTransitioning || isPending}
               onSelect={handleSelectContent}
             />
           </div>
