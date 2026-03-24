@@ -196,10 +196,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   const isMatch = formData.password === confirmPassword;
 
   return (
-    <form
-      action={action}
-      className="space-y-4 lg:max-h-[60vh] lg:overflow-y-auto lg:pr-2 hide-scroll w-full"
-    >
+    <form action={action} className="space-y-2 w-full">
       {/* Name */}
       <div>
         <Label
@@ -217,13 +214,8 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.name}
           autoComplete="name"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
         />
-        {!fieldErrors.name ? (
-          <p className="text-[10px] uppercase font-bold tracking-widest text-[#1a1a1a]/60 mt-1 hidden sm:block">
-            Used for personalized experience
-          </p>
-        ) : null}
       </div>
 
       {/* Email */}
@@ -244,7 +236,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.email}
           autoComplete="email"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
         />
       </div>
 
@@ -271,7 +263,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.password}
           autoComplete="new-password"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base mb-1 !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm mb-1 !h-[38px]"
         />
         <div className="scale-90 origin-left">
           <PasswordStrengthIndicator password={formData.password} />
@@ -305,7 +297,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.confirmPassword}
           autoComplete="new-password"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
         />
         {!fieldErrors.confirmPassword && confirmPassword ? (
           <p
@@ -326,7 +318,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
         value={formData.inviteCode || ''}
       />
 
-      <div className="pt-2 scale-95 origin-left">
+      <div className="pt-1 scale-95 origin-left">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}
@@ -340,7 +332,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           type="submit"
           isLoading={isLoading}
           disabled={!captchaToken || isLoading}
-          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-2.5 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
         >
           {isLoading ? 'Creating...' : 'Create Account'}
         </Button>
