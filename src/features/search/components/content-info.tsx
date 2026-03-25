@@ -163,12 +163,11 @@ export const ContentActions = memo(function ContentActions({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 mt-6">
+    <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 mt-6">
       <button
         type="button"
         className={cn(
           'col-span-2 sm:col-auto',
-          'h-14 sm:h-auto',
           'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
           isPlaying ||
             isCreatingParty ||
@@ -213,8 +212,8 @@ export const ContentActions = memo(function ContentActions({
         <button
           type="button"
           className={cn(
-            'col-span-1 sm:col-auto h-14 sm:h-auto',
-            'flex items-center justify-center gap-3 px-2 sm:px-8 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm md:text-lg transition-all duration-200',
+            'col-span-2 sm:col-auto',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
             isCreatingParty || isPlaying
               ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
               : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
@@ -228,7 +227,7 @@ export const ContentActions = memo(function ContentActions({
             <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
           )}
           <span className="truncate">
-            {isCreatingParty ? 'Creating' : 'Party'}
+            {isCreatingParty ? 'Creating' : 'Watch Together'}
           </span>
         </button>
       )}
@@ -238,8 +237,8 @@ export const ContentActions = memo(function ContentActions({
         <button
           type="button"
           className={cn(
-            'col-span-1 sm:col-auto h-14 sm:h-auto',
-            'flex items-center justify-center gap-3 px-2 sm:px-8 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm md:text-lg transition-all duration-200 group',
+            'col-span-2 sm:col-auto',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group',
             isWatchlistLoading
               ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
               : isInWatchlist
@@ -257,21 +256,15 @@ export const ContentActions = memo(function ContentActions({
             <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
           )}
           <span className="truncate">
-            {isInWatchlist
-              ? isMobile
-                ? 'Rem'
-                : 'Remove'
-              : isMobile
-                ? 'List'
-                : 'Watchlist'}
+            {isInWatchlist ? 'Remove from List' : 'To Watchlist'}
           </span>
         </button>
       )}
 
       {/* Extra Actions Container (Download) */}
       {extraActions && (
-        <div className="col-span-2 sm:col-auto h-14 sm:h-auto border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200">
-          <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:p-0">
+        <div className="col-span-2 sm:col-auto border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200">
+          <div className="w-full h-full [&>button]:w-full [&>button]:min-h-[56px] sm:[&>button]:min-h-0 [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg">
             {extraActions}
           </div>
         </div>
