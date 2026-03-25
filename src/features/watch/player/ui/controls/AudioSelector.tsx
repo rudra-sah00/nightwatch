@@ -63,7 +63,7 @@ export function AudioSelector({
             'bg-white border-[4px] border-[#1a1a1a]',
             'neo-shadow',
             'animate-in fade-in slide-in-from-bottom-3 zoom-in-95 duration-200',
-            'flex flex-col',
+            'flex flex-col z-[100]',
           )}
         >
           {/* Header */}

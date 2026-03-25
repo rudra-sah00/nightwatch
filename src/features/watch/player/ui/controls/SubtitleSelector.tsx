@@ -382,7 +382,7 @@ export function SubtitleSelector({
             'absolute bottom-full right-0 mb-3',
             'w-64 overflow-hidden',
             'bg-white border-[4px] border-[#1a1a1a] flex flex-col',
-            'neo-shadow',
+            'neo-shadow z-[100]',
             'animate-in fade-in slide-in-from-bottom-3 duration-200',
           )}
         >
