@@ -240,4 +240,46 @@ describe('useMp4', () => {
       expect.objectContaining({ type: 'SET_CURRENT_QUALITY', quality: '720p' }),
     );
   });
+
+  it('sets initial quality from streamUrl if no exact match found', () => {
+    const videoRef = createVideoRef();
+    const qualities = [
+      { quality: '1080p', url: '1080.mp4' },
+      { quality: '720p', url: '720.mp4' },
+    ];
+
+    renderHook(() =>
+      useMp4({
+        videoRef,
+        streamUrl: 'https://example.com/720.mp4?token=123',
+        dispatch: mockDispatch,
+        manualQualities: qualities,
+      }),
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'SET_CURRENT_QUALITY', quality: '720p' }),
+    );
+  });
+
+  it('sets first quality as default if no quality matches streamUrl', () => {
+    const videoRef = createVideoRef();
+    const qualities = [{ quality: '1080p', url: '1080.mp4' }];
+
+    renderHook(() =>
+      useMp4({
+        videoRef,
+        streamUrl: 'https://example.com/other.mp4',
+        dispatch: mockDispatch,
+        manualQualities: qualities,
+      }),
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SET_CURRENT_QUALITY',
+        quality: '1080p',
+      }),
+    );
+  });
 });

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { S2AudioTrack } from '@/features/watch/player/hooks/s2/useS2AudioTracks';
+import type { S2AudioTrack } from '@/features/watch/player/hooks/useS2AudioTracks';
 import { useWatchPartyVideoArea } from '@/features/watch-party/hooks/use-watch-party-video-area';
 import type { WatchPartyRoom } from '@/features/watch-party/room/types';
 

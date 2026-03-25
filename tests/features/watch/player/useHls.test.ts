@@ -794,4 +794,105 @@ describe('useHls', () => {
       });
     });
   });
+  describe('native HLS (Safari) edge cases', () => {
+    it('should handle native stalled and playing events', async () => {
+      (
+        MockHlsClass as unknown as {
+          isSupported: { mockReturnValue: (v: boolean) => void };
+        }
+      ).isSupported.mockReturnValue(false);
+      const videoRef = createVideoRef();
+      videoRef.current.canPlayType = vi.fn((type: string) =>
+        type === 'application/vnd.apple.mpegurl' ? 'maybe' : '',
+      ) as unknown as typeof videoRef.current.canPlayType;
+
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+        }),
+      );
+
+      await vi.waitFor(() => {
+        expect(videoRef.current.src).toContain('stream.m3u8');
+      });
+
+      // Simulate stalled
+      act(() => {
+        videoRef.current.dispatchEvent(new Event('stalled'));
+      });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_BUFFERING',
+        isBuffering: true,
+      });
+
+      // Simulate playing
+      act(() => {
+        videoRef.current.dispatchEvent(new Event('playing'));
+      });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_BUFFERING',
+        isBuffering: false,
+      });
+
+      (
+        MockHlsClass as unknown as {
+          isSupported: { mockReturnValue: (v: boolean) => void };
+        }
+      ).isSupported.mockReturnValue(true);
+    });
+
+    it('should handle native error event and trigger refetch if expired', async () => {
+      (
+        MockHlsClass as unknown as {
+          isSupported: { mockReturnValue: (v: boolean) => void };
+        }
+      ).isSupported.mockReturnValue(false);
+      const onStreamExpired = vi.fn();
+      const videoRef = createVideoRef();
+      videoRef.current.canPlayType = vi.fn((type: string) =>
+        type === 'application/vnd.apple.mpegurl' ? 'maybe' : '',
+      ) as unknown as typeof videoRef.current.canPlayType;
+
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+          onStreamExpired,
+        }),
+      );
+
+      await vi.waitFor(() => {
+        expect(videoRef.current.src).toContain('stream.m3u8');
+      });
+
+      // Mock MediaError
+      Object.defineProperty(videoRef.current, 'error', {
+        value: { code: 2 }, // MEDIA_ERR_NETWORK (simplified)
+        configurable: true,
+      });
+
+      // Note: In JSDOM MediaError.MEDIA_ERR_NETWORK is 2
+      // Some environments might need it specifically defined
+      global.MediaError = {
+        MEDIA_ERR_ABORTED: 1,
+        MEDIA_ERR_NETWORK: 2,
+        MEDIA_ERR_DECODE: 3,
+        MEDIA_ERR_SRC_NOT_SUPPORTED: 4,
+      } as unknown as typeof MediaError;
+
+      act(() => {
+        videoRef.current.dispatchEvent(new Event('error'));
+      });
+
+      expect(onStreamExpired).toHaveBeenCalled();
+      (
+        MockHlsClass as unknown as {
+          isSupported: { mockReturnValue: (v: boolean) => void };
+        }
+      ).isSupported.mockReturnValue(true);
+    });
+  });
 });

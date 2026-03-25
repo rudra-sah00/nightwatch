@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import type { S2AudioTrack } from '@/features/watch/player/hooks/s2/useS2AudioTracks';
+import type { S2AudioTrack } from '@/features/watch/player/hooks/useS2AudioTracks';
 import type { WatchPartyRoom } from '../room/types';
 
 export function useWatchPartyVideoArea(room: WatchPartyRoom) {

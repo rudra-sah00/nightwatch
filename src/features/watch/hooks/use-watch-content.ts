@@ -4,11 +4,11 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import { useS1StreamUrls } from '@/features/watch/player/hooks/s1/useS1StreamUrls';
 import {
   type S2AudioTrack,
   useS2AudioTracks,
-} from '@/features/watch/player/hooks/s2/useS2AudioTracks';
+} from '@/features/watch/player/hooks/useS2AudioTracks';
+import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
@@ -74,10 +74,9 @@ export function useWatchContent() {
     qualities,
     subtitleTracks,
     apiDurationSeconds,
-    applyResponse: applyS1Response,
-    applyS2Response,
+    applyResponse,
     applyS2Subtitles,
-  } = useS1StreamUrls({
+  } = useStreamUrls({
     initialStreamUrlRaw: streamParam ? decodeURIComponent(streamParam) : null,
     initialCaptionUrlRaw: captionParam
       ? decodeURIComponent(captionParam)
@@ -136,10 +135,11 @@ export function useWatchContent() {
         }
 
         if (response.success && response.masterPlaylistUrl) {
-          if (server === 's1') {
-            applyS1Response(response);
-          } else {
-            applyS2Response(response);
+          // Unified response handling via StreamUrlService (called within useStreamUrls)
+          applyResponse(server, response);
+
+          // Server 2 specific audio track handling
+          if (server === 's2') {
             if (response.audioTracks && response.audioTracks.length > 0) {
               setS2InitialAudioTracks(
                 response.audioTracks.map((t) => ({
@@ -180,17 +180,7 @@ export function useWatchContent() {
         }, 2000);
       }
     },
-    [
-      title,
-      type,
-      season,
-      episode,
-      movieId,
-      seriesId,
-      server,
-      applyS1Response,
-      applyS2Response,
-    ],
+    [title, type, season, episode, movieId, seriesId, server, applyResponse],
   );
 
   const handleBeforeS2Discovery = useCallback(() => {
