@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.9.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.8.0...v1.9.0) (2026-03-25)
+
+
+### Features
+
+* **auth:** support mobile callback redirect on web otp verify ([a767935](https://github.com/rudra-sah00/watch-rudra/commit/a7679353eb8fa4847b314c555111f97ec9f46d05))
+* **search:** show skeleton instantly on Enter key press ([0493afd](https://github.com/rudra-sah00/watch-rudra/commit/0493afd0778b5f3565c040057a08d0d14b6cf343))
+* **sketch:** replace browser prompt() with custom inline text input ([0ed6282](https://github.com/rudra-sah00/watch-rudra/commit/0ed628289028768b3c0a0add52a861f8b243e7c5))
+* **ui:** rename servers to more user-friendly labels ([fb90e59](https://github.com/rudra-sah00/watch-rudra/commit/fb90e59f006b5b0a30d079ac00866b37bdf83fdd))
+
+
+### Bug Fixes
+
+* abort signal support for fetch hooks, remove dead /health call ([e83fd3c](https://github.com/rudra-sah00/watch-rudra/commit/e83fd3c5a08f4e9df6ae645a382df58af570bdfa))
+* append CSRF token to sendBeacon URL for /api/video/stop ([5a4d39c](https://github.com/rudra-sah00/watch-rudra/commit/5a4d39c7b3f66b167936528ae0418940d4176cb4))
+* **auth:** match signup button to login design and rename to 'Begin Story' ([c6cc275](https://github.com/rudra-sah00/watch-rudra/commit/c6cc275f90f086e610e45041a97b38009bdc1c1f))
+* encode S2 content IDs in watch URLs to handle slashes in path segments ([2fd2285](https://github.com/rudra-sah00/watch-rudra/commit/2fd22855d796584061e49abec5282c6b8648e4b0))
+* **frontend:** render profile photo correctly on profile-overview ([1c3bace](https://github.com/rudra-sah00/watch-rudra/commit/1c3bace4535dbeaa449f53eb4e4156c843e0f341))
+* **frontend:** update frontend integrations and components ([22fd968](https://github.com/rudra-sah00/watch-rudra/commit/22fd968290232a8abe7acf93589b59a20a5023df))
+* **loading:** single white spinner on initial page load ([f90d803](https://github.com/rudra-sah00/watch-rudra/commit/f90d803dcc7bb311af2dc9e411e28f28427d2a46))
+* **player:** pass explicit providerId to watch party player root to prevent fallback to mp4 engine for server 3 streams ([78b8ed2](https://github.com/rudra-sah00/watch-rudra/commit/78b8ed2dfbd6f8ac7f4f35a91dd8b43814775e60))
+* profile error toast, modal close-before-nav, watch party inline mode, continue watching fixes ([ab8d883](https://github.com/rudra-sah00/watch-rudra/commit/ab8d883016bbb5cbef48e472ea9b63a3ba199bb9))
+* remove duplicate error toast and stale toast on settings tab switch ([bfbce58](https://github.com/rudra-sah00/watch-rudra/commit/bfbce58f4fa1921b6420576aea187b3fb839c491))
+* S2 playback, video fit, live page colors, continue watching reset ([9729f81](https://github.com/rudra-sah00/watch-rudra/commit/9729f8129982d2a5374116feb94e08df6075659d))
+* **search:** remove duplicate old skeleton on first navigation ([c4ed5ff](https://github.com/rudra-sah00/watch-rudra/commit/c4ed5ff4be4da0b3a2e64d43eab481afba7dd61b))
+* **signup:** fit entire form in one screen without scrolling ([9490e87](https://github.com/rudra-sah00/watch-rudra/commit/9490e877cec47634cb2d4985c17c2c1fec2a20c0))
+* **signup:** match button design to login and rename to 'Begin Story' ([916bf25](https://github.com/rudra-sah00/watch-rudra/commit/916bf256449a5d6b00cfa759533c841c616c2da7))
+* **signup:** match header size to login, left cards stretch to match form height ([9a0368c](https://github.com/rudra-sah00/watch-rudra/commit/9a0368c0972a8819130c5b7b40078f9018d9e9c0))
+* **signup:** restore Watch Rudra brand heading, just smaller (text-4xl) ([aaa028f](https://github.com/rudra-sah00/watch-rudra/commit/aaa028fd9b57d79e9fae05f090e3781a5113ae93))
+* stream session cleanup and video fit on ultrawide screens ([5adf9ae](https://github.com/rudra-sah00/watch-rudra/commit/5adf9ae7b458ee2bbf96797e56a1f3b5d0762b85))
+* **tests:** resolve Biome warnings and TS errors in watch-party test suite ([bd36943](https://github.com/rudra-sah00/watch-rudra/commit/bd369431c16d44677677b88137853a6fad4a326c))
+
 ## [1.8.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.7.0...v1.8.0) (2026-03-10)
 
 
