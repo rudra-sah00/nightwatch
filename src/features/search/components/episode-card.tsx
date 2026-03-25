@@ -51,7 +51,10 @@ export function EpisodeCard({
             src={thumbnailSrc}
             alt={episode.title || `Episode ${episode.episodeNumber}`}
             fill
-            className={cn('object-cover', isPlaying && 'opacity-70')}
+            className={cn(
+              'object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500',
+              isPlaying && 'opacity-70',
+            )}
             unoptimized={thumbnailSrc.startsWith('/api/stream/')}
             onError={() => setImageError(true)}
           />

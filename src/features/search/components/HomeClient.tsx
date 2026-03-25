@@ -74,7 +74,12 @@ export function HomeClient() {
                   autoComplete="off"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={handleSearch}
+                  onKeyDown={(e) => {
+                    handleSearch(e);
+                    if (e.key === 'Enter') {
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
                 />
               </div>
             </div>
