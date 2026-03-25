@@ -47,7 +47,7 @@ export default function LoginPage() {
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-center shrink-0">
           {/* Features Bento Box - Reduced padding and text */}
-          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:h-[540px]">
+          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:h-[500px]">
             <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
@@ -101,8 +101,8 @@ export default function LoginPage() {
             </div>
           </div>
           {/* Login Card wrapper */}
-          <div className="lg:col-span-5 flex items-center justify-center w-full">
-            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-[92%] max-w-xs mx-auto lg:w-full lg:max-w-none lg:mx-0 h-full lg:h-[540px]">
+          <div className="lg:col-span-12 xl:col-span-5 flex items-center justify-center w-full">
+            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none h-full lg:h-[500px]">
               <div className="flex-grow flex flex-col justify-start h-full overflow-hidden">
                 <LoginForm />
               </div>

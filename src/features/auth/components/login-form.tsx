@@ -28,7 +28,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
-      <div className="mb-3 shrink-0 text-center md:text-left">
+      <div className="mb-6 shrink-0 text-center md:text-left">
         <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
           Watch Rudra
         </h1>
@@ -37,7 +37,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-3 shrink-0">
+      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-4 shrink-0">
         <h2 className="text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
           {isOtpStep ? 'Verify' : 'Enter'}
         </h2>
@@ -46,7 +46,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <div className="flex-grow flex flex-col justify-start">
+      <div className="flex-grow flex flex-col justify-center">
         {isOtpStep ? (
           <OtpStep
             email={formData.email}
@@ -213,7 +213,7 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
 
-      <div className="pt-2 scale-[0.8] md:scale-95 origin-left">
+      <div className="pt-2 scale-95 origin-left">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}

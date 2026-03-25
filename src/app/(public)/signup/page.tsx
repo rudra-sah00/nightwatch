@@ -126,8 +126,8 @@ export default function SignupPage() {
               </div>
             </div>
             {/* Signup Card wrapper */}
-            <div className="lg:col-span-5 flex items-center justify-center w-full">
-              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-[92%] max-w-xs mx-auto lg:w-full lg:max-w-none lg:mx-0">
+            <div className="lg:col-span-12 xl:col-span-5 flex items-center justify-center w-full">
+              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none">
                 <div className="flex flex-col justify-start w-full">
                   <SignupForm />
                 </div>
