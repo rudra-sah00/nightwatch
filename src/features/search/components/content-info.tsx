@@ -11,7 +11,8 @@ import {
   Tv,
   Users,
 } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import type { ContentProgress } from '@/types/content';
 import { ContentType, type ShowDetails } from '../types';
@@ -23,7 +24,7 @@ interface ContentInfoProps {
   hasWatchProgress?: boolean;
   watchProgress?: ContentProgress | null;
   selectedSeason?: { seasonNumber: number } | null;
-  onPlay: () => void;
+  onPlay?: () => void;
   onResume?: () => void;
   onWatchParty?: () => void;
   isWatchPartyDisabled?: boolean;
@@ -54,14 +55,6 @@ export const ContentInfo = memo(function ContentInfo({
   extraActions,
 }: ContentInfoProps) {
   const isSeries = show.contentType === ContentType.Series;
-
-  const handleButtonClick = () => {
-    if (hasWatchProgress && onResume) {
-      onResume();
-    } else {
-      onPlay();
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -151,101 +144,150 @@ export const ContentInfo = memo(function ContentInfo({
           </div>
         </div>
       ) : null}
+    </div>
+  );
+});
 
-      {/* Play/Resume Button */}
-      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 md:gap-4 mt-6">
-        <button
-          type="button"
-          className={cn(
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
-            isPlaying ||
-              isCreatingParty ||
-              (hasWatchProgress && isLoadingProgress)
-              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
-              : 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
-          )}
-          onClick={handleButtonClick}
-          disabled={
-            isPlaying ||
+export const ContentActions = memo(function ContentActions({
+  isPlaying,
+  isLoadingProgress = false,
+  hasWatchProgress,
+  watchProgress,
+  isSeries,
+  selectedSeason,
+  onPlay,
+  onResume,
+  onWatchParty,
+  isWatchPartyDisabled,
+  isCreatingParty = false,
+  onWatchlistToggle,
+  isInWatchlist = false,
+  isWatchlistLoading = false,
+  extraActions,
+}: Omit<ContentInfoProps, 'show'> & { isSeries: boolean }) {
+  const isMobile = useIsMobile();
+  const handleButtonClick = () => {
+    if (hasWatchProgress && onResume) {
+      onResume();
+    } else if (onPlay) {
+      onPlay();
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 mt-6">
+      <button
+        type="button"
+        className={cn(
+          'col-span-2 sm:col-auto',
+          'h-14 sm:h-auto',
+          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
+          isPlaying ||
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
-          }
-        >
-          {isPlaying ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : isLoadingProgress && hasWatchProgress ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
-          )}
+            ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+            : 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
+        )}
+        onClick={handleButtonClick}
+        disabled={
+          isPlaying ||
+          isCreatingParty ||
+          (hasWatchProgress && isLoadingProgress)
+        }
+      >
+        {isPlaying ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : isLoadingProgress && hasWatchProgress ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
+        )}
+        <span className="truncate">
           {isPlaying
-            ? 'Loading...'
+            ? 'Loading'
             : isLoadingProgress && hasWatchProgress
-              ? 'Loading...'
+              ? 'Loading'
               : hasWatchProgress &&
                   isSeries &&
                   watchProgress?.seasonNumber != null &&
                   watchProgress?.episodeNumber != null
                 ? `Resume S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
                 : hasWatchProgress && !isSeries
-                  ? `Resume (${Math.round(watchProgress?.progressPercent || 0)}%)`
+                  ? `Resume`
                   : isSeries && selectedSeason
                     ? `Play S${selectedSeason.seasonNumber}:E1`
                     : 'Watch Solo'}
+        </span>
+      </button>
+
+      {/* Watch Together Button */}
+      {onWatchParty && !isWatchPartyDisabled && (
+        <button
+          type="button"
+          className={cn(
+            'col-span-1 sm:col-auto h-14 sm:h-auto',
+            'flex items-center justify-center gap-3 px-2 sm:px-8 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm md:text-lg transition-all duration-200',
+            isCreatingParty || isPlaying
+              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+              : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
+          )}
+          onClick={isCreatingParty ? undefined : onWatchParty}
+          disabled={isCreatingParty || isPlaying}
+        >
+          {isCreatingParty ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          )}
+          <span className="truncate">
+            {isCreatingParty ? 'Creating' : 'Party'}
+          </span>
         </button>
+      )}
 
-        {/* Watch Together Button */}
-        {onWatchParty && !isWatchPartyDisabled ? (
-          <button
-            type="button"
-            className={cn(
-              'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
-              isCreatingParty
-                ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
-                : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
-            )}
-            onClick={isCreatingParty ? undefined : onWatchParty}
-            disabled={isCreatingParty}
-          >
-            {isCreatingParty ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-            )}
-            {isCreatingParty ? 'Creating...' : 'Start Party'}
-          </button>
-        ) : null}
+      {/* Watchlist Action Button */}
+      {onWatchlistToggle && (
+        <button
+          type="button"
+          className={cn(
+            'col-span-1 sm:col-auto h-14 sm:h-auto',
+            'flex items-center justify-center gap-3 px-2 sm:px-8 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm md:text-lg transition-all duration-200 group',
+            isWatchlistLoading
+              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+              : isInWatchlist
+                ? 'bg-[#e63b2e] text-white neo-shadow-sm hover:bg-[#1a1a1a]'
+                : 'bg-white text-[#1a1a1a] neo-shadow-sm hover:bg-[#1a1a1a] hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
+          )}
+          onClick={onWatchlistToggle}
+          disabled={isWatchlistLoading}
+        >
+          {isWatchlistLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isInWatchlist ? (
+            <Trash2 className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          ) : (
+            <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          )}
+          <span className="truncate">
+            {isInWatchlist
+              ? isMobile
+                ? 'Rem'
+                : 'Remove'
+              : isMobile
+                ? 'List'
+                : 'Watchlist'}
+          </span>
+        </button>
+      )}
 
-        {/* Watchlist Action Button */}
-        {onWatchlistToggle ? (
-          <button
-            type="button"
-            className={cn(
-              'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group',
-              isWatchlistLoading
-                ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
-                : isInWatchlist
-                  ? 'bg-[#e63b2e] text-white neo-shadow-sm hover:bg-[#1a1a1a]'
-                  : 'bg-white text-[#1a1a1a] neo-shadow-sm hover:bg-[#1a1a1a] hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
-            )}
-            onClick={onWatchlistToggle}
-            disabled={isWatchlistLoading}
-          >
-            {isWatchlistLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : isInWatchlist ? (
-              <Trash2 className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-            ) : (
-              <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-            )}
-            <span className="hidden sm:inline">
-              {isInWatchlist ? 'Remove' : 'Watchlist'}
-            </span>
-          </button>
-        ) : null}
-
-        {extraActions}
-      </div>
+      {/* Extra Actions Container (Download) */}
+      {extraActions && (
+        <div className="col-span-2 sm:col-auto h-14 sm:h-auto border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200">
+          <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:p-0">
+            {extraActions}
+          </div>
+        </div>
+      )}
     </div>
   );
 });

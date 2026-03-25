@@ -9,7 +9,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
-import { ContentInfo } from './content-info';
+import { ContentActions, ContentInfo } from './content-info';
 import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
@@ -216,16 +216,28 @@ export function ContentDetailModal({
             )}
           </div>
 
-          {/* Content Info and Actions */}
-          <div className="p-6 md:p-10 lg:p-16 bg-[#f5f0e8] border-b-[4px] border-[#1a1a1a] flex-shrink-0">
+          {/* Content Info Area */}
+          <div className="p-6 md:p-10 lg:p-16 bg-[#f5f0e8] flex-shrink-0">
             <ContentInfo
               show={show}
+              isPlaying={isPlaying}
+              isLoadingProgress={isLoadingProgress}
+              hasWatchProgress={hasWatchProgress}
+              watchProgress={watchProgress}
+              selectedSeason={selectedSeason}
+            />
+          </div>
+
+          {/* Action Bar — Sticky on mobile, relative on desktop */}
+          <div className="sticky bottom-0 sm:relative z-30 px-6 pb-6 md:px-10 md:pb-10 lg:px-16 lg:pb-16 bg-[#f5f0e8] border-b-[4px] border-[#1a1a1a] sm:border-b-0 flex-shrink-0">
+            <ContentActions
               isPlaying={isPlaying}
               isCreatingParty={isCreatingParty}
               isLoadingProgress={isLoadingProgress}
               hasWatchProgress={hasWatchProgress}
               watchProgress={watchProgress}
               selectedSeason={selectedSeason}
+              isSeries={isSeries}
               onPlay={() => {
                 setShowTrailer(false);
                 handlePlay();
@@ -239,7 +251,6 @@ export function ContentDetailModal({
                 handleWatchParty();
               }}
               isWatchPartyDisabled={isMobile}
-              watchPartyDisabledReason={undefined}
               onWatchlistToggle={handleWatchlistToggle}
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
