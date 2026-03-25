@@ -320,14 +320,44 @@ export function useWatchContent() {
   }, [socket]);
 
   const mountFetchedRef = useRef(false);
+  // Handle initial fetch and subsequent navigation (switching episodes/seasons)
+  const prevParamsRef = useRef<{
+    movieId?: string;
+    season?: string | null;
+    episode?: string | null;
+    server?: string;
+  }>(undefined);
 
   useEffect(() => {
-    if (!initialStreamUrlRaw && title) {
-      if (mountFetchedRef.current) return;
+    // 1. If we have an initial stream URL (e.g. passed from Search page),
+    // skip the first fetch to avoid redundant API calls.
+    if (initialStreamUrlRaw && !mountFetchedRef.current) {
       mountFetchedRef.current = true;
+      prevParamsRef.current = { movieId, season, episode, server };
+      return;
+    }
+
+    // 2. Detect if identifying parameters have changed
+    const paramsChanged =
+      prevParamsRef.current?.movieId !== movieId ||
+      prevParamsRef.current?.season !== season ||
+      prevParamsRef.current?.episode !== episode ||
+      prevParamsRef.current?.server !== server;
+
+    if ((!mountFetchedRef.current || paramsChanged) && title) {
+      mountFetchedRef.current = true;
+      prevParamsRef.current = { movieId, season, episode, server };
       refetchStream();
     }
-  }, [initialStreamUrlRaw, title, refetchStream]);
+  }, [
+    movieId,
+    season,
+    episode,
+    server,
+    title,
+    refetchStream,
+    initialStreamUrlRaw,
+  ]);
 
   return {
     router,
