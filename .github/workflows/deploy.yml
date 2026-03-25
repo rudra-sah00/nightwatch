@@ -59,31 +59,4 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         id: deploy
-        run: |
-          # Retry logic for flaky uploads
-          set +e
-          for i in 1 2 3; do
-            echo "Deployment attempt $i..."
-            OUTPUT=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
-            DEPLOY_STATUS=$?
-            echo "$OUTPUT"
-            if [ $DEPLOY_STATUS -eq 0 ]; then
-              # Extract just the URL (last https:// line from output)
-              URL=$(echo "$OUTPUT" | grep -oE 'https://[^ ]+\.vercel\.app' | tail -1)
-              break
-            fi
-            
-            if [ $i -lt 3 ]; then
-              echo "Attempt $i failed, retrying in 10s..."
-              sleep 10
-            fi
-          done
-          
-          if [ $DEPLOY_STATUS -ne 0 ]; then
-            echo "❌ All deployment attempts failed."
-            exit 1
-          fi
-          
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "✅ Deployed to: $URL"
-          set -e
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
