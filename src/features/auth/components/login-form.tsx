@@ -28,16 +28,25 @@ export function LoginForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
+      <div className="mb-3 shrink-0 text-center md:text-left">
+        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
+          Watch Rudra
+        </h1>
+        <p className="font-headline font-bold text-[10px] uppercase tracking-[0.2em] text-[#e63b2e]">
+          Form Follows Function
+        </p>
+      </div>
+
       <div className="border-b-4 border-[#1a1a1a] pb-1 mb-3 shrink-0">
-        <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+        <h2 className="text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
           {isOtpStep ? 'Verify' : 'Enter'}
         </h2>
-        <p className="font-body font-semibold text-[10px] text-[#1a1a1a] uppercase">
+        <p className="font-body font-semibold text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
           {isOtpStep ? 'ACCESS VERIFICATION' : 'ACCESS YOUR LOUNGE'}
         </p>
       </div>
 
-      <div className="flex-grow flex flex-col justify-center">
+      <div className="flex-grow flex flex-col justify-start">
         {isOtpStep ? (
           <OtpStep
             email={formData.email}
@@ -98,12 +107,12 @@ const OtpStep = React.memo(function OtpStep({
         </p>
       </div>
 
-      <div className="space-y-1 pb-1">
+      <div className="space-y-1 pb-1 px-1">
         <Label className="sr-only">One-Time Password</Label>
         <OtpInput
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
         />
       </div>
 
@@ -159,12 +168,12 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
   action,
 }: InitialStepProps) {
   return (
-    <form action={action} className="space-y-4 w-full">
-      <div className="space-y-3">
+    <form action={action} className="space-y-5 w-full px-1">
+      <div className="space-y-4">
         <div>
           <Label
             htmlFor="email"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1.5 text-[#1a1a1a]"
           >
             Email Address
           </Label>
@@ -177,14 +186,14 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
             onChange={handleChange}
             autoComplete="username"
             disabled={isLoading}
-            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[48px]"
           />
         </div>
 
         <div>
           <Label
             htmlFor="password"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1.5 text-[#1a1a1a]"
           >
             Password
           </Label>
@@ -197,14 +206,14 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
             onChange={handleChange}
             autoComplete="current-password"
             disabled={isLoading}
-            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[44px]"
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[48px]"
           />
         </div>
       </div>
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
 
-      <div className="pt-2">
+      <div className="pt-2 scale-[0.8] md:scale-95 origin-left">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}

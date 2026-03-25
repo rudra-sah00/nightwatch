@@ -37,11 +37,20 @@ export function SignupForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
-      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-3 shrink-0">
-        <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+      <div className="mb-6 shrink-0 text-center md:text-left">
+        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
+          Watch Rudra
+        </h1>
+        <p className="font-headline font-bold text-[10px] uppercase tracking-[0.2em] text-[#e63b2e]">
+          Form Follows Function
+        </p>
+      </div>
+
+      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-4 shrink-0">
+        <h2 className="text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
           {isOtpStep ? 'Verify' : 'Join'}
         </h2>
-        <p className="font-body font-semibold text-[10px] text-[#1a1a1a] uppercase">
+        <p className="font-body font-semibold text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
           {isOtpStep ? 'VERIFY YOUR ACCOUNT' : 'CREATE YOUR ACCOUNT'}
         </p>
       </div>
@@ -115,12 +124,12 @@ const OtpStep = React.memo(function OtpStep({
         </p>
       </div>
 
-      <div className="space-y-1 pb-1">
+      <div className="space-y-1 pb-1 px-1">
         <Label className="sr-only">One-Time Password</Label>
         <OtpInput
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[44px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
         />
       </div>
 
@@ -196,7 +205,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   const isMatch = formData.password === confirmPassword;
 
   return (
-    <form action={action} className="space-y-2 w-full">
+    <form action={action} className="space-y-3 w-full px-1">
       {/* Name */}
       <div>
         <Label
@@ -214,7 +223,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.name}
           autoComplete="name"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
         />
       </div>
 
@@ -236,7 +245,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.email}
           autoComplete="email"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
         />
       </div>
 
@@ -263,9 +272,9 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.password}
           autoComplete="new-password"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm mb-1 !h-[38px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm mb-1 !h-[42px]"
         />
-        <div className="scale-90 origin-left">
+        <div className="scale-90 origin-left mb-1">
           <PasswordStrengthIndicator password={formData.password} />
         </div>
       </div>
@@ -297,7 +306,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
           error={fieldErrors.confirmPassword}
           autoComplete="new-password"
           disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[38px]"
+          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
         />
         {!fieldErrors.confirmPassword && confirmPassword ? (
           <p
@@ -318,7 +327,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
         value={formData.inviteCode || ''}
       />
 
-      <div className="pt-1 scale-95 origin-left">
+      <div className="pt-1 scale-[0.8] md:scale-95 origin-left">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}
