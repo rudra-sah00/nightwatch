@@ -2,7 +2,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { useLiveClock } from '../hooks/use-live-clock';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
@@ -65,15 +64,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     </Player.Root>
   );
 });
-
-/** Ticking real-time wall-clock — e.g. "14:32:07" */
-function _LiveClock() {
-  const { time } = useLiveClock();
-  return (
-    <span className="text-white/50 text-xs font-mono tabular-nums">{time}</span>
-  );
-}
-
 function LivePlayerState() {
   const { state, playerHandlers, metadata } = usePlayerContext();
 

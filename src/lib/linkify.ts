@@ -3,6 +3,7 @@
  */
 
 export interface TextSegment {
+  id: string;
   type: 'text' | 'link';
   content: string;
   url?: string;
@@ -25,6 +26,7 @@ export function parseLinks(text: string): TextSegment[] {
     // Add text before the URL
     if (match.index > lastIndex) {
       segments.push({
+        id: `text-${lastIndex}`,
         type: 'text',
         content: text.slice(lastIndex, match.index),
       });
@@ -32,6 +34,7 @@ export function parseLinks(text: string): TextSegment[] {
 
     // Add the URL
     segments.push({
+      id: `link-${match.index}`,
       type: 'link',
       content: match[0],
       url: match[0],
@@ -43,6 +46,7 @@ export function parseLinks(text: string): TextSegment[] {
   // Add remaining text
   if (lastIndex < text.length) {
     segments.push({
+      id: `text-${lastIndex}`,
       type: 'text',
       content: text.slice(lastIndex),
     });
@@ -51,6 +55,7 @@ export function parseLinks(text: string): TextSegment[] {
   // If no links found, return the whole text as one segment
   if (segments.length === 0) {
     segments.push({
+      id: 'text-0',
       type: 'text',
       content: text,
     });

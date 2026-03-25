@@ -291,11 +291,11 @@ const ChatMessageItem = memo(function ChatMessageItem({
         )}
       >
         {/* Render message with clickable links */}
-        {parseLinks(message.content).map((segment, idx) => {
+        {parseLinks(message.content).map((segment) => {
           if (segment.type === 'link') {
             return (
               <a
-                key={`${message.id}-link-${idx}`}
+                key={`${message.id}-${segment.id}`}
                 href={segment.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -312,7 +312,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
           }
           return (
             <span
-              key={`${message.id}-text-${idx}`}
+              key={`${message.id}-${segment.id}`}
               className="font-medium whitespace-pre-wrap"
             >
               {segment.content}

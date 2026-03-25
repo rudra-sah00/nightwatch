@@ -15,6 +15,7 @@ let visionResolver: Promise<FilesetResolverType> | null = null;
 let consoleIntercepted = false;
 // Stored so tests or cleanup code can fully restore the originals if needed
 let restoreMediaPipeLogs: (() => void) | null = null;
+
 export { restoreMediaPipeLogs as _restoreMediaPipeConsolePatch };
 
 /**

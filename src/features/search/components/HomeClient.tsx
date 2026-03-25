@@ -54,8 +54,7 @@ export function HomeClient() {
               <div className="relative flex-grow h-full flex items-center">
                 {/* Ghost Text Layer (Lower) */}
                 {query &&
-                suggestion &&
-                suggestion.toLowerCase().startsWith(query.toLowerCase()) ? (
+                suggestion?.toLowerCase().startsWith(query.toLowerCase()) ? (
                   <div className="absolute inset-0 pointer-events-none flex items-center select-none z-0">
                     <span className="text-transparent font-headline text-xl md:text-3xl font-bold uppercase whitespace-pre leading-none">
                       {query}

@@ -42,8 +42,7 @@ export function SearchInput({ isLoading = false }: SearchInputProps) {
         <div className="flex-grow relative h-10 flex items-center overflow-hidden">
           {/* Ghost Text Layer (Lower) */}
           {query &&
-          suggestion &&
-          suggestion.toLowerCase().startsWith(query.toLowerCase()) ? (
+          suggestion?.toLowerCase().startsWith(query.toLowerCase()) ? (
             <div className="absolute inset-0 pointer-events-none flex items-center select-none z-0 pl-10 pr-10 text-sm font-sans">
               <span className="text-transparent whitespace-pre leading-none">
                 {query}
