@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 
 export function useParticipantView(participant: AgoraParticipant) {
@@ -18,7 +18,7 @@ export function useParticipantView(participant: AgoraParticipant) {
   }, [participant.videoTrack]);
 
   // No mirroring for video tracks
-  const videoStyle = useMemo(() => ({ transform: 'scaleX(1)' }), []);
+  const videoStyle = { transform: 'scaleX(1)' };
 
   return { videoRef, videoStyle };
 }

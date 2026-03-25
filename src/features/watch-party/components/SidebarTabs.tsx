@@ -27,6 +27,7 @@ export function SidebarTabs({
             key={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
+            aria-label={`${tab.label} Tab`}
             className={cn(
               'flex-1 py-3 px-1 transition-colors relative border-r-[4px] border-[#1a1a1a] last:border-r-0 flex flex-col items-center justify-center gap-1.5',
               isActive

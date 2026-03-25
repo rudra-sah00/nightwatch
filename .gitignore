@@ -7,6 +7,7 @@ node_modules/
 
 # Environment files
 .env
+.env.test
 .env.local
 .env.*.local
 
@@ -34,6 +35,9 @@ Thumbs.db
 
 # Testing
 coverage/
+playwright-report/
+test-results/
+.last-run.json
 
 # TypeScript
 *.tsbuildinfo
@@ -45,3 +49,6 @@ next-env.d.ts
 *.seed
 *.local
 .env*.local
+.agents/
+.gemini/
+.pnpm-store/

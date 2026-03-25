@@ -144,7 +144,7 @@ export function ActiveWatchParty({
     <div
       ref={watchPartyContainerRef}
       className={cn(
-        'flex flex-row h-[100dvh] w-screen bg-black overflow-hidden relative',
+        'flex flex-row h-[100dvh] w-screen bg-background overflow-hidden relative',
       )}
     >
       {/* Sidebar */}

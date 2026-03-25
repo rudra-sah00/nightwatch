@@ -101,7 +101,7 @@ export function MediaControls({
             ) : (
               <Copy aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
             )}
-            <span className="sm:inline">
+            <span className="hidden xl:inline">
               {linkCopied ? 'Copied' : 'Invite'}
             </span>
           </button>
@@ -116,7 +116,7 @@ export function MediaControls({
           )}
         >
           <LogOut aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
-          <span className="sm:inline">{isHost ? 'End' : 'Leave'}</span>
+          <span className="hidden xl:inline">{isHost ? 'End' : 'Leave'}</span>
         </button>
       </div>
 

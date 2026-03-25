@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
@@ -15,6 +15,7 @@ interface UseWatchPartyMembersProps {
   room: WatchPartyRoom | null;
   setRoom: React.Dispatch<React.SetStateAction<WatchPartyRoom | null>>;
   userId?: string;
+  isHost?: boolean;
   onMemberJoined?: (member: RoomMember) => void;
   rtmSendMessageToPeer?: (targetUserId: string, msg: RTMMessage) => void;
   rtmSendMessage?: (msg: RTMMessage) => void;
@@ -25,11 +26,14 @@ export function useWatchPartyMembers({
   room,
   setRoom,
   userId,
+  isHost,
   onMemberJoined,
   rtmSendMessageToPeer,
   rtmSendMessage,
   streamToken,
 }: UseWatchPartyMembersProps) {
+  const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+
   const approveMember = useCallback(
     async (memberId: string) => {
       if (!room?.id) return;
@@ -139,19 +143,67 @@ export function useWatchPartyMembers({
     [room?.id, rtmSendMessage, setRoom],
   );
 
+  const handlePresenceEvent = useCallback(
+    (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
+      // Auto-kick logic is ONLY performed by the Host to prevent race conditions
+      if (!isHost || !room?.id) return;
+
+      // Ignore host drops (handled by useWatchPartySync for Guests)
+      if (event.userId === room.hostId) return;
+
+      if (event.action === 'LEAVE') {
+        // Start a 2-minute grace period before auto-kicking the dropped guest
+        if (disconnectTimersRef.current[event.userId]) {
+          clearTimeout(disconnectTimersRef.current[event.userId]);
+        }
+        disconnectTimersRef.current[event.userId] = setTimeout(() => {
+          // Verify they are still in the room before kicking
+          setRoom((prev) => {
+            if (!prev) return null;
+            const isStillMember = prev.members.some(
+              (m) => m?.id === event.userId,
+            );
+            if (isStillMember) {
+              toast.info(`Auto-removing dropped guest...`);
+              kickUser(event.userId).catch(() => {});
+            }
+            return prev;
+          });
+          delete disconnectTimersRef.current[event.userId];
+        }, 120000); // 2 minutes
+      } else if (event.action === 'JOIN') {
+        // Guest reconnected, cancel the auto-kick
+        if (disconnectTimersRef.current[event.userId]) {
+          clearTimeout(disconnectTimersRef.current[event.userId]);
+          delete disconnectTimersRef.current[event.userId];
+        }
+      }
+    },
+    [isHost, room?.id, room?.hostId, kickUser, setRoom],
+  );
+
   // Handle Watch Party SSE connection for real-time join request updates
   useEffect(() => {
     let active = true;
     let eventSource: EventSource | null = null;
     let reconnectTimer: NodeJS.Timeout;
 
-    if (!room?.id || room.hostId !== userId) return;
+    if (!room?.id || room.hostId !== userId) {
+      return;
+    }
 
     const connectSSE = () => {
       if (!active) return;
-      eventSource = new EventSource(`/api/rooms/${room.id}/stream`, {
+
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+      const streamUrl = `${backendUrl.replace(/\/$/, '')}/api/rooms/${room.id}/stream`;
+
+      eventSource = new EventSource(streamUrl, {
         withCredentials: true,
       });
+
+      eventSource.onopen = () => {};
 
       eventSource.onmessage = (event) => {
         try {
@@ -190,7 +242,7 @@ export function useWatchPartyMembers({
             });
           }
         } catch (_e) {
-          // Ignore parse errors
+          // SSE Message Error
         }
       };
 
@@ -328,5 +380,6 @@ export function useWatchPartyMembers({
     rejectMember,
     kickUser,
     handleIncomingRtmMessage,
+    handlePresenceEvent,
   };
 }

@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "for key in $(redis-cli --scan --pattern 'security:*' 2>/dev/null); do redis-cli del $key; done; for key in $(redis-cli --scan --pattern 'auth:otp_limit*' 2>/dev/null); do redis-cli del $key; done; npx playwright test",
     "version": "node -p \"require('./package.json').version\""
   },
   "lint-staged": {
@@ -53,7 +54,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.11",
+    "@biomejs/biome": "^2.3.13",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

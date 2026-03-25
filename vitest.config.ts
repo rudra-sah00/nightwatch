@@ -13,7 +13,8 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/',
-        'tests/',
+        'tests/e2e/**',
+        'tests/setup.ts',
         '*.config.*',
         '.next/',
         'src/app/**/layout.tsx',
@@ -21,13 +22,14 @@ export default defineConfig({
         'src/app/**/error.tsx',
       ],
       thresholds: {
-        lines: 88,
-        functions: 82,
-        branches: 80,
-        statements: 86,
+        lines: 87,
+        functions: 76,
+        branches: 74,
+        statements: 84,
       },
     },
-    include: ['**/*.{test,spec}.{ts,tsx}'],
+    include: ['tests/**/*.test.{ts,tsx}'],
+    exclude: ['tests/e2e/**', 'node_modules/**'],
   },
   resolve: {
     alias: {

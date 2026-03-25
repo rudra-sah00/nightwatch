@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { usePredictiveSync } from '@/features/watch-party/room/hooks/usePredictiveSync';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
@@ -76,6 +76,25 @@ export function useWatchPartyClient({
 
   const isGuestSocketReady = !!user || isSocketConnected;
 
+  const guestToken =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('guest_token')
+      : null;
+
+  const currentUserId = (() => {
+    if (user?.id) return user.id;
+    if (guestToken) {
+      if (guestToken.startsWith('guest_')) return guestToken;
+      try {
+        const payload = JSON.parse(atob(guestToken.split('.')[1]));
+        return payload.sub as string | undefined;
+      } catch (_e) {
+        /* invalid token */
+      }
+    }
+    return socket?.id ? `guest:${socket.id}` : undefined;
+  })();
+
   const {
     room,
     isLoading,
@@ -105,7 +124,8 @@ export function useWatchPartyClient({
       if (isHostRef.current) return;
       applyState(state);
     },
-    userId: user?.id,
+    userId: currentUserId,
+    roomId,
   });
 
   const { applyState } = usePredictiveSync(
@@ -118,23 +138,6 @@ export function useWatchPartyClient({
   const isHost = user?.id === room?.hostId;
   isHostRef.current = isHost;
   const prevMemberCount = useRef(0);
-
-  const currentUserId = useMemo(() => {
-    if (user?.id) return user.id;
-    const token =
-      typeof window !== 'undefined'
-        ? sessionStorage.getItem('guest_token')
-        : null;
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.sub as string | undefined;
-      } catch (_e) {
-        /* invalid token */
-      }
-    }
-    return socket?.id ? `guest:${socket.id}` : undefined;
-  }, [user?.id, socket?.id]);
 
   useEffect(() => {
     if (room && !roomCreationTimeRef.current) {

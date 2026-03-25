@@ -13,8 +13,14 @@ import { EpisodePanel } from '@/features/watch/player/ui/controls/EpisodePanel';
 vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => {
     const { fill, unoptimized, ...rest } = props;
-    // biome-ignore lint/a11y/useAltText: mock image component for tests
-    return <img data-fill={fill} data-unoptimized={unoptimized} {...rest} />;
+    return (
+      <img
+        alt={(props.alt as string) || ''}
+        data-fill={fill}
+        data-unoptimized={unoptimized}
+        {...rest}
+      />
+    );
   },
 }));
 

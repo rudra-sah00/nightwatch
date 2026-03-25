@@ -88,43 +88,43 @@
   /* Dark theme (default) */
   :root,
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
+    --background: 38 29% 94%; /* #f5f0e8 */
+    --foreground: 0 0% 10%; /* #1a1a1a */
 
-    /* Subtitle customization */
+    /* Subtitle customization - still needs to be legible, usually dark bg with light text or vice versa */
     --subtitle-font-size: 1.25rem;
-    --subtitle-font-family: system-ui, -apple-system, sans-serif;
-    --subtitle-bg-color: rgba(0, 0, 0, 0.75);
-    --subtitle-text-color: white;
+    --subtitle-font-family: var(--font-headline);
+    --subtitle-bg-color: rgba(26, 26, 26, 0.9);
+    --subtitle-text-color: #f5f0e8;
     --subtitle-text-shadow: none;
     --subtitle-opacity: 1;
 
-    --card: 0 0% 3%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 0 0% 3%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 38 29% 94%;
 
-    --secondary: 0 0% 6%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 38 29% 88%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 6%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 38 20% 85%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 0 0% 6%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 38 29% 88%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 0 0% 83.1%;
+    --border: 0 0% 10%;
+    --input: 38 29% 88%;
+    --ring: 0 0% 10%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* ── App-wide accent tokens ──────────────────────────────── */
     /* Activity graph level colors (GitHub-style heatmap) */

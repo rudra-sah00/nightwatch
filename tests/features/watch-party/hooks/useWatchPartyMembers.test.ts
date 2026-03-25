@@ -3,7 +3,11 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWatchPartyMembers } from '@/features/watch-party/room/hooks/useWatchPartyMembers';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
-import type { RoomMember } from '@/features/watch-party/room/types';
+import type {
+  RoomMember,
+  WatchPartyRoom,
+} from '@/features/watch-party/room/types';
+import type { RTMMessage } from '@/features/watch-party/room/types/rtm-messages';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   approveJoinRequest: vi.fn(),
@@ -39,7 +43,7 @@ describe('useWatchPartyMembers', () => {
           } as unknown as import('@/features/watch-party/room/types').RoomMember,
         ],
       };
-      updater(roomWithPending as unknown);
+      updater(roomWithPending as WatchPartyRoom);
     }
   });
   const mockRtmSendMessage = vi.fn();
@@ -56,7 +60,7 @@ describe('useWatchPartyMembers', () => {
       lastUpdated: Date.now(),
       playbackRate: 1,
     },
-  } as unknown as import('@/features/watch-party/room/types').WatchPartyRoom;
+  } as unknown as WatchPartyRoom;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,6 +70,7 @@ describe('useWatchPartyMembers', () => {
     room: mockRoom,
     setRoom: mockSetRoom,
     userId: 'host-1',
+    isHost: true,
     rtmSendMessage: mockRtmSendMessage,
     rtmSendMessageToPeer: mockRtmSendMessageToPeer,
   };
@@ -114,6 +119,31 @@ describe('useWatchPartyMembers', () => {
     );
   });
 
+  it('rejectMember should call REST and notify via RTM', async () => {
+    vi.mocked(api.rejectJoinRequest).mockResolvedValue({ success: true });
+    const roomWithPending = {
+      ...mockRoom,
+      pendingMembers: [{ id: 'user-2', name: 'Guest' }],
+    };
+
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithPending as unknown as import('@/features/watch-party/room/types').WatchPartyRoom,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.rejectMember('user-2');
+    });
+
+    expect(api.rejectJoinRequest).toHaveBeenCalledWith('room-1', 'user-2');
+    expect(mockRtmSendMessageToPeer).toHaveBeenCalledWith(
+      'user-2',
+      expect.objectContaining({ type: 'JOIN_REJECTED' }),
+    );
+  });
+
   it('handleIncomingRtmMessage should update room state for MEMBER_JOINED', () => {
     const { result } = renderHook(() => useWatchPartyMembers(defaultProps));
     const newMember: RoomMember = {
@@ -127,7 +157,7 @@ describe('useWatchPartyMembers', () => {
       result.current.handleIncomingRtmMessage({
         type: 'MEMBER_JOINED',
         member: newMember,
-      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
+      } as RTMMessage);
     });
 
     expect(mockSetRoom).toHaveBeenCalled();
@@ -147,7 +177,48 @@ describe('useWatchPartyMembers', () => {
       result.current.handleIncomingRtmMessage({
         type: 'MEMBER_LEFT',
         userId: 'user-2',
-      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
+      } as RTMMessage);
+    });
+
+    expect(localMockSetRoom).toHaveBeenCalled();
+  });
+
+  it('handleIncomingRtmMessage should update global permissions for PERMISSIONS_UPDATED', () => {
+    const localMockSetRoom = vi.fn();
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({ ...defaultProps, setRoom: localMockSetRoom }),
+    );
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'PERMISSIONS_UPDATED',
+        permissions: { canChat: false },
+      } as RTMMessage);
+    });
+
+    expect(localMockSetRoom).toHaveBeenCalled();
+  });
+
+  it('handleIncomingRtmMessage should update target member permissions for MEMBER_PERMISSIONS_UPDATED', () => {
+    const localMockSetRoom = vi.fn();
+    const roomWithGuest = {
+      ...mockRoom,
+      members: [{ id: 'user-2', name: 'Alice' } as unknown as RoomMember],
+    };
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithGuest,
+        setRoom: localMockSetRoom,
+      }),
+    );
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'MEMBER_PERMISSIONS_UPDATED',
+        memberId: 'user-2',
+        permissions: { canDraw: true },
+      } as RTMMessage);
     });
 
     expect(localMockSetRoom).toHaveBeenCalled();
@@ -168,5 +239,78 @@ describe('useWatchPartyMembers', () => {
         targetUserId: 'user-2',
       }),
     );
+  });
+
+  it('handlePresenceEvent should kick guest after 120s timeout', async () => {
+    vi.useFakeTimers();
+    const roomWithGuest = {
+      ...mockRoom,
+      members: [{ id: 'guest-2', name: 'Guest' } as unknown as RoomMember],
+    };
+    const localMockSetRoom = vi.fn((updater) => {
+      if (typeof updater === 'function') return updater(roomWithGuest);
+    });
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithGuest,
+        setRoom: localMockSetRoom,
+      }),
+    );
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'guest-2',
+      });
+    });
+
+    expect(api.kickMember).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(120000); // 2 minutes
+    });
+
+    expect(localMockSetRoom).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('handlePresenceEvent should clear timeout if guest rejoins', async () => {
+    vi.useFakeTimers();
+    const roomWithGuest = {
+      ...mockRoom,
+      members: [{ id: 'guest-drop', name: 'Guest' } as unknown as RoomMember],
+    };
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({ ...defaultProps, room: roomWithGuest }),
+    );
+
+    act(() => {
+      // Guest leaves/drops
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'guest-drop',
+      });
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(60000); // 1 minute passes
+    });
+
+    act(() => {
+      // Guest comes back!
+      result.current.handlePresenceEvent({
+        action: 'JOIN',
+        userId: 'guest-drop',
+      });
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(65000); // Wait past original timeout
+    });
+
+    // Should NOT be kicked
+    expect(api.kickMember).not.toHaveBeenCalledWith('room-1', 'guest-drop');
+    vi.useRealTimers();
   });
 });

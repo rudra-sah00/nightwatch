@@ -170,7 +170,8 @@ export async function apiFetch<T>(
           ? {}
           : { 'Content-Type': 'application/json' }),
         ...(typeof window !== 'undefined' &&
-        sessionStorage.getItem('guest_token')
+        sessionStorage.getItem('guest_token') &&
+        !getCookie('accessToken')
           ? { Authorization: `Bearer ${sessionStorage.getItem('guest_token')}` }
           : {}),
         ...(typeof window !== 'undefined' &&

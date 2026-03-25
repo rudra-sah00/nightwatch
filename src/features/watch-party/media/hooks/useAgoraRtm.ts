@@ -32,6 +32,8 @@ interface UseAgoraRtmOptions {
   userId: string | undefined;
   /** Called whenever an RTM message arrives from *another* user */
   onMessage?: (message: RTMMessage, senderId: string) => void;
+  /** Called whenever a user joins or leaves the channel */
+  onPresence?: (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => void;
 }
 
 /**
@@ -58,13 +60,8 @@ interface UseAgoraRtmOptions {
  * });
  * ```
  */
-export function useAgoraRtm({
-  appId,
-  token,
-  channel,
-  userId,
-  onMessage,
-}: UseAgoraRtmOptions) {
+export function useAgoraRtm(options: UseAgoraRtmOptions) {
+  const { appId, token, channel, userId, onMessage } = options;
   // --- Refs for SDK objects ---
   const clientRef = useRef<typeof AgoraRTMType.RTM.prototype | null>(null);
   const channelRef = useRef<string | null>(null);
@@ -72,6 +69,9 @@ export function useAgoraRtm({
   // needing to be re-registered on every re-render.
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
+
+  const onPresenceRef = useRef(options.onPresence);
+  onPresenceRef.current = options.onPresence;
 
   // --- State ---
   const [connectionState, setConnectionState] =
@@ -88,38 +88,30 @@ export function useAgoraRtm({
       const currentChannel = channelRef.current;
 
       if (!client || !currentChannel || !isConnected) {
-        // Silently drop — caller should rely on connection state before sending
         return;
       }
 
       try {
         await client.publish(currentChannel, JSON.stringify(message));
-      } catch (error) {
-        // Non-fatal — RTM will retry internally; surface only persistent errors
-        const _msg = error instanceof Error ? error.message : String(error);
-        if (process.env.NODE_ENV !== 'production') {
-        }
+      } catch (_error) {
+        // RTM Publish Error
       }
     },
     [isConnected],
   );
 
-  /**
-   * Send a direct (peer-to-peer) RTM message to a specific user.
-   * Used for host→guest JOIN_APPROVED / JOIN_REJECTED events so only the
-   * target recipient receives sensitive data (stream token, guest token).
-   */
   const sendMessageToPeer = useCallback(
     async (targetUserId: string, message: RTMMessage) => {
       const client = clientRef.current;
-      if (!client || !isConnected) return;
+      if (!client || !isConnected) {
+        return;
+      }
 
       try {
-        await client.publish(`user:${targetUserId}`, JSON.stringify(message));
-      } catch (error) {
-        const _msg = error instanceof Error ? error.message : String(error);
-        if (process.env.NODE_ENV !== 'production') {
-        }
+        const peerChannel = `user:${targetUserId}`;
+        await client.publish(peerChannel, JSON.stringify(message));
+      } catch (_error) {
+        // Peer Publish Error
       }
     },
     [isConnected],
@@ -150,6 +142,8 @@ export function useAgoraRtm({
         client = new AgoraRTM.RTM(appId, userId, { logLevel });
         clientRef.current = client;
         channelRef.current = channel;
+
+        const userChannel = `user:${userId}`;
 
         // --- Event listeners ---
 
@@ -193,19 +187,47 @@ export function useAgoraRtm({
           }
         };
 
+        // Presence events
+        const handlePresence = (event: {
+          eventType: string;
+          channelName: string;
+          publisher: string;
+        }) => {
+          if (cleaned) return;
+          if (event.channelName !== channelRef.current) return;
+
+          if (event.eventType === 'REMOTE_JOIN') {
+            onPresenceRef.current?.({
+              action: 'JOIN',
+              userId: event.publisher,
+            });
+          } else if (
+            event.eventType === 'REMOTE_LEAVE' ||
+            event.eventType === 'REMOTE_TIMEOUT'
+          ) {
+            onPresenceRef.current?.({
+              action: 'LEAVE',
+              userId: event.publisher,
+            });
+          }
+        };
+
         client.addEventListener('message', handleMessage);
         client.addEventListener('status', handleStatus);
+        client.addEventListener('presence', handlePresence);
 
         fallbackCleanup = () => {
           if (!client) return;
           client.removeEventListener('message', handleMessage);
           client.removeEventListener('status', handleStatus);
+          client.removeEventListener('presence', handlePresence);
 
+          client.unsubscribe(channel).catch(() => {});
+          client.unsubscribe(userChannel).catch(() => {});
           client
-            .unsubscribe(channel)
+            .logout()
             .catch(() => {})
             .finally(() => {
-              client?.logout().catch(() => {});
               if (clientRef.current === client) {
                 clientRef.current = null;
                 channelRef.current = null;
@@ -227,10 +249,18 @@ export function useAgoraRtm({
           return;
         }
 
-        await client.subscribe(channel, {
-          withMessage: true,
-          withPresence: false,
-        });
+        const subPromises = [
+          client.subscribe(channel, {
+            withMessage: true,
+            withPresence: true,
+          }),
+          client.subscribe(userChannel, {
+            withMessage: true,
+            withPresence: false,
+          }),
+        ];
+
+        await Promise.all(subPromises);
 
         if (cleaned) {
           fallbackCleanup();

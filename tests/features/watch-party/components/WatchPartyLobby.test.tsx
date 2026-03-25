@@ -80,8 +80,8 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      // Should have a loading spinner (Loader2 component)
-      expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+      // Should have a loading message
+      expect(screen.getByText('Loading room…')).toBeInTheDocument();
     });
   });
 

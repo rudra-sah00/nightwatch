@@ -61,7 +61,23 @@ export interface AuthContextType {
   resendOtp: (email: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isLoading: true,
+  isAuthenticated: false,
+  login: async () => {
+    throw new Error('Auth not ready');
+  },
+  register: async () => {
+    throw new Error('Auth not ready');
+  },
+  verifyOtp: async () => {
+    throw new Error('Auth not ready');
+  },
+  logout: async () => {},
+  updateUser: () => {},
+  resendOtp: async () => {},
+});
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -293,9 +309,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  const context = use(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return use(AuthContext);
 }

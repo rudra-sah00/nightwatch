@@ -98,8 +98,8 @@ export function WatchPartySketch() {
             className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#1a1a1a] hover:bg-[#ffe066] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
             title="Undo last action"
           >
-            <Undo2 className="w-3 h-3 stroke-[3px]" />
-            Undo
+            <Undo2 className="w-3.5 h-3.5 stroke-[3px]" />
+            <span className="hidden xl:inline">Undo</span>
           </button>
 
           <button
@@ -108,8 +108,8 @@ export function WatchPartySketch() {
             className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#0055ff] hover:bg-[#0055ff] hover:text-white transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
             title="Clear only your drawings"
           >
-            <Eraser className="w-3 h-3 stroke-[3px]" />
-            Clear Mine
+            <Eraser className="w-3.5 h-3.5 stroke-[3px]" />
+            <span className="hidden xl:inline">Clear Mine</span>
           </button>
 
           {isHost && (
@@ -119,8 +119,8 @@ export function WatchPartySketch() {
               className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-[#e63b2e] text-white hover:bg-[#1a1a1a] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
               title="Host only: Clear everything"
             >
-              <Trash2 className="w-3 h-3 stroke-[3px]" />
-              Clear All
+              <Trash2 className="w-3.5 h-3.5 stroke-[3px]" />
+              <span className="hidden xl:inline">Clear All</span>
             </button>
           )}
         </div>
@@ -132,7 +132,7 @@ export function WatchPartySketch() {
           <h4 className="text-xs font-black text-[#1a1a1a]/50 uppercase tracking-widest font-headline">
             Tools
           </h4>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {TOOLS.map((tool) => {
               const Icon = tool.icon;
               const isActive = currentTool === tool.id;

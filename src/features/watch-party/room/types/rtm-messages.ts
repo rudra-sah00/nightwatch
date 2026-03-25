@@ -61,6 +61,11 @@ export interface RtmSyncState {
   fromHost?: boolean;
 }
 
+export interface RtmSyncRequest {
+  type: 'SYNC_REQUEST';
+  userId: string;
+}
+
 // ============ Member Lifecycle ============
 
 export interface RtmJoinApproved {
@@ -219,6 +224,7 @@ export type RTMMessage =
   | RtmSeekEvent
   | RtmRateEvent
   | RtmSyncState
+  | RtmSyncRequest
   | RtmJoinApproved
   | RtmJoinRejected
   | RtmMemberJoined

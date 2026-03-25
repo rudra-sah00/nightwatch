@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   createPartyRoom,
   getPartyStreamToken,
+  getRoomDetails,
   leavePartyRoom,
   requestJoinPartyRoom,
 } from '../services/watch-party.api';
@@ -27,6 +29,9 @@ interface UseWatchPartyLifecycleProps {
     options?: { injectStream?: boolean },
   ) => WatchPartyRoom;
   room?: WatchPartyRoom | null;
+  userId?: string;
+  roomId?: string;
+  rtmSendMessage?: (msg: RTMMessage) => void;
 }
 export function useWatchPartyLifecycle({
   setRoom,
@@ -39,7 +44,84 @@ export function useWatchPartyLifecycle({
   requestStatus,
   normalizeRoomUrls,
   room,
+  userId,
+  roomId,
+  rtmSendMessage,
 }: UseWatchPartyLifecycleProps) {
+  // --- REAL-TIME APPROVAL LISTENER (SSE for Guests) ---
+  useEffect(() => {
+    if (requestStatus !== 'pending' || !userId) return;
+
+    let eventSource: EventSource | null = null;
+    const streamUrl = `${
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
+    }/api/rooms/${roomId || room?.id || 'PENDING'}/stream`;
+
+    const connectSse = () => {
+      eventSource = new EventSource(streamUrl, { withCredentials: true });
+
+      eventSource.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const payload = data.payload;
+
+          if (data.type === 'JOIN_RESULT' && payload?.userId === userId) {
+            if (payload.status === 'approved') {
+              // Now that we are approved, we can fetch the full room details (gated API)
+              const roomRes = await getRoomDetails(
+                roomId || room?.id || 'PENDING',
+              );
+
+              if (roomRes) {
+                const streamRes = await getPartyStreamToken(roomRes.id);
+                const token = streamRes.token || '';
+                const normalizedRoom = normalizeRoomUrls(roomRes, token, {
+                  injectStream: true,
+                });
+
+                setRoom(normalizedRoom);
+                setIsConnected(true);
+                setRequestStatus('joined');
+                toast.success('Your request was approved!');
+              } else {
+                setError('Failed to fetch room details after approval.');
+              }
+            } else if (payload.status === 'rejected') {
+              setRequestStatus('rejected');
+              setError('The host declined your request to join.');
+            }
+
+            eventSource?.close();
+          }
+        } catch (_e) {
+          // ignore parsing error for heartbeats/padding
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource?.close();
+        // Retry logic for unstable development connections
+        setTimeout(connectSse, 3000);
+      };
+    };
+
+    connectSse();
+
+    return () => {
+      eventSource?.close();
+    };
+  }, [
+    requestStatus,
+    userId,
+    roomId,
+    room?.id,
+    normalizeRoomUrls,
+    setRoom,
+    setIsConnected,
+    setRequestStatus,
+    setError,
+  ]);
+
   const createRoom = useCallback(
     async (roomId: string, payload: PartyCreatePayload) => {
       setIsLoading(true);
@@ -97,6 +179,9 @@ export function useWatchPartyLifecycle({
       }
 
       if (response.status === 'pending') {
+        if (response.guestToken && typeof window !== 'undefined') {
+          sessionStorage.setItem('guest_token', response.guestToken);
+        }
         setRequestStatus('pending');
         return { success: true, status: 'pending' };
       }
@@ -108,7 +193,9 @@ export function useWatchPartyLifecycle({
 
         const streamRes = await getPartyStreamToken(roomId);
         const token = streamRes.token || '';
-        const normalizedRoom = normalizeRoomUrls(response.room, token);
+        const normalizedRoom = normalizeRoomUrls(response.room, token, {
+          injectStream: true,
+        });
 
         setRoom(normalizedRoom);
         setIsConnected(true);
@@ -131,6 +218,19 @@ export function useWatchPartyLifecycle({
 
   const leaveRoom = useCallback(async () => {
     if (!room?.id) return;
+
+    // If host is leaving, broadcast closure so members can exit immediately
+    const isHost = userId === room.hostId;
+    if (isHost && rtmSendMessage) {
+      // Broadcast to RTM channel before calling backend
+      rtmSendMessage({
+        type: 'PARTY_CLOSED',
+        reason: 'The host has ended the party.',
+      });
+      // Small buffer to ensure message delivery before backend destroys room
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
     const response = await leavePartyRoom(room.id);
     if (response.success) {
       setRoom(null);
@@ -142,7 +242,15 @@ export function useWatchPartyLifecycle({
         sessionStorage.removeItem('guest_token');
       }
     }
-  }, [room?.id, setRoom, setIsConnected, setRequestStatus, setMessages]);
+  }, [
+    room,
+    userId,
+    rtmSendMessage,
+    setRoom,
+    setIsConnected,
+    setRequestStatus,
+    setMessages,
+  ]);
 
   const cancelRequest = useCallback(
     async (roomId: string, onComplete?: () => void) => {

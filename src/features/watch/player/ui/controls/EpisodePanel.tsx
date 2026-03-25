@@ -2,7 +2,7 @@
 
 import { ChevronDown, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Episode, Season } from '@/features/search/types';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 
@@ -71,12 +71,11 @@ export function EpisodePanel({
   );
 
   // Compute padding so first & last items can scroll to center
-  // biome-ignore lint/correctness/useExhaustiveDependencies: recalc on open/mount/episodes change
   useEffect(() => {
     if (!isOpen || !shouldRender || !scrollRef.current) return;
     const viewH = scrollRef.current.clientHeight;
     setPadH(Math.floor(viewH / 2 - ITEM_H / 2));
-  }, [isOpen, shouldRender, episodes.length]);
+  }, [isOpen, shouldRender]);
 
   // Track which item is closest to the vertical center
   const handleScroll = useCallback(() => {
@@ -94,7 +93,6 @@ export function EpisodePanel({
   }, [episodes.length]);
 
   // Initial scroll to current episode
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on open/mount + season change
   useEffect(() => {
     // shouldRender is included so this fires when the div is actually in the
     // DOM on re-open. Without it: isOpen fires first (div not rendered yet →
@@ -105,7 +103,7 @@ export function EpisodePanel({
     const targetIdx = currentIdx >= 0 ? currentIdx : 0;
     scrollRef.current.scrollTop = targetIdx * ITEM_H;
     setCenterIdx(targetIdx);
-  }, [isOpen, shouldRender, selectedSeason, currentIdx, padH]);
+  }, [isOpen, shouldRender, currentIdx, padH]);
 
   // Cleanup raf on unmount
   useEffect(() => {
@@ -135,14 +133,12 @@ export function EpisodePanel({
         )}
       />
 
-      {/* ── Close target — fixed so clicks anywhere (incl. sidebar) close the panel ── */}
-      {/* biome-ignore lint/a11y/useSemanticElements: glass scrim acts as close target */}
-      <div
-        className="fixed inset-0 cursor-pointer"
+      {/* Close target — fixed so clicks anywhere (incl. sidebar) close the panel */}
+      <button
+        type="button"
+        className="fixed inset-0 cursor-pointer bg-transparent border-none w-full h-full p-0"
         onClick={onClose}
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
-        role="button"
-        tabIndex={-1}
         aria-label="Close episodes"
       />
 
@@ -331,125 +327,122 @@ interface EpisodeThumbProps {
   opacity: number;
   onSelect: () => void;
   onHoverCenter?: (hovering: boolean) => void;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
-const EpisodeThumb = forwardRef<HTMLButtonElement, EpisodeThumbProps>(
-  function EpisodeThumb(
-    {
-      episode,
-      isCenter,
-      isPlaying,
-      isSelecting,
-      scale,
-      opacity,
-      onSelect,
-      onHoverCenter,
-    },
-    ref,
-  ) {
-    return (
-      <div
-        className="snap-center flex items-center justify-center"
-        style={{ height: ITEM_H }}
+function EpisodeThumb({
+  episode,
+  isCenter,
+  isPlaying,
+  isSelecting,
+  scale,
+  opacity,
+  onSelect,
+  onHoverCenter,
+  ref,
+}: EpisodeThumbProps) {
+  return (
+    <div
+      className="snap-center flex items-center justify-center"
+      style={{ height: ITEM_H }}
+    >
+      <button
+        ref={ref}
+        type="button"
+        onClick={onSelect}
+        onMouseEnter={() => onHoverCenter?.(true)}
+        onMouseLeave={() => onHoverCenter?.(false)}
+        className={cn(
+          'group relative overflow-hidden',
+          'transition-all duration-500 ease-out',
+          'focus:outline-none',
+          isCenter
+            ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow'
+            : 'border-[2px] border-[#1a1a1a] bg-[#f5f0e8]',
+        )}
+        style={{
+          width: isCenter ? 220 : 170,
+          aspectRatio: '16/9',
+          transform: `scale(${scale})`,
+          opacity,
+          transition:
+            'transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease-out, width 0.5s ease-out',
+        }}
+        aria-label={`${episode.title || `Episode ${episode.episodeNumber}`}${isPlaying ? ' (now playing)' : ''}`}
       >
-        <button
-          ref={ref}
-          type="button"
-          onClick={onSelect}
-          onMouseEnter={() => onHoverCenter?.(true)}
-          onMouseLeave={() => onHoverCenter?.(false)}
-          className={cn(
-            'group relative overflow-hidden',
-            'transition-all duration-500 ease-out',
-            'focus:outline-none',
-            isCenter
-              ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow'
-              : 'border-[2px] border-[#1a1a1a] bg-[#f5f0e8]',
-          )}
-          style={{
-            width: isCenter ? 220 : 170,
-            aspectRatio: '16/9',
-            transform: `scale(${scale})`,
-            opacity,
-            transition:
-              'transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease-out, width 0.5s ease-out',
-          }}
-          aria-label={`${episode.title || `Episode ${episode.episodeNumber}`}${isPlaying ? ' (now playing)' : ''}`}
-        >
-          {episode.thumbnailUrl ? (
-            <Image
-              src={getOptimizedImageUrl(episode.thumbnailUrl)}
-              alt={episode.title || `Episode ${episode.episodeNumber}`}
-              fill
-              className={cn(
-                'object-cover transition-all duration-500',
-                isCenter
-                  ? 'brightness-100'
-                  : 'brightness-50 group-hover:brightness-75',
-              )}
-              unoptimized={episode.thumbnailUrl.includes('/api/stream/')}
-              sizes="220px"
-            />
-          ) : (
-            <div className="w-full h-full bg-white/5 flex items-center justify-center">
-              <span className="text-sm font-bold text-white/10">
-                {episode.episodeNumber}
-              </span>
-            </div>
-          )}
-
-          {/* Now-playing audio bars */}
-          {isPlaying && isCenter && (
-            <div className="absolute top-1 left-1 flex items-end gap-[2px] h-2.5">
-              {[0, 150, 300, 450].map((delay) => (
-                <span
-                  key={delay}
-                  className="w-[2px] bg-white rounded-full animate-pulse"
-                  style={{
-                    animationDelay: `${delay}ms`,
-                    height: `${5 + Math.random() * 6}px`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Episode number badge */}
-          <div
+        {episode.thumbnailUrl ? (
+          <Image
+            src={getOptimizedImageUrl(episode.thumbnailUrl)}
+            alt={episode.title || `Episode ${episode.episodeNumber}`}
+            fill
             className={cn(
-              'absolute bottom-2 left-2',
-              'px-2 py-1',
-              'bg-white border-[2px] border-[#1a1a1a]',
-              'text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] tabular-nums',
+              'object-cover transition-all duration-500',
+              isCenter
+                ? 'brightness-100'
+                : 'brightness-50 group-hover:brightness-75',
             )}
-          >
-            E{episode.episodeNumber}
+            unoptimized={episode.thumbnailUrl.includes('/api/stream/')}
+            sizes="220px"
+          />
+        ) : (
+          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+            <span className="text-sm font-bold text-white/10">
+              {episode.episodeNumber}
+            </span>
           </div>
+        )}
 
-          {/* Duration badge */}
-          {episode.duration && (
-            <div className="absolute top-2 right-2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-white font-bold font-headline uppercase tracking-widest">
-              {episode.duration}m
-            </div>
-          )}
+        {/* Now-playing audio bars */}
+        {isPlaying && isCenter && (
+          <div className="absolute top-1 left-1 flex items-end gap-[2px] h-2.5">
+            {[0, 150, 300, 450].map((delay) => (
+              <span
+                key={delay}
+                className="w-[2px] bg-white rounded-full animate-pulse"
+                style={{
+                  animationDelay: `${delay}ms`,
+                  height: `${5 + Math.random() * 6}px`,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-          {/* Loading overlay — shown while playVideo is fetching the stream */}
-          {isSelecting && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <Loader2 className="w-5 h-5 text-white animate-spin" />
-            </div>
+        {/* Episode number badge */}
+        <div
+          className={cn(
+            'absolute bottom-2 left-2',
+            'px-2 py-1',
+            'bg-white border-[2px] border-[#1a1a1a]',
+            'text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] tabular-nums',
           )}
+        >
+          E{episode.episodeNumber}
+        </div>
 
-          {/* Play icon overlay on hover (center only) */}
-          {isCenter && !isPlaying && !isSelecting && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg shadow-black/30">
-                <Play className="w-3.5 h-3.5 text-black fill-current ml-0.5" />
-              </div>
+        {/* Duration badge */}
+        {episode.duration && (
+          <div className="absolute top-2 right-2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-white font-bold font-headline uppercase tracking-widest">
+            {episode.duration}m
+          </div>
+        )}
+
+        {/* Loading overlay — shown while playVideo is fetching the stream */}
+        {isSelecting && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <Loader2 className="w-5 h-5 text-white animate-spin" />
+          </div>
+        )}
+
+        {/* Play icon overlay on hover (center only) */}
+        {isCenter && !isPlaying && !isSelecting && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg shadow-black/30">
+              <Play className="w-3.5 h-3.5 text-black fill-current ml-0.5" />
             </div>
-          )}
-        </button>
-      </div>
-    );
-  },
-);
+          </div>
+        )}
+      </button>
+    </div>
+  );
+}

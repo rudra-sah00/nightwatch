@@ -6,6 +6,7 @@ import type {
   RoomPreview,
   WatchPartyRoom,
 } from '../types';
+import type { RTMMessage } from '../types/rtm-messages';
 
 /**
  * Check if a room exists
@@ -463,17 +464,18 @@ const rtmListeners: Record<string, Set<RtmListener>> = {};
 /**
  * Internal: Dispatch an incoming RTM message to all local subscribers
  */
-export function dispatchRtmMessage(msg: Record<string, unknown>) {
-  const eventType = msg.type as string;
+export function dispatchRtmMessage(msg: RTMMessage) {
+  const msgRecord = msg as unknown as Record<string, unknown>;
+  const eventType = msgRecord.type as string;
   if (rtmListeners[eventType]) {
     rtmListeners[eventType].forEach((cb) => {
-      cb(msg);
+      cb(msgRecord);
     });
   }
   // Also dispatch to the generic "INTERACTION" listener if it's an interaction
   if (eventType === 'INTERACTION' && rtmListeners.INTERACTION) {
     rtmListeners.INTERACTION.forEach((cb) => {
-      cb(msg);
+      cb(msgRecord);
     });
   }
 }

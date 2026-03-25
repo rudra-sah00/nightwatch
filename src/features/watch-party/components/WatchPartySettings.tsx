@@ -1,14 +1,10 @@
 import {
-  Check,
-  ChevronDown,
   MessageSquare,
   PenTool,
   Settings,
   Shield,
-  Subtitles,
   Volume2,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,18 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { loadSubtitleFonts } from '@/features/watch/player/ui/controls/load-subtitle-fonts';
-import {
-  applySubtitleSettings,
-  BACKGROUND_COLORS,
-  loadSubtitleSettings,
-  SUBTITLE_FONT_SIZES,
-  SUBTITLE_FONTS,
-  type SubtitleSettings,
-  saveSubtitleSettings,
-  TEXT_COLORS,
-  TEXT_SHADOWS,
-} from '@/features/watch/player/ui/controls/subtitle-settings';
 import { cn } from '@/lib/utils';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import {
@@ -82,29 +66,19 @@ export function WatchPartySettings({
   onToggleFloatingChat,
 }: WatchPartySettingsProps) {
   const { isOpen, setIsOpen } = useWatchPartySettings();
-  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
-    () => loadSubtitleSettings(),
-  );
-
-  // Sync subtitle settings when opening modal
-  useEffect(() => {
-    if (isOpen) {
-      setSubtitleSettings(loadSubtitleSettings());
-      loadSubtitleFonts();
-    }
-  }, [isOpen]);
-
-  const updateSubtitleSettings = (newSettings: SubtitleSettings) => {
-    setSubtitleSettings(newSettings);
-    applySubtitleSettings(newSettings);
-    saveSubtitleSettings(newSettings);
-  };
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
     value: boolean,
   ) => {
-    updatePartyPermissions(room.id, { [key]: value });
+    // Map frontend keys to backend schema keys
+    const backendKeyMap: Record<string, string> = {
+      canGuestsDraw: 'canSeek',
+      canGuestsPlaySounds: 'canPlayPause',
+      canGuestsChat: 'canChat',
+    };
+    const backendKey = backendKeyMap[key] || key;
+    updatePartyPermissions(room.id, { [backendKey]: value });
   };
 
   const handleUserPermissionToggle = (
@@ -112,7 +86,31 @@ export function WatchPartySettings({
     key: keyof NonNullable<RoomMember['permissions']>,
     value: boolean,
   ) => {
-    updateMemberPermissions(room.id, memberId, { [key]: value });
+    const member = room.members.find((m) => m.id === memberId);
+    if (!member) return;
+
+    // Merge existing permissions with the new toggle value
+    const currentPerms = member.permissions || {};
+    const globalPerms = room.permissions;
+
+    const merged = {
+      canDraw:
+        (key === 'canDraw' ? value : currentPerms.canDraw) ??
+        globalPerms.canGuestsDraw,
+      canPlaySound:
+        (key === 'canPlaySound' ? value : currentPerms.canPlaySound) ??
+        globalPerms.canGuestsPlaySounds,
+      canChat:
+        (key === 'canChat' ? value : currentPerms.canChat) ??
+        globalPerms.canGuestsChat,
+    };
+
+    // Schema expects all three fields with specific names
+    updateMemberPermissions(room.id, memberId, {
+      canSeek: merged.canDraw,
+      canPlayPause: merged.canPlaySound,
+      canChat: merged.canChat,
+    });
   };
 
   // Only guests should be listed in individual overrides (don't list the host)
@@ -163,93 +161,6 @@ export function WatchPartySettings({
                     checked={floatingChatEnabled}
                     onCheckedChange={() => onToggleFloatingChat?.()}
                   />
-                </div>
-
-                <div className="border-t-[2px] border-[#1a1a1a]/10 pt-4">
-                  <h4 className="text-[10px] md:text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]/60 mb-3 flex items-center gap-2">
-                    <Subtitles className="w-3 h-3" />
-                    Subtitle Style
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Font Size */}
-                    <Dropdown
-                      label="Size"
-                      value={subtitleSettings.fontSize}
-                      options={SUBTITLE_FONT_SIZES}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          fontSize: v,
-                        })
-                      }
-                    />
-                    {/* Font Family */}
-                    <Dropdown
-                      label="Font"
-                      value={subtitleSettings.fontFamily}
-                      options={SUBTITLE_FONTS}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          fontFamily: v,
-                        })
-                      }
-                    />
-                    {/* Text Color */}
-                    <Dropdown
-                      label="Text Color"
-                      value={subtitleSettings.textColor}
-                      options={TEXT_COLORS}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          textColor: v,
-                        })
-                      }
-                      isColor
-                    />
-                    {/* Background */}
-                    <Dropdown
-                      label="Background"
-                      value={subtitleSettings.backgroundColor}
-                      options={BACKGROUND_COLORS}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          backgroundColor: v,
-                        })
-                      }
-                      isColor
-                    />
-                    {/* Text Effect */}
-                    <Dropdown
-                      label="Effect"
-                      value={subtitleSettings.textShadow}
-                      options={TEXT_SHADOWS}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          textShadow: v,
-                        })
-                      }
-                    />
-                    {/* Opacity */}
-                    <Dropdown
-                      label="Opacity"
-                      value={String(subtitleSettings.opacity)}
-                      options={[
-                        { label: 'Opaque', value: '1' },
-                        { label: 'Semi-Transparent', value: '0.5' },
-                        { label: 'Transparent', value: '0' },
-                      ]}
-                      onChange={(v) =>
-                        updateSubtitleSettings({
-                          ...subtitleSettings,
-                          opacity: Number(v),
-                        })
-                      }
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -416,95 +327,5 @@ export function WatchPartySettings({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-// Reusable Dropdown for Settings
-interface DropdownProps {
-  label: string;
-  value: string;
-  options: readonly { label: string; value: string }[];
-  onChange: (value: string) => void;
-  isColor?: boolean;
-}
-
-function Dropdown({ label, value, options, onChange, isColor }: DropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [open]);
-
-  const selected = options.find((o) => o.value === value) ?? options[0];
-
-  return (
-    <div ref={ref} className="relative flex-1">
-      <p className="text-[10px] md:text-[8px] font-black font-headline uppercase tracking-widest text-[#1a1a1a]/40 mb-1 pl-1">
-        {label}
-      </p>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2 px-3 py-2 bg-white border-[2px] border-[#1a1a1a] text-[#1a1a1a] font-bold font-headline uppercase tracking-widest text-[10px] transition-all focus:outline-none hover:bg-[#ffe066] active:bg-[#f5f0e8] truncate"
-      >
-        {isColor && (
-          <span
-            className="w-3 h-3 border border-[#1a1a1a] flex-shrink-0"
-            style={{
-              backgroundColor: value === 'transparent' ? 'transparent' : value,
-            }}
-          />
-        )}
-        <span className="flex-1 text-left truncate">{selected.label}</span>
-        <ChevronDown
-          className={cn(
-            'w-3 h-3 text-[#1a1a1a] stroke-[3px] transition-transform duration-200 shrink-0',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {open && (
-        <div className="absolute z-[100] mt-1 w-full bg-white border-[3px] border-[#1a1a1a] neo-shadow-sm max-h-48 overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-100">
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-              className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold font-headline uppercase tracking-widest transition-colors border-b border-[#1a1a1a]/10 last:border-b-0',
-                value === opt.value
-                  ? 'bg-[#ffcc00] text-[#1a1a1a]'
-                  : 'text-[#1a1a1a] hover:bg-[#f5f0e8]',
-              )}
-            >
-              {isColor && (
-                <span
-                  className="w-3 h-3 border border-[#1a1a1a] flex-shrink-0"
-                  style={{
-                    backgroundColor:
-                      opt.value === 'transparent' ? 'transparent' : opt.value,
-                  }}
-                />
-              )}
-              <span className="flex-1 text-left truncate">{opt.label}</span>
-              {value === opt.value && (
-                <Check className="w-3 h-3 text-[#1a1a1a] stroke-[3px]" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }

@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWatchPartySync } from '@/features/watch-party/room/hooks/useWatchPartySync';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
+import type { WatchPartyRoom } from '@/features/watch-party/room/types';
+import type { RTMMessage } from '@/features/watch-party/room/types/rtm-messages';
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   syncPartyState: vi.fn(),
@@ -27,13 +29,14 @@ describe('useWatchPartySync', () => {
   const mockRoom = {
     id: 'room-1',
     title: 'Movie',
+    hostId: 'host-1',
     state: {
       currentTime: 0,
       isPlaying: false,
       lastUpdated: Date.now(),
       playbackRate: 1,
     },
-  } as unknown as import('@/features/watch-party/room/types').WatchPartyRoom;
+  } as unknown as WatchPartyRoom;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -100,7 +103,7 @@ describe('useWatchPartySync', () => {
         type: 'PLAY_EVENT',
         videoTime: 300,
         serverTime: Date.now(),
-      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
+      } as RTMMessage);
     });
 
     expect(mockSetRoom).toHaveBeenCalled();
@@ -113,10 +116,69 @@ describe('useWatchPartySync', () => {
       result.current.handleIncomingRtmMessage({
         type: 'HOST_DISCONNECTED',
         graceSeconds: 30,
-      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
+        message: 'Host left',
+      } as RTMMessage);
+    });
+
+    expect(toast.warning).toHaveBeenCalled();
+  });
+
+  it('handlePresenceEvent should trigger 30s auto-exit if host disconnects and fails to return', async () => {
+    vi.useFakeTimers();
+    const mockWindow = { location: { href: '' } };
+    vi.stubGlobal('window', mockWindow);
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'host-1', // Matches room.hostId
+      });
     });
 
     expect(result.current.hostDisconnected).toBe(true);
-    expect(toast.warning).toHaveBeenCalled();
+    expect(mockWindow.location.href).toBe('');
+
+    await act(async () => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    expect(mockWindow.location.href).toBe('/home');
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('handlePresenceEvent should clear 30s disconnect timeout if host rejoins', async () => {
+    vi.useFakeTimers();
+    const mockWindow = { location: { href: '' } };
+    vi.stubGlobal('window', mockWindow);
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'host-1',
+      });
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(15000);
+    });
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'JOIN',
+        userId: 'host-1',
+      });
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(20000);
+    });
+
+    expect(result.current.hostDisconnected).toBe(false);
+    expect(mockWindow.location.href).toBe(''); // Did not redirect
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 });

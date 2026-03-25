@@ -101,7 +101,7 @@ describe('WatchPartyChat', () => {
     it('should render message input', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       expect(input).toBeInTheDocument();
     });
 
@@ -440,7 +440,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...propsWithoutTyping} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       expect(input).toBeInTheDocument();
     });
   });
@@ -457,7 +457,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStart when user types', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'H' } });
 
       expect(defaultProps.onTypingStart).toHaveBeenCalled();
@@ -466,7 +466,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStop when input is cleared', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.change(input, { target: { value: '' } });
 
@@ -476,7 +476,7 @@ describe('WatchPartyChat', () => {
     it('should auto-stop typing after 3 seconds', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'H' } });
 
       expect(defaultProps.onTypingStart).toHaveBeenCalled();
@@ -490,7 +490,7 @@ describe('WatchPartyChat', () => {
     it('should reset timeout when user continues typing', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
 
       // Type first character
       fireEvent.change(input, { target: { value: 'H' } });
@@ -516,7 +516,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStop when sending message', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'Hello' } });
 
       const submitButton = screen
@@ -531,7 +531,7 @@ describe('WatchPartyChat', () => {
     it('should send message when Enter key is pressed', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.keyDown(input, { key: 'Enter', shiftKey: false });
 
@@ -542,7 +542,7 @@ describe('WatchPartyChat', () => {
     it('should not send message when Shift+Enter is pressed', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
 
@@ -553,7 +553,7 @@ describe('WatchPartyChat', () => {
     it('should cleanup typing timeout on unmount', () => {
       const { unmount } = render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       fireEvent.change(input, { target: { value: 'H' } });
 
       unmount();
@@ -597,7 +597,7 @@ describe('WatchPartyChat', () => {
       const emojiButton = screen.getByTitle('Add emoji');
       await user.click(emojiButton);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       await user.type(input, 'Hello');
 
       const submitButton = screen
@@ -618,7 +618,7 @@ describe('WatchPartyChat', () => {
       const emojiToClick = screen.getByTestId('emoji-😊');
       await user.click(emojiToClick);
 
-      const input = screen.getByPlaceholderText('Type a message...');
+      const input = screen.getByPlaceholderText('Message...');
       expect(input).toHaveValue('😊');
     });
   });

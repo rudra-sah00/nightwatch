@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Captcha } from '@/components/ui/captcha';
 import type { User } from '@/types';
 import type { RoomPreview } from '../room/types';
+import { WatchPartyLoading } from './WatchPartyLoading';
 
 interface WatchPartyLobbyProps {
   roomPreview: RoomPreview | null;
@@ -76,14 +77,7 @@ export function WatchPartyLobby({
   }
 
   if (isLoading && !roomPreview && !roomNotFound) {
-    return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-[#0055ff]" />
-        <p className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm">
-          Loading room…
-        </p>
-      </div>
-    );
+    return <WatchPartyLoading message="Loading room…" />;
   }
 
   if (roomNotFound) {

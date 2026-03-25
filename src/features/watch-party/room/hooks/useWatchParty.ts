@@ -52,11 +52,12 @@ interface UseWatchPartyOptions {
   onStateUpdate?: (state: PartyStateUpdate) => void;
   onMemberJoined?: (member: RoomMember) => void;
   userId?: string;
+  roomId?: string;
 }
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const router = useRouter();
-  const { userId } = options;
+  const { userId, roomId } = options;
 
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -99,7 +100,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         calibrate(msg.serverTime);
       }
 
-      dispatchRtmMessage(msg as unknown as Record<string, unknown>);
+      dispatchRtmMessage(msg);
 
       // Handle main lifecycle messages
       switch (msg.type) {
@@ -173,6 +174,10 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         }
       }
     },
+    onPresence: (event) => {
+      sync.handlePresenceEvent(event);
+      members.handlePresenceEvent(event);
+    },
   });
 
   // 1. Chat Hook
@@ -189,12 +194,15 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     setIsConnected,
     setRequestStatus,
     setMessages: chat.setMessages,
-    setError,
-    setErrorCode,
-    setIsLoading,
+    setError: setError,
+    setErrorCode: setErrorCode,
+    setIsLoading: setIsLoading,
     requestStatus,
     normalizeRoomUrls,
     room,
+    userId,
+    roomId,
+    rtmSendMessage,
   });
 
   // 3. Members Hook
@@ -202,6 +210,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     room,
     setRoom,
     userId: options.userId,
+    isHost: userId === room?.hostId,
     rtmSendMessage,
     rtmSendMessageToPeer,
     onMemberJoined: options.onMemberJoined,
@@ -216,6 +225,8 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     rtmSendMessage,
     onStateUpdate: options.onStateUpdate,
     normalizeRoomUrls,
+    rtmSendMessageToPeer,
+    isHost: userId === room?.hostId,
   });
 
   // Clock Synchronization
@@ -227,6 +238,21 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       // Initial calibration if needed - though JOIN_APPROVED should have handled it
     }
   }, [isConnected, requestStatus, isCalibrated]);
+
+  // Handle Guest Initial Sync Request
+  useEffect(() => {
+    const isHost = userId === room?.hostId;
+    if (isRtmConnected && !isHost && room?.id && userId) {
+      // Small delay to ensure host is ready to process RTM messages
+      const timer = setTimeout(() => {
+        rtmSendMessage?.({
+          type: 'SYNC_REQUEST',
+          userId,
+        });
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isRtmConnected, room?.id, userId, rtmSendMessage, room?.hostId]);
 
   // On connect/reconnect: fetch initial messages
   useEffect(() => {
@@ -265,7 +291,18 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     createRoom: lifecycle.createRoom,
     requestJoin: lifecycle.requestJoin,
     cancelRequest: lifecycle.cancelRequest,
-    leaveRoom: lifecycle.leaveRoom,
+    leaveRoom: async () => {
+      if (room?.hostId === userId) {
+        // Broadcast to all members that the party is closed
+        await rtmSendMessage?.({
+          type: 'PARTY_CLOSED',
+          reason: 'Host left the room',
+        });
+        // Give RTM a small window to ensure the broadcast is sent before we disconnect
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+      return lifecycle.leaveRoom();
+    },
     approveMember: members.approveMember,
     rejectMember: members.rejectMember,
     kickUser: members.kickUser,

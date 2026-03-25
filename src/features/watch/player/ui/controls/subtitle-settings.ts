@@ -71,6 +71,7 @@ export const TEXT_SHADOWS = [
 ] as const;
 
 const STORAGE_KEY = 'watch-subtitle-settings';
+const STORAGE_VERSION = 'v1';
 
 export const defaultSubtitleSettings: SubtitleSettings = {
   fontSize: '1.25rem',
@@ -91,6 +92,10 @@ export function loadSubtitleSettings(): SubtitleSettings {
     const saved = getCachedLocalStorage(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      // Invalidate if version mismatch or missing version
+      if (parsed._v !== STORAGE_VERSION) {
+        return defaultSubtitleSettings;
+      }
       return { ...defaultSubtitleSettings, ...parsed };
     }
   } catch (_e) {
@@ -106,7 +111,8 @@ export function saveSubtitleSettings(settings: SubtitleSettings): void {
   if (typeof window === 'undefined') return;
 
   try {
-    setCachedLocalStorage(STORAGE_KEY, JSON.stringify(settings));
+    const dataToSave = { ...settings, _v: STORAGE_VERSION };
+    setCachedLocalStorage(STORAGE_KEY, JSON.stringify(dataToSave));
   } catch (_e) {
     // Ignore save error
   }

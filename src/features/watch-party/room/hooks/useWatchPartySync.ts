@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
@@ -21,6 +21,8 @@ interface UseWatchPartySyncProps {
     token: string,
     options?: { injectStream?: boolean },
   ) => WatchPartyRoom;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  isHost?: boolean;
 }
 
 export function useWatchPartySync({
@@ -29,8 +31,52 @@ export function useWatchPartySync({
   rtmSendMessage,
   onStateUpdate,
   normalizeRoomUrls,
+  rtmSendMessageToPeer: _rtmSendMessageToPeer,
+  isHost,
 }: UseWatchPartySyncProps) {
   const [hostDisconnected, setHostDisconnected] = useState(false);
+  const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePresenceEvent = useCallback(
+    (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
+      // Only guests care about host disconnection
+      if (isHost) return;
+      if (event.userId !== room?.hostId) return;
+
+      if (event.action === 'LEAVE') {
+        setHostDisconnected(true);
+        const graceSeconds = 30;
+        toast.warning(
+          `Host disconnected. Party will close in ${graceSeconds}s if they don't return.`,
+          { id: 'host-disconnected', duration: graceSeconds * 1000 },
+        );
+
+        if (hostDisconnectTimerRef.current)
+          clearTimeout(hostDisconnectTimerRef.current);
+        hostDisconnectTimerRef.current = setTimeout(() => {
+          // Time's up! Leave the room
+          toast.error('Watch party closed because the host did not return.');
+          window.location.href = '/home'; // Hard redirect is safest for cleanup
+        }, graceSeconds * 1000);
+      } else if (event.action === 'JOIN') {
+        setHostDisconnected(false);
+        if (hostDisconnectTimerRef.current) {
+          clearTimeout(hostDisconnectTimerRef.current);
+          hostDisconnectTimerRef.current = null;
+        }
+        toast.success('Host reconnected!', { id: 'host-disconnected' });
+      }
+    },
+    [isHost, room?.hostId],
+  );
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hostDisconnectTimerRef.current)
+        clearTimeout(hostDisconnectTimerRef.current);
+    };
+  }, []);
 
   const emitEvent = useCallback(
     (event: PartyEvent) => {
@@ -183,9 +229,30 @@ export function useWatchPartySync({
           });
           break;
         }
+        case 'SYNC_REQUEST': {
+          if (isHost) {
+            // Host responds to sync request by broadcasting current state
+            // We use emitEvent which broadcasts to everyone - this is simplest
+            // and ensures everyone is on the same page.
+            // A more advanced version would use rtmSendMessageToPeer.
+            if (room?.id) {
+              // We trigger a "SYNC" type message which is more authoritative than just PLAY/PAUSE
+              rtmSendMessage?.({
+                type: 'SYNC',
+                currentTime: room.state.currentTime,
+                videoTime: room.state.currentTime,
+                isPlaying: room.state.isPlaying,
+                playbackRate: room.state.playbackRate,
+                serverTime: Date.now(),
+                fromHost: true,
+              });
+            }
+          }
+          break;
+        }
       }
     },
-    [onStateUpdate, normalizeRoomUrls, setRoom],
+    [onStateUpdate, normalizeRoomUrls, setRoom, isHost, rtmSendMessage, room],
   );
 
   return {
@@ -193,5 +260,6 @@ export function useWatchPartySync({
     emitEvent,
     updateContent,
     handleIncomingRtmMessage,
+    handlePresenceEvent,
   };
 }

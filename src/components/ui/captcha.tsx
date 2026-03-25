@@ -2,7 +2,7 @@
 
 import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 import { env } from '@/lib/env';
 
 // Hoisted to module level to prevent recreation on each render (rule 5.4)
@@ -16,12 +16,10 @@ interface CaptchaProps {
   onVerify: (token: string) => void;
   onError?: () => void;
   onExpire?: () => void;
+  ref?: React.Ref<CaptchaHandle>;
 }
 
-export const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha(
-  { onVerify, onError, onExpire },
-  ref,
-) {
+export function Captcha({ onVerify, onError, onExpire, ref }: CaptchaProps) {
   const isDev = process.env.NODE_ENV === 'development';
   const onVerifyRef = useRef(onVerify);
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -61,4 +59,4 @@ export const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha(
       />
     </div>
   );
-});
+}

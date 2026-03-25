@@ -766,14 +766,18 @@ describe('AuthProvider', () => {
 
   // ── useAuth outside provider ──────────────────────────────────────────
 
-  it('throws when useAuth is used outside AuthProvider', () => {
+  it('returns default context when useAuth is used outside AuthProvider', () => {
+    let context: ReturnType<typeof useAuth> = null as unknown as ReturnType<
+      typeof useAuth
+    >;
     function Orphan() {
-      useAuth();
+      context = useAuth();
       return <div />;
     }
 
-    expect(() => render(<Orphan />)).toThrow(
-      'useAuth must be used within an AuthProvider',
-    );
+    render(<Orphan />);
+    expect(context.user).toBeNull();
+    expect(context.isAuthenticated).toBe(false);
+    expect(context.isLoading).toBe(true);
   });
 });
