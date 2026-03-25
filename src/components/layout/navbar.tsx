@@ -48,16 +48,14 @@ export function Navbar() {
             <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
             <span className="hidden md:inline">Live</span>
           </Link>
-          {user ? (
-            <Link
-              href="/watchlist"
-              className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
-              title="Watchlist"
-            >
-              <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-              <span className="hidden md:inline">Watchlist</span>
-            </Link>
-          ) : null}
+          <Link
+            href="/watchlist"
+            className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
+            title="Watchlist"
+          >
+            <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
+            <span className="hidden md:inline">Watchlist</span>
+          </Link>
         </div>
 
         {/* Right Side: Profile */}

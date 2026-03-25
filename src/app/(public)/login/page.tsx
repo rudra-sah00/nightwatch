@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { GlobalLoading } from '@/components/ui/global-loading';
 import { useLoginPage } from './use-login-page';
 
 const LoginForm = dynamic(
@@ -34,16 +35,7 @@ export default function LoginPage() {
 
   // Loading State
   if (isLoading) {
-    return (
-      <main className="min-h-screen bg-white flex flex-col items-center justify-center animate-in fade-in duration-500">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-2 border-[#1a1a1a]/20"></div>
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#1a1a1a] animate-spin"></div>
-          </div>
-        </div>
-      </main>
-    );
+    return <GlobalLoading />;
   }
 
   if (initialAuthCheck) return null;

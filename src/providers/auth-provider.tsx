@@ -118,6 +118,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedUser) {
         if (controller.signal.aborted) return;
         setUser(storedUser);
+        // Set loading to false as soon as we have a stored user so the UI can hydrate and redirect.
+        // Profile fetch will continue in the background.
+        setIsLoading(false);
 
         // Connect Socket.IO with stored credentials
         connect(
@@ -156,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             disconnect();
             if (!controller.signal.aborted) {
               setUser(null);
+              setIsLoading(false); // Ensure loading is false if auth fails
             }
             clearCookiesAndRedirect('Session expired. Please login again.');
             return;
@@ -163,11 +167,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         // No stored user — nothing to initialize for anonymous visitors.
-        // All auth endpoints (/api/auth/login, register, verify-otp …) are
-        // in the CSRF skip list so no pre-seeding of the CSRF cookie is needed.
-      }
-      if (!controller.signal.aborted) {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 

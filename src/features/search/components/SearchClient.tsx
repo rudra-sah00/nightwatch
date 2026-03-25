@@ -14,6 +14,9 @@ const ContentDetailModal = dynamic(
   { ssr: false },
 );
 
+import { GlobalLoading } from '@/components/ui/global-loading';
+import { useAuth } from '@/providers/auth-provider';
+
 interface SearchClientProps {
   initialResults: SearchResult[];
   initialQuery: string;
@@ -39,6 +42,12 @@ export function SearchClient({
     handleSearch,
     isPending,
   } = useSearchInput();
+
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <GlobalLoading />;
+  }
 
   // isPending goes true the instant the user presses Enter (router transition
   // fires) and stays true until the new page renders — giving immediate
@@ -76,11 +85,9 @@ export function SearchClient({
                 />
               </h1>
             </div>
-            {!isTransitioning && !isPending && (
-              <p className="font-headline font-bold text-xl uppercase tracking-widest text-[#4a4a4a]">
-                {results.length} Films Found in the Archives
-              </p>
-            )}
+            <p className="font-headline font-bold text-xl uppercase tracking-widest text-[#4a4a4a]">
+              {results.length} Films Found in the Archives
+            </p>
           </div>
 
           <div className="space-y-6">
