@@ -72,7 +72,7 @@ export function NextEpisodeOverlay({
                   src={nextEpisode.thumbnailUrl}
                   alt={nextEpisode.title}
                   fill
-                  className="object-cover"
+                  className="object-cover grayscale contrast-125 transition-all duration-500"
                   unoptimized
                 />
               ) : (

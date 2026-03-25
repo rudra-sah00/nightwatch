@@ -128,7 +128,7 @@ export function EpisodePanel({
            watch-party sidebar is also blurred when the panel opens ── */}
       <div
         className={cn(
-          'fixed inset-0 bg-[#ffcc00]/95',
+          'fixed inset-0 bg-[#f5f0e8]/98', // Changed from yellow to cream
           'transition-all duration-300 ease-out',
         )}
       />
@@ -148,7 +148,7 @@ export function EpisodePanel({
           className={cn(
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
-            'pointer-events-none z-10 bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow',
+            'pointer-events-none z-10 bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow-sm',
             'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
           )}
         >
@@ -156,10 +156,7 @@ export function EpisodePanel({
             <span className="text-[10px] font-black font-headline text-[#4a4a4a] uppercase tracking-widest">
               Episode {centerEp.episodeNumber}
             </span>
-            <h3
-              className="text-xl md:text-2xl font-black font-headline uppercase text-[#1a1a1a] leading-tight"
-              style={{ textShadow: '2px 2px 0px #ffe066' }}
-            >
+            <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-[#1a1a1a] leading-tight">
               {centerEp.title || `Episode ${centerEp.episodeNumber}`}
             </h3>
             {centerEp.description && (
@@ -235,7 +232,7 @@ export function EpisodePanel({
                     }}
                     className={cn(
                       'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-[#1a1a1a]',
-                      'transition-colors border-b-[3px] border-[#1a1a1a] last:border-b-0',
+                      'transition-colors border-b-[4px] border-[#1a1a1a] last:border-b-0',
                       s.seasonNumber === selectedSeason
                         ? 'bg-[#ffcc00]'
                         : 'hover:bg-[#ffe066]',
@@ -357,8 +354,8 @@ function EpisodeThumb({
           'transition-all duration-500 ease-out',
           'focus:outline-none',
           isCenter
-            ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow'
-            : 'border-[2px] border-[#1a1a1a] bg-[#f5f0e8]',
+            ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow-sm'
+            : 'border-[3px] border-[#1a1a1a] bg-[#f5f0e8]',
         )}
         style={{
           width: isCenter ? 220 : 170,
@@ -378,8 +375,8 @@ function EpisodeThumb({
             className={cn(
               'object-cover transition-all duration-500',
               isCenter
-                ? 'brightness-100'
-                : 'brightness-50 group-hover:brightness-75',
+                ? 'brightness-100 grayscale-0'
+                : 'brightness-50 grayscale contrast-125 group-hover:brightness-100 group-hover:grayscale-0 group-hover:contrast-100',
             )}
             unoptimized={episode.thumbnailUrl.includes('/api/stream/')}
             sizes="220px"
