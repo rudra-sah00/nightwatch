@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerContext } from '../../../context/PlayerContext';
 import {
   applySubtitleSettings,
   loadSubtitleSettings,
   type SubtitleSettings,
   saveSubtitleSettings,
-} from '../controls/subtitle-settings';
+} from '../../controls/utils/subtitle-settings';
 
 export function usePlayerAudioSubtitleSelectors() {
   const { state, playerHandlers } = usePlayerContext();

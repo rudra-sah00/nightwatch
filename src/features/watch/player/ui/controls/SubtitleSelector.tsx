@@ -2,7 +2,8 @@
 
 import { Check, ChevronRight, Subtitles, Type, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { loadSubtitleFonts } from './load-subtitle-fonts';
+import { useSubtitleSelector } from './hooks/use-subtitle-selector';
+import { loadSubtitleFonts } from './utils/load-subtitle-fonts';
 import {
   BACKGROUND_COLORS,
   defaultSubtitleSettings,
@@ -11,11 +12,10 @@ import {
   type SubtitleSettings,
   TEXT_COLORS,
   TEXT_SHADOWS,
-} from './subtitle-settings';
-import { useSubtitleSelector } from './use-subtitle-selector';
+} from './utils/subtitle-settings';
 
 // Re-export SubtitleSettings for backwards compatibility
-export type { SubtitleSettings } from './subtitle-settings';
+export type { SubtitleSettings } from './utils/subtitle-settings';
 
 interface SubtitleTrack {
   id: string;

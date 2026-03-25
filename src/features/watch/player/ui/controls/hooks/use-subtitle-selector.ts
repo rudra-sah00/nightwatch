@@ -5,7 +5,7 @@ import {
   applySubtitleSettings,
   type SubtitleSettings,
   saveSubtitleSettings,
-} from './subtitle-settings';
+} from '../utils/subtitle-settings';
 
 interface SubtitleTrack {
   id: string;

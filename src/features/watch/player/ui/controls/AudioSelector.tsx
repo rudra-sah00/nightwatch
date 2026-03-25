@@ -2,7 +2,7 @@
 
 import { Check, Languages, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAudioSelector } from './use-audio-selector';
+import { useAudioSelector } from './hooks/use-audio-selector';
 
 interface AudioTrack {
   id: string;

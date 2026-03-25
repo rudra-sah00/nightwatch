@@ -5,19 +5,19 @@ import {
   playerReducer,
   type SubtitleTrack,
   type VideoMetadata,
-} from '../../context/types';
-import { useFullscreen } from '../../hooks/useFullscreen';
-import { useKeyboard } from '../../hooks/useKeyboard';
-import { useMobileDetection } from '../../hooks/useMobileDetection';
-import { useNextEpisode } from '../../hooks/useNextEpisode';
-import { usePlayerEngine } from '../../hooks/usePlayerEngine';
-import { usePlayerHandlers } from '../../hooks/usePlayerHandlers';
-import { useWatchProgress } from '../../hooks/useWatchProgress';
+} from '../../../context/types';
+import { useFullscreen } from '../../../hooks/useFullscreen';
+import { useKeyboard } from '../../../hooks/useKeyboard';
+import { useMobileDetection } from '../../../hooks/useMobileDetection';
+import { useNextEpisode } from '../../../hooks/useNextEpisode';
+import { usePlayerEngine } from '../../../hooks/usePlayerEngine';
+import { usePlayerHandlers } from '../../../hooks/usePlayerHandlers';
+import { useWatchProgress } from '../../../hooks/useWatchProgress';
 import {
   applySubtitleSettings,
   loadSubtitleSettings,
   type SubtitleSettings,
-} from '../controls/subtitle-settings';
+} from '../../controls/utils/subtitle-settings';
 
 interface PlayerRootHookProps {
   streamUrl: string | null;

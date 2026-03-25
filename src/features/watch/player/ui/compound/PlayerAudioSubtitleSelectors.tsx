@@ -1,7 +1,7 @@
 import { usePlayerContext } from '../../context/PlayerContext';
 import { AudioSelector } from '../controls/AudioSelector';
 import { SubtitleSelector } from '../controls/SubtitleSelector';
-import { usePlayerAudioSubtitleSelectors } from './use-player-audio-subtitle-selectors';
+import { usePlayerAudioSubtitleSelectors } from './hooks/use-player-audio-subtitle-selectors';
 
 export function PlayerAudioSubtitleSelectors() {
   const {

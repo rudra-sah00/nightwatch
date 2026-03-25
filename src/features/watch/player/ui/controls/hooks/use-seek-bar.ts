@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchSpriteVtt, type SpriteCue } from '../../../api';
+import { fetchSpriteVtt, type SpriteCue } from '../../../../api';
 
 interface SpriteSheet {
   imageUrl: string;

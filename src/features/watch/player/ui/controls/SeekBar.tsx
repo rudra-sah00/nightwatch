@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { formatTime } from '../../utils/format-time';
-import { useSeekBar } from './use-seek-bar';
+import { useSeekBar } from './hooks/use-seek-bar';
 
 // Sprite sheet configuration (keep interface here as it's UI-specific)
 interface SpriteSheet {

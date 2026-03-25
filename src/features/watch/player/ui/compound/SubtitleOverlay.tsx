@@ -1,6 +1,6 @@
 'use client';
 
-import { useSubtitleOverlay } from './use-subtitle-overlay';
+import { useSubtitleOverlay } from './hooks/use-subtitle-overlay';
 
 interface SubtitleOverlayProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;

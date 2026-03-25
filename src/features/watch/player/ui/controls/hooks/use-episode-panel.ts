@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getSeriesEpisodes, getShowDetails } from '@/features/search/api';
 import type { Episode, Season, ShowDetails } from '@/features/search/types';
-import { cacheSeriesData, getCachedSeriesData } from '../../hooks/series-cache';
+import {
+  cacheSeriesData,
+  getCachedSeriesData,
+} from '../../../hooks/series-cache';
 
 interface UseEpisodePanelOptions {
   seriesId?: string;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerContext } from '../../../context/PlayerContext';
 
 const LIVE_EDGE_THRESHOLD_S = 15;
 

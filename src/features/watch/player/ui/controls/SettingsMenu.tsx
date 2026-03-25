@@ -3,7 +3,7 @@
 import { Check, ChevronRight, Gauge, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Quality } from '../../context/types';
-import { useSettingsMenu } from './use-settings-menu';
+import { useSettingsMenu } from './hooks/use-settings-menu';
 
 interface SettingsMenuProps {
   qualities: Quality[];

@@ -2,7 +2,7 @@
 
 import { Volume1, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useVolume } from './use-volume';
+import { useVolume } from './hooks/use-volume';
 
 interface VolumeProps {
   volume: number;

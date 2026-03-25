@@ -7,7 +7,7 @@ import type { Episode } from '@/features/search/types';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { EpisodePanel } from '../controls/EpisodePanel';
-import { useEpisodePanel } from '../controls/use-episode-panel';
+import { useEpisodePanel } from '../controls/hooks/use-episode-panel';
 
 /**
  * Compound wrapper: manages state via useEpisodePanel and renders both

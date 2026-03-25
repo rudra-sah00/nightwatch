@@ -6,7 +6,7 @@ import { PlayerContext } from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
-import { usePlayerRoot } from './use-player-root';
+import { usePlayerRoot } from './hooks/use-player-root';
 
 interface PlayerRootProps {
   children: ReactNode;

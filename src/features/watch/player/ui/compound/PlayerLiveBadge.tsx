@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { usePlayerLiveBadge } from './use-player-live-badge';
+import { usePlayerLiveBadge } from './hooks/use-player-live-badge';
 
 /**
  * How many seconds behind the buffered live edge counts as "you are live".

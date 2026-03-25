@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useEpisodePanel } from '@/features/watch/player/ui/controls/use-episode-panel';
+import { useEpisodePanel } from '@/features/watch/player/ui/controls/hooks/use-episode-panel';
 
 // Mock the API calls
 vi.mock('@/features/search/api', () => ({
