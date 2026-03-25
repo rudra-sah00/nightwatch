@@ -39,21 +39,9 @@ interface ContentInfoProps {
 
 export const ContentInfo = memo(function ContentInfo({
   show,
-  isPlaying,
-  isLoadingProgress = false,
   hasWatchProgress,
   watchProgress,
-  selectedSeason,
-  onPlay,
-  onResume,
-  onWatchParty,
-  isWatchPartyDisabled,
-  isCreatingParty = false,
-  onWatchlistToggle,
-  isInWatchlist = false,
-  isWatchlistLoading = false,
-  extraActions,
-}: ContentInfoProps) {
+}: Pick<ContentInfoProps, 'show' | 'hasWatchProgress' | 'watchProgress'>) {
   const isSeries = show.contentType === ContentType.Series;
 
   return (

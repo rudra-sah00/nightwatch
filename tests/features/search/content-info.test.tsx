@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { ContentInfo } from '@/features/search/components/content-info';
+import {
+  ContentActions,
+  ContentInfo,
+} from '@/features/search/components/content-info';
 import { ContentType } from '@/features/search/types';
 
 describe('ContentInfo', () => {
@@ -25,12 +28,12 @@ describe('ContentInfo', () => {
 
   it('shows "Play S{N}:E1" for series without watch progress', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         selectedSeason={{ seasonNumber: 2 }}
         onPlay={mockOnPlay}
+        isSeries={true}
       />,
     );
 
@@ -58,14 +61,14 @@ describe('ContentInfo', () => {
     };
 
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={true}
         watchProgress={watchProgress}
         selectedSeason={{ seasonNumber: 2 }}
         onPlay={mockOnPlay}
         onResume={mockOnResume}
+        isSeries={true}
       />,
     );
 
@@ -76,12 +79,12 @@ describe('ContentInfo', () => {
 
   it('shows "Watch Solo" for series without selected season', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         selectedSeason={null}
         onPlay={mockOnPlay}
+        isSeries={true}
       />,
     );
 
@@ -91,14 +94,12 @@ describe('ContentInfo', () => {
   });
 
   it('shows "Watch Solo" for movies without watch progress', () => {
-    const movieShow = { ...mockShow, contentType: ContentType.Movie };
-
     render(
-      <ContentInfo
-        show={movieShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
+        isSeries={false}
       />,
     );
 
@@ -107,8 +108,7 @@ describe('ContentInfo', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows "Resume (X%)" for movies with watch progress', () => {
-    const movieShow = { ...mockShow, contentType: ContentType.Movie };
+  it('shows "Resume" for movies with watch progress', () => {
     const watchProgress = {
       id: '1',
       contentId: 'test-show',
@@ -124,29 +124,27 @@ describe('ContentInfo', () => {
     };
 
     render(
-      <ContentInfo
-        show={movieShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={true}
         watchProgress={watchProgress}
         onPlay={mockOnPlay}
         onResume={mockOnResume}
+        isSeries={false}
       />,
     );
 
-    expect(
-      screen.getByRole('button', { name: /resume \(30%\)/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resume/i })).toBeInTheDocument();
   });
 
-  it('shows "Loading..." when playing', () => {
+  it('shows "Loading" when playing', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={true}
         hasWatchProgress={false}
         selectedSeason={{ seasonNumber: 1 }}
         onPlay={mockOnPlay}
+        isSeries={true}
       />,
     );
 
@@ -155,15 +153,15 @@ describe('ContentInfo', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows "Loading..." when loading progress', () => {
+  it('shows "Loading" when loading progress', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         isLoadingProgress={true}
         hasWatchProgress={true}
         selectedSeason={{ seasonNumber: 1 }}
         onPlay={mockOnPlay}
+        isSeries={true}
       />,
     );
 
@@ -191,14 +189,14 @@ describe('ContentInfo', () => {
     };
 
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={true}
         watchProgress={watchProgress}
         selectedSeason={{ seasonNumber: 2 }}
         onPlay={mockOnPlay}
         onResume={mockOnResume}
+        isSeries={true}
       />,
     );
 
@@ -211,12 +209,12 @@ describe('ContentInfo', () => {
     const user = userEvent.setup();
 
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         selectedSeason={{ seasonNumber: 1 }}
         onPlay={mockOnPlay}
+        isSeries={true}
       />,
     );
 
@@ -242,15 +240,22 @@ describe('ContentInfo', () => {
     };
 
     render(
-      <ContentInfo
-        show={mockShow}
-        isPlaying={false}
-        hasWatchProgress={true}
-        watchProgress={watchProgress}
-        selectedSeason={{ seasonNumber: 3 }}
-        onPlay={mockOnPlay}
-        onResume={mockOnResume}
-      />,
+      <>
+        <ContentInfo
+          show={mockShow}
+          hasWatchProgress={true}
+          watchProgress={watchProgress}
+        />
+        <ContentActions
+          isPlaying={false}
+          hasWatchProgress={true}
+          watchProgress={watchProgress}
+          selectedSeason={{ seasonNumber: 3 }}
+          onPlay={mockOnPlay}
+          onResume={mockOnResume}
+          isSeries={true}
+        />
+      </>,
     );
 
     // Use within to find the text in the progress indicator specifically
@@ -280,14 +285,14 @@ describe('ContentInfo', () => {
 
     // Selected season is 2, but watch progress is at season 9
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={true}
         watchProgress={watchProgress}
         selectedSeason={{ seasonNumber: 2 }}
         onPlay={mockOnPlay}
         onResume={mockOnResume}
+        isSeries={true}
       />,
     );
 
@@ -303,14 +308,7 @@ describe('ContentInfo', () => {
       description: 'An amazing test show with a great storyline.',
     };
 
-    render(
-      <ContentInfo
-        show={showWithDescription}
-        isPlaying={false}
-        hasWatchProgress={false}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ContentInfo show={showWithDescription} hasWatchProgress={false} />);
 
     // Description is rendered (even if hidden via CSS)
     expect(
@@ -323,18 +321,18 @@ describe('ContentInfo', () => {
     const mockOnWatchParty = vi.fn();
 
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         selectedSeason={{ seasonNumber: 1 }}
         onPlay={mockOnPlay}
         onWatchParty={mockOnWatchParty}
+        isSeries={true}
       />,
     );
 
     const watchTogetherBtn = screen.getByRole('button', {
-      name: /start party/i,
+      name: /party/i,
     });
     expect(watchTogetherBtn).toBeInTheDocument();
 
@@ -344,35 +342,33 @@ describe('ContentInfo', () => {
 
   it('hides watch party button when disabled', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
         onWatchParty={vi.fn()}
         isWatchPartyDisabled={true}
-        watchPartyDisabledReason="Series not supported"
+        isSeries={true}
       />,
     );
 
     // Button is hidden entirely when disabled to keep mobile UI clean
-    expect(screen.queryByText('Start Party')).not.toBeInTheDocument();
-    expect(screen.queryByText('Series not supported')).not.toBeInTheDocument();
+    expect(screen.queryByText('Party')).not.toBeInTheDocument();
   });
 
   it('shows creating party state', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
         onWatchParty={vi.fn()}
         isCreatingParty={true}
+        isSeries={true}
       />,
     );
 
-    expect(screen.getByText('Creating...')).toBeInTheDocument();
+    expect(screen.getByText('Creating')).toBeInTheDocument();
   });
 
   it('renders Add to Watchlist button when onWatchlistToggle provided', async () => {
@@ -380,17 +376,17 @@ describe('ContentInfo', () => {
     const mockToggle = vi.fn();
 
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
         onWatchlistToggle={mockToggle}
         isInWatchlist={false}
+        isSeries={true}
       />,
     );
 
-    const addBtn = screen.getByRole('button', { name: /^watchlist$/i });
+    const addBtn = screen.getByRole('button', { name: /watchlist/i });
     expect(addBtn).toBeInTheDocument();
 
     await user.click(addBtn);
@@ -399,35 +395,33 @@ describe('ContentInfo', () => {
 
   it('renders Remove from Watchlist button when in watchlist', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
         onWatchlistToggle={vi.fn()}
         isInWatchlist={true}
+        isSeries={true}
       />,
     );
 
-    expect(
-      screen.getByRole('button', { name: /^remove$/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
   });
 
   it('shows watchlist loading state', () => {
     render(
-      <ContentInfo
-        show={mockShow}
+      <ContentActions
         isPlaying={false}
         hasWatchProgress={false}
         onPlay={mockOnPlay}
         onWatchlistToggle={vi.fn()}
         isInWatchlist={false}
         isWatchlistLoading={true}
+        isSeries={true}
       />,
     );
 
-    const addBtn = screen.getByRole('button', { name: /^watchlist$/i });
+    const addBtn = screen.getByRole('button', { name: /watchlist/i });
     expect(addBtn).toBeDisabled();
   });
 
@@ -437,15 +431,7 @@ describe('ContentInfo', () => {
       genre: 'Drama',
     };
 
-    render(
-      <ContentInfo
-        show={showWithGenre}
-        isPlaying={false}
-        hasWatchProgress={false}
-        selectedSeason={{ seasonNumber: 1 }}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ContentInfo show={showWithGenre} hasWatchProgress={false} />);
 
     expect(screen.getByText('Drama')).toBeInTheDocument();
   });
@@ -467,14 +453,21 @@ describe('ContentInfo', () => {
     };
 
     const { container } = render(
-      <ContentInfo
-        show={movieShow}
-        isPlaying={false}
-        hasWatchProgress={true}
-        watchProgress={watchProgress}
-        onPlay={mockOnPlay}
-        onResume={mockOnResume}
-      />,
+      <>
+        <ContentInfo
+          show={movieShow}
+          hasWatchProgress={true}
+          watchProgress={watchProgress}
+        />
+        <ContentActions
+          isPlaying={false}
+          hasWatchProgress={true}
+          watchProgress={watchProgress}
+          onPlay={mockOnPlay}
+          onResume={mockOnResume}
+          isSeries={false}
+        />
+      </>,
     );
 
     // Progress bar shows "Continue" for a movie (no season/episode numbers)
@@ -486,8 +479,6 @@ describe('ContentInfo', () => {
     expect(progressContainer).toHaveTextContent(/30%/);
 
     // And the button has it
-    expect(
-      screen.getByRole('button', { name: /resume \(30%\)/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resume/i })).toBeInTheDocument();
   });
 });

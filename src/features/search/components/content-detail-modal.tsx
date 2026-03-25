@@ -220,11 +220,8 @@ export function ContentDetailModal({
           <div className="p-6 md:p-10 lg:p-16 bg-[#f5f0e8] flex-shrink-0">
             <ContentInfo
               show={show}
-              isPlaying={isPlaying}
-              isLoadingProgress={isLoadingProgress}
               hasWatchProgress={hasWatchProgress}
               watchProgress={watchProgress}
-              selectedSeason={selectedSeason}
             />
           </div>
 
