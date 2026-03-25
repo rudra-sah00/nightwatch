@@ -66,7 +66,7 @@ export function FloatingChat({
   const visibleMessages = messages.slice(-60);
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] animate-in fade-in slide-in-from-right-3 duration-300">
+    <div className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] animate-in fade-in slide-in-from-right-3 duration-300">
       {/* ── Message list — no background, text + shadow only ── */}
       <div
         ref={listRef}
