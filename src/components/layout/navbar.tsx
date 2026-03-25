@@ -16,7 +16,7 @@ export function Navbar() {
         <div className="flex-1 flex justify-start items-center">
           <Link href="/home" className="flex items-center gap-2" title="Home">
             {/* Mobile: Play Icon */}
-            <div className="md:hidden w-10 h-10 border-[3px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center neo-shadow-sm hover:bg-[#ffe066] transition-colors">
+            <div className="md:hidden w-10 h-10 border-[3px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center neo-shadow-sm neo-shadow-hover neo-shadow-active hover:bg-[#ffe066] transition-all shrink-0">
               <img
                 src="/play.ico"
                 alt="Watch Rudra Logo"
