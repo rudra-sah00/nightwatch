@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.9.0...v1.9.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* **search:** fix text clipping, add blur on enter, and fix failing tests ([081a660](https://github.com/rudra-sah00/watch-rudra/commit/081a660a4eca320e9bce596e8894493895557945))
+
 ## [1.9.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.8.0...v1.9.0) (2026-03-25)
 
 
