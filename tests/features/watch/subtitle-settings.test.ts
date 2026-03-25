@@ -102,7 +102,9 @@ describe('Subtitle Settings', () => {
     });
 
     it('should load saved settings from localStorage', () => {
+      // Storage is versioned — data must include _v: 'v1' to be trusted
       const customSettings = {
+        _v: 'v1',
         fontSize: '1.5rem',
         fontFamily: 'Arial, sans-serif',
         backgroundColor: 'rgba(40, 40, 40, 0.85)',
@@ -117,7 +119,14 @@ describe('Subtitle Settings', () => {
       );
 
       const settings = loadSubtitleSettings();
-      expect(settings).toEqual(customSettings);
+      // _v is an internal field; the returned settings object spreads defaults
+      // then parsed data on top, so _v will be present — compare only user fields
+      expect(settings.fontSize).toBe('1.5rem');
+      expect(settings.fontFamily).toBe('Arial, sans-serif');
+      expect(settings.backgroundColor).toBe('rgba(40, 40, 40, 0.85)');
+      expect(settings.textColor).toBe('#ffff00');
+      expect(settings.textShadow).toBe('none');
+      expect(settings.opacity).toBe(0.8);
     });
 
     it('should return default settings on JSON parse error', () => {
@@ -128,7 +137,9 @@ describe('Subtitle Settings', () => {
     });
 
     it('should merge partial settings with defaults', () => {
+      // Must include _v otherwise version check returns defaults
       const partialSettings = {
+        _v: 'v1',
         fontSize: '2rem',
         textColor: '#ffff00',
       };
@@ -164,7 +175,15 @@ describe('Subtitle Settings', () => {
 
       const saved = localStorage.getItem('watch-subtitle-settings');
       expect(saved).toBeTruthy();
-      expect(JSON.parse(saved!)).toEqual(settings);
+      // saveSubtitleSettings appends _v for versioned storage
+      const parsed = JSON.parse(saved!);
+      expect(parsed._v).toBe('v1');
+      expect(parsed.fontSize).toBe(settings.fontSize);
+      expect(parsed.fontFamily).toBe(settings.fontFamily);
+      expect(parsed.backgroundColor).toBe(settings.backgroundColor);
+      expect(parsed.textColor).toBe(settings.textColor);
+      expect(parsed.textShadow).toBe(settings.textShadow);
+      expect(parsed.opacity).toBe(settings.opacity);
     });
   });
 
@@ -252,9 +271,16 @@ describe('Subtitle Settings', () => {
       // Clear CSS
       document.documentElement.style.cssText = '';
 
-      // Load settings
+      // Load settings — loadSubtitleSettings spreads defaults then parsed data,
+      // so _v from storage will be present in the returned object.
+      // Compare individual user-facing fields rather than the full object.
       const loaded = loadSubtitleSettings();
-      expect(loaded).toEqual(customSettings);
+      expect(loaded.fontSize).toBe(customSettings.fontSize);
+      expect(loaded.fontFamily).toBe(customSettings.fontFamily);
+      expect(loaded.backgroundColor).toBe(customSettings.backgroundColor);
+      expect(loaded.textColor).toBe(customSettings.textColor);
+      expect(loaded.textShadow).toBe(customSettings.textShadow);
+      expect(loaded.opacity).toBe(customSettings.opacity);
 
       // Apply loaded settings
       applySubtitleSettings(loaded);
