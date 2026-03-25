@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.10.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.9.1...v1.10.0) (2026-03-25)
+
+
+### Features
+
+* add chat sound effects ([9222f61](https://github.com/rudra-sah00/watch-rudra/commit/9222f6153f7d2904c30fc22dc1b35ef43f599dbf))
+* **auth:** aggressively optimize LoginForm spacing for 500px cards ([4677ce6](https://github.com/rudra-sah00/watch-rudra/commit/4677ce6d4a26ba8831c516746be70507e3a8ffba))
+* **auth:** refine authentication UI branding and stabilize responsive layouts ([aa1d0e9](https://github.com/rudra-sah00/watch-rudra/commit/aa1d0e964ab9a19bf3ce4eaf2ad2c6501ba69382))
+* **auth:** restore original layout while keeping new branding ([53e2c10](https://github.com/rudra-sah00/watch-rudra/commit/53e2c10e8c58c909efdd1097918e00b007bdcb3e))
+* **auth:** synchronize grid layouts for login and signup pages ([67d4d23](https://github.com/rudra-sah00/watch-rudra/commit/67d4d2303b9327d1630b0886a9b7c03bda92c7d3))
+* dynamic sidebar toggle icon ([7815326](https://github.com/rudra-sah00/watch-rudra/commit/7815326570af420657f535240e6a0f800fd9188b))
+* **search:** optimize content modal actions with sticky grid layout for mobile ([5ad7632](https://github.com/rudra-sah00/watch-rudra/commit/5ad763292251306f8b0185e5ff5adda241bd436f))
+* **search:** refactor content info and actions with fixed tests and sticky mobile layout ([99318cb](https://github.com/rudra-sah00/watch-rudra/commit/99318cbb45e79870bd89efb4e5ed93aaa19e223b))
+* **search:** standardize content modal action buttons ([aca6981](https://github.com/rudra-sah00/watch-rudra/commit/aca698185261876cd123d5fd8b358acc5b858700))
+* **watch-party:** neo-brutalist redesign for chat and access settings ([df54d38](https://github.com/rudra-sah00/watch-rudra/commit/df54d38a987dccb6e4e692c3b5510040122cf157))
+* **watch-party:** neo-brutalist UI standardization and robust permission synchronization ([a45872e](https://github.com/rudra-sah00/watch-rudra/commit/a45872eb93f622da8686afacafb9e553506b02fa))
+
+
+### Bug Fixes
+
+* **ci:** robust vercel deployment retry logic and env synchronization ([fd50eea](https://github.com/rudra-sah00/watch-rudra/commit/fd50eeae42d36ae33aeb36dc513e59792ce19f19))
+* **ci:** use vercel archive for stable uploads ([e5fe40a](https://github.com/rudra-sah00/watch-rudra/commit/e5fe40afac32b74abff7c8d69050018ea950ba69))
+* **player:** use router.replace for episode navigation to prevent history clutter ([c6a8044](https://github.com/rudra-sah00/watch-rudra/commit/c6a80446d35ee0fad05fd4a0de1a60526dd457a9))
+* **watch:** trigger stream refetch on episode/season change ([1590032](https://github.com/rudra-sah00/watch-rudra/commit/1590032202efffd027347b929ff05a098f3fd8c2))
+
 ## [1.9.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.9.0...v1.9.1) (2026-03-25)
 
 
