@@ -31,7 +31,7 @@ export function Navbar() {
         </div>
 
         {/* Middle: Global Navigation - Icons only on mobile, text only on desktop */}
-        <div className="flex items-center justify-center gap-4 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
+        <div className="flex items-center justify-center gap-6 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
           <Link
             href="/continue-watching"
             className="text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-all flex items-center gap-2 group"
