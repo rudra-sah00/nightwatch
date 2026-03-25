@@ -69,9 +69,7 @@ export function WatchlistClient() {
             <div className="flex items-center justify-center min-h-[50vh]">
               <Loader2 className="w-12 h-12 animate-spin text-[#1a1a1a]" />
             </div>
-          ) : isEmpty ? (
-            <EmptyWatchlist serverLabel={serverLabel} />
-          ) : (
+          ) : isEmpty ? null : (
             <div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
               style={{ contentVisibility: 'auto' }}
