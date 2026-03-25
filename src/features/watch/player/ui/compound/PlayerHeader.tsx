@@ -1,14 +1,16 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 
 interface PlayerHeaderProps {
   onSidebarToggle?: () => void;
+  isSidebarOpen?: boolean;
   hideBackButton?: boolean;
 }
 
 export function PlayerHeader({
   onSidebarToggle,
+  isSidebarOpen,
   hideBackButton,
 }: PlayerHeaderProps) {
   const { metadata, state, playerHandlers } = usePlayerContext();
@@ -37,9 +39,13 @@ export function PlayerHeader({
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
           className="p-3 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer text-white"
-          title="Toggle Watch Party sidebar"
+          title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
-          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          {isSidebarOpen ? (
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          ) : (
+            <ArrowRight className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+          )}
         </button>
       ) : null}
 

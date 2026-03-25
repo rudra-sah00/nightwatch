@@ -210,6 +210,7 @@ export function ActiveWatchParty({
           onVideoRef={handleVideoRef}
           onNavigate={handleNavigate}
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
+          isSidebarOpen={showDesktopSidebar}
           toggleFullscreen={toggleFullscreen}
           onNextEpisode={
             isHost && room.type === 'series' ? handleNextEpisode : undefined

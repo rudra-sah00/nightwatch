@@ -106,6 +106,7 @@ interface WatchPartyVideoAreaProps {
   onVideoRef: (ref: HTMLVideoElement | null) => void;
   onNavigate: (url: string) => void;
   onSidebarToggle: () => void;
+  isSidebarOpen: boolean;
   toggleFullscreen: () => Promise<void>;
   /** Host-only: called when next episode should start for the whole party */
   onNextEpisode?: (season: number, episode: number) => void;
@@ -128,6 +129,7 @@ export function WatchPartyVideoArea({
   onVideoRef,
   onNavigate,
   onSidebarToggle,
+  isSidebarOpen,
   toggleFullscreen,
   onNextEpisode,
   rtmSendMessage,
@@ -197,7 +199,11 @@ export function WatchPartyVideoArea({
       {!isSketchMode && (
         <Player.EpisodePanel>
           <Player.Controls>
-            <Player.Header onSidebarToggle={onSidebarToggle} hideBackButton />
+            <Player.Header
+              onSidebarToggle={onSidebarToggle}
+              isSidebarOpen={isSidebarOpen}
+              hideBackButton
+            />
             <Player.SeekBar />
             <Player.ControlRow>
               <Player.PlayPause />
