@@ -14,12 +14,19 @@ export function Navbar() {
       <div className="flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4">
         {/* Left Side: Brand Logo */}
         <div className="flex-1 flex justify-start items-center">
-          <Link
-            href="/home"
-            className="text-lg sm:text-2xl md:text-3xl font-black italic tracking-tighter text-[#1a1a1a] font-headline uppercase whitespace-nowrap"
-            title="Home"
-          >
-            WATCH RUDRA
+          <Link href="/home" className="flex items-center gap-2" title="Home">
+            {/* Mobile: Play Icon */}
+            <div className="md:hidden w-10 h-10 border-[3px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center neo-shadow-sm hover:bg-[#ffe066] transition-colors">
+              <img
+                src="/play.ico"
+                alt="Watch Rudra Logo"
+                className="w-6 h-6 object-contain"
+              />
+            </div>
+            {/* Desktop: Text Logo */}
+            <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-[#1a1a1a] font-headline uppercase whitespace-nowrap">
+              WATCH RUDRA
+            </span>
           </Link>
         </div>
 
