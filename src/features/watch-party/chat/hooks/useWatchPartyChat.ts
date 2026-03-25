@@ -39,6 +39,7 @@ export function useWatchPartyChat({
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, optimisticMsg]);
+      new Audio('/msg-sent.mp3').play().catch(() => {});
 
       // Broadcast via RTM
       rtmSendMessage?.({
@@ -90,6 +91,10 @@ export function useWatchPartyChat({
         case 'CHAT': {
           setMessages((prev) => {
             if (prev.some((m) => m.id === msg.messageId)) return prev;
+            if (msg.userId !== userId) {
+              new Audio('/msg-received.mp3').play().catch(() => {});
+            }
+
             return [
               ...prev,
               {
@@ -120,7 +125,7 @@ export function useWatchPartyChat({
         }
       }
     },
-    [room?.id],
+    [room?.id, userId],
   );
 
   return {
