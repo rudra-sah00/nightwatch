@@ -123,7 +123,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
             unoptimized={item.posterUrl.includes('/api/stream/')}
             sizes="192px"
             loading={index < 3 ? 'eager' : 'lazy'}
