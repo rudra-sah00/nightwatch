@@ -77,7 +77,7 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1 border-[2px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] transition-colors"
+          className="p-1.5 border-[3px] border-[#1a1a1a] bg-white text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>
@@ -172,7 +172,7 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setCurrentScreen('tracks')}
-          className="p-1 border-[2px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] transition-colors"
+          className="p-1.5 border-[3px] border-[#1a1a1a] bg-white text-[#1a1a1a] hover:bg-[#ffcc00] transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
         >
           <ChevronRight className="w-4 h-4 stroke-[3px] rotate-180" />
         </button>
@@ -182,7 +182,7 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1 border-[2px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] transition-colors"
+          className="p-1.5 border-[3px] border-[#1a1a1a] bg-white text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>

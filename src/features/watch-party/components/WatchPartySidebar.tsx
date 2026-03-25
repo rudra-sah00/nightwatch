@@ -242,6 +242,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         floatingChatEnabled={floatingChatEnabled}
         onToggleFloatingChat={onToggleFloatingChat}
         isAgoraConnected={isAgoraConnected}
+        rtmSendMessage={rtmSendMessage}
       />
     </div>
   );

@@ -159,7 +159,7 @@ export function ContentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 border-[4px] border-[#1a1a1a] bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0"
+            className="p-1.5 border-[3px] border-[#1a1a1a] bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px] flex-shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -289,7 +289,7 @@ export function ContentDetailModal({
                   <button
                     type="button"
                     onClick={() => setIsSetupOpen(false)}
-                    className="p-3 bg-[#e63b2e] border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] text-white transition-colors flex-shrink-0"
+                    className="p-3 bg-[#e63b2e] border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] text-white transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px] flex-shrink-0"
                     aria-label="Cancel watch party"
                   >
                     <X className="w-6 h-6 stroke-[3px]" />

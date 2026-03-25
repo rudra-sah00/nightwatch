@@ -1,7 +1,6 @@
 import {
   MessageSquare,
   PenTool,
-  Settings,
   Shield,
   ShieldCheck,
   Volume2,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
   updateMemberPermissions,
   updatePartyPermissions,
@@ -60,6 +60,7 @@ export interface WatchPartySettingsProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  rtmSendMessage?: (msg: RTMMessage) => void;
 }
 
 export function WatchPartySettings({
@@ -67,6 +68,7 @@ export function WatchPartySettings({
   isHost,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  rtmSendMessage,
 }: WatchPartySettingsProps) {
   const { isOpen, setIsOpen } = useWatchPartySettings();
 
@@ -74,14 +76,15 @@ export function WatchPartySettings({
     key: keyof WatchPartyRoom['permissions'],
     value: boolean,
   ) => {
-    // Map frontend keys to backend schema keys
-    const backendKeyMap: Record<string, string> = {
-      canGuestsDraw: 'canSeek',
-      canGuestsPlaySounds: 'canPlayPause',
-      canGuestsChat: 'canChat',
-    };
-    const backendKey = backendKeyMap[key] || key;
-    updatePartyPermissions(room.id, { [backendKey]: value });
+    // Direct update with no mapping needed - backend schema now matches frontend types
+    updatePartyPermissions(room.id, { [key]: value }).then((response) => {
+      if (response.permissions && rtmSendMessage) {
+        rtmSendMessage({
+          type: 'PERMISSIONS_UPDATED',
+          permissions: response.permissions,
+        });
+      }
+    });
   };
 
   const handleUserPermissionToggle = (
@@ -109,10 +112,14 @@ export function WatchPartySettings({
     };
 
     // Schema expects all three fields with specific names
-    updateMemberPermissions(room.id, memberId, {
-      canSeek: merged.canDraw,
-      canPlayPause: merged.canPlaySound,
-      canChat: merged.canChat,
+    updateMemberPermissions(room.id, memberId, merged).then((response) => {
+      if (response.permissions && rtmSendMessage) {
+        rtmSendMessage({
+          type: 'MEMBER_PERMISSIONS_UPDATED',
+          memberId,
+          permissions: response.permissions,
+        });
+      }
     });
   };
 
@@ -143,7 +150,7 @@ export function WatchPartySettings({
           <DialogClose asChild>
             <button
               type="button"
-              className="p-1.5 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+              className="p-1.5 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
             >
               <X className="w-5 h-5 stroke-[3.5px]" />
             </button>

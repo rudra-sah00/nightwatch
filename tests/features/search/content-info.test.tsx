@@ -332,7 +332,7 @@ describe('ContentInfo', () => {
     );
 
     const watchTogetherBtn = screen.getByRole('button', {
-      name: /party/i,
+      name: /Watch Together/i,
     });
     expect(watchTogetherBtn).toBeInTheDocument();
 
@@ -353,7 +353,7 @@ describe('ContentInfo', () => {
     );
 
     // Button is hidden entirely when disabled to keep mobile UI clean
-    expect(screen.queryByText('Party')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Watch Together/i)).not.toBeInTheDocument();
   });
 
   it('shows creating party state', () => {

@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
 import type { MediaDevice } from '../media/hooks/useAgora';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
 import { WatchPartySettings } from './WatchPartySettings';
 
@@ -44,6 +45,7 @@ interface MediaControlsProps {
   onToggleFloatingChat?: () => void;
   /** Actual Agora RTC connection state — used to show real status in the badge */
   isAgoraConnected?: boolean;
+  rtmSendMessage?: (msg: RTMMessage) => void;
 }
 
 /**
@@ -70,6 +72,7 @@ export function MediaControls({
   floatingChatEnabled = false,
   onToggleFloatingChat,
   isAgoraConnected = false,
+  rtmSendMessage,
 }: MediaControlsProps) {
   const {
     showAudioDevices,
@@ -88,6 +91,7 @@ export function MediaControls({
           isHost={isHost}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={onToggleFloatingChat}
+          rtmSendMessage={rtmSendMessage}
         />
 
         {isHost ? (

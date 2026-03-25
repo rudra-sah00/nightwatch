@@ -83,7 +83,7 @@ describe('WatchPartySettings', () => {
   it('renders settings panel', () => {
     render(<WatchPartySettings room={mockRoom} isHost={true} />);
     fireEvent.click(screen.getByRole('button'));
-    expect(screen.getByText(/Party Settings/i)).toBeInTheDocument();
+    expect(screen.getByText(/Room Access/i)).toBeInTheDocument();
   });
 
   it('handles permission toggles', () => {

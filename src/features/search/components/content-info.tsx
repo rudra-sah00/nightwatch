@@ -153,7 +153,6 @@ export const ContentActions = memo(function ContentActions({
   isWatchlistLoading = false,
   extraActions,
 }: Omit<ContentInfoProps, 'show'> & { isSeries: boolean }) {
-  const isMobile = useIsMobile();
   const handleButtonClick = () => {
     if (hasWatchProgress && onResume) {
       onResume();

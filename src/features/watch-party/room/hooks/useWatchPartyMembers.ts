@@ -240,6 +240,41 @@ export function useWatchPartyMembers({
                 })),
               };
             });
+          } else if (
+            data.type === 'PERMISSIONS_UPDATED' &&
+            data.payload?.permissions
+          ) {
+            setRoom((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                permissions: {
+                  ...prev.permissions,
+                  ...data.payload.permissions,
+                },
+              };
+            });
+          } else if (
+            data.type === 'MEMBER_PERMISSIONS_UPDATED' &&
+            data.payload?.memberId
+          ) {
+            setRoom((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                members: prev.members.map((m) =>
+                  m?.id === data.payload.memberId
+                    ? {
+                        ...m,
+                        permissions: {
+                          ...(m.permissions || {}),
+                          ...data.payload.permissions,
+                        },
+                      }
+                    : m,
+                ),
+              };
+            });
           }
         } catch (_e) {
           // SSE Message Error

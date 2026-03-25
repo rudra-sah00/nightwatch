@@ -221,10 +221,10 @@ export function UpdateProfileForm() {
                 e.preventDefault();
                 logout();
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#e63b2e] text-white font-headline font-bold uppercase border-2 border-[#1a1a1a] hover:bg-[#cc0000] neo-shadow-sm transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none min-w-[120px] justify-center md:justify-end"
+              className="flex items-center gap-2 px-6 py-2 bg-[#e63b2e] text-white font-headline font-black uppercase border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[3px] active:translate-y-[3px] min-w-[140px] justify-center md:justify-end"
               title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5 stroke-[3px]" />
               <span className="hidden sm:inline">Sign Out</span>
             </button>
             <button
