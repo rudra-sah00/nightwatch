@@ -65,7 +65,7 @@ describe('LoginPage', () => {
     render(<LoginPage />);
 
     expect(
-      screen.getByRole('heading', { name: /watch rudra/i }),
+      screen.getByRole('heading', { name: /solo viewing/i }),
     ).toBeInTheDocument();
 
     // Check that our mock exercised the loading paths

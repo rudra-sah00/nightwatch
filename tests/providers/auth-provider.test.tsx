@@ -743,8 +743,8 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('authenticated').textContent).toBe('true');
       expect(screen.getByTestId('user').textContent).toBe('Test User');
 
-      // Loading should still be true because early return skipped setIsLoading(false)
-      expect(screen.getByTestId('loading').textContent).toBe('true');
+      // Loading should be false because we optimistically set it to false when a stored user is found
+      expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
     it('clears user when unauthorized and NOT aborted', async () => {
