@@ -89,7 +89,7 @@ const mockPanel = {
   panelRef: { current: null },
 };
 
-vi.mock('@/features/watch/player/ui/controls/use-episode-panel', () => ({
+vi.mock('@/features/watch/player/ui/controls/hooks/use-episode-panel', () => ({
   useEpisodePanel: () => mockPanel,
 }));
 
