@@ -62,6 +62,7 @@ interface WatchPartySidebarProps {
   // Theme sync from RTM
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  currentUserName?: string;
 }
 
 /**
@@ -90,11 +91,12 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   floatingChatEnabled = false,
   onToggleFloatingChat,
   rtmSendMessage,
+  currentUserName: currentUserNameProp,
 }: WatchPartySidebarProps) {
   const {
     activeTab,
     setActiveTab,
-    currentUserName,
+    currentUserName: currentUserNameFromHook,
     canDraw,
     canPlaySound,
     canChat,
@@ -117,6 +119,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     onAgoraReady,
     rtmSendMessage,
   });
+
+  const currentUserName = currentUserNameProp || currentUserNameFromHook;
 
   return (
     <div

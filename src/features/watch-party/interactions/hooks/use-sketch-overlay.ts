@@ -23,12 +23,14 @@ interface UseSketchOverlayOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   userId?: string;
+  userName?: string;
 }
 
 export function useSketchOverlay({
   rtmSendMessage,
   rtmSendMessageToPeer,
   userId,
+  userName,
 }: UseSketchOverlayOptions = {}) {
   const {
     currentTool,
@@ -264,12 +266,12 @@ export function useSketchOverlay({
     if (action && userId) {
       rtmSendMessage?.({
         type: 'SKETCH_DRAW',
-        action: { ...action, userId },
+        action: { ...action, userId, userName },
       });
     }
 
     currentActionRef.current = null;
-  }, [canDraw, isSketchMode, userId, rtmSendMessage]);
+  }, [canDraw, isSketchMode, userId, rtmSendMessage, userName]);
 
   const confirmText = useCallback(
     (text: string) => {
@@ -286,12 +288,12 @@ export function useSketchOverlay({
       };
       rtmSendMessage?.({
         type: 'SKETCH_DRAW',
-        action,
+        action: { ...action, userId, userName },
       });
       setActions((prev) => [...prev, action]);
       setPendingText(null);
     },
-    [pendingText, color, strokeWidth, userId, rtmSendMessage],
+    [pendingText, color, strokeWidth, userId, rtmSendMessage, userName],
   );
 
   const cancelText = useCallback(() => setPendingText(null), []);

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@/providers/auth-provider';
 import { useGestureDetection } from '../interactions/hooks/useGestureDetection';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { useAgora } from '../media/hooks/useAgora';
@@ -29,9 +30,12 @@ export function useWatchPartySidebar({
     onTabChange?.(activeTab);
   }, [activeTab, onTabChange]);
 
+  const { user } = useAuth();
   const currentMember = room.members.find((m) => m.id === currentUserId);
   const currentUserName =
-    currentMember?.name || (room.hostId === currentUserId ? 'Host' : 'You');
+    currentMember?.name ||
+    user?.name ||
+    (currentUserId?.startsWith('guest') ? 'Guest' : 'You');
 
   const canDraw =
     currentMember?.permissions?.canDraw ??

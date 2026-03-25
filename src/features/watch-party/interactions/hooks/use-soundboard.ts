@@ -130,7 +130,8 @@ export function useSoundboard({
         sound: soundUrl,
         name: name,
         userId,
-        userName: userName || 'User',
+        userName:
+          userName || (userId?.startsWith('guest') ? 'Guest' : 'Member'),
       });
     },
     [rtmSendMessage, userId, userName, playSoundEffect],

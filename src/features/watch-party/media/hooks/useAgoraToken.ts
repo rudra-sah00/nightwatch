@@ -38,8 +38,11 @@ export function useAgoraToken(
           ? sessionStorage.getItem('guest_token')
           : null;
 
-      const isAuthenticatedAsUser = userId && !userId.startsWith('guest:');
-      const isApprovedGuest = userId?.startsWith('guest:') && guestToken;
+      const isAuthenticatedAsUser =
+        userId && !userId.startsWith('guest_') && !userId.startsWith('guest:');
+      const isApprovedGuest =
+        (userId?.startsWith('guest_') || userId?.startsWith('guest:')) &&
+        guestToken;
 
       if (
         !roomId ||

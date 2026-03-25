@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/providers/auth-provider';
 import { injectTokenIntoUrl, wrapInProxy } from '../../../watch/utils';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
@@ -53,6 +54,7 @@ interface UseWatchPartyOptions {
   onMemberJoined?: (member: RoomMember) => void;
   userId?: string;
   roomId?: string;
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
@@ -74,10 +76,17 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const requestStatusRef = useRef(requestStatus);
   requestStatusRef.current = requestStatus;
 
+  const { user } = useAuth();
   // 0. Agora RTM Signaling
+  const currentUserName =
+    room?.members.find((m) => m.id === userId)?.name ||
+    user?.name ||
+    (userId?.startsWith('guest') ? 'Guest' : 'Member');
+
   const rtmToken = useAgoraRtmToken({
     roomId: room?.id,
     userId: userId,
+    userName: currentUserName,
   });
 
   const {
@@ -185,7 +194,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     room,
     userId,
     rtmSendMessage,
-    currentUserName: room?.members.find((m) => m.id === userId)?.name || 'User',
+    currentUserName,
   });
 
   // 2. Lifecycle Hook
@@ -215,6 +224,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     rtmSendMessageToPeer,
     onMemberJoined: options.onMemberJoined,
     streamToken: room?.streamToken,
+    videoRef: options.videoRef,
   });
 
   // 4. Sync Hook
@@ -227,6 +237,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     normalizeRoomUrls,
     rtmSendMessageToPeer,
     isHost: userId === room?.hostId,
+    videoRef: options.videoRef,
   });
 
   // Clock Synchronization

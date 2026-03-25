@@ -140,7 +140,8 @@ function generateNumericUid(userId: string): number {
     const char = userId.charCodeAt(i);
     hash = ((hash << 5) - hash + char) | 0;
   }
-  return Math.abs(hash) || 1;
+  // Ensure 32-bit unsigned integer (0 to 4,294,967,295) and non-zero
+  return hash >>> 0 || 1;
 }
 
 /** Build a map from Agora numeric UID → member info. */
@@ -330,10 +331,13 @@ export function useAgora({
       remoteUserMap.set(String(user.uid), user);
     }
 
+    const mappedMemberIds = new Set<string>();
     const nextParticipants: AgoraParticipant[] = members.map((member) => {
       const isLocal = member.id === userId;
       const numericUid = String(generateNumericUid(member.id));
       const remoteUser = remoteUserMap.get(numericUid);
+
+      mappedMemberIds.add(numericUid);
 
       if (isLocal) {
         return {
@@ -368,7 +372,26 @@ export function useAgora({
       };
     });
 
-    setParticipants(nextParticipants);
+    // 3. Complement with any remote users NOT found in members list (Fail-safe for sync issues)
+    const unmappedParticipants: AgoraParticipant[] = Array.from(
+      remoteUserMap.entries(),
+    )
+      .filter(([uidStr]) => !mappedMemberIds.has(uidStr))
+      .map(([uidStr, remoteUser]) => ({
+        uid: uidStr,
+        identity: `unknown:${uidStr}`,
+        name: 'Unknown Participant',
+        isSpeaking: false,
+        isMicrophoneEnabled: remoteUser.hasAudio,
+        isCameraEnabled: remoteUser.hasVideo,
+        isLocal: false,
+        audioLevel: 0,
+        videoTrack: remoteUser.videoTrack,
+      }));
+
+    const finalParticipants = [...nextParticipants, ...unmappedParticipants];
+
+    setParticipants(finalParticipants);
   }, [remoteUsers, uid, userId, audioEnabled, videoEnabled, members]);
 
   /**
@@ -533,12 +556,12 @@ export function useAgora({
       setRemoteUsers([...client.remoteUsers]);
     };
 
-    const handleUserJoined = () => {
+    const handleUserJoined = (_user: IAgoraRTCRemoteUser) => {
       if (cleaned) return;
       setRemoteUsers([...client.remoteUsers]);
     };
 
-    const handleUserLeft = () => {
+    const handleUserLeft = (_user: IAgoraRTCRemoteUser) => {
       if (cleaned) return;
       setRemoteUsers([...client.remoteUsers]);
     };
@@ -556,7 +579,7 @@ export function useAgora({
         setConnectionState('CONNECTED');
         setRemoteUsers([...client.remoteUsers]);
       })
-      .catch(() => {
+      .catch((_err) => {
         // Only show error if this effect instance is still active.
         // Stale rejections from StrictMode double-fire are silently ignored.
         if (!cleaned) {

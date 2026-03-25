@@ -8,6 +8,8 @@ interface UseAgoraRtmTokenOptions {
   roomId: string | undefined;
   /** Current user's ID */
   userId: string | undefined;
+  /** Current user's display name */
+  userName: string | undefined;
 }
 
 interface UseAgoraRtmTokenReturn {
@@ -34,7 +36,7 @@ interface UseAgoraRtmTokenReturn {
 export function useAgoraRtmToken(
   options: UseAgoraRtmTokenOptions,
 ): UseAgoraRtmTokenReturn {
-  const { roomId, userId } = options;
+  const { roomId, userId, userName } = options;
 
   const [token, setToken] = useState<string | null>(null);
   const [appId, setAppId] = useState<string>('');
@@ -59,7 +61,11 @@ export function useAgoraRtmToken(
       setError(null);
 
       try {
-        const data = await getAgoraRtmToken({ channelName: roomId });
+        const data = await getAgoraRtmToken({
+          channelName: roomId,
+          guestId: userId,
+          guestName: userName || 'Guest',
+        });
         setToken(data.token);
         setAppId(data.appId);
         setChannel(roomId.toUpperCase());
@@ -74,7 +80,7 @@ export function useAgoraRtmToken(
     };
 
     fetchToken();
-  }, [roomId, userId]);
+  }, [roomId, userId, userName]);
 
   return { token, appId, channel, uid, isLoading, error };
 }

@@ -49,6 +49,7 @@ export function WatchPartyClient({
     isHost,
     isCreator,
     currentUserId,
+    currentUserName,
     roomPreview,
     roomNotFound,
     videoRef,
@@ -122,6 +123,7 @@ export function WatchPartyClient({
         <ActiveWatchParty
           room={room}
           currentUserId={currentUserId}
+          currentUserName={currentUserName}
           isHost={isHost}
           copied={copied}
           onKick={kickUser}

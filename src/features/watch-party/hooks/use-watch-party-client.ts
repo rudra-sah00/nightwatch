@@ -81,18 +81,23 @@ export function useWatchPartyClient({
       ? sessionStorage.getItem('guest_token')
       : null;
 
-  const currentUserId = (() => {
-    if (user?.id) return user.id;
+  const { currentUserId, currentUserName } = (() => {
+    if (user?.id) return { currentUserId: user.id, currentUserName: user.name };
     if (guestToken) {
-      if (guestToken.startsWith('guest_')) return guestToken;
+      if (guestToken.startsWith('guest_'))
+        return { currentUserId: guestToken, currentUserName: undefined };
       try {
         const payload = JSON.parse(atob(guestToken.split('.')[1]));
-        return payload.sub as string | undefined;
+        return {
+          currentUserId: payload.sub as string | undefined,
+          currentUserName: payload.name as string | undefined,
+        };
       } catch (_e) {
         /* invalid token */
       }
     }
-    return socket?.id ? `guest:${socket.id}` : undefined;
+    const socketId = socket?.id ? `guest:${socket.id}` : undefined;
+    return { currentUserId: socketId, currentUserName: undefined };
   })();
 
   const {
@@ -126,6 +131,7 @@ export function useWatchPartyClient({
     },
     userId: currentUserId,
     roomId,
+    videoRef,
   });
 
   const { applyState } = usePredictiveSync(
@@ -324,6 +330,7 @@ export function useWatchPartyClient({
     isHost,
     isCreator,
     currentUserId,
+    currentUserName,
     roomPreview,
     roomNotFound,
     videoRef,

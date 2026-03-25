@@ -2,15 +2,21 @@
 
 import type {
   FaceLandmarker as FaceLandmarkerType,
-  FilesetResolver as FilesetResolverType,
   GestureRecognizer as GestureRecognizerType,
 } from '@mediapipe/tasks-vision';
 import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef } from 'react';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
+interface WasmFileset {
+  wasmLoaderPath: string;
+  wasmBinaryPath: string;
+  assetLoaderPath?: string;
+  assetBinaryPath?: string;
+}
+
 // Singleton resolver promise to prevent redundant worker creation
-let visionResolver: Promise<FilesetResolverType> | null = null;
+let visionResolver: Promise<WasmFileset> | null = null;
 
 let consoleIntercepted = false;
 // Stored so tests or cleanup code can fully restore the originals if needed
@@ -73,7 +79,7 @@ function interceptMediaPipeLogs() {
   };
 }
 
-async function getVisionResolver() {
+async function getVisionResolver(): Promise<WasmFileset> {
   if (!visionResolver) {
     interceptMediaPipeLogs();
     const { FilesetResolver } = await import('@mediapipe/tasks-vision');
@@ -107,8 +113,7 @@ export function useGestureDetection(
     }
 
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: MediaPipe WasmFileset type mismatch with dynamic import
-      const vision = (await getVisionResolver()) as any;
+      const vision = await getVisionResolver();
       const { GestureRecognizer, FaceLandmarker } = await import(
         '@mediapipe/tasks-vision'
       );
@@ -173,7 +178,8 @@ export function useGestureDetection(
           kind: 'emoji',
           emoji,
           userId: userId || 'unknown',
-          userName: userName || 'User',
+          userName:
+            userName || (userId?.startsWith('guest') ? 'Guest' : 'Member'),
         });
       }
     },

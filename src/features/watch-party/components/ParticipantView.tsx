@@ -45,13 +45,19 @@ export function ParticipantView({
       {isVideoMuted ? (
         <AvatarFallback
           avatarUrl={avatarUrl}
-          name={participant.name || 'User'}
+          name={
+            participant.name ||
+            (participant.identity?.startsWith('guest') ? 'Guest' : 'Member')
+          }
         />
       ) : null}
 
       {/* Bottom Overlay: Name and Controls */}
       <ParticipantOverlay
-        name={participant.name || 'User'}
+        name={
+          participant.name ||
+          (participant.identity?.startsWith('guest') ? 'Guest' : 'Member')
+        }
         isMicEnabled={participant.isMicrophoneEnabled}
         canKick={canKick}
         onKick={onKick ? () => onKick(participant.identity) : undefined}

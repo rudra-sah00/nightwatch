@@ -18,12 +18,14 @@ interface SketchOverlayProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   userId?: string;
+  userName?: string;
 }
 
 export function SketchOverlay({
   rtmSendMessage,
   rtmSendMessageToPeer,
   userId,
+  userName,
 }: SketchOverlayProps) {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +41,12 @@ export function SketchOverlay({
     pendingText,
     confirmText,
     cancelText,
-  } = useSketchOverlay({ rtmSendMessage, rtmSendMessageToPeer, userId });
+  } = useSketchOverlay({
+    rtmSendMessage,
+    rtmSendMessageToPeer,
+    userId,
+    userName,
+  });
 
   const { color, strokeWidth, currentTool } = useSketch();
 

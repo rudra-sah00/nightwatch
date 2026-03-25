@@ -60,6 +60,7 @@ export function useWatchPartyHostSync({
         eventType: 'rate',
         videoTime: videoElement.currentTime,
         playbackRate: videoElement.playbackRate,
+        wasPlaying: !videoElement.paused,
       });
     };
 

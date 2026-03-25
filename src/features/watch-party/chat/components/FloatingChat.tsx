@@ -7,6 +7,7 @@ import type { ChatMessage } from '../../room/types';
 interface FloatingChatProps {
   messages: ChatMessage[];
   currentUserId?: string;
+  currentUserName?: string;
   onSendMessage: (content: string) => void;
   /** Whether the local user is allowed to send messages */
   canChat?: boolean;
@@ -25,6 +26,7 @@ interface FloatingChatProps {
 export function FloatingChat({
   messages,
   currentUserId,
+  currentUserName,
   onSendMessage,
   canChat = true,
 }: FloatingChatProps) {
@@ -96,7 +98,12 @@ export function FloatingChat({
               <span
                 className={`font-semibold mr-1 ${isMe ? 'text-indigo-300' : 'text-white/65'}`}
               >
-                {isMe ? 'You' : msg.userName}:
+                {isMe
+                  ? currentUserName
+                    ? `You (${currentUserName})`
+                    : 'You'
+                  : msg.userName}
+                :
               </span>
               <span className="text-white/90 font-normal">{msg.content}</span>
             </p>

@@ -58,6 +58,7 @@ interface PlayerRootProps {
   containerStyle?: React.CSSProperties;
   /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
   providerId?: 's1' | 's2' | 's3';
+  playbackRate?: number;
 }
 
 const CONTAINER_STYLE = { width: '100%', height: '100dvh' } as const;
@@ -88,6 +89,7 @@ export function PlayerRoot({
   isLive = false,
   containerStyle,
   providerId,
+  playbackRate,
 }: PlayerRootProps) {
   const { state, containerRef, contextValue, showControls } = usePlayerRoot({
     streamUrl,
@@ -111,6 +113,7 @@ export function PlayerRoot({
     onBack: onBackProp,
     isLive,
     providerId,
+    playbackRate,
   });
 
   const isMobile = useMobileDetection();

@@ -203,7 +203,8 @@ export interface SketchAction {
   videoTimestamp: number;
   data: number[];
   text?: string;
-  userId?: string; // Added by server on broadcast
+  userId?: string;
+  userName?: string;
 }
 
 export interface PartyPermissionsUpdate {

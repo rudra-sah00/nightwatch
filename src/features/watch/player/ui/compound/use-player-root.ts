@@ -60,6 +60,7 @@ interface PlayerRootHookProps {
   onBack?: () => void;
   isLive?: boolean;
   providerId?: 's1' | 's2' | 's3';
+  playbackRate?: number;
 }
 
 export function usePlayerRoot({
@@ -84,6 +85,7 @@ export function usePlayerRoot({
   onBack: onBackProp,
   isLive = false,
   providerId: _providerId,
+  playbackRate: playbackRateProp,
 }: PlayerRootHookProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -310,6 +312,16 @@ export function usePlayerRoot({
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFullscreenOverride });
     }
   }, [isFullscreenOverride]);
+
+  // Sync playback rate from external prop (e.g. Watch Party host)
+  useEffect(() => {
+    if (
+      playbackRateProp !== undefined &&
+      playbackRateProp !== state.playbackRate
+    ) {
+      dispatch({ type: 'SET_PLAYBACK_RATE', rate: playbackRateProp });
+    }
+  }, [playbackRateProp, state.playbackRate]);
 
   // On mobile, automatically lock to landscape the moment playback starts.
   // This handles all player types (HLS, MP4, livestream) uniformly.

@@ -35,6 +35,7 @@ export interface RtmPauseEvent {
 export interface RtmSeekEvent {
   type: 'SEEK_EVENT';
   videoTime: number;
+  playbackRate: number;
   wasPlaying: boolean;
   serverTime: number;
 }
@@ -43,6 +44,7 @@ export interface RtmRateEvent {
   type: 'RATE_EVENT';
   playbackRate: number;
   videoTime: number;
+  wasPlaying: boolean;
   serverTime: number;
 }
 

@@ -35,9 +35,14 @@ export async function getAgoraToken(params: {
  */
 export async function getAgoraRtmToken(params: {
   channelName: string;
+  guestId?: string;
+  guestName?: string;
 }): Promise<AgoraRtmTokenResponse> {
-  const { channelName } = params;
-  return apiFetch<AgoraRtmTokenResponse>(
-    `/api/agora/rtm-token?channelName=${channelName}`,
-  );
+  const { channelName, guestId, guestName } = params;
+  let url = `/api/agora/rtm-token?channelName=${channelName}`;
+
+  if (guestId) url += `&guestId=${guestId}`;
+  if (guestName) url += `&guestName=${encodeURIComponent(guestName)}`;
+
+  return apiFetch<AgoraRtmTokenResponse>(url);
 }

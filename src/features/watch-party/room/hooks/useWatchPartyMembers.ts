@@ -20,6 +20,7 @@ interface UseWatchPartyMembersProps {
   rtmSendMessageToPeer?: (targetUserId: string, msg: RTMMessage) => void;
   rtmSendMessage?: (msg: RTMMessage) => void;
   streamToken?: string;
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
 export function useWatchPartyMembers({
@@ -31,6 +32,7 @@ export function useWatchPartyMembers({
   rtmSendMessageToPeer,
   rtmSendMessage,
   streamToken,
+  videoRef,
 }: UseWatchPartyMembersProps) {
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
@@ -44,6 +46,9 @@ export function useWatchPartyMembers({
           if (!prev) return null;
           const isAlreadyMember = prev.members.some((m) => m?.id === memberId);
           const member = prev.pendingMembers?.find((m) => m?.id === memberId);
+          if (!member) {
+            return prev;
+          }
 
           if (isAlreadyMember) {
             return {
@@ -61,10 +66,16 @@ export function useWatchPartyMembers({
             room: prev,
             streamToken: streamToken || '',
             initialState: {
-              currentTime: prev.state.currentTime,
-              isPlaying: prev.state.isPlaying,
-              playbackRate: prev.state.playbackRate,
-              timestamp: prev.state.lastUpdated,
+              currentTime:
+                videoRef?.current?.currentTime ?? prev.state.currentTime,
+              isPlaying: videoRef?.current
+                ? !videoRef.current.paused
+                : prev.state.isPlaying,
+              playbackRate:
+                videoRef?.current?.playbackRate ?? prev.state.playbackRate,
+              timestamp: videoRef?.current
+                ? Date.now()
+                : prev.state.lastUpdated,
               serverTime: Date.now(),
             },
           });
@@ -89,7 +100,15 @@ export function useWatchPartyMembers({
         toast.error(response.error || 'Failed to approve member');
       }
     },
-    [room?.id, streamToken, rtmSendMessageToPeer, rtmSendMessage, setRoom],
+    [
+      room?.id,
+      streamToken,
+      rtmSendMessageToPeer,
+      rtmSendMessage,
+      setRoom,
+      videoRef?.current?.paused,
+      videoRef?.current,
+    ],
   );
 
   const rejectMember = useCallback(
@@ -272,6 +291,27 @@ export function useWatchPartyMembers({
                         },
                       }
                     : m,
+                ),
+              };
+            });
+          } else if (data.type === 'MEMBERS_UPDATED' && data.payload?.members) {
+            setRoom((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                members: data.payload.members.map((m: RoomMember) => ({
+                  ...m,
+                  profilePhoto: m.profilePhoto ?? undefined,
+                })),
+              };
+            });
+          } else if (data.type === 'MEMBER_LEFT' && data.payload?.userId) {
+            setRoom((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                members: prev.members.filter(
+                  (m) => m?.id !== data.payload.userId,
                 ),
               };
             });

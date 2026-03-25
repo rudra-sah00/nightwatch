@@ -23,6 +23,7 @@ interface UseWatchPartySyncProps {
   ) => WatchPartyRoom;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   isHost?: boolean;
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
 export function useWatchPartySync({
@@ -33,6 +34,7 @@ export function useWatchPartySync({
   normalizeRoomUrls,
   rtmSendMessageToPeer: _rtmSendMessageToPeer,
   isHost,
+  videoRef,
 }: UseWatchPartySyncProps) {
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -66,8 +68,37 @@ export function useWatchPartySync({
         }
         toast.success('Host reconnected!', { id: 'host-disconnected' });
       }
+
+      // Proactive Sync: When a NEW guest joins, the host should proactively
+      // broadcast the current state to ensure they sync immediately.
+      if (isHost && event.action === 'JOIN' && event.userId !== room?.hostId) {
+        if (room?.id) {
+          rtmSendMessage?.({
+            type: 'SYNC',
+            currentTime:
+              videoRef?.current?.currentTime ?? room.state.currentTime,
+            videoTime: videoRef?.current?.currentTime ?? room.state.currentTime,
+            isPlaying: videoRef?.current
+              ? !videoRef.current.paused
+              : room.state.isPlaying,
+            playbackRate:
+              videoRef?.current?.playbackRate ?? room.state.playbackRate,
+            serverTime: Date.now(),
+            fromHost: true,
+          });
+        }
+      }
     },
-    [isHost, room?.hostId],
+    [
+      isHost,
+      room?.hostId,
+      room?.id,
+      room?.state.isPlaying,
+      room?.state.playbackRate,
+      rtmSendMessage,
+      videoRef,
+      room?.state.currentTime,
+    ],
   );
 
   // Clear timer on unmount
@@ -149,12 +180,15 @@ export function useWatchPartySync({
                 ? false
                 : msg.type === 'SYNC'
                   ? msg.isPlaying
-                  : undefined;
+                  : msg.type === 'SEEK_EVENT' || msg.type === 'RATE_EVENT'
+                    ? msg.wasPlaying
+                    : undefined;
 
           const playbackRate =
             msg.type === 'SYNC' ||
             msg.type === 'PLAY_EVENT' ||
-            msg.type === 'RATE_EVENT'
+            msg.type === 'RATE_EVENT' ||
+            msg.type === 'SEEK_EVENT'
               ? msg.playbackRate
               : undefined;
 
@@ -239,10 +273,15 @@ export function useWatchPartySync({
               // We trigger a "SYNC" type message which is more authoritative than just PLAY/PAUSE
               rtmSendMessage?.({
                 type: 'SYNC',
-                currentTime: room.state.currentTime,
-                videoTime: room.state.currentTime,
-                isPlaying: room.state.isPlaying,
-                playbackRate: room.state.playbackRate,
+                currentTime:
+                  videoRef?.current?.currentTime ?? room.state.currentTime,
+                videoTime:
+                  videoRef?.current?.currentTime ?? room.state.currentTime,
+                isPlaying: videoRef?.current
+                  ? !videoRef.current.paused
+                  : room.state.isPlaying,
+                playbackRate:
+                  videoRef?.current?.playbackRate ?? room.state.playbackRate,
                 serverTime: Date.now(),
                 fromHost: true,
               });
@@ -252,7 +291,17 @@ export function useWatchPartySync({
         }
       }
     },
-    [onStateUpdate, normalizeRoomUrls, setRoom, isHost, rtmSendMessage, room],
+    [
+      onStateUpdate,
+      normalizeRoomUrls,
+      setRoom,
+      isHost,
+      rtmSendMessage,
+      room,
+      videoRef?.current?.paused,
+      videoRef?.current?.currentTime,
+      videoRef?.current,
+    ],
   );
 
   return {

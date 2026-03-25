@@ -112,6 +112,7 @@ interface WatchPartyVideoAreaProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   userId?: string;
+  currentUserName?: string;
 }
 
 /**
@@ -132,6 +133,7 @@ export function WatchPartyVideoArea({
   rtmSendMessage,
   rtmSendMessageToPeer,
   userId,
+  currentUserName,
 }: WatchPartyVideoAreaProps) {
   const {
     metadata,
@@ -164,6 +166,7 @@ export function WatchPartyVideoArea({
       }
       initialAudioTrackId={initialAudioTrackId}
       onAudioTrackChange={isHost ? handleAudioTrackChange : undefined}
+      playbackRate={room.state.playbackRate}
     >
       {/* Blurred poster background */}
       {metadata.posterUrl ? (
@@ -187,6 +190,7 @@ export function WatchPartyVideoArea({
         rtmSendMessage={rtmSendMessage}
         rtmSendMessageToPeer={rtmSendMessageToPeer}
         userId={userId}
+        userName={currentUserName}
       />
 
       {/* Episode panel provider wraps controls for shared context */}
@@ -203,7 +207,11 @@ export function WatchPartyVideoArea({
               <EmojiReactions
                 rtmSendMessage={rtmSendMessage}
                 userId={userId}
-                userName={user?.name || 'User'}
+                userName={
+                  currentUserName ||
+                  user?.name ||
+                  (isHost ? 'Room Host' : 'Member')
+                }
               />
               <Player.Spacer />
               <Player.EpisodePanelTrigger />

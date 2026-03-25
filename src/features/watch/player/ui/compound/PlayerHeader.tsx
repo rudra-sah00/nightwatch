@@ -1,4 +1,4 @@
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 
@@ -36,14 +36,10 @@ export function PlayerHeader({
           type="button"
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="group flex items-center gap-3 px-4 py-2 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer"
+          className="p-3 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer text-white"
           title="Toggle Watch Party sidebar"
         >
-          <Users className="w-5 h-5 md:w-6 md:h-6 text-white stroke-[3px]" />
-          <span className="hidden lg:inline text-sm 2xl:text-base font-black font-headline uppercase tracking-widest text-white">
-            Party
-          </span>
-          <div className="w-3 h-3 bg-[#ffcc00] border-[2px] border-[#1a1a1a] animate-pulse" />
+          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         </button>
       ) : null}
 

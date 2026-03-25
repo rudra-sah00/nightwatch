@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
@@ -37,6 +38,8 @@ const EMPTY_TYPING_USERS: TypingUser[] = [];
 
 interface ActiveWatchPartyProps {
   room: WatchPartyRoom;
+  currentUserId: string | undefined;
+  currentUserName?: string;
   isHost: boolean;
   copied: boolean;
   onKick: (id: string) => void;
@@ -57,7 +60,6 @@ interface ActiveWatchPartyProps {
     season?: number;
     episode?: number;
   }) => void;
-  currentUserId?: string;
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
@@ -68,6 +70,7 @@ interface ActiveWatchPartyProps {
 export function ActiveWatchParty({
   room,
   currentUserId,
+  currentUserName: propUserName,
   isHost,
   copied,
   onKick,
@@ -132,7 +135,18 @@ export function ActiveWatchParty({
   };
 
   // Whether the current user is permitted to send chat messages
+  const { user } = useAuth();
   const currentMember = room.members.find((m) => m.id === currentUserId);
+  const currentUserName =
+    currentMember?.name ||
+    propUserName ||
+    user?.name ||
+    (isHost
+      ? 'Room Host'
+      : currentUserId?.startsWith('guest')
+        ? 'Guest'
+        : 'Member');
+
   const canChatInParty =
     isHost ||
     (currentMember?.permissions?.canChat ??
@@ -177,6 +191,7 @@ export function ActiveWatchParty({
           onToggleFloatingChat={handleToggleFloatingChat}
           rtmSendMessage={rtmSendMessage}
           rtmSendMessageToPeer={rtmSendMessageToPeer}
+          currentUserName={currentUserName}
         />
       </div>
 
@@ -202,6 +217,7 @@ export function ActiveWatchParty({
           rtmSendMessage={rtmSendMessage}
           rtmSendMessageToPeer={rtmSendMessageToPeer}
           userId={currentUserId}
+          currentUserName={currentUserName}
         />
       </div>
 
@@ -210,6 +226,7 @@ export function ActiveWatchParty({
         <FloatingChat
           messages={messages}
           currentUserId={currentUserId}
+          currentUserName={currentUserName}
           onSendMessage={onSendMessage}
           canChat={canChatInParty}
         />

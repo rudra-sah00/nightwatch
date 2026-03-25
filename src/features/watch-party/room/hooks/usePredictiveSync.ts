@@ -35,8 +35,8 @@ export function usePredictiveSync(
   const applyState = useCallback(
     (update: PartyStateUpdate) => {
       const video = videoRef.current;
-      if (!video) {
-        // Video element not mounted yet (e.g. join_approved before ActiveWatchParty renders).
+      if (!video || video.readyState < 1) {
+        // Video element not mounted yet or metadata not loaded.
         // Save for later — the polling effect below will apply it once video is ready.
         pendingUpdateRef.current = update;
         return;
@@ -58,8 +58,10 @@ export function usePredictiveSync(
       // Livestreams: never seek — HLS live buffer is per-client and seeking
       // to a remote currentTime causes stalls/buffering. Only sync play/pause.
       if (isLive) {
-        if (newState.isPlaying && video.paused) video.play().catch(() => {});
-        if (!newState.isPlaying && !video.paused) video.pause();
+        if (newState.isPlaying && video.paused) {
+          video.play().catch((_err) => {});
+        }
+        if (newState.isPlaying === false && !video.paused) video.pause();
         return;
       }
 
@@ -80,8 +82,10 @@ export function usePredictiveSync(
         if (Math.abs(video.currentTime - targetTime) > 0.5) {
           video.currentTime = targetTime;
         }
-        if (newState.isPlaying && video.paused) video.play().catch(() => {});
-        if (!newState.isPlaying && !video.paused) video.pause();
+        if (newState.isPlaying && video.paused) {
+          video.play().catch((_err) => {});
+        }
+        if (newState.isPlaying === false && !video.paused) video.pause();
         video.playbackRate = newState.playbackRate;
         return;
       }
@@ -91,8 +95,8 @@ export function usePredictiveSync(
 
       // Handle Play/Pause State Sync immediately
       if (newState.isPlaying && video.paused) {
-        video.play().catch(() => {});
-      } else if (!newState.isPlaying && !video.paused) {
+        video.play().catch((_err) => {});
+      } else if (newState.isPlaying === false && !video.paused) {
         video.pause();
       }
 
@@ -131,7 +135,8 @@ export function usePredictiveSync(
   // the first state_update that arrives after the video mounts.
   useEffect(() => {
     const interval = setInterval(() => {
-      if (pendingUpdateRef.current && videoRef.current) {
+      const video = videoRef.current;
+      if (pendingUpdateRef.current && video && video.readyState >= 1) {
         applyState(pendingUpdateRef.current);
         clearInterval(interval);
       }
@@ -156,7 +161,7 @@ export function usePredictiveSync(
       // If user paused locally but party is playing, we force play (unless we want to allow local pause?)
       // For now, strict sync:
       if (video.paused && state.isPlaying) {
-        video.play().catch(() => {});
+        video.play().catch((_err) => {});
       }
 
       const expected = getExpectedTime();

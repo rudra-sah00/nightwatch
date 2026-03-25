@@ -12,7 +12,6 @@ import {
   Users,
 } from 'lucide-react';
 import { memo } from 'react';
-import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import type { ContentProgress } from '@/types/content';
 import { ContentType, type ShowDetails } from '../types';
