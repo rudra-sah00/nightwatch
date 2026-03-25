@@ -144,16 +144,22 @@ export function PlayerEpisodePanelTrigger() {
       type="button"
       onClick={ctx.toggle}
       className={cn(
-        'flex items-center justify-center',
-        'transition-all duration-300 ease-out',
-        'bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-[3px] border-[#1a1a1a]',
-        'neo-shadow-sm neo-shadow-hover neo-shadow-active',
-        'w-10 h-10 md:w-11 md:h-11',
+        'p-2.5 md:p-3 transition-all duration-200',
+        'bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm',
+        'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#f5f0e8]',
+        'active:bg-[#e0e0e0]',
+        ctx.isOpen &&
+          'bg-[#f5f0e8] translate-x-[2px] translate-y-[2px] shadow-none',
       )}
       aria-label="Show episodes"
       title="Episodes"
     >
-      <Library className="w-4 h-4 md:w-5 md:h-5 text-[#1a1a1a]" />
+      <Library
+        className={cn(
+          'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-200',
+          ctx.isOpen && 'scale-110',
+        )}
+      />
     </button>
   );
 }

@@ -126,12 +126,7 @@ export function EpisodePanel({
     >
       {/* ── Single unified glass backdrop ── covers full viewport so the
            watch-party sidebar is also blurred when the panel opens ── */}
-      <div
-        className={cn(
-          'fixed inset-0 bg-[#f5f0e8]/98', // Changed from yellow to cream
-          'transition-all duration-300 ease-out',
-        )}
-      />
+      {/* No backdrop per user request */}
 
       {/* Close target — fixed so clicks anywhere (incl. sidebar) close the panel */}
       <button
