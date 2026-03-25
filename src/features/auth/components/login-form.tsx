@@ -28,7 +28,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
-      <div className="mb-6 shrink-0 text-center md:text-left">
+      <div className="mb-1 shrink-0 text-center md:text-left">
         <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
           Watch Rudra
         </h1>
@@ -37,16 +37,16 @@ export function LoginForm() {
         </p>
       </div>
 
-      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-4 shrink-0">
-        <h2 className="text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+      <div className="border-b-4 border-[#1a1a1a] pb-0.5 mb-2 shrink-0">
+        <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
           {isOtpStep ? 'Verify' : 'Enter'}
         </h2>
-        <p className="font-body font-semibold text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
+        <p className="font-body font-semibold text-[8px] md:text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
           {isOtpStep ? 'ACCESS VERIFICATION' : 'ACCESS YOUR LOUNGE'}
         </p>
       </div>
 
-      <div className="flex-grow flex flex-col justify-center">
+      <div className="flex-grow flex flex-col justify-start">
         {isOtpStep ? (
           <OtpStep
             email={formData.email}
@@ -168,12 +168,12 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
   action,
 }: InitialStepProps) {
   return (
-    <form action={action} className="space-y-5 w-full px-1">
-      <div className="space-y-4">
+    <form action={action} className="space-y-2 w-full px-1">
+      <div className="space-y-2">
         <div>
           <Label
             htmlFor="email"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1.5 text-[#1a1a1a]"
+            className="block font-headline font-bold uppercase text-[10px] md:text-zs tracking-widest mb-0.5 text-[#1a1a1a]"
           >
             Email Address
           </Label>
@@ -186,14 +186,14 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
             onChange={handleChange}
             autoComplete="username"
             disabled={isLoading}
-            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[48px]"
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
           />
         </div>
 
         <div>
           <Label
             htmlFor="password"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1.5 text-[#1a1a1a]"
+            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
           >
             Password
           </Label>
@@ -206,14 +206,14 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
             onChange={handleChange}
             autoComplete="current-password"
             disabled={isLoading}
-            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm md:text-base !h-[48px]"
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
           />
         </div>
       </div>
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
 
-      <div className="pt-2 scale-95 origin-left">
+      <div className="pt-1 scale-[0.9] md:scale-95 origin-left">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}
@@ -226,7 +226,7 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
         type="submit"
         isLoading={isLoading}
         disabled={!captchaToken || isLoading}
-        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 md:py-5 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
+        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-0.5"
       >
         {isLoading ? 'Verifying...' : 'Launch Sync'}
       </Button>

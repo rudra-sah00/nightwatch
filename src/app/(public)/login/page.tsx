@@ -102,8 +102,8 @@ export default function LoginPage() {
           </div>
           {/* Login Card wrapper */}
           <div className="lg:col-span-12 xl:col-span-5 flex items-center justify-center w-full">
-            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none h-full lg:h-[500px]">
-              <div className="flex-grow flex flex-col justify-start h-full overflow-hidden">
+            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-4 md:p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none h-full lg:h-[500px] overflow-visible">
+              <div className="flex-grow flex flex-col justify-start h-full overflow-visible">
                 <LoginForm />
               </div>
             </div>
