@@ -3,10 +3,13 @@ import {
   PenTool,
   Settings,
   Shield,
+  ShieldCheck,
   Volume2,
+  X,
 } from 'lucide-react';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -122,18 +125,29 @@ export function WatchPartySettings({
         <button
           type="button"
           className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-[#1a1a1a] border-[3px] border-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:bg-[#f5f0e8]"
-          title="Room Settings"
+          title="Room Access & Permissions"
         >
-          <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
+          <ShieldCheck aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
         </button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md bg-white border-[4px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]">
-        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-[#1a1a1a] bg-[#ffcc00] m-0">
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-md bg-white border-[4px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]"
+      >
+        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-[#1a1a1a] bg-[#ffcc00] m-0 flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl">
             <Shield aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
-            Watch Party Settings
+            Room Access
           </DialogTitle>
+          <DialogClose asChild>
+            <button
+              type="button"
+              className="p-1.5 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+            >
+              <X className="w-5 h-5 stroke-[3.5px]" />
+            </button>
+          </DialogClose>
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-8 bg-white">

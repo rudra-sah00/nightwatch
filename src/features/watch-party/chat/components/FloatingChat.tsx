@@ -104,26 +104,26 @@ export function FloatingChat({
         })}
       </div>
 
-      {/* ── Send input — glass pill ── */}
+      {/* ── Send input — Neo-brutalist ── */}
       {canChat ? (
-        <div className="flex items-center gap-1.5 w-full pointer-events-auto">
+        <div className="flex items-center gap-1.5 w-full pointer-events-auto mt-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Chat…"
+            placeholder="TYPE SOMETHING..."
             maxLength={200}
             aria-label="Send a chat message"
-            className="flex-1 text-sm text-white placeholder-white/30 bg-black/55 backdrop-blur-md border border-white/10 rounded-full px-3 py-1.5 outline-none focus:border-white/25 transition-colors min-w-0"
+            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] placeholder-[#1a1a1a]/40 bg-white border-[3px] border-[#1a1a1a] px-3 py-2.5 outline-none focus:bg-[#f5f0e8] neo-shadow-sm transition-all min-w-0"
           />
           <button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
             aria-label="Send"
-            className="p-1.5 rounded-full bg-black/55 backdrop-blur-md border border-white/10 text-white/55 hover:text-white hover:border-white/25 transition-colors disabled:opacity-30"
+            className="p-2.5 bg-[#ffcc00] border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#e0b400] transition-all disabled:opacity-50 disabled:grayscale"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-4 h-4 stroke-[3px]" />
           </button>
         </div>
       ) : null}
