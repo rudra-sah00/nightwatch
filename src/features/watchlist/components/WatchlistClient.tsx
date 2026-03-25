@@ -2,9 +2,7 @@
 
 import { Film, Loader2, Tv } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
@@ -18,14 +16,8 @@ import { useWatchlist } from '../hooks/use-watchlist';
  * - Integration with ContentDetailModal.
  */
 export function WatchlistClient() {
-  const {
-    serverLabel,
-    watchlist,
-    loading,
-    selectedId,
-    setSelectedId,
-    isEmpty,
-  } = useWatchlist();
+  const { watchlist, loading, selectedId, setSelectedId, isEmpty } =
+    useWatchlist();
 
   return (
     <>
@@ -98,36 +90,7 @@ export function WatchlistClient() {
 
 // --- Helper Components ---
 
-const EmptyWatchlist = React.memo(function EmptyWatchlist({
-  serverLabel,
-}: {
-  serverLabel: string;
-}) {
-  return (
-    <div className="flex-1 flex items-center justify-center min-h-[50vh]">
-      <div className="flex flex-col items-center justify-center text-center space-y-6 w-full max-w-md bg-white border-[4px] border-[#1a1a1a] p-8 md:p-12 neo-shadow">
-        <div className="p-5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a]">
-          <Film className="w-12 h-12 text-[#1a1a1a] stroke-[3px]" />
-        </div>
-        <div className="space-y-4">
-          <h3 className="text-2xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
-            No items on <span className="text-[#0055ff]">{serverLabel}</span>
-          </h3>
-          <p className="text-sm font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
-            Add movies or shows while browsing on {serverLabel} and they'll
-            appear here.
-          </p>
-        </div>
-        <Button
-          asChild
-          className="mt-4 bg-[#ffcc00] text-[#1a1a1a] border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest px-8 py-6 rounded-none neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all"
-        >
-          <Link href="/">Browse Content</Link>
-        </Button>
-      </div>
-    </div>
-  );
-});
+// --- Helper Components ---
 
 const WatchlistItemCard = React.memo(function WatchlistItemCard({
   item,
