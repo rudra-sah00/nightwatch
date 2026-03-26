@@ -107,9 +107,29 @@ export function useSignupForm() {
         }
         return { success: true };
       } catch (err: unknown) {
-        // Reset the captcha widget so the consumed/expired token cannot be reused.
+        // Handle specific validation errors from the backend (e.g. email already taken)
+        if (
+          err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          err.code === 'VALIDATION_ERROR' &&
+          'details' in err &&
+          Array.isArray(err.details)
+        ) {
+          const errors: Record<string, string> = {};
+          for (const detail of err.details) {
+            const field = detail.path;
+            if (typeof field === 'string') errors[field] = detail.message;
+          }
+          // Reset captcha because the backend consumed the token on THIS request
+          setCaptchaToken(null);
+          captchaRef.current?.reset();
+          return { fieldErrors: errors };
+        }
+
+        // For all other backend errors, we must also reset the captcha widget
         // Turnstile tokens are single-use; if the backend consumed the token before
-        // another error occurred (e.g. email already taken), the next submission
+        // another error occurred (e.g. invite code invalid), the next submission
         // would fail with "Security verification failed" without this reset.
         setCaptchaToken(null);
         captchaRef.current?.reset();
