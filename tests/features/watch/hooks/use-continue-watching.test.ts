@@ -15,22 +15,6 @@ vi.mock('@/features/watch/api', () => ({
   setContinueWatchingCache: vi.fn(),
 }));
 
-// Mock socket provider
-vi.mock('@/providers/socket-provider', () => ({
-  useSocket: vi.fn(() => ({
-    socket: {
-      connected: true,
-      on: vi.fn(),
-      off: vi.fn(),
-      emit: vi.fn(),
-    } as unknown as Socket,
-    isConnected: true,
-    connect: vi.fn(),
-    connectGuest: vi.fn(),
-    disconnect: vi.fn(),
-  })),
-}));
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
@@ -38,20 +22,6 @@ vi.mock('sonner', () => ({
 describe('useContinueWatching — race condition and stale response guards', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    // Restore useSocket to connected state after any test that overrides it
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: {
-        connected: true,
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-      } as unknown as Socket,
-      isConnected: true,
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
-    });
     // Restore getCachedContinueWatching to no-cache
     const { getCachedContinueWatching } = await import('@/features/watch/api');
     vi.mocked(getCachedContinueWatching).mockReturnValue(null);
@@ -77,18 +47,10 @@ describe('useContinueWatching — race condition and stale response guards', () 
     ];
 
     // First fetch (s1) responds immediately
-    vi.mocked(fetchContinueWatching).mockImplementation((_l, _s, cb) => {
-      cb(s1Items);
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      cb?.(s1Items);
+      return s1Items;
     });
-
-    const _wrapper = ({
-      children,
-      server,
-    }: {
-      children: React.ReactNode;
-      server: 's1' | 's2';
-    }) =>
-      React.createElement(ServerProvider, { defaultServer: server, children });
 
     const { result, rerender } = renderHook(() => useContinueWatching({}), {
       wrapper: ({ children }) =>
@@ -99,19 +61,23 @@ describe('useContinueWatching — race condition and stale response guards', () 
       expect(result.current.items.length).toBe(1);
     });
 
-    // Now hold the next fetch callback
-    let holdCallback: ((items: typeof s1Items | null) => void) | null = null;
-    vi.mocked(fetchContinueWatching).mockImplementation((_l, _s, cb) => {
-      holdCallback = cb as typeof holdCallback;
+    // Now control the next fetch
+    let resolvePromise: (value: any) => void;
+    const pendingPromise = new Promise((resolve) => {
+      resolvePromise = resolve;
     });
 
-    // Switch server to s2 — triggers re-render with new ServerProvider
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      const items = await pendingPromise;
+      cb?.(items as any);
+      return items as any;
+    });
+
+    // Switch server triggers re-render (note: usually requires activeServer change in provider)
     rerender();
 
-    // Hold callback is pending — but items should have been cleared synchronously
-    // Note: because the ServerProvider default doesn't change in this wrapper,
-    // we test via the mock state.
-    expect(holdCallback).toBeDefined(); // second fetch was initiated
+    // Fetch should have been called
+    expect(fetchContinueWatching).toHaveBeenCalledTimes(2);
   });
 
   it('discards stale s1 response when server already switched to s2', async () => {
@@ -151,15 +117,27 @@ describe('useContinueWatching — race condition and stale response guards', () 
       },
     ];
 
-    // Hold the first callback
-    let firstCallback: ((items: typeof s1Items | null) => void) | null = null;
-    vi.mocked(fetchContinueWatching).mockImplementationOnce((_l, _s, cb) => {
-      firstCallback = cb as typeof firstCallback;
+    // First call (s1) - we handle the resolve manually
+    let resolveS1: (value: any) => void;
+    const s1Promise = new Promise((resolve) => {
+      resolveS1 = resolve;
     });
+
+    vi.mocked(fetchContinueWatching).mockImplementationOnce(
+      async (_l, _s, cb) => {
+        const items = await s1Promise;
+        cb?.(items as any);
+        return items as any;
+      },
+    );
+
     // Second call (s2) responds immediately
-    vi.mocked(fetchContinueWatching).mockImplementationOnce((_l, _s, cb) => {
-      cb(s2Items);
-    });
+    vi.mocked(fetchContinueWatching).mockImplementationOnce(
+      async (_l, _s, cb) => {
+        cb?.(s2Items);
+        return s2Items;
+      },
+    );
 
     // Wrap with mutable server state
     let setServer: (s: 's1' | 's2') => void = () => {};
@@ -176,21 +154,22 @@ describe('useContinueWatching — race condition and stale response guards', () 
       wrapper: ControlledWrapper,
     });
 
-    // Wait for first fetch to be initiated (callback is held)
-    await waitFor(() => expect(firstCallback).not.toBeNull());
+    // Initial fetch is pending
+    await waitFor(() => expect(fetchContinueWatching).toHaveBeenCalled());
 
-    // Switch to s2 — triggers new fetch which resolves with s2Items
+    // Switch to s2 - triggers second fetch
     act(() => {
       setServer('s2');
     });
 
+    // Wait for s2 response to be applied
     await waitFor(() => {
       expect(result.current.items).toEqual(s2Items);
     });
 
-    // Now fire the stale s1 callback — should be discarded
-    act(() => {
-      firstCallback?.(s1Items);
+    // Now resolve the stale s1 promise
+    await act(async () => {
+      resolveS1!(s1Items);
     });
 
     // Items must still be s2Items, not s1Items
@@ -198,35 +177,6 @@ describe('useContinueWatching — race condition and stale response guards', () 
     expect(result.current.items.every((i) => i.title === 'S2 Movie')).toBe(
       true,
     );
-  });
-
-  it('resolves isLoading=false when socket is disconnected', async () => {
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: null,
-      isConnected: false,
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
-    });
-
-    const onLoadComplete = vi.fn();
-    const { result } = renderHook(
-      () => useContinueWatching({ onLoadComplete }),
-      {
-        wrapper: ({ children }) =>
-          React.createElement(ServerProvider, {
-            defaultServer: 's1',
-            children,
-          }),
-      },
-    );
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(onLoadComplete).toHaveBeenCalledWith(0);
   });
 
   it('uses cache when available (no force)', async () => {
@@ -250,9 +200,10 @@ describe('useContinueWatching — race condition and stale response guards', () 
       },
     ];
 
-    // On mount, hook always force-fetches — return cached from the network call
-    vi.mocked(fetchContinueWatching).mockImplementation((_l, _s, cb) => {
-      cb(cachedItems);
+    // Response for the mount-time force fetch
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      cb?.(cachedItems);
+      return cachedItems;
     });
     vi.mocked(getCachedContinueWatching).mockReturnValue(cachedItems);
 

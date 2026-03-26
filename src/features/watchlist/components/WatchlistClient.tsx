@@ -1,6 +1,6 @@
 'use client';
 
-import { Film, Loader2, Tv } from 'lucide-react';
+import { Film, Loader2, Plus, Tv } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
@@ -61,7 +61,18 @@ export function WatchlistClient() {
             <div className="flex items-center justify-center min-h-[50vh]">
               <Loader2 className="w-12 h-12 animate-spin text-[#1a1a1a]" />
             </div>
-          ) : isEmpty ? null : (
+          ) : isEmpty ? (
+            <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-[#1a1a1a] neo-shadow text-center max-w-2xl mx-auto w-full">
+              <Plus className="w-20 h-20 text-[#0055ff] mb-6 stroke-[3px]" />
+              <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] mb-4">
+                Watchlist is Empty
+              </h3>
+              <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a] max-w-sm px-6">
+                You haven't saved any films yet. Search for content to add them
+                to your private collection.
+              </p>
+            </div>
+          ) : (
             <div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
               style={{ contentVisibility: 'auto' }}

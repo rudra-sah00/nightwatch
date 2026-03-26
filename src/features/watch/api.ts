@@ -1,5 +1,4 @@
 import { apiFetch } from '@/lib/fetch';
-import { getSocket } from '@/lib/socket';
 import type {
   ContentProgress,
   PlayParams,
@@ -92,78 +91,46 @@ export async function getContinueWatching(
   return result.items;
 }
 
-// Fetch continue watching via Socket.IO
-interface SocketResponse {
-  success: boolean;
-  items?: WatchProgress[];
-  error?: string;
-}
-
-export function fetchContinueWatching(
+// Fetch continue watching via HTTP
+export async function fetchContinueWatching(
   limit = 10,
   server = 's1',
-  callback: (items: WatchProgress[] | null, error?: string) => void,
-): void {
-  const socket = getSocket();
-  if (!socket?.connected) {
-    // If socket not connected, try HTTP fallback
-    getContinueWatching(limit, server)
-      .then((items) => callback(items))
-      .catch((err) => callback(null, err.message || 'Failed to load'));
-    return;
+  callback?: (items: WatchProgress[] | null, error?: string) => void,
+): Promise<WatchProgress[] | null> {
+  try {
+    const items = await getContinueWatching(limit, server);
+    setContinueWatchingCache(server, items);
+    callback?.(items);
+    return items;
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to load';
+    callback?.(null, errorMsg);
+    return null;
   }
-
-  const TIMEOUT_MS = 10_000;
-  let settled = false;
-
-  const timer = setTimeout(() => {
-    if (!settled) {
-      settled = true;
-      callback(null, 'Request timed out');
-    }
-  }, TIMEOUT_MS);
-
-  socket.emit(
-    'watch:get_continue_watching',
-    { limit, providerId: server },
-    (response: SocketResponse) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (response?.success && response.items) {
-        setContinueWatchingCache(server, response.items);
-        callback(response.items);
-      } else {
-        callback(null, response?.error || 'Failed to load');
-      }
-    },
-  );
 }
 
-// Delete progress via Socket.IO
-export function deleteWatchProgress(
+// Delete progress via HTTP
+export async function deleteWatchProgress(
   progressId: string,
   server = 's1',
-  callback: (success: boolean) => void,
-): void {
-  const socket = getSocket();
-  if (!socket?.connected) {
-    callback(false);
-    return;
-  }
+  callback?: (success: boolean) => void,
+): Promise<boolean> {
+  try {
+    const params = new URLSearchParams({ server });
+    const result = await apiFetch<{ success: boolean }>(
+      `/api/watch/progress/${progressId}?${params}`,
+      { method: 'DELETE' },
+    );
 
-  socket.emit(
-    'watch:delete_progress',
-    { progressId, providerId: server },
-    (response: SocketResponse) => {
-      if (response?.success) {
-        removeFromContinueWatchingCache(server, progressId);
-        callback(true);
-      } else {
-        callback(false);
-      }
-    },
-  );
+    if (result.success) {
+      removeFromContinueWatchingCache(server, progressId);
+    }
+    callback?.(result.success);
+    return result.success;
+  } catch (_err) {
+    callback?.(false);
+    return false;
+  }
 }
 
 /**
@@ -246,57 +213,16 @@ export async function getContentProgress(
   }
 }
 
-// Fetch progress via Socket.IO
-interface ProgressSocketResponse {
-  success: boolean;
-  progress?: {
-    progressSeconds: number;
-    seasonNumber?: number;
-    episodeNumber?: number;
-    progressPercent: number;
-  };
-}
-
+// Fetch progress via HTTP
 export function fetchContentProgress(
   contentId: string,
   callback: (progress: ContentProgress | null, hasProgress: boolean) => void,
 ): void {
-  // Infer provider from contentId prefix so S2 records are correctly scoped.
-  const providerId = inferProviderFromId(contentId);
-  const socket = getSocket();
-  if (!socket?.connected) {
-    // If socket not connected, try HTTP fallback
-    getContentProgress(contentId)
-      .then((progress) => callback(progress, !!progress))
-      .catch(() => callback(null, false));
-    return;
-  }
-
-  socket.emit(
-    'watch:get_progress',
-    { contentId, providerId },
-    (response: ProgressSocketResponse) => {
-      let progress: ContentProgress | null = null;
-      let hasProgress = false;
-
-      if (
-        response?.success &&
-        response.progress &&
-        response.progress.progressSeconds > 0
-      ) {
-        hasProgress = true;
-        progress = {
-          seasonNumber: response.progress.seasonNumber,
-          episodeNumber: response.progress.episodeNumber,
-          progressSeconds: response.progress.progressSeconds,
-          progressPercent: response.progress.progressPercent,
-        };
-      }
-
-      setProgressCache(contentId, progress, hasProgress);
-      callback(progress, hasProgress);
-    },
-  );
+  getContentProgress(contentId)
+    .then((progress) => {
+      callback(progress, !!progress);
+    })
+    .catch(() => callback(null, false));
 }
 
 /**

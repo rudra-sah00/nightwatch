@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useServer } from '@/providers/server-provider';
-import { useSocket } from '@/providers/socket-provider';
 import {
   fetchContinueWatching as apiFetchContinueWatching,
   deleteWatchProgress,
@@ -34,13 +33,12 @@ export function useContinueWatching({
     server: '',
   });
   // Track current items in a ref so fetchItems can report count without
-  // needing items in its dependency array (would cause re-renders on every change).
+  // needing items in its dependency array.
   const itemsRef = useRef<WatchProgress[]>([]);
   const fetchingForServerRef = useRef<string>('');
-  const { socket, isConnected } = useSocket();
 
   const fetchItems = useCallback(
-    (force = false) => {
+    async (force = false) => {
       const now = Date.now();
       const serverChanged = lastFetchRef.current.server !== activeServer;
 
@@ -64,12 +62,6 @@ export function useContinueWatching({
       }
       lastFetchRef.current = { time: now, server: activeServer };
 
-      if (!socket?.connected) {
-        setIsLoading(false);
-        onLoadComplete?.(0);
-        return;
-      }
-
       // Clear stale items and show skeleton immediately when server changes
       if (serverChanged) {
         setItems([]);
@@ -80,7 +72,8 @@ export function useContinueWatching({
       const fetchingServer = activeServer;
       fetchingForServerRef.current = fetchingServer;
 
-      apiFetchContinueWatching(10, activeServer, (fetchedItems) => {
+      try {
+        const fetchedItems = await apiFetchContinueWatching(10, activeServer);
         // Discard stale response if server changed while request was in flight
         if (fetchingForServerRef.current !== fetchingServer) return;
         setIsLoading(false);
@@ -91,9 +84,13 @@ export function useContinueWatching({
         } else {
           onLoadComplete?.(0);
         }
-      });
+      } catch (_err) {
+        if (fetchingForServerRef.current !== fetchingServer) return;
+        setIsLoading(false);
+        onLoadComplete?.(0);
+      }
     },
-    [onLoadComplete, socket, activeServer],
+    [onLoadComplete, activeServer],
   );
 
   // Invalidate cache on unmount so navigating away then back always triggers a fresh fetch.
@@ -104,19 +101,14 @@ export function useContinueWatching({
   }, []);
 
   useEffect(() => {
-    if (isConnected) {
-      // Force-bypass the cache on every mount so navigation-back shows fresh data.
-      fetchItems(true);
-    } else {
-      setIsLoading(false);
-      onLoadComplete?.(0);
-    }
+    fetchItems(true);
+
     const handleFocus = () => {
-      if (socket?.connected) fetchItems(true);
+      fetchItems(true);
     };
     window.addEventListener('focus', handleFocus, { passive: true });
     return () => window.removeEventListener('focus', handleFocus);
-  }, [fetchItems, isConnected, socket, onLoadComplete]);
+  }, [fetchItems]);
 
   const handleSelect = useCallback(
     (item: WatchProgress) => {
@@ -126,17 +118,16 @@ export function useContinueWatching({
   );
 
   const handleRemove = useCallback(
-    (item: WatchProgress, e: React.MouseEvent) => {
+    (item: WatchProgress, e: React.BaseSyntheticEvent) => {
       e.stopPropagation();
-      React.startTransition(() => {
+      React.startTransition(async () => {
         addOptimisticItem(item.id);
-        deleteWatchProgress(item.id, activeServer, (success) => {
-          if (success) {
-            setItems((prev) => prev.filter((i) => i.id !== item.id));
-          } else {
-            toast.error('Failed to remove from list');
-          }
-        });
+        const success = await deleteWatchProgress(item.id, activeServer);
+        if (success) {
+          setItems((prev) => prev.filter((i) => i.id !== item.id));
+        } else {
+          toast.error('Failed to remove from list');
+        }
       });
     },
     [addOptimisticItem, activeServer],

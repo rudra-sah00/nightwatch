@@ -8,16 +8,8 @@ import { ContentType } from '@/types/content';
 // Mock the watch API
 vi.mock('@/features/watch/api', () => import('./__mocks__/watch-api'));
 
-// Mock the websocket
-vi.mock('@/lib/socket', () => ({
-  getSocket: vi.fn(() => ({
-    connected: true,
-    on: vi.fn(),
-    once: vi.fn(),
-    off: vi.fn(),
-    emit: vi.fn(),
-  })),
-}));
+// Mock the watch API
+vi.mock('@/features/watch/api', () => import('./__mocks__/watch-api'));
 
 // Mock SocketProvider
 vi.mock(
@@ -28,21 +20,6 @@ vi.mock(
 describe('ContinueWatching', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-
-    // Always restore useSocket to default connected state (prevents pollution from tests that override it)
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: {
-        connected: true,
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-      } as unknown as Socket,
-      isConnected: true,
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
-    });
 
     // Always restore getCachedContinueWatching to return null (prevents pollution from cache tests)
     const { getCachedContinueWatching } = await import('@/features/watch/api');
@@ -70,25 +47,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -137,25 +96,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -184,25 +125,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -235,25 +158,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching onSelectContent={mockOnSelectContent} />);
 
@@ -283,25 +188,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -330,25 +217,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -375,25 +244,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -420,25 +271,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -465,25 +298,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -515,40 +330,9 @@ describe('ContinueWatching', () => {
     const { fetchContinueWatching, deleteWatchProgress } = await import(
       '@/features/watch/api'
     );
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
-    const mockDelete = deleteWatchProgress as unknown as {
-      mockImplementation: (
-        impl: (
-          id: string,
-          server: string,
-          callback: (success: boolean) => void,
-        ) => void,
-      ) => void;
-    };
-    mockDelete.mockImplementation(
-      (_id: string, _server: string, callback: (success: boolean) => void) => {
-        callback(true);
-      },
-    );
+    vi.mocked(deleteWatchProgress).mockImplementation(async () => true);
 
     render(<ContinueWatching />);
 
@@ -557,10 +341,9 @@ describe('ContinueWatching', () => {
     const removeButton = screen.getByTitle('Remove from list');
     await user.click(removeButton);
 
-    expect(mockDelete).toHaveBeenCalledWith(
+    expect(deleteWatchProgress).toHaveBeenCalledWith(
       'progress-1',
       expect.any(String),
-      expect.any(Function),
     );
   });
 
@@ -590,40 +373,8 @@ describe('ContinueWatching', () => {
     const { fetchContinueWatching, deleteWatchProgress } = await import(
       '@/features/watch/api'
     );
-    type WatchProgress = (typeof mockItems)[0];
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
-
-    const mockDelete = deleteWatchProgress as unknown as {
-      mockImplementation: (
-        impl: (
-          id: string,
-          server: string,
-          callback: (success: boolean) => void,
-        ) => void,
-      ) => void;
-    };
-    mockDelete.mockImplementation(
-      (_id: string, _server: string, callback: (success: boolean) => void) => {
-        callback(false); // Simulate failure
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
+    vi.mocked(deleteWatchProgress).mockImplementation(async () => false);
 
     render(<ContinueWatching />);
 
@@ -658,17 +409,7 @@ describe('ContinueWatching', () => {
       '@/features/watch/api'
     );
 
-    // Hook always force-fetches on mount (bypasses cache for navigation-back freshness).
-    // Set up fetchContinueWatching to respond with the items.
-    vi.mocked(fetchContinueWatching).mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: typeof mockItems | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     // Also return cached data so subsequent non-forced fetches (e.g. focus) use cache.
     vi.mocked(getCachedContinueWatching).mockReturnValue(mockItems);
@@ -679,59 +420,6 @@ describe('ContinueWatching', () => {
 
     // fetchContinueWatching is called once on mount (force=true bypasses cache)
     expect(fetchContinueWatching).toHaveBeenCalledTimes(1);
-  });
-
-  it('handles no socket connection gracefully', async () => {
-    const mockOnLoadComplete = vi.fn();
-
-    // Socket is null — no connection at all
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: null,
-      isConnected: false,
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
-    });
-
-    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
-
-    // Wait for the component to finish loading
-    await waitFor(
-      () => {
-        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
-      },
-      { timeout: 2000 },
-    );
-  });
-
-  it('handles socket not connected state', async () => {
-    const mockOnLoadComplete = vi.fn();
-
-    // Socket exists but is not connected
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: {
-        connected: false,
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-      } as unknown as Socket,
-      isConnected: false,
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
-    });
-
-    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
-
-    // When not connected, component should report 0 items and stop loading
-    await waitFor(
-      () => {
-        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
-      },
-      { timeout: 2000 },
-    );
   });
 
   it('registers window focus handler', async () => {
@@ -756,15 +444,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: typeof mockItems | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -781,28 +461,16 @@ describe('ContinueWatching', () => {
     addEventListenerSpy.mockRestore();
   });
 
-  it('returns null when no items to display', async () => {
+  it('displays empty state when no items to display', async () => {
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: [] | null, error?: string) => void,
-      ) => {
-        callback([]); // Empty array means no items
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      cb?.([]);
+      return [];
+    });
 
-    const { container } = render(<ContinueWatching />);
+    render(<ContinueWatching />);
 
-    // Wait for loading to complete and component to render null
-    await waitFor(
-      () => {
-        // Container should be empty (null render)
-        expect(container.querySelector('h2')).toBeNull();
-      },
-      { timeout: 2000 },
-    );
+    await screen.findByText(/your watch history is empty/i);
   });
 
   it('shows loading state initially', async () => {
@@ -813,9 +481,9 @@ describe('ContinueWatching', () => {
 
     // Reset to ensure no cached data and fetch hangs
     vi.mocked(getCachedContinueWatching).mockReturnValue(null);
-    vi.mocked(fetchContinueWatching).mockImplementation(() => {
-      // intentionally don't call callback — simulates pending fetch
-    });
+    vi.mocked(fetchContinueWatching).mockImplementation(
+      () => new Promise(() => {}),
+    );
 
     const { container } = render(<ContinueWatching />);
 
@@ -845,15 +513,7 @@ describe('ContinueWatching', () => {
     ];
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: typeof mockItems | null, error?: string) => void,
-      ) => {
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async () => mockItems);
 
     render(<ContinueWatching />);
 
@@ -891,27 +551,12 @@ describe('ContinueWatching', () => {
     };
     mockGetCached.mockReturnValue(null);
 
-    type WatchProgress = (typeof mockItems)[0];
     let callCount = 0;
-    const mockFetch = fetchContinueWatching as unknown as {
-      mockImplementation: (
-        impl: (
-          limit: number,
-          server: string,
-          callback: (items: WatchProgress[] | null, error?: string) => void,
-        ) => void,
-      ) => void;
-    };
-    mockFetch.mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: WatchProgress[] | null, error?: string) => void,
-      ) => {
-        callCount++;
-        callback(mockItems);
-      },
-    );
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      callCount++;
+      cb?.(mockItems);
+      return mockItems;
+    });
 
     render(<ContinueWatching />);
 
@@ -933,41 +578,9 @@ describe('ContinueWatching', () => {
     const mockOnLoadComplete = vi.fn();
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(
-      (
-        _limit: number | undefined,
-        _server: string | undefined,
-        callback: (items: null, error?: string) => void,
-      ) => {
-        callback(null, 'Network error');
-      },
-    );
-
-    render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);
-
-    await waitFor(
-      () => {
-        expect(mockOnLoadComplete).toHaveBeenCalledWith(0);
-      },
-      { timeout: 2000 },
-    );
-  });
-
-  it('calls onLoadComplete(0) when socket.connected is false in fetchItems', async () => {
-    const mockOnLoadComplete = vi.fn();
-
-    const { useSocket } = await import('@/providers/socket-provider');
-    vi.mocked(useSocket).mockReturnValue({
-      socket: {
-        connected: false,
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-      } as unknown as Socket,
-      isConnected: true, // effect fires, but fetchItems checks socket.connected
-      connect: vi.fn(),
-      connectGuest: vi.fn(),
-      disconnect: vi.fn(),
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+      cb?.(null, 'Network error');
+      return null;
     });
 
     render(<ContinueWatching onLoadComplete={mockOnLoadComplete} />);

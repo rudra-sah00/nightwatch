@@ -28,7 +28,7 @@ export function ContinueWatching({
   onSelectContent,
   onLoadComplete,
 }: ContinueWatchingProps) {
-  const { items, optimisticItems, isLoading, handleSelect, handleRemove } =
+  const { optimisticItems, isLoading, handleSelect, handleRemove } =
     useContinueWatching({ onSelectContent, onLoadComplete });
 
   if (isLoading) {
@@ -52,7 +52,31 @@ export function ContinueWatching({
     );
   }
 
-  if (items.length === 0) return null;
+  if (!isLoading && optimisticItems.length === 0) {
+    return (
+      <div
+        className={cn(
+          'py-12 w-full',
+          !hideTitle && 'max-w-5xl mx-auto',
+          className,
+        )}
+      >
+        {!hideTitle && (
+          <div className="inline-block bg-[#ffcc00] border-[4px] border-[#1a1a1a] px-4 py-2 mb-6 neo-shadow-sm">
+            <h2 className="text-xl md:text-2xl font-black font-headline text-[#1a1a1a] uppercase tracking-tighter m-0 leading-none">
+              Continue Watching
+            </h2>
+          </div>
+        )}
+        <div className="flex flex-col items-center justify-center py-20 bg-white border-[4px] border-[#1a1a1a] neo-shadow text-center">
+          <Clock className="w-16 h-16 text-[#1a1a1a] opacity-20 mb-4 stroke-[3px]" />
+          <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a]">
+            Your watch history is empty
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
