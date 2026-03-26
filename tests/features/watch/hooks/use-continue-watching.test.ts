@@ -52,9 +52,18 @@ describe('useContinueWatching — race condition and stale response guards', () 
       return s1Items;
     });
 
-    const { result, rerender } = renderHook(() => useContinueWatching({}), {
-      wrapper: ({ children }) =>
-        React.createElement(ServerProvider, { defaultServer: 's1', children }),
+    let setServer: (s: 's1' | 's2') => void = () => {};
+    function ControlledWrapper({ children }: { children: React.ReactNode }) {
+      const [server, setS] = React.useState<'s1' | 's2'>('s1');
+      setServer = setS;
+      return React.createElement(ServerProvider, {
+        defaultServer: server,
+        children,
+      });
+    }
+
+    const { result } = renderHook(() => useContinueWatching({}), {
+      wrapper: ControlledWrapper,
     });
 
     await waitFor(() => {
@@ -73,14 +82,20 @@ describe('useContinueWatching — race condition and stale response guards', () 
       return items;
     });
 
-    // Switch server triggers re-render (note: usually requires activeServer change in provider)
-    rerender();
+    // Switch server triggers re-render
+    act(() => {
+      setServer('s2');
+    });
 
     // Fetch should have been called
-    expect(fetchContinueWatching).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(fetchContinueWatching).toHaveBeenCalledTimes(2);
+    });
 
     // Resolve to avoid hanging
-    resolvePromise([]);
+    act(() => {
+      resolvePromise([]);
+    });
   });
 
   it('discards stale s1 response when server already switched to s2', async () => {

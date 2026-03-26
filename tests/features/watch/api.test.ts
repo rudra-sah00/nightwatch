@@ -21,7 +21,6 @@ import {
   stopVideo,
 } from '@/features/watch/api';
 import { apiFetch } from '@/lib/fetch';
-import { getSocket } from '@/lib/socket';
 import { ContentType, type WatchProgress } from '@/types/content';
 
 // Mock apiFetch
@@ -383,43 +382,8 @@ describe('Watch API', () => {
   });
 
   describe('fetchContentProgress', () => {
-    it('should use Socket.IO if available', () => {
+    it('should use HTTP', () => {
       return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            // Simulate success response
-            callback({
-              success: true,
-              progress: {
-                progressSeconds: 100,
-                progressPercent: 10,
-              },
-            });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
-
-        fetchContentProgress('content-123', (progress, hasProgress) => {
-          expect(mockWs.emit).toHaveBeenCalledWith(
-            'watch:get_progress',
-            { contentId: 'content-123', providerId: 's1' },
-            expect.any(Function),
-          );
-          expect(progress).not.toBeNull();
-          expect(hasProgress).toBe(true);
-          done();
-        });
-      });
-    });
-
-    it('should fallback to HTTP if Socket.IO unavailable', () => {
-      return new Promise<void>((done) => {
-        vi.mocked(getSocket).mockReturnValue(null);
-
         const mockProgress = {
           progressSeconds: 100,
           progressPercent: 10,
@@ -441,16 +405,19 @@ describe('Watch API', () => {
 
     it('should handle no progress', () => {
       return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: true, progress: null });
-          }),
-        };
+        vi.mocked(apiFetch).mockResolvedValueOnce({ progress: null });
 
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
+        fetchContentProgress('content-123', (progress, hasProgress) => {
+          expect(progress).toBeNull();
+          expect(hasProgress).toBe(false);
+          done();
+        });
+      });
+    });
+
+    it('should handle errors', () => {
+      return new Promise<void>((done) => {
+        vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Fetch failed'));
 
         fetchContentProgress('content-123', (progress, hasProgress) => {
           expect(progress).toBeNull();
@@ -462,62 +429,8 @@ describe('Watch API', () => {
   });
 
   describe('fetchContinueWatching', () => {
-    it('should use WebSocket if available', () => {
+    it('should use HTTP', () => {
       return new Promise<void>((done) => {
-        const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
-
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: true, items: mockItems });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
-
-        fetchContinueWatching(10, 's1', (result) => {
-          expect(mockWs.emit).toHaveBeenCalledWith(
-            'watch:get_continue_watching',
-            { limit: 10, providerId: 's1' },
-            expect.any(Function),
-          );
-          expect(result).toEqual(mockItems);
-          done();
-        });
-      });
-    });
-
-    it('should use custom limit', () => {
-      return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: true, items: [] });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
-
-        fetchContinueWatching(20, 's1', (result) => {
-          expect(mockWs.emit).toHaveBeenCalledWith(
-            'watch:get_continue_watching',
-            { limit: 20, providerId: 's1' },
-            expect.any(Function),
-          );
-          expect(result).toEqual([]);
-          done();
-        });
-      });
-    });
-
-    it('should fallback to HTTP if Socket.IO unavailable', () => {
-      return new Promise<void>((done) => {
-        vi.mocked(getSocket).mockReturnValue(null);
-
         const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
 
         vi.mocked(apiFetch).mockResolvedValueOnce({ items: mockItems });
@@ -533,22 +446,13 @@ describe('Watch API', () => {
       });
     });
 
-    it('should handle Socket.IO errors', () => {
+    it('should handle errors', () => {
       return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: false, error: 'Socket.IO error' });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
+        vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Fetch failed'));
 
         fetchContinueWatching(10, 's1', (result, error) => {
           expect(result).toBeNull();
-          expect(error).toBe('Socket.IO error');
+          expect(error).toBe('Fetch failed');
           done();
         });
       });
@@ -556,24 +460,14 @@ describe('Watch API', () => {
   });
 
   describe('deleteWatchProgress', () => {
-    it('should delete watch progress via Socket.IO', () => {
+    it('should delete watch progress via HTTP', () => {
       return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: true });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
+        vi.mocked(apiFetch).mockResolvedValueOnce({ success: true });
 
         deleteWatchProgress('progress-123', 's1', (success) => {
-          expect(mockWs.emit).toHaveBeenCalledWith(
-            'watch:delete_progress',
-            { progressId: 'progress-123', providerId: 's1' },
-            expect.any(Function),
+          expect(apiFetch).toHaveBeenCalledWith(
+            '/api/watch/progress/progress-123?server=s1',
+            { method: 'DELETE' },
           );
           expect(success).toBe(true);
           done();
@@ -581,29 +475,9 @@ describe('Watch API', () => {
       });
     });
 
-    it('should return false if Socket.IO unavailable', () => {
+    it('should handle errors', () => {
       return new Promise<void>((done) => {
-        vi.mocked(getSocket).mockReturnValue(null);
-
-        deleteWatchProgress('progress-123', 's1', (success) => {
-          expect(success).toBe(false);
-          done();
-        });
-      });
-    });
-
-    it('should return false on error', () => {
-      return new Promise<void>((done) => {
-        const mockWs = {
-          connected: true,
-          emit: vi.fn((_event, _data, callback) => {
-            callback({ success: false });
-          }),
-        };
-
-        vi.mocked(getSocket).mockReturnValue(
-          mockWs as unknown as ReturnType<typeof getSocket>,
-        );
+        vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Delete failed'));
 
         deleteWatchProgress('progress-123', 's1', (success) => {
           expect(success).toBe(false);
