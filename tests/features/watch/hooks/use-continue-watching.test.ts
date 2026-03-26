@@ -1,8 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useContinueWatching } from '@/features/watch/hooks/use-continue-watching';
+import type { WatchProgress } from '@/features/watch/types';
 import { ServerProvider } from '@/providers/server-provider';
 import { ContentType } from '@/types/content';
 
@@ -62,15 +62,15 @@ describe('useContinueWatching — race condition and stale response guards', () 
     });
 
     // Now control the next fetch
-    let resolvePromise: (value: any) => void;
-    const pendingPromise = new Promise((resolve) => {
+    let resolvePromise: (value: WatchProgress[]) => void = () => {};
+    const pendingPromise = new Promise<WatchProgress[]>((resolve) => {
       resolvePromise = resolve;
     });
 
     vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
       const items = await pendingPromise;
-      cb?.(items as any);
-      return items as any;
+      cb?.(items);
+      return items;
     });
 
     // Switch server triggers re-render (note: usually requires activeServer change in provider)
@@ -78,6 +78,9 @@ describe('useContinueWatching — race condition and stale response guards', () 
 
     // Fetch should have been called
     expect(fetchContinueWatching).toHaveBeenCalledTimes(2);
+
+    // Resolve to avoid hanging
+    resolvePromise([]);
   });
 
   it('discards stale s1 response when server already switched to s2', async () => {
@@ -118,16 +121,16 @@ describe('useContinueWatching — race condition and stale response guards', () 
     ];
 
     // First call (s1) - we handle the resolve manually
-    let resolveS1: (value: any) => void;
-    const s1Promise = new Promise((resolve) => {
+    let resolveS1: (value: WatchProgress[]) => void = () => {};
+    const s1Promise = new Promise<WatchProgress[]>((resolve) => {
       resolveS1 = resolve;
     });
 
     vi.mocked(fetchContinueWatching).mockImplementationOnce(
       async (_l, _s, cb) => {
         const items = await s1Promise;
-        cb?.(items as any);
-        return items as any;
+        cb?.(items);
+        return items;
       },
     );
 

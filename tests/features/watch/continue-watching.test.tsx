@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import type { Socket } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
 import { ContentType } from '@/types/content';
