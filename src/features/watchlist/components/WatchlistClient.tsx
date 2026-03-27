@@ -16,7 +16,7 @@ import { useWatchlist } from '../hooks/use-watchlist';
  * - Integration with ContentDetailModal.
  */
 export function WatchlistClient() {
-  const { watchlist, loading, selectedId, setSelectedId, isEmpty } =
+  const { watchlist, loading, selectedId, setSelectedId, isEmpty, removeItem } =
     useWatchlist();
 
   return (
@@ -93,6 +93,9 @@ export function WatchlistClient() {
         <ContentDetailModal
           contentId={selectedId}
           onClose={() => setSelectedId(null)}
+          onWatchlistChange={(id, inList) => {
+            if (!inList) removeItem(id);
+          }}
         />
       ) : null}
     </>

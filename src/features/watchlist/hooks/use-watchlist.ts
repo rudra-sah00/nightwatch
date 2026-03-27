@@ -37,14 +37,17 @@ export function useWatchlist() {
     }
   }, []);
 
+  const removeItem = useCallback((contentId: string) => {
+    setWatchlist((prev) => prev.filter((item) => item.contentId !== contentId));
+  }, []);
+
   useEffect(() => {
-    if (!selectedId) {
-      fetchWatchlist(activeServer);
-    }
+    fetchWatchlist(activeServer);
+
     return () => {
       abortRef.current?.abort();
     };
-  }, [selectedId, activeServer, fetchWatchlist]);
+  }, [activeServer, fetchWatchlist]);
 
   const isEmpty = !loading && watchlist.length === 0;
 
@@ -56,5 +59,6 @@ export function useWatchlist() {
     selectedId,
     setSelectedId,
     isEmpty,
+    removeItem,
   };
 }

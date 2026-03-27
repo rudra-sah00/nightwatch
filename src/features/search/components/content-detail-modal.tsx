@@ -24,6 +24,7 @@ interface ContentDetailModalProps {
   };
   fromContinueWatching?: boolean;
   onClose: () => void;
+  onWatchlistChange?: (contentId: string, inWatchlist: boolean) => void;
   autoPlay?: boolean;
 }
 
@@ -32,6 +33,7 @@ export function ContentDetailModal({
   initialContext,
   fromContinueWatching = false,
   onClose,
+  onWatchlistChange,
   autoPlay = false,
 }: ContentDetailModalProps) {
   const {
@@ -248,7 +250,11 @@ export function ContentDetailModal({
                 handleWatchParty();
               }}
               isWatchPartyDisabled={isMobile}
-              onWatchlistToggle={handleWatchlistToggle}
+              onWatchlistToggle={async () => {
+                const nextState = !inWatchlist;
+                await handleWatchlistToggle();
+                onWatchlistChange?.(contentId, nextState);
+              }}
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
