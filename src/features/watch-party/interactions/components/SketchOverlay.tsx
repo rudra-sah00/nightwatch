@@ -4,6 +4,7 @@ import {
   Arrow,
   Circle,
   Group,
+  Image,
   Label,
   Layer,
   Line,
@@ -79,7 +80,8 @@ export function SketchOverlay({
     }>
   >([]);
 
-  const { color, strokeWidth, currentTool, cursors, stageRef } = useSketch();
+  const { color, strokeWidth, currentTool, cursors, stageRef, videoRef } =
+    useSketch();
 
   useEffect(() => {
     if (pendingText) {
@@ -281,6 +283,15 @@ export function SketchOverlay({
 
   const isDraggable = isSketchMode && currentTool === 'select';
 
+  const [bgImage, setBgImage] = useState<HTMLVideoElement | null>(null);
+
+  // Poll video for background capture
+  useEffect(() => {
+    if (stageRef?.current && videoRef?.current) {
+      setBgImage(videoRef.current);
+    }
+  }, [stageRef, videoRef]);
+
   return (
     <div
       ref={containerRef}
@@ -299,6 +310,18 @@ export function SketchOverlay({
         onTouchMove={handleMouseMove}
         onTouchEnd={handleMouseUp}
       >
+        <Layer>
+          {bgImage && (
+            <Image
+              image={bgImage}
+              width={stageSize.width}
+              height={stageSize.height}
+              listening={false}
+              opacity={0} // Hidden normally, Konva will still capture it if we force draw or handle capture correctly
+              id="video-snapshot-layer"
+            />
+          )}
+        </Layer>
         <Layer>
           {actions.map((action) => {
             const { id, type, data, color, strokeWidth, fill } = action;

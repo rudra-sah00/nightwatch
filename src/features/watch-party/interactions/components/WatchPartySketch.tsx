@@ -342,11 +342,26 @@ export function WatchPartySketch() {
           onClick={() => {
             const stage = stageRef.current;
             if (!stage) return;
-            const dataUrl = stage.toDataURL({ pixelRatio: 2 });
-            const link = document.createElement('a');
-            link.download = `watch-party-sketch-${Date.now()}.png`;
-            link.href = dataUrl;
-            link.click();
+            // Briefly reveal the video snapshot layer (hidden by default)
+            const bgNode = stage.findOne('#video-snapshot-layer');
+            if (bgNode) {
+              bgNode.opacity(1);
+              stage.batchDraw();
+            }
+
+            // Small timeout to allow Konva to paint the frame if needed
+            setTimeout(() => {
+              const dataUrl = stage.toDataURL({ pixelRatio: 2 });
+              const link = document.createElement('a');
+              link.download = `watch-party-sketch-${Date.now()}.png`;
+              link.href = dataUrl;
+              link.click();
+
+              if (bgNode) {
+                bgNode.opacity(0);
+                stage.batchDraw();
+              }
+            }, 50);
           }}
           className="w-full flex items-center justify-center gap-2 py-3 bg-[#00ff88] text-[#1a1a1a] border-[3px] border-[#1a1a1a] neo-shadow-sm font-black font-headline uppercase tracking-widest hover:translate-x-[-2px] hover:translate-y-[-2px] hover:neo-shadow-md transition-all active:translate-x-[2px] active:translate-y-[2px] active:neo-shadow-none"
         >
