@@ -161,12 +161,12 @@ export const ContentActions = memo(function ContentActions({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 mt-6">
+    <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 mt-6">
       <button
         type="button"
         className={cn(
-          'col-span-2 sm:col-auto',
-          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
+          'w-full sm:w-auto sm:min-w-[220px] flex-1',
+          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
           isPlaying ||
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
@@ -210,8 +210,8 @@ export const ContentActions = memo(function ContentActions({
         <button
           type="button"
           className={cn(
-            'col-span-2 sm:col-auto',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200',
+            'w-full sm:w-auto sm:min-w-[220px] flex-1',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
             isCreatingParty || isPlaying
               ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
               : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
@@ -235,8 +235,8 @@ export const ContentActions = memo(function ContentActions({
         <button
           type="button"
           className={cn(
-            'col-span-2 sm:col-auto',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group',
+            'w-full sm:w-auto sm:min-w-[220px] flex-1',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group whitespace-nowrap',
             isWatchlistLoading
               ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
               : isInWatchlist
@@ -261,8 +261,8 @@ export const ContentActions = memo(function ContentActions({
 
       {/* Extra Actions Container (Download) */}
       {extraActions && (
-        <div className="col-span-2 sm:col-auto border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200">
-          <div className="w-full h-full [&>button]:w-full [&>button]:min-h-[56px] sm:[&>button]:min-h-0 [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg">
+        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200 overflow-hidden">
+          <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg [&>button]:font-black [&>button]:font-headline [&>button]:uppercase [&>button]:tracking-widest [&>button]:whitespace-nowrap [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:gap-3">
             {extraActions}
           </div>
         </div>
