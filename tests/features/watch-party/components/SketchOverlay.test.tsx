@@ -109,7 +109,16 @@ describe('SketchOverlay', () => {
     isHost: false,
     actions: [],
     setActions: vi.fn(),
-    cursors: {},
+    cursors: {} as Record<
+      string,
+      {
+        x: number;
+        y: number;
+        userName: string;
+        color: string;
+        lastUpdate: number;
+      }
+    >,
     setCursors: vi.fn(),
     selectedId: null,
     setSelectedId: vi.fn(),

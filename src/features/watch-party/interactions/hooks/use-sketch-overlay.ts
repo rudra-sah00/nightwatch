@@ -150,6 +150,7 @@ export function useSketchOverlay({
           y: data.y,
           userName: data.userName,
           color: data.color,
+          lastUpdate: Date.now(),
         },
       }));
     });

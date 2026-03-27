@@ -601,34 +601,36 @@ export function SketchOverlay({
           ))}
 
           {/* User Cursors */}
-          {Object.entries(cursors).map(([id, cursor]) => (
-            <Group key={id} x={cursor.x} y={cursor.y}>
-              <Circle
-                radius={4}
-                fill={cursor.color}
-                stroke="#1a1a1a"
-                strokeWidth={1}
-              />
-              <Label x={8} y={8}>
-                <Tag
+          {Object.entries(cursors)
+            .filter(([_, cursor]) => Date.now() - cursor.lastUpdate < 3000)
+            .map(([id, cursor]) => (
+              <Group key={id} x={cursor.x} y={cursor.y}>
+                <Circle
+                  radius={4}
                   fill={cursor.color}
                   stroke="#1a1a1a"
-                  strokeWidth={2}
-                  pointerDirection="left"
-                  pointerWidth={6}
-                  pointerHeight={6}
-                  lineJoin="round"
+                  strokeWidth={1}
                 />
-                <Text
-                  text={cursor.userName}
-                  padding={5}
-                  fill="#ffffff"
-                  fontSize={10}
-                  fontStyle="bold"
-                />
-              </Label>
-            </Group>
-          ))}
+                <Label x={8} y={8}>
+                  <Tag
+                    fill={cursor.color}
+                    stroke="#1a1a1a"
+                    strokeWidth={2}
+                    pointerDirection="left"
+                    pointerWidth={6}
+                    pointerHeight={6}
+                    lineJoin="round"
+                  />
+                  <Text
+                    text={cursor.userName}
+                    padding={5}
+                    fill="#ffffff"
+                    fontSize={10}
+                    fontStyle="bold"
+                  />
+                </Label>
+              </Group>
+            ))}
 
           {/* Particle Reactions */}
           {activeReactions.map((reaction) => (

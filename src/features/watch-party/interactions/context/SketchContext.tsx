@@ -59,22 +59,46 @@ export interface SketchContextType {
   setSelectedId: (id: string | null) => void;
   cursors: Record<
     string,
-    { x: number; y: number; userName: string; color: string }
+    {
+      x: number;
+      y: number;
+      userName: string;
+      color: string;
+      lastUpdate: number;
+    }
   >;
   setCursors: (
     cursors:
       | Record<
           string,
-          { x: number; y: number; userName: string; color: string }
+          {
+            x: number;
+            y: number;
+            userName: string;
+            color: string;
+            lastUpdate: number;
+          }
         >
       | ((
           prev: Record<
             string,
-            { x: number; y: number; userName: string; color: string }
+            {
+              x: number;
+              y: number;
+              userName: string;
+              color: string;
+              lastUpdate: number;
+            }
           >,
         ) => Record<
           string,
-          { x: number; y: number; userName: string; color: string }
+          {
+            x: number;
+            y: number;
+            userName: string;
+            color: string;
+            lastUpdate: number;
+          }
         >),
   ) => void;
   selectedSticker: string | null;
@@ -101,7 +125,16 @@ export function SketchProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<SketchAction[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cursors, setCursors] = useState<
-    Record<string, { x: number; y: number; userName: string; color: string }>
+    Record<
+      string,
+      {
+        x: number;
+        y: number;
+        userName: string;
+        color: string;
+        lastUpdate: number;
+      }
+    >
   >({});
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
