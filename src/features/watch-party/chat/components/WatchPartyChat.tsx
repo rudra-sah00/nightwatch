@@ -1,7 +1,7 @@
 import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,
@@ -50,7 +50,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
 
           return (
             <ChatMessageItem
-              key={msg.id}
+              key={msg.clientId || msg.id}
               message={msg}
               isMe={isMe}
               showHeader={showHeader}
@@ -129,7 +129,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
 
           return (
             <ChatMessageItem
-              key={msg.id}
+              key={msg.clientId || msg.id}
               message={msg}
               isMe={isMe}
               showHeader={showHeader}
@@ -244,6 +244,27 @@ const ChatMessageItem = memo(function ChatMessageItem({
   isMe,
   showHeader,
 }: ChatMessageItemProps) {
+  // Detect if message is a single emoji
+  const isSingleEmoji = useMemo(() => {
+    const trimmed = message.content.trim();
+    // Regex for a single emoji (including complex ones with joiners)
+    // We check if it's one grapheme and that grapheme is an emoji
+    try {
+      const segments = Array.from(
+        new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(trimmed),
+      );
+      return (
+        segments.length === 1 &&
+        /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base})/u.test(
+          segments[0].segment,
+        )
+      );
+    } catch {
+      // Fallback for environments without Intl.Segmenter
+      return /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)$/u.test(trimmed);
+    }
+  }, [message.content]);
+
   if (message.isSystem) {
     return (
       <div className="flex justify-center my-4">
@@ -284,10 +305,20 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Message Bubble */}
       <div
         className={cn(
-          'px-4 py-2 border-[3px] border-[#1a1a1a] text-sm max-w-[85%] break-words relative group',
+          'max-w-[85%] relative group',
+          isSingleEmoji
+            ? 'p-0 border-0 bg-transparent text-6xl leading-none'
+            : 'px-4 py-2 border-[3px] border-[#1a1a1a] text-sm break-words',
           isMe
-            ? 'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm mr-1'
-            : 'bg-white text-[#1a1a1a] neo-shadow-sm ml-1',
+            ? cn(
+                'mr-1',
+                !isSingleEmoji &&
+                  'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm',
+              )
+            : cn(
+                'ml-1',
+                !isSingleEmoji && 'bg-white text-[#1a1a1a] neo-shadow-sm',
+              ),
         )}
       >
         {/* Render message with clickable links */}
@@ -313,7 +344,10 @@ const ChatMessageItem = memo(function ChatMessageItem({
           return (
             <span
               key={`${message.id}-${segment.id}`}
-              className="font-medium whitespace-pre-wrap"
+              className={cn(
+                'whitespace-pre-wrap',
+                isSingleEmoji ? 'font-normal' : 'font-medium',
+              )}
             >
               {segment.content}
             </span>
@@ -322,7 +356,13 @@ const ChatMessageItem = memo(function ChatMessageItem({
 
         {/* Timestamp for Me */}
         {isMe ? (
-          <span className="text-[9px] font-bold font-headline uppercase tracking-widest text-[#1a1a1a] block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 -mb-6 bg-white border-[2px] border-[#1a1a1a] px-1 neo-shadow-sm z-10 w-max">
+          <span
+            className={cn(
+              'text-[9px] font-bold font-headline uppercase tracking-widest text-[#1a1a1a] block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 bg-white border-[2px] border-[#1a1a1a] px-1 neo-shadow-sm z-10 w-max',
+              isSingleEmoji ? '-bottom-6' : '-mb-6',
+            )}
+          >
+            {isSingleEmoji ? 'SENT AT ' : ''}
             {new Date(message.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',

@@ -3,7 +3,7 @@
 import { MessageSquare, PenTool, Users, Volume2 } from 'lucide-react';
 import { useMemo } from 'react';
 
-export function useSidebarTabs(unreadMessages: number) {
+export function useSidebarTabs() {
   const tabs = useMemo(
     () => [
       {
@@ -15,7 +15,6 @@ export function useSidebarTabs(unreadMessages: number) {
         id: 'chat' as const,
         label: 'Chat',
         icon: MessageSquare,
-        badge: unreadMessages,
       },
       {
         id: 'soundboard' as const,
@@ -28,7 +27,7 @@ export function useSidebarTabs(unreadMessages: number) {
         icon: PenTool,
       },
     ],
-    [unreadMessages],
+    [],
   );
 
   return { tabs };

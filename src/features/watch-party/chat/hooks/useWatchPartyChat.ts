@@ -31,6 +31,7 @@ export function useWatchPartyChat({
       // Optimistically add to UI
       const optimisticMsg: ChatMessage = {
         id: `temp-${Date.now()}`,
+        clientId: `temp-${Date.now()}`,
         roomId: room.id,
         userId: userId,
         userName: currentUserName,
@@ -61,7 +62,11 @@ export function useWatchPartyChat({
       } else if (response.message) {
         // Swap temp ID with real DB ID
         setMessages((prev) =>
-          prev.map((m) => (m.id === optimisticMsg.id ? response.message! : m)),
+          prev.map((m) =>
+            m.id === optimisticMsg.id
+              ? { ...response.message!, clientId: optimisticMsg.id }
+              : m,
+          ),
         );
       }
     },

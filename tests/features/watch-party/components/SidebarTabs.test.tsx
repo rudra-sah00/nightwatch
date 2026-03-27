@@ -6,7 +6,6 @@ describe('SidebarTabs', () => {
   const defaultProps = {
     activeTab: 'participants' as const,
     onTabChange: vi.fn(),
-    unreadMessages: 0,
   };
 
   describe('rendering', () => {
@@ -31,24 +30,6 @@ describe('SidebarTabs', () => {
       const buttons = screen.getAllByRole('button');
       // The second button is chat
       expect(buttons[1]).toHaveClass('bg-[#ffcc00]');
-    });
-  });
-
-  describe('unread messages indicator', () => {
-    it('should show unread badge when there are unread messages', () => {
-      render(<SidebarTabs {...defaultProps} unreadMessages={3} />);
-
-      // Badge shows numeric count
-      expect(screen.getByText('3')).toBeInTheDocument();
-    });
-
-    it('should not show unread badge when no unread messages', () => {
-      const { container } = render(
-        <SidebarTabs {...defaultProps} unreadMessages={0} />,
-      );
-
-      // No badge span rendered at all
-      expect(container.querySelector('span[style]')).not.toBeInTheDocument();
     });
   });
 
@@ -93,14 +74,6 @@ describe('SidebarTabs', () => {
       fireEvent.click(buttons[0]);
 
       expect(onTabChange).toHaveBeenCalledWith('participants');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle undefined unreadMessages', () => {
-      render(<SidebarTabs {...defaultProps} unreadMessages={undefined} />);
-      const buttons = screen.getAllByRole('button');
-      expect(buttons).toHaveLength(4);
     });
   });
 });

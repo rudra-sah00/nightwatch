@@ -169,6 +169,7 @@ export interface PartyClosed {
 
 export interface ChatMessage {
   id: string;
+  clientId?: string;
   roomId: string;
   userId: string;
   userName: string;
