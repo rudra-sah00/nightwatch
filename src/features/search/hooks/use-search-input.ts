@@ -35,9 +35,9 @@ export function useSearchInput() {
 
   // SUGGESTIONS: Fetch top suggestion as user types
   useEffect(() => {
-    const trimmedQuery = query.trim();
-
-    if (activeServer !== 's2' || isSearchPage) {
+    // We fetch suggestions based on raw query to support trailing space hints
+    // but we still want a minimum character count.
+    if (!query || query.length < 2 || activeServer !== 's2' || isSearchPage) {
       setSuggestions([]);
       return;
     }
@@ -45,10 +45,7 @@ export function useSearchInput() {
     const timer = setTimeout(async () => {
       setIsFetchingSuggestions(true);
       try {
-        const results = await getSearchSuggestions(
-          trimmedQuery || 'trending',
-          activeServer,
-        );
+        const results = await getSearchSuggestions(query, activeServer);
         // Only keep the first suggestion for inline typeahead
         setSuggestions(results.slice(0, 1));
       } catch {
@@ -62,17 +59,19 @@ export function useSearchInput() {
   }, [query, activeServer, isSearchPage]);
 
   const fetchSuggestions = async (searchTerm: string) => {
-    if (activeServer !== 's2' || isSearchPage) {
+    if (
+      !searchTerm ||
+      searchTerm.length < 2 ||
+      activeServer !== 's2' ||
+      isSearchPage
+    ) {
       setSuggestions([]);
       return;
     }
 
     setIsFetchingSuggestions(true);
     try {
-      const results = await getSearchSuggestions(
-        searchTerm.trim() || 'trending',
-        activeServer,
-      );
+      const results = await getSearchSuggestions(searchTerm, activeServer);
       setSuggestions(results.slice(0, 1));
     } catch {
       setSuggestions([]);

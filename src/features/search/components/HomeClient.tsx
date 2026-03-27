@@ -18,6 +18,8 @@ export function HomeClient() {
     query,
     setQuery,
     suggestion,
+    handleFocus,
+    handleBlur,
     handleSearch,
     handleManualSearch,
   } = useSearchInput();
@@ -74,6 +76,8 @@ export function HomeClient() {
                   autoComplete="off"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
                   onKeyDown={(e) => {
                     handleSearch(e);
                     if (e.key === 'Enter') {

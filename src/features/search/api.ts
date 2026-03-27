@@ -74,7 +74,7 @@ export async function getSearchSuggestions(
 ): Promise<string[]> {
   if (!query || query.length < 2) return [];
 
-  const cacheKey = `${query.toLowerCase().trim()}:${server || 'default'}`;
+  const cacheKey = `${query.toLowerCase()}:${server || 'default'}`;
   const cached = searchSuggestionsCache.get(cacheKey);
   if (cached && cached.expiry > Date.now()) {
     return cached.data;
