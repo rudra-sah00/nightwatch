@@ -61,6 +61,28 @@ vi.mock('react-konva', () => ({
   RegularPolygon: (props: Record<string, unknown>) => (
     <div data-testid="konva-poly" {...props} />
   ),
+  Group: ({ children }: { children: ReactNode }) => (
+    <div data-testid="konva-group">{children}</div>
+  ),
+  Label: ({
+    children,
+    x,
+    y,
+  }: {
+    children: ReactNode;
+    x?: number;
+    y?: number;
+  }) => (
+    <div data-testid="konva-label" style={{ left: x, top: y }}>
+      {children}
+    </div>
+  ),
+  Tag: (props: Record<string, unknown>) => (
+    <div data-testid="konva-tag" {...props} />
+  ),
+  Transformer: (props: Record<string, unknown>) => (
+    <div data-testid="konva-transformer" {...props} />
+  ),
   Star: (props: Record<string, unknown>) => (
     <div data-testid="konva-star" {...props} />
   ),
@@ -85,6 +107,15 @@ describe('SketchOverlay', () => {
     canDraw: true,
     videoRef: { current: { currentTime: 10 } },
     isHost: false,
+    actions: [],
+    setActions: vi.fn(),
+    cursors: {},
+    setCursors: vi.fn(),
+    selectedId: null,
+    setSelectedId: vi.fn(),
+    stageRef: { current: null },
+    opacity: 1,
+    isFilled: false,
   };
 
   beforeEach(() => {

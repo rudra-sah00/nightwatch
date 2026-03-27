@@ -45,7 +45,20 @@ describe('WatchPartySketch', () => {
     setCanDraw: vi.fn(),
     isHost: true,
     setIsHost: vi.fn(),
+    isFilled: false,
+    setIsFilled: vi.fn(),
+    opacity: 1,
+    setOpacity: vi.fn(),
+    actions: [],
+    setActions: vi.fn(),
+    selectedId: null,
+    setSelectedId: vi.fn(),
+    cursors: {},
+    setCursors: vi.fn(),
+    selectedSticker: null,
+    setSelectedSticker: vi.fn(),
     videoRef: { current: null },
+    stageRef: { current: null },
   };
 
   beforeEach(() => {
@@ -86,7 +99,7 @@ describe('WatchPartySketch', () => {
 
   it('should update stroke width', () => {
     render(<WatchPartySketch />);
-    const slider = screen.getByRole('slider');
+    const slider = screen.getByLabelText('Thickness');
     fireEvent.change(slider, { target: { value: '10' } });
     expect(mockContext.setStrokeWidth).toHaveBeenCalledWith(10);
   });

@@ -537,6 +537,75 @@ export const onSketchSyncState = <T = unknown[]>(
     callback({ elements: msg.elements as T }),
   );
 
+export const onSketchMoveZ = <
+  T extends { actionId: string; direction: 'front' | 'back' } = {
+    actionId: string;
+    direction: 'front' | 'back';
+  },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_MOVE_Z', (msg) =>
+    callback({
+      actionId: msg.actionId as string,
+      direction: msg.direction as 'front' | 'back',
+    } as unknown as T),
+  );
+
+export const onSketchCursorMove = <
+  T extends {
+    x: number;
+    y: number;
+    userName: string;
+    color: string;
+    userId: string;
+  } = {
+    x: number;
+    y: number;
+    userName: string;
+    color: string;
+    userId: string;
+  },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_CURSOR_MOVE', (msg) =>
+    callback({
+      x: msg.x as number,
+      y: msg.y as number,
+      userName: msg.userName as string,
+      color: msg.color as string,
+      userId: msg.userId as string,
+    } as unknown as T),
+  );
+
+export const onSketchReaction = <
+  T extends {
+    kind: 'heart' | 'star' | 'fire' | 'sparkle';
+    x: number;
+    y: number;
+    color: string;
+    userId: string;
+  } = {
+    kind: 'heart' | 'star' | 'fire' | 'sparkle';
+    x: number;
+    y: number;
+    color: string;
+    userId: string;
+  },
+>(
+  callback: (data: T) => void,
+) =>
+  subscribe('SKETCH_REACTION', (msg) =>
+    callback({
+      kind: msg.kind as 'heart' | 'star' | 'fire' | 'sparkle',
+      x: msg.x as number,
+      y: msg.y as number,
+      color: msg.color as string,
+      userId: msg.userId as string,
+    } as unknown as T),
+  );
+
 export const onPartyInteraction = <T = unknown>(
   callback: (interaction: T) => void,
 ) => subscribe('INTERACTION', (msg) => callback(msg as unknown as T));

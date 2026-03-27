@@ -171,16 +171,30 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {showEmoji ? (
         <div
           ref={emojiRef}
-          className="absolute bottom-16 left-4 z-50 shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="absolute bottom-20 left-4 z-50 border-[4px] border-[#1a1a1a] bg-white neo-shadow rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         >
           <EmojiPicker
-            theme={Theme.DARK}
+            theme={Theme.LIGHT}
             emojiStyle={EmojiStyle.APPLE}
             lazyLoadEmojis={true}
             height={350}
             width={300}
             onEmojiClick={onEmojiClick}
             previewConfig={{ showPreview: false }}
+            style={
+              {
+                '--epr-bg-color': '#ffffff',
+                '--epr-category-label-bg-color': '#ffffff',
+                '--epr-picker-border-color': 'transparent',
+                '--epr-search-input-bg-color': '#f5f0e8',
+                '--epr-search-input-border-color': '#1a1a1a',
+                '--epr-search-input-border-radius': '0px',
+                '--epr-hover-bg-color': '#ffcc00',
+                '--epr-focus-bg-color': '#ffcc00',
+                '--epr-highlight-color': '#ffcc00',
+                borderRadius: '0px',
+              } as React.CSSProperties
+            }
           />
         </div>
       ) : null}

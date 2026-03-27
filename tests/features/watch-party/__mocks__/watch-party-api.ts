@@ -33,6 +33,9 @@ export const onSketchClear = vi.fn(() => vi.fn());
 export const onSketchUndo = vi.fn(() => vi.fn());
 export const onSketchProvideSync = vi.fn(() => vi.fn());
 export const onSketchSyncState = vi.fn(() => vi.fn());
+export const onSketchMoveZ = vi.fn(() => vi.fn());
+export const onSketchCursorMove = vi.fn(() => vi.fn());
+export const onSketchReaction = vi.fn(() => vi.fn());
 export const onPartyInteraction = vi.fn(() => vi.fn());
 
 // These are NO LONGER in the API, but some old tests might still import them.

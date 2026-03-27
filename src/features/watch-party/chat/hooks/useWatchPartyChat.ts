@@ -40,7 +40,6 @@ export function useWatchPartyChat({
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, optimisticMsg]);
-      new Audio('/msg-sent.mp3').play().catch(() => {});
 
       // Broadcast via RTM
       rtmSendMessage?.({

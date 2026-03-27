@@ -189,6 +189,30 @@ export interface RtmSketchSyncState {
   targetId: string;
 }
 
+export interface RtmSketchMoveZ {
+  type: 'SKETCH_MOVE_Z';
+  actionId: string;
+  direction: 'front' | 'back';
+}
+
+export interface RtmSketchCursorMove {
+  type: 'SKETCH_CURSOR_MOVE';
+  x: number;
+  y: number;
+  userName: string;
+  color: string;
+  userId: string;
+}
+
+export interface RtmSketchReaction {
+  type: 'SKETCH_REACTION';
+  kind: 'heart' | 'star' | 'fire' | 'sparkle';
+  x: number;
+  y: number;
+  color: string;
+  userId: string;
+}
+
 // ============ Permissions & Settings ============
 
 export interface RtmPermissionsUpdated {
@@ -244,6 +268,9 @@ export type RTMMessage =
   | RtmSketchClear
   | RtmSketchRequestSync
   | RtmSketchSyncState
+  | RtmSketchMoveZ
+  | RtmSketchCursorMove
+  | RtmSketchReaction
   | RtmPermissionsUpdated
   | RtmMemberPermissionsUpdated
   | RtmContentUpdated

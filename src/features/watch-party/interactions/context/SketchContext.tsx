@@ -1,3 +1,4 @@
+import type Konva from 'konva';
 import {
   createContext,
   type ReactNode,
@@ -7,8 +8,10 @@ import {
   useRef,
   useState,
 } from 'react';
+import type { SketchAction } from '../../room/types';
 
 export type ToolType =
+  | 'select'
   | 'freehand'
   | 'pencil'
   | 'arrow'
@@ -18,8 +21,11 @@ export type ToolType =
   | 'triangle'
   | 'star'
   | 'text'
+  | 'bubble'
+  | 'sticker'
   | 'laser'
-  | 'eraser';
+  | 'eraser'
+  | 'reaction';
 
 export interface SketchContextType {
   currentTool: ToolType;
@@ -41,7 +47,40 @@ export interface SketchContextType {
   setCanDraw: (can: boolean) => void;
   isHost: boolean;
   setIsHost: (host: boolean) => void;
+  isFilled: boolean;
+  setIsFilled: (filled: boolean) => void;
+  opacity: number;
+  setOpacity: (opacity: number) => void;
+  actions: SketchAction[];
+  setActions: (
+    actions: SketchAction[] | ((prev: SketchAction[]) => SketchAction[]),
+  ) => void;
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
+  cursors: Record<
+    string,
+    { x: number; y: number; userName: string; color: string }
+  >;
+  setCursors: (
+    cursors:
+      | Record<
+          string,
+          { x: number; y: number; userName: string; color: string }
+        >
+      | ((
+          prev: Record<
+            string,
+            { x: number; y: number; userName: string; color: string }
+          >,
+        ) => Record<
+          string,
+          { x: number; y: number; userName: string; color: string }
+        >),
+  ) => void;
+  selectedSticker: string | null;
+  setSelectedSticker: (sticker: string | null) => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  stageRef: React.RefObject<Konva.Stage | null>;
 }
 
 const SketchContext = createContext<SketchContextType | null>(null);
@@ -57,7 +96,16 @@ export function SketchProvider({ children }: { children: ReactNode }) {
   const [isSketchMode, setIsSketchMode] = useState(false);
   const [canDraw, setCanDraw] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [isFilled, setIsFilled] = useState(false);
+  const [opacity, setOpacity] = useState(1);
+  const [actions, setActions] = useState<SketchAction[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [cursors, setCursors] = useState<
+    Record<string, { x: number; y: number; userName: string; color: string }>
+  >({});
+  const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const stageRef = useRef<Konva.Stage | null>(null);
 
   const triggerClear = useCallback(
     () => setClearTrigger((prev) => prev + 1),
@@ -91,7 +139,20 @@ export function SketchProvider({ children }: { children: ReactNode }) {
       setCanDraw,
       isHost,
       setIsHost,
+      isFilled,
+      setIsFilled,
+      opacity,
+      setOpacity,
+      actions,
+      setActions,
+      selectedId,
+      setSelectedId,
+      cursors,
+      setCursors,
+      selectedSticker,
+      setSelectedSticker,
       videoRef,
+      stageRef,
     }),
     [
       currentTool,
@@ -106,6 +167,12 @@ export function SketchProvider({ children }: { children: ReactNode }) {
       isSketchMode,
       canDraw,
       isHost,
+      isFilled,
+      opacity,
+      actions,
+      selectedId,
+      cursors,
+      selectedSticker,
     ],
   );
 

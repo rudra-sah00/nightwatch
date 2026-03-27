@@ -198,6 +198,8 @@ export interface SketchAction {
     | 'triangle'
     | 'star'
     | 'text'
+    | 'bubble'
+    | 'sticker'
     | 'laser';
   color: string;
   strokeWidth: number;
@@ -206,6 +208,13 @@ export interface SketchAction {
   text?: string;
   userId?: string;
   userName?: string;
+  fill?: boolean;
+  opacity?: number;
+  x?: number;
+  y?: number;
+  scaleX?: number;
+  scaleY?: number;
+  rotation?: number;
 }
 
 export interface PartyPermissionsUpdate {
