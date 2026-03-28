@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
