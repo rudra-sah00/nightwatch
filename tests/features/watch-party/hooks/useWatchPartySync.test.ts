@@ -256,7 +256,9 @@ describe('useWatchPartySync', () => {
   it('updateContent should show error toast on failure', async () => {
     vi.mocked(api.updatePartyContent).mockResolvedValue({
       error: 'Unauthorized',
-    } as any);
+    } as unknown as {
+      room: import('@/features/watch-party/room/types').WatchPartyRoom;
+    });
 
     const { result } = renderHook(() => useWatchPartySync(defaultProps));
 

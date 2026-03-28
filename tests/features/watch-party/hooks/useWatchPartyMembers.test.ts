@@ -322,7 +322,7 @@ describe('useWatchPartyMembers', () => {
         type: 'KICK',
         targetUserId: 'user-2',
         reason: 'Bye',
-      } as any);
+      } as unknown as RTMMessage);
     });
 
     // RTM KICK handler in useWatchPartyMembers actually doesn't do anything for others

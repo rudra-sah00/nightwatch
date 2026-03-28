@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type Konva from 'konva';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   WatchPartySketch,
@@ -227,13 +228,15 @@ describe('WatchPartySketch', () => {
     };
     vi.mocked(useSketch).mockReturnValue({
       ...mockContext,
-      stageRef: { current: mockStage as any },
+      stageRef: { current: mockStage as unknown as Konva.Stage },
     });
     render(<WatchPartySketch />);
 
     // Mock anchor element and its click
     const link = { click: vi.fn(), download: '', href: '' };
-    vi.spyOn(document, 'createElement').mockReturnValue(link as any);
+    vi.spyOn(document, 'createElement').mockReturnValue(
+      link as unknown as HTMLAnchorElement,
+    );
 
     vi.useFakeTimers();
     fireEvent.click(screen.getByText('Capture Scene'));
