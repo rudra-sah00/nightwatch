@@ -350,13 +350,20 @@ export function useAgora({
         audioLevel: 0,
       };
 
+      const isMicrophoneEnabled = !!(isLocal
+        ? audioEnabled
+        : remoteUser?.hasAudio);
+
+      // Force isSpeaking to false if mic is disabled (prevents stale speaker state after mute)
+      const isActuallySpeaking = !!(isMicrophoneEnabled && speaker.isSpeaking);
+
       if (isLocal) {
         return {
           uid: String(uid),
           identity: member.id,
           name: 'You',
-          isSpeaking: speaker.isSpeaking,
-          isMicrophoneEnabled: audioEnabled,
+          isSpeaking: isActuallySpeaking,
+          isMicrophoneEnabled,
           isCameraEnabled: videoEnabled,
           isLocal: true,
           audioLevel: speaker.audioLevel,
@@ -371,8 +378,8 @@ export function useAgora({
         uid: numericUid,
         identity: member.id,
         name: member.name,
-        isSpeaking: speaker.isSpeaking,
-        isMicrophoneEnabled: remoteUser?.hasAudio ?? false,
+        isSpeaking: isActuallySpeaking,
+        isMicrophoneEnabled,
         isCameraEnabled: remoteUser?.hasVideo ?? false,
         isLocal: false,
         audioLevel: speaker.audioLevel,
@@ -393,12 +400,13 @@ export function useAgora({
           isSpeaking: false,
           audioLevel: 0,
         };
+        const isMicrophoneEnabled = remoteUser.hasAudio;
         return {
           uid: uidStr,
           identity: `unknown:${uidStr}`,
           name: 'Unknown Participant',
-          isSpeaking: speaker.isSpeaking,
-          isMicrophoneEnabled: remoteUser.hasAudio,
+          isSpeaking: isMicrophoneEnabled && speaker.isSpeaking,
+          isMicrophoneEnabled,
           isCameraEnabled: remoteUser.hasVideo,
           isLocal: false,
           audioLevel: speaker.audioLevel,
