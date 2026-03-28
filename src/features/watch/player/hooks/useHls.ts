@@ -56,24 +56,29 @@ export function useHls({
               // latency. Count:1 caused 404 storms because the segment at the very
               // tip of the edge isn't always propagated to the CDN yet.
               enableWorker: true,
-              lowLatencyMode: false,
-              liveSyncDurationCount: 2,
-              // Allow up to 5 segments of drift before the player catches up;
-              // aggressive low values here (3) caused constant catch-up buffering.
-              liveMaxLatencyDurationCount: 5,
+              lowLatencyMode: true,
+              liveSyncDurationCount: 3,
+              // Allow up to 6 segments of drift before the player catches up;
+              // increased from 5 to provide more head-room for jitter.
+              liveMaxLatencyDurationCount: 6,
+              // Catch up smoothly by playing 10% faster when behind, rather than
+              // seeking which causes a visible 'jump' or buffer stutter.
+              maxLiveSyncPlaybackRate: 1.1,
+              // Recover from stalls faster if the buffer is actually sufficient.
+              highBufferWatchdogPeriod: 2,
               // Generous buffers for DVR — keep 60s of back-buffer so seeking
               // backward doesn't re-download everything (YouTube-style).
               maxBufferLength: 30,
               maxMaxBufferLength: 60,
               backBufferLength: 60,
               // Don't hammer the CDN on 404s — back off before retrying
-              fragLoadingRetryDelay: 1000,
-              fragLoadingMaxRetryTimeout: 8000,
-              manifestLoadingRetryDelay: 500,
-              levelLoadingRetryDelay: 500,
-              manifestLoadingMaxRetry: 5,
-              levelLoadingMaxRetry: 5,
-              fragLoadingMaxRetry: 6,
+              fragLoadingRetryDelay: 2000,
+              fragLoadingMaxRetryTimeout: 10000,
+              manifestLoadingRetryDelay: 1000,
+              levelLoadingRetryDelay: 1000,
+              manifestLoadingMaxRetry: 6,
+              levelLoadingMaxRetry: 6,
+              fragLoadingMaxRetry: 8,
             }
           : {
               // VOD-optimised: prefer stability over latency

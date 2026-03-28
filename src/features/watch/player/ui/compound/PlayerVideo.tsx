@@ -23,12 +23,21 @@ function useAmbientCanvas(
 
     let rafId: number;
     let running = true;
+    let frames = 0;
 
     const draw = () => {
       if (!running) return;
-      if (!video.paused && !video.ended && video.readyState >= 2) {
+      // Paint every 10th frame (~6 fps @ 60Hz). Since it's heavily blurred (20px),
+      // update fidelity isn't needed and this saves massive CPU/GPU cycles.
+      if (
+        frames % 10 === 0 &&
+        !video.paused &&
+        !video.ended &&
+        video.readyState >= 2
+      ) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
+      frames++;
       rafId = requestAnimationFrame(draw);
     };
 
