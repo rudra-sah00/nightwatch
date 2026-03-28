@@ -75,12 +75,12 @@ export async function resendOtp(
   });
 }
 
-export async function forgotPassword({
-  email,
-}: ForgotPasswordInput): Promise<{ message: string }> {
+export async function forgotPassword(
+  data: ForgotPasswordInput,
+): Promise<{ message: string }> {
   return apiFetch('/api/auth/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify(data),
   });
 }
 

@@ -1,8 +1,8 @@
-'use client';
-
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForgotPasswordForm } from '@/features/auth/hooks/use-forgot-password-form';
@@ -12,11 +12,15 @@ export function ForgotPasswordForm() {
     isLoading,
     error,
     success,
+    captchaToken,
+    setCaptchaToken,
     formData,
     fieldErrors,
     handleChange,
     handleSubmit,
   } = useForgotPasswordForm();
+
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
@@ -40,7 +44,7 @@ export function ForgotPasswordForm() {
 
       <div className="flex-grow flex flex-col justify-start">
         {success ? (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 py-4 text-center md:text-left">
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 py-4 text-center md:text-left h-full">
             <div className="space-y-2">
               <div className="h-12 w-12 border-[4px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center mx-auto md:mx-0 text-[#1a1a1a] neo-shadow-sm">
                 <CheckCircle2 className="h-6 w-6" />
@@ -55,12 +59,14 @@ export function ForgotPasswordForm() {
               </p>
             </div>
 
-            <Button
-              asChild
-              className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto"
-            >
-              <Link href="/login">Back to Login</Link>
-            </Button>
+            <div className="mt-auto">
+              <Button
+                asChild
+                className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto"
+              >
+                <Link href="/login">Back to Login</Link>
+              </Button>
+            </div>
           </div>
         ) : (
           <form
@@ -97,6 +103,15 @@ export function ForgotPasswordForm() {
               />
             </div>
 
+            <div className="pt-1 scale-[0.9] md:scale-95 origin-left shrink-0">
+              <Captcha
+                ref={captchaRef}
+                onVerify={setCaptchaToken}
+                onError={() => setCaptchaToken(null)}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            </div>
+
             {/* Spacer pushes buttons to the bottom */}
             <div className="flex-grow" />
 
@@ -104,7 +119,7 @@ export function ForgotPasswordForm() {
               <Button
                 type="submit"
                 isLoading={isLoading}
-                disabled={isLoading}
+                disabled={!captchaToken || isLoading}
                 className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
               >
                 {isLoading ? 'Dispatching...' : 'Dispatch Reset Link'}

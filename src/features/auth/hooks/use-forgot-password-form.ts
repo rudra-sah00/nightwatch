@@ -15,6 +15,7 @@ export function useForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ForgotPasswordInput>({
     email: '',
@@ -38,7 +39,15 @@ export function useForgotPasswordForm() {
     setError(null);
     setFieldErrors({});
 
-    const result = forgotPasswordSchema.safeParse(formData);
+    if (!captchaToken) {
+      setError('Please complete the security verification.');
+      return;
+    }
+
+    const result = forgotPasswordSchema.safeParse({
+      ...formData,
+      captchaToken,
+    });
     if (!result.success) {
       const errors: typeof fieldErrors = {};
       result.error.issues.forEach((err: z.ZodIssue) => {
@@ -54,7 +63,7 @@ export function useForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      await forgotPassword(formData);
+      await forgotPassword({ ...formData, captchaToken });
       setSuccess(true);
       toast.success('Reset link sent!');
     } catch (err: unknown) {
@@ -83,6 +92,8 @@ export function useForgotPasswordForm() {
     isLoading,
     error,
     success,
+    captchaToken,
+    setCaptchaToken,
     formData,
     fieldErrors,
     handleChange,

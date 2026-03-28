@@ -88,6 +88,7 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email format'),
+  captchaToken: z.string().optional(),
 });
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
