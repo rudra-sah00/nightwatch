@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
@@ -83,6 +84,13 @@ export function WatchPartyClient({
     initialRoomPreview,
     initialRoomNotFound,
   });
+
+  useEffect(() => {
+    // Prefetch ActiveWatchParty while request is pending for instant flip upon approval
+    if (requestStatus === 'pending') {
+      import('@/features/watch-party/components/ActiveWatchParty');
+    }
+  }, [requestStatus]);
 
   const isMobile = useIsMobile();
 

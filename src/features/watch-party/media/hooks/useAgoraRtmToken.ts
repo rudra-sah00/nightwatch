@@ -10,6 +10,12 @@ interface UseAgoraRtmTokenOptions {
   userId: string | undefined;
   /** Current user's display name */
   userName: string | undefined;
+  /** Optional pre-fetched token data for instant join */
+  initialTokenData?: {
+    token: string;
+    appId: string;
+    uid: string;
+  };
 }
 
 interface UseAgoraRtmTokenReturn {
@@ -46,6 +52,19 @@ export function useAgoraRtmToken(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Optimization: If we already received a token via SSE/JOIN payload, use it immediately
+    const preFetched = options.initialTokenData;
+    if (
+      preFetched?.token &&
+      (roomId === preFetched.uid?.split(':')[0] || !roomId)
+    ) {
+      setToken(preFetched.token);
+      setAppId(preFetched.appId);
+      setChannel(roomId?.toUpperCase() || '');
+      setUid(preFetched.uid);
+      return;
+    }
+
     const fetchToken = async () => {
       // Guard: both roomId and a settled userId are required
       if (
@@ -80,7 +99,7 @@ export function useAgoraRtmToken(
     };
 
     fetchToken();
-  }, [roomId, userId, userName]);
+  }, [roomId, userId, userName, options.initialTokenData]);
 
   return { token, appId, channel, uid, isLoading, error };
 }

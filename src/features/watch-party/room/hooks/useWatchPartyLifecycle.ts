@@ -22,6 +22,9 @@ interface UseWatchPartyLifecycleProps {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrorCode: React.Dispatch<React.SetStateAction<string | null>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setAgoraRtmToken: React.Dispatch<
+    React.SetStateAction<{ token: string; appId: string; uid: string } | null>
+  >;
   requestStatus: 'idle' | 'pending' | 'rejected' | 'joined';
   normalizeRoomUrls: (
     room: WatchPartyRoom,
@@ -47,6 +50,7 @@ export function useWatchPartyLifecycle({
   userId,
   roomId,
   rtmSendMessage,
+  setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
   // --- REAL-TIME APPROVAL LISTENER (SSE for Guests) ---
   useEffect(() => {
@@ -83,19 +87,32 @@ export function useWatchPartyLifecycle({
 
           if (data.type === 'JOIN_RESULT' && payload?.userId === activeUserId) {
             if (payload.status === 'approved') {
-              // Now that we are approved, we can fetch the full room details (gated API)
-              const roomRes = await getRoomDetails(
-                roomId || room?.id || 'PENDING',
-              );
+              const targetRoomId = roomId || room?.id || 'PENDING';
+
+              // Instant join: Use room data from SSE if available to bypass 3-4s of API round-trips
+              let roomRes = payload.room;
+              let token =
+                payload.streamToken || payload.room?.streamToken || '';
+
+              if (!roomRes) {
+                // FALLBACK: If payload is minimal, fetch manually (Legacy path)
+                const [r, s] = await Promise.all([
+                  getRoomDetails(targetRoomId),
+                  getPartyStreamToken(targetRoomId),
+                ]).catch(() => [null, { token: '' }]);
+                roomRes = r;
+                token = (s as { token?: string })?.token || '';
+              }
 
               if (roomRes) {
-                const streamRes = await getPartyStreamToken(roomRes.id);
-                const token = streamRes.token || '';
                 const normalizedRoom = normalizeRoomUrls(roomRes, token, {
                   injectStream: true,
                 });
 
                 setRoom(normalizedRoom);
+                if (payload.agoraRtmToken) {
+                  setAgoraRtmToken(payload.agoraRtmToken);
+                }
                 setIsConnected(true);
                 setRequestStatus('joined');
                 toast.success('Your request was approved!');
@@ -136,6 +153,7 @@ export function useWatchPartyLifecycle({
     setIsConnected,
     setRequestStatus,
     setError,
+    setAgoraRtmToken,
   ]);
 
   const createRoom = useCallback(

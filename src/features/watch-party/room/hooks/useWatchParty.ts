@@ -72,6 +72,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const [requestStatus, setRequestStatus] = useState<
     'idle' | 'pending' | 'rejected' | 'joined'
   >('idle');
+  const [agoraRtmToken, setAgoraRtmToken] = useState<{
+    token: string;
+    appId: string;
+    uid: string;
+  } | null>(null);
 
   const requestStatusRef = useRef(requestStatus);
   requestStatusRef.current = requestStatus;
@@ -87,6 +92,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     roomId: room?.id,
     userId: userId,
     userName: currentUserName,
+    initialTokenData: agoraRtmToken || undefined,
   });
 
   const {
@@ -212,6 +218,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     userId,
     roomId,
     rtmSendMessage,
+    setAgoraRtmToken,
   });
 
   // 3. Members Hook
