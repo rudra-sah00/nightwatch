@@ -6,7 +6,7 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
-type Step = 'initial' | 'otp';
+type Step = 'name' | 'details' | 'otp';
 
 interface FormState {
   error?: string;
@@ -17,7 +17,7 @@ interface FormState {
 export function useSignupForm() {
   const { register, verifyOtp, resendOtp } = useAuth();
   const searchParams = useSearchParams();
-  const [step, setStep] = useState<Step>('initial');
+  const [step, setStep] = useState<Step>('name');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);

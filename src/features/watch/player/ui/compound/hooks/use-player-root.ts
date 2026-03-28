@@ -283,6 +283,10 @@ export function usePlayerRoot({
     }
   }, [state.currentSubtitleTrack, state.subtitleTracks]);
 
+  // Ref bridge allows useKeyboard to access showControls (from usePlayerHandlers)
+  // despite the circular dependency (handlers need seek/togglePlay from keyboard).
+  const showControlsRef = useRef<() => void>(null);
+
   const { togglePlay, toggleMute, seek } = useKeyboard({
     videoRef,
     containerRef,
@@ -295,6 +299,7 @@ export function usePlayerRoot({
     onNextEpisode: playNextEpisode,
     disabled: readOnly,
     isLive,
+    onInteraction: () => showControlsRef.current?.(),
   });
 
   const { enterFullscreen, toggleFullscreen: nativeToggleFullscreen } =
@@ -370,6 +375,9 @@ export function usePlayerRoot({
     qualities: state.qualities,
     onExternalAudioChange: onAudioTrackChange,
   });
+
+  // Assign the handler to the ref so useKeyboard can trigger it
+  showControlsRef.current = showControls;
 
   const contextValue = {
     state,

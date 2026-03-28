@@ -18,6 +18,7 @@ interface UseKeyboardOptions {
   onNextEpisode: () => void;
   disabled?: boolean; // For watch party guests (disables playback controls)
   isLive?: boolean; // Disables seek/skip shortcuts for live streams
+  onInteraction?: () => void;
 }
 
 export function useKeyboard({
@@ -30,6 +31,7 @@ export function useKeyboard({
   onNextEpisode,
   disabled = false,
   isLive = false,
+  onInteraction,
 }: UseKeyboardOptions) {
   const seek = useCallback(
     (seconds: number) => {
@@ -117,6 +119,7 @@ export function useKeyboard({
     hasNextEpisode,
     disabled,
     isLive,
+    onInteraction,
   });
   useEffect(() => {
     handlersRef.current = {
@@ -132,6 +135,7 @@ export function useKeyboard({
       hasNextEpisode,
       disabled,
       isLive,
+      onInteraction,
     };
   });
 
@@ -153,35 +157,45 @@ export function useKeyboard({
           if (h.disabled) break;
           e.preventDefault();
           h.togglePlay();
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'ArrowLeft':
+          if (h.disabled) break;
+          e.preventDefault();
+          h.seek(-5);
+          h.onInteraction?.();
+          break;
         case 'KeyJ':
           if (h.disabled) break;
           e.preventDefault();
           h.seek(-10);
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'ArrowRight':
+          if (h.disabled) break;
+          e.preventDefault();
+          h.seek(5);
+          h.onInteraction?.();
+          break;
         case 'KeyL':
           if (h.disabled) break;
           e.preventDefault();
           h.seek(10);
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'ArrowUp':
           e.preventDefault();
           h.adjustVolume(0.1);
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'ArrowDown':
           e.preventDefault();
           h.adjustVolume(-0.1);
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'KeyM':
           h.toggleMute();
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'KeyF':
           h.toggleFullscreen();
@@ -194,7 +208,7 @@ export function useKeyboard({
         case 'KeyC':
           e.preventDefault();
           h.onToggleCaptions();
-          h.dispatch({ type: 'SHOW_CONTROLS' });
+          h.onInteraction?.();
           break;
         case 'KeyN':
           if (h.hasNextEpisode && !h.disabled) {

@@ -6,13 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import { PasswordInfo } from '@/components/ui/password-info';
-import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
 import type { RegisterInput } from '@/features/auth/schema';
-import { cn } from '@/lib/utils';
 import { useSignupForm } from '../hooks/use-signup-form';
 
 export function SignupForm() {
   const {
+    step,
     setStep,
     isLoading,
     captchaToken,
@@ -37,7 +36,7 @@ export function SignupForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-start">
-      <div className="mb-6 shrink-0 text-center md:text-left">
+      <div className="mb-1 shrink-0 text-center md:text-left">
         <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
           Watch Rudra
         </h1>
@@ -46,16 +45,20 @@ export function SignupForm() {
         </p>
       </div>
 
-      <div className="border-b-4 border-[#1a1a1a] pb-1 mb-4 shrink-0">
-        <h2 className="text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
-          {isOtpStep ? 'Verify' : 'Join'}
+      <div className="border-b-4 border-[#1a1a1a] pb-0.5 mb-2 shrink-0">
+        <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
+          {isOtpStep ? 'Verify' : step === 'name' ? 'Identity' : 'Details'}
         </h2>
-        <p className="font-body font-semibold text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
-          {isOtpStep ? 'VERIFY YOUR ACCOUNT' : 'CREATE YOUR ACCOUNT'}
+        <p className="font-body font-semibold text-[8px] md:text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
+          {isOtpStep
+            ? 'VERIFY YOUR ACCOUNT'
+            : step === 'name'
+              ? 'WHO ARE YOU?'
+              : 'SECURE YOUR SPOT'}
         </p>
       </div>
 
-      <div className="flex-grow flex flex-col justify-center max-h-full overflow-hidden">
+      <div className="flex-grow flex flex-col justify-start">
         {isOtpStep ? (
           <OtpStep
             email={formData.email}
@@ -63,12 +66,14 @@ export function SignupForm() {
             setOtp={setOtp}
             onSubmit={handleOtpSubmit}
             onResend={handleResend}
-            onBack={() => setStep('initial')}
+            onBack={() => setStep('details')}
             isLoading={isLoading}
             countdown={countdown}
           />
         ) : (
           <InitialRegistrationStep
+            step={step}
+            setStep={setStep}
             formData={formData}
             confirmPassword={confirmPassword}
             setConfirmPassword={setConfirmPassword}
@@ -137,7 +142,7 @@ const OtpStep = React.memo(function OtpStep({
         type="submit"
         isLoading={isLoading}
         disabled={isLoading || otp.length !== 6}
-        className="w-full bg-[#e63b2e] hover:bg-[#ff5544] text-[#ffffff] border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+        className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
       >
         Verify & Complete Signup
       </Button>
@@ -147,13 +152,13 @@ const OtpStep = React.memo(function OtpStep({
           type="button"
           onClick={onResend}
           disabled={isLoading || countdown > 0}
-          className="w-full bg-white hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] sm:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full bg-transparent hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {countdown > 0 ? (
             <>Resend Code in {countdown}s</>
           ) : (
             <>
-              <RefreshCw className="h-3 w-3" /> Resend Verification Code
+              <RefreshCw className="h-3 w-3" /> Resend Code
             </>
           )}
         </Button>
@@ -162,7 +167,7 @@ const OtpStep = React.memo(function OtpStep({
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] sm:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
+          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
         >
           Back to Details
         </Button>
@@ -172,6 +177,8 @@ const OtpStep = React.memo(function OtpStep({
 });
 
 interface InitialStepProps {
+  step: 'name' | 'details' | 'otp';
+  setStep: (step: 'name' | 'details' | 'otp') => void;
   formData: RegisterInput;
   confirmPassword: string;
   setConfirmPassword: (val: string) => void;
@@ -189,6 +196,8 @@ interface InitialStepProps {
 }
 
 const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
+  step,
+  setStep,
   formData,
   confirmPassword,
   setConfirmPassword,
@@ -202,150 +211,161 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   handleChange,
   action,
 }: InitialStepProps) {
-  const isMatch = formData.password === confirmPassword;
-
   return (
-    <form action={action} className="space-y-3 w-full px-1">
-      {/* Name */}
-      <div>
-        <Label
-          htmlFor="name"
-          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
-        >
-          Full Name
-        </Label>
-        <Input
-          id="name"
-          name="name"
-          placeholder="Mies van der Rohe"
-          value={formData.name}
-          onChange={handleChange}
-          error={fieldErrors.name}
-          autoComplete="name"
-          disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-        />
-      </div>
+    <form action={action} className="space-y-2 w-full px-1">
+      {step === 'name' ? (
+        <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+          <div>
+            <Label
+              htmlFor="name"
+              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+            >
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              placeholder="Mies van der Rohe"
+              value={formData.name}
+              onChange={handleChange}
+              error={fieldErrors.name}
+              autoComplete="name"
+              disabled={isLoading}
+              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+            />
+          </div>
 
-      {/* Email */}
-      <div>
-        <Label
-          htmlFor="email"
-          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
-        >
-          Email Address
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          name="email"
-          placeholder="mies@bauhaus.de"
-          value={formData.email}
-          onChange={handleChange}
-          error={fieldErrors.email}
-          autoComplete="email"
-          disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-        />
-      </div>
-
-      {/* Password space-y reduced to save height */}
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <Label
-            htmlFor="password"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]"
+          <Button
+            type="button"
+            disabled={!formData.name.trim()}
+            onClick={() => setStep('details')}
+            className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3.5 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
           >
-            Password
-          </Label>
-          <div className="scale-75 md:scale-90 origin-right">
-            <PasswordInfo />
+            Continue
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-2 animate-in fade-in slide-in-from-right-4 duration-300">
+          {/* Hidden Name input to include in FormData */}
+          <input type="hidden" name="name" value={formData.name} />
+
+          {/* Email */}
+          <div>
+            <Label
+              htmlFor="email"
+              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+            >
+              Email Address
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="mies@bauhaus.de"
+              value={formData.email}
+              onChange={handleChange}
+              error={fieldErrors.email}
+              autoComplete="email"
+              disabled={isLoading}
+              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <div className="flex items-center justify-between mb-0.5">
+              <Label
+                htmlFor="password"
+                className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]"
+              >
+                Password
+              </Label>
+              <div className="scale-75 origin-right">
+                <PasswordInfo />
+              </div>
+            </div>
+            <Input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              error={fieldErrors.password}
+              autoComplete="new-password"
+              disabled={isLoading}
+              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <Label
+              htmlFor="confirmPassword"
+              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+            >
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    confirmPassword: '',
+                  }));
+                }
+                setError(null);
+              }}
+              error={fieldErrors.confirmPassword}
+              autoComplete="new-password"
+              disabled={isLoading}
+              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+            />
+          </div>
+
+          <input type="hidden" name="captchaToken" value={captchaToken || ''} />
+          <input
+            type="hidden"
+            name="inviteCode"
+            value={formData.inviteCode || ''}
+          />
+
+          <div className="pt-0.5 scale-[0.85] origin-left">
+            <Captcha
+              ref={captchaRef}
+              onVerify={setCaptchaToken}
+              onError={() => setCaptchaToken(null)}
+              onExpire={() => setCaptchaToken(null)}
+            />
+          </div>
+
+          <div className="pt-1 flex flex-col gap-2">
+            <Button
+              type="submit"
+              isLoading={isLoading}
+              disabled={!captchaToken || isLoading}
+              className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+            >
+              {isLoading ? 'Creating...' : 'Begin Story'}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setStep('name')}
+              disabled={isLoading}
+              className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-2 text-[10px] font-bold uppercase tracking-tight transition-all rounded-none h-auto"
+            >
+              Back to Name
+            </Button>
           </div>
         </div>
-        <Input
-          id="password"
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          error={fieldErrors.password}
-          autoComplete="new-password"
-          disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm mb-1 !h-[42px]"
-        />
-        <div className="scale-90 origin-left mb-1">
-          <PasswordStrengthIndicator password={formData.password} />
-        </div>
-      </div>
-
-      {/* Confirm Password */}
-      <div>
-        <Label
-          htmlFor="confirmPassword"
-          className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-1 text-[#1a1a1a]"
-        >
-          Confirm Password
-        </Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          name="confirmPassword"
-          placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            if (fieldErrors.confirmPassword) {
-              setFieldErrors((prev: Record<string, string | undefined>) => ({
-                ...prev,
-                confirmPassword: '',
-              }));
-            }
-            setError(null);
-          }}
-          error={fieldErrors.confirmPassword}
-          autoComplete="new-password"
-          disabled={isLoading}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-        />
-        {!fieldErrors.confirmPassword && confirmPassword ? (
-          <p
-            className={cn(
-              'text-[10px] uppercase font-bold tracking-widest mt-1',
-              isMatch ? 'text-green-600' : 'text-[#cc0000]',
-            )}
-          >
-            {isMatch ? '✓ PASSWORDS MATCH' : '⚠ PASSWORDS DO NOT MATCH'}
-          </p>
-        ) : null}
-      </div>
-
-      <input type="hidden" name="captchaToken" value={captchaToken || ''} />
-      <input
-        type="hidden"
-        name="inviteCode"
-        value={formData.inviteCode || ''}
-      />
-
-      <div className="pt-1 scale-95 origin-left">
-        <Captcha
-          ref={captchaRef}
-          onVerify={setCaptchaToken}
-          onError={() => setCaptchaToken(null)}
-          onExpire={() => setCaptchaToken(null)}
-        />
-      </div>
-
-      <div className="pt-2">
-        <Button
-          type="submit"
-          isLoading={isLoading}
-          disabled={!captchaToken || isLoading}
-          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 md:py-5 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
-        >
-          {isLoading ? 'Creating...' : 'Begin Story'}
-        </Button>
-      </div>
+      )}
     </form>
   );
 });
