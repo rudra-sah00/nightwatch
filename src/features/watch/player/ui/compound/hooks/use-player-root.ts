@@ -287,6 +287,16 @@ export function usePlayerRoot({
   // despite the circular dependency (handlers need seek/togglePlay from keyboard).
   const showControlsRef = useRef<() => void>(null);
 
+  const { enterFullscreen, toggleFullscreen: nativeToggleFullscreen } =
+    useFullscreen({
+      containerRef,
+      videoRef,
+      dispatch,
+      playerIsFullscreen: state.isFullscreen,
+    });
+
+  const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
+
   const { togglePlay, toggleMute, seek } = useKeyboard({
     videoRef,
     containerRef,
@@ -300,17 +310,8 @@ export function usePlayerRoot({
     disabled: readOnly,
     isLive,
     onInteraction: () => showControlsRef.current?.(),
+    onToggleFullscreen: toggleFullscreen,
   });
-
-  const { enterFullscreen, toggleFullscreen: nativeToggleFullscreen } =
-    useFullscreen({
-      containerRef,
-      videoRef,
-      dispatch,
-      playerIsFullscreen: state.isFullscreen,
-    });
-
-  const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
 
   useEffect(() => {
     if (isFullscreenOverride !== undefined) {

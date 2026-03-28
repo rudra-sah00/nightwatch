@@ -4,8 +4,18 @@ import type {
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
 } from 'agora-rtc-sdk-ng';
+import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAgora } from '@/features/watch-party/media/hooks/useAgora';
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
 
 const { mockClient, mockAudioTrack, mockVideoTrack, mockCamera } = vi.hoisted(
   () => ({
@@ -506,6 +516,63 @@ describe('useAgora', () => {
           downlinkNetworkQuality: 1,
         }); // No change
       });
+    });
+  });
+
+  describe('participant state logic', () => {
+    it('should handle user-unpublished', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleUserUnpublished = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'user-unpublished',
+      )?.[1];
+
+      await act(async () => {
+        await handleUserUnpublished({ uid: 999 }, 'audio');
+      });
+
+      expect(result.current.remoteUsers).toHaveLength(0);
+    });
+
+    it('should update volume levels and isSpeaking status', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleVolumeIndicator = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'volume-indicator',
+      )?.[1];
+
+      act(() => {
+        handleVolumeIndicator([
+          { uid: 0, level: 50 }, // Local user
+          { uid: 999, level: 80 }, // Remote user
+        ]);
+      });
+
+      const localPart = result.current.participants.find((p) => p.isLocal);
+      expect(localPart?.isSpeaking).toBe(true);
+    });
+  });
+
+  describe('SDK exception handling', () => {
+    it('should handle client exceptions via toast', async () => {
+      const { result } = renderHook(() => useAgora(defaultOptions));
+      await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+      const handleException = mockClient.on.mock.calls.find(
+        (call) => call[0] === 'exception',
+      )?.[1];
+
+      act(() => {
+        handleException({
+          code: 1001,
+          msg: 'Critical error',
+          type: 'error',
+        });
+      });
+
+      expect(toast.error).toHaveBeenCalled();
     });
   });
 });

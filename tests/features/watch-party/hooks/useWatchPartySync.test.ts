@@ -22,7 +22,11 @@ vi.mock('sonner', () => ({
 }));
 
 describe('useWatchPartySync', () => {
-  const mockSetRoom = vi.fn();
+  const mockSetRoom = vi.fn((updater) => {
+    if (typeof updater === 'function') {
+      updater(mockRoom);
+    }
+  });
   const mockRtmSendMessage = vi.fn();
   const mockNormalizeRoomUrls = vi.fn((r) => r);
 
@@ -180,5 +184,86 @@ describe('useWatchPartySync', () => {
     expect(mockWindow.location.href).toBe(''); // Did not redirect
     vi.unstubAllGlobals();
     vi.useRealTimers();
+  });
+
+  it('handleIncomingRtmMessage should update room for SYNC event from host', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'SYNC',
+        videoTime: 450,
+        isPlaying: true,
+        playbackRate: 1.5,
+        serverTime: Date.now(),
+        fromHost: true,
+      } as RTMMessage);
+    });
+
+    expect(mockSetRoom).toHaveBeenCalled();
+  });
+
+  it('handleIncomingRtmMessage should update room for STREAM_TOKEN', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'STREAM_TOKEN',
+        token: 'new-token-123',
+      } as RTMMessage);
+    });
+
+    expect(mockNormalizeRoomUrls).toHaveBeenCalled();
+    expect(mockSetRoom).toHaveBeenCalled();
+  });
+
+  it('handleIncomingRtmMessage should handle HOST_RECONNECTED', () => {
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'HOST_RECONNECTED',
+      } as RTMMessage);
+    });
+
+    expect(result.current.hostDisconnected).toBe(false);
+    expect(toast.success).toHaveBeenCalledWith(
+      'Host reconnected!',
+      expect.any(Object),
+    );
+  });
+
+  it('host should respond to SYNC_REQUEST', () => {
+    const hostProps = { ...defaultProps, isHost: true };
+    const { result } = renderHook(() => useWatchPartySync(hostProps));
+
+    act(() => {
+      result.current.handleIncomingRtmMessage({
+        type: 'SYNC_REQUEST',
+        requesterId: 'user-2',
+        userId: 'user-2',
+      } as RTMMessage);
+    });
+
+    expect(mockRtmSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SYNC',
+        fromHost: true,
+      }),
+    );
+  });
+
+  it('updateContent should show error toast on failure', async () => {
+    vi.mocked(api.updatePartyContent).mockResolvedValue({
+      error: 'Unauthorized',
+    } as any);
+
+    const { result } = renderHook(() => useWatchPartySync(defaultProps));
+
+    await act(async () => {
+      await result.current.updateContent({ title: 'Fail', type: 'movie' });
+    });
+
+    expect(toast.error).toHaveBeenCalledWith('Unauthorized');
   });
 });

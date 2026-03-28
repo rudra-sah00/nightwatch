@@ -19,6 +19,7 @@ interface UseKeyboardOptions {
   disabled?: boolean; // For watch party guests (disables playback controls)
   isLive?: boolean; // Disables seek/skip shortcuts for live streams
   onInteraction?: () => void;
+  onToggleFullscreen?: () => void;
 }
 
 export function useKeyboard({
@@ -32,6 +33,7 @@ export function useKeyboard({
   disabled = false,
   isLive = false,
   onInteraction,
+  onToggleFullscreen,
 }: UseKeyboardOptions) {
   const seek = useCallback(
     (seconds: number) => {
@@ -89,6 +91,11 @@ export function useKeyboard({
   }, [videoRef, dispatch]);
 
   const toggleFullscreen = useCallback(async () => {
+    if (onToggleFullscreen) {
+      onToggleFullscreen();
+      return;
+    }
+
     if (!containerRef.current) return;
 
     try {
@@ -100,7 +107,7 @@ export function useKeyboard({
     } catch {
       toast.error('Fullscreen toggle failed');
     }
-  }, [containerRef]);
+  }, [containerRef, onToggleFullscreen]);
 
   // ── useLatest pattern (rule: advanced-use-latest) ──────────────────────────
   // Store all handler callbacks in a stable ref so the effect only registers
@@ -120,6 +127,7 @@ export function useKeyboard({
     disabled,
     isLive,
     onInteraction,
+    onToggleFullscreen,
   });
   useEffect(() => {
     handlersRef.current = {
@@ -136,6 +144,7 @@ export function useKeyboard({
       disabled,
       isLive,
       onInteraction,
+      onToggleFullscreen,
     };
   });
 

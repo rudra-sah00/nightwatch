@@ -55,8 +55,13 @@ vi.mock('react-konva', () => ({
   Arrow: (props: Record<string, unknown>) => (
     <div data-testid="konva-arrow" {...props} />
   ),
-  Text: (props: Record<string, unknown>) => (
-    <div data-testid="konva-text" {...props} />
+  Text: (
+    props: { text?: string; children?: ReactNode } & Record<string, unknown>,
+  ) => (
+    <div data-testid="konva-text" {...props}>
+      {props.text}
+      {props.children}
+    </div>
   ),
   RegularPolygon: (props: Record<string, unknown>) => (
     <div data-testid="konva-poly" {...props} />
@@ -194,5 +199,67 @@ describe('SketchOverlay', () => {
         }),
       }),
     );
+  });
+
+  it('cancels text input on Escape', async () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      currentTool: 'text',
+    } as unknown as import('@/features/watch-party/interactions/context/SketchContext').SketchContextType);
+    render(<SketchOverlay rtmSendMessage={mockRtmSendMessage} userId="u1" />);
+    const stage = screen.getByTestId('konva-stage');
+
+    act(() => {
+      fireEvent.mouseDown(stage);
+    });
+
+    const input = screen.getByPlaceholderText('Type text...');
+    fireEvent.change(input, { target: { value: 'Cancel me' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(mockRtmSendMessage).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SKETCH_DRAW',
+      }),
+    );
+  });
+
+  it('renders participant cursors', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      cursors: {
+        u2: {
+          x: 50,
+          y: 50,
+          userName: 'Alice',
+          color: '#00ff00',
+          lastUpdate: Date.now(),
+        },
+      },
+    } as unknown as import('@/features/watch-party/interactions/context/SketchContext').SketchContextType);
+
+    render(<SketchOverlay rtmSendMessage={mockRtmSendMessage} userId="u1" />);
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+  });
+
+  it('does not send DRAW message if canDraw is false', () => {
+    vi.mocked(useSketch).mockReturnValue({
+      ...mockContext,
+      canDraw: false,
+    } as unknown as import('@/features/watch-party/interactions/context/SketchContext').SketchContextType);
+
+    render(<SketchOverlay rtmSendMessage={mockRtmSendMessage} userId="u1" />);
+    const stage = screen.getByTestId('konva-stage');
+
+    act(() => {
+      fireEvent.mouseDown(stage);
+      fireEvent.mouseUp(stage);
+    });
+
+    // The SKETCH_REQUEST_SYNC might still be called, but SKETCH_DRAW shouldn't be.
+    const drawCalls = mockRtmSendMessage.mock.calls.filter(
+      (call) => call[0].type === 'SKETCH_DRAW',
+    );
+    expect(drawCalls.length).toBe(0);
   });
 });
