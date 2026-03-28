@@ -50,10 +50,28 @@ export function useWatchPartyLifecycle({
 }: UseWatchPartyLifecycleProps) {
   // --- REAL-TIME APPROVAL LISTENER (SSE for Guests) ---
   useEffect(() => {
-    if (requestStatus !== 'pending' || !userId) return;
+    const guestToken =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('guest_token')
+        : null;
+
+    // Derive userId from token if prop is missing (important for Guests in pending state)
+    let activeUserId = userId;
+    if (!activeUserId && guestToken) {
+      try {
+        const payload = JSON.parse(atob(guestToken.split('.')[1]));
+        activeUserId = payload.sub;
+      } catch (_e) {
+        // invalid token
+      }
+    }
+
+    if (requestStatus !== 'pending' || !activeUserId) return;
 
     let eventSource: EventSource | null = null;
-    const streamUrl = `/api/rooms/${roomId || room?.id || 'PENDING'}/stream`;
+    const streamUrl = `/api/rooms/${roomId || room?.id || 'PENDING'}/stream${
+      guestToken ? `?token=${encodeURIComponent(guestToken)}` : ''
+    }`;
 
     const connectSse = () => {
       eventSource = new EventSource(streamUrl, { withCredentials: true });
@@ -63,7 +81,7 @@ export function useWatchPartyLifecycle({
           const data = JSON.parse(event.data);
           const payload = data.payload;
 
-          if (data.type === 'JOIN_RESULT' && payload?.userId === userId) {
+          if (data.type === 'JOIN_RESULT' && payload?.userId === activeUserId) {
             if (payload.status === 'approved') {
               // Now that we are approved, we can fetch the full room details (gated API)
               const roomRes = await getRoomDetails(
