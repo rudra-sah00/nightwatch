@@ -155,34 +155,41 @@ function ParticipantOverlay({
   const [confirmKick, setConfirmKick] = useState(false);
 
   return (
-    <div className="absolute bottom-0 left-0 w-full p-2 bg-white border-t-[3px] border-[#1a1a1a] flex items-center justify-between">
-      <span className="text-[10px] font-black font-headline tracking-widest uppercase text-[#1a1a1a] truncate max-w-[120px]">
-        {name}
-      </span>
-      <div className="flex items-center gap-1.5">
-        <div className="flex items-center gap-1.5 bg-white border-[2px] border-[#1a1a1a] neo-shadow-sm px-2 py-0.5">
+    <>
+      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 pointer-events-none">
+        {/* Name Tag */}
+        <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
+          <span className="text-[9px] font-black font-headline tracking-widest uppercase text-white truncate max-w-[100px]">
+            {name}
+          </span>
+        </div>
+
+        {/* Mic Status */}
+        <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
           {isMicEnabled ? (
-            <Mic className="w-3 h-3 text-success" />
+            <Mic className="w-2.5 h-2.5 text-[#00ff88]" />
           ) : (
-            <MicOff className="w-3 h-3 text-danger" />
+            <MicOff className="w-2.5 h-2.5 text-[#ff4444]" />
           )}
         </div>
-        {canKick && onKick ? (
-          confirmKick ? (
-            <div className="flex items-center gap-1 animate-in fade-in duration-150">
+      </div>
+
+      {/* Kick Controls (Top Right) */}
+      {canKick && onKick && (
+        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          {confirmKick ? (
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={onKick}
-                className="px-2 py-0.5 border-[2px] border-[#1a1a1a] text-[9px] font-black font-headline uppercase tracking-widest text-white bg-[#e63b2e] hover:bg-[#1a1a1a] transition-colors neo-shadow-sm"
-                title="Confirm remove"
+                className="px-2 py-1 bg-[#e63b2e] text-white border-[2px] border-[#1a1a1a] text-[9px] font-black font-headline uppercase tracking-widest neo-shadow-sm hover:bg-[#1a1a1a] transition-all"
               >
-                Remove
+                Kick!
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmKick(false)}
-                className="p-1 px-1.5 bg-white border-[2px] border-[#1a1a1a] hover:bg-[#ffe066] transition-colors neo-shadow-sm"
-                title="Cancel"
+                className="p-1 bg-white border-[2px] border-[#1a1a1a] neo-shadow-sm"
               >
                 <X className="w-2.5 h-2.5 text-[#1a1a1a] stroke-[3px]" />
               </button>
@@ -191,15 +198,15 @@ function ParticipantOverlay({
             <button
               type="button"
               onClick={() => setConfirmKick(true)}
-              className="px-2 py-0.5 border-[2px] border-[#1a1a1a] transition-colors text-[9px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] bg-white hover:bg-[#ffe066] neo-shadow-sm"
+              className="p-1.5 bg-white/20 hover:bg-[#e63b2e] text-white border-[2px] border-white/40 hover:border-[#1a1a1a] transition-all backdrop-blur-md"
               title="Kick user"
             >
-              Kick
+              <X className="w-3 h-3 stroke-[3px]" />
             </button>
-          )
-        ) : null}
-      </div>
-    </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
