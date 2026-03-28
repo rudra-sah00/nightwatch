@@ -56,29 +56,33 @@ export function useHls({
               // latency. Count:1 caused 404 storms because the segment at the very
               // tip of the edge isn't always propagated to the CDN yet.
               enableWorker: true,
-              lowLatencyMode: true,
-              liveSyncDurationCount: 3,
-              // Allow up to 6 segments of drift before the player catches up;
-              // increased from 5 to provide more head-room for jitter.
-              liveMaxLatencyDurationCount: 6,
+              lowLatencyMode: false,
+              liveSyncDurationCount: 4,
+              // Allow up to 10 segments of drift before the player catches up;
+              // increased from 6 to give the browser more room during network spikes.
+              liveMaxLatencyDurationCount: 10,
               // Catch up smoothly by playing 10% faster when behind, rather than
               // seeking which causes a visible 'jump' or buffer stutter.
               maxLiveSyncPlaybackRate: 1.1,
+              // ABR weighting for live: smooths out jittery quality switches
+              abrEwmaFastLive: 2.0,
+              abrEwmaSlowLive: 5.0,
+              // For live, smaller buffers are actually MORE stable because they
+              // avoid the player trying to pre-fetch fragments that aren't yet
+              // fully encoded or propagated to the CDN / Proxy.
+              maxBufferLength: 15,
+              maxMaxBufferLength: 30,
+              backBufferLength: 60,
               // Recover from stalls faster if the buffer is actually sufficient.
               highBufferWatchdogPeriod: 2,
-              // Generous buffers for DVR — keep 60s of back-buffer so seeking
-              // backward doesn't re-download everything (YouTube-style).
-              maxBufferLength: 30,
-              maxMaxBufferLength: 60,
-              backBufferLength: 60,
               // Don't hammer the CDN on 404s — back off before retrying
               fragLoadingRetryDelay: 2000,
-              fragLoadingMaxRetryTimeout: 10000,
+              fragLoadingMaxRetryTimeout: 15000,
               manifestLoadingRetryDelay: 1000,
               levelLoadingRetryDelay: 1000,
-              manifestLoadingMaxRetry: 6,
+              manifestLoadingMaxRetry: 8,
               levelLoadingMaxRetry: 6,
-              fragLoadingMaxRetry: 8,
+              fragLoadingMaxRetry: 10,
             }
           : {
               // VOD-optimised: prefer stability over latency

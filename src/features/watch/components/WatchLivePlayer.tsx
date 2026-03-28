@@ -1,7 +1,7 @@
 'use client';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
@@ -85,7 +85,7 @@ function LivePlayerState() {
         isLoading={state.isLoading}
       />
 
-      <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+      <LiveBufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 
       <ErrorOverlay
         isVisible={!!state.error}
@@ -113,4 +113,21 @@ function LivePlayerState() {
       </Player.Controls>
     </>
   );
+}
+function LiveBufferingOverlay({ isVisible }: { isVisible: boolean }) {
+  const [debouncedVisible, setDebouncedVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setDebouncedVisible(false);
+      return;
+    }
+
+    // Only show the spinner if we've been stalled for > 500ms.
+    // This avoids 'flicker' for micro-buffering events that recover instantly.
+    const timer = setTimeout(() => setDebouncedVisible(true), 500);
+    return () => clearTimeout(timer);
+  }, [isVisible]);
+
+  return <BufferingOverlay isVisible={debouncedVisible} />;
 }
