@@ -214,9 +214,7 @@ export function useWatchPartyMembers({
     const connectSSE = () => {
       if (!active) return;
 
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-      const streamUrl = `${backendUrl.replace(/\/$/, '')}/api/rooms/${room.id}/stream`;
+      const streamUrl = `/api/rooms/${room.id}/stream`;
 
       eventSource = new EventSource(streamUrl, {
         withCredentials: true,

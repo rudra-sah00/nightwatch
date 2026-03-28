@@ -6,6 +6,7 @@ import PublicProfilePage from '@/app/(public)/user/[id]/page';
 vi.mock('lucide-react', () => ({
   User: () => <div data-testid="user-icon" />,
   Calendar: () => <div data-testid="calendar-icon" />,
+  Home: () => <div data-testid="home-icon" />,
 }));
 
 // Mock ActivityGraph component as it has its own tests
@@ -18,6 +19,11 @@ vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
 }));
 
+// Mock the API service so we don't need to mock global fetch
+vi.mock('@/features/profile/api', () => ({
+  getPublicProfile: vi.fn(),
+}));
+
 describe('PublicProfilePage (Server Component)', () => {
   const mockProfile = {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -25,18 +31,18 @@ describe('PublicProfilePage (Server Component)', () => {
     username: 'testuser',
     profilePhoto: 'https://example.com/photo.jpg',
     createdAt: '2024-01-01T00:00:00.000Z',
+    email: 'test@example.com',
+    preferredServer: 's1' as const,
+    sessionId: 'mock-session-id',
     activity: [
       { date: '2024-01-01', watchSeconds: 3600 },
       { date: '2024-01-02', watchSeconds: 7200 },
     ],
   };
 
-  it('renders correctly with user data', async () => {
-    // Mock global fetch for our backend API call
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ profile: mockProfile }),
-    });
+  it('renders correctly with user data using feature view', async () => {
+    const { getPublicProfile } = await import('@/features/profile/api');
+    vi.mocked(getPublicProfile).mockResolvedValue({ profile: mockProfile });
 
     // Call the server component directly (as it is just an async function)
     const page = await PublicProfilePage({
@@ -45,20 +51,21 @@ describe('PublicProfilePage (Server Component)', () => {
 
     render(page);
 
-    // Basic assertions
+    // Assert using the new UI texts from PublicProfileView
     expect(screen.getByText('Test User')).toBeInTheDocument();
     expect(screen.getByText('@testuser')).toBeInTheDocument();
     expect(screen.getByText(/Joined January 2024/i)).toBeInTheDocument();
 
-    // Check for activity statistics
-    expect(screen.getByText('Total Watch Time')).toBeInTheDocument();
-    expect(screen.getByText('3h')).toBeInTheDocument(); // (3600 + 7200) / 3600 = 3
+    // Check for activity statistics (new labels)
+    expect(screen.getByText('HRS TOTAL')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument(); // (3600 + 7200) / 3600 = 3
 
     // Check for mocked components
     expect(screen.getByTestId('activity-graph')).toBeInTheDocument();
   });
 
   it('triggers notFound when user is missing in backend', async () => {
+    const { getPublicProfile } = await import('@/features/profile/api');
     const { notFound } = await import('next/navigation');
 
     // Mock notFound to throw as it does in Next.js
@@ -66,11 +73,9 @@ describe('PublicProfilePage (Server Component)', () => {
       throw new Error('NEXT_NOT_FOUND');
     });
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-      json: () => Promise.resolve({ profile: null }),
-    });
+    vi.mocked(getPublicProfile).mockImplementation(() =>
+      Promise.reject(new Error('User not found')),
+    );
 
     await expect(
       PublicProfilePage({
@@ -81,16 +86,12 @@ describe('PublicProfilePage (Server Component)', () => {
     expect(notFound).toHaveBeenCalled();
   });
 
-  it('calculates streaks correctly (unintegrated utility check)', async () => {
-    // Note: computeStreak is internal to the file, but we've verified
-    // it by checking the rendered output for various activity inputs in manual tests.
+  it('calculates streaks correctly within the View component', async () => {
+    const { getPublicProfile } = await import('@/features/profile/api');
+
     // For this test, we verify the page handles empty activity gracefully.
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          profile: { ...mockProfile, activity: [] },
-        }),
+    vi.mocked(getPublicProfile).mockResolvedValue({
+      profile: { ...mockProfile, activity: [] },
     });
 
     const page = await PublicProfilePage({
@@ -98,6 +99,7 @@ describe('PublicProfilePage (Server Component)', () => {
     });
 
     render(page);
-    expect(screen.getByText('0 DAYS')).toBeInTheDocument();
+    expect(screen.getAllByText('0')).toHaveLength(2); // Streak and Total Hours
+    expect(screen.getByText('DAYS ACTIVE')).toBeInTheDocument();
   });
 });

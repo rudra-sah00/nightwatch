@@ -51,8 +51,15 @@ export function getOptimizedImageUrl(url: string | null | undefined): string {
   }
 
   // If it points to our backend, make it relative
-  // This handles http://localhost:4000/api/... -> /api/...
-  if (url.includes('localhost:4000/api/') || url.includes('/api/stream/')) {
+  const backendUrl =
+    typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_BACKEND_URL : '';
+  const isBackendUrl = backendUrl && url.startsWith(backendUrl);
+
+  if (
+    isBackendUrl ||
+    url.includes('localhost:4000/api/') ||
+    url.includes('/api/stream/')
+  ) {
     try {
       if (url.startsWith('http')) {
         const urlObj = new URL(url);

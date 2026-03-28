@@ -53,9 +53,7 @@ export function useWatchPartyLifecycle({
     if (requestStatus !== 'pending' || !userId) return;
 
     let eventSource: EventSource | null = null;
-    const streamUrl = `${
-      process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
-    }/api/rooms/${roomId || room?.id || 'PENDING'}/stream`;
+    const streamUrl = `/api/rooms/${roomId || room?.id || 'PENDING'}/stream`;
 
     const connectSse = () => {
       eventSource = new EventSource(streamUrl, { withCredentials: true });

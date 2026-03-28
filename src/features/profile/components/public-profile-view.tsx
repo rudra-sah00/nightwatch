@@ -1,0 +1,191 @@
+import { Calendar, Home, User } from 'lucide-react';
+import Link from 'next/link';
+import type { WatchActivity } from '../types';
+import { ActivityGraph } from './activity-graph';
+
+interface PublicProfileViewProps {
+  profile: {
+    id: string;
+    name: string;
+    username: string | null;
+    profilePhoto: string | null;
+    createdAt: string;
+    activity: { date: string; watchSeconds: number }[];
+  };
+}
+
+export function PublicProfileView({ profile }: PublicProfileViewProps) {
+  const joinDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  // Map API activity to Heatmap component expectations
+  const mappedActivity: WatchActivity[] = profile.activity.map((a) => {
+    const minutes = Math.floor(a.watchSeconds / 60);
+    let level: 0 | 1 | 2 | 3 | 4 = 0;
+    if (minutes > 0) {
+      if (minutes > 120) level = 4;
+      else if (minutes > 60) level = 3;
+      else if (minutes > 30) level = 2;
+      else level = 1;
+    }
+    return {
+      date: a.date,
+      count: minutes,
+      level,
+    };
+  });
+
+  // Calculate accurate activity streak (consecutive days with activity)
+  const watchStreak = computeStreak(profile.activity);
+  const totalWatchHours = Math.floor(
+    profile.activity.reduce((acc, curr) => acc + curr.watchSeconds, 0) / 3600,
+  );
+
+  return (
+    <div className="min-h-screen bg-[#f5f0e8] text-[#1a1a1a] selection:bg-[#ffcc00] selection:text-[#1a1a1a]">
+      {/* Background patterns / abstract shapes for premium look */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full border-[100px] border-[#1a1a1a]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] border-[80px] border-[#1a1a1a] rotate-45" />
+      </div>
+
+      <div className="container max-w-5xl mx-auto px-4 py-20 relative z-10">
+        {/* Header Navigation */}
+        <div className="mb-12 flex justify-between items-center">
+          <Link
+            href="/"
+            className="group flex items-center gap-2 px-5 py-2 bg-[#1a1a1a] text-white border-[3px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200 uppercase font-headline font-bold text-sm tracking-tight"
+          >
+            <Home className="w-4 h-4" />
+            <span>Return Base</span>
+          </Link>
+          <div className="hidden md:block bg-[#ffcc00] border-[3px] border-[#1a1a1a] px-5 py-2 neo-shadow-sm font-headline font-black uppercase text-sm tracking-widest">
+            Identity Profile Verified
+          </div>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow p-8 lg:p-12 mb-12">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 text-center md:text-left">
+            {/* Avatar Section */}
+            <div className="relative group shrink-0">
+              <div className="absolute inset-0 bg-[#ffcc00] translate-x-1.5 translate-y-1.5 border-[4px] border-[#1a1a1a]" />
+              <div className="relative w-32 h-32 md:w-44 md:h-44 bg-white border-[4px] border-[#1a1a1a] flex items-center justify-center overflow-hidden">
+                {profile.profilePhoto ? (
+                  <img
+                    src={profile.profilePhoto}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-16 h-16 md:w-20 md:h-20 text-[#1a1a1a]/20" />
+                )}
+              </div>
+            </div>
+
+            {/* User Info Section */}
+            <div className="flex-1 space-y-4">
+              <div className="inline-block bg-[#1a1a1a] text-white px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-2 leading-none">
+                Persistent Identity: {profile.id.slice(0, 8)}...
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
+                {profile.name}
+              </h1>
+              <p className="text-xl md:text-2xl font-bold text-[#1a1a1a]/40 font-headline uppercase tracking-tight">
+                @{profile.username || 'unknown_user'}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 pt-4 text-[#1a1a1a]/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Joined {joinDate}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats Bento */}
+            <div className="grid grid-cols-2 gap-4 w-full md:w-auto h-fit">
+              <div className="bg-[#e6f0ff] border-[3px] border-[#1a1a1a] p-4 text-center neo-shadow-sm">
+                <div className="text-2xl font-black mb-1">{watchStreak}</div>
+                <div className="text-[10px] uppercase font-black opacity-40">
+                  DAYS ACTIVE
+                </div>
+              </div>
+              <div className="bg-[#fff0e6] border-[3px] border-[#1a1a1a] p-4 text-center neo-shadow-sm">
+                <div className="text-2xl font-black mb-1">
+                  {totalWatchHours}
+                </div>
+                <div className="text-[10px] uppercase font-black opacity-40">
+                  HRS TOTAL
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Watch Activity Graph Section */}
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-[4px] border-[#1a1a1a] pb-6">
+            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+              WATCH ACTIVITY
+            </h2>
+            <div className="text-sm font-bold opacity-40 uppercase tracking-widest font-headline">
+              Last 365 days of interaction
+            </div>
+          </div>
+
+          <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow p-6 lg:p-10 overflow-x-auto">
+            <div className="min-w-[800px] lg:min-w-0">
+              <ActivityGraph activity={mappedActivity} />
+            </div>
+          </div>
+
+          {/* Activity Legend & Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 pb-12 opacity-50 font-black text-[10px] uppercase tracking-[0.2em]">
+            <div className="flex items-center gap-4">
+              <span>IDENTITY: {profile.id}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>SYSTEM VERSION: CORE-V1.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function computeStreak(activity: { date: string; watchSeconds: number }[]) {
+  if (activity.length === 0) return 0;
+
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const activeDates = new Set(
+    activity.filter((a) => a.watchSeconds > 0).map((a) => a.date),
+  );
+
+  const checkDate = new Date(today);
+
+  if (!activeDates.has(toIso(checkDate))) {
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  while (activeDates.has(toIso(checkDate))) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+    if (streak > 365) break;
+  }
+
+  return streak;
+}
+
+const toIso = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

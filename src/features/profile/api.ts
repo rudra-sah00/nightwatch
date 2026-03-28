@@ -102,3 +102,17 @@ export async function changePassword(
     ...options,
   });
 }
+
+/**
+ * Get public profile data by ID (UUID compulsory)
+ */
+export async function getPublicProfile(
+  id: string,
+  options?: RequestInit,
+): Promise<{
+  profile: User & { activity: { date: string; watchSeconds: number }[] };
+}> {
+  return apiFetch<{
+    profile: User & { activity: { date: string; watchSeconds: number }[] };
+  }>(`/api/user/public/${id}`, options);
+}
