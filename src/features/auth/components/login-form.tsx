@@ -168,8 +168,11 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
   action,
 }: InitialStepProps) {
   return (
-    <form action={action} className="space-y-2 w-full px-1">
-      <div className="space-y-2">
+    <form
+      action={action}
+      className="h-full flex flex-col space-y-2 w-full px-1"
+    >
+      <div className="space-y-2 shrink-0">
         <div>
           <Label
             htmlFor="email"
@@ -221,7 +224,7 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
 
-      <div className="pt-1 scale-[0.9] md:scale-95 origin-left">
+      <div className="pt-1 scale-[0.9] md:scale-95 origin-left shrink-0">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}
@@ -230,11 +233,14 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
         />
       </div>
 
+      {/* Spacer pushes button to base of the card */}
+      <div className="flex-grow" />
+
       <Button
         type="submit"
         isLoading={isLoading}
         disabled={!captchaToken || isLoading}
-        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-0.5"
+        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-auto"
       >
         {isLoading ? 'Verifying...' : 'Launch Sync'}
       </Button>

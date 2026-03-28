@@ -65,10 +65,10 @@ export function ForgotPasswordForm() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300 w-full px-1"
+            className="h-full flex flex-col space-y-2 animate-in fade-in slide-in-from-left-4 duration-300 w-full px-1"
           >
             {error ? (
-              <div className="flex items-center gap-3 border-4 border-[#1a1a1a] bg-[#e63b2e] p-3 text-white neo-shadow-sm mb-2">
+              <div className="flex items-center gap-3 border-4 border-[#1a1a1a] bg-[#e63b2e] p-3 text-white neo-shadow-sm mb-2 shrink-0">
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 <p className="font-headline font-bold uppercase text-[10px] tracking-widest">
                   {error}
@@ -76,7 +76,7 @@ export function ForgotPasswordForm() {
               </div>
             ) : null}
 
-            <div className="space-y-1">
+            <div className="space-y-1 shrink-0">
               <Label
                 htmlFor="email"
                 className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
@@ -97,12 +97,15 @@ export function ForgotPasswordForm() {
               />
             </div>
 
-            <div className="pt-1 flex flex-col gap-2">
+            {/* Spacer pushes buttons to the bottom */}
+            <div className="flex-grow" />
+
+            <div className="flex flex-col gap-2 shrink-0 pt-2 border-t-4 border-[#1a1a1a] mt-auto">
               <Button
                 type="submit"
                 isLoading={isLoading}
                 disabled={isLoading}
-                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-0.5"
+                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
               >
                 {isLoading ? 'Dispatching...' : 'Dispatch Reset Link'}
               </Button>
