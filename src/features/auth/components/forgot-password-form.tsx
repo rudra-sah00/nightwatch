@@ -57,7 +57,7 @@ export function ForgotPasswordForm() {
 
             <Button
               asChild
-              className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto"
+              className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto"
             >
               <Link href="/login">Back to Login</Link>
             </Button>
@@ -65,10 +65,10 @@ export function ForgotPasswordForm() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300 w-full px-1"
+            className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300 w-full px-1"
           >
             {error ? (
-              <div className="flex items-center gap-3 border-4 border-[#1a1a1a] bg-[#e63b2e] p-3 text-white neo-shadow-sm">
+              <div className="flex items-center gap-3 border-4 border-[#1a1a1a] bg-[#e63b2e] p-3 text-white neo-shadow-sm mb-2">
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 <p className="font-headline font-bold uppercase text-[10px] tracking-widest">
                   {error}
@@ -97,12 +97,12 @@ export function ForgotPasswordForm() {
               />
             </div>
 
-            <div className="pt-2 flex flex-col gap-2">
+            <div className="pt-1 flex flex-col gap-2">
               <Button
                 type="submit"
                 isLoading={isLoading}
                 disabled={isLoading}
-                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-4 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
+                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-0.5"
               >
                 {isLoading ? 'Dispatching...' : 'Dispatch Reset Link'}
               </Button>
@@ -110,7 +110,7 @@ export function ForgotPasswordForm() {
               <Button
                 asChild
                 type="button"
-                className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] font-bold uppercase tracking-tight transition-all rounded-none h-auto flex items-center justify-center gap-2"
+                className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto flex items-center justify-center gap-2"
               >
                 <Link href="/login">Back to Login</Link>
               </Button>
