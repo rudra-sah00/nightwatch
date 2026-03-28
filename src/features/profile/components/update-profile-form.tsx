@@ -243,6 +243,33 @@ export function UpdateProfileForm() {
         </div>
       </section>
 
+      {/* Public Profile Sharing */}
+      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+        <div className="space-y-2 text-center md:text-left">
+          <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+            Public Identity
+          </h2>
+          <p className="text-sm font-bold uppercase font-headline text-[#1a1a1a]/40">
+            Share your watching legacy publicly via your unique ID.
+          </p>
+          <div className="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-4 py-2 mt-4 font-mono text-xs md:text-sm font-black break-all text-[#1a1a1a]/60 select-all">
+            {user.id}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const url = `${window.location.origin}/user/${user.id}`;
+            navigator.clipboard.writeText(url);
+            // Optional: Show toast or feedback
+          }}
+          className="w-full md:w-auto px-8 py-4 bg-[#ffcc00] text-[#1a1a1a] font-headline font-black uppercase border-4 border-[#1a1a1a] hover:bg-white transition-all neo-shadow-sm active:translate-x-[2px] active:translate-y-[2px] text-xl"
+        >
+          COPY PUBLIC LINK
+        </button>
+      </section>
+
       {/* Server Selection */}
       <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow">
         <div className="flex items-center justify-between mb-8">
