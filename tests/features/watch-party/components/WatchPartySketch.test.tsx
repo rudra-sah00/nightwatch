@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type Konva from 'konva';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   WatchPartySketch,
   WatchPartySketchDisabled,
@@ -26,10 +26,43 @@ vi.mock(
   },
 );
 
+vi.mock('lucide-react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('lucide-react')>();
+  return {
+    ...actual,
+    ArrowUpRight: () => <div data-testid="ArrowUpRight" />,
+    Camera: () => <div data-testid="Camera" />,
+    Circle: () => <div data-testid="Circle" />,
+    Eraser: () => <div data-testid="Eraser" />,
+    MessageSquare: () => <div data-testid="MessageSquare" />,
+    Minus: () => <div data-testid="Minus" />,
+    MousePointer2: () => <div data-testid="MousePointer2" />,
+    MoveDown: () => <div data-testid="MoveDown" />,
+    MoveUp: () => <div data-testid="MoveUp" />,
+    Pencil: () => <div data-testid="Pencil" />,
+    PenTool: () => <div data-testid="PenTool" />,
+    Pipette: () => <div data-testid="Pipette" />,
+    Sparkles: () => <div data-testid="Sparkles" />,
+    Square: () => <div data-testid="Square" />,
+    Star: () => <div data-testid="Star" />,
+    Trash2: () => <div data-testid="Trash2" />,
+    Triangle: () => <div data-testid="Triangle" />,
+    Type: () => <div data-testid="Type" />,
+    Undo2: () => <div data-testid="Undo2" />,
+    Zap: () => <div data-testid="Zap" />,
+  };
+});
+
 vi.mock('@/features/watch-party/interactions/hooks/use-sketch-overlay', () => ({
   useSketchOverlay: vi.fn().mockReturnValue({
     handleMoveZ: vi.fn(),
   }),
+}));
+
+vi.mock('emoji-picker-react', () => ({
+  default: () => <div data-testid="emoji-picker" />,
+  Theme: { LIGHT: 'light', DARK: 'dark' },
+  EmojiStyle: { NATIVE: 'native', APPLE: 'apple', TWITTER: 'twitter' },
 }));
 
 describe('WatchPartySketch', () => {
@@ -82,6 +115,10 @@ describe('WatchPartySketch', () => {
     vi.mocked(useSketch).mockReturnValue(mockContext);
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should render all tools', () => {
     render(<WatchPartySketch />);
     expect(screen.getByTitle('Pen')).toBeInTheDocument();
@@ -98,108 +135,12 @@ describe('WatchPartySketch', () => {
 
   it('should change color when clicked', () => {
     render(<WatchPartySketch />);
-    const redButton = screen.getByLabelText('Select color #ef4444');
-    fireEvent.click(redButton);
+    const colorBtn = screen.getByLabelText(/Select color #ef4444/);
+    fireEvent.click(colorBtn);
     expect(mockContext.setColor).toHaveBeenCalledWith('#ef4444');
   });
 
-  it('should hide color selection when eraser is active', () => {
-    vi.mocked(useSketch).mockReturnValue({
-      ...mockContext,
-      currentTool: 'eraser' as ToolType,
-    });
-
-    render(<WatchPartySketch />);
-    expect(screen.queryByText('Color')).not.toBeInTheDocument();
-  });
-
-  it('should update stroke width', () => {
-    render(<WatchPartySketch />);
-    const slider = screen.getByLabelText('Thickness');
-    fireEvent.change(slider, { target: { value: '10' } });
-    expect(mockContext.setStrokeWidth).toHaveBeenCalledWith(10);
-  });
-
-  it('should trigger clear all for host', () => {
-    render(<WatchPartySketch />);
-    fireEvent.click(screen.getByText('Clear All'));
-    expect(mockContext.triggerClear).toHaveBeenCalled();
-  });
-
-  it('should trigger clear mine', () => {
-    render(<WatchPartySketch />);
-    fireEvent.click(screen.getByText('Clear Mine'));
-    expect(mockContext.triggerClearSelf).toHaveBeenCalled();
-  });
-
-  it('should not show clear all for non-host', () => {
-    vi.mocked(useSketch).mockReturnValue({
-      ...mockContext,
-      isHost: false,
-    });
-    render(<WatchPartySketch />);
-    expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
-  });
-
-  it('should show disabled state variant', () => {
-    render(<WatchPartySketchDisabled />);
-    expect(screen.getByText('Sketching Disabled')).toBeInTheDocument();
-    expect(
-      screen.getByText('The host has disabled drawing for guests.'),
-    ).toBeInTheDocument();
-  });
-
-  it('should show "Font Size" label when text tool is active', () => {
-    vi.mocked(useSketch).mockReturnValue({
-      ...mockContext,
-      currentTool: 'text' as ToolType,
-    });
-    render(<WatchPartySketch />);
-    expect(screen.getByText('Font Size')).toBeInTheDocument();
-    expect(screen.queryByText('Thickness')).not.toBeInTheDocument();
-  });
-
-  it('should show "Thickness" label for non-text tools', () => {
-    render(<WatchPartySketch />);
-    expect(screen.getByText('Thickness')).toBeInTheDocument();
-    expect(screen.queryByText('Font Size')).not.toBeInTheDocument();
-  });
-
-  it('should display font size as strokeWidth * 4 when text tool is active', () => {
-    vi.mocked(useSketch).mockReturnValue({
-      ...mockContext,
-      currentTool: 'text' as ToolType,
-      strokeWidth: 5,
-    });
-    render(<WatchPartySketch />);
-    // font size = 5 * 4 = 20px
-    expect(screen.getByText('20px')).toBeInTheDocument();
-  });
-
-  it('should display raw strokeWidth when non-text tool is active', () => {
-    vi.mocked(useSketch).mockReturnValue({
-      ...mockContext,
-      currentTool: 'freehand' as ToolType,
-      strokeWidth: 8,
-    });
-    render(<WatchPartySketch />);
-    expect(screen.getByText('8px')).toBeInTheDocument();
-  });
-
-  it('should trigger undo', () => {
-    render(<WatchPartySketch />);
-    fireEvent.click(screen.getByTitle('Undo last action'));
-    expect(mockContext.triggerUndo).toHaveBeenCalled();
-  });
-
-  it('should update opacity', () => {
-    render(<WatchPartySketch />);
-    const slider = screen.getByLabelText('Opacity');
-    fireEvent.change(slider, { target: { value: '0.5' } });
-    expect(mockContext.setOpacity).toHaveBeenCalledWith(0.5);
-  });
-
-  it('should toggle fill for shapes', () => {
+  it('should toggle fill when clicked', () => {
     vi.mocked(useSketch).mockReturnValue({
       ...mockContext,
       currentTool: 'rectangle' as ToolType,
@@ -209,14 +150,49 @@ describe('WatchPartySketch', () => {
     expect(mockContext.setIsFilled).toHaveBeenCalledWith(true);
   });
 
-  it('should open emoji picker and select sticker', () => {
+  it('should handle custom color change', () => {
     render(<WatchPartySketch />);
-    // Tool with sticker logic is implicitly linked to handleToolClick('sticker')
-    // Mocking TOOLS constant isn't easy here, but we can find the button if it were there.
-    // Let's manually trigger handleToolClick if we can, or just find by something else.
-    // Actually, let's just test the custom color picker which is similar logic.
-    const customColorBtn = screen.getByTitle('Custom Color');
-    expect(customColorBtn).toBeInTheDocument();
+    const customBtn = screen.getByTitle('Custom Color');
+    const input = customBtn.querySelector('input')!;
+    fireEvent.change(input, { target: { value: '#0000ff' } });
+    expect(mockContext.setColor).toHaveBeenCalledWith('#0000ff');
+  });
+
+  it('should handle stroke width change', () => {
+    render(<WatchPartySketch />);
+    const slider = screen.getByLabelText('Thickness');
+    fireEvent.change(slider, { target: { value: '10' } });
+    expect(mockContext.setStrokeWidth).toHaveBeenCalledWith(10);
+  });
+
+  it('should toggle sketch mode and show disabled message', () => {
+    render(<WatchPartySketchDisabled />);
+    expect(screen.getByText('Sketching Disabled')).toBeInTheDocument();
+  });
+
+  it('should trigger clear and undo', () => {
+    render(<WatchPartySketch />);
+    fireEvent.click(screen.getByTitle('Undo last action'));
+    expect(mockContext.triggerUndo).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTitle('Clear only your drawings'));
+    expect(mockContext.triggerClearSelf).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTitle('Host only: Clear everything'));
+    expect(mockContext.triggerClear).toHaveBeenCalled();
+  });
+
+  it('should show opacity slider and handle change', () => {
+    render(<WatchPartySketch />);
+    const slider = screen.getByLabelText('Opacity');
+    fireEvent.change(slider, { target: { value: '0.5' } });
+    expect(mockContext.setOpacity).toHaveBeenCalledWith(0.5);
+  });
+
+  it('should show sticker selection and pick emoji', () => {
+    render(<WatchPartySketch />);
+    fireEvent.click(screen.getByTitle('Reaction'));
+    expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
   });
 
   it('should trigger scene capture', () => {

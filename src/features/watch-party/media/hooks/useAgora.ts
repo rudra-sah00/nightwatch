@@ -225,6 +225,11 @@ export function useAgora({
   const [selectedAudioDevice, setSelectedAudioDevice] = useState('');
   const [selectedVideoDevice, setSelectedVideoDevice] = useState('');
 
+  // Track speaker state separately so it isn't lost when participants list re-clones
+  const [speakerState, setSpeakerState] = useState<
+    Record<string, { isSpeaking: boolean; audioLevel: number }>
+  >({});
+
   // Keep refs in sync for use in callbacks without stale closures
   useEffect(() => {
     selectedAudioDeviceRef.current = selectedAudioDevice;
@@ -339,16 +344,22 @@ export function useAgora({
 
       mappedMemberIds.add(numericUid);
 
+      // Fetch persistent speaker state for this user (keyed by Agora numeric UID)
+      const speaker = speakerState[isLocal ? String(uid) : numericUid] || {
+        isSpeaking: false,
+        audioLevel: 0,
+      };
+
       if (isLocal) {
         return {
           uid: String(uid),
           identity: member.id,
           name: 'You',
-          isSpeaking: false,
+          isSpeaking: speaker.isSpeaking,
           isMicrophoneEnabled: audioEnabled,
           isCameraEnabled: videoEnabled,
           isLocal: true,
-          audioLevel: 0,
+          audioLevel: speaker.audioLevel,
           videoTrack: localVideoTrackRef.current ?? undefined,
           metadata: member.profilePhoto
             ? JSON.stringify({ avatar: member.profilePhoto })
@@ -360,11 +371,11 @@ export function useAgora({
         uid: numericUid,
         identity: member.id,
         name: member.name,
-        isSpeaking: false,
+        isSpeaking: speaker.isSpeaking,
         isMicrophoneEnabled: remoteUser?.hasAudio ?? false,
         isCameraEnabled: remoteUser?.hasVideo ?? false,
         isLocal: false,
-        audioLevel: 0,
+        audioLevel: speaker.audioLevel,
         videoTrack: remoteUser?.videoTrack,
         metadata: member.profilePhoto
           ? JSON.stringify({ avatar: member.profilePhoto })
@@ -377,22 +388,36 @@ export function useAgora({
       remoteUserMap.entries(),
     )
       .filter(([uidStr]) => !mappedMemberIds.has(uidStr))
-      .map(([uidStr, remoteUser]) => ({
-        uid: uidStr,
-        identity: `unknown:${uidStr}`,
-        name: 'Unknown Participant',
-        isSpeaking: false,
-        isMicrophoneEnabled: remoteUser.hasAudio,
-        isCameraEnabled: remoteUser.hasVideo,
-        isLocal: false,
-        audioLevel: 0,
-        videoTrack: remoteUser.videoTrack,
-      }));
+      .map(([uidStr, remoteUser]) => {
+        const speaker = speakerState[uidStr] || {
+          isSpeaking: false,
+          audioLevel: 0,
+        };
+        return {
+          uid: uidStr,
+          identity: `unknown:${uidStr}`,
+          name: 'Unknown Participant',
+          isSpeaking: speaker.isSpeaking,
+          isMicrophoneEnabled: remoteUser.hasAudio,
+          isCameraEnabled: remoteUser.hasVideo,
+          isLocal: false,
+          audioLevel: speaker.audioLevel,
+          videoTrack: remoteUser.videoTrack,
+        };
+      });
 
     const finalParticipants = [...nextParticipants, ...unmappedParticipants];
 
     setParticipants(finalParticipants);
-  }, [remoteUsers, uid, userId, audioEnabled, videoEnabled, members]);
+  }, [
+    remoteUsers,
+    uid,
+    userId,
+    audioEnabled,
+    videoEnabled,
+    members,
+    speakerState,
+  ]);
 
   /**
    * Monitors audio volume indicators from Agora to drive the 'speaking' status
@@ -408,35 +433,26 @@ export function useAgora({
     const handleVolumeIndicator = (
       volumes: { uid: number; level: number }[],
     ) => {
-      // Build a Map for O(1) lookups — keyed by Agora numeric UID (not identity)
-      const volumeMap = new Map<string, number>();
-      for (const v of volumes) {
-        volumeMap.set(String(v.uid), v.level);
-      }
-
-      setParticipants((prev) => {
+      setSpeakerState((prev) => {
         let changed = false;
-        const next = prev.map((p) => {
-          // Match by p.uid (Agora numeric UID), NOT p.identity (user ID string)
-          const level = volumeMap.get(p.uid);
-          if (level !== undefined) {
-            const newSpeaking = level > 5;
-            const newAudioLevel = level / 100;
-            if (
-              p.isSpeaking !== newSpeaking ||
-              p.audioLevel !== newAudioLevel
-            ) {
-              changed = true;
-              return {
-                ...p,
-                isSpeaking: newSpeaking,
-                audioLevel: newAudioLevel,
-              };
-            }
+        const next = { ...prev };
+
+        for (const v of volumes) {
+          // If local participant, SDK uses UID 0. Map it back to our uid string.
+          const uidStr = v.uid === 0 ? String(uid) : String(v.uid);
+          const isSpeaking = v.level > 5;
+          const audioLevel = v.level / 100;
+
+          if (
+            !next[uidStr] ||
+            next[uidStr].isSpeaking !== isSpeaking ||
+            next[uidStr].audioLevel !== audioLevel
+          ) {
+            next[uidStr] = { isSpeaking, audioLevel };
+            changed = true;
           }
-          return p;
-        });
-        // Only return new array if something actually changed (rerender-defer-reads)
+        }
+
         return changed ? next : prev;
       });
     };
@@ -445,7 +461,7 @@ export function useAgora({
     return () => {
       client.off('volume-indicator', handleVolumeIndicator);
     };
-  }, [isClientReady]);
+  }, [isClientReady, uid]);
 
   /**
    * Monitors connection state changes and network quality to provide feedback
@@ -499,12 +515,15 @@ export function useAgora({
     };
 
     // Exception callback — quality anomalies (e.g. low framerate, low bitrate)
-    const handleException = (_evt: {
+    const handleException = (evt: {
       code: number;
       msg: string;
       uid: string;
+      type?: string;
     }) => {
-      // Intentional no-op — transient quality blips are not actionable
+      if (evt.type === 'error' || (evt.code && evt.code >= 1000)) {
+        toast.error(`Media Error: ${evt.msg || 'An unknown error occurred'}`);
+      }
     };
 
     client.on('connection-state-change', handleConnectionStateChange);

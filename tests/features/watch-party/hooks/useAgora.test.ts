@@ -529,6 +529,8 @@ describe('useAgora', () => {
       )?.[1];
 
       await act(async () => {
+        // Mock the SDK's remoteUsers being updated
+        mockClient.remoteUsers = [];
         await handleUserUnpublished({ uid: 999 }, 'audio');
       });
 
@@ -536,7 +538,9 @@ describe('useAgora', () => {
     });
 
     it('should update volume levels and isSpeaking status', async () => {
-      const { result } = renderHook(() => useAgora(defaultOptions));
+      const { result } = renderHook(() =>
+        useAgora({ ...defaultOptions, userId: 'user-1' }),
+      );
       await waitFor(() => expect(result.current.isConnected).toBe(true));
 
       const handleVolumeIndicator = mockClient.on.mock.calls.find(

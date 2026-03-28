@@ -106,7 +106,7 @@ export function WatchPartySketch() {
   const customColorInputRef = useRef<HTMLInputElement>(null);
 
   const handleToolClick = (toolId: ToolType) => {
-    if (toolId === 'sticker') {
+    if (toolId === 'sticker' || toolId === 'reaction') {
       setIsEmojiPickerOpen(true);
     } else {
       setCurrentTool(toolId);
