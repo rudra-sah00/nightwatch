@@ -57,26 +57,24 @@ export function useHls({
               // tip of the edge isn't always propagated to the CDN yet.
               enableWorker: true,
               lowLatencyMode: false,
-              liveSyncDurationCount: 4,
-              // Allow up to 10 segments of drift before the player catches up;
-              // increased from 6 to give the browser more room during network spikes.
+              // Reduced to 3 for slightly better latency while keeping stability;
+              // Combined with nudge logic it won't stall.
+              liveSyncDurationCount: 3,
               liveMaxLatencyDurationCount: 10,
-              // Catch up smoothly by playing 10% faster when behind, rather than
-              // seeking which causes a visible 'jump' or buffer stutter.
-              maxLiveSyncPlaybackRate: 1.1,
-              // ABR weighting for live: smooths out jittery quality switches
+              maxLiveSyncPlaybackRate: 1.15,
               abrEwmaFastLive: 2.0,
               abrEwmaSlowLive: 5.0,
-              // For live, smaller buffers are actually MORE stable because they
-              // avoid the player trying to pre-fetch fragments that aren't yet
-              // fully encoded or propagated to the CDN / Proxy.
+              // PREFETCHING: crucially important to eliminate the gap between segments.
+              startFragPrefetch: true,
+              // GAP SKIPPING: Tell HLS.js to jump over micro-holes (up to 0.5s) in the buffer.
+              maxBufferHole: 0.5,
+              nudgeOffset: 0.1,
+              nudgeMaxRetry: 3,
               maxBufferLength: 15,
               maxMaxBufferLength: 30,
               backBufferLength: 60,
-              // Recover from stalls faster if the buffer is actually sufficient.
               highBufferWatchdogPeriod: 2,
-              // Don't hammer the CDN on 404s — back off before retrying
-              fragLoadingRetryDelay: 2000,
+              fragLoadingRetryDelay: 1000,
               fragLoadingMaxRetryTimeout: 15000,
               manifestLoadingRetryDelay: 1000,
               levelLoadingRetryDelay: 1000,
