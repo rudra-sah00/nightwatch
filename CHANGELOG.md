@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.11.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.10.0...v1.11.0) (2026-03-28)
+
+
+### Features
+
+* **auth:** add captcha verification to forgot password form ([10b57f3](https://github.com/rudra-sah00/watch-rudra/commit/10b57f35f5632d126e8fa2a408b8a0efdb6a92e0))
+* **auth:** add password reset link and modernize forgot password flow ([4b7927c](https://github.com/rudra-sah00/watch-rudra/commit/4b7927c47e91e5f479663174fd21f4a461b1e466))
+* **auth:** refactor signup to multi-step UI and fix player auto-hide with keyboard shortcuts ([0171a05](https://github.com/rudra-sah00/watch-rudra/commit/0171a0529776d8838903f941dfbc742f5f708cb2))
+* improve watch party tests coverage and sync fullscreen toggle ([d01ed77](https://github.com/rudra-sah00/watch-rudra/commit/d01ed77b7eb3a493611d43bd13927d086998f866))
+* **sketch:** implement automatic cursor ghosting for inactive participants 🌬️ ([a80daa2](https://github.com/rudra-sah00/watch-rudra/commit/a80daa2de5910d40377faaac09577fcfa9c253ee))
+* **sketch:** unify premium collaborative board with 100% passing tests & zero biome warnings 💎🚀 ([6968a4a](https://github.com/rudra-sah00/watch-rudra/commit/6968a4a1332b877030cc7dc507721ac7cb22acb5))
+
+
+### Bug Fixes
+
+* **auth:** fix security verification failure during signup by hardening captcha handling and validation error mapping ([a71a975](https://github.com/rudra-sah00/watch-rudra/commit/a71a975e3570386b7bfbbda7270e76302693bf1b))
+* chat message flicker, remove unread badge, and add jumbomoji support ([7304bf6](https://github.com/rudra-sah00/watch-rudra/commit/7304bf600788e134adb70df8056cba1783521a1c))
+* resolve 9 Biome warnings in watch tests ([1a6e490](https://github.com/rudra-sah00/watch-rudra/commit/1a6e490ea29c2d1a728ba8734699ce994bd67269))
+* resolve all frontend test failures after HTTP migration ([6b6c19e](https://github.com/rudra-sah00/watch-rudra/commit/6b6c19e945a4d4821f5eef4b9f138ef8f9724485))
+* resolve test failures and migrate to HTTP ([2b1d67e](https://github.com/rudra-sah00/watch-rudra/commit/2b1d67e6dde7e86291d1fb099fa110292a8a1213))
+* **sketch:** ensure capture scene includes both video and drawings 📸🎬 ([bd7f9c5](https://github.com/rudra-sah00/watch-rudra/commit/bd7f9c5cca79e610c269c32b86220e94079339bc))
+* **watch-party:** finalize test suites, resolve biome lints and stale closures ([b0c851e](https://github.com/rudra-sah00/watch-rudra/commit/b0c851ef2a618a965fa225b94ad0f7838d9f7d37))
+
 ## [1.10.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.9.1...v1.10.0) (2026-03-25)
 
 
