@@ -1,17 +1,16 @@
 'use client';
 
-import { ShieldCheck } from 'lucide-react';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { useForgotPasswordPage } from './use-forgot-password-page';
 
 export default function ForgotPasswordPage() {
   const { isAuthenticated, isLoading } = useForgotPasswordPage();
 
-  // Loading State (optional to show while checking auth)
+  // Loading State
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-[#1a1a1a]/20 border-t-[#1a1a1a] animate-spin" />
       </main>
     );
   }
@@ -19,26 +18,85 @@ export default function ForgotPasswordPage() {
   if (isAuthenticated) return null;
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative z-10">
-        <div className="flex flex-col items-center mb-8 text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-gradient">
-            Reset Password
-          </h1>
-          <p className="text-muted-foreground">
-            Enter your email to receive a password reset link
+    <div className="bg-white text-[#1a1a1a] h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99]">
+      <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-center shrink-0">
+          {/* Features Bento Box */}
+          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:h-[500px]">
+            <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+              <div>
+                <span
+                  className="material-symbols-outlined text-3xl mb-2"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  history
+                </span>
+                <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-1 font-headline">
+                  Recovery Mode
+                </h3>
+                <p className="font-body opacity-80 leading-tight text-xs">
+                  Lost access? We'll help you regain control of your cinema
+                  vault.
+                </p>
+              </div>
+            </div>
+            <div className="bg-[#d6e3ff] text-[#1a1a1a] p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+              <div>
+                <span
+                  className="material-symbols-outlined text-3xl mb-2"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  lock_reset
+                </span>
+                <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-1 font-headline">
+                  Secure Reset
+                </h3>
+                <p className="font-body text-[#1a1a1a] leading-tight text-xs">
+                  State-of-the-art verification loops to keep your data safe.
+                </p>
+              </div>
+            </div>
+            <div className="md:col-span-2 bg-[#ffcc00] text-[#1a1a1a] p-4 md:p-6 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex items-center gap-4">
+              <span
+                className="material-symbols-outlined text-5xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                security
+              </span>
+              <div>
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter font-headline">
+                  Zero Trust Architecture
+                </h3>
+                <p className="font-body font-medium text-xs">
+                  Encrypted recovery tokens. One-way hashing. Ultimate security.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Recovery Card wrapper */}
+          <div className="lg:col-span-5 flex items-center justify-center w-full">
+            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none h-full lg:h-[500px] overflow-visible">
+              <div className="flex-grow flex flex-col justify-start h-full overflow-visible">
+                <ForgotPasswordForm />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-5 gap-1 hidden md:flex shrink-0">
+        <div className="hidden">Watch Rudra</div>
+        <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#f5f0e8]">
+          © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
+        </p>
+        <div className="flex gap-4">
+          <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#e63b2e]">
+            Access recovery is for registered members only.
           </p>
         </div>
-
-        <div className="glass rounded-3xl p-8 shadow-2xl">
-          <ForgotPasswordForm />
-        </div>
-
-        <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground opacity-60">
-          <ShieldCheck className="w-3 h-3" />
-          <p>Secure password recovery</p>
-        </div>
-      </div>
-    </main>
+      </footer>
+    </div>
   );
 }

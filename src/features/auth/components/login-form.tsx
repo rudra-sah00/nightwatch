@@ -191,12 +191,20 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
         </div>
 
         <div>
-          <Label
-            htmlFor="password"
-            className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
-          >
-            Password
-          </Label>
+          <div className="flex items-center justify-between mb-0.5">
+            <Label
+              htmlFor="password"
+              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]"
+            >
+              Password
+            </Label>
+            <a
+              href="/forgot-password"
+              className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#e63b2e] hover:underline"
+            >
+              Forgot?
+            </a>
+          </div>
           <Input
             id="password"
             type="password"
