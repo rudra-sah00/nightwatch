@@ -108,15 +108,20 @@ export function useContentDetailModal({
       show?.trailers &&
       show.trailers.length > 0 &&
       !isPlaying &&
-      !stopped
+      !stopped &&
+      !showTrailer
     ) {
       setShowTrailer(true);
     }
     return () => {
       stopped = true;
-      setShowTrailer(false);
     };
-  }, [show, isPlaying, contentId]);
+  }, [show, isPlaying, contentId, showTrailer]);
+
+  // Cleanup on unmount only
+  useEffect(() => {
+    return () => setShowTrailer(false);
+  }, []);
 
   // Block body scroll
   useEffect(() => {

@@ -208,8 +208,8 @@ export function DownloadMenu({
     show.contentType,
   );
 
-  // Only Server 2 content supports downloads
-  const isS2 = show.id.startsWith('s2:') || show.id.includes('::');
+  // Only Server 2 (Balanced Server) content supports downloads
+  const isS2 = show.id.startsWith('s2:');
   if (!isS2) return null;
 
   const isSeries = selectedDubType === ContentType.Series;

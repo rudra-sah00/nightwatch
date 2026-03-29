@@ -71,7 +71,7 @@ export function HomeClient() {
                 <input
                   name="q"
                   className="w-full bg-transparent border-none focus:ring-0 font-headline text-xl md:text-3xl font-bold uppercase placeholder:text-[#1a1a1a]/30 text-[#1a1a1a] relative z-10 outline-none p-0 leading-none h-full"
-                  placeholder="SEARCH MOVIES, DIRECTORS, OR CINEMA..."
+                  placeholder="SEARCH MOVIES, SHOWS, OR CINEMA..."
                   type="text"
                   autoComplete="off"
                   value={query}

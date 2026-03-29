@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { CreatorFooter } from '@/components/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
@@ -138,6 +139,8 @@ export function ProfileOverview() {
           isLoading={loadingActivity}
         />
       </section>
+
+      <CreatorFooter />
     </main>
   );
 }

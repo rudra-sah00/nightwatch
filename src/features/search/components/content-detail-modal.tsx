@@ -238,15 +238,12 @@ export function ContentDetailModal({
               selectedSeason={selectedSeason}
               isSeries={isSeries}
               onPlay={() => {
-                setShowTrailer(false);
                 handlePlay();
               }}
               onResume={async () => {
-                setShowTrailer(false);
                 await handleResume();
               }}
               onWatchParty={() => {
-                setShowTrailer(false);
                 handleWatchParty();
               }}
               isWatchPartyDisabled={isMobile}
@@ -258,11 +255,13 @@ export function ContentDetailModal({
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
-                <DownloadMenu
-                  show={show}
-                  selectedSeason={selectedSeason}
-                  episodes={episodes}
-                />
+                show.id.startsWith('s2:') ? (
+                  <DownloadMenu
+                    show={show}
+                    selectedSeason={selectedSeason}
+                    episodes={episodes}
+                  />
+                ) : null
               }
             />
           </div>
@@ -336,7 +335,6 @@ export function ContentDetailModal({
                   if (isSetupOpen) {
                     handleWatchParty(episode);
                   } else {
-                    setShowTrailer(false);
                     handlePlay(episode);
                   }
                 }}

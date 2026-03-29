@@ -167,12 +167,22 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
   handleChange,
   action,
 }: InitialStepProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopyEmail = () => {
+    const email = 'rudranarayanaknr@gmail.com';
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+
+    // Fallback: Open mailto link too
+    window.location.href = `mailto:${email}`;
+
+    setTimeout(() => setCopied(false), 3000);
+  };
+
   return (
-    <form
-      action={action}
-      className="h-full flex flex-col space-y-2 w-full px-1"
-    >
-      <div className="space-y-2 shrink-0">
+    <form action={action} className="space-y-4 w-full px-1">
+      <div className="space-y-4 shrink-0">
         <div>
           <Label
             htmlFor="email"
@@ -224,7 +234,7 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
 
       <input type="hidden" name="captchaToken" value={captchaToken || ''} />
 
-      <div className="pt-1 scale-[0.9] md:scale-95 origin-left shrink-0">
+      <div className="pt-0.5 shrink-0">
         <Captcha
           ref={captchaRef}
           onVerify={setCaptchaToken}
@@ -233,17 +243,33 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
         />
       </div>
 
-      {/* Spacer pushes button to base of the card */}
-      <div className="flex-grow" />
+      <div className="pt-2 flex flex-col gap-6">
+        <div className="text-center">
+          <p className="text-[9px] font-headline font-bold uppercase tracking-[0.2em] text-[#1a1a1a] opacity-40">
+            WANT AN ACCOUNT?
+          </p>
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="group mt-1 transition-all active:scale-95 duration-75 inline-block"
+          >
+            <span
+              className={`text-[10px] font-black font-headline uppercase tracking-tighter decoration-1 underline underline-offset-4 transition-all ${copied ? 'text-[#00aa44] decoration-[#00aa44]' : 'text-[#e63b2e] decoration-[#e63b2e]/20 group-hover:decoration-[#e63b2e]'}`}
+            >
+              {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
+            </span>
+          </button>
+        </div>
 
-      <Button
-        type="submit"
-        isLoading={isLoading}
-        disabled={!captchaToken || isLoading}
-        className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-auto"
-      >
-        {isLoading ? 'Verifying...' : 'Launch Sync'}
-      </Button>
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          disabled={!captchaToken || isLoading}
+          className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-lg font-black uppercase tracking-widest neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto shrink-0"
+        >
+          {isLoading ? 'Verifying...' : 'Launch Sync'}
+        </Button>
+      </div>
     </form>
   );
 });

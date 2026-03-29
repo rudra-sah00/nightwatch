@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { env } from '@/lib/env';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   createPartyRoom,
@@ -73,9 +74,9 @@ export function useWatchPartyLifecycle({
     if (requestStatus !== 'pending' || !activeUserId) return;
 
     let eventSource: EventSource | null = null;
-    const streamUrl = `/api/rooms/${roomId || room?.id || 'PENDING'}/stream${
-      guestToken ? `?token=${encodeURIComponent(guestToken)}` : ''
-    }`;
+    const streamUrl = `${env.BACKEND_URL}/api/rooms/${
+      roomId || room?.id || 'PENDING'
+    }/stream${guestToken ? `?token=${encodeURIComponent(guestToken)}` : ''}`;
 
     const connectSse = () => {
       eventSource = new EventSource(streamUrl, { withCredentials: true });

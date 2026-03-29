@@ -1,5 +1,6 @@
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
+import { CreatorFooter } from '@/components/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
 
@@ -97,8 +98,8 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
                 @{profile.username || 'unknown_user'}
               </p>
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 pt-4 text-[#1a1a1a]/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-8 pt-4">
+                <div className="flex items-center gap-2 text-[#1a1a1a]/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
                   <Calendar className="w-4 h-4" />
                   Joined {joinDate}
                 </div>
@@ -142,15 +143,16 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             </div>
           </div>
 
-          {/* Activity Legend & Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 pb-12 opacity-50 font-black text-[10px] uppercase tracking-[0.2em]">
             <div className="flex items-center gap-4">
-              <span>IDENTITY: {profile.id}</span>
+              <span>USER IDENTITY: {profile.id}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>SYSTEM VERSION: CORE-V1.0</span>
+              <span>CORE VERSION: V1.0-STABLE</span>
             </div>
           </div>
+
+          <CreatorFooter />
         </div>
       </div>
     </div>

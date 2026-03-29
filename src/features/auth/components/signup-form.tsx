@@ -336,7 +336,7 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
             value={formData.inviteCode || ''}
           />
 
-          <div className="pt-0.5 scale-[0.85] origin-left">
+          <div className="pt-0.5 origin-left">
             <Captcha
               ref={captchaRef}
               onVerify={setCaptchaToken}

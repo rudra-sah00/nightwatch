@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { env } from '@/lib/env';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   approveJoinRequest,
@@ -214,7 +215,7 @@ export function useWatchPartyMembers({
     const connectSSE = () => {
       if (!active) return;
 
-      const streamUrl = `/api/rooms/${room.id}/stream`;
+      const streamUrl = `${env.BACKEND_URL}/api/rooms/${room.id}/stream`;
 
       eventSource = new EventSource(streamUrl, {
         withCredentials: true,

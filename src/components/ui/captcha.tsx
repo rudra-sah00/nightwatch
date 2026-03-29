@@ -38,8 +38,11 @@ export function Captcha({ onVerify, onError, onExpire, ref }: CaptchaProps) {
 
   if (isDev) {
     return (
-      <div className="text-xs text-muted-foreground text-center my-2 p-2 border border-dashed rounded opacity-50">
-        Captcha Bypassed (Dev Mode)
+      <div className="w-full bg-[#f2ede5]/50 border-b-4 border-[#1a1a1a] p-2 flex items-center justify-center gap-2 select-none h-[42px]">
+        <div className="w-2 h-2 rounded-full bg-[#00aa44] animate-pulse" />
+        <span className="text-[10px] font-headline font-bold uppercase tracking-widest text-[#1a1a1a] opacity-40">
+          Dev Bypass Active
+        </span>
       </div>
     );
   }
