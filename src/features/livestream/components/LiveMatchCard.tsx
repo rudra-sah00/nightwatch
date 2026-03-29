@@ -1,12 +1,6 @@
 'use client';
 
-import { Clock, Play } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
+import { Play } from 'lucide-react';
 import type { CricketMatchInfo, LiveMatch } from '../api';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
 import { LiveMatchModal } from './LiveMatchModal';
@@ -33,20 +27,15 @@ function getCricketScore(match: LiveMatch, team: 1 | 2): string {
 
 interface LiveMatchCardProps {
   match: LiveMatch;
-  variant?: 'featured' | 'compact';
 }
 
-export function LiveMatchCard({
-  match,
-  variant = 'compact',
-}: LiveMatchCardProps) {
+export function LiveMatchCard({ match }: LiveMatchCardProps) {
   const {
     isLive,
     isEnded,
     isUpcoming,
     canWatch,
     formattedTime,
-    formattedDate,
     showPrompt,
     setShowPrompt,
     isCreatingParty,
@@ -54,6 +43,9 @@ export function LiveMatchCard({
     handleWatchSolo,
     handleWatchParty,
   } = useLiveMatchCard(match);
+
+  const isServer2 = match.id.startsWith('pm:');
+  const providerName = isServer2 ? 'Private Server' : 'Sports Today';
 
   const matchModal = (
     <LiveMatchModal
@@ -66,238 +58,108 @@ export function LiveMatchCard({
     />
   );
 
-  if (variant === 'featured') {
-    return (
-      <>
-        {matchModal}
-        <Card className="hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none">
-          <button
-            type="button"
-            onClick={handleWatchClick}
-            className={`w-full text-left flex flex-col h-full ${
-              canWatch ? 'cursor-pointer' : 'cursor-default'
-            }`}
-          >
-            {/* Top header bar */}
-            <CardHeader className="px-5 py-3 border-b-[4px] border-[#1a1a1a] bg-[#f5f0e8] flex-row items-center justify-between space-y-0">
-              <div className="flex items-center gap-3">
-                {isLive && (
-                  <span className="flex items-center gap-2 text-sm font-black font-headline uppercase tracking-widest text-[#e63b2e]">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full bg-[#e63b2e] opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 bg-[#e63b2e] border-2 border-[#1a1a1a]" />
-                    </span>
-                    Live
-                  </span>
-                )}
-                {isUpcoming && (
-                  <span className="flex items-center gap-2 text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
-                    <Clock className="w-4 h-4 stroke-[3px]" />
-                    {formattedTime}
-                  </span>
-                )}
-                {isEnded && (
-                  <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a]">
-                    Final
-                  </span>
-                )}
-              </div>
-              <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[140px]">
-                {match.league || match.type}
-              </span>
-            </CardHeader>
-
-            {/* Teams */}
-            <CardContent className="px-5 py-6 space-y-5">
-              {/* Team 1 */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white border-[3px] border-[#1a1a1a] neo-shadow-sm">
-                    {match.team1.avatar ? (
-                      <img
-                        src={match.team1.avatar}
-                        alt={match.team1.name}
-                        className="w-full h-full object-contain p-1"
-                      />
-                    ) : (
-                      <span className="text-sm text-[#1a1a1a] font-black font-headline uppercase">
-                        T1
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-lg md:text-xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] truncate">
-                    {match.team1.name}
-                  </span>
-                </div>
-                {!isUpcoming && (
-                  <span className="text-3xl font-black font-headline tracking-tighter text-[#1a1a1a] tabular-nums">
-                    {match.type === 'cricket'
-                      ? getCricketScore(match, 1)
-                      : match.team1.score}
-                  </span>
-                )}
-              </div>
-
-              {/* VS divider */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-black font-headline text-[#1a1a1a] uppercase bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a] neo-shadow-sm">
-                    VS
-                  </span>
-                </div>
-                <div className="flex-1 h-1 bg-[#1a1a1a]" />
-              </div>
-
-              {/* Team 2 */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white border-[3px] border-[#1a1a1a] neo-shadow-sm">
-                    {match.team2.avatar ? (
-                      <img
-                        src={match.team2.avatar}
-                        alt={match.team2.name}
-                        className="w-full h-full object-contain p-1"
-                      />
-                    ) : (
-                      <span className="text-sm text-[#1a1a1a] font-black font-headline uppercase">
-                        T2
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-lg md:text-xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] truncate">
-                    {match.team2.name}
-                  </span>
-                </div>
-                {!isUpcoming && (
-                  <span className="text-3xl font-black font-headline tracking-tighter text-[#1a1a1a] tabular-nums">
-                    {match.type === 'cricket'
-                      ? getCricketScore(match, 2)
-                      : match.team2.score}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-
-            {/* Bottom bar */}
-            {canWatch && (
-              <CardFooter className="border-t-[4px] border-[#1a1a1a] px-5 py-4 flex items-center justify-between bg-[#1a1a1a] mt-auto">
-                <span className="text-xs font-black font-headline uppercase tracking-widest text-[#f5f0e8]">
-                  {match.timeDesc || 'In Progress'}
-                </span>
-                <span className="flex items-center gap-2 text-sm font-black font-headline uppercase tracking-widest text-[#0055ff] bg-white px-3 py-1 border-[3px] border-[#1a1a1a] group-hover:bg-[#ffcc00] group-hover:text-[#1a1a1a] transition-colors">
-                  <Play className="w-4 h-4 fill-current stroke-[3px]" />
-                  Watch
-                </span>
-              </CardFooter>
-            )}
-            {isUpcoming && (
-              <CardFooter className="border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] px-5 py-4 mt-auto">
-                <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
-                  {formattedDate} • {formattedTime}
-                </span>
-              </CardFooter>
-            )}
-          </button>
-        </Card>
-      </>
-    );
-  }
-
-  // Compact row variant — clean table-like row
   return (
     <>
       {matchModal}
-      <button
-        type="button"
-        onClick={handleWatchClick}
-        className={`group flex items-center gap-4 px-6 py-4 transition-all duration-200 w-full text-left bg-white hover:bg-[#ffcc00] border-b-[3px] border-[#1a1a1a]/10 ${
-          canWatch ? 'cursor-pointer' : 'cursor-default'
-        }`}
-      >
-        {/* Time / Status column */}
-        <div className="w-16 flex-shrink-0 text-center">
-          {isLive ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#e63b2e] font-headline bg-white px-2 py-0.5 border-2 border-[#1a1a1a] neo-shadow-sm">
-              Liv
-            </span>
-          ) : isEnded ? (
-            <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline bg-[#ffcc00] px-2 py-0.5 border-2 border-[#1a1a1a] neo-shadow-sm">
-              Fin
-            </span>
-          ) : (
-            <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline tabular-nums">
-              {formattedTime}
-            </span>
-          )}
-        </div>
+      <div className="group relative bg-white border-b-[3px] border-[#1a1a1a]/10 hover:bg-[#f5f0e8] transition-colors">
+        <div className="flex items-center gap-4 px-6 py-5">
+          {/* Status Column */}
+          <div className="w-20 flex-shrink-0">
+            {isLive ? (
+              <div className="flex flex-col items-center">
+                <span className="px-2 py-0.5 bg-[#e63b2e] text-white text-[10px] font-black uppercase tracking-widest border-2 border-[#1a1a1a] neo-shadow-sm font-headline">
+                  Live
+                </span>
+                <span
+                  className={`mt-1.5 text-[8px] font-black uppercase tracking-tighter ${
+                    isServer2 ? 'text-[#0055ff]' : 'text-[#ffcc00]'
+                  }`}
+                >
+                  {providerName}
+                </span>
+              </div>
+            ) : isUpcoming ? (
+              <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline tabular-nums block text-center">
+                {formattedTime}
+              </span>
+            ) : (
+              <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a]/40 font-headline block text-center">
+                Final
+              </span>
+            )}
+          </div>
 
-        {/* Vertical separator */}
-        <div className="w-[3px] h-10 bg-[#1a1a1a] flex-shrink-0" />
+          <div className="w-[3px] h-12 bg-[#1a1a1a] hidden sm:block" />
 
-        {/* Teams column */}
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center neo-shadow-sm">
-              {match.team1.avatar ? (
-                <img
-                  src={match.team1.avatar}
-                  alt=""
-                  className="w-full h-full object-contain p-0.5"
-                />
-              ) : null}
+          {/* Teams Column */}
+          <div className="flex-grow min-w-0 grid grid-cols-1 gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center p-0.5 neo-shadow-sm">
+                {match.team1.avatar ? (
+                  <img
+                    src={match.team1.avatar}
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                ) : null}
+              </div>
+              <span className="text-sm font-black uppercase tracking-tight text-[#1a1a1a] font-headline truncate">
+                {match.team1.name}
+              </span>
+              {(isLive || isEnded) && (
+                <span className="ml-auto text-sm font-black font-headline tabular-nums">
+                  {match.type === 'cricket'
+                    ? getCricketScore(match, 1)
+                    : match.team1.score}
+                </span>
+              )}
             </div>
-            <span className="text-sm font-black uppercase tracking-widest text-[#1a1a1a] font-headline truncate">
-              {match.team1.name}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center neo-shadow-sm">
-              {match.team2.avatar ? (
-                <img
-                  src={match.team2.avatar}
-                  alt=""
-                  className="w-full h-full object-contain p-0.5"
-                />
-              ) : null}
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center p-0.5 neo-shadow-sm">
+                {match.team2.avatar ? (
+                  <img
+                    src={match.team2.avatar}
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                ) : null}
+              </div>
+              <span className="text-sm font-black uppercase tracking-tight text-[#1a1a1a] font-headline truncate">
+                {match.team2.name}
+              </span>
+              {(isLive || isEnded) && (
+                <span className="ml-auto text-sm font-black font-headline tabular-nums">
+                  {match.type === 'cricket'
+                    ? getCricketScore(match, 2)
+                    : match.team2.score}
+                </span>
+              )}
             </div>
-            <span className="text-sm font-black uppercase tracking-widest text-[#1a1a1a] font-headline truncate">
-              {match.team2.name}
+          </div>
+
+          <div className="w-32 flex-shrink-0 hidden lg:flex items-center justify-center">
+            <span className="px-3 py-1 bg-white border-2 border-[#1a1a1a] text-[10px] font-black uppercase tracking-[0.1em] font-headline neo-shadow-sm">
+              {match.league || match.type}
             </span>
           </div>
-        </div>
 
-        {/* Score column */}
-        {(isLive || isEnded) && (
-          <div className="flex-shrink-0 text-right space-y-2 min-w-[32px]">
-            <p className="text-sm tabular-nums text-[#1a1a1a] font-headline font-black">
-              {match.type === 'cricket'
-                ? getCricketScore(match, 1)
-                : match.team1.score || '-'}
-            </p>
-            <p className="text-sm tabular-nums text-[#1a1a1a] font-headline font-black">
-              {match.type === 'cricket'
-                ? getCricketScore(match, 2)
-                : match.team2.score || '-'}
-            </p>
+          {/* Action Button */}
+          <div className="w-24 flex-shrink-0 flex justify-end">
+            <button
+              type="button"
+              onClick={handleWatchClick}
+              className={`group/watch flex items-center gap-2 px-4 py-2 border-[3px] border-[#1a1a1a] font-black font-headline uppercase text-[10px] tracking-widest transition-all ${
+                canWatch
+                  ? 'bg-gradient-to-r from-[#e63b2e] to-[#ff6b00] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+                  : 'bg-[#f5f0e8] text-[#1a1a1a]/40 cursor-not-allowed opacity-50'
+              }`}
+            >
+              <Play className="w-3 h-3 fill-current transition-transform group-hover/watch:scale-110" />
+              Watch
+            </button>
           </div>
-        )}
-
-        {/* League tag */}
-        <div className="w-24 flex-shrink-0 hidden md:block">
-          <span className="text-[10px] text-[#4a4a4a] bg-white border-2 border-[#1a1a1a] px-2 py-0.5 uppercase tracking-widest font-headline font-black truncate block text-center neo-shadow-sm">
-            {match.league || match.type}
-          </span>
         </div>
-
-        {/* Action */}
-        {canWatch && (
-          <div className="flex-shrink-0 pl-2">
-            <span className="flex items-center justify-center w-8 h-8 bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] group-hover:bg-[#1a1a1a] group-hover:text-white transition-colors neo-shadow-sm group-hover:shadow-none">
-              <Play className="w-4 h-4 fill-current stroke-[3px]" />
-            </span>
-          </div>
-        )}
-      </button>
+      </div>
     </>
   );
 }

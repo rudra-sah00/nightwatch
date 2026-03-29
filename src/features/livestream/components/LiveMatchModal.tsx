@@ -81,7 +81,9 @@ export function LiveMatchModal({
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
-  const canWatch = isLive && match.playType === 'PlayTypeVideo';
+  const isServer2 = match.id.startsWith('pm:');
+  const providerName = isServer2 ? 'Private Server' : 'Sports Today';
+  const canWatch = (isLive || isServer2) && match.playType === 'PlayTypeVideo';
 
   const startTime = new Date(match.startTime);
   const formattedTime = startTime.toLocaleTimeString([], {
@@ -103,9 +105,20 @@ export function LiveMatchModal({
       <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white border-[4px] border-[#1a1a1a] neo-shadow flex flex-col no-scrollbar">
         {/* Header / Close button */}
         <div className="border-b-[4px] border-[#1a1a1a] bg-[#f5f0e8] flex justify-between items-center p-4 sticky top-0 z-20">
-          <span className="font-headline font-black uppercase tracking-widest text-[#1a1a1a] text-lg">
-            Match Details
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="font-headline font-black uppercase tracking-widest text-[#1a1a1a] text-lg">
+              Match Details
+            </span>
+            <div
+              className={`px-3 py-1 border-2 border-[#1a1a1a] text-[10px] font-black font-headline uppercase tracking-[0.2em] shadow-[2px_2px_0_0_#1a1a1a] hidden sm:block ${
+                isServer2
+                  ? 'bg-[#0055ff] text-white'
+                  : 'bg-[#ffcc00] text-[#1a1a1a]'
+              }`}
+            >
+              {providerName}
+            </div>
+          </div>
           <Button
             type="button"
             variant="neo-outline"

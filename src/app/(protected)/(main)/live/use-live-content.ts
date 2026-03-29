@@ -6,21 +6,40 @@ import { useTransition } from 'react';
 export function useLiveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const activeTab = searchParams.get('sportType') || 'basketball';
-
-  // No router.replace here — calling router.replace inside useEffect races
-  // with the useLivestreams fetch: if the schedule response arrives before
-  // the navigation commits, isLoading flips to false with schedule=[] and
-  // the effect never re-fires (sportType didn't change), showing
-  // "No Matches Found" until a hard refresh.
+  const activeServer =
+    (searchParams.get('server') as 'server1' | 'server2') || 'server1';
+  const activeTab =
+    searchParams.get('sportType') ||
+    (activeServer === 'server1' ? 'basketball' : 'soccer');
 
   const [isPending, startTransition] = useTransition();
 
   const handleTabChange = (val: string) => {
     startTransition(() => {
-      router.push(`/live?sportType=${val}`);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('sportType', val);
+      params.set('server', activeServer);
+      router.push(`/live?${params.toString()}`);
     });
   };
 
-  return { activeTab, isPending, handleTabChange };
+  const handleServerChange = (
+    serverId: 'server1' | 'server2',
+    defaultSport: string,
+  ) => {
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('server', serverId);
+      params.set('sportType', defaultSport);
+      router.push(`/live?${params.toString()}`);
+    });
+  };
+
+  return {
+    activeServer,
+    activeTab,
+    isPending,
+    handleTabChange,
+    handleServerChange,
+  };
 }

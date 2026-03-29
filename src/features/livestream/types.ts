@@ -25,6 +25,7 @@ export interface LiveMatch {
   timeDesc?: string;
   playPath?: string;
   playType?: string;
+  isStreamAvailable?: boolean;
   /** Cricket-specific: batting/bowling info for team 1 */
   teamMatchInfo1?: CricketMatchInfo;
   /** Cricket-specific: batting/bowling info for team 2 */

@@ -97,7 +97,19 @@ export function useHls({
               fragLoadingMaxRetry: 10,
             };
 
-        const hls = new Hls(hlsConfig);
+        const finalConfig = {
+          ...hlsConfig,
+          xhrSetup: (xhr: XMLHttpRequest, url: string) => {
+            // Smart Credentials: Only send cookies to our internal backend proxy.
+            // This fixes 401 errors for livestreams while keeping direct CDN
+            // movies working (which require anonymous access for '*' CORS).
+            if (url.includes('/api/stream/')) {
+              xhr.withCredentials = true;
+            }
+          },
+        };
+
+        const hls = new Hls(finalConfig);
 
         hls.loadSource(streamUrl);
         hls.attachMedia(video);

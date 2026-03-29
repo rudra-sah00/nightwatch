@@ -2,9 +2,7 @@ import { usePlayerContext } from '../../context/PlayerContext';
 import { SettingsMenu } from '../controls/SettingsMenu';
 
 export function PlayerSettingsMenu() {
-  const { state, playerHandlers, readOnly, metadata } = usePlayerContext();
-
-  if (metadata.type === 'livestream') return null;
+  const { state, playerHandlers, readOnly } = usePlayerContext();
 
   return (
     <SettingsMenu

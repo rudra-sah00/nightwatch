@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
 import type { LiveMatch } from '../types';
 
-export function useLivestreams(sportType = 'basketball') {
+export function useLivestreams(sportType = 'basketball', server = 'server1') {
   const [schedule, setSchedule] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -22,12 +22,19 @@ export function useLivestreams(sportType = 'basketball') {
         sportType,
         0,
         3,
+        server,
         controller.signal,
       );
 
       if (controller.signal.aborted) return;
+      // Deduplicate by ID to prevent React "duplicate key" errors from inconsistent API responses
+      const uniqueData = Array.from(
+        new Map(data.map((item) => [item.id, item])).values(),
+      );
       // Sort by start time (ascending) without mutating the API response
-      const sortedData = data.toSorted((a, b) => a.startTime - b.startTime);
+      const sortedData = uniqueData.toSorted(
+        (a, b) => a.startTime - b.startTime,
+      );
       setSchedule(sortedData);
     } catch (err: unknown) {
       if (controller.signal.aborted) return;
@@ -35,7 +42,7 @@ export function useLivestreams(sportType = 'basketball') {
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, [sportType]);
+  }, [sportType, server]);
 
   useEffect(() => {
     loadSchedule();
