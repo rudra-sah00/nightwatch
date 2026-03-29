@@ -1,7 +1,9 @@
 'use client';
 
 import { Loader2, Play, Users, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { cn } from '@/lib/utils';
 import type { LiveMatch } from '../types';
 
 interface LiveMatchModalProps {
@@ -104,14 +106,16 @@ export function LiveMatchModal({
           <span className="font-headline font-black uppercase tracking-widest text-[#1a1a1a] text-lg">
             Match Details
           </span>
-          <button
+          <Button
             type="button"
+            variant="neo-outline"
+            size="none"
             onClick={onClose}
-            className="p-2 border-[4px] border-[#1a1a1a] bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors"
+            className="p-2 h-auto"
             aria-label="Close"
           >
             <X className="w-5 h-5 stroke-[3px]" />
-          </button>
+          </Button>
         </div>
 
         {/* Hero — team panels */}
@@ -204,15 +208,17 @@ export function LiveMatchModal({
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* Watch Solo */}
-              <button
+              <Button
                 type="button"
+                variant="neo-yellow"
+                size="none"
                 onClick={onWatchSolo}
                 disabled={!canWatch}
-                className={`flex items-center justify-center gap-3 px-8 py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 ${
-                  canWatch
-                    ? 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-hover hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]'
-                    : 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70 border-[#4a4a4a]'
-                }`}
+                className={cn(
+                  'flex items-center justify-center gap-3 px-8 py-5 text-base md:text-lg',
+                  !canWatch &&
+                    'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70 border-[#4a4a4a]',
+                )}
               >
                 <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
                 {canWatch
@@ -220,19 +226,21 @@ export function LiveMatchModal({
                   : isUpcoming
                     ? 'Not Started Yet'
                     : 'Stream Unavailable'}
-              </button>
+              </Button>
 
               {/* Watch Party */}
               {!isMobile && (
-                <button
+                <Button
                   type="button"
+                  variant="neo"
+                  size="none"
                   onClick={onWatchParty}
                   disabled={isCreatingParty || !canWatch}
-                  className={`flex items-center justify-center gap-3 px-8 py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 ${
-                    canWatch && !isCreatingParty
-                      ? 'bg-[#1a1a1a] text-white neo-shadow-hover hover:bg-[#0055ff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
-                      : 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70 border-[#4a4a4a]'
-                  }`}
+                  className={cn(
+                    'flex items-center justify-center gap-3 px-8 py-5 text-base md:text-lg hover:bg-[#0055ff]',
+                    (isCreatingParty || !canWatch) &&
+                      'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70 border-[#4a4a4a]',
+                  )}
                 >
                   {isCreatingParty ? (
                     <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />
@@ -240,7 +248,7 @@ export function LiveMatchModal({
                     <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
                   )}
                   {isCreatingParty ? 'Creating...' : 'Start Party'}
-                </button>
+                </Button>
               )}
             </div>
 

@@ -23,21 +23,23 @@ export default function LiveMatchPlayerPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-black">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <Loader2 className="w-10 h-10 text-white animate-spin stroke-[3px]" />
       </div>
     );
   }
 
   if (error || !match) {
     return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <h2 className="text-2xl font-bold mb-4">Stream Unavailable</h2>
-        <p className="text-zinc-400 mb-8">
+      <div className="flex flex-col h-screen w-full items-center justify-center bg-[#f5f0e8] text-[#1a1a1a] px-4">
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4">
+          Stream Unavailable
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 mb-8">
           {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 w-4 h-4" /> Back to Schedule
+          <Button className="bg-white text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
       </div>
@@ -46,15 +48,18 @@ export default function LiveMatchPlayerPage() {
 
   if (match.status === 'MatchNotStart') {
     return (
-      <div className="fixed inset-0 z-50 bg-zinc-900 flex flex-col items-center justify-center text-white">
-        <Calendar className="w-16 h-16 text-zinc-600 mb-4" />
-        <h2 className="text-3xl font-bold mb-2">Match Has Not Started</h2>
-        <p className="text-zinc-400 mb-8">
-          Please check back closer to the start time.
+      <div className="fixed inset-0 z-50 bg-[#f5f0e8] flex flex-col items-center justify-center text-[#1a1a1a]">
+        <Calendar className="w-20 h-20 text-[#1a1a1a]/20 mb-6 stroke-[3px]" />
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2 text-center px-4">
+          Match Has Not Started
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 mb-8 max-w-sm text-center px-4">
+          Prepare for the event. Please check back closer to the scheduled start
+          time.
         </p>
         <Link href="/live">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 w-4 h-4" /> Back to Schedule
+          <Button className="bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
       </div>
@@ -63,10 +68,12 @@ export default function LiveMatchPlayerPage() {
 
   if (!match.playPath && match.status === 'MatchIng') {
     return (
-      <div className="fixed inset-0 z-50 bg-zinc-900 flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-12 h-12 text-zinc-600 animate-spin mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Waiting for Feed...</h2>
-        <p className="text-zinc-400">
+      <div className="fixed inset-0 z-50 bg-[#f5f0e8] flex flex-col items-center justify-center text-[#1a1a1a]">
+        <Loader2 className="w-16 h-16 text-[#1a1a1a]/20 animate-spin mb-6 stroke-[3px]" />
+        <h2 className="text-3xl font-black font-headline uppercase tracking-tighter mb-2">
+          Waiting for Feed...
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 max-w-xs text-center">
           The stream URL has not been broadcasted by the source yet.
         </p>
       </div>
@@ -75,16 +82,18 @@ export default function LiveMatchPlayerPage() {
 
   if (match.status === 'MatchEnded') {
     return (
-      <div className="fixed inset-0 z-50 bg-zinc-900 flex flex-col items-center justify-center text-white">
-        <Trophy className="w-16 h-16 text-zinc-600 mb-4" />
-        <h2 className="text-3xl font-bold mb-2">Match Ended</h2>
-        <p className="text-zinc-400 mb-8">
+      <div className="fixed inset-0 z-50 bg-[#f5f0e8] flex flex-col items-center justify-center text-[#1a1a1a]">
+        <Trophy className="w-20 h-20 text-[#ffcc00] mb-6 stroke-[3px]" />
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2">
+          Match Concluded
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-[#1a1a1a]/60 mb-8 max-w-md text-center px-4">
           {match.matchResult ||
-            `${match.team1.name} vs ${match.team2.name} has concluded.`}
+            `${match.team1.name} vs ${match.team2.name} has ended.`}
         </p>
         <Link href="/live">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 w-4 h-4" /> Back to Schedule
+          <Button className="bg-white text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
       </div>
@@ -110,47 +119,51 @@ export default function LiveMatchPlayerPage() {
     <div className="flex items-center gap-3 ml-auto">
       {match.status === 'MatchIng' && (
         <Badge
-          variant="destructive"
-          className="animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)] border-none"
+          variant="red"
+          className="animate-pulse shadow-[0_0_15px_rgba(230,59,46,0.6)]"
         >
           LIVE
         </Badge>
       )}
-      <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-sm">
+      <div className="flex items-center gap-2 bg-white border-[3px] border-[#1a1a1a] px-3 py-1 text-[#1a1a1a] neo-shadow-sm scale-90">
         <img
           src={match.team1.avatar}
           alt="T1"
-          className="w-5 h-5 rounded-full"
+          className="w-5 h-5 rounded-none border border-[#1a1a1a]"
         />
         {match.type === 'cricket' ? (
-          <span className="font-medium text-xs max-w-[140px] truncate">
+          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
             {match.matchResult || `${match.team1.name} vs ${match.team2.name}`}
           </span>
         ) : (
           <>
-            <span className="font-bold">{match.team1.score}</span>
-            <span className="text-zinc-500">-</span>
-            <span className="font-bold">{match.team2.score}</span>
+            <span className="font-black font-headline tabular-nums">
+              {match.team1.score}
+            </span>
+            <span className="text-[#1a1a1a]/30 font-black">-</span>
+            <span className="font-black font-headline tabular-nums">
+              {match.team2.score}
+            </span>
           </>
         )}
         <img
           src={match.team2.avatar}
           alt="T2"
-          className="w-5 h-5 rounded-full"
+          className="w-5 h-5 rounded-none border border-[#1a1a1a]"
         />
       </div>
       <Button
         onClick={handleCreateParty}
         disabled={isCreatingParty}
         size="sm"
-        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1.5 border border-indigo-500/50"
+        className="bg-[#0055ff] hover:bg-[#3377ff] text-white rounded-none border-[3px] border-[#1a1a1a] gap-1.5 font-headline font-black uppercase tracking-widest neo-shadow-sm h-8"
       >
         {isCreatingParty ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <Loader2 className="w-3 h-3 animate-spin stroke-[3px]" />
         ) : (
-          <Users className="w-3.5 h-3.5" />
+          <Users className="w-3.5 h-3.5 stroke-[3px]" />
         )}
-        Party
+        <span className="hidden sm:inline">Party</span>
       </Button>
     </div>
   );

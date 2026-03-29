@@ -23,6 +23,7 @@ export function useSignupForm() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaHandle>(null);
 
+  const [isInviteValid, setIsInviteValid] = useState<boolean | null>(null);
   const [formData, setFormData] = useState<RegisterInput>({
     name: '',
     username: '',
@@ -69,12 +70,28 @@ export function useSignupForm() {
     return () => clearTimeout(timer);
   }, [formData.username]);
 
-  // Pre-fill invite code from URL
+  // Pre-fill invite code from URL and validate
   useEffect(() => {
     const invite = searchParams.get('invite');
-    if (invite) {
-      setFormData((prev) => ({ ...prev, inviteCode: invite }));
+    if (!invite) {
+      setIsInviteValid(false);
+      return;
     }
+
+    setFormData((prev) => ({ ...prev, inviteCode: invite }));
+
+    const checkInvite = async () => {
+      try {
+        const { validateInvite } = await import('@/features/auth/api');
+        const { valid } = await validateInvite(invite);
+        setIsInviteValid(valid);
+      } catch (err) {
+        console.error('[SignupForm] Invite validation failed:', err);
+        setIsInviteValid(false);
+      }
+    };
+
+    checkInvite();
   }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +146,10 @@ export function useSignupForm() {
           const field = err.path[0];
           if (typeof field === 'string') errors[field] = err.message;
         }
-        return { fieldErrors: errors };
+        return {
+          fieldErrors: errors,
+          error: 'Please check all fields and try again.',
+        };
       }
 
       try {
@@ -290,5 +310,6 @@ export function useSignupForm() {
     handleResend,
     handleOtpSubmit,
     isOtpStep: step === 'otp',
+    isInviteValid,
   };
 }

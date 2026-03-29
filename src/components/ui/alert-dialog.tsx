@@ -65,7 +65,9 @@ export function AlertDialog({
         tabIndex={-1}
       />
       {/* Content */}
-      <div className="relative z-50">{children}</div>
+      <div className="relative z-50 animate-in fade-in zoom-in-95 duration-200">
+        {children}
+      </div>
     </div>
   );
 }
@@ -77,7 +79,7 @@ export function AlertDialogContent({
   return (
     <div
       className={cn(
-        'bg-zinc-900 border border-white/10 rounded-lg shadow-xl max-w-md w-full mx-4 p-6',
+        'bg-white border-[4px] border-[#1a1a1a] rounded-none neo-shadow max-w-md w-full mx-4 p-8 relative',
         className,
       )}
     >
@@ -90,7 +92,7 @@ export function AlertDialogHeader({
   children,
   className,
 }: AlertDialogHeaderProps) {
-  return <div className={cn('space-y-2 mb-4', className)}>{children}</div>;
+  return <div className={cn('space-y-4 mb-6', className)}>{children}</div>;
 }
 
 export function AlertDialogFooter({
@@ -98,7 +100,12 @@ export function AlertDialogFooter({
   className,
 }: AlertDialogFooterProps) {
   return (
-    <div className={cn('flex justify-end gap-3 mt-6', className)}>
+    <div
+      className={cn(
+        'flex flex-col-reverse sm:flex-row justify-end gap-4 mt-8',
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -109,7 +116,12 @@ export function AlertDialogTitle({
   className,
 }: AlertDialogTitleProps) {
   return (
-    <h2 className={cn('text-xl font-semibold text-white', className)}>
+    <h2
+      className={cn(
+        'text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-none',
+        className,
+      )}
+    >
       {children}
     </h2>
   );
@@ -119,7 +131,16 @@ export function AlertDialogDescription({
   children,
   className,
 }: AlertDialogDescriptionProps) {
-  return <p className={cn('text-sm text-white/70', className)}>{children}</p>;
+  return (
+    <p
+      className={cn(
+        'text-sm font-headline font-bold uppercase tracking-widest text-[#4a4a4a] leading-relaxed',
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
 }
 
 export function AlertDialogAction({
@@ -130,7 +151,7 @@ export function AlertDialogAction({
   return (
     <button
       className={cn(
-        'px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition-colors',
+        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-[#1a1a1a] font-headline font-black uppercase tracking-widest neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200',
         className,
       )}
       {...props}
@@ -148,7 +169,7 @@ export function AlertDialogCancel({
   return (
     <button
       className={cn(
-        'px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md font-medium transition-colors',
+        'px-6 py-3 bg-white text-[#1a1a1a] border-[3px] border-[#1a1a1a] font-headline font-black uppercase tracking-widest neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200',
         className,
       )}
       {...props}

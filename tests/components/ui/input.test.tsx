@@ -53,9 +53,9 @@ describe('Input', () => {
     expect(screen.getByTestId('input')).toHaveValue('hello');
   });
 
-  it('renders error text in destructive color class', () => {
+  it('renders error text in red color class', () => {
     const { container } = render(<Input error="Bad value" />);
     const errorP = container.querySelector('p');
-    expect(errorP).toHaveClass('text-destructive');
+    expect(errorP).toHaveClass('text-[#e63b2e]');
   });
 });

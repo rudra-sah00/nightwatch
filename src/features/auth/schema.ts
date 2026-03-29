@@ -93,10 +93,24 @@ export const registerSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-export const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  captchaToken: z.string().optional(),
-});
+export const forgotPasswordSchema = z
+  .object({
+    email: z
+      .string()
+      .email('Invalid email format')
+      .optional()
+      .or(z.literal('')),
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .optional()
+      .or(z.literal('')),
+    captchaToken: z.string().optional(),
+  })
+  .refine((data) => !!data.email || !!data.username, {
+    message: 'Either email or username is required',
+    path: ['email'],
+  });
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 

@@ -487,8 +487,8 @@ describe('ContinueWatching', () => {
     const { container } = render(<ContinueWatching />);
 
     expect(screen.getByText('Continue Watching')).toBeInTheDocument();
-    // Check for loading spinner
-    const loader = container.querySelector('.animate-spin');
+    // Check for loading pulse
+    const loader = container.querySelector('.animate-pulse');
     expect(loader).toBeInTheDocument();
   });
 

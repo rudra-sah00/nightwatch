@@ -22,6 +22,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { type ToolType, useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
@@ -137,36 +138,42 @@ export function WatchPartySketch() {
           Sketch Tools
         </h3>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <button
+          <Button
             type="button"
+            variant="neo-base"
+            size="none"
             onClick={triggerUndo}
-            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#1a1a1a] hover:bg-[#ffe066] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#1a1a1a] hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a]"
             title="Undo last action"
           >
             <Undo2 className="w-3.5 h-3.5 stroke-[3px]" />
             <span className="hidden xl:inline">Undo</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="neo-base"
+            size="none"
             onClick={triggerClearSelf}
-            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#0055ff] hover:bg-[#0055ff] hover:text-white transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#0055ff] hover:bg-[#0055ff] hover:text-white font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a]"
             title="Clear only your drawings"
           >
             <Eraser className="w-3.5 h-3.5 stroke-[3px]" />
             <span className="hidden xl:inline">Clear Mine</span>
-          </button>
+          </Button>
 
           {isHost && (
-            <button
+            <Button
               type="button"
+              variant="neo-base"
+              size="none"
               onClick={triggerClear}
-              className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-[#e63b2e] text-white hover:bg-[#1a1a1a] transition-colors font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] neo-shadow-sm"
+              className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-[#e63b2e] text-white hover:bg-[#1a1a1a] font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a]"
               title="Host only: Clear everything"
             >
               <Trash2 className="w-3.5 h-3.5 stroke-[3px]" />
               <span className="hidden xl:inline">Clear All</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -337,8 +344,9 @@ export function WatchPartySketch() {
 
       {/* Footer Actions */}
       <div className="p-4 border-t-[3px] border-[#1a1a1a] bg-[#f5f0e8]">
-        <button
+        <Button
           type="button"
+          variant="neo"
           onClick={() => {
             const stage = stageRef.current;
             if (!stage) return;
@@ -363,11 +371,11 @@ export function WatchPartySketch() {
               }
             }, 50);
           }}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-[#00ff88] text-[#1a1a1a] border-[3px] border-[#1a1a1a] neo-shadow-sm font-black font-headline uppercase tracking-widest hover:translate-x-[-2px] hover:translate-y-[-2px] hover:neo-shadow-md transition-all active:translate-x-[2px] active:translate-y-[2px] active:neo-shadow-none"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm bg-[#00ff88] hover:bg-[#00cc6a] text-[#1a1a1a]"
         >
           <Camera className="w-5 h-5 stroke-[3px]" />
           Capture Scene
-        </button>
+        </Button>
       </div>
 
       {/* Emoji Picker Overlay */}

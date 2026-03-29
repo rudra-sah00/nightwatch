@@ -9,6 +9,7 @@ import {
   VideoOff,
   X,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
 import type { MediaDevice } from '../media/hooks/useAgora';
@@ -95,10 +96,12 @@ export function MediaControls({
         />
 
         {isHost ? (
-          <button
+          <Button
             type="button"
+            variant="neo-yellow"
+            size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] transition-all hover:bg-[#1a1a1a] hover:text-[#ffcc00]"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm"
           >
             {linkCopied ? (
               <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
@@ -108,20 +111,22 @@ export function MediaControls({
             <span className="hidden xl:inline">
               {linkCopied ? 'Copied' : 'Invite'}
             </span>
-          </button>
+          </Button>
         ) : null}
 
-        <button
+        <Button
           type="button"
+          variant="neo-red"
+          size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-[#1a1a1a] bg-[#e63b2e] text-white transition-all hover:bg-[#1a1a1a]',
+            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm',
             isHost ? 'flex-1' : 'w-full',
           )}
         >
           <LogOut aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
           <span className="hidden xl:inline">{isHost ? 'End' : 'Leave'}</span>
-        </button>
+        </Button>
       </div>
 
       {/* Media Controls */}
@@ -174,11 +179,13 @@ export function MediaControls({
                   onClose={() => setShowAudioDevices(false)}
                 />
               ) : null}
-              <button
+              <Button
                 type="button"
+                variant="none"
+                size="none"
                 onClick={onToggleAudio}
                 className={cn(
-                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-colors',
+                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
                   audioEnabled
                     ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
                     : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
@@ -196,15 +203,17 @@ export function MediaControls({
                     className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
                   />
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="none"
+                size="none"
                 onClick={() => {
                   setShowAudioDevices(!showAudioDevices);
                   setShowVideoDevices(false);
                 }}
                 className={cn(
-                  'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
+                  'p-2.5 border-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
                   showAudioDevices
                     ? 'bg-[#1a1a1a] text-white'
                     : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
@@ -216,7 +225,7 @@ export function MediaControls({
                 ) : (
                   <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 )}
-              </button>
+              </Button>
             </div>
 
             {/* Video Button with Arrow */}
@@ -233,11 +242,13 @@ export function MediaControls({
                   onClose={() => setShowVideoDevices(false)}
                 />
               ) : null}
-              <button
+              <Button
                 type="button"
+                variant="none"
+                size="none"
                 onClick={onToggleVideo}
                 className={cn(
-                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-colors',
+                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
                   videoEnabled
                     ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
                     : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
@@ -255,15 +266,17 @@ export function MediaControls({
                     className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
                   />
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="none"
+                size="none"
                 onClick={() => {
                   setShowVideoDevices(!showVideoDevices);
                   setShowAudioDevices(false);
                 }}
                 className={cn(
-                  'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
+                  'p-2.5 border-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
                   showVideoDevices
                     ? 'bg-[#1a1a1a] text-white'
                     : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
@@ -275,7 +288,7 @@ export function MediaControls({
                 ) : (
                   <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -324,15 +337,17 @@ function DeviceDropdown({
           </div>
         ) : (
           devices.map((device) => (
-            <button
+            <Button
               key={device.deviceId}
               type="button"
+              variant="none"
+              size="none"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(device.deviceId);
               }}
               className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 border-[2px] text-xs font-bold font-headline uppercase tracking-widest text-left transition-colors cursor-pointer',
+                'w-full flex items-center gap-2 px-3 py-2 border-[2px] transition-all rounded-none h-auto active:translate-y-[1px]',
                 selectedDevice === device.deviceId
                   ? 'bg-[#ffe066] border-[#1a1a1a] text-[#1a1a1a]'
                   : 'bg-white border-transparent text-[#1a1a1a] hover:border-[#1a1a1a] hover:bg-[#f5f0e8]',
@@ -342,7 +357,7 @@ function DeviceDropdown({
                 <Check className="w-4 h-4 shrink-0 stroke-[3px]" />
               ) : null}
               <span className="truncate">{device.label}</span>
-            </button>
+            </Button>
           ))
         )}
       </div>

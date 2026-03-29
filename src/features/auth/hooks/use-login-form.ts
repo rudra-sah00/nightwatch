@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { type LoginInput, loginSchema } from '@/features/auth/schema';
+import { forgotPassword } from '@/features/auth/api';
+import { loginSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
-type Step = 'initial' | 'otp';
+type Step = 'initial' | 'otp' | 'forgot' | 'forgot_success';
 
 interface FormState {
   error?: string;
@@ -21,9 +22,10 @@ export function useLoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<LoginInput>({
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
+    identifier: '', // Unified field for forgot password
   });
 
   const [otp, setOtp] = useState('');
@@ -46,23 +48,27 @@ export function useLoginForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: LoginInput) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name as keyof typeof fieldErrors]) {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
     }
     if (error) setError(null);
   };
 
   const [state, action, isPending] = React.useActionState(
-    async (_prevState: FormState | null, formData: FormData) => {
+    async (_prevState: FormState | null, formDataObj: FormData) => {
       setError(null);
       setFieldErrors({});
 
-      const email = formData.get('email') as string;
-      const password = formData.get('password') as string;
-      const captchaToken = formData.get('captchaToken') as string;
+      if (step === 'forgot') {
+        return handleForgotPasswordAction(formDataObj);
+      }
 
-      if (!captchaToken) {
+      const email = formDataObj.get('email') as string;
+      const password = formDataObj.get('password') as string;
+      const captchaTokenVal = formDataObj.get('captchaToken') as string;
+
+      if (!captchaTokenVal) {
         return { error: 'Please complete the security verification.' };
       }
 
@@ -77,7 +83,11 @@ export function useLoginForm() {
       }
 
       try {
-        const response = await login({ email, password, captchaToken });
+        const response = await login({
+          email,
+          password,
+          captchaToken: captchaTokenVal,
+        });
         if (response.requiresOtp) {
           if (response.email) {
             setFormData((prev) => ({ ...prev, email: response.email ?? '' }));
@@ -113,6 +123,42 @@ export function useLoginForm() {
     null,
   );
 
+  const handleForgotPasswordAction = async (formDataObj: FormData) => {
+    const identifier = formDataObj.get('identifier') as string;
+    const captchaTokenVal = formDataObj.get('captchaToken') as string;
+
+    if (!captchaTokenVal) {
+      return { error: 'Please complete the security verification.' };
+    }
+
+    if (!identifier) {
+      return { error: 'Please provide either an email or a username.' };
+    }
+
+    try {
+      await forgotPassword({
+        email: identifier,
+        captchaToken: captchaTokenVal,
+      });
+      setStep('forgot_success');
+      return { success: true };
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      if (apiError.code === 'VALIDATION_ERROR' && apiError.details) {
+        const errors: Record<string, string> = {};
+        apiError.details.forEach((detail) => {
+          // In forgot step, we map validation errors to 'identifier'
+          errors.identifier = detail.message;
+        });
+        return { fieldErrors: errors };
+      }
+      return {
+        error:
+          apiError.message || 'Failed to send reset link. Please try again.',
+      };
+    }
+  };
+
   useEffect(() => {
     if (state) {
       if (state.error) {
@@ -121,9 +167,6 @@ export function useLoginForm() {
       }
       if (state.fieldErrors) {
         setFieldErrors(state.fieldErrors);
-        Object.values(state.fieldErrors).forEach((msg) => {
-          if (msg) toast.error(msg);
-        });
       }
     }
   }, [state]);
@@ -248,5 +291,7 @@ export function useLoginForm() {
     handleResend,
     handleOtpSubmit,
     isOtpStep: step === 'otp',
+    isForgotStep: step === 'forgot',
+    isForgotSuccessStep: step === 'forgot_success',
   };
 }

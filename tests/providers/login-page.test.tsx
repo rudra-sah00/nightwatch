@@ -60,20 +60,13 @@ describe('LoginPage', () => {
     sessionStorage.clear();
   });
 
-  it('renders correctly and exercises dynamic loading states', async () => {
+  it('renders correctly', async () => {
     const { default: LoginPage } = await import('@/app/(public)/login/page');
     render(<LoginPage />);
 
     expect(
       screen.getByRole('heading', { name: /solo viewing/i }),
     ).toBeInTheDocument();
-
-    // Check that our mock exercised the loading paths
-    const loadingElements = screen.getAllByTestId('dynamic-loading');
-    expect(loadingElements.length).toBeGreaterThan(0);
-
-    // LoginForm loading state contains "Loading..."
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('shows flash message from sessionStorage and clears it', async () => {

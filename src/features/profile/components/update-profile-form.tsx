@@ -2,6 +2,7 @@
 
 import { Camera, Loader2, LogOut } from 'lucide-react';
 import { useRef } from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
@@ -215,18 +216,20 @@ export function UpdateProfileForm() {
                 <span>Saving...</span>
               </div>
             )}
-            <button
+            <Button
               type="button"
+              variant="neo-red"
+              size="neo"
               onClick={(e) => {
                 e.preventDefault();
                 logout();
               }}
-              className="flex items-center gap-2 px-6 py-2 bg-[#e63b2e] text-white font-headline font-black uppercase border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[3px] active:translate-y-[3px] min-w-[140px] justify-center md:justify-end"
+              className="min-w-[140px] justify-center md:justify-end"
               title="Sign Out"
             >
               <LogOut className="w-5 h-5 stroke-[3px]" />
               <span className="hidden sm:inline">Sign Out</span>
-            </button>
+            </Button>
             <button
               type="submit"
               className="hidden pointer-events-none"
@@ -257,17 +260,18 @@ export function UpdateProfileForm() {
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="neo-yellow"
+          size="neo-lg"
           onClick={() => {
             const url = `${window.location.origin}/user/${user.id}`;
             navigator.clipboard.writeText(url);
-            // Optional: Show toast or feedback
           }}
-          className="w-full md:w-auto px-8 py-4 bg-[#ffcc00] text-[#1a1a1a] font-headline font-black uppercase border-4 border-[#1a1a1a] hover:bg-white transition-all neo-shadow-sm active:translate-x-[2px] active:translate-y-[2px] text-xl"
+          className="w-full md:w-auto text-xl"
         >
           COPY PUBLIC LINK
-        </button>
+        </Button>
       </section>
 
       {/* Server Selection */}

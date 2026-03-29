@@ -106,7 +106,7 @@ export function ContentDetailModal({
           Failed to load content
         </p>
         <Button
-          variant="outline"
+          variant="neo-outline"
           className="mt-6 border-[3px] border-[#1a1a1a] font-black uppercase neo-shadow-sm"
           onClick={onClose}
         >

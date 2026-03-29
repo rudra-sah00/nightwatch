@@ -1,7 +1,8 @@
 'use client';
 
-import { Calendar, CheckCircle2, Clock, Loader2, Radio } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, Radio } from 'lucide-react';
 import { Suspense } from 'react';
+import { LiveMatchSkeleton } from '@/components/ui/skeletons';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useLiveContent } from './use-live-content';
@@ -86,11 +87,23 @@ function LiveContent() {
       {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
         {isLoading || isPending ? (
-          <div className="flex flex-col items-center justify-center py-32">
-            <Loader2 className="w-16 h-16 text-[#1a1a1a] animate-spin mb-6" />
-            <p className="font-headline font-black uppercase text-2xl tracking-widest text-[#1a1a1a]">
-              Loading {activeSport?.label || 'matches'}...
-            </p>
+          <div className="space-y-16">
+            <section>
+              <div className="h-10 w-48 bg-[#e63b2e] border-[4px] border-[#1a1a1a] neo-shadow-sm mb-8 animate-pulse" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <LiveMatchSkeleton variant="featured" />
+                <LiveMatchSkeleton variant="featured" />
+                <LiveMatchSkeleton variant="featured" />
+              </div>
+            </section>
+            <section>
+              <div className="h-10 w-48 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow-sm mb-8 animate-pulse" />
+              <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow overflow-hidden">
+                <LiveMatchSkeleton variant="compact" />
+                <LiveMatchSkeleton variant="compact" />
+                <LiveMatchSkeleton variant="compact" />
+              </div>
+            </section>
           </div>
         ) : error ? (
           <div className="py-20 text-center flex flex-col items-center">
@@ -235,11 +248,22 @@ export default function LivePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-80px)] bg-[#f5f0e8] pb-32 flex flex-col items-center justify-center">
-          <Loader2 className="w-16 h-16 text-[#1a1a1a] animate-spin mb-6" />
-          <p className="font-headline font-black uppercase text-2xl tracking-widest text-[#1a1a1a]">
-            Loading Live Hub...
-          </p>
+        <div className="min-h-[calc(100vh-80px)] bg-[#f5f0e8] pb-32">
+          {/* Header Skeleton */}
+          <div className="h-48 md:h-64 bg-[#ffcc00] border-b-[4px] border-[#1a1a1a] mb-12" />
+
+          <div className="container mx-auto px-6 md:px-10">
+            <div className="space-y-16">
+              <section>
+                <div className="h-10 w-48 bg-[#e63b2e] border-[4px] border-[#1a1a1a] neo-shadow-sm mb-8 animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <LiveMatchSkeleton variant="featured" />
+                  <LiveMatchSkeleton variant="featured" />
+                  <LiveMatchSkeleton variant="featured" />
+                </div>
+              </section>
+            </div>
+          </div>
         </div>
       }
     >

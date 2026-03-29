@@ -77,7 +77,7 @@ export function Soundboard({
           {sounds.map((sound) => (
             <Button
               key={sound.slug}
-              variant="outline"
+              variant="neo-outline"
               size="sm"
               onClick={() => handleTriggerSound(sound.sound, sound.name)}
               className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-white text-[#1a1a1a] hover:bg-[#ffe066] border-[#1a1a1a] border-[3px] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none shadow-[2px_2px_0px_0px_#1a1a1a] group relative overflow-hidden rounded-none"
@@ -110,7 +110,7 @@ export function Soundboard({
           >
             {!loading && hasMore ? (
               <Button
-                variant="ghost"
+                variant="neo-ghost"
                 size="sm"
                 className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]/60 hover:text-[#1a1a1a] hover:bg-transparent"
                 onClick={loadMore}

@@ -8,6 +8,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import type { User } from '@/types';
 import type { RoomPreview } from '../room/types';
@@ -64,13 +65,15 @@ export function WatchPartyLobby({
             Watch Party is only available on desktop. Please open this link on a
             computer to watch together.
           </p>
-          <button
+          <Button
             type="button"
+            variant="neo-base"
+            size="none"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
+            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
           >
             Go Home
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -93,13 +96,15 @@ export function WatchPartyLobby({
           <p className="text-[#1a1a1a] font-medium uppercase text-sm leading-relaxed">
             This watch party has ended or the link is no longer valid.
           </p>
-          <button
+          <Button
             type="button"
+            variant="neo-base"
+            size="none"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
+            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
           >
             Back to Home
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -145,13 +150,15 @@ export function WatchPartyLobby({
           <p className="text-[#1a1a1a] font-medium uppercase text-xs text-center leading-relaxed mb-8">
             The host has been notified. You'll join automatically once approved.
           </p>
-          <button
+          <Button
             type="button"
+            variant="neo-base"
+            size="none"
             onClick={onCancelRequest || onLeave}
-            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-[#1a1a1a] font-bold font-headline uppercase text-sm hover:bg-[#e63b2e] hover:text-white transition-colors active:translate-x-[1px] active:translate-y-[1px]"
+            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white"
           >
             Cancel Request
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -171,20 +178,22 @@ export function WatchPartyLobby({
             The host has declined your request to join this party.
           </p>
           <div className="flex flex-col gap-3">
-            <button
+            <Button
               type="button"
+              variant="neo-base"
+              size="none"
               onClick={() => window.location.reload()}
-              className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm"
+              className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
             >
               Try Again
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="none"
               onClick={() => router.push('/home')}
-              className="w-full py-2 font-headline font-bold uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors text-xs"
+              className="w-full text-[#1a1a1a]/60 hover:text-[#1a1a1a] text-[10px] font-headline font-bold uppercase tracking-widest underline underline-offset-4"
             >
               Go Home
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -275,33 +284,29 @@ export function WatchPartyLobby({
             ) : null}
 
             <div className="space-y-3">
-              <button
+              <Button
                 type="button"
+                variant="neo-base"
+                size="none"
                 onClick={onJoin}
                 disabled={
                   isLoading ||
                   (!user && !guestName.trim()) ||
                   (!user && !captchaToken)
                 }
-                className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] font-black font-headline uppercase tracking-widest hover:bg-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none neo-shadow-sm disabled:opacity-50 disabled:grayscale disabled:shadow-none"
+                className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white opacity-100 disabled:opacity-50"
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Requesting…
-                  </div>
-                ) : (
-                  'Request to Join'
-                )}
-              </button>
+                {isLoading ? 'Requesting…' : 'Request to Join'}
+              </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="none"
                 onClick={() => router.push('/home')}
-                className="w-full py-2 font-headline font-bold uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors text-xs"
+                className="w-full text-[#1a1a1a]/60 hover:text-[#1a1a1a] text-[10px] font-headline font-bold uppercase tracking-widest underline underline-offset-4"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
 
             {error ? (

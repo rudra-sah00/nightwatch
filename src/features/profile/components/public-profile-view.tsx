@@ -152,7 +152,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             </div>
           </div>
 
-          <CreatorFooter />
+          <CreatorFooter isCompact={false} />
         </div>
       </div>
     </div>

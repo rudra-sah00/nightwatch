@@ -1,38 +1,34 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { GlobalLoading } from '@/components/ui/global-loading';
-import { useSignupContent } from './use-signup-content';
+import { SignupForm } from '@/features/auth/components/signup-form';
+import { useSignupForm } from '@/features/auth/hooks/use-signup-form';
 
-const SignupForm = dynamic(
-  () =>
-    import('@/features/auth/components/signup-form').then((m) => ({
-      default: m.SignupForm,
-    })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-pulse font-headline text-[#1a1a1a] opacity-60">
-          Loading...
-        </div>
-      </div>
-    ),
-    ssr: false,
-  },
-);
+import { useAuth } from '@/providers/auth-provider';
 
 export default function SignupPage() {
-  const { isAuthenticated, isLoading, isInviteValid } = useSignupContent();
+  const signupHook = useSignupForm();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isLoading: hookLoading, isInviteValid } = signupHook;
+
+  const isLoading = authLoading || hookLoading;
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
+  const router = useRouter();
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        router.push('/');
+      }, 700);
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, initialAuthCheck]);
+  }, [isAuthenticated, initialAuthCheck, router]);
 
   // Loading State
   if (isLoading) {
@@ -64,16 +60,18 @@ export default function SignupPage() {
             <div className="mt-8 w-full">
               <Button
                 asChild
-                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-6 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto block text-center"
+                variant="neo-yellow"
+                size="neo-lg"
+                className="w-full text-center"
               >
-                <a href="/login">Back to Login</a>
+                <Link href="/login">Back to Login</Link>
               </Button>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
             {/* Features Bento Box - height driven by the signup form on the right */}
-            <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6">
+            <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[440px] h-full">
               <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
                 <div>
                   <span
@@ -128,9 +126,9 @@ export default function SignupPage() {
             </div>
             {/* Signup Card wrapper */}
             <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
-              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none lg:min-h-[500px] h-full overflow-visible">
+              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
                 <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
-                  <SignupForm />
+                  <SignupForm {...signupHook} />
                 </div>
               </div>
             </div>
@@ -139,13 +137,12 @@ export default function SignupPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-2 gap-3 shrink-0">
-        <div className="hidden lg:block">Watch Rudra</div>
-        <p className="font-headline font-medium uppercase text-[8px] md:text-[10px] tracking-widest md:tracking-[0.3em] text-[#f5f0e8] opacity-80 text-center md:text-left">
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
+        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-[#f5f0e8] opacity-80 text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <p className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-[#e63b2e] text-center md:text-left">
+          <p className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#e63b2e] text-center md:text-left">
             PRIVATE ACCESS ONLY
           </p>
         </div>

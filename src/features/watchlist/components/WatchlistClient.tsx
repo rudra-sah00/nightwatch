@@ -1,8 +1,10 @@
 'use client';
 
-import { Film, Loader2, Plus, Tv } from 'lucide-react';
+import { Film, Plus, Tv } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { SearchSkeleton } from '@/components/ui/skeletons';
 import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
@@ -58,8 +60,10 @@ export function WatchlistClient() {
 
         <div className="container mx-auto px-6 md:px-10 flex-col flex flex-1">
           {loading ? (
-            <div className="flex items-center justify-center min-h-[50vh]">
-              <Loader2 className="w-12 h-12 animate-spin text-[#1a1a1a]" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {['wl-sk-1', 'wl-sk-2', 'wl-sk-3', 'wl-sk-4'].map((id) => (
+                <SearchSkeleton key={id} />
+              ))}
             </div>
           ) : isEmpty ? (
             <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-[#1a1a1a] neo-shadow text-center max-w-2xl mx-auto w-full">
@@ -104,8 +108,6 @@ export function WatchlistClient() {
 
 // --- Helper Components ---
 
-// --- Helper Components ---
-
 const WatchlistItemCard = React.memo(function WatchlistItemCard({
   item,
   onClick,
@@ -114,13 +116,14 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className="group relative bg-white border-[4px] border-[#1a1a1a] neo-shadow p-2 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] flex flex-col h-full cursor-pointer outline-none focus:translate-x-[-4px] focus:translate-y-[-4px] focus:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] text-left w-full"
-      onClick={onClick}
-      aria-label={`View details for ${item.title}`}
-    >
-      <div className="aspect-[2/3] border-[3px] border-[#1a1a1a] overflow-hidden relative mb-4 flex-shrink-0 bg-[#f5f0e8]">
+    <Card className="p-2 hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none">
+      {/* Aspect Ratio Box wrapped in a button for keyboard accessibility */}
+      <button
+        type="button"
+        className="aspect-[2/3] border-[3px] border-[#1a1a1a] overflow-hidden relative mb-4 flex-shrink-0 bg-[#f5f0e8] cursor-pointer w-full p-0"
+        onClick={onClick}
+        aria-label={`View details for ${item.title}`}
+      >
         {item.posterUrl ? (
           <Image
             src={getOptimizedImageUrl(item.posterUrl)}
@@ -140,17 +143,21 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
           </div>
         )}
 
-        {/* Type Badge */}
-        <div className="absolute top-4 left-4 bg-white border-[3px] border-[#1a1a1a] px-3 py-1 font-headline font-black uppercase text-xs tracking-widest text-[#1a1a1a]">
+        {/* Type Badge Overlay */}
+        <div className="absolute top-4 left-4 bg-white border-[3px] border-[#1a1a1a] px-3 py-1 font-headline font-black uppercase text-xs tracking-widest text-[#1a1a1a] neo-shadow-sm">
           {item.contentType}
         </div>
-      </div>
+      </button>
 
-      <div className="px-2 pb-2 flex flex-col flex-1">
-        <h3 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto text-[#1a1a1a] group-hover:text-[#0055ff] transition-colors line-clamp-2">
+      <CardContent className="px-1 pb-1">
+        <button
+          type="button"
+          onClick={onClick}
+          className="text-left font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto text-[#1a1a1a] hover:text-[#0055ff] transition-colors line-clamp-2"
+        >
           {item.title}
-        </h3>
-      </div>
-    </button>
+        </button>
+      </CardContent>
+    </Card>
   );
 });

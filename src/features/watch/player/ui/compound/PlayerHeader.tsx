@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 
@@ -23,22 +24,26 @@ export function PlayerHeader({
       )}
     >
       {!hideBackButton ? (
-        <button
+        <Button
           type="button"
+          variant="neo-outline"
+          size="none"
           onClick={playerHandlers.goBack}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-3 lg:p-4 bg-white border-[3px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] active:bg-[#ffcc00] transition-all duration-200 flex-shrink-0 text-[#1a1a1a]"
+          className="p-3 lg:p-4 bg-white hover:bg-[#ffe066] active:bg-[#ffcc00] flex-shrink-0 text-[#1a1a1a]"
         >
           <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 stroke-[3px]" />
-        </button>
+        </Button>
       ) : null}
 
       {onSidebarToggle ? (
-        <button
+        <Button
           type="button"
+          variant="none"
+          size="none"
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-3 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer text-white"
+          className="p-3 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer text-white h-auto rounded-none"
           title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           {isSidebarOpen ? (
@@ -46,7 +51,7 @@ export function PlayerHeader({
           ) : (
             <ArrowRight className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
           )}
-        </button>
+        </Button>
       ) : null}
 
       <div className="flex-1 min-w-0">

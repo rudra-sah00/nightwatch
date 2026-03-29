@@ -3,7 +3,6 @@
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { CreatorFooter } from '@/components/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
-import { PasswordStrengthIndicator } from '@/components/ui/password-strength';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { ActivityGraph } from './activity-graph';
@@ -67,9 +66,6 @@ export function ProfileOverview() {
               required
               className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-[#1a1a1a] placeholder:text-[#1a1a1a]/20 border-b-8 border-[#1a1a1a]/20 focus:border-[#e63b2e] focus:bg-[#e63b2e] focus:text-white transition-colors py-2"
             />
-            <div className="mt-2">
-              <PasswordStrengthIndicator password={passwordForm.newPassword} />
-            </div>
           </div>
 
           {/* Confirm */}
@@ -140,7 +136,7 @@ export function ProfileOverview() {
         />
       </section>
 
-      <CreatorFooter />
+      <CreatorFooter isCompact={false} />
     </main>
   );
 }

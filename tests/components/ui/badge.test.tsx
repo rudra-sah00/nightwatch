@@ -13,31 +13,21 @@ describe('Badge', () => {
     expect(container.querySelector('span')).toBeInTheDocument();
   });
 
-  it('applies variant class for secondary', () => {
-    const { container } = render(<Badge variant="secondary">Sec</Badge>);
+  it('applies variant class for blue', () => {
+    const { container } = render(<Badge variant="blue">Blue</Badge>);
     const el = container.querySelector('[data-slot="badge"]');
     expect(el).toBeInTheDocument();
-    expect(el?.getAttribute('data-variant')).toBe('secondary');
+    expect(el?.getAttribute('data-variant')).toBe('blue');
   });
 
-  it('applies variant class for destructive', () => {
-    render(<Badge variant="destructive">Error</Badge>);
-    expect(screen.getByText('Error')).toBeInTheDocument();
+  it('applies variant class for red', () => {
+    render(<Badge variant="red">Red</Badge>);
+    expect(screen.getByText('Red')).toBeInTheDocument();
   });
 
-  it('applies variant class for outline', () => {
-    render(<Badge variant="outline">Outline</Badge>);
-    expect(screen.getByText('Outline')).toBeInTheDocument();
-  });
-
-  it('applies variant class for ghost', () => {
-    render(<Badge variant="ghost">Ghost</Badge>);
-    expect(screen.getByText('Ghost')).toBeInTheDocument();
-  });
-
-  it('applies variant class for link', () => {
-    render(<Badge variant="link">Link</Badge>);
-    expect(screen.getByText('Link')).toBeInTheDocument();
+  it('applies variant class for yellow', () => {
+    render(<Badge variant="yellow">Yellow</Badge>);
+    expect(screen.getByText('Yellow')).toBeInTheDocument();
   });
 
   it('renders as child element when asChild is true', () => {

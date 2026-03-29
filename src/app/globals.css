@@ -391,44 +391,15 @@
   body {
     @apply bg-background text-foreground;
   }
-}
 
-@layer base {
+  /* Hide scrollbar globally but maintain functionality */
+  html,
+  body,
   * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  /* Hide scrollbar globally */
-  html {
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE and Edge */
-  }
-
-  html::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari, Opera */
-  }
-
-  /* Also hide scrollbar on body and all elements by default */
-  body {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-
-  body::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Allow scrolling but hide the scrollbar on any scrollable element */
   *::-webkit-scrollbar {
-    width: 0;
-    height: 0;
     display: none;
   }
 }
@@ -494,30 +465,5 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
-  }
-
-  /* Styled thin scrollbar for dropdowns */
-  .styled-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-  }
-
-  .styled-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    display: block;
-  }
-
-  .styled-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 10px;
-  }
-
-  .styled-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-  }
-
-  .styled-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.35);
   }
 }

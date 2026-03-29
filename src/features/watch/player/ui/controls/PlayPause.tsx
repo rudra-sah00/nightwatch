@@ -31,7 +31,6 @@ export function PlayPause({
     <button
       type="button"
       onClick={onToggle}
-      onMouseDown={(e) => e.preventDefault()}
       className={cn(
         'flex items-center justify-center transition-all duration-200',
         'border-[3px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] neo-shadow',
@@ -104,7 +103,6 @@ export function CenterPlayButton({
       )}
       style={{ pointerEvents: isPlaying || isLoading ? 'none' : 'auto' }}
       onClick={handleClick}
-      onMouseDown={(e) => e.preventDefault()}
     >
       {/* Dark overlay with gradients */}
       <div

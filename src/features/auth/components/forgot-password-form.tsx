@@ -1,141 +1,125 @@
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import { useRef } from 'react';
+'use client';
+
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Captcha, type CaptchaHandle } from '@/components/ui/captcha';
+import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForgotPasswordForm } from '@/features/auth/hooks/use-forgot-password-form';
+import type { useLoginForm } from '../hooks/use-login-form';
+import { AuthCard } from './auth-card';
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
   const {
-    isLoading,
-    error,
-    success,
+    step,
+    setStep,
+    isPending,
+    formData,
+    handleChange,
+    action,
     captchaToken,
     setCaptchaToken,
-    formData,
-    fieldErrors,
-    handleChange,
-    handleSubmit,
-  } = useForgotPasswordForm();
+  } = props;
 
-  const captchaRef = useRef<CaptchaHandle>(null);
+  const isSuccess = step === 'forgot_success';
 
   return (
-    <div className="w-full h-full flex flex-col justify-start">
-      <div className="mb-1 shrink-0 text-center md:text-left">
-        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-[#1a1a1a] mb-0 font-headline">
-          Watch Rudra
-        </h1>
-        <p className="font-headline font-bold text-[10px] uppercase tracking-[0.2em] text-[#e63b2e]">
-          Form Follows Function
-        </p>
-      </div>
-
-      <div className="border-b-4 border-[#1a1a1a] pb-0.5 mb-2 shrink-0">
-        <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter font-headline text-[#1a1a1a]">
-          {success ? 'Success' : 'Reset'}
-        </h2>
-        <p className="font-body font-semibold text-[8px] md:text-[9px] text-[#1a1a1a] opacity-60 uppercase tracking-widest">
-          {success ? 'ACCOUNT SECURED' : 'RECOVER YOUR ACCESS'}
-        </p>
-      </div>
-
-      <div className="flex-grow flex flex-col justify-start">
-        {success ? (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 py-4 text-center md:text-left h-full">
-            <div className="space-y-2">
-              <div className="h-12 w-12 border-[4px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center mx-auto md:mx-0 text-[#1a1a1a] neo-shadow-sm">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-body font-medium text-[#1a1a1a]">
-                A reset link has been dispatched to{' '}
-                <span className="font-bold underline decoration-[#e63b2e] decoration-2">
-                  {formData.email}
-                </span>
-                . Please review your archive (including spam) to finalize the
-                recovery.
-              </p>
-            </div>
-
-            <div className="mt-auto">
-              <Button
-                asChild
-                className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto"
-              >
-                <Link href="/login">Back to Login</Link>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="h-full flex flex-col space-y-2 animate-in fade-in slide-in-from-left-4 duration-300 w-full px-1"
-          >
-            {error ? (
-              <div className="flex items-center gap-3 border-4 border-[#1a1a1a] bg-[#e63b2e] p-3 text-white neo-shadow-sm mb-2 shrink-0">
-                <AlertCircle className="h-5 w-5 shrink-0" />
-                <p className="font-headline font-bold uppercase text-[10px] tracking-widest">
-                  {error}
-                </p>
-              </div>
-            ) : null}
-
-            <div className="space-y-1 shrink-0">
+    <AuthCard title={isSuccess ? 'SUCCESS' : 'RECOVERY'} className="h-[440px]">
+      {!isSuccess && (
+        <form
+          action={action}
+          className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          {/* TOP */}
+          <div className="w-full shrink-0">
+            <div className="flex items-center justify-between h-4 mb-1">
               <Label
-                htmlFor="email"
-                className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+                htmlFor="identifier"
+                className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
               >
-                Identification Email
+                EMAIL OR USERNAME
               </Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="mies@bauhaus.de"
-                value={formData.email}
-                onChange={handleChange}
-                error={fieldErrors.email}
-                autoComplete="email"
-                disabled={isLoading}
-                className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-              />
             </div>
+            <Input
+              id="identifier"
+              name="identifier"
+              type="text"
+              placeholder="ALIAS OR COMMUNICATION LINE"
+              value={formData.identifier}
+              onChange={handleChange}
+              disabled={isPending}
+              className="h-[46px] text-xs font-black uppercase transition-all relative"
+            />
+          </div>
 
-            <div className="pt-1 scale-[0.9] md:scale-95 origin-left shrink-0">
-              <Captcha
-                ref={captchaRef}
-                onVerify={setCaptchaToken}
-                onError={() => setCaptchaToken(null)}
-                onExpire={() => setCaptchaToken(null)}
-              />
+          {/* MIDDLE */}
+          <div className="flex justify-center items-center mt-6 mb-6 min-h-[68px]">
+            <input
+              type="hidden"
+              name="captchaToken"
+              value={captchaToken || ''}
+            />
+            <Captcha
+              onVerify={setCaptchaToken}
+              onError={() => setCaptchaToken(null)}
+              onExpire={() => setCaptchaToken(null)}
+              variant="bottom"
+            />
+          </div>
+
+          {/* BOTTOM */}
+          <div className="flex flex-col gap-2 pb-0.5">
+            <Button
+              type="submit"
+              variant="neo-yellow"
+              size="xl"
+              isLoading={isPending}
+              disabled={
+                !captchaToken || isPending || !formData.identifier?.trim()
+              }
+              className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
+            >
+              {isPending ? 'DISPATCHING...' : 'DISPATCH RESET LINK'}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setStep('initial')}
+              variant="neo-outline"
+              size="xl"
+              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-all hover:bg-[#ffcc00]/10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 inline" />
+              BACK TO LOGIN
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {isSuccess && (
+        <div className="h-full flex flex-col justify-between pt-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="shrink-0 flex flex-col justify-center items-center text-center gap-3 mt-4">
+            <div className="h-10 w-10 border-[3px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center neo-shadow-sm shrink-0">
+              <CheckCircle2 className="h-6 w-6" />
             </div>
+            <p className="text-[13px] font-body font-black text-[#1a1a1a] leading-tight uppercase tracking-[0.05em]">
+              SECURITY LINK DISPATCHED TO:
+            </p>
+            <span className="font-black underline decoration-[#e63b2e] decoration-2 tracking-tighter text-xl italic block leading-tight">
+              {formData.identifier}
+            </span>
+          </div>
 
-            {/* Spacer pushes buttons to the bottom */}
-            <div className="flex-grow" />
-
-            <div className="flex flex-col gap-2 shrink-0 pt-2 border-t-4 border-[#1a1a1a] mt-auto">
-              <Button
-                type="submit"
-                isLoading={isLoading}
-                disabled={!captchaToken || isLoading}
-                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 md:py-3.5 text-lg md:text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
-              >
-                {isLoading ? 'Dispatching...' : 'Dispatch Reset Link'}
-              </Button>
-
-              <Button
-                asChild
-                type="button"
-                className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto flex items-center justify-center gap-2"
-              >
-                <Link href="/login">Back to Login</Link>
-              </Button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
+          <div className="flex flex-col gap-2 pb-0.5 mb-1 mt-auto">
+            <Button
+              onClick={() => setStep('initial')}
+              variant="default"
+              size="xl"
+              className="w-full h-[52px] font-headline uppercase italic tracking-tighter text-sm font-black shrink-0"
+            >
+              RETURN TO ENTRANCE
+            </Button>
+          </div>
+        </div>
+      )}
+    </AuthCard>
   );
 }

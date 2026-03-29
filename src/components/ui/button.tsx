@@ -4,25 +4,35 @@ import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-black uppercase tracking-tighter rounded-none',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+        default:
+          'bg-[#1a1a1a] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active',
+        neo: 'bg-[#1a1a1a] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active',
+        'neo-yellow':
+          'bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-white active:neo-shadow-active',
+        'neo-red':
+          'bg-[#e63b2e] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-[#1a1a1a] active:neo-shadow-active',
+        'neo-outline':
+          'bg-transparent text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-[#f2ede5] active:neo-shadow-active',
+        'neo-ghost':
+          'bg-transparent text-[#1a1a1a] border-4 border-[#1a1a1a] hover:bg-[#f2ede5]',
+        'neo-base':
+          'neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active transition-all',
+        none: '',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 px-3 text-xs',
-        lg: 'h-11 px-8',
+        none: '',
+        default: 'h-auto py-3 px-6 text-sm',
+        sm: 'h-auto py-2 px-4 text-xs',
+        lg: 'h-12 px-8 text-xl',
+        xl: 'h-14 px-10 text-2xl',
+        '2xl': 'h-16 px-12 text-2xl',
         icon: 'h-10 w-10',
+        neo: 'h-auto py-3 px-6',
+        'neo-lg': 'h-auto py-4 px-8',
       },
     },
     defaultVariants: {

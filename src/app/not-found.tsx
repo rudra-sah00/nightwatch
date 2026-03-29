@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Home, Search } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
@@ -33,22 +34,28 @@ export default function NotFound() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-12">
-            <Link
-              href="/"
-              className="group flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-[#1a1a1a] text-white border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all duration-200 uppercase font-black tracking-widest text-lg"
+            <Button
+              asChild
+              variant="neo"
+              size="none"
+              className="px-10 py-5 text-lg tracking-widest"
             >
-              <Home className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              ABORT TO HOME
-            </Link>
+              <Link href="/">
+                <Home className="w-6 h-6 group-hover:scale-110 transition-transform mr-3" />
+                ABORT TO HOME
+              </Link>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="neo-outline"
+              size="none"
               onClick={() => window.history.back()}
-              className="group flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-white text-[#1a1a1a] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all duration-200 uppercase font-black tracking-widest text-lg"
+              className="px-10 py-5 text-lg tracking-widest bg-white"
             >
-              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform mr-3" />
               PREVIOUS SECTOR
-            </button>
+            </Button>
           </div>
         </div>
 
