@@ -36,6 +36,8 @@ export function prepareProgressPayload(
   lastProgress: number | null,
   hasMoreEpisodes = true,
 ) {
+  if (metadata.type === 'livestream') return null;
+
   const currentTime = video.currentTime;
   const duration = video.duration;
 
