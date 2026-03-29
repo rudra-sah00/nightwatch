@@ -26,12 +26,20 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useLoginPage();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
     }
   }, [isAuthenticated, initialAuthCheck]);
+
+  const handleCopyEmail = () => {
+    const email = 'rudranarayanaknr@gmail.com';
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
 
   // Loading State
   if (isLoading) {
@@ -47,7 +55,7 @@ export default function LoginPage() {
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-center shrink-0">
           {/* Features Bento Box - Reduced padding and text */}
-          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:h-[500px]">
+          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[500px]">
             <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
@@ -102,8 +110,8 @@ export default function LoginPage() {
           </div>
           {/* Login Card wrapper */}
           <div className="lg:col-span-5 flex items-center justify-center w-full">
-            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none h-full lg:h-[500px] overflow-visible">
-              <div className="flex-grow flex flex-col justify-start h-full overflow-visible">
+            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none lg:min-h-[500px] overflow-visible">
+              <div className="flex flex-col justify-start w-full overflow-visible">
                 <LoginForm />
               </div>
             </div>
@@ -112,13 +120,28 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-5 gap-1 hidden md:flex shrink-0">
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-5 gap-4 hidden md:flex shrink-0">
         <div className="hidden">Watch Rudra</div>
-        <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#f5f0e8]">
+        <p className="font-headline font-medium uppercase text-[10px] tracking-[0.3em] text-[#f5f0e8] opacity-80">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
-        <div className="flex gap-4">
-          <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#e63b2e]">
+        <div className="flex items-center gap-8">
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="group flex items-center gap-2 transition-all active:scale-95"
+          >
+            <span className="font-headline font-bold uppercase text-[10px] tracking-widest text-[#f5f0e8] opacity-40 group-hover:opacity-100 transition-opacity">
+              WANT AN ACCOUNT?
+            </span>
+            <span
+              className={`font-headline font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'text-[#00aa44]' : 'text-[#ffcc00] group-hover:text-[#ffffff] underline decoration-[#ffcc00]/30 underline-offset-4'}`}
+            >
+              {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
+            </span>
+          </button>
+
+          <p className="font-headline font-bold uppercase text-[10px] tracking-widest text-[#e63b2e]">
             This is a private website. Public access is not allowed.
           </p>
         </div>

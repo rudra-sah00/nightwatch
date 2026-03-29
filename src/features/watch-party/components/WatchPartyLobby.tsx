@@ -261,7 +261,7 @@ export function WatchPartyLobby({
                     <p className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]/60 mb-2 text-center">
                       Security Check
                     </p>
-                    <div className="border-4 border-[#1a1a1a] p-2 bg-[#f5f0e8]">
+                    <div className="mt-2">
                       <Captcha onVerify={onCaptchaVerify} onError={() => {}} />
                     </div>
                     {captchaToken ? (

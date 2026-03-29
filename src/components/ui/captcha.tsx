@@ -17,9 +17,18 @@ interface CaptchaProps {
   onError?: () => void;
   onExpire?: () => void;
   ref?: React.Ref<CaptchaHandle>;
+  className?: string;
+  variant?: 'full' | 'bottom';
 }
 
-export function Captcha({ onVerify, onError, onExpire, ref }: CaptchaProps) {
+export function Captcha({
+  onVerify,
+  onError,
+  onExpire,
+  ref,
+  className,
+  variant = 'full',
+}: CaptchaProps) {
   const isDev = process.env.NODE_ENV === 'development';
   const onVerifyRef = useRef(onVerify);
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -37,11 +46,22 @@ export function Captcha({ onVerify, onError, onExpire, ref }: CaptchaProps) {
   }, [isDev]);
 
   if (isDev) {
+    const isBottom = variant === 'bottom';
     return (
-      <div className="w-full bg-[#f2ede5]/50 border-b-4 border-[#1a1a1a] p-2 flex items-center justify-center gap-2 select-none h-[42px]">
-        <div className="w-2 h-2 rounded-full bg-[#00aa44] animate-pulse" />
-        <span className="text-[10px] font-headline font-bold uppercase tracking-widest text-[#1a1a1a] opacity-40">
-          Dev Bypass Active
+      <div
+        className={`w-full bg-[#f2ede5]/50 flex items-center justify-center gap-3 select-none group transition-colors hover:bg-[#ffcc00] ${
+          isBottom
+            ? 'border-b-4 border-[#1a1a1a] h-[42px]'
+            : 'border-4 border-[#1a1a1a] bg-white h-[52px]'
+        } ${className}`}
+      >
+        <div className="w-2.5 h-2.5 rounded-full bg-[#00aa44] animate-pulse neo-shadow-sm border border-[#1a1a1a]" />
+        <span
+          className={`font-headline font-black uppercase tracking-widest text-[#1a1a1a] ${
+            isBottom ? 'text-[10px] opacity-40' : 'text-xs'
+          }`}
+        >
+          Security Verified
         </span>
       </div>
     );
@@ -50,7 +70,7 @@ export function Captcha({ onVerify, onError, onExpire, ref }: CaptchaProps) {
   const siteKey = env.TURNSTILE_SITE_KEY;
 
   return (
-    <div className="w-full flex justify-center my-4">
+    <div className={`w-full flex justify-center py-2 ${className}`}>
       <Turnstile
         ref={turnstileRef}
         siteKey={siteKey}

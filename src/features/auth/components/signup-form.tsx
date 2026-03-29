@@ -342,10 +342,13 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
               onVerify={setCaptchaToken}
               onError={() => setCaptchaToken(null)}
               onExpire={() => setCaptchaToken(null)}
+              variant="bottom"
             />
           </div>
 
-          <div className="pt-1 flex flex-col gap-2">
+          <div className="flex-grow min-h-[0.5rem]" />
+
+          <div className="mt-auto flex flex-col gap-2">
             <Button
               type="submit"
               isLoading={isLoading}

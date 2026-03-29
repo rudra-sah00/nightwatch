@@ -167,19 +167,6 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
   handleChange,
   action,
 }: InitialStepProps) {
-  const [copied, setCopied] = React.useState(false);
-
-  const handleCopyEmail = () => {
-    const email = 'rudranarayanaknr@gmail.com';
-    navigator.clipboard.writeText(email);
-    setCopied(true);
-
-    // Fallback: Open mailto link too
-    window.location.href = `mailto:${email}`;
-
-    setTimeout(() => setCopied(false), 3000);
-  };
-
   return (
     <form action={action} className="space-y-4 w-full px-1">
       <div className="space-y-4 shrink-0">
@@ -240,27 +227,13 @@ const InitialLoginStep = React.memo(function InitialLoginStep({
           onVerify={setCaptchaToken}
           onError={() => setCaptchaToken(null)}
           onExpire={() => setCaptchaToken(null)}
+          variant="bottom"
         />
       </div>
 
-      <div className="pt-2 flex flex-col gap-6">
-        <div className="text-center">
-          <p className="text-[9px] font-headline font-bold uppercase tracking-[0.2em] text-[#1a1a1a] opacity-40">
-            WANT AN ACCOUNT?
-          </p>
-          <button
-            type="button"
-            onClick={handleCopyEmail}
-            className="group mt-1 transition-all active:scale-95 duration-75 inline-block"
-          >
-            <span
-              className={`text-[10px] font-black font-headline uppercase tracking-tighter decoration-1 underline underline-offset-4 transition-all ${copied ? 'text-[#00aa44] decoration-[#00aa44]' : 'text-[#e63b2e] decoration-[#e63b2e]/20 group-hover:decoration-[#e63b2e]'}`}
-            >
-              {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
-            </span>
-          </button>
-        </div>
+      <div className="flex-grow min-h-[1.5rem]" />
 
+      <div className="mt-auto">
         <Button
           type="submit"
           isLoading={isLoading}
