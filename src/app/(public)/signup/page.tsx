@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { useSignupContent } from './use-signup-content';
 
@@ -61,12 +62,12 @@ export default function SignupPage() {
               administrator.
             </p>
             <div className="mt-8 w-full">
-              <a
-                href="/login"
-                className="block w-full text-center bg-[#1a1a1a] text-white py-4 border-4 border-[#1a1a1a] neo-shadow-sm hover:neo-shadow-hover active:translate-y-1 active:neo-shadow-none transition-all font-headline font-bold uppercase tracking-tight text-lg"
+              <Button
+                asChild
+                className="w-full bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-4 border-[#1a1a1a] py-6 text-xl font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto block text-center"
               >
-                Back to Login
-              </a>
+                <a href="/login">Back to Login</a>
+              </Button>
             </div>
           </div>
         ) : (
@@ -126,9 +127,9 @@ export default function SignupPage() {
               </div>
             </div>
             {/* Signup Card wrapper */}
-            <div className="lg:col-span-5 flex items-center justify-center w-full">
-              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none overflow-visible">
-                <div className="flex flex-col justify-start w-full overflow-visible">
+            <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
+              <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-3 w-full max-w-md lg:max-w-none lg:min-h-[500px] h-full overflow-visible">
+                <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
                   <SignupForm />
                 </div>
               </div>
@@ -138,14 +139,14 @@ export default function SignupPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-5 gap-1 hidden md:flex shrink-0">
-        <div className="hidden">Watch Rudra</div>
-        <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#f5f0e8]">
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-2 gap-3 shrink-0">
+        <div className="hidden lg:block">Watch Rudra</div>
+        <p className="font-headline font-medium uppercase text-[8px] md:text-[10px] tracking-widest md:tracking-[0.3em] text-[#f5f0e8] opacity-80 text-center md:text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
-        <div className="flex gap-4">
-          <p className="font-headline font-medium uppercase text-xs tracking-widest text-[#e63b2e]">
-            This is a private website. Public access is not allowed.
+        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+          <p className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-[#e63b2e] text-center md:text-left">
+            PRIVATE ACCESS ONLY
           </p>
         </div>
       </footer>

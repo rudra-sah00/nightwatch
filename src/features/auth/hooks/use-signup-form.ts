@@ -25,6 +25,7 @@ export function useSignupForm() {
 
   const [formData, setFormData] = useState<RegisterInput>({
     name: '',
+    username: '',
     email: '',
     password: '',
     inviteCode: '',
@@ -32,10 +33,41 @@ export function useSignupForm() {
 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<
+    'idle' | 'checking' | 'available' | 'taken' | 'invalid'
+  >('idle');
 
   const [fieldErrors, setFieldErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  // Real-time username availability check (Debounced)
+  useEffect(() => {
+    const username = formData.username.trim().toLowerCase();
+    if (username.length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    if (!/^[a-z0-9_]+$/i.test(username)) {
+      setUsernameStatus('invalid');
+      return;
+    }
+
+    setUsernameStatus('checking');
+    const timer = setTimeout(async () => {
+      try {
+        const { checkUsername } = await import('@/features/auth/api');
+        const { available } = await checkUsername(username);
+        setUsernameStatus(available ? 'available' : 'taken');
+      } catch (err) {
+        console.error('[SignupForm] Username check failed:', err);
+        setUsernameStatus('idle');
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [formData.username]);
 
   // Pre-fill invite code from URL
   useEffect(() => {
@@ -54,12 +86,17 @@ export function useSignupForm() {
     if (error) setError(null);
   };
 
+  const handleSetStep = (newStep: Step) => {
+    setStep(newStep);
+  };
+
   const [state, action, isPending] = React.useActionState(
     async (_prevState: FormState | null, formData: FormData) => {
       setError(null);
       setFieldErrors({});
 
       const name = formData.get('name') as string;
+      const username = formData.get('username') as string;
       const email = formData.get('email') as string;
       const password = formData.get('password') as string;
       const inviteCode = formData.get('inviteCode') as string;
@@ -79,11 +116,13 @@ export function useSignupForm() {
 
       const result = registerSchema.safeParse({
         name,
+        username,
         email,
         password,
         inviteCode,
         captchaToken,
       });
+
       if (!result.success) {
         const errors: Record<string, string> = {};
         for (const err of result.error.issues) {
@@ -96,17 +135,20 @@ export function useSignupForm() {
       try {
         const response = await register({
           name,
+          username,
           email,
           password,
           inviteCode,
           captchaToken,
         });
+
         if (response.requiresOtp) {
-          setStep('otp');
+          handleSetStep('otp');
           return { success: true };
         }
         return { success: true };
       } catch (err: unknown) {
+        console.error('[SignupForm] Registration failed:', err);
         // Handle specific validation errors from the backend (e.g. email already taken)
         if (
           err &&
@@ -226,7 +268,7 @@ export function useSignupForm() {
 
   return {
     step,
-    setStep,
+    setStep: handleSetStep,
     isLoading,
     error,
     captchaToken,
@@ -237,6 +279,7 @@ export function useSignupForm() {
     setConfirmPassword,
     otp,
     setOtp,
+    usernameStatus,
     fieldErrors,
     setFieldErrors,
     setError,

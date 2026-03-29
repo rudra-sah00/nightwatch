@@ -21,10 +21,7 @@ export function useSignupContent() {
     }
 
     if (!isAuthLoading && !inviteCode) {
-      toast.error('Registration requires a valid invite link');
-      setIsInviteValid(false);
-      // Wait a bit before redirecting to let the user see the error state if needed
-      setTimeout(() => router.replace('/login'), 2000);
+      setIsInviteValid(null); // Allow manual entry instead of locking them out
       return;
     }
 
@@ -37,12 +34,10 @@ export function useSignupContent() {
         setIsInviteValid(valid);
         if (!valid) {
           toast.error('Invalid or expired invite code');
-          setTimeout(() => router.push('/login'), 2000);
         }
       } catch (_error) {
         toast.error('Failed to validate invite');
-        setIsInviteValid(false);
-        setTimeout(() => router.push('/login'), 2000);
+        setIsInviteValid(null);
       }
     };
 

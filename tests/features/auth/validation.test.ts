@@ -53,6 +53,7 @@ describe('Register Schema', () => {
   it('accepts valid registration data', () => {
     const validData = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'Password!1',
     };
@@ -64,6 +65,7 @@ describe('Register Schema', () => {
   it('rejects password without uppercase', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password!1',
     };
@@ -78,6 +80,7 @@ describe('Register Schema', () => {
   it('rejects password without special character', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'Password12',
     };
@@ -92,6 +95,7 @@ describe('Register Schema', () => {
   it('rejects short password (under 8 chars)', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'Pa!1xx',
     };
@@ -106,6 +110,7 @@ describe('Register Schema', () => {
   it('accepts password without lowercase (not required)', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'ABCDEFGH!',
     };
@@ -117,6 +122,7 @@ describe('Register Schema', () => {
   it('accepts password without number (not required)', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'Password!',
     };
@@ -128,6 +134,7 @@ describe('Register Schema', () => {
   it('rejects invalid email', () => {
     const data = {
       name: 'John Doe',
+      username: 'johndoe',
       email: 'notanemail',
       password: 'Password!1',
     };
@@ -139,6 +146,7 @@ describe('Register Schema', () => {
   it('rejects short name', () => {
     const data = {
       name: 'J',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'Password!1',
     };

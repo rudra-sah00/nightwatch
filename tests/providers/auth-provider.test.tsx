@@ -536,6 +536,7 @@ describe('AuthProvider', () => {
       await act(async () => {
         response = await result.current!.register({
           name: 'New User',
+          username: 'newuser',
           email: 'new@test.com',
           password: 'Test@12345',
         });

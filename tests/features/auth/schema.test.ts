@@ -63,6 +63,7 @@ describe('Auth Schemas', () => {
     it('should validate correct registration data', () => {
       const validData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password!1',
       };
@@ -74,6 +75,7 @@ describe('Auth Schemas', () => {
     it('should reject name shorter than 2 characters', () => {
       const invalidData = {
         name: 'T',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password!1',
       };
@@ -90,6 +92,7 @@ describe('Auth Schemas', () => {
     it('should reject invalid email format', () => {
       const invalidData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'invalid-email',
         password: 'Password!1',
       };
@@ -104,6 +107,7 @@ describe('Auth Schemas', () => {
     it('should reject password shorter than 8 characters', () => {
       const invalidData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Pass1!',
       };
@@ -120,6 +124,7 @@ describe('Auth Schemas', () => {
     it('should reject password without uppercase letter', () => {
       const invalidData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'password!1',
       };
@@ -136,6 +141,7 @@ describe('Auth Schemas', () => {
     it('should reject password without special character', () => {
       const invalidData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password12',
       };
@@ -152,6 +158,7 @@ describe('Auth Schemas', () => {
     it('should accept password without lowercase (not required)', () => {
       const validData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'ABCDEFG!',
       };
@@ -163,6 +170,7 @@ describe('Auth Schemas', () => {
     it('should accept password without number (not required)', () => {
       const validData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password!',
       };
@@ -174,6 +182,7 @@ describe('Auth Schemas', () => {
     it('should accept optional invite code', () => {
       const validData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password!1',
         inviteCode: 'INVITE123',

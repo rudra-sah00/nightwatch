@@ -53,9 +53,9 @@ export default function LoginPage() {
       className={`bg-white text-[#1a1a1a] h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99] ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-center shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch shrink-0">
           {/* Features Bento Box - Reduced padding and text */}
-          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[500px]">
+          <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[500px] h-full">
             <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
@@ -109,9 +109,9 @@ export default function LoginPage() {
             </div>
           </div>
           {/* Login Card wrapper */}
-          <div className="lg:col-span-5 flex items-center justify-center w-full">
-            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none lg:min-h-[500px] overflow-visible">
-              <div className="flex flex-col justify-start w-full overflow-visible">
+          <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
+            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow p-5 flex flex-col gap-2 w-full max-w-md lg:max-w-none lg:min-h-[500px] h-full overflow-visible">
+              <div className="flex-grow flex flex-col justify-start w-full overflow-visible">
                 <LoginForm />
               </div>
             </div>
@@ -120,29 +120,29 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-5 gap-4 hidden md:flex shrink-0">
-        <div className="hidden">Watch Rudra</div>
-        <p className="font-headline font-medium uppercase text-[10px] tracking-[0.3em] text-[#f5f0e8] opacity-80">
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-8 md:py-2 gap-3 shrink-0">
+        <div className="hidden lg:block">Watch Rudra</div>
+        <p className="font-headline font-medium uppercase text-[8px] md:text-[10px] tracking-widest md:tracking-[0.3em] text-[#f5f0e8] opacity-80 text-center md:text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
-        <div className="flex items-center gap-8">
+        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
           <button
             type="button"
             onClick={handleCopyEmail}
             className="group flex items-center gap-2 transition-all active:scale-95"
           >
-            <span className="font-headline font-bold uppercase text-[10px] tracking-widest text-[#f5f0e8] opacity-40 group-hover:opacity-100 transition-opacity">
+            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-[#f5f0e8] opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               WANT AN ACCOUNT?
             </span>
             <span
-              className={`font-headline font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'text-[#00aa44]' : 'text-[#ffcc00] group-hover:text-[#ffffff] underline decoration-[#ffcc00]/30 underline-offset-4'}`}
+              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-all ${copied ? 'text-[#00aa44]' : 'text-[#ffcc00] group-hover:text-[#ffffff] underline decoration-[#ffcc00]/30 underline-offset-4'}`}
             >
               {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
             </span>
           </button>
 
-          <p className="font-headline font-bold uppercase text-[10px] tracking-widest text-[#e63b2e]">
-            This is a private website. Public access is not allowed.
+          <p className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-[#e63b2e] text-center md:text-left">
+            PRIVATE ACCESS ONLY
           </p>
         </div>
       </footer>

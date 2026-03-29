@@ -31,6 +31,7 @@ export function SignupForm() {
     handleChange,
     handleResend,
     handleOtpSubmit,
+    usernameStatus,
     isOtpStep,
   } = useSignupForm();
 
@@ -58,7 +59,7 @@ export function SignupForm() {
         </p>
       </div>
 
-      <div className="flex-grow flex flex-col justify-start">
+      <div className="flex-grow flex flex-col justify-start h-full">
         {isOtpStep ? (
           <OtpStep
             email={formData.email}
@@ -86,6 +87,7 @@ export function SignupForm() {
             captchaRef={captchaRef}
             handleChange={handleChange}
             action={action}
+            usernameStatus={usernameStatus}
           />
         )}
       </div>
@@ -119,58 +121,67 @@ const OtpStep = React.memo(function OtpStep({
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full"
+      className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full px-1"
     >
-      <div className="space-y-1 mb-3">
-        <p className="text-[10px] md:text-xs font-body font-medium text-[#1a1a1a]">
-          We sent a code to{' '}
-          <span className="font-bold underline decoration-2">{email}</span>.
-          Please check your spam folder.
-        </p>
+      <div className="space-y-4">
+        <div className="space-y-1 mb-3">
+          <p className="text-[10px] md:text-[11px] font-body font-medium text-[#1a1a1a]">
+            We sent a verification code to:{' '}
+            <span className="font-bold border-b-2 border-[#1a1a1a] block mt-1 py-1">
+              {email}
+            </span>
+          </p>
+        </div>
+
+        <div className="space-y-1 pb-1">
+          <Label className="sr-only">One-Time Password</Label>
+          <OtpInput
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
+          />
+        </div>
       </div>
 
-      <div className="space-y-1 pb-1 px-1">
-        <Label className="sr-only">One-Time Password</Label>
-        <OtpInput
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
-        />
-      </div>
+      <div className="flex-grow min-h-[1rem]" />
 
-      <Button
-        type="submit"
-        isLoading={isLoading}
-        disabled={isLoading || otp.length !== 6}
-        className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
-      >
-        Verify & Complete Signup
-      </Button>
-
-      <div className="flex flex-col gap-2 mt-2 pt-3 border-t-4 border-[#1a1a1a]">
+      <div className="flex flex-col gap-3 mt-auto">
         <Button
-          type="button"
-          onClick={onResend}
-          disabled={isLoading || countdown > 0}
-          className="w-full bg-transparent hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2 disabled:opacity-50"
+          type="submit"
+          isLoading={isLoading}
+          disabled={isLoading || otp.length !== 6}
+          className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
         >
-          {countdown > 0 ? (
-            <>Resend Code in {countdown}s</>
-          ) : (
-            <>
-              <RefreshCw className="h-3 w-3" /> Resend Code
-            </>
-          )}
+          Verify Account
         </Button>
 
-        <Button
-          type="button"
-          onClick={onBack}
-          disabled={isLoading}
-          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
-        >
-          Back to Details
-        </Button>
+        <div className="flex flex-col gap-2 pt-2 border-t-4 border-[#1a1a1a]">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={onResend}
+              disabled={isLoading || countdown > 0}
+              className="flex-[2] bg-[#f2ede5] hover:bg-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {countdown > 0 ? (
+                <>Resend Code in {countdown}s</>
+              ) : (
+                <>
+                  <RefreshCw className="h-3 w-3" /> Resend Code
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={onBack}
+              disabled={isLoading}
+              className="flex-1 bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
+            >
+              Back
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );
@@ -193,6 +204,7 @@ interface InitialStepProps {
   captchaRef: React.RefObject<CaptchaHandle | null>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   action: (formData: FormData) => void;
+  usernameStatus: 'idle' | 'checking' | 'available' | 'taken' | 'invalid';
 }
 
 const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
@@ -210,66 +222,120 @@ const InitialRegistrationStep = React.memo(function InitialRegistrationStep({
   captchaRef,
   handleChange,
   action,
+  usernameStatus,
 }: InitialStepProps) {
   return (
-    <form action={action} className="space-y-2 w-full px-1">
+    <form
+      action={action}
+      className="h-full flex flex-col space-y-4 w-full px-1"
+    >
       {step === 'name' ? (
-        <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
-          <div>
-            <Label
-              htmlFor="name"
-              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
-            >
-              Full Name
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              placeholder="Mies van der Rohe"
-              value={formData.name}
-              onChange={handleChange}
-              error={fieldErrors.name}
-              autoComplete="name"
-              disabled={isLoading}
-              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-            />
+        <div className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+          <div className="space-y-4">
+            <div>
+              <Label
+                htmlFor="name"
+                className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+              >
+                Full Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="Mies van der Rohe"
+                value={formData.name}
+                onChange={handleChange}
+                error={fieldErrors.name}
+                autoComplete="name"
+                disabled={isLoading}
+                className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+              />
+            </div>
+
+            <div>
+              <Label
+                htmlFor="username"
+                className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+              >
+                Username
+              </Label>
+              <div className="relative">
+                <Input
+                  id="username"
+                  name="username"
+                  placeholder="mies_1920"
+                  value={formData.username}
+                  onChange={handleChange}
+                  error={fieldErrors.username}
+                  autoComplete="off"
+                  disabled={isLoading}
+                  className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                  {usernameStatus === 'checking' && (
+                    <div className="w-4 h-4 rounded-full border-2 border-[#1a1a1a]/20 border-t-[#1a1a1a] animate-spin" />
+                  )}
+                  {usernameStatus === 'available' && (
+                    <span className="material-symbols-outlined text-emerald-600 text-lg font-bold">
+                      check_circle
+                    </span>
+                  )}
+                  {usernameStatus === 'taken' && (
+                    <span className="material-symbols-outlined text-[#e63b2e] text-lg font-bold">
+                      cancel
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="email"
+                className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
+              >
+                Email Address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="mies@bauhaus.de"
+                value={formData.email}
+                onChange={handleChange}
+                error={fieldErrors.email}
+                autoComplete="email"
+                disabled={isLoading}
+                className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
+              />
+            </div>
           </div>
 
-          <Button
-            type="button"
-            disabled={!formData.name.trim()}
-            onClick={() => setStep('details')}
-            className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3.5 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto mt-2"
-          >
-            Continue
-          </Button>
+          <div className="flex-grow min-h-[0.5rem]" />
+
+          <div className="mt-auto">
+            <Button
+              type="button"
+              disabled={
+                !formData.name.trim() ||
+                !formData.email.trim() ||
+                !formData.username.trim() ||
+                usernameStatus !== 'available' ||
+                isLoading
+              }
+              onClick={() => setStep('details')}
+              className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-3.5 text-lg font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto disabled:opacity-50 disabled:grayscale transition-all"
+            >
+              Continue
+            </Button>
+          </div>
         </div>
       ) : (
-        <div className="space-y-2 animate-in fade-in slide-in-from-right-4 duration-300">
-          {/* Hidden Name input to include in FormData */}
+        <div className="h-full flex flex-col space-y-2 animate-in fade-in slide-in-from-right-4 duration-300">
+          {/* Hidden Name, Username and Email input to include in FormData */}
           <input type="hidden" name="name" value={formData.name} />
-
-          {/* Email */}
-          <div>
-            <Label
-              htmlFor="email"
-              className="block font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest mb-0.5 text-[#1a1a1a]"
-            >
-              Email Address
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="mies@bauhaus.de"
-              value={formData.email}
-              onChange={handleChange}
-              error={fieldErrors.email}
-              autoComplete="email"
-              disabled={isLoading}
-              className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 px-3 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-sm !h-[42px]"
-            />
-          </div>
+          <input type="hidden" name="username" value={formData.username} />
+          <input type="hidden" name="email" value={formData.email} />
 
           {/* Password */}
           <div>

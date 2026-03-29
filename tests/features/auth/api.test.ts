@@ -98,6 +98,7 @@ describe('Auth API', () => {
 
       const registerData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password123',
       };
@@ -121,6 +122,7 @@ describe('Auth API', () => {
 
       const registerData = {
         name: 'Test User',
+        username: 'testuser',
         email: 'test@example.com',
         password: 'Password123',
         inviteCode: 'INVITE123',

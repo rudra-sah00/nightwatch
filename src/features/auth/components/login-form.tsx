@@ -97,52 +97,61 @@ const OtpStep = React.memo(function OtpStep({
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full"
+      className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 w-full px-1"
     >
-      <div className="space-y-1 mb-3">
-        <p className="text-[10px] md:text-xs font-body font-medium text-[#1a1a1a]">
-          We sent a code to{' '}
-          <span className="font-bold underline decoration-2">{email}</span>.
-          Please check your spam folder.
-        </p>
+      <div className="space-y-4">
+        <div className="space-y-1 mb-3">
+          <p className="text-[10px] md:text-xs font-body font-medium text-[#1a1a1a]">
+            We sent a verification code to:{' '}
+            <span className="font-bold border-b-2 border-[#1a1a1a] block mt-1 py-1">
+              {email}
+            </span>
+          </p>
+        </div>
+
+        <div className="space-y-1 pb-1">
+          <Label className="sr-only">One-Time Password</Label>
+          <OtpInput
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
+          />
+        </div>
       </div>
 
-      <div className="space-y-1 pb-1 px-1">
-        <Label className="sr-only">One-Time Password</Label>
-        <OtpInput
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          className="w-full !bg-[#f2ede5] !border-x-0 !border-t-0 !border-b-4 !border-[#1a1a1a] !rounded-none p-2 font-body focus:!outline-none focus:!bg-white focus:!ring-0 transition-colors !text-[#1a1a1a] text-center tracking-[0.5em] text-base md:text-lg font-bold !h-[48px]"
-        />
-      </div>
+      <div className="flex-grow min-h-[1.5rem]" />
 
-      <Button
-        type="submit"
-        isLoading={isLoading}
-        disabled={isLoading || otp.length !== 6}
-        className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
-      >
-        Verify & Sign In
-      </Button>
-
-      <div className="flex flex-col gap-2 mt-2 pt-3 border-t-4 border-[#1a1a1a]">
+      <div className="flex flex-col gap-3 mt-auto">
         <Button
-          type="button"
-          onClick={onResend}
-          disabled={isLoading}
-          className="w-full bg-transparent hover:bg-[#f2ede5] text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2"
+          type="submit"
+          isLoading={isLoading}
+          disabled={isLoading || otp.length !== 6}
+          className="w-full bg-[#1a1a1a] hover:bg-[#333333] text-white border-4 border-[#1a1a1a] py-4 text-base font-black uppercase tracking-tighter neo-shadow-sm neo-shadow-hover neo-shadow-active transition-all rounded-none h-auto"
         >
-          <RefreshCw className="h-3 w-3" /> Resend Code
+          Verify & Sign In
         </Button>
 
-        <Button
-          type="button"
-          onClick={onBack}
-          disabled={isLoading}
-          className="w-full bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
-        >
-          Back to Login
-        </Button>
+        <div className="flex flex-col gap-2 pt-2 border-t-4 border-[#1a1a1a]">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={onResend}
+              disabled={isLoading}
+              className="flex-[2] bg-[#f2ede5] hover:bg-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight neo-shadow-sm neo-shadow-hover transition-all rounded-none h-auto flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="h-3 w-3" /> Resend Code
+            </Button>
+
+            <Button
+              type="button"
+              onClick={onBack}
+              disabled={isLoading}
+              className="flex-1 bg-transparent hover:bg-[#1a1a1a] hover:text-white text-[#1a1a1a] border-4 border-[#1a1a1a] py-3 text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all rounded-none h-auto"
+            >
+              Back
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );

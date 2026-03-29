@@ -78,6 +78,13 @@ export type LoginInput = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .regex(
+      /^[a-z0-9_]+$/i,
+      'Username can only contain letters, numbers, and underscores',
+    ),
   email: z.string().email('Invalid email format'),
   password: passwordSchema,
   inviteCode: z.string().optional(),

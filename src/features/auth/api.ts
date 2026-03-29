@@ -93,3 +93,14 @@ export async function resetPassword(
     body: JSON.stringify({ token, newPassword: password }),
   });
 }
+
+/**
+ * Checks if a username is available in real-time
+ */
+export async function checkUsername(
+  username: string,
+): Promise<{ available: boolean }> {
+  return apiFetch<{ available: boolean }>(
+    `/api/user/check-username/${encodeURIComponent(username)}`,
+  );
+}
