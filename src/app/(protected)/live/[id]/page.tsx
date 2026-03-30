@@ -3,13 +3,14 @@
 import { ArrowLeft, Calendar, Loader2, Trophy, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLiveMatchPlayer } from '@/features/livestream/hooks/use-live-match-player';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
+import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import { env } from '@/lib/env';
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();
@@ -19,6 +20,37 @@ export default function LiveMatchPlayerPage() {
     match ?? null,
     matchId,
   );
+
+  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!match || !match.playPath || sessionUrl || sessionLoading) return;
+
+    const initSession = async () => {
+      setSessionLoading(true);
+      try {
+        const response = await playVideo({
+          type: 'livestream',
+          title: `${match.team1.name} vs ${match.team2.name}`,
+          movieId: match.playPath!,
+        });
+
+        if (response.success && response.masterPlaylistUrl) {
+          setSessionUrl(response.masterPlaylistUrl);
+        } else {
+          setSessionError('Failed to initialize secure stream session.');
+        }
+      } catch (_err) {
+        setSessionError('Error connecting to stream server.');
+      } finally {
+        setSessionLoading(false);
+      }
+    };
+
+    initSession();
+  }, [match, sessionUrl, sessionLoading]);
 
   if (isLoading) {
     return (
@@ -31,10 +63,10 @@ export default function LiveMatchPlayerPage() {
   if (error || !match) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4">
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
           Stream Unavailable
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8">
+        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
           {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
@@ -46,10 +78,13 @@ export default function LiveMatchPlayerPage() {
     );
   }
 
-  const isServer2 = match.id.startsWith('pm:');
-  const isEffectivelyLive = match.status === 'MatchIng' || isServer2;
+  // Guaranteed non-null from here
+  const activeMatch = match;
 
-  if (match.status === 'MatchNotStart' && !isServer2) {
+  const isServer2 = activeMatch.id.startsWith('pm:');
+  const isEffectivelyLive = activeMatch.status === 'MatchIng' || isServer2;
+
+  if (activeMatch.status === 'MatchNotStart' && !isServer2) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
         <Calendar className="w-20 h-20 text-white/20 mb-6 stroke-[3px]" />
@@ -69,7 +104,7 @@ export default function LiveMatchPlayerPage() {
     );
   }
 
-  if (!match.playPath && match.status === 'MatchIng') {
+  if (!activeMatch.playPath && activeMatch.status === 'MatchIng') {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
         <Loader2 className="w-16 h-16 text-white/20 animate-spin mb-6 stroke-[3px]" />
@@ -83,7 +118,7 @@ export default function LiveMatchPlayerPage() {
     );
   }
 
-  if (match.status === 'MatchEnded') {
+  if (activeMatch.status === 'MatchEnded') {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
         <Trophy className="w-20 h-20 text-[#ffcc00] mb-6 stroke-[3px]" />
@@ -91,8 +126,8 @@ export default function LiveMatchPlayerPage() {
           Match Concluded
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 max-w-md text-center px-4">
-          {match.matchResult ||
-            `${match.team1.name} vs ${match.team2.name} has ended.`}
+          {activeMatch.matchResult ||
+            `${activeMatch.team1.name} vs ${activeMatch.team2.name} has ended.`}
         </p>
         <Link href="/live">
           <Button className="bg-white text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
@@ -103,24 +138,44 @@ export default function LiveMatchPlayerPage() {
     );
   }
 
-  // Build the proxy stream URL
-  const streamUrl = match.playPath
-    ? `${env.BACKEND_URL}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath)}&token=LIVESTREAM`
-    : null;
+  if (sessionLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-black">
+        <Loader2 className="w-10 h-10 text-white animate-spin stroke-[3px]" />
+      </div>
+    );
+  }
 
-  const team1Name = match.team1.name;
-  const team2Name = match.team2.name;
+  if (sessionError) {
+    return (
+      <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
+          Access Denied
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
+          {sessionError}
+        </p>
+        <Link href="/live">
+          <Button className="bg-white text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const team1Name = activeMatch.team1.name;
+  const team2Name = activeMatch.team2.name;
 
   let displayTitle = '';
 
-  // Edge case: PrivateMedia sometimes sends team1="LIVE", team2="STREAM"
   if (
     team1Name.toUpperCase() === 'LIVE' &&
     team2Name.toUpperCase() === 'STREAM'
   ) {
     displayTitle =
-      match.timeDesc && match.timeDesc !== 'LIVE'
-        ? match.timeDesc
+      activeMatch.timeDesc && activeMatch.timeDesc !== 'LIVE'
+        ? activeMatch.timeDesc
         : 'LIVE STREAM';
   } else {
     const isChannelOrEvent =
@@ -135,16 +190,14 @@ export default function LiveMatchPlayerPage() {
       : `${team1Name} vs ${team2Name}`;
   }
 
-  // Build metadata for the WatchPage component
   const metadata: VideoMetadata = {
     movieId: matchId,
     title: displayTitle,
     type: 'livestream',
-    posterUrl: match.team1.avatar,
+    posterUrl: activeMatch.team1.avatar,
     providerId: 's1', // Force HLS engine
   };
 
-  // Live match header content for mobile
   const mobileHeader = (
     <div className="flex items-center gap-3 ml-auto">
       {isEffectivelyLive && (
@@ -156,41 +209,41 @@ export default function LiveMatchPlayerPage() {
         </Badge>
       )}
       <div className="flex items-center gap-2 bg-white border-[3px] border-[#1a1a1a] px-3 py-1 text-[#1a1a1a] neo-shadow-sm scale-90">
-        {match.team1.avatar ? (
+        {activeMatch.team1.avatar ? (
           <img
-            src={match.team1.avatar}
-            alt={match.team1.name}
+            src={activeMatch.team1.avatar}
+            alt={activeMatch.team1.name}
             className="w-5 h-5 rounded-none border border-[#1a1a1a]"
           />
         ) : (
           <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-[#f5f0e8] border border-[#1a1a1a]">
-            {match.team1.name.charAt(0)}
+            {activeMatch.team1.name.charAt(0)}
           </span>
         )}
-        {match.type === 'cricket' ? (
+        {activeMatch.type === 'cricket' ? (
           <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-            {match.matchResult || displayTitle}
+            {activeMatch.matchResult || displayTitle}
           </span>
         ) : (
           <>
             <span className="font-black font-headline tabular-nums">
-              {match.team1.score}
+              {activeMatch.team1.score}
             </span>
             <span className="text-[#1a1a1a]/30 font-black">-</span>
             <span className="font-black font-headline tabular-nums">
-              {match.team2.score}
+              {activeMatch.team2.score}
             </span>
           </>
         )}
-        {match.team2.avatar ? (
+        {activeMatch.team2.avatar ? (
           <img
-            src={match.team2.avatar}
-            alt={match.team2.name}
+            src={activeMatch.team2.avatar}
+            alt={activeMatch.team2.name}
             className="w-5 h-5 rounded-none border border-[#1a1a1a]"
           />
         ) : (
           <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-[#f5f0e8] border border-[#1a1a1a]">
-            {match.team2.name.charAt(0)}
+            {activeMatch.team2.name.charAt(0)}
           </span>
         )}
       </div>
@@ -212,7 +265,7 @@ export default function LiveMatchPlayerPage() {
 
   return (
     <WatchLivePlayer
-      streamUrl={streamUrl}
+      streamUrl={sessionUrl}
       metadata={metadata}
       mobileHeaderContent={mobileHeader}
     />

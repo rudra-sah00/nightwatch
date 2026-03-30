@@ -60,7 +60,7 @@ export function SketchOverlay({
   });
 
   const [guides, setGuides] = useState<
-    Array<{ x1: number; y1: number; x2: number; y2: number }>
+    Array<{ id: string; x1: number; y1: number; x2: number; y2: number }>
   >([]);
 
   const [activeReactions, setActiveReactions] = useState<
@@ -70,6 +70,7 @@ export function SketchOverlay({
       y: number;
       color: string;
       particles: Array<{
+        id: string;
         x: number;
         y: number;
         vx: number;
@@ -141,8 +142,13 @@ export function SketchOverlay({
     const stageWidth = stage.width();
     const stageHeight = stage.height();
 
-    const newGuides: Array<{ x1: number; y1: number; x2: number; y2: number }> =
-      [];
+    const newGuides: Array<{
+      id: string;
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+    }> = [];
 
     // Potential snapping points [guide_pos, snap_to_pos]
     const snapPointsX: Array<[number, number]> = [
@@ -180,7 +186,13 @@ export function SketchOverlay({
         if (Math.abs(itemX - guideX) < SNAP_THRESHOLD) {
           const offset = itemX - item.x();
           item.x(snapTo - offset);
-          newGuides.push({ x1: guideX, y1: 0, x2: guideX, y2: stageHeight });
+          newGuides.push({
+            id: `guide-x-${guideX}`,
+            x1: guideX,
+            y1: 0,
+            x2: guideX,
+            y2: stageHeight,
+          });
           snappedX = true;
           break;
         }
@@ -199,7 +211,13 @@ export function SketchOverlay({
         if (Math.abs(itemY - guideY) < SNAP_THRESHOLD) {
           const offset = itemY - item.y();
           item.y(snapTo - offset);
-          newGuides.push({ x1: 0, y1: guideY, x2: stageWidth, y2: guideY });
+          newGuides.push({
+            id: `guide-y-${guideY}`,
+            x1: 0,
+            y1: guideY,
+            x2: stageWidth,
+            y2: guideY,
+          });
           snappedY = true;
           break;
         }
@@ -234,6 +252,7 @@ export function SketchOverlay({
     return onSketchReaction((data) => {
       const numParticles = 12;
       const particles = Array.from({ length: numParticles }).map(() => ({
+        id: Math.random().toString(36).substr(2, 9),
         x: 0,
         y: 0,
         vx: (Math.random() - 0.5) * 10,
@@ -612,10 +631,9 @@ export function SketchOverlay({
               }}
             />
           )}
-          {guides.map((guide, i) => (
+          {guides.map((guide) => (
             <Line
-              // biome-ignore lint/suspicious/noArrayIndexKey: transient guides
-              key={i}
+              key={guide.id}
               points={[guide.x1, guide.y1, guide.x2, guide.y2]}
               stroke="#a855f7" // Purple guide color
               strokeWidth={1}
@@ -658,10 +676,9 @@ export function SketchOverlay({
           {/* Particle Reactions */}
           {activeReactions.map((reaction) => (
             <Group key={reaction.id} x={reaction.x} y={reaction.y}>
-              {reaction.particles.map((p, i) => (
+              {reaction.particles.map((p) => (
                 <Star
-                  // biome-ignore lint/suspicious/noArrayIndexKey: transient particles
-                  key={`${reaction.id}-${i}`}
+                  key={p.id}
                   x={p.x}
                   y={p.y}
                   numPoints={5}

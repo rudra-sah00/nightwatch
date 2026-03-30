@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
+import { useStreamRevocation } from '../player/hooks/useStreamRevocation';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
@@ -20,6 +21,16 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
   const router = useRouter();
+
+  const [revokedError, setRevokedError] = useState<string | null>(null);
+
+  useStreamRevocation({
+    onRevoked: () => {
+      setRevokedError(
+        'Playback stopped — you started playing on another tab or device.',
+      );
+    },
+  });
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -60,12 +71,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         {props.mobileHeaderContent}
       </div>
 
-      <LivePlayerState />
+      <LivePlayerState revokedError={revokedError} />
     </Player.Root>
   );
 });
-function LivePlayerState() {
+function LivePlayerState({ revokedError }: { revokedError: string | null }) {
   const { state, playerHandlers, metadata } = usePlayerContext();
+  const error = revokedError || state.error;
 
   return (
     <>
@@ -88,8 +100,8 @@ function LivePlayerState() {
       <LiveBufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 
       <ErrorOverlay
-        isVisible={!!state.error}
-        message={state.error || 'Live stream unavailable'}
+        isVisible={!!error}
+        message={error || 'Live stream unavailable'}
         onRetry={() => {
           window.location.reload();
         }}

@@ -8,6 +8,7 @@ import {
   type S2AudioTrack,
   useS2AudioTracks,
 } from '@/features/watch/player/hooks/useS2AudioTracks';
+import { useStreamRevocation } from '@/features/watch/player/hooks/useStreamRevocation';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
@@ -275,23 +276,16 @@ export function useWatchContent() {
     }
   }, [streamUrl]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleStreamRevoked = () => {
-      if (replacingSessionRef.current) return;
-
+  // ============ STREAM REVOCATION ============
+  useStreamRevocation({
+    onRevoked: () => {
       setStreamUrl(null);
       setRefetchError(
         'Playback stopped — you started playing on another tab or device.',
       );
-    };
-
-    socket.on(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
-    return () => {
-      socket.off(WS_EVENTS.STREAM_REVOKED, handleStreamRevoked);
-    };
-  }, [socket, setStreamUrl]);
+    },
+    isReplacingSession: replacingSessionRef.current,
+  });
 
   useEffect(() => {
     const handleUnload = () => stopVideo();

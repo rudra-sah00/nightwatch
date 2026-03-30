@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useStreamRevocation } from '@/features/watch/player/hooks/useStreamRevocation';
 import { usePredictiveSync } from '@/features/watch-party/room/hooks/usePredictiveSync';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
 import type {
@@ -59,6 +60,7 @@ export function useWatchPartyClient({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const roomCreationTimeRef = useRef<number>(0);
   const isHostRef = useRef(false);
+  const [revocationError, setRevocationError] = useState<string | null>(null);
 
   const hasConnectedGuest = useRef(false);
   useEffect(() => {
@@ -143,6 +145,21 @@ export function useWatchPartyClient({
 
   const isHost = user?.id === room?.hostId;
   isHostRef.current = isHost;
+
+  useStreamRevocation({
+    onRevoked: () => {
+      setRevocationError(
+        'Playback stopped — you started playing on another tab or device.',
+      );
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+    },
+    // We don't have a simple 'replacingSession' flag here like VOD,
+    // but the backend's 2-second buffer and host-only check handle most cases.
+    isReplacingSession: false,
+  });
+
   const prevMemberCount = useRef(0);
 
   useEffect(() => {
@@ -322,8 +339,8 @@ export function useWatchPartyClient({
     user,
     room,
     isLoading,
-    partyError,
-    partyErrorCode,
+    partyError: revocationError || partyError,
+    partyErrorCode: revocationError ? 'STREAM_REVOKED' : partyErrorCode,
     isConnected,
     requestStatus,
     isGuestSocketReady,
