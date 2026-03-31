@@ -100,7 +100,8 @@ describe('Auth API', () => {
         name: 'Test User',
         username: 'testuser',
         email: 'test@example.com',
-        password: 'Password123',
+        password: 'Password123!',
+        inviteCode: 'INVITE123',
       };
 
       const result = await registerUser(registerData);

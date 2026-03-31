@@ -4,7 +4,9 @@ import { z } from 'zod';
 const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/\d/, 'Password must contain at least one number')
   .regex(
     /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
     'Password must contain at least one special character',
@@ -87,7 +89,7 @@ export const registerSchema = z.object({
     ),
   email: z.string().email('Invalid email format'),
   password: passwordSchema,
-  inviteCode: z.string().optional(),
+  inviteCode: z.string().min(1, 'Invite code is required'),
   captchaToken: z.string().optional(),
 });
 

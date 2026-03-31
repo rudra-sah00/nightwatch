@@ -539,6 +539,7 @@ describe('AuthProvider', () => {
           username: 'newuser',
           email: 'new@test.com',
           password: 'Test@12345',
+          inviteCode: 'INVITE123',
         });
       });
 
