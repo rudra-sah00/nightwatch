@@ -103,6 +103,13 @@ export async function changePassword(
   });
 }
 
+export async function deleteAccount(options?: RequestInit): Promise<void> {
+  await apiFetch('/api/user/profile', {
+    method: 'DELETE',
+    ...options,
+  });
+}
+
 /**
  * Get public profile data by ID (UUID compulsory)
  */

@@ -3,11 +3,11 @@ import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
-import { checkUsername, updateProfile } from '../api';
+import { checkUsername, deleteAccount, updateProfile } from '../api';
 import { updateProfileSchema } from '../schema';
 
 export function useUpdateProfileForm() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [preferredServer, setPreferredServer] = useState<'s1' | 's2' | 's3'>(
@@ -16,6 +16,8 @@ export function useUpdateProfileForm() {
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const isInitialized = useRef(false);
 
@@ -125,6 +127,20 @@ export function useUpdateProfileForm() {
     username !== (user?.username || '') ||
     preferredServer !== (user?.preferredServer || 's2');
 
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteAccount();
+      toast.success('Account deleted successfully');
+      setShowDeleteDialog(false);
+      logout();
+    } catch (err) {
+      const apiError = err as ApiError;
+      toast.error(apiError.message || 'Failed to delete account');
+      setIsDeleting(false);
+    }
+  };
+
   return {
     user,
     name,
@@ -138,5 +154,9 @@ export function useUpdateProfileForm() {
     hasChanges,
     action,
     isPending,
+    isDeleting,
+    showDeleteDialog,
+    setShowDeleteDialog,
+    handleDeleteAccount,
   };
 }
