@@ -1,6 +1,7 @@
 import { Mic, MicOff, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useParticipantView } from '../hooks/use-participant-view';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
@@ -30,7 +31,7 @@ export function ParticipantView({
   const isVideoMuted = !participant.isCameraEnabled;
 
   return (
-    <div className="relative w-full h-full bg-background group">
+    <div className="relative w-full h-full bg-gray-100 group">
       {/* Video Container — Agora renders into this div */}
       <div
         ref={videoRef}
@@ -48,7 +49,7 @@ export function ParticipantView({
       {isCurrentUser ? (
         <div
           className={cn(
-            'absolute top-2 left-2 z-20 px-1.5 py-0.5 bg-selected border-[2px] border-foreground text-[9px] font-black font-headline text-white uppercase tracking-widest neo-shadow-sm',
+            'absolute top-2 left-2 z-20 px-2 py-0.5 bg-blue-500 rounded-md shadow-sm text-[9px] font-bold font-headline text-white uppercase tracking-widest ',
             participant.isSpeaking && 'left-6', // Shift if speaking to not overlap
           )}
         >
@@ -105,7 +106,7 @@ function AvatarFallback({
   name: string;
 }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-background">
+    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
       {/* Background blur effect */}
       {avatarUrl ? (
         <div className="absolute inset-0">
@@ -122,7 +123,7 @@ function AvatarFallback({
       {/* Centered Avatar */}
       <div className="relative z-10 flex items-center justify-center">
         {avatarUrl ? (
-          <div className="w-20 h-20 rounded-full border-[3px] border-foreground overflow-hidden neo-shadow-sm relative">
+          <div className="w-20 h-20 rounded-full border-2 border-white overflow-hidden shadow-md relative">
             <Image
               src={avatarUrl}
               alt={name}
@@ -132,8 +133,8 @@ function AvatarFallback({
             />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full flex items-center justify-center neo-shadow-sm border-[3px] border-foreground bg-host">
-            <span className="text-3xl font-black font-headline text-foreground">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 border-white bg-blue-500 shadow-md">
+            <span className="text-3xl font-black font-headline text-white">
               {name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -170,11 +171,11 @@ function ParticipantOverlay({
         </div>
 
         {/* Mic Status */}
-        <div className="bg-foreground/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
+        <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
           {isMicEnabled ? (
-            <Mic className="w-2.5 h-2.5 text-success-strong" />
+            <Mic className="w-2.5 h-2.5 text-green-400" />
           ) : (
-            <MicOff className="w-2.5 h-2.5 text-danger" />
+            <MicOff className="w-2.5 h-2.5 text-red-500" />
           )}
         </div>
       </div>
@@ -184,30 +185,30 @@ function ParticipantOverlay({
         <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
           {confirmKick ? (
             <div className="flex items-center gap-1">
-              <button
+              <Button
                 type="button"
                 onClick={onKick}
-                className="px-2 py-1 bg-danger text-white border-[2px] border-foreground text-[9px] font-black font-headline uppercase tracking-widest neo-shadow-sm hover:bg-foreground transition-all"
+                className="px-2 py-1 bg-red-500 text-white rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-red-600 transition-all shadow-sm"
               >
                 Kick!
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setConfirmKick(false)}
-                className="p-1 bg-host border-[2px] border-foreground neo-shadow-sm hover:bg-white transition-all"
+                className="p-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-all shadow-sm"
               >
-                <X className="w-2.5 h-2.5 text-foreground stroke-[3px]" />
-              </button>
+                <X className="w-2.5 h-2.5 stroke-[3px]" />
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={() => setConfirmKick(true)}
-              className="p-1.5 bg-danger text-white border-[2px] border-foreground hover:bg-foreground transition-all neo-shadow-sm"
+              className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all shadow-sm"
               title="Kick user"
             >
               <X className="w-3 h-3 stroke-[3px]" />
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -223,9 +224,9 @@ function SpeakingIndicator() {
     <div
       className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full animate-pulse z-30 pointer-events-none"
       style={{
-        backgroundColor: 'var(--success-color-strong)',
-        boxShadow: '0 0 12px var(--success-glow), 0 0 4px #000',
-        border: '1.5px solid var(--foreground)',
+        backgroundColor: '#4ade80',
+        boxShadow: '0 0 12px #22c55e, 0 0 4px #000',
+        border: '1.5px solid #ffffff',
       }}
     />
   );

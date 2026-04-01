@@ -79,7 +79,7 @@ export function AlertDialogContent({
   return (
     <div
       className={cn(
-        'bg-white border-[4px] border-[#1a1a1a] rounded-none neo-shadow max-w-md w-full mx-4 p-8 relative',
+        'bg-white border-[4px] border-border rounded-none  max-w-md w-full mx-4 p-8 relative',
         className,
       )}
     >
@@ -118,7 +118,7 @@ export function AlertDialogTitle({
   return (
     <h2
       className={cn(
-        'text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-none',
+        'text-3xl font-black font-headline uppercase tracking-tighter text-foreground leading-none',
         className,
       )}
     >
@@ -151,7 +151,7 @@ export function AlertDialogAction({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-[#1a1a1a] font-headline font-black uppercase tracking-widest neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200',
+        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-border font-headline font-black uppercase tracking-widest  transition-all duration-200',
         className,
       )}
       {...props}
@@ -169,7 +169,7 @@ export function AlertDialogCancel({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-white text-[#1a1a1a] border-[3px] border-[#1a1a1a] font-headline font-black uppercase tracking-widest neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200',
+        'px-6 py-3 bg-white text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest  transition-all duration-200',
         className,
       )}
       {...props}

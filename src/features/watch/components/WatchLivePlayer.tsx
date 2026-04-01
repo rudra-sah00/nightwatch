@@ -59,7 +59,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         <button
           type="button"
           onClick={handleBack}
-          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          className="p-2 rounded-full bg-white/10/20 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>

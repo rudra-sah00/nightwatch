@@ -33,8 +33,8 @@ export function SeasonSelector({
           onToggle();
         }}
         className={cn(
-          'flex items-center gap-3 px-6 py-3 border-[3px] border-[#1a1a1a] neo-shadow bg-[#f5f0e8] hover:bg-[#ffcc00] transition-all duration-200',
-          'text-[#1a1a1a] font-headline font-black uppercase tracking-widest text-sm sm:text-base',
+          'flex items-center gap-3 px-6 py-3 border-[3px] border-border  bg-background hover:bg-[#ffcc00] transition-all duration-200',
+          'text-foreground font-headline font-black uppercase tracking-widest text-sm sm:text-base',
         )}
       >
         {selectedSeason
@@ -50,7 +50,7 @@ export function SeasonSelector({
 
       {/* Dropdown */}
       {isOpen ? (
-        <div className="absolute top-full right-0 mt-4 w-56 bg-white border-[3px] border-[#1a1a1a] neo-shadow-yellow overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full right-0 mt-4 w-56 bg-white border-[3px] border-border -yellow overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {seasons.map((season) => (
             <button
               type="button"
@@ -60,11 +60,11 @@ export function SeasonSelector({
                 onSelect(season);
               }}
               className={cn(
-                'w-full px-6 py-4 text-left transition-all duration-150 border-b-[3px] last:border-b-0 border-[#1a1a1a]',
+                'w-full px-6 py-4 text-left transition-all duration-150 border-b-[3px] last:border-b-0 border-border',
                 'font-headline font-bold uppercase tracking-wider text-sm',
                 selectedSeason?.seasonId === season.seasonId
                   ? 'bg-[#0055ff] text-white'
-                  : 'bg-white text-[#1a1a1a] hover:bg-[#ffcc00]',
+                  : 'bg-white text-foreground hover:bg-[#ffcc00]',
               )}
             >
               SEASON {season.seasonNumber}

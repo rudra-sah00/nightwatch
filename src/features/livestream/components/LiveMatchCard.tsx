@@ -1,6 +1,7 @@
 'use client';
 
 import { Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import type { CricketMatchInfo, LiveMatch } from '../api';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
 import { LiveMatchModal } from './LiveMatchModal';
@@ -61,74 +62,94 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   return (
     <>
       {matchModal}
-      <div className="group relative bg-white border-b-[3px] border-[#1a1a1a]/10 hover:bg-[#f5f0e8] transition-colors">
-        <div className="flex items-center gap-4 px-6 py-5">
-          {/* Status Column */}
-          <div className="w-20 flex-shrink-0">
-            {isLive ? (
-              <div className="flex flex-col items-center">
-                <span className="px-2 py-0.5 bg-[#e63b2e] text-white text-[10px] font-black uppercase tracking-widest border-2 border-[#1a1a1a] neo-shadow-sm font-headline">
-                  Live
-                </span>
-                <span
-                  className={`mt-1.5 text-[8px] font-black uppercase tracking-tighter ${
-                    isServer2 ? 'text-[#0055ff]' : 'text-[#ffcc00]'
-                  }`}
-                >
-                  {providerName}
-                </span>
-              </div>
-            ) : isUpcoming ? (
-              <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a] font-headline tabular-nums block text-center">
-                {formattedTime}
+      <div className="group bg-white border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-[#f8f9fa] transition-colors rounded-md">
+        {/* 1. Time / Status / League (Left) */}
+        <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
+          {isLive ? (
+            <div className="animate-pulse mb-1">
+              <span className="px-3 py-1 bg-[#e63b2e] text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md">
+                Live Now
               </span>
-            ) : (
-              <span className="text-xs font-black uppercase tracking-widest text-[#1a1a1a]/40 font-headline block text-center">
-                Final
-              </span>
-            )}
+            </div>
+          ) : isUpcoming ? (
+            <span className="text-sm font-black uppercase tracking-widest text-foreground font-headline tabular-nums bg-gray-100 px-2 py-1 border-[2px] border-border mb-1 rounded-md">
+              {formattedTime}
+            </span>
+          ) : (
+            <span className="text-sm font-black uppercase tracking-widest text-foreground/60 font-headline mb-1">
+              Final
+            </span>
+          )}
+
+          <div className="flex flex-col items-center md:items-start gap-1 w-full mt-2">
+            <span className="px-2 py-0.5 bg-gray-100 border-[2px] border-border text-[10px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
+              {match.league || match.type}
+            </span>
+            <span
+              className={`text-[9px] font-black uppercase tracking-tighter ${
+                isServer2 ? 'text-[#0055ff]' : 'text-[#ffcc00]'
+              }`}
+            >
+              {providerName}
+            </span>
           </div>
+        </div>
 
-          <div className="w-[3px] h-12 bg-[#1a1a1a] hidden sm:block" />
-
-          {/* Teams Column */}
-          <div className="flex-grow min-w-0 grid grid-cols-1 gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center p-0.5 neo-shadow-sm">
-                {match.team1.avatar ? (
-                  <img
-                    src={match.team1.avatar}
-                    alt=""
-                    className="w-full h-full object-contain"
-                  />
-                ) : null}
-              </div>
-              <span className="text-sm font-black uppercase tracking-tight text-[#1a1a1a] font-headline truncate">
+        {/* 2. Teams (Center) */}
+        <div className="flex flex-1 items-center justify-center gap-4 w-full">
+          {/* Team 1 */}
+          <div className="flex flex-1 items-center justify-end gap-2 md:gap-3 text-right min-w-0">
+            <div className="flex flex-col items-end min-w-0">
+              <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
                 {match.team1.name}
               </span>
               {(isLive || isEnded) && (
-                <span className="ml-auto text-sm font-black font-headline tabular-nums">
+                <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
                   {match.type === 'cricket'
                     ? getCricketScore(match, 1)
                     : match.team1.score}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-white border-2 border-[#1a1a1a] flex-shrink-0 overflow-hidden flex items-center justify-center p-0.5 neo-shadow-sm">
-                {match.team2.avatar ? (
-                  <img
-                    src={match.team2.avatar}
-                    alt=""
-                    className="w-full h-full object-contain"
-                  />
-                ) : null}
-              </div>
-              <span className="text-sm font-black uppercase tracking-tight text-[#1a1a1a] font-headline truncate">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+              {match.team1.avatar ? (
+                <img
+                  src={match.team1.avatar}
+                  alt={match.team1.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 rounded-full" />
+              )}
+            </div>
+          </div>
+
+          {/* VS Badge */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center -mt-2">
+            <span className="text-sm md:text-lg font-black italic text-foreground/40 font-headline bg-gray-100 px-2 py-1 rounded-md border border-border/20">
+              VS
+            </span>
+          </div>
+
+          {/* Team 2 */}
+          <div className="flex flex-1 items-center justify-start gap-2 md:gap-3 text-left min-w-0">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+              {match.team2.avatar ? (
+                <img
+                  src={match.team2.avatar}
+                  alt={match.team2.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 rounded-full" />
+              )}
+            </div>
+            <div className="flex flex-col items-start min-w-0">
+              <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
                 {match.team2.name}
               </span>
               {(isLive || isEnded) && (
-                <span className="ml-auto text-sm font-black font-headline tabular-nums">
+                <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
                   {match.type === 'cricket'
                     ? getCricketScore(match, 2)
                     : match.team2.score}
@@ -136,28 +157,19 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="w-32 flex-shrink-0 hidden lg:flex items-center justify-center">
-            <span className="px-3 py-1 bg-white border-2 border-[#1a1a1a] text-[10px] font-black uppercase tracking-[0.1em] font-headline neo-shadow-sm">
-              {match.league || match.type}
-            </span>
-          </div>
-
-          {/* Action Button */}
-          <div className="w-24 flex-shrink-0 flex justify-end">
-            <button
-              type="button"
-              onClick={handleWatchClick}
-              className={`group/watch flex items-center gap-2 px-4 py-2 border-[3px] border-[#1a1a1a] font-black font-headline uppercase text-[10px] tracking-widest transition-all ${
-                canWatch
-                  ? 'bg-gradient-to-r from-[#e63b2e] to-[#ff6b00] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
-                  : 'bg-[#f5f0e8] text-[#1a1a1a]/40 cursor-not-allowed opacity-50'
-              }`}
-            >
-              <Play className="w-3 h-3 fill-current transition-transform group-hover/watch:scale-110" />
-              Watch
-            </button>
-          </div>
+        {/* 3. Action Button (Right) */}
+        <div className="w-full md:w-auto flex-shrink-0 flex justify-end mt-4 md:mt-0">
+          <Button
+            onClick={handleWatchClick}
+            disabled={!canWatch}
+            variant={canWatch ? 'neo-red' : 'neo-outline'}
+            className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-all hover:bg-[#1a1a1a] hover:text-white"
+          >
+            <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
+            Watch
+          </Button>
         </div>
       </div>
     </>

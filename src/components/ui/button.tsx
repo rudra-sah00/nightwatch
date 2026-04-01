@@ -4,23 +4,22 @@ import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-black uppercase tracking-tighter rounded-none',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-medium tracking-normal',
   {
     variants: {
       variant: {
         default:
-          'bg-[#1a1a1a] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active',
-        neo: 'bg-[#1a1a1a] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active',
+          'border border-transparent bg-[#1a1a1a] text-white hover:bg-gray-800 hover:text-white rounded-md',
+        neo: 'border border-transparent bg-[#1a1a1a] text-white hover:bg-gray-800 hover:text-white rounded-md',
         'neo-yellow':
-          'bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-white active:neo-shadow-active',
+          'border border-transparent bg-[#ffcc00] text-foreground hover:bg-[#e6b800] hover:text-foreground rounded-md',
         'neo-red':
-          'bg-[#e63b2e] text-white border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-[#1a1a1a] active:neo-shadow-active',
+          'border border-transparent bg-[#e63b2e] text-white hover:bg-[#cc3429] hover:text-white rounded-md',
         'neo-outline':
-          'bg-transparent text-[#1a1a1a] border-4 border-[#1a1a1a] neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-[#f2ede5] active:neo-shadow-active',
+          'bg-transparent text-foreground border border-border hover:bg-[#1a1a1a] hover:text-white rounded-md',
         'neo-ghost':
-          'bg-transparent text-[#1a1a1a] border-4 border-[#1a1a1a] hover:bg-[#f2ede5]',
-        'neo-base':
-          'neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] active:neo-shadow-active transition-all',
+          'border border-transparent bg-transparent text-foreground hover:bg-black/5 hover:text-foreground rounded-md',
+        'neo-base': 'transition-all',
         none: '',
       },
       size: {

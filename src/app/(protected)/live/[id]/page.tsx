@@ -70,7 +70,7 @@ export default function LiveMatchPlayerPage() {
           {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -96,7 +96,7 @@ export default function LiveMatchPlayerPage() {
           time.
         </p>
         <Link href="/live">
-          <Button className="bg-[#ffcc00] text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+          <Button className="bg-[#ffcc00] text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -130,7 +130,7 @@ export default function LiveMatchPlayerPage() {
             `${activeMatch.team1.name} vs ${activeMatch.team2.name} has ended.`}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -156,7 +156,7 @@ export default function LiveMatchPlayerPage() {
           {sessionError}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black neo-shadow-sm px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -208,15 +208,15 @@ export default function LiveMatchPlayerPage() {
           LIVE
         </Badge>
       )}
-      <div className="flex items-center gap-2 bg-white border-[3px] border-[#1a1a1a] px-3 py-1 text-[#1a1a1a] neo-shadow-sm scale-90">
+      <div className="flex items-center gap-2 bg-white border-[3px] border-border px-3 py-1 text-foreground  scale-90">
         {activeMatch.team1.avatar ? (
           <img
             src={activeMatch.team1.avatar}
             alt={activeMatch.team1.name}
-            className="w-5 h-5 rounded-none border border-[#1a1a1a]"
+            className="w-5 h-5 rounded-none border border-border"
           />
         ) : (
-          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-[#f5f0e8] border border-[#1a1a1a]">
+          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
             {activeMatch.team1.name.charAt(0)}
           </span>
         )}
@@ -229,7 +229,7 @@ export default function LiveMatchPlayerPage() {
             <span className="font-black font-headline tabular-nums">
               {activeMatch.team1.score}
             </span>
-            <span className="text-[#1a1a1a]/30 font-black">-</span>
+            <span className="text-foreground/30 font-black">-</span>
             <span className="font-black font-headline tabular-nums">
               {activeMatch.team2.score}
             </span>
@@ -239,10 +239,10 @@ export default function LiveMatchPlayerPage() {
           <img
             src={activeMatch.team2.avatar}
             alt={activeMatch.team2.name}
-            className="w-5 h-5 rounded-none border border-[#1a1a1a]"
+            className="w-5 h-5 rounded-none border border-border"
           />
         ) : (
-          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-[#f5f0e8] border border-[#1a1a1a]">
+          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
             {activeMatch.team2.name.charAt(0)}
           </span>
         )}
@@ -251,7 +251,7 @@ export default function LiveMatchPlayerPage() {
         onClick={handleCreateParty}
         disabled={isCreatingParty}
         size="sm"
-        className="bg-[#0055ff] hover:bg-[#3377ff] text-white rounded-none border-[3px] border-[#1a1a1a] gap-1.5 font-headline font-black uppercase tracking-widest neo-shadow-sm h-8"
+        className="bg-[#0055ff] hover:bg-[#3377ff] text-white rounded-none border-[3px] border-border gap-1.5 font-headline font-black uppercase tracking-widest  h-8"
       >
         {isCreatingParty ? (
           <Loader2 className="w-3 h-3 animate-spin stroke-[3px]" />

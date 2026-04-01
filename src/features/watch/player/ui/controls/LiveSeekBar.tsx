@@ -287,7 +287,7 @@ export function LiveSeekBar() {
               left: `${Math.min(95, Math.max(5, hoverFraction * 100))}%`,
             }}
           >
-            <div className="px-3 py-1 bg-white border-[3px] border-[#1a1a1a] text-[11px] lg:text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] whitespace-nowrap neo-shadow-sm">
+            <div className="px-3 py-1 bg-white border-[3px] border-border text-[11px] lg:text-xs font-black font-headline uppercase tracking-widest text-foreground whitespace-nowrap ">
               {formatBehind(hoverBehind)}
             </div>
             <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#1a1a1a] mx-auto drop-shadow-sm" />
@@ -297,7 +297,7 @@ export function LiveSeekBar() {
         {/* Track */}
         <div
           ref={barRef}
-          className={`relative h-2.5 lg:h-3 2xl:h-4 bg-white border-[3px] border-[#1a1a1a] overflow-visible ${isDragging ? 'h-3.5 lg:h-4 2xl:h-5' : 'group-hover:h-3.5 lg:group-hover:h-4 2xl:group-hover:h-5'}`}
+          className={`relative h-2.5 lg:h-3 2xl:h-4 bg-white border-[3px] border-border overflow-visible ${isDragging ? 'h-3.5 lg:h-4 2xl:h-5' : 'group-hover:h-3.5 lg:group-hover:h-4 2xl:group-hover:h-5'}`}
           onClick={handleClick}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -333,38 +333,38 @@ export function LiveSeekBar() {
         >
           {/* Buffered region within DVR window */}
           <div
-            className="absolute h-full top-[-3px] bottom-[-3px] bg-[#f5f0e8] border-[3px] border-[#1a1a1a]"
+            className="absolute h-full top-[-3px] bottom-[-3px] bg-background border-[3px] border-border"
             style={{ width: `${Math.max(0, bufferedFraction * 100 - 0.5)}%` }}
           />
 
           {/* Hover ghost position */}
           {hoverFraction !== null ? (
             <div
-              className="absolute h-full top-[-3px] bottom-[-3px] bg-[#1a1a1a]/10 border-r-[3px] border-[#1a1a1a]"
+              className="absolute h-full top-[-3px] bottom-[-3px] bg-[#1a1a1a]/10 border-r-[3px] border-border"
               style={{ width: `${Math.max(0, hoverFraction * 100 - 0.5)}%` }}
             />
           ) : null}
 
           {/* DVR progress fill — no CSS transition; rAF gives 60 fps smoothness */}
           <div
-            className="absolute h-full top-[-3px] bottom-[-3px] bg-[#e63b2e] border-y-[3px] border-[#1a1a1a] border-l-[1.5px] border-r-[3px]"
+            className="absolute h-full top-[-3px] bottom-[-3px] bg-[#e63b2e] border-y-[3px] border-border border-l-[1.5px] border-r-[3px]"
             style={{ width: `${Math.max(0, progress - 0.5)}%` }}
           />
 
           {/* Scrubber knob — always visible while dragging */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 bg-white border-[4px] border-[#1a1a1a] shadow-none pointer-events-none rounded-none ${isDragging ? 'scale-125' : 'scale-0 group-hover:scale-100 hover:scale-125'}`}
+            className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 bg-white border-[4px] border-border shadow-none pointer-events-none rounded-none ${isDragging ? 'scale-125' : 'scale-0 group-hover:scale-100 hover:scale-125'}`}
             style={{ left: `calc(${progress}% - 8px)` }}
           />
 
           {/* LIVE edge dot — always at 100 % right */}
           <div
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] w-2.5 h-2.5 border-[2px] border-[#1a1a1a] pointer-events-none z-10 ${isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]'}`}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] w-2.5 h-2.5 border-[2px] border-border pointer-events-none z-10 ${isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]'}`}
           />
         </div>
 
         {/* LIVE label pinned to the right edge */}
-        <div className="absolute right-0 top-full mt-2 font-black font-headline tracking-widest text-[#1a1a1a] text-[10px] uppercase pointer-events-none">
+        <div className="absolute right-0 top-full mt-2 font-black font-headline tracking-widest text-foreground text-[10px] uppercase pointer-events-none">
           LIVE
         </div>
       </div>

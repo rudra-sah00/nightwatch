@@ -46,17 +46,17 @@ export function NextEpisodeOverlay({
 
   return (
     <div className="absolute bottom-36 md:bottom-48 right-6 z-50 animate-in slide-in-from-right-4 fade-in duration-300">
-      <div className="w-80 bg-[#f5f0e8] border-[4px] border-[#1a1a1a] neo-shadow flex flex-col pointer-events-auto">
+      <div className="w-80 bg-background border-[4px] border-border  flex flex-col pointer-events-auto">
         {/* Header */}
-        <div className="px-4 py-3 bg-[#ffcc00] border-b-[4px] border-[#1a1a1a] flex justify-between items-center">
+        <div className="px-4 py-3 bg-[#ffcc00] border-b-[4px] border-border flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <SkipForward className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
-            <span className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm">
+            <SkipForward className="w-5 h-5 text-foreground stroke-[3px]" />
+            <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
               {isNextSeason ? 'Next Season' : 'Next Episode'}
             </span>
           </div>
           {!cancelled && autoPlayDelay > 0 && !isLoading ? (
-            <span className="text-[#1a1a1a] font-bold font-headline uppercase tracking-widest text-[10px]">
+            <span className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px]">
               in {countdown}s
             </span>
           ) : null}
@@ -66,7 +66,7 @@ export function NextEpisodeOverlay({
         <div className="p-4 flex flex-col gap-4">
           <div className="flex gap-4">
             {/* Thumbnail */}
-            <div className="relative w-28 aspect-video border-[3px] border-[#1a1a1a] flex-shrink-0 bg-white">
+            <div className="relative w-28 aspect-video border-[3px] border-border flex-shrink-0 bg-white">
               {nextEpisode.thumbnailUrl ? (
                 <Image
                   src={nextEpisode.thumbnailUrl}
@@ -76,8 +76,8 @@ export function NextEpisodeOverlay({
                   unoptimized
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[#f5f0e8]">
-                  <span className="text-[#1a1a1a] font-black font-headline uppercase text-xl">
+                <div className="w-full h-full flex items-center justify-center bg-background">
+                  <span className="text-foreground font-black font-headline uppercase text-xl">
                     E{nextEpisode.episodeNumber}
                   </span>
                 </div>
@@ -86,10 +86,10 @@ export function NextEpisodeOverlay({
 
             {/* Info */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <p className="text-[#1a1a1a] font-bold font-headline uppercase tracking-widest text-[10px] mb-1">
+              <p className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px] mb-1">
                 S{nextEpisode.seasonNumber} • E{nextEpisode.episodeNumber}
               </p>
-              <h4 className="text-[#1a1a1a] font-black font-headline uppercase tracking-tighter text-sm line-clamp-2 leading-tight">
+              <h4 className="text-foreground font-black font-headline uppercase tracking-tighter text-sm line-clamp-2 leading-tight">
                 {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
               </h4>
               {nextEpisode.duration ? (
@@ -107,9 +107,9 @@ export function NextEpisodeOverlay({
               onClick={onPlayNext}
               disabled={isLoading}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] border-[#1a1a1a] bg-[#e63b2e] text-white',
-                'font-black font-headline uppercase tracking-widest text-xs neo-shadow-sm',
-                'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ff4d40]',
+                'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] border-border bg-[#e63b2e] text-white',
+                'font-black font-headline uppercase tracking-widest text-xs ',
+                'hover:bg-[#ff4d40]',
                 'active:bg-[#cc3329] transition-all disabled:opacity-50 disabled:pointer-events-none',
               )}
             >
@@ -130,9 +130,9 @@ export function NextEpisodeOverlay({
               onClick={handleCancel}
               disabled={isLoading}
               className={cn(
-                'px-4 py-2 border-[3px] border-[#1a1a1a] bg-white text-[#1a1a1a]',
-                'font-black font-headline uppercase tracking-widest text-xs neo-shadow-sm',
-                'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#f5f0e8]',
+                'px-4 py-2 border-[3px] border-border bg-white text-foreground',
+                'font-black font-headline uppercase tracking-widest text-xs ',
+                'hover:bg-background',
                 'active:bg-[#e0dcd3] transition-all disabled:opacity-50 disabled:pointer-events-none',
               )}
             >
@@ -142,7 +142,7 @@ export function NextEpisodeOverlay({
 
           {/* Progress bar for countdown */}
           {!cancelled && autoPlayDelay > 0 && !isLoading ? (
-            <div className="h-2 bg-white border-[2px] border-[#1a1a1a]">
+            <div className="h-2 bg-white border-[2px] border-border">
               <div
                 className="h-full bg-[#1a1a1a] transition-[width] duration-1000 ease-linear"
                 style={{ width: `${(countdown / autoPlayDelay) * 100}%` }}

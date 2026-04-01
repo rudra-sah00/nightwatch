@@ -40,10 +40,10 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
       {step === 'otp' && (
         <div className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="flex flex-col justify-start">
-            <p className="text-[10px] font-body font-black text-[#1a1a1a] uppercase tracking-[0.18em] opacity-80 text-center mb-2">
+            <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               CODE DISPATCHED TO
             </p>
-            <p className="font-black border-b-2 border-[#1a1a1a] text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
+            <p className="font-black border-b-2 border-border text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
               {formData.email}
             </p>
             <div className="w-full shrink-0 mt-2">

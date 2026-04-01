@@ -2,6 +2,7 @@
 
 import { Send } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '../../room/types';
 
 interface FloatingChatProps {
@@ -121,17 +122,17 @@ export function FloatingChat({
             placeholder="TYPE SOMETHING..."
             maxLength={200}
             aria-label="Send a chat message"
-            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a] placeholder-[#1a1a1a]/40 bg-white border-[3px] border-[#1a1a1a] px-3 py-2.5 outline-none focus:bg-[#f5f0e8] neo-shadow-sm transition-all min-w-0"
+            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-foreground placeholder-[#1a1a1a]/40 bg-white border-[3px] border-border px-3 py-2.5 outline-none focus:bg-background  transition-all min-w-0"
           />
-          <button
+          <Button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
             aria-label="Send"
-            className="p-2.5 bg-[#ffcc00] border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#e0b400] transition-all disabled:opacity-50 disabled:grayscale"
+            className="p-2.5 bg-[#ffcc00] border-[3px] border-border text-foreground  active:bg-[#e0b400] transition-all disabled:opacity-50 disabled:grayscale"
           >
             <Send className="w-4 h-4 stroke-[3px]" />
-          </button>
+          </Button>
         </div>
       ) : null}
     </div>

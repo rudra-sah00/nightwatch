@@ -226,7 +226,19 @@ export function useGestureDetection(
         videoElementRef.current = video;
       }
 
+      // If component unmounted during the async play(), refs will be null
+      if (!gestureRecognizerRef.current || !faceLandmarkerRef.current) {
+        return;
+      }
+
       const videoElement = videoElementRef.current;
+
+      // Ensure video actually has enough data to be processed by MediaPipe
+      if (videoElement.readyState < 2 || videoElement.videoWidth === 0) {
+        requestRef.current = requestAnimationFrame(predict);
+        return;
+      }
+
       const nowInMs = Date.now();
 
       // Ensure timestamp is monotonically increasing and unique for each task

@@ -60,7 +60,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
           {/* Centered Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div
-              className="relative w-full max-w-sm bg-white border-[4px] border-[#1a1a1a] neo-shadow pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+              className="relative w-full max-w-sm bg-white border-[4px] border-border  pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
               role="dialog"
               aria-modal="true"
               aria-labelledby="password-requirements-title"
@@ -69,7 +69,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 bg-white border-[3px] border-[#1a1a1a] p-1.5 text-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white transition-all neo-shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                className="absolute top-4 right-4 bg-white border-[3px] border-border p-1.5 text-foreground hover:bg-[#e63b2e] hover:text-white transition-all "
                 aria-label="Close"
               >
                 <X className="h-4 w-4 stroke-[3px]" />
@@ -79,7 +79,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 {/* Header */}
                 <h4
                   id="password-requirements-title"
-                  className="font-black font-headline text-2xl uppercase tracking-tighter pr-8 text-[#1a1a1a]"
+                  className="font-black font-headline text-2xl uppercase tracking-tighter pr-8 text-foreground"
                 >
                   Password Requirements
                 </h4>
@@ -92,7 +92,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 </div>
 
                 {/* Breach note */}
-                <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-[#4a4a4a] pt-4 border-t-[3px] border-[#1a1a1a]">
+                <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-[#4a4a4a] pt-4 border-t-[3px] border-border">
                   We check passwords against{' '}
                   <a
                     href="https://haveibeenpwned.com/Passwords"
@@ -115,9 +115,9 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
 
 function RequirementItem({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-3 text-sm font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
-      <div className="flex-shrink-0 w-5 h-5 bg-[#d6f6d5] border-[2px] border-[#1a1a1a] flex items-center justify-center neo-shadow-sm">
-        <Check className="h-3.5 w-3.5 text-[#1a1a1a] stroke-[3.5px]" />
+    <div className="flex items-center gap-3 text-sm font-headline font-black uppercase tracking-widest text-foreground">
+      <div className="flex-shrink-0 w-5 h-5 bg-[#d6f6d5] border-[2px] border-border flex items-center justify-center ">
+        <Check className="h-3.5 w-3.5 text-foreground stroke-[3.5px]" />
       </div>
       <span>{text}</span>
     </div>

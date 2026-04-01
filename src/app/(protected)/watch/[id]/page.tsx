@@ -77,7 +77,7 @@ function WatchContent() {
           <button
             type="button"
             onClick={() => router.push('/home')}
-            className="px-6 py-2 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
+            className="px-6 py-2 bg-white text-black rounded-lg font-medium/90 transition-colors"
           >
             Go to Home
           </button>

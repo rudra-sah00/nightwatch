@@ -49,7 +49,7 @@ export const ContentInfo = memo(function ContentInfo({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            'px-3 py-1 bg-white border-2 border-[#1a1a1a] text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]',
+            'px-3 py-1 bg-white border-2 border-border text-xs font-black font-headline uppercase tracking-widest text-foreground',
             isSeries ? '' : '',
           )}
         >
@@ -70,32 +70,32 @@ export const ContentInfo = memo(function ContentInfo({
       {/* Title */}
       <h1
         id="modal-title"
-        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-tight"
+        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-headline uppercase tracking-tighter text-foreground leading-tight"
       >
         {show.title}
       </h1>
 
       {/* Metadata Row */}
-      <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm font-black font-headline uppercase tracking-widest text-foreground">
         {show.year ? (
-          <span className="flex items-center gap-1.5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-3 py-1">
+          <span className="flex items-center gap-1.5 bg-background border-[3px] border-border px-3 py-1">
             <Calendar className="w-4 h-4 stroke-[3px]" />
             {show.year}
           </span>
         ) : null}
         {show.runtime ? (
-          <span className="flex items-center gap-1.5 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-3 py-1">
+          <span className="flex items-center gap-1.5 bg-background border-[3px] border-border px-3 py-1">
             <Clock className="w-4 h-4 stroke-[3px]" />
             {show.runtime} M
           </span>
         ) : null}
         {isSeries && show.seasons && show.seasons.length > 0 ? (
-          <span className="hidden md:inline bg-[#ffcc00] border-[3px] border-[#1a1a1a] px-3 py-1">
+          <span className="hidden md:inline bg-[#ffcc00] border-[3px] border-border px-3 py-1">
             {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
           </span>
         ) : null}
         {show.genre ? (
-          <span className="hidden md:inline bg-white border-[3px] border-[#1a1a1a] px-3 py-1">
+          <span className="hidden md:inline bg-white border-[3px] border-border px-3 py-1">
             {show.genre}
           </span>
         ) : null}
@@ -103,7 +103,7 @@ export const ContentInfo = memo(function ContentInfo({
 
       {/* Description */}
       {show.description ? (
-        <p className="text-[#4a4a4a] text-sm md:text-base leading-relaxed max-w-2xl border-l-[4px] border-[#1a1a1a] pl-4 my-6">
+        <p className="text-[#4a4a4a] text-sm md:text-base leading-relaxed max-w-2xl border-l-[4px] border-border pl-4 my-6">
           {show.description}
         </p>
       ) : null}
@@ -112,8 +112,8 @@ export const ContentInfo = memo(function ContentInfo({
       {hasWatchProgress &&
       watchProgress &&
       watchProgress.progressPercent > 0 ? (
-        <div className="space-y-3 max-w-xl bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow-sm">
-          <div className="flex items-center justify-between text-xs font-black font-headline tracking-widest uppercase text-[#1a1a1a]">
+        <div className="space-y-3 max-w-xl bg-white border-[4px] border-border p-4 ">
+          <div className="flex items-center justify-between text-xs font-black font-headline tracking-widest uppercase text-foreground">
             <span>
               {isSeries &&
               watchProgress?.seasonNumber != null &&
@@ -123,7 +123,7 @@ export const ContentInfo = memo(function ContentInfo({
             </span>
             <span>{Math.round(watchProgress?.progressPercent || 0)}%</span>
           </div>
-          <div className="h-3 bg-[#f5f0e8] border-2 border-[#1a1a1a] overflow-hidden">
+          <div className="h-3 bg-background border-2 border-border overflow-hidden">
             <div
               className="h-full bg-[#1a1a1a] transition-[width] duration-300"
               style={{ width: `${watchProgress?.progressPercent || 0}%` }}
@@ -166,12 +166,12 @@ export const ContentActions = memo(function ContentActions({
         type="button"
         className={cn(
           'w-full sm:w-auto sm:min-w-[220px] flex-1',
-          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
           isPlaying ||
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
-            ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
-            : 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
+            ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
+            : 'bg-[#ffcc00] text-foreground  hover:bg-[#ffe066]',
         )}
         onClick={handleButtonClick}
         disabled={
@@ -211,10 +211,10 @@ export const ContentActions = memo(function ContentActions({
           type="button"
           className={cn(
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
             isCreatingParty || isPlaying
-              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
-              : 'bg-[#1a1a1a] text-white neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#0055ff]',
+              ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
+              : 'bg-[#1a1a1a] text-white  hover:bg-[#0055ff]',
           )}
           onClick={isCreatingParty ? undefined : onWatchParty}
           disabled={isCreatingParty || isPlaying}
@@ -236,12 +236,12 @@ export const ContentActions = memo(function ContentActions({
           type="button"
           className={cn(
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group whitespace-nowrap',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group whitespace-nowrap',
             isWatchlistLoading
-              ? 'bg-[#f5f0e8] text-[#4a4a4a] cursor-not-allowed opacity-70'
+              ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
               : isInWatchlist
-                ? 'bg-[#e63b2e] text-white neo-shadow-sm hover:bg-[#1a1a1a]'
-                : 'bg-white text-[#1a1a1a] neo-shadow-sm hover:bg-[#1a1a1a] hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
+                ? 'bg-[#e63b2e] text-white  hover:bg-[#1a1a1a]'
+                : 'bg-white text-foreground  hover:bg-[#1a1a1a] hover:text-white',
           )}
           onClick={onWatchlistToggle}
           disabled={isWatchlistLoading}
@@ -261,7 +261,7 @@ export const ContentActions = memo(function ContentActions({
 
       {/* Extra Actions Container (Download) */}
       {extraActions && (
-        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-[#1a1a1a] bg-[#ffcc00] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200 overflow-hidden">
+        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-[#ffcc00]  hover:bg-[#ffe066] transition-all duration-200 overflow-hidden">
           <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg [&>button]:font-black [&>button]:font-headline [&>button]:uppercase [&>button]:tracking-widest [&>button]:whitespace-nowrap [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:gap-3">
             {extraActions}
           </div>

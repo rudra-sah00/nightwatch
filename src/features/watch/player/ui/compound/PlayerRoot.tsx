@@ -150,14 +150,14 @@ export function PlayerRoot({
         {/* iOS portrait wall: blocks playback UI until user physically rotates device */}
         {showRotateWall && (
           <div className="absolute inset-0 z-50 bg-[#ffcc00] flex flex-col items-center justify-center gap-8 pointer-events-auto select-none p-6 text-center">
-            <div className="bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow rounded-none">
-              <RotateCw className="w-16 h-16 text-[#1a1a1a] animate-spin [animation-duration:2s] stroke-[3px]" />
+            <div className="bg-white border-[4px] border-border p-4  rounded-none">
+              <RotateCw className="w-16 h-16 text-foreground animate-spin [animation-duration:2s] stroke-[3px]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-[#1a1a1a] text-2xl font-black font-headline uppercase tracking-widest">
+              <p className="text-foreground text-2xl font-black font-headline uppercase tracking-widest">
                 Rotate to landscape
               </p>
-              <p className="text-[#1a1a1a] text-sm font-bold font-headline uppercase tracking-widest max-w-[250px] mx-auto">
+              <p className="text-foreground text-sm font-bold font-headline uppercase tracking-widest max-w-[250px] mx-auto">
                 This player is only available in landscape mode
               </p>
             </div>

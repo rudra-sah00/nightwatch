@@ -97,10 +97,10 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
       {isSuccess && (
         <div className="h-full flex flex-col justify-between pt-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="shrink-0 flex flex-col justify-center items-center text-center gap-3 mt-4">
-            <div className="h-10 w-10 border-[3px] border-[#1a1a1a] bg-[#ffcc00] flex items-center justify-center neo-shadow-sm shrink-0">
+            <div className="h-10 w-10 border-[3px] border-border bg-[#ffcc00] flex items-center justify-center  shrink-0">
               <CheckCircle2 className="h-6 w-6" />
             </div>
-            <p className="text-[13px] font-body font-black text-[#1a1a1a] leading-tight uppercase tracking-[0.05em]">
+            <p className="text-[13px] font-body font-black text-foreground leading-tight uppercase tracking-[0.05em]">
               SECURITY LINK DISPATCHED TO:
             </p>
             <span className="font-black underline decoration-[#e63b2e] decoration-2 tracking-tighter text-xl italic block leading-tight">

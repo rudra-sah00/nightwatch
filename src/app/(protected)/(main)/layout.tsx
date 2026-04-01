@@ -8,7 +8,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return (
     <ServerProvider defaultServer={user?.preferredServer}>
-      <div className="min-h-[100dvh] w-full bg-[#f5f0e8] text-[#1a1a1a] font-body flex flex-col">
+      <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">
         <Navbar />
         <div className="flex-grow flex flex-col">{children}</div>
       </div>

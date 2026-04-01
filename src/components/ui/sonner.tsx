@@ -8,19 +8,19 @@ type ToasterProps = React.ComponentProps<typeof Sonner>;
 const TOAST_OPTIONS = {
   classNames: {
     toast:
-      'group toast group-[.toaster]:bg-[#f5f0e8] group-[.toaster]:text-[#1a1a1a] group-[.toaster]:border-4 group-[.toaster]:border-[#1a1a1a] group-[.toaster]:rounded-none group-[.toaster]:neo-shadow-sm font-body font-bold w-full',
+      'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-4 group-[.toaster]:border-border group-[.toaster]:rounded-none group-[.toaster]: font-body font-bold w-full',
     description: 'group-[.toast]:font-medium group-[.toast]:opacity-80',
     actionButton:
-      'group-[.toast]:bg-[#1a1a1a] group-[.toast]:text-white group-[.toast]:border-4 group-[.toast]:border-[#1a1a1a] group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
+      'group-[.toast]:bg-[#1a1a1a] group-[.toast]:text-white group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
     cancelButton:
-      'group-[.toast]:bg-white group-[.toast]:text-[#1a1a1a] group-[.toast]:border-4 group-[.toast]:border-[#1a1a1a] group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
+      'group-[.toast]:bg-white group-[.toast]:text-foreground group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
     error:
-      'group-[.toast]:!bg-[#ffdad6] group-[.toast]:!text-[#1a1a1a] group-[.toast]:!border-[#1a1a1a]',
+      'group-[.toast]:!bg-[#ffdad6] group-[.toast]:!text-foreground group-[.toast]:!border-border',
     success:
-      'group-[.toast]:!bg-[#d6f6d5] group-[.toast]:!text-[#1a1a1a] group-[.toast]:!border-[#1a1a1a]',
+      'group-[.toast]:!bg-[#d6f6d5] group-[.toast]:!text-foreground group-[.toast]:!border-border',
     warning:
-      'group-[.toast]:!bg-[#ffcc00] group-[.toast]:!text-[#1a1a1a] group-[.toast]:!border-[#1a1a1a]',
-    info: 'group-[.toast]:!bg-[#d6e3ff] group-[.toast]:!text-[#1a1a1a] group-[.toast]:!border-[#1a1a1a]',
+      'group-[.toast]:!bg-[#ffcc00] group-[.toast]:!text-foreground group-[.toast]:!border-border',
+    info: 'group-[.toast]:!bg-[#d6e3ff] group-[.toast]:!text-foreground group-[.toast]:!border-border',
   },
 } as const;
 

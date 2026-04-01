@@ -49,10 +49,10 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
       {step === 'otp' && (
         <div className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="flex flex-col justify-start">
-            <p className="text-[10px] font-body font-black text-[#1a1a1a] uppercase tracking-[0.18em] opacity-80 text-center mb-2">
+            <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               CODE DISPATCHED TO
             </p>
-            <p className="font-black border-b-2 border-[#1a1a1a] text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
+            <p className="font-black border-b-2 border-border text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
               {formData.email}
             </p>
             <div className="w-full shrink-0 mt-2">
@@ -157,7 +157,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 {usernameStatus && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {usernameStatus === 'checking' && (
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-[#1a1a1a]/20 border-t-[#1a1a1a] animate-spin" />
+                      <div className="w-3.5 h-3.5 rounded-full border-2 border-border/20 border-t-[#1a1a1a] animate-spin" />
                     )}
                     {usernameStatus === 'available' && (
                       <span className="text-emerald-600 font-black text-xs">

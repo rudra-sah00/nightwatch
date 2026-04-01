@@ -10,6 +10,7 @@ const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ),
 });
 
+import { Button } from '@/components/ui/button';
 import { parseLinks } from '@/lib/linkify';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../../room/types';
@@ -60,7 +61,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] text-center shrink-0">
+      <div className="p-4 border-t-[4px] border-border bg-background text-center shrink-0">
         <p className="text-xs font-black font-headline uppercase tracking-widest text-[#e63b2e]">
           Chat has been disabled by the host
         </p>
@@ -101,12 +102,12 @@ export const WatchPartyChat = memo(function WatchPartyChat({
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
       <div
-        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-[#f5f0e8]"
+        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-background"
         style={{ contentVisibility: 'auto' }}
       >
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-[#1a1a1a] text-sm space-y-3">
-            <div className="w-16 h-16 bg-white border-[4px] border-[#1a1a1a] flex items-center justify-center neo-shadow">
+          <div className="flex flex-col items-center justify-center h-full text-foreground text-sm space-y-3">
+            <div className="w-16 h-16 bg-white border-[4px] border-border flex items-center justify-center ">
               <Smile className="w-8 h-8 stroke-[3px]" />
             </div>
             <div className="text-center">
@@ -141,12 +142,12 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 border-[2px] border-[#1a1a1a] bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
-                <span className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]">
+              <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+                <span className="text-[10px] font-black font-headline uppercase text-foreground">
                   {typingUsers[0].userName.charAt(0)}
                 </span>
               </div>
-              <span className="text-xs font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
+              <span className="text-xs font-black font-headline uppercase tracking-widest text-foreground">
                 {typingUsers.length === 1
                   ? `${typingUsers[0].userName} is typing`
                   : typingUsers.length === 2
@@ -171,7 +172,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {showEmoji ? (
         <div
           ref={emojiRef}
-          className="absolute bottom-20 left-4 z-50 border-[4px] border-[#1a1a1a] bg-white neo-shadow rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-white  rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         >
           <EmojiPicker
             theme={Theme.LIGHT}
@@ -202,24 +203,24 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {/* Input Area */}
       <form
         onSubmit={handleSend}
-        className="p-3 border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] relative z-10"
+        className="p-3 border-t-[4px] border-border bg-background relative z-10"
       >
         <div className="relative flex items-center gap-2">
-          <button
+          <Button
             type="button"
             onClick={() => setShowEmoji(!showEmoji)}
             onMouseEnter={() => void import('emoji-picker-react')}
             onFocus={() => void import('emoji-picker-react')}
             className={cn(
-              'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
+              'p-2.5 rounded-md transition-colors',
               showEmoji
                 ? 'bg-[#1a1a1a] text-[var(--wp-accent,#ffcc00)]'
-                : 'bg-white text-[#1a1a1a] hover:bg-[#ffe066]',
+                : 'bg-white text-foreground hover:bg-[#ffe066]',
             )}
             title="Add emoji"
           >
             <Smile className="w-5 h-5 stroke-[3px]" />
-          </button>
+          </Button>
 
           <input
             type="text"
@@ -227,20 +228,20 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message..."
-            className="flex-1 text-[#1a1a1a] placeholder:text-[#1a1a1a]/50 px-4 py-2.5 border-[3px] border-[#1a1a1a] bg-white text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,#0055ff)] transition-colors"
+            className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-white text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,#0055ff)] transition-colors"
           />
-          <button
+          <Button
             type="submit"
             disabled={!input.trim()}
             className={cn(
-              'p-2.5 border-[3px] border-[#1a1a1a] transition-colors',
+              'p-2.5 rounded-md transition-colors',
               input.trim()
-                ? 'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none'
-                : 'bg-[#f5f0e8] text-[#1a1a1a]/30 cursor-not-allowed',
+                ? 'bg-[var(--wp-send-btn,#0055ff)] text-white '
+                : 'bg-background text-foreground/30 cursor-not-allowed',
             )}
           >
             <Send className="w-5 h-5 stroke-[3px]" />
-          </button>
+          </Button>
         </div>
       </form>
     </div>
@@ -282,7 +283,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
   if (message.isSystem) {
     return (
       <div className="flex justify-center my-4">
-        <span className="text-[10px] bg-white border-[2px] border-[#1a1a1a] text-[#1a1a1a] font-black font-headline uppercase tracking-widest px-3 py-1 neo-shadow-sm">
+        <span className="text-[10px] bg-white border-[2px] border-border text-foreground font-black font-headline uppercase tracking-widest px-3 py-1 ">
           {message.content}
         </span>
       </div>
@@ -299,12 +300,12 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Avatar/Name Header */}
       {!isMe && showHeader ? (
         <div className="flex items-center gap-2 mb-1 pl-1">
-          <div className="w-6 h-6 border-[2px] border-[#1a1a1a] bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
-            <span className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]">
+          <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+            <span className="text-[10px] font-black font-headline uppercase text-foreground">
               {message.userName.charAt(0)}
             </span>
           </div>
-          <span className="text-xs text-[#1a1a1a] font-black font-headline uppercase tracking-widest">
+          <span className="text-xs text-foreground font-black font-headline uppercase tracking-widest">
             {message.userName}
           </span>
           <span className="text-[10px] text-[#4a4a4a] font-bold font-headline uppercase tracking-widest">
@@ -322,17 +323,13 @@ const ChatMessageItem = memo(function ChatMessageItem({
           'max-w-[85%] relative group',
           isSingleEmoji
             ? 'p-0 border-0 bg-transparent text-6xl leading-none'
-            : 'px-4 py-2 border-[3px] border-[#1a1a1a] text-sm break-words',
+            : 'px-4 py-2 rounded-md text-sm break-words',
           isMe
             ? cn(
                 'mr-1',
-                !isSingleEmoji &&
-                  'bg-[var(--wp-send-btn,#0055ff)] text-white neo-shadow-sm',
+                !isSingleEmoji && 'bg-[var(--wp-send-btn,#0055ff)] text-white ',
               )
-            : cn(
-                'ml-1',
-                !isSingleEmoji && 'bg-white text-[#1a1a1a] neo-shadow-sm',
-              ),
+            : cn('ml-1', !isSingleEmoji && 'bg-white text-foreground '),
         )}
       >
         {/* Render message with clickable links */}
@@ -372,7 +369,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
         {isMe ? (
           <span
             className={cn(
-              'text-[9px] font-bold font-headline uppercase tracking-widest text-[#1a1a1a] block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 bg-white border-[2px] border-[#1a1a1a] px-1 neo-shadow-sm z-10 w-max',
+              'text-[9px] font-bold font-headline uppercase tracking-widest text-foreground block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 bg-white border-[2px] border-border px-1  z-10 w-max',
               isSingleEmoji ? '-bottom-6' : '-mb-6',
             )}
           >

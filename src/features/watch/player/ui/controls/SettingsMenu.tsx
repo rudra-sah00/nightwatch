@@ -42,7 +42,7 @@ export function SettingsMenu({
       <button
         type="button"
         onClick={() => setCurrentScreen('quality')}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-[#1a1a1a] text-[#1a1a1a]"
+        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border text-foreground"
       >
         <div className="flex items-center gap-3">
           <Gauge className="w-5 h-5 stroke-[3px]" />
@@ -62,9 +62,9 @@ export function SettingsMenu({
         onClick={() => !disabled && setCurrentScreen('speed')}
         disabled={disabled}
         className={cn(
-          'w-full flex items-center justify-between p-4 transition-colors text-[#1a1a1a]',
+          'w-full flex items-center justify-between p-4 transition-colors text-foreground',
           disabled
-            ? 'cursor-not-allowed bg-[#f5f0e8] text-[#4a4a4a]'
+            ? 'cursor-not-allowed bg-background text-[#4a4a4a]'
             : 'hover:bg-[#ffe066]',
         )}
       >
@@ -110,15 +110,15 @@ export function SettingsMenu({
 
   const renderQualityMenu = () => (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b-[3px] border-[#1a1a1a] bg-[#f5f0e8]">
+      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-background">
         <button
           type="button"
           onClick={handleBack}
-          className="text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-[#1a1a1a] p-1"
+          className="text-foreground hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-border p-1"
         >
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
-        <span className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm">
+        <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
           Quality
         </span>
         <div className="w-8" />
@@ -131,7 +131,7 @@ export function SettingsMenu({
           onQualityChange('auto');
           setIsOpen(false);
         }}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-[#1a1a1a] text-[#1a1a1a]"
+        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border text-foreground"
       >
         <span className="font-bold font-headline uppercase tracking-widest text-sm">
           Auto
@@ -149,7 +149,7 @@ export function SettingsMenu({
             onQualityChange(quality.label);
             setIsOpen(false);
           }}
-          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-[#1a1a1a] last:border-b-0 text-[#1a1a1a]"
+          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
         >
           <span className="font-bold font-headline uppercase tracking-widest text-sm">
             {quality.label}
@@ -164,15 +164,15 @@ export function SettingsMenu({
 
   const renderSpeedMenu = () => (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b-[3px] border-[#1a1a1a] bg-[#f5f0e8]">
+      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-background">
         <button
           type="button"
           onClick={handleBack}
-          className="text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-[#1a1a1a] p-1"
+          className="text-foreground hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-border p-1"
         >
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
-        <span className="text-[#1a1a1a] font-black font-headline uppercase tracking-widest text-sm">
+        <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
           Speed
         </span>
         <div className="w-8" />
@@ -186,7 +186,7 @@ export function SettingsMenu({
             onPlaybackRateChange(speed);
             setIsOpen(false);
           }}
-          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-[#1a1a1a] last:border-b-0 text-[#1a1a1a]"
+          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
         >
           <span className="font-bold font-headline uppercase tracking-widest text-sm">
             {speed === 1 ? 'Normal' : `${speed}x`}
@@ -208,11 +208,10 @@ export function SettingsMenu({
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
           'p-2.5 transition-all duration-200',
-          'bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm',
-          'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#f5f0e8]',
+          'bg-white border-[3px] border-border text-foreground ',
+          'hover:bg-background',
           'active:bg-[#e0e0e0]',
-          isOpen &&
-            'bg-[#f5f0e8] shadow-none translate-x-[2px] translate-y-[2px]',
+          isOpen && 'bg-background shadow-none',
         )}
       >
         <Settings
@@ -225,7 +224,7 @@ export function SettingsMenu({
 
       {/* Menu dropdown */}
       {isOpen ? (
-        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-white border-[4px] border-[#1a1a1a] neo-shadow flex flex-col z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-white border-[4px] border-border  flex flex-col z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
           {currentScreen === 'main' && renderMainMenu()}
           {currentScreen === 'quality' && renderQualityMenu()}
           {currentScreen === 'speed' && renderSpeedMenu()}

@@ -143,7 +143,7 @@ export function EpisodePanel({
           className={cn(
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
-            'pointer-events-none z-10 bg-white border-[4px] border-[#1a1a1a] p-4 neo-shadow-sm',
+            'pointer-events-none z-10 bg-white border-[4px] border-border p-4 ',
             'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
           )}
         >
@@ -151,16 +151,16 @@ export function EpisodePanel({
             <span className="text-[10px] font-black font-headline text-[#4a4a4a] uppercase tracking-widest">
               Episode {centerEp.episodeNumber}
             </span>
-            <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-[#1a1a1a] leading-tight">
+            <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-foreground leading-tight">
               {centerEp.title || `Episode ${centerEp.episodeNumber}`}
             </h3>
             {centerEp.description && (
-              <p className="text-xs md:text-sm text-[#1a1a1a] font-bold md:line-clamp-3 leading-relaxed border-l-[3px] border-[#1a1a1a] pl-2">
+              <p className="text-xs md:text-sm text-foreground font-bold md:line-clamp-3 leading-relaxed border-l-[3px] border-border pl-2">
                 {centerEp.description}
               </p>
             )}
             {centerEp.duration && (
-              <span className="text-xs text-[#1a1a1a] font-bold font-headline uppercase px-2 py-0.5 border-[2px] border-[#1a1a1a] bg-[#f5f0e8] inline-block self-start mt-1">
+              <span className="text-xs text-foreground font-bold font-headline uppercase px-2 py-0.5 border-[2px] border-border bg-background inline-block self-start mt-1">
                 {centerEp.duration} min
               </span>
             )}
@@ -192,9 +192,9 @@ export function EpisodePanel({
               onClick={() => setSeasonOpen((p) => !p)}
               className={cn(
                 'flex items-center gap-3',
-                'bg-white border-[3px] border-[#1a1a1a] hover:bg-[#ffe066]',
-                'px-5 py-2.5 neo-shadow-sm',
-                'text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a]',
+                'bg-white border-[3px] border-border hover:bg-[#ffe066]',
+                'px-5 py-2.5 ',
+                'text-sm font-black font-headline uppercase tracking-widest text-foreground',
                 'transition-all duration-200',
               )}
             >
@@ -212,7 +212,7 @@ export function EpisodePanel({
               <div
                 className={cn(
                   'absolute top-full left-1/2 -translate-x-1/2 mt-2',
-                  'bg-white border-[4px] border-[#1a1a1a] neo-shadow',
+                  'bg-white border-[4px] border-border ',
                   'flex flex-col min-w-[140px]',
                   'animate-in fade-in slide-in-from-top-2 duration-200',
                 )}
@@ -226,8 +226,8 @@ export function EpisodePanel({
                       setSeasonOpen(false);
                     }}
                     className={cn(
-                      'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-[#1a1a1a]',
-                      'transition-colors border-b-[4px] border-[#1a1a1a] last:border-b-0',
+                      'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-foreground',
+                      'transition-colors border-b-[4px] border-border last:border-b-0',
                       s.seasonNumber === selectedSeason
                         ? 'bg-[#ffcc00]'
                         : 'hover:bg-[#ffe066]',
@@ -349,8 +349,8 @@ function EpisodeThumb({
           'transition-all duration-500 ease-out',
           'focus:outline-none',
           isCenter
-            ? 'border-[4px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow-sm'
-            : 'border-[3px] border-[#1a1a1a] bg-[#f5f0e8]',
+            ? 'border-[4px] border-border bg-background '
+            : 'border-[3px] border-border bg-background',
         )}
         style={{
           width: isCenter ? 220 : 170,
@@ -405,8 +405,8 @@ function EpisodeThumb({
           className={cn(
             'absolute bottom-2 left-2',
             'px-2 py-1',
-            'bg-white border-[2px] border-[#1a1a1a]',
-            'text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a] tabular-nums',
+            'bg-white border-[2px] border-border',
+            'text-[10px] font-black font-headline uppercase tracking-widest text-foreground tabular-nums',
           )}
         >
           E{episode.episodeNumber}

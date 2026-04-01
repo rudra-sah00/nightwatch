@@ -47,11 +47,11 @@ function ActivityGraphSkeleton() {
         {skeletonIds.map((id) => (
           <div
             key={id}
-            className="w-3 h-3 bg-[#1a1a1a]/5 border border-[#1a1a1a]/10"
+            className="w-3 h-3 bg-[#1a1a1a]/5 border border-border/10"
           ></div>
         ))}
       </div>
-      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-[#1a1a1a]/20">
+      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/20">
         <span>Jan</span>
         <span>Feb</span>
         <span>Mar</span>
@@ -186,10 +186,10 @@ export function ActivityGraph({
               <div
                 key={day.dateStr}
                 className={cn(
-                  'w-3 h-3 border border-[#1a1a1a]/10 transition-colors relative group/cell',
+                  'w-3 h-3 border border-border/10 transition-colors relative group/cell',
                   ACTIVITY_LEVEL_COLORS[day.level],
                   day.isValid && day.level > 0
-                    ? 'hover:border-[#1a1a1a] hover:z-50'
+                    ? 'hover:border-border hover:z-50'
                     : '',
                   !day.isValid ? 'opacity-0' : 'cursor-pointer',
                 )}
@@ -225,7 +225,7 @@ export function ActivityGraph({
           }),
         )}
       </div>
-      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-[#1a1a1a]/40">
+      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/40">
         <span>Jan</span>
         <span>Feb</span>
         <span>Mar</span>

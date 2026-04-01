@@ -18,16 +18,16 @@ export function PlayerLiveBadge() {
       onClick={isAtLiveEdge ? undefined : handleGoLive}
       title={isAtLiveEdge ? 'You are watching live' : 'Jump to live'}
       className={cn(
-        'flex items-center gap-2 ml-2 md:ml-3 px-3 py-1 border-[3px] border-[#1a1a1a] text-xs font-black font-headline uppercase tracking-widest flex-shrink-0 transition-all duration-200 select-none neo-shadow-sm',
+        'flex items-center gap-2 ml-2 md:ml-3 px-3 py-1 border-[3px] border-border text-xs font-black font-headline uppercase tracking-widest flex-shrink-0 transition-all duration-200 select-none ',
         isAtLiveEdge
           ? 'bg-[#e63b2e] text-white cursor-default'
-          : 'bg-white text-[#1a1a1a] cursor-pointer hover:bg-[#ffe066] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
+          : 'bg-white text-foreground cursor-pointer hover:bg-[#ffe066]',
       )}
     >
       {/* Dot indicator: pulses when live, static grey dot when behind */}
       <span
         className={cn(
-          'inline-block w-2.5 h-2.5 border-[2px] border-[#1a1a1a] flex-shrink-0',
+          'inline-block w-2.5 h-2.5 border-[2px] border-border flex-shrink-0',
           isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]',
         )}
       />

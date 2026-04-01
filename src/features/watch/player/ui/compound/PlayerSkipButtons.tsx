@@ -12,7 +12,7 @@ export function PlayerSkipButtons() {
         type="button"
         onClick={() => playerHandlers.skip(-10)}
         onMouseDown={(e) => e.preventDefault()}
-        className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-[colors,transform] duration-200 active:scale-95 group"
+        className="p-3 lg:p-4 2xl:p-5 rounded-full/20 transition-[colors,transform] duration-200 active:scale-95 group"
       >
         <SkipBack className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
       </button>
@@ -20,7 +20,7 @@ export function PlayerSkipButtons() {
         type="button"
         onClick={() => playerHandlers.skip(10)}
         onMouseDown={(e) => e.preventDefault()}
-        className="p-3 lg:p-4 2xl:p-5 rounded-full hover:bg-white/20 transition-[colors,transform] duration-200 active:scale-95 group"
+        className="p-3 lg:p-4 2xl:p-5 rounded-full/20 transition-[colors,transform] duration-200 active:scale-95 group"
       >
         <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-white group-hover:text-white/90" />
       </button>

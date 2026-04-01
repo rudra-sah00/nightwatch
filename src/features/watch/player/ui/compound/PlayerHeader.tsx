@@ -27,10 +27,10 @@ export function PlayerHeader({
         <Button
           type="button"
           variant="neo-outline"
-          size="none"
+          size="icon"
           onClick={playerHandlers.goBack}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-3 lg:p-4 bg-white hover:bg-[#ffe066] active:bg-[#ffcc00] flex-shrink-0 text-[#1a1a1a]"
+          className="flex-shrink-0 bg-white/90 hover:bg-gray-100 transition-colors"
         >
           <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 stroke-[3px]" />
         </Button>
@@ -39,11 +39,11 @@ export function PlayerHeader({
       {onSidebarToggle ? (
         <Button
           type="button"
-          variant="none"
-          size="none"
+          variant="default"
+          size="icon"
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-3 bg-[#0055ff] border-[4px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-[#0044cc] transition-all duration-200 flex-shrink-0 cursor-pointer text-white h-auto rounded-none"
+          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer border-transparent"
           title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           {isSidebarOpen ? (

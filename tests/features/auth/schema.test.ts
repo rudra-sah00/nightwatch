@@ -155,7 +155,7 @@ describe('Auth Schemas', () => {
       }
     });
 
-    it('should accept password without lowercase (not required)', () => {
+    it('should reject password without lowercase', () => {
       const validData = {
         name: 'Test User',
         username: 'testuser',

@@ -42,9 +42,9 @@ export const SearchResults = React.memo(function SearchResults({
 
   if (results.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-[#1a1a1a] neo-shadow text-center max-w-2xl mx-auto w-full">
+      <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-border  text-center max-w-2xl mx-auto w-full">
         <Film className="w-20 h-20 text-[#0055ff] mb-6 stroke-[3px]" />
-        <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] mb-4">
+        <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
           No Results Found
         </h3>
         <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a] max-w-sm px-6">
@@ -86,17 +86,17 @@ const SearchResultItem = React.memo(function SearchResultItem({
   const { imageError, setImageError } = useSearchResultItem();
 
   return (
-    <Card className="p-2 hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none">
+    <Card className="p-2">
       {/* Target Poster Container */}
       <button
         type="button"
-        className="aspect-[2/3] border-[3px] border-[#1a1a1a] overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-[#f5f0e8]"
+        className="aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-background"
         onClick={() => onSelect(result)}
         aria-label={`View details for ${result.title}`}
       >
         {imageError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#f5f0e8]">
-            <Film className="w-12 h-12 text-[#1a1a1a]/20 stroke-[3px]" />
+          <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <Film className="w-12 h-12 text-foreground/20 stroke-[3px]" />
           </div>
         ) : (
           <Image
@@ -114,7 +114,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
 
         {/* Release Year Badge */}
         {result.year ? (
-          <div className="absolute top-4 right-4 bg-[#ffcc00] border-[2px] border-[#1a1a1a] px-3 py-1 font-headline font-black uppercase text-sm text-[#1a1a1a] neo-shadow-sm">
+          <div className="absolute top-4 right-4 bg-[#ffcc00] border-[2px] border-border px-3 py-1 font-headline font-black uppercase text-sm text-foreground ">
             {result.year}
           </div>
         ) : null}
@@ -124,7 +124,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
         {/* Title */}
         <button
           type="button"
-          className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto cursor-pointer hover:text-[#0055ff] text-[#1a1a1a] outline-none focus:text-[#0055ff] text-left w-full p-0 bg-transparent border-none appearance-none line-clamp-2"
+          className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto cursor-pointer hover:text-[#0055ff] text-foreground outline-none focus:text-[#0055ff] text-left w-full p-0 bg-transparent border-none appearance-none line-clamp-2"
           title={result.title}
           onClick={() => onSelect(result)}
         >

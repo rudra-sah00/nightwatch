@@ -55,13 +55,13 @@ export function WatchPartyLobby({
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center space-y-6">
-          <Monitor className="w-16 h-16 text-[#1a1a1a] mx-auto" />
-          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6">
+          <Monitor className="w-16 h-16 text-foreground mx-auto" />
+          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Desktop Only
           </h1>
-          <p className="text-[#1a1a1a] font-medium leading-relaxed uppercase text-sm">
+          <p className="text-foreground font-medium leading-relaxed uppercase text-sm">
             Watch Party is only available on desktop. Please open this link on a
             computer to watch together.
           </p>
@@ -70,7 +70,7 @@ export function WatchPartyLobby({
             variant="neo-base"
             size="none"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
+            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
           >
             Go Home
           </Button>
@@ -85,15 +85,15 @@ export function WatchPartyLobby({
 
   if (roomNotFound) {
     return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-[#1a1a1a] flex items-center justify-center mx-auto neo-shadow-sm">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto ">
             <Users className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Room Not Found
           </h1>
-          <p className="text-[#1a1a1a] font-medium uppercase text-sm leading-relaxed">
+          <p className="text-foreground font-medium uppercase text-sm leading-relaxed">
             This watch party has ended or the link is no longer valid.
           </p>
           <Button
@@ -101,7 +101,7 @@ export function WatchPartyLobby({
             variant="neo-base"
             size="none"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
+            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
           >
             Back to Home
           </Button>
@@ -112,33 +112,33 @@ export function WatchPartyLobby({
 
   if (requestStatus === 'pending') {
     return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow animate-in fade-in zoom-in-95 duration-500">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  animate-in fade-in zoom-in-95 duration-500">
           {/* 3-step indicator - Neobrutalist style */}
           <div className="flex items-center justify-center gap-2 mb-10">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 bg-emerald-500 border-2 border-[#1a1a1a] flex items-center justify-center neo-shadow-sm">
+              <div className="w-10 h-10 bg-emerald-500 border-2 border-border flex items-center justify-center ">
                 <Check className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] text-[#1a1a1a] font-black font-headline uppercase">
+              <span className="text-[10px] text-foreground font-black font-headline uppercase">
                 Sent
               </span>
             </div>
             <div className="w-12 h-1 bg-[#1a1a1a] mb-6" />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-[#1a1a1a] flex items-center justify-center animate-pulse neo-shadow-sm">
-                <Loader2 className="w-6 h-6 animate-spin text-[#1a1a1a]" />
+              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-border flex items-center justify-center animate-pulse ">
+                <Loader2 className="w-6 h-6 animate-spin text-foreground" />
               </div>
-              <span className="text-[10px] text-[#1a1a1a] font-black font-headline uppercase">
+              <span className="text-[10px] text-foreground font-black font-headline uppercase">
                 Waiting
               </span>
             </div>
             <div className="w-12 h-1 bg-[#1a1a1a]/20 mb-6" />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 bg-[#f5f0e8] border-2 border-[#1a1a1a] flex items-center justify-center">
-                <Users className="w-5 h-5 text-[#1a1a1a]/40" />
+              <div className="w-10 h-10 bg-background border-2 border-border flex items-center justify-center">
+                <Users className="w-5 h-5 text-foreground/40" />
               </div>
-              <span className="text-[10px] text-[#1a1a1a]/40 font-black font-headline uppercase">
+              <span className="text-[10px] text-foreground/40 font-black font-headline uppercase">
                 Joining
               </span>
             </div>
@@ -147,7 +147,7 @@ export function WatchPartyLobby({
           <h2 className="text-2xl font-black font-headline uppercase tracking-tighter text-center mb-2">
             Waiting for Approval
           </h2>
-          <p className="text-[#1a1a1a] font-medium uppercase text-xs text-center leading-relaxed mb-8">
+          <p className="text-foreground font-medium uppercase text-xs text-center leading-relaxed mb-8">
             The host has been notified. You'll join automatically once approved.
           </p>
           <Button
@@ -155,7 +155,7 @@ export function WatchPartyLobby({
             variant="neo-base"
             size="none"
             onClick={onCancelRequest || onLeave}
-            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-[#1a1a1a] hover:bg-[#e63b2e] hover:text-white"
+            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-border hover:bg-[#e63b2e] hover:text-white"
           >
             Cancel Request
           </Button>
@@ -166,15 +166,15 @@ export function WatchPartyLobby({
 
   if (requestStatus === 'rejected') {
     return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] p-8 neo-shadow text-center animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-[#1a1a1a] flex items-center justify-center mx-auto mb-6 neo-shadow-sm">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto mb-6 ">
             <UserMinus className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
             Request Declined
           </h2>
-          <p className="text-[#1a1a1a] font-medium uppercase text-sm leading-relaxed mb-8">
+          <p className="text-foreground font-medium uppercase text-sm leading-relaxed mb-8">
             The host has declined your request to join this party.
           </p>
           <div className="flex flex-col gap-3">
@@ -183,14 +183,14 @@ export function WatchPartyLobby({
               variant="neo-base"
               size="none"
               onClick={() => window.location.reload()}
-              className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white"
+              className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
             >
               Try Again
             </Button>
             <Button
-              variant="none"
+              variant="neo-ghost"
               onClick={() => router.push('/home')}
-              className="w-full text-[#1a1a1a]/60 hover:text-[#1a1a1a] text-[10px] font-headline font-bold uppercase tracking-widest underline underline-offset-4"
+              className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
             >
               Go Home
             </Button>
@@ -202,39 +202,39 @@ export function WatchPartyLobby({
 
   if (roomPreview) {
     return (
-      <div className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-[#1a1a1a] neo-shadow animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border-4 border-border  animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
           {/* Header */}
-          <div className="bg-[#ffcc00] border-b-4 border-[#1a1a1a] p-6 text-center">
-            <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-[#1a1a1a] border-2 border-[#1a1a1a] bg-white px-3 py-1 mb-4">
+          <div className="bg-[#ffcc00] border-b-4 border-border p-6 text-center">
+            <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-foreground border-2 border-border bg-white px-3 py-1 mb-4">
               <div className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse" />
               Live Watch Party
             </div>
-            <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+            <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
               You're Invited
             </h1>
           </div>
 
           <div className="p-6 space-y-6">
             {/* Content info */}
-            <div className="bg-[#f5f0e8] border-4 border-[#1a1a1a] p-5 neo-shadow-sm">
-              <h2 className="font-black font-headline uppercase text-xl leading-tight text-[#1a1a1a]">
+            <div className="bg-background border-4 border-border p-5 ">
+              <h2 className="font-black font-headline uppercase text-xl leading-tight text-foreground">
                 {roomPreview.title}
               </h2>
               {roomPreview.season ? (
-                <p className="text-xs font-bold font-headline uppercase text-[#1a1a1a]/60 mt-1">
+                <p className="text-xs font-bold font-headline uppercase text-foreground/60 mt-1">
                   Season {roomPreview.season} &middot; Episode{' '}
                   {roomPreview.episode}
                 </p>
               ) : null}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-4">
-                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-[#1a1a1a]">
+                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-foreground">
                   <Crown className="w-4 h-4 text-[#0055ff]" />
                   <span className="truncate max-w-[120px]">
                     {roomPreview.hostName}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-[#1a1a1a]">
+                <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-foreground">
                   <Users className="w-4 h-4 text-[#0055ff]" />
                   <span>{roomPreview.memberCount} watching</span>
                 </div>
@@ -246,12 +246,12 @@ export function WatchPartyLobby({
                 <div>
                   <label
                     htmlFor="guestName"
-                    className="block text-xs font-black font-headline uppercase mb-2 text-[#1a1a1a]"
+                    className="block text-xs font-black font-headline uppercase mb-2 text-foreground"
                   >
                     Your Display Name
                   </label>
                   <div className="relative">
-                    <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#1a1a1a]/40 pointer-events-none" />
+                    <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40 pointer-events-none" />
                     <input
                       id="guestName"
                       type="text"
@@ -259,7 +259,7 @@ export function WatchPartyLobby({
                       onChange={(e) => onGuestNameChange(e.target.value)}
                       placeholder="ENTER YOUR NAME"
                       maxLength={30}
-                      className="w-full pl-10 pr-4 py-3 bg-white border-4 border-[#1a1a1a] text-[#1a1a1a] outline-none font-bold placeholder:text-[#1a1a1a]/40 transition-colors focus:bg-[#ffcc00] relative"
+                      className="w-full pl-10 pr-4 py-3 bg-white border-4 border-border text-foreground outline-none font-bold placeholder:text-foreground/40 transition-colors focus:bg-[#ffcc00] relative"
                     />
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export function WatchPartyLobby({
                 {/* Captcha for guest users */}
                 {onCaptchaVerify ? (
                   <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <p className="text-[10px] font-black font-headline uppercase text-[#1a1a1a]/60 mb-2 text-center">
+                    <p className="text-[10px] font-black font-headline uppercase text-foreground/60 mb-2 text-center">
                       Security Check
                     </p>
                     <div className="mt-2">
@@ -294,23 +294,23 @@ export function WatchPartyLobby({
                   (!user && !guestName.trim()) ||
                   (!user && !captchaToken)
                 }
-                className="w-full py-4 bg-[#ffcc00] text-[#1a1a1a] border-4 border-[#1a1a1a] tracking-widest hover:bg-white opacity-100 disabled:opacity-50"
+                className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest opacity-100 disabled:opacity-50"
               >
                 {isLoading ? 'Requesting…' : 'Request to Join'}
               </Button>
 
               <Button
                 type="button"
-                variant="none"
+                variant="neo-ghost"
                 onClick={() => router.push('/home')}
-                className="w-full text-[#1a1a1a]/60 hover:text-[#1a1a1a] text-[10px] font-headline font-bold uppercase tracking-widest underline underline-offset-4"
+                className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
               >
                 Cancel
               </Button>
             </div>
 
             {error ? (
-              <div className="p-4 bg-[#e63b2e] border-4 border-[#1a1a1a] text-white">
+              <div className="p-4 bg-[#e63b2e] border-4 border-border text-white">
                 <p className="text-sm font-black font-headline uppercase leading-tight">
                   {error}
                 </p>

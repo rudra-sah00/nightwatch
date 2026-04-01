@@ -52,8 +52,20 @@ describe('useGestureDetection', () => {
       mockLandmarker as unknown as import('@mediapipe/tasks-vision').FaceLandmarker,
     );
 
-    // Mock video element play
+    // Mock video element properties
     vi.spyOn(HTMLVideoElement.prototype, 'play').mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, 'readyState', {
+      value: 4,
+      configurable: true,
+    });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoWidth', {
+      value: 640,
+      configurable: true,
+    });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', {
+      value: 480,
+      configurable: true,
+    });
   });
 
   const flushPromises = async () => {

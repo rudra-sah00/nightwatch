@@ -1,0 +1,115 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/rudra/Development/watch-rudra[39m
+
+ [32m✓[39m tests/features/watch-party/components/WatchPartyChat.test.tsx [2m([22m[2m40 tests[22m[2m)[22m[33m 360[2mms[22m[39m
+ [32m✓[39m tests/features/search/download-menu.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 355[2mms[22m[39m
+ [32m✓[39m tests/features/profile/components/activity-graph.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 633[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/EpisodePanel.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 769[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/WatchPartySidebar.test.tsx [2m([22m[2m29 tests[22m[2m)[22m[33m 419[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useAgora.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 866[2mms[22m[39m
+ [32m✓[39m tests/features/profile/components/update-profile-form.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 905[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/useHls.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 1223[2mms[22m[39m
+ [32m✓[39m tests/providers/login-page.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 316[2mms[22m[39m
+ [32m✓[39m tests/hooks/use-debounce.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 226[2mms[22m[39m
+ [32m✓[39m tests/features/search/hooks/use-search-input.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1490[2mms[22m[39m
+     [33m[2m✓[22m[39m does NOT fetch suggestions on s1 server [33m 602[2mms[22m[39m
+     [33m[2m✓[22m[39m fetches suggestions on s2 server after debounce [33m 606[2mms[22m[39m
+ [32m✓[39m tests/features/watch/hooks/use-continue-watching.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 185[2mms[22m[39m
+ [32m✓[39m tests/features/watch/continue-watching.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[32m 258[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/useS2AudioTracks.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 185[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/PendingRequests.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m tests/providers/auth-provider.test.tsx [2m([22m[2m27 tests[22m[2m)[22m[32m 209[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/MediaControls.test.tsx [2m([22m[2m31 tests[22m[2m)[22m[33m 389[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useSoundboard.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 207[2mms[22m[39m
+ [32m✓[39m tests/hooks/use-mobile-detection.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 196[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/WatchPartySketch.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 143[2mms[22m[39m
+ [32m✓[39m tests/components/ui/dialog.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 137[2mms[22m[39m
+ [32m✓[39m tests/lib/utils.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 126[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/WatchPartyLobby.test.tsx [2m([22m[2m32 tests[22m[2m)[22m[32m 172[2mms[22m[39m
+ [32m✓[39m tests/features/search/content-info.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useWatchPartyMembers.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 92[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/volume.test.tsx [2m([22m[2m22 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m tests/features/watch/overlays/NextEpisodeOverlay.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/WatchPartySettings.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/use-episode-panel.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/useTheaterMode.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/SidebarTabs.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 84[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/PlayPause.test.tsx [2m([22m[2m23 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m tests/features/profile/public-profile-page.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 87[2mms[22m[39m
+ [32m✓[39m tests/lib/utils.extra.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/SketchOverlay.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+ [32m✓[39m tests/providers/socket-provider.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useWatchParty.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useWatchPartyLifecycle.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/useMp4.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/lib/edge-cases.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m tests/components/ui/input.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/PlayerEpisodePanel.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/VideoGrid.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/features/watch/overlays/ErrorOverlay.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/fullscreen.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m tests/features/watch/controls/SkipButtons.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/chat/hooks/useWatchPartyChat.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/context/SketchContext.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/interactions/EmojiReactions.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m tests/hooks/use-predictive-sync.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/components/ui/badge.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/interactions/Soundboard.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/components/interactions/FloatingEmojis.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m tests/features/watch/overlays/LoadingOverlay.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/services/watch-party.api.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useGestureDetection.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 144[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/use-watch-party-video-area.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/lib/fetch.test.ts [2m([22m[2m31 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useWatchPartySync.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m tests/features/watch/page/use-mobile-detection.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/helpers/utils.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useFloatingEmojis.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/features/watch/subtitle-settings.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m tests/providers/server-provider.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useEmojiReactions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useWatchPartyChat.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/features/search/schema.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/features/watch/overlays/BufferingOverlay.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/hooks/useClockSync.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m tests/features/watch/api.test.ts [2m([22m[2m46 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m tests/lib/socket.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m tests/lib/env.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m tests/features/profile/api.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/services/StreamUrlService.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/lib/storage.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/features/search/api.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/lib/linkify.test.ts [2m([22m[2m40 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/features/profile/schema.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/features/watch/utils.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/lib/auth.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/services/NextEpisodeService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/services/agora.api.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/lib/storage-cache.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/features/auth/validation.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/types.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/features/auth/api.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/types/index.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/lib/constants.extra.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/features/watch/series-cache.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/features/schemas.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/lib/constants.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/api.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/features/watch/api-types.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/types.test.ts [2m([22m[2m33 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/services/SpriteService.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/features/auth/schema.test.ts [2m([22m[2m31 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/features/profile/types.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/features/watch-party/soundboard-api.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/features/watch/player/services/WatchProgressService.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/features/search/api-types.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m tests/lib/env_error.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m tests/features/watch/types.extra.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m tests/features/search/types.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 1[2mms[22m[39m
+ [32m✓[39m tests/lib/cookies.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m104 passed[39m[22m[90m (104)[39m
+[2m      Tests [22m [1m[32m1409 passed[39m[22m[90m (1409)[39m
+[2m   Start at [22m 10:38:12
+[2m   Duration [22m 8.60s[2m (transform 3.50s, setup 13.42s, import 8.71s, tests 12.51s, environment 23.06s)[22m
+

@@ -60,13 +60,13 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`bg-white text-[#1a1a1a] h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99] ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
+      className={`bg-white text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99] ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
           {/* Features Bento Box - Identical to Signup for Parity */}
           <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[440px] h-full">
-            <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+            <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-border  cursor-pointer -hover -active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
                   className="material-symbols-outlined text-3xl mb-2"
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#d6e3ff] text-[#1a1a1a] p-4 md:p-5 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+            <div className="bg-[#d6e3ff] text-foreground p-4 md:p-5 border-4 border-border  cursor-pointer -hover -active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
                   className="material-symbols-outlined text-3xl mb-2"
@@ -94,13 +94,13 @@ export default function LoginPage() {
                 <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-1 font-headline">
                   Watch Parties
                 </h3>
-                <p className="font-body text-[#1a1a1a] leading-tight text-xs">
+                <p className="font-body text-foreground leading-tight text-xs">
                   Integrated video calls. React in real-time without leaving the
                   frame.
                 </p>
               </div>
             </div>
-            <div className="md:col-span-2 bg-[#ffcc00] text-[#1a1a1a] p-4 md:p-6 border-4 border-[#1a1a1a] neo-shadow cursor-pointer neo-shadow-hover neo-shadow-active transition-all flex items-center gap-4">
+            <div className="md:col-span-2 bg-[#ffcc00] text-foreground p-4 md:p-6 border-4 border-border  cursor-pointer -hover -active transition-all flex items-center gap-4">
               <span
                 className="material-symbols-outlined text-5xl"
                 style={{ fontVariationSettings: "'FILL' 1" }}
@@ -121,7 +121,7 @@ export default function LoginPage() {
 
           {/* Login Card wrapper - Identical to Signup Card wrapper */}
           <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
-            <div className="bg-white border-4 border-[#1a1a1a] neo-shadow pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
+            <div className="bg-white border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
               <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
                 {hookLoading ? null : loginHook.step === 'forgot' ||
                   loginHook.step === 'forgot_success' ? (
@@ -136,7 +136,7 @@ export default function LoginPage() {
       </main>
 
       {/* Footer - Aligned with Signup for Parity */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-[#1a1a1a] mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
+      <footer className="bg-[#1a1a1a] w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
         <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-[#f5f0e8] opacity-80 text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>

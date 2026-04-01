@@ -310,7 +310,7 @@ describe('MediaControls', () => {
       const micOption = screen
         .getByText('Built-in Microphone')
         .closest('button');
-      expect(micOption).toHaveClass('bg-[#ffe066]');
+      expect(micOption).toHaveClass('bg-[#1a1a1a]');
     });
   });
 

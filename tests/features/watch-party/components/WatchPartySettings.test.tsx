@@ -10,11 +10,13 @@ vi.mock('@/components/ui/button', () => ({
     onClick,
     'aria-label': ariaLabel,
     className,
+    ...props
   }: {
     children: React.ReactNode;
     onClick?: () => void;
     'aria-label'?: string;
     className?: string;
+    [key: string]: unknown;
   }) => (
     <button
       type="button"
@@ -22,6 +24,7 @@ vi.mock('@/components/ui/button', () => ({
       aria-label={ariaLabel}
       className={className}
       data-testid="mock-button"
+      {...props}
     >
       {children}
     </button>
@@ -59,8 +62,8 @@ vi.mock('@/components/ui/label', () => ({
 }));
 
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
-  updatePartyPermissions: vi.fn(),
-  updateMemberPermissions: vi.fn(),
+  updatePartyPermissions: vi.fn().mockResolvedValue({}),
+  updateMemberPermissions: vi.fn().mockResolvedValue({}),
 }));
 
 import { updatePartyPermissions } from '@/features/watch-party/room/services/watch-party.api';
@@ -83,7 +86,7 @@ describe('WatchPartySettings', () => {
   it('renders settings panel', () => {
     render(<WatchPartySettings room={mockRoom} isHost={true} />);
     fireEvent.click(screen.getByRole('button'));
-    expect(screen.getByText(/Room Access/i)).toBeInTheDocument();
+    expect(screen.getByText(/Room Settings/i)).toBeInTheDocument();
   });
 
   it('handles permission toggles', () => {

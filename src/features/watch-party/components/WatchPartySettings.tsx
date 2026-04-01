@@ -1,11 +1,4 @@
-import {
-  MessageSquare,
-  PenTool,
-  Shield,
-  ShieldCheck,
-  Volume2,
-  X,
-} from 'lucide-react';
+import { MessageSquare, PenTool, Settings, Volume2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -40,8 +33,8 @@ function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border-[3px] border-[#1a1a1a] transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0',
-        checked ? 'bg-[#ffcc00]' : 'bg-[#f5f0e8]',
+        'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border-[3px] border-border transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0 p-0 m-0',
+        checked ? 'bg-[#ffcc00]' : 'bg-background',
       )}
     >
       <span
@@ -132,23 +125,24 @@ export function WatchPartySettings({
       <DialogTrigger asChild>
         <Button
           type="button"
-          variant="neo-outline"
+          variant="none"
           size="none"
-          className="px-3 flex items-center justify-center gap-2 py-2 bg-white"
+          className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] rounded-none transition-all"
           title="Room Access & Permissions"
         >
-          <ShieldCheck aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
+          <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
         </Button>
       </DialogTrigger>
 
       <DialogContent
+        aria-describedby={undefined}
         showCloseButton={false}
-        className="max-w-md bg-white border-[4px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]"
+        className="max-w-md bg-white border-[4px] border-border text-foreground  p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]"
       >
-        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-[#1a1a1a] bg-[#ffcc00] m-0 flex flex-row items-center justify-between">
+        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-border bg-[#ffcc00] m-0 flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl">
-            <Shield aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
-            Room Access
+            <Settings aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
+            Room Settings
           </DialogTitle>
           <DialogClose asChild>
             <Button
@@ -166,16 +160,16 @@ export function WatchPartySettings({
           {/* Personal Preferences — visible to all users */}
           {onToggleFloatingChat !== undefined ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] flex items-center gap-2 border-b-[3px] border-[#1a1a1a] pb-2">
+              <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2 border-b-[3px] border-border pb-2">
                 <MessageSquare className="w-5 h-5 stroke-[3px]" />
                 Personal
               </h3>
-              <div className="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-4 space-y-4">
+              <div className="bg-background border-[3px] border-border p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <MessageSquare className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                    <MessageSquare className="w-5 h-5 text-foreground stroke-[3px]" />
                     <div className="flex flex-col">
-                      <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                      <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                         Floating chat
                       </p>
                       <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
@@ -196,16 +190,16 @@ export function WatchPartySettings({
             <div className="space-y-8">
               {/* Global Permissions */}
               <div className="space-y-4">
-                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] border-b-[3px] border-[#1a1a1a] pb-2">
+                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground border-b-[3px] border-border pb-2">
                   Global Permissions for Guests
                 </h3>
 
-                <div className="space-y-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] p-4">
+                <div className="space-y-3 bg-background border-[3px] border-border p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <PenTool className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <PenTool className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Sketch Board
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
@@ -221,11 +215,11 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between border-t-[2px] border-[#1a1a1a]/10 pt-3">
+                  <div className="flex items-center justify-between border-t-[2px] border-border/10 pt-3">
                     <div className="flex items-center gap-3">
-                      <Volume2 className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <Volume2 className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Soundboard
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
@@ -241,11 +235,11 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between border-t-[2px] border-[#1a1a1a]/10 pt-3">
+                  <div className="flex items-center justify-between border-t-[2px] border-border/10 pt-3">
                     <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-[#1a1a1a] stroke-[3px]" />
+                      <MessageSquare className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] leading-none">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Live Chat
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
@@ -266,7 +260,7 @@ export function WatchPartySettings({
               {/* Individual Overrides */}
               {guests.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] border-b-[3px] border-[#1a1a1a] pb-2">
+                  <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground border-b-[3px] border-border pb-2">
                     Individual Guest Overrides
                   </h3>
 
@@ -274,15 +268,15 @@ export function WatchPartySettings({
                     {guests.map((guest) => (
                       <div
                         key={guest.id}
-                        className="bg-white border-[3px] border-[#1a1a1a] p-4 flex flex-col gap-4 neo-shadow-sm"
+                        className="bg-white border-[3px] border-border p-4 flex flex-col gap-4 "
                       >
-                        <div className="flex items-center gap-3 border-b-[3px] border-[#1a1a1a] pb-3">
-                          <div className="w-8 h-8 bg-[#0055ff] border-[2px] border-[#1a1a1a] flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-3 border-b-[3px] border-border pb-3">
+                          <div className="w-8 h-8 bg-[#0055ff] border-[2px] border-border flex items-center justify-center shrink-0">
                             <span className="text-xs font-black font-headline uppercase tracking-widest text-white">
                               {guest.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
-                          <span className="text-sm font-black font-headline uppercase tracking-widest pr-2 truncate text-[#1a1a1a]">
+                          <span className="text-sm font-black font-headline uppercase tracking-widest pr-2 truncate text-foreground">
                             {guest.name}
                           </span>
                         </div>
@@ -306,7 +300,7 @@ export function WatchPartySettings({
                               }
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-[#1a1a1a]/10">
+                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
                             <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
                               Sounds
                             </span>
@@ -324,7 +318,7 @@ export function WatchPartySettings({
                               }
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-[#1a1a1a]/10">
+                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
                             <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
                               Chat
                             </span>

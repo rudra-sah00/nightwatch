@@ -8,9 +8,9 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
   return (
     <div
       id="creator-footer"
-      className={`${isCompact ? 'mt-4 pt-4' : 'mt-12 pt-12'} border-t-[4px] border-[#1a1a1a] flex flex-col items-center gap-6 w-full max-w-5xl mx-auto mb-8`}
+      className={`${isCompact ? 'mt-4 pt-4' : 'mt-12 pt-12'} border-t-[4px] border-border flex flex-col items-center gap-6 w-full max-w-5xl mx-auto mb-8`}
     >
-      <div className="bg-[#1a1a1a] text-white px-3 py-1 font-headline font-black uppercase text-[10px] tracking-[0.3em] neo-shadow-sm">
+      <div className="bg-[#1a1a1a] text-white px-3 py-1 font-headline font-black uppercase text-[10px] tracking-[0.3em] ">
         Creator Identity
       </div>
 
@@ -20,7 +20,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           asChild
           variant="neo-base"
           size="none"
-          className="group p-3 bg-white border-[3px] border-[#1a1a1a] hover:bg-[#ff0066] hover:text-white"
+          className="group p-3 bg-white border-[3px] border-border hover:bg-[#ff0066] hover:text-white"
         >
           <a
             href="https://www.instagram.com/rudra.sah00/"
@@ -44,7 +44,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           asChild
           variant="neo-base"
           size="none"
-          className="group p-3 bg-white border-[3px] border-[#1a1a1a] hover:bg-[#0a66c2] hover:text-white"
+          className="group p-3 bg-white border-[3px] border-border hover:bg-[#0a66c2] hover:text-white"
         >
           <a
             href="https://www.linkedin.com/in/rudra-narayana-sahoo-695342288/"
@@ -68,7 +68,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           asChild
           variant="neo-base"
           size="none"
-          className="group p-3 bg-white border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white"
+          className="group p-3 bg-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-white"
         >
           <a
             href="https://github.com/rudra-sah00"
@@ -92,7 +92,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           asChild
           variant="neo-base"
           size="none"
-          className="group p-3 bg-white border-[3px] border-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white"
+          className="group p-3 bg-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-white"
         >
           <a
             href="https://x.com/rudrasah00"

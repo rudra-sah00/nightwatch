@@ -58,11 +58,9 @@ function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 }
 
 function qualityColor(q: string): string {
-  if (q === '1080p')
-    return 'bg-[#ffcc00] text-[#1a1a1a] border-[#1a1a1a] neo-shadow-sm';
-  if (q === '720p')
-    return 'bg-[#0055ff] text-white border-[#1a1a1a] neo-shadow-sm';
-  return 'bg-white text-[#1a1a1a] border-[#1a1a1a] neo-shadow-sm';
+  if (q === '1080p') return 'bg-[#ffcc00] text-foreground border-border ';
+  if (q === '720p') return 'bg-[#0055ff] text-white border-border ';
+  return 'bg-white text-foreground border-border ';
 }
 
 function sanitizeFilename(name: string): string {
@@ -131,25 +129,25 @@ function EpisodeDownloadItem({
       <button
         type="button"
         onClick={handleExpand}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-[#f5f0e8] transition-all duration-200 text-left border-[3px] border-[#1a1a1a] bg-white"
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-all duration-200 text-left border-[3px] border-border bg-white"
       >
         <div className="flex items-center gap-4">
-          <span className="text-xs font-black font-headline uppercase tracking-tighter text-[#1a1a1a] bg-[#ffe066] px-2 py-0.5 border-2 border-[#1a1a1a]">
+          <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-[#ffe066] px-2 py-0.5 border-2 border-border">
             EP {episode.episodeNumber}
           </span>
-          <span className="text-sm font-headline font-black uppercase text-[#1a1a1a] truncate">
+          <span className="text-sm font-headline font-black uppercase text-foreground truncate">
             {episode.title || `EPISODE ${episode.episodeNumber}`}
           </span>
         </div>
         <ChevronDown
-          className={`w-5 h-5 text-[#1a1a1a] flex-shrink-0 transition-transform duration-200 stroke-[3px] ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-foreground flex-shrink-0 transition-transform duration-200 stroke-[3px] ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
 
       {isExpanded && (
-        <div className="px-6 pb-4 pt-2 border-x-[3px] border-b-[3px] border-[#1a1a1a] bg-[#f5f0e8] neo-shadow-sm ml-2 mr-2 -mt-1 relative z-0">
+        <div className="px-6 pb-4 pt-2 border-x-[3px] border-b-[3px] border-border bg-background  ml-2 mr-2 -mt-1 relative z-0">
           {isLoading ? (
-            <div className="flex items-center gap-2 py-2 text-[#1a1a1a] text-xs font-headline font-black uppercase">
+            <div className="flex items-center gap-2 py-2 text-foreground text-xs font-headline font-black uppercase">
               <Loader2 className="w-4 h-4 animate-spin stroke-[3px]" />
               FETCHING LINKS…
             </div>
@@ -223,7 +221,7 @@ export function DownloadMenu({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066] transition-all duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
+        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-[#ffcc00] text-foreground  hover:bg-[#ffe066] transition-all duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
       >
         <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         DOWNLOAD
@@ -232,12 +230,12 @@ export function DownloadMenu({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           showCloseButton={false}
-          className="fixed z-[150] bg-white border-[4px] border-[#1a1a1a] neo-shadow-yellow max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0"
+          className="fixed z-[150] bg-white border-[4px] border-border -yellow max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0"
         >
-          <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 bg-[#f5f0e8] border-b-[4px] border-[#1a1a1a] flex-row items-center justify-between space-y-0">
+          <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 bg-background border-b-[4px] border-border flex-row items-center justify-between space-y-0">
             <div className="flex flex-col gap-0.5 truncate pr-4 text-left">
-              <DialogTitle className="text-[#1a1a1a] text-lg sm:text-xl font-headline font-black uppercase tracking-widest flex items-center gap-3 leading-none">
-                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-[#1a1a1a] stroke-[3px]" />
+              <DialogTitle className="text-foreground text-lg sm:text-xl font-headline font-black uppercase tracking-widest flex items-center gap-3 leading-none">
+                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
                 DOWNLOAD
               </DialogTitle>
               <p className="text-[#4a4a4a] text-[10px] sm:text-xs font-headline font-bold uppercase tracking-widest truncate opacity-80">
@@ -247,7 +245,7 @@ export function DownloadMenu({
             <DialogClose asChild>
               <button
                 type="button"
-                className="p-2 border-[4px] border-[#1a1a1a] bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0"
+                className="p-2 border-[4px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
@@ -260,8 +258,8 @@ export function DownloadMenu({
             {show.dubs && show.dubs.length > 1 && (
               <div className="mb-8 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-6 bg-[#0055ff] border-2 border-[#1a1a1a]" />
-                  <span className="text-xs font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+                  <div className="w-2 h-6 bg-[#0055ff] border-2 border-border" />
+                  <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
                     SELECT LANGUAGE
                   </span>
                 </div>
@@ -278,10 +276,10 @@ export function DownloadMenu({
                           setSelectedDubType(dub.contentType);
                         }}
                         className={cn(
-                          'px-4 py-2 border-[2px] border-[#1a1a1a] font-headline font-black uppercase text-xs tracking-widest transition-all duration-150 active:scale-95',
+                          'px-4 py-2 border-[2px] border-border font-headline font-black uppercase text-xs tracking-widest transition-all duration-150 active:scale-95',
                           isSelected
-                            ? 'bg-[#ffcc00] text-[#1a1a1a] neo-shadow-sm'
-                            : 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]',
+                            ? 'bg-[#ffcc00] text-foreground '
+                            : 'bg-white text-foreground hover:bg-background',
                         )}
                       >
                         {dub.lanName}
@@ -359,21 +357,21 @@ function MovieDownloadSection({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-2 h-6 bg-[#ffcc00] border-2 border-[#1a1a1a]" />
-        <span className="text-xs font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+        <div className="w-2 h-6 bg-[#ffcc00] border-2 border-border" />
+        <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
           SELECT QUALITY
         </span>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center gap-4 py-12 justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-[#1a1a1a] stroke-[3px]" />
-          <span className="text-sm font-headline font-black uppercase tracking-widest text-[#1a1a1a]">
+          <Loader2 className="w-10 h-10 animate-spin text-foreground stroke-[3px]" />
+          <span className="text-sm font-headline font-black uppercase tracking-widest text-foreground">
             FETCHING DOWNLOAD LINKS…
           </span>
         </div>
       ) : !qualities || qualities.length === 0 ? (
-        <div className="py-8 text-center border-[3px] border-dashed border-[#1a1a1a]/20">
+        <div className="py-8 text-center border-[3px] border-dashed border-border/20">
           <p className="text-sm font-headline font-black uppercase text-[#4a4a4a]">
             NO DOWNLOAD LINKS AVAILABLE FOR THIS TITLE.
           </p>
@@ -388,7 +386,7 @@ function MovieDownloadSection({
               referrerPolicy="no-referrer"
               onClick={() => triggerDownload(q.quality)}
               className={cn(
-                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-[#1a1a1a] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:neo-shadow active:scale-[0.98] no-underline',
+                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-border transition-all duration-150 hover: active:scale-[0.98] no-underline',
                 qualityColor(q.quality),
               )}
             >
@@ -419,7 +417,7 @@ function MovieDownloadSection({
         </div>
       )}
 
-      <p className="text-[10px] text-[#4a4a4a] font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-[#1a1a1a]/10">
+      <p className="text-[10px] text-[#4a4a4a] font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-border/10">
         DOWNLOADS ARE SERVED DIRECTLY FROM THE CONTENT CDN.
       </p>
     </div>
@@ -445,7 +443,7 @@ function SeriesDownloadSection({
   return (
     <div className="space-y-3">
       {seasonEpisodes.length === 0 ? (
-        <p className="text-sm font-headline font-black uppercase text-[#4a4a4a] py-8 text-center border-[3px] border-dashed border-[#1a1a1a]/10">
+        <p className="text-sm font-headline font-black uppercase text-[#4a4a4a] py-8 text-center border-[3px] border-dashed border-border/10">
           NO EPISODES FOUND.
         </p>
       ) : (

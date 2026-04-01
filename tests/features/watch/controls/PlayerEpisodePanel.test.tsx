@@ -286,8 +286,8 @@ describe('PlayerEpisodePanelTrigger', () => {
     );
 
     const button = screen.getByLabelText('Show episodes');
-    expect(button).toHaveClass('bg-[#f5f0e8]');
-    expect(button).toHaveClass('translate-x-[2px]');
+    expect(button).toHaveClass('bg-background');
+    expect(button).toHaveClass('shadow-none');
     expect(button).toHaveClass('shadow-none');
   });
 
@@ -302,7 +302,7 @@ describe('PlayerEpisodePanelTrigger', () => {
 
     const button = screen.getByLabelText('Show episodes');
     expect(button).toHaveClass('bg-white');
-    expect(button).toHaveClass('border-[#1a1a1a]');
+    expect(button).toHaveClass('border-border');
   });
 
   it('should have the correct title', () => {

@@ -709,7 +709,7 @@ export function SketchOverlay({
               onKeyDown={handleInputKeyDown}
               onBlur={handleInputBlur}
               placeholder="Type text..."
-              className="bg-white/95 backdrop-blur-sm placeholder-black/30 outline-none px-3 py-1.5 min-w-[140px] max-w-[260px] rounded-none border-[3px] border-[#1a1a1a] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] font-black font-headline uppercase tracking-widest text-[#1a1a1a]"
+              className="bg-white/95 backdrop-blur-sm placeholder-black/30 outline-none px-3 py-1.5 min-w-[140px] max-w-[260px] rounded-none border-[3px] border-border font-black font-headline uppercase tracking-widest text-foreground"
               style={{
                 borderColor: color,
                 color: color,
@@ -717,10 +717,10 @@ export function SketchOverlay({
               }}
             />
             <div className="flex gap-1.5 px-0.5">
-              <span className="bg-[#1a1a1a] text-white px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-[#1a1a1a]">
+              <span className="bg-[#1a1a1a] text-white px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-border">
                 ↵ place
               </span>
-              <span className="bg-white text-[#1a1a1a] px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-[#1a1a1a]">
+              <span className="bg-white text-foreground px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-border">
                 Esc cancel
               </span>
             </div>

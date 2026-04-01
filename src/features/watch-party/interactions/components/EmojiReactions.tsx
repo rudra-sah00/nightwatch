@@ -3,6 +3,7 @@
 import { Theme } from 'emoji-picker-react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useEmojiReactions } from '../hooks/use-emoji-reactions';
@@ -33,7 +34,7 @@ export function EmojiReactions({
   return (
     <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
       {QUICK_EMOJIS.map((emoji, index) => (
-        <button
+        <Button
           type="button"
           key={emoji}
           onClick={() => handleTriggerEmoji(emoji)}
@@ -45,12 +46,12 @@ export function EmojiReactions({
           aria-label={`Send ${emoji} reaction`}
         >
           {emoji}
-        </button>
+        </Button>
       ))}
 
       <div className="w-px h-3 bg-white/20 mx-0.5 md:mx-1" />
 
-      <button
+      <Button
         type="button"
         onClick={() => setShowPicker(!showPicker)}
         onMouseEnter={() => void import('emoji-picker-react')}
@@ -59,7 +60,7 @@ export function EmojiReactions({
           'p-1 md:p-1.5 rounded-full transition-[colors,transform] duration-200',
           showPicker
             ? 'bg-white/20 text-white'
-            : 'text-white/40 hover:text-white hover:bg-white/10',
+            : 'text-white/40 hover:text-white/10',
         )}
         title="Full Emoji Library"
         aria-label="Open emoji picker"
@@ -67,7 +68,7 @@ export function EmojiReactions({
         aria-haspopup="dialog"
       >
         <Plus className="w-3.5 h-3.5 md:w-4 h-4 lg:w-5 h-5" />
-      </button>
+      </Button>
 
       {/* Popover */}
       {showPicker ? (

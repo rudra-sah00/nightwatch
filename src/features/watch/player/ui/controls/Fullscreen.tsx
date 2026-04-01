@@ -22,8 +22,8 @@ export function Fullscreen({ isFullscreen, onToggle, label }: FullscreenProps) {
       aria-label={ariaLabel}
       className={cn(
         'p-2.5 transition-all duration-200',
-        'bg-white border-[3px] border-[#1a1a1a] text-[#1a1a1a] neo-shadow-sm',
-        'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#f5f0e8]',
+        'bg-white border-[3px] border-border text-foreground ',
+        'hover:bg-background',
         'active:bg-[#e0e0e0]',
       )}
     >

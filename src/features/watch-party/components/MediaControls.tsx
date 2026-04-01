@@ -83,9 +83,9 @@ export function MediaControls({
   } = useMediaControls();
 
   return (
-    <div className="border-t-[4px] border-[#1a1a1a] bg-[#f5f0e8] relative z-[60] flex flex-col">
+    <div className="border-t-[4px] border-border bg-background relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="p-4 flex gap-3 border-b-[4px] border-[#1a1a1a] bg-white">
+      <div className="p-4 flex gap-3 border-b-[4px] border-border bg-white">
         {/* Settings */}
         <WatchPartySettings
           room={room}
@@ -98,10 +98,10 @@ export function MediaControls({
         {isHost ? (
           <Button
             type="button"
-            variant="neo-yellow"
+            variant="none"
             size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-all"
           >
             {linkCopied ? (
               <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
@@ -116,11 +116,11 @@ export function MediaControls({
 
         <Button
           type="button"
-          variant="neo-red"
+          variant="none"
           size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm',
+            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-all',
             isHost ? 'flex-1' : 'w-full',
           )}
         >
@@ -132,17 +132,17 @@ export function MediaControls({
       {/* Media Controls */}
       <div className="p-4 space-y-4">
         {/* User Info & Controls */}
-        <div className="flex items-center justify-between bg-white border-[3px] border-[#1a1a1a] p-3 neo-shadow-sm">
+        <div className="flex items-center justify-between bg-white border-[3px] border-border p-3 ">
           {/* User Avatar & Status */}
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-12 h-12 shrink-0 flex items-center justify-center border-[3px] border-[#1a1a1a] bg-[#ffcc00]">
-              <span className="text-xl font-black font-headline text-[#1a1a1a] uppercase">
+            <div className="w-12 h-12 shrink-0 flex items-center justify-center border-[3px] border-border bg-[#ffcc00]">
+              <span className="text-xl font-black font-headline text-foreground uppercase">
                 {userName.charAt(0)}
               </span>
             </div>
             <div className="flex flex-col overflow-hidden">
               <span
-                className="text-sm font-black font-headline uppercase tracking-widest text-[#1a1a1a] truncate max-w-[100px]"
+                className="text-sm font-black font-headline uppercase tracking-widest text-foreground truncate max-w-[100px]"
                 title={userName}
               >
                 {userName}
@@ -152,7 +152,7 @@ export function MediaControls({
               >
                 <span
                   className={cn(
-                    'w-2.5 h-2.5 border-2 border-[#1a1a1a]',
+                    'w-2.5 h-2.5 border-2 border-border',
                     isAgoraConnected
                       ? 'bg-[#0055ff] animate-pulse'
                       : 'bg-[#e63b2e] animate-[pulse_1.5s_ease-in-out_infinite]',
@@ -181,15 +181,10 @@ export function MediaControls({
               ) : null}
               <Button
                 type="button"
-                variant="none"
-                size="none"
+                variant={audioEnabled ? 'neo-outline' : 'neo-red'}
+                size="icon"
                 onClick={onToggleAudio}
-                className={cn(
-                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
-                  audioEnabled
-                    ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
-                    : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
-                )}
+                className={cn('rounded-r-none border-r-0 z-10 w-auto px-3')}
                 title={audioEnabled ? 'Mute' : 'Unmute'}
               >
                 {audioEnabled ? (
@@ -206,18 +201,13 @@ export function MediaControls({
               </Button>
               <Button
                 type="button"
-                variant="none"
-                size="none"
+                variant={showAudioDevices ? 'default' : 'neo-outline'}
+                size="icon"
                 onClick={() => {
                   setShowAudioDevices(!showAudioDevices);
                   setShowVideoDevices(false);
                 }}
-                className={cn(
-                  'p-2.5 border-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
-                  showAudioDevices
-                    ? 'bg-[#1a1a1a] text-white'
-                    : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
-                )}
+                className={cn('rounded-l-none w-auto px-2 border-l-0')}
                 title="Select Microphone"
               >
                 {showAudioDevices ? (
@@ -244,15 +234,10 @@ export function MediaControls({
               ) : null}
               <Button
                 type="button"
-                variant="none"
-                size="none"
+                variant={videoEnabled ? 'neo-outline' : 'neo-red'}
+                size="icon"
                 onClick={onToggleVideo}
-                className={cn(
-                  'p-2.5 border-y-[3px] border-l-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
-                  videoEnabled
-                    ? 'bg-white text-[#1a1a1a] hover:bg-[#f5f0e8]'
-                    : 'bg-[#e63b2e] text-white hover:bg-[#1a1a1a]',
-                )}
+                className={cn('rounded-r-none border-r-0 z-10 w-auto px-3')}
                 title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
               >
                 {videoEnabled ? (
@@ -269,18 +254,13 @@ export function MediaControls({
               </Button>
               <Button
                 type="button"
-                variant="none"
-                size="none"
+                variant={showVideoDevices ? 'default' : 'neo-outline'}
+                size="icon"
                 onClick={() => {
                   setShowVideoDevices(!showVideoDevices);
                   setShowAudioDevices(false);
                 }}
-                className={cn(
-                  'p-2.5 border-[3px] border-[#1a1a1a] transition-all active:translate-y-[2px]',
-                  showVideoDevices
-                    ? 'bg-[#1a1a1a] text-white'
-                    : 'bg-[#f5f0e8] text-[#1a1a1a] hover:bg-[#e0e0e0]',
-                )}
+                className={cn('rounded-l-none w-auto px-2 border-l-0')}
                 title="Select Camera"
               >
                 {showVideoDevices ? (
@@ -314,21 +294,23 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-[#1a1a1a] neo-shadow z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 flex flex-col">
-      <div className="p-3 border-b-[4px] border-[#1a1a1a] flex items-center justify-between bg-[#f5f0e8]">
-        <span className="text-[10px] font-black font-headline uppercase tracking-widest text-[#1a1a1a]">
+    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-border  z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 flex flex-col">
+      <div className="p-3 border-b-[4px] border-border flex items-center justify-between bg-background">
+        <span className="text-[10px] font-black font-headline uppercase tracking-widest text-foreground">
           {title}
         </span>
-        <button
+        <Button
           type="button"
+          variant="neo-ghost"
+          size="sm"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
-          className="text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-[#1a1a1a] px-1"
+          className="px-2"
         >
           ✕
-        </button>
+        </Button>
       </div>
       <div className="p-2 max-h-48 overflow-y-auto no-scrollbar flex flex-col gap-2">
         {devices.length === 0 ? (
@@ -340,18 +322,15 @@ function DeviceDropdown({
             <Button
               key={device.deviceId}
               type="button"
-              variant="none"
-              size="none"
+              variant={
+                selectedDevice === device.deviceId ? 'default' : 'neo-ghost'
+              }
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(device.deviceId);
               }}
-              className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 border-[2px] transition-all rounded-none h-auto active:translate-y-[1px]',
-                selectedDevice === device.deviceId
-                  ? 'bg-[#ffe066] border-[#1a1a1a] text-[#1a1a1a]'
-                  : 'bg-white border-transparent text-[#1a1a1a] hover:border-[#1a1a1a] hover:bg-[#f5f0e8]',
-              )}
+              className="w-full flex items-center justify-start gap-2"
             >
               {selectedDevice === device.deviceId ? (
                 <Check className="w-4 h-4 shrink-0 stroke-[3px]" />

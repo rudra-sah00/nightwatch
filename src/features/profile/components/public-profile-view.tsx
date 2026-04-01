@@ -45,11 +45,11 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] text-[#1a1a1a] selection:bg-[#ffcc00] selection:text-[#1a1a1a]">
+    <div className="min-h-screen bg-background text-foreground selection:bg-[#ffcc00] selection:text-foreground">
       {/* Background patterns / abstract shapes for premium look */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full border-[100px] border-[#1a1a1a]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] border-[80px] border-[#1a1a1a] rotate-45" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full border-[100px] border-border" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] border-[80px] border-border rotate-45" />
       </div>
 
       <div className="container max-w-5xl mx-auto px-4 py-20 relative z-10">
@@ -57,23 +57,23 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
         <div className="mb-12 flex justify-between items-center">
           <Link
             href="/"
-            className="group flex items-center gap-2 px-5 py-2 bg-[#1a1a1a] text-white border-[3px] border-[#1a1a1a] neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-200 uppercase font-headline font-bold text-sm tracking-tight"
+            className="group flex items-center gap-2 px-5 py-2 bg-[#1a1a1a] text-white border-[3px] border-border  transition-all duration-200 uppercase font-headline font-bold text-sm tracking-tight"
           >
             <Home className="w-4 h-4" />
             <span>Return Base</span>
           </Link>
-          <div className="hidden md:block bg-[#ffcc00] border-[3px] border-[#1a1a1a] px-5 py-2 neo-shadow-sm font-headline font-black uppercase text-sm tracking-widest">
+          <div className="hidden md:block bg-[#ffcc00] border-[3px] border-border px-5 py-2  font-headline font-black uppercase text-sm tracking-widest">
             Identity Profile Verified
           </div>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow p-8 lg:p-12 mb-12">
+        <div className="bg-white border-[4px] border-border  p-8 lg:p-12 mb-12">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 text-center md:text-left">
             {/* Avatar Section */}
             <div className="relative group shrink-0">
-              <div className="absolute inset-0 bg-[#ffcc00] translate-x-1.5 translate-y-1.5 border-[4px] border-[#1a1a1a]" />
-              <div className="relative w-32 h-32 md:w-44 md:h-44 bg-white border-[4px] border-[#1a1a1a] flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 bg-[#ffcc00] translate-x-1.5 translate-y-1.5 border-[4px] border-border" />
+              <div className="relative w-32 h-32 md:w-44 md:h-44 bg-white border-[4px] border-border flex items-center justify-center overflow-hidden">
                 {profile.profilePhoto ? (
                   <img
                     src={profile.profilePhoto}
@@ -81,7 +81,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <User className="w-16 h-16 md:w-20 md:h-20 text-[#1a1a1a]/20" />
+                  <User className="w-16 h-16 md:w-20 md:h-20 text-foreground/20" />
                 )}
               </div>
             </div>
@@ -94,12 +94,12 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
               <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
                 {profile.name}
               </h1>
-              <p className="text-xl md:text-2xl font-bold text-[#1a1a1a]/40 font-headline uppercase tracking-tight">
+              <p className="text-xl md:text-2xl font-bold text-foreground/40 font-headline uppercase tracking-tight">
                 @{profile.username || 'unknown_user'}
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-8 pt-4">
-                <div className="flex items-center gap-2 text-[#1a1a1a]/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-foreground/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
                   <Calendar className="w-4 h-4" />
                   Joined {joinDate}
                 </div>
@@ -108,13 +108,13 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
 
             {/* Quick Stats Bento */}
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto h-fit">
-              <div className="bg-[#e6f0ff] border-[3px] border-[#1a1a1a] p-4 text-center neo-shadow-sm">
+              <div className="bg-[#e6f0ff] border-[3px] border-border p-4 text-center ">
                 <div className="text-2xl font-black mb-1">{watchStreak}</div>
                 <div className="text-[10px] uppercase font-black opacity-40">
                   DAYS ACTIVE
                 </div>
               </div>
-              <div className="bg-[#fff0e6] border-[3px] border-[#1a1a1a] p-4 text-center neo-shadow-sm">
+              <div className="bg-[#fff0e6] border-[3px] border-border p-4 text-center ">
                 <div className="text-2xl font-black mb-1">
                   {totalWatchHours}
                 </div>
@@ -128,7 +128,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
 
         {/* Watch Activity Graph Section */}
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-[4px] border-[#1a1a1a] pb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-[4px] border-border pb-6">
             <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
               WATCH ACTIVITY
             </h2>
@@ -137,7 +137,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             </div>
           </div>
 
-          <div className="bg-white border-[4px] border-[#1a1a1a] neo-shadow p-6 lg:p-10 overflow-x-auto">
+          <div className="bg-white border-[4px] border-border  p-6 lg:p-10 overflow-x-auto">
             <div className="min-w-[800px] lg:min-w-0">
               <ActivityGraph activity={mappedActivity} />
             </div>

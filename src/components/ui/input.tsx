@@ -8,8 +8,8 @@ const inputVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-[#1a1a1a] rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-[#1a1a1a] text-sm h-[42px] font-body',
-        neo: 'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-[#1a1a1a] rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-[#1a1a1a] text-sm h-[42px] font-body',
+          'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-foreground text-sm h-[42px] font-body',
+        neo: 'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-foreground text-sm h-[42px] font-body',
       },
     },
     defaultVariants: {

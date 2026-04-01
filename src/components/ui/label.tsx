@@ -10,8 +10,8 @@ const labelVariants = cva(
     variants: {
       variant: {
         default:
-          'font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]',
-        neo: 'font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#1a1a1a]',
+          'font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-foreground',
+        neo: 'font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-foreground',
       },
     },
     defaultVariants: {

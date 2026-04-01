@@ -59,7 +59,7 @@ export function SearchClient({
         <div className="w-full">
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 mb-4">
-              <h1 className="font-headline text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-[#1a1a1a] flex flex-wrap gap-x-4 items-baseline overflow-visible">
+              <h1 className="font-headline text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-foreground flex flex-wrap gap-x-4 items-baseline overflow-visible">
                 <span className="shrink-0">
                   {isTransitioning || isPending ? 'Searching:' : 'Results:'}
                 </span>
@@ -76,7 +76,7 @@ export function SearchClient({
                   autoComplete="off"
                   autoCapitalize="off"
                   spellCheck="false"
-                  className="text-[#0055ff] underline decoration-4 md:decoration-8 underline-offset-8 outline-none caret-[#0055ff] min-w-[2ch] inline-block bg-transparent border-none p-0 focus:bg-[#ffcc00] focus:text-[#1a1a1a] focus:no-underline transition-colors focus:px-2 rounded-sm font-black font-headline uppercase leading-none tracking-tighter relative z-10 text-inherit overflow-visible"
+                  className="text-[#0055ff] underline decoration-4 md:decoration-8 underline-offset-8 outline-none caret-[#0055ff] min-w-[2ch] inline-block bg-transparent border-none p-0 focus:bg-[#ffcc00] focus:text-foreground focus:no-underline transition-colors focus:px-2 rounded-sm font-black font-headline uppercase leading-none tracking-tighter relative z-10 text-inherit overflow-visible"
                   style={{
                     // +2ch buffer: uppercase condensed glyphs are wider than 1ch at large sizes
                     width: `${Math.max(searchInputQuery.length + 1, 2)}ch`,

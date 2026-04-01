@@ -33,19 +33,22 @@ export function PlayPause({
       onClick={onToggle}
       className={cn(
         'flex items-center justify-center transition-all duration-200',
-        'border-[3px] border-[#1a1a1a] bg-[#ffcc00] text-[#1a1a1a] neo-shadow',
-        'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-[#ffe066]',
+        'border-[3px] border-border bg-[#ffcc00] text-foreground ',
+        'hover:bg-[#ffe066]',
         'active:bg-[#ffb700]',
         SIZE_CLASSES[size],
       )}
     >
       {isPlaying ? (
         <Pause
-          className={cn('text-[#1a1a1a] fill-[#1a1a1a]', ICON_SIZES[size])}
+          className={cn('text-foreground fill-[#1a1a1a]', ICON_SIZES[size])}
         />
       ) : (
         <Play
-          className={cn('text-[#1a1a1a] fill-[#1a1a1a] ml-1', ICON_SIZES[size])}
+          className={cn(
+            'text-foreground fill-[#1a1a1a] ml-1',
+            ICON_SIZES[size],
+          )}
         />
       )}
     </button>
@@ -130,7 +133,7 @@ export function CenterPlayButton({
             {/* Content type badge */}
             <div
               className={cn(
-                'px-3 py-1 text-[10px] sm:text-xs font-black font-headline uppercase tracking-widest mb-3 sm:mb-5 flex-shrink-0 border-[3px] border-[#1a1a1a] neo-shadow-sm',
+                'px-3 py-1 text-[10px] sm:text-xs font-black font-headline uppercase tracking-widest mb-3 sm:mb-5 flex-shrink-0 border-[3px] border-border ',
                 metadata.type === 'series'
                   ? 'bg-[#0055ff] text-white'
                   : 'bg-[#e63b2e] text-white',
@@ -188,13 +191,13 @@ export function CenterPlayButton({
               {disabled ? (
                 /* Guest locked view - premium aesthetic */
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] neo-shadow">
+                  <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
                     <div className="relative">
-                      <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-[#1a1a1a] stroke-[3px]" />
-                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-[#1a1a1a] animate-pulse" />
+                      <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[#1a1a1a] text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
+                      <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
                         Host Controls Playback
                       </span>
                       <span className="text-[#4a4a4a] text-[10px] sm:text-xs font-bold font-headline uppercase mt-1">
@@ -205,9 +208,9 @@ export function CenterPlayButton({
                 </div>
               ) : (
                 /* Normal paused state for host */
-                <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-[#1a1a1a] neo-shadow">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-[#1a1a1a] animate-pulse" />
-                  <span className="text-[#1a1a1a] text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
+                <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-border ">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+                  <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
                     Tap to resume
                   </span>
                 </div>
@@ -223,20 +226,20 @@ export function CenterPlayButton({
           {disabled ? (
             /* Guest locked view */
             <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-[#f5f0e8] border-[3px] border-[#1a1a1a] neo-shadow">
+              <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
                 <div className="relative">
-                  <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-[#1a1a1a] stroke-[3px]" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-[#1a1a1a] animate-pulse" />
+                  <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
                 </div>
-                <span className="text-[#1a1a1a] text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
+                <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
                   Host Controls Playback
                 </span>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-[#1a1a1a] neo-shadow">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-[#1a1a1a] animate-pulse" />
-              <span className="text-[#1a1a1a] text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
+            <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-border ">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+              <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
                 Tap to resume
               </span>
             </div>

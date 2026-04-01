@@ -31,10 +31,10 @@ export function UpdateProfileForm() {
       className="space-y-16"
     >
       {/* Main Profile Info Section */}
-      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow relative flex flex-col items-center md:items-start md:flex-row gap-8 min-h-[320px]">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 relative flex flex-col items-center md:items-start md:flex-row gap-8 min-h-[320px]">
         {/* Avatar Section */}
         <div className="relative group shrink-0">
-          <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border-4 border-[#1a1a1a] rounded-none neo-shadow-sm transition-transform group-hover:-translate-y-1">
+          <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border border-gray-200 rounded-xl shadow-sm bg-gray-50 transition-transform">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -42,8 +42,8 @@ export function UpdateProfileForm() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-[#f1ece4] flex items-center justify-center">
-                <span className="text-4xl md:text-5xl font-black font-headline uppercase text-[#1a1a1a]">
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-4xl md:text-5xl font-black font-headline uppercase text-muted-foreground">
                   {user.name.charAt(0)}
                 </span>
               </div>
@@ -54,13 +54,13 @@ export function UpdateProfileForm() {
             type="button"
             onClick={handleFileClick}
             disabled={isUploading}
-            className="absolute -bottom-2 -right-2 p-4 bg-[#ffcc00] border-4 border-[#1a1a1a] neo-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-50 group/btn"
+            className="absolute -bottom-2 -right-2 p-3 bg-white border border-gray-200 rounded-full shadow-md text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-all disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             title="Update Photo"
           >
             {isUploading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-[#1a1a1a]" />
+              <Loader2 className="w-6 h-6 animate-spin text-foreground" />
             ) : (
-              <Camera className="w-6 h-6 text-[#1a1a1a]" />
+              <Camera className="w-6 h-6 text-foreground" />
             )}
           </button>
 
@@ -77,9 +77,9 @@ export function UpdateProfileForm() {
         <div className="flex-1 flex flex-col gap-6 w-full text-center md:text-left mt-4 md:mt-0">
           <div className="space-y-2">
             {/* Display Name - Mobile position (under photo) */}
-            <div className="md:hidden text-2xl font-headline font-black text-[#1a1a1a] uppercase">
+            <div className="md:hidden text-2xl font-headline font-black text-foreground uppercase">
               <div className="min-w-0 grid grid-cols-1 items-baseline relative group">
-                <span className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible">
+                <span className="col-start-1 row-start-1 pointer-events-none text-foreground underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible">
                   {profileForm.name || user.name}
                 </span>
                 <input
@@ -97,19 +97,19 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100"
                 />
               </div>
             </div>
 
             {/* Username Selection Header */}
-            <h1 className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 text-4xl md:text-7xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a] leading-none mb-2 justify-center md:justify-start">
+            <h1 className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 text-4xl md:text-7xl font-black font-headline uppercase tracking-tighter text-foreground leading-none mb-2 justify-center md:justify-start">
               <span className="inline-flex items-center gap-1.5 md:gap-3 justify-center md:justify-start">
-                <span className="text-[#0055ff] leading-none translate-y-[-2px] md:translate-y-[-4px]">
+                <span className="text-[blue-600] leading-none translate-y-[-2px] md:translate-y-[-4px]">
                   @
                 </span>
                 <div className="min-w-0 flex-1 grid grid-cols-1 items-baseline relative group">
-                  <span className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 md:decoration-8 underline-offset-[6px] md:underline-offset-8 font-black font-headline uppercase truncate group-focus-within:invisible">
+                  <span className="col-start-1 row-start-1 pointer-events-none text-foreground underline decoration-4 md:decoration-8 underline-offset-[6px] md:underline-offset-8 font-black font-headline uppercase truncate group-focus-within:invisible">
                     {profileForm.username ||
                       (profileForm.isPending ? '' : user.username)}
                   </span>
@@ -136,7 +136,7 @@ export function UpdateProfileForm() {
                         profileFormRef.current?.requestSubmit();
                       }
                     }}
-                    className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 md:focus:decoration-8 underline-offset-[6px] md:underline-offset-8 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                    className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 md:focus:decoration-8 underline-offset-[6px] md:underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
                     aria-label="Username"
                   />
                 </div>
@@ -145,11 +145,11 @@ export function UpdateProfileForm() {
             <input type="hidden" name="username" value={profileForm.username} />
 
             {/* Display Name - Desktop position (grouped with username) */}
-            <div className="hidden md:block text-xl md:text-2xl font-headline font-bold text-[#1a1a1a] w-full max-w-lg uppercase">
+            <div className="hidden md:block text-xl md:text-2xl font-headline font-bold text-foreground w-full max-w-lg uppercase">
               <div className="min-w-0 grid grid-cols-1 items-baseline relative group">
                 <label
                   htmlFor="name"
-                  className="col-start-1 row-start-1 pointer-events-none text-[#1a1a1a] underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible"
+                  className="col-start-1 row-start-1 pointer-events-none text-foreground underline decoration-4 underline-offset-4 font-headline font-bold uppercase truncate group-focus-within:invisible"
                 >
                   {profileForm.name || user.name}
                 </label>
@@ -169,14 +169,14 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-[#1a1a1a] outline-none caret-[#0055ff] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-[#ffcc00] focus:text-[#1a1a1a] rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
                   aria-label="Display Name"
                 />
                 <input type="hidden" name="name" value={profileForm.name} />
               </div>
             </div>
 
-            <div className="text-base md:text-lg font-headline font-medium text-[#1a1a1a] max-w-lg border-l-4 border-[#0055ff] pl-3 uppercase">
+            <div className="text-base md:text-lg font-headline font-medium text-foreground max-w-lg border-l-4 border-[blue-600] pl-3 uppercase">
               <span className="opacity-80">
                 {user.email} • JOINED {formattedJoinDate}
               </span>
@@ -189,10 +189,10 @@ export function UpdateProfileForm() {
                   className={cn(
                     'text-sm font-bold uppercase font-headline flex items-center gap-2',
                     profileForm.isAvailable === false
-                      ? 'text-[#e63b2e]'
+                      ? 'text-[red-600]'
                       : profileForm.isAvailable
                         ? 'text-emerald-600'
-                        : 'text-[#1a1a1a]/50',
+                        : 'text-foreground/50',
                   )}
                 >
                   {profileForm.isPending && (
@@ -211,20 +211,20 @@ export function UpdateProfileForm() {
 
           <div className="md:absolute md:top-8 md:right-8 flex flex-col items-center md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0">
             {profileForm.isPending && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#ffcc00] text-[#1a1a1a] font-headline font-bold uppercase border-2 border-[#1a1a1a] neo-shadow-sm animate-pulse">
+              <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-foreground font-headline font-bold uppercase border-2 border-border  animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Saving...</span>
               </div>
             )}
             <Button
               type="button"
-              variant="neo-red"
-              size="neo"
+              variant="neo-outline"
+              size="default"
               onClick={(e) => {
                 e.preventDefault();
                 logout();
               }}
-              className="min-w-[140px] justify-center md:justify-end"
+              className="gap-2 shrink-0 md:self-start self-center min-w-[140px]"
               title="Sign Out"
             >
               <LogOut className="w-5 h-5 stroke-[3px]" />
@@ -247,41 +247,41 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Public Profile Sharing */}
-      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
         <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+          <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Public Identity
           </h2>
-          <p className="text-sm font-bold uppercase font-headline text-[#1a1a1a]/40">
+          <p className="text-sm font-bold uppercase font-headline text-foreground/40">
             Share your watching legacy publicly via your unique ID.
           </p>
-          <div className="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] px-4 py-2 mt-4 font-mono text-xs md:text-sm font-black break-all text-[#1a1a1a]/60 select-all">
+          <div className="bg-background border border-border px-4 py-2 mt-4 font-mono text-xs md:text-sm font-semibold break-all text-foreground/60 select-all rounded-md">
             {user.id}
           </div>
         </div>
 
         <Button
           type="button"
-          variant="neo-yellow"
-          size="neo-lg"
+          variant="neo-outline"
+          size="default"
           onClick={() => {
             const url = `${window.location.origin}/user/${user.id}`;
             navigator.clipboard.writeText(url);
           }}
-          className="w-full md:w-auto text-xl"
+          className="w-full md:w-auto"
         >
           COPY PUBLIC LINK
         </Button>
       </section>
 
       {/* Server Selection */}
-      <section className="bg-white border-4 border-[#1a1a1a] p-8 neo-shadow">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter text-[#1a1a1a]">
+          <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Server Selection
           </h2>
           {profileForm.isPending && (
-            <Loader2 className="w-8 h-8 animate-spin text-[#1a1a1a]" />
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -301,16 +301,16 @@ export function UpdateProfileForm() {
                   setTimeout(() => profileFormRef.current?.requestSubmit(), 0);
                 }}
                 className={cn(
-                  'flex flex-col items-start gap-2 p-6 border-4 border-[#1a1a1a] transition-all active:translate-x-[2px] active:translate-y-[2px]',
+                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-all text-left w-full shadow-sm',
                   isSelected
-                    ? 'bg-[#0055ff] text-white neo-shadow-yellow -translate-y-1'
-                    : 'bg-[#f5f0e8] hover:bg-white text-[#1a1a1a] neo-shadow-sm',
+                    ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-600 ring-offset-2'
+                    : 'bg-white text-gray-800 border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md',
                 )}
               >
-                <span className="font-black text-2xl font-headline tracking-tighter uppercase">
+                <span className="font-bold text-xl font-headline uppercase tracking-tight">
                   {s.label}
                 </span>
-                <span className="text-sm uppercase opacity-90 font-body font-bold">
+                <span className="text-sm uppercase opacity-90 font-medium tracking-wide">
                   {s.sub}
                 </span>
               </button>
