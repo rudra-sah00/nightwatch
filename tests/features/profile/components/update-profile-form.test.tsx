@@ -388,4 +388,95 @@ describe('UpdateProfileForm', () => {
       expect(nameInput).toHaveValue('New Name');
     });
   });
+
+  describe('Account Deletion', () => {
+    it('renders Danger Zone and opens confirmation dialog', async () => {
+      const user = userEvent.setup();
+      render(<UpdateProfileForm />);
+
+      // Find Danger Zone button
+      const deleteButton = screen.getByRole('button', {
+        name: /DELETE ACCOUNT/i,
+      });
+      expect(deleteButton).toBeInTheDocument();
+
+      // Click to open dialog
+      await user.click(deleteButton);
+
+      // Verify dialog content
+      expect(screen.getByText('Terminal Erase')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Are you sure you want to delete your account\?/i),
+      ).toBeInTheDocument();
+
+      // Verify cancel button
+      const cancelButton = screen.getByRole('button', { name: /CANCEL/i });
+      expect(cancelButton).toBeInTheDocument();
+
+      // Verify confirm button
+      const confirmButton = screen.getByRole('button', {
+        name: /CONFIRM DELETE/i,
+      });
+      expect(confirmButton).toBeInTheDocument();
+
+      // Click cancel should close dialog
+      await user.click(cancelButton);
+      await waitFor(() => {
+        expect(screen.queryByText('Terminal Erase')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls deleteAccount and handles success', async () => {
+      const user = userEvent.setup();
+      const mockLogout = vi.fn();
+      vi.mocked(useAuth).mockReturnValue({
+        user: mockUser,
+        updateUser: mockUpdateUser,
+        logout: mockLogout,
+      } as unknown as ReturnType<typeof useAuth>);
+
+      const { deleteAccount } = await import('@/features/profile/api');
+      const { toast } = await import('sonner');
+      vi.mocked(deleteAccount).mockResolvedValueOnce(undefined);
+
+      render(<UpdateProfileForm />);
+
+      // Open dialog and confirm
+      await user.click(screen.getByRole('button', { name: /DELETE ACCOUNT/i }));
+      await user.click(screen.getByRole('button', { name: /CONFIRM DELETE/i }));
+
+      // Wait for success actions
+      await waitFor(() => {
+        expect(deleteAccount).toHaveBeenCalled();
+        expect(mockLogout).toHaveBeenCalled();
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+          'Account deleted successfully',
+        );
+      });
+    });
+
+    it('shows error toast on deletion failure', async () => {
+      const user = userEvent.setup();
+
+      const { deleteAccount } = await import('@/features/profile/api');
+      const { toast } = await import('sonner');
+      vi.mocked(deleteAccount).mockRejectedValueOnce(
+        new Error('Failed to delete account'),
+      );
+
+      render(<UpdateProfileForm />);
+
+      // Open dialog and confirm
+      await user.click(screen.getByRole('button', { name: /DELETE ACCOUNT/i }));
+      await user.click(screen.getByRole('button', { name: /CONFIRM DELETE/i }));
+
+      // Wait for error actions
+      await waitFor(() => {
+        expect(deleteAccount).toHaveBeenCalled();
+        expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
+          'Failed to delete account',
+        );
+      });
+    });
+  });
 });

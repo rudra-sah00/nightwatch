@@ -6,4 +6,5 @@ export const getWatchActivity = vi.fn().mockResolvedValue([]);
 export const uploadProfileImage = vi.fn();
 export const checkUsername = vi.fn();
 export const updateProfile = vi.fn();
+export const deleteAccount = vi.fn();
 export const changePassword = vi.fn();

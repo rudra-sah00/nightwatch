@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   changePassword,
   checkUsername,
+  deleteAccount,
   getProfile,
   getWatchActivity,
   invalidateProfileCache,
@@ -374,6 +375,28 @@ describe('Profile API', () => {
       await expect(
         changePassword({ currentPassword: 'wrong', newPassword: 'new' }),
       ).rejects.toThrow('Invalid password');
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('should call DELETE /api/user/profile', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({});
+      const options = { signal: new AbortController().signal };
+
+      await deleteAccount(options);
+
+      expect(apiFetch).toHaveBeenCalledWith('/api/user/profile', {
+        method: 'DELETE',
+        ...options,
+      });
+    });
+
+    it('should throw error on failure', async () => {
+      vi.mocked(apiFetch).mockRejectedValueOnce(
+        new Error('Failed to delete account'),
+      );
+
+      await expect(deleteAccount()).rejects.toThrow('Failed to delete account');
     });
   });
 });
