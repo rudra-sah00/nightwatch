@@ -1,6 +1,8 @@
 'use client';
 
+import { Suspense } from 'react';
 import { Navbar } from '@/components/layout/navbar';
+import { GlobalTour } from '@/components/ui/global-tour';
 import { useAuth } from '@/providers/auth-provider';
 import { ServerProvider } from '@/providers/server-provider';
 
@@ -9,6 +11,9 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <ServerProvider defaultServer={user?.preferredServer}>
       <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">
+        <Suspense fallback={null}>
+          <GlobalTour />
+        </Suspense>
         <Navbar />
         <div className="flex-grow flex flex-col">{children}</div>
       </div>

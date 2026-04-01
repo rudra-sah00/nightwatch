@@ -30,7 +30,7 @@ export default function LoginPage() {
 
     // Direct redirect if already authenticated
     if (isAuthenticated) {
-      router.replace('/');
+      router.replace('/home');
     }
   }, [isAuthenticated, router]);
 
@@ -38,7 +38,7 @@ export default function LoginPage() {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
-        router.push('/');
+        router.push('/home');
       }, 700);
       return () => clearTimeout(timer);
     }

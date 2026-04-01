@@ -24,7 +24,7 @@ export default function SignupPage() {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
-        router.push('/');
+        router.push('/home?tour=true');
       }, 700);
       return () => clearTimeout(timer);
     }
