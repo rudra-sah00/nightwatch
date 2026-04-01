@@ -26,13 +26,13 @@ export function PlayerHeader({
       {!hideBackButton ? (
         <Button
           type="button"
-          variant="neo-outline"
+          variant="default"
           size="icon"
           onClick={playerHandlers.goBack}
           onMouseDown={(e) => e.preventDefault()}
-          className="flex-shrink-0 bg-white/90 hover:bg-gray-100 transition-colors"
+          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer border-transparent"
         >
-          <ArrowLeft className="w-6 h-6 md:w-7 md:h-7 stroke-[3px]" />
+          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         </Button>
       ) : null}
 
