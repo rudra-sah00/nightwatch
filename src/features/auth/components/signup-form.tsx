@@ -107,7 +107,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
 
       {step === 'name' && (
         <form
-          action={action}
+          onSubmit={(e) => e.preventDefault()}
           className="h-full flex flex-col justify-between pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
         >
           {/* TOP */}
