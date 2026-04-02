@@ -16,10 +16,10 @@ export default function NotFound() {
       <div className="relative z-10 max-w-2xl w-full text-center">
         {/* Massive 404 text with neo-brutal treatment */}
         <div className="relative inline-block mb-12">
-          <h1 className="text-[12rem] md:text-[20rem] font-black uppercase tracking-tighter leading-none select-none text-foreground drop-shadow-[10px_10px_0px_#ffcc00] animate-in slide-in-from-bottom-12 duration-500">
+          <h1 className="text-[12rem] md:text-[20rem] font-black uppercase tracking-tighter leading-none select-none text-foreground animate-in slide-in-from-bottom-12 duration-500">
             404
           </h1>
-          <div className="absolute -bottom-4 right-0 md:right-4 bg-[#e63b2e] text-white px-6 py-2 border-[4px] border-border  rotate-6 font-black text-xl md:text-2xl uppercase tracking-tighter">
+          <div className="absolute -bottom-4 right-0 md:right-4 bg-primary text-primary-foreground px-6 py-2 rounded-xl border border-gray-200 font-bold text-xl md:text-2xl uppercase tracking-tighter">
             MISSION FAILED
           </div>
         </div>

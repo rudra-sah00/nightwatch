@@ -201,14 +201,11 @@ export default function LiveMatchPlayerPage() {
   const mobileHeader = (
     <div className="flex items-center gap-3 ml-auto">
       {isEffectivelyLive && (
-        <Badge
-          variant="red"
-          className="animate-pulse shadow-[0_0_15px_rgba(230,59,46,0.6)]"
-        >
+        <Badge variant="red" className="animate-pulse">
           LIVE
         </Badge>
       )}
-      <div className="flex items-center gap-2 bg-white border-[3px] border-border px-3 py-1 text-foreground  scale-90">
+      <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90">
         {activeMatch.team1.avatar ? (
           <img
             src={activeMatch.team1.avatar}

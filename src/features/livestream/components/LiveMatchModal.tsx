@@ -103,7 +103,7 @@ export function LiveMatchModal({
               Match Details
             </span>
             <div
-              className={`px-3 py-1 border-2 border-border text-[10px] font-black font-headline uppercase tracking-[0.2em] shadow-[2px_2px_0_0_#1a1a1a] hidden sm:block ${
+              className={`px-3 py-1 border border-gray-200 text-[10px] font-black font-headline uppercase tracking-[0.2em] rounded-md hidden sm:block ${
                 isServer2
                   ? 'bg-[#0055ff] text-white'
                   : 'bg-[#ffcc00] text-foreground'

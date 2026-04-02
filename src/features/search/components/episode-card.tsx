@@ -36,7 +36,7 @@ export function EpisodeCard({
       type="button"
       className={cn(
         'group flex gap-4 p-4 cursor-pointer transition-all duration-300 w-full text-left border border-gray-100 rounded-xl overflow-hidden relative',
-        'bg-white/40 hover:bg-white/60 hover:backdrop-blur-xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]',
+        'bg-white/40 hover:bg-white/60 hover:backdrop-blur-xl hover:shadow-md',
         isPlaying &&
           'bg-white/80 backdrop-blur-xl ring-2 ring-primary/20 pointer-events-none scale-[0.98]',
         isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',

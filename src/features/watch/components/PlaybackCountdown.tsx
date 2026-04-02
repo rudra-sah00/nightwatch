@@ -61,7 +61,7 @@ export function PlaybackCountdown({
               fill="transparent"
               strokeDasharray={653.45}
               strokeDashoffset={653.45 * (1 - progress / 100)}
-              className="text-primary transition-[stroke-dashoffset] duration-150 ease-linear drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]"
+              className="text-primary transition-[stroke-dashoffset] duration-150 ease-linear"
               strokeLinecap="round"
             />
           </svg>
@@ -70,7 +70,7 @@ export function PlaybackCountdown({
           <div className="relative flex flex-col items-center">
             <span
               key={count}
-              className="text-9xl font-black text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-in zoom-in-75 duration-300"
+              className="text-9xl font-black text-white animate-in zoom-in-75 duration-300 drop-shadow-md"
             >
               {count > 0 ? count : 'GO'}
             </span>

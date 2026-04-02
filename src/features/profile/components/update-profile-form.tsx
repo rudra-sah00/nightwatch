@@ -335,10 +335,10 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-red-50 border-4 border-red-500 rounded-none shadow-[4px_4px_0_0_#ef4444] p-8 mt-16 group relative overflow-hidden transition-all hover:bg-red-100 hover:shadow-[6px_6px_0_0_#ef4444]">
+      <section className="bg-white border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-all hover:bg-red-50">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-red-600 mb-2">
+            <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-red-600 mb-2">
               Danger Zone
             </h2>
             <p className="text-red-900 font-bold font-headline uppercase tracking-widest text-sm opacity-80">
@@ -349,8 +349,8 @@ export function UpdateProfileForm() {
           <Button
             type="button"
             onClick={() => profileForm.setShowDeleteDialog(true)}
-            variant="neo-yellow"
-            className="w-full md:w-auto bg-red-600 border-red-900 text-white hover:bg-black hover:text-red-600 hover:border-black shrink-0"
+            variant="neo-red"
+            className="w-full md:w-auto shrink-0 bg-red-600 hover:bg-red-700 text-white"
           >
             DELETE ACCOUNT
           </Button>
@@ -361,22 +361,19 @@ export function UpdateProfileForm() {
         open={profileForm.showDeleteDialog}
         onOpenChange={profileForm.setShowDeleteDialog}
       >
-        <AlertDialogContent className="bg-[#1a1a1a] text-white border-red-600">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-500">
+            <AlertDialogTitle className="text-red-600">
               Terminal Erase
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300 normal-case opacity-100 font-body text-base mt-2">
+            <AlertDialogDescription>
               Are you sure you want to delete your account? This action cannot
               be reversed. All your data, watchlist, history, and preferences
               will be permanently wiped from the server.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8">
-            <AlertDialogCancel
-              disabled={profileForm.isDeleting}
-              className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-black"
-            >
+            <AlertDialogCancel disabled={profileForm.isDeleting}>
               CANCEL
             </AlertDialogCancel>
             <AlertDialogAction
@@ -385,7 +382,7 @@ export function UpdateProfileForm() {
                 profileForm.handleDeleteAccount();
               }}
               disabled={profileForm.isDeleting}
-              className="bg-red-600 text-white border-2 border-red-600 hover:bg-red-700"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               {profileForm.isDeleting ? (
                 <>

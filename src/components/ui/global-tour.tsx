@@ -25,9 +25,9 @@ export function GlobalTour() {
           showProgress: true,
           animate: true,
           allowClose: true,
-          overlayColor: '#1a1a1a',
+          overlayColor: 'rgba(0,0,0,0.5)',
           popoverClass:
-            'rounded-none border-[3px] border-border shadow-[4px_4px_0px_0px_#1a1a1a] !font-body',
+            'rounded-xl border border-gray-200 shadow-lg !font-body',
           steps: [
             {
               popover: {

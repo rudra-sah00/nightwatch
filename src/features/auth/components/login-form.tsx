@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { OtpInput } from '@/components/ui/otp-input';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
@@ -55,15 +56,13 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   SECURITY CODE
                 </Label>
               </div>
-              <Input
+              <OtpInput
                 id="otp"
                 name="otp"
-                type="text"
-                inputMode="numeric"
                 placeholder="000000"
                 value={otp || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const val = e.target.value.replace(/\D/g, '');
+                  const val = e.target.value;
                   if (val.length <= 6) setOtp(val);
                 }}
                 disabled={isLoading}
