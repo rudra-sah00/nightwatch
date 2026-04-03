@@ -35,11 +35,12 @@ export function WatchPartySetup({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none">
       <div
-        className="w-full max-w-3xl bg-zinc-950 border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[82vh] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
+        className="w-full max-w-3xl bg-zinc-950 border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[82vh] motion-safe:animate-in motion-safe:slide-in-from-bottom-4 sm:motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="watch-party-setup-title"
       >
         {/* Header */}
         <div className="relative overflow-hidden flex-shrink-0">
@@ -54,7 +55,10 @@ export function WatchPartySetup({
                 <p className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.15em] mb-0.5">
                   Watch Party
                 </p>
-                <h3 className="text-base sm:text-lg font-bold text-white leading-tight">
+                <h3
+                  id="watch-party-setup-title"
+                  className="text-base sm:text-lg font-bold text-white leading-tight"
+                >
                   {show.title}
                 </h3>
                 <p className="text-xs text-white/40 mt-0.5">
@@ -66,7 +70,7 @@ export function WatchPartySetup({
               type="button"
               onClick={onClose}
               disabled={!!creatingEpisodeId}
-              className="p-1.5 rounded-lg/10 transition-colors disabled:opacity-40 flex-shrink-0 -mt-0.5"
+              className="p-1.5 rounded-lg/10 transition-colors disabled:opacity-40 flex-shrink-0 -mt-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
               aria-label="Close"
             >
               <X className="w-5 h-5 text-white/50" />
@@ -86,7 +90,7 @@ export function WatchPartySetup({
                     type="button"
                     onClick={() => onSelectSeason(season)}
                     className={cn(
-                      'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border whitespace-nowrap',
+                      'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-[background-color,color,border-color] duration-200 border whitespace-nowrap',
                       isActive
                         ? 'bg-violet-500/15 text-violet-300 border-violet-500/25'
                         : 'text-white/35 hover:text-white/65/[0.05] border-transparent',
@@ -185,7 +189,7 @@ function PartyEpisodeCard({
       onClick={onSelect}
       disabled={isCreating || isDisabled}
       className={cn(
-        'group flex items-center gap-3 p-2.5 rounded-xl text-left w-full transition-all duration-200 border',
+        'group flex items-center gap-3 p-2.5 rounded-xl text-left w-full transition-[background-color,border-color,opacity] duration-200 border',
         isCreating
           ? 'bg-violet-500/10 border-violet-500/25 cursor-default'
           : isDisabled

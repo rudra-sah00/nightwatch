@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -129,7 +130,7 @@ function EpisodeDownloadItem({
       <button
         type="button"
         onClick={handleExpand}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-all duration-200 text-left border-[3px] border-border bg-white"
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-colors duration-200 text-left border-[3px] border-border bg-white"
       >
         <div className="flex items-center gap-4">
           <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-[#ffe066] px-2 py-0.5 border-2 border-border">
@@ -165,7 +166,7 @@ function EpisodeDownloadItem({
                   referrerPolicy="no-referrer"
                   onClick={() => triggerDownload(q.quality)}
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-4 py-2 border-[2px] text-xs font-headline font-black uppercase transition-all duration-150 active:scale-95 no-underline',
+                    'inline-flex items-center gap-1.5 px-4 py-2 border-[2px] text-xs font-headline font-black uppercase transition-[background-color,color,border-color,transform] duration-150 active:scale-95 no-underline',
                     qualityColor(q.quality),
                   )}
                 >
@@ -221,7 +222,7 @@ export function DownloadMenu({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-[#ffcc00] text-foreground  hover:bg-[#ffe066] transition-all duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
+        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-[#ffcc00] text-foreground hover:bg-[#ffe066] transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
       >
         <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         DOWNLOAD
@@ -238,6 +239,10 @@ export function DownloadMenu({
                 <Download className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
                 DOWNLOAD
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Download links for {show.title}. Choose a language and quality,
+                then start downloading the selected file.
+              </DialogDescription>
               <p className="text-[#4a4a4a] text-[10px] sm:text-xs font-headline font-bold uppercase tracking-widest truncate opacity-80">
                 {show.title}
               </p>
@@ -276,7 +281,7 @@ export function DownloadMenu({
                           setSelectedDubType(dub.contentType);
                         }}
                         className={cn(
-                          'px-4 py-2 border-[2px] border-border font-headline font-black uppercase text-xs tracking-widest transition-all duration-150 active:scale-95',
+                          'px-4 py-2 border-[2px] border-border font-headline font-black uppercase text-xs tracking-widest transition-[background-color,color,transform] duration-150 active:scale-95',
                           isSelected
                             ? 'bg-[#ffcc00] text-foreground '
                             : 'bg-white text-foreground hover:bg-background',
@@ -386,7 +391,7 @@ function MovieDownloadSection({
               referrerPolicy="no-referrer"
               onClick={() => triggerDownload(q.quality)}
               className={cn(
-                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-border transition-all duration-150 hover: active:scale-[0.98] no-underline',
+                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-border transition-[background-color,color,border-color,transform] duration-150 hover: active:scale-[0.98] no-underline',
                 qualityColor(q.quality),
               )}
             >

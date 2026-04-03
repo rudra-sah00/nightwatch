@@ -91,15 +91,19 @@ export function LiveMatchModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="live-match-modal-title"
     >
       <div className="relative w-full h-full overflow-y-auto bg-white flex flex-col no-scrollbar">
         {/* Header / Close button */}
         <div className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg">
+            <span
+              id="live-match-modal-title"
+              className="font-headline font-black uppercase tracking-widest text-foreground text-lg"
+            >
               Match Details
             </span>
             <div
@@ -115,7 +119,7 @@ export function LiveMatchModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-all flex-shrink-0"
+            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
             aria-label="Close"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -138,7 +142,7 @@ export function LiveMatchModal({
               {isLive && (
                 <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
                   <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full bg-white opacity-75" />
+                    <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
                     <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
                   </span>
                   <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
@@ -214,7 +218,7 @@ export function LiveMatchModal({
                 type="button"
                 className={cn(
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
                   !canWatch
                     ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
                     : 'bg-[#ffcc00] text-foreground hover:bg-[#ffe066]',
@@ -238,7 +242,7 @@ export function LiveMatchModal({
                   type="button"
                   className={cn(
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
                     isCreatingParty || !canWatch
                       ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
                       : 'bg-[#1a1a1a] text-white hover:bg-[#0055ff]',
@@ -247,7 +251,7 @@ export function LiveMatchModal({
                   disabled={isCreatingParty || !canWatch}
                 >
                   {isCreatingParty ? (
-                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />
+                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
                   ) : (
                     <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
                   )}

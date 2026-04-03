@@ -50,7 +50,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         bottom: 0,
         left: 0,
       }}
-      isLive
+      streamMode="live"
       onBack={handleBack}
       onNavigate={(url) => router.push(url)}
     >

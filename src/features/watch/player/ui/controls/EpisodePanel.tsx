@@ -63,6 +63,19 @@ export function EpisodePanel({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   const isCurrentSeason = selectedSeason === currentSeason;
 
   // Find current episode index for initial scroll
@@ -133,8 +146,8 @@ export function EpisodePanel({
         type="button"
         className="fixed inset-0 cursor-pointer bg-transparent border-none w-full h-full p-0"
         onClick={onClose}
-        onKeyDown={(e) => e.key === 'Escape' && onClose()}
-        aria-label="Close episodes"
+        tabIndex={-1}
+        aria-hidden="true"
       />
 
       {/* ── Info panel — appears to the left of the scroll column on hover ── */}
@@ -144,7 +157,7 @@ export function EpisodePanel({
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
             'pointer-events-none z-10 bg-white border-[4px] border-border p-4 ',
-            'animate-in slide-in-from-right-4 fade-in duration-300 ease-out',
+            'motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-300 motion-safe:ease-out motion-reduce:animate-none',
           )}
         >
           <div className="flex flex-col gap-2">
@@ -195,7 +208,7 @@ export function EpisodePanel({
                 'bg-white border-[3px] border-border hover:bg-[#ffe066]',
                 'px-5 py-2.5 ',
                 'text-sm font-black font-headline uppercase tracking-widest text-foreground',
-                'transition-all duration-200',
+                'transition-colors duration-200',
               )}
             >
               S{selectedSeason}
@@ -214,7 +227,7 @@ export function EpisodePanel({
                   'absolute top-full left-1/2 -translate-x-1/2 mt-2',
                   'bg-white border-[4px] border-border ',
                   'flex flex-col min-w-[140px]',
-                  'animate-in fade-in slide-in-from-top-2 duration-200',
+                  'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none',
                 )}
               >
                 {seasons.map((s) => (
@@ -346,7 +359,7 @@ function EpisodeThumb({
         onMouseLeave={() => onHoverCenter?.(false)}
         className={cn(
           'group relative overflow-hidden',
-          'transition-all duration-500 ease-out',
+          'transition-[background-color,border-color] duration-500 ease-out',
           'focus:outline-none',
           isCenter
             ? 'border-[4px] border-border bg-background '
@@ -368,7 +381,7 @@ function EpisodeThumb({
             alt={episode.title || `Episode ${episode.episodeNumber}`}
             fill
             className={cn(
-              'object-cover transition-all duration-500',
+              'object-cover transition-[filter] duration-500',
               isCenter
                 ? 'brightness-100 grayscale-0'
                 : 'brightness-50 grayscale contrast-125 group-hover:brightness-100 group-hover:grayscale-0 group-hover:contrast-100',

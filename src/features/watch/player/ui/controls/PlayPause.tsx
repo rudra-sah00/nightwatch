@@ -32,7 +32,7 @@ export function PlayPause({
       type="button"
       onClick={onToggle}
       className={cn(
-        'flex items-center justify-center transition-all duration-200',
+        'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
         'border-[3px] border-border bg-[#ffcc00] text-foreground ',
         'hover:bg-[#ffe066]',
         'active:bg-[#ffb700]',
@@ -268,7 +268,7 @@ export function TapIndicator({
     <div
       className={cn(
         'absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-2',
-        'animate-in fade-in zoom-in-50 duration-200',
+        'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50 motion-safe:duration-200 motion-reduce:animate-none',
         direction === 'left' ? 'left-1/4' : 'right-1/4',
       )}
     >

@@ -210,11 +210,11 @@ export function WatchPartySketch() {
 
         {/* Fill Toggle & Visual Options */}
         {showFillToggle && (
-          <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+          <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
             <h4 className="text-xs font-black text-foreground/50 uppercase tracking-widest font-headline flex items-center justify-between">
               Options
               {selectedId && (
-                <div className="flex gap-1 animate-in fade-in slide-in-from-right-4">
+                <div className="flex gap-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-reduce:animate-none">
                   <Button
                     type="button"
                     onClick={() => handleMoveZ(selectedId, 'front')}
@@ -253,7 +253,7 @@ export function WatchPartySketch() {
 
         {/* Color Selection */}
         {showColorPicker && (
-          <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+          <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
             <h4 className="text-xs font-black text-foreground/50 uppercase tracking-widest font-headline">
               Color
             </h4>
@@ -296,7 +296,7 @@ export function WatchPartySketch() {
         )}
 
         {/* Stroke Width / Font Size Slider */}
-        <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+        <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-black font-headline text-foreground/50 uppercase tracking-widest">
               {currentTool === 'text' ? 'Font Size' : 'Thickness'}
@@ -320,7 +320,7 @@ export function WatchPartySketch() {
         </div>
 
         {/* Opacity Slider */}
-        <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+        <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-black font-headline text-foreground/50 uppercase tracking-widest">
               Opacity
@@ -381,7 +381,7 @@ export function WatchPartySketch() {
       {/* Emoji Picker Overlay */}
       {isEmojiPickerOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative animate-in zoom-in-95 duration-200">
+          <div className="relative motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
             <Button
               type="button"
               onClick={() => setIsEmojiPickerOpen(false)}

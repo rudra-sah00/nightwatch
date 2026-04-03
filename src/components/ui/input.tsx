@@ -39,7 +39,7 @@ function Input({ className, variant, type, error, ref, ...props }: InputProps) {
         {...props}
       />
       {error ? (
-        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] animate-in fade-in slide-in-from-top-1">
+        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none">
           {error}
         </p>
       ) : null}

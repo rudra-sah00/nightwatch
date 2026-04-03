@@ -140,7 +140,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
 
         {/* Typing Indicator */}
         {typingUsers.length > 0 ? (
-          <div className="flex items-center gap-2 px-2 py-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2 px-2 py-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
                 <span className="text-[10px] font-black font-headline uppercase text-foreground">
@@ -158,9 +158,9 @@ export const WatchPartyChat = memo(function WatchPartyChat({
               </span>
             </div>
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none" />
             </div>
           </div>
         ) : null}
@@ -172,7 +172,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {showEmoji ? (
         <div
           ref={emojiRef}
-          className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-white  rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-white  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
             theme={Theme.LIGHT}
@@ -293,7 +293,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
   return (
     <div
       className={cn(
-        'flex flex-col w-full animate-in fade-in slide-in-from-bottom-2 duration-300',
+        'flex flex-col w-full motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none',
         isMe ? 'items-end' : 'items-start',
       )}
     >

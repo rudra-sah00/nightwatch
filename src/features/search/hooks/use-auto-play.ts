@@ -24,7 +24,6 @@ interface UseAutoPlayProps {
   ) => Promise<void>;
   handlePlay: (episode?: Episode) => Promise<void>;
   progressCheckedRef: React.MutableRefObject<boolean>;
-  setIsLoadingProgress: (isLoading: boolean) => void;
   autoPlaySeasonSelectedRef: React.MutableRefObject<boolean>;
   autoPlayEpisodeStartedRef: React.MutableRefObject<boolean>;
 }
@@ -38,7 +37,6 @@ export function useAutoPlay({
   loadSeasonEpisodesInternal,
   handlePlay,
   progressCheckedRef,
-  setIsLoadingProgress,
   autoPlaySeasonSelectedRef,
   autoPlayEpisodeStartedRef,
 }: UseAutoPlayProps): void {
@@ -70,7 +68,6 @@ export function useAutoPlay({
         autoPlaySeasonSelectedRef.current = true;
         // Also mark progress as checked so we don't override
         progressCheckedRef.current = true;
-        setIsLoadingProgress(false);
       }
     }
   }, [
@@ -79,7 +76,6 @@ export function useAutoPlay({
     loadSeasonEpisodesInternal,
     setSelectedSeason,
     progressCheckedRef,
-    setIsLoadingProgress,
     autoPlaySeasonSelectedRef,
   ]);
 

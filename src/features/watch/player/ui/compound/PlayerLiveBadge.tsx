@@ -18,7 +18,7 @@ export function PlayerLiveBadge() {
       onClick={isAtLiveEdge ? undefined : handleGoLive}
       title={isAtLiveEdge ? 'You are watching live' : 'Jump to live'}
       className={cn(
-        'flex items-center gap-2 ml-2 md:ml-3 px-3 py-1 border-[3px] border-border text-xs font-black font-headline uppercase tracking-widest flex-shrink-0 transition-all duration-200 select-none ',
+        'flex items-center gap-2 ml-2 md:ml-3 px-3 py-1 border-[3px] border-border text-xs font-black font-headline uppercase tracking-widest flex-shrink-0 transition-colors duration-200 select-none ',
         isAtLiveEdge
           ? 'bg-[#e63b2e] text-white cursor-default'
           : 'bg-white text-foreground cursor-pointer hover:bg-[#ffe066]',

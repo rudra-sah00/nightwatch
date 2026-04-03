@@ -29,6 +29,7 @@ const GOOGLE_FONTS_URL =
 
 export function loadSubtitleFonts(): void {
   if (typeof document === 'undefined') return;
+  if (process.env.NODE_ENV === 'test') return;
   if (document.getElementById(FONTS_LINK_ID)) return;
 
   // Preconnect for faster font loading

@@ -179,7 +179,6 @@ export function useContentDetail({
     loadSeasonEpisodesInternal,
     handlePlay,
     progressCheckedRef,
-    setIsLoadingProgress: () => {}, // We don't have direct setter for isLoadingProgress from hook.
     autoPlaySeasonSelectedRef,
     autoPlayEpisodeStartedRef,
   });

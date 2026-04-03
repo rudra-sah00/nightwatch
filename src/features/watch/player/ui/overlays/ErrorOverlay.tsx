@@ -18,7 +18,7 @@ export function ErrorOverlay({
   if (!isVisible) return null;
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-30 animate-in fade-in duration-300">
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-30 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300 motion-reduce:animate-none">
       <div className="flex flex-col items-center max-w-md bg-background border-[4px] border-border  p-8 text-center mx-4">
         <div className="w-16 h-16 bg-[#e63b2e] border-[4px] border-border flex items-center justify-center mb-6 ">
           <AlertCircle className="w-10 h-10 text-white stroke-[3px]" />
@@ -35,7 +35,7 @@ export function ErrorOverlay({
             <button
               type="button"
               onClick={onRetry}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#ffcc00] text-foreground border-[4px] border-border py-3 font-black font-headline uppercase tracking-widest  hover:bg-[#ffe066] active:bg-[#ffb700] transition-all"
+              className="flex-1 flex items-center justify-center gap-2 bg-[#ffcc00] text-foreground border-[4px] border-border py-3 font-black font-headline uppercase tracking-widest hover:bg-[#ffe066] active:bg-[#ffb700] transition-colors"
             >
               <RefreshCw className="w-5 h-5 stroke-[3px]" />
               Try Again
@@ -45,7 +45,7 @@ export function ErrorOverlay({
             <button
               type="button"
               onClick={onBack}
-              className="flex-1 flex items-center justify-center gap-2 bg-white text-foreground border-[4px] border-border py-3 font-black font-headline uppercase tracking-widest  hover:bg-background active:bg-[#e0dcd3] transition-all"
+              className="flex-1 flex items-center justify-center gap-2 bg-white text-foreground border-[4px] border-border py-3 font-black font-headline uppercase tracking-widest hover:bg-background active:bg-[#e0dcd3] transition-colors"
             >
               Go Back
             </button>

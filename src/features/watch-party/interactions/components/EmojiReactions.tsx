@@ -74,7 +74,7 @@ export function EmojiReactions({
       {showPicker ? (
         <div
           ref={pickerRef}
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
             theme={Theme.DARK}

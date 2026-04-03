@@ -128,7 +128,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
     <div
       className={cn(
         'group relative flex flex-col p-2 w-full text-left bg-white border-[4px] border-border  h-full',
-        'transition-all',
+        'transition-[background-color,color,border-color,box-shadow,transform,opacity]',
       )}
     >
       {/* Remove Button - Top Right Overlay */}
@@ -138,7 +138,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
           variant="none"
           size="none"
           onClick={(e) => onRemove(item, e)}
-          className="p-1 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white  transition-all"
+          className="p-1 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-[background-color,color,border-color,opacity,transform]"
           title="Remove from list"
         >
           <X className="w-5 h-5 stroke-[3px]" />
@@ -156,7 +156,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter,transform] duration-500 group-hover:scale-105"
             unoptimized={item.posterUrl.includes('/api/stream/')}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             loading={index < 4 ? 'eager' : 'lazy'}

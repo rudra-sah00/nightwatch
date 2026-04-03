@@ -86,7 +86,7 @@ export function WatchPartyLobby({
   if (roomNotFound) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
           <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto ">
             <Users className="w-10 h-10 text-white" />
           </div>
@@ -113,7 +113,7 @@ export function WatchPartyLobby({
   if (requestStatus === 'pending') {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  animate-in fade-in zoom-in-95 duration-500">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
           {/* 3-step indicator - Neobrutalist style */}
           <div className="flex items-center justify-center gap-2 mb-10">
             <div className="flex flex-col items-center gap-2">
@@ -126,8 +126,8 @@ export function WatchPartyLobby({
             </div>
             <div className="w-12 h-1 bg-[#1a1a1a] mb-6" />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-border flex items-center justify-center animate-pulse ">
-                <Loader2 className="w-6 h-6 animate-spin text-foreground" />
+              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-border flex items-center justify-center animate-pulse motion-reduce:animate-none ">
+                <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-foreground" />
               </div>
               <span className="text-[10px] text-foreground font-black font-headline uppercase">
                 Waiting
@@ -167,7 +167,7 @@ export function WatchPartyLobby({
   if (requestStatus === 'rejected') {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center animate-in fade-in zoom-in-95 duration-300">
+        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
           <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto mb-6 ">
             <UserMinus className="w-10 h-10 text-white" />
           </div>
@@ -203,11 +203,11 @@ export function WatchPartyLobby({
   if (roomPreview) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border  animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
+        <div className="max-w-md w-full bg-white border-4 border-border  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none overflow-hidden">
           {/* Header */}
           <div className="bg-[#ffcc00] border-b-4 border-border p-6 text-center">
             <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-foreground border-2 border-border bg-white px-3 py-1 mb-4">
-              <div className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse motion-reduce:animate-none" />
               Live Watch Party
             </div>
             <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
@@ -266,7 +266,7 @@ export function WatchPartyLobby({
 
                 {/* Captcha for guest users */}
                 {onCaptchaVerify ? (
-                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-300 motion-reduce:animate-none">
                     <p className="text-[10px] font-black font-headline uppercase text-foreground/60 mb-2 text-center">
                       Security Check
                     </p>

@@ -101,7 +101,7 @@ export function MediaControls({
             variant="none"
             size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-all"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-colors"
           >
             {linkCopied ? (
               <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
@@ -120,7 +120,7 @@ export function MediaControls({
           size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-all',
+            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-colors',
             isHost ? 'flex-1' : 'w-full',
           )}
         >
@@ -294,7 +294,7 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-border  z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 flex flex-col">
+    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-border  z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none flex flex-col">
       <div className="p-3 border-b-[4px] border-border flex items-center justify-between bg-background">
         <span className="text-[10px] font-black font-headline uppercase tracking-widest text-foreground">
           {title}

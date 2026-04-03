@@ -4,7 +4,7 @@ import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-medium tracking-normal',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-[background-color,color,border-color,opacity,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-medium tracking-normal',
   {
     variants: {
       variant: {
@@ -19,7 +19,8 @@ const buttonVariants = cva(
           'bg-transparent text-foreground border border-border hover:bg-[#1a1a1a] hover:text-white rounded-md',
         'neo-ghost':
           'border border-transparent bg-transparent text-foreground hover:bg-black/5 hover:text-foreground rounded-md',
-        'neo-base': 'transition-all',
+        'neo-base':
+          'transition-[background-color,color,border-color,opacity,transform]',
         none: '',
       },
       size: {

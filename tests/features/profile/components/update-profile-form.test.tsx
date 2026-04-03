@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
+import { useProfileOverview } from '@/features/profile/hooks/use-profile-overview';
 import { useAuth } from '@/providers/auth-provider';
 import type { User } from '@/types';
 
@@ -23,6 +24,11 @@ vi.mock('@/providers/auth-provider', () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock profile overview hook to keep tests deterministic and avoid unrelated async updates
+vi.mock('@/features/profile/hooks/use-profile-overview', () => ({
+  useProfileOverview: vi.fn(),
+}));
+
 // Mock the API
 vi.mock('@/features/profile/api', () => import('../__mocks__/profile-api'));
 
@@ -39,6 +45,19 @@ describe('UpdateProfileForm', () => {
       user: mockUser,
       updateUser: mockUpdateUser,
     } as unknown as ReturnType<typeof useAuth>);
+
+    vi.mocked(useProfileOverview).mockReturnValue({
+      user: mockUser,
+      logout: vi.fn(),
+      activity: [],
+      loadingActivity: false,
+      isUploading: false,
+      displayImage: null,
+      fileInputRef: { current: null },
+      formattedJoinDate: 'January 2025',
+      handleFileClick: vi.fn(),
+      handleFileChange: vi.fn(),
+    });
   });
 
   describe('rendering', () => {
@@ -368,6 +387,35 @@ describe('UpdateProfileForm', () => {
 
       // Resolve the promise
       resolvePromise!({ user: { ...mockUser, name: 'New Name' } });
+
+      await waitFor(() => {
+        expect(submitButton).not.toBeDisabled();
+      });
+    });
+  });
+
+  describe('public profile sharing', () => {
+    it('copies public link and shows success toast', async () => {
+      const { toast } = await import('sonner');
+      const writeText = vi
+        .spyOn(navigator.clipboard, 'writeText')
+        .mockResolvedValue(undefined);
+
+      const user = userEvent.setup();
+      render(<UpdateProfileForm />);
+
+      await user.click(
+        screen.getByRole('button', { name: /COPY PUBLIC LINK/i }),
+      );
+
+      await waitFor(() => {
+        expect(writeText).toHaveBeenCalledWith(
+          `${window.location.origin}/user/user-1`,
+        );
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+          'Public profile link copied',
+        );
+      });
     });
   });
 

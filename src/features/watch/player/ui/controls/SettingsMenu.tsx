@@ -207,7 +207,7 @@ export function SettingsMenu({
         onClick={toggleMenu}
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
-          'p-2.5 transition-all duration-200',
+          'p-2.5 transition-colors duration-200',
           'bg-white border-[3px] border-border text-foreground ',
           'hover:bg-background',
           'active:bg-[#e0e0e0]',
@@ -224,7 +224,7 @@ export function SettingsMenu({
 
       {/* Menu dropdown */}
       {isOpen ? (
-        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-white border-[4px] border-border  flex flex-col z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-white border-[4px] border-border  flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
           {currentScreen === 'main' && renderMainMenu()}
           {currentScreen === 'quality' && renderQualityMenu()}
           {currentScreen === 'speed' && renderSpeedMenu()}

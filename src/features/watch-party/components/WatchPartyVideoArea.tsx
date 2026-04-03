@@ -156,13 +156,13 @@ export function WatchPartyVideoArea({
       spriteVtt={room.spriteVtt}
       qualities={room.qualities}
       onVideoRef={onVideoRef}
-      readOnly={!isHost}
+      interactionMode={isHost ? 'interactive' : 'read-only'}
       isHost={isHost}
       isAuthenticated={isAuthenticated}
       onNavigate={onNavigate}
       fullscreenToggleOverride={toggleFullscreen}
       isFullscreenOverride={isFullscreen}
-      isLive={room.type === 'livestream'}
+      streamMode={room.type === 'livestream' ? 'live' : 'vod'}
       initialAudioTracks={
         initialAudioTracks.length > 0 ? initialAudioTracks : undefined
       }

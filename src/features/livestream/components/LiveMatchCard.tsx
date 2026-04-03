@@ -165,7 +165,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             onClick={handleWatchClick}
             disabled={!canWatch}
             variant={canWatch ? 'neo-red' : 'neo-outline'}
-            className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-all hover:bg-[#1a1a1a] hover:text-white"
+            className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors hover:bg-[#1a1a1a] hover:text-white"
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
             Watch

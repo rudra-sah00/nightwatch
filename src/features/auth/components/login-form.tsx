@@ -39,7 +39,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   return (
     <AuthCard title={getHeader()} className="h-[440px]">
       {step === 'otp' && (
-        <div className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300 motion-reduce:animate-none">
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               CODE DISPATCHED TO
@@ -66,7 +66,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   if (val.length <= 6) setOtp(val);
                 }}
                 disabled={isLoading}
-                className="h-[46px] text-base font-black uppercase text-center tracking-[0.5em] transition-all relative"
+                className="h-[46px] text-base font-black uppercase text-center tracking-[0.5em] transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               variant="neo-outline"
               size="xl"
               disabled={isLoading || (countdown || 0) > 0}
-              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-all hover:bg-[#ffcc00]/10"
+              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-colors hover:bg-[#ffcc00]/10"
             >
               {(countdown || 0) > 0 ? `RETRY IN ${countdown}S` : 'RESEND KEY'}
             </Button>
@@ -99,7 +99,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
       {step === 'initial' && (
         <form
           action={action}
-          className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none"
         >
           {/* TOP: Inputs */}
           <div className="flex flex-col gap-3">
@@ -117,10 +117,13 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                 name="email"
                 type="text"
                 placeholder="ARCHITECT@BAUHAUS.DE OR WALTER_1919"
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-all relative"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
 
@@ -135,7 +138,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                 <button
                   type="button"
                   onClick={() => setStep('forgot')}
-                  className="font-headline font-bold uppercase text-[9px] tracking-widest text-[#e63b2e] hover:underline whitespace-nowrap leading-none"
+                  className="font-headline font-bold uppercase text-[9px] tracking-widest text-[#e63b2e] hover:underline focus-visible:underline focus-visible:outline-none whitespace-nowrap leading-none"
                 >
                   Forgot?
                 </button>
@@ -145,10 +148,11 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                 name="password"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-all relative tracking-[0.2em]"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
           </div>

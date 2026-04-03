@@ -67,7 +67,7 @@ export function FloatingChat({
   const visibleMessages = messages.slice(-60);
 
   return (
-    <div className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] animate-in fade-in slide-in-from-right-3 duration-300">
+    <div className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-3 motion-safe:duration-300 motion-reduce:animate-none">
       {/* ── Message list — no background, text + shadow only ── */}
       <div
         ref={listRef}
@@ -122,14 +122,14 @@ export function FloatingChat({
             placeholder="TYPE SOMETHING..."
             maxLength={200}
             aria-label="Send a chat message"
-            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-foreground placeholder-[#1a1a1a]/40 bg-white border-[3px] border-border px-3 py-2.5 outline-none focus:bg-background  transition-all min-w-0"
+            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-foreground placeholder-[#1a1a1a]/40 bg-white border-[3px] border-border px-3 py-2.5 outline-none focus:bg-background transition-colors min-w-0"
           />
           <Button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
             aria-label="Send"
-            className="p-2.5 bg-[#ffcc00] border-[3px] border-border text-foreground  active:bg-[#e0b400] transition-all disabled:opacity-50 disabled:grayscale"
+            className="p-2.5 bg-[#ffcc00] border-[3px] border-border text-foreground active:bg-[#e0b400] transition-colors disabled:opacity-50 disabled:grayscale"
           >
             <Send className="w-4 h-4 stroke-[3px]" />
           </Button>

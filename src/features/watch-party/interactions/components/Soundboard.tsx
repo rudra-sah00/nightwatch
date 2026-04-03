@@ -80,7 +80,7 @@ export function Soundboard({
               variant="neo-outline"
               size="sm"
               onClick={() => handleTriggerSound(sound.sound, sound.name)}
-              className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-white text-foreground hover:bg-[#ffe066] border-border border-[3px] transition-all group relative overflow-hidden rounded-none"
+              className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-white text-foreground hover:bg-[#ffe066] border-border border-[3px] transition-colors group relative overflow-hidden rounded-none"
               aria-label={`Play ${sound.name} sound`}
             >
               <div

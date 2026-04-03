@@ -254,13 +254,22 @@ describe('EpisodePanel', () => {
   describe('interactions', () => {
     it('should call onClose when left glass area is clicked', async () => {
       const onClose = vi.fn();
-      render(<EpisodePanel {...defaultProps} onClose={onClose} />);
+      const { container } = render(
+        <EpisodePanel {...defaultProps} onClose={onClose} />,
+      );
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Close episodes')).toBeInTheDocument();
+        const dismissSurface = container.querySelector(
+          'button.fixed.inset-0[aria-hidden="true"][tabindex="-1"]',
+        );
+        expect(dismissSurface).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByLabelText('Close episodes'));
+      const dismissSurface = container.querySelector(
+        'button.fixed.inset-0[aria-hidden="true"][tabindex="-1"]',
+      );
+      expect(dismissSurface).toBeInTheDocument();
+      fireEvent.click(dismissSurface as HTMLButtonElement);
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
@@ -269,12 +278,10 @@ describe('EpisodePanel', () => {
       render(<EpisodePanel {...defaultProps} onClose={onClose} />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Close episodes')).toBeInTheDocument();
+        expect(screen.getByText('E1')).toBeInTheDocument();
       });
 
-      fireEvent.keyDown(screen.getByLabelText('Close episodes'), {
-        key: 'Escape',
-      });
+      fireEvent.keyDown(window, { key: 'Escape' });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 

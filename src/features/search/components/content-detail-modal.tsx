@@ -134,8 +134,8 @@ export function ContentDetailModal({
   if (autoPlay) {
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/10 backdrop-blur-sm">
-        <div className="bg-white p-12 border-[4px] border-border -yellow animate-pulse">
-          <Loader2 className="w-16 h-16 animate-spin text-foreground stroke-[3px]" />
+        <div className="bg-white p-12 border-[4px] border-border -yellow animate-pulse motion-reduce:animate-none">
+          <Loader2 className="w-16 h-16 animate-spin motion-reduce:animate-none text-foreground stroke-[3px]" />
         </div>
       </div>
     );
@@ -147,7 +147,7 @@ export function ContentDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -155,13 +155,16 @@ export function ContentDetailModal({
       <div className="relative w-full h-full flex flex-col bg-white overflow-hidden">
         {/* Fixed Header */}
         <div className="border-b-[4px] border-border bg-background flex justify-between items-center px-4 sm:px-6 py-4 flex-shrink-0 z-20 sticky top-0">
-          <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg sm:text-xl truncate flex-1 pr-4">
+          <span
+            id="modal-title"
+            className="font-headline font-black uppercase tracking-widest text-foreground text-lg sm:text-xl truncate flex-1 pr-4"
+          >
             {show.title}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-all  flex-shrink-0"
+            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -184,7 +187,7 @@ export function ContentDetailModal({
                 />
                 <button
                   type="button"
-                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ffcc00]"
+                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-[#ffcc00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                   onClick={() => setShowTrailer(false)}
                 >
                   Close Preview
@@ -294,7 +297,7 @@ export function ContentDetailModal({
                   <button
                     type="button"
                     onClick={() => setIsSetupOpen(false)}
-                    className="p-3 bg-[#e63b2e] border-[3px] border-border hover:bg-[#1a1a1a] text-white transition-all  flex-shrink-0"
+                    className="p-3 bg-[#e63b2e] border-[3px] border-border hover:bg-[#1a1a1a] text-white transition-colors flex-shrink-0"
                     aria-label="Cancel watch party"
                   >
                     <X className="w-6 h-6 stroke-[3px]" />

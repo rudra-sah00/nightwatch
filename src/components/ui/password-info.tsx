@@ -40,7 +40,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-[#4a4a4a] hover:text-[#0055ff] transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-[#4a4a4a] hover:text-[#0055ff] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
         aria-label="Password requirements"
       >
         <Info className="h-3.5 w-3.5 stroke-[3px]" />
@@ -60,7 +60,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
           {/* Centered Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div
-              className="relative w-full max-w-sm bg-white border-[4px] border-border  pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+              className="relative w-full max-w-sm bg-white border-[4px] border-border  pointer-events-auto motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
               role="dialog"
               aria-modal="true"
               aria-labelledby="password-requirements-title"
@@ -69,7 +69,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 bg-white border-[3px] border-border p-1.5 text-foreground hover:bg-[#e63b2e] hover:text-white transition-all "
+                className="absolute top-4 right-4 bg-white border-[3px] border-border p-1.5 text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                 aria-label="Close"
               >
                 <X className="h-4 w-4 stroke-[3px]" />

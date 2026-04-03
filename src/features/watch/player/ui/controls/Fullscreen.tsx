@@ -21,7 +21,7 @@ export function Fullscreen({ isFullscreen, onToggle, label }: FullscreenProps) {
       onMouseDown={(e) => e.preventDefault()}
       aria-label={ariaLabel}
       className={cn(
-        'p-2.5 transition-all duration-200',
+        'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
         'bg-white border-[3px] border-border text-foreground ',
         'hover:bg-background',
         'active:bg-[#e0e0e0]',

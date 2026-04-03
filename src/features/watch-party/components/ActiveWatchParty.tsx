@@ -250,13 +250,13 @@ export function ActiveWatchParty({
             <AlertDialogFooter className="mt-6 sm:space-x-4">
               <AlertDialogCancel
                 onClick={() => onShowLeaveDialog(false)}
-                className="bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-all  py-3 text-sm"
+                className="bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-colors py-3 text-sm"
               >
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={onConfirmLeave}
-                className="bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-all  sm:mt-0 py-3 text-sm"
+                className="bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm"
               >
                 {isHost ? 'End Party' : 'Leave'}
               </AlertDialogAction>

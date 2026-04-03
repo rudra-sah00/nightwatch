@@ -166,7 +166,7 @@ export const ContentActions = memo(function ContentActions({
         type="button"
         className={cn(
           'w-full sm:w-auto sm:min-w-[220px] flex-1',
-          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
           isPlaying ||
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
@@ -211,7 +211,7 @@ export const ContentActions = memo(function ContentActions({
           type="button"
           className={cn(
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 whitespace-nowrap',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
             isCreatingParty || isPlaying
               ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
               : 'bg-[#1a1a1a] text-white  hover:bg-[#0055ff]',
@@ -236,7 +236,7 @@ export const ContentActions = memo(function ContentActions({
           type="button"
           className={cn(
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
-            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-all duration-200 group whitespace-nowrap',
+            'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 group whitespace-nowrap',
             isWatchlistLoading
               ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
               : isInWatchlist
@@ -261,7 +261,7 @@ export const ContentActions = memo(function ContentActions({
 
       {/* Extra Actions Container (Download) */}
       {extraActions && (
-        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-[#ffcc00]  hover:bg-[#ffe066] transition-all duration-200 overflow-hidden">
+        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-[#ffcc00] hover:bg-[#ffe066] transition-[background-color,color,border-color,opacity,transform] duration-200 overflow-hidden">
           <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg [&>button]:font-black [&>button]:font-headline [&>button]:uppercase [&>button]:tracking-widest [&>button]:whitespace-nowrap [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:gap-3">
             {extraActions}
           </div>

@@ -65,6 +65,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         bottom: 0,
         left: 0,
       }}
+      streamMode="vod"
       onNavigate={props.onNavigate || ((url) => router.replace(url))}
     >
       {/* Mobile Header - Solid Top Bar */}

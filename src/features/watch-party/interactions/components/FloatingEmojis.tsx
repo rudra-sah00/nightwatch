@@ -45,7 +45,7 @@ export function FloatingEmojis() {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-[100] overflow-hidden">
-      <style jsx global>{`
+      <style>{`
                 @keyframes floating-up {
                     0% {
                         transform: translate3d(0, 20px, 0) scale(0);

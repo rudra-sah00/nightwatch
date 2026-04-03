@@ -1,16 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useSearchInput } from '@/features/search/hooks/use-search-input';
-
-// Dynamic import for heavy modal component
-const _ContentDetailModal = dynamic(
-  () =>
-    import('@/features/search/components/content-detail-modal').then(
-      (m) => m.ContentDetailModal,
-    ),
-  { ssr: false },
-);
 
 export function HomeClient() {
   const {
@@ -74,6 +64,10 @@ export function HomeClient() {
                   placeholder="SEARCH MOVIES, SHOWS, OR CINEMA..."
                   type="text"
                   autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={handleFocus}
@@ -89,7 +83,7 @@ export function HomeClient() {
             </div>
             {/* Search Button */}
             <button
-              className="bg-[#ffcc00] text-foreground border-l-0 md:border-l-[3px] border-t-[3px] md:border-t-0 border-border px-6 md:px-12 py-3 md:py-0 font-headline text-lg md:text-2xl font-black uppercase tracking-[0.2em] md:tracking-widest hover:bg-[#1a1a1a] hover:text-[#ffcc00] transition-all duration-200 cursor-pointer h-full whitespace-nowrap"
+              className="bg-[#ffcc00] text-foreground border-l-0 md:border-l-[3px] border-t-[3px] md:border-t-0 border-border px-6 md:px-12 py-3 md:py-0 font-headline text-lg md:text-2xl font-black uppercase tracking-[0.2em] md:tracking-widest hover:bg-[#1a1a1a] hover:text-[#ffcc00] transition-[background-color,color,border-color,opacity,transform] duration-200 cursor-pointer h-full whitespace-nowrap"
               type="button"
               onClick={handleManualSearch}
             >

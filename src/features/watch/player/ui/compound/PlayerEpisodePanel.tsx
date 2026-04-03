@@ -144,7 +144,7 @@ export function PlayerEpisodePanelTrigger() {
       type="button"
       onClick={ctx.toggle}
       className={cn(
-        'p-2.5 md:p-3 transition-all duration-200',
+        'p-2.5 md:p-3 transition-colors duration-200',
         'bg-white border-[3px] border-border text-foreground ',
         'hover:bg-background',
         'active:bg-[#e0e0e0]',

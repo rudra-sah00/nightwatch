@@ -70,7 +70,7 @@ export default function LiveMatchPlayerPage() {
           {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -96,7 +96,7 @@ export default function LiveMatchPlayerPage() {
           time.
         </p>
         <Link href="/live">
-          <Button className="bg-[#ffcc00] text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
+          <Button className="bg-[#ffcc00] text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -130,7 +130,7 @@ export default function LiveMatchPlayerPage() {
             `${activeMatch.team1.name} vs ${activeMatch.team2.name} has ended.`}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -156,7 +156,7 @@ export default function LiveMatchPlayerPage() {
           {sessionError}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-all">
+          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>

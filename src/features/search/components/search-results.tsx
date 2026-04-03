@@ -90,7 +90,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
       {/* Target Poster Container */}
       <button
         type="button"
-        className="aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-background"
+        className="group aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-background"
         onClick={() => onSelect(result)}
         aria-label={`View details for ${result.title}`}
       >
@@ -103,7 +103,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
             src={getOptimizedImageUrl(result.poster)}
             alt={result.title}
             fill
-            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300"
+            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter] duration-300"
             onError={() => setImageError(true)}
             unoptimized={result.poster?.includes('/api/stream/')}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

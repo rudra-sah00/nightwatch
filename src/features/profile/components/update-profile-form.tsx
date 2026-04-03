@@ -2,6 +2,7 @@
 
 import { Camera, Loader2, LogOut } from 'lucide-react';
 import { useRef } from 'react';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +32,17 @@ export function UpdateProfileForm() {
 
   const profileForm = useUpdateProfileForm();
   const profileFormRef = useRef<HTMLFormElement>(null);
+
+  const handleCopyPublicLink = async () => {
+    try {
+      if (!user) return;
+      const url = `${window.location.origin}/user/${user.id}`;
+      await navigator.clipboard.writeText(url);
+      toast.success('Public profile link copied');
+    } catch {
+      toast.error('Failed to copy public profile link');
+    }
+  };
 
   if (!user) return null;
 
@@ -64,7 +76,7 @@ export function UpdateProfileForm() {
             type="button"
             onClick={handleFileClick}
             disabled={isUploading}
-            className="absolute -bottom-2 -right-2 p-3 bg-white border border-gray-200 rounded-full shadow-md text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-all disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute -bottom-2 -right-2 p-3 bg-white border border-gray-200 rounded-full shadow-md text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             title="Update Photo"
           >
             {isUploading ? (
@@ -107,7 +119,7 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100"
                 />
               </div>
             </div>
@@ -190,7 +202,7 @@ export function UpdateProfileForm() {
                         profileFormRef.current?.requestSubmit();
                       }
                     }}
-                    className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                    className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
                     aria-label="Username"
                   />
                 </div>
@@ -223,7 +235,7 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
                   aria-label="Display Name"
                 />
                 <input type="hidden" name="name" value={profileForm.name} />
@@ -319,10 +331,7 @@ export function UpdateProfileForm() {
           type="button"
           variant="neo-outline"
           size="default"
-          onClick={() => {
-            const url = `${window.location.origin}/user/${user.id}`;
-            navigator.clipboard.writeText(url);
-          }}
+          onClick={handleCopyPublicLink}
           className="w-full md:w-auto"
         >
           COPY PUBLIC LINK
@@ -356,7 +365,7 @@ export function UpdateProfileForm() {
                   setTimeout(() => profileFormRef.current?.requestSubmit(), 0);
                 }}
                 className={cn(
-                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-all text-left w-full shadow-sm',
+                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-[background-color,border-color,color,box-shadow] text-left w-full shadow-sm',
                   isSelected
                     ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-600 ring-offset-2'
                     : 'bg-white text-gray-800 border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md',
@@ -380,7 +389,7 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-white border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-all hover:bg-red-50">
+      <section className="bg-white border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-red-50">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-red-600 mb-2">

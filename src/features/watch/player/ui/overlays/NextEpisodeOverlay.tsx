@@ -45,7 +45,10 @@ export function NextEpisodeOverlay({
   const isNextSeason = nextEpisode.episodeNumber === 1;
 
   return (
-    <div className="absolute bottom-36 md:bottom-48 right-6 z-50 animate-in slide-in-from-right-4 fade-in duration-300">
+    <section
+      className="absolute bottom-36 md:bottom-48 right-6 z-50 motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-300 motion-reduce:animate-none"
+      aria-label={isNextSeason ? 'Next season prompt' : 'Next episode prompt'}
+    >
       <div className="w-80 bg-background border-[4px] border-border  flex flex-col pointer-events-auto">
         {/* Header */}
         <div className="px-4 py-3 bg-[#ffcc00] border-b-[4px] border-border flex justify-between items-center">
@@ -56,7 +59,10 @@ export function NextEpisodeOverlay({
             </span>
           </div>
           {!cancelled && autoPlayDelay > 0 && !isLoading ? (
-            <span className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px]">
+            <span
+              className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px]"
+              aria-live="polite"
+            >
               in {countdown}s
             </span>
           ) : null}
@@ -72,7 +78,7 @@ export function NextEpisodeOverlay({
                   src={nextEpisode.thumbnailUrl}
                   alt={nextEpisode.title}
                   fill
-                  className="object-cover grayscale contrast-125 transition-all duration-500"
+                  className="object-cover grayscale contrast-125"
                   unoptimized
                 />
               ) : (
@@ -110,7 +116,7 @@ export function NextEpisodeOverlay({
                 'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] border-border bg-[#e63b2e] text-white',
                 'font-black font-headline uppercase tracking-widest text-xs ',
                 'hover:bg-[#ff4d40]',
-                'active:bg-[#cc3329] transition-all disabled:opacity-50 disabled:pointer-events-none',
+                'active:bg-[#cc3329] transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
               )}
             >
               {isLoading ? (
@@ -133,7 +139,7 @@ export function NextEpisodeOverlay({
                 'px-4 py-2 border-[3px] border-border bg-white text-foreground',
                 'font-black font-headline uppercase tracking-widest text-xs ',
                 'hover:bg-background',
-                'active:bg-[#e0dcd3] transition-all disabled:opacity-50 disabled:pointer-events-none',
+                'active:bg-[#e0dcd3] transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
               )}
             >
               Cancel
@@ -151,6 +157,6 @@ export function NextEpisodeOverlay({
           ) : null}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

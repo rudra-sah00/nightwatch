@@ -38,7 +38,7 @@ export function Volume({
         onClick={onMuteToggle}
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
-          'p-2.5 transition-all duration-200',
+          'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
           'bg-white border-[3px] border-border text-foreground ',
           'hover:bg-[#ffe066]',
           'active:bg-[#ffcc00]',

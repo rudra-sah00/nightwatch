@@ -36,7 +36,7 @@ export function AudioSelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'p-2.5 md:p-3 transition-all duration-200',
+          'p-2.5 md:p-3 transition-colors duration-200',
           'bg-white border-[3px] border-border text-foreground ',
           'hover:bg-background',
           'active:bg-[#e0e0e0]',
@@ -61,7 +61,7 @@ export function AudioSelector({
             'w-64 max-h-80 overflow-hidden',
             'bg-white border-[4px] border-border',
             '',
-            'animate-in fade-in slide-in-from-bottom-3 zoom-in-95 duration-200',
+            'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none',
             'flex flex-col z-[100]',
           )}
         >
@@ -74,7 +74,7 @@ export function AudioSelector({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-all "
+              className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors "
             >
               <X className="w-4 h-4 stroke-[3.5px]" />
             </button>

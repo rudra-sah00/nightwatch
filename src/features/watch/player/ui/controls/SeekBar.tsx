@@ -67,7 +67,7 @@ export function SeekBar({
       {/* Time preview tooltip - show when hovering (guests can preview but not seek) */}
       {canPreview && hoverTime !== null ? (
         <div
-          className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="absolute bottom-full mb-4 lg:mb-6 2xl:mb-8 transform -translate-x-1/2 flex flex-col items-center pointer-events-none z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none"
           style={{
             left: Math.max(
               100 * previewScale,

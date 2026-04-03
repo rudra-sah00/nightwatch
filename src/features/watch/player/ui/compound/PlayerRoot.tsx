@@ -29,14 +29,24 @@ interface PlayerRootProps {
     rows: number;
     interval: number;
   };
+  /** Preferred explicit interaction variant. */
+  interactionMode?: 'interactive' | 'read-only';
+  /** Preferred explicit controls visibility variant. */
+  controlsVisibility?: 'visible' | 'hidden';
+  /** Preferred explicit stream variant. */
+  streamMode?: 'vod' | 'live';
+  /** Legacy compatibility: replaced by interactionMode. */
   readOnly?: boolean;
+  /** Legacy compatibility: use role semantics in parent flows. */
   isHost?: boolean;
+  /** Legacy compatibility: pass auth state from parent. */
   isAuthenticated?: boolean;
   onNavigate?: (url: string) => void;
   fullscreenToggleOverride?: () => void;
   isFullscreenOverride?: boolean;
   onStreamExpired?: () => void;
   className?: string;
+  /** Legacy compatibility: replaced by controlsVisibility. */
   hideControls?: boolean;
   onVideoRef?: (ref: HTMLVideoElement | null) => void;
   /** Server 2 language dubs pre-populated from the /play response */
@@ -52,7 +62,7 @@ interface PlayerRootProps {
   onAudioTrackChange?: (trackId: string) => void;
   /** Override the back button destination (defaults to /home) */
   onBack?: () => void;
-  /** Pass true for live streams — uses a low-latency HLS config that stays at the live edge */
+  /** Legacy compatibility: replaced by streamMode. */
   isLive?: boolean;
   /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
   containerStyle?: React.CSSProperties;
@@ -72,6 +82,9 @@ export function PlayerRoot({
   qualities,
   spriteVtt,
   spriteSheet,
+  interactionMode,
+  controlsVisibility,
+  streamMode,
   readOnly = false,
   isHost = true,
   isAuthenticated = true,
@@ -91,6 +104,23 @@ export function PlayerRoot({
   providerId,
   playbackRate,
 }: PlayerRootProps) {
+  const resolvedReadOnly =
+    interactionMode === 'read-only'
+      ? true
+      : interactionMode === 'interactive'
+        ? false
+        : readOnly;
+
+  const resolvedHideControls =
+    controlsVisibility === 'hidden'
+      ? true
+      : controlsVisibility === 'visible'
+        ? false
+        : hideControls;
+
+  const resolvedIsLive =
+    streamMode === 'live' ? true : streamMode === 'vod' ? false : isLive;
+
   const { state, containerRef, contextValue, showControls } = usePlayerRoot({
     streamUrl,
     metadata,
@@ -99,7 +129,7 @@ export function PlayerRoot({
     qualities,
     spriteVtt,
     spriteSheet,
-    readOnly,
+    readOnly: resolvedReadOnly,
     isHost,
     isAuthenticated,
     onNavigate,
@@ -111,7 +141,7 @@ export function PlayerRoot({
     onAudioTrackChange,
     initialAudioTrackId,
     onBack: onBackProp,
-    isLive,
+    isLive: resolvedIsLive,
     providerId,
     playbackRate,
   });
@@ -137,7 +167,7 @@ export function PlayerRoot({
         className={cn(
           'video-container relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col',
           'cursor-none',
-          state.showControls && !hideControls && 'cursor-auto',
+          state.showControls && !resolvedHideControls && 'cursor-auto',
           className,
         )}
         style={containerStyle ?? CONTAINER_STYLE}

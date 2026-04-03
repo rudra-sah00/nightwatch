@@ -59,7 +59,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
   return (
     <AuthCard title={getHeader()} className="h-[440px]">
       {step === 'otp' && (
-        <div className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300 motion-reduce:animate-none">
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               CODE DISPATCHED TO
@@ -86,7 +86,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   if (val.length <= 6) setOtp(val);
                 }}
                 disabled={isLoading}
-                className="h-[46px] text-base font-black uppercase text-center tracking-[0.5em] transition-all relative"
+                className="h-[46px] text-base font-black uppercase text-center tracking-[0.5em] transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               variant="neo-outline"
               size="xl"
               disabled={isLoading || (countdown || 0) > 0}
-              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-all hover:bg-[#ffcc00]/10"
+              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-colors hover:bg-[#ffcc00]/10"
             >
               {(countdown || 0) > 0 ? `RETRY IN ${countdown}S` : 'RESEND KEY'}
             </Button>
@@ -119,7 +119,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
       {step === 'name' && (
         <form
           onSubmit={(e) => e.preventDefault()}
-          className="h-full flex flex-col justify-between pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="h-full flex flex-col justify-between pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none"
         >
           {/* TOP */}
           <div className="flex flex-col gap-3">
@@ -137,11 +137,12 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 name="name"
                 type="text"
                 placeholder="WALTER GROPIUS"
+                autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isPending}
                 error={fieldErrors?.name}
-                className="h-[46px] text-xs font-black uppercase transition-all relative"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
 
@@ -160,11 +161,14 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   name="username"
                   type="text"
                   placeholder="WALTER_1919"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   value={formData.username}
                   onChange={handleChange}
                   disabled={isPending}
                   error={fieldErrors?.username}
-                  className="h-[46px] text-xs font-black uppercase transition-all relative"
+                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
                 />
                 {usernameStatus && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -205,11 +209,15 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 name="email"
                 type="email"
                 placeholder="DIRECTOR@BAUHAUS.DE"
+                autoComplete="email"
+                autoCapitalize="none"
+                inputMode="email"
+                spellCheck={false}
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isPending}
                 error={fieldErrors?.email}
-                className="h-[46px] text-xs font-black uppercase transition-all relative"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
           </div>
@@ -247,7 +255,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
       {step === 'details' && (
         <form
           action={action}
-          className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none"
         >
           {/* Preserve state from previous step */}
           <input type="hidden" name="name" value={formData.name || ''} />
@@ -282,11 +290,12 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 name="password"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isPending}
                 error={fieldErrors?.password}
-                className="h-[46px] text-xs font-black uppercase transition-all relative tracking-[0.2em]"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
 
@@ -304,13 +313,14 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 name="confirmPassword"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConfirmPassword?.(e.target.value)
                 }
                 disabled={isPending}
                 error={fieldErrors?.confirmPassword}
-                className="h-[46px] text-xs font-black uppercase transition-all relative tracking-[0.2em]"
+                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
           </div>

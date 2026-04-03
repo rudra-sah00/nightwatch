@@ -188,14 +188,14 @@ function ParticipantOverlay({
               <Button
                 type="button"
                 onClick={onKick}
-                className="px-2 py-1 bg-red-500 text-white rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-red-600 transition-all shadow-sm"
+                className="px-2 py-1 bg-red-500 text-white rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-red-600 transition-colors shadow-sm"
               >
                 Kick!
               </Button>
               <Button
                 type="button"
                 onClick={() => setConfirmKick(false)}
-                className="p-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-all shadow-sm"
+                className="p-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors shadow-sm"
               >
                 <X className="w-2.5 h-2.5 stroke-[3px]" />
               </Button>
@@ -204,7 +204,7 @@ function ParticipantOverlay({
             <Button
               type="button"
               onClick={() => setConfirmKick(true)}
-              className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all shadow-sm"
+              className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors shadow-sm"
               title="Kick user"
             >
               <X className="w-3 h-3 stroke-[3px]" />

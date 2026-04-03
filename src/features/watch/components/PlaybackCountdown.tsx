@@ -18,15 +18,20 @@ export function PlaybackCountdown({
   const { count, progress } = usePlaybackCountdown(onComplete);
 
   return (
-    <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl animate-in fade-in duration-700 pointer-events-auto select-none">
+    <div
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-reduce:animate-none pointer-events-auto select-none"
+      role="status"
+      aria-live="polite"
+      aria-label="Playback countdown"
+    >
       {/* Background Glows */}
-      <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-700" />
+      <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse motion-reduce:animate-none" />
+      <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-700 motion-reduce:animate-none" />
 
       <div className="relative flex flex-col items-center gap-10 text-center px-6">
         {/* Animated Brand Icon */}
         <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 shadow-2xl">
-          <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+          <Sparkles className="w-10 h-10 text-primary animate-pulse motion-reduce:animate-none" />
         </div>
 
         <div className="space-y-3">
@@ -70,7 +75,7 @@ export function PlaybackCountdown({
           <div className="relative flex flex-col items-center">
             <span
               key={count}
-              className="text-9xl font-black text-white animate-in zoom-in-75 duration-300 drop-shadow-md"
+              className="text-9xl font-black text-white motion-safe:animate-in motion-safe:zoom-in-75 motion-safe:duration-300 motion-reduce:animate-none drop-shadow-md"
             >
               {count > 0 ? count : 'GO'}
             </span>

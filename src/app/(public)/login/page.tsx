@@ -60,13 +60,13 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`bg-white text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-all duration-700 ease-out origin-top animate-in fade-in slide-in-from-bottom-4 zoom-in-[0.99] ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
+      className={`bg-white text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
           {/* Features Bento Box - Identical to Signup for Parity */}
           <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[440px] h-full">
-            <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-border  cursor-pointer -hover -active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+            <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
                   className="material-symbols-outlined text-3xl mb-2"
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#d6e3ff] text-foreground p-4 md:p-5 border-4 border-border  cursor-pointer -hover -active transition-all flex flex-col justify-between aspect-square md:aspect-auto">
+            <div className="bg-[#d6e3ff] text-foreground p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
                 <span
                   className="material-symbols-outlined text-3xl mb-2"
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
-            <div className="md:col-span-2 bg-[#ffcc00] text-foreground p-4 md:p-6 border-4 border-border  cursor-pointer -hover -active transition-all flex items-center gap-4">
+            <div className="md:col-span-2 bg-[#ffcc00] text-foreground p-4 md:p-6 border-4 border-border cursor-default select-none flex items-center gap-4">
               <span
                 className="material-symbols-outlined text-5xl"
                 style={{ fontVariationSettings: "'FILL' 1" }}
@@ -144,13 +144,13 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleCopyEmail}
-            className="group flex items-center gap-2 transition-all active:scale-95"
+            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffcc00]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a1a1a]"
           >
             <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-[#f5f0e8] opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               WANT AN ACCOUNT?
             </span>
             <span
-              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-all ${copied ? 'text-[#00aa44]' : 'text-[#ffcc00] group-hover:text-[#ffffff] underline decoration-[#ffcc00]/30 underline-offset-4'}`}
+              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-colors ${copied ? 'text-[#00aa44]' : 'text-[#ffcc00] group-hover:text-[#ffffff] underline decoration-[#ffcc00]/30 underline-offset-4'}`}
             >
               {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
             </span>

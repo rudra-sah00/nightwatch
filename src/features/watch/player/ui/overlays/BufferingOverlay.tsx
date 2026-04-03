@@ -11,12 +11,16 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
         'absolute inset-0 z-20 flex items-center justify-center pointer-events-none transition-opacity duration-300',
         isVisible ? 'opacity-100' : 'opacity-0',
       )}
+      role="status"
+      aria-live="polite"
+      aria-label="Buffering video"
+      aria-hidden={!isVisible}
     >
       <div className="relative flex items-center justify-center">
         {/* Brutalist Square Loader */}
         <div className="relative w-12 h-12 md:w-16 md:h-16">
-          <div className="absolute inset-0 border-[4px] border-border bg-[#ffcc00] animate-[spin_2s_steps(4)_infinite]" />
-          <div className="absolute inset-2 bg-[#e63b2e] border-[3px] border-border animate-[spin_2s_steps(4)_infinite_reverse]" />
+          <div className="absolute inset-0 border-[4px] border-border bg-[#ffcc00] animate-[spin_2s_steps(4)_infinite] motion-reduce:animate-none" />
+          <div className="absolute inset-2 bg-[#e63b2e] border-[3px] border-border animate-[spin_2s_steps(4)_infinite_reverse] motion-reduce:animate-none" />
         </div>
       </div>
     </div>

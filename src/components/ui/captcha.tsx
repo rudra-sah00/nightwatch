@@ -30,6 +30,7 @@ export function Captcha({
   variant = 'full',
 }: CaptchaProps) {
   const isDev = process.env.NODE_ENV === 'development';
+  const isTest = process.env.NODE_ENV === 'test';
   const onVerifyRef = useRef(onVerify);
   const turnstileRef = useRef<TurnstileInstance>(null);
   onVerifyRef.current = onVerify;
@@ -45,7 +46,7 @@ export function Captcha({
     }
   }, [isDev]);
 
-  if (isDev) {
+  if (isDev || isTest) {
     const isBottom = variant === 'bottom';
     return (
       <div

@@ -57,7 +57,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
         <div className="mb-12 flex justify-between items-center">
           <Link
             href="/"
-            className="group flex items-center gap-2 px-5 py-2 bg-[#1a1a1a] text-white border-[3px] border-border  transition-all duration-200 uppercase font-headline font-bold text-sm tracking-tight"
+            className="group flex items-center gap-2 px-5 py-2 bg-[#1a1a1a] text-white border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight"
           >
             <Home className="w-4 h-4" />
             <span>Return Base</span>

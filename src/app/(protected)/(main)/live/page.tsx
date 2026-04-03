@@ -132,7 +132,10 @@ function LiveContent() {
                     setIsServerMenuOpen(!isServerMenuOpen);
                     setIsSportMenuOpen(false);
                   }}
-                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-all duration-200 border-[3px] border-border whitespace-nowrap min-w-[220px] md:min-w-[260px] hover:bg-gray-100 hover:text-foreground cursor-pointer rounded-md ${
+                  aria-haspopup="menu"
+                  aria-expanded={isServerMenuOpen}
+                  aria-controls="live-server-menu"
+                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap min-w-[220px] md:min-w-[260px] hover:bg-gray-100 hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2 ${
                     isServerMenuOpen || activeServer
                       ? 'bg-gray-100 text-foreground'
                       : 'bg-white'
@@ -154,11 +157,16 @@ function LiveContent() {
                 </button>
 
                 {isServerMenuOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 rounded-md shadow-md">
+                  <div
+                    id="live-server-menu"
+                    role="menu"
+                    className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none rounded-md shadow-md"
+                  >
                     {SERVERS.map((server) => (
                       <button
                         type="button"
                         key={server.id}
+                        role="menuitem"
                         onClick={() => {
                           handleServerChange(
                             server.id,
@@ -168,7 +176,7 @@ function LiveContent() {
                           );
                           setIsServerMenuOpen(false);
                         }}
-                        className={`w-full text-left px-6 py-4 font-headline font-bold text-lg uppercase tracking-widest border-b-[3px] last:border-b-0 border-border transition-all flex items-center justify-between cursor-pointer ${
+                        className={`w-full text-left px-6 py-4 font-headline font-bold text-lg uppercase tracking-widest border-b-[3px] last:border-b-0 border-border transition-colors flex items-center justify-between cursor-pointer focus-visible:outline-none focus-visible:bg-gray-100 ${
                           activeServer === server.id
                             ? 'bg-gray-100 text-foreground'
                             : 'bg-white hover:bg-gray-50'
@@ -200,7 +208,10 @@ function LiveContent() {
                     setIsSportMenuOpen(!isSportMenuOpen);
                     setIsServerMenuOpen(false);
                   }}
-                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-all duration-200 border-[3px] border-border whitespace-nowrap w-full md:min-w-[300px] bg-white text-foreground hover:bg-gray-100 cursor-pointer rounded-md"
+                  aria-haspopup="menu"
+                  aria-expanded={isSportMenuOpen}
+                  aria-controls="live-sport-menu"
+                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap w-full md:min-w-[300px] bg-white text-foreground hover:bg-gray-100 cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-center gap-3">
                     <span className="w-3 h-3 bg-[#e63b2e] border-[2px] border-border rounded-full animate-pulse shrink-0" />
@@ -214,17 +225,22 @@ function LiveContent() {
                 </button>
 
                 {isSportMenuOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 animate-in fade-in slide-in-from-top-2 duration-200 p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md">
+                  <div
+                    id="live-sport-menu"
+                    role="menu"
+                    className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
+                  >
                     <div className="flex flex-col gap-2">
                       {currentSports.map((sport) => (
                         <button
                           type="button"
                           key={sport.id}
+                          role="menuitem"
                           onClick={() => {
                             handleTabChange(sport.id);
                             setIsSportMenuOpen(false);
                           }}
-                          className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-all text-left flex items-center justify-between cursor-pointer rounded-md ${
+                          className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-gray-100 ${
                             activeTab === sport.id
                               ? 'bg-gray-100 text-foreground'
                               : 'bg-white hover:bg-gray-50'
@@ -275,7 +291,7 @@ function LiveContent() {
               </p>
               <Button
                 onClick={refresh}
-                className="bg-white text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-all hover:bg-gray-100"
+                className="bg-white text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-gray-100"
               >
                 Try Again
               </Button>

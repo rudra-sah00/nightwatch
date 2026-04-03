@@ -27,7 +27,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
       {!isSuccess && (
         <form
           action={action}
-          className="h-full flex flex-col pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none"
         >
           {/* TOP */}
           <div className="w-full shrink-0">
@@ -47,7 +47,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               value={formData.identifier}
               onChange={handleChange}
               disabled={isPending}
-              className="h-[46px] text-xs font-black uppercase transition-all relative"
+              className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
             />
           </div>
 
@@ -85,7 +85,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               onClick={() => setStep('initial')}
               variant="neo-outline"
               size="xl"
-              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-all hover:bg-[#ffcc00]/10"
+              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-colors hover:bg-[#ffcc00]/10"
             >
               <ArrowLeft className="h-4 w-4 mr-2 inline" />
               BACK TO LOGIN
@@ -95,7 +95,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
       )}
 
       {isSuccess && (
-        <div className="h-full flex flex-col justify-between pt-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="h-full flex flex-col justify-between pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500 motion-reduce:animate-none">
           <div className="shrink-0 flex flex-col justify-center items-center text-center gap-3 mt-4">
             <div className="h-10 w-10 border-[3px] border-border bg-[#ffcc00] flex items-center justify-center  shrink-0">
               <CheckCircle2 className="h-6 w-6" />

@@ -74,8 +74,10 @@ export function SearchClient({
                     }
                   }}
                   autoComplete="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="search"
                   className="text-[#0055ff] underline decoration-4 md:decoration-8 underline-offset-8 outline-none caret-[#0055ff] min-w-[2ch] inline-block bg-transparent border-none p-0 focus:bg-[#ffcc00] focus:text-foreground focus:no-underline transition-colors focus:px-2 rounded-sm font-black font-headline uppercase leading-none tracking-tighter relative z-10 text-inherit overflow-visible"
                   style={{
                     // +2ch buffer: uppercase condensed glyphs are wider than 1ch at large sizes

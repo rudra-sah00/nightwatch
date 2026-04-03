@@ -25,20 +25,34 @@ export function useUpdateProfileForm() {
   // Only sync ONCE to avoid clearing inputs when the user is typing
   useEffect(() => {
     if (user && !isInitialized.current) {
-      setName(user.name || '');
-      setUsername(user.username || '');
-      setPreferredServer(user.preferredServer || 's2');
+      const nextName = user.name || '';
+      const nextUsername = user.username || '';
+      const nextServer = user.preferredServer || 's2';
+
+      if (name !== nextName) {
+        setName(nextName);
+      }
+      if (username !== nextUsername) {
+        setUsername(nextUsername);
+      }
+      if (preferredServer !== nextServer) {
+        setPreferredServer(nextServer);
+      }
       isInitialized.current = true;
     }
-  }, [user]);
+  }, [name, preferredServer, user, username]);
 
   useEffect(() => {
     if (!debouncedUsername || debouncedUsername === user?.username) {
-      setIsAvailable(null);
+      if (isAvailable !== null) {
+        setIsAvailable(null);
+      }
       return;
     }
     if (debouncedUsername.length < 3) {
-      setIsAvailable(false);
+      if (isAvailable !== false) {
+        setIsAvailable(false);
+      }
       return;
     }
     startCheckTransition(async () => {
@@ -49,7 +63,7 @@ export function useUpdateProfileForm() {
         toast.error('Failed to check username availability');
       }
     });
-  }, [debouncedUsername, user?.username]);
+  }, [debouncedUsername, isAvailable, user?.username]);
 
   const [state, action, isPending] = React.useActionState(
     async (

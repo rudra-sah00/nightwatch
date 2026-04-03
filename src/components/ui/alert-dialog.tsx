@@ -65,7 +65,7 @@ export function AlertDialog({
         tabIndex={-1}
       />
       {/* Content */}
-      <div className="relative z-50 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
         {children}
       </div>
     </div>
@@ -151,7 +151,7 @@ export function AlertDialogAction({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-border font-headline font-black uppercase tracking-widest  transition-all duration-200',
+        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
         className,
       )}
       {...props}
@@ -169,7 +169,7 @@ export function AlertDialogCancel({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-white text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest  transition-all duration-200',
+        'px-6 py-3 bg-white text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
         className,
       )}
       {...props}

@@ -1,14 +1,22 @@
 'use client';
 
 import { Film, Plus, Tv } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SearchSkeleton } from '@/components/ui/skeletons';
-import { ContentDetailModal } from '@/features/search/components/content-detail-modal';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useWatchlist } from '../hooks/use-watchlist';
+
+const ContentDetailModal = dynamic(
+  () =>
+    import('@/features/search/components/content-detail-modal').then(
+      (m) => m.ContentDetailModal,
+    ),
+  { ssr: false },
+);
 
 /**
  * Watchlist view component.
@@ -120,7 +128,7 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
       {/* Aspect Ratio Box wrapped in a button for keyboard accessibility */}
       <button
         type="button"
-        className="aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 bg-background cursor-pointer w-full p-0"
+        className="group aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 bg-background cursor-pointer w-full p-0"
         onClick={onClick}
         aria-label={`View details for ${item.title}`}
       >
@@ -130,7 +138,7 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
             alt={item.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300"
+            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter] duration-300"
             unoptimized={item.posterUrl.includes('/api/stream/')}
           />
         ) : (

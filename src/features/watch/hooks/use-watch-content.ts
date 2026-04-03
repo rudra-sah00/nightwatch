@@ -91,7 +91,7 @@ export function useWatchContent() {
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
   const s2ColdStartRetried = useRef(false);
-  const replacingSessionRef = useRef(false);
+  const [isReplacingSession, setIsReplacingSession] = useState(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -111,7 +111,7 @@ export function useWatchContent() {
       if (replacingSessionTimerRef.current) {
         clearTimeout(replacingSessionTimerRef.current);
       }
-      replacingSessionRef.current = true;
+      setIsReplacingSession(true);
 
       try {
         const decodedTitle = decodeURIComponent(title);
@@ -176,7 +176,7 @@ export function useWatchContent() {
       } finally {
         setIsRefetching(false);
         replacingSessionTimerRef.current = setTimeout(() => {
-          replacingSessionRef.current = false;
+          setIsReplacingSession(false);
           replacingSessionTimerRef.current = null;
         }, 2000);
       }
@@ -187,9 +187,9 @@ export function useWatchContent() {
   const handleBeforeS2Discovery = useCallback(() => {
     if (replacingSessionTimerRef.current)
       clearTimeout(replacingSessionTimerRef.current);
-    replacingSessionRef.current = true;
+    setIsReplacingSession(true);
     replacingSessionTimerRef.current = setTimeout(() => {
-      replacingSessionRef.current = false;
+      setIsReplacingSession(false);
       replacingSessionTimerRef.current = null;
     }, 90_000);
   }, []);
@@ -200,7 +200,7 @@ export function useWatchContent() {
       if (replacingSessionTimerRef.current)
         clearTimeout(replacingSessionTimerRef.current);
       replacingSessionTimerRef.current = setTimeout(() => {
-        replacingSessionRef.current = false;
+        setIsReplacingSession(false);
         replacingSessionTimerRef.current = null;
       }, 2000);
     },
@@ -284,7 +284,7 @@ export function useWatchContent() {
         'Playback stopped — you started playing on another tab or device.',
       );
     },
-    isReplacingSession: replacingSessionRef.current,
+    isReplacingSession,
   });
 
   useEffect(() => {
