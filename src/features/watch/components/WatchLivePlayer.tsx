@@ -33,56 +33,57 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     }
   };
 
-  return (
-    <Player.Root
-      {...props}
-      containerStyle={
-        useInlineMobileLayout
-          ? {
-              position: 'relative',
-              width: '100%',
-              height: 'auto',
-              aspectRatio: '16 / 9',
-              maxHeight: '56.25vw',
-            }
-          : {
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-            }
-      }
-      streamMode="live"
-      allowPortraitPlayback={useInlineMobileLayout}
-      onBack={handleBack}
-      onNavigate={(url) => router.push(url)}
-    >
-      {/* Mobile Header - Solid Top Bar */}
-      <div
-        className={`relative z-50 px-4 pb-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5 ${
-          useInlineMobileLayout
-            ? 'pt-4'
-            : 'pt-[max(1rem,env(safe-area-inset-top))]'
-        }`}
+  const mobileHeader = (
+    <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <button
+        type="button"
+        onClick={handleBack}
+        className="p-2 rounded-full bg-white/10/20 transition-colors"
       >
-        <button
-          type="button"
-          onClick={handleBack}
-          className="p-2 rounded-full bg-white/10/20 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-base font-semibold text-white truncate">
-            {props.metadata.title}
-          </h1>
-        </div>
-        {props.mobileHeaderContent}
+        <ArrowLeft className="w-5 h-5 text-white" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <h1 className="text-base font-semibold text-white truncate">
+          {props.metadata.title}
+        </h1>
       </div>
+      {props.mobileHeaderContent}
+    </div>
+  );
 
-      <LivePlayerState />
-    </Player.Root>
+  return (
+    <>
+      {useInlineMobileLayout ? mobileHeader : null}
+      <Player.Root
+        {...props}
+        containerStyle={
+          useInlineMobileLayout
+            ? {
+                position: 'relative',
+                width: '100%',
+                height: 'auto',
+                aspectRatio: '16 / 9',
+                maxHeight: '56.25vw',
+                marginTop: '0.5rem',
+              }
+            : {
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+              }
+        }
+        streamMode="live"
+        allowPortraitPlayback={useInlineMobileLayout}
+        onBack={handleBack}
+        onNavigate={(url) => router.push(url)}
+      >
+        {!useInlineMobileLayout ? mobileHeader : null}
+
+        <LivePlayerState />
+      </Player.Root>
+    </>
   );
 });
 function LivePlayerState() {

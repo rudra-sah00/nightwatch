@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 
 // Pure formatter — hoisted to module level (rule 6.3, no hook deps)
@@ -30,7 +31,7 @@ function formatBehind(s: number): string {
  * - Hover shows how far behind live the cursor would land (e.g. "-45 s").
  * - Click **or drag** to seek within the DVR window (touch supported).
  */
-export function LiveSeekBar() {
+export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
   const { videoRef, playerHandlers, readOnly } = usePlayerContext();
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -275,9 +276,15 @@ export function LiveSeekBar() {
   if (dvr.end === 0) return null; // Not loaded yet
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 2xl:px-10 pointer-events-auto">
+    <div
+      className={`${compact ? 'px-2.5 md:px-6 lg:px-8 2xl:px-10' : 'px-4 md:px-6 lg:px-8 2xl:px-10'} pointer-events-auto`}
+    >
       <div
-        className={`relative group py-3 lg:py-4 select-none ${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
+        className={cn(
+          'relative group select-none',
+          compact ? 'py-1.5 lg:py-2' : 'py-3 lg:py-4',
+          readOnly ? 'cursor-default' : 'cursor-pointer',
+        )}
       >
         {/* Hover time tooltip */}
         {hoverFraction !== null && hoverBehind !== null ? (
@@ -297,7 +304,17 @@ export function LiveSeekBar() {
         {/* Track */}
         <div
           ref={barRef}
-          className={`relative h-2.5 lg:h-3 2xl:h-4 bg-white border-[3px] border-border overflow-visible ${isDragging ? 'h-3.5 lg:h-4 2xl:h-5' : 'group-hover:h-3.5 lg:group-hover:h-4 2xl:group-hover:h-5'}`}
+          className={cn(
+            'relative bg-white border-[3px] border-border overflow-visible',
+            compact ? 'h-2 lg:h-2.5' : 'h-2.5 lg:h-3 2xl:h-4',
+            isDragging
+              ? compact
+                ? 'h-2.5 lg:h-3'
+                : 'h-3.5 lg:h-4 2xl:h-5'
+              : compact
+                ? 'group-hover:h-2.5 lg:group-hover:h-3'
+                : 'group-hover:h-3.5 lg:group-hover:h-4 2xl:group-hover:h-5',
+          )}
           onClick={handleClick}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -353,13 +370,21 @@ export function LiveSeekBar() {
 
           {/* Scrubber knob — always visible while dragging */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 bg-white border-[4px] border-border shadow-none pointer-events-none rounded-none ${isDragging ? 'scale-125' : 'scale-0 group-hover:scale-100 hover:scale-125'}`}
+            className={cn(
+              'absolute top-1/2 -translate-y-1/2 bg-white border-border shadow-none pointer-events-none rounded-none',
+              compact
+                ? 'w-3 h-3 lg:w-3.5 lg:h-3.5 border-[3px]'
+                : 'w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 border-[4px]',
+              isDragging
+                ? 'scale-125'
+                : 'scale-0 group-hover:scale-100 hover:scale-125',
+            )}
             style={{ left: `calc(${progress}% - 8px)` }}
           />
 
           {/* LIVE edge dot — always at 100 % right */}
           <div
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] w-2.5 h-2.5 border-[2px] border-border pointer-events-none z-10 ${isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]'}`}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] ${compact ? 'w-2 h-2 border' : 'w-2.5 h-2.5 border-[2px]'} border-border pointer-events-none z-10 ${isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]'}`}
           />
         </div>
 

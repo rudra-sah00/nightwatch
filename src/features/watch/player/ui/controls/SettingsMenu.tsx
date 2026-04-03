@@ -13,6 +13,7 @@ interface SettingsMenuProps {
   onPlaybackRateChange: (rate: number) => void;
   disabled?: boolean;
   onInteraction?: (isActive: boolean) => void;
+  compact?: boolean;
 }
 
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -25,6 +26,7 @@ export function SettingsMenu({
   onPlaybackRateChange,
   disabled = false,
   onInteraction,
+  compact = false,
 }: SettingsMenuProps) {
   const {
     isOpen,
@@ -207,7 +209,9 @@ export function SettingsMenu({
         onClick={toggleMenu}
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
-          'p-2.5 transition-colors duration-200',
+          compact
+            ? 'p-1.5 transition-colors duration-200'
+            : 'p-2.5 transition-colors duration-200',
           'bg-white border-[3px] border-border text-foreground ',
           'hover:bg-background',
           'active:bg-[#e0e0e0]',
@@ -216,7 +220,9 @@ export function SettingsMenu({
       >
         <Settings
           className={cn(
-            'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-300',
+            compact
+              ? 'w-4 h-4 stroke-[3px] transition-transform duration-300'
+              : 'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-300',
             isOpen && 'rotate-45',
           )}
         />

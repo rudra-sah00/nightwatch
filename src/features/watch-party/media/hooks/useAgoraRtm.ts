@@ -135,9 +135,13 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         const AgoraRTM = (await import('agora-rtm-sdk')).default;
         if (cleaned) return;
 
-        // Suppress SDK logs in production
-        const logLevel =
-          process.env.NODE_ENV === 'production' ? 'none' : 'warn';
+        // Keep RTM logs fully silent in production.
+        const isProduction = process.env.NODE_ENV === 'production';
+        const logLevel = isProduction
+          ? 'none'
+          : process.env.NEXT_PUBLIC_AGORA_DEBUG === 'true'
+            ? 'debug'
+            : 'warn';
 
         client = new AgoraRTM.RTM(appId, userId, { logLevel });
         clientRef.current = client;

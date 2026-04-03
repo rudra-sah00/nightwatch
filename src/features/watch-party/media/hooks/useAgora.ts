@@ -16,14 +16,13 @@ import { toast } from 'sonner';
  */
 
 // Set log level: 0 (DEBUG), 1 (INFO), 2 (WARNING), 3 (ERROR), 4 (NONE)
-// NOTE: Do NOT use process.env.NODE_ENV here — agora-rtc-sdk-ng is listed in
-// optimizePackageImports, which causes Next.js to re-export it through a
-// generated barrel. That barrel can initialize this module before webpack has
-// inlined NODE_ENV, causing the ternary to resolve to 'development' even in a
-// production build, which leaks internal SDK cache logs (updateLastSubOrJoinOptionsCache).
-// Hardcoding 4 (NONE) ensures silence in all cases. Dev verbosity can be
-// temporarily toggled by setting NEXT_PUBLIC_AGORA_DEBUG=true in .env.local.
-const AGORA_LOG_LEVEL = process.env.NEXT_PUBLIC_AGORA_DEBUG === 'true' ? 0 : 4;
+// Production must remain silent for Agora RTC logs.
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const AGORA_LOG_LEVEL = IS_PRODUCTION
+  ? 4
+  : process.env.NEXT_PUBLIC_AGORA_DEBUG === 'true'
+    ? 0
+    : 2;
 AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
 
 // Handle autoplay restrictions (browsers block audio before user interaction).

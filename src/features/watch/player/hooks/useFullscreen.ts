@@ -39,6 +39,7 @@ export function useFullscreen({
   const isMobile = useMobileDetection();
   const latestVideoRef = useRef<VideoElementWithWebkit | null>(null);
   const manualMobileFullscreenRef = useRef(false);
+  const shouldResumeAfterFullscreenExitRef = useRef(false);
   const lockedStylesRef = useRef<{
     htmlOverflow: string;
     bodyOverflow: string;
@@ -133,6 +134,10 @@ export function useFullscreen({
       manualMobileFullscreenRef.current = false;
       unlockDocumentScroll();
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+      if (shouldResumeAfterFullscreenExitRef.current) {
+        shouldResumeAfterFullscreenExitRef.current = false;
+        void video.play().catch(() => {});
+      }
     };
 
     video.addEventListener('webkitbeginfullscreen', handleNativeVideoEnter);
@@ -199,6 +204,7 @@ export function useFullscreen({
           (video.webkitSupportsFullscreen ?? true)
         ) {
           try {
+            shouldResumeAfterFullscreenExitRef.current = !video.paused;
             await Promise.resolve(video.webkitEnterFullscreen());
             manualMobileFullscreenRef.current = false;
             unlockDocumentScroll();
@@ -263,6 +269,10 @@ export function useFullscreen({
           manualMobileFullscreenRef.current = false;
           unlockDocumentScroll();
           dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+          if (shouldResumeAfterFullscreenExitRef.current) {
+            shouldResumeAfterFullscreenExitRef.current = false;
+            void video.play().catch(() => {});
+          }
           return;
         }
 

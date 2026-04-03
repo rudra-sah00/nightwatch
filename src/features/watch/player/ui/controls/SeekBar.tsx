@@ -24,6 +24,8 @@ interface SeekBarProps {
   disabled?: boolean;
   /** Allow hover preview even when disabled (for guests) */
   allowPreview?: boolean;
+  /** Compact sizing for portrait mobile player */
+  compact?: boolean;
 }
 
 export function SeekBar({
@@ -35,6 +37,7 @@ export function SeekBar({
   spriteSheet,
   disabled = false,
   allowPreview = false,
+  compact = false,
 }: SeekBarProps) {
   const {
     canPreview,
@@ -62,7 +65,7 @@ export function SeekBar({
 
   return (
     <div
-      className={`relative group py-2 lg:py-3 2xl:py-4 ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+      className={`relative group ${compact ? 'py-1.5 lg:py-2' : 'py-2 lg:py-3 2xl:py-4'} ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
     >
       {/* Time preview tooltip - show when hovering (guests can preview but not seek) */}
       {canPreview && hoverTime !== null ? (
@@ -132,7 +135,16 @@ export function SeekBar({
       {/* Seek bar */}
       <div
         ref={barRef}
-        className={`relative h-3 lg:h-4 2xl:h-5 bg-white border-[2px] border-border transition-[height] duration-200 ${canPreview ? 'group-hover:h-4 lg:group-hover:h-5 2xl:group-hover:h-6' : ''} ${disabled ? 'cursor-not-allowed bg-white/50' : ''}`}
+        className={cn(
+          'relative bg-white border-[2px] border-border transition-[height] duration-200',
+          compact ? 'h-2.5 lg:h-3' : 'h-3 lg:h-4 2xl:h-5',
+          canPreview
+            ? compact
+              ? 'group-hover:h-3 lg:group-hover:h-3.5'
+              : 'group-hover:h-4 lg:group-hover:h-5 2xl:group-hover:h-6'
+            : '',
+          disabled ? 'cursor-not-allowed bg-white/50' : '',
+        )}
         onClick={disabled ? undefined : handleClick}
         onMouseMove={(e) => {
           handleMouseMove(e);
@@ -186,7 +198,15 @@ export function SeekBar({
 
         {/* Scrubber - show lock icon for disabled guests */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-4 lg:w-5 2xl:w-6 h-6 lg:h-8 2xl:h-10 border-[3px] border-border scale-0 group-hover:scale-100 transition-transform duration-200 ${disabled ? 'bg-zinc-500 cursor-not-allowed' : 'bg-[#fff] hover:scale-110'}`}
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 border-[3px] border-border scale-0 group-hover:scale-100 transition-transform duration-200',
+            compact
+              ? 'w-3.5 h-5 lg:w-4 lg:h-6'
+              : 'w-4 lg:w-5 2xl:w-6 h-6 lg:h-8 2xl:h-10',
+            disabled
+              ? 'bg-zinc-500 cursor-not-allowed'
+              : 'bg-[#fff] hover:scale-110',
+          )}
           style={{ left: `calc(${progress}% - 8px)` }}
         />
       </div>

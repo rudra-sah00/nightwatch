@@ -243,21 +243,9 @@ export default function LiveMatchPlayerPage() {
             {activeMatch.team1.name.charAt(0)}
           </span>
         )}
-        {activeMatch.type === 'cricket' ? (
-          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-            {activeMatch.matchResult || displayTitle}
-          </span>
-        ) : (
-          <>
-            <span className="font-black font-headline tabular-nums">
-              {activeMatch.team1.score}
-            </span>
-            <span className="text-foreground/30 font-black">-</span>
-            <span className="font-black font-headline tabular-nums">
-              {activeMatch.team2.score}
-            </span>
-          </>
-        )}
+        <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
+          VS
+        </span>
         {activeMatch.team2.avatar ? (
           <img
             src={activeMatch.team2.avatar}
@@ -281,7 +269,7 @@ export default function LiveMatchPlayerPage() {
   });
 
   return (
-    <div className="min-h-screen bg-black md:bg-transparent">
+    <div className="min-h-screen bg-background">
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}
@@ -289,13 +277,13 @@ export default function LiveMatchPlayerPage() {
         mobileLayout="inline"
       />
 
-      <section className="md:hidden px-4 py-4 space-y-4 bg-black text-white">
+      <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
               {displayTitle}
             </h1>
-            <p className="text-xs text-white/70 font-headline uppercase tracking-widest mt-1 truncate">
+            <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1 truncate">
               {activeMatch.league} · {startLabel}
             </p>
           </div>
@@ -306,56 +294,50 @@ export default function LiveMatchPlayerPage() {
           ) : null}
         </div>
 
-        <div className="bg-[#111] border border-white/15 rounded-md p-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
+        <div className="bg-card border border-border rounded-md p-3 shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
               {activeMatch.team1.avatar ? (
                 <img
                   src={activeMatch.team1.avatar}
                   alt={activeMatch.team1.name}
-                  className="w-7 h-7 rounded-sm border border-white/20"
+                  className="w-9 h-9 rounded-sm border border-border"
                 />
               ) : (
-                <span className="w-7 h-7 flex items-center justify-center text-[10px] font-black bg-white/10 rounded-sm border border-white/20">
+                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
                   {activeMatch.team1.name.charAt(0)}
                 </span>
               )}
-              <span className="text-sm font-black font-headline uppercase truncate max-w-[110px]">
+              <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
                 {activeMatch.team1.name}
               </span>
             </div>
-            <span className="font-black font-headline text-lg tabular-nums">
-              {activeMatch.team1.score}
+
+            <span className="font-black font-headline text-sm uppercase tracking-widest text-muted-foreground">
+              VS
             </span>
-          </div>
 
-          <div className="my-2 h-px bg-white/10" />
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
               {activeMatch.team2.avatar ? (
                 <img
                   src={activeMatch.team2.avatar}
                   alt={activeMatch.team2.name}
-                  className="w-7 h-7 rounded-sm border border-white/20"
+                  className="w-9 h-9 rounded-sm border border-border"
                 />
               ) : (
-                <span className="w-7 h-7 flex items-center justify-center text-[10px] font-black bg-white/10 rounded-sm border border-white/20">
+                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
                   {activeMatch.team2.name.charAt(0)}
                 </span>
               )}
-              <span className="text-sm font-black font-headline uppercase truncate max-w-[110px]">
+              <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
                 {activeMatch.team2.name}
               </span>
             </div>
-            <span className="font-black font-headline text-lg tabular-nums">
-              {activeMatch.team2.score}
-            </span>
           </div>
         </div>
 
         {activeMatch.matchResult ? (
-          <p className="text-xs text-white/80 font-headline uppercase tracking-wider leading-relaxed">
+          <p className="text-xs text-muted-foreground font-headline uppercase tracking-wider leading-relaxed">
             {activeMatch.matchResult}
           </p>
         ) : null}
