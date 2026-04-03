@@ -32,6 +32,9 @@ export function useVideoElement({
   ref,
 }: UseVideoElementOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const pendingErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const mergedRef = useCallback(
     (el: HTMLVideoElement | null) => {
@@ -50,6 +53,13 @@ export function useVideoElement({
   useEffect(() => {
     const video = videoRef?.current;
     if (!video) return;
+
+    const clearPendingError = () => {
+      if (pendingErrorTimerRef.current) {
+        clearTimeout(pendingErrorTimerRef.current);
+        pendingErrorTimerRef.current = null;
+      }
+    };
 
     const handlePlay = () => dispatch({ type: 'PLAY' });
     const handlePause = () => dispatch({ type: 'PAUSE' });
@@ -79,10 +89,18 @@ export function useVideoElement({
     };
     const handleWaiting = () =>
       dispatch({ type: 'SET_BUFFERING', isBuffering: true });
-    const handlePlaying = () =>
+    const handlePlaying = () => {
+      clearPendingError();
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
-    const handleCanPlay = () =>
+      // Playback recovered (e.g. after transient segment 404/retry),
+      // so clear any stale error overlay state.
+      dispatch({ type: 'SET_ERROR', error: null });
+    };
+    const handleCanPlay = () => {
+      clearPendingError();
       dispatch({ type: 'SET_LOADING', isLoading: false });
+      dispatch({ type: 'SET_ERROR', error: null });
+    };
     const handleError = (e: Event) => {
       const target = e.target as HTMLVideoElement;
       // Only handle genuine decode errors (MEDIA_ERR_DECODE = 3): corrupt or
@@ -99,7 +117,14 @@ export function useVideoElement({
       // cleanup. Not a real playback failure.
       if (!target?.error) return;
       if (target.error.code !== MediaError.MEDIA_ERR_DECODE) return;
-      dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+
+      // Avoid flashing the error overlay for transient decode hiccups that
+      // self-heal after HLS retries the next segments.
+      clearPendingError();
+      pendingErrorTimerRef.current = setTimeout(() => {
+        pendingErrorTimerRef.current = null;
+        dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
+      }, 1200);
     };
     const handleEnded = () => dispatch({ type: 'PAUSE' });
     const handleLoadStart = () => {};
@@ -125,6 +150,7 @@ export function useVideoElement({
     video.addEventListener('abort', handleAbort);
 
     return () => {
+      clearPendingError();
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('timeupdate', handleTimeUpdate);
