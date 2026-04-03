@@ -45,9 +45,9 @@ export function HomeClient() {
           <div className="absolute inset-0 bg-[#1a1a1a] translate-x-3 translate-y-3 -z-10"></div>
           <div className="flex flex-col md:flex-row bg-background border-[3px] border-border w-full h-auto md:h-24 overflow-visible">
             {/* Search Input Container */}
-            <div className="flex-grow flex items-center px-6 relative overflow-hidden group/input">
+            <div className="flex-grow flex items-center px-5 md:px-6 py-5 md:py-0 min-h-[5.5rem] md:min-h-0 relative overflow-hidden group/input">
               <span
-                className="material-symbols-outlined text-4xl mr-4 z-20 shrink-0"
+                className="material-symbols-outlined text-3xl md:text-4xl mr-3 md:mr-4 z-20 shrink-0"
                 style={{ fontVariationSettings: "'FILL' 0" }}
               >
                 search
@@ -61,7 +61,7 @@ export function HomeClient() {
                     <span className="text-transparent font-headline text-xl md:text-3xl font-bold uppercase whitespace-pre leading-none">
                       {query}
                     </span>
-                    <span className="text-foreground/20 font-headline text-xl md:text-3xl font-bold uppercase whitespace-pre leading-none">
+                    <span className="text-foreground/20 font-headline text-2xl md:text-3xl font-bold uppercase whitespace-pre leading-none">
                       {suggestion.slice(query.length)}
                     </span>
                   </div>
@@ -70,7 +70,7 @@ export function HomeClient() {
                 {/* Real Input Layer (Upper) */}
                 <input
                   name="q"
-                  className="w-full bg-transparent border-none focus:ring-0 font-headline text-xl md:text-3xl font-bold uppercase placeholder:text-foreground/30 text-foreground relative z-10 outline-none p-0 leading-none h-full"
+                  className="w-full bg-transparent border-none focus:ring-0 font-headline text-2xl md:text-3xl font-bold uppercase placeholder:text-foreground/30 text-foreground relative z-10 outline-none p-0 leading-none h-full"
                   placeholder="SEARCH MOVIES, SHOWS, OR CINEMA..."
                   type="text"
                   autoComplete="off"
@@ -89,7 +89,7 @@ export function HomeClient() {
             </div>
             {/* Search Button */}
             <button
-              className="bg-[#ffcc00] text-foreground border-l-0 md:border-l-[3px] border-t-[3px] md:border-t-0 border-border px-12 py-6 md:py-0 font-headline text-2xl font-black uppercase tracking-widest hover:bg-[#1a1a1a] hover:text-[#ffcc00] transition-all duration-200 cursor-pointer h-full whitespace-nowrap"
+              className="bg-[#ffcc00] text-foreground border-l-0 md:border-l-[3px] border-t-[3px] md:border-t-0 border-border px-6 md:px-12 py-3 md:py-0 font-headline text-lg md:text-2xl font-black uppercase tracking-[0.2em] md:tracking-widest hover:bg-[#1a1a1a] hover:text-[#ffcc00] transition-all duration-200 cursor-pointer h-full whitespace-nowrap"
               type="button"
               onClick={handleManualSearch}
             >
