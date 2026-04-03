@@ -64,7 +64,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
                 height: 'auto',
                 aspectRatio: '16 / 9',
                 maxHeight: '56.25vw',
-                marginTop: '0.5rem',
               }
             : {
                 position: 'fixed',
