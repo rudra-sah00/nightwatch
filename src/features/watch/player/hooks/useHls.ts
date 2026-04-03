@@ -4,6 +4,20 @@ import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import type { AudioTrack, PlayerAction, Quality } from '../context/types';
 
+interface ManualQualityOption {
+  label: string;
+  height: number;
+  bandwidth: number;
+  url: string;
+}
+
+function parseManualQualityHeight(label: string): number {
+  const normalized = label.trim().toLowerCase();
+  if (normalized.includes('4k')) return 2160;
+  const parsed = parseInt(normalized, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 interface UseHlsOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   streamUrl: string | null;
@@ -25,9 +39,36 @@ export function useHls({
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
+  const manualQualitiesRef = useRef<ManualQualityOption[]>([]);
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
+
+  useEffect(() => {
+    const manualQualities = (_manualQualities || [])
+      .filter((q) => q.url)
+      .map((q) => ({
+        label: q.quality,
+        height: parseManualQualityHeight(q.quality),
+        bandwidth: 0,
+        url: q.url,
+      }))
+      .filter((q) => !q.label.toLowerCase().startsWith('auto'));
+
+    manualQualitiesRef.current = manualQualities;
+    if (manualQualities.length === 0) return;
+
+    // Keep quality menu aligned with backend-provided options even when
+    // manual qualities arrive after HLS manifest parsing.
+    dispatch({
+      type: 'SET_QUALITIES',
+      qualities: manualQualities.map((q) => ({
+        label: q.label,
+        height: q.height,
+        bandwidth: q.bandwidth,
+      })),
+    });
+  }, [_manualQualities, dispatch]);
 
   useEffect(() => {
     if (!streamUrl || !videoRef.current) return;
@@ -119,26 +160,39 @@ export function useHls({
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
           dispatch({ type: 'SET_LOADING', isLoading: false });
 
-          // Extract quality levels
-          const qualities: Quality[] = data.levels.map((level, index) => {
-            const hasDuplicateResolution = data.levels.some(
-              (l, i) => i !== index && l.height === level.height,
-            );
+          const manualQualities = manualQualitiesRef.current;
 
-            let label = `${level.height}p`;
-            if (hasDuplicateResolution) {
-              const mbps = (level.bitrate / 1000000).toFixed(1);
-              label = `${level.height}p (${mbps} Mbps)`;
-            }
+          if (manualQualities.length > 0) {
+            dispatch({
+              type: 'SET_QUALITIES',
+              qualities: manualQualities.map((q) => ({
+                label: q.label,
+                height: q.height,
+                bandwidth: q.bandwidth,
+              })),
+            });
+          } else {
+            // Extract quality levels from parsed HLS manifest
+            const qualities: Quality[] = data.levels.map((level, index) => {
+              const hasDuplicateResolution = data.levels.some(
+                (l, i) => i !== index && l.height === level.height,
+              );
 
-            return {
-              label,
-              height: level.height,
-              bandwidth: level.bitrate,
-            };
-          });
+              let label = `${level.height}p`;
+              if (hasDuplicateResolution) {
+                const mbps = (level.bitrate / 1000000).toFixed(1);
+                label = `${level.height}p (${mbps} Mbps)`;
+              }
 
-          dispatch({ type: 'SET_QUALITIES', qualities });
+              return {
+                label,
+                height: level.height,
+                bandwidth: level.bitrate,
+              };
+            });
+
+            dispatch({ type: 'SET_QUALITIES', qualities });
+          }
 
           // Extract audio tracks
           if (data.audioTracks && data.audioTracks.length > 0) {
@@ -368,11 +422,28 @@ export function useHls({
     };
   }, [streamUrl, videoRef, dispatch, isLive]); // Keep this minimal to avoid HLS re-init
 
-  const setQuality = useCallback((levelIndex: number) => {
-    if (hlsRef.current) {
+  const setQuality = useCallback(
+    (levelIndex: number) => {
+      if (!hlsRef.current) return;
+
+      const manualQualities = manualQualitiesRef.current;
+      if (manualQualities.length > 0) {
+        if (levelIndex === -1) {
+          hlsRef.current.loadSource(streamUrl || manualQualities[0].url);
+          return;
+        }
+
+        const selected = manualQualities[levelIndex];
+        if (selected) {
+          hlsRef.current.loadSource(selected.url);
+          return;
+        }
+      }
+
       hlsRef.current.currentLevel = levelIndex;
-    }
-  }, []);
+    },
+    [streamUrl],
+  );
 
   const setAudioTrack = useCallback((trackId: string) => {
     if (hlsRef.current) {

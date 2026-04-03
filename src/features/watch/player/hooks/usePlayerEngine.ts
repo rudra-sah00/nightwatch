@@ -65,6 +65,7 @@ export function usePlayerEngine({
     streamUrl: engineType === 'hls' ? streamUrl : null,
     dispatch,
     onStreamExpired,
+    qualities,
     isLive,
   });
 
