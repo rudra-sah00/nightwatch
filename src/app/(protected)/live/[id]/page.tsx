@@ -1,12 +1,11 @@
 'use client';
 
-import { ArrowLeft, Calendar, Loader2, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useLiveMatchPlayer } from '@/features/livestream/hooks/use-live-match-player';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
@@ -18,10 +17,6 @@ export default function LiveMatchPlayerPage() {
   const matchId = params.id as string;
   const titleFromRoute = searchParams.get('title')?.trim() ?? '';
   const { match, isLoading, error } = useLiveMatch(matchId);
-  const { isCreatingParty, handleCreateParty } = useLiveMatchPlayer(
-    match ?? null,
-    matchId,
-  );
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -275,19 +270,6 @@ export default function LiveMatchPlayerPage() {
           </span>
         )}
       </div>
-      <Button
-        onClick={handleCreateParty}
-        disabled={isCreatingParty}
-        size="sm"
-        className="bg-[#0055ff] hover:bg-[#3377ff] text-white rounded-none border-[3px] border-border gap-1.5 font-headline font-black uppercase tracking-widest  h-8"
-      >
-        {isCreatingParty ? (
-          <Loader2 className="w-3 h-3 animate-spin stroke-[3px]" />
-        ) : (
-          <Users className="w-3.5 h-3.5 stroke-[3px]" />
-        )}
-        <span className="hidden sm:inline">Party</span>
-      </Button>
     </div>
   );
 

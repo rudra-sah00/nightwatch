@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject, useCallback, useEffect } from 'react';
+import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { PlayerAction } from '../context/types';
 import { useMobileDetection } from './useMobileDetection';
@@ -36,6 +36,41 @@ export function useFullscreen({
   playerIsFullscreen,
 }: UseFullscreenOptions) {
   const isMobile = useMobileDetection();
+  const manualMobileFullscreenRef = useRef(false);
+  const lockedStylesRef = useRef<{
+    htmlOverflow: string;
+    bodyOverflow: string;
+    bodyOverscrollBehavior: string;
+    bodyHeight: string;
+  } | null>(null);
+
+  const lockDocumentScroll = useCallback(() => {
+    if (typeof document === 'undefined' || lockedStylesRef.current) return;
+    const html = document.documentElement;
+    const body = document.body;
+    lockedStylesRef.current = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyOverscrollBehavior: body.style.overscrollBehavior,
+      bodyHeight: body.style.height,
+    };
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.overscrollBehavior = 'none';
+    body.style.height = '100dvh';
+  }, []);
+
+  const unlockDocumentScroll = useCallback(() => {
+    if (typeof document === 'undefined' || !lockedStylesRef.current) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = lockedStylesRef.current;
+    html.style.overflow = prev.htmlOverflow;
+    body.style.overflow = prev.bodyOverflow;
+    body.style.overscrollBehavior = prev.bodyOverscrollBehavior;
+    body.style.height = prev.bodyHeight;
+    lockedStylesRef.current = null;
+  }, []);
 
   // Listen for fullscreen changes (covers Android container-fullscreen path)
   useEffect(() => {
@@ -53,6 +88,10 @@ export function useFullscreen({
           /* not supported on this platform */
         }
       }
+      if (!isFullscreen) {
+        manualMobileFullscreenRef.current = false;
+        unlockDocumentScroll();
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -64,8 +103,9 @@ export function useFullscreen({
         'webkitfullscreenchange',
         handleFullscreenChange,
       );
+      unlockDocumentScroll();
     };
-  }, [dispatch]);
+  }, [dispatch, unlockDocumentScroll]);
 
   const enterFullscreen = useCallback(async () => {
     try {
@@ -92,6 +132,8 @@ export function useFullscreen({
           if (container.requestFullscreen) {
             try {
               await container.requestFullscreen({ navigationUI: 'hide' });
+              manualMobileFullscreenRef.current = false;
+              unlockDocumentScroll();
               return; // fullscreenchange event will dispatch SET_FULLSCREEN:true
             } catch {
               /* not available (iOS) */
@@ -101,6 +143,8 @@ export function useFullscreen({
             if (el.webkitRequestFullscreen) {
               try {
                 await el.webkitRequestFullscreen();
+                manualMobileFullscreenRef.current = false;
+                unlockDocumentScroll();
                 return;
               } catch {
                 /* not available */
@@ -111,6 +155,8 @@ export function useFullscreen({
 
         // Step 3: iOS fallback — manually update state so the UI enters
         // "fullscreen mode" visually; user rotates the device to get landscape.
+        manualMobileFullscreenRef.current = true;
+        lockDocumentScroll();
         dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
         toast('Rotate your device for best experience', { icon: '📱' });
         return;
@@ -129,7 +175,13 @@ export function useFullscreen({
     } catch {
       toast.error('Failed to enter fullscreen');
     }
-  }, [isMobile, containerRef, dispatch]);
+  }, [
+    isMobile,
+    containerRef,
+    dispatch,
+    lockDocumentScroll,
+    unlockDocumentScroll,
+  ]);
 
   const exitFullscreen = useCallback(async () => {
     try {
@@ -149,6 +201,8 @@ export function useFullscreen({
         }
 
         // iOS manual-state path: no real fullscreen was entered.
+        manualMobileFullscreenRef.current = false;
+        unlockDocumentScroll();
         dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
         return;
       }
@@ -162,7 +216,7 @@ export function useFullscreen({
     } catch {
       toast.error('Failed to exit fullscreen');
     }
-  }, [isMobile, dispatch]);
+  }, [isMobile, dispatch, unlockDocumentScroll]);
 
   const toggleFullscreen = useCallback(async () => {
     const doc = document as DocumentWithWebkit;
