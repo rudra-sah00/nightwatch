@@ -21,8 +21,9 @@ interface DocumentWithWebkit extends Document {
 
 interface VideoElementWithWebkit extends HTMLVideoElement {
   webkitDisplayingFullscreen?: boolean;
-  webkitEnterFullscreen?: () => Promise<void>;
-  webkitExitFullscreen?: () => Promise<void>;
+  webkitSupportsFullscreen?: boolean;
+  webkitEnterFullscreen?: () => void | Promise<void>;
+  webkitExitFullscreen?: () => void | Promise<void>;
 }
 
 interface HTMLElementWithWebkit extends HTMLElement {
@@ -36,6 +37,7 @@ export function useFullscreen({
   playerIsFullscreen,
 }: UseFullscreenOptions) {
   const isMobile = useMobileDetection();
+  const latestVideoRef = useRef<VideoElementWithWebkit | null>(null);
   const manualMobileFullscreenRef = useRef(false);
   const lockedStylesRef = useRef<{
     htmlOverflow: string;
@@ -72,6 +74,11 @@ export function useFullscreen({
     lockedStylesRef.current = null;
   }, []);
 
+  useEffect(() => {
+    latestVideoRef.current =
+      (videoRef?.current as VideoElementWithWebkit | null) ?? null;
+  }, [videoRef]);
+
   // Listen for fullscreen changes (covers Android container-fullscreen path)
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -107,6 +114,39 @@ export function useFullscreen({
     };
   }, [dispatch, unlockDocumentScroll]);
 
+  // iOS Safari native video fullscreen does not always trigger document-level
+  // fullscreen events, so keep player state synced via video-level WebKit events.
+  useEffect(() => {
+    const video = videoRef?.current as
+      | VideoElementWithWebkit
+      | null
+      | undefined;
+    if (!video) return;
+
+    const handleNativeVideoEnter = () => {
+      manualMobileFullscreenRef.current = false;
+      unlockDocumentScroll();
+      dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
+    };
+
+    const handleNativeVideoExit = () => {
+      manualMobileFullscreenRef.current = false;
+      unlockDocumentScroll();
+      dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+    };
+
+    video.addEventListener('webkitbeginfullscreen', handleNativeVideoEnter);
+    video.addEventListener('webkitendfullscreen', handleNativeVideoExit);
+
+    return () => {
+      video.removeEventListener(
+        'webkitbeginfullscreen',
+        handleNativeVideoEnter,
+      );
+      video.removeEventListener('webkitendfullscreen', handleNativeVideoExit);
+    };
+  }, [videoRef, dispatch, unlockDocumentScroll]);
+
   const enterFullscreen = useCallback(async () => {
     try {
       if (isMobile) {
@@ -124,9 +164,8 @@ export function useFullscreen({
           }
         }
 
-        // Step 2: Try container requestFullscreen (Android Chrome).
-        // This keeps our custom controls visible; we never use
-        // video.webkitEnterFullscreen which hands control to the native player.
+        // Step 2: Try container requestFullscreen (Android Chrome and modern mobile browsers).
+        // This keeps our custom controls visible whenever platform support exists.
         const container = containerRef.current;
         if (container) {
           if (container.requestFullscreen) {
@@ -153,7 +192,25 @@ export function useFullscreen({
           }
         }
 
-        // Step 3: iOS fallback — manually update state so the UI enters
+        // Step 3: Prefer native video fullscreen fallback (best path on iOS Safari).
+        const video = latestVideoRef.current;
+        if (
+          video?.webkitEnterFullscreen &&
+          (video.webkitSupportsFullscreen ?? true)
+        ) {
+          try {
+            await Promise.resolve(video.webkitEnterFullscreen());
+            manualMobileFullscreenRef.current = false;
+            unlockDocumentScroll();
+            // Some WebKit builds don't emit begin event consistently.
+            dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
+            return;
+          } catch {
+            /* continue to manual fallback */
+          }
+        }
+
+        // Step 4: iOS manual fallback — update state so the UI enters
         // "fullscreen mode" visually; user rotates the device to get landscape.
         manualMobileFullscreenRef.current = true;
         lockDocumentScroll();
@@ -200,6 +257,15 @@ export function useFullscreen({
           return; // fullscreenchange event dispatches SET_FULLSCREEN:false
         }
 
+        const video = latestVideoRef.current;
+        if (video?.webkitDisplayingFullscreen && video.webkitExitFullscreen) {
+          await Promise.resolve(video.webkitExitFullscreen());
+          manualMobileFullscreenRef.current = false;
+          unlockDocumentScroll();
+          dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+          return;
+        }
+
         // iOS manual-state path: no real fullscreen was entered.
         manualMobileFullscreenRef.current = false;
         unlockDocumentScroll();
@@ -226,7 +292,7 @@ export function useFullscreen({
     // is in its "fullscreen" state (iOS manual path).  Use the player state
     // value so the toggle always works correctly on all platforms.
     const isCurrentlyFullscreen = isMobile
-      ? (playerIsFullscreen ?? false)
+      ? (playerIsFullscreen ?? false) || !!video?.webkitDisplayingFullscreen
       : !!document.fullscreenElement ||
         !!doc.webkitFullscreenElement ||
         !!video?.webkitDisplayingFullscreen;

@@ -26,9 +26,9 @@ export function PlayerControls({ children }: { children: React.ReactNode }) {
 
 export function PlayerControlRow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative p-4 md:p-6 lg:p-8 2xl:p-10 space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div className="relative px-2 py-3 min-[380px]:p-3 md:p-6 lg:p-8 2xl:p-10 space-y-1 min-[380px]:space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[380px]:pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="flex items-center justify-between">
-        <div className="flex w-full items-center gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
+        <div className="flex w-full items-center gap-0.5 min-[380px]:gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
           {children}
         </div>
       </div>

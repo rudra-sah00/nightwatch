@@ -108,7 +108,9 @@ function LivePlayerState() {
           <Player.PlayPause />
           <Player.Volume />
           <Player.Spacer />
-          <Player.SettingsMenu />
+          <div className="hidden min-[380px]:contents md:contents">
+            <Player.SettingsMenu />
+          </div>
           <Player.Fullscreen />
         </Player.ControlRow>
       </Player.Controls>

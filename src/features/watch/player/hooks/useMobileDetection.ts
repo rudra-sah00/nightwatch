@@ -8,12 +8,20 @@ const checkMobile = () => {
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       userAgent,
     );
+  const isSmallMobileViewport = window.innerWidth < 768;
+  const hasLegacyTouchSignals =
+    'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
   const isSmallViewport = window.innerWidth < 1024;
 
-  // Prefer explicit mobile user agents. For ambiguous devices, require both
-  // coarse pointer and a smaller viewport to avoid matching touch laptops.
-  return isMobileUserAgent || (hasCoarsePointer && isSmallViewport);
+  // Backward-compatible mobile detection for existing watch-player behavior.
+  // Keep the coarse-pointer heuristic as an additional signal.
+  return (
+    isMobileUserAgent ||
+    isSmallMobileViewport ||
+    hasLegacyTouchSignals ||
+    (hasCoarsePointer && isSmallViewport)
+  );
 };
 
 /**

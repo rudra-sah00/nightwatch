@@ -147,10 +147,16 @@ function VODPlayerState() {
             <Player.PlayPause />
             <Player.SkipButtons />
             <Player.Volume />
-            <Player.TimeDisplay />
+            <div className="hidden min-[420px]:contents md:contents">
+              <Player.TimeDisplay />
+            </div>
             <Player.Spacer />
-            <Player.EpisodePanelTrigger />
-            <Player.AudioSubtitleSelectors />
+            <div className="hidden min-[420px]:contents md:contents">
+              <Player.EpisodePanelTrigger />
+            </div>
+            <div className="hidden min-[420px]:contents md:contents">
+              <Player.AudioSubtitleSelectors />
+            </div>
             <Player.SettingsMenu />
             <Player.Fullscreen />
           </Player.ControlRow>

@@ -6,6 +6,8 @@ import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { VideoElement } from '../VideoElement';
 import { SubtitleOverlay } from './SubtitleOverlay';
 
+type TapZone = 'left' | 'right';
+
 /** Continuously paints video frames onto a low-res canvas used as an ambient
  *  blur background. Fills black bars from letterbox / pillarbox regardless of
  *  screen size or video aspect ratio. */
@@ -53,6 +55,8 @@ export function PlayerVideo() {
   const {
     state,
     dispatch,
+    metadata,
+    readOnly,
     videoRef,
     videoCallbackRef,
     captionUrl,
@@ -65,6 +69,21 @@ export function PlayerVideo() {
   // On mobile the tap-to-pause gesture is confusing and causes accidental
   // pauses. Controls are always reachable via the play/pause button instead.
   const isMobile = useMobileDetection();
+  const lastTapRef = useRef<{ zone: TapZone; at: number } | null>(null);
+
+  const canUseTapSeek =
+    isMobile && !readOnly && metadata.type !== 'livestream' && !state.isLoading;
+
+  const handleTapSeek = (zone: TapZone) => {
+    const now = Date.now();
+    const last = lastTapRef.current;
+    if (last && last.zone === zone && now - last.at <= 280) {
+      playerHandlers.skip(zone === 'left' ? -10 : 10);
+      lastTapRef.current = null;
+      return;
+    }
+    lastTapRef.current = { zone, at: now };
+  };
 
   return (
     <div className="absolute inset-0 z-0 bg-black">
@@ -96,6 +115,23 @@ export function PlayerVideo() {
           videoRef={videoRef}
           currentTrackId={state.currentSubtitleTrack}
         />
+
+        {canUseTapSeek ? (
+          <div className="absolute inset-0 z-[2] pointer-events-none">
+            <button
+              type="button"
+              aria-label="Seek backward 10 seconds"
+              className="absolute inset-y-0 left-0 w-1/3 pointer-events-auto bg-transparent"
+              onClick={() => handleTapSeek('left')}
+            />
+            <button
+              type="button"
+              aria-label="Seek forward 10 seconds"
+              className="absolute inset-y-0 right-0 w-1/3 pointer-events-auto bg-transparent"
+              onClick={() => handleTapSeek('right')}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
