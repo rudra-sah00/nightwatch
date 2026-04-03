@@ -38,6 +38,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
   Object.defineProperty(MockHlsClass, 'Events', {
     value: {
       MANIFEST_PARSED: 'hlsManifestParsed',
+      FRAG_LOADED: 'hlsFragLoaded',
       AUDIO_TRACK_SWITCHED: 'hlsAudioTrackSwitched',
       AUDIO_TRACKS_UPDATED: 'hlsAudioTracksUpdated',
       LEVEL_SWITCHED: 'hlsLevelSwitched',
@@ -500,8 +501,16 @@ describe('useHls', () => {
     });
   });
 
-  it('should keep retrying livestream 401s without showing expired error', async () => {
+  it('should keep retrying livestream 401s without forcing buffering when already playing', async () => {
     const videoRef = createVideoRef();
+    Object.defineProperty(videoRef.current, 'paused', {
+      configurable: true,
+      get: () => false,
+    });
+    Object.defineProperty(videoRef.current, 'readyState', {
+      configurable: true,
+      get: () => 4,
+    });
 
     renderHook(() =>
       useHls({
@@ -526,7 +535,7 @@ describe('useHls', () => {
 
     expect(mockHls.startLoad).toHaveBeenCalled();
     expect(mockHls.destroy).not.toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledWith({
+    expect(mockDispatch).not.toHaveBeenCalledWith({
       type: 'SET_BUFFERING',
       isBuffering: true,
     });

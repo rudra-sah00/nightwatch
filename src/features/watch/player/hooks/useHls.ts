@@ -167,6 +167,12 @@ export function useHls({
           video.play().catch(() => {});
         });
 
+        hls.on(Hls.Events.FRAG_LOADED, () => {
+          // Live retries can briefly mark buffering; clear it as soon as
+          // a fragment arrives so the spinner doesn't stick while video plays.
+          dispatch({ type: 'SET_BUFFERING', isBuffering: false });
+        });
+
         // Handle audio track changes from HLS
         hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_, data) => {
           dispatch({
@@ -212,7 +218,10 @@ export function useHls({
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
             if (isLive) {
               unauthorizedRetryCountRef.current += 1;
-              dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+              const isLikelyStalled = video.paused || video.readyState < 3;
+              if (isLikelyStalled) {
+                dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+              }
               hls.startLoad();
               return;
             }
@@ -280,7 +289,10 @@ export function useHls({
           const code = video.error?.code;
           const isExpired = code === MediaError.MEDIA_ERR_NETWORK;
           if (isExpired && isLive) {
-            dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+            const isLikelyStalled = video.paused || video.readyState < 3;
+            if (isLikelyStalled) {
+              dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+            }
             video.play().catch(() => {});
           } else if (isExpired && onStreamExpiredRef.current) {
             dispatch({ type: 'SET_LOADING', isLoading: true });
