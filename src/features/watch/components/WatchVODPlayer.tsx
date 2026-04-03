@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';
+import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
@@ -25,6 +26,7 @@ export interface WatchPlayerProps {
   description?: string;
   onVideoRef?: (ref: HTMLVideoElement | null) => void;
   mobileHeaderContent?: React.ReactNode;
+  mobileLayout?: 'immersive' | 'inline';
   isAuthenticated?: boolean;
   onNavigate?: (url: string) => void;
   onStreamExpired?: () => void;
@@ -45,6 +47,9 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   props: WatchPlayerProps,
 ) {
   const router = useRouter();
+  const isMobile = useMobileDetection();
+  const useInlineMobileLayout =
+    isMobile && (props.mobileLayout ?? 'inline') === 'inline';
 
   // Handle going back
   const handleBack = () => {
@@ -55,43 +60,60 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     }
   };
 
-  return (
-    <Player.Root
-      {...props}
-      containerStyle={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-      }}
-      streamMode="vod"
-      onNavigate={props.onNavigate || ((url) => router.replace(url))}
-    >
-      {/* Mobile Header - Solid Top Bar */}
-      <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="p-2 rounded-full bg-white/10/20 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-base font-semibold text-white truncate">
-            {props.metadata.title}
-          </h1>
-          {props.metadata.season != null && props.metadata.episode != null ? (
-            <p className="text-xs text-white/70 truncate">
-              S{props.metadata.season}:E{props.metadata.episode}
-            </p>
-          ) : null}
-        </div>
-        {props.mobileHeaderContent}
+  const mobileHeader = (
+    <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <button
+        type="button"
+        onClick={handleBack}
+        className="p-2 rounded-full bg-white/10/20 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5 text-white" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <h1 className="text-base font-semibold text-white truncate">
+          {props.metadata.title}
+        </h1>
+        {props.metadata.season != null && props.metadata.episode != null ? (
+          <p className="text-xs text-white/70 truncate">
+            S{props.metadata.season}:E{props.metadata.episode}
+          </p>
+        ) : null}
       </div>
+      {props.mobileHeaderContent}
+    </div>
+  );
 
-      <VODPlayerState />
-    </Player.Root>
+  return (
+    <>
+      {useInlineMobileLayout ? mobileHeader : null}
+      <Player.Root
+        {...props}
+        containerStyle={
+          useInlineMobileLayout
+            ? {
+                position: 'relative',
+                width: '100%',
+                height: 'auto',
+                aspectRatio: '16 / 9',
+                maxHeight: '56.25vw',
+              }
+            : {
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+              }
+        }
+        streamMode="vod"
+        allowPortraitPlayback={useInlineMobileLayout}
+        onBack={handleBack}
+        onNavigate={props.onNavigate || ((url) => router.replace(url))}
+      >
+        {!useInlineMobileLayout ? mobileHeader : null}
+        <VODPlayerState />
+      </Player.Root>
+    </>
   );
 });
 
