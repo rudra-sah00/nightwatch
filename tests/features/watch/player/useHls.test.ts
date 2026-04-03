@@ -500,6 +500,42 @@ describe('useHls', () => {
     });
   });
 
+  it('should keep retrying livestream 401s without showing expired error', async () => {
+    const videoRef = createVideoRef();
+
+    renderHook(() =>
+      useHls({
+        videoRef,
+        streamUrl: 'https://example.com/stream.m3u8',
+        dispatch: mockDispatch,
+        isLive: true,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(eventHandlers.has('hlsError')).toBe(true);
+    });
+
+    act(() => {
+      triggerEvent('hlsError', {
+        fatal: false,
+        type: 'networkError',
+        response: { code: 401 },
+      });
+    });
+
+    expect(mockHls.startLoad).toHaveBeenCalled();
+    expect(mockHls.destroy).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'SET_BUFFERING',
+      isBuffering: true,
+    });
+    expect(mockDispatch).not.toHaveBeenCalledWith({
+      type: 'SET_ERROR',
+      error: 'Stream session expired. Please start playback again.',
+    });
+  });
+
   it('should handle native HLS (Safari) when Hls is not supported', async () => {
     // Temporarily make isSupported return false (use the existing mock)
     (

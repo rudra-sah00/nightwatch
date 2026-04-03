@@ -65,7 +65,12 @@ export function useActiveWatchParty({
     containerRef: watchPartyContainerRef,
   });
 
-  useWatchPartyHostSync({ videoElement, isHost, onPartyEvent });
+  useWatchPartyHostSync({
+    videoElement,
+    isHost,
+    isLive: room.type === 'livestream',
+    onPartyEvent,
+  });
 
   useEffect(() => {
     const check = () => setIsPortrait(window.innerHeight > window.innerWidth);

@@ -210,6 +210,13 @@ export function useHls({
             (data as { response?: { code?: number } }).response?.code;
 
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
+            if (isLive) {
+              unauthorizedRetryCountRef.current += 1;
+              dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+              hls.startLoad();
+              return;
+            }
+
             // A transient 401 can happen while auth refresh is in-flight.
             // Retry a few times before considering it truly expired.
             unauthorizedRetryCountRef.current += 1;
@@ -272,7 +279,10 @@ export function useHls({
           if (cancelled) return;
           const code = video.error?.code;
           const isExpired = code === MediaError.MEDIA_ERR_NETWORK;
-          if (isExpired && onStreamExpiredRef.current) {
+          if (isExpired && isLive) {
+            dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+            video.play().catch(() => {});
+          } else if (isExpired && onStreamExpiredRef.current) {
             dispatch({ type: 'SET_LOADING', isLoading: true });
             onStreamExpiredRef.current();
           } else {

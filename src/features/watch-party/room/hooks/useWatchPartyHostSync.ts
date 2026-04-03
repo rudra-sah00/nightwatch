@@ -4,6 +4,7 @@ import type { PartyEvent } from '../types';
 interface UseWatchPartyHostSyncProps {
   videoElement: HTMLVideoElement | null;
   isHost: boolean;
+  isLive?: boolean;
   onPartyEvent: (event: PartyEvent) => void;
 }
 
@@ -16,6 +17,7 @@ interface UseWatchPartyHostSyncProps {
 export function useWatchPartyHostSync({
   videoElement,
   isHost,
+  isLive = false,
   onPartyEvent,
 }: UseWatchPartyHostSyncProps) {
   useEffect(() => {
@@ -40,6 +42,7 @@ export function useWatchPartyHostSync({
     };
 
     const handleSeek = () => {
+      if (isLive) return;
       const now = Date.now();
       if (now - lastSeekTime < 50) return; // Debounce rapid seek events
       lastSeekTime = now;
@@ -56,6 +59,7 @@ export function useWatchPartyHostSync({
     };
 
     const handleRateChange = () => {
+      if (isLive) return;
       onPartyEvent({
         eventType: 'rate',
         videoTime: videoElement.currentTime,
@@ -66,8 +70,10 @@ export function useWatchPartyHostSync({
 
     videoElement.addEventListener('play', handlePlay);
     videoElement.addEventListener('pause', handlePause);
-    videoElement.addEventListener('seeked', handleSeek);
-    videoElement.addEventListener('ratechange', handleRateChange);
+    if (!isLive) {
+      videoElement.addEventListener('seeked', handleSeek);
+      videoElement.addEventListener('ratechange', handleRateChange);
+    }
 
     return () => {
       videoElement.removeEventListener('play', handlePlay);
@@ -76,5 +82,5 @@ export function useWatchPartyHostSync({
       videoElement.removeEventListener('ratechange', handleRateChange);
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     };
-  }, [videoElement, isHost, onPartyEvent]);
+  }, [videoElement, isHost, isLive, onPartyEvent]);
 }

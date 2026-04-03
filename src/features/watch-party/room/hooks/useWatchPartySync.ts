@@ -38,6 +38,7 @@ export function useWatchPartySync({
 }: UseWatchPartySyncProps) {
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLiveRoom = room?.type === 'livestream';
 
   const handlePresenceEvent = useCallback(
     (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
@@ -75,9 +76,12 @@ export function useWatchPartySync({
         if (room?.id) {
           rtmSendMessage?.({
             type: 'SYNC',
-            currentTime:
-              videoRef?.current?.currentTime ?? room.state.currentTime,
-            videoTime: videoRef?.current?.currentTime ?? room.state.currentTime,
+            currentTime: isLiveRoom
+              ? 0
+              : (videoRef?.current?.currentTime ?? room.state.currentTime),
+            videoTime: isLiveRoom
+              ? 0
+              : (videoRef?.current?.currentTime ?? room.state.currentTime),
             isPlaying: videoRef?.current
               ? !videoRef.current.paused
               : room.state.isPlaying,
@@ -91,6 +95,7 @@ export function useWatchPartySync({
     },
     [
       isHost,
+      isLiveRoom,
       room?.hostId,
       room?.id,
       room?.state.isPlaying,
@@ -112,17 +117,30 @@ export function useWatchPartySync({
   const emitEvent = useCallback(
     (event: PartyEvent) => {
       if (!room?.id) return;
+      const normalizedEventType =
+        isLiveRoom && event.eventType === 'seek'
+          ? event.wasPlaying
+            ? 'play'
+            : 'pause'
+          : isLiveRoom && event.eventType === 'rate'
+            ? room.state.isPlaying
+              ? 'play'
+              : 'pause'
+            : event.eventType;
+
+      const normalizedVideoTime = isLiveRoom ? 0 : event.videoTime;
+
       // Host broadcasts the event to all peers via RTM
       rtmSendMessage?.({
         type:
-          event.eventType === 'play'
+          normalizedEventType === 'play'
             ? 'PLAY_EVENT'
-            : event.eventType === 'pause'
+            : normalizedEventType === 'pause'
               ? 'PAUSE_EVENT'
-              : event.eventType === 'seek'
+              : normalizedEventType === 'seek'
                 ? 'SEEK_EVENT'
                 : 'RATE_EVENT',
-        videoTime: event.videoTime,
+        videoTime: normalizedVideoTime,
         playbackRate: event.playbackRate || room.state.playbackRate,
         wasPlaying: event.wasPlaying,
         serverTime: Date.now(),
@@ -130,14 +148,20 @@ export function useWatchPartySync({
 
       // Also persist to backend so new joiners/reconnects get latest state
       syncPartyState(room.id, {
-        currentTime: event.videoTime,
+        currentTime: normalizedVideoTime,
         isPlaying:
-          event.eventType === 'play' ||
-          (event.eventType !== 'pause' && room.state.isPlaying),
+          normalizedEventType === 'play' ||
+          (normalizedEventType !== 'pause' && room.state.isPlaying),
         playbackRate: event.playbackRate || room.state.playbackRate,
       });
     },
-    [room?.id, room?.state.isPlaying, room?.state.playbackRate, rtmSendMessage],
+    [
+      room?.id,
+      room?.state.isPlaying,
+      room?.state.playbackRate,
+      rtmSendMessage,
+      isLiveRoom,
+    ],
   );
 
   const updateContent = useCallback(
@@ -166,6 +190,13 @@ export function useWatchPartySync({
         case 'SEEK_EVENT':
         case 'RATE_EVENT':
         case 'SYNC': {
+          if (
+            isLiveRoom &&
+            (msg.type === 'SEEK_EVENT' || msg.type === 'RATE_EVENT')
+          ) {
+            break;
+          }
+
           let videoTime = 0;
           if (msg.type === 'SYNC') {
             videoTime = msg.videoTime;
@@ -193,7 +224,7 @@ export function useWatchPartySync({
               : undefined;
 
           const state: PartyStateUpdate = {
-            currentTime: videoTime,
+            currentTime: isLiveRoom ? 0 : videoTime,
             isPlaying: isPlaying as boolean,
             playbackRate,
             timestamp: msg.serverTime,
@@ -216,7 +247,9 @@ export function useWatchPartySync({
               ...prev,
               state: {
                 ...prev.state,
-                currentTime: state.currentTime,
+                currentTime: isLiveRoom
+                  ? prev.state.currentTime
+                  : state.currentTime,
                 isPlaying: state.isPlaying ?? prev.state.isPlaying,
                 playbackRate: state.playbackRate ?? prev.state.playbackRate,
                 lastUpdated: state.timestamp,
@@ -273,10 +306,12 @@ export function useWatchPartySync({
               // We trigger a "SYNC" type message which is more authoritative than just PLAY/PAUSE
               rtmSendMessage?.({
                 type: 'SYNC',
-                currentTime:
-                  videoRef?.current?.currentTime ?? room.state.currentTime,
-                videoTime:
-                  videoRef?.current?.currentTime ?? room.state.currentTime,
+                currentTime: isLiveRoom
+                  ? 0
+                  : (videoRef?.current?.currentTime ?? room.state.currentTime),
+                videoTime: isLiveRoom
+                  ? 0
+                  : (videoRef?.current?.currentTime ?? room.state.currentTime),
                 isPlaying: videoRef?.current
                   ? !videoRef.current.paused
                   : room.state.isPlaying,
@@ -295,6 +330,7 @@ export function useWatchPartySync({
       onStateUpdate,
       normalizeRoomUrls,
       setRoom,
+      isLiveRoom,
       isHost,
       rtmSendMessage,
       room,
