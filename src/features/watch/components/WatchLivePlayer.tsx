@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
+import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
@@ -14,12 +15,15 @@ export interface WatchLivePlayerProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   mobileHeaderContent?: React.ReactNode;
+  mobileLayout?: 'immersive' | 'inline';
 }
 
 export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
   const router = useRouter();
+  const isMobile = useMobileDetection();
+  const useInlineMobileLayout = isMobile && props.mobileLayout === 'inline';
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -32,19 +36,36 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   return (
     <Player.Root
       {...props}
-      containerStyle={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-      }}
+      containerStyle={
+        useInlineMobileLayout
+          ? {
+              position: 'relative',
+              width: '100%',
+              height: 'auto',
+              aspectRatio: '16 / 9',
+              maxHeight: '56.25vw',
+            }
+          : {
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+            }
+      }
       streamMode="live"
+      allowPortraitPlayback={useInlineMobileLayout}
       onBack={handleBack}
       onNavigate={(url) => router.push(url)}
     >
       {/* Mobile Header - Solid Top Bar */}
-      <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
+      <div
+        className={`relative z-50 px-4 pb-4 flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5 ${
+          useInlineMobileLayout
+            ? 'pt-4'
+            : 'pt-[max(1rem,env(safe-area-inset-top))]'
+        }`}
+      >
         <button
           type="button"
           onClick={handleBack}

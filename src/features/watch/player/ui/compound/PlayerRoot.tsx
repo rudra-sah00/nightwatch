@@ -66,6 +66,8 @@ interface PlayerRootProps {
   isLive?: boolean;
   /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
   containerStyle?: React.CSSProperties;
+  /** Allow portrait playback on mobile (disables rotate wall) for inline layouts. */
+  allowPortraitPlayback?: boolean;
   /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
   providerId?: 's1' | 's2' | 's3';
   playbackRate?: number;
@@ -101,6 +103,7 @@ export function PlayerRoot({
   onBack: onBackProp,
   isLive = false,
   containerStyle,
+  allowPortraitPlayback = false,
   providerId,
   playbackRate,
 }: PlayerRootProps) {
@@ -157,6 +160,7 @@ export function PlayerRoot({
     isMobile &&
     isPortrait &&
     state.isPlaying &&
+    !allowPortraitPlayback &&
     !isFullscreenOverride &&
     !state.isFullscreen;
 
