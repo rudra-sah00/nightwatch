@@ -191,7 +191,7 @@ export function useVideoElement({
           (targetTrack && track.label === targetTrack.label) ||
           (targetTrack && track.language === targetTrack.language)
         ) {
-          track.mode = 'hidden';
+          track.mode = 'showing';
           found = true;
           break;
         }
@@ -204,7 +204,7 @@ export function useVideoElement({
             targetTrack &&
             track.label.toLowerCase().includes(targetTrack.label.toLowerCase())
           ) {
-            track.mode = 'hidden';
+            track.mode = 'showing';
             break;
           }
         }

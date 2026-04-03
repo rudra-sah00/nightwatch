@@ -54,8 +54,9 @@ export function useSubtitleOverlay({
         if (!targetTrack && currentTrackId && currentTrackId !== 'off') {
           for (let i = 0; i < textTracks.length; i++) {
             const t = textTracks[i];
-            // If a track's mode became 'hidden', it's the one use-video-element activated!
-            if (t.mode === 'hidden') {
+            // Active subtitle track can be either hidden/showing depending on
+            // native player requirements.
+            if (t.mode !== 'disabled') {
               targetTrack = t;
               break;
             }

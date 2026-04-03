@@ -78,10 +78,15 @@ export const VideoElement = memo(function VideoElement({
         <track
           key={track.id}
           id={track.id}
-          kind="captions"
+          kind="subtitles"
           src={track.src}
           label={track.label}
           srcLang={track.language}
+          default={
+            currentTrackId
+              ? track.id === currentTrackId
+              : track.id === tracks[0]?.id
+          }
         />
       ))}
       <track kind="captions" src="data:text/vtt," label="None" srcLang="en" />
