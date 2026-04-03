@@ -104,6 +104,8 @@ export function useSignupForm() {
   };
 
   const handleSetStep = (newStep: Step) => {
+    setError(null);
+    setFieldErrors({});
     setStep(newStep);
   };
 
@@ -146,9 +148,12 @@ export function useSignupForm() {
           const field = err.path[0];
           if (typeof field === 'string') errors[field] = err.message;
         }
+        const firstIssue = result.error.issues[0]?.message;
         return {
           fieldErrors: errors,
-          error: 'Please check all fields and try again.',
+          error:
+            firstIssue ||
+            'Some details look invalid. Please review the form and try again.',
         };
       }
 
@@ -169,24 +174,94 @@ export function useSignupForm() {
         return { success: true };
       } catch (err: unknown) {
         console.error('[SignupForm] Registration failed:', err);
+        const apiError = err as ApiError;
+
         // Handle specific validation errors from the backend (e.g. email already taken)
         if (
-          err &&
-          typeof err === 'object' &&
-          'code' in err &&
-          err.code === 'VALIDATION_ERROR' &&
-          'details' in err &&
-          Array.isArray(err.details)
+          apiError?.code === 'VALIDATION_ERROR' &&
+          Array.isArray(apiError.details)
         ) {
           const errors: Record<string, string> = {};
-          for (const detail of err.details) {
-            const field = detail.path;
-            if (typeof field === 'string') errors[field] = detail.message;
+          let fallbackMessage: string | undefined;
+
+          for (const detail of apiError.details) {
+            if (!detail || typeof detail !== 'object') continue;
+
+            const rawDetail = detail as Record<string, unknown>;
+            const field =
+              typeof rawDetail.path === 'string' ? rawDetail.path : undefined;
+            const message =
+              typeof rawDetail.message === 'string'
+                ? rawDetail.message
+                : undefined;
+
+            if (field && message) {
+              errors[field] = message;
+            }
+
+            if (!fallbackMessage && message) {
+              fallbackMessage = message;
+            }
           }
+
           // Reset captcha because the backend consumed the token on THIS request
           setCaptchaToken(null);
           captchaRef.current?.reset();
-          return { fieldErrors: errors };
+
+          if (Object.keys(errors).length > 0) {
+            return {
+              fieldErrors: errors,
+              ...(fallbackMessage ? { error: fallbackMessage } : {}),
+            };
+          }
+
+          return {
+            error:
+              fallbackMessage ||
+              'Some details are invalid. Please review your information and try again.',
+          };
+        }
+
+        if (apiError?.code === 'USER_EXISTS') {
+          setCaptchaToken(null);
+          captchaRef.current?.reset();
+          return {
+            fieldErrors: {
+              email: 'An account with this email already exists',
+            },
+            error: 'An account with this email already exists.',
+          };
+        }
+
+        if (apiError?.code === 'INVALID_INVITE') {
+          setCaptchaToken(null);
+          captchaRef.current?.reset();
+          return {
+            error:
+              'Invite link is invalid or expired. Please request a new invite link.',
+          };
+        }
+
+        if (
+          apiError?.code === 'CAPTCHA_REQUIRED' ||
+          apiError?.code === 'CAPTCHA_FAILED'
+        ) {
+          setCaptchaToken(null);
+          captchaRef.current?.reset();
+          return {
+            error:
+              'Security verification failed. Please complete the captcha again and retry.',
+          };
+        }
+
+        if (apiError?.code === 'OTP_RATE_LIMIT' || apiError?.status === 429) {
+          setCaptchaToken(null);
+          captchaRef.current?.reset();
+          return {
+            error:
+              apiError.message ||
+              'Too many attempts. Please wait a little and try again.',
+          };
         }
 
         // For all other backend errors, we must also reset the captcha widget
@@ -195,6 +270,19 @@ export function useSignupForm() {
         // would fail with "Security verification failed" without this reset.
         setCaptchaToken(null);
         captchaRef.current?.reset();
+
+        const isNetworkLikeError =
+          (err instanceof Error &&
+            /(failed to fetch|networkerror|timed out)/i.test(err.message)) ||
+          (apiError?.status === 408 && !!apiError.message);
+
+        if (isNetworkLikeError) {
+          return {
+            error:
+              'Network issue detected. Please check your connection (or disable VPN/ad-blocker) and try again.',
+          };
+        }
+
         return {
           error:
             err instanceof Error
@@ -212,7 +300,7 @@ export function useSignupForm() {
         setError(state.error);
         toast.error(state.error);
       }
-      if (state.fieldErrors) {
+      if ('fieldErrors' in state && state.fieldErrors) {
         setFieldErrors(state.fieldErrors);
       }
     }

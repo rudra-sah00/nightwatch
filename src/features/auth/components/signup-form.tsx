@@ -19,8 +19,11 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
     formData,
     handleChange,
     action,
+    error,
+    fieldErrors,
     captchaToken,
     setCaptchaToken,
+    captchaRef,
     otp,
     setOtp,
     handleOtpSubmit,
@@ -30,7 +33,15 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
     usernameStatus,
     confirmPassword,
     setConfirmPassword,
+    setError,
   } = props;
+
+  const normalizedUsername = formData.username.trim();
+  const isUsernameLocallyValid = /^[a-z0-9_]{3,}$/i.test(normalizedUsername);
+  const isUsernameCheckBlocking =
+    usernameStatus === 'checking' ||
+    usernameStatus === 'taken' ||
+    usernameStatus === 'invalid';
 
   const getHeader = () => {
     switch (step) {
@@ -129,6 +140,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.name}
                 className="h-[46px] text-xs font-black uppercase transition-all relative"
               />
             </div>
@@ -151,6 +163,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   value={formData.username}
                   onChange={handleChange}
                   disabled={isPending}
+                  error={fieldErrors?.username}
                   className="h-[46px] text-xs font-black uppercase transition-all relative"
                 />
                 {usernameStatus && (
@@ -166,6 +179,11 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                     {usernameStatus === 'taken' && (
                       <span className="text-[#e63b2e] font-black text-xs">
                         ✗
+                      </span>
+                    )}
+                    {usernameStatus === 'invalid' && (
+                      <span className="text-[#e63b2e] font-black text-xs">
+                        !
                       </span>
                     )}
                   </div>
@@ -190,10 +208,17 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.email}
                 className="h-[46px] text-xs font-black uppercase transition-all relative"
               />
             </div>
           </div>
+
+          {error ? (
+            <p className="mt-2 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] text-center">
+              {error}
+            </p>
+          ) : null}
 
           {/* BOTTOM */}
           <div className="flex flex-col gap-2 pb-0.5 mt-auto">
@@ -205,8 +230,9 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               disabled={
                 !formData.name?.trim() ||
                 !formData.email?.trim() ||
-                !formData.username?.trim() ||
-                usernameStatus !== 'available' ||
+                !normalizedUsername ||
+                !isUsernameLocallyValid ||
+                isUsernameCheckBlocking ||
                 isPending
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
@@ -259,6 +285,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.password}
                 className="h-[46px] text-xs font-black uppercase transition-all relative tracking-[0.2em]"
               />
             </div>
@@ -282,6 +309,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   setConfirmPassword?.(e.target.value)
                 }
                 disabled={isPending}
+                error={fieldErrors?.confirmPassword}
                 className="h-[46px] text-xs font-black uppercase transition-all relative tracking-[0.2em]"
               />
             </div>
@@ -295,12 +323,34 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               value={captchaToken || ''}
             />
             <Captcha
-              onVerify={setCaptchaToken}
-              onError={() => setCaptchaToken(null)}
-              onExpire={() => setCaptchaToken(null)}
+              ref={captchaRef}
+              onVerify={(token) => {
+                setCaptchaToken(token);
+                if (error?.toLowerCase().includes('security')) {
+                  setError(null);
+                }
+              }}
+              onError={() => {
+                setCaptchaToken(null);
+                setError(
+                  'Security verification could not load. Please disable blockers/VPN and retry.',
+                );
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+                setError(
+                  'Security verification expired. Please complete it again.',
+                );
+              }}
               variant="bottom"
             />
           </div>
+
+          {error ? (
+            <p className="mb-2 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] text-center">
+              {error}
+            </p>
+          ) : null}
 
           {/* BOTTOM */}
           <div className="flex flex-col gap-2 pb-0.5 mt-auto mb-6">
