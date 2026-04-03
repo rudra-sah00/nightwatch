@@ -17,7 +17,6 @@ export const STORAGE_KEYS = {
 // Socket.IO Events
 export const WS_EVENTS = {
   FORCE_LOGOUT: 'force_logout',
-  STREAM_REVOKED: 'stream:revoked',
   /** Emitted by the client to signal intentional stream teardown so the
    *  backend can immediately remove the Redis session rather than waiting
    *  for its TTL or the socket-disconnect handler. */

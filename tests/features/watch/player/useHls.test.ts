@@ -423,6 +423,22 @@ describe('useHls', () => {
       expect(eventHandlers.has('hlsError')).toBe(true);
     });
 
+    // First 3 unauthorized responses are treated as transient during refresh.
+    for (let i = 0; i < 3; i += 1) {
+      act(() => {
+        triggerEvent('hlsError', {
+          fatal: false,
+          type: 'networkError',
+          response: { code: 401 },
+        });
+      });
+    }
+
+    expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
+    expect(mockHls.destroy).not.toHaveBeenCalled();
+    expect(onStreamExpired).not.toHaveBeenCalled();
+
+    // 4th unauthorized response is treated as expired session.
     act(() => {
       triggerEvent('hlsError', {
         fatal: false,
@@ -454,6 +470,21 @@ describe('useHls', () => {
       expect(eventHandlers.has('hlsError')).toBe(true);
     });
 
+    // First 3 unauthorized responses retry the load.
+    for (let i = 0; i < 3; i += 1) {
+      act(() => {
+        triggerEvent('hlsError', {
+          fatal: false,
+          type: 'networkError',
+          response: { code: 401 },
+        });
+      });
+    }
+
+    expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
+    expect(mockHls.destroy).not.toHaveBeenCalled();
+
+    // 4th unauthorized response surfaces expired-session UI error.
     act(() => {
       triggerEvent('hlsError', {
         fatal: false,
@@ -462,7 +493,7 @@ describe('useHls', () => {
       });
     });
 
-    expect(mockHls.destroy).toHaveBeenCalled();
+    expect(mockHls.destroy).not.toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalledWith({
       type: 'SET_ERROR',
       error: 'Stream session expired. Please start playback again.',

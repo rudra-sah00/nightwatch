@@ -5,7 +5,6 @@ import { memo, useEffect, useState } from 'react';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
-import { useStreamRevocation } from '../player/hooks/useStreamRevocation';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
@@ -21,16 +20,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
   const router = useRouter();
-
-  const [revokedError, setRevokedError] = useState<string | null>(null);
-
-  useStreamRevocation({
-    onRevoked: () => {
-      setRevokedError(
-        'Playback stopped — you started playing on another tab or device.',
-      );
-    },
-  });
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -71,13 +60,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         {props.mobileHeaderContent}
       </div>
 
-      <LivePlayerState revokedError={revokedError} />
+      <LivePlayerState />
     </Player.Root>
   );
 });
-function LivePlayerState({ revokedError }: { revokedError: string | null }) {
+function LivePlayerState() {
   const { state, playerHandlers, metadata } = usePlayerContext();
-  const error = revokedError || state.error;
+  const error = state.error;
 
   return (
     <>

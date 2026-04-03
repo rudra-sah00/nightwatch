@@ -24,6 +24,7 @@ export function useHls({
   isLive = false,
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
+  const unauthorizedRetryCountRef = useRef(0);
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -39,6 +40,7 @@ export function useHls({
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
+    unauthorizedRetryCountRef.current = 0;
 
     const initHls = async () => {
       const { default: Hls } = await import('hls.js');
@@ -208,9 +210,18 @@ export function useHls({
             (data as { response?: { code?: number } }).response?.code;
 
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
-            hls.destroy();
-            // If parent can refetch a fresh stream, trigger it silently
+            // A transient 401 can happen while auth refresh is in-flight.
+            // Retry a few times before considering it truly expired.
+            unauthorizedRetryCountRef.current += 1;
+
+            if (unauthorizedRetryCountRef.current <= 3) {
+              hls.startLoad();
+              return;
+            }
+
+            // If parent can refetch a fresh stream, trigger it after retries
             if (onStreamExpiredRef.current) {
+              hls.destroy();
               dispatch({ type: 'SET_LOADING', isLoading: true });
               onStreamExpiredRef.current();
             } else {
@@ -220,6 +231,10 @@ export function useHls({
               });
             }
             return;
+          }
+
+          if (data.type !== Hls.ErrorTypes.NETWORK_ERROR || status !== 401) {
+            unauthorizedRetryCountRef.current = 0;
           }
 
           if (data.fatal) {

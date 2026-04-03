@@ -8,7 +8,6 @@ import {
   type S2AudioTrack,
   useS2AudioTracks,
 } from '@/features/watch/player/hooks/useS2AudioTracks';
-import { useStreamRevocation } from '@/features/watch/player/hooks/useStreamRevocation';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
@@ -17,7 +16,7 @@ import type { PlayResponse } from '@/types/content';
 
 /**
  * Core hook for VOD playback page logic.
- * Handles metadata derivation, stream fetching, and session revoked events.
+ * Handles metadata derivation and stream fetching.
  */
 const MAX_STREAM_RETRIES = 2;
 const S2_COLD_START_RETRY_DELAY_MS = 3000;
@@ -91,7 +90,7 @@ export function useWatchContent() {
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
   const s2ColdStartRetried = useRef(false);
-  const [isReplacingSession, setIsReplacingSession] = useState(false);
+  const [_isReplacingSession, setIsReplacingSession] = useState(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -275,17 +274,6 @@ export function useWatchContent() {
       s2ColdStartRetried.current = false;
     }
   }, [streamUrl]);
-
-  // ============ STREAM REVOCATION ============
-  useStreamRevocation({
-    onRevoked: () => {
-      setStreamUrl(null);
-      setRefetchError(
-        'Playback stopped — you started playing on another tab or device.',
-      );
-    },
-    isReplacingSession,
-  });
 
   useEffect(() => {
     const handleUnload = () => stopVideo();
