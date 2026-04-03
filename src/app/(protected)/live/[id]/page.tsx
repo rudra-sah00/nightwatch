@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Calendar, Loader2, Trophy, Users } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,9 @@ import type { VideoMetadata } from '@/features/watch/player/context/types';
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const matchId = params.id as string;
+  const titleFromRoute = searchParams.get('title')?.trim() ?? '';
   const { match, isLoading, error } = useLiveMatch(matchId);
   const { isCreatingParty, handleCreateParty } = useLiveMatchPlayer(
     match ?? null,
@@ -166,24 +168,46 @@ export default function LiveMatchPlayerPage() {
 
   const team1Name = activeMatch.team1.name;
   const team2Name = activeMatch.team2.name;
+  const normalizedTeam1 = team1Name.trim().toUpperCase();
+  const normalizedTeam2 = team2Name.trim().toUpperCase();
+  const isGenericLivePair =
+    normalizedTeam1 === 'LIVE' &&
+    (normalizedTeam2 === 'STREAM' ||
+      normalizedTeam2 === 'LIVE STREAM' ||
+      normalizedTeam2 === '');
+  const channelLabelCandidates = [
+    activeMatch.channelName,
+    titleFromRoute,
+    activeMatch.league,
+    activeMatch.timeDesc,
+  ]
+    .map((value) => value?.trim())
+    .filter((value): value is string => {
+      if (!value) return false;
+      const normalized = value.toUpperCase();
+      return (
+        normalized !== 'LIVE' &&
+        normalized !== 'STREAM' &&
+        normalized !== 'LIVE STREAM'
+      );
+    });
+  const channelLabel = channelLabelCandidates[0] ?? '';
   const isChannelCard =
     activeMatch.contentKind === 'channel' ||
     activeMatch.type === 'all_channels' ||
     team2Name.toUpperCase() === 'STREAM' ||
-    team2Name.toLowerCase() === 'live stream';
+    team2Name.toLowerCase() === 'live stream' ||
+    isGenericLivePair;
 
   let displayTitle = '';
 
   if (isChannelCard) {
-    displayTitle = activeMatch.channelName || team1Name;
+    displayTitle = channelLabel || team1Name;
   } else if (
     team1Name.toUpperCase() === 'LIVE' &&
     team2Name.toUpperCase() === 'STREAM'
   ) {
-    displayTitle =
-      activeMatch.timeDesc && activeMatch.timeDesc !== 'LIVE'
-        ? activeMatch.timeDesc
-        : 'LIVE STREAM';
+    displayTitle = channelLabel || 'LIVE STREAM';
   } else {
     const isChannelOrEvent =
       !team2Name ||

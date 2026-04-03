@@ -43,7 +43,11 @@ export function useLiveMatchCard(match: LiveMatch) {
 
   const handleWatchSolo = () => {
     setShowPrompt(false);
-    router.push(`/live/${match.id}`);
+    const title =
+      match.contentKind === 'channel' || match.type === 'all_channels'
+        ? match.channelName || match.team1.name
+        : `${match.team1.name} vs ${match.team2.name}`;
+    router.push(`/live/${match.id}?title=${encodeURIComponent(title)}`);
   };
 
   const handleWatchParty = () => {
