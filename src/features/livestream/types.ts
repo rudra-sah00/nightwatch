@@ -32,6 +32,10 @@ export interface LiveMatch {
   teamMatchInfo2?: CricketMatchInfo;
   /** Cricket-specific: human-readable match situation */
   matchResult?: string;
+  /** UI hint to render as a channel card (single stream) */
+  contentKind?: 'match' | 'channel';
+  /** Optional channel name for channel-focused lists */
+  channelName?: string;
 }
 
 export interface LivestreamScheduleResponse {

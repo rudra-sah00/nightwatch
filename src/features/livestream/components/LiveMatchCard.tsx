@@ -30,6 +30,20 @@ interface LiveMatchCardProps {
   match: LiveMatch;
 }
 
+function asText(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  if (value && typeof value === 'object') {
+    const maybe = value as { name?: unknown; title?: unknown; id?: unknown };
+    if (typeof maybe.name === 'string') return maybe.name;
+    if (typeof maybe.title === 'string') return maybe.title;
+    if (typeof maybe.id === 'string' || typeof maybe.id === 'number') {
+      return String(maybe.id);
+    }
+  }
+  return fallback;
+}
+
 export function LiveMatchCard({ match }: LiveMatchCardProps) {
   const {
     isLive,
@@ -46,7 +60,13 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   } = useLiveMatchCard(match);
 
   const isServer2 = match.id.startsWith('pm:');
+  const isChannelCard =
+    match.contentKind === 'channel' || match.type === 'all_channels';
   const providerName = isServer2 ? 'Private Server' : 'Sports Today';
+  const team1Name = asText(match.team1?.name, 'Team 1');
+  const team2Name = asText(match.team2?.name, 'Team 2');
+  const leagueName = asText(match.league) || asText(match.type);
+  const channelName = asText(match.channelName) || team1Name;
 
   const matchModal = (
     <LiveMatchModal
@@ -83,7 +103,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
 
           <div className="flex flex-col items-center md:items-start gap-1 w-full mt-2">
             <span className="px-2 py-0.5 bg-gray-100 border-[2px] border-border text-[10px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
-              {match.league || match.type}
+              {leagueName}
             </span>
             <span
               className={`text-[9px] font-black uppercase tracking-tighter ${
@@ -95,68 +115,93 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
           </div>
         </div>
 
-        {/* 2. Teams (Center) */}
+        {/* 2. Teams / Channel (Center) */}
         <div className="flex flex-1 items-center justify-center gap-4 w-full">
-          {/* Team 1 */}
-          <div className="flex flex-1 items-center justify-end gap-2 md:gap-3 text-right min-w-0">
-            <div className="flex flex-col items-end min-w-0">
-              <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
-                {match.team1.name}
-              </span>
-              {(isLive || isEnded) && (
-                <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
-                  {match.type === 'cricket'
-                    ? getCricketScore(match, 1)
-                    : match.team1.score}
-                </span>
-              )}
+          {isChannelCard ? (
+            <div className="flex w-full items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                  {match.team1.avatar ? (
+                    <img
+                      src={match.team1.avatar}
+                      alt={channelName}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-headline font-black text-sm md:text-lg uppercase truncate text-foreground">
+                    {channelName}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
-              {match.team1.avatar ? (
-                <img
-                  src={match.team1.avatar}
-                  alt={match.team1.name}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-100 rounded-full" />
-              )}
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Team 1 */}
+              <div className="flex flex-1 items-center justify-end gap-2 md:gap-3 text-right min-w-0">
+                <div className="flex flex-col items-end min-w-0">
+                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
+                    {team1Name}
+                  </span>
+                  {(isLive || isEnded) && (
+                    <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
+                      {match.type === 'cricket'
+                        ? getCricketScore(match, 1)
+                        : match.team1.score}
+                    </span>
+                  )}
+                </div>
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                  {match.team1.avatar ? (
+                    <img
+                      src={match.team1.avatar}
+                      alt={team1Name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                  )}
+                </div>
+              </div>
 
-          {/* VS Badge */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center -mt-2">
-            <span className="text-sm md:text-lg font-black italic text-foreground/40 font-headline bg-gray-100 px-2 py-1 rounded-md border border-border/20">
-              VS
-            </span>
-          </div>
-
-          {/* Team 2 */}
-          <div className="flex flex-1 items-center justify-start gap-2 md:gap-3 text-left min-w-0">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
-              {match.team2.avatar ? (
-                <img
-                  src={match.team2.avatar}
-                  alt={match.team2.name}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-100 rounded-full" />
-              )}
-            </div>
-            <div className="flex flex-col items-start min-w-0">
-              <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
-                {match.team2.name}
-              </span>
-              {(isLive || isEnded) && (
-                <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
-                  {match.type === 'cricket'
-                    ? getCricketScore(match, 2)
-                    : match.team2.score}
+              {/* VS Badge */}
+              <div className="flex-shrink-0 flex flex-col items-center justify-center -mt-2">
+                <span className="text-sm md:text-lg font-black italic text-foreground/40 font-headline bg-gray-100 px-2 py-1 rounded-md border border-border/20">
+                  VS
                 </span>
-              )}
-            </div>
-          </div>
+              </div>
+
+              {/* Team 2 */}
+              <div className="flex flex-1 items-center justify-start gap-2 md:gap-3 text-left min-w-0">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                  {match.team2.avatar ? (
+                    <img
+                      src={match.team2.avatar}
+                      alt={match.team2.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                  )}
+                </div>
+                <div className="flex flex-col items-start min-w-0">
+                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
+                    {team2Name}
+                  </span>
+                  {(isLive || isEnded) && (
+                    <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
+                      {match.type === 'cricket'
+                        ? getCricketScore(match, 2)
+                        : match.team2.score}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 3. Action Button (Right) */}

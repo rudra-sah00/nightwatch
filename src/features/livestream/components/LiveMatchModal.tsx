@@ -14,6 +14,20 @@ interface LiveMatchModalProps {
   onWatchParty: () => void;
 }
 
+function asText(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  if (value && typeof value === 'object') {
+    const maybe = value as { name?: unknown; title?: unknown; id?: unknown };
+    if (typeof maybe.name === 'string') return maybe.name;
+    if (typeof maybe.title === 'string') return maybe.title;
+    if (typeof maybe.id === 'string' || typeof maybe.id === 'number') {
+      return String(maybe.id);
+    }
+  }
+  return fallback;
+}
+
 function TeamPanel({
   team,
   score,
@@ -77,6 +91,25 @@ export function LiveMatchModal({
   const isServer2 = match.id.startsWith('pm:');
   const providerName = isServer2 ? 'Private Server' : 'Sports Today';
   const canWatch = (isLive || isServer2) && match.playType === 'PlayTypeVideo';
+  const team1Name = asText(match.team1?.name, 'Team 1');
+  const team2Name = asText(match.team2?.name, 'Team 2');
+  const leagueName = asText(match.league);
+  const typeName = asText(match.type);
+  const timeDesc = asText(match.timeDesc);
+  const isChannelCard =
+    match.contentKind === 'channel' || typeName === 'all_channels';
+  const channelTitle = asText(match.channelName) || team1Name;
+
+  const safeTeam1 = {
+    ...match.team1,
+    name: team1Name,
+    score: asText(match.team1?.score, '0'),
+  };
+  const safeTeam2 = {
+    ...match.team2,
+    name: team2Name,
+    score: asText(match.team2?.score, '0'),
+  };
 
   const startTime = new Date(match.startTime);
   const formattedTime = startTime.toLocaleTimeString([], {
@@ -104,7 +137,7 @@ export function LiveMatchModal({
               id="live-match-modal-title"
               className="font-headline font-black uppercase tracking-widest text-foreground text-lg"
             >
-              Match Details
+              {isChannelCard ? 'Channel Details' : 'Match Details'}
             </span>
             <div
               className={`px-3 py-1 border border-gray-200 text-[10px] font-black font-headline uppercase tracking-[0.2em] rounded-md hidden sm:block ${
@@ -128,59 +161,88 @@ export function LiveMatchModal({
 
         {/* Hero — team panels */}
         <div className="relative w-full bg-background border-b-[4px] border-border">
-          <div className="relative flex items-stretch py-8 md:py-16">
-            <TeamPanel
-              team={match.team1}
-              score={match.team1.score}
-              isLive={isLive}
-              isEnded={isEnded}
-            />
-
-            {/* Centre column */}
-            <div className="flex-shrink-0 w-24 md:w-48 flex flex-col items-center justify-center gap-4 relative z-10 px-2 lg:px-4">
-              {/* LIVE badge */}
-              {isLive && (
-                <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
-                    <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
+          {isChannelCard ? (
+            <div className="relative py-8 md:py-16">
+              <div className="max-w-2xl mx-auto flex flex-col items-center gap-5 px-4">
+                <TeamPanel
+                  team={safeTeam1}
+                  score={safeTeam1.score}
+                  isLive={false}
+                  isEnded={false}
+                />
+                {isLive && (
+                  <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
+                    </span>
+                    <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
+                      Live
+                    </span>
+                  </div>
+                )}
+                {isUpcoming && (
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-white border-[3px] border-border px-3 py-1 ">
+                    {formattedTime}
                   </span>
-                  <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
-                    Live
-                  </span>
-                </div>
-              )}
-              {isEnded && (
-                <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-[#ffcc00] border-[3px] border-border px-3 py-1 ">
-                  Final
-                </span>
-              )}
-              {isUpcoming && (
-                <span className="text-xs md:text-sm font-black font-headline text-foreground bg-white border-[3px] border-border px-3 py-1 ">
-                  {formattedTime}
-                </span>
-              )}
-
-              {/* VS */}
-              <span className="text-3xl md:text-6xl font-black font-headline text-foreground tracking-widest">
-                VS
-              </span>
-
-              {/* Live time desc */}
-              {isLive && match.timeDesc && (
-                <span className="text-[10px] md:text-sm font-bold font-headline uppercase tracking-widest text-foreground text-center">
-                  {match.timeDesc}
-                </span>
-              )}
+                )}
+              </div>
             </div>
+          ) : (
+            <div className="relative flex items-stretch py-8 md:py-16">
+              <TeamPanel
+                team={safeTeam1}
+                score={safeTeam1.score}
+                isLive={isLive}
+                isEnded={isEnded}
+              />
 
-            <TeamPanel
-              team={match.team2}
-              score={match.team2.score}
-              isLive={isLive}
-              isEnded={isEnded}
-            />
-          </div>
+              {/* Centre column */}
+              <div className="flex-shrink-0 w-24 md:w-48 flex flex-col items-center justify-center gap-4 relative z-10 px-2 lg:px-4">
+                {/* LIVE badge */}
+                {isLive && (
+                  <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
+                    </span>
+                    <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
+                      Live
+                    </span>
+                  </div>
+                )}
+                {isEnded && (
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-[#ffcc00] border-[3px] border-border px-3 py-1 ">
+                    Final
+                  </span>
+                )}
+                {isUpcoming && (
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-white border-[3px] border-border px-3 py-1 ">
+                    {formattedTime}
+                  </span>
+                )}
+
+                {/* VS */}
+                <span className="text-3xl md:text-6xl font-black font-headline text-foreground tracking-widest">
+                  VS
+                </span>
+
+                {/* Live time desc */}
+                {isLive && !isChannelCard && timeDesc && (
+                  <span className="text-[10px] md:text-sm font-bold font-headline uppercase tracking-widest text-foreground text-center">
+                    {timeDesc}
+                  </span>
+                )}
+              </div>
+
+              <TeamPanel
+                team={safeTeam2}
+                score={safeTeam2.score}
+                isLive={isLive}
+                isEnded={isEnded}
+              />
+            </div>
+          )}
         </div>
 
         {/* Details section */}
@@ -189,13 +251,19 @@ export function LiveMatchModal({
             {/* Title row */}
             <div className="text-center space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
-                {match.team1.name} <span className="text-[#e63b2e]">vs</span>{' '}
-                {match.team2.name}
+                {isChannelCard ? (
+                  channelTitle
+                ) : (
+                  <>
+                    {team1Name} <span className="text-[#e63b2e]">vs</span>{' '}
+                    {team2Name}
+                  </>
+                )}
               </h1>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                {match.league && (
+                {leagueName && (
                   <span className="bg-white border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
-                    {match.league}
+                    {leagueName}
                   </span>
                 )}
                 {isUpcoming && (
@@ -203,9 +271,9 @@ export function LiveMatchModal({
                     {formattedDate} • {formattedTime}
                   </span>
                 )}
-                {match.type && match.type !== match.league && (
+                {typeName && typeName !== leagueName && (
                   <span className="text-foreground text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-border px-4 py-1.5 bg-[#ffcc00]">
-                    {match.type}
+                    {typeName}
                   </span>
                 )}
               </div>

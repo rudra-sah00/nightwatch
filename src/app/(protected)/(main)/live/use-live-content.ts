@@ -10,7 +10,7 @@ export function useLiveContent() {
     (searchParams.get('server') as 'server1' | 'server2') || 'server1';
   const activeTab =
     searchParams.get('sportType') ||
-    (activeServer === 'server1' ? 'basketball' : 'soccer');
+    (activeServer === 'server1' ? 'basketball' : 'all_channels');
 
   const [isPending, startTransition] = useTransition();
 

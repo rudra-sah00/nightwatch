@@ -28,6 +28,7 @@ const SERVER_1_SPORTS = [
 ] as const;
 
 const SERVER_2_SPORTS = [
+  { id: 'all_channels', label: 'All Channels' },
   { id: 'soccer', label: 'Soccer' },
   { id: 'nba', label: 'NBA' },
   { id: 'ufc', label: 'UFC/MMA' },
@@ -67,6 +68,9 @@ function LiveContent() {
     activeTab,
     activeServer,
   );
+
+  const isAllChannelsView =
+    activeServer === 'server2' && activeTab === 'all_channels';
 
   // Separate live, upcoming, and ended matches
   const endedMatches = schedule.filter((m) => m.status === 'MatchEnded');
@@ -301,78 +305,102 @@ function LiveContent() {
           <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-border  text-center max-w-2xl mx-auto">
             <Calendar className="w-20 h-20 text-[#0055ff] mb-6" />
             <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-              No Matches Found
+              {isAllChannelsView ? 'No Channels Found' : 'No Matches Found'}
             </h3>
             <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a] max-w-md">
-              No {activeSport?.label?.toLowerCase()} matches scheduled for the
-              upcoming days.
+              {isAllChannelsView
+                ? 'No always-on channels are currently available from this provider.'
+                : `No ${activeSport?.label?.toLowerCase()} matches scheduled for the upcoming days.`}
             </p>
           </div>
         ) : (
           <div className="space-y-16">
-            {/* SCHEDULE Section (Combines Live and Upcoming) */}{' '}
-            {Object.keys(upcomingByDate).length > 0 && (
+            {isAllChannelsView && (
               <section>
                 <div className="flex items-center gap-4 mb-8 bg-[#0055ff] border-[4px] border-border px-5 py-3 inline-flex ">
-                  <Clock className="w-6 h-6 text-white stroke-[3px]" />
+                  <Radio className="w-6 h-6 text-white stroke-[3px]" />
                   <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
-                    Schedule
+                    All Channels
                   </h2>
+                  <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
+                    {schedule.length}
+                  </span>
                 </div>
-                <div className="space-y-8">
-                  {Object.entries(upcomingByDate).map(([date, matches]) => {
-                    const isToday =
-                      new Date().toLocaleDateString([], {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      }) === date;
-                    return (
-                      <div key={date} className="mb-8">
-                        <div className="px-6 py-4 bg-background border-[4px] border-border mb-6 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-6 h-6 text-foreground stroke-[3px]" />
-                            <span className="text-xl md:text-2xl font-black uppercase tracking-widest text-foreground font-headline mt-1">
-                              {isToday ? 'Today' : date}
-                            </span>
-                          </div>
-                          <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
-                            {matches.length}{' '}
-                            {matches.length === 1 ? 'Match' : 'Matches'}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-4">
-                          {matches.map((match) => (
-                            <LiveMatchCard key={match.id} match={match} />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="flex flex-col gap-4">
+                  {schedule.map((match) => (
+                    <LiveMatchCard key={match.id} match={match} />
+                  ))}
                 </div>
               </section>
             )}
-            {/* ENDED Section */}
-            {endedMatches.length > 0 && (
-              <section>
-                <div className="flex items-center gap-4 mb-8 bg-[#1a1a1a] border-[4px] border-border px-5 py-3 inline-flex ">
-                  <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
-                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
-                    Completed
-                  </h2>
-                  <span className="bg-[#4a4a4a] text-white px-3 py-1 border-[3px] border-[#f5f0e8] text-sm font-black font-headline uppercase tracking-widest">
-                    {endedMatches.length}{' '}
-                    {endedMatches.length === 1 ? 'Match' : 'Matches'}
-                  </span>
-                </div>
-                <div className="bg-transparent">
-                  <div className="flex flex-col gap-4">
-                    {endedMatches.map((match) => (
-                      <LiveMatchCard key={match.id} match={match} />
-                    ))}
-                  </div>
-                </div>
-              </section>
+
+            {!isAllChannelsView && (
+              <>
+                {/* SCHEDULE Section (Combines Live and Upcoming) */}{' '}
+                {Object.keys(upcomingByDate).length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-4 mb-8 bg-[#0055ff] border-[4px] border-border px-5 py-3 inline-flex ">
+                      <Clock className="w-6 h-6 text-white stroke-[3px]" />
+                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
+                        Schedule
+                      </h2>
+                    </div>
+                    <div className="space-y-8">
+                      {Object.entries(upcomingByDate).map(([date, matches]) => {
+                        const isToday =
+                          new Date().toLocaleDateString([], {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                          }) === date;
+                        return (
+                          <div key={date} className="mb-8">
+                            <div className="px-6 py-4 bg-background border-[4px] border-border mb-6 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Calendar className="w-6 h-6 text-foreground stroke-[3px]" />
+                                <span className="text-xl md:text-2xl font-black uppercase tracking-widest text-foreground font-headline mt-1">
+                                  {isToday ? 'Today' : date}
+                                </span>
+                              </div>
+                              <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
+                                {matches.length}{' '}
+                                {matches.length === 1 ? 'Match' : 'Matches'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-4">
+                              {matches.map((match) => (
+                                <LiveMatchCard key={match.id} match={match} />
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+                {/* ENDED Section */}
+                {endedMatches.length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-4 mb-8 bg-[#1a1a1a] border-[4px] border-border px-5 py-3 inline-flex ">
+                      <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
+                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
+                        Completed
+                      </h2>
+                      <span className="bg-[#4a4a4a] text-white px-3 py-1 border-[3px] border-[#f5f0e8] text-sm font-black font-headline uppercase tracking-widest">
+                        {endedMatches.length}{' '}
+                        {endedMatches.length === 1 ? 'Match' : 'Matches'}
+                      </span>
+                    </div>
+                    <div className="bg-transparent">
+                      <div className="flex flex-col gap-4">
+                        {endedMatches.map((match) => (
+                          <LiveMatchCard key={match.id} match={match} />
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </>
             )}
           </div>
         )}

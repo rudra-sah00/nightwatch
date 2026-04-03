@@ -55,12 +55,16 @@ export function useLiveMatchCard(match: LiveMatch) {
 
     setIsCreatingParty(true);
     const proxyUrl = `${env.BACKEND_URL}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
+    const roomTitle =
+      match.contentKind === 'channel' || match.type === 'all_channels'
+        ? match.channelName || match.team1.name
+        : `${match.team1.name} vs ${match.team2.name}`;
 
     const roomId = generateRoomId();
 
     createPartyRoom(roomId, {
       contentId: match.id,
-      title: `${match.team1.name} vs ${match.team2.name}`,
+      title: roomTitle,
       type: 'livestream',
       streamUrl: proxyUrl,
       posterUrl: match.team1.avatar,

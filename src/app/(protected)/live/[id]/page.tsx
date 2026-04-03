@@ -166,10 +166,17 @@ export default function LiveMatchPlayerPage() {
 
   const team1Name = activeMatch.team1.name;
   const team2Name = activeMatch.team2.name;
+  const isChannelCard =
+    activeMatch.contentKind === 'channel' ||
+    activeMatch.type === 'all_channels' ||
+    team2Name.toUpperCase() === 'STREAM' ||
+    team2Name.toLowerCase() === 'live stream';
 
   let displayTitle = '';
 
-  if (
+  if (isChannelCard) {
+    displayTitle = activeMatch.channelName || team1Name;
+  } else if (
     team1Name.toUpperCase() === 'LIVE' &&
     team2Name.toUpperCase() === 'STREAM'
   ) {
