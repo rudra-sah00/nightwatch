@@ -12,20 +12,58 @@ export function useSubtitleOverlay({
 }: UseSubtitleOverlayOptions) {
   const [cueText, setCueText] = useState<string>('');
   const prevCueTextRef = useRef<string>('');
+  const isFullscreenRef = useRef(false);
 
   // Inject CSS to suppress native VTT rendering
   useEffect(() => {
     const video = videoRef?.current;
     if (!video) return;
 
-    const style = document.createElement('style');
-    style.id = 'hide-native-cues';
-    style.textContent =
-      'video::cue { color: transparent; background: transparent; text-shadow: none; }';
-    document.head.appendChild(style);
+    const ensureStyle = () => {
+      if (document.getElementById('hide-native-cues')) return;
+      const style = document.createElement('style');
+      style.id = 'hide-native-cues';
+      style.textContent =
+        'video::cue { color: transparent; background: transparent; text-shadow: none; }';
+      document.head.appendChild(style);
+    };
+
+    const removeStyle = () => {
+      document.getElementById('hide-native-cues')?.remove();
+    };
+
+    const syncCueVisibility = () => {
+      const isNativeVideoFullscreen =
+        (video as HTMLVideoElement & { webkitDisplayingFullscreen?: boolean })
+          .webkitDisplayingFullscreen === true;
+      const isDocumentFullscreen = !!document.fullscreenElement;
+      isFullscreenRef.current = isNativeVideoFullscreen || isDocumentFullscreen;
+
+      if (isFullscreenRef.current) {
+        removeStyle();
+      } else {
+        ensureStyle();
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      syncCueVisibility();
+    };
+
+    syncCueVisibility();
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    video.addEventListener('webkitbeginfullscreen', handleFullscreenChange);
+    video.addEventListener('webkitendfullscreen', handleFullscreenChange);
 
     return () => {
-      document.getElementById('hide-native-cues')?.remove();
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      video.removeEventListener(
+        'webkitbeginfullscreen',
+        handleFullscreenChange,
+      );
+      video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+      removeStyle();
     };
   }, [videoRef]);
 
@@ -77,7 +115,7 @@ export function useSubtitleOverlay({
       }
 
       if (activeText !== prevCueTextRef.current) {
-        setCueText(activeText);
+        setCueText(isFullscreenRef.current ? '' : activeText);
         prevCueTextRef.current = activeText;
       }
     };

@@ -29,6 +29,20 @@ interface UseHlsOptions {
   isLive?: boolean;
 }
 
+interface NativeAudioTrack {
+  id?: string;
+  label?: string;
+  language?: string;
+  enabled: boolean;
+}
+
+interface VideoWithNativeAudioTracks extends HTMLVideoElement {
+  audioTracks?: {
+    length: number;
+    [index: number]: NativeAudioTrack;
+  };
+}
+
 export function useHls({
   videoRef,
   streamUrl,
@@ -334,6 +348,34 @@ export function useHls({
         // its own error / control UI.
         nativeLoadedMetadataHandler = () => {
           if (cancelled) return;
+
+          const nativeVideo = video as VideoWithNativeAudioTracks;
+          const nativeAudioTracks = nativeVideo.audioTracks;
+          if (nativeAudioTracks && nativeAudioTracks.length > 0) {
+            const audioTracks: AudioTrack[] = [];
+            let selectedTrackId: string | null = null;
+
+            for (let i = 0; i < nativeAudioTracks.length; i++) {
+              const track = nativeAudioTracks[i];
+              const id = String(i);
+              const isDefault = !!track.enabled || i === 0;
+              if (track.enabled) selectedTrackId = id;
+
+              audioTracks.push({
+                id,
+                label: track.label || track.language || `Audio ${i + 1}`,
+                language: track.language || 'unknown',
+                isDefault,
+              });
+            }
+
+            dispatch({ type: 'SET_AUDIO_TRACKS', audioTracks });
+            dispatch({
+              type: 'SET_CURRENT_AUDIO_TRACK',
+              trackId: selectedTrackId || audioTracks[0]?.id || null,
+            });
+          }
+
           dispatch({ type: 'SET_LOADING', isLoading: false });
           video.play().catch(() => {});
         };
@@ -445,14 +487,29 @@ export function useHls({
     [streamUrl],
   );
 
-  const setAudioTrack = useCallback((trackId: string) => {
-    if (hlsRef.current) {
-      const trackIndex = parseInt(trackId, 10);
-      if (!Number.isNaN(trackIndex) && trackIndex >= 0) {
-        hlsRef.current.audioTrack = trackIndex;
+  const setAudioTrack = useCallback(
+    (trackId: string) => {
+      if (hlsRef.current) {
+        const trackIndex = parseInt(trackId, 10);
+        if (!Number.isNaN(trackIndex) && trackIndex >= 0) {
+          hlsRef.current.audioTrack = trackIndex;
+        }
+        return;
       }
-    }
-  }, []);
+
+      const nativeVideo = videoRef.current as VideoWithNativeAudioTracks | null;
+      const nativeAudioTracks = nativeVideo?.audioTracks;
+      if (!nativeAudioTracks) return;
+
+      const trackIndex = parseInt(trackId, 10);
+      if (Number.isNaN(trackIndex) || trackIndex < 0) return;
+
+      for (let i = 0; i < nativeAudioTracks.length; i++) {
+        nativeAudioTracks[i].enabled = i === trackIndex;
+      }
+    },
+    [videoRef],
+  );
 
   return { hlsRef, setQuality, setAudioTrack };
 }
