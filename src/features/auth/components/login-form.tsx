@@ -39,7 +39,10 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   return (
     <AuthCard title={getHeader()} className="h-[440px]">
       {step === 'otp' && (
-        <div className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300 motion-reduce:animate-none">
+        <form
+          onSubmit={handleOtpSubmit}
+          className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300 motion-reduce:animate-none"
+        >
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               CODE DISPATCHED TO
@@ -73,7 +76,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
 
           <div className="flex flex-col gap-2 pb-0.5 mt-8">
             <Button
-              onClick={handleOtpSubmit}
+              type="submit"
               variant="neo-yellow"
               size="xl"
               isLoading={isLoading}
@@ -93,7 +96,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               {(countdown || 0) > 0 ? `RETRY IN ${countdown}S` : 'RESEND KEY'}
             </Button>
           </div>
-        </div>
+        </form>
       )}
 
       {step === 'initial' && (

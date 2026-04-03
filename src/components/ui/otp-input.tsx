@@ -23,7 +23,7 @@ export function OtpInput({
         maxLength={6}
         placeholder="123456"
         className={cn(
-          'text-center text-3xl tracking-[0.6em] font-headline font-black h-16 bg-white border border-gray-200 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] shadow-sm',
+          'text-center text-3xl tracking-[0.6em] font-headline font-black h-16 transition-[background-color,color,border-color,box-shadow,opacity,transform]',
           className,
         )}
         value={value}
