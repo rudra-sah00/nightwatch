@@ -58,7 +58,7 @@ describe('UpdateProfileForm', () => {
 
     it('shows @ symbol prefix for username', () => {
       render(<UpdateProfileForm />);
-      expect(screen.getByText('@')).toBeInTheDocument();
+      expect(screen.getAllByText('@').length).toBeGreaterThan(0);
     });
 
     it('initializes with user data', () => {

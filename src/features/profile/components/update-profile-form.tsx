@@ -41,7 +41,7 @@ export function UpdateProfileForm() {
       className="space-y-16"
     >
       {/* Main Profile Info Section */}
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 relative flex flex-col items-center md:items-start md:flex-row gap-8 min-h-[320px]">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8 relative flex flex-col items-center md:items-start md:flex-row gap-6 md:gap-8 min-h-[320px]">
         {/* Avatar Section */}
         <div className="relative group shrink-0">
           <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border border-gray-200 rounded-xl shadow-sm bg-gray-50 transition-transform">
@@ -84,7 +84,7 @@ export function UpdateProfileForm() {
         </div>
 
         {/* User Info & Quick Actions */}
-        <div className="flex-1 flex flex-col gap-6 w-full text-center md:text-left mt-4 md:mt-0">
+        <div className="flex-1 min-w-0 flex flex-col gap-6 w-full text-center md:text-left mt-2 md:mt-0">
           <div className="space-y-2">
             {/* Display Name - Mobile position (under photo) */}
             <div className="md:hidden text-2xl font-headline font-black text-foreground uppercase">
@@ -112,14 +112,58 @@ export function UpdateProfileForm() {
               </div>
             </div>
 
-            {/* Username Selection Header */}
-            <h1 className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 text-4xl md:text-7xl font-black font-headline uppercase tracking-tighter text-foreground leading-none mb-2 justify-center md:justify-start">
-              <span className="inline-flex items-center gap-1.5 md:gap-3 justify-center md:justify-start">
-                <span className="text-[blue-600] leading-none translate-y-[-2px] md:translate-y-[-4px]">
+            {/* Username - Mobile */}
+            <div className="md:hidden">
+              <div className="mx-auto w-fit max-w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                <label
+                  htmlFor="username_mobile"
+                  className="inline-flex w-full max-w-full items-baseline justify-center gap-1"
+                >
+                  <span className="shrink-0 text-4xl font-black font-headline text-[blue-600] leading-none">
+                    @
+                  </span>
+                  <input
+                    id="username_mobile"
+                    name="username_mobile"
+                    value={profileForm.username}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      profileForm.setUsername(
+                        val.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+                      );
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        profileFormRef.current?.requestSubmit();
+                      }
+                    }}
+                    onBlur={() => {
+                      if (
+                        profileForm.hasChanges &&
+                        profileForm.isAvailable !== false
+                      ) {
+                        profileFormRef.current?.requestSubmit();
+                      }
+                    }}
+                    className="w-fit min-w-[3ch] max-w-[58vw] bg-transparent border-none p-0 text-center text-4xl font-black font-headline uppercase tracking-tighter text-foreground leading-none outline-none caret-[blue-600]"
+                    size={Math.min(
+                      Math.max(profileForm.username.length, 3),
+                      20,
+                    )}
+                    aria-label="Mobile Handle"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Username Selection Header - Desktop */}
+            <h1 className="hidden md:flex w-full min-w-0 overflow-hidden flex-row items-baseline gap-3 text-7xl font-black font-headline uppercase tracking-tighter text-foreground leading-none mb-2 justify-start">
+              <span className="inline-flex w-auto max-w-lg items-baseline gap-3 justify-start">
+                <span className="shrink-0 text-[blue-600] leading-none translate-y-[-4px]">
                   @
                 </span>
-                <div className="min-w-0 flex-1 grid grid-cols-1 items-baseline relative group">
-                  <span className="col-start-1 row-start-1 pointer-events-none text-foreground underline decoration-4 md:decoration-8 underline-offset-[6px] md:underline-offset-8 font-black font-headline uppercase truncate group-focus-within:invisible">
+                <div className="min-w-0 flex-1 overflow-hidden grid grid-cols-1 items-baseline relative group">
+                  <span className="col-start-1 row-start-1 block max-w-full pointer-events-none text-left text-foreground underline decoration-8 underline-offset-8 font-black font-headline uppercase truncate group-focus-within:invisible">
                     {profileForm.username ||
                       (profileForm.isPending ? '' : user.username)}
                   </span>
@@ -146,7 +190,7 @@ export function UpdateProfileForm() {
                         profileFormRef.current?.requestSubmit();
                       }
                     }}
-                    className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 md:focus:decoration-8 underline-offset-[6px] md:underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
+                    className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-all opacity-0 focus:opacity-100 placeholder:text-transparent"
                     aria-label="Username"
                   />
                 </div>
@@ -186,9 +230,10 @@ export function UpdateProfileForm() {
               </div>
             </div>
 
-            <div className="text-base md:text-lg font-headline font-medium text-foreground max-w-lg border-l-4 border-[blue-600] pl-3 uppercase">
-              <span className="opacity-80">
-                {user.email} • JOINED {formattedJoinDate}
+            <div className="w-full min-w-0 text-base md:text-lg font-headline font-medium text-foreground md:max-w-lg uppercase">
+              <span className="opacity-80 flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 md:justify-start md:flex-nowrap">
+                <span className="min-w-0 truncate">{user.email}</span>
+                <span className="shrink-0">• JOINED {formattedJoinDate}</span>
               </span>
             </div>
 
@@ -219,7 +264,7 @@ export function UpdateProfileForm() {
               )}
           </div>
 
-          <div className="md:absolute md:top-8 md:right-8 flex flex-col items-center md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0">
+          <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0 md:self-start md:ml-auto">
             {profileForm.isPending && (
               <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-foreground font-headline font-bold uppercase border-2 border-border  animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -234,7 +279,7 @@ export function UpdateProfileForm() {
                 e.preventDefault();
                 logout();
               }}
-              className="gap-2 shrink-0 md:self-start self-center min-w-[140px]"
+              className="gap-2 shrink-0 md:self-start self-center w-full max-w-xs md:w-auto min-w-[140px]"
               title="Sign Out"
             >
               <LogOut className="w-5 h-5 stroke-[3px]" />
@@ -373,7 +418,11 @@ export function UpdateProfileForm() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8">
-            <AlertDialogCancel disabled={profileForm.isDeleting}>
+            <AlertDialogCancel
+              type="button"
+              onClick={() => profileForm.setShowDeleteDialog(false)}
+              disabled={profileForm.isDeleting}
+            >
               CANCEL
             </AlertDialogCancel>
             <AlertDialogAction
