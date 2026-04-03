@@ -154,7 +154,7 @@ export function ContentDetailModal({
     >
       <div className="relative w-full h-full flex flex-col bg-white overflow-hidden">
         {/* Fixed Header */}
-        <div className="border-b-[4px] border-border bg-background flex justify-between items-center px-4 sm:px-6 py-4 flex-shrink-0 z-20 sticky top-0">
+        <div className="border-b-[4px] border-border bg-background flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0">
           <span
             id="modal-title"
             className="font-headline font-black uppercase tracking-widest text-foreground text-lg sm:text-xl truncate flex-1 pr-4"
