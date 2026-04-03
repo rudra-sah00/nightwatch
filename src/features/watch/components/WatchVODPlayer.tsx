@@ -51,6 +51,15 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   const useInlineMobileLayout =
     isMobile && (props.mobileLayout ?? 'inline') === 'inline';
 
+  const mobileMetaText =
+    props.metadata.type === 'series' &&
+    props.metadata.season != null &&
+    props.metadata.episode != null
+      ? `S${props.metadata.season}:E${props.metadata.episode}${props.metadata.episodeTitle ? ` • ${props.metadata.episodeTitle}` : ''}`
+      : props.metadata.year
+        ? `Movie • ${props.metadata.year}`
+        : 'Movie';
+
   // Handle going back
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -73,11 +82,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         <h1 className="text-base font-semibold text-white truncate">
           {props.metadata.title}
         </h1>
-        {props.metadata.season != null && props.metadata.episode != null ? (
-          <p className="text-xs text-white/70 truncate">
-            S{props.metadata.season}:E{props.metadata.episode}
-          </p>
-        ) : null}
+        <p className="text-xs text-white/70 truncate">{mobileMetaText}</p>
       </div>
       {props.mobileHeaderContent}
     </div>
@@ -169,14 +174,14 @@ function VODPlayerState() {
             <Player.PlayPause />
             <Player.SkipButtons />
             <Player.Volume />
-            <div className="hidden min-[420px]:contents md:contents">
+            <div className="hidden md:contents">
               <Player.TimeDisplay />
             </div>
             <Player.Spacer />
-            <div className="hidden min-[420px]:contents md:contents">
+            <div className="hidden md:contents">
               <Player.EpisodePanelTrigger />
             </div>
-            <div className="hidden min-[420px]:contents md:contents">
+            <div className="hidden md:contents">
               <Player.AudioSubtitleSelectors />
             </div>
             <Player.SettingsMenu />
