@@ -154,17 +154,17 @@ export function ContentDetailModal({
     >
       <div className="relative w-full h-full flex flex-col bg-white overflow-hidden">
         {/* Fixed Header */}
-        <div className="border-b-[4px] border-border bg-background flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0">
+        <div className="border-b-[4px] border-white/10 sm:border-border bg-black text-white sm:bg-background sm:text-foreground flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0">
           <span
             id="modal-title"
-            className="font-headline font-black uppercase tracking-widest text-foreground text-lg sm:text-xl truncate flex-1 pr-4"
+            className="font-headline font-black uppercase tracking-widest text-white sm:text-foreground text-lg sm:text-xl truncate flex-1 pr-4"
           >
             {show.title}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-white/20 sm:border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />
