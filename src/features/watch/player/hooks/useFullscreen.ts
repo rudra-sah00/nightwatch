@@ -49,89 +49,12 @@ export function useFullscreen({
   const latestVideoRef = useRef<VideoElementWithWebkit | null>(null);
   const manualMobileFullscreenRef = useRef(false);
   const shouldResumeAfterFullscreenExitRef = useRef(false);
-  const fsDebugEnabledRef = useRef(false);
-  const fsDebugPanelRef = useRef<HTMLPreElement | null>(null);
-  const fsDebugLinesRef = useRef<string[]>([]);
   const lockedStylesRef = useRef<{
     htmlOverflow: string;
     bodyOverflow: string;
     bodyOverscrollBehavior: string;
     bodyHeight: string;
   } | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return;
-    }
-
-    const enabled = new URLSearchParams(window.location.search).has('fsdebug');
-    fsDebugEnabledRef.current = enabled;
-    if (!enabled) return;
-
-    const panel = document.createElement('pre');
-    panel.id = 'fs-debug-panel';
-    panel.setAttribute('aria-live', 'polite');
-    panel.style.position = 'fixed';
-    panel.style.left = '8px';
-    panel.style.right = '8px';
-    panel.style.bottom = '8px';
-    panel.style.maxHeight = '40dvh';
-    panel.style.overflow = 'auto';
-    panel.style.padding = '8px';
-    panel.style.margin = '0';
-    panel.style.borderRadius = '8px';
-    panel.style.background = 'rgba(0, 0, 0, 0.82)';
-    panel.style.color = '#7CFC00';
-    panel.style.fontSize = '11px';
-    panel.style.lineHeight = '1.35';
-    panel.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-    panel.style.zIndex = '2147483647';
-    panel.style.pointerEvents = 'none';
-    panel.textContent = '[fs] debug panel enabled';
-    document.body.append(panel);
-    fsDebugPanelRef.current = panel;
-
-    return () => {
-      fsDebugEnabledRef.current = false;
-      fsDebugLinesRef.current = [];
-      if (fsDebugPanelRef.current) {
-        fsDebugPanelRef.current.remove();
-        fsDebugPanelRef.current = null;
-      }
-    };
-  }, []);
-
-  const logFsDebug = useCallback((message: string) => {
-    if (typeof window === 'undefined' || !fsDebugEnabledRef.current) return;
-
-    const stamp = new Date().toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-    const line = `[fs ${stamp}] ${message}`;
-
-    fsDebugLinesRef.current = [...fsDebugLinesRef.current.slice(-24), line];
-    if (fsDebugPanelRef.current) {
-      fsDebugPanelRef.current.textContent = fsDebugLinesRef.current.join('\n');
-    }
-    try {
-      window.localStorage.setItem(
-        'fsdebug:last',
-        fsDebugLinesRef.current.join('\n'),
-      );
-    } catch {
-      /* ignore storage errors */
-    }
-
-    console.info(line);
-    try {
-      toast(line, { duration: 2000 });
-    } catch {
-      /* toast renderer may be unavailable in some layouts */
-    }
-  }, []);
 
   const lockDocumentScroll = useCallback(() => {
     if (typeof document === 'undefined' || lockedStylesRef.current) return;
@@ -161,61 +84,43 @@ export function useFullscreen({
     lockedStylesRef.current = null;
   }, []);
 
-  const requestElementFullscreen = useCallback(
-    async (target: HTMLElement) => {
-      if (target.requestFullscreen) {
+  const requestElementFullscreen = useCallback(async (target: HTMLElement) => {
+    if (target.requestFullscreen) {
+      try {
+        // Some mobile browsers reject unsupported options. Retry without options.
+        await target.requestFullscreen({ navigationUI: 'hide' });
+        return true;
+      } catch {
         try {
-          // Some mobile browsers reject unsupported options. Retry without options.
-          await target.requestFullscreen({ navigationUI: 'hide' });
-          logFsDebug('entered via requestFullscreen(options)');
+          await target.requestFullscreen();
           return true;
         } catch {
-          logFsDebug(
-            'requestFullscreen(options) failed, retrying without options',
-          );
-          try {
-            await target.requestFullscreen();
-            logFsDebug('entered via requestFullscreen()');
-            return true;
-          } catch {
-            logFsDebug(
-              'requestFullscreen() failed, trying webkit prefixed path',
-            );
-            /* continue to vendor-prefixed fallbacks */
-          }
+          /* continue to vendor-prefixed fallbacks */
         }
       }
+    }
 
-      const el = target as HTMLElementWithWebkit;
-      if (el.webkitRequestFullscreen) {
-        try {
-          await el.webkitRequestFullscreen();
-          logFsDebug('entered via webkitRequestFullscreen()');
-          return true;
-        } catch {
-          logFsDebug(
-            'webkitRequestFullscreen() failed, trying legacy webkitRequestFullScreen()',
-          );
-          /* continue to older fallback */
-        }
+    const el = target as HTMLElementWithWebkit;
+    if (el.webkitRequestFullscreen) {
+      try {
+        await el.webkitRequestFullscreen();
+        return true;
+      } catch {
+        /* continue to older fallback */
       }
+    }
 
-      if (el.webkitRequestFullScreen) {
-        try {
-          el.webkitRequestFullScreen();
-          logFsDebug('entered via webkitRequestFullScreen()');
-          return true;
-        } catch {
-          logFsDebug('webkitRequestFullScreen() failed');
-          /* no-op */
-        }
+    if (el.webkitRequestFullScreen) {
+      try {
+        el.webkitRequestFullScreen();
+        return true;
+      } catch {
+        /* no-op */
       }
+    }
 
-      logFsDebug('no element fullscreen API succeeded');
-      return false;
-    },
-    [logFsDebug],
-  );
+    return false;
+  }, []);
 
   const isVideoNativeFullscreen = useCallback(
     (video: VideoElementWithWebkit | null | undefined) =>
@@ -231,9 +136,8 @@ export function useFullscreen({
       if (video.paused) {
         try {
           await Promise.resolve(video.play());
-          logFsDebug('video.play() succeeded before fullscreen');
         } catch {
-          logFsDebug('video.play() failed before fullscreen');
+          /* continue even if play fails */
         }
       }
 
@@ -245,33 +149,27 @@ export function useFullscreen({
           shouldResumeAfterFullscreenExitRef.current = !video.paused;
           await Promise.resolve(video.webkitEnterFullscreen());
           if (isVideoNativeFullscreen(video)) {
-            logFsDebug('entered via webkitEnterFullscreen()');
             return true;
           }
-          logFsDebug(
-            'webkitEnterFullscreen() returned but native fullscreen not active',
-          );
         }
       } catch {
-        logFsDebug('webkitEnterFullscreen() threw error');
+        /* continue to presentation-mode fallback */
       }
 
       if (video.webkitSetPresentationMode) {
         try {
           video.webkitSetPresentationMode('fullscreen');
           if (isVideoNativeFullscreen(video)) {
-            logFsDebug('entered via webkitSetPresentationMode(fullscreen)');
             return true;
           }
-          logFsDebug('webkitSetPresentationMode(fullscreen) did not activate');
         } catch {
-          logFsDebug('webkitSetPresentationMode(fullscreen) threw error');
+          /* continue to caller fallback */
         }
       }
 
       return false;
     },
-    [isVideoNativeFullscreen, logFsDebug],
+    [isVideoNativeFullscreen],
   );
 
   latestVideoRef.current =
@@ -352,9 +250,6 @@ export function useFullscreen({
 
   const enterFullscreen = useCallback(async () => {
     try {
-      logFsDebug(
-        `enter requested mobile=${String(isMobile)} ios=${String(isIOS)}`,
-      );
       if (isMobile) {
         const currentVideo =
           (videoRef?.current as VideoElementWithWebkit | null | undefined) ??
@@ -367,7 +262,6 @@ export function useFullscreen({
           currentVideo?.webkitEnterFullscreen &&
           (currentVideo.webkitSupportsFullscreen ?? true)
         ) {
-          logFsDebug('trying iOS native video fullscreen first');
           const entered = await tryEnterIOSVideoFullscreen(currentVideo);
           if (entered) {
             manualMobileFullscreenRef.current = false;
@@ -375,9 +269,6 @@ export function useFullscreen({
             dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
             return;
           }
-          logFsDebug(
-            'iOS native fullscreen did not activate; continuing fallbacks',
-          );
         }
 
         // Step 1: Lock orientation to landscape (Android Chrome + installed PWA).
@@ -389,9 +280,7 @@ export function useFullscreen({
         if (orientation?.lock) {
           try {
             await orientation.lock('landscape-primary');
-            logFsDebug('orientation lock success');
           } catch {
-            logFsDebug('orientation lock failed/unsupported');
             /* not supported — fall through */
           }
         }
@@ -406,9 +295,6 @@ export function useFullscreen({
             unlockDocumentScroll();
             return; // fullscreenchange event will dispatch SET_FULLSCREEN:true
           }
-          logFsDebug(
-            'container fullscreen failed; trying native video fallback',
-          );
         }
 
         // Step 3: Prefer native video fullscreen fallback (best path on iOS Safari).
@@ -423,7 +309,6 @@ export function useFullscreen({
             dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
             return;
           }
-          logFsDebug('native video fullscreen fallback failed');
         }
 
         // Step 4: iOS manual fallback — update state so the UI enters
@@ -431,7 +316,6 @@ export function useFullscreen({
         manualMobileFullscreenRef.current = true;
         lockDocumentScroll();
         dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
-        logFsDebug('entered manual fullscreen fallback (state-only)');
         toast('Rotate your device for best experience', { icon: '📱' });
         return;
       }
@@ -440,11 +324,9 @@ export function useFullscreen({
       const target = containerRef.current || document.documentElement;
       const entered = await requestElementFullscreen(target);
       if (!entered) {
-        logFsDebug('desktop fullscreen unsupported/failed');
         toast.error('Fullscreen is not supported in this browser');
       }
     } catch {
-      logFsDebug('enter fullscreen threw error');
       toast.error('Failed to enter fullscreen');
     }
   }, [
@@ -454,7 +336,6 @@ export function useFullscreen({
     videoRef,
     dispatch,
     lockDocumentScroll,
-    logFsDebug,
     requestElementFullscreen,
     tryEnterIOSVideoFullscreen,
     unlockDocumentScroll,
@@ -474,7 +355,6 @@ export function useFullscreen({
 
         if (document.fullscreenElement) {
           await document.exitFullscreen();
-          logFsDebug('exited via document.exitFullscreen()');
           return; // fullscreenchange event dispatches SET_FULLSCREEN:false
         }
 
@@ -483,7 +363,6 @@ export function useFullscreen({
           latestVideoRef.current;
         if (video?.webkitDisplayingFullscreen && video.webkitExitFullscreen) {
           await Promise.resolve(video.webkitExitFullscreen());
-          logFsDebug('exited via webkitExitFullscreen()');
           manualMobileFullscreenRef.current = false;
           unlockDocumentScroll();
           dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
@@ -497,13 +376,12 @@ export function useFullscreen({
         if (video?.webkitPresentationMode === 'fullscreen') {
           try {
             video.webkitSetPresentationMode?.('inline');
-            logFsDebug('exited via webkitSetPresentationMode(inline)');
             manualMobileFullscreenRef.current = false;
             unlockDocumentScroll();
             dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
             return;
           } catch {
-            logFsDebug('webkitSetPresentationMode(inline) threw error');
+            /* continue to manual fallback */
           }
         }
 
@@ -511,26 +389,21 @@ export function useFullscreen({
         manualMobileFullscreenRef.current = false;
         unlockDocumentScroll();
         dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
-        logFsDebug('exited manual fullscreen fallback');
         return;
       }
 
       const doc = document as DocumentWithWebkit;
       if (document.fullscreenElement) {
         await document.exitFullscreen();
-        logFsDebug('desktop exit via document.exitFullscreen()');
       } else if (doc.webkitExitFullscreen) {
         await doc.webkitExitFullscreen();
-        logFsDebug('desktop exit via webkitExitFullscreen()');
       } else if (doc.webkitCancelFullScreen) {
         doc.webkitCancelFullScreen();
-        logFsDebug('desktop exit via webkitCancelFullScreen()');
       }
     } catch {
-      logFsDebug('exit fullscreen threw error');
       toast.error('Failed to exit fullscreen');
     }
-  }, [dispatch, isMobile, logFsDebug, unlockDocumentScroll, videoRef]);
+  }, [dispatch, isMobile, unlockDocumentScroll, videoRef]);
 
   const toggleFullscreen = useCallback(async () => {
     const doc = document as DocumentWithWebkit;
@@ -548,10 +421,8 @@ export function useFullscreen({
       : isNativeFullscreen;
 
     if (isCurrentlyFullscreen) {
-      logFsDebug('toggle deciding: exit');
       await exitFullscreen();
     } else {
-      logFsDebug('toggle deciding: enter');
       await enterFullscreen();
     }
   }, [
@@ -559,7 +430,6 @@ export function useFullscreen({
     exitFullscreen,
     isIOS,
     isMobile,
-    logFsDebug,
     playerIsFullscreen,
     videoRef,
     isVideoNativeFullscreen,
