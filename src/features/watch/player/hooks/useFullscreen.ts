@@ -226,6 +226,17 @@ export function useFullscreen({
 
   const tryEnterIOSVideoFullscreen = useCallback(
     async (video: VideoElementWithWebkit) => {
+      // On some iOS Safari builds, fullscreen calls fail when video is paused.
+      // Kick playback in the same user gesture before requesting fullscreen.
+      if (video.paused) {
+        try {
+          await Promise.resolve(video.play());
+          logFsDebug('video.play() succeeded before fullscreen');
+        } catch {
+          logFsDebug('video.play() failed before fullscreen');
+        }
+      }
+
       try {
         if (
           video.webkitEnterFullscreen &&
