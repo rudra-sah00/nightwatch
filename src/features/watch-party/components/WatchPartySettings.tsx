@@ -122,16 +122,13 @@ export function WatchPartySettings({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="none"
-          size="none"
-          className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] rounded-none transition-colors"
-          title="Room Access & Permissions"
-        >
-          <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
-        </Button>
+      <DialogTrigger
+        type="button"
+        className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] rounded-none transition-colors"
+        title="Room Access & Permissions"
+        onClick={() => setIsOpen(true)}
+      >
+        <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
       </DialogTrigger>
 
       <DialogContent
