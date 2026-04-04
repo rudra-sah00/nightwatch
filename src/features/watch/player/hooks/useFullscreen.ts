@@ -328,22 +328,31 @@ export function useFullscreen({
   const toggleFullscreen = useCallback(async () => {
     const doc = document as DocumentWithWebkit;
     const video = videoRef?.current as VideoElementWithWebkit | undefined;
+    const isNativeFullscreen =
+      !!document.fullscreenElement ||
+      !!doc.webkitFullscreenElement ||
+      !!video?.webkitDisplayingFullscreen;
 
     // On mobile document.fullscreenElement may be null even when the player
     // is in its "fullscreen" state (iOS manual path).  Use the player state
     // value so the toggle always works correctly on all platforms.
     const isCurrentlyFullscreen = isMobile
-      ? (playerIsFullscreen ?? false) || !!video?.webkitDisplayingFullscreen
-      : !!document.fullscreenElement ||
-        !!doc.webkitFullscreenElement ||
-        !!video?.webkitDisplayingFullscreen;
+      ? isNativeFullscreen || (!!playerIsFullscreen && !isIOS)
+      : isNativeFullscreen;
 
     if (isCurrentlyFullscreen) {
       await exitFullscreen();
     } else {
       await enterFullscreen();
     }
-  }, [enterFullscreen, exitFullscreen, isMobile, playerIsFullscreen, videoRef]);
+  }, [
+    enterFullscreen,
+    exitFullscreen,
+    isIOS,
+    isMobile,
+    playerIsFullscreen,
+    videoRef,
+  ]);
 
   return { enterFullscreen, exitFullscreen, toggleFullscreen, isMobile };
 }
