@@ -101,10 +101,10 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <p className="text-[13px] font-body font-black text-foreground leading-tight uppercase tracking-[0.05em]">
-              SECURITY LINK DISPATCHED TO:
+              IF AN ACCOUNT EXISTS, A RESET LINK HAS BEEN SENT.
             </p>
-            <span className="font-black underline decoration-[#e63b2e] decoration-2 tracking-tighter text-xl italic block leading-tight">
-              {formData.identifier}
+            <span className="font-black tracking-tighter text-sm block leading-tight uppercase opacity-80">
+              CHECK YOUR EMAIL INBOX AND SPAM FOLDER.
             </span>
           </div>
 
