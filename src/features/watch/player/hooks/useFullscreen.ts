@@ -45,6 +45,9 @@ export function useFullscreen({
   const latestVideoRef = useRef<VideoElementWithWebkit | null>(null);
   const manualMobileFullscreenRef = useRef(false);
   const shouldResumeAfterFullscreenExitRef = useRef(false);
+  const fsDebugEnabledRef = useRef(false);
+  const fsDebugPanelRef = useRef<HTMLPreElement | null>(null);
+  const fsDebugLinesRef = useRef<string[]>([]);
   const lockedStylesRef = useRef<{
     htmlOverflow: string;
     bodyOverflow: string;
@@ -52,14 +55,78 @@ export function useFullscreen({
     bodyHeight: string;
   } | null>(null);
 
-  const logFsDebug = useCallback((message: string) => {
-    if (typeof window === 'undefined') return;
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
     const enabled = new URLSearchParams(window.location.search).has('fsdebug');
+    fsDebugEnabledRef.current = enabled;
     if (!enabled) return;
 
-    const line = `[fs] ${message}`;
+    const panel = document.createElement('pre');
+    panel.id = 'fs-debug-panel';
+    panel.setAttribute('aria-live', 'polite');
+    panel.style.position = 'fixed';
+    panel.style.left = '8px';
+    panel.style.right = '8px';
+    panel.style.bottom = '8px';
+    panel.style.maxHeight = '40dvh';
+    panel.style.overflow = 'auto';
+    panel.style.padding = '8px';
+    panel.style.margin = '0';
+    panel.style.borderRadius = '8px';
+    panel.style.background = 'rgba(0, 0, 0, 0.82)';
+    panel.style.color = '#7CFC00';
+    panel.style.fontSize = '11px';
+    panel.style.lineHeight = '1.35';
+    panel.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+    panel.style.zIndex = '2147483647';
+    panel.style.pointerEvents = 'none';
+    panel.textContent = '[fs] debug panel enabled';
+    document.body.append(panel);
+    fsDebugPanelRef.current = panel;
+
+    return () => {
+      fsDebugEnabledRef.current = false;
+      fsDebugLinesRef.current = [];
+      if (fsDebugPanelRef.current) {
+        fsDebugPanelRef.current.remove();
+        fsDebugPanelRef.current = null;
+      }
+    };
+  }, []);
+
+  const logFsDebug = useCallback((message: string) => {
+    if (typeof window === 'undefined' || !fsDebugEnabledRef.current) return;
+
+    const stamp = new Date().toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    const line = `[fs ${stamp}] ${message}`;
+
+    fsDebugLinesRef.current = [...fsDebugLinesRef.current.slice(-24), line];
+    if (fsDebugPanelRef.current) {
+      fsDebugPanelRef.current.textContent = fsDebugLinesRef.current.join('\n');
+    }
+    try {
+      window.localStorage.setItem(
+        'fsdebug:last',
+        fsDebugLinesRef.current.join('\n'),
+      );
+    } catch {
+      /* ignore storage errors */
+    }
+
     console.info(line);
-    toast(line, { duration: 3500 });
+    try {
+      toast(line, { duration: 2000 });
+    } catch {
+      /* toast renderer may be unavailable in some layouts */
+    }
   }, []);
 
   const lockDocumentScroll = useCallback(() => {
