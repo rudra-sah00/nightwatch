@@ -25,6 +25,10 @@ interface VideoElementWithWebkit extends HTMLVideoElement {
   webkitSupportsFullscreen?: boolean;
   webkitEnterFullscreen?: () => void | Promise<void>;
   webkitExitFullscreen?: () => void | Promise<void>;
+  webkitPresentationMode?: 'inline' | 'fullscreen' | 'picture-in-picture';
+  webkitSetPresentationMode?: (
+    mode: 'inline' | 'fullscreen' | 'picture-in-picture',
+  ) => void;
 }
 
 interface HTMLElementWithWebkit extends HTMLElement {
@@ -213,6 +217,52 @@ export function useFullscreen({
     [logFsDebug],
   );
 
+  const isVideoNativeFullscreen = useCallback(
+    (video: VideoElementWithWebkit | null | undefined) =>
+      !!video?.webkitDisplayingFullscreen ||
+      video?.webkitPresentationMode === 'fullscreen',
+    [],
+  );
+
+  const tryEnterIOSVideoFullscreen = useCallback(
+    async (video: VideoElementWithWebkit) => {
+      try {
+        if (
+          video.webkitEnterFullscreen &&
+          (video.webkitSupportsFullscreen ?? true)
+        ) {
+          shouldResumeAfterFullscreenExitRef.current = !video.paused;
+          await Promise.resolve(video.webkitEnterFullscreen());
+          if (isVideoNativeFullscreen(video)) {
+            logFsDebug('entered via webkitEnterFullscreen()');
+            return true;
+          }
+          logFsDebug(
+            'webkitEnterFullscreen() returned but native fullscreen not active',
+          );
+        }
+      } catch {
+        logFsDebug('webkitEnterFullscreen() threw error');
+      }
+
+      if (video.webkitSetPresentationMode) {
+        try {
+          video.webkitSetPresentationMode('fullscreen');
+          if (isVideoNativeFullscreen(video)) {
+            logFsDebug('entered via webkitSetPresentationMode(fullscreen)');
+            return true;
+          }
+          logFsDebug('webkitSetPresentationMode(fullscreen) did not activate');
+        } catch {
+          logFsDebug('webkitSetPresentationMode(fullscreen) threw error');
+        }
+      }
+
+      return false;
+    },
+    [isVideoNativeFullscreen, logFsDebug],
+  );
+
   latestVideoRef.current =
     (videoRef?.current as VideoElementWithWebkit | null) ??
     latestVideoRef.current;
@@ -306,19 +356,17 @@ export function useFullscreen({
           currentVideo?.webkitEnterFullscreen &&
           (currentVideo.webkitSupportsFullscreen ?? true)
         ) {
-          try {
-            logFsDebug('trying iOS native video fullscreen first');
-            shouldResumeAfterFullscreenExitRef.current = !currentVideo.paused;
-            currentVideo.webkitEnterFullscreen();
+          logFsDebug('trying iOS native video fullscreen first');
+          const entered = await tryEnterIOSVideoFullscreen(currentVideo);
+          if (entered) {
             manualMobileFullscreenRef.current = false;
             unlockDocumentScroll();
             dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
-            logFsDebug('entered via webkitEnterFullscreen()');
             return;
-          } catch {
-            logFsDebug('webkitEnterFullscreen() failed; continuing fallbacks');
-            /* continue to other mobile paths */
           }
+          logFsDebug(
+            'iOS native fullscreen did not activate; continuing fallbacks',
+          );
         }
 
         // Step 1: Lock orientation to landscape (Android Chrome + installed PWA).
@@ -356,23 +404,15 @@ export function useFullscreen({
         const video =
           (videoRef?.current as VideoElementWithWebkit | null | undefined) ??
           latestVideoRef.current;
-        if (
-          video?.webkitEnterFullscreen &&
-          (video.webkitSupportsFullscreen ?? true)
-        ) {
-          try {
-            shouldResumeAfterFullscreenExitRef.current = !video.paused;
-            await Promise.resolve(video.webkitEnterFullscreen());
+        if (isIOS && video) {
+          const entered = await tryEnterIOSVideoFullscreen(video);
+          if (entered) {
             manualMobileFullscreenRef.current = false;
             unlockDocumentScroll();
-            // Some WebKit builds don't emit begin event consistently.
             dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
-            logFsDebug('entered via webkitEnterFullscreen() fallback');
             return;
-          } catch {
-            logFsDebug('native video fullscreen fallback failed');
-            /* continue to manual fallback */
           }
+          logFsDebug('native video fullscreen fallback failed');
         }
 
         // Step 4: iOS manual fallback — update state so the UI enters
@@ -405,6 +445,7 @@ export function useFullscreen({
     lockDocumentScroll,
     logFsDebug,
     requestElementFullscreen,
+    tryEnterIOSVideoFullscreen,
     unlockDocumentScroll,
   ]);
 
@@ -442,6 +483,19 @@ export function useFullscreen({
           return;
         }
 
+        if (video?.webkitPresentationMode === 'fullscreen') {
+          try {
+            video.webkitSetPresentationMode?.('inline');
+            logFsDebug('exited via webkitSetPresentationMode(inline)');
+            manualMobileFullscreenRef.current = false;
+            unlockDocumentScroll();
+            dispatch({ type: 'SET_FULLSCREEN', isFullscreen: false });
+            return;
+          } catch {
+            logFsDebug('webkitSetPresentationMode(inline) threw error');
+          }
+        }
+
         // iOS manual-state path: no real fullscreen was entered.
         manualMobileFullscreenRef.current = false;
         unlockDocumentScroll();
@@ -473,7 +527,7 @@ export function useFullscreen({
     const isNativeFullscreen =
       !!document.fullscreenElement ||
       !!doc.webkitFullscreenElement ||
-      !!video?.webkitDisplayingFullscreen;
+      isVideoNativeFullscreen(video);
 
     // On mobile document.fullscreenElement may be null even when the player
     // is in its "fullscreen" state (iOS manual path).  Use the player state
@@ -497,6 +551,7 @@ export function useFullscreen({
     logFsDebug,
     playerIsFullscreen,
     videoRef,
+    isVideoNativeFullscreen,
   ]);
 
   return { enterFullscreen, exitFullscreen, toggleFullscreen, isMobile };
