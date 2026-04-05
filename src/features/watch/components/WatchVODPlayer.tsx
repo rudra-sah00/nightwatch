@@ -1,17 +1,17 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
+import { memo } from 'react';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
+import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 import { NextEpisodeOverlay } from '../player/ui/overlays/NextEpisodeOverlay';
 
-interface WatchPlayerProps {
+export interface WatchPlayerProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   captionUrl?: string | null;
@@ -125,19 +125,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 function VODPlayerState() {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
-  const lastErrorRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!state.error) {
-      lastErrorRef.current = null;
-      return;
-    }
-
-    if (lastErrorRef.current !== state.error) {
-      lastErrorRef.current = state.error;
-      toast.error(state.error);
-    }
-  }, [state.error]);
 
   return (
     <>
@@ -160,6 +147,15 @@ function VODPlayerState() {
       <Player.Video />
 
       <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+
+      <ErrorOverlay
+        isVisible={!!state.error}
+        message={state.error || 'An error occurred'}
+        onRetry={() => {
+          window.location.reload();
+        }}
+        onBack={playerHandlers.goBack}
+      />
 
       <CenterPlayButton
         isPlaying={state.isPlaying}

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   CenterPlayButton,
   PlayPause,
+  TapIndicator,
 } from '@/features/watch/player/ui/controls/PlayPause';
 
 describe('PlayPause', () => {
@@ -194,6 +195,54 @@ describe('CenterPlayButton', () => {
 
       expect(screen.getByText('Inception')).toBeInTheDocument();
       expect(screen.queryByText(/S\d/)).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('TapIndicator', () => {
+  const defaultProps = {
+    direction: 'right' as const,
+    seconds: 10,
+    isVisible: true,
+  };
+
+  describe('visibility', () => {
+    it('should render when visible', () => {
+      render(<TapIndicator {...defaultProps} isVisible={true} />);
+
+      expect(screen.getByText('10s')).toBeInTheDocument();
+    });
+
+    it('should not render when not visible', () => {
+      const { container } = render(
+        <TapIndicator {...defaultProps} isVisible={false} />,
+      );
+
+      expect(container.firstChild).toBeNull();
+    });
+  });
+
+  describe('display', () => {
+    it('should show seconds with s suffix', () => {
+      render(<TapIndicator {...defaultProps} seconds={15} />);
+
+      expect(screen.getByText('15s')).toBeInTheDocument();
+    });
+
+    it('should position on right for right direction', () => {
+      const { container } = render(
+        <TapIndicator {...defaultProps} direction="right" />,
+      );
+
+      expect(container.firstChild).toHaveClass('right-1/4');
+    });
+
+    it('should position on left for left direction', () => {
+      const { container } = render(
+        <TapIndicator {...defaultProps} direction="left" />,
+      );
+
+      expect(container.firstChild).toHaveClass('left-1/4');
     });
   });
 });

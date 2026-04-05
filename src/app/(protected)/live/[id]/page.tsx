@@ -3,8 +3,7 @@
 import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
@@ -22,24 +21,6 @@ export default function LiveMatchPlayerPage() {
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const lastToastErrorRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const message =
-      sessionError ||
-      error?.message ||
-      (!match && !isLoading ? 'Stream unavailable.' : null);
-
-    if (!message) {
-      lastToastErrorRef.current = null;
-      return;
-    }
-
-    if (lastToastErrorRef.current !== message) {
-      lastToastErrorRef.current = message;
-      toast.error(message);
-    }
-  }, [sessionError, error, match, isLoading]);
 
   useEffect(() => {
     if (!match || !match.playPath || sessionUrl || sessionLoading) return;
@@ -79,9 +60,11 @@ export default function LiveMatchPlayerPage() {
   if (error || !match) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <Loader2 className="w-10 h-10 text-white/80 animate-spin stroke-[3px] mb-6" />
-        <p className="font-headline font-bold uppercase tracking-widest text-white/70 mb-8 text-center max-w-md">
-          Loading schedule options
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
+          Stream Unavailable
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
+          {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
           <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
@@ -163,9 +146,11 @@ export default function LiveMatchPlayerPage() {
   if (sessionError) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <Loader2 className="w-10 h-10 text-white/80 animate-spin stroke-[3px] mb-6" />
-        <p className="font-headline font-bold uppercase tracking-widest text-white/70 mb-8 text-center max-w-md">
-          Reconnect to continue playback
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
+          Access Denied
+        </h2>
+        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
+          {sessionError}
         </p>
         <Link href="/live">
           <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">

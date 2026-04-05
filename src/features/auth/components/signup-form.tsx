@@ -2,7 +2,6 @@
 
 import { ArrowLeft } from 'lucide-react';
 import type React from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
@@ -20,6 +19,8 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
     formData,
     handleChange,
     action,
+    error,
+    fieldErrors,
     captchaToken,
     setCaptchaToken,
     captchaRef,
@@ -32,6 +33,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
     usernameStatus,
     confirmPassword,
     setConfirmPassword,
+    setError,
   } = props;
 
   const normalizedUsername = formData.username.trim();
@@ -142,6 +144,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.name}
                 className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
@@ -167,6 +170,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   value={formData.username}
                   onChange={handleChange}
                   disabled={isPending}
+                  error={fieldErrors?.username}
                   className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
                 />
                 {usernameStatus && (
@@ -215,10 +219,17 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.email}
                 className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
           </div>
+
+          {error ? (
+            <p className="mt-2 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] text-center">
+              {error}
+            </p>
+          ) : null}
 
           {/* BOTTOM */}
           <div className="flex flex-col gap-2 pb-0.5 mt-auto">
@@ -286,6 +297,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isPending}
+                error={fieldErrors?.password}
                 className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
@@ -310,6 +322,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   setConfirmPassword?.(e.target.value)
                 }
                 disabled={isPending}
+                error={fieldErrors?.confirmPassword}
                 className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
@@ -324,22 +337,33 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
             />
             <Captcha
               ref={captchaRef}
-              onVerify={(token) => setCaptchaToken(token)}
+              onVerify={(token) => {
+                setCaptchaToken(token);
+                if (error?.toLowerCase().includes('security')) {
+                  setError(null);
+                }
+              }}
               onError={() => {
                 setCaptchaToken(null);
-                toast.error(
+                setError(
                   'Security verification could not load. Please disable blockers/VPN and retry.',
                 );
               }}
               onExpire={() => {
                 setCaptchaToken(null);
-                toast.error(
+                setError(
                   'Security verification expired. Please complete it again.',
                 );
               }}
               variant="bottom"
             />
           </div>
+
+          {error ? (
+            <p className="mb-2 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] text-center">
+              {error}
+            </p>
+          ) : null}
 
           {/* BOTTOM */}
           <div className="flex flex-col gap-2 pb-0.5 mt-auto mb-6">

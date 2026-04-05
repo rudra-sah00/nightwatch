@@ -280,3 +280,32 @@ export function CenterPlayButton({
     </button>
   );
 }
+
+// Ripple effect on tap (mobile)
+interface TapIndicatorProps {
+  direction: 'left' | 'right';
+  seconds: number;
+  isVisible: boolean;
+}
+
+export function TapIndicator({
+  direction,
+  seconds,
+  isVisible,
+}: TapIndicatorProps) {
+  if (!isVisible) return null;
+
+  return (
+    <div
+      className={cn(
+        'absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-2',
+        'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50 motion-safe:duration-200 motion-reduce:animate-none',
+        direction === 'left' ? 'left-1/4' : 'right-1/4',
+      )}
+    >
+      <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+        <span className="text-white text-2xl font-bold">{seconds}s</span>
+      </div>
+    </div>
+  );
+}

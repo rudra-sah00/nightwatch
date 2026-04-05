@@ -48,7 +48,7 @@ function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
   );
 }
 
-interface WatchPartySettingsProps {
+export interface WatchPartySettingsProps {
   room: WatchPartyRoom;
   isHost: boolean;
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */

@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { CreatorFooter } from '@/components/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
@@ -83,6 +83,12 @@ export function ProfileOverview() {
               className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-foreground/20 border-b-2 rounded-md border-border/20 focus:border-red-500 focus:bg-red-50 focus:text-red-900 transition-colors py-2"
             />
           </div>
+
+          {passwordForm.error && (
+            <div className="bg-red-50 text-red-600 p-4 border border-red-200 rounded-xl shadow-sm font-bold font-headline uppercase flex gap-2 items-center">
+              <AlertCircle /> {passwordForm.error}
+            </div>
+          )}
 
           {passwordForm.newPassword && (
             <div className="pt-4 animate-in fade-in slide-in-from-bottom-2">

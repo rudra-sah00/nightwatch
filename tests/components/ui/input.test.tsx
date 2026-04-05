@@ -23,12 +23,22 @@ describe('Input', () => {
     expect(screen.getByTestId('input')).toHaveClass('custom-input');
   });
 
-  it('does not render helper paragraph by default', () => {
+  it('shows error message when error prop is provided', () => {
+    render(<Input error="This field is required" />);
+    expect(screen.getByText('This field is required')).toBeInTheDocument();
+  });
+
+  it('does not show error element when error prop is absent', () => {
     const { container } = render(<Input />);
     expect(container.querySelector('p')).not.toBeInTheDocument();
   });
 
-  it('does not apply destructive border class', () => {
+  it('applies error border class when error is set', () => {
+    render(<Input error="Required" data-testid="input" />);
+    expect(screen.getByTestId('input')).toHaveClass('border-destructive');
+  });
+
+  it('does not apply error border class when no error', () => {
     render(<Input data-testid="input" />);
     expect(screen.getByTestId('input')).not.toHaveClass('border-destructive');
   });
@@ -43,8 +53,9 @@ describe('Input', () => {
     expect(screen.getByTestId('input')).toHaveValue('hello');
   });
 
-  it('renders with base input styling', () => {
-    render(<Input data-testid="input" />);
-    expect(screen.getByTestId('input')).toHaveClass('border-b-4');
+  it('renders error text in red color class', () => {
+    const { container } = render(<Input error="Bad value" />);
+    const errorP = container.querySelector('p');
+    expect(errorP).toHaveClass('text-[#e63b2e]');
   });
 });

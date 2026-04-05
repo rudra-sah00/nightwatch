@@ -8,8 +8,6 @@ import {
   Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import type { User } from '@/types';
@@ -54,20 +52,6 @@ export function WatchPartyLobby({
   isMobile = false,
 }: WatchPartyLobbyProps) {
   const router = useRouter();
-  const lastErrorRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!error) {
-      lastErrorRef.current = null;
-      return;
-    }
-
-    const message = errorCode ? `${error} (Code: ${errorCode})` : error;
-    if (lastErrorRef.current !== message) {
-      lastErrorRef.current = message;
-      toast.error(message);
-    }
-  }, [error, errorCode]);
 
   if (isMobile) {
     return (
@@ -324,6 +308,19 @@ export function WatchPartyLobby({
                 Cancel
               </Button>
             </div>
+
+            {error ? (
+              <div className="p-4 bg-[#e63b2e] border-4 border-border text-white">
+                <p className="text-sm font-black font-headline uppercase leading-tight">
+                  {error}
+                </p>
+                {errorCode ? (
+                  <p className="text-[8px] uppercase tracking-widest mt-1 opacity-80">
+                    Code: {errorCode}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -5,22 +5,12 @@ import { WatchPartyLobby } from '@/features/watch-party/components/WatchPartyLob
 import type { RoomPreview } from '@/features/watch-party/room/types';
 import type { User } from '@/types';
 
-const { mockToastError } = vi.hoisted(() => ({
-  mockToastError: vi.fn(),
-}));
-
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
-}));
-
-vi.mock('sonner', () => ({
-  toast: {
-    error: mockToastError,
-  },
 }));
 
 // Mock the Captcha component
@@ -337,13 +327,13 @@ describe('WatchPartyLobby', () => {
   });
 
   describe('error display', () => {
-    it('should show error message via toast', () => {
+    it('should show error message', () => {
       render(<WatchPartyLobby {...defaultProps} error="Failed to join room" />);
 
-      expect(mockToastError).toHaveBeenCalledWith('Failed to join room');
+      expect(screen.getByText('Failed to join room')).toBeInTheDocument();
     });
 
-    it('should show error code when provided via toast', () => {
+    it('should show error code when provided', () => {
       render(
         <WatchPartyLobby
           {...defaultProps}
@@ -352,9 +342,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      expect(mockToastError).toHaveBeenCalledWith(
-        'Failed to join (Code: ROOM_FULL)',
-      );
+      expect(screen.getByText('Code: ROOM_FULL')).toBeInTheDocument();
     });
   });
 

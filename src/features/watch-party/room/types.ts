@@ -99,6 +99,34 @@ export interface PartyJoinRequestPayload {
   captchaToken?: string;
 }
 
+export interface PartyJoinRejected {
+  roomId: string;
+  reason: string;
+}
+
+export interface PartyAdminRequest {
+  member: RoomMember;
+}
+
+export interface PartyJoinApproved {
+  room: WatchPartyRoom;
+  streamToken: string;
+  guestToken?: string;
+  refreshToken?: string;
+  initialState?: {
+    currentTime: number;
+    videoTime?: number;
+    isPlaying: boolean;
+    playbackRate?: number;
+    timestamp?: number;
+    serverTime?: number;
+  };
+}
+
+export interface PartyKicked {
+  reason: string;
+}
+
 export interface PartySyncPayload {
   currentTime: number;
   isPlaying: boolean;
@@ -116,11 +144,27 @@ export interface PartyStateUpdate {
   fromHost?: boolean;
 }
 
+export interface PartyPingPayload {
+  t1: number;
+}
+
 export interface PartyEvent {
   eventType: 'play' | 'pause' | 'seek' | 'rate';
   videoTime: number;
   playbackRate?: number;
   wasPlaying?: boolean;
+}
+
+export interface PartyMemberJoined {
+  member: RoomMember;
+}
+
+export interface PartyMemberLeft {
+  userId: string;
+}
+
+export interface PartyClosed {
+  reason: string;
 }
 
 export interface ChatMessage {
@@ -171,4 +215,13 @@ export interface SketchAction {
   scaleX?: number;
   scaleY?: number;
   rotation?: number;
+}
+
+export interface PartyPermissionsUpdate {
+  permissions: Partial<WatchPartyRoom['permissions']>;
+}
+
+export interface MemberPermissionsUpdate {
+  memberId: string;
+  permissions: Partial<NonNullable<RoomMember['permissions']>>;
 }

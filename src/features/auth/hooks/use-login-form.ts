@@ -9,6 +9,7 @@ type Step = 'initial' | 'otp' | 'forgot' | 'forgot_success';
 
 interface FormState {
   error?: string;
+  fieldErrors?: Record<string, string>;
   success?: boolean;
 }
 
@@ -29,6 +30,10 @@ export function useLoginForm() {
 
   const [otp, setOtp] = useState('');
 
+  const [fieldErrors, setFieldErrors] = useState<
+    Record<string, string | undefined>
+  >({});
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -44,12 +49,16 @@ export function useLoginForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
     if (error) setError(null);
   };
 
   const [state, action, isPending] = React.useActionState(
     async (_prevState: FormState | null, formDataObj: FormData) => {
       setError(null);
+      setFieldErrors({});
 
       if (step === 'forgot') {
         return handleForgotPasswordAction(formDataObj);
@@ -65,12 +74,12 @@ export function useLoginForm() {
 
       const result = loginSchema.safeParse({ email, password });
       if (!result.success) {
-        const firstIssue = result.error.issues[0]?.message;
-        return {
-          error:
-            firstIssue ||
-            'Some details look invalid. Please review the form and try again.',
-        };
+        const errors: Record<string, string> = {};
+        for (const err of result.error.issues) {
+          const field = err.path[0];
+          if (typeof field === 'string') errors[field] = err.message;
+        }
+        return { fieldErrors: errors };
       }
 
       try {
@@ -96,27 +105,12 @@ export function useLoginForm() {
           'details' in err &&
           Array.isArray(err.details)
         ) {
-          let fallbackMessage: string | undefined;
-
+          const errors: Record<string, string> = {};
           for (const detail of err.details) {
-            if (!detail || typeof detail !== 'object') continue;
-
-            const rawDetail = detail as Record<string, unknown>;
-            const message =
-              typeof rawDetail.message === 'string'
-                ? rawDetail.message
-                : undefined;
-
-            if (!fallbackMessage && message) {
-              fallbackMessage = message;
-            }
+            const field = detail.path;
+            if (typeof field === 'string') errors[field] = detail.message;
           }
-
-          return {
-            error:
-              fallbackMessage ||
-              'Some details are invalid. Please review your information and try again.',
-          };
+          return { fieldErrors: errors };
         }
         return {
           error:
@@ -151,12 +145,12 @@ export function useLoginForm() {
     } catch (err: unknown) {
       const apiError = err as ApiError;
       if (apiError.code === 'VALIDATION_ERROR' && apiError.details) {
-        const firstDetailMessage = apiError.details[0]?.message;
-        return {
-          error:
-            firstDetailMessage ||
-            'Some details are invalid. Please review your information and try again.',
-        };
+        const errors: Record<string, string> = {};
+        apiError.details.forEach((detail) => {
+          // In forgot step, we map validation errors to 'identifier'
+          errors.identifier = detail.message;
+        });
+        return { fieldErrors: errors };
       }
       return {
         error:
@@ -170,6 +164,9 @@ export function useLoginForm() {
       if (state.error) {
         setError(state.error);
         toast.error(state.error);
+      }
+      if (state.fieldErrors) {
+        setFieldErrors(state.fieldErrors);
       }
     }
   }, [state]);
@@ -227,9 +224,7 @@ export function useLoginForm() {
     e.preventDefault();
     setError(null);
     if (!otp || otp.length !== 6) {
-      const msg = 'Please enter a valid 6-digit code.';
-      setError(msg);
-      toast.error(msg);
+      setError('Please enter a valid 6-digit code.');
       return;
     }
 
@@ -288,6 +283,7 @@ export function useLoginForm() {
     formData,
     otp,
     setOtp,
+    fieldErrors,
     countdown,
     isPending,
     action,

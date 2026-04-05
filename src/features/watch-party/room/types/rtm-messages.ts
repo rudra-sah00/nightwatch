@@ -18,7 +18,7 @@ import type { RoomMember, SketchAction, WatchPartyRoom } from '../types';
 
 // ============ Playback Events ============
 
-interface RtmPlayEvent {
+export interface RtmPlayEvent {
   type: 'PLAY_EVENT';
   videoTime: number;
   playbackRate: number;
@@ -26,13 +26,13 @@ interface RtmPlayEvent {
   serverTime: number;
 }
 
-interface RtmPauseEvent {
+export interface RtmPauseEvent {
   type: 'PAUSE_EVENT';
   videoTime: number;
   serverTime: number;
 }
 
-interface RtmSeekEvent {
+export interface RtmSeekEvent {
   type: 'SEEK_EVENT';
   videoTime: number;
   playbackRate: number;
@@ -40,7 +40,7 @@ interface RtmSeekEvent {
   serverTime: number;
 }
 
-interface RtmRateEvent {
+export interface RtmRateEvent {
   type: 'RATE_EVENT';
   playbackRate: number;
   videoTime: number;
@@ -52,7 +52,7 @@ interface RtmRateEvent {
  * Full state broadcast — used during reconnection, initial join, and
  * periodic host sync.
  */
-interface RtmSyncState {
+export interface RtmSyncState {
   type: 'SYNC';
   currentTime: number;
   videoTime: number;
@@ -63,14 +63,14 @@ interface RtmSyncState {
   fromHost?: boolean;
 }
 
-interface RtmSyncRequest {
+export interface RtmSyncRequest {
   type: 'SYNC_REQUEST';
   userId: string;
 }
 
 // ============ Member Lifecycle ============
 
-interface RtmJoinApproved {
+export interface RtmJoinApproved {
   type: 'JOIN_APPROVED';
   room: WatchPartyRoom;
   streamToken: string;
@@ -84,27 +84,27 @@ interface RtmJoinApproved {
   };
 }
 
-interface RtmJoinRejected {
+export interface RtmJoinRejected {
   type: 'JOIN_REJECTED';
   reason: string;
 }
 
-interface RtmMemberJoined {
+export interface RtmMemberJoined {
   type: 'MEMBER_JOINED';
   member: RoomMember;
 }
 
-interface RtmMemberLeft {
+export interface RtmMemberLeft {
   type: 'MEMBER_LEFT';
   userId: string;
 }
 
-interface RtmPartyClosed {
+export interface RtmPartyClosed {
   type: 'PARTY_CLOSED';
   reason: string;
 }
 
-interface RtmKick {
+export interface RtmKick {
   type: 'KICK';
   targetUserId: string;
   reason: string;
@@ -112,19 +112,19 @@ interface RtmKick {
 
 // ============ Host Connectivity ============
 
-interface RtmHostDisconnected {
+export interface RtmHostDisconnected {
   type: 'HOST_DISCONNECTED';
   graceSeconds: number;
   message: string;
 }
 
-interface RtmHostReconnected {
+export interface RtmHostReconnected {
   type: 'HOST_RECONNECTED';
 }
 
 // ============ Chat ============
 
-interface RtmChatMessage {
+export interface RtmChatMessage {
   type: 'CHAT';
   messageId: string;
   userId: string;
@@ -134,13 +134,13 @@ interface RtmChatMessage {
   timestamp: number;
 }
 
-interface RtmTypingStart {
+export interface RtmTypingStart {
   type: 'TYPING_START';
   userId: string;
   userName: string;
 }
 
-interface RtmTypingStop {
+export interface RtmTypingStop {
   type: 'TYPING_STOP';
   userId: string;
 }
@@ -166,36 +166,36 @@ export interface RtmSketchDraw {
   action: SketchAction;
 }
 
-interface RtmSketchUndo {
+export interface RtmSketchUndo {
   type: 'SKETCH_UNDO';
   actionId: string;
   userId: string;
 }
 
-interface RtmSketchClear {
+export interface RtmSketchClear {
   type: 'SKETCH_CLEAR';
   mode: 'all' | 'self';
   userId: string;
 }
 
-interface RtmSketchRequestSync {
+export interface RtmSketchRequestSync {
   type: 'SKETCH_REQUEST_SYNC';
   requesterId: string;
 }
 
-interface RtmSketchSyncState {
+export interface RtmSketchSyncState {
   type: 'SKETCH_SYNC_STATE';
   elements: SketchAction[];
   targetId: string;
 }
 
-interface RtmSketchMoveZ {
+export interface RtmSketchMoveZ {
   type: 'SKETCH_MOVE_Z';
   actionId: string;
   direction: 'front' | 'back';
 }
 
-interface RtmSketchCursorMove {
+export interface RtmSketchCursorMove {
   type: 'SKETCH_CURSOR_MOVE';
   x: number;
   y: number;
@@ -204,7 +204,7 @@ interface RtmSketchCursorMove {
   userId: string;
 }
 
-interface RtmSketchReaction {
+export interface RtmSketchReaction {
   type: 'SKETCH_REACTION';
   kind: 'heart' | 'star' | 'fire' | 'sparkle';
   x: number;
@@ -215,25 +215,25 @@ interface RtmSketchReaction {
 
 // ============ Permissions & Settings ============
 
-interface RtmPermissionsUpdated {
+export interface RtmPermissionsUpdated {
   type: 'PERMISSIONS_UPDATED';
   permissions: Partial<WatchPartyRoom['permissions']>;
 }
 
-interface RtmMemberPermissionsUpdated {
+export interface RtmMemberPermissionsUpdated {
   type: 'MEMBER_PERMISSIONS_UPDATED';
   memberId: string;
   permissions: Partial<NonNullable<RoomMember['permissions']>>;
 }
 
-interface RtmContentUpdated {
+export interface RtmContentUpdated {
   type: 'CONTENT_UPDATED';
   room: WatchPartyRoom;
 }
 
 // ============ Stream Token ============
 
-interface RtmStreamToken {
+export interface RtmStreamToken {
   type: 'STREAM_TOKEN';
   token: string;
 }
@@ -275,3 +275,9 @@ export type RTMMessage =
   | RtmMemberPermissionsUpdated
   | RtmContentUpdated
   | RtmStreamToken;
+
+/** Narrow the message type for specific handling */
+export type RTMMessageOfType<T extends RTMMessage['type']> = Extract<
+  RTMMessage,
+  { type: T }
+>;

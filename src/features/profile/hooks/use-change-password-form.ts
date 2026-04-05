@@ -9,6 +9,7 @@ export function useChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
 
   const [state, action, isPending] = React.useActionState(
     async (
@@ -52,6 +53,7 @@ export function useChangePasswordForm() {
   useEffect(() => {
     if (isPending) {
       wasPending.current = true;
+      setError('');
       return;
     }
     if (!wasPending.current) return;
@@ -63,7 +65,7 @@ export function useChangePasswordForm() {
       setNewPassword('');
       setConfirmPassword('');
     } else if (state.type === 'error') {
-      toast.error(state.message);
+      setError(state.message);
     }
   }, [state, isPending]);
 
@@ -74,6 +76,7 @@ export function useChangePasswordForm() {
     setNewPassword,
     confirmPassword,
     setConfirmPassword,
+    error,
     action,
     isPending,
   };

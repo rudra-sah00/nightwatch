@@ -27,7 +27,7 @@ interface UseStreamUrlsProps {
   initialQualitiesRaw: QualityOption[] | undefined;
 }
 
-interface StreamUrlsReturn {
+export interface StreamUrlsReturn {
   streamUrl: string | null;
   setStreamUrl: (url: string | null) => void;
   captionUrl: string | null;

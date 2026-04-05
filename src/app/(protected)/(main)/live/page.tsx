@@ -9,8 +9,7 @@ import {
   Radio,
   Trophy,
 } from 'lucide-react';
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { Suspense, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
@@ -69,20 +68,6 @@ function LiveContent() {
     activeTab,
     activeServer,
   );
-  const lastScheduleErrorRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const message = error?.message ?? null;
-    if (!message) {
-      lastScheduleErrorRef.current = null;
-      return;
-    }
-
-    if (lastScheduleErrorRef.current !== message) {
-      lastScheduleErrorRef.current = message;
-      toast.error(message);
-    }
-  }, [error]);
 
   const isAllChannelsView =
     activeServer === 'server2' && activeTab === 'all_channels';
@@ -301,6 +286,21 @@ function LiveContent() {
               </div>
             </section>
           </div>
+        ) : error ? (
+          <div className="py-20 text-center flex flex-col items-center">
+            <div className="bg-[#e63b2e] border-[4px] border-border  px-10 py-12 max-w-lg w-full flex flex-col items-center">
+              <Radio className="w-12 h-12 text-foreground mb-6" />
+              <p className="font-headline font-black text-2xl uppercase tracking-tighter text-foreground mb-8 bg-white px-4 py-2 border-[4px] border-border">
+                Failed to Load Schedule
+              </p>
+              <Button
+                onClick={refresh}
+                className="bg-white text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-gray-100"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
         ) : schedule.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-border  text-center max-w-2xl mx-auto">
             <Calendar className="w-20 h-20 text-[#0055ff] mb-6" />
@@ -312,12 +312,6 @@ function LiveContent() {
                 ? 'No always-on channels are currently available from this provider.'
                 : `No ${activeSport?.label?.toLowerCase()} matches scheduled for the upcoming days.`}
             </p>
-            <Button
-              onClick={refresh}
-              className="mt-6 bg-white text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-gray-100"
-            >
-              Refresh Schedule
-            </Button>
           </div>
         ) : (
           <div className="space-y-16">
