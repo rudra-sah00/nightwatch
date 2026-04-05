@@ -4,13 +4,43 @@ import { useSocket } from '@/providers/socket-provider';
 import type { VideoMetadata } from '../context/types';
 import { WatchProgressService } from '../services/WatchProgressService';
 
-// Helper to get local date string in YYYY-MM-DD format
-function getLocalDateString(): string {
-  const now = new Date();
+function getLocalDateStringFromTimestamp(ts: number): string {
+  const now = new Date(ts);
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function splitElapsedByLocalDate(
+  startMs: number,
+  endMs: number,
+): Array<{ date: string; seconds: number }> {
+  if (endMs <= startMs) return [];
+
+  const segments = new Map<string, number>();
+  let cursor = startMs;
+
+  while (cursor < endMs) {
+    const local = new Date(cursor);
+    const nextMidnight = new Date(
+      local.getFullYear(),
+      local.getMonth(),
+      local.getDate() + 1,
+    ).getTime();
+
+    const segmentEnd = Math.min(endMs, nextMidnight);
+    const date = getLocalDateStringFromTimestamp(cursor);
+    const seconds = (segmentEnd - cursor) / 1000;
+
+    segments.set(date, (segments.get(date) ?? 0) + seconds);
+    cursor = segmentEnd;
+  }
+
+  return Array.from(segments.entries()).map(([date, seconds]) => ({
+    date,
+    seconds,
+  }));
 }
 
 // How often to sync progress to backend (in ms)
@@ -55,9 +85,8 @@ export function useWatchProgress({
   hasMoreEpisodes,
 }: UseWatchProgressProps) {
   const { socket: contextSocket, isConnected } = useSocket();
-  const accumulateSecondsRef = useRef(0);
+  const pendingActivityByDateRef = useRef<Map<string, number>>(new Map());
   const lastTimeRef = useRef(0);
-  const lastDateRef = useRef<string>(getLocalDateString());
   const lastProgressRef = useRef<number | null>(null);
   const wasPlayingRef = useRef(false);
 
@@ -81,22 +110,33 @@ export function useWatchProgress({
     (forceFlush = false, dateOverride?: string) => {
       if (skipActivityTrackingRef.current) return;
 
-      const seconds = Math.floor(accumulateSecondsRef.current);
-      if (seconds < 1 && !forceFlush) return;
+      const pending = pendingActivityByDateRef.current;
+      const datesToFlush = dateOverride
+        ? [dateOverride]
+        : Array.from(pending.keys()).sort();
 
-      const localDate = dateOverride ?? getLocalDateString();
-      WatchProgressService.syncActivity(
-        socketRef.current,
-        seconds,
-        localDate,
-        forceFlush,
-        (sent) => {
-          accumulateSecondsRef.current = Math.max(
-            0,
-            accumulateSecondsRef.current - sent,
-          );
-        },
-      );
+      for (const localDate of datesToFlush) {
+        const buffered = pending.get(localDate) ?? 0;
+        const seconds = Math.floor(buffered);
+        if (seconds < 1) continue;
+
+        WatchProgressService.syncActivity(
+          socketRef.current,
+          seconds,
+          localDate,
+          forceFlush,
+          (sent) => {
+            const current =
+              pendingActivityByDateRef.current.get(localDate) ?? 0;
+            const remaining = Math.max(0, current - sent);
+            if (remaining > 0) {
+              pendingActivityByDateRef.current.set(localDate, remaining);
+            } else {
+              pendingActivityByDateRef.current.delete(localDate);
+            }
+          },
+        );
+      }
     },
     [],
   );
@@ -180,21 +220,22 @@ export function useWatchProgress({
 
     wasPlayingRef.current = true;
     lastTimeRef.current = Date.now();
-    lastDateRef.current = getLocalDateString();
 
     const interval = setInterval(() => {
       const now = Date.now();
-      const delta = (now - lastTimeRef.current) / 1000;
+      const elapsedMs = now - lastTimeRef.current;
       lastTimeRef.current = now;
 
-      if (delta > 0 && delta < 30) {
-        const currentDate = getLocalDateString();
-        if (currentDate !== lastDateRef.current) {
-          flushActivity(true, lastDateRef.current);
-          lastDateRef.current = currentDate;
-          return;
+      // Ignore extreme jumps (sleep/wake, tab freeze) to avoid inflated watch time.
+      if (elapsedMs > 0 && elapsedMs < 30000) {
+        const segments = splitElapsedByLocalDate(now - elapsedMs, now);
+        for (const segment of segments) {
+          pendingActivityByDateRef.current.set(
+            segment.date,
+            (pendingActivityByDateRef.current.get(segment.date) ?? 0) +
+              segment.seconds,
+          );
         }
-        accumulateSecondsRef.current += delta;
       }
     }, 1000);
 
