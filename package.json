@@ -30,6 +30,7 @@
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.4",
+    "@sentry/nextjs": "^10.47.0",
     "@types/video.js": "^7.3.58",
     "agora-rtc-sdk-ng": "^4.24.2",
     "agora-rtm-sdk": "2.2.3-1",
