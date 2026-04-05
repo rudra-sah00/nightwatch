@@ -10,7 +10,6 @@ type Step = 'name' | 'details' | 'otp';
 
 interface FormState {
   error?: string;
-  fieldErrors?: Record<string, string>;
   success?: boolean;
 }
 
@@ -37,10 +36,6 @@ export function useSignupForm() {
   const [usernameStatus, setUsernameStatus] = useState<
     'idle' | 'checking' | 'available' | 'taken' | 'invalid'
   >('idle');
-
-  const [fieldErrors, setFieldErrors] = useState<
-    Record<string, string | undefined>
-  >({});
 
   // Real-time username availability check (Debounced)
   useEffect(() => {
@@ -97,22 +92,17 @@ export function useSignupForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name as keyof typeof fieldErrors]) {
-      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
     if (error) setError(null);
   };
 
   const handleSetStep = (newStep: Step) => {
     setError(null);
-    setFieldErrors({});
     setStep(newStep);
   };
 
   const [state, action, isPending] = React.useActionState(
     async (_prevState: FormState | null, formData: FormData) => {
       setError(null);
-      setFieldErrors({});
 
       const name = formData.get('name') as string;
       const username = formData.get('username') as string;
@@ -128,7 +118,6 @@ export function useSignupForm() {
 
       if (password !== confirmPassword) {
         return {
-          fieldErrors: { confirmPassword: 'Passwords do not match' },
           error: 'Please make sure both passwords match.',
         };
       }
@@ -143,14 +132,8 @@ export function useSignupForm() {
       });
 
       if (!result.success) {
-        const errors: Record<string, string> = {};
-        for (const err of result.error.issues) {
-          const field = err.path[0];
-          if (typeof field === 'string') errors[field] = err.message;
-        }
         const firstIssue = result.error.issues[0]?.message;
         return {
-          fieldErrors: errors,
           error:
             firstIssue ||
             'Some details look invalid. Please review the form and try again.',
@@ -181,23 +164,16 @@ export function useSignupForm() {
           apiError?.code === 'VALIDATION_ERROR' &&
           Array.isArray(apiError.details)
         ) {
-          const errors: Record<string, string> = {};
           let fallbackMessage: string | undefined;
 
           for (const detail of apiError.details) {
             if (!detail || typeof detail !== 'object') continue;
 
             const rawDetail = detail as Record<string, unknown>;
-            const field =
-              typeof rawDetail.path === 'string' ? rawDetail.path : undefined;
             const message =
               typeof rawDetail.message === 'string'
                 ? rawDetail.message
                 : undefined;
-
-            if (field && message) {
-              errors[field] = message;
-            }
 
             if (!fallbackMessage && message) {
               fallbackMessage = message;
@@ -207,13 +183,6 @@ export function useSignupForm() {
           // Reset captcha because the backend consumed the token on THIS request
           setCaptchaToken(null);
           captchaRef.current?.reset();
-
-          if (Object.keys(errors).length > 0) {
-            return {
-              fieldErrors: errors,
-              ...(fallbackMessage ? { error: fallbackMessage } : {}),
-            };
-          }
 
           return {
             error:
@@ -226,9 +195,6 @@ export function useSignupForm() {
           setCaptchaToken(null);
           captchaRef.current?.reset();
           return {
-            fieldErrors: {
-              email: 'An account with this email already exists',
-            },
             error: 'An account with this email already exists.',
           };
         }
@@ -300,9 +266,6 @@ export function useSignupForm() {
         setError(state.error);
         toast.error(state.error);
       }
-      if ('fieldErrors' in state && state.fieldErrors) {
-        setFieldErrors(state.fieldErrors);
-      }
     }
   }, [state]);
 
@@ -357,7 +320,9 @@ export function useSignupForm() {
     e.preventDefault();
     setError(null);
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit code.');
+      const msg = 'Please enter a valid 6-digit code.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -388,8 +353,6 @@ export function useSignupForm() {
     otp,
     setOtp,
     usernameStatus,
-    fieldErrors,
-    setFieldErrors,
     setError,
     countdown,
     isPending,

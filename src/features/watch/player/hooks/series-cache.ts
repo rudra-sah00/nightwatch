@@ -103,6 +103,3 @@ export function clearSeriesCache(): void {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(SERIES_CACHE_KEY);
 }
-
-// Export types for use in other files
-export type { CachedSeriesData };

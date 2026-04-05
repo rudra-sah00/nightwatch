@@ -1,6 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 import { LoadingOverlay } from '@/features/watch/player/ui/overlays/LoadingOverlay';
@@ -27,6 +28,19 @@ function WatchContent() {
     handleStreamExpired,
     refetchStream,
   } = useWatchContent();
+  const lastRefetchErrorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!refetchError) {
+      lastRefetchErrorRef.current = null;
+      return;
+    }
+
+    if (lastRefetchErrorRef.current !== refetchError) {
+      lastRefetchErrorRef.current = refetchError;
+      toast.error(refetchError);
+    }
+  }, [refetchError]);
 
   // Loading state while refetching
   if (isRefetching) {
@@ -53,27 +67,21 @@ function WatchContent() {
   if (!streamUrl) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6">
-          <span className="text-4xl">⚠️</span>
+        <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-6">
+          <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
         </div>
         <h2 className="text-white text-xl font-semibold mb-2">
-          {refetchError || 'No Stream Available'}
+          Playback is temporarily paused
         </h2>
-        <p className="text-white/60 mb-6">
-          {refetchError
-            ? 'There was an error loading the stream'
-            : 'Please start playback from the content page'}
-        </p>
+        <p className="text-white/60 mb-6">Please retry or return home.</p>
         <div className="flex gap-3">
-          {refetchError ? (
-            <button
-              type="button"
-              onClick={() => refetchStream()}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={() => refetchStream()}
+            className="px-6 py-2 bg-white text-black rounded-lg font-medium/90 transition-colors"
+          >
+            Retry
+          </button>
           <button
             type="button"
             onClick={() => router.push('/home')}

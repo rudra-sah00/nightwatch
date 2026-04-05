@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { Player } from '@/features/watch/player';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
@@ -51,6 +53,19 @@ function PlayerOverlays({
     onNextEpisode,
   );
   const { metadata, playerHandlers } = usePlayerContext();
+  const lastErrorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!state.error) {
+      lastErrorRef.current = null;
+      return;
+    }
+
+    if (lastErrorRef.current !== state.error) {
+      lastErrorRef.current = state.error;
+      toast.error(state.error);
+    }
+  }, [state.error]);
 
   const pauseOverlayMetadata = {
     title: metadata.title,
@@ -72,12 +87,6 @@ function PlayerOverlays({
           </p>
         </div>
       )}
-      {state.error && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 gap-3">
-          <p className="text-white text-sm font-medium">{state.error}</p>
-        </div>
-      )}
-
       <CenterPlayButton
         isPlaying={state.isPlaying}
         onToggle={playerHandlers.togglePlay}

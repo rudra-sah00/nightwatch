@@ -230,8 +230,10 @@ export function fetchContentProgress(
  * Logic moved to SpriteService.ts
  */
 
-export type { SpriteCue } from './player/services/SpriteService';
-export { fetchSpriteVtt } from './player/services/SpriteService';
+export {
+  fetchSpriteVtt,
+  type SpriteCue,
+} from './player/services/SpriteService';
 
 /**
  * Video playback trigger and status monitoring.

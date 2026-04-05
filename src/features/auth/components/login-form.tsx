@@ -1,6 +1,7 @@
 'use client';
 
 import type React from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
@@ -169,8 +170,18 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
             />
             <Captcha
               onVerify={setCaptchaToken}
-              onError={() => setCaptchaToken(null)}
-              onExpire={() => setCaptchaToken(null)}
+              onError={() => {
+                setCaptchaToken(null);
+                toast.error(
+                  'Security verification could not load. Please disable blockers/VPN and retry.',
+                );
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+                toast.error(
+                  'Security verification expired. Please complete it again.',
+                );
+              }}
               variant="bottom"
             />
           </div>

@@ -3,7 +3,7 @@
 import { Loader2, Users, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
@@ -77,6 +77,7 @@ export function ContentDetailModal({
 
   const isMobile = useIsMobile();
   const episodesSectionRef = useRef<HTMLDivElement>(null);
+  const hasNotifiedMissingContentRef = useRef(false);
 
   // Scroll to episodes when party mode activates
   useEffect(() => {
@@ -87,6 +88,19 @@ export function ContentDetailModal({
       });
     }
   }, [isSetupOpen]);
+
+  useEffect(() => {
+    if (isLoading || autoPlay || show) {
+      hasNotifiedMissingContentRef.current = false;
+      return;
+    }
+
+    if (!hasNotifiedMissingContentRef.current) {
+      hasNotifiedMissingContentRef.current = true;
+      toast.error('Failed to load content');
+      onClose();
+    }
+  }, [isLoading, autoPlay, show, onClose]);
 
   // Loading state
   if (isLoading) {
@@ -100,20 +114,7 @@ export function ContentDetailModal({
   // Error state
   if (!show) {
     if (autoPlay) return null; // Silently fail if autoplay
-    return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
-        <p className="text-foreground text-lg font-headline font-black uppercase tracking-widest">
-          Failed to load content
-        </p>
-        <Button
-          variant="neo-outline"
-          className="mt-6 border-[3px] border-border font-black uppercase "
-          onClick={onClose}
-        >
-          Close
-        </Button>
-      </div>
-    );
+    return null;
   }
 
   // Headless mode for AI Auto-play

@@ -5,18 +5,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 
+export type { RTMMessage };
+
 /**
  * Connection states for the Agora RTM client.
  */
-export type RtmConnectionState =
+type RtmConnectionState =
   | 'DISCONNECTED'
   | 'CONNECTING'
   | 'CONNECTED'
   | 'RECONNECTING'
   | 'DISCONNECTING';
-
-// Export RTMMessage so other hooks can type their handlers
-export type { RTMMessage };
 
 /**
  * Options passed into `useAgoraRtm`.

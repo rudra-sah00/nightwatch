@@ -153,7 +153,7 @@ function EpisodeDownloadItem({
               FETCHING LINKS…
             </div>
           ) : !qualities || qualities.length === 0 ? (
-            <p className="text-xs font-headline font-black uppercase text-[#e63b2e] py-2">
+            <p className="text-xs font-headline font-black uppercase text-foreground/60 py-2">
               NO DOWNLOAD LINKS AVAILABLE.
             </p>
           ) : (

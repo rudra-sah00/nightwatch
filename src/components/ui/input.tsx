@@ -21,28 +21,18 @@ const inputVariants = cva(
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
-  error?: string;
   ref?: React.Ref<HTMLInputElement>;
 }
 
-function Input({ className, variant, type, error, ref, ...props }: InputProps) {
+function Input({ className, variant, type, ref, ...props }: InputProps) {
   return (
     <div className="w-full">
       <input
         type={type}
-        className={cn(
-          inputVariants({ variant }),
-          error && 'border-destructive focus-visible:ring-destructive',
-          className,
-        )}
+        className={cn(inputVariants({ variant }), className)}
         ref={ref}
         {...props}
       />
-      {error ? (
-        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

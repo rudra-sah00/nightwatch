@@ -78,14 +78,14 @@ const VIDEO_OPTIMIZATION_MODE = 'motion' as const;
  * Possible connection states with the project's Agora RTC client.
  */
 
-export type ConnectionState =
+type ConnectionState =
   | 'DISCONNECTED'
   | 'CONNECTING'
   | 'CONNECTED'
   | 'RECONNECTING'
   | 'DISCONNECTING';
 
-export interface NetworkQuality {
+interface NetworkQuality {
   /** 0=unknown, 1=excellent, 2=good, 3=poor, 4=bad, 5=very bad, 6=down */
   uplink: number;
   /** 0=unknown, 1=excellent, 2=good, 3=poor, 4=bad, 5=very bad, 6=down */

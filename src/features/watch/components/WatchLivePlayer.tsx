@@ -1,17 +1,17 @@
 'use client';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
 import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
-import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 
-export interface WatchLivePlayerProps {
+interface WatchLivePlayerProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   mobileHeaderContent?: React.ReactNode;
@@ -88,6 +88,19 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
 function LivePlayerState() {
   const { state, playerHandlers, metadata } = usePlayerContext();
   const error = state.error;
+  const lastErrorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!error) {
+      lastErrorRef.current = null;
+      return;
+    }
+
+    if (lastErrorRef.current !== error) {
+      lastErrorRef.current = error;
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <>
@@ -108,15 +121,6 @@ function LivePlayerState() {
       />
 
       <LiveBufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
-
-      <ErrorOverlay
-        isVisible={!!error}
-        message={error || 'Live stream unavailable'}
-        onRetry={() => {
-          window.location.reload();
-        }}
-        onBack={playerHandlers.goBack}
-      />
 
       <Player.Controls>
         <Player.Header />

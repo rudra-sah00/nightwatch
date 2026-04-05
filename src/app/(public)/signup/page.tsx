@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { SignupForm } from '@/features/auth/components/signup-form';
@@ -19,6 +20,7 @@ export default function SignupPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
   const router = useRouter();
+  const hasInviteToastRef = useRef(false);
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {
@@ -29,6 +31,24 @@ export default function SignupPage() {
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, initialAuthCheck, router]);
+
+  useEffect(() => {
+    if (isInviteValid !== false) {
+      hasInviteToastRef.current = false;
+      return;
+    }
+
+    if (!hasInviteToastRef.current) {
+      hasInviteToastRef.current = true;
+      toast.error(
+        'Invalid or expired invite link. Please request a new invite.',
+      );
+      const timer = setTimeout(() => {
+        router.replace('/login');
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isInviteValid, router]);
 
   // Loading State
   if (isLoading) {
@@ -43,30 +63,18 @@ export default function SignupPage() {
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         {isInviteValid === false ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white border-4 border-border  max-w-md w-full motion-safe:animate-in motion-safe:zoom-in motion-safe:duration-300 motion-reduce:animate-none">
-            <span className="material-symbols-outlined text-6xl text-[#e63b2e] mb-4">
-              block
-            </span>
-            <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 font-headline text-center">
-              Access Denied
-            </h1>
-            <p className="text-center font-body font-semibold text-sm text-foreground/60 uppercase tracking-tight mb-2">
-              A valid invite link is required to join this community.
+          <div className="flex flex-col items-center justify-center p-8 bg-white border-4 border-border max-w-md w-full motion-safe:animate-in motion-safe:zoom-in motion-safe:duration-300 motion-reduce:animate-none">
+            <p className="text-center font-body font-semibold text-sm text-foreground/60 uppercase tracking-tight mb-4">
+              Redirecting to login...
             </p>
-            <p className="text-center font-body text-[10px] text-foreground opacity-50 uppercase tracking-widest max-w-[80%]">
-              If you believe this is a mistake, please contact your
-              administrator.
-            </p>
-            <div className="mt-8 w-full">
-              <Button
-                asChild
-                variant="neo-yellow"
-                size="neo-lg"
-                className="w-full text-center"
-              >
-                <Link href="/login">Back to Login</Link>
-              </Button>
-            </div>
+            <Button
+              asChild
+              variant="neo-yellow"
+              size="neo-lg"
+              className="w-full text-center"
+            >
+              <Link href="/login">Back to Login</Link>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">

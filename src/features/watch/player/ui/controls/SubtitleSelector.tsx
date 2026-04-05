@@ -14,9 +14,6 @@ import {
   TEXT_SHADOWS,
 } from './utils/subtitle-settings';
 
-// Re-export SubtitleSettings for backwards compatibility
-export type { SubtitleSettings } from './utils/subtitle-settings';
-
 interface SubtitleTrack {
   id: string;
   label: string;
