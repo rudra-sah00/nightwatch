@@ -88,24 +88,63 @@ function WatchContent() {
 
   // Create a unique key that changes when episode changes to force WatchPage remount
   const watchKey = `${movieId}-${season || 0}-${episode || 0}`;
+  const isSeries = metadata.type === 'series';
+
+  const metaLabel = isSeries
+    ? [
+        metadata.season != null ? `Season ${metadata.season}` : null,
+        metadata.episode != null ? `Episode ${metadata.episode}` : null,
+      ]
+        .filter(Boolean)
+        .join(' • ')
+    : metadata.year
+      ? `Movie • ${metadata.year}`
+      : 'Movie';
 
   return (
-    <WatchVODPlayer
-      key={watchKey}
-      streamUrl={streamUrl}
-      metadata={metadata}
-      captionUrl={captionUrl}
-      subtitleTracks={subtitleTracks}
-      spriteVtt={spriteVtt}
-      qualities={qualities}
-      description={description ? decodeURIComponent(description) : undefined}
-      onStreamExpired={handleStreamExpired}
-      initialAudioTracks={s2AudioTracks.length > 0 ? s2AudioTracks : undefined}
-      initialAudioTrackId={s2ActiveTrackId || undefined}
-      onAudioTrackChange={
-        s2AudioTracks.length > 0 ? handleS2AudioTrackChange : undefined
-      }
-    />
+    <div className="min-h-screen bg-background">
+      <WatchVODPlayer
+        key={watchKey}
+        streamUrl={streamUrl}
+        metadata={metadata}
+        captionUrl={captionUrl}
+        subtitleTracks={subtitleTracks}
+        spriteVtt={spriteVtt}
+        qualities={qualities}
+        description={description ? decodeURIComponent(description) : undefined}
+        onStreamExpired={handleStreamExpired}
+        initialAudioTracks={
+          s2AudioTracks.length > 0 ? s2AudioTracks : undefined
+        }
+        initialAudioTrackId={s2ActiveTrackId || undefined}
+        onAudioTrackChange={
+          s2AudioTracks.length > 0 ? handleS2AudioTrackChange : undefined
+        }
+      />
+
+      <section className="md:hidden px-4 py-4 space-y-3 bg-background text-foreground border-t border-border/60">
+        <div className="min-w-0">
+          <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
+            {metadata.title}
+          </h1>
+          {metaLabel ? (
+            <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1 truncate">
+              {metaLabel}
+            </p>
+          ) : null}
+        </div>
+
+        {metadata.description ? (
+          <p className="text-sm leading-relaxed text-foreground/80">
+            {metadata.description}
+          </p>
+        ) : (
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Continue watching in portrait mode.
+          </p>
+        )}
+      </section>
+    </div>
   );
 }
 
