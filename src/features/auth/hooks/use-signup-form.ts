@@ -357,7 +357,9 @@ export function useSignupForm() {
     e.preventDefault();
     setError(null);
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit code.');
+      const msg = 'Please enter a valid 6-digit code.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
