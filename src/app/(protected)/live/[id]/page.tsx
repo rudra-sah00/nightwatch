@@ -135,15 +135,7 @@ export default function LiveMatchPlayerPage() {
     );
   }
 
-  if (sessionLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-black">
-        <Loader2 className="w-10 h-10 text-white animate-spin stroke-[3px]" />
-      </div>
-    );
-  }
-
-  if (sessionError) {
+  if (!sessionLoading && sessionError) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">

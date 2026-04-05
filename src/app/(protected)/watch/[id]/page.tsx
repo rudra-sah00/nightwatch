@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
-import { LoadingOverlay } from '@/features/watch/player/ui/overlays/LoadingOverlay';
 
 function WatchContent() {
   const {
@@ -12,7 +11,6 @@ function WatchContent() {
     season,
     episode,
     description,
-    posterUrl,
     isRefetching,
     refetchError,
     streamUrl,
@@ -28,29 +26,8 @@ function WatchContent() {
     refetchStream,
   } = useWatchContent();
 
-  // Loading state while refetching
-  if (isRefetching) {
-    return (
-      <div className="relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col items-center justify-center">
-        {/* Aesthetic Background - Match WatchPage */}
-        {posterUrl ? (
-          <div className="absolute inset-0 z-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center blur-3xl scale-110 opacity-30 animate-pulse"
-              style={{ backgroundImage: `url(${posterUrl})` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60" />
-          </div>
-        ) : null}
-
-        {/* Reuse the LoadingOverlay for consistency */}
-        <LoadingOverlay isVisible={true} />
-      </div>
-    );
-  }
-
-  // No stream URL and error
-  if (!streamUrl) {
+  // No stream URL after refetch has settled
+  if (!isRefetching && !streamUrl) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
         <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6">
