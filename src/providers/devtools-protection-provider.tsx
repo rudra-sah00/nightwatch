@@ -10,7 +10,8 @@ export function DevToolsProtectionProvider({
   children,
 }: DevToolsProtectionProviderProps) {
   useEffect(() => {
-    // Enabled DevTools protection
+    // Disabled for now as requested
+    /*
     if (process.env.NODE_ENV === 'development') return;
 
     let cancelled = false;
@@ -26,6 +27,7 @@ export function DevToolsProtectionProvider({
       cancelled = true;
       cleanup?.();
     };
+    */
   }, []);
 
   return <>{children}</>;
