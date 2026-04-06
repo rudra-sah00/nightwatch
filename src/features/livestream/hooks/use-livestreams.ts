@@ -123,16 +123,17 @@ export function useLiveMatch(id: string | null) {
   useEffect(() => {
     loadMatch();
 
-    // Poll every 15 s while live or waiting for the stream URL to appear.
-    // 60 s was too slow — users would be stuck on "Waiting for Feed" for up
-    // to a minute after the source starts broadcasting.
+    // Poll to keep checking for a stream URL before the match starts.
+    // Once we have the stream URL (playPath), we can stop polling entirely
+    // since the player doesn't display live score updates anyway.
     const interval = setInterval(() => {
       const current = matchRef.current;
       if (
         current &&
+        !current.playPath &&
         (current.status === 'MatchIng' || current.status === 'MatchNotStart')
       ) {
-        loadMatch(true); // isPoll=true — never clears an active stream on 404
+        loadMatch(true); // isPoll=true
       }
     }, 15_000);
 
