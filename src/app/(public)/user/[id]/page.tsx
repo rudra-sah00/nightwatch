@@ -55,5 +55,10 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
-  return <PublicProfileView profile={result.profile} />;
+  // Compute today's date on server to prevent hydration mismatch
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString().split('T')[0];
+
+  return <PublicProfileView profile={result.profile} todayIso={todayIso} />;
 }

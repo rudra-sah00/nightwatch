@@ -13,9 +13,14 @@ interface PublicProfileViewProps {
     createdAt: string;
     activity: { date: string; watchSeconds: number }[];
   };
+  /** Pre-computed today's date (ISO string) from server to prevent hydration mismatch */
+  todayIso: string;
 }
 
-export function PublicProfileView({ profile }: PublicProfileViewProps) {
+export function PublicProfileView({
+  profile,
+  todayIso,
+}: PublicProfileViewProps) {
   const joinDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -39,7 +44,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
   });
 
   // Calculate accurate activity streak (consecutive days with activity)
-  const watchStreak = computeStreak(profile.activity);
+  const watchStreak = computeStreak(profile.activity, todayIso);
   const totalWatchHours = Math.floor(
     profile.activity.reduce((acc, curr) => acc + curr.watchSeconds, 0) / 3600,
   );
@@ -159,35 +164,38 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
   );
 }
 
-function computeStreak(activity: { date: string; watchSeconds: number }[]) {
+function computeStreak(
+  activity: { date: string; watchSeconds: number }[],
+  todayIso: string,
+) {
   if (activity.length === 0) return 0;
 
   let streak = 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const activeDates = new Set(
     activity.filter((a) => a.watchSeconds > 0).map((a) => a.date),
   );
 
-  const checkDate = new Date(today);
+  let currentDate = todayIso;
 
-  if (!activeDates.has(toIso(checkDate))) {
-    checkDate.setDate(checkDate.getDate() - 1);
+  if (!activeDates.has(currentDate)) {
+    currentDate = addDays(currentDate, -1);
   }
 
-  while (activeDates.has(toIso(checkDate))) {
+  while (activeDates.has(currentDate)) {
     streak++;
-    checkDate.setDate(checkDate.getDate() - 1);
+    currentDate = addDays(currentDate, -1);
     if (streak > 365) break;
   }
 
   return streak;
 }
 
-const toIso = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+/**
+ * Add days to an ISO date string without timezone conversions.
+ * Prevents hydration mismatches from Date object behavior.
+ */
+function addDays(isoDate: string, days: number): string {
+  const date = new Date(isoDate + 'T00:00:00Z');
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().split('T')[0];
+}
