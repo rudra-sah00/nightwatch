@@ -53,7 +53,7 @@ describe('useWatchPartyMembers', () => {
     id: 'room-1',
     hostId: 'host-1',
     members: [],
-    pendingMembers: [],
+    pendingMembers: [{ id: 'user-2', name: 'Guest' }],
     state: {
       currentTime: 0,
       isPlaying: false,

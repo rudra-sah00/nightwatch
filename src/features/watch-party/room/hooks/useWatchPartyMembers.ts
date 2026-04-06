@@ -41,16 +41,21 @@ export function useWatchPartyMembers({
   const approveMember = useCallback(
     async (memberId: string) => {
       if (!room?.id) return;
+
+      // Capture member details BEFORE the async API call.
+      // Socket.IO may update pendingMembers and remove the user while the API call is still pending
+      const memberToApprove = room.pendingMembers?.find(
+        (m) => m?.id === memberId,
+      );
+      if (!memberToApprove) return;
+
       const response = await approveJoinRequest(room.id, memberId);
       if (response.success) {
         toast.success('Member approved');
         setRoom((prev) => {
           if (!prev) return null;
           const isAlreadyMember = prev.members.some((m) => m?.id === memberId);
-          const member = prev.pendingMembers?.find((m) => m?.id === memberId);
-          if (!member) {
-            return prev;
-          }
+          const member = memberToApprove;
 
           if (isAlreadyMember) {
             return {
@@ -61,7 +66,6 @@ export function useWatchPartyMembers({
             };
           }
 
-          if (!member) return prev;
           // Notify the approved member directly so they can connect to streams/RTM
           rtmSendMessageToPeer?.(memberId, {
             type: 'JOIN_APPROVED',
@@ -110,6 +114,7 @@ export function useWatchPartyMembers({
       setRoom,
       videoRef?.current?.paused,
       videoRef?.current,
+      room?.pendingMembers,
     ],
   );
 
