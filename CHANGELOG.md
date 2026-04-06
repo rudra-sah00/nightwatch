@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.12.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.11.0...v1.12.0) (2026-04-06)
+
+
+### Features
+
+* **auth:** standardize signup/login UI, add username validation, fix mobile footer, and resolve all auth tests ([d2e0169](https://github.com/rudra-sah00/watch-rudra/commit/d2e01695deaebd8ec163bd2860461f8fe790d517))
+* implemented brutalist Danger Zone and Account Deletion logic connecting to backend ([17da624](https://github.com/rudra-sah00/watch-rudra/commit/17da624e472ed70ed7523e47b51d35e7693d663c))
+* implemented global tour for first-time users via driver.js linked to signup routing ([a66c5bd](https://github.com/rudra-sah00/watch-rudra/commit/a66c5bdab48dccb2da2f947866032755ee9b9b70))
+* login/signup UI refinements and layout stability fixes ([0369e9d](https://github.com/rudra-sah00/watch-rudra/commit/0369e9dbd8e16b98fe61889795cfd57bc3ca455c))
+* **profile:** implement public profile sharing via UUID with activity heatmap and sharing UI ([46cde3f](https://github.com/rudra-sah00/watch-rudra/commit/46cde3f9d68e3c07b3b3175b7905f94fca9e18bf))
+* **profile:** modularize public profile into feature component, harden backend URLs, and add premium neobrutalist 404 ([d6e07fc](https://github.com/rudra-sah00/watch-rudra/commit/d6e07fcb0fbedc5e306fc1a63b49c1568b2d0b28))
+* **security:** activate devtools protection in production ([5e0aa45](https://github.com/rudra-sah00/watch-rudra/commit/5e0aa45cdf75ed2b0b21e2b93b2269498b9e8b6c))
+* standardizing creator identity and auth UI refinements ([2347039](https://github.com/rudra-sah00/watch-rudra/commit/23470399647aea8a7b2571ddff1f8715e8e6fddb))
+* **ui:** unify neo-brutalist interaction physics across all card grids ([73e59d4](https://github.com/rudra-sah00/watch-rudra/commit/73e59d41d9c2208708f014d7465b27e3c271223b))
+
+
+### Bug Fixes
+
+* **agora:** silence SDK logs in production via NEXT_PUBLIC_AGORA_DEBUG ([73a3959](https://github.com/rudra-sah00/watch-rudra/commit/73a39590d691ed30b7a6b46e1952dd3482be6c5f))
+* **auth:** align REVERT button hover with neo-outline standard ([e93c19e](https://github.com/rudra-sah00/watch-rudra/commit/e93c19eb655a3b4b6b936d13fa5d000428236ec5))
+* **auth:** align signup schema, enforce mandatory invite code, and fix tests ([2ac46ab](https://github.com/rudra-sah00/watch-rudra/commit/2ac46ab2c4ff0e0dc168dd1b867c349112b61eaf))
+* **auth:** improve signup errors and captcha recovery ([0b73fa7](https://github.com/rudra-sah00/watch-rudra/commit/0b73fa789cc84deccf25be459a5163646f08ae4b))
+* **auth:** prevent accidental signup form submission on Enter key ([b5ffba3](https://github.com/rudra-sah00/watch-rudra/commit/b5ffba301959c6292318dc58f9f388e521f9c6d2))
+* CSP headers for Cloudflare Turnstile explicitly allowing challenges.cloudflare.com and about: frames ([14e534c](https://github.com/rudra-sah00/watch-rudra/commit/14e534cc025b6d3953f27e5455df93ec2e415337))
+* handle AbortError in video.play() during navigation ([84ea950](https://github.com/rudra-sah00/watch-rudra/commit/84ea9505b525166d9fb8e15e46516057e729b950))
+* **home:** refine mobile search bar and button sizing ([734ea86](https://github.com/rudra-sah00/watch-rudra/commit/734ea86dd5f8d951fa170a6a54a7abbee1cbc19e))
+* **live:** prevent livestream progress states from saving to database ([d9634e0](https://github.com/rudra-sah00/watch-rudra/commit/d9634e06e86d0634e6147c36c34292eecc4f2c06))
+* **live:** resolve server 2 stream titles and bypass upcoming blocker ([7f60f2b](https://github.com/rudra-sah00/watch-rudra/commit/7f60f2bec9167fe197a6d7325f607388dbb7e4bb))
+* **livestream:** stop polling match details after stream URL is found to prevent rate limits ([4321197](https://github.com/rudra-sah00/watch-rudra/commit/432119720d78686ee3193da3a265f8824c1f464d))
+* prevent hydration mismatch on public profile page ([682515b](https://github.com/rudra-sah00/watch-rudra/commit/682515b85d55576408855f0b08c3e202e1c2aebe))
+* **profile:** redesign mobile card and stabilize profile tests ([0200126](https://github.com/rudra-sah00/watch-rudra/commit/0200126ea3a659483eac28548aeda482a6cb027f))
+* **test:** update login page redirect assertion to /home ([8423126](https://github.com/rudra-sah00/watch-rudra/commit/84231267642a9b98c0dae3a5e87055905935f825))
+* **watch-party:** resolve audio ducking lingering after muting and stabilize participant speaker state mapping ([6ae43a4](https://github.com/rudra-sah00/watch-rudra/commit/6ae43a4cd0008aa12c06e6ae39472fa447554004))
+* **watch-party:** resolve guest join approval notification bug ([b9fd97d](https://github.com/rudra-sah00/watch-rudra/commit/b9fd97d441234d18ef0817901fb2d6b97a5cb8c6))
+
 ## [1.11.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.10.0...v1.11.0) (2026-03-28)
 
 
