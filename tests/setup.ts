@@ -29,11 +29,24 @@ process.env.NEXT_PUBLIC_WS_URL = 'http://localhost:4000';
 process.env.NEXT_PUBLIC_AGORA_APP_ID = 'test-agora-app-id';
 process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = 'test-key';
 
-vi.stubGlobal(
-  'EventSource',
-  class EventSource {
-    close = vi.fn();
-    addEventListener = vi.fn();
-    removeEventListener = vi.fn();
-  },
-);
+vi.mock('@/providers/socket-provider', () => ({
+  useSocket: () => ({
+    socket: {
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn((_event, ...args) => {
+        const callback = args[args.length - 1];
+        if (typeof callback === 'function') {
+          callback({ success: true });
+        }
+      }),
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      connected: true,
+      id: 'mock-socket-id',
+    },
+    isConnected: true,
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+  }),
+}));

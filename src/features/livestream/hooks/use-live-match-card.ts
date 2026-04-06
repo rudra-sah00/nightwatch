@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
 import { generateRoomId } from '@/features/watch-party/room/utils';
-import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 import type { LiveMatch } from '../types';
 
@@ -58,7 +57,7 @@ export function useLiveMatchCard(match: LiveMatch) {
     }
 
     setIsCreatingParty(true);
-    const proxyUrl = `${env.BACKEND_URL}/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
+    const proxyUrl = `/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
     const roomTitle =
       match.contentKind === 'channel' || match.type === 'all_channels'
         ? match.channelName || match.team1.name

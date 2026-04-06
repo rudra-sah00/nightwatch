@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import { toast } from 'sonner';
 import { env } from '@/lib/env';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
@@ -53,7 +54,7 @@ export function useWatchPartyLifecycle({
   rtmSendMessage,
   setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
-  // --- REAL-TIME APPROVAL LISTENER (SSE for Guests) ---
+  // --- REAL-TIME APPROVAL LISTENER (Socket.IO for Guests) ---
   useEffect(() => {
     const guestToken =
       typeof window !== 'undefined'
@@ -64,8 +65,8 @@ export function useWatchPartyLifecycle({
     let activeUserId = userId;
     if (!activeUserId && guestToken) {
       try {
-        const payload = JSON.parse(atob(guestToken.split('.')[1]));
-        activeUserId = payload.sub;
+        const payloadJSON = JSON.parse(atob(guestToken.split('.')[1]));
+        activeUserId = payloadJSON.sub;
       } catch (_e) {
         // invalid token
       }
@@ -73,76 +74,94 @@ export function useWatchPartyLifecycle({
 
     if (requestStatus !== 'pending' || !activeUserId) return;
 
-    let eventSource: EventSource | null = null;
-    const streamUrl = `${env.BACKEND_URL}/api/rooms/${
-      roomId || room?.id || 'PENDING'
-    }/stream${guestToken ? `?token=${encodeURIComponent(guestToken)}` : ''}`;
+    let tempSocket: ReturnType<typeof io> | null = null;
 
-    const connectSse = () => {
-      eventSource = new EventSource(streamUrl, { withCredentials: true });
+    const connectSocket = () => {
+      const socketUrl =
+        env.WS_URL ||
+        (env as Record<string, string | undefined>).BACKEND_URL ||
+        'ws://localhost:4000';
+      tempSocket = io(socketUrl, {
+        withCredentials: true,
+        query: {
+          isGuest: 'true',
+          guestToken: guestToken || '',
+        },
+      });
 
-      eventSource.onmessage = async (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          const payload = data.payload;
+      tempSocket.on('connect', () => {
+        tempSocket?.emit(
+          'watch-party:join_room',
+          roomId || room?.id || 'PENDING',
+        );
+      });
 
-          if (data.type === 'JOIN_RESULT' && payload?.userId === activeUserId) {
-            if (payload.status === 'approved') {
-              const targetRoomId = roomId || room?.id || 'PENDING';
+      const handleJoinResult = async (payload: {
+        userId?: string;
+        status?: string;
+        room?: WatchPartyRoom;
+        streamToken?: string;
+        agoraRtmToken?: { token: string; appId: string; uid: string };
+      }) => {
+        if (payload?.userId === activeUserId) {
+          if (payload.status === 'approved') {
+            const targetRoomId = roomId || room?.id || 'PENDING';
 
-              // Instant join: Use room data from SSE if available to bypass 3-4s of API round-trips
-              let roomRes = payload.room;
-              let token =
-                payload.streamToken || payload.room?.streamToken || '';
+            // Instant join: Use room data from Socket.IO if available
+            let roomRes = payload.room;
+            let token = payload.streamToken || payload.room?.streamToken || '';
 
-              if (!roomRes) {
-                // FALLBACK: If payload is minimal, fetch manually (Legacy path)
-                const [r, s] = await Promise.all([
-                  getRoomDetails(targetRoomId),
-                  getPartyStreamToken(targetRoomId),
-                ]).catch(() => [null, { token: '' }]);
-                roomRes = r;
-                token = (s as { token?: string })?.token || '';
-              }
-
-              if (roomRes) {
-                const normalizedRoom = normalizeRoomUrls(roomRes, token, {
-                  injectStream: true,
-                });
-
-                setRoom(normalizedRoom);
-                if (payload.agoraRtmToken) {
-                  setAgoraRtmToken(payload.agoraRtmToken);
-                }
-                setIsConnected(true);
-                setRequestStatus('joined');
-                toast.success('Your request was approved!');
-              } else {
-                setError('Failed to fetch room details after approval.');
-              }
-            } else if (payload.status === 'rejected') {
-              setRequestStatus('rejected');
-              setError('The host declined your request to join.');
+            if (!roomRes) {
+              // FALLBACK: Fetch manually
+              const [r, s] = await Promise.all([
+                getRoomDetails(targetRoomId),
+                getPartyStreamToken(targetRoomId),
+              ]).catch(() => [null, { token: '' }]);
+              roomRes = r as WatchPartyRoom;
+              token = (s as { token?: string })?.token || '';
             }
 
-            eventSource?.close();
+            if (roomRes) {
+              const normalizedRoom = normalizeRoomUrls(roomRes, token, {
+                injectStream: true,
+              });
+
+              setRoom(normalizedRoom);
+              if (payload.agoraRtmToken) {
+                setAgoraRtmToken(payload.agoraRtmToken);
+              }
+              setIsConnected(true);
+              setRequestStatus('joined');
+              toast.success('Your request was approved!');
+            } else {
+              setError('Failed to fetch room details after approval.');
+            }
+          } else if (payload.status === 'rejected') {
+            setRequestStatus('rejected');
+            setError('The host declined your request to join.');
           }
-        } catch (_e) {
-          // ignore parsing error for heartbeats/padding
+
+          tempSocket?.off('JOIN_RESULT', handleJoinResult);
+          tempSocket?.disconnect();
         }
       };
 
-      eventSource.onerror = () => {
-        eventSource?.close();
-        // Retry logic for unstable development connections
-        setTimeout(connectSse, 3000);
-      };
+      tempSocket.on('JOIN_RESULT', handleJoinResult);
+
+      tempSocket.on('connect_error', () => {
+        // Simple retry logic if unstable
+        setTimeout(() => {
+          if (!tempSocket?.active) {
+            tempSocket?.connect();
+          }
+        }, 3000);
+      });
     };
 
-    connectSse();
+    connectSocket();
 
     return () => {
-      eventSource?.close();
+      tempSocket?.disconnect();
     };
   }, [
     requestStatus,

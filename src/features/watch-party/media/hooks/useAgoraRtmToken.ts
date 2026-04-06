@@ -52,7 +52,7 @@ export function useAgoraRtmToken(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Optimization: If we already received a token via SSE/JOIN payload, use it immediately
+    // Optimization: If we already received a token via Socket.IO/JOIN payload, use it immediately
     const preFetched = options.initialTokenData;
     if (
       preFetched?.token &&

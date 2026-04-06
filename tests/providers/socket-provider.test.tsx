@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as socketLib from '@/lib/socket';
 import { SocketProvider, useSocket } from '@/providers/socket-provider';
 
+vi.unmock('@/providers/socket-provider');
+
 vi.mock('@/lib/socket', () => ({
   initSocket: vi.fn(),
   disconnectSocket: vi.fn(),

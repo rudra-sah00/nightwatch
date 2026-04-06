@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { env } from '@/lib/env';
+import { useSocket } from '@/providers/socket-provider';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   approveJoinRequest,
@@ -35,6 +35,7 @@ export function useWatchPartyMembers({
   streamToken,
   videoRef,
 }: UseWatchPartyMembersProps) {
+  const { socket } = useSocket();
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   const approveMember = useCallback(
@@ -202,43 +203,29 @@ export function useWatchPartyMembers({
     [isHost, room?.id, room?.hostId, kickUser, setRoom],
   );
 
-  // Handle Watch Party SSE connection for real-time join request updates
+  // Handle Watch Party Socket.IO connection for real-time join request updates
   useEffect(() => {
     let active = true;
-    let eventSource: EventSource | null = null;
-    let reconnectTimer: NodeJS.Timeout;
 
-    if (!room?.id || room.hostId !== userId) {
+    if (!room?.id || room.hostId !== userId || !socket) {
       return;
     }
 
-    const connectSSE = () => {
+    const setupSocketListeners = () => {
       if (!active) return;
+      socket.emit('watch-party:join_room', room.id);
 
-      const streamUrl = `${env.BACKEND_URL}/api/rooms/${room.id}/stream`;
-
-      eventSource = new EventSource(streamUrl, {
-        withCredentials: true,
-      });
-
-      eventSource.onopen = () => {};
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          if (
-            data.type === 'PENDING_MEMBERS_UPDATED' &&
-            data.payload?.pendingMembers
-          ) {
+      socket.on(
+        'PENDING_MEMBERS_UPDATED',
+        (payload: { pendingMembers?: RoomMember[] }) => {
+          if (payload?.pendingMembers) {
             setRoom((prev) => {
               if (!prev) return null;
 
               const existingIds = new Set(
                 prev.pendingMembers?.map((m) => m.id) || [],
               );
-              const incomingPending = data.payload
-                .pendingMembers as RoomMember[];
+              const incomingPending = payload.pendingMembers as RoomMember[];
               const newPendingCount = incomingPending.filter(
                 (m) => !existingIds.has(m.id),
               ).length;
@@ -258,78 +245,12 @@ export function useWatchPartyMembers({
                 })),
               };
             });
-          } else if (
-            data.type === 'PERMISSIONS_UPDATED' &&
-            data.payload?.permissions
-          ) {
-            setRoom((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                permissions: {
-                  ...prev.permissions,
-                  ...data.payload.permissions,
-                },
-              };
-            });
-          } else if (
-            data.type === 'MEMBER_PERMISSIONS_UPDATED' &&
-            data.payload?.memberId
-          ) {
-            setRoom((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                members: prev.members.map((m) =>
-                  m?.id === data.payload.memberId
-                    ? {
-                        ...m,
-                        permissions: {
-                          ...(m.permissions || {}),
-                          ...data.payload.permissions,
-                        },
-                      }
-                    : m,
-                ),
-              };
-            });
-          } else if (data.type === 'MEMBERS_UPDATED' && data.payload?.members) {
-            setRoom((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                members: data.payload.members.map((m: RoomMember) => ({
-                  ...m,
-                  profilePhoto: m.profilePhoto ?? undefined,
-                })),
-              };
-            });
-          } else if (data.type === 'MEMBER_LEFT' && data.payload?.userId) {
-            setRoom((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                members: prev.members.filter(
-                  (m) => m?.id !== data.payload.userId,
-                ),
-              };
-            });
           }
-        } catch (_e) {
-          // SSE Message Error
-        }
-      };
-
-      eventSource.onerror = () => {
-        eventSource?.close();
-        if (active) {
-          // Retry connection after 5 seconds to reduce server load on failure
-          reconnectTimer = setTimeout(connectSSE, 5000);
-        }
-      };
+        },
+      );
     };
 
-    // Initial fetch to make sure nothing was missed before SSE connects
+    // Initial fetch to make sure nothing was missed before Socket.IO connects
     fetchPendingRequests(room.id).then((response) => {
       if (!active) return;
       const members = response.pendingMembers;
@@ -347,14 +268,14 @@ export function useWatchPartyMembers({
       });
     });
 
-    connectSSE();
+    setupSocketListeners();
 
     return () => {
       active = false;
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      if (eventSource) eventSource.close();
+      socket.off('PENDING_MEMBERS_UPDATED');
+      socket.emit('watch-party:leave_room', room.id);
     };
-  }, [room?.id, room?.hostId, userId, setRoom]);
+  }, [room?.id, room?.hostId, userId, setRoom, socket]);
 
   // Handle incoming member-related RTM messages
   const handleIncomingRtmMessage = useCallback(
@@ -362,7 +283,7 @@ export function useWatchPartyMembers({
       switch (msg.type) {
         case 'MEMBER_JOINED': {
           const { member } = msg;
-          if (!member || !member.id) return;
+          if (!member?.id) return;
 
           const isSelf = userId && member.id === userId;
           if (!isSelf) {

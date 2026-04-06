@@ -195,7 +195,7 @@ function computeStreak(
  * Prevents hydration mismatches from Date object behavior.
  */
 function addDays(isoDate: string, days: number): string {
-  const date = new Date(isoDate + 'T00:00:00Z');
+  const date = new Date(`${isoDate}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().split('T')[0];
 }
