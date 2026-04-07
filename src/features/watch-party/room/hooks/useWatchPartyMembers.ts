@@ -38,6 +38,12 @@ export function useWatchPartyMembers({
   const { socket } = useSocket();
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
+  // Track latest room state for async callbacks without triggering stale closures or side-effects in setState
+  const roomRef = useRef<WatchPartyRoom | null>(room);
+  useEffect(() => {
+    roomRef.current = room;
+  }, [room]);
+
   const approveMember = useCallback(
     async (memberId: string) => {
       if (!room?.id) return;
@@ -183,18 +189,17 @@ export function useWatchPartyMembers({
           clearTimeout(disconnectTimersRef.current[event.userId]);
         }
         disconnectTimersRef.current[event.userId] = setTimeout(() => {
-          // Verify they are still in the room before kicking
-          setRoom((prev) => {
-            if (!prev) return null;
-            const isStillMember = prev.members.some(
-              (m) => m?.id === event.userId,
-            );
-            if (isStillMember) {
-              toast.info(`Auto-removing dropped guest...`);
-              kickUser(event.userId).catch(() => {});
-            }
-            return prev;
-          });
+          // Verify they are still in the room using ref to avoid React strict-mode double-firing side effects
+          const currentRoom = roomRef.current;
+          if (!currentRoom) return;
+
+          const isStillMember = currentRoom.members.some(
+            (m) => m?.id === event.userId,
+          );
+          if (isStillMember) {
+            toast.info(`Auto-removing dropped guest...`);
+            kickUser(event.userId).catch(() => {});
+          }
           delete disconnectTimersRef.current[event.userId];
         }, 120000); // 2 minutes
       } else if (event.action === 'JOIN') {
@@ -205,7 +210,7 @@ export function useWatchPartyMembers({
         }
       }
     },
-    [isHost, room?.id, room?.hostId, kickUser, setRoom],
+    [isHost, room?.id, room?.hostId, kickUser],
   );
 
   // Listen for optimistic local updates from WatchPartySettings via CustomEvent

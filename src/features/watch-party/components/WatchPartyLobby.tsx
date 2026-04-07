@@ -101,7 +101,7 @@ export function WatchPartyLobby({
             variant="neo-base"
             size="none"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
+            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest hover:bg-[#1a1a1a] hover:text-white transition-colors"
           >
             Back to Home
           </Button>
