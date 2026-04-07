@@ -77,6 +77,7 @@ export function ParticipantView({
         isMicEnabled={participant.isMicrophoneEnabled}
         canKick={canKick}
         onKick={onKick ? () => onKick(participant.identity) : undefined}
+        isCurrentUser={isCurrentUser}
       />
     </div>
   );
@@ -152,11 +153,13 @@ function ParticipantOverlay({
   isMicEnabled,
   canKick,
   onKick,
+  isCurrentUser,
 }: {
   name: string;
   isMicEnabled: boolean;
   canKick?: boolean;
   onKick?: () => void;
+  isCurrentUser?: boolean;
 }) {
   const [confirmKick, setConfirmKick] = useState(false);
 
@@ -164,11 +167,13 @@ function ParticipantOverlay({
     <>
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 pointer-events-none">
         {/* Name Tag */}
-        <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
-          <span className="text-[9px] font-black font-headline tracking-widest uppercase text-white truncate max-w-[100px]">
-            {name}
-          </span>
-        </div>
+        {!isCurrentUser && (
+          <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
+            <span className="text-[9px] font-black font-headline tracking-widest uppercase text-white truncate max-w-[100px]">
+              {name}
+            </span>
+          </div>
+        )}
 
         {/* Mic Status */}
         <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
