@@ -208,6 +208,62 @@ export function useWatchPartyMembers({
     [isHost, room?.id, room?.hostId, kickUser, setRoom],
   );
 
+  // Listen for optimistic local updates from WatchPartySettings via CustomEvent
+  useEffect(() => {
+    const handleGlobal = (e: CustomEvent) => {
+      setRoom((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          permissions: {
+            ...prev.permissions,
+            ...e.detail.permissions,
+          },
+        };
+      });
+    };
+
+    const handleMember = (e: CustomEvent) => {
+      setRoom((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          members: prev.members.map((m) =>
+            m?.id === e.detail.memberId
+              ? {
+                  ...m,
+                  permissions: {
+                    ...(m.permissions || {}),
+                    ...e.detail.permissions,
+                  },
+                }
+              : m,
+          ),
+        };
+      });
+    };
+
+    window.addEventListener(
+      'LOCAL_PERMISSIONS_UPDATED',
+      handleGlobal as EventListener,
+    );
+    window.addEventListener(
+      'LOCAL_MEMBER_PERMISSIONS_UPDATED',
+      handleMember as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'LOCAL_PERMISSIONS_UPDATED',
+        handleGlobal as EventListener,
+      );
+      window.removeEventListener(
+        'LOCAL_MEMBER_PERMISSIONS_UPDATED',
+        handleMember as EventListener,
+      );
+    };
+  }, [setRoom]);
+
   // Handle Watch Party Socket.IO connection for real-time join request updates
   useEffect(() => {
     let active = true;

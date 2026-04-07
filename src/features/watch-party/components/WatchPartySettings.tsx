@@ -77,6 +77,13 @@ export function WatchPartySettings({
           type: 'PERMISSIONS_UPDATED',
           permissions: response.permissions,
         });
+
+        // Optimistically update local room state for host
+        window.dispatchEvent(
+          new CustomEvent('LOCAL_PERMISSIONS_UPDATED', {
+            detail: { permissions: response.permissions },
+          }),
+        );
       }
     });
   };
@@ -113,6 +120,13 @@ export function WatchPartySettings({
           memberId,
           permissions: response.permissions,
         });
+
+        // Optimistically update local room state for host
+        window.dispatchEvent(
+          new CustomEvent('LOCAL_MEMBER_PERMISSIONS_UPDATED', {
+            detail: { memberId, permissions: response.permissions },
+          }),
+        );
       }
     });
   };
