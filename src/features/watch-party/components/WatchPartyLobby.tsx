@@ -67,10 +67,9 @@ export function WatchPartyLobby({
           </p>
           <Button
             type="button"
-            variant="neo-base"
-            size="none"
+            variant="neo-outline"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
+            className="w-full py-4 tracking-widest uppercase font-black border-4"
           >
             Go Home
           </Button>
@@ -98,10 +97,9 @@ export function WatchPartyLobby({
           </p>
           <Button
             type="button"
-            variant="neo-base"
-            size="none"
+            variant="neo-outline"
             onClick={() => router.push('/home')}
-            className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest hover:bg-[#1a1a1a] hover:text-white transition-colors"
+            className="w-full py-4 tracking-widest uppercase font-black border-4"
           >
             Back to Home
           </Button>
@@ -152,10 +150,9 @@ export function WatchPartyLobby({
           </p>
           <Button
             type="button"
-            variant="neo-base"
-            size="none"
+            variant="neo-outline"
             onClick={onCancelRequest || onLeave}
-            className="w-full py-3 bg-white text-[#e63b2e] border-2 border-border hover:bg-[#e63b2e] hover:text-white"
+            className="w-full py-3 tracking-widest uppercase font-black border-4"
           >
             Cancel Request
           </Button>
@@ -180,10 +177,9 @@ export function WatchPartyLobby({
           <div className="flex flex-col gap-3">
             <Button
               type="button"
-              variant="neo-base"
-              size="none"
+              variant="neo-outline"
               onClick={() => window.location.reload()}
-              className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest"
+              className="w-full py-4 tracking-widest uppercase font-black border-4"
             >
               Try Again
             </Button>
@@ -286,15 +282,14 @@ export function WatchPartyLobby({
             <div className="space-y-3">
               <Button
                 type="button"
-                variant="neo-base"
-                size="none"
+                variant="neo-outline"
                 onClick={onJoin}
                 disabled={
                   isLoading ||
                   (!user && !guestName.trim()) ||
                   (!user && !captchaToken)
                 }
-                className="w-full py-4 bg-[#ffcc00] text-foreground border-4 border-border tracking-widest opacity-100 disabled:opacity-50"
+                className="w-full py-4 tracking-widest uppercase font-black border-4"
               >
                 {isLoading ? 'Requesting…' : 'Request to Join'}
               </Button>
