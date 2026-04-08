@@ -110,7 +110,7 @@ function LivePlayerState() {
       <LiveBufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 
       <ErrorOverlay
-        isVisible={!!error}
+        isVisible={!!error && !state.isLoading && !state.isBuffering}
         message={error || 'Live stream unavailable'}
         onRetry={() => {
           window.location.reload();

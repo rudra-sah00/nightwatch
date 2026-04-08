@@ -30,6 +30,7 @@ export function useMp4({
     video.src = streamUrl;
 
     const handleLoadedMetadata = () => {
+      dispatch({ type: 'SET_ERROR', error: null });
       dispatch({ type: 'SET_LOADING', isLoading: false });
       video.play().catch((_err) => {});
     };

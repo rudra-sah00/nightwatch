@@ -149,7 +149,7 @@ function VODPlayerState() {
       <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 
       <ErrorOverlay
-        isVisible={!!state.error}
+        isVisible={!!state.error && !state.isLoading && !state.isBuffering}
         message={state.error || 'An error occurred'}
         onRetry={() => {
           window.location.reload();

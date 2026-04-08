@@ -172,6 +172,7 @@ export function useHls({
         hls.attachMedia(video);
 
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+          dispatch({ type: 'SET_ERROR', error: null });
           dispatch({ type: 'SET_LOADING', isLoading: false });
 
           const manualQualities = manualQualitiesRef.current;
@@ -348,6 +349,8 @@ export function useHls({
         // its own error / control UI.
         nativeLoadedMetadataHandler = () => {
           if (cancelled) return;
+
+          dispatch({ type: 'SET_ERROR', error: null });
 
           const nativeVideo = video as VideoWithNativeAudioTracks;
           const nativeAudioTracks = nativeVideo.audioTracks;
