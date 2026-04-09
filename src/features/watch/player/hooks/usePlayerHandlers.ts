@@ -112,7 +112,7 @@ export function usePlayerHandlers({
   const handleSeek = useCallback(
     (time: number) => {
       if (readOnly) return;
-      if (videoRef.current && Number.isFinite(time)) {
+      if (Number.isFinite(time) && videoRef.current) {
         videoRef.current.currentTime = time;
       }
       showControls();

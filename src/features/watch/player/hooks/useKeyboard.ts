@@ -50,15 +50,22 @@ export function useKeyboard({
         const start = src.start(0);
         const end = src.end(src.length - 1);
         if (!Number.isFinite(start) || !Number.isFinite(end)) return;
+        const currentTime = Number.isFinite(video.currentTime)
+          ? video.currentTime
+          : start;
         video.currentTime = Math.max(
           start,
-          Math.min(end, video.currentTime + seconds),
+          Math.min(end, currentTime + seconds),
         );
       } else {
         if (!Number.isFinite(video.duration)) return;
+        const currentTime = Number.isFinite(video.currentTime)
+          ? video.currentTime
+          : 0;
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
         video.currentTime = Math.max(
           0,
-          Math.min(video.duration, video.currentTime + seconds),
+          Math.min(duration, currentTime + seconds),
         );
       }
     },
