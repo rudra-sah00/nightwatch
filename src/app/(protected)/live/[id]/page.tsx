@@ -157,6 +157,7 @@ export default function LiveMatchPlayerPage() {
   const team2Name = activeMatch.team2.name;
   const normalizedTeam1 = team1Name.trim().toUpperCase();
   const normalizedTeam2 = team2Name.trim().toUpperCase();
+  const normalizedTeam2Lower = team2Name.trim().toLowerCase();
   const isGenericLivePair =
     normalizedTeam1 === 'LIVE' &&
     (normalizedTeam2 === 'STREAM' ||
@@ -182,14 +183,19 @@ export default function LiveMatchPlayerPage() {
   const isChannelCard =
     activeMatch.contentKind === 'channel' ||
     activeMatch.type === 'all_channels' ||
-    team2Name.toUpperCase() === 'STREAM' ||
-    team2Name.toLowerCase() === 'live stream' ||
+    normalizedTeam2 === 'STREAM' ||
+    normalizedTeam2Lower === 'live stream' ||
+    normalizedTeam2 === '' ||
+    normalizedTeam2 === 'TBA' ||
+    normalizedTeam2Lower === 'team 2' ||
     isGenericLivePair;
+
+  const channelDisplayName = channelLabel || team1Name || 'LIVE STREAM';
 
   let displayTitle = '';
 
   if (isChannelCard) {
-    displayTitle = channelLabel || team1Name;
+    displayTitle = channelDisplayName;
   } else if (
     team1Name.toUpperCase() === 'LIVE' &&
     team2Name.toUpperCase() === 'STREAM'
@@ -223,33 +229,52 @@ export default function LiveMatchPlayerPage() {
           LIVE
         </Badge>
       )}
-      <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90">
-        {activeMatch.team1.avatar ? (
-          <img
-            src={activeMatch.team1.avatar}
-            alt={activeMatch.team1.name}
-            className="w-5 h-5 rounded-none border border-border"
-          />
-        ) : (
-          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
-            {activeMatch.team1.name.charAt(0)}
+      {isChannelCard ? (
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90 max-w-[180px]">
+          {activeMatch.team1.avatar ? (
+            <img
+              src={activeMatch.team1.avatar}
+              alt={channelDisplayName}
+              className="w-5 h-5 rounded-none border border-border"
+            />
+          ) : (
+            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
+              {channelDisplayName.charAt(0)}
+            </span>
+          )}
+          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
+            {channelDisplayName}
           </span>
-        )}
-        <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-          VS
-        </span>
-        {activeMatch.team2.avatar ? (
-          <img
-            src={activeMatch.team2.avatar}
-            alt={activeMatch.team2.name}
-            className="w-5 h-5 rounded-none border border-border"
-          />
-        ) : (
-          <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
-            {activeMatch.team2.name.charAt(0)}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90">
+          {activeMatch.team1.avatar ? (
+            <img
+              src={activeMatch.team1.avatar}
+              alt={activeMatch.team1.name}
+              className="w-5 h-5 rounded-none border border-border"
+            />
+          ) : (
+            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
+              {activeMatch.team1.name.charAt(0)}
+            </span>
+          )}
+          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
+            VS
           </span>
-        )}
-      </div>
+          {activeMatch.team2.avatar ? (
+            <img
+              src={activeMatch.team2.avatar}
+              alt={activeMatch.team2.name}
+              className="w-5 h-5 rounded-none border border-border"
+            />
+          ) : (
+            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
+              {activeMatch.team2.name.charAt(0)}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -287,45 +312,64 @@ export default function LiveMatchPlayerPage() {
         </div>
 
         <div className="bg-card border border-border rounded-md p-3 shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
+          {isChannelCard ? (
+            <div className="flex items-center gap-3 min-w-0">
               {activeMatch.team1.avatar ? (
                 <img
                   src={activeMatch.team1.avatar}
-                  alt={activeMatch.team1.name}
-                  className="w-9 h-9 rounded-sm border border-border"
+                  alt={channelDisplayName}
+                  className="w-9 h-9 rounded-sm border border-border shrink-0"
                 />
               ) : (
-                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
-                  {activeMatch.team1.name.charAt(0)}
+                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border shrink-0">
+                  {channelDisplayName.charAt(0)}
                 </span>
               )}
-              <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
-                {activeMatch.team1.name}
+              <span className="text-sm font-black font-headline uppercase truncate">
+                {channelDisplayName}
               </span>
             </div>
-
-            <span className="font-black font-headline text-sm uppercase tracking-widest text-muted-foreground">
-              VS
-            </span>
-
-            <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
-              {activeMatch.team2.avatar ? (
-                <img
-                  src={activeMatch.team2.avatar}
-                  alt={activeMatch.team2.name}
-                  className="w-9 h-9 rounded-sm border border-border"
-                />
-              ) : (
-                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
-                  {activeMatch.team2.name.charAt(0)}
+          ) : (
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
+                {activeMatch.team1.avatar ? (
+                  <img
+                    src={activeMatch.team1.avatar}
+                    alt={activeMatch.team1.name}
+                    className="w-9 h-9 rounded-sm border border-border"
+                  />
+                ) : (
+                  <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
+                    {activeMatch.team1.name.charAt(0)}
+                  </span>
+                )}
+                <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
+                  {activeMatch.team1.name}
                 </span>
-              )}
-              <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
-                {activeMatch.team2.name}
+              </div>
+
+              <span className="font-black font-headline text-sm uppercase tracking-widest text-muted-foreground">
+                VS
               </span>
+
+              <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
+                {activeMatch.team2.avatar ? (
+                  <img
+                    src={activeMatch.team2.avatar}
+                    alt={activeMatch.team2.name}
+                    className="w-9 h-9 rounded-sm border border-border"
+                  />
+                ) : (
+                  <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
+                    {activeMatch.team2.name.charAt(0)}
+                  </span>
+                )}
+                <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
+                  {activeMatch.team2.name}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {activeMatch.matchResult ? (
