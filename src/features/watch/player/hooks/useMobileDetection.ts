@@ -29,9 +29,13 @@ const checkMobile = () => {
  * Checks window width, touch support, and max touch points
  */
 export function useMobileDetection() {
-  const [isMobile, setIsMobile] = useState(checkMobile);
+  // Start with a stable value so server render and first client render match.
+  // We update immediately after mount to avoid hydration mismatches.
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setIsMobile(checkMobile());
+
     const handleResize = () => setIsMobile(checkMobile());
     window.addEventListener('resize', handleResize, { passive: true });
     window.addEventListener('orientationchange', handleResize, {
