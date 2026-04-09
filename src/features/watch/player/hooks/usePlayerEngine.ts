@@ -48,6 +48,11 @@ export function usePlayerEngine({
     // livestream watch parties where the stream is an HLS playlist.
     const lowerUrl = streamUrl.toLowerCase();
     if (lowerUrl.includes('.m3u8')) return 'hls';
+
+    // Live streams are overwhelmingly HLS, even if the URL doesn't end in .m3u8
+    // Using the MP4 engine for live streams breaks playback and causes false-positive errors on mobile Safari.
+    if (isLive) return 'hls';
+
     if (lowerUrl.includes('.mp4')) return 'mp4';
 
     // Fall back to provider preference for streams without a clear extension
@@ -57,7 +62,7 @@ export function usePlayerEngine({
     if (effectiveProvider === 's3') return 'hls';
 
     return 'hls';
-  }, [streamUrl, providerIdProp, activeServer]);
+  }, [streamUrl, providerIdProp, activeServer, isLive]);
 
   // Initialize HLS engine
   const hlsResult = useHls({
