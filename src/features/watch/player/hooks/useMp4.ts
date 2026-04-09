@@ -36,7 +36,17 @@ export function useMp4({
     };
 
     const handleError = (e: Event) => {
-      const _mediaError = (e.target as HTMLVideoElement).error;
+      const mediaError = (e.target as HTMLVideoElement).error;
+
+      // Ignore MEDIA_ERR_SRC_NOT_SUPPORTED (4) which happens when src is set to empty during unmount
+      // Ignore MEDIA_ERR_ABORTED (1) which happens on unmount or browser interruption
+      if (
+        !mediaError ||
+        mediaError.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+        mediaError.code === MediaError.MEDIA_ERR_ABORTED
+      )
+        return;
+
       dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
       onStreamExpired?.();
     };

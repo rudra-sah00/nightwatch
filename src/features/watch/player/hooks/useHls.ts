@@ -385,7 +385,16 @@ export function useHls({
 
         const nativeErrorHandler = () => {
           if (cancelled) return;
-          const code = video.error?.code;
+
+          // Ignore empty source errors triggered by cleanup or browser abort (e.g. backgrounding)
+          if (
+            !video.error ||
+            video.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+            video.error.code === MediaError.MEDIA_ERR_ABORTED
+          )
+            return;
+
+          const code = video.error.code;
           const isExpired = code === MediaError.MEDIA_ERR_NETWORK;
           if (isExpired && isLive) {
             const isLikelyStalled = video.paused || video.readyState < 3;
