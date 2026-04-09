@@ -93,12 +93,16 @@ export function useMp4({
     (levelIndex: number) => {
       if (manualQualities?.[levelIndex] && videoRef.current) {
         const video = videoRef.current;
-        const currentTime = video.currentTime;
+        const currentTime = Number.isFinite(video.currentTime)
+          ? video.currentTime
+          : null;
         const wasPlaying = !video.paused;
         const newUrl = manualQualities[levelIndex].url;
 
         video.src = newUrl;
-        video.currentTime = currentTime;
+        if (currentTime !== null) {
+          video.currentTime = currentTime;
+        }
         if (wasPlaying) {
           video.play().catch(() => {});
         }

@@ -40,6 +40,8 @@ export function useKeyboard({
       if (disabled) return;
       const video = videoRef.current;
       if (!video) return;
+      if (!Number.isFinite(seconds) || !Number.isFinite(video.currentTime))
+        return;
 
       if (isLive) {
         // DVR seek: clamp within the seekable/buffered range
@@ -47,11 +49,13 @@ export function useKeyboard({
         if (!src.length) return;
         const start = src.start(0);
         const end = src.end(src.length - 1);
+        if (!Number.isFinite(start) || !Number.isFinite(end)) return;
         video.currentTime = Math.max(
           start,
           Math.min(end, video.currentTime + seconds),
         );
       } else {
+        if (!Number.isFinite(video.duration)) return;
         video.currentTime = Math.max(
           0,
           Math.min(video.duration, video.currentTime + seconds),

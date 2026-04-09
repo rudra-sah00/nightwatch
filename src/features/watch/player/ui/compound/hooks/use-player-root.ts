@@ -244,7 +244,7 @@ export function usePlayerRoot({
   });
 
   const handleProgressLoaded = useCallback((seconds: number) => {
-    if (seconds > 0 && videoRef.current) {
+    if (seconds > 0 && Number.isFinite(seconds) && videoRef.current) {
       videoRef.current.currentTime = seconds;
     }
   }, []);
