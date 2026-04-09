@@ -149,20 +149,26 @@ export function usePredictiveSync(
     };
   }, [applyState, videoRef]);
 
-  // Periodic drift check (every 2s) — skipped for livestreams
+  // Periodic state enforcement & drift check (every 2s)
   useEffect(() => {
-    if (!isCalibrated || isLive) return;
-
     const interval = setInterval(() => {
       const video = videoRef.current;
       const state = stateRef.current;
-      if (!video || !state || !state.isPlaying) return;
+      if (!video || !state) return;
 
-      // If user paused locally but party is playing, we force play (unless we want to allow local pause?)
-      // For now, strict sync:
-      if (video.paused && state.isPlaying) {
+      // If user's browser auto-paused (e.g. background tab / lost focus on dual monitor)
+      // but the party is officially playing, fiercely force it back to play.
+      if (state.isPlaying && video.paused) {
         video.play().catch((_err) => {});
       }
+
+      // Conversely, enforce pause state
+      if (!state.isPlaying && !video.paused) {
+        video.pause();
+      }
+
+      // Skip actual time-drift correction for livestreams or uncalibrated VOD or if paused
+      if (!state.isPlaying || !isCalibrated || isLive) return;
 
       const expected = getExpectedTime();
       const actual = video.currentTime;
