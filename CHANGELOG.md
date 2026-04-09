@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.12.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.12.0...v1.12.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **player:** clear stale playback overlay after successful load ([5e71137](https://github.com/rudra-sah00/watch-rudra/commit/5e71137f30e276871c77c3478f0f7ba4485fa92b))
+* **player:** fully optimize error overlay layout to fit dynamically on narrow vertical mobile screens and break long words ([ca90702](https://github.com/rudra-sah00/watch-rudra/commit/ca907026d2bd03900b1f097a4a50d4232291cf1b))
+* **player:** guard non-finite seek times ([0d65245](https://github.com/rudra-sah00/watch-rudra/commit/0d65245c84df3a3f63d6590ffb16bfa504bd5e70))
+* **player:** make mobile detection hydration safe ([0461652](https://github.com/rudra-sah00/watch-rudra/commit/046165210414802fbb2834cb7e69e07016b93e45))
+* resolve race condition causing unknown participant grid and broken kick feature ([26e61fc](https://github.com/rudra-sah00/watch-rudra/commit/26e61fcbabf454d999d483285f162b4819a9f11c))
+* **watch-party:** aggressively enforce play state to prevent browsers from auto-pausing inactive monitors/tabs ([4d8ae14](https://github.com/rudra-sah00/watch-rudra/commit/4d8ae1423b0015a9718724e8907cf6dace1f08e4))
+* **watch-party:** hide duplicate 'You' name badge in bottom-left for current user overlay ([c86e0e8](https://github.com/rudra-sah00/watch-rudra/commit/c86e0e88c929d01b16ee10fdb13d759e0946b913))
+* **watch-party:** optimistically update host local state for permission toggles ([105fed8](https://github.com/rudra-sah00/watch-rudra/commit/105fed8453b40639f9f37ead3237a1b7155cb606))
+
 ## [1.12.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.11.0...v1.12.0) (2026-04-06)
 
 
