@@ -665,24 +665,6 @@ export function useAgora({
    * Optimized for voice chat in a watch party context.
    */
 
-  const toggleDeafen = useCallback(() => {
-    const next = !isDeafenedRef.current;
-    isDeafenedRef.current = next;
-    setIsDeafened(next);
-
-    if (clientRef.current) {
-      clientRef.current.remoteUsers.forEach((user) => {
-        if (user.audioTrack) {
-          if (next) {
-            user.audioTrack.setVolume(0);
-          } else {
-            user.audioTrack.setVolume(100);
-          }
-        }
-      });
-    }
-  }, []);
-
   const toggleAudio = useCallback(async () => {
     const client = clientRef.current;
     if (!client || connectionState !== 'CONNECTED') {
@@ -710,6 +692,17 @@ export function useAgora({
           // Fall through, handleDeviceError will catch
         }
 
+        // Auto-undeafen if the user opens their mic while deafened
+        if (isDeafenedRef.current) {
+          isDeafenedRef.current = false;
+          setIsDeafened(false);
+          if (clientRef.current) {
+            clientRef.current.remoteUsers.forEach((user) => {
+              if (user.audioTrack) user.audioTrack.setVolume(100);
+            });
+          }
+        }
+
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
           microphoneId: selectedAudioDeviceRef.current || undefined,
           encoderConfig: AUDIO_ENCODER_CONFIG,
@@ -729,6 +722,28 @@ export function useAgora({
       handleDeviceError(error, 'Microphone');
     }
   }, [refreshDevices, connectionState]);
+  const toggleDeafen = useCallback(() => {
+    const next = !isDeafenedRef.current;
+    isDeafenedRef.current = next;
+    setIsDeafened(next);
+
+    if (clientRef.current) {
+      clientRef.current.remoteUsers.forEach((user) => {
+        if (user.audioTrack) {
+          if (next) {
+            user.audioTrack.setVolume(0);
+          } else {
+            user.audioTrack.setVolume(100);
+          }
+        }
+      });
+    }
+
+    // Auto-mute mic if user deafens themselves while their mic is presently unmuted
+    if (next && localAudioTrackRef.current) {
+      toggleAudio().catch(() => {});
+    }
+  }, [toggleAudio]);
 
   const toggleVideo = useCallback(async () => {
     const client = clientRef.current;
