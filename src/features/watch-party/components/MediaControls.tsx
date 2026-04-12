@@ -2,6 +2,7 @@ import {
   Check,
   ChevronUp,
   Copy,
+  HeadphoneOff,
   Headphones,
   LogOut,
   Mic,
@@ -181,16 +182,17 @@ export function MediaControls({
               className="relative h-7 w-7 sm:h-8 sm:w-8 px-0"
               title={isDeafened ? 'Undeafen' : 'Deafen'}
             >
-              <Headphones
-                aria-hidden="true"
-                className={cn(
-                  'w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]',
-                  isDeafened && 'opacity-70 scale-90',
-                )}
-              />
               {isDeafened ? (
-                <X className="absolute w-4 h-4 stroke-[3px] pointer-events-none" />
-              ) : null}
+                <HeadphoneOff
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
+                />
+              ) : (
+                <Headphones
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
+                />
+              )}
             </Button>
 
             {/* Mic Button with Arrow */}
