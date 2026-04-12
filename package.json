@@ -1,6 +1,6 @@
 {
   "name": "watch-rudra",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -119,7 +119,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "rudra",
+        "owner": "rudra-sah00",
         "repo": "watch-rudra"
       }
     ]
