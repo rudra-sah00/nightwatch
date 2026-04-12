@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import { MermaidDiagram } from '../components/MermaidDiagram';
 
 export async function generateStaticParams() {
   const docsDir = path.join(process.cwd(), 'docs');
@@ -58,6 +59,18 @@ export default async function DocPage({
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
+          // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown passes complex AST nodes that don't need strict typing here
+          code: ({ node, className, children, ...props }: any) => {
+            const match = /language-(\w+)/.exec(className || '');
+            if (match && match[1] === 'mermaid') {
+              return <MermaidDiagram chart={String(children).trim()} />;
+            }
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
           a: ({ node, ...props }) => {
             let targetRef = props.href;
             if (targetRef && !targetRef.startsWith('http')) {
