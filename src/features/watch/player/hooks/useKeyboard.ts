@@ -241,6 +241,32 @@ export function useKeyboard({
 
     // Register once — no dependencies, reads via ref
     window.addEventListener('keydown', handleKeyDown);
+
+    // --- ELECTRON GLOBAL MEDIA KEYS HANDLER ---
+    // Listen for physical keyboard media keys if running as the Watch Rudra Desktop app!
+    if (typeof window !== 'undefined' && window.electronAPI?.onMediaCommand) {
+      window.electronAPI.onMediaCommand((command) => {
+        const h = handlersRef.current;
+        if (h.disabled) return;
+
+        switch (command) {
+          case 'MediaPlayPause':
+            h.togglePlay();
+            h.onInteraction?.();
+            break;
+          case 'MediaNextTrack':
+            if (h.hasNextEpisode) {
+              h.onNextEpisode();
+            }
+            break;
+          case 'MediaPreviousTrack':
+            h.seek(-10); // Or restart video if implemented
+            h.onInteraction?.();
+            break;
+        }
+      });
+    }
+
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
