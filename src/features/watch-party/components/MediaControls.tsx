@@ -178,7 +178,7 @@ export function MediaControls({
               variant={isDeafened ? 'neo-red' : 'neo-outline'}
               size="sm"
               onClick={onToggleDeafen}
-              className="h-7 w-7 sm:h-8 sm:w-8 px-0"
+              className="relative h-7 w-7 sm:h-8 sm:w-8 px-0"
               title={isDeafened ? 'Undeafen' : 'Deafen'}
             >
               <Headphones
