@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -77,7 +76,7 @@ export default async function DocPage({
               // Convert link to .md over to dynamic route link
               // features/WATCH.md -> /features/WATCH
               targetRef = `/${targetRef.replace('.md', '')}`;
-              return <Link href={targetRef}>{props.children}</Link>;
+              return <a href={targetRef}>{props.children}</a>;
             }
             return <a target="_blank" rel="noopener noreferrer" {...props} />;
           },
