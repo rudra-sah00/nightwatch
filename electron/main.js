@@ -28,6 +28,7 @@ const { handleDeepLink } = require('./modules/deep-link.js');
 const { setupTray } = require('./modules/tray.js');
 const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
+const { createSplash } = require('./modules/splash.js');
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
@@ -68,22 +69,30 @@ const startElectronApp = async () => {
   // macOS needs explicit user authorization popups for Camera & Mics
   await macOS.setupMacOS();
 
-  // Create main UI Chromium window
-  AppWindow.create();
+  // Initialize Background Auto Updater with Discord-style Splash Screen
+  const finishLaunch = () => {
+    // Create main UI Chromium window
+    AppWindow.create();
 
-  // Allow clicking on discord/slack links to focus the window on mac
-  macOS.handleMacOSDeepLink(triggerDeepLink);
-  macOS.preventDefaultQuit(); // Standard mac dock behavior
+    // Allow clicking on discord/slack links to focus the window on mac
+    macOS.handleMacOSDeepLink(triggerDeepLink);
+    macOS.preventDefaultQuit(); // Standard mac dock behavior
 
-  // Start Tray Icon capabilities
-  setupTray(AppWindow.getInstance(), (quitState) =>
-    AppWindow.setQuitting(quitState),
-  );
+    // Start Tray Icon capabilities
+    setupTray(AppWindow.getInstance(), (quitState) =>
+      AppWindow.setQuitting(quitState),
+    );
+  };
 
-  // Initialize Background Auto Updater
-  // Note: Only works effectively in Production when built and code-signed
   if (app.isPackaged) {
-    setupUpdater();
+    const splash = createSplash();
+    setupUpdater(splash, () => {
+      splash.close();
+      finishLaunch();
+    });
+  } else {
+    // Skip updater in development for speed
+    finishLaunch();
   }
 
   // Example Global Shortcut:

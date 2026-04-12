@@ -1,63 +1,101 @@
 const { autoUpdater } = require('electron-updater');
 const { autoUpdater: asarUpdater } = require('electron-asar-hot-updater');
-const { dialog } = require('electron');
 const log = require('electron-log');
 
-function setupUpdater() {
+function setupUpdater(splashWindow, onComplete) {
   log.transports.file.level = 'info';
   autoUpdater.logger = log;
-
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
+  let updateFinished = false;
+  let asarChecked = false;
+
+  const finish = () => {
+    if (updateFinished) return;
+    updateFinished = true;
+    setTimeout(onComplete, 1000); // 1s buffer so user sees it finishes
+  };
+
+  const sendStatus = (text, percent) => {
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.webContents.send('updater-message', text);
+      if (percent !== undefined) {
+        splashWindow.webContents.send('updater-progress', percent);
+      }
+    }
+  };
+
+  sendStatus('Checking for updates...', 10);
+
+  // ---------- NATIVE UPDATER ----------
   autoUpdater.on('update-available', () => {
-    log.info('Update available. Downloading...');
+    sendStatus('Core update incoming...', 30);
   });
 
-  autoUpdater.on('update-downloaded', (_info) => {
-    dialog
-      .showMessageBox({
-        type: 'info',
-        title: 'Update Ready',
-        message:
-          'A new version of Watch Rudra has been downloaded. Restart the application to apply the updates?',
-        buttons: ['Restart Now', 'Later'],
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          autoUpdater.quitAndInstall();
-        }
-      });
+  autoUpdater.on('download-progress', (progressObj) => {
+    sendStatus(
+      `Downloading engine ${Math.floor(progressObj.percent)}%...`,
+      progressObj.percent,
+    );
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    // If native doesn't need updating, check ASAR
+    checkAsarUpdater();
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    sendStatus('Installing updates...', 100);
+    // Silent restart for native update
+    setTimeout(() => {
+      autoUpdater.quitAndInstall(true, true);
+    }, 2000);
   });
 
   autoUpdater.on('error', (err) => {
     log.error('Error in auto-updater:', err);
+    checkAsarUpdater();
   });
 
-  // Start the background check for updates when the app opens
-  try {
-    autoUpdater.checkForUpdatesAndNotify();
-  } catch (err) {
-    log.warn('Could not check for full updates:', err);
-  }
+  // ---------- ASAR HOT UPDATER ----------
+  const checkAsarUpdater = () => {
+    if (asarChecked) return;
+    asarChecked = true;
+    sendStatus('Checking resources...', 80);
 
-  // Setup ASAR Hot Updater
+    try {
+      asarUpdater.setFeedURL(
+        'https://raw.githubusercontent.com/rudra-sah00/watch-rudra/main/update.json',
+      );
+      // Monkey patch the logger of asar updater to track progress because it handles its own download
+      // For now we just await the promise
+      asarUpdater
+        .checkForUpdates()
+        .then((res) => {
+          log.info('ASAR checked:', res);
+          // It automatically prompts/restarts or returns null if no update.
+          // Since it doesn't give fine-grained progress hooks cleanly to UI yet:
+          sendStatus('Ready to launch!', 100);
+          finish();
+        })
+        .catch((err) => {
+          log.warn('ASAR update error/no-update:', err);
+          sendStatus('Starting Watch Rudra...', 100);
+          finish();
+        });
+    } catch (err) {
+      log.warn('ASAR catch:', err);
+      sendStatus('Loading local files...', 100);
+      finish();
+    }
+  };
+
+  // Kickoff Native Updater first
   try {
-    // You will need to host a simple update.json on your server or GitHub Pages:
-    // { "name": "watch-rudra", "version": "1.15.19", "asar": "https://url.watch-rudra.com/app.asar", "info": "Fixes" }
-    asarUpdater.setFeedURL(
-      'https://raw.githubusercontent.com/rudra-sah00/watch-rudra/main/update.json',
-    );
-    asarUpdater
-      .checkForUpdates()
-      .then((res) => {
-        log.info('ASAR Hot Updater checked. Status:', res);
-      })
-      .catch((err) => {
-        log.warn('ASAR Hot Updater warning/no-update:', err);
-      });
-  } catch (err) {
-    log.warn('Could not check for hot updates:', err);
+    autoUpdater.checkForUpdates();
+  } catch (e) {
+    checkAsarUpdater();
   }
 }
 
