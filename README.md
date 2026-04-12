@@ -28,6 +28,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 ## Technology Stack
 
 - **Framework:** Next.js (React 18+, App Router)
+- **Desktop Wrapper:** Electron, Electron Builder
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
 - **Real-Time Data:** Agora RTM, Socket.IO
@@ -66,6 +67,30 @@ For thorough type-checking, formatting, and tests before committing:
 ```bash
 pnpm validate
 ```
+
+## Desktop Application (macOS, Windows, Linux)
+
+This repository also contains a native OS desktop wrapper using Electron. It adds Picture-in-Picture mode, system tray icons, Windows Taskbar media controls, and macOS Dock unread badging.
+
+To develop the desktop app locally:
+```bash
+pnpm desktop:start
+```
+
+### Automated Cloud Builds (Releases)
+
+The application uses GitHub Actions to automatically build and publish `.dmg` (Mac), `.exe` (Windows), and `.AppImage` (Linux) binaries whenever a new "v*" version tag is created.
+
+You can easily trigger a new desktop build using the official [GitHub CLI (`gh`)](https://cli.github.com/):
+
+```bash
+# 1. Update the version in package.json
+# 2. Commit the change
+# 3. Create and push a new release tag using the gh cli
+gh release create v1.14.0 --title "v1.14.0 - Major Update" --notes "Release notes here..."
+```
+
+As soon as the tag is pushed to GitHub, the `Build Desktop Apps` action will spin up cloud runners, compile the binaries, and attach the installer links automatically to the GitHub Releases page.
 
 ---
 *For issues regarding the backend services or database administration, see the respective `watch-rudra-backend` or `admin-watch-rudra` repositories.*
