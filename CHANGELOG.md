@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.16.0...v1.16.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* **ci:** trigger desktop builds directly from release pipeline ([1405ebe](https://github.com/rudra-sah00/watch-rudra/commit/1405ebe1c70aa5046902a81069ece1c0fe493e37))
+
 ## [1.16.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.15.19...v1.16.0) (2026-04-12)
 
 
