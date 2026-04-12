@@ -27,4 +27,8 @@ function _preventDefaultQuit() {
   });
 }
 
-module.exports = {};
+module.exports = {
+  setupMacOS: _setupMacOS,
+  handleMacOSDeepLink: _handleMacOSDeepLink,
+  preventDefaultQuit: _preventDefaultQuit,
+};

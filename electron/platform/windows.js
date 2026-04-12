@@ -31,4 +31,7 @@ function _registerProtocol() {
   }
 }
 
-module.exports = {};
+module.exports = {
+  setupWindows: _setupWindows,
+  registerProtocol: _registerProtocol,
+};

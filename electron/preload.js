@@ -2,8 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Pass Discord Rich Presence updates from React Next.js to the Main Backend Node Process
-  updateDiscordPresence: (details, state) => {
-    ipcRenderer.send('update-discord-status', { details, state });
+  updateDiscordPresence: (presenceData) => {
+    ipcRenderer.send('update-discord-status', presenceData);
   },
 
   // Let Next.js invoke desktop system features, like copying magic invite links via native copy

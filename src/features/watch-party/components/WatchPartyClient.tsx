@@ -92,6 +92,38 @@ export function WatchPartyClient({
     }
   }, [requestStatus]);
 
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.electronAPI &&
+      room &&
+      isConnected
+    ) {
+      window.electronAPI.updateDiscordPresence({
+        details: room.title,
+        state:
+          room.type === 'series'
+            ? `Season ${room.season} Ep ${room.episode}`
+            : 'Co-Watching Movie',
+        largeImageText: room.title,
+        largeImageKey: room.posterUrl || 'watchrudra_logo',
+        smallImageKey: 'party_icon',
+        smallImageText: 'In a Watch Party',
+        partySize: room.members?.length || 1,
+        partyMax: 10,
+        startTimestamp: room.createdAt || Date.now(),
+      });
+
+      return () => {
+        window.electronAPI!.updateDiscordPresence({
+          details: 'Browsing Homepage',
+          state: 'Looking for content',
+          largeImageKey: 'watchrudra_logo',
+        });
+      };
+    }
+  }, [room, isConnected]);
+
   const isMobile = useIsMobile();
 
   if (!isGuestSocketReady) {

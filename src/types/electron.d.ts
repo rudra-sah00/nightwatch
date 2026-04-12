@@ -3,7 +3,19 @@
 
 export interface ElectronAPI {
   /** Updates the user's playing status directly in Discord */
-  updateDiscordPresence: (details: string, state: string) => void;
+  updateDiscordPresence: (presence: {
+    details?: string;
+    state?: string;
+    largeImageKey?: string;
+    largeImageText?: string;
+    smallImageKey?: string;
+    smallImageText?: string;
+    partySize?: number;
+    partyMax?: number;
+    startTimestamp?: number;
+    endTimestamp?: number;
+    instance?: boolean;
+  }) => void;
 
   /** Securely copies a string to the user's OS clipboard natively */
   copyToClipboard: (text: string) => void;

@@ -14,7 +14,10 @@ class DiscordIntegration {
   async init() {
     this.rpc.on('ready', () => {
       this.connected = true;
-      this.setActivity('Browsing Homepage', 'Looking for Live Streams');
+      this.setActivity({
+        details: 'Browsing Homepage',
+        state: 'Looking for Live Streams',
+      });
       console.log('Discord RPC Successfully Active!');
     });
 
@@ -25,17 +28,21 @@ class DiscordIntegration {
     }
   }
 
-  setActivity(details, state) {
+  setActivity(presence) {
     if (!this.connected) return;
+
+    // Default presence values
+    const defaultPresence = {
+      largeImageKey: 'watchrudra_logo', // Upload in Discord Dev Portal
+      largeImageText: 'Watch Rudra App',
+      startTimestamp: this.startTimestamp,
+      instance: false,
+    };
 
     this.rpc
       .setActivity({
-        details,
-        state,
-        startTimestamp: this.startTimestamp,
-        largeImageKey: 'watchrudra_logo', // Upload in Discord Dev Portal
-        largeImageText: 'Watch Rudra App',
-        instance: false,
+        ...defaultPresence,
+        ...presence,
       })
       .catch(console.error);
   }

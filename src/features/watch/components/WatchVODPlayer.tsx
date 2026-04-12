@@ -1,6 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';
@@ -68,6 +68,33 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
       router.push('/home');
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      window.electronAPI.updateDiscordPresence({
+        details: props.metadata.title,
+        state:
+          props.metadata.type === 'series'
+            ? `Season ${props.metadata.season} Ep ${props.metadata.episode}`
+            : props.metadata.year
+              ? `Movie (${props.metadata.year})`
+              : 'Feature Film',
+        largeImageText: props.metadata.title,
+        largeImageKey: props.metadata.posterUrl || 'watchrudra_logo',
+        smallImageKey: 'play_icon',
+        smallImageText: 'Solo Watch',
+        startTimestamp: Date.now(),
+      });
+
+      return () => {
+        window.electronAPI!.updateDiscordPresence({
+          details: 'Browsing Homepage',
+          state: 'Looking for content',
+          largeImageKey: 'watchrudra_logo',
+        });
+      };
+    }
+  }, [props.metadata]);
 
   const mobileHeader = (
     <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">

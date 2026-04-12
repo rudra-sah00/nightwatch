@@ -115,8 +115,8 @@ const startElectronApp = async () => {
   discordLogic.init().catch(console.error);
 
   // IPC Event listener for React letting us know the user changed rooms!
-  ipcMain.on('update-discord-status', (_event, { details, state }) => {
-    discordLogic.setActivity(details, state);
+  ipcMain.on('update-discord-status', (_event, presenceData) => {
+    discordLogic.setActivity(presenceData);
   });
 
   // Native Clipboard API
@@ -144,7 +144,10 @@ const startElectronApp = async () => {
       // We send 'MediaPlayPause' because if it's playing, it will pause.
       // (Note: To be entirely safe, we realistically just want to PAUSE. But standard play/pause hardware key is robust).
       win.webContents.send('media-command', 'MediaPlayPause');
-      discordLogic.setActivity('Away (System Locked)', 'AFK from Watch Party');
+      discordLogic.setActivity({
+        details: 'Away (System Locked)',
+        state: 'AFK from Watch Party',
+      });
     }
   };
 
@@ -153,7 +156,10 @@ const startElectronApp = async () => {
   powerMonitor.on('lock-screen', triggerSleepPause);
 
   const triggerResume = () => {
-    discordLogic.setActivity('Back Online', 'Browsing Homepage');
+    discordLogic.setActivity({
+      details: 'Back Online',
+      state: 'Browsing Homepage',
+    });
   };
   powerMonitor.on('resume', triggerResume);
   powerMonitor.on('unlock-screen', triggerResume);
@@ -323,6 +329,10 @@ app.whenReady().then(startElectronApp);
 windows.setupWindows(triggerDeepLink, AppWindow.getInstance());
 
 // Lifecycle Cleanup hook
+app.on('before-quit', () => {
+  AppWindow.setQuitting(true);
+});
+
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });

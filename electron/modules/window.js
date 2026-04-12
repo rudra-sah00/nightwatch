@@ -133,13 +133,16 @@ class AppWindow {
       this.mainWindow.show();
     });
 
-    // Minimize to tray on close, instead of quitting the application completely
+    // Minimize to tray on close for macOS (standard behavior), but quit on Windows/Linux
     this.mainWindow.on('close', (event) => {
       if (!this.isQuitting) {
-        event.preventDefault();
-        this.mainWindow.hide();
+        if (process.platform === 'darwin') {
+          event.preventDefault();
+          this.mainWindow.hide();
+        } else {
+          // Allow the window to close normally, which triggers window-all-closed and app.quit()
+        }
       }
-      return false;
     });
 
     return this.mainWindow;
