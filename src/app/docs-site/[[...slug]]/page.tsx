@@ -53,7 +53,7 @@ export default async function DocPage({
   const content = fs.readFileSync(filepath, 'utf8');
 
   return (
-    <article className="prose prose-zinc prose-a:text-amber-600 prose-a:font-bold prose-a:decoration-4 prose-a:underline-offset-4 hover:prose-a:text-black prose-headings:font-black prose-headings:uppercase prose-pre:border-4 prose-pre:border-black prose-pre:shadow-[4px_4px_0px_#1a1a1a] prose-pre:bg-zinc-900 prose-img:border-4 prose-img:border-black prose-img:shadow-[4px_4px_0px_#1a1a1a] max-w-none bg-white p-8 md:p-12 border-4 border-black shadow-[8px_8px_0px_#1a1a1a] mb-12 break-words">
+    <article className="prose prose-zinc prose-invert prose-a:text-amber-500 hover:prose-a:text-amber-400 prose-headings:font-bold prose-headings:tracking-tight prose-pre:border prose-pre:border-white/10 prose-pre:bg-white/5 prose-img:border prose-img:border-white/10 prose-img:rounded-xl max-w-none bg-black text-zinc-300 p-8 md:p-12 border border-white/10 rounded-2xl mb-12 break-words">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
