@@ -55,6 +55,9 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
         <DevToolsProtectionProvider>
+          {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
+          <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-transparent pointer-events-auto [-webkit-app-region:drag]" />
+
           <SocketProvider>
             <AuthProvider>
               {children}
