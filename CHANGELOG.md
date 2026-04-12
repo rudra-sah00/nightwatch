@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.18.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.17.0...v1.18.0) (2026-04-12)
+
+
+### Features
+
+* **docs:** add mermaid.js diagram rendering support to docs markdown ([e695517](https://github.com/rudra-sah00/watch-rudra/commit/e695517ac7c662403e06e4ecdeb0aa25eae2014c))
+
+
+### Bug Fixes
+
+* **docs:** remove invalid background config from MermaidDiagram ([76da449](https://github.com/rudra-sah00/watch-rudra/commit/76da449af595c79097a71c29b0946eced2a040c7))
+
 ## [1.17.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.16.1...v1.17.0) (2026-04-12)
 
 
