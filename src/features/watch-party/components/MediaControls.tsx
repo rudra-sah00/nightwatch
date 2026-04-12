@@ -173,28 +173,6 @@ export function MediaControls({
 
           {/* Media Buttons */}
           <div className="flex items-center gap-2">
-            {/* Deafen Button */}
-            <Button
-              type="button"
-              variant={isDeafened ? 'neo-red' : 'neo-outline'}
-              size="sm"
-              onClick={onToggleDeafen}
-              className="relative h-7 w-7 sm:h-8 sm:w-8 px-0"
-              title={isDeafened ? 'Undeafen' : 'Deafen'}
-            >
-              {isDeafened ? (
-                <HeadphoneOff
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
-                />
-              ) : (
-                <Headphones
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
-                />
-              )}
-            </Button>
-
             {/* Mic Button with Arrow */}
             <div className="flex items-center relative">
               {showAudioDevices ? (
@@ -308,6 +286,27 @@ export function MediaControls({
                 )}
               </Button>
             </div>
+            {/* Deafen Button */}
+            <Button
+              type="button"
+              variant={isDeafened ? 'neo-red' : 'neo-outline'}
+              size="sm"
+              onClick={onToggleDeafen}
+              className="relative h-7 w-7 sm:h-8 sm:w-8 px-0"
+              title={isDeafened ? 'Undeafen' : 'Deafen'}
+            >
+              {isDeafened ? (
+                <HeadphoneOff
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
+                />
+              ) : (
+                <Headphones
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
+                />
+              )}
+            </Button>
           </div>
         </div>
       </div>
