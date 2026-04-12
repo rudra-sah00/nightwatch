@@ -2,6 +2,7 @@ import {
   Check,
   ChevronUp,
   Copy,
+  Headphones,
   LogOut,
   Mic,
   MicOff,
@@ -148,17 +149,17 @@ export function MediaControls({
             </div>
             <div className="flex flex-col overflow-hidden">
               <span
-                className="text-xs sm:text-sm font-black font-headline uppercase tracking-widest text-foreground truncate max-w-[100px] sm:max-w-[140px]"
+                className="text-[9px] sm:text-[10px] font-black font-headline uppercase tracking-widest text-foreground truncate max-w-[60px] sm:max-w-[75px]"
                 title={userName}
               >
                 {userName}
               </span>
               <span
-                className={`text-[10px] sm:text-xs flex items-center gap-1.5 font-bold font-headline uppercase tracking-widest ${isAgoraConnected ? 'text-[#0055ff]' : 'text-[#e63b2e]'}`}
+                className={`text-[7px] sm:text-[9px] flex items-center gap-1 font-bold font-headline uppercase tracking-widest ${isAgoraConnected ? 'text-[#0055ff]' : 'text-[#e63b2e]'}`}
               >
                 <span
                   className={cn(
-                    'w-2.5 h-2.5 border-2 border-border',
+                    'w-2 h-2 border-[1.5px] border-border',
                     isAgoraConnected
                       ? 'bg-[#0055ff] animate-pulse'
                       : 'bg-[#e63b2e] animate-[pulse_1.5s_ease-in-out_infinite]',
@@ -175,26 +176,20 @@ export function MediaControls({
             <Button
               type="button"
               variant={isDeafened ? 'neo-red' : 'neo-outline'}
-              size="icon"
+              size="sm"
               onClick={onToggleDeafen}
+              className="h-7 w-7 sm:h-8 sm:w-8 px-0"
               title={isDeafened ? 'Undeafen' : 'Deafen'}
             >
-              <svg
+              <Headphones
                 aria-hidden="true"
-                viewBox="-11 -11 22 22"
                 className={cn(
-                  'w-5 h-5 md:w-6 md:h-6',
+                  'w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]',
                   isDeafened && 'opacity-70 scale-90',
                 )}
-              >
-                <path
-                  fill="rgb(88,101,242)"
-                  fillOpacity="1"
-                  d=" M-8.000072479248047,-0.2881828546524048 C-7.999939918518066,-4.706087589263916 -4.418000221252441,-8.288000106811523 0,-8.288000106811523 C4.418000221252441,-8.288000106811523 7.999929904937744,-4.706122875213623 8.000077247619629,-0.2881803512573242 C8.000102043151855,0.40481603145599365 7.954133987426758,1.0718117952346802 7.854161262512207,1.7118114233016968 C7.854161262512207,1.7118114233016968 6.000174522399902,1.7118886709213257 6.000174522399902,1.7118886709213257 C5.05618143081665,1.7119280099868774 4.167206287384033,2.156961679458618 3.6002418994903564,2.911979913711548 C3.6002418994903564,2.911979913711548 1.6273654699325562,5.542043209075928 1.6273654699325562,5.542043209075928 C1.1583948135375977,6.168058395385742 1.03643000125885,6.988057613372803 1.3044586181640625,7.72304105758667 C1.8895213603973389,9.332005500793457 3.8875467777252197,10.287915229797363 5.482487678527832,9.131856918334961 C8.839362144470215,6.700735092163086 10.00019359588623,3.3797173500061035 10.000062942504883,-0.28826361894607544 C9.999899864196777,-5.811119556427002 5.5229997634887695,-10.288000106811523 0,-10.288000106811523 C-5.5229997634887695,-10.288000106811523 -9.99986457824707,-5.81110954284668 -10.000057220458984,-0.2882695198059082 C-10.000213623046875,3.3797030448913574 -8.83936882019043,6.700726509094238 -5.482500076293945,9.131853103637695 C-3.8875625133514404,10.28791332244873 -1.8895366191864014,9.33200740814209 -1.304471492767334,7.7230448722839355 C-1.036441683769226,6.988062381744385 -1.1584053039550781,6.168063640594482 -1.627374529838562,5.54204797744751 C-1.627374529838562,5.54204797744751 -3.600245475769043,2.911982774734497 -3.600245475769043,2.911982774734497 C-4.167208194732666,2.156964063644409 -5.056182384490967,1.7119290828704834 -6.0001749992370605,1.7118881940841675 C-6.0001749992370605,1.7118881940841675 -7.854179859161377,1.7118425369262695 -7.854179859161377,1.7118425369262695 C-7.954162120819092,1.071841835975647 -8.000097274780273,0.40481364727020264 -8.000072479248047,-0.2881828546524048z"
-                ></path>
-              </svg>
+              />
               {isDeafened ? (
-                <X className="absolute w-5 h-5 stroke-[4px] pointer-events-none" />
+                <X className="absolute w-4 h-4 stroke-[3px] pointer-events-none" />
               ) : null}
             </Button>
 
@@ -215,38 +210,42 @@ export function MediaControls({
               <Button
                 type="button"
                 variant={audioEnabled ? 'neo-outline' : 'neo-red'}
-                size="icon"
+                size="sm"
                 onClick={onToggleAudio}
-                className={cn('rounded-r-none border-r-0 z-10 w-auto px-3')}
+                className={cn(
+                  'rounded-r-none border-r-0 z-10 h-7 px-2 sm:px-2.5 sm:h-8 w-auto',
+                )}
                 title={audioEnabled ? 'Mute' : 'Unmute'}
               >
                 {audioEnabled ? (
                   <Mic
                     aria-hidden="true"
-                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                    className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
                   />
                 ) : (
                   <MicOff
                     aria-hidden="true"
-                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                    className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
                   />
                 )}
               </Button>
               <Button
                 type="button"
                 variant={showAudioDevices ? 'default' : 'neo-outline'}
-                size="icon"
+                size="sm"
                 onClick={() => {
                   setShowAudioDevices(!showAudioDevices);
                   setShowVideoDevices(false);
                 }}
-                className={cn('rounded-l-none w-auto px-2 border-l-0')}
+                className={cn(
+                  'rounded-l-none w-5 h-7 sm:h-8 sm:w-6 px-0 border-l-0',
+                )}
                 title="Select Microphone"
               >
                 {showAudioDevices ? (
-                  <X className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
                 ) : (
-                  <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
+                  <ChevronUp className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
                 )}
               </Button>
             </div>
@@ -268,38 +267,42 @@ export function MediaControls({
               <Button
                 type="button"
                 variant={videoEnabled ? 'neo-outline' : 'neo-red'}
-                size="icon"
+                size="sm"
                 onClick={onToggleVideo}
-                className={cn('rounded-r-none border-r-0 z-10 w-auto px-3')}
+                className={cn(
+                  'rounded-r-none border-r-0 z-10 h-7 px-2 sm:px-2.5 sm:h-8 w-auto',
+                )}
                 title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
               >
                 {videoEnabled ? (
                   <Video
                     aria-hidden="true"
-                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                    className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
                   />
                 ) : (
                   <VideoOff
                     aria-hidden="true"
-                    className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"
+                    className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]"
                   />
                 )}
               </Button>
               <Button
                 type="button"
                 variant={showVideoDevices ? 'default' : 'neo-outline'}
-                size="icon"
+                size="sm"
                 onClick={() => {
                   setShowVideoDevices(!showVideoDevices);
                   setShowAudioDevices(false);
                 }}
-                className={cn('rounded-l-none w-auto px-2 border-l-0')}
+                className={cn(
+                  'rounded-l-none w-5 h-7 sm:h-8 sm:w-6 px-0 border-l-0',
+                )}
                 title="Select Camera"
               >
                 {showVideoDevices ? (
-                  <X className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
                 ) : (
-                  <ChevronUp className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
+                  <ChevronUp className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
                 )}
               </Button>
             </div>
