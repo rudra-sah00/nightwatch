@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.16](https://github.com/rudra-sah00/watch-rudra/compare/v1.15.15...v1.15.16) (2026-04-12)
+
+
+### Bug Fixes
+
+* update sentry import path for electron 41 compatibility ([c0c4e81](https://github.com/rudra-sah00/watch-rudra/commit/c0c4e81e20dcd8aae5310acd623a3ef37ce057b5))
+
 ## [1.12.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.12.0...v1.12.1) (2026-04-09)
 
 
