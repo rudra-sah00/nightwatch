@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
       'lucide-react',
       'sonner',
       'agora-rtc-sdk-ng',
-      '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-tabs',
       '@radix-ui/react-tooltip',
