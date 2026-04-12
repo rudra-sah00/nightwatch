@@ -95,6 +95,7 @@
   },
   "main": "electron/main.js",
   "build": {
+    "npmRebuild": false,
     "appId": "com.watchrudra.app",
     "productName": "Watch Rudra",
     "directories": {
@@ -130,5 +131,5 @@
       }
     ]
   },
-  "version": "1.15.11"
+  "version": "1.15.12"
 }
