@@ -59,17 +59,17 @@ jobs:
       - name: Build and Publish (macOS)
         if: matrix.os == 'macos-latest'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec electron-builder --mac --publish always -c.npmRebuild=false
 
       - name: Build and Publish (Windows)
         if: matrix.os == 'windows-latest'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec electron-builder --win --publish always -c.npmRebuild=false
 
       - name: Build and Publish (Linux)
         if: matrix.os == 'ubuntu-latest'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec electron-builder --linux --publish always -c.npmRebuild=false
