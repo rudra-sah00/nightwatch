@@ -1,13 +1,12 @@
 const { autoUpdater } = require('electron-updater');
+const { autoUpdater: asarUpdater } = require('electron-asar-hot-updater');
 const { dialog } = require('electron');
+const log = require('electron-log');
 
 function setupUpdater() {
-  // Logger setup for debugging update issues in production
-  const log = require('electron-log');
   log.transports.file.level = 'info';
   autoUpdater.logger = log;
 
-  // We want the app to automatically download the update in the background
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
@@ -16,7 +15,6 @@ function setupUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (_info) => {
-    // When finished downloading, prompt the user if they want to install it now or later
     dialog
       .showMessageBox({
         type: 'info',
@@ -40,7 +38,26 @@ function setupUpdater() {
   try {
     autoUpdater.checkForUpdatesAndNotify();
   } catch (err) {
-    log.warn('Could not check for updates:', err);
+    log.warn('Could not check for full updates:', err);
+  }
+
+  // Setup ASAR Hot Updater
+  try {
+    // You will need to host a simple update.json on your server or GitHub Pages:
+    // { "name": "watch-rudra", "version": "1.15.19", "asar": "https://url.watch-rudra.com/app.asar", "info": "Fixes" }
+    asarUpdater.setFeedURL(
+      'https://raw.githubusercontent.com/rudra-sah00/watch-rudra/main/update.json',
+    );
+    asarUpdater
+      .checkForUpdates()
+      .then((res) => {
+        log.info('ASAR Hot Updater checked. Status:', res);
+      })
+      .catch((err) => {
+        log.warn('ASAR Hot Updater warning/no-update:', err);
+      });
+  } catch (err) {
+    log.warn('Could not check for hot updates:', err);
   }
 }
 
