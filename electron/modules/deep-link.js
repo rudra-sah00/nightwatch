@@ -6,7 +6,10 @@ function handleDeepLink(url, mainWindow) {
     mainWindow.focus();
 
     // Map watch-rudra://party/123 to https://watch.rudrasahoo.live/party/123
-    const secureUrl = url.replace('watch-rudra://', 'https://watch.rudrasahoo.live/');
+    const secureUrl = url.replace(
+      'watch-rudra://',
+      'https://watch.rudrasahoo.live/',
+    );
     mainWindow.loadURL(secureUrl);
   }
 }

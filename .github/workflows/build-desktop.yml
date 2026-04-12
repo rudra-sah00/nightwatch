@@ -48,6 +48,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Inject Production Secrets
+        run: |
+          # Inject Sentry DSN into the Electron main process before building
+          sed -i.bak "s#process.env.VITE_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN#'${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}'#g" electron/main.js
+          # If a Discord RPC Client ID secret is available, inject it
+          sed -i.bak "s#'1234567890123456789'#'${{ secrets.DISCORD_CLIENT_ID }}'#g" electron/modules/discord.js
+        shell: bash
+
       - name: Build and Publish (macOS)
         if: matrix.os == 'macos-latest'
         env:

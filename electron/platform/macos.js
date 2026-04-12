@@ -1,4 +1,4 @@
-const { systemPreferences, app, session } = require('electron');
+const { systemPreferences, app } = require('electron');
 
 async function setupMacOS() {
   if (process.platform === 'darwin') {
@@ -13,7 +13,7 @@ async function setupMacOS() {
   }
 }
 
-function handleMacOSDeepLink(url, handleDeepLinkCallback) {
+function handleMacOSDeepLink(_url, handleDeepLinkCallback) {
   app.on('open-url', (event, openUrl) => {
     event.preventDefault();
     handleDeepLinkCallback(openUrl);
@@ -21,7 +21,7 @@ function handleMacOSDeepLink(url, handleDeepLinkCallback) {
 }
 
 function preventDefaultQuit() {
-  app.on('window-all-closed', function () {
+  app.on('window-all-closed', () => {
     // On macOS, applications typically stay active in the dock even when all windows are closed.
     if (process.platform !== 'darwin') app.quit();
   });
@@ -30,5 +30,5 @@ function preventDefaultQuit() {
 module.exports = {
   setupMacOS,
   handleMacOSDeepLink,
-  preventDefaultQuit
+  preventDefaultQuit,
 };

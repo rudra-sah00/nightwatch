@@ -20,7 +20,7 @@ class DiscordIntegration {
 
     try {
       await this.rpc.login({ clientId }).catch(console.error);
-    } catch (e) {
+    } catch (_e) {
       console.warn('Discord not active on this machine.');
     }
   }
@@ -28,14 +28,16 @@ class DiscordIntegration {
   setActivity(details, state) {
     if (!this.connected) return;
 
-    this.rpc.setActivity({
-      details,
-      state,
-      startTimestamp: this.startTimestamp,
-      largeImageKey: 'watchrudra_logo', // Upload in Discord Dev Portal
-      largeImageText: 'Watch Rudra App',
-      instance: false,
-    }).catch(console.error);
+    this.rpc
+      .setActivity({
+        details,
+        state,
+        startTimestamp: this.startTimestamp,
+        largeImageKey: 'watchrudra_logo', // Upload in Discord Dev Portal
+        largeImageText: 'Watch Rudra App',
+        instance: false,
+      })
+      .catch(console.error);
   }
 }
 

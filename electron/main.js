@@ -1,13 +1,22 @@
-const { app, globalShortcut, BrowserWindow, ipcMain, clipboard, powerSaveBlocker, Notification, nativeImage } = require('electron');
-const path = require('path');
+const {
+  app,
+  globalShortcut,
+  BrowserWindow,
+  ipcMain,
+  clipboard,
+  powerSaveBlocker,
+  Notification,
+  nativeImage,
+} = require('electron');
+const _path = require('node:path');
 const Sentry = require('@sentry/electron');
 const Store = require('electron-store');
 
 // --- 0. INITIALIZE CRASH REPORTING ---
 // Catches native C++ crashes (V8 Out of Memory, renderer crashes, etc.)
-Sentry.init({ 
-  dsn: process.env.VITE_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN || '', 
-  environment: app.isPackaged ? 'production' : 'development'
+Sentry.init({
+  dsn: process.env.VITE_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN || '',
+  environment: app.isPackaged ? 'production' : 'development',
 });
 
 // --- 0.1. LOCAL SETTINGS STORAGE ---
@@ -28,7 +37,9 @@ const windows = require('./platform/windows.js');
 // If a user has a command line flag --disable-gpu or saves a local setting, we fall back to CPU video decoding.
 if (process.argv.includes('--disable-gpu')) {
   app.disableHardwareAcceleration();
-  console.log('Hardware Acceleration disabled. Using software rendering for videos.');
+  console.log(
+    'Hardware Acceleration disabled. Using software rendering for videos.',
+  );
 }
 
 // --- 1. SINGLE INSTANCE LOCK ---
@@ -57,7 +68,9 @@ const startElectronApp = async () => {
   macOS.preventDefaultQuit(); // Standard mac dock behavior
 
   // Start Tray Icon capabilities
-  setupTray(AppWindow.getInstance(), (quitState) => AppWindow.setQuitting(quitState));
+  setupTray(AppWindow.getInstance(), (quitState) =>
+    AppWindow.setQuitting(quitState),
+  );
 
   // Initialize Background Auto Updater
   // Note: Only works effectively in Production when built and code-signed
@@ -65,7 +78,7 @@ const startElectronApp = async () => {
     setupUpdater();
   }
 
-  // Example Global Shortcut: 
+  // Example Global Shortcut:
   // CommandOrControl+Shift+M lets a user mute the stream even if they are playing a fullscreen game.
   globalShortcut.register('CommandOrControl+Shift+M', () => {
     const w = AppWindow.getInstance();
@@ -76,27 +89,27 @@ const startElectronApp = async () => {
   });
 
   // Automatically reopen closed window when clicking dock icon if it's minimized
-  app.on('activate', function () {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) AppWindow.create();
     else AppWindow.getInstance().show();
   });
 
-  // Start Discord RPC silently in background 
+  // Start Discord RPC silently in background
   discordLogic.init().catch(console.error);
 
   // IPC Event listener for React letting us know the user changed rooms!
-  ipcMain.on('update-discord-status', (event, { details, state }) => {
+  ipcMain.on('update-discord-status', (_event, { details, state }) => {
     discordLogic.setActivity(details, state);
   });
 
   // Native Clipboard API
-  ipcMain.on('copy-to-clipboard', (event, text) => {
+  ipcMain.on('copy-to-clipboard', (_event, text) => {
     clipboard.writeText(text);
   });
 
   // Keep screen awake while watching media!
   let powerBlockerId = 0;
-  ipcMain.on('toggle-keep-awake', (event, keepAwake) => {
+  ipcMain.on('toggle-keep-awake', (_event, keepAwake) => {
     if (keepAwake && !powerSaveBlocker.isStarted(powerBlockerId)) {
       powerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
       console.log('Keep-Awake Enabled: Screen will not sleep.');
@@ -107,12 +120,12 @@ const startElectronApp = async () => {
   });
 
   // Picture in Picture (Always on Top) Mode + Ghost Mode Opacity
-  ipcMain.on('set-pip', (event, isEnabled, opacityLevel = 1.0) => {
+  ipcMain.on('set-pip', (_event, isEnabled, opacityLevel = 1.0) => {
     const win = AppWindow.getInstance();
     if (!win) return;
-    
+
     win.setAlwaysOnTop(isEnabled, 'floating');
-    
+
     // Ghost Mode (0.7 makes it 70% transparent when floating, 1.0 restores it perfectly)
     if (isEnabled && opacityLevel < 1.0 && process.platform !== 'linux') {
       win.setOpacity(opacityLevel);
@@ -122,7 +135,7 @@ const startElectronApp = async () => {
   });
 
   // Dock & Taskbar Badges: E.g., showing a little '3' for 3 unread party chats
-  ipcMain.on('set-badge', (event, badgeCount) => {
+  ipcMain.on('set-badge', (_event, badgeCount) => {
     if (process.platform === 'darwin') {
       app.dock.setBadge(badgeCount > 0 ? String(badgeCount) : '');
       // Bounce the dock icon if they get an important invite while minimized!
@@ -130,7 +143,11 @@ const startElectronApp = async () => {
     } else {
       // Windows / Linux Taskbar Red Badging
       const win = AppWindow.getInstance();
-      if (win) win.setOverlayIcon(badgeCount > 0 ? AppWindow.trayImage : null, badgeCount > 0 ? `${badgeCount} unread` : '');
+      if (win)
+        win.setOverlayIcon(
+          badgeCount > 0 ? AppWindow.trayImage : null,
+          badgeCount > 0 ? `${badgeCount} unread` : '',
+        );
     }
   });
 
@@ -139,7 +156,7 @@ const startElectronApp = async () => {
     'MediaPlayPause',
     'MediaNextTrack',
     'MediaPreviousTrack',
-    'MediaStop'
+    'MediaStop',
   ];
 
   mediaKeys.forEach((key) => {
@@ -157,25 +174,25 @@ const startElectronApp = async () => {
   });
 
   // Trigger Native Desktop Notifications (e.g. for Party Invites or Chat)
-  ipcMain.on('show-notification', (event, { title, body }) => {
+  ipcMain.on('show-notification', (_event, { title, body }) => {
     if (Notification.isSupported()) {
       new Notification({ title, body }).show();
     }
   });
 
   // Allow users to configure the app to launch quietly when their OS Boots
-  ipcMain.on('set-run-on-boot', (event, enable) => {
+  ipcMain.on('set-run-on-boot', (_event, enable) => {
     app.setLoginItemSettings({
       openAtLogin: enable,
       openAsHidden: true, // Only show in tray when automatically booting
-      path: app.getPath('exe')
+      path: app.getPath('exe'),
     });
   });
 
   // --- LOCAL CONFIG STORE ---
-  ipcMain.handle('store-get', (event, key) => store.get(key));
-  ipcMain.on('store-set', (event, key, value) => store.set(key, value));
-  ipcMain.on('store-delete', (event, key) => store.delete(key));
+  ipcMain.handle('store-get', (_event, key) => store.get(key));
+  ipcMain.on('store-set', (_event, key, value) => store.set(key, value));
+  ipcMain.on('store-delete', (_event, key) => store.delete(key));
 
   // --- WINDOWS TASKBAR MEDIA CONTROLS ---
   if (process.platform === 'win32') {
@@ -188,30 +205,36 @@ const startElectronApp = async () => {
             tooltip: 'Previous',
             icon: nativeImage.createEmpty(), // Replace with real asset when ready
             flags: ['enabled'],
-            click: () => win.webContents.send('media-command', 'MediaPreviousTrack')
+            click: () =>
+              win.webContents.send('media-command', 'MediaPreviousTrack'),
           },
           {
             tooltip: 'Play/Pause',
             icon: nativeImage.createEmpty(),
             flags: ['enabled'],
-            click: () => win.webContents.send('media-command', 'MediaPlayPause')
+            click: () =>
+              win.webContents.send('media-command', 'MediaPlayPause'),
           },
           {
             tooltip: 'Next',
             icon: nativeImage.createEmpty(),
             flags: ['enabled'],
-            click: () => win.webContents.send('media-command', 'MediaNextTrack')
-          }
+            click: () =>
+              win.webContents.send('media-command', 'MediaNextTrack'),
+          },
         ];
         win.setThumbarButtons(thumbButtons);
       } catch (e) {
-        console.warn('Windows Thumbar setup failed, normal if playing headless', e);
+        console.warn(
+          'Windows Thumbar setup failed, normal if playing headless',
+          e,
+        );
       }
     }
   }
 };
 
-// Lifecycle Start hook 
+// Lifecycle Start hook
 app.whenReady().then(startElectronApp);
 
 // Re-route additional instance attempts or windows URL arguments cleanly
