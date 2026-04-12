@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.16.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.15.19...v1.16.0) (2026-04-12)
+
+
+### Features
+
+* add electron-asar-hot-updater for over-the-air hotfixes ([76f7038](https://github.com/rudra-sah00/watch-rudra/commit/76f7038839398c9de1de4ce76ec680928fe52c8f))
+* implement deafen button in the Watch Party Media Controls and shrink username display ([65e0e23](https://github.com/rudra-sah00/watch-rudra/commit/65e0e236e3b9ddf3ee4c5fd2c3af454965ccdc71))
+* integrate updater splash screen into app launch lifecycle ([52413ea](https://github.com/rudra-sah00/watch-rudra/commit/52413ea216f44b6884eb056c149b509b244c18ed))
+* linking deafen logic to auto-mute mic locally to match standard voice communication behaviour ([e74fa80](https://github.com/rudra-sah00/watch-rudra/commit/e74fa80f2c7e8807c147a86334c86ce00964ac9e))
+* replace deafen icon with custom SVG ([98791b0](https://github.com/rudra-sah00/watch-rudra/commit/98791b0755aac7ba225a6c41b036ef4c80edcfa2))
+
+
+### Bug Fixes
+
+* **electron:** disable custom WatchRudraDesktop UserAgent suffix because Cloudflare Turnstile flags it as bot traffic ([60a6fb1](https://github.com/rudra-sah00/watch-rudra/commit/60a6fb159d76e9394d2e2742fdfe69a143bf0052))
+* position absolute overlay properly on deafen button ([12a1015](https://github.com/rudra-sah00/watch-rudra/commit/12a10159c9136a2035d470523df375388feaa255))
+* standardize button hover styles for consistency ([872bcb5](https://github.com/rudra-sah00/watch-rudra/commit/872bcb5744a39962d47e80e0f507e49ba2e18da7))
+
 ## [1.15.16](https://github.com/rudra-sah00/watch-rudra/compare/v1.15.15...v1.15.16) (2026-04-12)
 
 
