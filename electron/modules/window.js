@@ -57,8 +57,12 @@ class AppWindow {
 
     // Custom User Agent to inform Next.js that the user is running the Desktop App
     // (You can check this in Next.js via navigator.userAgent.includes('WatchRudraDesktop'))
-    const defaultUserAgent = this.mainWindow.webContents.userAgent;
-    this.mainWindow.webContents.userAgent = `${defaultUserAgent} WatchRudraDesktop/1.0.0`;
+    /* 
+      DO NOT MODIFY USER AGENT: Cloudflare Turnstile explicitly blocks custom padded
+      User Agents as "Bot" activity, preventing Electron logins. We use window.electronAPI instead.
+      const defaultUserAgent = this.mainWindow.webContents.userAgent;
+      this.mainWindow.webContents.userAgent = `${defaultUserAgent} WatchRudraDesktop/1.0.0`;
+    */
 
     mainWindowState.manage(this.mainWindow);
 
