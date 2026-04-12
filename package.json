@@ -155,7 +155,8 @@
       {
         "provider": "github",
         "owner": "rudra-sah00",
-        "repo": "watch-rudra"
+        "repo": "watch-rudra",
+        "releaseType": "release"
       }
     ]
   },
