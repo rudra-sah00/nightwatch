@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.17.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.16.1...v1.17.0) (2026-04-12)
+
+
+### Features
+
+* **desktop:** enhance Discord Rich Presence to show detailed movie/series metadata dynamically ([9c27f6d](https://github.com/rudra-sah00/watch-rudra/commit/9c27f6d7075708c7b538f2186fac2aff17bd449c))
+* **docs:** add embedded markdown documentation portal with tailwind typography ([3f80887](https://github.com/rudra-sah00/watch-rudra/commit/3f808871f07bc761163a47991f281ee6a008c7f0))
+
+
+### Bug Fixes
+
+* **build:** move use client directive to top line in useStreamUrls to fix Vercel deploy ([6e3a411](https://github.com/rudra-sah00/watch-rudra/commit/6e3a411e14bc05f03c590bc5709cbb43162e9180))
+* **build:** rename middleware function export to proxy ([e96bddd](https://github.com/rudra-sah00/watch-rudra/commit/e96bddd01d6e818014401a6f4fcab14492603363))
+
 ## [1.16.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.16.0...v1.16.1) (2026-04-12)
 
 
