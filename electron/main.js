@@ -9,7 +9,7 @@ const {
   nativeImage,
 } = require('electron');
 const _path = require('node:path');
-const Sentry = require('@sentry/electron');
+const Sentry = require('@sentry/electron/main');
 const Store = require('electron-store');
 
 // --- 0. INITIALIZE CRASH REPORTING ---
