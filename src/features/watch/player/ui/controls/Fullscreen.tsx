@@ -31,8 +31,8 @@ export function Fullscreen({
           ? 'p-1.5 transition-[background-color,color,border-color,opacity,transform] duration-200'
           : 'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
         'bg-white border-[3px] border-border text-foreground ',
-        'hover:bg-background',
-        'active:bg-[#e0e0e0]',
+        'hover:bg-[#ffe066]',
+        'active:bg-[#ffcc00]',
       )}
     >
       {isFullscreen ? (

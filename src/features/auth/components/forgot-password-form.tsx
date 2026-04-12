@@ -85,7 +85,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               onClick={() => setStep('initial')}
               variant="neo-outline"
               size="xl"
-              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline transition-colors hover:bg-[#ffcc00]/10"
+              className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline"
             >
               <ArrowLeft className="h-4 w-4 mr-2 inline" />
               BACK TO LOGIN
