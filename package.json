@@ -1,7 +1,7 @@
 {
   "name": "watch-rudra",
   "description": "Watch Rudra Desktop Application",
-  "author": "Rudra Sah00",
+  "author": "Rudra Sah00 <rudranarayanaknr@gmail.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/rudra-sah00/watch-rudra.git"
@@ -130,5 +130,5 @@
       }
     ]
   },
-  "version": "1.15.9"
+  "version": "1.15.11"
 }
