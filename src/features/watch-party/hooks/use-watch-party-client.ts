@@ -310,13 +310,25 @@ export function useWatchPartyClient({
     goBackOrHome();
   };
 
-  const copyInviteLink = () => {
+  const copyInviteLink = async () => {
     const url = new URL(window.location.href);
     url.searchParams.delete('new');
-    navigator.clipboard.writeText(url.toString());
-    setCopied(true);
-    toast.success('Invite link copied!');
-    setTimeout(() => setCopied(false), 2000);
+    const finalUrl = url.toString();
+    try {
+      if (
+        typeof window !== 'undefined' &&
+        window.electronAPI?.copyToClipboard
+      ) {
+        window.electronAPI.copyToClipboard(finalUrl);
+      } else {
+        await navigator.clipboard.writeText(finalUrl);
+      }
+      setCopied(true);
+      toast.success('Invite link copied!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy link. Try copying from URL bar manually.');
+    }
   };
 
   return {

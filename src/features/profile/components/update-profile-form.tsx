@@ -37,7 +37,15 @@ export function UpdateProfileForm() {
     try {
       if (!user) return;
       const url = `${window.location.origin}/user/${user.id}`;
-      await navigator.clipboard.writeText(url);
+
+      if (
+        typeof window !== 'undefined' &&
+        window.electronAPI?.copyToClipboard
+      ) {
+        window.electronAPI.copyToClipboard(url);
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
       toast.success('Public profile link copied');
     } catch {
       toast.error('Failed to copy public profile link');

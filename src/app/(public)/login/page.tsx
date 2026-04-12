@@ -46,9 +46,20 @@ export default function LoginPage() {
 
   const handleCopyEmail = () => {
     const email = 'rudranarayanaknr@gmail.com';
-    navigator.clipboard.writeText(email);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    try {
+      if (
+        typeof window !== 'undefined' &&
+        window.electronAPI?.copyToClipboard
+      ) {
+        window.electronAPI.copyToClipboard(email);
+      } else {
+        navigator.clipboard.writeText(email);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      console.warn('Failed to write to clipboard');
+    }
   };
 
   // Loading State
