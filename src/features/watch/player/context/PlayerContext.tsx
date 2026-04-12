@@ -1,7 +1,7 @@
 import { createContext, use } from 'react';
 import type { PlayerAction, PlayerState, VideoMetadata } from './types';
 
-export interface PlayerContextValue {
+interface PlayerContextValue {
   state: PlayerState;
   dispatch: React.Dispatch<PlayerAction>;
   metadata: VideoMetadata;

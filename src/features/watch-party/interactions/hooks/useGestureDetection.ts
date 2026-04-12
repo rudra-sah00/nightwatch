@@ -20,9 +20,7 @@ let visionResolver: Promise<WasmFileset> | null = null;
 
 let consoleIntercepted = false;
 // Stored so tests or cleanup code can fully restore the originals if needed
-let restoreMediaPipeLogs: (() => void) | null = null;
-
-export { restoreMediaPipeLogs as _restoreMediaPipeConsolePatch };
+let _restoreMediaPipeLogs: (() => void) | null = null;
 
 /**
  * Emscripten (MediaPipe WASM) prints raw C++ logs to the browser console.
@@ -71,11 +69,11 @@ function interceptMediaPipeLogs() {
   };
 
   // Expose restore function for tests / teardown
-  restoreMediaPipeLogs = () => {
+  _restoreMediaPipeLogs = () => {
     win.console.log = originalLog;
     win.console.info = originalInfo;
     consoleIntercepted = false;
-    restoreMediaPipeLogs = null;
+    _restoreMediaPipeLogs = null;
   };
 }
 

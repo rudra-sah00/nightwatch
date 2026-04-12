@@ -3,7 +3,10 @@ import { getSeriesEpisodes, getShowDetails } from '@/features/search/api';
 import { playVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import { getCachedSeriesData } from '@/features/watch/player/hooks/series-cache';
-import { NextEpisodeService } from '@/features/watch/player/services/NextEpisodeService';
+import {
+  fetchNextEpisodeInfo,
+  prepareNextEpisodeCommand,
+} from '@/features/watch/player/services/NextEpisodeService';
 import type { Episode, ShowDetails } from '@/types/content';
 import { ContentType } from '@/types/content';
 
@@ -65,7 +68,7 @@ describe('NextEpisodeService', () => {
         title: 'Movie',
         movieId: '1',
       };
-      const result = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+      const result = await fetchNextEpisodeInfo(metadata);
       expect(result).toBeNull();
     });
 
@@ -98,7 +101,7 @@ describe('NextEpisodeService', () => {
         totalEpisodes: 2,
       });
 
-      const result = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+      const result = await fetchNextEpisodeInfo(metadata);
 
       expect(result).toEqual({
         title: 'Next Ep',
@@ -148,7 +151,7 @@ describe('NextEpisodeService', () => {
         },
       );
 
-      const result = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+      const result = await fetchNextEpisodeInfo(metadata);
 
       expect(result).not.toBeNull();
       expect(result?.seasonNumber).toBe(2);
@@ -180,7 +183,7 @@ describe('NextEpisodeService', () => {
 
       vi.mocked(getCachedSeriesData).mockReturnValueOnce(mockCached);
 
-      const result = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+      const result = await fetchNextEpisodeInfo(metadata);
 
       expect(result?.title).toBe('Cached Next');
       expect(getSeriesEpisodes).not.toHaveBeenCalled();
@@ -202,7 +205,7 @@ describe('NextEpisodeService', () => {
         ]),
       );
 
-      const result = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+      const result = await fetchNextEpisodeInfo(metadata);
       expect(result).toBeNull();
     });
   });
@@ -226,10 +229,8 @@ describe('NextEpisodeService', () => {
         title: 'Show',
       });
 
-      const url = await NextEpisodeService.prepareNextEpisodeCommand(
-        info as Parameters<
-          typeof NextEpisodeService.prepareNextEpisodeCommand
-        >[0],
+      const url = await prepareNextEpisodeCommand(
+        info as Parameters<typeof prepareNextEpisodeCommand>[0],
         metadata,
       );
 

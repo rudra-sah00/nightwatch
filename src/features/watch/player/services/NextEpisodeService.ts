@@ -191,8 +191,3 @@ export async function prepareNextEpisodeCommand(
 
   return null;
 }
-
-export const NextEpisodeService = {
-  fetchNextEpisodeInfo,
-  prepareNextEpisodeCommand,
-};

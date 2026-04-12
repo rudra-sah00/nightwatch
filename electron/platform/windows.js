@@ -1,7 +1,7 @@
 const { app } = require('electron');
 const path = require('node:path');
 
-function setupWindows(handleDeepLinkCallback, mainWindow) {
+function _setupWindows(handleDeepLinkCallback, mainWindow) {
   if (process.platform !== 'win32') return;
 
   // Single Instance Lock handling specifically for Windows Deep Links via command arg
@@ -19,7 +19,7 @@ function setupWindows(handleDeepLinkCallback, mainWindow) {
   });
 }
 
-function registerProtocol() {
+function _registerProtocol() {
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
       app.setAsDefaultProtocolClient('watch-rudra', process.execPath, [
@@ -31,7 +31,4 @@ function registerProtocol() {
   }
 }
 
-module.exports = {
-  setupWindows,
-  registerProtocol,
-};
+module.exports = {};

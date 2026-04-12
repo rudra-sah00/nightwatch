@@ -2,7 +2,11 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useSocket } from '@/providers/socket-provider';
 import type { VideoMetadata } from '../context/types';
-import { WatchProgressService } from '../services/WatchProgressService';
+import {
+  prepareProgressPayload,
+  syncActivity,
+  syncProgress,
+} from '../services/WatchProgressService';
 
 function getLocalDateStringFromTimestamp(ts: number): string {
   const now = new Date(ts);
@@ -120,7 +124,7 @@ export function useWatchProgress({
         const seconds = Math.floor(buffered);
         if (seconds < 1) continue;
 
-        WatchProgressService.syncActivity(
+        syncActivity(
           socketRef.current,
           seconds,
           localDate,
@@ -146,7 +150,7 @@ export function useWatchProgress({
     if (skipProgressHistoryRef.current) return;
     if (!videoRef.current) return;
 
-    const payload = WatchProgressService.prepareProgressPayload(
+    const payload = prepareProgressPayload(
       videoRef.current,
       metadataRef.current,
       lastProgressRef.current,
@@ -154,13 +158,9 @@ export function useWatchProgress({
     );
 
     if (payload) {
-      WatchProgressService.syncProgress(
-        socketRef.current,
-        payload,
-        (rounded) => {
-          lastProgressRef.current = rounded;
-        },
-      );
+      syncProgress(socketRef.current, payload, (rounded) => {
+        lastProgressRef.current = rounded;
+      });
     }
   }, [videoRef]);
 

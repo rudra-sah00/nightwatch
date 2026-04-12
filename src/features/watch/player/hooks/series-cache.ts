@@ -105,4 +105,3 @@ export function clearSeriesCache(): void {
 }
 
 // Export types for use in other files
-export type { CachedSeriesData };

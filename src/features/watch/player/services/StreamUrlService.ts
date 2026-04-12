@@ -20,7 +20,7 @@ export interface QualityOption {
   url: string;
 }
 
-export interface NormalizedUrls {
+interface NormalizedUrls {
   streamUrl: string | null;
   captionUrl: string | null;
   spriteVtt: string | undefined;
@@ -113,21 +113,21 @@ function processHlsResponse(
 /**
  * Processes a Server 1 (VidSrc / HLS) PlayResponse.
  */
-export function processS1Response(response: PlayResponse): NormalizedUrls {
+function processS1Response(response: PlayResponse): NormalizedUrls {
   return processHlsResponse(response, 'S1');
 }
 
 /**
  * Processes a Server 3 (VidSrc.plus / HLS) PlayResponse.
  */
-export function processS3Response(response: PlayResponse): NormalizedUrls {
+function processS3Response(response: PlayResponse): NormalizedUrls {
   return processHlsResponse(response, 'S3');
 }
 
 /**
  * Processes a Server 2 (SuperEmbed / MP4) PlayResponse.
  */
-export function processS2Response(response: PlayResponse): NormalizedUrls {
+function processS2Response(response: PlayResponse): NormalizedUrls {
   if (!response.success || !response.masterPlaylistUrl) {
     throw new Error('Invalid S2 response');
   }
@@ -182,12 +182,3 @@ export function processS2Subtitles(
     })),
   };
 }
-
-export const StreamUrlService = {
-  normalizeRawUrls,
-  processS1Response,
-  processS2Response,
-  processS3Response,
-  processResponse,
-  processS2Subtitles,
-};

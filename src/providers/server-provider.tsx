@@ -3,7 +3,7 @@
 import type React from 'react';
 import { createContext, use, useState } from 'react';
 
-export type ServerId = 's1' | 's2' | 's3';
+type ServerId = 's1' | 's2' | 's3';
 
 interface ServerContextValue {
   activeServer: ServerId;

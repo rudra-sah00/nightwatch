@@ -1,5 +1,5 @@
 const { BrowserWindow } = require('electron');
-const path = require('path');
+const _path = require('node:path');
 
 let splashWindow;
 

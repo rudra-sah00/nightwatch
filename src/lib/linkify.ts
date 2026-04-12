@@ -2,7 +2,7 @@
  * Link parsing and rendering utilities for chat messages
  */
 
-export interface TextSegment {
+interface TextSegment {
   id: string;
   type: 'text' | 'link';
   content: string;

@@ -8,8 +8,6 @@ import type {
 export type {
   CricketMatchInfo,
   LiveMatch,
-  LivestreamMatchResponse,
-  LivestreamScheduleResponse,
 } from './types';
 
 export const fetchLivestreamSchedule = async (

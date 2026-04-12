@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { StreamUrlService } from '@/features/watch/player/services/StreamUrlService';
+import {
+  normalizeRawUrls,
+  processResponse,
+  processS2Subtitles,
+} from '@/features/watch/player/services/StreamUrlService';
 import type { PlayResponse } from '@/types/content';
 
 describe('StreamUrlService', () => {
@@ -13,7 +17,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      const result = StreamUrlService.processResponse('s1', response);
+      const result = processResponse('s1', response);
 
       expect(result.streamUrl).toContain('/123');
     });
@@ -36,7 +40,7 @@ describe('StreamUrlService', () => {
         ],
       };
 
-      const result = StreamUrlService.processResponse('s2', response);
+      const result = processResponse('s2', response);
 
       expect(result.streamUrl).toBe('https://example.com/video.mp4');
       expect(result.qualities).toHaveLength(1);
@@ -52,7 +56,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      const result = StreamUrlService.processResponse('s3', response);
+      const result = processResponse('s3', response);
 
       expect(result.streamUrl).toContain('/abc');
     });
@@ -66,7 +70,7 @@ describe('StreamUrlService', () => {
         title: '',
       };
 
-      expect(() => StreamUrlService.processResponse('s1', response)).toThrow(
+      expect(() => processResponse('s1', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -80,7 +84,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      expect(() => StreamUrlService.processResponse('s1', response)).toThrow(
+      expect(() => processResponse('s1', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -88,30 +92,30 @@ describe('StreamUrlService', () => {
 
   describe('normalizeRawUrls', () => {
     it('should use streamUrl if present', () => {
-      const raw: Parameters<typeof StreamUrlService.normalizeRawUrls>[0] = {
+      const raw: Parameters<typeof normalizeRawUrls>[0] = {
         streamUrl: '/api/stream/hls/123',
         captionUrl: 'cap',
       };
-      const result = StreamUrlService.normalizeRawUrls(raw, 'tok');
+      const result = normalizeRawUrls(raw, 'tok');
       expect(result.streamUrl).toContain('/tok/123');
     });
 
     it('should fallback to qualities if others are missing', () => {
-      const raw: Parameters<typeof StreamUrlService.normalizeRawUrls>[0] = {
+      const raw: Parameters<typeof normalizeRawUrls>[0] = {
         streamUrl: null,
         qualities: [{ quality: '1080p', url: '/api/stream/hls/789' }],
         captionUrl: 'cap',
       };
-      const result = StreamUrlService.normalizeRawUrls(raw, 'tok');
+      const result = normalizeRawUrls(raw, 'tok');
       expect(result.streamUrl).toContain('/tok/789');
     });
 
     it('should return null streamUrl if no source found', () => {
-      const raw: Parameters<typeof StreamUrlService.normalizeRawUrls>[0] = {
+      const raw: Parameters<typeof normalizeRawUrls>[0] = {
         streamUrl: null,
         captionUrl: null,
       };
-      const result = StreamUrlService.normalizeRawUrls(raw, null);
+      const result = normalizeRawUrls(raw, null);
       expect(result.streamUrl).toBeNull();
     });
   });
@@ -119,7 +123,7 @@ describe('StreamUrlService', () => {
   describe('extractTokenFromUrl', () => {
     it('should extract token from URL', () => {
       const url = '/api/stream/hls/xyz123/movie';
-      const result = StreamUrlService.processResponse('s1', {
+      const result = processResponse('s1', {
         success: true,
         masterPlaylistUrl: url,
         movieId: '1',
@@ -140,7 +144,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      const result = StreamUrlService.processS2Subtitles(response);
+      const result = processS2Subtitles(response);
       expect(result.subtitleTracks).toBeUndefined();
     });
 
@@ -157,7 +161,7 @@ describe('StreamUrlService', () => {
         ],
       };
 
-      const result = StreamUrlService.processS2Subtitles(response);
+      const result = processS2Subtitles(response);
       expect(result.subtitleTracks).toHaveLength(2);
       expect(result.subtitleTracks?.[0].id).toBe('en-0');
       expect(result.subtitleTracks?.[1].id).toBe('track-1');
@@ -178,7 +182,7 @@ describe('StreamUrlService', () => {
         spriteVtt: 'sprite.vtt',
         durationSeconds: 3600,
       };
-      const result = StreamUrlService.processS2Response(response);
+      const result = processResponse('s2', response);
       expect(result.streamUrl).toBe('video.mp4');
       expect(result.qualities).toHaveLength(1);
       expect(result.subtitleTracks).toHaveLength(1);
@@ -195,7 +199,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
         subtitleTracks: [{ label: 'Unknown', language: '', url: 'sub.srt' }],
       };
-      const result = StreamUrlService.processS2Response(response);
+      const result = processResponse('s2', response);
       expect(result.subtitleTracks?.[0].id).toBe('track-0');
     });
 
@@ -207,7 +211,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: 'Test',
       };
-      const result = StreamUrlService.processS2Response(response);
+      const result = processResponse('s2', response);
       expect(result.captionUrl).toBeNull();
     });
 
@@ -219,7 +223,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: '',
       };
-      expect(() => StreamUrlService.processS2Response(response)).toThrow(
+      expect(() => processResponse('s2', response)).toThrow(
         'Invalid S2 response',
       );
     });
@@ -234,7 +238,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: '',
       };
-      expect(() => StreamUrlService.processS3Response(response)).toThrow(
+      expect(() => processResponse('s3', response)).toThrow(
         'Invalid S3 response',
       );
     });
@@ -247,7 +251,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: 'Test',
       };
-      const result = StreamUrlService.processS3Response(response);
+      const result = processResponse('s3', response);
       expect(result.streamUrl).toContain('/TOK123/');
     });
   });

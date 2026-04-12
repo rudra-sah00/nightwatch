@@ -128,9 +128,3 @@ export function syncActivity(
     },
   );
 }
-
-export const WatchProgressService = {
-  prepareProgressPayload,
-  syncProgress,
-  syncActivity,
-};

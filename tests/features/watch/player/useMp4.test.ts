@@ -4,6 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PlayerAction } from '@/features/watch/player/context/types';
 import { useMp4 } from '@/features/watch/player/hooks/useMp4';
 
+globalThis.MediaError = {
+  MEDIA_ERR_SRC_NOT_SUPPORTED: 4,
+} as unknown as typeof MediaError;
+
 function createVideoRef() {
   const video = document.createElement('video');
   return { current: video };
@@ -72,6 +76,10 @@ describe('useMp4', () => {
     );
 
     act(() => {
+      Object.defineProperty(videoRef.current, 'error', {
+        value: { code: 2 }, // Simulate a network error
+        configurable: true,
+      });
       videoRef.current.dispatchEvent(new Event('error'));
     });
 
@@ -97,6 +105,10 @@ describe('useMp4', () => {
     );
 
     act(() => {
+      Object.defineProperty(videoRef.current, 'error', {
+        value: { code: 2 }, // Simulate a network error
+        configurable: true,
+      });
       videoRef.current.dispatchEvent(new Event('error'));
     });
 
@@ -118,6 +130,10 @@ describe('useMp4', () => {
 
     // No error event wired up — onStreamExpired must stay silent
     act(() => {
+      Object.defineProperty(videoRef.current, 'error', {
+        value: { code: 2 }, // Simulate a network error
+        configurable: true,
+      });
       videoRef.current.dispatchEvent(new Event('error'));
     });
 

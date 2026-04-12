@@ -1,6 +1,6 @@
 const { systemPreferences, app } = require('electron');
 
-async function setupMacOS() {
+async function _setupMacOS() {
   if (process.platform === 'darwin') {
     try {
       // Prompt for critical macOS media access before loading any web views
@@ -13,22 +13,18 @@ async function setupMacOS() {
   }
 }
 
-function handleMacOSDeepLink(_url, handleDeepLinkCallback) {
+function _handleMacOSDeepLink(_url, handleDeepLinkCallback) {
   app.on('open-url', (event, openUrl) => {
     event.preventDefault();
     handleDeepLinkCallback(openUrl);
   });
 }
 
-function preventDefaultQuit() {
+function _preventDefaultQuit() {
   app.on('window-all-closed', () => {
     // On macOS, applications typically stay active in the dock even when all windows are closed.
     if (process.platform !== 'darwin') app.quit();
   });
 }
 
-module.exports = {
-  setupMacOS,
-  handleMacOSDeepLink,
-  preventDefaultQuit,
-};
+module.exports = {};

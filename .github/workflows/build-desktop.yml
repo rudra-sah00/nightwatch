@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*' # Auto-builds when you push a version tag like "v1.0.0"
   workflow_dispatch: # Gives you a manual "Run Workflow" button in the Actions tab
+  workflow_call: # Allows this workflow to be called from another workflow
 
 permissions:
   contents: write # Required so it can upload binaries to GitHub Releases page

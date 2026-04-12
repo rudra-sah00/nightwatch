@@ -11,7 +11,7 @@ import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 
-export interface WatchLivePlayerProps {
+interface WatchLivePlayerProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   mobileHeaderContent?: React.ReactNode;

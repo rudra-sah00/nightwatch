@@ -1,3 +1,9 @@
+import {
+  normalizeRawUrls,
+  processResponse,
+  processS2Subtitles,
+} from '../services/StreamUrlService';
+
 /**
  * useStreamUrls — Unified stream URL management for all servers (S1, S2, S3).
  *
@@ -5,15 +11,14 @@
  * and delegates server-specific normalization logic to the StreamUrlService.
  */
 
-'use client';
+('use client');
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { extractTokenFromUrl } from '@/features/watch/utils';
 import type { PlayResponse } from '@/types/content';
-import {
-  type QualityOption,
-  StreamUrlService,
-  type SubtitleTrack,
+import type {
+  QualityOption,
+  SubtitleTrack,
 } from '../services/StreamUrlService';
 
 interface UseStreamUrlsProps {
@@ -27,7 +32,7 @@ interface UseStreamUrlsProps {
   initialQualitiesRaw: QualityOption[] | undefined;
 }
 
-export interface StreamUrlsReturn {
+interface StreamUrlsReturn {
   streamUrl: string | null;
   setStreamUrl: (url: string | null) => void;
   captionUrl: string | null;
@@ -53,7 +58,7 @@ export function useStreamUrls({
   // Initial normalized state
   const initial = useMemo(
     () =>
-      StreamUrlService.normalizeRawUrls(
+      normalizeRawUrls(
         {
           streamUrl: initialStreamUrlRaw,
           captionUrl: initialCaptionUrlRaw,
@@ -96,7 +101,7 @@ export function useStreamUrls({
     const token = extractTokenFromUrl(initialStreamUrlRaw);
     if (!initialStreamUrlRaw) return;
 
-    const normalized = StreamUrlService.normalizeRawUrls(
+    const normalized = normalizeRawUrls(
       {
         streamUrl: initialStreamUrlRaw,
         captionUrl: initialCaptionUrlRaw,
@@ -120,7 +125,7 @@ export function useStreamUrls({
   const applyResponse = useCallback(
     (server: 's1' | 's2' | 's3', response: PlayResponse) => {
       try {
-        const normalized = StreamUrlService.processResponse(server, response);
+        const normalized = processResponse(server, response);
         setStreamUrl(normalized.streamUrl);
         setCaptionUrl(normalized.captionUrl);
         setSpriteVtt(normalized.spriteVtt);
@@ -133,7 +138,7 @@ export function useStreamUrls({
   );
 
   const applyS2Subtitles = useCallback((response: PlayResponse) => {
-    const normalized = StreamUrlService.processS2Subtitles(response);
+    const normalized = processS2Subtitles(response);
     if (normalized.captionUrl !== undefined)
       setCaptionUrl(normalized.captionUrl);
     if (normalized.subtitleTracks) setSubtitleTracks(normalized.subtitleTracks);

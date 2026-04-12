@@ -8,7 +8,7 @@ import type { RTMMessage } from '../../room/types/rtm-messages';
 /**
  * Connection states for the Agora RTM client.
  */
-export type RtmConnectionState =
+type RtmConnectionState =
   | 'DISCONNECTED'
   | 'CONNECTING'
   | 'CONNECTED'

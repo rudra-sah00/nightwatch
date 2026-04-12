@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { VideoMetadata } from '../context/types';
-import { NextEpisodeService } from '../services/NextEpisodeService';
-import type { NextEpisodeInfo } from '../ui/overlays/NextEpisodeOverlay';
 import {
-  cacheSeriesData,
-  clearSeriesCache,
-  getCachedSeriesData,
-} from './series-cache';
+  fetchNextEpisodeInfo,
+  prepareNextEpisodeCommand,
+} from '../services/NextEpisodeService';
+import type { NextEpisodeInfo } from '../ui/overlays/NextEpisodeOverlay';
+import { cacheSeriesData } from './series-cache';
 
 // Re-export cache utilities for external use
-export { cacheSeriesData, clearSeriesCache, getCachedSeriesData };
+export { cacheSeriesData };
 
 interface UseNextEpisodeOptions {
   metadata: VideoMetadata;
@@ -90,7 +89,7 @@ export function useNextEpisode({
     const fetchNextEpisode = async () => {
       try {
         fetchedRef.current = true;
-        const info = await NextEpisodeService.fetchNextEpisodeInfo(metadata);
+        const info = await fetchNextEpisodeInfo(metadata);
         if (info) {
           setNextEpisodeInfo(info);
         }
@@ -143,7 +142,7 @@ export function useNextEpisode({
 
     setIsLoadingNext(true);
     try {
-      const url = await NextEpisodeService.prepareNextEpisodeCommand(
+      const url = await prepareNextEpisodeCommand(
         nextEpisodeInfo,
         metadata,
         serverProp,

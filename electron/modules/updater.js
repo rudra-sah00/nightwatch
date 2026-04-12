@@ -94,7 +94,7 @@ function setupUpdater(splashWindow, onComplete) {
   // Kickoff Native Updater first
   try {
     autoUpdater.checkForUpdates();
-  } catch (e) {
+  } catch (_e) {
     checkAsarUpdater();
   }
 }

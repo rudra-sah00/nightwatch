@@ -11,7 +11,7 @@ import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 import { NextEpisodeOverlay } from '../player/ui/overlays/NextEpisodeOverlay';
 
-export interface WatchPlayerProps {
+interface WatchPlayerProps {
   streamUrl: string | null;
   metadata: VideoMetadata;
   captionUrl?: string | null;

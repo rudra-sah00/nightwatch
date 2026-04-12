@@ -98,3 +98,10 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+
+  build-desktop:
+    name: Build Desktop Apps (Release)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/build-desktop.yml
+    secrets: inherit

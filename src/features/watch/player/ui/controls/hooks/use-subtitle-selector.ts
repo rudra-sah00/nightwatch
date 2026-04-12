@@ -13,7 +13,7 @@ interface SubtitleTrack {
   language: string;
 }
 
-export type SubtitleMenuScreen = 'tracks' | 'style';
+type SubtitleMenuScreen = 'tracks' | 'style';
 
 interface UseSubtitleSelectorOptions {
   tracks: SubtitleTrack[];

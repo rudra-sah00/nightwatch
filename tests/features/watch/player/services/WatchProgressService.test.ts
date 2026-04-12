@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import { WatchProgressService } from '@/features/watch/player/services/WatchProgressService';
+import {
+  prepareProgressPayload,
+  syncProgress,
+} from '@/features/watch/player/services/WatchProgressService';
 
 interface MockSocketResponse {
   success: boolean;
@@ -37,11 +40,7 @@ describe('WatchProgressService', () => {
         posterUrl: 'poster',
       };
 
-      const payload = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        null,
-      );
+      const payload = prepareProgressPayload(mockVideo, metadata, null);
 
       expect(payload).toMatchObject({
         contentId: '123',
@@ -60,11 +59,7 @@ describe('WatchProgressService', () => {
         providerId: 's1',
       };
 
-      const payload = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        null,
-      );
+      const payload = prepareProgressPayload(mockVideo, metadata, null);
 
       expect(payload).toMatchObject({
         contentId: 'show1',
@@ -87,11 +82,7 @@ describe('WatchProgressService', () => {
         posterUrl: 'poster',
       };
 
-      const payload = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        50,
-      );
+      const payload = prepareProgressPayload(mockVideo, metadata, 50);
 
       expect(payload).toMatchObject({
         contentId: 'show1',
@@ -113,11 +104,7 @@ describe('WatchProgressService', () => {
         providerId: 's1',
       };
 
-      const payload = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        null,
-      );
+      const payload = prepareProgressPayload(mockVideo, metadata, null);
       expect(payload?.episodeId).toBeUndefined();
     });
 
@@ -128,19 +115,11 @@ describe('WatchProgressService', () => {
         title: 'Test',
       };
       // lastProgress is 90, current is 100. Delta is 10.
-      const payload = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        90,
-      );
+      const payload = prepareProgressPayload(mockVideo, metadata, 90);
       expect(payload?.progressDelta).toBe(10);
 
       // lastProgress is 110 (ahead), current is 100. Delta should be 0.
-      const payload2 = WatchProgressService.prepareProgressPayload(
-        mockVideo,
-        metadata,
-        110,
-      );
+      const payload2 = prepareProgressPayload(mockVideo, metadata, 110);
       expect(payload2?.progressDelta).toBe(0);
     });
 
@@ -154,11 +133,7 @@ describe('WatchProgressService', () => {
         type: 'movie',
         title: 'Test',
       };
-      const payload = WatchProgressService.prepareProgressPayload(
-        invalidVideo,
-        metadata,
-        null,
-      );
+      const payload = prepareProgressPayload(invalidVideo, metadata, null);
       expect(payload).toBeNull();
     });
 
@@ -172,11 +147,7 @@ describe('WatchProgressService', () => {
         currentTime: 0,
         duration: 1000,
       } as unknown as HTMLVideoElement;
-      const payload = WatchProgressService.prepareProgressPayload(
-        zeroVideo,
-        metadata,
-        null,
-      );
+      const payload = prepareProgressPayload(zeroVideo, metadata, null);
       expect(payload).toBeNull();
     });
   });
@@ -194,13 +165,9 @@ describe('WatchProgressService', () => {
       };
 
       const onSuccess = vi.fn();
-      WatchProgressService.syncProgress(
-        mockSocket as unknown as Parameters<
-          typeof WatchProgressService.syncProgress
-        >[0],
-        payload as unknown as Parameters<
-          typeof WatchProgressService.syncProgress
-        >[1],
+      syncProgress(
+        mockSocket as unknown as Parameters<typeof syncProgress>[0],
+        payload as unknown as Parameters<typeof syncProgress>[1],
         onSuccess,
       );
 
@@ -218,13 +185,9 @@ describe('WatchProgressService', () => {
         emit: vi.fn(),
       };
 
-      WatchProgressService.syncProgress(
-        mockSocket as unknown as Parameters<
-          typeof WatchProgressService.syncProgress
-        >[0],
-        {} as unknown as Parameters<
-          typeof WatchProgressService.syncProgress
-        >[1],
+      syncProgress(
+        mockSocket as unknown as Parameters<typeof syncProgress>[0],
+        {} as unknown as Parameters<typeof syncProgress>[1],
         vi.fn(),
       );
 
