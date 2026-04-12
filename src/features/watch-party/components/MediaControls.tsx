@@ -2,6 +2,7 @@ import {
   Check,
   ChevronUp,
   Copy,
+  Headphones,
   LogOut,
   Mic,
   MicOff,
@@ -35,6 +36,10 @@ interface MediaControlsProps {
   selectedVideoDevice: string | null;
   onSwitchVideoDevice: (deviceId: string) => void;
 
+  // Deafen
+  isDeafened?: boolean;
+  onToggleDeafen?: () => void;
+
   // Party actions
   isHost: boolean;
   linkCopied: boolean;
@@ -67,6 +72,8 @@ export function MediaControls({
   onSwitchVideoDevice,
   isHost,
   linkCopied,
+  isDeafened = false,
+  onToggleDeafen,
   onCopyLink,
   onLeave,
   room,
@@ -142,7 +149,7 @@ export function MediaControls({
             </div>
             <div className="flex flex-col overflow-hidden">
               <span
-                className="text-sm font-black font-headline uppercase tracking-widest text-foreground truncate max-w-[100px]"
+                className="text-xs sm:text-sm font-black font-headline uppercase tracking-widest text-foreground truncate max-w-[100px] sm:max-w-[140px]"
                 title={userName}
               >
                 {userName}
@@ -165,6 +172,26 @@ export function MediaControls({
 
           {/* Media Buttons */}
           <div className="flex items-center gap-2">
+            {/* Deafen Button */}
+            <Button
+              type="button"
+              variant={isDeafened ? 'neo-red' : 'neo-outline'}
+              size="icon"
+              onClick={onToggleDeafen}
+              title={isDeafened ? 'Undeafen' : 'Deafen'}
+            >
+              <Headphones
+                aria-hidden="true"
+                className={cn(
+                  'w-4 h-4 md:w-5 md:h-5 stroke-[3px]',
+                  isDeafened && 'opacity-70 scale-90',
+                )}
+              />
+              {isDeafened ? (
+                <X className="absolute w-5 h-5 stroke-[4px] pointer-events-none" />
+              ) : null}
+            </Button>
+
             {/* Mic Button with Arrow */}
             <div className="flex items-center relative">
               {showAudioDevices ? (

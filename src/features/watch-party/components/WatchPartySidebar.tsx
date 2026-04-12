@@ -111,6 +111,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     selectedVideoDevice,
     switchAudioDevice,
     switchVideoDevice,
+    isDeafened,
+    toggleDeafen,
     isAgoraConnected,
   } = useWatchPartySidebar({
     room,
@@ -236,6 +238,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         onSwitchAudioDevice={switchAudioDevice}
         videoEnabled={videoEnabled}
         onToggleVideo={toggleVideo}
+        isDeafened={isDeafened}
+        onToggleDeafen={toggleDeafen}
         videoInputDevices={videoInputDevices}
         selectedVideoDevice={selectedVideoDevice}
         onSwitchVideoDevice={switchVideoDevice}

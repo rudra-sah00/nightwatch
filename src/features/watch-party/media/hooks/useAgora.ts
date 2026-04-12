@@ -209,6 +209,8 @@ export function useAgora({
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [participants, setParticipants] = useState<AgoraParticipant[]>([]);
   const [remoteUsers, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([]);
+  const [isDeafened, setIsDeafened] = useState(false);
+  const isDeafenedRef = useRef(false);
 
   // Track when the SDK client has joined so effects can safely attach listeners.
   // Using state instead of depending on clientRef.current (a mutable ref)
@@ -579,6 +581,9 @@ export function useAgora({
 
       if (mediaType === 'audio' && user.audioTrack) {
         user.audioTrack.play();
+        if (isDeafenedRef.current) {
+          user.audioTrack.setVolume(0);
+        }
       }
 
       setRemoteUsers([...client.remoteUsers]);
@@ -659,6 +664,24 @@ export function useAgora({
    * Toggles for local audio and video tracks.
    * Optimized for voice chat in a watch party context.
    */
+
+  const toggleDeafen = useCallback(() => {
+    const next = !isDeafenedRef.current;
+    isDeafenedRef.current = next;
+    setIsDeafened(next);
+
+    if (clientRef.current) {
+      clientRef.current.remoteUsers.forEach((user) => {
+        if (user.audioTrack) {
+          if (next) {
+            user.audioTrack.setVolume(0);
+          } else {
+            user.audioTrack.setVolume(100);
+          }
+        }
+      });
+    }
+  }, []);
 
   const toggleAudio = useCallback(async () => {
     const client = clientRef.current;
@@ -787,6 +810,8 @@ export function useAgora({
    */
 
   return {
+    isDeafened,
+    toggleDeafen,
     client: clientRef.current,
     participants,
     remoteUsers,
