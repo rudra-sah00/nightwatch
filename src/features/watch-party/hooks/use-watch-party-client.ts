@@ -7,6 +7,7 @@ import type {
   PartyStateUpdate,
   RoomPreview,
 } from '@/features/watch-party/room/types';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 
@@ -24,6 +25,7 @@ export function useWatchPartyClient({
   initialRoomNotFound,
 }: UseWatchPartyClientOptions) {
   const router = useRouter();
+  const { copyToClipboard } = useDesktopApp();
 
   const goBackOrHome = useCallback(() => {
     if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -315,14 +317,7 @@ export function useWatchPartyClient({
     url.searchParams.delete('new');
     const finalUrl = url.toString();
     try {
-      if (
-        typeof window !== 'undefined' &&
-        window.electronAPI?.copyToClipboard
-      ) {
-        window.electronAPI.copyToClipboard(finalUrl);
-      } else {
-        await navigator.clipboard.writeText(finalUrl);
-      }
+      await copyToClipboard(finalUrl);
       setCopied(true);
       toast.success('Invite link copied!');
       setTimeout(() => setCopied(false), 2000);

@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import type { User } from '@/types';
 import type { RoomPreview } from '../room/types';
 import { WatchPartyLoading } from './WatchPartyLoading';
@@ -52,6 +53,7 @@ export function WatchPartyLobby({
   isMobile = false,
 }: WatchPartyLobbyProps) {
   const router = useRouter();
+  const { isBrowser, openInDesktopApp } = useDesktopApp();
 
   if (isMobile) {
     return (
@@ -293,6 +295,18 @@ export function WatchPartyLobby({
               >
                 {isLoading ? 'Requesting…' : 'Request to Join'}
               </Button>
+
+              {isBrowser ? (
+                <Button
+                  type="button"
+                  variant="neo-outline"
+                  onClick={() => openInDesktopApp()}
+                  className="w-full py-4 tracking-widest uppercase font-black bg-[#ffcc00] text-black border-4 hover:bg-[#ffe066]"
+                >
+                  <Monitor className="w-5 h-5 mr-2" />
+                  Open in Desktop App
+                </Button>
+              ) : null}
 
               <Button
                 type="button"
