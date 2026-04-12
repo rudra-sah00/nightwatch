@@ -1,6 +1,11 @@
 {
   "name": "watch-rudra",
-  "version": "1.15.7",
+  "description": "Watch Rudra Desktop Application",
+  "author": "Rudra Sah00",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rudra-sah00/watch-rudra.git"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -123,5 +128,6 @@
         "repo": "watch-rudra"
       }
     ]
-  }
+  },
+  "version": "1.15.8"
 }
