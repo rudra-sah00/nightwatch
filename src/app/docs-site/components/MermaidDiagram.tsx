@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 export function MermaidDiagram({ chart }: { chart: string }) {
   const [svg, setSvg] = useState<string>('');
-  const [error, setError] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -24,9 +24,9 @@ export function MermaidDiagram({ chart }: { chart: string }) {
         if (isMounted) {
           setSvg(renderedSvg);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Mermaid rendering failed', err);
-        if (isMounted) setError(true);
+        if (isMounted) setError(err?.message || String(err));
       }
     };
 
@@ -41,6 +41,9 @@ export function MermaidDiagram({ chart }: { chart: string }) {
     return (
       <div className="my-8 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm font-medium text-red-500">
         Failed to render diagram.
+        <pre className="mt-4 text-left text-xs bg-black/50 p-4 overflow-x-auto rounded-lg font-mono text-red-300">
+          {error}
+        </pre>
         <pre className="mt-4 text-left text-xs bg-black/50 p-4 overflow-x-auto rounded-lg font-mono">
           {chart}
         </pre>

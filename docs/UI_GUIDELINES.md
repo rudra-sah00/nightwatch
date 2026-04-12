@@ -29,11 +29,11 @@ Below is an overview of how variants map to the Neo-Brutalist elements, using th
 ```mermaid
 graph TD
     A[Developer imports Button] --> B{Select Variant Prop}
-    B -->|variant="default"| C[Solid Black / White Text]
-    B -->|variant="neo-yellow"| D[Solid Yellow / Black Text]
-    B -->|variant="neo-red"| E[Warning Red / White Text]
-    B -->|variant="neo-outline"| F[Transparent / Black Border / Inverts on Hover]
-    B -->|variant="neo-ghost"| G[Transparent / Faint Hover]
+    B -->|variant='default'| C[Solid Black / White Text]
+    B -->|variant='neo-yellow'| D[Solid Yellow / Black Text]
+    B -->|variant='neo-red'| E[Warning Red / White Text]
+    B -->|variant='neo-outline'| F[Transparent / Black Border / Inverts on Hover]
+    B -->|variant='neo-ghost'| G[Transparent / Faint Hover]
     
     C --> H[Standardized Tailwind Output]
     D --> H
