@@ -194,6 +194,36 @@ export function usePlayerRoot({
   }, [captionUrl, subtitleTracksKey]);
 
   useEffect(() => {
+    if ('mediaSession' in navigator) {
+      const art = metadata.posterUrl
+        ? [
+            { src: metadata.posterUrl, sizes: '96x144', type: 'image/jpeg' },
+            { src: metadata.posterUrl, sizes: '256x384', type: 'image/jpeg' },
+            { src: metadata.posterUrl, sizes: '512x768', type: 'image/jpeg' },
+          ]
+        : [];
+
+      let mediaTitle = metadata.title;
+      let mediaArtist = 'Watch Rudra';
+
+      if (metadata.type === 'series') {
+        mediaTitle = metadata.episodeTitle
+          ? `Ep ${metadata.episode}: ${metadata.episodeTitle}`
+          : `Episode ${metadata.episode}`;
+        mediaArtist = `${metadata.title} (S${metadata.season})`;
+      } else if (metadata.type === 'livestream') {
+        mediaTitle = `${metadata.title}`;
+        mediaArtist = 'Live Stream';
+      }
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: mediaTitle,
+        artist: mediaArtist,
+        album: 'Watch Rudra',
+        artwork: art,
+      });
+    }
+
     return () => {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'none';
@@ -215,7 +245,14 @@ export function usePlayerRoot({
         }
       }
     };
-  }, []);
+  }, [
+    metadata.episode,
+    metadata.episodeTitle,
+    metadata.posterUrl,
+    metadata.season,
+    metadata.title,
+    metadata.type,
+  ]);
 
   const handleNavigate = useCallback(
     (url: string) => {
@@ -310,6 +347,25 @@ export function usePlayerRoot({
     onInteraction: () => showControlsRef.current?.(),
     onToggleFullscreen: toggleFullscreen,
   });
+
+  const [_isDesktopPip, setIsDesktopPip] = useState(false);
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    if (typeof window !== 'undefined' && window.electronAPI?.onPipModeChanged) {
+      unsubscribe = window.electronAPI.onPipModeChanged((isPip) => {
+        setIsDesktopPip(isPip);
+        dispatch({ type: isPip ? 'HIDE_CONTROLS' : 'SHOW_CONTROLS' });
+
+        // Let the CSS know we are in native PiP so we can strip borders
+        if (isPip) {
+          document.body.classList.add('is-desktop-pip');
+        } else {
+          document.body.classList.remove('is-desktop-pip');
+        }
+      });
+    }
+    return () => unsubscribe?.();
+  }, []);
 
   useEffect(() => {
     if (isFullscreenOverride !== undefined) {

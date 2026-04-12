@@ -450,4 +450,33 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
   }
+
+  /* TRUE DESKTOP PIP MODE - Strip out borders and sidebars to make video strictly full bleed */
+  body.is-desktop-pip {
+    overflow: hidden !important;
+  }
+  body.is-desktop-pip header,
+  body.is-desktop-pip footer,
+  body.is-desktop-pip nav,
+  body.is-desktop-pip aside,
+  body.is-desktop-pip .watch-sidebar,
+  body.is-desktop-pip .player-overlay-controls {
+    display: none !important;
+  }
+
+  body.is-desktop-pip main,
+  body.is-desktop-pip #root,
+  body.is-desktop-pip .player-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    background: black;
+  }
 }

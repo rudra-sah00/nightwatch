@@ -77,7 +77,7 @@ export function WatchPartyClient({
     handleCancelRequest,
     handleLeave,
     confirmLeave,
-    copyInviteLink,
+    handleCopyLink,
   } = useWatchPartyClient({
     roomId,
     isNewParty,
@@ -137,7 +137,7 @@ export function WatchPartyClient({
           onKick={kickUser}
           onApprove={approveMember}
           onReject={rejectMember}
-          onCopyLink={copyInviteLink}
+          onCopyLink={handleCopyLink}
           onLeave={handleLeave}
           onConfirmLeave={confirmLeave}
           showLeaveDialog={showLeaveDialog}

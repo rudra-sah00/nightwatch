@@ -26,6 +26,9 @@ export interface ElectronAPI {
   /** Prevents the OS from going to sleep or locking the screen while a video is playing */
   setKeepAwake: (shouldKeepAwake: boolean) => void;
 
+  /** Tells React when Native PiP forces the window to shrink, allowing us to hide CSS menus. */
+  onPipModeChanged: (callback: (isPipMode: boolean) => void) => () => void;
+
   /** Triggers a native system notification popup (e.g. for Party Invites or Chat messages) */
   showNotification: (title: string, body: string) => void;
 
@@ -35,7 +38,7 @@ export interface ElectronAPI {
   /** Only used by the fallback offline error page */
   retryConnection: () => void;
 
-  /** Connects React hardware Media key events (Play, Pause, Next Track) */
+  /** Connects React hardware Media key events (Play, Pause, Next Track). Returns an unsubscribe function. */
   onMediaCommand: (
     callback: (
       command:
@@ -44,7 +47,7 @@ export interface ElectronAPI {
         | 'MediaPreviousTrack'
         | 'MediaStop',
     ) => void,
-  ) => void;
+  ) => () => void;
 }
 
 declare global {

@@ -25,6 +25,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setKeepAwake: (shouldKeepAwake) =>
     ipcRenderer.send('toggle-keep-awake', shouldKeepAwake),
 
+  // Listener to hide CSS when the Native Window shrinks down to a PiP block
+  onPipModeChanged: (callback) => {
+    const subscription = (_event, isPip) => callback(isPip);
+    ipcRenderer.on('pip-mode-changed', subscription);
+    return () => ipcRenderer.removeListener('pip-mode-changed', subscription);
+  },
+
   // Used by the offline.html screen to instruct the main backend to map back to Next.js
   retryConnection: () => ipcRenderer.send('retry-connection'),
 
@@ -37,6 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Listen for Native Hardware Media Keys
   onMediaCommand: (callback) => {
-    ipcRenderer.on('media-command', (_event, command) => callback(command));
+    const subscription = (_event, command) => callback(command);
+    ipcRenderer.on('media-command', subscription);
+    return () => ipcRenderer.removeListener('media-command', subscription);
   },
 });

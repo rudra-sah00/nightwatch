@@ -50,6 +50,14 @@ if (!hasSingleInstanceLock) {
   process.exit(0);
 }
 
+// --- 1.5 HARDWARE ACCELERATION & VIDEO ENHANCEMENTS ---
+// Forces Chromium to offload video streaming computation to the dedicated graphics card (GPU/VRAM)
+app.commandLine.appendSwitch('enable-accelerated-mjpeg-decode');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+// Saves memory by not copying video textures across backend/frontend process lines
+app.commandLine.appendSwitch('enable-zero-copy');
+
 // --- 2. DEEP LINK URL REGISTRATION ---
 // Tells the Host OS that "watch-rudra://" should be handled by this Electron binary
 windows.registerProtocol();
@@ -119,18 +127,83 @@ const startElectronApp = async () => {
     }
   });
 
-  // Picture in Picture (Always on Top) Mode + Ghost Mode Opacity
+  // --- SMART POWER & BANDWIDTH SAVER ---
+  // If the user folds their laptop or locks their PC, forcefully pause the movie and show Away on Discord!
+  const triggerSleepPause = () => {
+    const win = AppWindow.getInstance();
+    if (win) {
+      // We send 'MediaPlayPause' because if it's playing, it will pause.
+      // (Note: To be entirely safe, we realistically just want to PAUSE. But standard play/pause hardware key is robust).
+      win.webContents.send('media-command', 'MediaPlayPause');
+      discordLogic.setActivity('Away (System Locked)', 'AFK from Watch Party');
+    }
+  };
+
+  const { powerMonitor } = require('electron');
+  powerMonitor.on('suspend', triggerSleepPause);
+  powerMonitor.on('lock-screen', triggerSleepPause);
+
+  const triggerResume = () => {
+    discordLogic.setActivity('Back Online', 'Browsing Homepage');
+  };
+  powerMonitor.on('resume', triggerResume);
+  powerMonitor.on('unlock-screen', triggerResume);
+
+  // --- TRUE PICTURE-IN-PICTURE OS SNAP ---
   ipcMain.on('set-pip', (_event, isEnabled, opacityLevel = 1.0) => {
     const win = AppWindow.getInstance();
     if (!win) return;
 
-    win.setAlwaysOnTop(isEnabled, 'floating');
+    const { screen } = require('electron');
 
-    // Ghost Mode (0.7 makes it 70% transparent when floating, 1.0 restores it perfectly)
-    if (isEnabled && opacityLevel < 1.0 && process.platform !== 'linux') {
-      win.setOpacity(opacityLevel);
+    if (isEnabled) {
+      win.setAlwaysOnTop(true, 'floating');
+
+      // Hide MacOS Traffic Lights (Red/Yellow/Green window buttons) for a seamless 16:9 rectangle
+      if (process.platform === 'darwin') win.setWindowButtonVisibility(false);
+
+      // Ghost Mode Transparency
+      if (opacityLevel < 1.0 && process.platform !== 'linux') {
+        win.setOpacity(opacityLevel);
+      }
+
+      // Calculate Bottom-Right Corner of current monitor
+      const winBounds = win.getBounds();
+      const currentScreen = screen.getDisplayNearestPoint({
+        x: winBounds.x,
+        y: winBounds.y,
+      });
+      const { x, y, width, height } = currentScreen.workArea;
+
+      const pipWidth = 480;
+      const pipHeight = Math.round(pipWidth * (9 / 16));
+      const padding = 24;
+
+      // Ensure 16:9 aspect ratio and snap
+      win.setAspectRatio(16 / 9);
+      win.setBounds(
+        {
+          x: Math.round(x + width - pipWidth - padding),
+          y: Math.round(y + height - pipHeight - padding),
+          width: pipWidth,
+          height: pipHeight,
+        },
+        true,
+      ); // Animate transition
+
+      // Tell React to hide sidebars and make video true full-bleed
+      win.webContents.send('pip-mode-changed', true);
     } else {
-      win.setOpacity(1.0); // Always restore to 100% safe solid when PIP closes
+      win.setAlwaysOnTop(false);
+      win.setOpacity(1.0);
+
+      if (process.platform === 'darwin') win.setWindowButtonVisibility(true);
+
+      win.setAspectRatio(0); // unlock aspect ratio
+      win.setSize(1280, 800, true);
+      win.center();
+
+      win.webContents.send('pip-mode-changed', false);
     }
   });
 

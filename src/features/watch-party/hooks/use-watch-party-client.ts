@@ -310,7 +310,7 @@ export function useWatchPartyClient({
     goBackOrHome();
   };
 
-  const copyInviteLink = async () => {
+  const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     url.searchParams.delete('new');
     const finalUrl = url.toString();
@@ -370,6 +370,6 @@ export function useWatchPartyClient({
     handleCancelRequest,
     handleLeave,
     confirmLeave,
-    copyInviteLink,
+    handleCopyLink,
   };
 }
