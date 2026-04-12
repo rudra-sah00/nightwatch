@@ -1,38 +1,43 @@
 # API Layer and Communication
 
-This document outlines the client-side API architecture in Watch Rudra, detailing how the frontend application connects, fetches, and secures its data across our Node.js Backend services and WebRTC architectures.
+This document outlines the client-side API architecture in Watch Rudra, governed primarily by the custom `apiFetch` wrapper in `src/lib/fetch.ts`. Unlike standard Next.js boilerplate, this project employs a rigorous, self-managing fetch pipeline with proactive token refreshing to ensure sessions never visibly expire during active Watch Party or playback sessions.
 
 ## Overview of Services
 
-The Next.js App Router communicates across three separate data planes:
+The Next.js application communicates across several data planes:
 
-1. **Watch-Rudra Backend:** The primary Node.js/Express server (REST + Socket.IO). Handles PostgreSQL database interactions, Redis sessions, user management, room creation, and rate-limiting.
-2. **Agora (RTM/RTC):** The decentralized edge network handling low-latency WebRTC streams, room chat, and playback synchronization broadcasts.
-3. **Cloudflare Workers (Optional):** Used in production as an intermediate proxy for video stream segments (HLS) to obscure origins and mitigate direct scraping attacks.
+1. **Watch-Rudra Backend**: Our primary monolithic Node.js/Express server handling the primary Database features.
+2. **Agora (RTC)**: Real-time Audio/Video streams.
+3. **Cloudflare Workers (Optional)**: Proxies for specific HLS/m3u8 CDN streams to circumvent scraping attacks.
 
-## Connecting to the Node.js API
+## The `apiFetch` Wrapper
 
-All standard API calls from the client to the Backend happen over standard HTTPS (or HTTP in local dev).
+Rather than using raw `fetch()`, all interactions with our backend **must** funnel through `apiFetch<T>(endpoint, options)`.
 
-### Authentication
-Every secure API request requires the user's session cookie. Next.js App Router Middleware automatically checks the session cookie on navigation. The client-side `fetch` wrappers automatically include `credentials: "include"` under the hood so the backend can extract the JWT and User ID securely.
+### Automatic Token Refresh (Proactive)
 
-### Error Handling
-The application uses standardized HTTP response codes (200, 400, 429). The `AppError` payload from the backend is captured and displayed to the user via the `toast` notification system (e.g., SONNER).
+Most applications wait for an API call to fail with a `401 Unauthorized`, and *then* attempt a token refresh. Watch Rudra explicitly avoids this "lazy refresh" pattern because it causes visual stuttering or failed network cascades in streaming apps. 
 
-### Rate Limiting Awareness
-The frontend interacts with backend rate limiters designed to protect specific routes:
-- **API (`apiLimiter`)**
-- **Auth (`authLimiter`)**
-- **Stream (`streamLimiter`)**
+Inside `fetch.ts`, we maintain a `tokenExpiresAt` state. A background interval (`scheduleTokenRefresh()`) is fired whenever a new token is received. The client automatically re-authenticates **1 minute before expiration**, ensuring the user's active session is never interrupted by a 401.
 
-*Important Note:* Due to corporate NAT environments where multiple users share an IP, the backend has been explicitly engineered to rate-limit authenticated users by `userId` and unauthenticated users by a combination of `IP + User-Agent`. The frontend developer must ensure the `User-Agent` headers are preserved during any SSR fetches.
+### Automatic Retry & Refresh Locks
 
-## Integrating with Next.js App Router
+If multiple components fire fetches at the exact millisecond a token expires, `isRefreshing` acts as a mutex lock. Only *one* refresh request is dispatched to the backend, and all other pending `apiFetch` calls `await refreshPromise` until the token is replaced, then automatically retry.
 
-We heavily utilize the App Router paradigms:
-- **Server Components:** Most database queries and page loads are executed directly on the server to reduce the JavaScript bundle size shipped to the client.
-- **Client Components (`"use client"`):** Restricted closely to the interactive leaves of the UI tree, such as the Watch Party video player, forms, and toggles.
-- **Server Actions:** Secure form submissions (e.g., password reset, username updates) run via Next.js Server Actions, bypassing the need for dedicated intermediate API routes inside the Next.js `app/api` folder.
+### Features & Abstraction
 
-This dual-plane approach minimizes the API surface area we naturally have to maintain in the Next.js repo, deferring heavy business logic to the official Node.js Backend service.
+```typescript
+export async function apiFetch<T>(
+  endpoint: string,
+  options: FetchOptions = {},
+): Promise<T>
+```
+
+- **Timeouts**: Every request uses an `AbortController` defaulted to `30000ms`.
+- **SSR vs. CSR URL Resolution**: On the Node.js Server (`typeof window === 'undefined'`), URLs resolve to `NEXT_PUBLIC_BACKEND_URL`. On the client, they resolve relatively (`/api/*`), triggering `next.config.ts` rewrite rules into the backend to bypass standard CORS warnings seamlessly.
+- **Custom Header Injection**: `Content-Type: application/json` is automatically inferred and attached, along with standard creds.
+
+## Server Actions vs. API Routes
+
+In Watch Rudra, we prefer Next.js Server Actions for secure form mutations (e.g. Profile editing or Logins). When passing through a Server Action, we do not hit Next.js `/api/` folders. We execute `apiFetch` directly inside the Action bounds before returning the result down to the Client Component, minimizing client-side bandwidth and obscuring the upstream REST signatures.
+

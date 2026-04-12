@@ -39,9 +39,29 @@ export default function DocsLayout({
             >
               Architecture
             </a>
+            <div className="ml-4 flex flex-col space-y-2 border-l border-white/10 pl-4 py-1 text-sm mt-1">
+              <a
+                href="/CONTRIBUTING"
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Contributing
+              </a>
+              <a
+                href="/STREAMING"
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Streaming Engine
+              </a>
+              <a
+                href="/WEB_SOCKETS"
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                WebSockets
+              </a>
+            </div>
             <a
               href="/FEATURES"
-              className="text-zinc-400 hover:text-white transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors pt-2"
             >
               Features
             </a>
