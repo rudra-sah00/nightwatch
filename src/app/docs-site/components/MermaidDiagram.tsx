@@ -14,7 +14,6 @@ export function MermaidDiagram({ chart }: { chart: string }) {
       startOnLoad: false,
       theme: 'dark',
       fontFamily: 'inherit',
-      background: 'transparent',
     });
 
     const renderChart = async () => {
