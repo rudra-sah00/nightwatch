@@ -1,3 +1,5 @@
+'use client';
+
 import {
   normalizeRawUrls,
   processResponse,
@@ -10,8 +12,6 @@ import {
  * This hook manages the shared state for the video player (streamUrl, captions, etc.)
  * and delegates server-specific normalization logic to the StreamUrlService.
  */
-
-('use client');
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { extractTokenFromUrl } from '@/features/watch/utils';
