@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.21.0...v1.22.0) (2026-04-13)
+
+
+### Features
+
+* add what's new page and integrate links across public and private views ([6eda3ad](https://github.com/rudra-sah00/watch-rudra/commit/6eda3adfcfee5df098e144a48844d07dd8e1d37e))
+
 ## [1.21.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.20.0...v1.21.0) (2026-04-13)
 
 
