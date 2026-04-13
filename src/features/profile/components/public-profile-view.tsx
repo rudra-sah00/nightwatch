@@ -113,17 +113,17 @@ export function PublicProfileView({
 
             {/* Quick Stats Bento */}
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto h-fit">
-              <div className="bg-[#e6f0ff] border-[3px] border-border p-4 text-center ">
+              <div className="bg-neo-blue text-foreground border-[3px] border-border p-4 text-center ">
                 <div className="text-2xl font-black mb-1">{watchStreak}</div>
-                <div className="text-[10px] uppercase font-black opacity-40">
+                <div className="text-[10px] uppercase font-black opacity-80">
                   DAYS ACTIVE
                 </div>
               </div>
-              <div className="bg-[#fff0e6] border-[3px] border-border p-4 text-center ">
+              <div className="bg-neo-orange text-foreground border-[3px] border-border p-4 text-center ">
                 <div className="text-2xl font-black mb-1">
                   {totalWatchHours}
                 </div>
-                <div className="text-[10px] uppercase font-black opacity-40">
+                <div className="text-[10px] uppercase font-black opacity-80">
                   HRS TOTAL
                 </div>
               </div>
