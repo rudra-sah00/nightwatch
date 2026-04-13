@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.23.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.22.0...v1.23.0) (2026-04-13)
+
+
+### Features
+
+* **desktop:** implement native electron integrations ([b530117](https://github.com/rudra-sah00/watch-rudra/commit/b530117eecad4050bb4dc2ce956c6a6d989363c3))
+
+
+### Bug Fixes
+
+* **electron:** remove 3d shadow effects from splash screen components ([097573f](https://github.com/rudra-sah00/watch-rudra/commit/097573f6a571fdd0795f0b36b690a38bd9f4d8c8))
+* **electron:** resolve macos CMD+Q zombie process lag during splash screen ([cfe6f25](https://github.com/rudra-sah00/watch-rudra/commit/cfe6f25875e68e78792ba5572dccd99b56051349))
+* **electron:** update splash screen dark mode colors and icon visibility ([f5259de](https://github.com/rudra-sah00/watch-rudra/commit/f5259de515b16789c7941ca6fa6ee729e818c035))
+
+
+### Performance Improvements
+
+* **ui:** migrate raw img tags to Next.js optimized Image components ([4edeea5](https://github.com/rudra-sah00/watch-rudra/commit/4edeea5171483474dd258871a7c4f3c86c650ed5))
+
 ## [1.22.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.21.0...v1.22.0) (2026-04-13)
 
 
