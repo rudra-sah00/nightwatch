@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import packageJson from '../../package.json';
 
 /**
  * Shared Creator Identity footer with social links.
@@ -110,6 +111,13 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
             </svg>
           </a>
         </Button>
+      </div>
+
+      <div className="text-muted-foreground font-mono text-xs uppercase tracking-widest mt-2 flex flex-col items-center gap-1">
+        <span>App Version</span>
+        <span className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50">
+          v{packageJson.version}
+        </span>
       </div>
     </div>
   );
