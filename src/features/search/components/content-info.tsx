@@ -103,7 +103,7 @@ export const ContentInfo = memo(function ContentInfo({
 
       {/* Description */}
       {show.description ? (
-        <p className="text-[#4a4a4a] text-sm md:text-base leading-relaxed max-w-2xl border-l-[4px] border-border pl-4 my-6">
+        <p className="text-foreground/70 text-sm md:text-base leading-relaxed max-w-2xl border-l-[4px] border-border pl-4 my-6">
           {show.description}
         </p>
       ) : null}
@@ -112,7 +112,7 @@ export const ContentInfo = memo(function ContentInfo({
       {hasWatchProgress &&
       watchProgress &&
       watchProgress.progressPercent > 0 ? (
-        <div className="space-y-3 max-w-xl bg-white border-[4px] border-border p-4 ">
+        <div className="space-y-3 max-w-xl bg-card border-[4px] border-border p-4 ">
           <div className="flex items-center justify-between text-xs font-black font-headline tracking-widest uppercase text-foreground">
             <span>
               {isSeries &&
@@ -170,8 +170,8 @@ export const ContentActions = memo(function ContentActions({
           isPlaying ||
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
-            ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-            : 'bg-neo-yellow text-foreground  hover:bg-neo-yellow/80',
+            ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
+            : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
         )}
         onClick={handleButtonClick}
         disabled={
@@ -213,8 +213,8 @@ export const ContentActions = memo(function ContentActions({
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
             'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
             isCreatingParty || isPlaying
-              ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-              : 'bg-primary text-white  hover:bg-neo-blue',
+              ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
+              : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
           )}
           onClick={isCreatingParty ? undefined : onWatchParty}
           disabled={isCreatingParty || isPlaying}
@@ -238,10 +238,10 @@ export const ContentActions = memo(function ContentActions({
             'w-full sm:w-auto sm:min-w-[220px] flex-1',
             'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 group whitespace-nowrap',
             isWatchlistLoading
-              ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
+              ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
               : isInWatchlist
-                ? 'bg-neo-red text-white  hover:bg-primary'
-                : 'bg-white text-foreground  hover:bg-primary hover:text-white',
+                ? 'bg-neo-red text-white hover:bg-primary hover:text-primary-foreground'
+                : 'bg-card text-foreground hover:bg-primary hover:text-primary-foreground',
           )}
           onClick={onWatchlistToggle}
           disabled={isWatchlistLoading}
