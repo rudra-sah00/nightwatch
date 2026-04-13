@@ -104,7 +104,7 @@ export function AudioSelector({
                     {track.label}
                   </span>
                   {track.language && track.language !== track.label ? (
-                    <span className="text-[10px] font-bold font-headline uppercase text-[#4a4a4a] tracking-widest mt-0.5">
+                    <span className="text-[10px] font-bold font-headline uppercase text-foreground/70 tracking-widest mt-0.5">
                       {track.language}
                     </span>
                   ) : null}

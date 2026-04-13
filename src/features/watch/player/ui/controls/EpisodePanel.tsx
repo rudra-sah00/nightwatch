@@ -161,7 +161,7 @@ export function EpisodePanel({
           )}
         >
           <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-black font-headline text-[#4a4a4a] uppercase tracking-widest">
+            <span className="text-[10px] font-black font-headline text-foreground/70 uppercase tracking-widest">
               Episode {centerEp.episodeNumber}
             </span>
             <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-foreground leading-tight">
@@ -248,7 +248,7 @@ export function EpisodePanel({
                   >
                     Season {s.seasonNumber}
                     {s.episodeCount ? (
-                      <span className="text-[#4a4a4a] ml-1.5 text-xs">
+                      <span className="text-foreground/70 ml-1.5 text-xs">
                         ({s.episodeCount})
                       </span>
                     ) : null}

@@ -134,7 +134,7 @@ export function AlertDialogDescription({
   return (
     <p
       className={cn(
-        'text-sm font-headline font-bold uppercase tracking-widest text-[#4a4a4a] leading-relaxed',
+        'text-sm font-headline font-bold uppercase tracking-widest text-foreground/70 leading-relaxed',
         className,
       )}
     >

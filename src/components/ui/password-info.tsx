@@ -40,7 +40,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-[#4a4a4a] hover:text-neo-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-foreground/70 hover:text-neo-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
         aria-label="Password requirements"
       >
         <Info className="h-3.5 w-3.5 stroke-[3px]" />
@@ -92,7 +92,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 </div>
 
                 {/* Breach note */}
-                <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-[#4a4a4a] pt-4 border-t-[3px] border-border">
+                <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-foreground/70 pt-4 border-t-[3px] border-border">
                   We check passwords against{' '}
                   <a
                     href="https://haveibeenpwned.com/Passwords"

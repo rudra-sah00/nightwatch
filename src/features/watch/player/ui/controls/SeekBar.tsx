@@ -128,7 +128,7 @@ export function SeekBar({
             </div>
           </div>
           {/* Tooltip Arrow */}
-          <div className="w-0 h-0 border-l-[10px] lg:border-l-[12px] 2xl:border-l-[14px] border-l-transparent border-r-[10px] lg:border-r-[12px] 2xl:border-r-[14px] border-r-transparent border-t-[10px] lg:border-t-[12px] 2xl:border-t-[14px] border-t-[#1a1a1a] drop-shadow-sm" />
+          <div className="w-0 h-0 border-l-[10px] lg:border-l-[12px] 2xl:border-l-[14px] border-l-transparent border-r-[10px] lg:border-r-[12px] 2xl:border-r-[14px] border-r-transparent border-t-[10px] lg:border-t-[12px] 2xl:border-t-[14px] border-t-primary drop-shadow-sm" />
         </div>
       ) : null}
 

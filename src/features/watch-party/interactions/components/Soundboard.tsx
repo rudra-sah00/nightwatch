@@ -72,7 +72,7 @@ export function Soundboard({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 scrollbar-thin scrollbar-thumb-[#1a1a1a]/20">
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0 scrollbar-thin scrollbar-thumb-foreground/20">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 pb-4">
           {sounds.map((sound) => (
             <Button

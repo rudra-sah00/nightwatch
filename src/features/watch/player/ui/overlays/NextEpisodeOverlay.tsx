@@ -99,7 +99,7 @@ export function NextEpisodeOverlay({
                 {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
               </h4>
               {nextEpisode.duration ? (
-                <p className="text-[#4a4a4a] font-bold font-headline uppercase tracking-widest text-[10px] mt-1">
+                <p className="text-foreground/70 font-bold font-headline uppercase tracking-widest text-[10px] mt-1">
                   {nextEpisode.duration} MIN
                 </p>
               ) : null}

@@ -174,7 +174,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 {usernameStatus && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {usernameStatus === 'checking' && (
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-border/20 border-t-[#1a1a1a] animate-spin" />
+                      <div className="w-3.5 h-3.5 rounded-full border-2 border-border/20 border-t-primary animate-spin" />
                     )}
                     {usernameStatus === 'available' && (
                       <span className="text-emerald-600 font-black text-xs">

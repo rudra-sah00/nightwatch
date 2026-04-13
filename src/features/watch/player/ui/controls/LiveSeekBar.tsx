@@ -297,7 +297,7 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
             <div className="px-3 py-1 bg-background border-[3px] border-border text-[11px] lg:text-xs font-black font-headline uppercase tracking-widest text-foreground whitespace-nowrap ">
               {formatBehind(hoverBehind)}
             </div>
-            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#1a1a1a] mx-auto drop-shadow-sm" />
+            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-primary mx-auto drop-shadow-sm" />
           </div>
         ) : null}
 

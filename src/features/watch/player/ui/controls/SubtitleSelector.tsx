@@ -132,7 +132,7 @@ export function SubtitleSelector({
                 {track.label}
               </span>
               {track.language && track.language !== track.label ? (
-                <span className="text-xs text-[#4a4a4a] font-bold font-headline uppercase">
+                <span className="text-xs text-foreground/70 font-bold font-headline uppercase">
                   {track.language}
                 </span>
               ) : null}

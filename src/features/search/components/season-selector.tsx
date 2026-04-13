@@ -56,7 +56,7 @@ export function SeasonSelector({
         <div
           id="season-selector-menu"
           role="menu"
-          className="absolute top-full right-0 mt-4 w-56 bg-white border-[3px] border-border -yellow overflow-hidden z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none"
+          className="absolute top-full right-0 mt-4 w-56 bg-card border-[3px] border-border -yellow overflow-hidden z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none"
         >
           {seasons.map((season) => (
             <button
@@ -71,8 +71,8 @@ export function SeasonSelector({
                 'w-full px-6 py-4 text-left transition-colors duration-150 border-b-[3px] last:border-b-0 border-border',
                 'font-headline font-bold uppercase tracking-wider text-sm',
                 selectedSeason?.seasonId === season.seasonId
-                  ? 'bg-neo-blue text-white'
-                  : 'bg-white text-foreground hover:bg-neo-yellow',
+                  ? 'bg-neo-blue text-primary-foreground'
+                  : 'bg-card text-foreground hover:bg-neo-yellow',
               )}
             >
               SEASON {season.seasonNumber}
@@ -82,7 +82,7 @@ export function SeasonSelector({
                     'ml-2 text-[10px] font-black',
                     selectedSeason?.seasonId === season.seasonId
                       ? 'text-white/70'
-                      : 'text-[#4a4a4a]',
+                      : 'text-foreground/70',
                   )}
                 >
                   ({season.episodeCount} EP)

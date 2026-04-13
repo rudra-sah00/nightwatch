@@ -49,7 +49,7 @@ export const ContentInfo = memo(function ContentInfo({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            'px-3 py-1 bg-white border-2 border-border text-xs font-black font-headline uppercase tracking-widest text-foreground',
+            'px-3 py-1 bg-card border-2 border-border text-xs font-black font-headline uppercase tracking-widest text-foreground',
             isSeries ? '' : '',
           )}
         >
@@ -95,7 +95,7 @@ export const ContentInfo = memo(function ContentInfo({
           </span>
         ) : null}
         {show.genre ? (
-          <span className="hidden md:inline bg-white border-[3px] border-border px-3 py-1">
+          <span className="hidden md:inline bg-card border-[3px] border-border px-3 py-1">
             {show.genre}
           </span>
         ) : null}

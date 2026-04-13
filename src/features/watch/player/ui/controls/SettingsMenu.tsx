@@ -66,7 +66,7 @@ export function SettingsMenu({
         className={cn(
           'w-full flex items-center justify-between p-4 transition-colors text-foreground',
           disabled
-            ? 'cursor-not-allowed bg-background text-[#4a4a4a]'
+            ? 'cursor-not-allowed bg-background text-foreground/70'
             : 'hover:bg-neo-yellow/80',
         )}
       >

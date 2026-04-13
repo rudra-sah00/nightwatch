@@ -114,7 +114,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
               <p className="font-black font-headline uppercase tracking-widest text-lg">
                 No messages yet
               </p>
-              <p className="text-xs font-headline uppercase tracking-widest font-bold text-[#4a4a4a] mt-1">
+              <p className="text-xs font-headline uppercase tracking-widest font-bold text-foreground/70 mt-1">
                 Be the first to say hello! 👋
               </p>
             </div>
@@ -188,7 +188,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
                 '--epr-category-label-bg-color': '#ffffff',
                 '--epr-picker-border-color': 'transparent',
                 '--epr-search-input-bg-color': '#f5f0e8',
-                '--epr-search-input-border-color': '#1a1a1a',
+                '--epr-search-input-border-color': 'var(--neo-border)',
                 '--epr-search-input-border-radius': '0px',
                 '--epr-hover-bg-color': 'var(--neo-yellow)',
                 '--epr-focus-bg-color': 'var(--neo-yellow)',
@@ -308,7 +308,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
           <span className="text-xs text-foreground font-black font-headline uppercase tracking-widest">
             {message.userName}
           </span>
-          <span className="text-[10px] text-[#4a4a4a] font-bold font-headline uppercase tracking-widest">
+          <span className="text-[10px] text-foreground/70 font-bold font-headline uppercase tracking-widest">
             {new Date(message.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',

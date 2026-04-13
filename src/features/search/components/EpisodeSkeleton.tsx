@@ -2,7 +2,7 @@
 
 export function EpisodeSkeleton() {
   return (
-    <div className="flex gap-4 p-4 border-[3px] border-border  w-full animate-pulse bg-white">
+    <div className="flex gap-4 p-4 border-[3px] border-border  w-full animate-pulse bg-card">
       {/* Thumbnail Skeleton */}
       <div className="relative w-40 md:w-56 aspect-video bg-background flex-shrink-0 border-r-[3px] border-border -m-4 mr-0" />
 

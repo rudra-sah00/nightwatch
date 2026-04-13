@@ -183,7 +183,7 @@ export function WatchPartySettings({
                       <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                         Floating chat
                       </p>
-                      <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                      <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
                         Show chat overlay when closed
                       </p>
                     </div>
@@ -213,7 +213,7 @@ export function WatchPartySettings({
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Sketch Board
                         </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
                           Allow guests to draw on video
                         </p>
                       </div>
@@ -233,7 +233,7 @@ export function WatchPartySettings({
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Soundboard
                         </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
                           Allow guests to play trending sounds
                         </p>
                       </div>
@@ -253,7 +253,7 @@ export function WatchPartySettings({
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
                           Live Chat
                         </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
                           Allow guests to send chat messages
                         </p>
                       </div>
@@ -294,7 +294,7 @@ export function WatchPartySettings({
 
                         <div className="grid grid-cols-3 gap-2">
                           <div className="flex flex-col items-center gap-3">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
                               Sketch
                             </span>
                             <Switch
@@ -312,7 +312,7 @@ export function WatchPartySettings({
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
                               Sounds
                             </span>
                             <Switch
@@ -330,7 +330,7 @@ export function WatchPartySettings({
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
+                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
                               Chat
                             </span>
                             <Switch

@@ -36,16 +36,16 @@ export function EpisodeCard({
       type="button"
       className={cn(
         'group flex gap-4 p-4 enabled:cursor-pointer transition-[background-color,border-color,box-shadow,opacity,transform,backdrop-filter] duration-300 w-full text-left border border-gray-100 rounded-xl overflow-hidden relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
-        'bg-white/40 hover:bg-white/60 hover:backdrop-blur-xl hover:shadow-md',
+        'bg-background/40 hover:bg-background/60 hover:backdrop-blur-xl hover:shadow-md',
         isPlaying &&
-          'bg-white/80 backdrop-blur-xl ring-2 ring-primary/20 scale-[0.98]',
+          'bg-background/80 backdrop-blur-xl ring-2 ring-primary/20 scale-[0.98]',
         isAnyLoading && !isPlaying && 'opacity-50 cursor-not-allowed',
       )}
       onClick={handleClick}
       disabled={isPlaying}
     >
       {/* Blurred background element for glass effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-foreground/10 to-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       {/* Episode Thumbnail */}
       <div className="relative w-40 md:w-56 aspect-video bg-gray-100 flex-shrink-0 rounded-lg overflow-hidden my-auto mr-0">
@@ -85,7 +85,7 @@ export function EpisodeCard({
               </span>
             </div>
           ) : (
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full border border-white/40 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+            <div className="w-12 h-12 bg-foreground/20 backdrop-blur-md rounded-full border border-foreground/40 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
               <Play className="w-5 h-5 text-white fill-white ml-1" />
             </div>
           )}
@@ -95,7 +95,7 @@ export function EpisodeCard({
       {/* Episode Info */}
       <div className="flex-1 min-w-0 py-2 pl-2">
         <div className="flex items-center gap-3 mb-1.5">
-          <span className="px-2.5 py-1 bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 rounded-md text-[10px] font-bold font-headline uppercase tracking-tighter shrink-0 shadow-sm">
+          <span className="px-2.5 py-1 bg-card/50 backdrop-blur-sm border border-border text-foreground rounded-md text-[10px] font-bold font-headline uppercase tracking-tighter shrink-0 shadow-sm">
             EP {episode.episodeNumber}
           </span>
           <h4 className="font-headline font-black text-lg md:text-xl uppercase tracking-tighter text-foreground truncate leading-none">
@@ -104,7 +104,7 @@ export function EpisodeCard({
         </div>
 
         {episode.description ? (
-          <p className="text-sm font-medium text-[#4a4a4a] line-clamp-2 mt-2 leading-tight uppercase font-headline tracking-tight opacity-80">
+          <p className="text-sm font-medium text-foreground/70 line-clamp-2 mt-2 leading-tight uppercase font-headline tracking-tight opacity-80">
             {episode.description}
           </p>
         ) : null}

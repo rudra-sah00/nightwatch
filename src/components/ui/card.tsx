@@ -50,7 +50,7 @@ function _CardDescription({
     <div
       data-slot="card-description"
       className={cn(
-        'text-xs font-headline font-bold uppercase tracking-widest text-[#4a4a4a]',
+        'text-xs font-headline font-bold uppercase tracking-widest text-foreground/70',
         className,
       )}
       {...props}

@@ -87,7 +87,7 @@ export function SearchClient({
                 />
               </h1>
             </div>
-            <p className="font-headline font-bold text-xl uppercase tracking-widest text-[#4a4a4a]">
+            <p className="font-headline font-bold text-xl uppercase tracking-widest text-foreground/70">
               {results.length} Films Found in the Archives
             </p>
           </div>

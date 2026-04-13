@@ -228,7 +228,7 @@ export function CenterPlayButton({
                       <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
                         Host Controls Playback
                       </span>
-                      <span className="text-[#4a4a4a] text-[10px] sm:text-xs font-bold font-headline uppercase mt-1">
+                      <span className="text-foreground/70 text-[10px] sm:text-xs font-bold font-headline uppercase mt-1">
                         Sit back and enjoy the show
                       </span>
                     </div>

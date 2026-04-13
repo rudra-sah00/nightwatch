@@ -351,7 +351,7 @@ function DeviceDropdown({
       </div>
       <div className="p-2 max-h-48 overflow-y-auto no-scrollbar flex flex-col gap-2">
         {devices.length === 0 ? (
-          <div className="text-xs font-bold font-headline uppercase tracking-widest text-[#4a4a4a] p-4 text-center border-[2px] border-transparent">
+          <div className="text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 p-4 text-center border-[2px] border-transparent">
             No devices found
           </div>
         ) : (
