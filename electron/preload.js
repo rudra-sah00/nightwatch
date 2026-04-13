@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   storeSet: (key, value) => ipcRenderer.send('store-set', key, value),
   storeDelete: (key) => ipcRenderer.send('store-delete', key),
 
+  // Sync React Native Theme with Electron Window Frame
+  setNativeTheme: (theme) => ipcRenderer.send('set-native-theme', theme),
+
   // Toggle Picture-in-Picture mode (Always on Top) with optional opacity (0.7 = 70% safe transparent!)
   setPictureInPicture: (isEnabled, opacityLevel = 1.0) =>
     ipcRenderer.send('set-pip', isEnabled, opacityLevel),

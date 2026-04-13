@@ -1,3 +1,4 @@
+require('v8-compile-cache');
 const {
   app,
   globalShortcut,
@@ -36,7 +37,10 @@ const windows = require('./platform/windows.js');
 
 // --- 0. HARDWARE ACCELERATION TOGGLE (Crucial for weird GPU video green-screen bugs) ---
 // If a user has a command line flag --disable-gpu or saves a local setting, we fall back to CPU video decoding.
-if (process.argv.includes('--disable-gpu')) {
+if (
+  process.argv.includes('--disable-gpu') ||
+  store.get('disable-gpu') === true
+) {
   app.disableHardwareAcceleration();
   console.log(
     'Hardware Acceleration disabled. Using software rendering for videos.',
@@ -281,6 +285,16 @@ const startElectronApp = async () => {
   ipcMain.handle('store-get', (_event, key) => store.get(key));
   ipcMain.on('store-set', (_event, key, value) => store.set(key, value));
   ipcMain.on('store-delete', (_event, key) => store.delete(key));
+
+  // --- NATIVE THEMING ---
+  const { nativeTheme } = require('electron');
+  ipcMain.on('set-native-theme', (_event, theme) => {
+    nativeTheme.themeSource = theme; // 'light', 'dark', or 'system'
+    const win = AppWindow.getInstance();
+    if (win) {
+      win.setBackgroundColor(theme === 'light' ? '#ffffff' : '#09090b');
+    }
+  });
 
   // --- WINDOWS TASKBAR MEDIA CONTROLS ---
   if (process.platform === 'win32') {

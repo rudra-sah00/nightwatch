@@ -30,12 +30,12 @@ function setupUpdater(splashWindow, onComplete) {
 
   // ---------- NATIVE UPDATER ----------
   autoUpdater.on('update-available', () => {
-    sendStatus('Core update incoming...', 30);
+    sendStatus('Downloading update please...', 30);
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
     sendStatus(
-      `Downloading engine ${Math.floor(progressObj.percent)}%...`,
+      `Downloading update please... ${Math.floor(progressObj.percent)}%`,
       progressObj.percent,
     );
   });

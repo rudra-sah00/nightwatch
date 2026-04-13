@@ -45,6 +45,7 @@ class AppWindow {
       show: false, // Prevents white flash via ready-to-show
       backgroundColor: '#09090b', // Matches dark mode themes
       webPreferences: {
+        sandbox: true, // Enables OS-level Chromium sandboxing
         nodeIntegration: false,
         contextIsolation: true,
         spellcheck: true,
@@ -66,6 +67,17 @@ class AppWindow {
 
     mainWindowState.manage(this.mainWindow);
 
+    // --- RAM AND CPU OPTIMIZATIONS FOR VIDEO ---
+    // Clear out heavy OS memory pages automatically every 10 minutes
+    setInterval(
+      () => {
+        if (!this.mainWindow.isDestroyed()) {
+          require('electron').app.releaseMemory();
+        }
+      },
+      10 * 60 * 1000,
+    );
+
     // Dynamic Media and Desktop permission handler
     session.defaultSession.setPermissionRequestHandler(
       (_webContents, permission, callback) => {
@@ -86,11 +98,21 @@ class AppWindow {
       },
     );
 
-    // Sandbox URL safety: Open external links like Discord in OS Browser, not the App
+    // Catch network crashes and swap to the beautiful Offline failure screen natively
+    const isDev =
+      process.env.NODE_ENV === 'development' ||
+      !require('electron').app.isPackaged;
+    const APP_URL = isDev
+      ? 'http://localhost:3000'
+      : 'https://watch.rudrasahoo.live';
+
+    // Prevent new untracked windows from spawning! Lock internal links to the MAIN electron window wrapper
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      if (url.startsWith('https://watch.rudrasahoo.live')) {
-        return { action: 'allow' };
+      if (url.startsWith(APP_URL)) {
+        this.mainWindow.loadURL(url);
+        return { action: 'deny' }; // Block OS from creating an unstyled pop-up popup
       }
+      // Send Discord, GitHub, external links to default OS browser
       shell.openExternal(url);
       return { action: 'deny' };
     });
@@ -103,17 +125,12 @@ class AppWindow {
       }
 
       // Allow internal links and deep links routing, send everything else to Mac/Windows
-      if (
-        !url.startsWith('https://watch.rudrasahoo.live') &&
-        !url.startsWith('watch-rudra://')
-      ) {
+      if (!url.startsWith(APP_URL) && !url.startsWith('watch-rudra://')) {
         event.preventDefault();
         shell.openExternal(url);
       }
     });
 
-    // Instead of localhost, point the compiled app to the live deployed server
-    // Catch network crashes and swap to the beautiful Offline failure screen natively!
     this.mainWindow.webContents.on(
       'did-fail-load',
       (_event, errorCode, errorDescription) => {
@@ -127,7 +144,7 @@ class AppWindow {
       },
     );
 
-    this.mainWindow.loadURL('https://watch.rudrasahoo.live');
+    this.mainWindow.loadURL(APP_URL);
 
     this.mainWindow.once('ready-to-show', () => {
       this.mainWindow.show();

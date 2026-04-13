@@ -67,6 +67,7 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "v8-compile-cache": "^2.4.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },

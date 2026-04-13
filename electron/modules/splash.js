@@ -14,8 +14,13 @@ function createSplash() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: false, // allow local files to load in data URI
     },
   });
+
+  const iconPath = require('node:path')
+    .join(__dirname, '../build/icon.png')
+    .replace(/\\/g, '/');
 
   const html = `
     <!DOCTYPE html>
@@ -37,12 +42,13 @@ function createSplash() {
           }
           .splash-logo { 
             width: 80px; height: 80px; 
-            background: #ffcc00; border: 4px solid #1a1a1a; 
             border-radius: 12px; box-shadow: 4px 4px 0px #1a1a1a;
             display: flex; align-items: center; justify-content: center; 
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 900; font-style: italic; font-size: 32px; color: #1a1a1a; 
             margin-bottom: 24px; animation: pulse 2s infinite ease-in-out; 
+            background-color: transparent;
+          }
+          .splash-logo img {
+            width: 100%; height: 100%; border-radius: 12px; object-fit: contain;
           }
           .title { 
             font-family: 'Space Grotesk', sans-serif;
@@ -73,7 +79,7 @@ function createSplash() {
       </head>
       <body>
         <div class="container">
-          <div class="splash-logo">WR</div>
+          <div class="splash-logo"><img src="file://${iconPath}" alt="Logo" /></div>
           <div class="title">Watch Rudra</div>
           <div id="status" class="status">STARTING...</div>
           <div class="progress-bar-bg">

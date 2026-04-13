@@ -36,6 +36,13 @@ export function ThemeProvider({
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Sync initial theme with electron window if in desktop app
+    // @ts-expect-error
+    if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
+      // @ts-expect-error
+      window.electronAPI.setNativeTheme(initialTheme);
+    }
   }, []);
 
   const setTheme = (newTheme: Theme) => {
@@ -45,6 +52,13 @@ export function ThemeProvider({
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+
+    // Sync live theme switch with electron window
+    // @ts-expect-error
+    if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
+      // @ts-expect-error
+      window.electronAPI.setNativeTheme(newTheme);
     }
   };
 
