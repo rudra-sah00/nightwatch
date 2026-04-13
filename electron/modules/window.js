@@ -32,7 +32,7 @@ class AppWindow {
       autoHideMenuBar: true,
 
       // Frameless Window Customizations (macOS Traffic Lights + Win11 Snap Layouts)
-      titleBarStyle: 'hidden', // Required for both Mac and Win native overlays
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', // 'hiddenInset' pushes macOS buttons slightly down for better centering, while Win uses 'hidden' with overlays.
       titleBarOverlay:
         process.platform === 'win32'
           ? {

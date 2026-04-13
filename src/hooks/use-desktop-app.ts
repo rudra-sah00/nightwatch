@@ -11,12 +11,16 @@ import { toast } from 'sonner';
 export function useDesktopApp() {
   const [isDesktopApp, setIsDesktopApp] = useState<boolean>(false);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
+  const [isMacOS, setIsMacOS] = useState<boolean>(false);
+  const [isWindows, setIsWindows] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const hasElectronAPI = !!window.electronAPI;
       setIsDesktopApp(hasElectronAPI);
       setIsBrowser(!hasElectronAPI);
+      setIsMacOS(navigator.userAgent.includes('Mac OS X'));
+      setIsWindows(navigator.userAgent.includes('Windows NT'));
     }
   }, []);
 
@@ -88,6 +92,8 @@ export function useDesktopApp() {
   return {
     isDesktopApp,
     isBrowser,
+    isMacOS,
+    isWindows,
     openInDesktopApp,
     copyToClipboard,
     getDesktopTopPaddingClass,
