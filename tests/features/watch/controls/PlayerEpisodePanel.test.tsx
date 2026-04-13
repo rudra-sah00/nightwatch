@@ -301,7 +301,7 @@ describe('PlayerEpisodePanelTrigger', () => {
     );
 
     const button = screen.getByLabelText('Show episodes');
-    expect(button).toHaveClass('bg-white');
+    expect(button).toHaveClass('bg-background');
     expect(button).toHaveClass('border-border');
   });
 

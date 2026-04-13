@@ -21,7 +21,7 @@ describe('SidebarTabs', () => {
 
       const buttons = screen.getAllByRole('button');
       // The first button is participants/people
-      expect(buttons[0]).toHaveClass('bg-[#ffcc00]');
+      expect(buttons[0]).toHaveClass('bg-neo-yellow');
     });
 
     it('should highlight active chat tab', () => {
@@ -29,7 +29,7 @@ describe('SidebarTabs', () => {
 
       const buttons = screen.getAllByRole('button');
       // The second button is chat
-      expect(buttons[1]).toHaveClass('bg-[#ffcc00]');
+      expect(buttons[1]).toHaveClass('bg-neo-yellow');
     });
   });
 

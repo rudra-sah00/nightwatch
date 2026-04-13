@@ -56,6 +56,6 @@ describe('Input', () => {
   it('renders error text in red color class', () => {
     const { container } = render(<Input error="Bad value" />);
     const errorP = container.querySelector('p');
-    expect(errorP).toHaveClass('text-[#e63b2e]');
+    expect(errorP).toHaveClass('text-neo-red');
   });
 });
