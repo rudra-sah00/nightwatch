@@ -68,17 +68,6 @@ class AppWindow {
 
     mainWindowState.manage(this.mainWindow);
 
-    // --- RAM AND CPU OPTIMIZATIONS FOR VIDEO ---
-    // Clear out heavy OS memory pages automatically every 10 minutes
-    setInterval(
-      () => {
-        if (!this.mainWindow.isDestroyed()) {
-          require('electron').app.releaseMemory();
-        }
-      },
-      10 * 60 * 1000,
-    );
-
     // Dynamic Media and Desktop permission handler
     session.defaultSession.setPermissionRequestHandler(
       (_webContents, permission, callback) => {
