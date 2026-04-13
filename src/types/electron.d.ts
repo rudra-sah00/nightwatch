@@ -42,7 +42,16 @@ export interface ElectronAPI {
   onPipModeChanged: (callback: (isPipMode: boolean) => void) => () => void;
 
   /** Triggers a native system notification popup (e.g. for Party Invites or Chat messages) */
-  showNotification: (title: string, body: string) => void;
+  showNotification: (payload: {
+    title: string;
+    body: string;
+    actions?: { type: string; text: string }[];
+    replyPlaceholder?: string;
+    closeButtonText?: string;
+    [key: string]: any;
+  }) => void;
+  onNotificationAction: (callback: (payload: any) => void) => () => void;
+  onNotificationClick: (callback: (payload: any) => void) => () => void;
 
   /** Sets the app to run silently in the background when the user turns on their computer */
   setRunOnBoot: (isEnabled: boolean) => void;

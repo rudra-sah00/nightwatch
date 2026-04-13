@@ -39,8 +39,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   retryConnection: () => ipcRenderer.send('retry-connection'),
 
   // Native Desktop Notifications (e.g., Party Invites)
-  showNotification: (title, body) =>
-    ipcRenderer.send('show-notification', { title, body }),
+  showNotification: (payload) => ipcRenderer.send('show-notification', payload),
+
+  onNotificationAction: (callback) => {
+    const subscription = (_event, payload) => callback(payload);
+    ipcRenderer.on('notification-action', subscription);
+    return () =>
+      ipcRenderer.removeListener('notification-action', subscription);
+  },
+
+  onNotificationClick: (callback) => {
+    const clickSub = (_event, payload) => callback(payload);
+    ipcRenderer.on('notification-click', clickSub);
+    return () => ipcRenderer.removeListener('notification-click', clickSub);
+  },
 
   // Configure app to launch on system startup silently
   setRunOnBoot: (isEnabled) => ipcRenderer.send('set-run-on-boot', isEnabled),

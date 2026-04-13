@@ -102,6 +102,23 @@ const startElectronApp = async () => {
   // Example Global Shortcut:
   // CommandOrControl+Shift+M lets a user mute the stream even if they are playing a fullscreen game.
   globalShortcut.register('CommandOrControl+Shift+M', () => {
+    const mainWindow = AppWindow.getInstance();
+    if (mainWindow) {
+      mainWindow.webContents.send('media-command', 'toggle-mute');
+    }
+  });
+
+  // Global Media Controls (Play/Pause, Next, Previous) - control video when out of focus
+  globalShortcut.register('MediaPlayPause', () => {
+    AppWindow.getInstance()?.webContents.send('media-command', 'play/pause');
+  });
+  globalShortcut.register('MediaNextTrack', () => {
+    AppWindow.getInstance()?.webContents.send('media-command', 'next');
+  });
+  globalShortcut.register('MediaPreviousTrack', () => {
+    AppWindow.getInstance()?.webContents.send('media-command', 'prev');
+  });
+  globalShortcut.register('CommandOrControl+Shift+M', () => {
     const w = AppWindow.getInstance();
     if (w) {
       const isMuted = w.webContents.audioMuted;
@@ -265,10 +282,47 @@ const startElectronApp = async () => {
     if (win) win.loadURL('https://watch.rudrasahoo.live');
   });
 
-  // Trigger Native Desktop Notifications (e.g. for Party Invites or Chat)
-  ipcMain.on('show-notification', (_event, { title, body }) => {
+  // Trigger Actionable Native Desktop Notifications (e.g. for Party Invites or Chat)
+  ipcMain.on('show-notification', (_event, payload) => {
     if (Notification.isSupported()) {
-      new Notification({ title, body }).show();
+      const { title, body, actions, replyPlaceholder, closeButtonText } =
+        payload;
+
+      const notification = new Notification({
+        title,
+        body,
+        actions,
+        replyPlaceholder,
+        closeButtonText,
+      });
+
+      // Forward native click/action events back to Next.js
+      notification.on('click', () => {
+        AppWindow.getInstance()?.show();
+        AppWindow.getInstance()?.webContents.send(
+          'notification-click',
+          payload,
+        );
+      });
+
+      notification.on('action', (event, index) => {
+        if (actions && actions[index]) {
+          AppWindow.getInstance()?.show();
+          AppWindow.getInstance()?.webContents.send('notification-action', {
+            ...payload,
+            actionSelected: actions[index].type,
+          });
+        }
+      });
+
+      notification.on('reply', (event, reply) => {
+        AppWindow.getInstance()?.webContents.send('notification-reply', {
+          ...payload,
+          reply,
+        });
+      });
+
+      notification.show();
     }
   });
 
