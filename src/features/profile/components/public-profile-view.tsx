@@ -62,7 +62,7 @@ export function PublicProfileView({
         <div className="mb-12 flex justify-between items-center">
           <Link
             href="/"
-            className="group flex items-center gap-2 px-5 py-2 bg-primary text-white border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight"
+            className="group flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight hover:bg-primary/90"
           >
             <Home className="w-4 h-4" />
             <span>Return Base</span>
@@ -93,7 +93,7 @@ export function PublicProfileView({
 
             {/* User Info Section */}
             <div className="flex-1 space-y-4">
-              <div className="inline-block bg-primary text-white px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-2 leading-none">
+              <div className="inline-block bg-primary text-primary-foreground px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-2 leading-none border-[3px] border-border">
                 Persistent Identity: {profile.id.slice(0, 8)}...
               </div>
               <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
