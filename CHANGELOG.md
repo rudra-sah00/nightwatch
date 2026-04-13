@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.19.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.18.0...v1.19.0) (2026-04-13)
+
+
+### Features
+
+* **desktop:** add app installation heuristic fallback for deep links ([72137a4](https://github.com/rudra-sah00/watch-rudra/commit/72137a4768de9db0f232c828a8cbef5c549ef0c0))
+* **electron:** Auto-Picture-in-Picture on window blur ([de47956](https://github.com/rudra-sah00/watch-rudra/commit/de47956f190df34b1bbe6967e251f6dafd7a8daa))
+* implement macOS hiddenInset native title bar and custom application menus ([60758b4](https://github.com/rudra-sah00/watch-rudra/commit/60758b4a161add0eb7b30319e782a3d3aceb7574))
+* implement native actionable desktop notifications and global media key shortcuts ([002e92c](https://github.com/rudra-sah00/watch-rudra/commit/002e92c43bd881682850ee357d4472e575f8b2ae))
+* show app version in creator footer ([69e5e31](https://github.com/rudra-sah00/watch-rudra/commit/69e5e31ac96f0bdadfe303fdd0bea0937450a489))
+* splash screen logo update texts and native optim ([808255d](https://github.com/rudra-sah00/watch-rudra/commit/808255d8f287350433b710f39766cd126b31dc41))
+
+
+### Bug Fixes
+
+* **desktop:** restore native title bar window dragging region for Electron traffic lights ([60f5b30](https://github.com/rudra-sah00/watch-rudra/commit/60f5b3093dd3e6286af314ece4e0fea82ee4668f))
+* **docs:** resolve 404 navigation errors on proxy by replacing Next.js Link with vanilla anchor tags ([0eeae4d](https://github.com/rudra-sah00/watch-rudra/commit/0eeae4d2c6815c11254b4b48b54e4195c492fb04))
+* **docs:** resolve API_LAYER documentation 404 proxy overlap and rewrite API architecture documentation to match codebase exactly ([eeb8543](https://github.com/rudra-sah00/watch-rudra/commit/eeb8543992fcfaf4bf658e119c69b88b98cb212b))
+* **docs:** resolve mermaid chart unrenderable syntax error and expose parser error in UI ([c30d723](https://github.com/rudra-sah00/watch-rudra/commit/c30d723aa3cee72e0cc379ea0441c4edcd6addb5))
+* ensure dynamic Next.js routes sync with Discord Rich Presence natively without invalidating image keys ([758d3cd](https://github.com/rudra-sah00/watch-rudra/commit/758d3cdaa6406a0e5f134272a41a00b2705d5d54))
+* ensure live streams in Watch Party correctly format Discord status and add missing Discord presence sync for solo Live Streams ([6875731](https://github.com/rudra-sah00/watch-rudra/commit/68757313e94f1572bd7a88b12ba8be4660131453))
+* **layout:** add Suspense boundary for DiscordPresenceSync to fix build ([9a87dd4](https://github.com/rudra-sah00/watch-rudra/commit/9a87dd4b7d25cbdce478e20cba50ecc2d48cac91))
+* login and signup footer color scheme inverted correctly for black theme ([1435d72](https://github.com/rudra-sah00/watch-rudra/commit/1435d723f4c6f42982be195a05c606bc69909fa7))
+* track missing DiscordPresenceSync component and github templates ([fa51427](https://github.com/rudra-sah00/watch-rudra/commit/fa514278955c54f3fc8927f2a54a2a3ca3a20b08))
+
 ## [1.18.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.17.0...v1.18.0) (2026-04-12)
 
 
