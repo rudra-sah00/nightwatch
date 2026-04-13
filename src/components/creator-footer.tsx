@@ -115,9 +115,12 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
 
       <div className="text-muted-foreground font-mono text-xs uppercase tracking-widest mt-2 flex flex-col items-center gap-1">
         <span>App Version</span>
-        <span className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50">
+        <a
+          href="/whats-new"
+          className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors hover:text-primary"
+        >
           v{packageJson.version}
-        </span>
+        </a>
       </div>
     </div>
   );

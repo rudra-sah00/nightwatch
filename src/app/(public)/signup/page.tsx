@@ -142,6 +142,18 @@ export default function SignupPage() {
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+          <Link
+            href="/whats-new"
+            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary dark:ring-offset-background"
+          >
+            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-primary-foreground/80 dark:text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              STAY UPDATED
+            </span>
+            <span className="font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest text-neo-yellow group-hover:text-white underline decoration-neo-yellow/30 underline-offset-4 transition-colors whitespace-nowrap">
+              WHAT'S NEW
+            </span>
+          </Link>
+
           <p className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-neo-red text-center md:text-left">
             PRIVATE ACCESS ONLY
           </p>
