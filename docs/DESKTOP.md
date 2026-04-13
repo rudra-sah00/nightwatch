@@ -2,6 +2,18 @@
 
 Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app acts as a secure, optimized wrapper around the Next.js frontend while providing native capabilities like discord rich presence, raw media access, and offline fallback screens.
 
+## Installation & Troubleshooting
+
+### macOS "App is damaged" Error
+Since our project does not currently use a paid $99/yr Apple Developer Account to officially notarize the macOS builds, Apple's Gatekeeper will quarantine the app when downloaded from our GitHub releases. 
+
+If you see an error stating **"Watch Rudra is damaged and can't be opened. You should move it to the Bin."**, you can bypass this security flag easily by opening your Terminal and running:
+
+```bash
+xattr -cr "/Applications/Watch Rudra.app"
+```
+*(Note: If you extracted the app directly to your Downloads folder instead of Applications, adjust the path accordingly: `xattr -cr ~/Downloads/Watch\ Rudra.app`)*
+
 ## Architecture
 
 The desktop structure cleanly separates the Electron `main` processes from the Next.js `renderer` layer:
