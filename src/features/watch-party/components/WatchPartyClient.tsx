@@ -6,6 +6,7 @@ import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyL
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useDesktopNotifications } from '../hooks/use-desktop-notifications';
 import { useWatchPartyClient } from '../hooks/use-watch-party-client';
 
 // Dynamic imports for heavy watch party components
@@ -92,29 +93,12 @@ export function WatchPartyClient({
     }
   }, [requestStatus]);
 
-  useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      window.electronAPI &&
-      room &&
-      isConnected
-    ) {
-      window.electronAPI.updateDiscordPresence({
-        details: `Party: ${room.title}`,
-        state:
-          room.type === 'series'
-            ? `Season ${room.season} Episode ${room.episode}`
-            : room.type === 'livestream'
-              ? 'Co-Watching Live Stream'
-              : 'Co-Watching Movie',
-        largeImageText: room.title,
-        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
-        partySize: room.members?.length || 1,
-        partyMax: 10,
-        startTimestamp: room.createdAt || Date.now(),
-      });
-    }
-  }, [room, isConnected]);
+  useDesktopNotifications({
+    room,
+    isConnected,
+    messages: messages || [],
+    currentUserId,
+  });
 
   const isMobile = useIsMobile();
 

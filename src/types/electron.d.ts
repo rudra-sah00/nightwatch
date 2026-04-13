@@ -29,6 +29,9 @@ export interface ElectronAPI {
   /** Delete a locally stored user setting */
   storeDelete: (key: string) => void;
 
+  /** Sets the native electron window frame theme to avoid white flashes and keep context menus aligned */
+  setNativeTheme: (theme: 'light' | 'dark' | 'system') => void;
+
   /** Toggles Picture-in-Picture mode. OpacityLevel 1.0 = Solid. 0.7 = 30% See-Through (Ghost mode) */
   setPictureInPicture: (isEnabled: boolean, opacityLevel?: number) => void;
 

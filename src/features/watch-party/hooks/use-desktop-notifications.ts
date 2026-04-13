@@ -1,0 +1,99 @@
+import { useEffect, useRef, useState } from 'react';
+import type {
+  ChatMessage,
+  WatchPartyRoom,
+} from '@/features/watch-party/room/types';
+
+interface UseDesktopNotificationsProps {
+  room: WatchPartyRoom | null;
+  isConnected: boolean;
+  messages: ChatMessage[];
+  currentUserId?: string;
+}
+
+export function useDesktopNotifications({
+  room,
+  isConnected,
+  messages,
+  currentUserId,
+}: UseDesktopNotificationsProps) {
+  // --- Discord Rich Presence ---
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.electronAPI &&
+      room &&
+      isConnected
+    ) {
+      window.electronAPI.updateDiscordPresence({
+        details: `Party: ${room.title}`,
+        state:
+          room.type === 'series'
+            ? `Season ${room.season} Episode ${room.episode}`
+            : room.type === 'livestream'
+              ? 'Co-Watching Live Stream'
+              : 'Co-Watching Movie',
+        largeImageText: room.title,
+        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
+        partySize: room.members?.length || 1,
+        partyMax: 10,
+        startTimestamp: room.createdAt || Date.now(),
+      });
+    }
+  }, [room, isConnected]);
+
+  // --- Taskbar Notification Icon Bounces ---
+  const isWindowFocusedRef = useRef(true);
+  const [, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      const unsubFocus = window.electronAPI.onWindowFocus(() => {
+        isWindowFocusedRef.current = true;
+        setUnreadCount(0);
+        window.electronAPI!.setUnreadBadge(0);
+      });
+      const unsubBlur = window.electronAPI.onWindowBlur(() => {
+        isWindowFocusedRef.current = false;
+      });
+      return () => {
+        unsubFocus();
+        unsubBlur();
+      };
+    }
+  }, []);
+
+  const prevMessagesLength = useRef(messages?.length || 0);
+
+  useEffect(() => {
+    if (messages && messages.length > prevMessagesLength.current) {
+      if (!isWindowFocusedRef.current) {
+        // Taskbar Bounce
+        setUnreadCount((c) => {
+          const added = messages.length - prevMessagesLength.current;
+          const next = c + added;
+          if (window.electronAPI?.setUnreadBadge) {
+            window.electronAPI.setUnreadBadge(next);
+          }
+          return next;
+        });
+
+        // Trigger Real OS Native Toast Notification for the latest message
+        const latestMsg = messages[messages.length - 1];
+        // We only want to show toasts for actual human text messages (not 'User joined' system messages)
+        if (
+          window.electronAPI?.showNotification &&
+          latestMsg &&
+          latestMsg.userId !== currentUserId &&
+          !latestMsg.isSystem
+        ) {
+          window.electronAPI.showNotification({
+            title: latestMsg.userName || 'New Message',
+            body: latestMsg.content,
+          });
+        }
+      }
+    }
+    prevMessagesLength.current = messages?.length || 0;
+  }, [messages, currentUserId]);
+}

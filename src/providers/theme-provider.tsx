@@ -38,9 +38,7 @@ export function ThemeProvider({
     }
 
     // Sync initial theme with electron window if in desktop app
-    // @ts-expect-error
     if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
-      // @ts-expect-error
       window.electronAPI.setNativeTheme(initialTheme);
     }
   }, []);
@@ -55,9 +53,7 @@ export function ThemeProvider({
     }
 
     // Sync live theme switch with electron window
-    // @ts-expect-error
     if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
-      // @ts-expect-error
       window.electronAPI.setNativeTheme(newTheme);
     }
   };

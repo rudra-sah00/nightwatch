@@ -1,9 +1,45 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import {
+  createJSONStorage,
+  persist,
+  type StateStorage,
+} from 'zustand/middleware';
 import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import type { LoginResponse, User } from '@/types';
+
+// Persistent Native Caching Wrapper that automatically synchronizes the user's
+// Auth Tokens and preferences natively to their hard drive `window.electronAPI.storeSet('token', value)`.
+const customNativeStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    if (typeof window !== 'undefined' && window.electronAPI?.storeGet) {
+      try {
+        const val = await window.electronAPI.storeGet(name);
+        if (val) return JSON.stringify(val);
+      } catch {
+        // Fallback
+      }
+    }
+    return localStorage.getItem(name);
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    if (typeof window !== 'undefined' && window.electronAPI?.storeSet) {
+      try {
+        await window.electronAPI.storeSet(name, JSON.parse(value));
+      } catch {}
+    }
+    localStorage.setItem(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    if (typeof window !== 'undefined' && window.electronAPI?.storeDelete) {
+      try {
+        await window.electronAPI.storeDelete(name);
+      } catch {}
+    }
+    localStorage.removeItem(name);
+  },
+};
 
 function clearCookiesAndRedirect(message?: string) {
   if (message) {
@@ -104,6 +140,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'watch_rudra_auth',
+      storage: createJSONStorage(() => customNativeStorage),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

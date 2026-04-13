@@ -375,6 +375,23 @@ export function usePlayerRoot({
     isPausedRef.current = state.isPaused;
   }, [state.isPlaying, state.isPaused]);
 
+  // --- NATIVE OS: KEEP AWAKE DURING PLAYBACK ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI?.setKeepAwake) {
+      if (state.isPlaying && !state.isPaused) {
+        window.electronAPI.setKeepAwake(true);
+      } else {
+        window.electronAPI.setKeepAwake(false);
+      }
+    }
+    // Cleanup on unmount or URL change
+    return () => {
+      if (typeof window !== 'undefined' && window.electronAPI?.setKeepAwake) {
+        window.electronAPI.setKeepAwake(false);
+      }
+    };
+  }, [state.isPlaying, state.isPaused]);
+
   useEffect(() => {
     let unsubscribeBlur: (() => void) | undefined;
     let unsubscribeFocus: (() => void) | undefined;
