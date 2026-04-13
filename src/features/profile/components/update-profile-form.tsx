@@ -397,13 +397,13 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-card border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-red-50">
+      <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-red-600 mb-2">
+            <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-neo-red mb-2">
               Danger Zone
             </h2>
-            <p className="text-red-900 font-bold font-headline uppercase tracking-widest text-sm opacity-80">
+            <p className="text-neo-red font-bold font-headline uppercase tracking-widest text-sm opacity-80">
               Irreversible Actions. Proceed with Caution.
             </p>
           </div>
@@ -412,7 +412,7 @@ export function UpdateProfileForm() {
             type="button"
             onClick={() => profileForm.setShowDeleteDialog(true)}
             variant="neo-red"
-            className="w-full md:w-auto shrink-0 bg-red-600 hover:bg-red-700 text-white"
+            className="w-full md:w-auto shrink-0"
           >
             DELETE ACCOUNT
           </Button>
@@ -425,7 +425,7 @@ export function UpdateProfileForm() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">
+            <AlertDialogTitle className="text-neo-red">
               Terminal Erase
             </AlertDialogTitle>
             <AlertDialogDescription>

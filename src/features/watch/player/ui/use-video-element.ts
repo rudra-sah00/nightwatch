@@ -171,7 +171,7 @@ export function useVideoElement({
 
   useEffect(() => {
     const video = videoRef?.current;
-    if (!video || !video.textTracks) return;
+    if (!video?.textTracks) return;
 
     const trackId = currentTrackId;
     const textTracks = video.textTracks;

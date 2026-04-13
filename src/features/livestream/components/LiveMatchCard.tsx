@@ -8,7 +8,7 @@ import { LiveMatchModal } from './LiveMatchModal';
 
 /** Format cricket innings score e.g. "212/5 (17.3 ov)" */
 function formatCricketScore(info: CricketMatchInfo | undefined): string {
-  if (!info || !info.crtRunsScored) return '-';
+  if (!info?.crtRunsScored) return '-';
   const runs = info.crtRunsScored;
   const wickets = info.crtWicketsLost;
   const overs = info.crtOvers;

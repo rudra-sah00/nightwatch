@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const result = await getPublicProfile(id).catch(() => null);
 
-  if (!result || !result.profile) {
+  if (!result?.profile) {
     return {
       title: 'User Not Found | Rudra Watch',
     };
@@ -51,7 +51,7 @@ export default async function PublicProfilePage({ params }: Props) {
   const { id } = await params;
   const result = await getPublicProfile(id).catch(() => null);
 
-  if (!result || !result.profile) {
+  if (!result?.profile) {
     notFound();
   }
 

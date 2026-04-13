@@ -48,10 +48,10 @@ export interface ElectronAPI {
     actions?: { type: string; text: string }[];
     replyPlaceholder?: string;
     closeButtonText?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }) => void;
-  onNotificationAction: (callback: (payload: any) => void) => () => void;
-  onNotificationClick: (callback: (payload: any) => void) => () => void;
+  onNotificationAction: (callback: (payload: unknown) => void) => () => void;
+  onNotificationClick: (callback: (payload: unknown) => void) => () => void;
 
   /** Sets the app to run silently in the background when the user turns on their computer */
   setRunOnBoot: (isEnabled: boolean) => void;

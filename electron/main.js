@@ -287,8 +287,8 @@ const startElectronApp = async () => {
         );
       });
 
-      notification.on('action', (event, index) => {
-        if (actions && actions[index]) {
+      notification.on('action', (_event, index) => {
+        if (actions?.[index]) {
           AppWindow.getInstance()?.show();
           AppWindow.getInstance()?.webContents.send('notification-action', {
             ...payload,
@@ -297,7 +297,7 @@ const startElectronApp = async () => {
         }
       });
 
-      notification.on('reply', (event, reply) => {
+      notification.on('reply', (_event, reply) => {
         AppWindow.getInstance()?.webContents.send('notification-reply', {
           ...payload,
           reply,

@@ -7,101 +7,101 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #f5f0e8;
-            color: #1a1a1a;
-            font-family: 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
+                            background-color: #f5f0e8;
+                            color: #1a1a1a;
+                            font-family: 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            text-align: center;
+                        }
 
-        .container {
-            background: white;
-            border: 4px solid #1a1a1a;
-            border-radius: 16px;
-            box-shadow: 8px 8px 0px #1a1a1a;
-            padding: 40px;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+                        .container {
+                            background: white;
+                            border: 4px solid #1a1a1a;
+                            border-radius: 16px;
+                            box-shadow: 8px 8px 0px #1a1a1a;
+                            padding: 40px;
+                            max-width: 400px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        }
 
-        h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            margin-top: 1rem;
-            font-size: 2.2rem;
-            font-style: italic;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.05em;
-            color: #e63b2e;
-        }
+                        h1 {
+                            font-family: 'Space Grotesk', sans-serif;
+                            margin-top: 1rem;
+                            font-size: 2.2rem;
+                            font-style: italic;
+                            font-weight: 900;
+                            text-transform: uppercase;
+                            letter-spacing: -0.05em;
+                            color: #e63b2e;
+                        }
 
-        p {
-            color: #1a1a1a;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            line-height: 1.4;
-            max-width: 320px;
-            text-transform: uppercase;
-        }
+                        p {
+                            color: #1a1a1a;
+                            font-size: 14px;
+                            font-weight: 700;
+                            margin-bottom: 2rem;
+                            line-height: 1.4;
+                            max-width: 320px;
+                            text-transform: uppercase;
+                        }
 
-        .spinner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            background: #ffcc00;
-            border: 4px solid #1a1a1a;
-            border-radius: 12px;
-            box-shadow: 4px 4px 0px #1a1a1a;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 900;
-            font-style: italic;
-            font-size: 24px;
-            animation: bounce 0.5s infinite alternate ease-in-out;
-        }
-        
-        @keyframes bounce {
-            0% { transform: translateY(0); box-shadow: 4px 4px 0px #1a1a1a; }
-            100% { transform: translateY(-10px); box-shadow: 4px 14px 0px #1a1a1a; }
-        }
+                        .spinner {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 60px;
+                            height: 60px;
+                            background: #ffcc00;
+                            border: 4px solid #1a1a1a;
+                            border-radius: 12px;
+                            box-shadow: 4px 4px 0px #1a1a1a;
+                            font-family: 'Space Grotesk', sans-serif;
+                            font-weight: 900;
+                            font-style: italic;
+                            font-size: 24px;
+                            animation: bounce 0.5s infinite alternate ease-in-out;
+                        }
+                        
+                        @keyframes bounce {
+                            0% { transform: translateY(0); box-shadow: 4px 4px 0px #1a1a1a; }
+                            100% { transform: translateY(-10px); box-shadow: 4px 14px 0px #1a1a1a; }
+                        }
 
-        .btn {
-            background-color: white;
-            color: #1a1a1a;
-            font-family: 'Space Grotesk', sans-serif;
-            border: 3px solid #1a1a1a;
-            box-shadow: 4px 4px 0px #1a1a1a;
-            padding: 12px 24px;
-            cursor: pointer;
-            font-weight: 900;
-            font-style: italic;
-            font-size: 16px;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            width: 100%;
-        }
+                        .btn {
+                            background-color: white;
+                            color: #1a1a1a;
+                            font-family: 'Space Grotesk', sans-serif;
+                            border: 3px solid #1a1a1a;
+                            box-shadow: 4px 4px 0px #1a1a1a;
+                            padding: 12px 24px;
+                            cursor: pointer;
+                            font-weight: 900;
+                            font-style: italic;
+                            font-size: 16px;
+                            text-transform: uppercase;
+                            transition: all 0.2s ease;
+                            text-decoration: none;
+                            width: 100%;
+                        }
 
-        .btn:hover {
-            background-color: #ffcc00;
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #1a1a1a;
-        }
-        
-        .btn:active {
-            background-color: #ffb700;
-            transform: translate(4px, 4px);
-            box-shadow: 0px 0px 0px #1a1a1a;
-        }
+                        .btn:hover {
+                            background-color: #ffcc00;
+                            transform: translate(2px, 2px);
+                            box-shadow: 2px 2px 0px #1a1a1a;
+                        }
+                        
+                        .btn:active {
+                            background-color: #ffb700;
+                            transform: translate(4px, 4px);
+                            box-shadow: 0px 0px 0px #1a1a1a;
+                        }
     </style>
 </head>
 <body>
@@ -114,33 +114,33 @@
 
     <script>
         function updateOnlineStatus() {
-            if (navigator.onLine) {
-                console.log('Internet back online, trying to reboot...');
-                retryConnection();
-            }
-        }
-        
-        function retryConnection() {
-           const btn = document.querySelector('.btn');
-           btn.innerText = 'CONNECTING...';
-           btn.style.backgroundColor = '#ffcc00';
-            
-            // Wait a brief moment for DNS to catch up before loading
-            setTimeout(() => {
-                if (window.electronAPI) {
-                    window.electronAPI.retryConnection();
-                } else {
-                    window.location.reload();
-                }
-            }, 1000);
-        }
+                            if (navigator.onLine) {
+                                console.log('Internet back online, trying to reboot...');
+                                retryConnection();
+                            }
+                        }
+                        
+                        function retryConnection() {
+                           const btn = document.querySelector('.btn');
+                           btn.innerText = 'CONNECTING...';
+                           btn.style.backgroundColor = '#ffcc00';
+                            
+                            // Wait a brief moment for DNS to catch up before loading
+                            setTimeout(() => {
+                                if (window.electronAPI) {
+                                    window.electronAPI.retryConnection();
+                                } else {
+                                    window.location.reload();
+                                }
+                            }, 1000);
+                        }
 
-        window.addEventListener('online', updateOnlineStatus);
-        
-        // Polling as a secondary fallback strategy
-        setInterval(() => {
-            if (navigator.onLine) retryConnection();
-        }, 5000);
+                        window.addEventListener('online', updateOnlineStatus);
+                        
+                        // Polling as a secondary fallback strategy
+                        setInterval(() => {
+                            if (navigator.onLine) retryConnection();
+                        }, 5000);
     </script>
 </body>
 </html>

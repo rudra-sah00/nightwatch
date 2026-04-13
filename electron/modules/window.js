@@ -1,5 +1,5 @@
 const { BrowserWindow, shell, session, TouchBar } = require('electron');
-const { TouchBarButton, TouchBarSpacer, TouchBarGroup } = TouchBar || {};
+const { TouchBarButton, TouchBarSpacer } = TouchBar || {};
 const windowStateKeeper = require('electron-window-state');
 
 // Ensure native right-click menus are enabled
