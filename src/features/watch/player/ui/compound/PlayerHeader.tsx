@@ -55,17 +55,11 @@ export function PlayerHeader({
       ) : null}
 
       <div className="flex-1 min-w-0">
-        <h1
-          className="text-primary-foreground font-black font-headline uppercase tracking-wider text-xl md:text-3xl lg:text-4xl 2xl:text-5xl truncate"
-          style={{ textShadow: '4px 4px 0px #1a1a1a' }}
-        >
+        <h1 className="text-white font-black font-headline uppercase tracking-wider text-xl md:text-3xl lg:text-4xl 2xl:text-5xl truncate drop-shadow-md">
           {metadata.title}
         </h1>
         {metadata.type === 'series' && metadata.season && metadata.episode ? (
-          <p
-            className="text-neo-yellow font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1"
-            style={{ textShadow: '2px 2px 0px #1a1a1a' }}
-          >
+          <p className="text-neo-yellow font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1 drop-shadow-md">
             Season {metadata.season} · Episode {metadata.episode}
           </p>
         ) : null}

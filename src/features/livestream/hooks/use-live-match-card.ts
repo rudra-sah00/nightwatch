@@ -16,9 +16,14 @@ export function useLiveMatchCard(match: LiveMatch) {
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isServer2 = match.id.startsWith('pm:');
-  // Server 2 always shows WATCH button, S1 depends on status
+  const isServer3 = match.id.startsWith('dd:');
+  // Server 2 & 3 always show WATCH button, S1 depends on status
   const canWatch =
-    (isLive || isServer2) && (match.playType === 'PlayTypeVideo' || isServer2);
+    (isLive || isServer2 || isServer3) &&
+    (match.playType === 'PlayTypeVideo' ||
+      isServer2 ||
+      isServer3 ||
+      match.playType === 'hls');
 
   const startTime = new Date(match.startTime);
   const formattedTime = startTime.toLocaleTimeString([], {

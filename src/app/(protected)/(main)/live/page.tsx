@@ -19,12 +19,17 @@ import { useLiveContent } from './use-live-content';
 const SERVERS = [
   { id: 'server1', label: 'Server 1', desc: 'Main Sports' },
   { id: 'server2', label: 'Server 2', desc: 'Global Sports' },
+  { id: 'server3', label: 'Server 3', desc: '24/7 Live TV' },
 ] as const;
 
 const SERVER_1_SPORTS = [
   { id: 'basketball', label: 'Basketball' },
   { id: 'football', label: 'Football' },
   { id: 'cricket', label: 'Cricket' },
+] as const;
+
+const SERVER_3_SPORTS = [
+  { id: 'all_channels', label: 'All Channels' },
 ] as const;
 
 const SERVER_2_SPORTS = [
@@ -62,7 +67,11 @@ function LiveContent() {
   } = useLiveContent();
 
   const currentSports =
-    activeServer === 'server1' ? SERVER_1_SPORTS : SERVER_2_SPORTS;
+    activeServer === 'server1'
+      ? SERVER_1_SPORTS
+      : activeServer === 'server2'
+        ? SERVER_2_SPORTS
+        : SERVER_3_SPORTS;
 
   const { schedule, isLoading, error, refresh } = useLivestreams(
     activeTab,
@@ -70,7 +79,8 @@ function LiveContent() {
   );
 
   const isAllChannelsView =
-    activeServer === 'server2' && activeTab === 'all_channels';
+    (activeServer === 'server2' || activeServer === 'server3') &&
+    activeTab === 'all_channels';
 
   // Separate live, upcoming, and ended matches
   const endedMatches = schedule.filter((m) => m.status === 'MatchEnded');
@@ -94,9 +104,11 @@ function LiveContent() {
     {} as Record<string, typeof activeMatches>,
   );
 
-  const activeSport = [...SERVER_1_SPORTS, ...SERVER_2_SPORTS].find(
-    (s) => s.id === activeTab,
-  );
+  const activeSport = [
+    ...SERVER_1_SPORTS,
+    ...SERVER_2_SPORTS,
+    ...SERVER_3_SPORTS,
+  ].find((s) => s.id === activeTab);
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background pb-32 overflow-x-hidden">
@@ -148,8 +160,10 @@ function LiveContent() {
                   <div className="flex items-center gap-3">
                     {activeServer === 'server1' ? (
                       <Trophy className="w-6 h-6" />
-                    ) : (
+                    ) : activeServer === 'server2' ? (
                       <Globe2 className="w-6 h-6" />
+                    ) : (
+                      <Radio className="w-6 h-6" />
                     )}
                     {SERVERS.find((s) => s.id === activeServer)?.label}
                   </div>
@@ -176,7 +190,9 @@ function LiveContent() {
                             server.id,
                             server.id === 'server1'
                               ? SERVER_1_SPORTS[0].id
-                              : SERVER_2_SPORTS[0].id,
+                              : server.id === 'server2'
+                                ? SERVER_2_SPORTS[0].id
+                                : SERVER_3_SPORTS[0].id,
                           );
                           setIsServerMenuOpen(false);
                         }}

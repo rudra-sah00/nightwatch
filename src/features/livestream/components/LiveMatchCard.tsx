@@ -60,9 +60,16 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   } = useLiveMatchCard(match);
 
   const isServer2 = match.id.startsWith('pm:');
+  const isServer3 = match.id.startsWith('dd:');
   const isChannelCard =
-    match.contentKind === 'channel' || match.type === 'all_channels';
-  const providerName = isServer2 ? 'Private Server' : 'Sports Today';
+    match.contentKind === 'channel' ||
+    match.type === 'all_channels' ||
+    isServer3;
+  const providerName = isServer3
+    ? 'Live TV'
+    : isServer2
+      ? 'Private Server'
+      : 'Sports Today';
   const team1Name = asText(match.team1?.name, 'Team 1');
   const team2Name = asText(match.team2?.name, 'Team 2');
   const leagueName = asText(match.league) || asText(match.type);
@@ -109,7 +116,11 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             )}
             <span
               className={`text-[9px] font-black uppercase tracking-tighter ${
-                isServer2 ? 'text-[#0055ff]' : 'text-[#ffcc00]'
+                isServer3
+                  ? 'text-neo-blue'
+                  : isServer2
+                    ? 'text-[#0055ff]'
+                    : 'text-[#ffcc00]'
               }`}
             >
               {providerName}

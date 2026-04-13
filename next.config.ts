@@ -41,7 +41,10 @@ const nextConfig: NextConfig = {
     ],
     localPatterns: [
       {
-        pathname: '/api/stream/image',
+        pathname: '/api/stream/image/**',
+      },
+      {
+        pathname: '/**', // Allow local public files like /play.ico
       },
     ],
     unoptimized: false,

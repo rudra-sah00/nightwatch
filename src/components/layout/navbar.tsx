@@ -27,7 +27,7 @@ export function Navbar() {
           >
             {/* Mobile: Play Icon */}
             <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
-              <Image
+              <img
                 src="/play.ico"
                 alt="Watch Rudra Logo"
                 width={24}
@@ -77,7 +77,7 @@ export function Navbar() {
             className="flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors min-w-[72px]"
             title="Profile"
           >
-            <div className="w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="relative w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
               {user?.profilePhoto ? (
                 <Image
                   src={user.profilePhoto}

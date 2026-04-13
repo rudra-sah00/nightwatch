@@ -7,7 +7,8 @@ export function useLiveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const activeServer =
-    (searchParams.get('server') as 'server1' | 'server2') || 'server1';
+    (searchParams.get('server') as 'server1' | 'server2' | 'server3') ||
+    'server1';
   const activeTab =
     searchParams.get('sportType') ||
     (activeServer === 'server1' ? 'basketball' : 'all_channels');
@@ -24,7 +25,7 @@ export function useLiveContent() {
   };
 
   const handleServerChange = (
-    serverId: 'server1' | 'server2',
+    serverId: 'server1' | 'server2' | 'server3',
     defaultSport: string,
   ) => {
     startTransition(() => {

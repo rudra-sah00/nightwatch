@@ -138,7 +138,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
     >
       <div
         className={cn(
-          'shrink-0 transition-all',
+          'shrink-0 transition-all relative z-50 bg-background',
           getDesktopTopPaddingClass(isFullscreen),
         )}
         style={noDragStyle}

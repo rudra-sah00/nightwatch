@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -134,6 +134,13 @@ export function ActiveWatchParty({
     });
   };
 
+  const handleTabChange = useCallback(
+    (tab: 'chat' | 'participants' | 'soundboard' | 'sketch') => {
+      setIsSketchMode(tab === 'sketch');
+    },
+    [setIsSketchMode],
+  );
+
   // Whether the current user is permitted to send chat messages
   const { user } = useAuth();
   const currentMember = room.members.find((m) => m.id === currentUserId);
@@ -187,7 +194,7 @@ export function ActiveWatchParty({
           typingUsers={typingUsers}
           onTypingStart={onTypingStart}
           onTypingStop={onTypingStop}
-          onTabChange={(tab) => setIsSketchMode(tab === 'sketch')}
+          onTabChange={handleTabChange}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={handleToggleFloatingChat}
           rtmSendMessage={rtmSendMessage}

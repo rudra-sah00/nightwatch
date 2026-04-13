@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
+import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
@@ -59,7 +60,7 @@ export default function RootLayout({
       >
         <DevToolsProtectionProvider>
           {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
-          <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-transparent pointer-events-auto [-webkit-app-region:drag]" />
+          <ElectronDragRegion />
 
           <ThemeProvider>
             <SocketProvider>

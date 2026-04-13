@@ -175,10 +175,7 @@ export function CenterPlayButton({
             </div>
 
             {/* Title - responsive sizing */}
-            <h2
-              className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black font-headline uppercase tracking-wider text-primary-foreground text-center mb-2 sm:mb-4 px-2 line-clamp-2 sm:line-clamp-none flex-shrink-0"
-              style={{ textShadow: '4px 4px 0px #1a1a1a' }}
-            >
+            <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black font-headline uppercase tracking-wider text-white text-center mb-2 sm:mb-4 px-2 line-clamp-2 sm:line-clamp-none flex-shrink-0 drop-shadow-md">
               {metadata.title}
             </h2>
 
@@ -186,30 +183,21 @@ export function CenterPlayButton({
             {metadata.type === 'series' &&
             metadata.season &&
             metadata.episode ? (
-              <p
-                className="text-neo-yellow font-black font-headline uppercase text-sm sm:text-lg md:text-2xl mb-2 sm:mb-4 flex-shrink-0"
-                style={{ textShadow: '2px 2px 0px #1a1a1a' }}
-              >
+              <p className="text-neo-yellow font-black font-headline uppercase text-sm sm:text-lg md:text-2xl mb-2 sm:mb-4 flex-shrink-0 drop-shadow-md">
                 S{metadata.season} · E{metadata.episode}
               </p>
             ) : null}
 
             {/* Year - hidden on very small mobile portrait */}
             {metadata.year ? (
-              <p
-                className="text-primary-foreground font-bold font-headline text-xs sm:text-sm mb-2 sm:mb-4 hidden portrait:sm:block landscape:block flex-shrink-0"
-                style={{ textShadow: '1px 1px 0px #1a1a1a' }}
-              >
+              <p className="text-white/90 font-bold font-headline text-xs sm:text-sm mb-2 sm:mb-4 hidden portrait:sm:block landscape:block flex-shrink-0 drop-shadow-md">
                 {metadata.year}
               </p>
             ) : null}
 
             {/* Description - hidden on mobile portrait, shown on landscape/larger */}
             {metadata.description ? (
-              <p
-                className="text-primary-foreground text-xs sm:text-sm md:text-base font-bold text-center max-w-2xl line-clamp-2 sm:line-clamp-3 leading-relaxed mb-4 sm:mb-8 px-2 hidden landscape:block sm:block flex-shrink-0"
-                style={{ textShadow: '1px 1px 0px #1a1a1a' }}
-              >
+              <p className="text-white/80 text-xs sm:text-sm md:text-base font-bold text-center max-w-2xl line-clamp-2 sm:line-clamp-3 leading-relaxed mb-4 sm:mb-8 px-2 hidden landscape:block sm:block flex-shrink-0 drop-shadow-md">
                 {metadata.description}
               </p>
             ) : null}

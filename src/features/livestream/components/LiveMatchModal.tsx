@@ -89,15 +89,25 @@ export function LiveMatchModal({
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isServer2 = match.id.startsWith('pm:');
-  const providerName = isServer2 ? 'Private Server' : 'Sports Today';
-  const canWatch = (isLive || isServer2) && match.playType === 'PlayTypeVideo';
+  const isServer3 = match.id.startsWith('dd:');
+  const providerName = isServer3
+    ? 'Live TV'
+    : isServer2
+      ? 'Private Server'
+      : 'Sports Today';
+  const canWatch =
+    (isLive || isServer2 || isServer3) &&
+    (match.playType === 'PlayTypeVideo' ||
+      isServer2 ||
+      isServer3 ||
+      match.playType === 'hls');
   const team1Name = asText(match.team1?.name, 'Team 1');
   const team2Name = asText(match.team2?.name, 'Team 2');
   const leagueName = asText(match.league);
   const typeName = asText(match.type);
   const timeDesc = asText(match.timeDesc);
   const isChannelCard =
-    match.contentKind === 'channel' || typeName === 'all_channels';
+    isServer3 || match.contentKind === 'channel' || typeName === 'all_channels';
   const channelTitle = asText(match.channelName) || team1Name;
 
   const safeTeam1 = {
