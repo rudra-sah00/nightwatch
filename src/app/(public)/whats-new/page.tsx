@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 
@@ -105,9 +106,11 @@ export default async function WhatsNewPage() {
                 </div>
 
                 <div className="flex items-center gap-2 border-[2px] border-border px-3 py-1 bg-background">
-                  <img
+                  <Image
                     src={release.author.avatar_url}
                     alt={release.author.login}
+                    width={24}
+                    height={24}
                     className="w-6 h-6 rounded-full border border-border"
                   />
                   <span className="text-sm font-bold">

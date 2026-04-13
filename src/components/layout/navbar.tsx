@@ -1,4 +1,5 @@
 import { History, Plus, Radio, User } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
@@ -26,9 +27,11 @@ export function Navbar() {
           >
             {/* Mobile: Play Icon */}
             <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
-              <img
+              <Image
                 src="/play.ico"
                 alt="Watch Rudra Logo"
+                width={24}
+                height={24}
                 className="w-6 h-6 object-contain"
               />
             </div>
@@ -76,11 +79,12 @@ export function Navbar() {
           >
             <div className="w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
               {user?.profilePhoto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={user.profilePhoto}
                   alt={user?.name || 'Profile'}
-                  className="w-full h-full object-cover rounded-full"
+                  fill
+                  sizes="32px"
+                  className="object-cover rounded-full"
                 />
               ) : (
                 <User className="w-5 h-5 text-foreground" />
