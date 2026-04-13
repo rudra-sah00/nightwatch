@@ -67,6 +67,8 @@ app.commandLine.appendSwitch('enable-zero-copy');
 // Tells the Host OS that "watch-rudra://" should be handled by this Electron binary
 windows.registerProtocol();
 
+let internalAppIsQuitting = false;
+
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
 const startElectronApp = async () => {
@@ -75,6 +77,8 @@ const startElectronApp = async () => {
 
   // Initialize Background Auto Updater with Discord-style Splash Screen
   const finishLaunch = () => {
+    if (internalAppIsQuitting) return; // Prevent spawning zombie windows if user hit CMD+Q early
+
     // Create main UI Chromium window
     AppWindow.create();
 
@@ -91,7 +95,9 @@ const startElectronApp = async () => {
   if (app.isPackaged) {
     const splash = createSplash();
     setupUpdater(splash, () => {
-      splash.close();
+      if (!splash.isDestroyed()) {
+        splash.close();
+      }
       finishLaunch();
     });
   } else {
@@ -380,6 +386,7 @@ windows.setupWindows(triggerDeepLink, AppWindow.getInstance());
 
 // Lifecycle Cleanup hook
 app.on('before-quit', () => {
+  internalAppIsQuitting = true;
   AppWindow.setQuitting(true);
 });
 
