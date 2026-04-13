@@ -28,23 +28,39 @@ function createSplash() {
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
         <style>
+          :root {
+            --bg-color: #f5f0e8;
+            --border-color: #1a1a1a;
+            --text-color: #1a1a1a;
+            --progress-bg: white;
+            --progress-fill: #ffcc00;
+          }
+          @media (prefers-color-scheme: dark) {
+            :root {
+              --bg-color: #09090b;
+              --border-color: #e4e4e7;
+              --text-color: #f4f4f5;
+              --progress-bg: #18181b;
+              --progress-fill: #a855f7;
+            }
+          }
           body { 
             margin: 0; padding: 0; background: transparent; overflow: hidden; 
             display: flex; align-items: center; justify-content: center; height: 100vh; 
           }
           .container { 
             width: 280px; height: 330px; 
-            background: #f5f0e8; 
-            border-radius: 12px; border: 4px solid #1a1a1a; 
-            box-shadow: 6px 6px 0px #1a1a1a; 
+            background: var(--bg-color); 
+            border-radius: 12px; border: 4px solid var(--border-color); 
+            box-shadow: 6px 6px 0px var(--border-color); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 20px; color: #1a1a1a; text-align: center; 
+            padding: 20px; color: var(--text-color); text-align: center; 
           }
           .splash-logo { 
             width: 80px; height: 80px; 
-            border-radius: 12px; box-shadow: 4px 4px 0px #1a1a1a;
+            border-radius: 12px; box-shadow: 4px 4px 0px var(--border-color);
             display: flex; align-items: center; justify-content: center; 
-            margin-bottom: 24px; animation: pulse 2s infinite ease-in-out; 
+            margin-bottom: 24px;
             background-color: transparent;
           }
           .splash-logo img {
@@ -57,23 +73,18 @@ function createSplash() {
           }
           .status { 
             font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; 
-            color: #1a1a1a; font-style: italic;
+            color: var(--text-color); font-style: italic;
             max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
             text-transform: uppercase; letter-spacing: 0.1em;
           }
           .progress-bar-bg { 
-            width: 100%; height: 26px; background: white; 
-            border: 3px solid #1a1a1a; border-radius: 4px; box-shadow: 2px 2px 0px #1a1a1a;
+            width: 100%; height: 26px; background: var(--progress-bg); 
+            border: 3px solid var(--border-color); border-radius: 4px; box-shadow: 2px 2px 0px var(--border-color);
             margin-top: 24px; overflow: hidden; display: flex;
           }
           .progress-bar { 
-            width: 0%; height: 100%; background: #ffcc00; 
-            border-right: 3px solid #1a1a1a; transition: width 0.3s ease; 
-          }
-          @keyframes pulse { 
-            0% { transform: scale(1) translateY(0px); box-shadow: 4px 4px 0px #1a1a1a; } 
-            50% { transform: scale(1) translateY(3px); box-shadow: 1px 1px 0px #1a1a1a; } 
-            100% { transform: scale(1) translateY(0px); box-shadow: 4px 4px 0px #1a1a1a; } 
+            width: 0%; height: 100%; background: var(--progress-fill); 
+            border-right: 3px solid var(--border-color); transition: width 0.3s ease; 
           }
         </style>
       </head>
