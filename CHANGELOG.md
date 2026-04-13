@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.19.0...v1.20.0) (2026-04-13)
+
+
+### Features
+
+* **electron:** macOS Touch Bar API, expanded system tray, global PTT ([985cbe1](https://github.com/rudra-sah00/watch-rudra/commit/985cbe1ea9796e2f5b171710c55616974ff91ac1))
+
 ## [1.19.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.18.0...v1.19.0) (2026-04-13)
 
 
