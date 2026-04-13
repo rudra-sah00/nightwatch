@@ -59,13 +59,13 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
     handleWatchParty,
   } = useLiveMatchCard(match);
 
-  const isServer2 = match.id.startsWith('pm:');
-  const isServer3 = match.id.startsWith('dd:');
+  const isServer2 = match.id.startsWith('live-server2');
+  const isServer1 = match.id.startsWith('live-server1');
   const isChannelCard =
     match.contentKind === 'channel' ||
     match.type === 'all_channels' ||
-    isServer3;
-  const providerName = isServer3
+    isServer1;
+  const providerName = isServer1
     ? 'Live TV'
     : isServer2
       ? 'Private Server'
@@ -116,7 +116,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             )}
             <span
               className={`text-[9px] font-black uppercase tracking-tighter ${
-                isServer3
+                isServer1
                   ? 'text-neo-blue'
                   : isServer2
                     ? 'text-[#0055ff]'

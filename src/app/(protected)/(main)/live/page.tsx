@@ -7,52 +7,28 @@ import {
   Clock,
   Globe2,
   Radio,
-  Trophy,
 } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
+import { Server1Channels } from '@/features/livestream/components/Server1Channels';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
+import { useSports } from '@/features/livestream/hooks/use-sports';
 import { useLiveContent } from './use-live-content';
 
 const SERVERS = [
-  { id: 'server1', label: 'Server 1', desc: 'Main Sports' },
+  { id: 'server1', label: 'Server 1', desc: '24/7 Live TV' },
   { id: 'server2', label: 'Server 2', desc: 'Global Sports' },
-  { id: 'server3', label: 'Server 3', desc: '24/7 Live TV' },
 ] as const;
 
 const SERVER_1_SPORTS = [
-  { id: 'basketball', label: 'Basketball' },
-  { id: 'football', label: 'Football' },
-  { id: 'cricket', label: 'Cricket' },
-] as const;
-
-const SERVER_3_SPORTS = [
   { id: 'all_channels', label: 'All Channels' },
 ] as const;
 
-const SERVER_2_SPORTS = [
+const _SERVER_2_SPORTS_FALLBACK = [
   { id: 'all_channels', label: 'All Channels' },
-  { id: 'soccer', label: 'Soccer' },
-  { id: 'nba', label: 'NBA' },
-  { id: 'ufc', label: 'UFC/MMA' },
-  { id: 'boxing', label: 'Boxing' },
-  { id: 'racing', label: 'Racing/F1' },
-  { id: 'fifawc', label: 'FIFA WC' },
-  { id: 'rugby', label: 'Rugby' },
-  { id: 'rugby_league', label: 'Rugby League' },
-  { id: 'nhl', label: 'NHL' },
-  { id: 'mlb', label: 'MLB' },
-  { id: 'ncaab', label: 'NCAAB' },
-  { id: 'afl', label: 'AFL' },
-  { id: 'tennis', label: 'Tennis' },
-  { id: 'gaa', label: 'GAA' },
-  { id: 'golf', label: 'Golf' },
-  { id: 'events', label: 'Events' },
-  { id: 'curling', label: 'Curling' },
-  { id: 'ufl', label: 'UFL' },
-] as const;
+];
 
 function LiveContent() {
   const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
@@ -66,12 +42,9 @@ function LiveContent() {
     handleServerChange,
   } = useLiveContent();
 
+  const { sports: dynamicServer2Sports } = useSports();
   const currentSports =
-    activeServer === 'server1'
-      ? SERVER_1_SPORTS
-      : activeServer === 'server2'
-        ? SERVER_2_SPORTS
-        : SERVER_3_SPORTS;
+    activeServer === 'server1' ? SERVER_1_SPORTS : dynamicServer2Sports;
 
   const { schedule, isLoading, error, refresh } = useLivestreams(
     activeTab,
@@ -79,7 +52,7 @@ function LiveContent() {
   );
 
   const isAllChannelsView =
-    (activeServer === 'server2' || activeServer === 'server3') &&
+    (activeServer === 'server1' || activeServer === 'server2') &&
     activeTab === 'all_channels';
 
   // Separate live, upcoming, and ended matches
@@ -104,11 +77,9 @@ function LiveContent() {
     {} as Record<string, typeof activeMatches>,
   );
 
-  const activeSport = [
-    ...SERVER_1_SPORTS,
-    ...SERVER_2_SPORTS,
-    ...SERVER_3_SPORTS,
-  ].find((s) => s.id === activeTab);
+  const activeSport = [...SERVER_1_SPORTS, ...dynamicServer2Sports].find(
+    (s) => s.id === activeTab,
+  );
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background pb-32 overflow-x-hidden">
@@ -159,11 +130,9 @@ function LiveContent() {
                 >
                   <div className="flex items-center gap-3">
                     {activeServer === 'server1' ? (
-                      <Trophy className="w-6 h-6" />
-                    ) : activeServer === 'server2' ? (
-                      <Globe2 className="w-6 h-6" />
-                    ) : (
                       <Radio className="w-6 h-6" />
+                    ) : (
+                      <Globe2 className="w-6 h-6" />
                     )}
                     {SERVERS.find((s) => s.id === activeServer)?.label}
                   </div>
@@ -190,9 +159,7 @@ function LiveContent() {
                             server.id,
                             server.id === 'server1'
                               ? SERVER_1_SPORTS[0].id
-                              : server.id === 'server2'
-                                ? SERVER_2_SPORTS[0].id
-                                : SERVER_3_SPORTS[0].id,
+                              : dynamicServer2Sports[0]?.id || 'all_channels',
                           );
                           setIsServerMenuOpen(false);
                         }}
@@ -283,7 +250,9 @@ function LiveContent() {
 
       {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
-        {isLoading || isPending ? (
+        {activeServer === 'server1' ? (
+          <Server1Channels />
+        ) : isLoading || isPending ? (
           <div className="space-y-16">
             <section>
               <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />

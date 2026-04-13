@@ -78,10 +78,12 @@ export default function LiveMatchPlayerPage() {
   // Guaranteed non-null from here
   const activeMatch = match;
 
-  const isServer2 = activeMatch.id.startsWith('pm:');
-  const isEffectivelyLive = activeMatch.status === 'MatchIng' || isServer2;
+  const isServer2 = activeMatch.id.startsWith('live-server2');
+  const isServer1 = activeMatch.id.startsWith('live-server1');
+  const isEffectivelyLive =
+    activeMatch.status === 'MatchIng' || isServer2 || isServer1;
 
-  if (activeMatch.status === 'MatchNotStart' && !isServer2) {
+  if (activeMatch.status === 'MatchNotStart' && !isServer2 && !isServer1) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
         <Calendar className="w-20 h-20 text-white/20 mb-6 stroke-[3px]" />
