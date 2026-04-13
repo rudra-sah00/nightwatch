@@ -55,13 +55,12 @@ function createSplash() {
             width: 280px; height: 330px; 
             background: var(--bg-color); 
             border-radius: 12px; border: 4px solid var(--border-color); 
-            box-shadow: 6px 6px 0px var(--border-color); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             padding: 20px; color: var(--text-color); text-align: center; 
           }
           .splash-logo { 
             width: 80px; height: 80px; 
-            border-radius: 12px; box-shadow: 4px 4px 0px var(--border-color);
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center; 
             margin-bottom: 24px;
             background-color: transparent;
@@ -82,7 +81,7 @@ function createSplash() {
           }
           .progress-bar-bg { 
             width: 100%; height: 26px; background: var(--progress-bg); 
-            border: 3px solid var(--border-color); border-radius: 4px; box-shadow: 2px 2px 0px var(--border-color);
+            border: 3px solid var(--border-color); border-radius: 4px;
             margin-top: 24px; overflow: hidden; display: flex;
           }
           .progress-bar { 
