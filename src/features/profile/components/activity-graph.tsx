@@ -28,8 +28,8 @@ interface ActivityGraphProps {
 }
 
 const ACTIVITY_LEVEL_COLORS = [
-  'bg-[#f1ece4]', // Level 0 - empty
-  'bg-[#b3ccff]', // Level 1
+  'bg-secondary', // Level 0 - empty
+  'bg-neo-blue/40', // Level 1
   'bg-neo-blue', // Level 2
   'bg-neo-yellow', // Level 3
   'bg-neo-red', // Level 4
@@ -179,8 +179,8 @@ export function ActivityGraph({
               ? 'top-full mt-2'
               : 'bottom-full mb-2';
             const arrowVertical = isTopRow
-              ? 'bottom-full -mb-px border-b-[#1a1a1a] border-t-transparent'
-              : 'top-full -mt-px border-t-[#1a1a1a] border-b-transparent';
+              ? 'bottom-full -mb-px border-b-primary border-t-transparent'
+              : 'top-full -mt-px border-t-primary border-b-transparent';
 
             return (
               <div
@@ -198,7 +198,7 @@ export function ActivityGraph({
                 {day.isValid && (
                   <div
                     className={cn(
-                      'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-primary text-white font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
+                      'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-primary text-primary-foreground font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
                       tooltipHorizontal,
                       tooltipVertical,
                     )}
@@ -208,7 +208,7 @@ export function ActivityGraph({
                         ? `${Math.ceil(day.count)} min`
                         : 'No activity'}
                     </span>
-                    <span className="text-white/60 ml-2">
+                    <span className="text-primary-foreground/60 ml-2">
                       {formatDate(day.date)}
                     </span>
                     <div
