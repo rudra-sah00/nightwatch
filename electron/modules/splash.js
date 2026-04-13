@@ -38,10 +38,13 @@ function createSplash() {
           @media (prefers-color-scheme: dark) {
             :root {
               --bg-color: #09090b;
-              --border-color: #e4e4e7;
+              --border-color: #27272a; /* Replaced the white border with a dark subtle border */
               --text-color: #f4f4f5;
               --progress-bg: #18181b;
               --progress-fill: #a855f7;
+            }
+            .splash-logo img {
+              filter: brightness(0) invert(1); /* Turns the black play icon to pure white in dark mode */
             }
           }
           body { 
