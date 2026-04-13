@@ -96,7 +96,19 @@ export function useWatchPartyChat({
           setMessages((prev) => {
             if (prev.some((m) => m.id === msg.messageId)) return prev;
             if (msg.userId !== userId) {
-              new Audio('/msg-received.mp3').play().catch(() => {});
+              // Check if user is actively watching the chat (floating chat or sidebar chat tab)
+              const isFloatingChatVisible =
+                !!document.getElementById('wp-floating-chat');
+              const sidebarChat = document.getElementById(
+                'wp-sidebar-chat-container',
+              );
+              const isSidebarChatVisible =
+                sidebarChat?.getAttribute('data-active') === 'true';
+
+              // Only play sound if chat is hidden completely
+              if (!isFloatingChatVisible && !isSidebarChatVisible) {
+                new Audio('/msg-received.mp3').play().catch(() => {});
+              }
             }
 
             return [

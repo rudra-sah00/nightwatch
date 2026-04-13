@@ -66,7 +66,10 @@ export function FloatingChat({
   const visibleMessages = messages.slice(-60);
 
   return (
-    <div className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-3 motion-safe:duration-300 motion-reduce:animate-none">
+    <div
+      id="wp-floating-chat"
+      className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-3 motion-safe:duration-300 motion-reduce:animate-none"
+    >
       {/* ── Message list — no background, text + shadow only ── */}
       <div
         ref={listRef}

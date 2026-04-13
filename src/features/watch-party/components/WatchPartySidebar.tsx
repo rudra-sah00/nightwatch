@@ -178,6 +178,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
 
         {/* Chat Tab */}
         <div
+          id="wp-sidebar-chat-container"
+          data-active={activeTab === 'chat'}
           className={cn(
             'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out bg-background',
             activeTab === 'chat'
