@@ -106,6 +106,18 @@ export function useWatchPartySidebar({
     onAgoraReadyRef.current?.({ participants });
   }, [participants]);
 
+  // --- DESKTOP PTT GLOBAL SHORTCUT ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI?.onMediaCommand) {
+      const unsubscribe = window.electronAPI.onMediaCommand((command) => {
+        if (command === 'toggle-ptt') {
+          toggleAudio().catch(() => {});
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [toggleAudio]);
+
   return {
     activeTab,
     setActiveTab,

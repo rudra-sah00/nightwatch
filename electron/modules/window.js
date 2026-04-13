@@ -1,4 +1,5 @@
-const { BrowserWindow, shell, session } = require('electron');
+const { BrowserWindow, shell, session, TouchBar } = require('electron');
+const { TouchBarButton, TouchBarSpacer, TouchBarGroup } = TouchBar || {};
 const windowStateKeeper = require('electron-window-state');
 
 // Ensure native right-click menus are enabled
@@ -171,6 +172,31 @@ class AppWindow {
         }
       }
     });
+
+    // --- MAC TOUCH BAR SETUP ---
+    if (process.platform === 'darwin' && TouchBarButton) {
+      const playPauseButton = new TouchBarButton({
+        label: '⏯ Play/Pause',
+        backgroundColor: '#09090b',
+        click: () =>
+          this.mainWindow.webContents.send('media-command', 'MediaPlayPause'),
+      });
+      const micButton = new TouchBarButton({
+        label: '🎙️ Toggle Mic',
+        backgroundColor: '#780016', // Neo-Red warning
+        click: () =>
+          this.mainWindow.webContents.send('media-command', 'toggle-ptt'),
+      });
+
+      const touchBar = new TouchBar({
+        items: [
+          playPauseButton,
+          new TouchBarSpacer({ size: 'flexible' }),
+          micButton,
+        ],
+      });
+      this.mainWindow.setTouchBar(touchBar);
+    }
 
     return this.mainWindow;
   }

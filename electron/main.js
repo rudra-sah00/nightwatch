@@ -99,30 +99,12 @@ const startElectronApp = async () => {
     finishLaunch();
   }
 
-  // Example Global Shortcut:
-  // CommandOrControl+Shift+M lets a user mute the stream even if they are playing a fullscreen game.
+  // --- GLOBAL OS PUSH-TO-TALK (PTT) / MEDIA KEYS ---
+  // CommandOrControl+Shift+M lets a user mute the mic globally even if playing a fullscreen game.
   globalShortcut.register('CommandOrControl+Shift+M', () => {
     const mainWindow = AppWindow.getInstance();
     if (mainWindow) {
-      mainWindow.webContents.send('media-command', 'toggle-mute');
-    }
-  });
-
-  // Global Media Controls (Play/Pause, Next, Previous) - control video when out of focus
-  globalShortcut.register('MediaPlayPause', () => {
-    AppWindow.getInstance()?.webContents.send('media-command', 'play/pause');
-  });
-  globalShortcut.register('MediaNextTrack', () => {
-    AppWindow.getInstance()?.webContents.send('media-command', 'next');
-  });
-  globalShortcut.register('MediaPreviousTrack', () => {
-    AppWindow.getInstance()?.webContents.send('media-command', 'prev');
-  });
-  globalShortcut.register('CommandOrControl+Shift+M', () => {
-    const w = AppWindow.getInstance();
-    if (w) {
-      const isMuted = w.webContents.audioMuted;
-      w.webContents.setAudioMuted(!isMuted);
+      mainWindow.webContents.send('media-command', 'toggle-ptt');
     }
   });
 

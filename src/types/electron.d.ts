@@ -66,7 +66,8 @@ export interface ElectronAPI {
         | 'MediaPlayPause'
         | 'MediaNextTrack'
         | 'MediaPreviousTrack'
-        | 'MediaStop',
+        | 'MediaStop'
+        | 'toggle-ptt',
     ) => void,
   ) => () => void;
 

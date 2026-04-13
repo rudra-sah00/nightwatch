@@ -32,6 +32,19 @@ function setupTray(mainWindow, setQuittingCallback) {
       },
       { type: 'separator' },
       {
+        label: '⏯ Play/Pause Video',
+        click: () =>
+          mainWindow &&
+          mainWindow.webContents.send('media-command', 'MediaPlayPause'),
+      },
+      {
+        label: '🎙️ Toggle Microphone (PTT)',
+        click: () =>
+          mainWindow &&
+          mainWindow.webContents.send('media-command', 'toggle-ptt'),
+      },
+      { type: 'separator' },
+      {
         label: 'Quit Now',
         click: () => {
           setQuittingCallback(true);
