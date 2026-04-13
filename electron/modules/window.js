@@ -150,6 +150,16 @@ class AppWindow {
       this.mainWindow.show();
     });
 
+    // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---
+    // Let Next.js know when the user clicks away, so it can enter a mini-player
+    this.mainWindow.on('blur', () => {
+      this.mainWindow.webContents.send('window-blur');
+    });
+
+    this.mainWindow.on('focus', () => {
+      this.mainWindow.webContents.send('window-focus');
+    });
+
     // Minimize to tray on close for macOS (standard behavior), but quit on Windows/Linux
     this.mainWindow.on('close', (event) => {
       if (!this.isQuitting) {

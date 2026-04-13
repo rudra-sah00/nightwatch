@@ -367,6 +367,42 @@ export function usePlayerRoot({
     return () => unsubscribe?.();
   }, []);
 
+  // --- AUTO-PiP ON BLUR IMPL ---
+  const isPlayingRef = useRef(state.isPlaying);
+  const isPausedRef = useRef(state.isPaused);
+  useEffect(() => {
+    isPlayingRef.current = state.isPlaying;
+    isPausedRef.current = state.isPaused;
+  }, [state.isPlaying, state.isPaused]);
+
+  useEffect(() => {
+    let unsubscribeBlur: (() => void) | undefined;
+    let unsubscribeFocus: (() => void) | undefined;
+
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      if (window.electronAPI.onWindowBlur) {
+        unsubscribeBlur = window.electronAPI.onWindowBlur(() => {
+          // Only Auto-PiP if we are currently playing media
+          if (isPlayingRef.current && !isPausedRef.current) {
+            window.electronAPI!.setPictureInPicture(true, 1.0);
+          }
+        });
+      }
+
+      if (window.electronAPI.onWindowFocus) {
+        unsubscribeFocus = window.electronAPI.onWindowFocus(() => {
+          // Restore window normally when user comes back
+          window.electronAPI!.setPictureInPicture(false);
+        });
+      }
+    }
+
+    return () => {
+      unsubscribeBlur?.();
+      unsubscribeFocus?.();
+    };
+  }, []);
+
   useEffect(() => {
     if (isFullscreenOverride !== undefined) {
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFullscreenOverride });

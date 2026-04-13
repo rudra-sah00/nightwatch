@@ -77,6 +77,12 @@ export interface ElectronAPI {
   onFullscreenChanged: (
     callback: (isFullScreen: boolean) => void,
   ) => () => void;
+
+  /** Tells React when the window has lost focus (good for Auto-PiP) */
+  onWindowBlur: (callback: () => void) => () => void;
+
+  /** Tells React when the window has regained focus */
+  onWindowFocus: (callback: () => void) => () => void;
 }
 
 declare global {

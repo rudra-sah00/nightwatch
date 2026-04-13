@@ -63,4 +63,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('media-command', subscription);
     return () => ipcRenderer.removeListener('media-command', subscription);
   },
+
+  // Listen for Window Auto-PiP Triggers (Blur/Focus)
+  onWindowBlur: (callback) => {
+    const subscription = () => callback();
+    ipcRenderer.on('window-blur', subscription);
+    return () => ipcRenderer.removeListener('window-blur', subscription);
+  },
+
+  onWindowFocus: (callback) => {
+    const subscription = () => callback();
+    ipcRenderer.on('window-focus', subscription);
+    return () => ipcRenderer.removeListener('window-focus', subscription);
+  },
 });
