@@ -72,27 +72,17 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   useEffect(() => {
     if (typeof window !== 'undefined' && window.electronAPI) {
       window.electronAPI.updateDiscordPresence({
-        details: props.metadata.title,
+        details: `Watching: ${props.metadata.title}`,
         state:
           props.metadata.type === 'series'
-            ? `Season ${props.metadata.season} Ep ${props.metadata.episode}`
+            ? `Season ${props.metadata.season} Episode ${props.metadata.episode}`
             : props.metadata.year
               ? `Movie (${props.metadata.year})`
               : 'Feature Film',
         largeImageText: props.metadata.title,
-        largeImageKey: props.metadata.posterUrl || 'watchrudra_logo',
-        smallImageKey: 'play_icon',
-        smallImageText: 'Solo Watch',
+        largeImageKey: 'watchrudra_logo', // Safe fallback, external URLs usually break discord-rpc
         startTimestamp: Date.now(),
       });
-
-      return () => {
-        window.electronAPI!.updateDiscordPresence({
-          details: 'Browsing Homepage',
-          state: 'Looking for content',
-          largeImageKey: 'watchrudra_logo',
-        });
-      };
     }
   }, [props.metadata]);
 

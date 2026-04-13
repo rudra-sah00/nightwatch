@@ -100,27 +100,17 @@ export function WatchPartyClient({
       isConnected
     ) {
       window.electronAPI.updateDiscordPresence({
-        details: room.title,
+        details: `Party: ${room.title}`,
         state:
           room.type === 'series'
-            ? `Season ${room.season} Ep ${room.episode}`
+            ? `Season ${room.season} Episode ${room.episode}`
             : 'Co-Watching Movie',
         largeImageText: room.title,
-        largeImageKey: room.posterUrl || 'watchrudra_logo',
-        smallImageKey: 'party_icon',
-        smallImageText: 'In a Watch Party',
+        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         partySize: room.members?.length || 1,
         partyMax: 10,
         startTimestamp: room.createdAt || Date.now(),
       });
-
-      return () => {
-        window.electronAPI!.updateDiscordPresence({
-          details: 'Browsing Homepage',
-          state: 'Looking for content',
-          largeImageKey: 'watchrudra_logo',
-        });
-      };
     }
   }, [room, isConnected]);
 

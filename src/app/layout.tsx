@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
+import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
@@ -62,6 +63,7 @@ export default function RootLayout({
           <ThemeProvider>
             <SocketProvider>
               <AuthProvider>
+                <DiscordPresenceSync />
                 {children}
                 <Toaster />
               </AuthProvider>
