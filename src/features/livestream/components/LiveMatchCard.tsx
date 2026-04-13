@@ -82,17 +82,17 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   return (
     <>
       {matchModal}
-      <div className="group bg-white border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-[#f8f9fa] transition-colors rounded-md">
+      <div className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-accent transition-colors rounded-md">
         {/* 1. Time / Status / League (Left) */}
         <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
           {isLive ? (
             <div className="animate-pulse mb-1">
-              <span className="px-3 py-1 bg-[#e63b2e] text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md">
+              <span className="px-3 py-1 bg-neo-red text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md">
                 Live Now
               </span>
             </div>
           ) : isUpcoming ? (
-            <span className="text-sm font-black uppercase tracking-widest text-foreground font-headline tabular-nums bg-gray-100 px-2 py-1 border-[2px] border-border mb-1 rounded-md">
+            <span className="text-sm font-black uppercase tracking-widest text-foreground font-headline tabular-nums bg-secondary px-2 py-1 border-[2px] border-border mb-1 rounded-md">
               {formattedTime}
             </span>
           ) : (
@@ -102,9 +102,11 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
           )}
 
           <div className="flex flex-col items-center md:items-start gap-1 w-full mt-2">
-            <span className="px-2 py-0.5 bg-gray-100 border-[2px] border-border text-[10px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
-              {leagueName}
-            </span>
+            {leagueName && leagueName.trim() !== '' && (
+              <span className="px-2 py-0.5 bg-secondary border-[2px] border-border text-[10px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
+                {leagueName}
+              </span>
+            )}
             <span
               className={`text-[9px] font-black uppercase tracking-tighter ${
                 isServer2 ? 'text-[#0055ff]' : 'text-[#ffcc00]'
@@ -120,15 +122,15 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
           {isChannelCard ? (
             <div className="flex w-full items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-card border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
                   {match.team1.avatar ? (
                     <img
                       src={match.team1.avatar}
                       alt={channelName}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain bg-white"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                    <div className="w-full h-full bg-secondary rounded-full" />
                   )}
                 </div>
                 <div className="min-w-0">
@@ -154,37 +156,37 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
                     </span>
                   )}
                 </div>
-                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-card border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
                   {match.team1.avatar ? (
                     <img
                       src={match.team1.avatar}
                       alt={team1Name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain bg-white"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                    <div className="w-full h-full bg-secondary rounded-full" />
                   )}
                 </div>
               </div>
 
               {/* VS Badge */}
               <div className="flex-shrink-0 flex flex-col items-center justify-center -mt-2">
-                <span className="text-sm md:text-lg font-black italic text-foreground/40 font-headline bg-gray-100 px-2 py-1 rounded-md border border-border/20">
+                <span className="text-sm md:text-lg font-black italic text-muted-foreground font-headline bg-secondary px-2 py-1 rounded-md border border-border/20">
                   VS
                 </span>
               </div>
 
               {/* Team 2 */}
               <div className="flex flex-1 items-center justify-start gap-2 md:gap-3 text-left min-w-0">
-                <div className="w-10 h-10 md:w-14 md:h-14 bg-white border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-card border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
                   {match.team2.avatar ? (
                     <img
                       src={match.team2.avatar}
                       alt={match.team2.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain bg-white"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                    <div className="w-full h-full bg-secondary rounded-full" />
                   )}
                 </div>
                 <div className="flex flex-col items-start min-w-0">
@@ -210,7 +212,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             onClick={handleWatchClick}
             disabled={!canWatch}
             variant={canWatch ? 'neo-red' : 'neo-outline'}
-            className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors hover:bg-[#1a1a1a] hover:text-white"
+            className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors hover:bg-foreground hover:text-background"
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
             Watch

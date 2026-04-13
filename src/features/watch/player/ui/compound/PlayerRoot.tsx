@@ -183,8 +183,8 @@ export function PlayerRoot({
 
         {/* iOS portrait wall: blocks playback UI until user physically rotates device */}
         {showRotateWall && (
-          <div className="absolute inset-0 z-50 bg-[#ffcc00] flex flex-col items-center justify-center gap-8 pointer-events-auto select-none p-6 text-center">
-            <div className="bg-white border-[4px] border-border p-4  rounded-none">
+          <div className="absolute inset-0 z-50 bg-neo-yellow flex flex-col items-center justify-center gap-8 pointer-events-auto select-none p-6 text-center">
+            <div className="bg-background border-[4px] border-border p-4  rounded-none">
               <RotateCw className="w-16 h-16 text-foreground animate-spin [animation-duration:2s] stroke-[3px]" />
             </div>
             <div className="flex flex-col gap-2">

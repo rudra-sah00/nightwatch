@@ -39,9 +39,9 @@ export function Volume({
         onMouseDown={(e) => e.preventDefault()}
         className={cn(
           'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-          'bg-white border-[3px] border-border text-foreground ',
-          'hover:bg-[#ffe066]',
-          'active:bg-[#ffcc00]',
+          'bg-background border-[3px] border-border text-foreground ',
+          'hover:bg-neo-yellow/80',
+          'active:bg-neo-yellow',
         )}
       >
         <VolumeIcon className="w-5 h-5 stroke-[3px]" />
@@ -56,7 +56,7 @@ export function Volume({
         <div
           ref={sliderRef}
           className={cn(
-            'relative h-3 w-24 bg-white border-[2px] border-border cursor-pointer',
+            'relative h-3 w-24 bg-background border-[2px] border-border cursor-pointer',
           )}
           onMouseDown={handleMouseDown}
           role="slider"
@@ -77,7 +77,7 @@ export function Volume({
         >
           {/* Volume fill */}
           <div
-            className="absolute top-0 bottom-0 left-0 bg-[#0055ff] border-r-[2px] border-border"
+            className="absolute top-0 bottom-0 left-0 bg-neo-blue border-r-[2px] border-border"
             style={{
               width: `${displayVolume * 100}%`,
               transition: isDragging ? 'none' : 'width 50ms ease-out',
@@ -87,7 +87,7 @@ export function Volume({
           {/* Slider handle */}
           <div
             className={cn(
-              'absolute top-1/2 -translate-y-1/2 w-4 h-5 bg-[#ffcc00] border-[2px] border-border',
+              'absolute top-1/2 -translate-y-1/2 w-4 h-5 bg-neo-yellow border-[2px] border-border',
               'transition-transform duration-100',
               isHovered || isDragging ? 'scale-110' : 'scale-100',
             )}

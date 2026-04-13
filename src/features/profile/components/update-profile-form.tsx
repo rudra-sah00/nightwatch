@@ -61,10 +61,10 @@ export function UpdateProfileForm() {
       className="space-y-16"
     >
       {/* Main Profile Info Section */}
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8 relative flex flex-col items-center md:items-start md:flex-row gap-6 md:gap-8 min-h-[320px]">
+      <section className="bg-card border border-border rounded-xl shadow-sm p-6 md:p-8 relative flex flex-col items-center md:items-start md:flex-row gap-6 md:gap-8 min-h-[320px]">
         {/* Avatar Section */}
         <div className="relative group shrink-0">
-          <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border border-gray-200 rounded-xl shadow-sm bg-gray-50 transition-transform">
+          <div className="overflow-hidden w-48 h-48 md:w-56 md:h-56 border border-border rounded-xl shadow-sm bg-muted transition-transform">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -84,7 +84,7 @@ export function UpdateProfileForm() {
             type="button"
             onClick={handleFileClick}
             disabled={isUploading}
-            className="absolute -bottom-2 -right-2 p-3 bg-white border border-gray-200 rounded-full shadow-md text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute -bottom-2 -right-2 p-3 bg-card border border-border rounded-full shadow-md text-gray-700 hover:text-primary hover:border-blue-300 transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             title="Update Photo"
           >
             {isUploading ? (
@@ -127,19 +127,19 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-accent focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100"
                 />
               </div>
             </div>
 
             {/* Username - Mobile */}
             <div className="md:hidden">
-              <div className="mx-auto w-fit max-w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+              <div className="mx-auto w-fit max-w-full rounded-lg border border-border bg-muted px-3 py-2">
                 <label
                   htmlFor="username_mobile"
                   className="inline-flex w-full max-w-full items-baseline justify-center gap-1"
                 >
-                  <span className="shrink-0 text-4xl font-black font-headline text-[blue-600] leading-none">
+                  <span className="shrink-0 text-4xl font-black font-headline text-primary leading-none">
                     @
                   </span>
                   <input
@@ -165,7 +165,7 @@ export function UpdateProfileForm() {
                         profileFormRef.current?.requestSubmit();
                       }
                     }}
-                    className="w-fit min-w-[3ch] max-w-[58vw] bg-transparent border-none p-0 text-center text-4xl font-black font-headline uppercase tracking-tighter text-foreground leading-none outline-none caret-[blue-600]"
+                    className="w-fit min-w-[3ch] max-w-[58vw] bg-transparent border-none p-0 text-center text-4xl font-black font-headline uppercase tracking-tighter text-foreground leading-none outline-none caret-primary"
                     size={Math.min(
                       Math.max(profileForm.username.length, 3),
                       20,
@@ -179,7 +179,7 @@ export function UpdateProfileForm() {
             {/* Username Selection Header - Desktop */}
             <h1 className="hidden md:flex w-full min-w-0 overflow-hidden flex-row items-baseline gap-3 text-7xl font-black font-headline uppercase tracking-tighter text-foreground leading-none mb-2 justify-start">
               <span className="inline-flex w-auto max-w-lg items-baseline gap-3 justify-start">
-                <span className="shrink-0 text-[blue-600] leading-none translate-y-[-4px]">
+                <span className="shrink-0 text-primary leading-none translate-y-[-4px]">
                   @
                 </span>
                 <div className="min-w-0 flex-1 overflow-hidden grid grid-cols-1 items-baseline relative group">
@@ -210,7 +210,7 @@ export function UpdateProfileForm() {
                         profileFormRef.current?.requestSubmit();
                       }
                     }}
-                    className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-amber-100 focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
+                    className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-accent focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
                     aria-label="Username"
                   />
                 </div>
@@ -243,7 +243,7 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
-                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-[blue-600] bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-amber-100 focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
+                  className="col-start-1 row-start-1 w-full text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-accent focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
                   aria-label="Display Name"
                 />
                 <input type="hidden" name="name" value={profileForm.name} />
@@ -286,7 +286,7 @@ export function UpdateProfileForm() {
 
           <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0 md:self-start md:ml-auto">
             {profileForm.isPending && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-foreground font-headline font-bold uppercase border-2 border-border  animate-pulse">
+              <div className="flex items-center gap-2 px-4 py-2 bg-accent text-foreground font-headline font-bold uppercase border-2 border-border  animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Saving...</span>
               </div>
@@ -322,7 +322,7 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Public Profile Sharing */}
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+      <section className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
         <div className="space-y-2 text-center md:text-left">
           <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Public Identity
@@ -347,7 +347,7 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Server Selection */}
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+      <section className="bg-card border border-border rounded-xl shadow-sm p-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Server Selection
@@ -373,10 +373,10 @@ export function UpdateProfileForm() {
                   setTimeout(() => profileFormRef.current?.requestSubmit(), 0);
                 }}
                 className={cn(
-                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-[background-color,border-color,color,box-shadow] text-left w-full shadow-sm',
+                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-[background-color,border-color,color,box-shadow] text-left w-full shadow-sm cursor-pointer',
                   isSelected
-                    ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-600 ring-offset-2'
-                    : 'bg-white text-gray-800 border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md',
+                    ? 'bg-primary text-primary-foreground border-primary ring-2 ring-primary ring-offset-2 ring-offset-background'
+                    : 'bg-card text-card-foreground border-border hover:border-primary/50 hover:bg-accent hover:text-accent-foreground hover:shadow-md',
                 )}
               >
                 <span className="font-bold text-xl font-headline uppercase tracking-tight">
@@ -397,7 +397,7 @@ export function UpdateProfileForm() {
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-white border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-red-50">
+      <section className="bg-card border border-red-200 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-red-50">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-red-600 mb-2">

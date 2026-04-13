@@ -79,7 +79,7 @@ export function AlertDialogContent({
   return (
     <div
       className={cn(
-        'bg-white border-[4px] border-border rounded-none  max-w-md w-full mx-4 p-8 relative',
+        'bg-background border-[4px] border-border rounded-none  max-w-md w-full mx-4 p-8 relative',
         className,
       )}
     >
@@ -151,7 +151,7 @@ export function AlertDialogAction({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-[#e63b2e] text-white border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+        'px-6 py-3 bg-neo-red text-primary-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
         className,
       )}
       {...props}
@@ -169,7 +169,7 @@ export function AlertDialogCancel({
   return (
     <button
       className={cn(
-        'px-6 py-3 bg-white text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+        'px-6 py-3 bg-background text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
         className,
       )}
       {...props}

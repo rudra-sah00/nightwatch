@@ -76,7 +76,7 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors "
+          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>
@@ -93,8 +93,8 @@ export function SubtitleSelector({
             'w-full flex items-center justify-between p-4',
             'transition-colors duration-150',
             'border-b-[3px] border-border',
-            isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-[#ffe066]',
-            !currentTrack ? 'bg-[#ffcc00]' : 'bg-white',
+            isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-neo-yellow/80',
+            !currentTrack ? 'bg-neo-yellow' : 'bg-background',
           )}
         >
           <span
@@ -118,8 +118,8 @@ export function SubtitleSelector({
             className={cn(
               'w-full flex items-center justify-between p-4',
               'transition-colors duration-150',
-              isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-[#ffe066]',
-              currentTrack === track.id ? 'bg-[#ffcc00]' : 'bg-white',
+              isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-neo-yellow/80',
+              currentTrack === track.id ? 'bg-neo-yellow' : 'bg-background',
               index !== tracks.length - 1 && 'border-b-[3px] border-border',
             )}
           >
@@ -151,7 +151,7 @@ export function SubtitleSelector({
           loadSubtitleFonts();
           setCurrentScreen('style');
         }}
-        className="w-full flex items-center justify-between p-4 border-t-[3px] border-border bg-background hover:bg-[#ffe066] transition-colors"
+        className="w-full flex items-center justify-between p-4 border-t-[3px] border-border bg-background hover:bg-neo-yellow/80 transition-colors"
       >
         <div className="flex items-center gap-3">
           <Type className="w-5 h-5 stroke-[3px] text-foreground" />
@@ -171,7 +171,7 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setCurrentScreen('tracks')}
-          className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#ffcc00] transition-colors "
+          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-yellow transition-colors "
         >
           <ChevronRight className="w-4 h-4 stroke-[3px] rotate-180" />
         </button>
@@ -181,13 +181,13 @@ export function SubtitleSelector({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors "
+          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>
       </div>
 
-      <div className="overflow-y-auto max-h-[300px] overscroll-contain no-scrollbar bg-white">
+      <div className="overflow-y-auto max-h-[300px] overscroll-contain no-scrollbar bg-background">
         {/* Font Size Section */}
         <div className="px-4 py-2 bg-background border-b-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
@@ -200,10 +200,10 @@ export function SubtitleSelector({
             key={size.value}
             onClick={() => handleFontSizeChange(size.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-[#ffe066] transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
               subtitleSettings.fontSize === size.value
-                ? 'bg-[#ffcc00]/30'
-                : 'bg-white',
+                ? 'bg-neo-yellow/30'
+                : 'bg-background',
             )}
           >
             <span className="text-foreground text-xs font-bold font-headline uppercase tracking-widest">
@@ -227,10 +227,10 @@ export function SubtitleSelector({
             key={font.value}
             onClick={() => handleFontFamilyChange(font.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-[#ffe066] transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
               subtitleSettings.fontFamily === font.value
-                ? 'bg-[#ffcc00]/30'
-                : 'bg-white',
+                ? 'bg-neo-yellow/30'
+                : 'bg-background',
             )}
           >
             <span
@@ -257,10 +257,10 @@ export function SubtitleSelector({
             key={bg.value}
             onClick={() => handleBackgroundColorChange(bg.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-[#ffe066] transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
               subtitleSettings.backgroundColor === bg.value
-                ? 'bg-[#ffcc00]/30'
-                : 'bg-white',
+                ? 'bg-neo-yellow/30'
+                : 'bg-background',
             )}
           >
             <div className="flex items-center gap-3">
@@ -293,10 +293,10 @@ export function SubtitleSelector({
             key={color.value}
             onClick={() => handleTextColorChange(color.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-[#ffe066] transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
               subtitleSettings.textColor === color.value
-                ? 'bg-[#ffcc00]/30'
-                : 'bg-white',
+                ? 'bg-neo-yellow/30'
+                : 'bg-background',
             )}
           >
             <div className="flex items-center gap-3">
@@ -326,10 +326,10 @@ export function SubtitleSelector({
             key={shadow.value}
             onClick={() => handleTextShadowChange(shadow.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-[#ffe066] transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
               subtitleSettings.textShadow === shadow.value
-                ? 'bg-[#ffcc00]/30'
-                : 'bg-white',
+                ? 'bg-neo-yellow/30'
+                : 'bg-background',
             )}
           >
             <span
@@ -357,11 +357,11 @@ export function SubtitleSelector({
         onClick={toggleMenu}
         className={cn(
           'p-2.5 md:p-3 transition-colors duration-200',
-          'bg-white border-[3px] border-border text-foreground ',
+          'bg-background border-[3px] border-border text-foreground ',
           'hover:bg-background',
-          'active:bg-[#e0e0e0]',
+          'active:bg-muted',
           isOpen && 'bg-background shadow-none',
-          isActive && !isOpen && 'bg-[#ffcc00]',
+          isActive && !isOpen && 'bg-neo-yellow',
         )}
         title={currentLabel ? `Subtitles: ${currentLabel}` : 'Subtitles Off'}
       >
@@ -379,7 +379,7 @@ export function SubtitleSelector({
           className={cn(
             'absolute bottom-full right-0 mb-3',
             'w-64 overflow-hidden',
-            'bg-white border-[4px] border-border flex flex-col',
+            'bg-background border-[4px] border-border flex flex-col',
             ' z-[100]',
             'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-200 motion-reduce:animate-none',
           )}

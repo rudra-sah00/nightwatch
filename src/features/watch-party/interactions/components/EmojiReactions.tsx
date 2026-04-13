@@ -32,7 +32,7 @@ export function EmojiReactions({
     useEmojiReactions({ rtmSendMessage, userId, userName });
 
   return (
-    <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
+    <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-background/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
       {QUICK_EMOJIS.map((emoji, index) => (
         <Button
           type="button"
@@ -49,7 +49,7 @@ export function EmojiReactions({
         </Button>
       ))}
 
-      <div className="w-px h-3 bg-white/20 mx-0.5 md:mx-1" />
+      <div className="w-px h-3 bg-background/20 mx-0.5 md:mx-1" />
 
       <Button
         type="button"
@@ -59,8 +59,8 @@ export function EmojiReactions({
         className={cn(
           'p-1 md:p-1.5 rounded-full transition-[colors,transform] duration-200',
           showPicker
-            ? 'bg-white/20 text-white'
-            : 'text-white/40 hover:text-white/10',
+            ? 'bg-background/20 text-primary-foreground'
+            : 'text-primary-foreground/40 hover:text-primary-foreground/10',
         )}
         title="Full Emoji Library"
         aria-label="Open emoji picker"

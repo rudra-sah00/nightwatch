@@ -90,7 +90,7 @@ export const ContentInfo = memo(function ContentInfo({
           </span>
         ) : null}
         {isSeries && show.seasons && show.seasons.length > 0 ? (
-          <span className="hidden md:inline bg-[#ffcc00] border-[3px] border-border px-3 py-1">
+          <span className="hidden md:inline bg-neo-yellow border-[3px] border-border px-3 py-1">
             {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
           </span>
         ) : null}
@@ -125,7 +125,7 @@ export const ContentInfo = memo(function ContentInfo({
           </div>
           <div className="h-3 bg-background border-2 border-border overflow-hidden">
             <div
-              className="h-full bg-[#1a1a1a] transition-[width] duration-300"
+              className="h-full bg-primary transition-[width] duration-300"
               style={{ width: `${watchProgress?.progressPercent || 0}%` }}
             />
           </div>
@@ -171,7 +171,7 @@ export const ContentActions = memo(function ContentActions({
             isCreatingParty ||
             (hasWatchProgress && isLoadingProgress)
             ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-            : 'bg-[#ffcc00] text-foreground  hover:bg-[#ffe066]',
+            : 'bg-neo-yellow text-foreground  hover:bg-neo-yellow/80',
         )}
         onClick={handleButtonClick}
         disabled={
@@ -214,7 +214,7 @@ export const ContentActions = memo(function ContentActions({
             'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
             isCreatingParty || isPlaying
               ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-              : 'bg-[#1a1a1a] text-white  hover:bg-[#0055ff]',
+              : 'bg-primary text-white  hover:bg-neo-blue',
           )}
           onClick={isCreatingParty ? undefined : onWatchParty}
           disabled={isCreatingParty || isPlaying}
@@ -240,8 +240,8 @@ export const ContentActions = memo(function ContentActions({
             isWatchlistLoading
               ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
               : isInWatchlist
-                ? 'bg-[#e63b2e] text-white  hover:bg-[#1a1a1a]'
-                : 'bg-white text-foreground  hover:bg-[#1a1a1a] hover:text-white',
+                ? 'bg-neo-red text-white  hover:bg-primary'
+                : 'bg-white text-foreground  hover:bg-primary hover:text-white',
           )}
           onClick={onWatchlistToggle}
           disabled={isWatchlistLoading}
@@ -261,7 +261,7 @@ export const ContentActions = memo(function ContentActions({
 
       {/* Extra Actions Container (Download) */}
       {extraActions && (
-        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-[#ffcc00] hover:bg-[#ffe066] transition-[background-color,color,border-color,opacity,transform] duration-200 overflow-hidden">
+        <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-neo-yellow hover:bg-neo-yellow/80 transition-[background-color,color,border-color,opacity,transform] duration-200 overflow-hidden">
           <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg [&>button]:font-black [&>button]:font-headline [&>button]:uppercase [&>button]:tracking-widest [&>button]:whitespace-nowrap [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:gap-3">
             {extraActions}
           </div>

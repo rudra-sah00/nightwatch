@@ -23,18 +23,18 @@ export function PendingRequests({
   }
 
   return (
-    <div className="mx-3 mt-3 mb-2 bg-[#ffcc00] border-[4px] border-border overflow-hidden flex-shrink-0 ">
-      <div className="px-3 py-2 flex items-center gap-2 border-b-[4px] border-border bg-white">
+    <div className="mx-3 mt-3 mb-2 bg-neo-yellow border-[4px] border-border overflow-hidden flex-shrink-0 ">
+      <div className="px-3 py-2 flex items-center gap-2 border-b-[4px] border-border bg-background">
         <UserPlus className="w-4 h-4 text-foreground stroke-[3px]" />
         <span className="text-[10px] font-black font-headline text-foreground uppercase tracking-widest">
           {pendingMembers.length} waiting to join
         </span>
       </div>
-      <div className="p-3 space-y-3 max-h-40 overflow-y-auto custom-scrollbar bg-[#ffcc00]">
+      <div className="p-3 space-y-3 max-h-40 overflow-y-auto custom-scrollbar bg-neo-yellow">
         {pendingMembers.map((pending) => (
           <div
             key={pending.id}
-            className="flex items-center gap-2 p-2 bg-white border-[3px] border-border  transition-transform"
+            className="flex items-center gap-2 p-2 bg-background border-[3px] border-border  transition-transform"
           >
             {/* Avatar */}
             {pending.profilePhoto ? (
@@ -47,8 +47,8 @@ export function PendingRequests({
                 unoptimized
               />
             ) : (
-              <div className="w-7 h-7 border-[2px] border-border bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-black font-headline text-white uppercase tracking-widest">
+              <div className="w-7 h-7 border-[2px] border-border bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-black font-headline text-primary-foreground uppercase tracking-widest">
                   {pending.name.charAt(0)}
                 </span>
               </div>
@@ -64,7 +64,7 @@ export function PendingRequests({
               <Button
                 type="button"
                 onClick={() => onApprove(pending.id)}
-                className="p-1 border-[2px] border-border hover:bg-success hover:text-white transition-colors bg-white text-success "
+                className="p-1 border-[2px] border-border hover:bg-success hover:text-primary-foreground transition-colors bg-background text-success "
                 title="Approve"
               >
                 <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
@@ -72,7 +72,7 @@ export function PendingRequests({
               <Button
                 type="button"
                 onClick={() => onReject(pending.id)}
-                className="p-1 border-[2px] border-border hover:bg-[#e63b2e] hover:text-white transition-colors bg-white text-[#e63b2e] "
+                className="p-1 border-[2px] border-border hover:bg-neo-red hover:text-primary-foreground transition-colors bg-background text-neo-red "
                 title="Reject"
               >
                 <X aria-hidden="true" className="w-4 h-4 stroke-[3px]" />

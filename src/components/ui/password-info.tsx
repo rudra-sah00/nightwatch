@@ -40,7 +40,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-[#4a4a4a] hover:text-[#0055ff] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-[#4a4a4a] hover:text-neo-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
         aria-label="Password requirements"
       >
         <Info className="h-3.5 w-3.5 stroke-[3px]" />
@@ -60,7 +60,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
           {/* Centered Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div
-              className="relative w-full max-w-sm bg-white border-[4px] border-border  pointer-events-auto motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
+              className="relative w-full max-w-sm bg-background border-[4px] border-border  pointer-events-auto motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
               role="dialog"
               aria-modal="true"
               aria-labelledby="password-requirements-title"
@@ -69,7 +69,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 bg-white border-[3px] border-border p-1.5 text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+                className="absolute top-4 right-4 bg-background border-[3px] border-border p-1.5 text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                 aria-label="Close"
               >
                 <X className="h-4 w-4 stroke-[3px]" />
@@ -98,7 +98,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                     href="https://haveibeenpwned.com/Passwords"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#0055ff] underline hover:text-[#e63b2e] transition-colors"
+                    className="text-neo-blue underline hover:text-neo-red transition-colors"
                   >
                     known breaches
                   </a>
@@ -116,7 +116,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
 function RequirementItem({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 text-sm font-headline font-black uppercase tracking-widest text-foreground">
-      <div className="flex-shrink-0 w-5 h-5 bg-[#d6f6d5] border-[2px] border-border flex items-center justify-center ">
+      <div className="flex-shrink-0 w-5 h-5 bg-success/20 border-[2px] border-border flex items-center justify-center ">
         <Check className="h-3.5 w-3.5 text-foreground stroke-[3.5px]" />
       </div>
       <span>{text}</span>

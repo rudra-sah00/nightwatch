@@ -41,3 +41,24 @@ pnpm run desktop:start
 - **Permissions**: Prompts native OS popups for Media and Microphone access (necessary for Agora Video/Audio chat during Watch Parties).
 - **Window Management**: Restores last window size, placement, and full-screen state via `electron-window-state`.
 - **Deep Linking**: Registers the custom `watch-rudra://` protocol handler directly with the OS so web links can spawn and join Watch Parties natively in the desktop client.
+
+## Integrating with the Next.js Web App
+
+Watch Rudra's web and desktop apps share the exact same Next.js codebase. To prevent polluting React components with aggressive `typeof window !== "undefined"` checks everywhere we need native OS features, we pipe all interactions through a single hook:
+
+### `src/hooks/use-desktop-app.ts`
+
+This globally binds `window.electronAPI` to React.
+
+*   `isDesktopApp`: Boolean flag to accurately show/hide Desktop-only features natively.
+*   `openInDesktopApp()`: A deep-linking fallback heuristic utilizing `document.hidden` and asynchronous `setTimeout`. If a browser fails to redirect the custom protocol (`watch-rudra://`) within 2000 milliseconds, it alerts the user to download the `.dmg` or `.exe`.
+*   `getDesktopTopPaddingClass(isFullscreen)`: Provides strict styling logic targeting the Electron frameless 32px top-bar. It safely outputs `pt-8` padding natively, dynamically fading to `0` whenever `toggleFullscreen` triggers Chromium OS-level maximize states, preventing black gaps at the top of the Sidebar.
+*   `copyToClipboard(text)`: Abstracts OS Clipboard writes conditionally depending on the environment.
+
+### Electron IPC Bridging (`src/types/electron.d.ts`)
+
+For Typescript stability, all `ipcRenderer.send()` commands are strongly typed:
+
+*   **`updateDiscordPresence`**: Maps party numbers to Discord.
+*   **`toggleFullscreen`**: Discards generic Chromium HTML5 HTML bounds (`webkitRequestFullscreen`). Electron calls this explicitly so the Watch Party DOM doesn't trap the user inside a simulated video canvas.
+*   **`onFullscreenChanged`**: Allows the React tree to listen natively for OS-level Mac/Windows window maximize and minimize events.

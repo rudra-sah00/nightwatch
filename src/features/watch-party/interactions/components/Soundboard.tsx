@@ -65,7 +65,7 @@ export function Soundboard({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50 stroke-[3px]" />
           <Input
             placeholder="Search sounds..."
-            className="pl-9 bg-white border-border border-[3px] h-10 text-sm font-bold font-headline tracking-wide focus-visible:ring-0 focus-visible:border-[var(--wp-send-btn,#0055ff)] text-foreground placeholder:text-foreground/50 rounded-none  transition-colors"
+            className="pl-9 bg-background border-border border-[3px] h-10 text-sm font-bold font-headline tracking-wide focus-visible:ring-0 focus-visible:border-[var(--wp-send-btn,#0055ff)] text-foreground placeholder:text-foreground/50 rounded-none  transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -80,7 +80,7 @@ export function Soundboard({
               variant="neo-outline"
               size="sm"
               onClick={() => handleTriggerSound(sound.sound, sound.name)}
-              className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-white text-foreground hover:bg-[#ffe066] border-border border-[3px] transition-colors group relative overflow-hidden rounded-none"
+              className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-background text-foreground hover:bg-neo-yellow/80 border-border border-[3px] transition-colors group relative overflow-hidden rounded-none"
               aria-label={`Play ${sound.name} sound`}
             >
               <div

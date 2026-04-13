@@ -30,9 +30,9 @@ export function Fullscreen({
         compact
           ? 'p-1.5 transition-[background-color,color,border-color,opacity,transform] duration-200'
           : 'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'bg-white border-[3px] border-border text-foreground ',
-        'hover:bg-[#ffe066]',
-        'active:bg-[#ffcc00]',
+        'bg-background border-[3px] border-border text-foreground ',
+        'hover:bg-neo-yellow/80',
+        'active:bg-neo-yellow',
       )}
     >
       {isFullscreen ? (

@@ -1,6 +1,7 @@
 'use client';
 
 import { Toaster as Sonner } from 'sonner';
+import { useTheme } from '@/providers/theme-provider';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -11,23 +12,25 @@ const TOAST_OPTIONS = {
       'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-4 group-[.toaster]:border-border group-[.toaster]:rounded-none group-[.toaster]: font-body font-bold w-full',
     description: 'group-[.toast]:font-medium group-[.toast]:opacity-80',
     actionButton:
-      'group-[.toast]:bg-[#1a1a1a] group-[.toast]:text-white group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
+      'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
     cancelButton:
-      'group-[.toast]:bg-white group-[.toast]:text-foreground group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
+      'group-[.toast]:bg-muted group-[.toast]:text-foreground group-[.toast]:border-4 group-[.toast]:border-border group-[.toast]:rounded-none font-headline font-bold uppercase tracking-widest',
     error:
-      'group-[.toast]:!bg-[#ffdad6] group-[.toast]:!text-foreground group-[.toast]:!border-border',
+      'group-[.toast]:!bg-destructive group-[.toast]:!text-destructive-foreground group-[.toast]:!border-border',
     success:
-      'group-[.toast]:!bg-[#d6f6d5] group-[.toast]:!text-foreground group-[.toast]:!border-border',
+      'group-[.toast]:!bg-success/20 group-[.toast]:!text-foreground group-[.toast]:!border-border',
     warning:
-      'group-[.toast]:!bg-[#ffcc00] group-[.toast]:!text-foreground group-[.toast]:!border-border',
-    info: 'group-[.toast]:!bg-[#d6e3ff] group-[.toast]:!text-foreground group-[.toast]:!border-border',
+      'group-[.toast]:!bg-neo-yellow/20 group-[.toast]:!text-foreground group-[.toast]:!border-border',
+    info: 'group-[.toast]:!bg-neo-blue/20 group-[.toast]:!text-foreground group-[.toast]:!border-border',
   },
 } as const;
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const { theme = 'light' } = useTheme();
+
   return (
     <Sonner
-      theme="light"
+      theme={theme as ToasterProps['theme']}
       className="toaster group"
       toastOptions={TOAST_OPTIONS}
       {...props}

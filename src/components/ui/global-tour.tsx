@@ -98,7 +98,7 @@ export function GlobalTour() {
               element: 'a[href="/profile"]',
               popover: {
                 title:
-                  '<span class="font-headline font-black text-xl text-[#e63b2e] uppercase tracking-tighter">Pro Tip: Server Change</span>',
+                  '<span class="font-headline font-black text-xl text-neo-red uppercase tracking-tighter">Pro Tip: Server Change</span>',
                 description:
                   '<span class="font-body text-sm font-medium opacity-80">Inside your profile, you can switch between <strong>Server 1, Server 2, and Server 3</strong>.<br/><br/><strong>Why?</strong> They have different content libraries! If you can\'t find a movie or show on one server, try switching to another.</span>',
                 side: 'bottom',

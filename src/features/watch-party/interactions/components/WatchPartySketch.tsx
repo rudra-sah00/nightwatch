@@ -132,7 +132,7 @@ export function WatchPartySketch() {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="p-4 border-b-[4px] border-border shrink-0 flex items-center justify-between bg-white">
+      <div className="p-4 border-b-[4px] border-border shrink-0 flex items-center justify-between bg-background">
         <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2">
           <PenTool className="w-4 h-4 text-foreground stroke-[3px]" />
           Sketch Tools
@@ -143,7 +143,7 @@ export function WatchPartySketch() {
             variant="neo-base"
             size="none"
             onClick={triggerUndo}
-            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-foreground hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest border-[3px] border-border"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-background text-foreground hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest border-[3px] border-border"
             title="Undo last action"
           >
             <Undo2 className="w-3.5 h-3.5 stroke-[3px]" />
@@ -155,7 +155,7 @@ export function WatchPartySketch() {
             variant="neo-base"
             size="none"
             onClick={triggerClearSelf}
-            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#0055ff] hover:bg-[#0055ff] hover:text-white font-black font-headline uppercase tracking-widest border-[3px] border-border"
+            className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-background text-neo-blue hover:bg-neo-blue hover:text-primary-foreground font-black font-headline uppercase tracking-widest border-[3px] border-border"
             title="Clear only your drawings"
           >
             <Eraser className="w-3.5 h-3.5 stroke-[3px]" />
@@ -168,7 +168,7 @@ export function WatchPartySketch() {
               variant="neo-base"
               size="none"
               onClick={triggerClear}
-              className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-[#e63b2e] text-white hover:bg-[#1a1a1a] font-black font-headline uppercase tracking-widest border-[3px] border-border"
+              className="text-[10px] flex items-center gap-1.5 px-3 py-1.5 bg-neo-red text-primary-foreground hover:bg-primary font-black font-headline uppercase tracking-widest border-[3px] border-border"
               title="Host only: Clear everything"
             >
               <Trash2 className="w-3.5 h-3.5 stroke-[3px]" />
@@ -198,7 +198,7 @@ export function WatchPartySketch() {
                     'flex flex-col items-center justify-center gap-1.5 p-3 transition-colors border-[3px]',
                     isActive
                       ? 'bg-[var(--wp-send-btn,#ffcc00)] text-foreground border-border '
-                      : 'bg-white text-foreground hover:bg-[#ffe066] border-border',
+                      : 'bg-background text-foreground hover:bg-neo-yellow/80 border-border',
                   )}
                 >
                   <Icon className="w-5 h-5 stroke-[3px]" />
@@ -219,7 +219,7 @@ export function WatchPartySketch() {
                     type="button"
                     onClick={() => handleMoveZ(selectedId, 'front')}
                     title="Bring to Front"
-                    className="p-1 hover:bg-[#ffe066] border-[2px] border-border  transition-colors"
+                    className="p-1 hover:bg-neo-yellow/80 border-[2px] border-border  transition-colors"
                   >
                     <MoveUp className="w-3 h-3 stroke-[3px]" />
                   </Button>
@@ -227,7 +227,7 @@ export function WatchPartySketch() {
                     type="button"
                     onClick={() => handleMoveZ(selectedId, 'back')}
                     title="Send to Back"
-                    className="p-1 hover:bg-[#ffe066] border-[2px] border-border  transition-colors"
+                    className="p-1 hover:bg-neo-yellow/80 border-[2px] border-border  transition-colors"
                   >
                     <MoveDown className="w-3 h-3 stroke-[3px]" />
                   </Button>
@@ -241,8 +241,8 @@ export function WatchPartySketch() {
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] font-black font-headline uppercase tracking-widest text-xs transition-colors',
                   isFilled
-                    ? 'bg-[#1a1a1a] text-white border-border'
-                    : 'bg-white text-foreground border-border hover:bg-background',
+                    ? 'bg-primary text-primary-foreground border-border'
+                    : 'bg-background text-foreground border-border hover:bg-background',
                 )}
               >
                 {isFilled ? 'Filled Shape' : 'Outline Only'}
@@ -282,7 +282,7 @@ export function WatchPartySketch() {
                 )}
                 title="Custom Color"
               >
-                <Pipette className="w-4 h-4 text-white drop-shadow-md stroke-[3px]" />
+                <Pipette className="w-4 h-4 text-primary-foreground drop-shadow-md stroke-[3px]" />
                 <input
                   ref={customColorInputRef}
                   type="color"
@@ -314,7 +314,7 @@ export function WatchPartySketch() {
             step="1"
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            className="w-full h-2 border-[2px] border-border bg-white accent-[#0055ff] appearance-none cursor-pointer"
+            className="w-full h-2 border-[2px] border-border bg-background accent-[#0055ff] appearance-none cursor-pointer"
             aria-label={currentTool === 'text' ? 'Font Size' : 'Thickness'}
           />
         </div>
@@ -336,7 +336,7 @@ export function WatchPartySketch() {
             step="0.1"
             value={opacity}
             onChange={(e) => setOpacity(Number(e.target.value))}
-            className="w-full h-2 border-[2px] border-border bg-white accent-[#0055ff] appearance-none cursor-pointer"
+            className="w-full h-2 border-[2px] border-border bg-background accent-[#0055ff] appearance-none cursor-pointer"
             aria-label="Opacity"
           />
         </div>
@@ -371,7 +371,7 @@ export function WatchPartySketch() {
               }
             }, 50);
           }}
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm bg-[#00ff88] hover:bg-[#00cc6a] text-foreground"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm bg-success hover:opacity-80 text-foreground"
         >
           <Camera className="w-5 h-5 stroke-[3px]" />
           Capture Scene
@@ -385,7 +385,7 @@ export function WatchPartySketch() {
             <Button
               type="button"
               onClick={() => setIsEmojiPickerOpen(false)}
-              className="absolute -top-12 right-0 px-4 py-2 bg-white border-[3px] border-border  font-black text-xs uppercase tracking-widest hover:bg-[#ffe066] transition-colors"
+              className="absolute -top-12 right-0 px-4 py-2 bg-background border-[3px] border-border  font-black text-xs uppercase tracking-widest hover:bg-neo-yellow/80 transition-colors"
             >
               Close
             </Button>

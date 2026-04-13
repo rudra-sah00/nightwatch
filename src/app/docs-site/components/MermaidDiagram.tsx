@@ -24,9 +24,9 @@ export function MermaidDiagram({ chart }: { chart: string }) {
         if (isMounted) {
           setSvg(renderedSvg);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Mermaid rendering failed', err);
-        if (isMounted) setError(err?.message || String(err));
+        if (isMounted) setError((err as Error)?.message || String(err));
       }
     };
 

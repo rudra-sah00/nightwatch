@@ -9,10 +9,10 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white text-foreground',
-        blue: 'bg-[#0055ff] text-white',
-        yellow: 'bg-[#ffcc00] text-foreground',
-        red: 'bg-[#e63b2e] text-white',
+        default: 'bg-background text-foreground',
+        blue: 'bg-neo-blue text-primary-foreground',
+        yellow: 'bg-neo-yellow text-foreground',
+        red: 'bg-neo-red text-primary-foreground',
       },
     },
     defaultVariants: {

@@ -35,22 +35,19 @@ export function PlayPause({
       onClick={onToggle}
       className={cn(
         'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'border-[3px] border-border bg-[#ffcc00] text-foreground ',
-        'hover:bg-[#ffe066]',
-        'active:bg-[#ffb700]',
+        'border-[3px] border-border bg-neo-yellow text-foreground ',
+        'hover:bg-neo-yellow/80',
+        'active:bg-neo-yellow/80',
         SIZE_CLASSES[size],
       )}
     >
       {isPlaying ? (
         <Pause
-          className={cn('text-foreground fill-[#1a1a1a]', ICON_SIZES[size])}
+          className={cn('text-foreground fill-current', ICON_SIZES[size])}
         />
       ) : (
         <Play
-          className={cn(
-            'text-foreground fill-[#1a1a1a] ml-1',
-            ICON_SIZES[size],
-          )}
+          className={cn('text-foreground fill-current ml-1', ICON_SIZES[size])}
         />
       )}
     </button>
@@ -131,18 +128,18 @@ export function CenterPlayButton({
 
       {useCompactOverlay ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none px-4">
-          <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
-            <Play className="w-7 h-7 text-white fill-white ml-0.5" />
+          <div className="w-16 h-16 rounded-full bg-background/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+            <Play className="w-7 h-7 text-primary-foreground fill-white ml-0.5" />
           </div>
           {disabled ? (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/20 rounded-full">
-              <Lock className="w-3.5 h-3.5 text-white" />
-              <span className="text-[10px] text-white font-black font-headline uppercase tracking-widest">
+              <Lock className="w-3.5 h-3.5 text-primary-foreground" />
+              <span className="text-[10px] text-primary-foreground font-black font-headline uppercase tracking-widest">
                 Host Controls Playback
               </span>
             </div>
           ) : (
-            <span className="text-[11px] text-white font-black font-headline uppercase tracking-widest">
+            <span className="text-[11px] text-primary-foreground font-black font-headline uppercase tracking-widest">
               Tap to resume
             </span>
           )}
@@ -166,8 +163,8 @@ export function CenterPlayButton({
               className={cn(
                 'px-3 py-1 text-[10px] sm:text-xs font-black font-headline uppercase tracking-widest mb-3 sm:mb-5 flex-shrink-0 border-[3px] border-border ',
                 metadata.type === 'series'
-                  ? 'bg-[#0055ff] text-white'
-                  : 'bg-[#e63b2e] text-white',
+                  ? 'bg-neo-blue text-primary-foreground'
+                  : 'bg-neo-red text-primary-foreground',
               )}
             >
               {metadata.type === 'series'
@@ -179,7 +176,7 @@ export function CenterPlayButton({
 
             {/* Title - responsive sizing */}
             <h2
-              className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black font-headline uppercase tracking-wider text-white text-center mb-2 sm:mb-4 px-2 line-clamp-2 sm:line-clamp-none flex-shrink-0"
+              className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black font-headline uppercase tracking-wider text-primary-foreground text-center mb-2 sm:mb-4 px-2 line-clamp-2 sm:line-clamp-none flex-shrink-0"
               style={{ textShadow: '4px 4px 0px #1a1a1a' }}
             >
               {metadata.title}
@@ -190,7 +187,7 @@ export function CenterPlayButton({
             metadata.season &&
             metadata.episode ? (
               <p
-                className="text-[#ffcc00] font-black font-headline uppercase text-sm sm:text-lg md:text-2xl mb-2 sm:mb-4 flex-shrink-0"
+                className="text-neo-yellow font-black font-headline uppercase text-sm sm:text-lg md:text-2xl mb-2 sm:mb-4 flex-shrink-0"
                 style={{ textShadow: '2px 2px 0px #1a1a1a' }}
               >
                 S{metadata.season} · E{metadata.episode}
@@ -200,7 +197,7 @@ export function CenterPlayButton({
             {/* Year - hidden on very small mobile portrait */}
             {metadata.year ? (
               <p
-                className="text-white font-bold font-headline text-xs sm:text-sm mb-2 sm:mb-4 hidden portrait:sm:block landscape:block flex-shrink-0"
+                className="text-primary-foreground font-bold font-headline text-xs sm:text-sm mb-2 sm:mb-4 hidden portrait:sm:block landscape:block flex-shrink-0"
                 style={{ textShadow: '1px 1px 0px #1a1a1a' }}
               >
                 {metadata.year}
@@ -210,7 +207,7 @@ export function CenterPlayButton({
             {/* Description - hidden on mobile portrait, shown on landscape/larger */}
             {metadata.description ? (
               <p
-                className="text-white text-xs sm:text-sm md:text-base font-bold text-center max-w-2xl line-clamp-2 sm:line-clamp-3 leading-relaxed mb-4 sm:mb-8 px-2 hidden landscape:block sm:block flex-shrink-0"
+                className="text-primary-foreground text-xs sm:text-sm md:text-base font-bold text-center max-w-2xl line-clamp-2 sm:line-clamp-3 leading-relaxed mb-4 sm:mb-8 px-2 hidden landscape:block sm:block flex-shrink-0"
                 style={{ textShadow: '1px 1px 0px #1a1a1a' }}
               >
                 {metadata.description}
@@ -225,7 +222,7 @@ export function CenterPlayButton({
                   <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
                     <div className="relative">
                       <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
-                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-red border-[2px] border-border animate-pulse" />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
@@ -239,8 +236,8 @@ export function CenterPlayButton({
                 </div>
               ) : (
                 /* Normal paused state for host */
-                <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-border ">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+                <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-neo-red border-[2px] border-border animate-pulse" />
                   <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
                     Tap to resume
                   </span>
@@ -260,7 +257,7 @@ export function CenterPlayButton({
               <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
                 <div className="relative">
                   <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-red border-[2px] border-border animate-pulse" />
                 </div>
                 <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
                   Host Controls Playback
@@ -268,8 +265,8 @@ export function CenterPlayButton({
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white border-[3px] border-border ">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#e63b2e] border-[2px] border-border animate-pulse" />
+            <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-neo-red border-[2px] border-border animate-pulse" />
               <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
                 Tap to resume
               </span>
@@ -303,8 +300,10 @@ export function TapIndicator({
         direction === 'left' ? 'left-1/4' : 'right-1/4',
       )}
     >
-      <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-        <span className="text-white text-2xl font-bold">{seconds}s</span>
+      <div className="w-20 h-20 rounded-full bg-background/10 backdrop-blur-sm flex items-center justify-center">
+        <span className="text-primary-foreground text-2xl font-bold">
+          {seconds}s
+        </span>
       </div>
     </div>
   );

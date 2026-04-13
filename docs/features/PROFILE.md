@@ -1,27 +1,23 @@
-# User Profile and Settings
+# Profile & Account Management
 
-This document describes the structure and operations of the `/src/features/profile` architecture within Watch Rudra.
+## Overview
+The `profile` directory encapsulates user identity, public-facing user portfolios, and restricted account settings. 
 
-The Profile module handles the presentation and mutation of the authenticated user's account data via the backend REST API.
+## Directory Structure
+`src/features/profile/`
+- `components/`: `AvatarUpload`, `ProfileHeader`, `FollowButton`, `SettingsForms`.
+- `hooks/`: `useProfileQuery`, `useUpdateProfile`.
+- `schema.ts`: Zod validation boundaries rigorously checking payload sizes (e.g., bio character limits, URL sanitation for social links).
+- `api.ts`: Profile resolution, follow/unfollow mutations, and avatar upload signed-url requests.
 
-## Profile Architecture
+## Implementation Details
+1. **Public vs Protected Contexts**
+   - Resolving a public profile operates under standard GET route groupings.
+   - Mutating a profile heavily relies on `apiFetch` executing under the umbrella of our `AUTH_TOKEN` cookies. If a 401 triggers here, the lock mechanism described in `STATE_MANAGEMENT.md` cleanly intercepts it.
 
-The Profile interface is divided into several discrete tabs or pages, each mapping to a specific backend domain.
-- **Account Details:** Core mutable fields (username, avatar, email). Validated heavily by Zod schemas before being passed to Server Actions or TRPC/Fetch clients.
-- **Security:** Password change and 2FA (Two-Factor Authentication) enablement. Relies on the `/users/security` endpoint logic.
-- **Billing/Subscriptions:** Connects with the payment gateway (e.g., Stripe) webhooks. This sub-module polls for active plan statuses.
+2. **Zod Form Pipelines**
+   - Every input in the user settings area is strictly mapped to `react-hook-form` paired with `@hookform/resolvers/zod`.
+   - The schemas live in `schema.ts` to guarantee the exact same bounds are verified safely on the client before the payload strikes the NestJS backend.
 
-## UI Components
-Buttons are strictly constrained to the `buttonVariants({ variant: 'neo-outline' })` standard for a cohesive Neo-brutalist interaction model.
-
-### Form Validation
-React Hook Form is integrated with `@hookform/resolvers/zod`.
-1. Users attempt changes.
-2. The UI synchronously prevents submission if local validation fails (e.g., password too short).
-3. If valid, an optimistic update occurs modifying the UI context via `useMutation`, which subsequently awaits the true backend validation hook.
-
-## Avatar Upload 
-Images are handled locally before upload.
-- File Size limitation checks run natively in the browser before invoking S3 presigned-url logic via our server (`/upload/presign`).
-- Upload leverages multi-part fetch requests to stream directly to the block storage to bypass Next.js API route 4MB limitations.
-- Image proxy API resizes/crops are applied using Next.js `next/image` or backend pipelines dynamically for performance.
+3. **Optimistic Updates**
+   - Clicking "Follow" on a profile page triggers an immediate client-side UI mutation using our unified state context, avoiding a network-latency flicker.

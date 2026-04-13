@@ -4,7 +4,6 @@ import { Clock, Film, Tv, X } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { WatchProgressSkeleton } from '@/components/ui/skeletons';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
@@ -36,15 +35,18 @@ export function ContinueWatching({
     return (
       <div className={cn('py-6', className)}>
         {!hideTitle && (
-          <div className="inline-block bg-[#ffcc00] border-[4px] border-border px-4 py-2 mb-6 ">
+          <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
             <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
               Continue Watching
             </h2>
           </div>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="flex flex-col gap-6">
           {['cw-sk-1', 'cw-sk-2', 'cw-sk-3', 'cw-sk-4'].map((id) => (
-            <WatchProgressSkeleton key={id} />
+            <div
+              key={id}
+              className="w-full h-32 bg-muted animate-pulse border-[4px] border-border"
+            />
           ))}
         </div>
       </div>
@@ -61,15 +63,15 @@ export function ContinueWatching({
         )}
       >
         {!hideTitle && (
-          <div className="inline-block bg-[#ffcc00] border-[4px] border-border px-4 py-2 mb-6 ">
+          <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
             <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
               Continue Watching
             </h2>
           </div>
         )}
-        <div className="flex flex-col items-center justify-center py-20 bg-white border-[4px] border-border  text-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
           <Clock className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
-          <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a]">
+          <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
             Your watch history is empty
           </p>
         </div>
@@ -86,14 +88,14 @@ export function ContinueWatching({
       )}
     >
       {!hideTitle && (
-        <div className="inline-block bg-[#ffcc00] border-[4px] border-border px-4 py-2 mb-6 ">
+        <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
           <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
             Continue Watching
           </h2>
         </div>
       )}
       <section
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        className="flex flex-col gap-6"
         style={{ contentVisibility: 'auto' }}
         aria-label="Recently viewed content"
       >
@@ -127,7 +129,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
   return (
     <div
       className={cn(
-        'group relative flex flex-col p-2 w-full text-left bg-white border-[4px] border-border  h-full',
+        'group relative flex flex-col sm:flex-row p-4 gap-6 w-full text-left bg-neo-surface border-[4px] border-border items-start sm:items-center',
         'transition-[background-color,color,border-color,box-shadow,transform,opacity]',
       )}
     >
@@ -138,7 +140,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
           variant="none"
           size="none"
           onClick={(e) => onRemove(item, e)}
-          className="p-1 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-[background-color,color,border-color,opacity,transform]"
+          className="p-1 border-[3px] border-border bg-neo-surface text-foreground hover:bg-neo-red hover:text-white transition-[background-color,color,border-color,opacity,transform]"
           title="Remove from list"
         >
           <X className="w-5 h-5 stroke-[3px]" />
@@ -148,7 +150,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
       <button
         type="button"
         title={`Continue watching ${item.title}`}
-        className="relative z-10 w-full aspect-[2/3] overflow-hidden flex-shrink-0 bg-background border-[3px] border-border mb-4 group/poster"
+        className="relative z-10 w-full sm:w-40 xl:w-48 aspect-[2/3] overflow-hidden flex-shrink-0 bg-background border-[4px] border-border group/poster"
         onClick={() => onSelect(item)}
       >
         {item.posterUrl ? (
@@ -173,29 +175,29 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
         )}
 
         {/* Floating Play Overlay on Hover */}
-        <div className="absolute inset-0 bg-[#1a1a1a]/40 opacity-0 group-hover/poster:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-16 h-16 bg-[#ffcc00] border-4 border-border flex items-center justify-center  group-hover/poster:scale-110 transition-transform">
+        <div className="absolute inset-0 bg-foreground/40 opacity-0 group-hover/poster:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="w-16 h-16 bg-neo-yellow border-4 border-border flex items-center justify-center  group-hover/poster:scale-110 transition-transform">
             <Clock className="w-8 h-8 text-foreground fill-current" />
           </div>
         </div>
 
         {/* Progress Bar at bottom of poster */}
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#1a1a1a] border-t-[3px] border-border">
+        <div className="absolute bottom-0 left-0 right-0 h-2 bg-primary border-t-[3px] border-border">
           <div
-            className="h-full bg-[#ffcc00] border-r-[3px] border-border transition-[width] duration-1000"
+            className="h-full bg-neo-yellow border-r-[3px] border-border transition-[width] duration-1000"
             style={{ width: `${item.progressPercent}%` }}
           />
         </div>
       </button>
 
-      <div className="flex-1 min-w-0 px-2 pb-2 flex flex-col">
-        <div className="flex items-center gap-2 mb-2">
+      <div className="flex-1 min-w-0 flex flex-col h-full justify-center">
+        <div className="flex items-center gap-2 mb-3">
           <span
             className={cn(
               'px-2 py-0.5 text-[10px] font-black font-headline uppercase tracking-widest border-[2px] border-border',
               item.contentType === 'Series'
-                ? 'bg-[#0055ff] text-white'
-                : 'bg-[#ffcc00] text-foreground',
+                ? 'bg-neo-blue text-white'
+                : 'bg-neo-yellow text-foreground',
             )}
           >
             {item.contentType === 'Series' ? 'Series' : 'Movie'}
@@ -208,20 +210,24 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
           title={item.title}
           className="text-left group/title mb-auto"
         >
-          <h3 className="font-black font-headline uppercase tracking-tighter text-foreground text-2xl lg:text-3xl leading-none group-hover/title:text-[#0055ff] transition-colors line-clamp-2">
+          <h3 className="font-black font-headline uppercase tracking-tighter text-foreground text-3xl lg:text-5xl leading-none group-hover/title:text-neo-blue transition-colors line-clamp-2 mix-blend-normal">
             {item.title}
           </h3>
         </button>
 
-        <div className="mt-4 flex flex-col gap-1 text-[10px] font-bold font-headline uppercase tracking-widest text-[#4a4a4a]">
+        <div className="mt-6 flex gap-4 text-xs md:text-sm font-bold font-headline uppercase tracking-widest text-neo-muted">
           {item.contentType === 'Series' && item.seasonNumber != null ? (
-            <span className="text-foreground opacity-60">
+            <span className="text-foreground opacity-60 flex items-center">
               S{item.seasonNumber}:E{item.episodeNumber}{' '}
-              {item.episodeTitle && `• ${item.episodeTitle}`}
+              {item.episodeTitle && (
+                <span className="hidden sm:inline">
+                  &nbsp;• {item.episodeTitle}
+                </span>
+              )}
             </span>
           ) : null}
-          <span className="flex items-center gap-1.5 text-foreground">
-            <span className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse" />
+          <span className="flex items-center gap-2 text-foreground bg-neo-yellow px-3 py-1 border-[3px] border-border w-fit">
+            <span className="w-2.5 h-2.5 rounded-full bg-black animate-pulse" />
             {formatRemainingTime(item.remainingMinutes)}
           </span>
         </div>

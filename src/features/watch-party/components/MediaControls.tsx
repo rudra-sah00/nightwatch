@@ -93,7 +93,7 @@ export function MediaControls({
   return (
     <div className="border-t-[4px] border-border bg-background relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="p-4 flex gap-3 border-b-[4px] border-border bg-white">
+      <div className="p-4 flex gap-3 border-b-[4px] border-border bg-background">
         {/* Settings */}
         <WatchPartySettings
           room={room}
@@ -109,7 +109,7 @@ export function MediaControls({
             variant="none"
             size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors"
           >
             {linkCopied ? (
               <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
@@ -128,7 +128,7 @@ export function MediaControls({
           size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-colors',
+            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors',
             isHost ? 'flex-1' : 'w-full',
           )}
         >
@@ -140,10 +140,10 @@ export function MediaControls({
       {/* Media Controls */}
       <div className="p-4 space-y-4">
         {/* User Info & Controls */}
-        <div className="flex items-center justify-between bg-white border-[3px] border-border p-3 ">
+        <div className="flex items-center justify-between bg-background border-[3px] border-border p-3 ">
           {/* User Avatar & Status */}
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-12 h-12 shrink-0 flex items-center justify-center border-[3px] border-border bg-[#ffcc00]">
+            <div className="w-12 h-12 shrink-0 flex items-center justify-center border-[3px] border-border bg-neo-yellow">
               <span className="text-xl font-black font-headline text-foreground uppercase">
                 {userName.charAt(0)}
               </span>
@@ -156,14 +156,14 @@ export function MediaControls({
                 {userName}
               </span>
               <span
-                className={`text-[7px] sm:text-[9px] flex items-center gap-1 font-bold font-headline uppercase tracking-widest ${isAgoraConnected ? 'text-[#0055ff]' : 'text-[#e63b2e]'}`}
+                className={`text-[7px] sm:text-[9px] flex items-center gap-1 font-bold font-headline uppercase tracking-widest ${isAgoraConnected ? 'text-neo-blue' : 'text-neo-red'}`}
               >
                 <span
                   className={cn(
                     'w-2 h-2 border-[1.5px] border-border',
                     isAgoraConnected
-                      ? 'bg-[#0055ff] animate-pulse'
-                      : 'bg-[#e63b2e] animate-[pulse_1.5s_ease-in-out_infinite]',
+                      ? 'bg-neo-blue animate-pulse'
+                      : 'bg-neo-red animate-[pulse_1.5s_ease-in-out_infinite]',
                   )}
                 />
                 {isAgoraConnected ? 'Connected' : 'Connecting…'}
@@ -331,7 +331,7 @@ function DeviceDropdown({
   onClose,
 }: DeviceDropdownProps) {
   return (
-    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-white border-[4px] border-border  z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none flex flex-col">
+    <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-background border-[4px] border-border  z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none flex flex-col">
       <div className="p-3 border-b-[4px] border-border flex items-center justify-between bg-background">
         <span className="text-[10px] font-black font-headline uppercase tracking-widest text-foreground">
           {title}

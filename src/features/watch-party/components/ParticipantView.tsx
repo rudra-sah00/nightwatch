@@ -49,7 +49,7 @@ export function ParticipantView({
       {isCurrentUser ? (
         <div
           className={cn(
-            'absolute top-2 left-2 z-20 px-2 py-0.5 bg-blue-500 rounded-md shadow-sm text-[9px] font-bold font-headline text-white uppercase tracking-widest ',
+            'absolute top-2 left-2 z-20 px-2 py-0.5 bg-neo-blue rounded-md shadow-sm text-[9px] font-bold font-headline text-primary-foreground uppercase tracking-widest ',
             participant.isSpeaking && 'left-6', // Shift if speaking to not overlap
           )}
         >
@@ -134,8 +134,8 @@ function AvatarFallback({
             />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 border-white bg-blue-500 shadow-md">
-            <span className="text-3xl font-black font-headline text-white">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 border-white bg-neo-blue shadow-md">
+            <span className="text-3xl font-black font-headline text-primary-foreground">
               {name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -168,15 +168,15 @@ function ParticipantOverlay({
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 pointer-events-none">
         {/* Name Tag */}
         {!isCurrentUser && (
-          <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
-            <span className="text-[9px] font-black font-headline tracking-widest uppercase text-white truncate max-w-[100px]">
+          <div className="bg-primary/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
+            <span className="text-[9px] font-black font-headline tracking-widest uppercase text-primary-foreground truncate max-w-[100px]">
               {name}
             </span>
           </div>
         )}
 
         {/* Mic Status */}
-        <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
+        <div className="bg-primary/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
           {isMicEnabled ? (
             <Mic className="w-2.5 h-2.5 text-green-400" />
           ) : (
@@ -193,14 +193,14 @@ function ParticipantOverlay({
               <Button
                 type="button"
                 onClick={onKick}
-                className="px-2 py-1 bg-red-500 text-white rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-red-600 transition-colors shadow-sm"
+                className="px-2 py-1 bg-neo-red text-primary-foreground rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-neo-red/80 transition-colors shadow-sm"
               >
                 Kick!
               </Button>
               <Button
                 type="button"
                 onClick={() => setConfirmKick(false)}
-                className="p-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors shadow-sm"
+                className="p-1 bg-muted text-foreground rounded-md hover:bg-muted/80 transition-colors shadow-sm"
               >
                 <X className="w-2.5 h-2.5 stroke-[3px]" />
               </Button>
@@ -209,7 +209,7 @@ function ParticipantOverlay({
             <Button
               type="button"
               onClick={() => setConfirmKick(true)}
-              className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors shadow-sm"
+              className="p-1.5 bg-neo-red text-primary-foreground rounded-md hover:bg-neo-red/80 transition-colors shadow-sm"
               title="Kick user"
             >
               <X className="w-3 h-3 stroke-[3px]" />

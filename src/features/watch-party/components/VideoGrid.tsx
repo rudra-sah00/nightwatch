@@ -31,13 +31,13 @@ export function VideoGrid({
   if (sorted.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-12 text-center px-4">
-        <div className="w-16 h-16 border border-gray-200 rounded-full bg-white shadow-sm flex items-center justify-center mb-4">
-          <Video className="w-8 h-8 text-gray-400 stroke-2" />
+        <div className="w-16 h-16 border border-gray-200 rounded-full bg-background shadow-sm flex items-center justify-center mb-4">
+          <Video className="w-8 h-8 text-muted-foreground stroke-2" />
         </div>
-        <p className="font-semibold font-headline uppercase tracking-widest text-lg text-gray-800">
+        <p className="font-semibold font-headline uppercase tracking-widest text-lg text-foreground">
           No one on camera yet
         </p>
-        <p className="text-gray-500 text-xs font-medium mt-2 max-w-[200px]">
+        <p className="text-muted-foreground text-xs font-medium mt-2 max-w-[200px]">
           Turn on your camera or wait for others to join
         </p>
       </div>
@@ -50,7 +50,7 @@ export function VideoGrid({
         {sorted.map((participant) => (
           <div
             key={participant.identity}
-            className="w-full aspect-video border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden"
+            className="w-full aspect-video border border-gray-200 rounded-xl bg-background shadow-sm overflow-hidden"
           >
             <ParticipantView
               participant={participant}

@@ -36,7 +36,7 @@ export function SeasonSelector({
         aria-expanded={isOpen}
         aria-controls="season-selector-menu"
         className={cn(
-          'flex items-center gap-3 px-6 py-3 border-[3px] border-border  bg-background hover:bg-[#ffcc00] transition-colors duration-200',
+          'flex items-center gap-3 px-6 py-3 border-[3px] border-border  bg-background hover:bg-neo-yellow transition-colors duration-200',
           'text-foreground font-headline font-black uppercase tracking-widest text-sm sm:text-base',
         )}
       >
@@ -71,8 +71,8 @@ export function SeasonSelector({
                 'w-full px-6 py-4 text-left transition-colors duration-150 border-b-[3px] last:border-b-0 border-border',
                 'font-headline font-bold uppercase tracking-wider text-sm',
                 selectedSeason?.seasonId === season.seasonId
-                  ? 'bg-[#0055ff] text-white'
-                  : 'bg-white text-foreground hover:bg-[#ffcc00]',
+                  ? 'bg-neo-blue text-white'
+                  : 'bg-white text-foreground hover:bg-neo-yellow',
               )}
             >
               SEASON {season.seasonNumber}

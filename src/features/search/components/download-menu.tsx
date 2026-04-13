@@ -59,8 +59,8 @@ function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 }
 
 function qualityColor(q: string): string {
-  if (q === '1080p') return 'bg-[#ffcc00] text-foreground border-border ';
-  if (q === '720p') return 'bg-[#0055ff] text-white border-border ';
+  if (q === '1080p') return 'bg-neo-yellow text-foreground border-border ';
+  if (q === '720p') return 'bg-neo-blue text-white border-border ';
   return 'bg-white text-foreground border-border ';
 }
 
@@ -133,7 +133,7 @@ function EpisodeDownloadItem({
         className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-colors duration-200 text-left border-[3px] border-border bg-white"
       >
         <div className="flex items-center gap-4">
-          <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-[#ffe066] px-2 py-0.5 border-2 border-border">
+          <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-neo-yellow/80 px-2 py-0.5 border-2 border-border">
             EP {episode.episodeNumber}
           </span>
           <span className="text-sm font-headline font-black uppercase text-foreground truncate">
@@ -153,7 +153,7 @@ function EpisodeDownloadItem({
               FETCHING LINKS…
             </div>
           ) : !qualities || qualities.length === 0 ? (
-            <p className="text-xs font-headline font-black uppercase text-[#e63b2e] py-2">
+            <p className="text-xs font-headline font-black uppercase text-neo-red py-2">
               NO DOWNLOAD LINKS AVAILABLE.
             </p>
           ) : (
@@ -222,7 +222,7 @@ export function DownloadMenu({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-[#ffcc00] text-foreground hover:bg-[#ffe066] transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
+        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-neo-yellow text-foreground hover:bg-neo-yellow/80 transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
       >
         <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         DOWNLOAD
@@ -250,7 +250,7 @@ export function DownloadMenu({
             <DialogClose asChild>
               <button
                 type="button"
-                className="p-2 border-[4px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0"
+                className="p-2 border-[4px] border-border bg-neo-red text-white hover:bg-primary hover:text-white transition-colors flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
@@ -263,7 +263,7 @@ export function DownloadMenu({
             {show.dubs && show.dubs.length > 1 && (
               <div className="mb-8 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-6 bg-[#0055ff] border-2 border-border" />
+                  <div className="w-2 h-6 bg-neo-blue border-2 border-border" />
                   <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
                     SELECT LANGUAGE
                   </span>
@@ -283,7 +283,7 @@ export function DownloadMenu({
                         className={cn(
                           'px-4 py-2 border-[2px] border-border font-headline font-black uppercase text-xs tracking-widest transition-[background-color,color,transform] duration-150 active:scale-95',
                           isSelected
-                            ? 'bg-[#ffcc00] text-foreground '
+                            ? 'bg-neo-yellow text-foreground '
                             : 'bg-white text-foreground hover:bg-background',
                         )}
                       >
@@ -362,7 +362,7 @@ function MovieDownloadSection({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-2 h-6 bg-[#ffcc00] border-2 border-border" />
+        <div className="w-2 h-6 bg-neo-yellow border-2 border-border" />
         <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
           SELECT QUALITY
         </span>

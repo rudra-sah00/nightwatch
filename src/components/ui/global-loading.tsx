@@ -26,12 +26,12 @@ export function GlobalLoading({
         {/* Neo-brutalist custom spinner */}
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 border-[4px] border-border rounded-full" />
-          <div className="absolute inset-0 border-[4px] border-transparent border-t-[#ffcc00] rounded-full animate-spin motion-reduce:animate-none" />
-          <div className="absolute inset-2 border-[4px] border-transparent border-b-[#e63b2e] rounded-full animate-[spin_1.5s_linear_infinite_reverse] motion-reduce:animate-none" />
+          <div className="absolute inset-0 border-[4px] border-transparent border-t-neo-yellow rounded-full animate-spin motion-reduce:animate-none" />
+          <div className="absolute inset-2 border-[4px] border-transparent border-b-neo-red rounded-full animate-[spin_1.5s_linear_infinite_reverse] motion-reduce:animate-none" />
         </div>
 
         {message && (
-          <div className="bg-[#1a1a1a] text-white px-4 py-2 border-[3px] border-border ">
+          <div className="bg-primary text-primary-foreground px-4 py-2 border-[3px] border-border ">
             <span className="font-headline font-black uppercase text-sm tracking-[0.2em] animate-pulse motion-reduce:animate-none">
               {message}
             </span>

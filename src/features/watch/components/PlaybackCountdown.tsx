@@ -30,7 +30,7 @@ export function PlaybackCountdown({
 
       <div className="relative flex flex-col items-center gap-10 text-center px-6">
         {/* Animated Brand Icon */}
-        <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 shadow-2xl">
+        <div className="w-20 h-20 rounded-full bg-neo-surface/5 border border-white/10 flex items-center justify-center mb-2 shadow-2xl">
           <Sparkles className="w-10 h-10 text-primary animate-pulse motion-reduce:animate-none" />
         </div>
 
@@ -89,7 +89,7 @@ export function PlaybackCountdown({
               key={n}
               className={cn(
                 'h-1.5 rounded-full transition-[width,background-color] duration-500 shadow-sm',
-                count === n ? 'bg-primary w-12' : 'bg-white/10 w-4',
+                count === n ? 'bg-primary w-12' : 'bg-neo-surface/10 w-4',
               )}
             />
           ))}

@@ -1,24 +1,25 @@
-# Content Watching Experience 
+# VOD & Watch Feature Specifications
 
-This document describes the structure and operations of the `/src/features/watch` architecture within Watch Rudra.
+## Overview
+The `watch` directory handles the core Video On-Demand (VOD) playback experience. This is the primary consumption layer for uploaded or processed video content.
 
-The Watch feature acts as a VOD (Video on Demand) interface providing robust streaming capabilities via dynamic adaptive bitrates.
+## Directory Structure
+`src/features/watch/`
+- `components/`: Contains the `VideoPlayer`, `QualitySelector`, `TheaterModeToggle`, and transcript UI elements.
+- `hooks/`: 
+  - `useHls.ts`: The primary HLS.js integration binding standard `.m3u8` streams to the `<video>` element natively.
+  - `usePlayerState.ts`: Manages localized playback state (buffering, playing, seeking, volume).
+- `api.ts`: Dedicated endpoints for fetching stream metadata, available qualities, and logging video heatmaps/analytics.
 
-## Video Engine Integration
-The default video container uses standard HTML5 `<video>`, wrapped with our custom `HeroVideo.tsx` and `WatchControls.tsx` elements.
+## Core Mechanics
+1. **HLS Integration (`useHls.ts`)**
+   We do not use an off-the-shelf heavy player like Video.js by default. We natively wrap an HTML5 `<video>` element with HLS.js on the client-side to maintain maximum control over buffer health and DRM/signed-url ticket rotation.
+2. **Theater & Fullscreen Architecture**
+   - The player supports normal, theater (CSS-driven expansion), and native fullscreen.
+   - **Important:** As detailed in [DESKTOP.md](../DESKTOP.md), if `isDesktopApp` is true, clicking "Fullscreen" actively triggers an IPC message (`window.electronAPI.toggleFullscreen()`) instead of the standard WebKit DOM wrapper fullscreen, guaranteeing the Chromium shell natively fills the screen without trapping UI elements.
+3. **Analytics Syncing**
+   - Playback progress is periodically flushed to the server using the `apiFetch` utility to remember where the user left off.
 
-### The Player (HLS/DASH)
-The player must resolve encrypted stream endpoints. For HLS compatibility on Chromium, it loads the `hls.js` extension runtime.
-- **Auto-Resolution Switches:** Based on connection speed (via the video server manifest file), HLS seamlessly scales down streams from 4K (`2160p`) to SD (`480p`). The state is captured in the UI controls via `hls.currentLevel()`.
-- **Keyboard Shortcuts:** Hardcoded native DOM event listeners exist inside a master `useEffect` within `VideoControls` mapping standard media keys (Spacebar for play/pause; Left/Right axes for seeking `+/- 10s`; `M` for mute; `F` for fullscreen pointer API lock).
-
-## State Management
-To track elapsed viewing times (useful for "Continue Watching" tracking) the player fires off sync requests to the backend server.
-1. The heartbeat (`useWatchMetrics.ts`) sends current `video.currentTime` to Redis cache. 
-2. Upon reloading the page for a specific VOD content-ID, Next.js hydration extracts the logged time.
-
-## Subtitles/Captions
-Tracks are parsed natively or via `.vtt` implementations injected into the video DOM. `TextTrack` cues trigger subtitle rendering inside the internal React tree. The styling matches custom CSS overrides (Neo-brutalist configurations mapping to global UI fonts and border styles).
-
-## Recommendations (Watch Next)
-Within `WatchSideBar`, infinite scrolling loads personalized recommendations via TanStack query `useInfiniteQuery`. Upon video ending (DOM `onEnded`), it auto-progresses after a countdown (handled by `useAutoPlay.ts`).
+## Future VOD Upgrades
+- SCTE-35 ad-marker parsing.
+- Enhanced dual-audio track selection via advanced HLS manifests.

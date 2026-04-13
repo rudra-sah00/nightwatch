@@ -85,7 +85,7 @@ export function SeekBar({
         >
           <div
             className={cn(
-              'relative bg-white border-[3px] border-border ',
+              'relative bg-background border-[3px] border-border ',
               getSpriteStyle ? 'p-2 lg:p-3 2xl:p-3' : 'px-3 py-1.5',
             )}
           >
@@ -120,7 +120,7 @@ export function SeekBar({
               className={cn(
                 'text-[11px] lg:text-xs 2xl:text-sm font-black font-headline uppercase tracking-widest text-foreground tabular-nums text-center',
                 getSpriteStyle
-                  ? 'absolute bottom-4 left-1/2 -translate-x-1/2 px-3 lg:px-4 2xl:px-5 py-1.5 bg-[#ffcc00] border-[2px] border-border '
+                  ? 'absolute bottom-4 left-1/2 -translate-x-1/2 px-3 lg:px-4 2xl:px-5 py-1.5 bg-neo-yellow border-[2px] border-border '
                   : '',
               )}
             >
@@ -136,14 +136,14 @@ export function SeekBar({
       <div
         ref={barRef}
         className={cn(
-          'relative bg-white border-[2px] border-border transition-[height] duration-200',
+          'relative bg-background border-[2px] border-border transition-[height] duration-200',
           compact ? 'h-2.5 lg:h-3' : 'h-3 lg:h-4 2xl:h-5',
           canPreview
             ? compact
               ? 'group-hover:h-3 lg:group-hover:h-3.5'
               : 'group-hover:h-4 lg:group-hover:h-5 2xl:group-hover:h-6'
             : '',
-          disabled ? 'cursor-not-allowed bg-white/50' : '',
+          disabled ? 'cursor-not-allowed bg-background/50' : '',
         )}
         onClick={disabled ? undefined : handleClick}
         onMouseMove={(e) => {
@@ -184,14 +184,14 @@ export function SeekBar({
 
         {/* Progress */}
         <div
-          className="absolute h-full bg-[#ffcc00] border-r-[2px] border-border outline outline-2 outline-transparent transition-[width] duration-75"
+          className="absolute h-full bg-neo-yellow border-r-[2px] border-border outline outline-2 outline-transparent transition-[width] duration-75"
           style={{ width: `${progress}%` }}
         />
 
         {/* Hover indicator */}
         {hoverTime !== null ? (
           <div
-            className="absolute h-full bg-[#1a1a1a]/20 border-r-[2px] border-border"
+            className="absolute h-full bg-primary/20 border-r-[2px] border-border"
             style={{ width: `${(hoverTime / duration) * 100}%` }}
           />
         ) : null}

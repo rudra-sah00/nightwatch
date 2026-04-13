@@ -37,9 +37,9 @@ export function AudioSelector({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'p-2.5 md:p-3 transition-colors duration-200',
-          'bg-white border-[3px] border-border text-foreground ',
+          'bg-background border-[3px] border-border text-foreground ',
           'hover:bg-background',
-          'active:bg-[#e0e0e0]',
+          'active:bg-muted',
           'flex items-center justify-center',
           isOpen && 'bg-background shadow-none',
         )}
@@ -59,7 +59,7 @@ export function AudioSelector({
           className={cn(
             'absolute bottom-full right-0 mb-3',
             'w-64 max-h-80 overflow-hidden',
-            'bg-white border-[4px] border-border',
+            'bg-background border-[4px] border-border',
             '',
             'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none',
             'flex flex-col z-[100]',
@@ -74,14 +74,14 @@ export function AudioSelector({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1.5 border-[3px] border-border bg-white text-foreground hover:bg-[#e63b2e] hover:text-white transition-colors "
+              className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
             >
               <X className="w-4 h-4 stroke-[3.5px]" />
             </button>
           </div>
 
           {/* Scrollable Track List */}
-          <div className="overflow-y-auto max-h-56 overscroll-contain no-scrollbar bg-white">
+          <div className="overflow-y-auto max-h-56 overscroll-contain no-scrollbar bg-background">
             {tracks.map((track, index) => (
               <button
                 type="button"
@@ -94,8 +94,8 @@ export function AudioSelector({
                   'w-full flex items-center justify-between px-4 py-4',
                   'transition-colors duration-150',
                   currentTrack === track.id
-                    ? 'bg-[#ffcc00]'
-                    : 'bg-white hover:bg-[#ffe066]',
+                    ? 'bg-neo-yellow'
+                    : 'bg-background hover:bg-neo-yellow/80',
                   index !== tracks.length - 1 && 'border-b-[3px] border-border',
                 )}
               >

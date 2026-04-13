@@ -30,7 +30,7 @@ const FloatingEmojiItem = memo(
         <span className="text-4xl md:text-6xl drop-shadow-2xl select-none filter transition-transform duration-500 hover:scale-125">
           {emoji}
         </span>
-        <span className="text-[10px] md:text-xs font-bold text-white bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full shadow-lg border border-white/20 whitespace-nowrap select-none">
+        <span className="text-[10px] md:text-xs font-bold text-primary-foreground bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full shadow-lg border border-white/20 whitespace-nowrap select-none">
           {userName}
         </span>
       </div>

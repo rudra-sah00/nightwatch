@@ -8,6 +8,16 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
+  /* Neo-Brutalist Theme Tokens */
+  --color-neo-bg: var(--neo-bg);
+  --color-neo-surface: var(--neo-surface);
+  --color-neo-border: var(--neo-border);
+  --color-neo-yellow: var(--neo-yellow);
+  --color-neo-red: var(--neo-red);
+  --color-neo-blue: var(--neo-blue);
+  --color-neo-muted: var(--neo-muted);
+  --color-neo-text: var(--neo-text);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-headline: var(--font-space-grotesk), sans-serif;
@@ -88,6 +98,17 @@
 @layer base {
   /* Dark theme (default) */
   :root {
+    --neo-bg: #f5f0e8;
+    --neo-surface: #ffffff;
+    --neo-border: #1a1a1a;
+    --neo-yellow: #ffcc00;
+    --neo-red: #e63b2e;
+    --neo-blue: #0055ff;
+    --neo-muted: #d4d4d8;
+    --neo-text: #1a1a1a;
+
+    --neo-focus: #1a1a1a;
+
     --background: 38 29% 94%; /* #f5f0e8 */
     --foreground: 0 0% 10%; /* #1a1a1a */
 
@@ -248,6 +269,51 @@
       rgb(99, 102, 241),
       rgb(168, 85, 247)
     );
+  }
+
+  /* Dark Mode Overrides */
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 38 29% 94%;
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 95%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 95%;
+
+    --neo-bg: #09090b;
+    --neo-surface: #18181b;
+    --neo-border: #e4e4e7;
+    --neo-yellow: #a855f7; /* Changed yellow to purple in dark mode! */
+    --neo-red: #fb7185;
+    --neo-blue: #38bdf8;
+    --neo-muted: #3f3f46;
+    --neo-text: #f4f4f5;
+
+    --neo-focus: #f4f4f5;
+
+    --subtitle-bg-color: rgba(244, 244, 245, 0.9);
+    --subtitle-text-color: #09090b;
   }
 
   /* Watch party sidebar — pink theme */

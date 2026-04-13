@@ -101,10 +101,10 @@ function LiveContent() {
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background pb-32 overflow-x-hidden">
       {/* Hero Header */}
-      <div className="border-b-[4px] border-border mb-12 bg-[#ffcc00] relative z-40">
+      <div className="border-b-[4px] border-border mb-12 bg-neo-yellow relative z-40">
         {/* Abstract background shapes */}
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
-        <div className="absolute top-10 left-1/4 w-24 h-24 bg-[#e63b2e] border-[4px] border-border opacity-20 rotate-12" />
+        <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
 
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
@@ -112,15 +112,15 @@ function LiveContent() {
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
                 LIVE
                 <br />
-                <span className="bg-white px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
+                <span className="bg-background px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
                   STREAM
                 </span>
               </h1>
               <div className="flex items-center gap-3">
-                <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-white inline-block px-4 py-2 border-[3px] border-border">
+                <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
                   Form Follows Action
                 </p>
-                <div className="w-12 h-[3px] bg-[#1a1a1a] hidden sm:block" />
+                <div className="w-12 h-[3px] bg-primary hidden sm:block" />
               </div>
             </div>
 
@@ -139,10 +139,10 @@ function LiveContent() {
                   aria-haspopup="menu"
                   aria-expanded={isServerMenuOpen}
                   aria-controls="live-server-menu"
-                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap min-w-[220px] md:min-w-[260px] hover:bg-gray-100 hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2 ${
+                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap min-w-[220px] md:min-w-[260px] hover:bg-muted hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 ${
                     isServerMenuOpen || activeServer
-                      ? 'bg-gray-100 text-foreground'
-                      : 'bg-white'
+                      ? 'bg-muted text-foreground'
+                      : 'bg-background'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ function LiveContent() {
                   <div
                     id="live-server-menu"
                     role="menu"
-                    className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none rounded-md shadow-md"
+                    className="absolute top-full left-0 right-0 mt-3 bg-background border-[3px] border-border z-50 overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none rounded-md shadow-md"
                   >
                     {SERVERS.map((server) => (
                       <button
@@ -180,10 +180,10 @@ function LiveContent() {
                           );
                           setIsServerMenuOpen(false);
                         }}
-                        className={`w-full text-left px-6 py-4 font-headline font-bold text-lg uppercase tracking-widest border-b-[3px] last:border-b-0 border-border transition-colors flex items-center justify-between cursor-pointer focus-visible:outline-none focus-visible:bg-gray-100 ${
+                        className={`w-full text-left px-6 py-4 font-headline font-bold text-lg uppercase tracking-widest border-b-[3px] last:border-b-0 border-border transition-colors flex items-center justify-between cursor-pointer focus-visible:outline-none focus-visible:bg-muted ${
                           activeServer === server.id
-                            ? 'bg-gray-100 text-foreground'
-                            : 'bg-white hover:bg-gray-50'
+                            ? 'bg-muted text-foreground'
+                            : 'bg-background hover:bg-muted/80'
                         }`}
                       >
                         <div className="flex flex-col">
@@ -193,7 +193,7 @@ function LiveContent() {
                           </span>
                         </div>
                         {activeServer === server.id && (
-                          <div className="w-3 h-3 bg-[#1a1a1a] rounded-full" />
+                          <div className="w-3 h-3 bg-primary rounded-full" />
                         )}
                       </button>
                     ))}
@@ -215,10 +215,10 @@ function LiveContent() {
                   aria-haspopup="menu"
                   aria-expanded={isSportMenuOpen}
                   aria-controls="live-sport-menu"
-                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap w-full md:min-w-[300px] bg-white text-foreground hover:bg-gray-100 cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap w-full md:min-w-[300px] bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-3 h-3 bg-[#e63b2e] border-[2px] border-border rounded-full animate-pulse shrink-0" />
+                    <span className="w-3 h-3 bg-neo-red border-[2px] border-border rounded-full animate-pulse shrink-0" />
                     {activeSport?.label}
                   </div>
                   <ChevronDown
@@ -232,7 +232,7 @@ function LiveContent() {
                   <div
                     id="live-sport-menu"
                     role="menu"
-                    className="absolute top-full left-0 right-0 mt-3 bg-white border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
+                    className="absolute top-full left-0 right-0 mt-3 bg-background border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
                   >
                     <div className="flex flex-col gap-2">
                       {currentSports.map((sport) => (
@@ -244,15 +244,15 @@ function LiveContent() {
                             handleTabChange(sport.id);
                             setIsSportMenuOpen(false);
                           }}
-                          className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-gray-100 ${
+                          className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-muted ${
                             activeTab === sport.id
-                              ? 'bg-gray-100 text-foreground'
-                              : 'bg-white hover:bg-gray-50'
+                              ? 'bg-muted text-foreground'
+                              : 'bg-background hover:bg-muted/80'
                           }`}
                         >
                           {sport.label}
                           {activeTab === sport.id && (
-                            <div className="w-3 h-3 bg-[#1a1a1a] rounded-full" />
+                            <div className="w-3 h-3 bg-primary rounded-full" />
                           )}
                         </button>
                       ))}
@@ -270,16 +270,16 @@ function LiveContent() {
         {isLoading || isPending ? (
           <div className="space-y-16">
             <section>
-              <div className="h-10 w-48 bg-[#e63b2e] border-[4px] border-border  mb-8 animate-pulse" />
-              <div className="bg-white border-[4px] border-border  overflow-hidden">
+              <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
+              <div className="bg-background border-[4px] border-border  overflow-hidden">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
               </div>
             </section>
             <section>
-              <div className="h-10 w-48 bg-[#0055ff] border-[4px] border-border  mb-8 animate-pulse" />
-              <div className="bg-white border-[4px] border-border  overflow-hidden">
+              <div className="h-10 w-48 bg-neo-blue border-[4px] border-border  mb-8 animate-pulse" />
+              <div className="bg-background border-[4px] border-border  overflow-hidden">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
@@ -288,26 +288,26 @@ function LiveContent() {
           </div>
         ) : error ? (
           <div className="py-20 text-center flex flex-col items-center">
-            <div className="bg-[#e63b2e] border-[4px] border-border  px-10 py-12 max-w-lg w-full flex flex-col items-center">
+            <div className="bg-neo-red border-[4px] border-border  px-10 py-12 max-w-lg w-full flex flex-col items-center">
               <Radio className="w-12 h-12 text-foreground mb-6" />
-              <p className="font-headline font-black text-2xl uppercase tracking-tighter text-foreground mb-8 bg-white px-4 py-2 border-[4px] border-border">
+              <p className="font-headline font-black text-2xl uppercase tracking-tighter text-foreground mb-8 bg-background px-4 py-2 border-[4px] border-border">
                 Failed to Load Schedule
               </p>
               <Button
                 onClick={refresh}
-                className="bg-white text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-gray-100"
+                className="bg-background text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-muted"
               >
                 Try Again
               </Button>
             </div>
           </div>
         ) : schedule.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-border  text-center max-w-2xl mx-auto">
-            <Calendar className="w-20 h-20 text-[#0055ff] mb-6" />
+          <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border  text-center max-w-2xl mx-auto">
+            <Calendar className="w-20 h-20 text-neo-blue mb-6" />
             <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
               {isAllChannelsView ? 'No Channels Found' : 'No Matches Found'}
             </h3>
-            <p className="font-headline font-bold uppercase tracking-widest text-[#4a4a4a] max-w-md">
+            <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-md">
               {isAllChannelsView
                 ? 'No always-on channels are currently available from this provider.'
                 : `No ${activeSport?.label?.toLowerCase()} matches scheduled for the upcoming days.`}
@@ -317,12 +317,12 @@ function LiveContent() {
           <div className="space-y-16">
             {isAllChannelsView && (
               <section>
-                <div className="flex items-center gap-4 mb-8 bg-[#0055ff] border-[4px] border-border px-5 py-3 inline-flex ">
-                  <Radio className="w-6 h-6 text-white stroke-[3px]" />
-                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
+                <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
+                  <Radio className="w-6 h-6 text-primary-foreground stroke-[3px]" />
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
                     All Channels
                   </h2>
-                  <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
+                  <span className="bg-primary text-neo-yellow px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
                     {schedule.length}
                   </span>
                 </div>
@@ -339,9 +339,9 @@ function LiveContent() {
                 {/* SCHEDULE Section (Combines Live and Upcoming) */}{' '}
                 {Object.keys(upcomingByDate).length > 0 && (
                   <section>
-                    <div className="flex items-center gap-4 mb-8 bg-[#0055ff] border-[4px] border-border px-5 py-3 inline-flex ">
-                      <Clock className="w-6 h-6 text-white stroke-[3px]" />
-                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
+                    <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
+                      <Clock className="w-6 h-6 text-primary-foreground stroke-[3px]" />
+                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
                         Schedule
                       </h2>
                     </div>
@@ -362,7 +362,7 @@ function LiveContent() {
                                   {isToday ? 'Today' : date}
                                 </span>
                               </div>
-                              <span className="bg-[#1a1a1a] text-[#ffcc00] px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
+                              <span className="bg-primary text-neo-yellow px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
                                 {matches.length}{' '}
                                 {matches.length === 1 ? 'Match' : 'Matches'}
                               </span>
@@ -381,12 +381,12 @@ function LiveContent() {
                 {/* ENDED Section */}
                 {endedMatches.length > 0 && (
                   <section>
-                    <div className="flex items-center gap-4 mb-8 bg-[#1a1a1a] border-[4px] border-border px-5 py-3 inline-flex ">
-                      <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
-                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-white font-headline">
+                    <div className="flex items-center gap-4 mb-8 bg-primary border-[4px] border-border px-5 py-3 inline-flex ">
+                      <CheckCircle2 className="w-6 h-6 text-primary-foreground stroke-[3px]" />
+                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
                         Completed
                       </h2>
-                      <span className="bg-[#4a4a4a] text-white px-3 py-1 border-[3px] border-[#f5f0e8] text-sm font-black font-headline uppercase tracking-widest">
+                      <span className="bg-secondary text-secondary-foreground px-3 py-1 border-[3px] border-border text-sm font-black font-headline uppercase tracking-widest">
                         {endedMatches.length}{' '}
                         {endedMatches.length === 1 ? 'Match' : 'Matches'}
                       </span>
@@ -415,13 +415,13 @@ export default function LivePage() {
       fallback={
         <div className="min-h-[calc(100vh-80px)] bg-background pb-32">
           {/* Header Skeleton */}
-          <div className="h-48 md:h-64 bg-[#ffcc00] border-b-[4px] border-border mb-12" />
+          <div className="h-48 md:h-64 bg-neo-yellow border-b-[4px] border-border mb-12" />
 
           <div className="container mx-auto px-6 md:px-10">
             <div className="space-y-16">
               <section>
-                <div className="h-10 w-48 bg-[#e63b2e] border-[4px] border-border  mb-8 animate-pulse" />
-                <div className="bg-white border-[4px] border-border  overflow-hidden">
+                <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
+                <div className="bg-background border-[4px] border-border  overflow-hidden">
                   <LiveMatchSkeleton />
                   <LiveMatchSkeleton />
                   <LiveMatchSkeleton />

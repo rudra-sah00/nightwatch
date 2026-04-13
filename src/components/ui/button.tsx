@@ -9,14 +9,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'border border-transparent bg-[#1a1a1a] text-white hover:bg-gray-800 hover:text-white rounded-md',
-        neo: 'border border-transparent bg-[#1a1a1a] text-white hover:bg-gray-800 hover:text-white rounded-md',
+          'border border-transparent bg-primary text-primary-foreground hover:bg-gray-800 hover:text-primary-foreground rounded-md',
+        neo: 'border border-transparent bg-primary text-primary-foreground hover:bg-gray-800 hover:text-primary-foreground rounded-md',
         'neo-yellow':
-          'border border-transparent bg-[#ffcc00] text-foreground hover:bg-[#e6b800] hover:text-foreground rounded-md',
+          'border border-transparent bg-neo-yellow text-foreground hover:bg-neo-yellow/80 hover:text-foreground rounded-md',
         'neo-red':
-          'border border-transparent bg-[#e63b2e] text-white hover:bg-[#cc3429] hover:text-white rounded-md',
+          'border border-transparent bg-neo-red text-primary-foreground hover:bg-neo-red/80 hover:text-primary-foreground rounded-md',
         'neo-outline':
-          'bg-transparent text-foreground border border-border hover:bg-[#1a1a1a] hover:text-white rounded-md',
+          'bg-transparent text-foreground border border-border hover:bg-primary hover:text-primary-foreground rounded-md',
         'neo-ghost':
           'border border-transparent bg-transparent text-foreground hover:bg-black/5 hover:text-foreground rounded-md',
         'neo-base':

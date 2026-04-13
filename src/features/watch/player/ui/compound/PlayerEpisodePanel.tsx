@@ -145,9 +145,9 @@ export function PlayerEpisodePanelTrigger() {
       onClick={ctx.toggle}
       className={cn(
         'p-2.5 md:p-3 transition-colors duration-200',
-        'bg-white border-[3px] border-border text-foreground ',
+        'bg-background border-[3px] border-border text-foreground ',
         'hover:bg-background',
-        'active:bg-[#e0e0e0]',
+        'active:bg-muted',
         ctx.isOpen && 'bg-background shadow-none',
       )}
       aria-label="Show episodes"

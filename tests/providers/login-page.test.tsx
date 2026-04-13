@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AuthContextType } from '@/providers/auth-provider';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -110,7 +109,7 @@ describe('LoginPage', () => {
       updateUser: vi.fn(),
       resendOtp: vi.fn(),
       resendCooldown: 0,
-    } as unknown as AuthContextType);
+    } as unknown);
 
     const { default: LoginPage } = await import('@/app/(public)/login/page');
 
@@ -127,7 +126,7 @@ describe('LoginPage', () => {
       isAuthenticated: false,
       isLoading: true,
       user: null,
-    } as unknown as AuthContextType);
+    } as unknown);
 
     const { default: LoginPage } = await import('@/app/(public)/login/page');
 

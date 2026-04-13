@@ -1,27 +1,49 @@
-# State Management Strategy
+# Comprehensive State Management Strategy
 
-With over 400+ modules and highly concurrent real-time features, managing state predictably across the frontend is critical. Watch Rudra employs a multi-tiered state management approach to ensure performance, consistency, and a bug-free user experience.
+With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Electron Desktop bridges, state management in Watch Rudra runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
 
-## Global Contexts (Providers)
+## 1. Global Application State (React Context)
 
-For state that must be globally accessible but changes infrequently, we use React Context API mapped inside the `src/providers/` directory.
-- **AuthProvider:** Stores the current authenticated user session, managing the login/logout lifecycle and hydrating user data across the app.
-- **SocketProvider:** Maintains the singleton Socket.IO connection to the backend, ensuring we do not spawn multiple websockets per client.
+For state that must be globally accessible but mutates infrequently, we utilize strict React Context Providers located in `src/providers/`:
 
-## Server State & Data Fetching
+*   **`AuthProvider`**: Manages the `<AuthContext>` tracking `user` profiles, tokens, and active session loading boundaries. It handles seamless multi-tab authentication syncs.
+*   **`SocketProvider`**: Manages the singleton `socket.io-client` connection instance used globally for fallback room approvals and force-logout broadcasts.
+*   **`DevToolsProtectionProvider`**: Secures production environments by listening to keyboard shortcuts and native OS inspection triggers, blinding the UI if devtools are forcefully opened.
+*   **`ServerProvider`**: Scaffolds layout requirements globally at the top level.
 
-Next.js Server Components and modern fetching strategies govern how we interact with the database.
-- **Server Actions:** Used for secure, server-side mutations (e.g., updating profiles, passwords) directly from forms without needing manual API endpoints.
-- **Client Fetching:** For client-side data fetching, we leverage generic `fetch` wrappers integrated with React's `useEffect` or `swr` for caching and revalidation.
+## 2. Highly Mutative Domain State (`useReducer`)
 
-## Real-Time Decentralized State (Watch Parties)
+Complex UI components that trigger dozens of rapid state mutations per second (like the `hls.js` VOD layer) strictly use the `useReducer` abstract pattern.
 
-The most complex state in the application lives within the Watch Party domain. Because up to dozens of users can mutate state concurrently, we heavily isolate this logic into custom hooks.
-- **Single Source of Truth:** The Host's client is the absolute source of truth for the playback state.
-- **Local Optimistic Updates:** When a user performs an action (e.g., the Host toggling a permission), the UI updates locally via `CustomEvent` dispatches immediately before the network confirms the broadcast. This prevents UI stuttering.
-- **Reducer Patterns:** We use strict `Switch/Case` reducers to process incoming Agora RTM messages (e.g., `MEMBER_JOINED`, `PERMISSIONS_UPDATED`) and apply them functionally to the React State.
+### `PlayerContext.tsx`
+Located in `src/features/watch/player/context/PlayerContext.tsx`, our proprietary Video Player avoids spamming `useState` (which guarantees re-render storms upon rapid `timeupdate` events). Instead:
+*   It dispatches typed events (`PLAY`, `PAUSE`, `SEEK`, `SYNC_BUFFERING`, `SET_FULLSCREEN`).
+*   The pure reducer mathematically computes the next DOM state.
+*   Components deep in the tree (like `<Player.SeekBar />` or `<Player.TimeDisplay />`) consume the Context and update independently of the parent `<PlayerRoot />`.
 
-## Safe React State Practices
+## 3. Real-Time State & Stale Closure Prevention
 
-To avoid React Concurrent Mode bugs and stale closures inside highly asynchronous event listeners:
-- **Ref Synchronization:** Do not rely on dependencies in `useCallback` for variables that change rapidly (like the `room` state). Instead, maintain a synchronized `useRef` (e.g., `roomRef.current = room`) and read from the ref inside asynchronous blocks (like connection drop timeouts or delayed RTM messages). This prevents infinite re-render loops and ghost-kicking bugs.
+The Watch Party domain handles WebRTC events asynchronously. A common React pitfall is "Stale Closures" inside socket or RTM event listeners, where old state variables are trapped in memory.
+
+**The `useRef` Synchronization Pattern:**
+You will notice extensively inside `src/features/watch-party/room/hooks/` that we do *not* pass the `room` state into rapid `useEffect` dependency arrays.
+```typescript
+const roomRef = useRef<WatchPartyRoom>(room);
+useEffect(() => {
+  roomRef.current = room; // Synchronize latest state safely
+}, [room]);
+```
+When an Agora `RTMMessage` arrives triggering `onMessage(msg)`, the listener uniquely reads `roomRef.current` without causing an infinite re-render loop on the listener itself.
+
+## 4. Electron Desktop State (`useDesktopApp.ts`)
+
+Instead of throwing `typeof window` and `window.electronAPI` checks sporadically across UI components, we funnel OS state detection through `src/hooks/use-desktop-app.ts`.
+
+It exposes reactive booleans (`isDesktopApp`, `isBrowser`) and provides fallback DOM timeouts to gracefully error-trap if an OS custom protocol deep link (`watch-rudra://`) fails to acquire focus.
+
+## 5. Server State (Next.js Data Fetching layer)
+
+We do not use Apollo or React Query. Instead, we lean directly into Next.js App Router caching paradigms integrated through our custom `fetch.ts` and `storage-cache.ts` interceptors in `src/lib/`:
+
+*   **Mutations (Server Actions)**: For forms and sensitive data updates (passwords, profiles, avatars).
+*   **Query-Level Locking**: Our `fetch.ts` implements a Mutex queue (`lockPromise`). If multiple components request a new Access Token refresh simultaneously, State is blocked globally across all components, waiting for the singular HTTP promise to resolve natively before retrying the render tree.

@@ -39,12 +39,12 @@ export default function SignupPage() {
 
   return (
     <div
-      className={`bg-white text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
+      className={`bg-background text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         {isInviteValid === false ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white border-4 border-border  max-w-md w-full motion-safe:animate-in motion-safe:zoom-in motion-safe:duration-300 motion-reduce:animate-none">
-            <span className="material-symbols-outlined text-6xl text-[#e63b2e] mb-4">
+          <div className="flex flex-col items-center justify-center p-8 bg-background border-4 border-border  max-w-md w-full motion-safe:animate-in motion-safe:zoom-in motion-safe:duration-300 motion-reduce:animate-none">
+            <span className="material-symbols-outlined text-6xl text-neo-red mb-4">
               block
             </span>
             <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 font-headline text-center">
@@ -72,7 +72,7 @@ export default function SignupPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
             {/* Features Bento Box - height driven by the signup form on the right */}
             <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[440px] h-full">
-              <div className="bg-[#1a1a1a] text-white p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
+              <div className="bg-primary text-primary-foreground p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
                 <div>
                   <span
                     className="material-symbols-outlined text-3xl mb-2"
@@ -89,7 +89,7 @@ export default function SignupPage() {
                   </p>
                 </div>
               </div>
-              <div className="bg-[#d6e3ff] text-foreground p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
+              <div className="bg-secondary text-foreground p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
                 <div>
                   <span
                     className="material-symbols-outlined text-3xl mb-2"
@@ -106,7 +106,7 @@ export default function SignupPage() {
                   </p>
                 </div>
               </div>
-              <div className="md:col-span-2 bg-[#ffcc00] text-foreground p-4 md:p-6 border-4 border-border cursor-default select-none flex items-center gap-4">
+              <div className="md:col-span-2 bg-accent text-foreground p-4 md:p-6 border-4 border-border cursor-default select-none flex items-center gap-4">
                 <span
                   className="material-symbols-outlined text-5xl"
                   style={{ fontVariationSettings: "'FILL' 1" }}
@@ -126,7 +126,7 @@ export default function SignupPage() {
             </div>
             {/* Signup Card wrapper */}
             <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
-              <div className="bg-white border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
+              <div className="bg-background border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
                 <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
                   <SignupForm {...signupHook} />
                 </div>
@@ -137,12 +137,12 @@ export default function SignupPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
-        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-[#f5f0e8] opacity-80 text-left">
+      <footer className="bg-primary w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
+        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-muted-foreground opacity-80 text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <p className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-[#e63b2e] text-center md:text-left">
+          <p className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-neo-red text-center md:text-left">
             PRIVATE ACCESS ONLY
           </p>
         </div>

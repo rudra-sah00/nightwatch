@@ -58,7 +58,7 @@ export function WatchPartyLobby({
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6">
+        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center space-y-6">
           <Monitor className="w-16 h-16 text-foreground mx-auto" />
           <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Desktop Only
@@ -87,9 +87,9 @@ export function WatchPartyLobby({
   if (roomNotFound) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
-          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto ">
-            <Users className="w-10 h-10 text-white" />
+        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
+          <div className="w-20 h-20 bg-neo-red border-4 border-border flex items-center justify-center mx-auto ">
+            <Users className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
             Room Not Found
@@ -113,27 +113,27 @@ export function WatchPartyLobby({
   if (requestStatus === 'pending') {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
+        <div className="max-w-md w-full bg-background border-4 border-border p-8  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
           {/* 3-step indicator - Neobrutalist style */}
           <div className="flex items-center justify-center gap-2 mb-10">
             <div className="flex flex-col items-center gap-2">
               <div className="w-10 h-10 bg-emerald-500 border-2 border-border flex items-center justify-center ">
-                <Check className="w-5 h-5 text-white" />
+                <Check className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-[10px] text-foreground font-black font-headline uppercase">
                 Sent
               </span>
             </div>
-            <div className="w-12 h-1 bg-[#1a1a1a] mb-6" />
+            <div className="w-12 h-1 bg-primary mb-6" />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 bg-[#ffcc00] border-4 border-border flex items-center justify-center animate-pulse motion-reduce:animate-none ">
+              <div className="w-12 h-12 bg-neo-yellow border-4 border-border flex items-center justify-center animate-pulse motion-reduce:animate-none ">
                 <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-foreground" />
               </div>
               <span className="text-[10px] text-foreground font-black font-headline uppercase">
                 Waiting
               </span>
             </div>
-            <div className="w-12 h-1 bg-[#1a1a1a]/20 mb-6" />
+            <div className="w-12 h-1 bg-primary/20 mb-6" />
             <div className="flex flex-col items-center gap-2">
               <div className="w-10 h-10 bg-background border-2 border-border flex items-center justify-center">
                 <Users className="w-5 h-5 text-foreground/40" />
@@ -166,9 +166,9 @@ export function WatchPartyLobby({
   if (requestStatus === 'rejected') {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border p-8  text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
-          <div className="w-20 h-20 bg-[#e63b2e] border-4 border-border flex items-center justify-center mx-auto mb-6 ">
-            <UserMinus className="w-10 h-10 text-white" />
+        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
+          <div className="w-20 h-20 bg-neo-red border-4 border-border flex items-center justify-center mx-auto mb-6 ">
+            <UserMinus className="w-10 h-10 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
             Request Declined
@@ -201,11 +201,11 @@ export function WatchPartyLobby({
   if (roomPreview) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white border-4 border-border  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none overflow-hidden">
+        <div className="max-w-md w-full bg-background border-4 border-border  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none overflow-hidden">
           {/* Header */}
-          <div className="bg-[#ffcc00] border-b-4 border-border p-6 text-center">
-            <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-foreground border-2 border-border bg-white px-3 py-1 mb-4">
-              <div className="w-2 h-2 rounded-full bg-[#ffcc00] animate-pulse motion-reduce:animate-none" />
+          <div className="bg-neo-yellow border-b-4 border-border p-6 text-center">
+            <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-foreground border-2 border-border bg-background px-3 py-1 mb-4">
+              <div className="w-2 h-2 rounded-full bg-neo-yellow animate-pulse motion-reduce:animate-none" />
               Live Watch Party
             </div>
             <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
@@ -227,13 +227,13 @@ export function WatchPartyLobby({
               ) : null}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-4">
                 <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-foreground">
-                  <Crown className="w-4 h-4 text-[#0055ff]" />
+                  <Crown className="w-4 h-4 text-neo-blue" />
                   <span className="truncate max-w-[120px]">
                     {roomPreview.hostName}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-foreground">
-                  <Users className="w-4 h-4 text-[#0055ff]" />
+                  <Users className="w-4 h-4 text-neo-blue" />
                   <span>{roomPreview.memberCount} watching</span>
                 </div>
               </div>
@@ -257,7 +257,7 @@ export function WatchPartyLobby({
                       onChange={(e) => onGuestNameChange(e.target.value)}
                       placeholder="ENTER YOUR NAME"
                       maxLength={30}
-                      className="w-full pl-10 pr-4 py-3 bg-white border-4 border-border text-foreground outline-none font-bold placeholder:text-foreground/40 transition-colors focus:bg-[#ffcc00] relative"
+                      className="w-full pl-10 pr-4 py-3 bg-background border-4 border-border text-foreground outline-none font-bold placeholder:text-foreground/40 transition-colors focus:bg-neo-yellow relative"
                     />
                   </div>
                 </div>
@@ -301,7 +301,7 @@ export function WatchPartyLobby({
                   type="button"
                   variant="neo-outline"
                   onClick={() => openInDesktopApp()}
-                  className="w-full py-4 tracking-widest uppercase font-black bg-[#ffcc00] text-black border-4 hover:bg-[#ffe066]"
+                  className="w-full py-4 tracking-widest uppercase font-black bg-neo-yellow text-primary-foreground border-4 hover:bg-neo-yellow/80"
                 >
                   <Monitor className="w-5 h-5 mr-2" />
                   Open in Desktop App
@@ -319,7 +319,7 @@ export function WatchPartyLobby({
             </div>
 
             {error ? (
-              <div className="p-4 bg-[#e63b2e] border-4 border-border text-white">
+              <div className="p-4 bg-neo-red border-4 border-border text-primary-foreground">
                 <p className="text-sm font-black font-headline uppercase leading-tight">
                   {error}
                 </p>

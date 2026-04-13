@@ -182,14 +182,10 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                       </span>
                     )}
                     {usernameStatus === 'taken' && (
-                      <span className="text-[#e63b2e] font-black text-xs">
-                        ✗
-                      </span>
+                      <span className="text-neo-red font-black text-xs">✗</span>
                     )}
                     {usernameStatus === 'invalid' && (
-                      <span className="text-[#e63b2e] font-black text-xs">
-                        !
-                      </span>
+                      <span className="text-neo-red font-black text-xs">!</span>
                     )}
                   </div>
                 )}

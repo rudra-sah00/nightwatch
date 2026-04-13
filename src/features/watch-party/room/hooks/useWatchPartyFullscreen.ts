@@ -13,6 +13,9 @@ interface UseWatchPartyFullscreenReturn {
 /**
  * Manages native browser fullscreen for a container element,
  * with Safari/WebKit fallback support.
+ * In the Electron Desktop App, delegates exactly to OS window fullscreen
+ * APIs rather than Chromium HTML5 bounds, ensuring the Watch Party
+ * Sidebar can gracefully sit under dragging logic without being consumed.
  */
 export function useWatchPartyFullscreen({
   containerRef,
@@ -20,6 +23,13 @@ export function useWatchPartyFullscreen({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = useCallback(async () => {
+    // 1. Desktop App Native OS Fullscreen
+    if (typeof window !== 'undefined' && window.electronAPI?.toggleFullscreen) {
+      window.electronAPI.toggleFullscreen();
+      return;
+    }
+
+    // 2. Web Browser DOM Fallback
     try {
       const doc = document as Document & {
         webkitFullscreenElement?: Element;
@@ -51,6 +61,18 @@ export function useWatchPartyFullscreen({
   }, [containerRef]);
 
   useEffect(() => {
+    // 1. Desktop App Native OS Event Link
+    if (
+      typeof window !== 'undefined' &&
+      window.electronAPI?.onFullscreenChanged
+    ) {
+      const unsubscribe = window.electronAPI.onFullscreenChanged((isFS) => {
+        setIsFullscreen(isFS);
+      });
+      return unsubscribe;
+    }
+
+    // 2. Web Browser Fallback DOM Events
     const handleFullscreenChange = () => {
       const doc = document as Document & {
         webkitFullscreenElement?: Element;

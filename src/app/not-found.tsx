@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-[#ffcc00] selection:text-foreground flex items-center justify-center p-6 font-headline overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground selection:bg-neo-yellow selection:text-foreground flex items-center justify-center p-6 font-headline overflow-hidden">
       {/* Dynamic Background Patterns */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.05] z-0">
         <div className="absolute top-[10%] left-[5%] w-[30vw] h-[30vw] border-[10vw] border-border rounded-full" />
@@ -19,7 +19,7 @@ export default function NotFound() {
           <h1 className="text-[12rem] md:text-[20rem] font-black uppercase tracking-tighter leading-none select-none text-foreground animate-in slide-in-from-bottom-12 duration-500">
             404
           </h1>
-          <div className="absolute -bottom-4 right-0 md:right-4 bg-primary text-primary-foreground px-6 py-2 rounded-xl border border-gray-200 font-bold text-xl md:text-2xl uppercase tracking-tighter">
+          <div className="absolute -bottom-4 right-0 md:right-4 bg-primary text-primary-foreground px-6 py-2 rounded-xl border border-border font-bold text-xl md:text-2xl uppercase tracking-tighter">
             MISSION FAILED
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function NotFound() {
               variant="neo-outline"
               size="none"
               onClick={() => window.history.back()}
-              className="px-10 py-5 text-lg tracking-widest bg-white"
+              className="px-10 py-5 text-lg tracking-widest bg-background"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform mr-3" />
               PREVIOUS SECTOR

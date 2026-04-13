@@ -60,6 +60,14 @@ export interface ElectronAPI {
         | 'MediaStop',
     ) => void,
   ) => () => void;
+
+  /** Toggles native OS fullscreen on the main window */
+  toggleFullscreen: () => void;
+
+  /** Tells React when Native OS Fullscreen state changes. */
+  onFullscreenChanged: (
+    callback: (isFullScreen: boolean) => void,
+  ) => () => void;
 }
 
 declare global {

@@ -141,7 +141,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                 <button
                   type="button"
                   onClick={() => setStep('forgot')}
-                  className="font-headline font-bold uppercase text-[9px] tracking-widest text-[#e63b2e] hover:underline focus-visible:underline focus-visible:outline-none whitespace-nowrap leading-none"
+                  className="font-headline font-bold uppercase text-[9px] tracking-widest text-neo-red hover:underline focus-visible:underline focus-visible:outline-none whitespace-nowrap leading-none"
                 >
                   Forgot?
                 </button>

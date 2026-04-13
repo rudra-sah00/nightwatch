@@ -72,7 +72,7 @@ export function EpisodeCard({
         {/* Play/Loading Overlay */}
         <div
           className={cn(
-            'absolute inset-0 flex items-center justify-center bg-[#0055ff]/40',
+            'absolute inset-0 flex items-center justify-center bg-neo-blue/40',
             isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
             'transition-opacity duration-200',
           )}

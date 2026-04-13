@@ -294,7 +294,7 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
               left: `${Math.min(95, Math.max(5, hoverFraction * 100))}%`,
             }}
           >
-            <div className="px-3 py-1 bg-white border-[3px] border-border text-[11px] lg:text-xs font-black font-headline uppercase tracking-widest text-foreground whitespace-nowrap ">
+            <div className="px-3 py-1 bg-background border-[3px] border-border text-[11px] lg:text-xs font-black font-headline uppercase tracking-widest text-foreground whitespace-nowrap ">
               {formatBehind(hoverBehind)}
             </div>
             <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#1a1a1a] mx-auto drop-shadow-sm" />
@@ -305,7 +305,7 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
         <div
           ref={barRef}
           className={cn(
-            'relative bg-white border-[3px] border-border overflow-visible',
+            'relative bg-background border-[3px] border-border overflow-visible',
             compact ? 'h-2 lg:h-2.5' : 'h-2.5 lg:h-3 2xl:h-4',
             isDragging
               ? compact
@@ -357,21 +357,21 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
           {/* Hover ghost position */}
           {hoverFraction !== null ? (
             <div
-              className="absolute h-full top-[-3px] bottom-[-3px] bg-[#1a1a1a]/10 border-r-[3px] border-border"
+              className="absolute h-full top-[-3px] bottom-[-3px] bg-primary/10 border-r-[3px] border-border"
               style={{ width: `${Math.max(0, hoverFraction * 100 - 0.5)}%` }}
             />
           ) : null}
 
           {/* DVR progress fill — no CSS transition; rAF gives 60 fps smoothness */}
           <div
-            className="absolute h-full top-[-3px] bottom-[-3px] bg-[#e63b2e] border-y-[3px] border-border border-l-[1.5px] border-r-[3px]"
+            className="absolute h-full top-[-3px] bottom-[-3px] bg-neo-red border-y-[3px] border-border border-l-[1.5px] border-r-[3px]"
             style={{ width: `${Math.max(0, progress - 0.5)}%` }}
           />
 
           {/* Scrubber knob — always visible while dragging */}
           <div
             className={cn(
-              'absolute top-1/2 -translate-y-1/2 bg-white border-border shadow-none pointer-events-none rounded-none',
+              'absolute top-1/2 -translate-y-1/2 bg-background border-border shadow-none pointer-events-none rounded-none',
               compact
                 ? 'w-3 h-3 lg:w-3.5 lg:h-3.5 border-[3px]'
                 : 'w-4 lg:w-5 2xl:w-6 h-4 lg:h-5 2xl:h-6 border-[4px]',
@@ -384,7 +384,7 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
 
           {/* LIVE edge dot — always at 100 % right */}
           <div
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] ${compact ? 'w-2 h-2 border' : 'w-2.5 h-2.5 border-[2px]'} border-border pointer-events-none z-10 ${isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]'}`}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] ${compact ? 'w-2 h-2 border' : 'w-2.5 h-2.5 border-[2px]'} border-border pointer-events-none z-10 ${isAtLiveEdge ? 'bg-background animate-pulse' : 'bg-neo-red'}`}
           />
         </div>
 

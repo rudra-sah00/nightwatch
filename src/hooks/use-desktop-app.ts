@@ -69,10 +69,29 @@ export function useDesktopApp() {
     }
   };
 
+  /**
+   * Dynamically adds top padding strictly within the Desktop App
+   * to prevent UI from hiding underneath the 32px native OS window controls.
+   */
+  const getDesktopTopPaddingClass = (isFullscreen = false) => {
+    return isDesktopApp && !isFullscreen ? 'pt-8' : '';
+  };
+
+  /** Inline style enabling/disabling the Electron native frameless window drag area. */
+  const dragStyle: React.CSSProperties = {
+    WebkitAppRegion: 'drag',
+  } as React.CSSProperties;
+  const noDragStyle: React.CSSProperties = {
+    WebkitAppRegion: 'no-drag',
+  } as React.CSSProperties;
+
   return {
     isDesktopApp,
     isBrowser,
     openInDesktopApp,
     copyToClipboard,
+    getDesktopTopPaddingClass,
+    dragStyle,
+    noDragStyle,
   };
 }

@@ -10,7 +10,7 @@ export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
   const { tabs } = useSidebarTabs();
 
   return (
-    <div className="flex border-b border-border bg-white shrink-0">
+    <div className="flex border-b border-border bg-background shrink-0">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;

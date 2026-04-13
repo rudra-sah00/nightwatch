@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
 import { SocketProvider } from '@/providers/socket-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -58,12 +59,14 @@ export default function RootLayout({
           {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
           <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-transparent pointer-events-auto [-webkit-app-region:drag]" />
 
-          <SocketProvider>
-            <AuthProvider>
-              {children}
-              <Toaster />
-            </AuthProvider>
-          </SocketProvider>
+          <ThemeProvider>
+            <SocketProvider>
+              <AuthProvider>
+                {children}
+                <Toaster />
+              </AuthProvider>
+            </SocketProvider>
+          </ThemeProvider>
         </DevToolsProtectionProvider>
       </body>
     </html>

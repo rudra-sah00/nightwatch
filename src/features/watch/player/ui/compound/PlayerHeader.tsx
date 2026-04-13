@@ -30,7 +30,7 @@ export function PlayerHeader({
           size="icon"
           onClick={playerHandlers.goBack}
           onMouseDown={(e) => e.preventDefault()}
-          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer border-transparent"
+          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-primary-foreground transition-colors cursor-pointer border-transparent"
         >
           <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
         </Button>
@@ -43,7 +43,7 @@ export function PlayerHeader({
           size="icon"
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer border-transparent"
+          className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-primary-foreground transition-colors cursor-pointer border-transparent"
           title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           {isSidebarOpen ? (
@@ -56,14 +56,14 @@ export function PlayerHeader({
 
       <div className="flex-1 min-w-0">
         <h1
-          className="text-white font-black font-headline uppercase tracking-wider text-xl md:text-3xl lg:text-4xl 2xl:text-5xl truncate"
+          className="text-primary-foreground font-black font-headline uppercase tracking-wider text-xl md:text-3xl lg:text-4xl 2xl:text-5xl truncate"
           style={{ textShadow: '4px 4px 0px #1a1a1a' }}
         >
           {metadata.title}
         </h1>
         {metadata.type === 'series' && metadata.season && metadata.episode ? (
           <p
-            className="text-[#ffcc00] font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1"
+            className="text-neo-yellow font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1"
             style={{ textShadow: '2px 2px 0px #1a1a1a' }}
           >
             Season {metadata.season} · Episode {metadata.episode}

@@ -1,87 +1,48 @@
-# Contributing & Developer Workflow
+# Contributing to Watch Rudra
 
-Watch Rudra is a monolithic unified repository, containing our Next.js frontend, Node.js proxy layers, and the Electron desktop application. Given the size of the codebase, we maintain strict contribution guidelines to ensure high code quality, optimal performance, and safe deployment.
+With Watch Rudra's extensive ecosystem (Next.js 15, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
 
-## Prerequisites
+## Code Formatting & Linting (Biome)
 
-Before you start building, ensure your local environment meets the strict tooling requirements:
+We do **not** use Prettier or ESLint. We exclusively use [Biome (formerly Rome)](https://biomejs.dev/). Biome is natively integrated into `package.json` (`@biomejs/biome`) and `pnpm`.
 
-- **Node.js**: v20 or higher.
-- **Package Manager**: Strictly `pnpm` (v9). We do NOT use `npm` or `yarn`. 
-- **Formatter/Linter**: Rust-based [Biome](https://biomejs.dev/). We do not use Prettier or ESLint to maximize toolchain speed.
-
+Before pushing PRs or committing changes, run:
 ```bash
-# Install pnpm globally if you haven't
-npm install -g pnpm
-
-# Install dependencies using the strict lockfile
-pnpm install
+pnpm biome check src/ --write
+pnpm biome format src/ --write
 ```
+*   **Quotes**: Use single quotes (`'`) internally, especially for component configuration or Mermaid JS maps (which crash `docs/UI_GUIDELINES.md` if double-quotes `"default"` are used).
+*   **Spacing**: 2 spaces.
+*   **Organized Imports**: Biome manages and automatically organizes imports alphabetically based on group types (`src/features` vs `react`). Let it sort for you.
 
-## Running the Project
+## Component Design (Neo-Brutalist)
 
-The workspace relies on a robust Next.js environment combined with an Electron shell wrapper.
+All UI elements must utilize `cva` (Class Variance Authority) from `src/components/ui/` to ensure the strict brutalist styling rules are applied identically.
+*   **Variants**: Use `variant="neo-yellow"`, `variant="neo-red"`, `variant="neo-outline"`, `variant="default"`.
+*   Avoid adding standard Tailwind shadows. Use our bespoke `shadow-[4px_4px_0px_#000]` or utility classes like `border-2 border-black`.
 
-### Web Only (Development)
+## Hooks and Global Context
 
-To run the standard web browser application, which includes hot-module-reloading (HMR) and Tailwind compilation:
+Do not scatter standard React `useState` everywhere inside complex features.
+*   If managing the VOD Player, dispatch events internally through `PlayerContext.tsx` strictly.
+*   If bridging the Desktop Electron shell with the browser, never write `typeof window !== "undefined" && window.electronAPI` redundantly. Import and utilize `useDesktopApp()` from `src/hooks/use-desktop-app.ts`. This central hook includes heuristics to automatically fallback deep links.
 
-```bash
-pnpm dev
-# The application will be accessible at http://localhost:3000
-```
+## React Rendering Optimization
 
-### Desktop Only (Electron Development)
+Because we heavily use Agora's real-time channels:
+*   Do not put rapidly changing domain states (like `WatchPartyRoom.time`) into `useEffect` dependency arrays unless strictly needed. It triggers destructive re-rendering loops.
+*   Cache the latest pointer logic into mutable memory: `const roomRef = useRef(room); roomRef.current = room;` and only let the listeners read `.current` statically.
 
-To test the Desktop Application functionality (like Deep Linking, `app-region` dragging, and Discord RPC):
+## State Management
 
-1. **Build the Web Code First:** Electron requires a compiled production output. You cannot hot-reload Next.js *inside* the Electron shell easily due to IPC context bindings.
-    ```bash
-    pnpm build
-    ```
-2. **Start the Electron Shell:**
-    ```bash
-    pnpm start:electron
-    ```
+*   **Mutations**: Standard data mutations (profiles, passwords) use **Server Actions**.
+*   **API Calling**: We do not use standard `fetch()` syntax. Route heavily through `src/lib/fetch.ts`, specifically employing `apiFetch` which wraps Mutex Queues to handle JWT Access Token timeouts silently without crashing active components executing parallel requests.
 
-## Formatting & Code Quality
+## Adding Markdown Files to `/docs`
 
-If any formatting checks fail in CI, your Pull Request will be blocked. You should format your code locally before committing.
+If you add a new Markdown file, ensure it correctly proxies in Next.js Server config. Any file containing the string `api` out of pure coincidence (like `API_LAYER.md`) can trigger Vercel Edge Server 404 collapses unless whitelisted in `src/proxy.ts` using the correct negative-lookahead expressions:
+`/((?!api\/|_next\/static).*)`
 
-```bash
-# Format the entire codebase
-pnpm biome format --write .
+## Running Tests
 
-# Or, safely lint and apply fixes
-pnpm biome check --write --unsafe .
-```
-
-### Rule of Thumb
-Do not create complex CSS styling rules inside individual `.tsx` files if a Neo-Brutalist `cva` button or component already exists! Refer to the [UI Guidelines](/UI_GUIDELINES) documentation.
-
-## Commit Guidelines
-
-We use [Conventional Commits](https://www.conventionalcommits.org/). This dictates how we parse changes for semantic versioning (e.g. creating releases like `v1.18.0`).
-
-**Valid Prefixes:**
-- `feat:` A new feature. (e.g., `feat(watch-party): add deep link hook`)
-- `fix:` A bug fix. (e.g., `fix(desktop): restore frameless window region`)
-- `docs:` Documentation updates. (e.g., `docs: update UI guidelines`)
-- `refactor:` Code restructuring without changing external behavior.
-- `chore:` Tooling, configs, dependency bumps.
-
-## Pull Request Process
-
-1. Create a branch logically named: `feat/add-watch-party-sync`, `fix/desktop-memory-leak`.
-2. Write tests for robust features (e.g. Socket.io handlers in `tests/features/auth/schemas.test.ts`).
-3. Run `pnpm run test` locally to ensure no regressions.
-4. Keep the PR focused. Don't mix UI redesigns into a Desktop IPC logic fix.
-
-## Building for Production
-
-If you need to cut a physical `.dmg` or `.exe` release of the Electron app:
-
-```bash
-pnpm build:desktop
-```
-This leverages `electron-builder` under the hood. For the Web layer on Vercel, merges to `main` automatically kick off an Edge network deployment.
+All testing rules are comprehensively outlined in `docs/TESTING.md`. We enforce cross-platform Playwright e2e checking heavily for the Watch Party features.

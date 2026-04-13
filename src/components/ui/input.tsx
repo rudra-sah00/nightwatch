@@ -8,8 +8,8 @@ const inputVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-foreground text-sm h-[42px] font-body',
-        neo: 'bg-[#f2ede5] border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-white focus:ring-0 text-foreground text-sm h-[42px] font-body',
+          'bg-muted/30 border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-background focus:ring-0 text-foreground text-sm h-[42px] font-body',
+        neo: 'bg-muted/30 border-x-0 border-t-0 border-b-4 border-border rounded-none p-2 px-3 focus:bg-background focus:ring-0 text-foreground text-sm h-[42px] font-body',
       },
     },
     defaultVariants: {
@@ -39,7 +39,7 @@ function Input({ className, variant, type, error, ref, ...props }: InputProps) {
         {...props}
       />
       {error ? (
-        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-[#e63b2e] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none">
+        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-neo-red motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none">
           {error}
         </p>
       ) : null}

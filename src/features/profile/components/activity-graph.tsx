@@ -30,9 +30,9 @@ interface ActivityGraphProps {
 const ACTIVITY_LEVEL_COLORS = [
   'bg-[#f1ece4]', // Level 0 - empty
   'bg-[#b3ccff]', // Level 1
-  'bg-[#0055ff]', // Level 2
-  'bg-[#ffcc00]', // Level 3
-  'bg-[#e63b2e]', // Level 4
+  'bg-neo-blue', // Level 2
+  'bg-neo-yellow', // Level 3
+  'bg-neo-red', // Level 4
 ] as const;
 
 function ActivityGraphSkeleton() {
@@ -47,7 +47,7 @@ function ActivityGraphSkeleton() {
         {skeletonIds.map((id) => (
           <div
             key={id}
-            className="w-3 h-3 bg-[#1a1a1a]/5 border border-border/10"
+            className="w-3 h-3 bg-primary/5 border border-border/10"
           ></div>
         ))}
       </div>
@@ -198,7 +198,7 @@ export function ActivityGraph({
                 {day.isValid && (
                   <div
                     className={cn(
-                      'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-[#1a1a1a] text-white font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
+                      'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-primary text-white font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
                       tooltipHorizontal,
                       tooltipVertical,
                     )}

@@ -43,7 +43,7 @@ export const SearchResults = React.memo(function SearchResults({
   if (results.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 bg-white border-[4px] border-border  text-center max-w-2xl mx-auto w-full">
-        <Film className="w-20 h-20 text-[#0055ff] mb-6 stroke-[3px]" />
+        <Film className="w-20 h-20 text-neo-blue mb-6 stroke-[3px]" />
         <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
           No Results Found
         </h3>
@@ -114,7 +114,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
 
         {/* Release Year Badge */}
         {result.year ? (
-          <div className="absolute top-4 right-4 bg-[#ffcc00] border-[2px] border-border px-3 py-1 font-headline font-black uppercase text-sm text-foreground ">
+          <div className="absolute top-4 right-4 bg-neo-yellow border-[2px] border-border px-3 py-1 font-headline font-black uppercase text-sm text-foreground ">
             {result.year}
           </div>
         ) : null}
@@ -124,7 +124,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
         {/* Title */}
         <button
           type="button"
-          className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto cursor-pointer hover:text-[#0055ff] text-foreground outline-none focus:text-[#0055ff] text-left w-full p-0 bg-transparent border-none appearance-none line-clamp-2"
+          className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto cursor-pointer hover:text-neo-blue text-foreground outline-none focus:text-neo-blue text-left w-full p-0 bg-transparent border-none appearance-none line-clamp-2"
           title={result.title}
           onClick={() => onSelect(result)}
         >

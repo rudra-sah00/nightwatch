@@ -49,7 +49,7 @@ function TeamPanel({
           <img
             src={team.avatar}
             alt={team.name}
-            className="w-full h-full object-contain p-2"
+            className="w-full h-full object-contain p-2 bg-white"
           />
         ) : (
           <span className="text-3xl font-black font-headline text-foreground uppercase">
@@ -129,7 +129,7 @@ export function LiveMatchModal({
       aria-modal="true"
       aria-labelledby="live-match-modal-title"
     >
-      <div className="relative w-full h-full overflow-y-auto bg-white flex flex-col no-scrollbar">
+      <div className="relative w-full h-full overflow-y-auto bg-background flex flex-col no-scrollbar">
         {/* Header / Close button */}
         <div className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20">
           <div className="flex items-center gap-4">
@@ -142,8 +142,8 @@ export function LiveMatchModal({
             <div
               className={`px-3 py-1 border border-gray-200 text-[10px] font-black font-headline uppercase tracking-[0.2em] rounded-md hidden sm:block ${
                 isServer2
-                  ? 'bg-[#0055ff] text-white'
-                  : 'bg-[#ffcc00] text-foreground'
+                  ? 'bg-neo-blue text-primary-foreground'
+                  : 'bg-neo-yellow text-foreground'
               }`}
             >
               {providerName}
@@ -152,7 +152,7 @@ export function LiveMatchModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
             aria-label="Close"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -171,18 +171,18 @@ export function LiveMatchModal({
                   isEnded={false}
                 />
                 {isLive && (
-                  <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
+                  <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
                     <span className="relative flex h-3 w-3">
-                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
+                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
                     </span>
-                    <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
+                    <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
                       Live
                     </span>
                   </div>
                 )}
                 {isUpcoming && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-white border-[3px] border-border px-3 py-1 ">
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
                     {formattedTime}
                   </span>
                 )}
@@ -201,23 +201,23 @@ export function LiveMatchModal({
               <div className="flex-shrink-0 w-24 md:w-48 flex flex-col items-center justify-center gap-4 relative z-10 px-2 lg:px-4">
                 {/* LIVE badge */}
                 {isLive && (
-                  <div className="flex items-center gap-2 bg-[#e63b2e] border-[3px] border-border px-3 py-1 ">
+                  <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
                     <span className="relative flex h-3 w-3">
-                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-white opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 bg-white border-2 border-border" />
+                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
                     </span>
-                    <span className="text-xs md:text-sm font-black font-headline text-white uppercase tracking-widest">
+                    <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
                       Live
                     </span>
                   </div>
                 )}
                 {isEnded && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-[#ffcc00] border-[3px] border-border px-3 py-1 ">
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-neo-yellow border-[3px] border-border px-3 py-1 ">
                     Final
                   </span>
                 )}
                 {isUpcoming && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-white border-[3px] border-border px-3 py-1 ">
+                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
                     {formattedTime}
                   </span>
                 )}
@@ -246,7 +246,7 @@ export function LiveMatchModal({
         </div>
 
         {/* Details section */}
-        <div className="px-6 md:px-10 py-10 bg-white">
+        <div className="px-6 md:px-10 py-10 bg-background">
           <div className="max-w-3xl mx-auto space-y-10">
             {/* Title row */}
             <div className="text-center space-y-6">
@@ -255,14 +255,14 @@ export function LiveMatchModal({
                   channelTitle
                 ) : (
                   <>
-                    {team1Name} <span className="text-[#e63b2e]">vs</span>{' '}
+                    {team1Name} <span className="text-neo-red">vs</span>{' '}
                     {team2Name}
                   </>
                 )}
               </h1>
               <div className="flex items-center justify-center gap-3 flex-wrap">
                 {leagueName && (
-                  <span className="bg-white border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
+                  <span className="bg-background border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
                     {leagueName}
                   </span>
                 )}
@@ -272,7 +272,7 @@ export function LiveMatchModal({
                   </span>
                 )}
                 {typeName && typeName !== leagueName && (
-                  <span className="text-foreground text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-border px-4 py-1.5 bg-[#ffcc00]">
+                  <span className="text-foreground text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-border px-4 py-1.5 bg-neo-yellow">
                     {typeName}
                   </span>
                 )}
@@ -286,10 +286,10 @@ export function LiveMatchModal({
                 type="button"
                 className={cn(
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
+                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
                   !canWatch
-                    ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-                    : 'bg-[#ffcc00] text-foreground hover:bg-[#ffe066]',
+                    ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
+                    : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
                 )}
                 onClick={onWatchSolo}
                 disabled={!canWatch}
@@ -310,10 +310,10 @@ export function LiveMatchModal({
                   type="button"
                   className={cn(
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
+                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
                     isCreatingParty || !canWatch
-                      ? 'bg-background text-[#4a4a4a] cursor-not-allowed opacity-70'
-                      : 'bg-[#1a1a1a] text-white hover:bg-[#0055ff]',
+                      ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
+                      : 'bg-primary text-primary-foreground hover:bg-neo-blue',
                   )}
                   onClick={onWatchParty}
                   disabled={isCreatingParty || !canWatch}
@@ -332,7 +332,7 @@ export function LiveMatchModal({
 
             {/* Mobile-only note */}
             {isMobile && (
-              <p className="text-center text-sm font-black uppercase tracking-widest text-[#e63b2e] font-headline">
+              <p className="text-center text-sm font-black uppercase tracking-widest text-neo-red font-headline">
                 Watch Party is only available on desktop.
               </p>
             )}

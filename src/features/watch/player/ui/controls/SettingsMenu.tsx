@@ -44,7 +44,7 @@ export function SettingsMenu({
       <button
         type="button"
         onClick={() => setCurrentScreen('quality')}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border text-foreground"
+        className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border text-foreground"
       >
         <div className="flex items-center gap-3">
           <Gauge className="w-5 h-5 stroke-[3px]" />
@@ -67,7 +67,7 @@ export function SettingsMenu({
           'w-full flex items-center justify-between p-4 transition-colors text-foreground',
           disabled
             ? 'cursor-not-allowed bg-background text-[#4a4a4a]'
-            : 'hover:bg-[#ffe066]',
+            : 'hover:bg-neo-yellow/80',
         )}
       >
         <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export function SettingsMenu({
         <button
           type="button"
           onClick={handleBack}
-          className="text-foreground hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-border p-1"
+          className="text-foreground hover:bg-primary hover:text-primary-foreground transition-colors border-[2px] border-border p-1"
         >
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
@@ -133,7 +133,7 @@ export function SettingsMenu({
           onQualityChange('auto');
           setIsOpen(false);
         }}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border text-foreground"
+        className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border text-foreground"
       >
         <span className="font-bold font-headline uppercase tracking-widest text-sm">
           Auto
@@ -151,7 +151,7 @@ export function SettingsMenu({
             onQualityChange(quality.label);
             setIsOpen(false);
           }}
-          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
+          className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
         >
           <span className="font-bold font-headline uppercase tracking-widest text-sm">
             {quality.label}
@@ -170,7 +170,7 @@ export function SettingsMenu({
         <button
           type="button"
           onClick={handleBack}
-          className="text-foreground hover:bg-[#1a1a1a] hover:text-white transition-colors border-[2px] border-border p-1"
+          className="text-foreground hover:bg-primary hover:text-primary-foreground transition-colors border-[2px] border-border p-1"
         >
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
@@ -188,7 +188,7 @@ export function SettingsMenu({
             onPlaybackRateChange(speed);
             setIsOpen(false);
           }}
-          className="w-full flex items-center justify-between p-4 hover:bg-[#ffe066] transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
+          className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
         >
           <span className="font-bold font-headline uppercase tracking-widest text-sm">
             {speed === 1 ? 'Normal' : `${speed}x`}
@@ -212,9 +212,9 @@ export function SettingsMenu({
           compact
             ? 'p-1.5 transition-colors duration-200'
             : 'p-2.5 transition-colors duration-200',
-          'bg-white border-[3px] border-border text-foreground ',
-          'hover:bg-[#ffe066]',
-          'active:bg-[#ffcc00]',
+          'bg-background border-[3px] border-border text-foreground ',
+          'hover:bg-neo-yellow/80',
+          'active:bg-neo-yellow',
           isOpen && 'bg-background shadow-none',
         )}
       >
@@ -230,7 +230,7 @@ export function SettingsMenu({
 
       {/* Menu dropdown */}
       {isOpen ? (
-        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-white border-[4px] border-border  flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
+        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-background border-[4px] border-border  flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
           {currentScreen === 'main' && renderMainMenu()}
           {currentScreen === 'quality' && renderQualityMenu()}
           {currentScreen === 'speed' && renderSpeedMenu()}

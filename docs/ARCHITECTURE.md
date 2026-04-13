@@ -1,56 +1,63 @@
-# Frontend Architecture
+# Real-World Codebase Architecture
 
-This document outlines the high-level architecture and technical decisions for the Watch Rudra frontend.
+Watch Rudra is not a simple Next.js boilerplate; it's a massive, multi-environment monorepo architecture bridging browser clients explicitly with native Electron (OS) hooks, complex HLS streaming, and real-time P2P networking protocols.
 
-## Tech Stack
+## High-Level Tech Stack
 
-- Framework: Next.js (App Router)
-- Language: TypeScript
-- Styling: Tailwind CSS (Custom Neo-brutalist theme)
-- Real-time Communication: Agora RTM, Agora RTC, Socket.IO
-- Tooling: Biome (Linting & Formatting), Vitest (Testing), Playwright (E2E)
+*   **Framework**: Next.js 15 (App Router fully utilizing RSC / Server Actions).
+*   **Language**: TypeScript (Strict typing for RPC channels, APIs, and React props).
+*   **Styling**: Tailwind CSS (Custom Neo-Brutalist Theme with variables in `tailwind.config`).
+*   **Real-time Infrastructure**: Agora RTM (Signaling / UI State), Agora RTC (WebRTC Video/Audio Calls), and Socket.io (`socket.ts` legacy fallbacks).
+*   **Video Engine**: Custom HLS abstractions over `hls.js` supporting dynamic manifest swapping.
+*   **Native Bridge**: Electron IPC `window.electronAPI`.
+*   **Quality Config**: `biome.json` (Lint/Format entirely replacing ESLint/Prettier), Vitest (Unit), Playwright (E2E).
 
-## Core Structure
+---
 
-The codebase follows a feature-based architecture within the `src` directory to keep domain logic isolated and maintainable:
+## 1. The Route Grouping Paradigm
 
-- `app/`: Next.js App Router definitions, defining the routing, layouts, and pages.
-- `components/`: Shared UI components (mostly generic elements like Buttons, Inputs, Dialogs).
-- `features/`: Domain-specific components, hooks, services, and types (e.g., `watch-party`, `profile`, `auth`).
-- `lib/`: Shared utilities, global helpers, and API configurations.
-- `providers/`: Global React Context providers (e.g., AuthProvider, SocketProvider).
-- `types/`: Global TypeScript definitions.
+The entry point of the app lives in `src/app/`, where React Server Components determine authentication layouts gracefully before reaching the client boundaries.
 
-## Real-Time Architecture
+We strategically compartmentalize routes using parenthesis:
+*   `app/(public)/`: Landing pages, SEO-focused indexing maps, and unauthenticated feature showcases. No auth middleware blocking occurs here.
+*   `app/(protected)/`: The core dashboard, Discover maps, user profiles, and VOD watch streams (`/watch/:id`). This enforces the user has hit the `AuthProvider`.
+*   `app/(party)/`: The extremely complex layout dedicated solely to real-time WebRTC connections, bypassing generic navigation sidebars to prevent accidental unmounts of the Agora connection container (`src/features/watch-party/`).
 
-A Watch Party requires sub-second synchronization across multiple clients. We utilize a hybrid approach to balance server load and speed:
+---
 
-1. Socket.IO (Signaling & Lobby Management)
-   - Used for initial presence, join requests, and lobby approval management.
-   - Connects directly to our Node.js backend.
+## 2. Feature-Sliced Design (`src/features/`)
 
-2. Agora RTM (Real-Time Messaging)
-   - Used for in-room peer-to-peer data synchronization.
-   - Handles playback state (play/pause/seek), chat messages, typing indicators, and precise permission updates.
-   - Offloads the heavy websocket broadcasting traffic from our backend to Agora's edge network, reducing latency.
+Instead of throwing every component into a global `src/components/` folder, Watch Rudra embraces a deeply nested Feature-Pattern architecture. A generic `Button` lives in `src/components/ui/`, but business logic lives in `src/features/[domain]/`:
 
-3. Agora RTC (Real-Time Communication)
-   - Used for the voice and video streams between party members over WebRTC.
+*   **`auth/`**: Sign In, Sign Up, JWT handling UI.
+*   **`watch/`**: The complete VOD engine, storing `src/features/watch/player/` for parsing m3u8 manifests into `HTMLVideoElement` contexts cleanly.
+*   **`watch-party/`**: The single largest domain in the project. Broken down locally into:
+    *   `/chat/`: Instant messaging hooks and P2P overlays.
+    *   `/hooks/`: Global UI states, full-screen detection, active media controls.
+    *   `/interactions/`: The `useGestureDetection.ts` logic handling camera hand movements, `useSoundboard.ts`, and `SketchContext.tsx` for drawing on the screen.
+    *   `/media/`: The exact `useAgora.ts` and `useAgoraRtm.ts` engines. Provides standard React hooks mapping perfectly to SDK connection promises.
+    *   `/room/`: Member tracking, permission sync (`useWatchPartyMembers.ts`, `usePredictiveSync.ts`), and the legacy fallback lobby logic natively bridging socket approvals.
 
-### State Synchronization
+---
 
-In a Watch Party room, state is managed locally via domain hooks (`useWatchPartyMembers`, `usePredictiveSync`) and synchronized optimistically where possible.
+## 3. The `src/lib/` Utilities Layer
 
-When a user triggers an action (e.g., the Host toggling a permission):
-1. An API call is made to the backend to persist the new state in Redis.
-2. Upon success, the Host's client broadcasts an RTM message to all Guests.
-3. The Host dispatches a local event (`CustomEvent`) to update their own UI instantly, as RTM does not echo messages back to the sender.
-4. Guests receive the RTM message and update their React states via reducers.
+*   **`fetch.ts`:** A wildly complex implementation of the `apiFetch` wrapper. It governs Token Expiration timestamps proactively, blocking simultaneous API requests inside a Mutex Promise Lock (`lockPromise`) if 5 React components mount at the exact same millisecond simultaneously requesting refreshed JWT credentials.
+*   **`socket.ts`:** A global singleton initialization for the older Socket.io server connection. Keeps track of force logouts and active connections if a Host needs to approve new guests hovering in the Watch Party Lobby.
+*   **`constants.ts`:** Strongly typed enumerations for system-wide behaviors.
+*   **`env.ts`:** A highly validated environment configuration file validating `.env` files strictly at runtime to aggressively prevent undefined production crashes.
 
-## Design Pattern
+---
 
-The UI implements a Neo-Brutalist aesthetic characterized by:
-- High contrast, thick borders.
-- Solid, bold colors and sharp typography.
-- Avoidance of soft drop-shadows in favor of solid offset shadows or borders.
-- Reusable UI elements in `src/components/ui/` utilizing `cva` (Class Variance Authority) for standardized variants (e.g., `variant="neo-outline"`).
+## 4. The Edge Proxy & Custom Matchers
+
+Inside Next.js `src/proxy.ts` (mapped in Edge infrastructure), our frontend intercepts direct CDN manifest requests (`.m3u8` or chunk `.ts` files) dynamically. This forces CDN edge servers to believe the VOD stream is being requested by the authorized Host Platform, mitigating hard CORS rules and Hotlink protections designed to crash third-party React players.
+
+*   **The Regex Matcher Strategy:** A heavily tested Regex pattern `/((?!api/|_next/static).*)` ensures internal documentation links like `/API_LAYER` aren't automatically redirected into 404 Vercel Edge endpoints.
+
+---
+
+## 5. The Electron Sandbox (`src/hooks/use-desktop-app.ts`)
+
+Instead of rendering a normal web app in Chromium, the Watch Rudra standard browser experience contains fallback abstractions checking for custom protocol handlers (`watch-rudra://`).
+If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/types/electron.d.ts`.

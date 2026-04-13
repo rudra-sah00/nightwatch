@@ -53,10 +53,10 @@ export default function DocsLayout({
                 Streaming Engine
               </a>
               <a
-                href="/WEB_SOCKETS"
+                href="/AGORA_RTM_RTC"
                 className="text-zinc-500 hover:text-white transition-colors"
               >
-                WebSockets
+                Agora RTM & RTC
               </a>
             </div>
             <a

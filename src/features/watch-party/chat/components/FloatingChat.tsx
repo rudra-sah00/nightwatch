@@ -78,7 +78,7 @@ export function FloatingChat({
             return (
               <p
                 key={msg.id}
-                className="text-[11px] text-white/40 italic text-right leading-snug px-1"
+                className="text-[11px] text-primary-foreground/40 italic text-right leading-snug px-1"
                 style={{ textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}
               >
                 {msg.content}
@@ -97,7 +97,7 @@ export function FloatingChat({
               }}
             >
               <span
-                className={`font-semibold mr-1 ${isMe ? 'text-indigo-300' : 'text-white/65'}`}
+                className={`font-semibold mr-1 ${isMe ? 'text-indigo-300' : 'text-primary-foreground/65'}`}
               >
                 {isMe
                   ? currentUserName
@@ -106,7 +106,9 @@ export function FloatingChat({
                   : msg.userName}
                 :
               </span>
-              <span className="text-white/90 font-normal">{msg.content}</span>
+              <span className="text-primary-foreground/90 font-normal">
+                {msg.content}
+              </span>
             </p>
           );
         })}
@@ -122,14 +124,14 @@ export function FloatingChat({
             placeholder="TYPE SOMETHING..."
             maxLength={200}
             aria-label="Send a chat message"
-            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-foreground placeholder-[#1a1a1a]/40 bg-white border-[3px] border-border px-3 py-2.5 outline-none focus:bg-background transition-colors min-w-0"
+            className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-foreground placeholder:text-muted-foreground bg-background border-[3px] border-border px-3 py-2.5 outline-none focus:bg-background transition-colors min-w-0"
           />
           <Button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
             aria-label="Send"
-            className="p-2.5 bg-[#ffcc00] border-[3px] border-border text-foreground active:bg-[#e0b400] transition-colors disabled:opacity-50 disabled:grayscale"
+            className="p-2.5 bg-neo-yellow border-[3px] border-border text-foreground active:bg-[var(--neo-yellow)/80] transition-colors disabled:opacity-50 disabled:grayscale"
           >
             <Send className="w-4 h-4 stroke-[3px]" />
           </Button>

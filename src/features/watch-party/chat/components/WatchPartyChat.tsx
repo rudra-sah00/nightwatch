@@ -62,7 +62,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
       </div>
 
       <div className="p-4 border-t-[4px] border-border bg-background text-center shrink-0">
-        <p className="text-xs font-black font-headline uppercase tracking-widest text-[#e63b2e]">
+        <p className="text-xs font-black font-headline uppercase tracking-widest text-neo-red">
           Chat has been disabled by the host
         </p>
       </div>
@@ -107,7 +107,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-foreground text-sm space-y-3">
-            <div className="w-16 h-16 bg-white border-[4px] border-border flex items-center justify-center ">
+            <div className="w-16 h-16 bg-background border-[4px] border-border flex items-center justify-center ">
               <Smile className="w-8 h-8 stroke-[3px]" />
             </div>
             <div className="text-center">
@@ -142,7 +142,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+              <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,var(--neo-yellow))] flex items-center justify-center">
                 <span className="text-[10px] font-black font-headline uppercase text-foreground">
                   {typingUsers[0].userName.charAt(0)}
                 </span>
@@ -158,9 +158,9 @@ export const WatchPartyChat = memo(function WatchPartyChat({
               </span>
             </div>
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full animate-bounce motion-reduce:animate-none" />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce motion-reduce:animate-none" />
             </div>
           </div>
         ) : null}
@@ -172,7 +172,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {showEmoji ? (
         <div
           ref={emojiRef}
-          className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-white  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
+          className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-background  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
             theme={Theme.LIGHT}
@@ -190,9 +190,9 @@ export const WatchPartyChat = memo(function WatchPartyChat({
                 '--epr-search-input-bg-color': '#f5f0e8',
                 '--epr-search-input-border-color': '#1a1a1a',
                 '--epr-search-input-border-radius': '0px',
-                '--epr-hover-bg-color': '#ffcc00',
-                '--epr-focus-bg-color': '#ffcc00',
-                '--epr-highlight-color': '#ffcc00',
+                '--epr-hover-bg-color': 'var(--neo-yellow)',
+                '--epr-focus-bg-color': 'var(--neo-yellow)',
+                '--epr-highlight-color': 'var(--neo-yellow)',
                 borderRadius: '0px',
               } as React.CSSProperties
             }
@@ -214,8 +214,8 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             className={cn(
               'p-2.5 rounded-md transition-colors',
               showEmoji
-                ? 'bg-[#1a1a1a] text-[var(--wp-accent,#ffcc00)]'
-                : 'bg-white text-foreground hover:bg-[#ffe066]',
+                ? 'bg-primary text-[var(--wp-accent,var(--neo-yellow))]'
+                : 'bg-background text-foreground hover:bg-neo-yellow/80',
             )}
             title="Add emoji"
           >
@@ -228,7 +228,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message..."
-            className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-white text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,#0055ff)] transition-colors"
+            className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
           />
           <Button
             type="submit"
@@ -236,7 +236,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             className={cn(
               'p-2.5 rounded-md transition-colors',
               input.trim()
-                ? 'bg-[var(--wp-send-btn,#0055ff)] text-white '
+                ? 'bg-[var(--wp-send-btn,var(--neo-blue))] text-primary-foreground '
                 : 'bg-background text-foreground/30 cursor-not-allowed',
             )}
           >
@@ -283,7 +283,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
   if (message.isSystem) {
     return (
       <div className="flex justify-center my-4">
-        <span className="text-[10px] bg-white border-[2px] border-border text-foreground font-black font-headline uppercase tracking-widest px-3 py-1 ">
+        <span className="text-[10px] bg-background border-[2px] border-border text-foreground font-black font-headline uppercase tracking-widest px-3 py-1 ">
           {message.content}
         </span>
       </div>
@@ -300,7 +300,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Avatar/Name Header */}
       {!isMe && showHeader ? (
         <div className="flex items-center gap-2 mb-1 pl-1">
-          <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,#ffcc00)] flex items-center justify-center">
+          <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,var(--neo-yellow))] flex items-center justify-center">
             <span className="text-[10px] font-black font-headline uppercase text-foreground">
               {message.userName.charAt(0)}
             </span>
@@ -327,9 +327,10 @@ const ChatMessageItem = memo(function ChatMessageItem({
           isMe
             ? cn(
                 'mr-1',
-                !isSingleEmoji && 'bg-[var(--wp-send-btn,#0055ff)] text-white ',
+                !isSingleEmoji &&
+                  'bg-[var(--wp-send-btn,var(--neo-blue))] text-primary-foreground ',
               )
-            : cn('ml-1', !isSingleEmoji && 'bg-white text-foreground '),
+            : cn('ml-1', !isSingleEmoji && 'bg-background text-foreground '),
         )}
       >
         {/* Render message with clickable links */}
@@ -342,8 +343,10 @@ const ChatMessageItem = memo(function ChatMessageItem({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  'inline-flex items-center gap-1 underline font-bold hover:bg-[#1a1a1a] hover:text-white px-1 transition-colors',
-                  isMe ? 'text-white' : 'text-[var(--wp-send-btn,#0055ff)]',
+                  'inline-flex items-center gap-1 underline font-bold hover:bg-primary hover:text-primary-foreground px-1 transition-colors',
+                  isMe
+                    ? 'text-primary-foreground'
+                    : 'text-[var(--wp-send-btn,var(--neo-blue))]',
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -369,7 +372,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
         {isMe ? (
           <span
             className={cn(
-              'text-[9px] font-bold font-headline uppercase tracking-widest text-foreground block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 bg-white border-[2px] border-border px-1  z-10 w-max',
+              'text-[9px] font-bold font-headline uppercase tracking-widest text-foreground block text-right mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 right-2 bg-background border-[2px] border-border px-1  z-10 w-max',
               isSingleEmoji ? '-bottom-6' : '-mb-6',
             )}
           >

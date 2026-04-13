@@ -164,7 +164,7 @@ export function ContentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-[#e63b2e] text-white hover:bg-[#1a1a1a] hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -174,7 +174,7 @@ export function ContentDetailModal({
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-white">
           {/* Hero Media Container */}
-          <div className="w-full aspect-video md:h-[45vh] md:aspect-auto bg-[#1a1a1a] border-b-[4px] border-border relative flex-shrink-0">
+          <div className="w-full aspect-video md:h-[45vh] md:aspect-auto bg-primary border-b-[4px] border-border relative flex-shrink-0">
             {showTrailer && show.trailers && show.trailers.length > 0 ? (
               <div className="relative w-full h-full group bg-black">
                 <video
@@ -187,7 +187,7 @@ export function ContentDetailModal({
                 />
                 <button
                   type="button"
-                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-[#ffcc00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-neo-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                   onClick={() => setShowTrailer(false)}
                 >
                   Close Preview
@@ -275,14 +275,14 @@ export function ContentDetailModal({
               ref={episodesSectionRef}
               className={cn(
                 'p-6 md:p-10 lg:p-16 min-h-[40vh] transition-colors duration-300',
-                isSetupOpen ? 'bg-[#ffe066]' : 'bg-white',
+                isSetupOpen ? 'bg-neo-yellow/80' : 'bg-white',
               )}
             >
               {/* Party Mode Banner */}
               {isSetupOpen ? (
                 <div className="flex items-center justify-between gap-4 mb-8 p-6 bg-white border-[4px] border-border  flex-wrap">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#0055ff] border-[3px] border-border flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-neo-blue border-[3px] border-border flex items-center justify-center flex-shrink-0">
                       <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -297,7 +297,7 @@ export function ContentDetailModal({
                   <button
                     type="button"
                     onClick={() => setIsSetupOpen(false)}
-                    className="p-3 bg-[#e63b2e] border-[3px] border-border hover:bg-[#1a1a1a] text-white transition-colors flex-shrink-0"
+                    className="p-3 bg-neo-red border-[3px] border-border hover:bg-primary text-white transition-colors flex-shrink-0"
                     aria-label="Cancel watch party"
                   >
                     <X className="w-6 h-6 stroke-[3px]" />

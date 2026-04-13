@@ -12,25 +12,6 @@ import {
 } from '@/features/watch/player/ui/controls/utils/subtitle-settings';
 import { clearStorageCache } from '@/lib/storage-cache';
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-  };
-})();
-
-global.localStorage = localStorageMock as unknown as Storage;
-
 describe('Subtitle Settings', () => {
   beforeEach(() => {
     // Clear localStorage before each test

@@ -60,7 +60,7 @@ export default function LiveMatchPlayerPage() {
   if (error || !match) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
           Stream Unavailable
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
@@ -93,7 +93,7 @@ export default function LiveMatchPlayerPage() {
           time.
         </p>
         <Link href="/live">
-          <Button className="bg-[#ffcc00] text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+          <Button className="bg-neo-yellow text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -118,7 +118,7 @@ export default function LiveMatchPlayerPage() {
   if (activeMatch.status === 'MatchEnded') {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
-        <Trophy className="w-20 h-20 text-[#ffcc00] mb-6 stroke-[3px]" />
+        <Trophy className="w-20 h-20 text-neo-yellow mb-6 stroke-[3px]" />
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2">
           Match Concluded
         </h2>
@@ -138,7 +138,7 @@ export default function LiveMatchPlayerPage() {
   if (!sessionLoading && sessionError) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-[#e63b2e]">
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
           Access Denied
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">

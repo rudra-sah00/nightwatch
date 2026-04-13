@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { cn } from '@/lib/utils';
 import {
   WatchPartyChat,
@@ -63,6 +64,7 @@ interface WatchPartySidebarProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   currentUserName?: string;
+  isFullscreen?: boolean;
 }
 
 /**
@@ -92,7 +94,10 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   onToggleFloatingChat,
   rtmSendMessage,
   currentUserName: currentUserNameProp,
+  isFullscreen = false,
 }: WatchPartySidebarProps) {
+  const { getDesktopTopPaddingClass, noDragStyle } = useDesktopApp();
+
   const {
     activeTab,
     setActiveTab,
@@ -131,12 +136,19 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         className,
       )}
     >
-      {/* Tab Navigation */}
-      <SidebarTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <div
+        className={cn(
+          'shrink-0 transition-all',
+          getDesktopTopPaddingClass(isFullscreen),
+        )}
+        style={noDragStyle}
+      >
+        {/* Tab Navigation */}
+        <SidebarTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative bg-background">
-        {/* Participants Tab - renders first */}
         <div
           className={cn(
             'absolute inset-0 flex flex-col transition-[opacity,transform] duration-250 ease-out bg-background',

@@ -34,13 +34,13 @@ function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
       onClick={() => onCheckedChange(!checked)}
       className={cn(
         'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border-[3px] border-border transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0 p-0 m-0',
-        checked ? 'bg-[#ffcc00]' : 'bg-background',
+        checked ? 'bg-neo-yellow' : 'bg-background',
       )}
     >
       <span
         data-state={checked ? 'checked' : 'unchecked'}
         className={cn(
-          'pointer-events-none block h-4 w-4 bg-[#1a1a1a] transition-transform',
+          'pointer-events-none block h-4 w-4 bg-primary transition-transform',
           checked ? 'translate-x-[22px]' : 'translate-x-[2px]',
         )}
       />
@@ -138,7 +138,7 @@ export function WatchPartySettings({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger
         type="button"
-        className="px-3 flex items-center justify-center gap-2 py-2 bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] rounded-none transition-colors"
+        className="px-3 flex items-center justify-center gap-2 py-2 bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 rounded-none transition-colors"
         title="Room Access & Permissions"
         onClick={() => setIsOpen(true)}
       >
@@ -148,9 +148,9 @@ export function WatchPartySettings({
       <DialogContent
         aria-describedby={undefined}
         showCloseButton={false}
-        className="max-w-md bg-white border-[4px] border-border text-foreground  p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]"
+        className="max-w-md bg-background border-[4px] border-border text-foreground  p-0 rounded-none overflow-hidden m-4 w-[calc(100%-2rem)]"
       >
-        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-border bg-[#ffcc00] m-0 flex flex-row items-center justify-between">
+        <DialogHeader className="p-4 md:p-6 border-b-[4px] border-border bg-neo-yellow m-0 flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl">
             <Settings aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
             Room Settings
@@ -160,14 +160,14 @@ export function WatchPartySettings({
               type="button"
               variant="neo-outline"
               size="none"
-              className="p-1.5 bg-white hover:bg-[#e63b2e] hover:text-white"
+              className="p-1.5 bg-background hover:bg-neo-red hover:text-primary-foreground"
             >
               <X className="w-5 h-5 stroke-[3.5px]" />
             </Button>
           </DialogClose>
         </DialogHeader>
 
-        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-8 bg-white">
+        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-8 bg-background">
           {/* Personal Preferences — visible to all users */}
           {onToggleFloatingChat !== undefined ? (
             <div className="space-y-4">
@@ -279,11 +279,11 @@ export function WatchPartySettings({
                     {guests.map((guest) => (
                       <div
                         key={guest.id}
-                        className="bg-white border-[3px] border-border p-4 flex flex-col gap-4 "
+                        className="bg-background border-[3px] border-border p-4 flex flex-col gap-4 "
                       >
                         <div className="flex items-center gap-3 border-b-[3px] border-border pb-3">
-                          <div className="w-8 h-8 bg-[#0055ff] border-[2px] border-border flex items-center justify-center shrink-0">
-                            <span className="text-xs font-black font-headline uppercase tracking-widest text-white">
+                          <div className="w-8 h-8 bg-neo-blue border-[2px] border-border flex items-center justify-center shrink-0">
+                            <span className="text-xs font-black font-headline uppercase tracking-widest text-primary-foreground">
                               {guest.name.charAt(0).toUpperCase()}
                             </span>
                           </div>

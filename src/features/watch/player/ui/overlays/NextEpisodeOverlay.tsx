@@ -51,7 +51,7 @@ export function NextEpisodeOverlay({
     >
       <div className="w-80 bg-background border-[4px] border-border  flex flex-col pointer-events-auto">
         {/* Header */}
-        <div className="px-4 py-3 bg-[#ffcc00] border-b-[4px] border-border flex justify-between items-center">
+        <div className="px-4 py-3 bg-neo-yellow border-b-[4px] border-border flex justify-between items-center">
           <div className="flex items-center gap-2">
             <SkipForward className="w-5 h-5 text-foreground stroke-[3px]" />
             <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
@@ -72,7 +72,7 @@ export function NextEpisodeOverlay({
         <div className="p-4 flex flex-col gap-4">
           <div className="flex gap-4">
             {/* Thumbnail */}
-            <div className="relative w-28 aspect-video border-[3px] border-border flex-shrink-0 bg-white">
+            <div className="relative w-28 aspect-video border-[3px] border-border flex-shrink-0 bg-background">
               {nextEpisode.thumbnailUrl ? (
                 <Image
                   src={nextEpisode.thumbnailUrl}
@@ -113,10 +113,10 @@ export function NextEpisodeOverlay({
               onClick={onPlayNext}
               disabled={isLoading}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] border-border bg-[#e63b2e] text-white',
+                'flex-1 flex items-center justify-center gap-2 px-4 py-2 border-[3px] border-border bg-neo-red text-primary-foreground',
                 'font-black font-headline uppercase tracking-widest text-xs ',
-                'hover:bg-[#ff4d40]',
-                'active:bg-[#cc3329] transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
+                'hover:bg-neo-red/80',
+                'active:bg-neo-red/60 transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
               )}
             >
               {isLoading ? (
@@ -136,10 +136,10 @@ export function NextEpisodeOverlay({
               onClick={handleCancel}
               disabled={isLoading}
               className={cn(
-                'px-4 py-2 border-[3px] border-border bg-white text-foreground',
+                'px-4 py-2 border-[3px] border-border bg-background text-foreground',
                 'font-black font-headline uppercase tracking-widest text-xs ',
                 'hover:bg-background',
-                'active:bg-[#e0dcd3] transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
+                'active:bg-muted/80 transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
               )}
             >
               Cancel
@@ -148,9 +148,9 @@ export function NextEpisodeOverlay({
 
           {/* Progress bar for countdown */}
           {!cancelled && autoPlayDelay > 0 && !isLoading ? (
-            <div className="h-2 bg-white border-[2px] border-border">
+            <div className="h-2 bg-background border-[2px] border-border">
               <div
-                className="h-full bg-[#1a1a1a] transition-[width] duration-1000 ease-linear"
+                className="h-full bg-primary transition-[width] duration-1000 ease-linear"
                 style={{ width: `${(countdown / autoPlayDelay) * 100}%` }}
               />
             </div>

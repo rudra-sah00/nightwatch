@@ -173,6 +173,7 @@ export function ActiveWatchParty({
           room={room}
           currentUserId={currentUserId}
           isHost={isHost}
+          isFullscreen={isFullscreen}
           onKick={onKick}
           onApprove={onApprove}
           onReject={onReject}
@@ -236,7 +237,7 @@ export function ActiveWatchParty({
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (
         <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
-          <AlertDialogContent className="bg-white border-[4px] border-border rounded-none  sm:max-w-[425px] p-6">
+          <AlertDialogContent className="bg-background border-[4px] border-border rounded-none  sm:max-w-[425px] p-6">
             <AlertDialogHeader className="space-y-3">
               <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-foreground">
                 {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
@@ -250,13 +251,13 @@ export function ActiveWatchParty({
             <AlertDialogFooter className="mt-6 sm:space-x-4">
               <AlertDialogCancel
                 onClick={() => onShowLeaveDialog(false)}
-                className="bg-white text-foreground border-[3px] border-border hover:bg-[#ffe066] font-black font-headline uppercase tracking-widest rounded-none transition-colors py-3 text-sm"
+                className="bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors py-3 text-sm"
               >
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={onConfirmLeave}
-                className="bg-[#e63b2e] text-white border-[3px] border-border hover:bg-[#1a1a1a] hover:text-[#e63b2e] font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm"
+                className="bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm"
               >
                 {isHost ? 'End Party' : 'Leave'}
               </AlertDialogAction>

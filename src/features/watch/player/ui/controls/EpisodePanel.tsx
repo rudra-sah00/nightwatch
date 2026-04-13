@@ -156,7 +156,7 @@ export function EpisodePanel({
           className={cn(
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
-            'pointer-events-none z-10 bg-white border-[4px] border-border p-4 ',
+            'pointer-events-none z-10 bg-background border-[4px] border-border p-4 ',
             'motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-300 motion-safe:ease-out motion-reduce:animate-none',
           )}
         >
@@ -178,8 +178,8 @@ export function EpisodePanel({
               </span>
             )}
             <div className="flex items-center gap-2 mt-2">
-              <Play className="w-4 h-4 text-[#e63b2e] fill-current" />
-              <span className="text-[10px] text-[#e63b2e] uppercase tracking-widest font-black font-headline">
+              <Play className="w-4 h-4 text-neo-red fill-current" />
+              <span className="text-[10px] text-neo-red uppercase tracking-widest font-black font-headline">
                 Click to play
               </span>
             </div>
@@ -205,7 +205,7 @@ export function EpisodePanel({
               onClick={() => setSeasonOpen((p) => !p)}
               className={cn(
                 'flex items-center gap-3',
-                'bg-white border-[3px] border-border hover:bg-[#ffe066]',
+                'bg-background border-[3px] border-border hover:bg-neo-yellow/80',
                 'px-5 py-2.5 ',
                 'text-sm font-black font-headline uppercase tracking-widest text-foreground',
                 'transition-colors duration-200',
@@ -225,7 +225,7 @@ export function EpisodePanel({
               <div
                 className={cn(
                   'absolute top-full left-1/2 -translate-x-1/2 mt-2',
-                  'bg-white border-[4px] border-border ',
+                  'bg-background border-[4px] border-border ',
                   'flex flex-col min-w-[140px]',
                   'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none',
                 )}
@@ -242,8 +242,8 @@ export function EpisodePanel({
                       'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-foreground',
                       'transition-colors border-b-[4px] border-border last:border-b-0',
                       s.seasonNumber === selectedSeason
-                        ? 'bg-[#ffcc00]'
-                        : 'hover:bg-[#ffe066]',
+                        ? 'bg-neo-yellow'
+                        : 'hover:bg-neo-yellow/80',
                     )}
                   >
                     Season {s.seasonNumber}
@@ -262,12 +262,16 @@ export function EpisodePanel({
         {/* Scroll wheel */}
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 text-white/25 animate-spin" />
-            <span className="text-[9px] text-white/25">Loading...</span>
+            <Loader2 className="w-4 h-4 text-primary-foreground/25 animate-spin" />
+            <span className="text-[9px] text-primary-foreground/25">
+              Loading...
+            </span>
           </div>
         ) : episodes.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <span className="text-[10px] text-white/20">No episodes</span>
+            <span className="text-[10px] text-primary-foreground/20">
+              No episodes
+            </span>
           </div>
         ) : (
           <div
@@ -390,8 +394,8 @@ function EpisodeThumb({
             sizes="220px"
           />
         ) : (
-          <div className="w-full h-full bg-white/5 flex items-center justify-center">
-            <span className="text-sm font-bold text-white/10">
+          <div className="w-full h-full bg-background/5 flex items-center justify-center">
+            <span className="text-sm font-bold text-primary-foreground/10">
               {episode.episodeNumber}
             </span>
           </div>
@@ -403,7 +407,7 @@ function EpisodeThumb({
             {[0, 150, 300, 450].map((delay) => (
               <span
                 key={delay}
-                className="w-[2px] bg-white rounded-full animate-pulse"
+                className="w-[2px] bg-background rounded-full animate-pulse"
                 style={{
                   animationDelay: `${delay}ms`,
                   height: `${5 + Math.random() * 6}px`,
@@ -418,7 +422,7 @@ function EpisodeThumb({
           className={cn(
             'absolute bottom-2 left-2',
             'px-2 py-1',
-            'bg-white border-[2px] border-border',
+            'bg-background border-[2px] border-border',
             'text-[10px] font-black font-headline uppercase tracking-widest text-foreground tabular-nums',
           )}
         >
@@ -427,7 +431,7 @@ function EpisodeThumb({
 
         {/* Duration badge */}
         {episode.duration && (
-          <div className="absolute top-2 right-2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-white font-bold font-headline uppercase tracking-widest">
+          <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-[10px] text-primary-foreground font-bold font-headline uppercase tracking-widest">
             {episode.duration}m
           </div>
         )}
@@ -435,15 +439,15 @@ function EpisodeThumb({
         {/* Loading overlay — shown while playVideo is fetching the stream */}
         {isSelecting && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <Loader2 className="w-5 h-5 text-white animate-spin" />
+            <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
           </div>
         )}
 
         {/* Play icon overlay on hover (center only) */}
         {isCenter && !isPlaying && !isSelecting && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg shadow-black/30">
-              <Play className="w-3.5 h-3.5 text-black fill-current ml-0.5" />
+            <div className="w-8 h-8 rounded-full bg-background/90 flex items-center justify-center shadow-lg shadow-black/30">
+              <Play className="w-3.5 h-3.5 text-foreground fill-current ml-0.5" />
             </div>
           </div>
         )}

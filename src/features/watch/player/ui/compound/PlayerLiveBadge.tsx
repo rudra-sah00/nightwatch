@@ -20,15 +20,15 @@ export function PlayerLiveBadge() {
       className={cn(
         'flex items-center gap-2 ml-2 md:ml-3 px-3 py-1 border-[3px] border-border text-xs font-black font-headline uppercase tracking-widest flex-shrink-0 transition-colors duration-200 select-none ',
         isAtLiveEdge
-          ? 'bg-[#e63b2e] text-white cursor-default'
-          : 'bg-white text-foreground cursor-pointer hover:bg-[#ffe066]',
+          ? 'bg-neo-red text-primary-foreground cursor-default'
+          : 'bg-background text-foreground cursor-pointer hover:bg-neo-yellow/80',
       )}
     >
       {/* Dot indicator: pulses when live, static grey dot when behind */}
       <span
         className={cn(
           'inline-block w-2.5 h-2.5 border-[2px] border-border flex-shrink-0',
-          isAtLiveEdge ? 'bg-white animate-pulse' : 'bg-[#e63b2e]',
+          isAtLiveEdge ? 'bg-background animate-pulse' : 'bg-neo-red',
         )}
       />
       LIVE

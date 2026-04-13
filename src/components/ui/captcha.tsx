@@ -50,13 +50,13 @@ export function Captcha({
     const isBottom = variant === 'bottom';
     return (
       <div
-        className={`w-full bg-[#f2ede5]/50 flex items-center justify-center gap-3 select-none group transition-colors hover:bg-[#ffcc00] ${
+        className={`w-full bg-muted/50 flex items-center justify-center gap-3 select-none group transition-colors hover:bg-neo-yellow ${
           isBottom
             ? 'h-[65px] border-b-4 border-border'
-            : 'h-[65px] border-4 border-border bg-white'
+            : 'h-[65px] border-4 border-border bg-background'
         } ${className}`}
       >
-        <div className="w-2.5 h-2.5 rounded-full bg-[#00aa44] animate-pulse  border border-border" />
+        <div className="w-2.5 h-2.5 rounded-full bg-success animate-pulse  border border-border" />
         <span
           className={`font-headline font-black uppercase tracking-widest text-foreground ${
             isBottom ? 'text-[10px] opacity-40' : 'text-xs'
