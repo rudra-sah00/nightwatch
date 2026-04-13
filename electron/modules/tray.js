@@ -43,6 +43,10 @@ function setupTray(mainWindow, setQuittingCallback) {
       },
       { type: 'separator' },
       {
+        label: 'About Watch Rudra',
+        click: () => app.showAboutPanel(),
+      },
+      {
         label: 'Quit Now',
         click: () => {
           setQuittingCallback(true);

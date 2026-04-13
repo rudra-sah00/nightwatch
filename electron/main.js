@@ -79,6 +79,24 @@ const startElectronApp = async () => {
   const finishLaunch = () => {
     if (internalAppIsQuitting) return; // Prevent spawning zombie windows if user hit CMD+Q early
 
+    // Force universal OS About Panels to show the live ASAR Javascript bundle version
+    // instead of the outdated read-only version tied to the C++ native `.exe` or `.app` wrapper.
+    try {
+      const fs = require('node:fs');
+      const pkgPath = _path.join(app.getAppPath(), 'package.json');
+      let currentVersion = app.getVersion();
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        currentVersion = pkg.version || app.getVersion();
+      }
+      app.setAboutPanelOptions({
+        applicationName: 'Watch Rudra',
+        applicationVersion: currentVersion,
+        version: currentVersion,
+        copyright: '© Watch Rudra',
+      });
+    } catch (_e) {}
+
     // Create main UI Chromium window
     AppWindow.create();
 

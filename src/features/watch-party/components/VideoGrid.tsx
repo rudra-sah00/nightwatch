@@ -31,7 +31,7 @@ export function VideoGrid({
   if (sorted.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-12 text-center px-4">
-        <div className="w-16 h-16 border border-gray-200 rounded-full bg-background shadow-sm flex items-center justify-center mb-4">
+        <div className="w-16 h-16 border-[3px] border-border rounded-full bg-background shadow-sm flex items-center justify-center mb-4">
           <Video className="w-8 h-8 text-muted-foreground stroke-2" />
         </div>
         <p className="font-semibold font-headline uppercase tracking-widest text-lg text-foreground">
@@ -50,7 +50,7 @@ export function VideoGrid({
         {sorted.map((participant) => (
           <div
             key={participant.identity}
-            className="w-full aspect-video border border-gray-200 rounded-xl bg-background shadow-sm overflow-hidden"
+            className="w-full aspect-video border-[3px] border-border rounded-xl bg-background shadow-sm overflow-hidden relative"
           >
             <ParticipantView
               participant={participant}

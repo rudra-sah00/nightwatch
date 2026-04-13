@@ -71,7 +71,16 @@ function createSplash() {
           .title { 
             font-family: 'Space Grotesk', sans-serif;
             font-size: 24px; font-weight: 900; font-style: italic;
-            text-transform: uppercase; margin-bottom: 8px; letter-spacing: -0.05em; 
+            text-transform: uppercase; margin-bottom: 2px; letter-spacing: -0.05em; 
+          }
+          .version {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-color);
+            opacity: 0.6;
+            margin-bottom: 24px;
+            letter-spacing: 0.05em;
           }
           .status { 
             font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; 
@@ -94,6 +103,7 @@ function createSplash() {
         <div class="container">
           <div class="splash-logo"><img src="file://${iconPath}" alt="Logo" /></div>
           <div class="title">Watch Rudra</div>
+          <div id="version" class="version">v${require('electron').app.getVersion()}</div>
           <div id="status" class="status">STARTING...</div>
           <div class="progress-bar-bg">
             <div id="progress" class="progress-bar"></div>
@@ -103,6 +113,9 @@ function createSplash() {
           const { ipcRenderer } = require('electron');
           ipcRenderer.on('updater-message', (event, text) => {
             document.getElementById('status').innerText = text;
+          });
+          ipcRenderer.on('updater-version', (event, version) => {
+            document.getElementById('version').innerText = 'Updating to v' + version;
           });
           ipcRenderer.on('updater-progress', (event, percent) => {
             document.getElementById('progress').style.width = percent + '%';

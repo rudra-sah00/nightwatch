@@ -78,7 +78,7 @@ async function _setupMacOS() {
   }
 }
 
-function _handleMacOSDeepLink(_url, handleDeepLinkCallback) {
+function _handleMacOSDeepLink(handleDeepLinkCallback) {
   app.on('open-url', (event, openUrl) => {
     event.preventDefault();
     handleDeepLinkCallback(openUrl);

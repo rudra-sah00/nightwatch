@@ -21,8 +21,7 @@ interface FloatingChatProps {
  * - No background on the message list — text only, readable via text-shadow.
  * - Max height 60 % of screen; older messages scroll up.
  * - A minimal glass-effect input at the bottom lets users send messages.
- * - Pointer-events are only active on the input row so the video is still
- *   clickable through the message list.
+ * - Pointer-events allow scrolling the message list without blocking the entire screen.
  */
 export function FloatingChat({
   messages,
@@ -71,7 +70,7 @@ export function FloatingChat({
       {/* ── Message list — no background, text + shadow only ── */}
       <div
         ref={listRef}
-        className="w-full max-h-[55vh] overflow-y-auto flex flex-col gap-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pointer-events-none select-none"
+        className="w-full max-h-[55vh] overflow-y-auto flex flex-col gap-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pointer-events-auto select-none"
       >
         {visibleMessages.map((msg) => {
           if (msg.isSystem) {

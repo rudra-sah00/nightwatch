@@ -345,58 +345,77 @@ export function useAgora({
     }
 
     const mappedMemberIds = new Set<string>();
-    const nextParticipants: AgoraParticipant[] = members.map((member) => {
-      const isLocal = member.id === userId;
-      const numericUid = String(generateNumericUid(member.id));
-      const remoteUser = remoteUserMap.get(numericUid);
+    const nextParticipants: AgoraParticipant[] = members
+      .filter((member) => {
+        const isLocal = member.id === userId;
+        const numericUid = String(generateNumericUid(member.id));
 
-      mappedMemberIds.add(numericUid);
+        // If we are fully connected to Agora RTC, instantly hide non-local members
+        // who have dropped their real-time connection. Overrides the 120s RTM grace period
+        // so ghost tiles immediately vanish from the Grid and Tab.
+        if (
+          !isLocal &&
+          connectionState === 'CONNECTED' &&
+          !remoteUserMap.has(numericUid)
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map((member) => {
+        const isLocal = member.id === userId;
+        const numericUid = String(generateNumericUid(member.id));
+        const remoteUser = remoteUserMap.get(numericUid);
 
-      // Fetch persistent speaker state for this user (keyed by Agora numeric UID)
-      const speaker = speakerState[isLocal ? String(uid) : numericUid] || {
-        isSpeaking: false,
-        audioLevel: 0,
-      };
+        mappedMemberIds.add(numericUid);
 
-      const isMicrophoneEnabled = !!(isLocal
-        ? audioEnabled
-        : remoteUser?.hasAudio);
+        // Fetch persistent speaker state for this user (keyed by Agora numeric UID)
+        const speaker = speakerState[isLocal ? String(uid) : numericUid] || {
+          isSpeaking: false,
+          audioLevel: 0,
+        };
 
-      // Force isSpeaking to false if mic is disabled (prevents stale speaker state after mute)
-      const isActuallySpeaking = !!(isMicrophoneEnabled && speaker.isSpeaking);
+        const isMicrophoneEnabled = !!(isLocal
+          ? audioEnabled
+          : remoteUser?.hasAudio);
 
-      if (isLocal) {
+        // Force isSpeaking to false if mic is disabled (prevents stale speaker state after mute)
+        const isActuallySpeaking = !!(
+          isMicrophoneEnabled && speaker.isSpeaking
+        );
+
+        if (isLocal) {
+          return {
+            uid: String(uid),
+            identity: member.id,
+            name: 'You',
+            isSpeaking: isActuallySpeaking,
+            isMicrophoneEnabled,
+            isCameraEnabled: videoEnabled,
+            isLocal: true,
+            audioLevel: speaker.audioLevel,
+            videoTrack: localVideoTrackRef.current ?? undefined,
+            metadata: member.profilePhoto
+              ? JSON.stringify({ avatar: member.profilePhoto })
+              : undefined,
+          };
+        }
+
         return {
-          uid: String(uid),
+          uid: numericUid,
           identity: member.id,
-          name: 'You',
+          name: member.name,
           isSpeaking: isActuallySpeaking,
           isMicrophoneEnabled,
-          isCameraEnabled: videoEnabled,
-          isLocal: true,
+          isCameraEnabled: remoteUser?.hasVideo ?? false,
+          isLocal: false,
           audioLevel: speaker.audioLevel,
-          videoTrack: localVideoTrackRef.current ?? undefined,
+          videoTrack: remoteUser?.videoTrack,
           metadata: member.profilePhoto
             ? JSON.stringify({ avatar: member.profilePhoto })
             : undefined,
         };
-      }
-
-      return {
-        uid: numericUid,
-        identity: member.id,
-        name: member.name,
-        isSpeaking: isActuallySpeaking,
-        isMicrophoneEnabled,
-        isCameraEnabled: remoteUser?.hasVideo ?? false,
-        isLocal: false,
-        audioLevel: speaker.audioLevel,
-        videoTrack: remoteUser?.videoTrack,
-        metadata: member.profilePhoto
-          ? JSON.stringify({ avatar: member.profilePhoto })
-          : undefined,
-      };
-    });
+      });
 
     // 3. Complement with any remote users NOT found in members list (Fail-safe for sync issues)
     const unmappedParticipants: AgoraParticipant[] = Array.from(
@@ -433,6 +452,7 @@ export function useAgora({
     videoEnabled,
     members,
     speakerState,
+    connectionState,
   ]);
 
   /**

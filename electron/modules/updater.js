@@ -29,7 +29,10 @@ function setupUpdater(splashWindow, onComplete) {
   sendStatus('Checking for updates...', 10);
 
   // ---------- NATIVE UPDATER ----------
-  autoUpdater.on('update-available', () => {
+  autoUpdater.on('update-available', (info) => {
+    if (splashWindow && !splashWindow.isDestroyed() && info.version) {
+      splashWindow.webContents.send('updater-version', info.version);
+    }
     sendStatus('Downloading update please...', 30);
   });
 

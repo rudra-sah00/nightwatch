@@ -31,7 +31,7 @@ export function ParticipantView({
   const isVideoMuted = !participant.isCameraEnabled;
 
   return (
-    <div className="relative w-full h-full bg-gray-100 group">
+    <div className="relative w-full h-full bg-muted/30 group">
       {/* Video Container — Agora renders into this div */}
       <div
         ref={videoRef}
@@ -49,8 +49,8 @@ export function ParticipantView({
       {isCurrentUser ? (
         <div
           className={cn(
-            'absolute top-2 left-2 z-20 px-2 py-0.5 bg-neo-blue rounded-md shadow-sm text-[9px] font-bold font-headline text-primary-foreground uppercase tracking-widest ',
-            participant.isSpeaking && 'left-6', // Shift if speaking to not overlap
+            'absolute top-2 left-2 z-20 px-2 py-0.5 bg-neo-yellow border-[3px] border-border rounded-md shadow-sm text-[9px] font-black font-headline text-foreground uppercase tracking-widest ',
+            participant.isSpeaking && 'left-7', // Shift if speaking to not overlap
           )}
         >
           You
@@ -107,7 +107,7 @@ function AvatarFallback({
   name: string;
 }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+    <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
       {/* Background blur effect */}
       {avatarUrl ? (
         <div className="absolute inset-0">
@@ -124,7 +124,7 @@ function AvatarFallback({
       {/* Centered Avatar */}
       <div className="relative z-10 flex items-center justify-center">
         {avatarUrl ? (
-          <div className="w-20 h-20 rounded-full border-2 border-white overflow-hidden shadow-md relative">
+          <div className="w-20 h-20 rounded-full border-[3px] border-border overflow-hidden shadow-md relative">
             <Image
               src={avatarUrl}
               alt={name}
@@ -134,7 +134,7 @@ function AvatarFallback({
             />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 border-white bg-neo-blue shadow-md">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center border-[3px] border-border bg-neo-blue shadow-md">
             <span className="text-3xl font-black font-headline text-primary-foreground">
               {name.charAt(0).toUpperCase()}
             </span>
@@ -168,19 +168,19 @@ function ParticipantOverlay({
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 pointer-events-none">
         {/* Name Tag */}
         {!isCurrentUser && (
-          <div className="bg-primary/80 backdrop-blur-sm border-[2px] border-white/20 px-2 py-0.5 shadow-lg">
-            <span className="text-[9px] font-black font-headline tracking-widest uppercase text-primary-foreground truncate max-w-[100px]">
+          <div className="bg-background/80 backdrop-blur-sm border-[3px] border-border px-2 py-0.5 shadow-lg">
+            <span className="text-[9px] font-black font-headline tracking-widest uppercase text-foreground truncate max-w-[100px]">
               {name}
             </span>
           </div>
         )}
 
         {/* Mic Status */}
-        <div className="bg-primary/80 backdrop-blur-sm border-[2px] border-white/20 p-1 shadow-lg">
+        <div className="bg-background/80 backdrop-blur-sm border-[3px] border-border p-1 shadow-lg flex items-center justify-center">
           {isMicEnabled ? (
-            <Mic className="w-2.5 h-2.5 text-green-400" />
+            <Mic className="w-2.5 h-2.5 text-green-500 stroke-[3px]" />
           ) : (
-            <MicOff className="w-2.5 h-2.5 text-red-500" />
+            <MicOff className="w-2.5 h-2.5 text-neo-red stroke-[3px]" />
           )}
         </div>
       </div>
