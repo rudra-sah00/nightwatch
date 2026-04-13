@@ -137,8 +137,8 @@ export default function SignupPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] dark:bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
-        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-[#a1a1aa] dark:text-muted-foreground opacity-80 text-left">
+      <footer className="bg-primary dark:bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
+        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-primary-foreground/80 dark:text-muted-foreground opacity-80 text-left">
           © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
