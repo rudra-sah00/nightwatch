@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.21.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.20.0...v1.21.0) (2026-04-13)
+
+
+### Features
+
+* **desktop:** make splash screen respect system dark theme and remove logo blink ([2a32b25](https://github.com/rudra-sah00/watch-rudra/commit/2a32b258a8115dc6d7ae02f19b6bd1de07b84520))
+
+
+### Bug Fixes
+
+* **desktop:** remove invalid app.releaseMemory call crashing the app after 10 minutes ([0b20fa3](https://github.com/rudra-sah00/watch-rudra/commit/0b20fa3f8c89c8302a1efd8e6bb987352ee554cf))
+* **profile:** update danger zone styling for dark mode and fix biome errors ([0cdfc2a](https://github.com/rudra-sah00/watch-rudra/commit/0cdfc2aa36e6d53d4e6698c1f1d156878c1bed4d))
+* **theme:** complete global refactor of hardcoded colors for dark mode support ([f112f5d](https://github.com/rudra-sah00/watch-rudra/commit/f112f5d3dfb3bb0fc07b7a3f56ebe78269907473))
+* **ui:** dynamic theme coloring for activity graph and tooltip ([b155f47](https://github.com/rudra-sah00/watch-rudra/commit/b155f4728e852fafe4f1af9b123f4080d5c6d3f8))
+* **ui:** remove hardcoded colors in public profile stats ([f7bbead](https://github.com/rudra-sah00/watch-rudra/commit/f7bbeadf63d93f353898e45c4a99891acd0b131b))
+* **ui:** update content info modal with dark theme compatible colors for resume progress, description, and action buttons ([93a379e](https://github.com/rudra-sah00/watch-rudra/commit/93a379ecc0532510fb6f735f2b46c5efab3bdfa9))
+* **ui:** update download modal and content details modal for complete dark theme compatibility ([bee1f0c](https://github.com/rudra-sah00/watch-rudra/commit/bee1f0cbe344c901fa90e57f085524c9e798719b))
+* **ui:** update public profile return base button and user id tag for dark theme ([8336e41](https://github.com/rudra-sah00/watch-rudra/commit/8336e41089efacdd109bdf1e5685a6aefe240800))
+
 ## [1.20.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.19.0...v1.20.0) (2026-04-13)
 
 
