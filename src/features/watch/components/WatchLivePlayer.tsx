@@ -33,6 +33,18 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     }
   };
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      window.electronAPI.updateDiscordPresence({
+        details: `Watching Live: ${props.metadata.title}`,
+        state: 'Live Stream',
+        largeImageText: props.metadata.title,
+        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
+        startTimestamp: Date.now(),
+      });
+    }
+  }, [props.metadata]);
+
   const mobileHeader = (
     <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
       <button

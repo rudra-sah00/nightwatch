@@ -104,7 +104,9 @@ export function WatchPartyClient({
         state:
           room.type === 'series'
             ? `Season ${room.season} Episode ${room.episode}`
-            : 'Co-Watching Movie',
+            : room.type === 'livestream'
+              ? 'Co-Watching Live Stream'
+              : 'Co-Watching Movie',
         largeImageText: room.title,
         largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         partySize: room.members?.length || 1,
