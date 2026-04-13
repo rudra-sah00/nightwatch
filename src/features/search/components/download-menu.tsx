@@ -60,8 +60,8 @@ function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 
 function qualityColor(q: string): string {
   if (q === '1080p') return 'bg-neo-yellow text-foreground border-border ';
-  if (q === '720p') return 'bg-neo-blue text-white border-border ';
-  return 'bg-white text-foreground border-border ';
+  if (q === '720p') return 'bg-neo-blue text-primary-foreground border-border ';
+  return 'bg-card text-foreground border-border ';
 }
 
 function sanitizeFilename(name: string): string {
@@ -130,7 +130,7 @@ function EpisodeDownloadItem({
       <button
         type="button"
         onClick={handleExpand}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-colors duration-200 text-left border-[3px] border-border bg-white"
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-colors duration-200 text-left border-[3px] border-border bg-card"
       >
         <div className="flex items-center gap-4">
           <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-neo-yellow/80 px-2 py-0.5 border-2 border-border">
@@ -231,7 +231,7 @@ export function DownloadMenu({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           showCloseButton={false}
-          className="fixed z-[150] bg-white border-[4px] border-border -yellow max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0"
+          className="fixed z-[150] bg-card border-[4px] border-border -yellow max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0"
         >
           <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 bg-background border-b-[4px] border-border flex-row items-center justify-between space-y-0">
             <div className="flex flex-col gap-0.5 truncate pr-4 text-left">
@@ -243,14 +243,14 @@ export function DownloadMenu({
                 Download links for {show.title}. Choose a language and quality,
                 then start downloading the selected file.
               </DialogDescription>
-              <p className="text-[#4a4a4a] text-[10px] sm:text-xs font-headline font-bold uppercase tracking-widest truncate opacity-80">
+              <p className="text-foreground/70 text-[10px] sm:text-xs font-headline font-bold uppercase tracking-widest truncate opacity-80">
                 {show.title}
               </p>
             </div>
             <DialogClose asChild>
               <button
                 type="button"
-                className="p-2 border-[4px] border-border bg-neo-red text-white hover:bg-primary hover:text-white transition-colors flex-shrink-0"
+                className="p-2 border-[4px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
@@ -258,7 +258,7 @@ export function DownloadMenu({
             </DialogClose>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto p-6 bg-white no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 bg-card no-scrollbar">
             {/* Dub/Language Selector */}
             {show.dubs && show.dubs.length > 1 && (
               <div className="mb-8 space-y-4">
@@ -284,7 +284,7 @@ export function DownloadMenu({
                           'px-4 py-2 border-[2px] border-border font-headline font-black uppercase text-xs tracking-widest transition-[background-color,color,transform] duration-150 active:scale-95',
                           isSelected
                             ? 'bg-neo-yellow text-foreground '
-                            : 'bg-white text-foreground hover:bg-background',
+                            : 'bg-background text-foreground hover:bg-secondary',
                         )}
                       >
                         {dub.lanName}
@@ -377,7 +377,7 @@ function MovieDownloadSection({
         </div>
       ) : !qualities || qualities.length === 0 ? (
         <div className="py-8 text-center border-[3px] border-dashed border-border/20">
-          <p className="text-sm font-headline font-black uppercase text-[#4a4a4a]">
+          <p className="text-sm font-headline font-black uppercase text-foreground/70">
             NO DOWNLOAD LINKS AVAILABLE FOR THIS TITLE.
           </p>
         </div>
@@ -422,7 +422,7 @@ function MovieDownloadSection({
         </div>
       )}
 
-      <p className="text-[10px] text-[#4a4a4a] font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-border/10">
+      <p className="text-[10px] text-foreground/70 font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-border/10">
         DOWNLOADS ARE SERVED DIRECTLY FROM THE CONTENT CDN.
       </p>
     </div>
@@ -448,7 +448,7 @@ function SeriesDownloadSection({
   return (
     <div className="space-y-3">
       {seasonEpisodes.length === 0 ? (
-        <p className="text-sm font-headline font-black uppercase text-[#4a4a4a] py-8 text-center border-[3px] border-dashed border-border/10">
+        <p className="text-sm font-headline font-black uppercase text-foreground/70 py-8 text-center border-[3px] border-dashed border-border/10">
           NO EPISODES FOUND.
         </p>
       ) : (

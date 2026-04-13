@@ -152,7 +152,7 @@ export function ContentDetailModal({
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="relative w-full h-full flex flex-col bg-white overflow-hidden">
+      <div className="relative w-full h-full flex flex-col bg-card overflow-hidden">
         {/* Fixed Header */}
         <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0">
           <span
@@ -164,7 +164,7 @@ export function ContentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-white transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />
@@ -172,7 +172,7 @@ export function ContentDetailModal({
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-white">
+        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-card">
           {/* Hero Media Container */}
           <div className="w-full aspect-video md:h-[45vh] md:aspect-auto bg-primary border-b-[4px] border-border relative flex-shrink-0">
             {showTrailer && show.trailers && show.trailers.length > 0 ? (
@@ -187,7 +187,7 @@ export function ContentDetailModal({
                 />
                 <button
                   type="button"
-                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-neo-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+                  className="absolute top-4 left-4 z-10 px-4 py-2 bg-card text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-neo-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                   onClick={() => setShowTrailer(false)}
                 >
                   Close Preview
@@ -275,21 +275,21 @@ export function ContentDetailModal({
               ref={episodesSectionRef}
               className={cn(
                 'p-6 md:p-10 lg:p-16 min-h-[40vh] transition-colors duration-300',
-                isSetupOpen ? 'bg-neo-yellow/80' : 'bg-white',
+                isSetupOpen ? 'bg-neo-yellow/80' : 'bg-card',
               )}
             >
               {/* Party Mode Banner */}
               {isSetupOpen ? (
-                <div className="flex items-center justify-between gap-4 mb-8 p-6 bg-white border-[4px] border-border  flex-wrap">
+                <div className="flex items-center justify-between gap-4 mb-8 p-6 bg-card border-[4px] border-border  flex-wrap">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-neo-blue border-[3px] border-border flex items-center justify-center flex-shrink-0">
-                      <Users className="w-6 h-6 text-white" />
+                      <Users className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div>
                       <p className="text-lg md:text-xl font-black font-headline uppercase tracking-widest text-foreground leading-tight">
                         Watch Party — Pick an episode
                       </p>
-                      <p className="text-sm font-bold font-headline uppercase tracking-widest text-[#4a4a4a] mt-1">
+                      <p className="text-sm font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
                         Everyone joins once you select
                       </p>
                     </div>
@@ -297,7 +297,7 @@ export function ContentDetailModal({
                   <button
                     type="button"
                     onClick={() => setIsSetupOpen(false)}
-                    className="p-3 bg-neo-red border-[3px] border-border hover:bg-primary text-white transition-colors flex-shrink-0"
+                    className="p-3 bg-neo-red border-[3px] border-border hover:bg-primary text-white hover:text-primary-foreground transition-colors flex-shrink-0"
                     aria-label="Cancel watch party"
                   >
                     <X className="w-6 h-6 stroke-[3px]" />
