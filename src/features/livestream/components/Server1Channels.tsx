@@ -116,7 +116,7 @@ export function Server1Channels() {
 
 function ChannelRow({ channel }: { channel: Channel }) {
   const pseudoMatch = {
-    id: `live-server1:${channel.providerId}`,
+    id: `iptvorg:${channel.providerId}`,
     team1: { name: channel.name, id: '', score: '', avatar: '' },
     team2: { name: '', id: '', score: '', avatar: '' },
     status: 'MatchIng',
