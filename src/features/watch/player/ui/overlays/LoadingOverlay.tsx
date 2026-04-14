@@ -1,3 +1,6 @@
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface LoadingOverlayProps {
@@ -5,31 +8,41 @@ interface LoadingOverlayProps {
 }
 
 export function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
+  const router = useRouter();
+
   return (
     <div
       className={cn(
-        'absolute inset-0 z-40 flex flex-col items-center justify-center transition-opacity duration-300 ease-in-out',
-        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        'absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center transition-opacity duration-300 ease-in-out',
+        isVisible
+          ? 'opacity-100 pointer-events-auto'
+          : 'opacity-0 pointer-events-none',
       )}
       role="status"
       aria-live="polite"
       aria-label="Initializing secure connection"
       aria-hidden={!isVisible}
     >
-      <div className="bg-neo-yellow border-[4px] border-border px-4 py-3 min-[380px]:px-5 min-[380px]:py-4 md:px-12 md:py-8 flex flex-col items-center gap-3 min-[380px]:gap-4 md:gap-6 saturate-[1.2] max-w-[calc(100vw-2rem)] md:max-w-none">
-        {/* Brutalist Square Loader */}
-        <div className="relative w-10 h-10 min-[380px]:w-11 min-[380px]:h-11 md:w-16 md:h-16">
-          <div className="absolute inset-0 border-[4px] border-border bg-background animate-[spin_2s_steps(4)_infinite] motion-reduce:animate-none" />
-          <div className="absolute inset-2 bg-neo-red border-[3px] border-border animate-[spin_2s_steps(4)_infinite_reverse] motion-reduce:animate-none" />
-        </div>
+      <div className="flex flex-col items-center gap-6 saturate-[1.2] max-w-[calc(100vw-2rem)] md:max-w-none">
+        {/* Simple Circular Spinner */}
+        <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-primary animate-spin" />
 
         {/* Steady Loading Text */}
-        <div className="mt-2 min-[380px]:mt-3 md:mt-4 flex flex-col items-center gap-2 min-[380px]:gap-3">
-          <span className="text-foreground text-[9px] min-[380px]:text-[10px] md:text-sm font-black font-headline tracking-[0.16em] uppercase text-center leading-tight max-w-[170px] min-[380px]:max-w-[190px] md:max-w-[240px]">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-white text-xs min-[380px]:text-sm md:text-base font-medium tracking-wide text-center">
             Initializing secure connection
           </span>
-          <div className="h-[4px] w-full bg-primary" />
         </div>
+
+        {/* Back Button */}
+        <Button
+          variant="neo-outline"
+          className="mt-4 bg-white/10 hover:bg-white/20 text-white border-white/20 h-10 px-6 rounded-full"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Go Back
+        </Button>
       </div>
     </div>
   );
