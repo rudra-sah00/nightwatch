@@ -6,6 +6,7 @@ export function useChannels(page = 1, limit = 30, search = '') {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const hasDataRef = useRef(false);
 
   const loadChannels = useCallback(async () => {
     abortRef.current?.abort();
@@ -14,20 +15,21 @@ export function useChannels(page = 1, limit = 30, search = '') {
 
     try {
       // Don't flash a loading skeleton if we just changed page/search slightly
-      if (!data) setIsLoading(true);
+      if (!hasDataRef.current) setIsLoading(true);
       setError(null);
 
       const res = await fetchChannels(page, limit, search, controller.signal);
 
       if (controller.signal.aborted) return;
       setData(res);
+      hasDataRef.current = true;
     } catch (err: unknown) {
       if (controller.signal.aborted) return;
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, [page, limit, search, data]);
+  }, [page, limit, search]);
 
   useEffect(() => {
     loadChannels();

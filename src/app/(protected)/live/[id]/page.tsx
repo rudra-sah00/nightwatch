@@ -23,7 +23,8 @@ export default function LiveMatchPlayerPage() {
   const [sessionError, setSessionError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!match?.playPath || sessionUrl || sessionLoading) return;
+    if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
+      return;
 
     const initSession = async () => {
       setSessionLoading(true);
@@ -47,7 +48,7 @@ export default function LiveMatchPlayerPage() {
     };
 
     initSession();
-  }, [match, sessionUrl, sessionLoading]);
+  }, [match, sessionUrl, sessionLoading, sessionError]);
 
   if (isLoading) {
     return (
