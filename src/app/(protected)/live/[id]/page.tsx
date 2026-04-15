@@ -26,7 +26,44 @@ export default function LiveMatchPlayerPage() {
     if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
       return;
 
+    const isServer1 = match.id.startsWith('s1:');
+    const isDesktopApp =
+      typeof window !== 'undefined' && 'electronAPI' in window;
+
+    let bridgeUnsubscribe: (() => void) | undefined;
+
     const initSession = async () => {
+      if (isServer1) {
+        if (!isDesktopApp) {
+          setSessionError('Premium channels require the Desktop App.');
+          return;
+        }
+
+        const sourceUrl = match.playPath!.replace('s1://', '');
+        setSessionLoading(true);
+
+        bridgeUnsubscribe = (window as any).electronAPI.onLiveBridgeResolved(
+          (result: any) => {
+            if (result && result.hlsUrl) {
+              setSessionUrl(result.hlsUrl);
+              setSessionLoading(false);
+              if (bridgeUnsubscribe) bridgeUnsubscribe();
+            } else {
+              setSessionError('Failed to extract stream URL via LiveBridge.');
+              setSessionLoading(false);
+              if (bridgeUnsubscribe) bridgeUnsubscribe();
+            }
+          },
+        );
+
+        (window as any).electronAPI.startLiveBridge({
+          url: sourceUrl,
+          channelId: match.id,
+          referer: '',
+        });
+        return;
+      }
+
       setSessionLoading(true);
       try {
         const response = await playVideo({
@@ -43,11 +80,18 @@ export default function LiveMatchPlayerPage() {
       } catch (_err) {
         setSessionError('Error connecting to stream server.');
       } finally {
-        setSessionLoading(false);
+        if (!isServer1) setSessionLoading(false);
       }
     };
 
     initSession();
+
+    return () => {
+      if (bridgeUnsubscribe) bridgeUnsubscribe();
+      if (isServer1 && isDesktopApp) {
+        (window as any).electronAPI.stopLiveBridge();
+      }
+    };
   }, [match, sessionUrl, sessionLoading, sessionError]);
 
   if (isLoading) {
@@ -139,19 +183,40 @@ export default function LiveMatchPlayerPage() {
   }
 
   if (!sessionLoading && sessionError) {
+    const isDesktopError = sessionError.includes(
+      'Premium channels require the Desktop App',
+    );
+
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-          Access Denied
+          {isDesktopError ? 'Desktop App Required' : 'Access Denied'}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
           {sessionError}
         </p>
-        <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
-          </Button>
-        </Link>
+
+        {isDesktopError ? (
+          <div className="flex gap-4">
+            <Link href="/docs-site/DESKTOP">
+              <Button className="bg-neo-blue text-white border-4 border-black px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+                Download App
+              </Button>
+            </Link>
+            <Link href="/live">
+              <Button className="bg-white text-black border-4 border-black px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+                Back
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <Link href="/live">
+            <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to
+              Schedule
+            </Button>
+          </Link>
+        )}
       </div>
     );
   }

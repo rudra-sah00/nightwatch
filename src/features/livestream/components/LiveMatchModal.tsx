@@ -89,7 +89,7 @@ export function LiveMatchModal({
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isServer2 = match.id.startsWith('live-server2');
-  const isServer1 = match.id.startsWith('live-server1');
+  const isServer1 = match.id.startsWith('s1:');
   const providerName = isServer1
     ? 'Live TV'
     : isServer2
@@ -321,12 +321,12 @@ export function LiveMatchModal({
                   className={cn(
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
                     'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
-                    isCreatingParty || !canWatch
+                    isCreatingParty || !canWatch || isServer1
                       ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
                       : 'bg-primary text-primary-foreground hover:bg-neo-blue',
                   )}
                   onClick={onWatchParty}
-                  disabled={isCreatingParty || !canWatch}
+                  disabled={isCreatingParty || !canWatch || isServer1}
                 >
                   {isCreatingParty ? (
                     <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
@@ -334,7 +334,11 @@ export function LiveMatchModal({
                     <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
                   )}
                   <span className="truncate">
-                    {isCreatingParty ? 'Creating' : 'Watch Together'}
+                    {isServer1
+                      ? 'Coming Soon'
+                      : isCreatingParty
+                        ? 'Creating'
+                        : 'Watch Together'}
                   </span>
                 </button>
               )}

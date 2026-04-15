@@ -30,6 +30,7 @@ const { setupTray } = require('./modules/tray.js');
 const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
+const { setupLiveBridge } = require('./modules/live-bridge.js');
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
@@ -108,6 +109,9 @@ const startElectronApp = async () => {
     setupTray(AppWindow.getInstance(), (quitState) =>
       AppWindow.setQuitting(quitState),
     );
+
+    // Setup Live Bridge for Headless Premium Channels
+    setupLiveBridge();
   };
 
   if (app.isPackaged) {

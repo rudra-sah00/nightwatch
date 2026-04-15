@@ -76,4 +76,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('window-focus', subscription);
     return () => ipcRenderer.removeListener('window-focus', subscription);
   },
+
+  // --- LIVE HLS EXTRACTOR BRIDGE (DaddyLive) ---
+  startLiveBridge: (config) => ipcRenderer.send('start-live-bridge', config),
+  stopLiveBridge: () => ipcRenderer.send('stop-live-bridge'),
+  onLiveBridgeResolved: (callback) => {
+    const subscription = (_event, result) => callback(result);
+    ipcRenderer.on('live-bridge-resolved', subscription);
+    return () =>
+      ipcRenderer.removeListener('live-bridge-resolved', subscription);
+  },
 });

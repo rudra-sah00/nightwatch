@@ -116,7 +116,7 @@ export function Server1Channels() {
 
 function ChannelRow({ channel }: { channel: Channel }) {
   const pseudoMatch = {
-    id: `iptvorg:${channel.providerId}`,
+    id: `s1:${channel.providerId}`,
     team1: { name: channel.name, id: '', score: '', avatar: '' },
     team2: { name: '', id: '', score: '', avatar: '' },
     status: 'MatchIng',
@@ -142,16 +142,29 @@ function ChannelRow({ channel }: { channel: Channel }) {
 
   return (
     <>
+      <LiveMatchModal
+        match={
+          pseudoMatch as unknown as typeof pseudoMatch & { status: 'MatchIng' }
+        }
+        isOpen={showPrompt}
+        onClose={() => setShowPrompt(false)}
+        onWatchSolo={handleWatchSolo}
+        onWatchParty={handleWatchParty}
+        isCreatingParty={isCreatingParty}
+      />
       <div className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 transition-colors hover:bg-accent rounded-md">
         {/* Left Side: Tag / Live Indicator */}
         <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
-          <div className="animate-pulse mb-1">
+          <div className="flex gap-2 animate-pulse mb-1">
             <span className="px-3 py-1 bg-neo-red text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md inline-flex">
               24/7 LIVE
             </span>
           </div>
-          <div className="flex flex-col items-center md:items-start gap-1 w-full mt-2">
-            <span className="px-2 py-0.5 bg-secondary border-[2px] border-border text-[10px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
+          <div className="flex flex-col items-center md:items-start gap-1 w-full mt-1">
+            <span className="px-2 py-0.5 bg-neo-blue text-white border-[2px] border-border text-[9px] font-black uppercase tracking-widest rounded-sm">
+              DESKTOP ONLY
+            </span>
+            <span className="px-2 py-0.5 bg-secondary border-[2px] border-border text-[9px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
               {channel.category || 'TV Channel'}
             </span>
           </div>
@@ -198,17 +211,6 @@ function ChannelRow({ channel }: { channel: Channel }) {
           </Button>
         </div>
       </div>
-
-      <LiveMatchModal
-        match={
-          pseudoMatch as unknown as typeof pseudoMatch & { status: 'MatchIng' }
-        }
-        isOpen={showPrompt}
-        isCreatingParty={isCreatingParty}
-        onClose={() => setShowPrompt(false)}
-        onWatchSolo={handleWatchSolo}
-        onWatchParty={handleWatchParty}
-      />
     </>
   );
 }
