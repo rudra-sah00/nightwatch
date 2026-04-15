@@ -51,7 +51,7 @@ class AppWindow {
         contextIsolation: true,
         spellcheck: true,
         backgroundThrottling: false, // CRITICAL: Prevents video/audio desync when app is minimized!
-        devTools: process.env.NODE_ENV === 'development', // Lock down debugger in production
+        devTools: true, // FORCE TRUE FOR NOW SO WE CAN DEBUG
         // Securely inject desktop APIs to Nextjs React
         preload: require('node:path').join(__dirname, '../preload.js'),
       },
@@ -67,7 +67,6 @@ class AppWindow {
     */
 
     mainWindowState.manage(this.mainWindow);
-
     // Dynamic Media and Desktop permission handler
     session.defaultSession.setPermissionRequestHandler(
       (_webContents, permission, callback) => {
@@ -78,6 +77,7 @@ class AppWindow {
           'microphone',
           'notifications',
           'clipboard-sanitized-write',
+          'fullscreen', // ALLOW STREAMING PLAYERS TO FULLSCREEN
         ];
         if (allowedPermissions.includes(permission)) {
           callback(true);
@@ -138,6 +138,7 @@ class AppWindow {
 
     this.mainWindow.once('ready-to-show', () => {
       this.mainWindow.show();
+      this.mainWindow.webContents.openDevTools({ mode: 'detach' });
     });
 
     // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---

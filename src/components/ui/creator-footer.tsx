@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import packageJson from '../../package.json';
+import packageJson from '../../../package.json';
 
 /**
  * Shared Creator Identity footer with social links.

@@ -68,6 +68,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       {useInlineMobileLayout ? mobileHeader : null}
       <Player.Root
         {...props}
+        skipProgressHistory={true}
         containerStyle={
           useInlineMobileLayout
             ? {

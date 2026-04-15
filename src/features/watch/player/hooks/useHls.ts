@@ -167,6 +167,7 @@ export function useHls({
         };
 
         const hls = new Hls(finalConfig);
+        hlsRef.current = hls;
 
         hls.loadSource(streamUrl);
         hls.attachMedia(video);

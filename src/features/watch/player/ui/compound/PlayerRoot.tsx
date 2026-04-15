@@ -12,6 +12,7 @@ interface PlayerRootProps {
   children: ReactNode;
   streamUrl: string | null;
   metadata: VideoMetadata;
+  skipProgressHistory?: boolean;
   captionUrl?: string | null;
   subtitleTracks?: {
     id: string;
@@ -79,6 +80,7 @@ export function PlayerRoot({
   children,
   streamUrl,
   metadata,
+  skipProgressHistory,
   captionUrl,
   subtitleTracks,
   qualities,
@@ -127,6 +129,7 @@ export function PlayerRoot({
   const { state, containerRef, contextValue, showControls } = usePlayerRoot({
     streamUrl,
     metadata,
+    skipProgressHistory,
     captionUrl,
     subtitleTracks,
     qualities,

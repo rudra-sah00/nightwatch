@@ -315,7 +315,7 @@ export function LiveMatchModal({
               </button>
 
               {/* Watch Party */}
-              {!isMobile && (
+              {!isMobile && !isServer1 && (
                 <button
                   type="button"
                   className={cn(

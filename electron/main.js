@@ -1,4 +1,4 @@
-require('v8-compile-cache');
+// require('v8-compile-cache');
 const {
   app,
   globalShortcut,
@@ -73,7 +73,19 @@ let internalAppIsQuitting = false;
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
 const startElectronApp = async () => {
-  // macOS needs explicit user authorization popups for Camera & Mics
+  // INJECT GLOBAL CORS BYPASS FOR THE VIDEO PLAYER TO ALLOW CROSS-ORIGIN TS STREAM LOADING
+  const { session } = require('electron');
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    // Force CORS Allow-Origin to everything, so our React video player can fetch chunks!
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Access-Control-Allow-Origin': ['*'],
+        'Access-Control-Allow-Headers': ['*'],
+      },
+    });
+  });
+
   await macOS.setupMacOS();
 
   // Initialize Background Auto Updater with Discord-style Splash Screen

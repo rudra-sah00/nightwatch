@@ -157,7 +157,11 @@ function VODPlayerState() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/60" />
             </div>
           ) : null}
-          <LoadingOverlay isVisible={true} />
+          <LoadingOverlay
+            isVisible={true}
+            text="Loading content..."
+            bgOpacity="bg-transparent"
+          />
         </div>
       ) : null}
 

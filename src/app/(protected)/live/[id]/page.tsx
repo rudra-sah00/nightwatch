@@ -6,10 +6,29 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
+
+interface LiveBridgeResult {
+  hlsUrl?: string;
+}
+
+interface ElectronWindowOverride {
+  electronAPI: {
+    onLiveBridgeResolved: (
+      cb: (result: LiveBridgeResult) => void,
+    ) => () => void;
+    startLiveBridge: (params: {
+      url: string;
+      channelId: string;
+      referer: string;
+    }) => void;
+    stopLiveBridge: () => void;
+  };
+}
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();
@@ -26,13 +45,21 @@ export default function LiveMatchPlayerPage() {
     if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
       return;
 
-    const isServer1 = match.id.startsWith('s1:');
-    const isDesktopApp =
+    const _isServer1 = match.id.startsWith('s1:');
+    const _isDesktopApp =
       typeof window !== 'undefined' && 'electronAPI' in window;
 
-    let bridgeUnsubscribe: (() => void) | undefined;
+    let _bridgeUnsubscribe: (() => void) | undefined;
 
     const initSession = async () => {
+      // PREVENT DOUBLE FIRE
+      if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
+        return;
+
+      const isServer1 = match.id.startsWith('s1:');
+      const isDesktopApp =
+        typeof window !== 'undefined' && 'electronAPI' in window;
+
       if (isServer1) {
         if (!isDesktopApp) {
           setSessionError('Premium channels require the Desktop App.');
@@ -42,21 +69,24 @@ export default function LiveMatchPlayerPage() {
         const sourceUrl = match.playPath!.replace('s1://', '');
         setSessionLoading(true);
 
-        bridgeUnsubscribe = (window as any).electronAPI.onLiveBridgeResolved(
-          (result: any) => {
-            if (result && result.hlsUrl) {
-              setSessionUrl(result.hlsUrl);
-              setSessionLoading(false);
-              if (bridgeUnsubscribe) bridgeUnsubscribe();
-            } else {
-              setSessionError('Failed to extract stream URL via LiveBridge.');
-              setSessionLoading(false);
-              if (bridgeUnsubscribe) bridgeUnsubscribe();
-            }
-          },
-        );
+        _bridgeUnsubscribe = (
+          window as unknown as ElectronWindowOverride
+        ).electronAPI.onLiveBridgeResolved((result) => {
+          console.log('[LiveBridge React] Received resolution:', result);
+          if (result?.hlsUrl) {
+            setSessionUrl(result.hlsUrl);
+            setSessionLoading(false);
+            // if (bridgeUnsubscribe) bridgeUnsubscribe(); <--- DO NOT UNSUBSCRIBE IMMEDIATELY, LET IT BE!
+          } else {
+            setSessionError('Failed to extract stream URL via LiveBridge.');
+            setSessionLoading(false);
+          }
+        });
 
-        (window as any).electronAPI.startLiveBridge({
+        console.log('[LiveBridge React] Starting Extraction...');
+        (
+          window as unknown as ElectronWindowOverride
+        ).electronAPI.startLiveBridge({
           url: sourceUrl,
           channelId: match.id,
           referer: '',
@@ -87,32 +117,43 @@ export default function LiveMatchPlayerPage() {
     initSession();
 
     return () => {
-      if (bridgeUnsubscribe) bridgeUnsubscribe();
-      if (isServer1 && isDesktopApp) {
-        (window as any).electronAPI.stopLiveBridge();
-      }
+      // We must not unsubscribe from the IPC listener here because setSessionLoading(true)
+      // immediately triggers this cleanup block, severing the listener string!
+      // if (bridgeUnsubscribe) bridgeUnsubscribe();
     };
   }, [match, sessionUrl, sessionLoading, sessionError]);
 
+  // Clean up LiveBridge ONLY when the user physically leaves this page
+  useEffect(() => {
+    return () => {
+      const isDesktopApp =
+        typeof window !== 'undefined' && 'electronAPI' in window;
+      if (isDesktopApp) {
+        (
+          window as unknown as ElectronWindowOverride
+        ).electronAPI.stopLiveBridge();
+      }
+    };
+  }, []);
+
   if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-black">
-        <Loader2 className="w-10 h-10 text-white animate-spin stroke-[3px]" />
-      </div>
-    );
+    return <PlayerLoadingSkeleton />;
   }
 
   if (error || !match) {
     return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
+      <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
           Stream Unavailable
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
+        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
           {error?.message || 'Match not found or stream unavailable.'}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+          <Button
+            variant="default"
+            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+          >
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -130,17 +171,20 @@ export default function LiveMatchPlayerPage() {
 
   if (activeMatch.status === 'MatchNotStart' && !isServer2 && !isServer1) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
-        <Calendar className="w-20 h-20 text-white/20 mb-6 stroke-[3px]" />
+      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
+        <Calendar className="w-20 h-20 text-muted-foreground mb-6 stroke-[3px]" />
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2 text-center px-4">
           Match Has Not Started
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 max-w-sm text-center px-4">
+        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-sm text-center px-4">
           Prepare for the event. Please check back closer to the scheduled start
           time.
         </p>
         <Link href="/live">
-          <Button className="bg-neo-yellow text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+          <Button
+            variant="default"
+            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+          >
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -150,12 +194,12 @@ export default function LiveMatchPlayerPage() {
 
   if (!activeMatch.playPath && activeMatch.status === 'MatchIng') {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-16 h-16 text-white/20 animate-spin mb-6 stroke-[3px]" />
+      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
+        <Loader2 className="w-16 h-16 text-muted-foreground animate-spin mb-6 stroke-[3px]" />
         <h2 className="text-3xl font-black font-headline uppercase tracking-tighter mb-2">
           Waiting for Feed...
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 max-w-xs text-center">
+        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-xs text-center">
           The stream URL has not been broadcasted by the source yet.
         </p>
       </div>
@@ -164,17 +208,20 @@ export default function LiveMatchPlayerPage() {
 
   if (activeMatch.status === 'MatchEnded') {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
+      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
         <Trophy className="w-20 h-20 text-neo-yellow mb-6 stroke-[3px]" />
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2">
           Match Concluded
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 max-w-md text-center px-4">
+        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-md text-center px-4">
           {activeMatch.matchResult ||
             `${activeMatch.team1.name} vs ${activeMatch.team2.name} has ended.`}
         </p>
         <Link href="/live">
-          <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+          <Button
+            variant="default"
+            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+          >
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
           </Button>
         </Link>
@@ -188,30 +235,39 @@ export default function LiveMatchPlayerPage() {
     );
 
     return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-black text-white px-4">
+      <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
           {isDesktopError ? 'Desktop App Required' : 'Access Denied'}
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-white/60 mb-8 text-center max-w-md">
+        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
           {sessionError}
         </p>
 
         {isDesktopError ? (
           <div className="flex gap-4">
             <Link href="/docs-site/DESKTOP">
-              <Button className="bg-neo-blue text-white border-4 border-black px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+              <Button
+                variant="default"
+                className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 Download App
               </Button>
             </Link>
             <Link href="/live">
-              <Button className="bg-white text-black border-4 border-black px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+              <Button
+                variant="default"
+                className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+              >
                 Back
               </Button>
             </Link>
           </div>
         ) : (
           <Link href="/live">
-            <Button className="bg-white text-black border-4 border-black  px-8 py-4 h-auto text-lg font-black font-headline uppercase tracking-widest transition-colors">
+            <Button
+              variant="default"
+              className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+            >
               <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to
               Schedule
             </Button>
@@ -352,6 +408,13 @@ export default function LiveMatchPlayerPage() {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  console.log(
+    '[LiveMatchPlayerPage] Rendering WatchLivePlayer with sessionUrl:',
+    sessionUrl,
+    'and metadata:',
+    metadata,
+  );
 
   return (
     <div className="min-h-screen bg-background">

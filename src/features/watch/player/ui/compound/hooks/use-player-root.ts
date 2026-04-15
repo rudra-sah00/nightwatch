@@ -60,6 +60,7 @@ interface PlayerRootHookProps {
   isLive?: boolean;
   providerId?: 's1' | 's2' | 's3';
   playbackRate?: number;
+  skipProgressHistory?: boolean;
 }
 
 export function usePlayerRoot({
@@ -85,6 +86,7 @@ export function usePlayerRoot({
   isLive = false,
   providerId: _providerId,
   playbackRate: playbackRateProp,
+  skipProgressHistory = false,
 }: PlayerRootHookProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -291,7 +293,7 @@ export function usePlayerRoot({
     metadata,
     isPlaying: state.isPlaying && !state.isPaused && !state.isBuffering,
     onProgressLoaded: isHost ? handleProgressLoaded : undefined,
-    skipProgressHistory: !isHost,
+    skipProgressHistory: skipProgressHistory || !isHost,
     enableProgressLoad: isHost,
     skipActivityTracking: !isAuthenticated,
     hasMoreEpisodes:

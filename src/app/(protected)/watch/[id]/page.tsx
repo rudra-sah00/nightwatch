@@ -1,4 +1,6 @@
-'use client';
+import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
+
+('use client');
 
 import { Suspense } from 'react';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
@@ -127,13 +129,7 @@ function WatchContent() {
 
 export default function WatchRoutePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center w-full h-[100dvh] bg-black">
-          <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PlayerLoadingSkeleton />}>
       <WatchContent />
     </Suspense>
   );

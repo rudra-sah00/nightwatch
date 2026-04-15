@@ -1,6 +1,6 @@
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
-import { CreatorFooter } from '@/components/creator-footer';
+import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
 

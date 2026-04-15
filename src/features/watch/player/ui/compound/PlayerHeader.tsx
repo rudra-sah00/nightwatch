@@ -14,13 +14,12 @@ export function PlayerHeader({
   isSidebarOpen,
   hideBackButton,
 }: PlayerHeaderProps) {
-  const { metadata, state, playerHandlers } = usePlayerContext();
+  const { metadata, playerHandlers } = usePlayerContext();
 
   return (
     <div
       className={cn(
-        'absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300',
-        state.isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100',
+        'absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300 opacity-100',
       )}
     >
       {!hideBackButton ? (

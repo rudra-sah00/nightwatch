@@ -2,7 +2,7 @@
 
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { CreatorFooter } from '@/components/creator-footer';
+import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
