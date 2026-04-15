@@ -1,8 +1,7 @@
-import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
-
-('use client');
+'use client';
 
 import { Suspense } from 'react';
+import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 

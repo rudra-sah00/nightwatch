@@ -147,14 +147,14 @@ export function ContentDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       <div className="relative w-full h-full flex flex-col bg-card overflow-hidden">
         {/* Fixed Header */}
-        <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0">
+        <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:py-4 flex-shrink-0 z-20 sticky top-0 [-webkit-app-region:drag]">
           <span
             id="modal-title"
             className="font-headline font-black uppercase tracking-widest text-foreground text-lg sm:text-xl truncate flex-1 min-w-0 pr-4"
@@ -164,7 +164,7 @@ export function ContentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[3px]" />

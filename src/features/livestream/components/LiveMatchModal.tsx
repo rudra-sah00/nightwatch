@@ -134,14 +134,14 @@ export function LiveMatchModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-match-modal-title"
     >
       <div className="relative w-full h-full overflow-y-auto bg-background flex flex-col no-scrollbar">
         {/* Header / Close button */}
-        <div className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20">
+        <div className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20 [-webkit-app-region:drag]">
           <div className="flex items-center gap-4">
             <span
               id="live-match-modal-title"
@@ -162,7 +162,7 @@ export function LiveMatchModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
             aria-label="Close"
           >
             <X className="w-5 h-5 stroke-[3px]" />
