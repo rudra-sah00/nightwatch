@@ -86,4 +86,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () =>
       ipcRenderer.removeListener('live-bridge-resolved', subscription);
   },
+
+  // --- OFFLINE HLS DOWNLOADER ---
+  startDownload: (config) => ipcRenderer.send('start-download', config),
+  cancelDownload: (contentId) => ipcRenderer.send('cancel-download', contentId),
+  getDownloads: () => ipcRenderer.invoke('get-downloads'),
+  onDownloadProgress: (callback) => {
+    const sub = (_event, state) => callback(state);
+    ipcRenderer.on('download-progress', sub);
+    return () => ipcRenderer.removeListener('download-progress', sub);
+  },
 });

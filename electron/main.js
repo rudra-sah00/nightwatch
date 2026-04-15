@@ -12,6 +12,24 @@ const {
 const _path = require('node:path');
 const Sentry = require('@sentry/electron/main');
 const Store = require('electron-store');
+const { protocol } = require('electron');
+
+// --- PROTOCOL PRIVILEGES ---
+// Ensure offline-media is treated securely like https (fixes CORS + Video tags)
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'offline-media',
+    privileges: {
+      standard: true,
+      secure: true,
+      bypassCSP: true,
+      allowServiceWorkers: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+    },
+  },
+]);
 
 // --- 0. INITIALIZE CRASH REPORTING ---
 // Catches native C++ crashes (V8 Out of Memory, renderer crashes, etc.)
@@ -31,6 +49,7 @@ const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
 const { setupLiveBridge } = require('./modules/live-bridge.js');
+const { setupDownloadManager } = require('./modules/download-manager.js');
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
@@ -124,6 +143,9 @@ const startElectronApp = async () => {
 
     // Setup Live Bridge for Headless Premium Channels
     setupLiveBridge();
+
+    // Setup Offline Download Manager for HLS segments
+    setupDownloadManager();
   };
 
   if (app.isPackaged) {
