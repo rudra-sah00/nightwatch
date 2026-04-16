@@ -258,13 +258,11 @@ export function ContentDetailModal({
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
-                show.id.startsWith('s2:') ? (
-                  <DownloadMenu
-                    show={show}
-                    selectedSeason={selectedSeason}
-                    episodes={episodes}
-                  />
-                ) : null
+                <DownloadMenu
+                  show={show}
+                  selectedSeason={selectedSeason}
+                  episodes={episodes}
+                />
               }
             />
           </div>
