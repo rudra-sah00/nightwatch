@@ -108,10 +108,10 @@ function QualitySelectionOptions({
             onPick(opt.value, url);
           }}
           className={cn(
-            'flex items-center justify-center gap-2 px-3 py-3 sm:py-4 border-[3px] border-border font-headline font-black uppercase text-xs tracking-widest transition-all duration-150 active:scale-[0.98]',
+            'flex items-center justify-center gap-2 px-3 py-3 sm:py-4 border-[3px] border-border font-headline font-black uppercase text-xs tracking-widest transition-colors duration-200',
             downloaded === opt.value
               ? 'bg-neo-green text-green-950 border-neo-green scale-[0.98]'
-              : 'bg-background text-foreground hover:bg-card hover:-translate-y-0.5 hover:shadow-[0_4px_0_0_rgb(0,0,0)] dark:hover:shadow-none',
+              : 'bg-background text-foreground hover:bg-card',
           )}
         >
           {isElectronLoading && downloaded === opt.value ? (
