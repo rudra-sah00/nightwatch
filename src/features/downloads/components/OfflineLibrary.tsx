@@ -54,10 +54,10 @@ export function OfflineLibrary() {
             <div>
               <Link
                 href="/home"
-                className="inline-flex items-center gap-2 mb-6 bg-background border-[3px] border-border px-4 py-2 hover:bg-black/5 hover:-translate-y-1 transition-transform font-headline font-bold uppercase tracking-widest text-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-fit [-webkit-app-region:no-drag]"
+                className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground hover:underline font-mono text-sm w-fit [-webkit-app-region:no-drag]"
               >
-                <ArrowLeft className="w-5 h-5 stroke-[3px]" />
-                Back
+                <ArrowLeft className="w-5 h-5" />
+                Back to Home
               </Link>
               <h1 className="flex items-center gap-4 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-foreground font-headline uppercase leading-none min-w-0">
                 OFFLINE
@@ -68,7 +68,7 @@ export function OfflineLibrary() {
               </h1>
             </div>
 
-            <div className="bg-background text-foreground border-[4px] border-border px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="bg-background text-foreground border-[4px] border-border px-6 py-4">
               <div className="flex items-center gap-4">
                 <Download className="w-10 h-10 stroke-[3px] text-neo-blue" />
                 <div className="space-y-1">
@@ -189,7 +189,7 @@ export function OfflineLibrary() {
                         {item.status === 'completed' && (
                           <Link
                             href={`/watch/${item.contentId}`}
-                            className="flex items-center gap-2 bg-neo-green text-black uppercase font-black tracking-wider text-xs px-6 py-3 border-[3px] border-black hover:bg-neo-green/80 hover:-translate-y-0.5 active:translate-y-0 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                            className="flex items-center gap-2 bg-neo-green text-black uppercase font-black tracking-wider text-xs px-6 py-3 border-[3px] border-black hover:bg-neo-green/90 transition-colors"
                           >
                             <Play className="w-4 h-4 fill-black stroke-[3px]" />{' '}
                             Play
