@@ -13,8 +13,10 @@ export function useDesktopApp() {
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const [isMacOS, setIsMacOS] = useState<boolean>(false);
   const [isWindows, setIsWindows] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsMounted(true);
     if (typeof window !== 'undefined') {
       const hasElectronAPI = !!window.electronAPI;
       setIsDesktopApp(hasElectronAPI);
@@ -91,6 +93,7 @@ export function useDesktopApp() {
 
   return {
     isDesktopApp,
+    isMounted,
     isBrowser,
     isMacOS,
     isWindows,

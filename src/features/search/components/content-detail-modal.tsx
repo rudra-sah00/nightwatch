@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
@@ -38,6 +39,7 @@ export function ContentDetailModal({
   autoPlay = false,
   isOfflineMode = false,
 }: ContentDetailModalProps) {
+  const { isDesktopApp } = useDesktopApp();
   const {
     show,
     episodes,
@@ -261,11 +263,13 @@ export function ContentDetailModal({
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
-                <DownloadMenu
-                  show={show}
-                  selectedSeason={selectedSeason}
-                  episodes={episodes}
-                />
+                isDesktopApp ? (
+                  <DownloadMenu
+                    show={show}
+                    selectedSeason={selectedSeason}
+                    episodes={episodes}
+                  />
+                ) : undefined
               }
             />
           </div>

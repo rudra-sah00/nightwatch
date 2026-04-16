@@ -5,7 +5,7 @@ import { useDesktopApp } from '@/hooks/use-desktop-app';
 import type { DownloadItem } from '@/types/electron';
 
 export function useDownloads() {
-  const { isDesktopApp } = useDesktopApp();
+  const { isDesktopApp, isMounted } = useDesktopApp();
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   useEffect(() => {
@@ -57,6 +57,7 @@ export function useDownloads() {
   return {
     downloads,
     isDesktopApp,
+    isMounted,
     cancelDownload,
   };
 }

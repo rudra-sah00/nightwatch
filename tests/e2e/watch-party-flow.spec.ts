@@ -87,7 +87,7 @@ test.describe('Watch Party Multi-User Flow', () => {
     // The app uses path-based routing: /watch-party/[roomId]
     await expect(hostPage).toHaveURL(/\/watch-party\//i, { timeout: 15000 });
     const roomUrl = hostPage.url();
-    // console.log(`Generated Room URL: ${roomUrl}`);
+    //
 
     // --- STEP 3: GUEST JOINS ---
     await guestPage.goto(roomUrl);

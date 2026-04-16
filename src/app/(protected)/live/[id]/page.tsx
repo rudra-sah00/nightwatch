@@ -72,7 +72,6 @@ export default function LiveMatchPlayerPage() {
         _bridgeUnsubscribe = (
           window as unknown as ElectronWindowOverride
         ).electronAPI.onLiveBridgeResolved((result) => {
-          console.log('[LiveBridge React] Received resolution:', result);
           if (result?.hlsUrl) {
             setSessionUrl(result.hlsUrl);
             setSessionLoading(false);
@@ -83,7 +82,6 @@ export default function LiveMatchPlayerPage() {
           }
         });
 
-        console.log('[LiveBridge React] Starting Extraction...');
         (
           window as unknown as ElectronWindowOverride
         ).electronAPI.startLiveBridge({

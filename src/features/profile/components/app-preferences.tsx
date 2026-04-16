@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, DownloadCloud, Moon, Power, Sun, Zap } from 'lucide-react';
+import { Activity, Moon, Power, Sun, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
@@ -10,9 +10,7 @@ export function AppPreferences() {
   const isDark = theme === 'dark';
 
   const [runOnBoot, setRunOnBoot] = useState(false);
-  const [downloadQuality, setDownloadQuality] = useState<
-    'low' | 'medium' | 'high'
-  >('high');
+
   const [concurrentDownloads, setConcurrentDownloads] = useState<number>(3);
   const [downloadSpeedLimit, setDownloadSpeedLimit] = useState<number>(0);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -24,11 +22,7 @@ export function AppPreferences() {
       window.electronAPI.storeGet('runOnBoot').then((val: unknown) => {
         if (typeof val === 'boolean') setRunOnBoot(val);
       });
-      window.electronAPI.storeGet('downloadQuality').then((val: unknown) => {
-        if (val === 'low' || val === 'medium' || val === 'high') {
-          setDownloadQuality(val);
-        }
-      });
+
       window.electronAPI
         .storeGet('concurrentDownloads')
         .then((val: unknown) => {
@@ -46,13 +40,6 @@ export function AppPreferences() {
     if (window.electronAPI?.setRunOnBoot) {
       window.electronAPI.setRunOnBoot(newValue);
       window.electronAPI.storeSet('runOnBoot', newValue);
-    }
-  };
-
-  const handleQualityChange = (quality: 'low' | 'medium' | 'high') => {
-    setDownloadQuality(quality);
-    if (window.electronAPI) {
-      window.electronAPI.storeSet('downloadQuality', quality);
     }
   };
 
@@ -148,37 +135,6 @@ export function AppPreferences() {
             </div>
 
             <div className="h-px bg-border w-full" />
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2">
-                <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
-                  <DownloadCloud className="w-4 h-4 text-neo-pink" />
-                  Default Download Quality
-                </span>
-                <p className="text-muted-foreground font-body text-sm max-w-sm">
-                  Choose the quality for offline downloads (Server 1 & 3). Lower
-                  consumes less space, higher takes longer.
-                </p>
-              </div>
-
-              <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
-                {(['low', 'medium', 'high'] as const).map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => handleQualityChange(q)}
-                    className={cn(
-                      'px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors',
-                      downloadQuality === q
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex flex-col gap-2">

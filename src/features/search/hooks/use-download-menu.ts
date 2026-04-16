@@ -34,19 +34,6 @@ export function useDownloadMenu({
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [isElectronLoading, setElectronLoading] = useState(false);
-  const [prefQuality, setPrefQuality] = useState<'low' | 'medium' | 'high'>(
-    'high',
-  );
-
-  useEffect(() => {
-    if (window.electronAPI) {
-      window.electronAPI.storeGet('downloadQuality').then((val: unknown) => {
-        if (val === 'low' || val === 'medium' || val === 'high') {
-          setPrefQuality(val);
-        }
-      });
-    }
-  }, []);
 
   useEffect(() => {
     if (contentId) {
@@ -71,13 +58,9 @@ export function useDownloadMenu({
   }, [contentId, qualities, isS2, isLoading, type, season, episode]);
 
   const handleElectronClick = async (
+    qualityLabel: 'low' | 'medium' | 'high',
     qualityUrl?: string,
-    qualityLabel?: string,
   ) => {
-    console.log('[useDownloadMenu] handleElectronClick', {
-      qualityUrl,
-      qualityLabel,
-    });
     setElectronLoading(true);
     await startElectronDownload({
       contentId,
@@ -87,12 +70,11 @@ export function useDownloadMenu({
       season,
       episode,
       directUrl: qualityUrl,
-      quality: prefQuality,
+      quality: qualityLabel,
       show,
     });
 
-    console.log('[useDownloadMenu] handleElectronClick DONE');
-    setDownloaded(qualityLabel || 'desktop');
+    setDownloaded(qualityLabel);
 
     const epText = type === 'series' ? ` for Ep ${episode}` : '';
     toast.success(`Downloading${epText}! Check your Offline Library.`);
@@ -112,7 +94,6 @@ export function useDownloadMenu({
     isLoading,
     downloaded,
     isElectronLoading,
-    prefQuality,
     loadQualities,
     handleElectronClick,
   };

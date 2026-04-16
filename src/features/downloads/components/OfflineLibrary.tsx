@@ -10,7 +10,9 @@ import {
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
 
 const ContentDetailModal = dynamic(
@@ -31,10 +33,47 @@ function formatBytes(bytes?: number, decimals = 2) {
 }
 
 export function OfflineLibrary() {
-  const { downloads, isDesktopApp, cancelDownload } = useDownloads();
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(
-    null,
-  );
+  const { downloads, isDesktopApp, isMounted, cancelDownload } = useDownloads();
+  const [selectedItem, setSelectedItem] = useState<{
+    contentId: string;
+    season?: number;
+    episode?: number;
+  } | null>(null);
+
+  const handleSelect = (item: DownloadItem) => {
+    if (item.status !== 'COMPLETED') {
+      toast.info('Please wait until the download is complete to view offline.');
+      return;
+    }
+
+    const sEpMatch = item.contentId.match(/^(.*?)_S(\d+)E(\d+)$/);
+    if (sEpMatch) {
+      setSelectedItem({
+        contentId: sEpMatch[1],
+        season: parseInt(sEpMatch[2], 10),
+        episode: parseInt(sEpMatch[3], 10),
+      });
+      return;
+    }
+    const epMatch = item.contentId.match(/^(.*?)-ep(\d+)$/);
+    if (epMatch) {
+      setSelectedItem({
+        contentId: epMatch[1],
+        season: 1,
+        episode: parseInt(epMatch[2], 10),
+      });
+      return;
+    }
+    setSelectedItem({ contentId: item.contentId });
+  };
+
+  if (!isMounted) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center border-[4px] border-border bg-card min-h-[calc(100vh-80px)]">
+        {/* Empty state while mounting to prevent flash */}
+      </div>
+    );
+  }
 
   if (!isDesktopApp) {
     return (
@@ -109,13 +148,7 @@ export function OfflineLibrary() {
                 <button
                   type="button"
                   key={item.contentId}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedContentId(item.contentId);
-                    }
-                  }}
-                  onClick={() => setSelectedContentId(item.contentId)}
+                  onClick={() => handleSelect(item)}
                   className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left"
                 >
                   {/* Poster */}
@@ -289,10 +322,15 @@ export function OfflineLibrary() {
       </div>
 
       {/* Content Details Modal / Sheet */}
-      {selectedContentId && (
+      {selectedItem && (
         <ContentDetailModal
-          contentId={selectedContentId}
-          onClose={() => setSelectedContentId(null)}
+          contentId={selectedItem.contentId}
+          initialContext={
+            selectedItem.season && selectedItem.episode
+              ? { season: selectedItem.season, episode: selectedItem.episode }
+              : undefined
+          }
+          onClose={() => setSelectedItem(null)}
           isOfflineMode={true}
         />
       )}

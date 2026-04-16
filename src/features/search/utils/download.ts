@@ -61,19 +61,7 @@ export async function startElectronDownload({
   quality?: 'low' | 'medium' | 'high';
   show?: ShowDetails;
 }) {
-  console.log('[startElectronDownload] INITIAL CALL', {
-    contentId,
-    showTitle,
-    type,
-    season,
-    episode,
-    directUrl,
-    quality,
-  });
   if (directUrl && window.electronAPI) {
-    console.log(
-      '[startElectronDownload] Has directUrl, calling startDownload IPC',
-    );
     window.electronAPI.startDownload({
       contentId:
         type === 'series' && episode ? `${contentId}-ep${episode}` : contentId,
@@ -86,15 +74,12 @@ export async function startElectronDownload({
       quality,
       metadata: show,
     });
-    console.log('[startElectronDownload] Return from directUrl call');
+
     return;
   }
 
   const server = contentId.includes(':') ? contentId.split(':')[0] : 's1';
-  console.log('[startElectronDownload] No directUrl. Calling playVideo API', {
-    server,
-    contentId,
-  });
+
   const response = await playVideo({
     type,
     title: showTitle,
@@ -104,16 +89,9 @@ export async function startElectronDownload({
     season,
     episode,
   });
-  console.log('[startElectronDownload] playVideo response:', response);
 
   if (response.success && response.masterPlaylistUrl) {
-    console.log(
-      '[startElectronDownload] Success. Valid masterPlaylistUrl. Preparing IPC window.electronAPI',
-    );
     if (window.electronAPI) {
-      console.log(
-        '[startElectronDownload] Calling IPC startDownload from masterPlaylistUrl',
-      );
       window.electronAPI.startDownload({
         contentId: `${contentId}${season ? `_S${season}E${episode}` : ''}`,
         title: `${showTitle}${season ? ` S${season} E${episode}` : ''}`,
@@ -123,9 +101,7 @@ export async function startElectronDownload({
         quality,
         metadata: show,
       });
-      console.log(
-        '[startElectronDownload] Returning true from masterPlaylistUrl',
-      );
+
       return true;
     }
   } else {
@@ -134,6 +110,5 @@ export async function startElectronDownload({
     );
   }
 
-  console.log('[startElectronDownload] Returning false');
   return false;
 }

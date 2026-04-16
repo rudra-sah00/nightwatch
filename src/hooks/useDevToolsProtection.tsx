@@ -122,8 +122,7 @@ export function initDevToolsProtection(): (() => void) | undefined {
   const checkConsole = () => {
     // Trigger Method 2 (Image ID getter) and Method 7 (Div ID getter)
     // These getters are only called when the objects are inspected in the console
-    console.log(image);
-    console.log(element);
+
     console.clear();
 
     // Method 8: Debugger timing check

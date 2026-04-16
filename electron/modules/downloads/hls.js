@@ -1,0 +1,274 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const {
+  getDatabase,
+  syncDbState,
+  sendSafeProgress,
+  activeDownloadsMap,
+  finalizeCancel,
+  VAULT_PATH,
+  store,
+} = require('./state');
+const {
+  fetchText,
+  downloadFile,
+  resolveUrl,
+  formatSpeed,
+} = require('./network');
+
+const CONCURRENCY_LIMIT = 5;
+
+async function startHlsDownload(
+  eventSender,
+  { contentId, title, m3u8Url, posterUrl, subtitleTracks, quality = 'high' },
+) {
+  const contentFolder = path.join(VAULT_PATH, contentId);
+  if (!fs.existsSync(contentFolder))
+    fs.mkdirSync(contentFolder, { recursive: true });
+
+  const db = getDatabase();
+  let item = db.items.find((i) => i.contentId === contentId);
+  if (!item) {
+    item = {
+      contentId,
+      title,
+      m3u8Url,
+      status: 'DOWNLOADING',
+      progress: 0,
+      downloadedBytes: 0,
+      segmentsTotal: 0,
+      segmentsDownloaded: 0,
+    };
+    db.items.push(item);
+  } else {
+    item.status = 'DOWNLOADING';
+  }
+
+  if (!item.downloadedBytes) item.downloadedBytes = 0;
+
+  activeDownloadsMap.set(contentId, item);
+  item.reqs = [];
+
+  if (subtitleTracks && Array.isArray(subtitleTracks)) {
+    const processedTracks = [];
+    for (let i = 0; i < subtitleTracks.length; i++) {
+      const track = subtitleTracks[i];
+      try {
+        const ext = track.url.includes('.srt') ? '.srt' : '.vtt';
+        const subName = `subtitle_${track.language.replace(/[^a-z0-9]/gi, '_') || i}${ext}`;
+        const subDest = path.join(contentFolder, subName);
+
+        if (!fs.existsSync(subDest)) {
+          const subText = await fetchText(track.url);
+          fs.writeFileSync(subDest, subText, 'utf8');
+        }
+
+        processedTracks.push({
+          label: track.label,
+          language: track.language,
+          url: track.url,
+          localPath: `offline-media://local/${encodeURIComponent(contentId)}/${encodeURIComponent(subName)}`,
+        });
+      } catch (_err) {}
+    }
+    item.subtitleTracks = processedTracks;
+  }
+
+  syncDbState(item);
+  sendSafeProgress(eventSender, item);
+
+  if (
+    !m3u8Url ||
+    m3u8Url === 'null' ||
+    m3u8Url.startsWith('null') ||
+    m3u8Url === 'undefined'
+  ) {
+    if (item.status !== 'CANCELLED') {
+      item.status = 'FAILED';
+      item.error = 'Invalid M3U8 URL provided';
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+    }
+    return;
+  }
+
+  try {
+    if (posterUrl && !item.posterUrl) {
+      try {
+        const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
+        const posterDest = path.join(contentFolder, `poster${ext}`);
+        if (!fs.existsSync(posterDest)) {
+          await downloadFile(posterUrl, posterDest, null, item, store).catch(
+            () => null,
+          );
+        }
+        item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
+      } catch (err) {
+        console.error(
+          '[DownloadManager] Error processing poster URL:',
+          err.message,
+        );
+      }
+    }
+
+    if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+
+    const masterText = await fetchText(m3u8Url);
+    let targetPlaylistUrl = m3u8Url;
+    const lines = masterText.split('\n');
+    const playlists = [];
+    let currentBandwidth = 0;
+
+    const isMediaPlaylist = lines.some((l) => l.startsWith('#EXTINF:'));
+
+    if (!isMediaPlaylist) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('#EXT-X-STREAM-INF')) {
+          const bwMatch = line.match(/BANDWIDTH=(\d+)/);
+          if (bwMatch) currentBandwidth = parseInt(bwMatch[1], 10);
+        } else if (line && !line.startsWith('#')) {
+          playlists.push({
+            url: resolveUrl(m3u8Url, line),
+            bandwidth: currentBandwidth,
+          });
+        }
+      }
+
+      if (playlists.length > 0) {
+        playlists.sort((a, b) => b.bandwidth - a.bandwidth);
+        if (quality === 'low')
+          targetPlaylistUrl = playlists[playlists.length - 1].url;
+        else if (quality === 'medium')
+          targetPlaylistUrl = playlists[Math.floor(playlists.length / 2)].url;
+        else targetPlaylistUrl = playlists[0].url;
+      }
+    }
+
+    const mediaText = isMediaPlaylist
+      ? masterText
+      : await fetchText(targetPlaylistUrl);
+    const mediaLines = mediaText.split('\n');
+    const segments = [];
+
+    for (let i = 0; i < mediaLines.length; i++) {
+      const line = mediaLines[i].trim();
+      if (line && !line.startsWith('#')) {
+        segments.push({
+          originalUrl: resolveUrl(targetPlaylistUrl, line),
+          localName: `segment_${segments.length}.ts`,
+          lineIndex: i,
+        });
+      }
+    }
+
+    item.segmentsTotal = segments.length;
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
+
+    const rewritenLines = [...mediaLines];
+    let lastTime = Date.now();
+    let bytesSinceLastTick = 0;
+
+    const downloadSegment = async (segment) => {
+      if (item.status === 'CANCELLED') return;
+      const destPath = path.join(contentFolder, segment.localName);
+      rewritenLines[segment.lineIndex] = segment.localName;
+
+      if (fs.existsSync(destPath)) {
+        const stat = fs.statSync(destPath);
+        if (
+          stat.size > 0 &&
+          !item.segmentsDownloadedSet?.includes(segment.localName)
+        ) {
+          item.downloadedBytes += stat.size;
+          item.segmentsDownloaded++;
+          if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
+          item.segmentsDownloadedSet.push(segment.localName);
+          return;
+        }
+      }
+
+      await downloadFile(
+        segment.originalUrl,
+        destPath,
+        (bytes) => {
+          item.downloadedBytes += bytes;
+          bytesSinceLastTick += bytes;
+        },
+        item,
+        store,
+      );
+
+      item.segmentsDownloaded++;
+      if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
+      item.segmentsDownloadedSet.push(segment.localName);
+      item.progress = (item.segmentsDownloaded / item.segmentsTotal) * 100;
+
+      const now = Date.now();
+      if (now - lastTime > 1000) {
+        const bytesPerSec = (bytesSinceLastTick / (now - lastTime)) * 1000;
+        item.speed = formatSpeed(bytesPerSec);
+        lastTime = now;
+        bytesSinceLastTick = 0;
+        syncDbState(item);
+      }
+      sendSafeProgress(eventSender, item);
+    };
+
+    item.segmentsDownloaded = 0;
+    item.segmentsDownloadedSet = [];
+
+    await (async function runPool() {
+      let index = 0;
+      const active = new Set();
+      return new Promise((resolve) => {
+        const next = () => {
+          if (item.status === 'CANCELLED') return resolve();
+          if (index >= segments.length && active.size === 0) return resolve();
+          while (active.size < CONCURRENCY_LIMIT && index < segments.length) {
+            const seg = segments[index++];
+            const p = downloadSegment(seg).catch(() => null);
+            active.add(p);
+            p.then(() => {
+              active.delete(p);
+              next();
+            });
+          }
+        };
+        next();
+      });
+    })();
+
+    if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+
+    fs.writeFileSync(
+      path.join(contentFolder, 'local_playlist.m3u8'),
+      rewritenLines.join('\n'),
+    );
+
+    item.status = 'COMPLETED';
+    item.progress = 100;
+    item.localPlaylistPath = `offline-media://local/${encodeURIComponent(contentId)}/local_playlist.m3u8`;
+    item.speed = '';
+    delete item.segmentsDownloadedSet;
+    delete item.reqs;
+
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
+  } catch (error) {
+    if (error.message === 'CANCELLED_BY_USER' || item.status === 'CANCELLED') {
+      return finalizeCancel(item, contentId);
+    }
+    item.status = 'FAILED';
+    item.error = error.message;
+    console.error('[startHlsDownload ERROR]', error);
+    item.speed = '';
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
+  } finally {
+    activeDownloadsMap.delete(contentId);
+  }
+}
+
+module.exports = { startHlsDownload };
