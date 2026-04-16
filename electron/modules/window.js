@@ -51,7 +51,7 @@ class AppWindow {
         contextIsolation: true,
         spellcheck: true,
         backgroundThrottling: false, // CRITICAL: Prevents video/audio desync when app is minimized!
-        devTools: true, // FORCE TRUE FOR NOW SO WE CAN DEBUG
+        devTools: !require('electron').app.isPackaged,
         // Securely inject desktop APIs to Nextjs React
         preload: require('node:path').join(__dirname, '../preload.js'),
       },

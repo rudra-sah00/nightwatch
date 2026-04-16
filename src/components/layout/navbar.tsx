@@ -71,13 +71,15 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 text-xs font-headline font-black tracking-widest uppercase">
-          <Link
-            href="/downloads"
-            className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
-            title="Offline Downloads"
-          >
-            <span className="hidden md:inline">Downloads</span>
-          </Link>
+          {isDesktopApp && (
+            <Link
+              href="/downloads"
+              className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
+              title="Offline Downloads"
+            >
+              <span className="hidden md:inline">Downloads</span>
+            </Link>
+          )}
         </div>
 
         {/* Right Side: Profile */}

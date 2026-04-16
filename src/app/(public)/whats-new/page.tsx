@@ -64,7 +64,7 @@ export default async function WhatsNewPage() {
 
       <div className="space-y-12">
         {releases.length === 0 ? (
-          <div className="p-8 text-center bg-card border-[3px] border-border shadow-neo-sm">
+          <div className="p-8 text-center bg-card border border-border rounded-xl shadow-sm">
             <p className="font-mono text-muted-foreground">
               No releases found or failed to load.
             </p>
@@ -73,9 +73,9 @@ export default async function WhatsNewPage() {
           releases.map((release) => (
             <article
               key={release.id}
-              className="bg-card border-[3px] border-border shadow-neo-sm overflow-hidden"
+              className="bg-card border border-border shadow-sm rounded-xl overflow-hidden"
             >
-              <div className="border-b-[3px] border-border bg-muted/30 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="border-b border-border bg-muted/30 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold font-headline">
                     <a
@@ -105,7 +105,7 @@ export default async function WhatsNewPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 border-[2px] border-border px-3 py-1 bg-background">
+                <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 bg-background shadow-sm">
                   <Image
                     src={release.author.avatar_url}
                     alt={release.author.login}
@@ -119,7 +119,7 @@ export default async function WhatsNewPage() {
                 </div>
               </div>
 
-              <div className="p-6 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-pre:bg-muted prose-pre:border-2 prose-pre:border-border prose-pre:text-foreground">
+              <div className="p-6 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-lg prose-pre:text-foreground">
                 <ReactMarkdown>
                   {release.body || '*No release notes provided.*'}
                 </ReactMarkdown>

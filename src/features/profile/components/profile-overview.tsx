@@ -135,7 +135,7 @@ export function ProfileOverview() {
       </section>
 
       {/* App Updates / What's New */}
-      <section className="bg-card text-card-foreground border-[3px] border-border shadow-neo-sm p-8 transition-transform hover:-translate-y-1">
+      <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-3xl font-black font-headline uppercase tracking-tighter">
@@ -149,7 +149,7 @@ export function ProfileOverview() {
 
           <Link
             href="/whats-new"
-            className="flex-shrink-0 bg-primary text-primary-foreground font-headline font-black uppercase text-sm px-6 py-4 border-[3px] border-border shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+            className="flex-shrink-0 py-3 px-8 bg-primary text-primary-foreground font-semibold font-headline tracking-widest rounded-lg hover:bg-primary/90 transition-colors shadow-sm text-sm uppercase"
           >
             VIEW WHAT'S NEW
           </Link>
