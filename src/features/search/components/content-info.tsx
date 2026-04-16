@@ -151,7 +151,11 @@ export const ContentActions = memo(function ContentActions({
   isInWatchlist = false,
   isWatchlistLoading = false,
   extraActions,
-}: Omit<ContentInfoProps, 'show'> & { isSeries: boolean }) {
+  isOfflineMode = false,
+}: Omit<ContentInfoProps, 'show'> & {
+  isSeries: boolean;
+  isOfflineMode?: boolean;
+}) {
   const handleButtonClick = () => {
     if (hasWatchProgress && onResume) {
       onResume();
@@ -206,7 +210,7 @@ export const ContentActions = memo(function ContentActions({
       </button>
 
       {/* Watch Together Button */}
-      {onWatchParty && !isWatchPartyDisabled && (
+      {!isOfflineMode && onWatchParty && !isWatchPartyDisabled && (
         <button
           type="button"
           className={cn(
@@ -231,7 +235,7 @@ export const ContentActions = memo(function ContentActions({
       )}
 
       {/* Watchlist Action Button */}
-      {onWatchlistToggle && (
+      {!isOfflineMode && onWatchlistToggle && (
         <button
           type="button"
           className={cn(
@@ -260,7 +264,7 @@ export const ContentActions = memo(function ContentActions({
       )}
 
       {/* Extra Actions Container (Download) */}
-      {extraActions && (
+      {!isOfflineMode && extraActions && (
         <div className="w-full sm:w-auto sm:min-w-[220px] flex-1 border-[4px] border-border bg-neo-yellow hover:bg-neo-yellow/80 transition-[background-color,color,border-color,opacity,transform] duration-200 overflow-hidden">
           <div className="w-full h-full [&>button]:w-full [&>button]:h-full [&>button]:border-0 [&>button]:bg-transparent [&>button]:shadow-none [&>button]:px-6 [&>button]:py-4 md:[&>button]:px-8 md:[&>button]:py-5 [&>button]:text-base md:[&>button]:text-lg [&>button]:font-black [&>button]:font-headline [&>button]:uppercase [&>button]:tracking-widest [&>button]:whitespace-nowrap [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:gap-3">
             {extraActions}

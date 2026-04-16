@@ -4,14 +4,22 @@ import {
   Download,
   HardDriveDownload,
   MonitorDown,
-  Play,
   Trash2,
   X,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
+
+const ContentDetailModal = dynamic(
+  () =>
+    import('@/features/search/components/content-detail-modal').then(
+      (m) => m.ContentDetailModal,
+    ),
+  { ssr: false },
+);
 
 function formatBytes(bytes?: number, decimals = 2) {
   if (!bytes || bytes === 0) return '0 Bytes';
@@ -24,6 +32,9 @@ function formatBytes(bytes?: number, decimals = 2) {
 
 export function OfflineLibrary() {
   const { downloads, isDesktopApp, cancelDownload } = useDownloads();
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(
+    null,
+  );
 
   if (!isDesktopApp) {
     return (
@@ -95,20 +106,40 @@ export function OfflineLibrary() {
           ) : (
             <div className="flex flex-col gap-4">
               {downloads.map((item) => (
-                <div
+                <button
+                  type="button"
                   key={item.contentId}
-                  className="flex flex-col sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedContentId(item.contentId);
+                    }
+                  }}
+                  onClick={() => setSelectedContentId(item.contentId)}
+                  className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left"
                 >
                   {/* Poster */}
                   <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
                     {item.posterUrl ? (
-                      <Image
-                        src={item.posterUrl}
-                        alt={item.title}
-                        fill
-                        sizes="112px"
-                        className="object-cover"
-                      />
+                      item.posterUrl.startsWith('offline-media://') ? (
+                        <img
+                          src={
+                            item.posterUrl.startsWith('offline-media://local/')
+                              ? item.posterUrl
+                              : `offline-media://local/${encodeURIComponent(item.posterUrl.replace('offline-media://', ''))}`
+                          }
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Image
+                          src={item.posterUrl}
+                          alt={item.title}
+                          fill
+                          sizes="112px"
+                          className="object-cover"
+                        />
+                      )
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-foreground/20">
                         <MonitorDown className="w-8 h-8 stroke-[2px]" />
@@ -129,20 +160,23 @@ export function OfflineLibrary() {
                         <div className="flex flex-wrap items-center gap-2 text-xs uppercase font-bold text-foreground/60 tracking-wider">
                           <span
                             className={cn(
-                              item.status === 'completed' &&
+                              item.status === 'COMPLETED' &&
                                 'text-neo-green font-black',
-                              item.status === 'error' &&
+                              item.status === 'FAILED' &&
                                 'text-neo-red font-black',
-                              item.status === 'downloading' &&
+                              item.status === 'DOWNLOADING' &&
                                 'text-neo-yellow font-black',
-                              item.status === 'cancelled' &&
+                              item.status === 'QUEUED' &&
+                                'text-neo-yellow font-black animate-pulse',
+                              item.status === 'CANCELLED' &&
                                 'text-foreground/50',
                             )}
                           >
                             {item.status}
                           </span>
 
-                          {item.status === 'downloading' && (
+                          {(item.status === 'DOWNLOADING' ||
+                            item.status === 'QUEUED') && (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
                               <span className="text-foreground/90 tabular-nums">
@@ -153,87 +187,115 @@ export function OfflineLibrary() {
                               </span>
                               <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
                               <span className="text-neo-blue tabular-nums">
-                                {item.speed
-                                  ? item.speed
-                                  : `${item.progress.toFixed(1)}%`}
+                                {item.status === 'QUEUED'
+                                  ? 'Waiting in queue...'
+                                  : item.speed
+                                    ? item.speed
+                                    : !item.isMp4
+                                      ? `${item.progress.toFixed(1)}%`
+                                      : 'Downloading...'}
                               </span>
-                              {item.speed && (
-                                <>
-                                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
-                                  <span className="text-neo-yellow tabular-nums">
-                                    {item.progress.toFixed(1)}%
-                                  </span>
-                                </>
-                              )}
+                              {item.speed &&
+                                !item.isMp4 &&
+                                item.status !== 'QUEUED' && (
+                                  <>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                                    <span className="text-neo-yellow tabular-nums">
+                                      {item.progress.toFixed(1)}%
+                                    </span>
+                                  </>
+                                )}
                             </>
                           )}
 
-                          {item.status === 'completed' && item.filesize && (
+                          {item.status === 'COMPLETED' &&
+                          (item.filesize || item.downloadedBytes) ? (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
                               <span className="text-foreground/80">
-                                {formatBytes(item.filesize)}
+                                {formatBytes(
+                                  item.filesize || item.downloadedBytes,
+                                )}
                               </span>
                             </>
-                          )}
+                          ) : null}
                         </div>
                       </div>
 
                       {/* Actions Column */}
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
-                        {item.status === 'completed' && (
-                          <Link
-                            href={`/watch/${item.contentId}`}
-                            className="flex items-center gap-2 bg-neo-green text-black uppercase font-black tracking-wider text-xs px-6 py-3 border-[3px] border-black hover:bg-neo-green/90 transition-colors"
-                          >
-                            <Play className="w-4 h-4 fill-black stroke-[3px]" />{' '}
-                            Play
-                          </Link>
-                        )}
-
-                        {(item.status === 'error' ||
-                          item.status === 'cancelled' ||
-                          item.status === 'completed') && (
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        {item.status === 'FAILED' ||
+                        item.status === 'CANCELLED' ||
+                        item.status === 'COMPLETED' ? (
                           <button
                             type="button"
-                            onClick={() => cancelDownload(item.contentId)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              cancelDownload(item.contentId);
+                            }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
                             title="Remove Download"
                           >
                             <Trash2 className="w-4 h-4 stroke-[3px]" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              cancelDownload(item.contentId);
+                            }}
+                            className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
+                            title="Cancel Download"
+                          >
+                            <X className="w-4 h-4 stroke-[3px]" />
                           </button>
                         )}
                       </div>
                     </div>
 
                     {/* Progress Bar Bottom Row */}
-                    {item.status === 'downloading' && (
+                    {(item.status === 'DOWNLOADING' ||
+                      item.status === 'QUEUED') && (
                       <div className="mt-8 flex items-center gap-4">
-                        <div className="flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden">
+                        <div
+                          className={cn(
+                            'flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden',
+                            item.status === 'QUEUED' && 'opacity-60',
+                          )}
+                        >
                           <div
-                            className="h-full bg-neo-yellow transition-all duration-500 ease-out"
+                            className={cn(
+                              'h-full bg-neo-yellow transition-all duration-500 ease-out',
+                              (item.isMp4 || item.status === 'QUEUED') &&
+                                'w-full animate-pulse',
+                            )}
                             style={{
-                              width: `${Math.max(0, Math.min(100, item.progress))}%`,
+                              width:
+                                item.isMp4 || item.status === 'QUEUED'
+                                  ? '100%'
+                                  : `${Math.max(0, Math.min(100, item.progress))}%`,
                             }}
                           />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => cancelDownload(item.contentId)}
-                          className="flex items-center justify-center bg-background border-[2px] border-border p-1.5 text-foreground/50 hover:bg-neo-red hover:text-white transition-colors"
-                          title="Cancel Download"
-                        >
-                          <X className="w-4 h-4 stroke-[3px]" />
-                        </button>
                       </div>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Content Details Modal / Sheet */}
+      {selectedContentId && (
+        <ContentDetailModal
+          contentId={selectedContentId}
+          onClose={() => setSelectedContentId(null)}
+          isOfflineMode={true}
+        />
+      )}
     </main>
   );
 }

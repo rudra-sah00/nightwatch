@@ -129,7 +129,7 @@ export function useWatchContent() {
           }
 
           const downloadedItem = fetchedDownloads.find(
-            (d) => d.contentId === offlineContentId && d.status === 'completed',
+            (d) => d.contentId === offlineContentId && d.status === 'COMPLETED',
           );
 
           if (downloadedItem?.localPlaylistPath) {

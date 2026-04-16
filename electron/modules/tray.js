@@ -64,9 +64,7 @@ function setupTray(mainWindow, setQuittingCallback) {
         mainWindow.show();
       }
     });
-  } catch (err) {
-    console.warn('System tray load issue: ', err);
-  }
+  } catch (_err) {}
 }
 
 module.exports = { setupTray };

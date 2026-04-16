@@ -6,10 +6,7 @@ async function _setupMacOS() {
       // Prompt for critical macOS media access before loading any web views
       await systemPreferences.askForMediaAccess('camera');
       await systemPreferences.askForMediaAccess('microphone');
-      console.log('macOS Media Permissions Granted');
-    } catch (err) {
-      console.warn('macOS media permission setup error:', err);
-    }
+    } catch (_err) {}
 
     // Setup Custom macOS Application Menu
     const menuTemplate = [
@@ -53,10 +50,14 @@ async function _setupMacOS() {
       {
         label: 'View',
         submenu: [
-          { role: 'reload' },
-          { role: 'forceReload' },
-          { role: 'toggleDevTools' },
-          { type: 'separator' },
+          ...(app.isPackaged
+            ? []
+            : [
+                { role: 'reload' },
+                { role: 'forceReload' },
+                { role: 'toggleDevTools' },
+                { type: 'separator' },
+              ]),
           { role: 'resetZoom' },
           { role: 'zoomIn' },
           { role: 'zoomOut' },

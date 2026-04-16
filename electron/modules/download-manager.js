@@ -3,12 +3,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 const https = require('node:https');
 const http = require('node:http');
+const Store = require('electron-store');
+
+const store = new Store();
 
 // Config
-const CONCURRENCY_LIMIT = 5; // How many chunks to download in parallel
+const CONCURRENCY_LIMIT = 5; // How many chunks to download in parallel per item
 
 const VAULT_PATH = path.join(app.getPath('userData'), 'OfflineVault');
-const DB_PATH = path.join(VAULT_PATH, 'downloads.json');
 
 // Ensure vault exists
 if (!fs.existsSync(VAULT_PATH)) {
@@ -16,25 +18,38 @@ if (!fs.existsSync(VAULT_PATH)) {
 }
 
 function getDatabase() {
-  if (!fs.existsSync(DB_PATH)) {
-    return { items: [] };
-  }
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    return { items: store.get('downloads', []) };
   } catch (_e) {
     return { items: [] };
   }
 }
 
-function saveDatabase(db) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+function saveDatabase(dbObj) {
+  try {
+    store.set('downloads', dbObj.items || []);
+  } catch (_e) {}
 }
 
 /**
  * Fetch a raw HTTP/HTTPS text content
  */
 function fetchText(url) {
+  if (
+    !url ||
+    typeof url !== 'string' ||
+    url === 'null' ||
+    url.startsWith('null') ||
+    url === 'undefined'
+  ) {
+    return Promise.reject(
+      new Error(`[fetchText] Invalid URL provided: ${url}`),
+    );
+  }
   return new Promise((resolve, reject) => {
+    if (url.startsWith('//')) {
+      url = `https:${url}`;
+    }
     const client = url.startsWith('https') ? https : http;
     client
       .get(
@@ -62,47 +77,82 @@ function fetchText(url) {
 }
 
 /**
- * Downloads a binary file and tracks bytes
+ * Downloads a binary file and tracks bytes, observing global speed limits & cancel state
  */
-function downloadFile(url, dest, onProgressBytes) {
+function downloadFile(url, dest, onProgressBytes, activeItem = null) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(dest);
-    client
-      .get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+
+    const req = client.get(
+      url,
+      { headers: { 'User-Agent': 'Mozilla/5.0' } },
+      (res) => {
         if (
           res.statusCode >= 300 &&
           res.statusCode < 400 &&
           res.headers.location
         ) {
-          // Handle redirect
           resolve(
             downloadFile(
               new URL(res.headers.location, url).href,
               dest,
               onProgressBytes,
+              activeItem,
             ),
           );
           return;
         }
+
         res.on('data', (chunk) => {
+          // Abort requested!
+          if (activeItem && activeItem.status === 'CANCELLED') {
+            res.destroy();
+            file.close();
+            fs.unlink(dest, () => {});
+            return reject(new Error('CANCELLED_BY_USER'));
+          }
+
           if (onProgressBytes) onProgressBytes(chunk.length);
+
+          // Enforce Speed Limit (MB/s)
+          const speedLimitMB = store.get('downloadSpeedLimit') || 0; // 0 = unlimited
+          if (speedLimitMB > 0) {
+            res.pause();
+            const targetBytesPerSec = speedLimitMB * 1024 * 1024;
+            const waitTimeMs = (chunk.length / targetBytesPerSec) * 1000;
+            setTimeout(() => res.resume(), waitTimeMs);
+          }
         });
+
         res.pipe(file);
         file.on('finish', () => {
           file.close(resolve);
         });
-      })
-      .on('error', (err) => {
-        fs.unlink(dest, () => reject(err));
-      });
+      },
+    );
+
+    req.on('error', (err) => {
+      fs.unlink(dest, () => reject(err));
+    });
+
+    // Attach req to active item so we can abort eagerly before connection establishes
+    if (activeItem && !activeItem.reqs) activeItem.reqs = [];
+    if (activeItem) activeItem.reqs.push(req);
   });
 }
 
 function resolveUrl(baseUrl, segmentUrl) {
+  if (!segmentUrl) return baseUrl;
   if (segmentUrl.startsWith('http')) return segmentUrl;
-  const parsed = new URL(segmentUrl, baseUrl);
-  return parsed.href;
+  try {
+    const parsed = new URL(segmentUrl, baseUrl);
+    return parsed.href;
+  } catch (err) {
+    throw new Error(
+      `Failed to resolve URL. baseUrl: ${baseUrl}, segmentUrl: ${segmentUrl}. ${err.message}`,
+    );
+  }
 }
 
 function formatSpeed(bytesPerSec) {
@@ -111,6 +161,20 @@ function formatSpeed(bytesPerSec) {
   const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
   const i = Math.floor(Math.log(bytesPerSec) / Math.log(k));
   return `${parseFloat((bytesPerSec / k ** i).toFixed(1))} ${sizes[i]}`;
+}
+
+// Queue Management State
+const activeDownloadsMap = new Map(); // K: contentId, V: shared item object reference!
+const downloadQueue = [];
+let currentActiveCount = 0;
+
+// Helper to strip non-serializable objects (like HTTP reqs) from being sent over IPC
+function sendSafeProgress(eventSender, item) {
+  if (!eventSender) return;
+  const safeClone = { ...item };
+  delete safeClone.reqs;
+  delete safeClone.segmentsDownloadedSet;
+  eventSender.send('download-progress', safeClone);
 }
 
 async function startHlsDownload(
@@ -136,11 +200,13 @@ async function startHlsDownload(
     db.items.push(item);
   } else {
     item.status = 'DOWNLOADING';
-    // Keep existing downloaded bytes and segments for resuming
   }
 
-  // Ensure missing keys
   if (!item.downloadedBytes) item.downloadedBytes = 0;
+
+  // Register global in-memory reference to override cancel bugs!!
+  activeDownloadsMap.set(contentId, item);
+  item.reqs = []; // stores active http requests
 
   // Process subtitles
   if (subtitleTracks && Array.isArray(subtitleTracks)) {
@@ -161,41 +227,56 @@ async function startHlsDownload(
           label: track.label,
           language: track.language,
           url: track.url,
-          localPath: `offline-media://${contentId}/${subName}`,
+          localPath: `offline-media://local/${encodeURIComponent(contentId)}/${encodeURIComponent(subName)}`,
         });
-      } catch (err) {
-        console.error(`Failed to download subtitle ${track.language}`, err);
-      }
+      } catch (_err) {}
     }
     item.subtitleTracks = processedTracks;
   }
 
-  saveDatabase(db);
-  if (eventSender) eventSender.send('download-progress', item);
+  // Initial Sync
+  syncDbState(item);
+  sendSafeProgress(eventSender, item);
+
+  if (
+    !m3u8Url ||
+    m3u8Url === 'null' ||
+    m3u8Url.startsWith('null') ||
+    m3u8Url === 'undefined'
+  ) {
+    if (item.status !== 'CANCELLED') {
+      item.status = 'FAILED';
+      item.error = 'Invalid M3U8 URL provided';
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+    }
+    return;
+  }
 
   try {
     // 1. Download Poster
     if (posterUrl && !item.posterUrl) {
-      try {
-        const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
-        const posterDest = path.join(contentFolder, `poster${ext}`);
-        if (!fs.existsSync(posterDest)) {
-          await downloadFile(posterUrl, posterDest);
-        }
-        item.posterUrl = `offline-media://${contentId}/poster${ext}`;
-      } catch (e) {
-        console.error('Poster download failed', e);
+      const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
+      const posterDest = path.join(contentFolder, `poster${ext}`);
+      if (!fs.existsSync(posterDest)) {
+        await downloadFile(posterUrl, posterDest, null, item).catch(() => null); // Ignore cancel error silently
       }
+      item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
     }
 
+    if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+
     // 2. Determine if HLS or MP4
-    const isMp4 = m3u8Url.includes('.mp4') || m3u8Url.includes('/subject/play');
+    const isMp4 =
+      m3u8Url.includes('.mp4') ||
+      m3u8Url.includes('/subject/play') ||
+      m3u8Url.includes('?dl=1');
 
     if (isMp4) {
-      // MP4 DOWNLOAD LOGIC
       item.segmentsTotal = 1;
-      saveDatabase(db);
-      if (eventSender) eventSender.send('download-progress', item);
+      item.isMp4 = true;
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
 
       const localName = 'movie.mp4';
       const destPath = path.join(contentFolder, localName);
@@ -204,81 +285,78 @@ async function startHlsDownload(
       let bytesSinceLastTick = 0;
 
       if (!fs.existsSync(destPath) || fs.statSync(destPath).size === 0) {
-        await downloadFile(m3u8Url, destPath, (bytes) => {
-          item.downloadedBytes += bytes;
-          bytesSinceLastTick += bytes;
-
-          const now = Date.now();
-          if (now - lastTime >= 1000) {
-            item.speed = formatSpeed(bytesSinceLastTick);
-            item.progress = 50; // Just an active indicator since total size might be unknown
-            saveDatabase(db);
-            if (eventSender) eventSender.send('download-progress', item);
-            lastTime = now;
-            bytesSinceLastTick = 0;
-          }
-        });
+        await downloadFile(
+          m3u8Url,
+          destPath,
+          (bytes) => {
+            item.downloadedBytes += bytes;
+            bytesSinceLastTick += bytes;
+            const now = Date.now();
+            if (now - lastTime >= 1000) {
+              item.speed = formatSpeed(bytesSinceLastTick);
+              item.progress = 50;
+              syncDbState(item);
+              sendSafeProgress(eventSender, item);
+              lastTime = now;
+              bytesSinceLastTick = 0;
+            }
+          },
+          item,
+        );
       } else {
         const stat = fs.statSync(destPath);
         item.downloadedBytes = stat.size;
       }
 
+      if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+
       item.segmentsDownloaded = 1;
-
-      if (item.status === 'CANCELLED') {
-        const currentDb = getDatabase();
-        currentDb.items = currentDb.items.filter(
-          (i) => i.contentId !== contentId,
-        );
-        saveDatabase(currentDb);
-        return;
-      }
-
       item.status = 'COMPLETED';
       item.progress = 100;
-      item.localPlaylistPath = `offline-media://${contentId}/${localName}`;
+      item.localPlaylistPath = `offline-media://local/${encodeURIComponent(contentId)}/${encodeURIComponent(localName)}`;
       item.speed = '';
-      delete item.segmentsDownloadedSet;
-      saveDatabase(db);
-      if (eventSender) eventSender.send('download-progress', item);
-
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
       return;
     }
 
-    // HLS DOWNLOAD LOGIC
+    // 3. HLS LOGIC
     const masterText = await fetchText(m3u8Url);
     let targetPlaylistUrl = m3u8Url;
-
     const lines = masterText.split('\n');
     const playlists = [];
     let currentBandwidth = 0;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.startsWith('#EXT-X-STREAM-INF')) {
-        const bwMatch = line.match(/BANDWIDTH=(\d+)/);
-        if (bwMatch) currentBandwidth = parseInt(bwMatch[1], 10);
-      } else if (line && !line.startsWith('#')) {
-        playlists.push({
-          url: resolveUrl(m3u8Url, line),
-          bandwidth: currentBandwidth,
-        });
+    // Quick check: is this already a media playlist?
+    const isMediaPlaylist = lines.some((l) => l.startsWith('#EXTINF:'));
+
+    if (!isMediaPlaylist) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('#EXT-X-STREAM-INF')) {
+          const bwMatch = line.match(/BANDWIDTH=(\d+)/);
+          if (bwMatch) currentBandwidth = parseInt(bwMatch[1], 10);
+        } else if (line && !line.startsWith('#')) {
+          playlists.push({
+            url: resolveUrl(m3u8Url, line),
+            bandwidth: currentBandwidth,
+          });
+        }
+      }
+
+      if (playlists.length > 0) {
+        playlists.sort((a, b) => b.bandwidth - a.bandwidth);
+        if (quality === 'low')
+          targetPlaylistUrl = playlists[playlists.length - 1].url;
+        else if (quality === 'medium')
+          targetPlaylistUrl = playlists[Math.floor(playlists.length / 2)].url;
+        else targetPlaylistUrl = playlists[0].url;
       }
     }
 
-    if (playlists.length > 0) {
-      playlists.sort((a, b) => b.bandwidth - a.bandwidth);
-      if (quality === 'low') {
-        targetPlaylistUrl = playlists[playlists.length - 1].url;
-      } else if (quality === 'medium') {
-        targetPlaylistUrl = playlists[Math.floor(playlists.length / 2)].url;
-      } else {
-        targetPlaylistUrl = playlists[0].url;
-      }
-    }
-
-    // 3. Fetch Media Playlist
-    const mediaText = await fetchText(targetPlaylistUrl);
+    const mediaText = isMediaPlaylist
+      ? masterText
+      : await fetchText(targetPlaylistUrl);
     const mediaLines = mediaText.split('\n');
     const segments = [];
 
@@ -294,29 +372,24 @@ async function startHlsDownload(
     }
 
     item.segmentsTotal = segments.length;
-    saveDatabase(db);
-    if (eventSender) eventSender.send('download-progress', item);
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
 
     const rewritenLines = [...mediaLines];
-
-    // 4. Parallel Download Segments Process (with Speed Tracking & Pause/Resume)
     let lastTime = Date.now();
     let bytesSinceLastTick = 0;
 
     const downloadSegment = async (segment) => {
       if (item.status === 'CANCELLED') return;
-
       const destPath = path.join(contentFolder, segment.localName);
       rewritenLines[segment.lineIndex] = segment.localName;
 
-      // PAUSE & RESUME: Skip if already fully downloaded previously (simple fast check)
       if (fs.existsSync(destPath)) {
         const stat = fs.statSync(destPath);
         if (
           stat.size > 0 &&
           !item.segmentsDownloadedSet?.includes(segment.localName)
         ) {
-          // Was already downloaded in a previous session
           item.downloadedBytes += stat.size;
           item.segmentsDownloaded++;
           if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
@@ -325,46 +398,46 @@ async function startHlsDownload(
         }
       }
 
-      // Fresh Download
-      await downloadFile(segment.originalUrl, destPath, (bytes) => {
-        item.downloadedBytes += bytes;
-        bytesSinceLastTick += bytes;
-      });
+      await downloadFile(
+        segment.originalUrl,
+        destPath,
+        (bytes) => {
+          item.downloadedBytes += bytes;
+          bytesSinceLastTick += bytes;
+        },
+        item,
+      );
 
       item.segmentsDownloaded++;
       if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
       item.segmentsDownloadedSet.push(segment.localName);
-
       item.progress = (item.segmentsDownloaded / item.segmentsTotal) * 100;
 
-      // Speed calculation tick (every ~1s)
       const now = Date.now();
       if (now - lastTime > 1000) {
         const bytesPerSec = (bytesSinceLastTick / (now - lastTime)) * 1000;
         item.speed = formatSpeed(bytesPerSec);
         lastTime = now;
         bytesSinceLastTick = 0;
-
-        // Sync to file less aggressively, but dispatch UI often
-        saveDatabase(db);
+        syncDbState(item);
       }
-
-      if (eventSender) eventSender.send('download-progress', item);
+      sendSafeProgress(eventSender, item);
     };
 
-    // Better async pool logic
-    async function runPool(segments) {
+    item.segmentsDownloaded = 0;
+    item.segmentsDownloadedSet = [];
+
+    // Parallel processing loop that aborts instantly if cancelled
+    await (async function runPool() {
       let index = 0;
       const active = new Set();
-
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const next = () => {
           if (item.status === 'CANCELLED') return resolve();
           if (index >= segments.length && active.size === 0) return resolve();
-
           while (active.size < CONCURRENCY_LIMIT && index < segments.length) {
-            const segment = segments[index++];
-            const p = downloadSegment(segment).catch(reject);
+            const seg = segments[index++];
+            const p = downloadSegment(seg).catch(() => null); // Silently drop rejected cancel promises
             active.add(p);
             p.then(() => {
               active.delete(p);
@@ -374,26 +447,10 @@ async function startHlsDownload(
         };
         next();
       });
-    }
+    })();
 
-    // Reset loop & use accurate pool
-    item.segmentsDownloaded = 0;
-    item.segmentsDownloadedSet = [];
-    // We already skipped checking existing files inside downloadSegment, it will naturally fast-forward.
+    if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
 
-    await runPool(segments);
-
-    if (item.status === 'CANCELLED') {
-      fs.rmSync(contentFolder, { recursive: true, force: true });
-      const currentDb = getDatabase();
-      currentDb.items = currentDb.items.filter(
-        (i) => i.contentId !== contentId,
-      );
-      saveDatabase(currentDb);
-      return;
-    }
-
-    // Save rewritten playlist securely
     fs.writeFileSync(
       path.join(contentFolder, 'local_playlist.m3u8'),
       rewritenLines.join('\n'),
@@ -401,36 +458,118 @@ async function startHlsDownload(
 
     item.status = 'COMPLETED';
     item.progress = 100;
-    item.localPlaylistPath = `offline-media://${contentId}/local_playlist.m3u8`;
-    item.speed = ''; // Clear speed when done
-
-    // Cleanup temporary tracking data
+    item.localPlaylistPath = `offline-media://local/${encodeURIComponent(contentId)}/local_playlist.m3u8`;
+    item.speed = '';
     delete item.segmentsDownloadedSet;
+    delete item.reqs;
 
-    saveDatabase(db);
-    if (eventSender) eventSender.send('download-progress', item);
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
   } catch (error) {
-    console.error('Download Error:', error);
-    item.status = 'ERROR';
+    if (error.message === 'CANCELLED_BY_USER' || item.status === 'CANCELLED') {
+      return finalizeCancel(item, contentId);
+    }
+    item.status = 'FAILED';
     item.error = error.message;
     item.speed = '';
-    saveDatabase(db);
-    if (eventSender) eventSender.send('download-progress', item);
+    syncDbState(item);
+    sendSafeProgress(eventSender, item);
+  } finally {
+    activeDownloadsMap.delete(contentId);
+  }
+}
+
+// Updates ONE target item safely into DB without trashing others
+function syncDbState(updatedItem) {
+  if (updatedItem.status === 'CANCELLED') return; // Cancel handles own cleanup
+  const db = getDatabase();
+  const idx = db.items.findIndex((i) => i.contentId === updatedItem.contentId);
+  // Snapshot just safe serializable fields!
+  const safeClone = { ...updatedItem };
+  delete safeClone.reqs;
+  delete safeClone.segmentsDownloadedSet;
+
+  if (idx > -1) db.items[idx] = safeClone;
+  else db.items.push(safeClone);
+  saveDatabase(db);
+}
+
+function finalizeCancel(_item, contentId) {
+  const db = getDatabase();
+  db.items = db.items.filter((i) => i.contentId !== contentId);
+  saveDatabase(db);
+  try {
+    const p = path.join(VAULT_PATH, contentId);
+    if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
+  } catch (_e) {}
+  activeDownloadsMap.delete(contentId);
+}
+
+// Queue processor manages parallel limits defined by user config
+function processQueue() {
+  const maxActive = store.get('concurrentDownloads') || 1;
+  while (currentActiveCount < maxActive && downloadQueue.length > 0) {
+    const task = downloadQueue.shift();
+    if (task.isCancelled) continue;
+
+    currentActiveCount++;
+    startHlsDownload(task.eventSender, task.args).finally(() => {
+      currentActiveCount--;
+      processQueue();
+    });
   }
 }
 
 function setupDownloadManager() {
   ipcMain.on('start-download', (event, args) => {
-    startHlsDownload(event.sender, args).catch(console.error);
+    // Stage the item as QUEUED and sync DB immediately
+    const db = getDatabase();
+    let iter = db.items.find((i) => i.contentId === args.contentId);
+    if (!iter) {
+      iter = {
+        contentId: args.contentId,
+        title: args.title,
+        status: 'QUEUED',
+        progress: 0,
+        downloadedBytes: 0,
+      };
+      if (args.metadata) iter.showData = args.metadata;
+      db.items.push(iter);
+    } else {
+      iter.status = 'QUEUED';
+      if (args.metadata) iter.showData = args.metadata;
+    }
+    saveDatabase(db);
+    sendSafeProgress(event.sender, iter);
+
+    // Enqueue
+    downloadQueue.push({
+      eventSender: event.sender,
+      args,
+      isCancelled: false,
+      contentId: args.contentId,
+    });
+    processQueue();
   });
 
   ipcMain.on('cancel-download', (_event, contentId) => {
-    const db = getDatabase();
-    const item = db.items.find((i) => i.contentId === contentId);
-    if (item) {
-      item.status = 'CANCELLED';
-      saveDatabase(db);
+    // 1. Cancel active running tasks
+    if (activeDownloadsMap.has(contentId)) {
+      const activeItem = activeDownloadsMap.get(contentId);
+      activeItem.status = 'CANCELLED';
+      if (activeItem.reqs && Array.isArray(activeItem.reqs)) {
+        activeItem.reqs.forEach((req) => {
+          req?.destroy();
+        });
+      }
     }
+    // 2. Clear out of queued tasks waiting
+    const qIndex = downloadQueue.findIndex((q) => q.contentId === contentId);
+    if (qIndex > -1) {
+      downloadQueue[qIndex].isCancelled = true;
+    }
+    // 3. Purge from JSON right now
+    finalizeCancel({ status: 'CANCELLED' }, contentId);
   });
 
   ipcMain.handle('get-downloads', async () => {
@@ -439,21 +578,19 @@ function setupDownloadManager() {
 
   if (protocol.handle) {
     protocol.handle('offline-media', (request) => {
-      const urlObj = new URL(request.url);
-      const relativePath = decodeURIComponent(
-        urlObj.hostname + urlObj.pathname,
-      );
-      const absolutePath = path.join(VAULT_PATH, relativePath);
-      return net.fetch(`file://${absolutePath}`);
-    });
-  } else {
-    protocol.registerFileProtocol('offline-media', (request, callback) => {
-      const urlObj = new URL(request.url);
-      const relativePath = decodeURIComponent(
-        urlObj.hostname + urlObj.pathname,
-      );
-      const absolutePath = path.join(VAULT_PATH, relativePath);
-      callback({ path: absolutePath });
+      let relativePath;
+      try {
+        const urlObj = new URL(request.url);
+        relativePath =
+          urlObj.hostname === 'local'
+            ? decodeURIComponent(urlObj.pathname.slice(1))
+            : decodeURIComponent(urlObj.hostname + urlObj.pathname);
+      } catch (_e) {
+        relativePath = decodeURIComponent(
+          request.url.replace(/^offline-media:\/\//, ''),
+        );
+      }
+      return net.fetch(`file://${path.join(VAULT_PATH, relativePath)}`);
     });
   }
 }

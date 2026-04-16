@@ -24,6 +24,9 @@ export function useDownloads() {
     const unsubscribe = window.electronAPI.onDownloadProgress(
       (updatedItem: DownloadItem) => {
         setDownloads((prev) => {
+          if (updatedItem.status === 'CANCELLED') {
+            return prev.filter((i) => i.contentId !== updatedItem.contentId);
+          }
           const exists = prev.find(
             (i) => i.contentId === updatedItem.contentId,
           );
@@ -46,12 +49,8 @@ export function useDownloads() {
     if (typeof window !== 'undefined' && window.electronAPI) {
       window.electronAPI.cancelDownload(contentId);
 
-      // Optimistically remove or mark as cancelled
-      setDownloads((prev) =>
-        prev.map((i) =>
-          i.contentId === contentId ? { ...i, status: 'cancelled' } : i,
-        ),
-      );
+      // Optimistically remove it instantly from the UI
+      setDownloads((prev) => prev.filter((i) => i.contentId !== contentId));
     }
   }, []);
 

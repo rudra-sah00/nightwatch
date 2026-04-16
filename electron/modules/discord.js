@@ -33,14 +33,12 @@ class DiscordIntegration {
       this.rpc.on('ready', () => {
         this.connected = true;
         this.isConnecting = false;
-        console.log('Discord RPC Successfully Active!');
       });
 
       this.rpc.on('disconnected', () => {
         this.connected = false;
         this.isConnecting = false;
         this.rpc = null;
-        console.log('Discord Client disconnected gracefully.');
       });
 
       // Catch login promise reject silently without throwing stack traces

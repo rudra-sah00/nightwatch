@@ -26,6 +26,7 @@ interface ContentDetailModalProps {
   onClose: () => void;
   onWatchlistChange?: (contentId: string, inWatchlist: boolean) => void;
   autoPlay?: boolean;
+  isOfflineMode?: boolean;
 }
 
 export function ContentDetailModal({
@@ -35,6 +36,7 @@ export function ContentDetailModal({
   onClose,
   onWatchlistChange,
   autoPlay = false,
+  isOfflineMode = false,
 }: ContentDetailModalProps) {
   const {
     show,
@@ -233,6 +235,7 @@ export function ContentDetailModal({
           {/* Action Bar — Sticky on mobile, relative on desktop */}
           <div className="sticky bottom-0 sm:relative z-30 px-6 pb-6 md:px-10 md:pb-10 lg:px-16 lg:pb-16 bg-background border-b-[4px] border-border sm:border-b-0 flex-shrink-0">
             <ContentActions
+              isOfflineMode={isOfflineMode}
               isPlaying={isPlaying}
               isCreatingParty={isCreatingParty}
               isLoadingProgress={isLoadingProgress}

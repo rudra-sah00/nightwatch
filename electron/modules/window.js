@@ -1,4 +1,4 @@
-const { BrowserWindow, shell, session, TouchBar } = require('electron');
+const { BrowserWindow, shell, session, TouchBar, app } = require('electron');
 const { TouchBarButton, TouchBarSpacer } = TouchBar || {};
 const windowStateKeeper = require('electron-window-state');
 
@@ -8,7 +8,7 @@ const windowStateKeeper = require('electron-window-state');
   const contextMenu = contextMenuModule.default || contextMenuModule;
   contextMenu({
     showSaveImageAs: true,
-    showInspectElement: true,
+    showInspectElement: !app.isPackaged,
     showSearchWithGoogle: false,
   });
 })();
@@ -82,7 +82,6 @@ class AppWindow {
         if (allowedPermissions.includes(permission)) {
           callback(true);
         } else {
-          console.warn(`Denied unwanted permission request: ${permission}`);
           callback(false);
         }
       },
@@ -123,14 +122,9 @@ class AppWindow {
 
     this.mainWindow.webContents.on(
       'did-fail-load',
-      (_event, errorCode, errorDescription) => {
+      (_event, errorCode, _errorDescription) => {
         // DNS / Connection errors usually fall within the -100 range in Chromium
         if (errorCode >= -199 && errorCode <= -100) {
-          console.warn(
-            'Network crash detected:',
-            errorDescription,
-            'but skipping native offline override to let React handle it',
-          );
           // this.mainWindow.loadFile(
           //   require('node:path').join(__dirname, '../offline.html'),
           // );

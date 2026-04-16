@@ -9,7 +9,14 @@ export interface DownloadItem {
   downloadedBytes: number;
   progress: number;
   speed?: string; // e.g. "2.4 MB/s"
-  status: 'downloading' | 'completed' | 'paused' | 'error' | 'cancelled';
+  isMp4?: boolean;
+  status:
+    | 'QUEUED'
+    | 'DOWNLOADING'
+    | 'COMPLETED'
+    | 'PAUSED'
+    | 'FAILED'
+    | 'CANCELLED';
   error?: string;
   localPlaylistPath?: string;
   subtitleTracks?: {
@@ -116,6 +123,7 @@ export interface ElectronAPI {
     posterUrl?: string;
     subtitleTracks?: { label: string; language: string; url: string }[];
     quality?: 'low' | 'medium' | 'high';
+    metadata?: unknown;
   }) => void;
 
   /** Cancel an ongoing download */

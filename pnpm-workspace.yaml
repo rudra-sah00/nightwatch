@@ -1,5 +1,8 @@
 packages:
   - .
+
 ignoredBuiltDependencies:
+  - better-sqlite3
+  - lzma-native
   - sharp
   - unrs-resolver

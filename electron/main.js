@@ -62,9 +62,6 @@ if (
   store.get('disable-gpu') === true
 ) {
   app.disableHardwareAcceleration();
-  console.log(
-    'Hardware Acceleration disabled. Using software rendering for videos.',
-  );
 }
 
 // --- 1. SINGLE INSTANCE LOCK ---
@@ -177,7 +174,6 @@ const startElectronApp = async () => {
   });
 
   // Start Discord RPC silently in background
-  discordLogic.init().catch(console.error);
 
   // IPC Event listener for React letting us know the user changed rooms!
   ipcMain.on('update-discord-status', (_event, presenceData) => {
@@ -194,10 +190,8 @@ const startElectronApp = async () => {
   ipcMain.on('toggle-keep-awake', (_event, keepAwake) => {
     if (keepAwake && !powerSaveBlocker.isStarted(powerBlockerId)) {
       powerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
-      console.log('Keep-Awake Enabled: Screen will not sleep.');
     } else if (!keepAwake && powerSaveBlocker.isStarted(powerBlockerId)) {
       powerSaveBlocker.stop(powerBlockerId);
-      console.log('Keep-Awake Disabled: Screen can sleep normally.');
     }
   });
 
@@ -418,12 +412,7 @@ const startElectronApp = async () => {
           },
         ];
         win.setThumbarButtons(thumbButtons);
-      } catch (e) {
-        console.warn(
-          'Windows Thumbar setup failed, normal if playing headless',
-          e,
-        );
-      }
+      } catch (_e) {}
     }
   }
 };
