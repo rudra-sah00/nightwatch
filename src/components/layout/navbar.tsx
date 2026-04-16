@@ -1,4 +1,4 @@
-import { History, Plus, Radio, User } from 'lucide-react';
+import { DownloadCloud, History, Plus, Radio, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -68,15 +68,13 @@ export function Navbar() {
             <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
             <span className="hidden md:inline">Watchlist</span>
           </Link>
-        </div>
-
-        <div className="flex items-center gap-4 text-xs font-headline font-black tracking-widest uppercase">
           {isDesktopApp && (
             <Link
               href="/downloads"
               className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
               title="Offline Downloads"
             >
+              <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
               <span className="hidden md:inline">Downloads</span>
             </Link>
           )}

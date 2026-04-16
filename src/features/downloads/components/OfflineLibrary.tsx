@@ -52,20 +52,16 @@ export function OfflineLibrary() {
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
             <div>
-              <Link
-                href="/home"
-                className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground hover:underline font-mono text-sm w-fit [-webkit-app-region:no-drag]"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Home
-              </Link>
-              <h1 className="flex items-center gap-4 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-foreground font-headline uppercase leading-none min-w-0">
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4 min-w-0">
                 OFFLINE
                 <br />
-                <span className="bg-background text-foreground px-4 inline-block border-[4px] border-border -rotate-1 ml-2 mt-2">
+                <span className="bg-background text-foreground px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
                   VAULT
                 </span>
               </h1>
+              <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
+                Your Downloaded Content
+              </p>
             </div>
 
             <div className="bg-background text-foreground border-[4px] border-border px-6 py-4">
