@@ -3,33 +3,10 @@
 import { Download, MonitorDown, Play, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
-import type { DownloadItem } from '@/types/electron';
+import { useDownloads } from '../hooks/use-downloads';
 
 export function OfflineLibrary() {
-  const { isDesktopApp } = useDesktopApp();
-  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
-
-  useEffect(() => {
-    if (!isDesktopApp || !window.electronAPI) return;
-
-    window.electronAPI.getDownloads().then(setDownloads);
-
-    const unsubscribe = window.electronAPI.onDownloadProgress((updatedItem) => {
-      setDownloads((prev) => {
-        const exists = prev.find((i) => i.contentId === updatedItem.contentId);
-        if (exists) {
-          return prev.map((i) =>
-            i.contentId === updatedItem.contentId ? updatedItem : i,
-          );
-        }
-        return [...prev, updatedItem];
-      });
-    });
-
-    return () => unsubscribe();
-  }, [isDesktopApp]);
+  const { downloads, isDesktopApp, cancelDownload } = useDownloads();
 
   if (!isDesktopApp) {
     return (
@@ -45,12 +22,6 @@ export function OfflineLibrary() {
       </div>
     );
   }
-
-  const cancelDownload = (contentId: string) => {
-    if (window.electronAPI) {
-      window.electronAPI.cancelDownload(contentId);
-    }
-  };
 
   return (
     <div className="space-y-6">
