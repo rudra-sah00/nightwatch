@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.24.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.24.0...v1.24.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **desktop:** disable auto-open devtools in production build ([12c8607](https://github.com/rudra-sah00/watch-rudra/commit/12c86076fcb91e78da80b518795bc4569a483795))
+* **styles:** bundle google fonts locally via material-symbols to bypass CORS & silence Turnstile XR warnings ([1ca477d](https://github.com/rudra-sah00/watch-rudra/commit/1ca477dd3e5c08708cbbd809d885e9e574a78662))
+
 ## [1.24.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.23.0...v1.24.0) (2026-04-16)
 
 
