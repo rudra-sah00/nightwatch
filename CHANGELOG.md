@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.24.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.23.0...v1.24.0) (2026-04-16)
+
+
+### Features
+
+* add livestreaming components, tests, and docs, fix types/linting ([c278fa3](https://github.com/rudra-sah00/watch-rudra/commit/c278fa3308c4857032d1baffd09d7609d7c2529a))
+* **electron:** implement speed tracking, pause resume skipping, and chunk concurrency pooling ([d50722f](https://github.com/rudra-sah00/watch-rudra/commit/d50722f0f8dd3e37b5af6e6844363596ab3e44d0))
+* enable universal downloads for all servers on desktop app ([50ce3d5](https://github.com/rudra-sah00/watch-rudra/commit/50ce3d5f9923c7b547e2a70217ae832c87335978))
+* implement Offline HLS Downloader logic using Custom internal file protocol ([bfb8c56](https://github.com/rudra-sah00/watch-rudra/commit/bfb8c56c897a100d29723b2963f8ffeb578f2cfc))
+* **livestream:** implement Desktop-Only restriction and LiveBridge for Server 1 ([5e41092](https://github.com/rudra-sah00/watch-rudra/commit/5e4109216573b18757c877ce40a07a8421799a04))
+* redesign offline library to detailed horizontal list stack and add precision sizes ([f08fdb9](https://github.com/rudra-sah00/watch-rudra/commit/f08fdb9c3cad1aba46c52b3dcc07d9dabcc2a6f7))
+* **ui:** replace brutalist square loaders with simple elegant circular spinners and add back button to loading overlay ([9d4b8c8](https://github.com/rudra-sah00/watch-rudra/commit/9d4b8c8d95f248cb86682db786a7da3bfe6c9330))
+
+
+### Bug Fixes
+
+* correct use client directive placement in watch/[id]/page.tsx ([d22af4b](https://github.com/rudra-sah00/watch-rudra/commit/d22af4ba186792afc7d21f5630d445fcfe4f0a50))
+* **desktop:** implement native downloads and fix tests ([959a2c9](https://github.com/rudra-sah00/watch-rudra/commit/959a2c9b3eb7662a0ad14c96946b3d593ff3bf38))
+* mute incoming chat sound when chat UI is visible ([be9545f](https://github.com/rudra-sah00/watch-rudra/commit/be9545f28b449545496ce52489f581bc5423e609))
+* resolve biome and typescript issues for deployment ([adb4d42](https://github.com/rudra-sah00/watch-rudra/commit/adb4d422427bcdd0b6b0f4bc180525a7e767a0ff))
+* resolve infinite loops, useCallback dependencies and live paths ([06c9321](https://github.com/rudra-sah00/watch-rudra/commit/06c9321db23a66a7c983268fe573c9f728891034))
+* resolve watch party sync issues, dark mode theming, and electron deep linking ([46eeb34](https://github.com/rudra-sah00/watch-rudra/commit/46eeb3426553eee8d5fd784753d0b21cadf45906))
+* **ui:** watch party and player UI enhancements ([677c706](https://github.com/rudra-sah00/watch-rudra/commit/677c706f587138cefdcf94d10b9ac346e8571957))
+
 ## [1.23.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.22.0...v1.23.0) (2026-04-13)
 
 
