@@ -142,7 +142,10 @@ class AppWindow {
 
     this.mainWindow.once('ready-to-show', () => {
       this.mainWindow.show();
-      this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+      // Only open DevTools automatically in local development builds
+      if (!require('electron').app.isPackaged) {
+        this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+      }
     });
 
     // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---
