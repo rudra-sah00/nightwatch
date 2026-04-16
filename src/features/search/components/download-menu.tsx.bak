@@ -2,6 +2,7 @@
 
 import { Check, ChevronDown, Download, Loader2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogClose,
@@ -12,7 +13,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import type { DownloadItem } from '@/types/electron';
 import { useDownloadMenu } from '../hooks/use-download-menu';
 import {
   ContentType,
@@ -20,7 +20,10 @@ import {
   type Season,
   type ShowDetails,
 } from '../types';
-import type { DownloadQuality } from '../utils/download';
+import {
+  type DownloadQuality,
+} from '../utils/download';
+import type { DownloadItem } from '@/types/electron';
 
 // ─── Components ─────────────────────────────────────────────────────────────
 
@@ -247,6 +250,33 @@ function EpisodeItem({
     if (isNowExpanded && isS2 && qualities === null) {
       loadQualities();
     }
+  };
+
+  const handleElectronClick = async (
+    qualityLabel: 'high' | 'medium' | 'low',
+    qualityUrl?: string,
+  ) => {
+    setElectronLoading(true);
+    await startElectronDownload({
+      contentId,
+      showTitle,
+      posterUrl,
+      type: 'series',
+      season: episode.seasonNumber || 1,
+      episode: episode.episodeNumber,
+      directUrl: qualityUrl,
+      quality: qualityLabel,
+      show,
+    });
+    setDownloaded(qualityLabel);
+    toast.success(
+      `Download Started for Ep ${episode.episodeNumber}! Check your Offline Library.`,
+    );
+    setTimeout(() => {
+      setDownloaded(null);
+      if (onComplete) onComplete();
+    }, 800);
+    setElectronLoading(false);
   };
 
   return (

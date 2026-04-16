@@ -8,6 +8,7 @@ export interface DownloadItem {
   filesize?: number;
   downloadedBytes: number;
   progress: number;
+  quality?: string; // e.g. "high", "medium", "low"
   speed?: string; // e.g. "2.4 MB/s"
   isMp4?: boolean;
   status:

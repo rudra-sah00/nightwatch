@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useDownloads } from '@/features/downloads/hooks/use-downloads';
 import type { ShowDetails } from '@/types/content';
 import {
   type DownloadQuality,
   fetchDownloadLinks,
+  getOfflineIdentifier,
   sortQualities,
   startElectronDownload,
 } from '../utils/download';
@@ -34,6 +36,21 @@ export function useDownloadMenu({
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [isElectronLoading, setElectronLoading] = useState(false);
+  const { downloads } = useDownloads();
+
+  const offlineIdentifier = useMemo(() => {
+    return getOfflineIdentifier({
+      contentId,
+      type,
+      season,
+      episode,
+      isDirectUrl: isS2,
+    });
+  }, [contentId, type, season, episode, isS2]);
+
+  const existingDownload = useMemo(() => {
+    return downloads.find((d) => d.contentId === offlineIdentifier);
+  }, [downloads, offlineIdentifier]);
 
   useEffect(() => {
     if (contentId) {
@@ -94,6 +111,7 @@ export function useDownloadMenu({
     isLoading,
     downloaded,
     isElectronLoading,
+    existingDownload,
     loadQualities,
     handleElectronClick,
   };

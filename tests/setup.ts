@@ -74,3 +74,18 @@ const createStorageMock = () => {
 
 Object.defineProperty(window, 'localStorage', { value: createStorageMock() });
 Object.defineProperty(window, 'sessionStorage', { value: createStorageMock() });
+
+// Mock electronAPI globally
+Object.defineProperty(window, 'electronAPI', {
+  value: {
+    startDownload: vi.fn(),
+    getDownloads: vi.fn().mockResolvedValue([]),
+    onDownloadProgress: vi.fn(),
+    removeDownloadProgress: vi.fn(),
+    onDownloadComplete: vi.fn(),
+    removeDownloadComplete: vi.fn(),
+    onDownloadError: vi.fn(),
+    removeDownloadError: vi.fn(),
+  },
+  writable: true,
+});

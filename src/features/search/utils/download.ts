@@ -22,6 +22,27 @@ export function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 }
 
 // Server 2 direct mp4 fallback
+export function getOfflineIdentifier({
+  contentId,
+  type,
+  season,
+  episode,
+  isDirectUrl,
+}: {
+  contentId: string;
+  type: 'movie' | 'series';
+  season?: number;
+  episode?: number;
+  isDirectUrl?: boolean;
+}): string {
+  if (isDirectUrl) {
+    return type === 'series' && episode
+      ? `${contentId}-ep${episode}`
+      : contentId;
+  }
+  return `${contentId}${season ? `_S${season}E${episode}` : ''}`;
+}
+
 export async function fetchDownloadLinks(
   id: string,
   type: 'movie' | 'series',
@@ -63,8 +84,12 @@ export async function startElectronDownload({
 }) {
   if (directUrl && window.electronAPI) {
     window.electronAPI.startDownload({
-      contentId:
-        type === 'series' && episode ? `${contentId}-ep${episode}` : contentId,
+      contentId: getOfflineIdentifier({
+        contentId,
+        type,
+        episode,
+        isDirectUrl: true,
+      }),
       title:
         type === 'series' && episode
           ? `${showTitle} - S${season}E${episode}`
@@ -93,7 +118,13 @@ export async function startElectronDownload({
   if (response.success && response.masterPlaylistUrl) {
     if (window.electronAPI) {
       window.electronAPI.startDownload({
-        contentId: `${contentId}${season ? `_S${season}E${episode}` : ''}`,
+        contentId: getOfflineIdentifier({
+          contentId,
+          type,
+          season,
+          episode,
+          isDirectUrl: false,
+        }),
         title: `${showTitle}${season ? ` S${season} E${episode}` : ''}`,
         m3u8Url: response.masterPlaylistUrl,
         posterUrl,

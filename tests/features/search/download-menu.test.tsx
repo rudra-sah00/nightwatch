@@ -139,7 +139,16 @@ describe('DownloadMenu', () => {
     it('quality URLs trigger electron download with corresponding URL', async () => {
       const mockElectronStart = vi.fn();
       Object.defineProperty(window, 'electronAPI', {
-        value: { startDownload: mockElectronStart },
+        value: {
+          startDownload: mockElectronStart,
+          getDownloads: vi.fn().mockResolvedValue([]),
+          onDownloadProgress: vi.fn(),
+          removeDownloadProgress: vi.fn(),
+          onDownloadComplete: vi.fn(),
+          removeDownloadComplete: vi.fn(),
+          onDownloadError: vi.fn(),
+          removeDownloadError: vi.fn(),
+        },
         writable: true,
       });
 
@@ -284,7 +293,16 @@ describe('DownloadMenu', () => {
     it('episode qualities trigger electron download', async () => {
       const mockElectronStart = vi.fn();
       Object.defineProperty(window, 'electronAPI', {
-        value: { startDownload: mockElectronStart },
+        value: {
+          startDownload: mockElectronStart,
+          getDownloads: vi.fn().mockResolvedValue([]),
+          onDownloadProgress: vi.fn(),
+          removeDownloadProgress: vi.fn(),
+          onDownloadComplete: vi.fn(),
+          removeDownloadComplete: vi.fn(),
+          onDownloadError: vi.fn(),
+          removeDownloadError: vi.fn(),
+        },
         writable: true,
       });
 

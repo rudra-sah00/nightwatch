@@ -52,6 +52,7 @@ function setupDownloadManager() {
         contentId: args.contentId,
         title: args.title,
         m3u8Url: args.m3u8Url,
+        quality: args.quality || 'high',
         status: 'QUEUED',
         progress: 0,
         downloadedBytes: 0,
@@ -59,6 +60,17 @@ function setupDownloadManager() {
       if (args.metadata) iter.showData = args.metadata;
       db.items.push(iter);
     } else {
+      if (iter.quality !== args.quality) {
+        const fs = require('node:fs');
+        const contentFolder = path.join(VAULT_PATH, args.contentId);
+        if (fs.existsSync(contentFolder)) {
+          fs.rmSync(contentFolder, { recursive: true, force: true });
+        }
+        iter.downloadedBytes = 0;
+        iter.progress = 0;
+        iter.m3u8Url = args.m3u8Url;
+      }
+      iter.quality = args.quality || 'high';
       iter.status = 'QUEUED';
       if (args.metadata) iter.showData = args.metadata;
     }

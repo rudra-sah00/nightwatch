@@ -11,7 +11,10 @@ const {
 } = require('./state');
 const { downloadFile, formatSpeed } = require('./network');
 
-async function startMp4Download(eventSender, { contentId, title, url }) {
+async function startMp4Download(
+  eventSender,
+  { contentId, title, url, posterUrl },
+) {
   const contentFolder = path.join(VAULT_PATH, contentId);
   if (!fs.existsSync(contentFolder))
     fs.mkdirSync(contentFolder, { recursive: true });
@@ -50,6 +53,24 @@ async function startMp4Download(eventSender, { contentId, title, url }) {
   let bytesSinceLastTick = 0;
 
   try {
+    if (posterUrl && !item.posterUrl) {
+      try {
+        const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
+        const posterDest = path.join(contentFolder, `poster${ext}`);
+        if (!fs.existsSync(posterDest)) {
+          await downloadFile(posterUrl, posterDest, null, item, store).catch(
+            () => null,
+          );
+        }
+        item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
+      } catch (err) {
+        console.error(
+          '[startMp4Download] Error processing poster URL:',
+          err.message,
+        );
+      }
+    }
+
     if (!fs.existsSync(destPath) || fs.statSync(destPath).size === 0) {
       await downloadFile(
         url,
