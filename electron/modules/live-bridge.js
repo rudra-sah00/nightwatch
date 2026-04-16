@@ -1,4 +1,4 @@
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain, BrowserWindow, net } = require('electron');
 const http = require('node:http');
 const _https = require('node:https');
 const url = require('node:url');
@@ -51,11 +51,14 @@ function startProxyServer(_eventSender) {
             Referer: 'https://funsday.cfd/',
             Cookie: getCookieString(),
             'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
           },
         };
 
-        const response = await fetch(fetchUrl, reqOpts);
+        const response = await net.fetch(fetchUrl, {
+          ...reqOpts,
+          bypassCustomProtocolHandlers: true,
+        });
 
         const body = await response.text();
 
@@ -122,11 +125,14 @@ function startProxyServer(_eventSender) {
             Referer: 'https://funsday.cfd/',
             Cookie: getCookieString(),
             'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
           },
         };
 
-        const targetResponse = await fetch(targetQueryUrl, reqOpts);
+        const targetResponse = await net.fetch(targetQueryUrl, {
+          ...reqOpts,
+          bypassCustomProtocolHandlers: true,
+        });
 
         targetResponse.headers.forEach((val, key) => {
           const k = key.toLowerCase();
