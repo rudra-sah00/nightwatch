@@ -1,6 +1,13 @@
 'use client';
 
-import { Check, ChevronDown, Download, Loader2, X } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Download,
+  Loader2,
+  MonitorDown,
+  X,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
@@ -10,6 +17,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { playVideo } from '@/features/watch/api';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { apiFetch } from '@/lib/fetch';
 import { cn } from '@/lib/utils';
 import {
@@ -26,6 +35,7 @@ interface DownloadQuality {
   url: string;
 }
 
+// Server 2 direct mp4 fallback
 async function fetchDownloadLinks(
   id: string,
   type: 'movie' | 'series',
@@ -38,87 +48,169 @@ async function fetchDownloadLinks(
 
   const res = await apiFetch<{
     success: boolean;
-    qualities: DownloadQuality[];
-  }>(`/api/video/download-links?${params}`);
-  return res.qualities ?? [];
+    data: DownloadQuality[];
+  }>(`/api/v1/download?${params.toString()}`);
+
+  return res.success && res.data ? res.data : [];
 }
 
-// ─── Quality Badge ──────────────────────────────────────────────────────────
-
-const QUALITY_ORDER = ['1080p', '720p', '480p', '360p', '240p'];
-
+const QUALITY_ORDER = ['1080p', '720p', '480p', '360p'];
 function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
   return [...qualities].sort((a, b) => {
     const ai = QUALITY_ORDER.indexOf(a.quality);
     const bi = QUALITY_ORDER.indexOf(b.quality);
-    if (ai === -1 && bi === -1) return 0;
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.quality.localeCompare(b.quality);
   });
 }
 
-function qualityColor(q: string): string {
-  if (q === '1080p') return 'bg-neo-yellow text-foreground border-border ';
-  if (q === '720p') return 'bg-neo-blue text-primary-foreground border-border ';
-  return 'bg-card text-foreground border-border ';
-}
+// ─── Shared Desktop Download Handler ────────────────────────────────────────
 
-function sanitizeFilename(name: string): string {
-  return name.replace(/[^a-z0-9]/gi, '_').replace(/_{2,}/g, '_');
-}
-
-// ─── Episode Item ────────────────────────────────────────────────────────────
-
-interface EpisodeDownloadItemProps {
-  episode: Episode;
-  contentId: string;
-  seasonNumber: number;
-  showTitle: string;
-}
-
-function EpisodeDownloadItem({
-  episode,
+async function startElectronDownload({
   contentId,
-  seasonNumber,
   showTitle,
-}: EpisodeDownloadItemProps) {
+  posterUrl,
+  type,
+  season,
+  episode,
+}: {
+  contentId: string;
+  showTitle: string;
+  posterUrl?: string;
+  type: 'movie' | 'series';
+  season?: number;
+  episode?: number;
+}) {
+  const server = contentId.split(':')[0] || 's2';
+  const response = await playVideo({
+    type,
+    title: showTitle,
+    server,
+    movieId: type === 'movie' ? contentId : undefined,
+    seriesId: type === 'series' ? contentId : undefined,
+    season,
+    episode,
+  });
+
+  if (response.success && response.masterPlaylistUrl) {
+    if (window.electronAPI) {
+      window.electronAPI.startDownload({
+        contentId: `${contentId}${season ? `_S${season}E${episode}` : ''}`,
+        title: `${showTitle}${season ? ` S${season} E${episode}` : ''}`,
+        m3u8Url: response.masterPlaylistUrl,
+        posterUrl,
+      });
+      return true;
+    }
+  }
+  return false;
+}
+
+// ─── Components ─────────────────────────────────────────────────────────────
+
+function DesktopDownloadButton({
+  onClick,
+  isLoading,
+}: {
+  onClick: () => void;
+  isLoading: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLoading}
+      className={cn(
+        'flex w-full items-center justify-between p-4 border-[3px] border-border bg-neo-yellow text-foreground hover:bg-neo-yellow/80 hover:text-black transition-colors font-headline font-black uppercase text-sm tracking-widest',
+        isLoading && 'opacity-70 cursor-not-allowed',
+      )}
+    >
+      <span className="flex items-center gap-3">
+        {isLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <MonitorDown className="w-5 h-5 stroke-[3px]" />
+        )}
+        {isLoading ? 'PREPARING...' : 'DOWNLOAD OFFLINE'}
+      </span>
+      <span className="px-2 py-0.5 bg-background text-[10px] font-bold tracking-widest border border-border rounded-sm">
+        NATIVE
+      </span>
+    </button>
+  );
+}
+
+function MovieDownloadSection({
+  contentId,
+  showTitle,
+  posterUrl,
+}: {
+  contentId: string;
+  showTitle: string;
+  posterUrl?: string;
+}) {
+  const { isDesktopApp } = useDesktopApp();
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
-
-  const handleExpand = useCallback(async () => {
-    if (isExpanded) {
-      setIsExpanded(false);
-      return;
-    }
-    setIsExpanded(true);
-    if (!qualities) {
-      setIsLoading(true);
-      try {
-        const q = await fetchDownloadLinks(
-          contentId,
-          'series',
-          seasonNumber,
-          episode.episodeNumber,
-        );
-        setQualities(sortQualities(q));
-      } catch {
-        setQualities([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  }, [isExpanded, qualities, contentId, seasonNumber, episode.episodeNumber]);
+  const [isElectronLoading, setElectronLoading] = useState(false);
 
   useEffect(() => {
-    // Reset qualities when contentId or isExpanded changes
-    if (contentId || isExpanded) {
+    if (contentId) {
       setQualities(null);
       setDownloaded(null);
     }
-  }, [contentId, isExpanded]);
+  }, [contentId]);
+
+  const loadQualities = useCallback(async () => {
+    if (qualities !== null || isDesktopApp) return;
+    setIsLoading(true);
+    try {
+      const q = await fetchDownloadLinks(contentId, 'movie');
+      setQualities(sortQualities(q));
+    } catch {
+      setQualities([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [contentId, qualities, isDesktopApp]);
+
+  // Load on mount or when reset (Web only)
+  if (!isDesktopApp && qualities === null && !isLoading) {
+    loadQualities();
+  }
+
+  const handleElectronClick = async () => {
+    setElectronLoading(true);
+    await startElectronDownload({
+      contentId,
+      showTitle,
+      posterUrl,
+      type: 'movie',
+    });
+    setDownloaded('desktop');
+    setTimeout(() => setDownloaded(null), 3000);
+    setElectronLoading(false);
+  };
+
+  if (isDesktopApp) {
+    return (
+      <div className="space-y-6">
+        {downloaded === 'desktop' ? (
+          <div className="p-4 bg-green-500/20 text-green-500 border-[3px] border-green-500 font-black font-headline uppercase tracking-widest text-center">
+            Download Started! Check Offline Library
+          </div>
+        ) : (
+          <DesktopDownloadButton
+            onClick={handleElectronClick}
+            isLoading={isElectronLoading}
+          />
+        )}
+      </div>
+    );
+  }
 
   const triggerDownload = (quality: string) => {
     setDownloaded(quality);
@@ -126,48 +218,188 @@ function EpisodeDownloadItem({
   };
 
   return (
-    <div className="border border-transparent mb-2">
-      <button
-        type="button"
-        onClick={handleExpand}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-background transition-colors duration-200 text-left border-[3px] border-border bg-card"
-      >
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-black font-headline uppercase tracking-tighter text-foreground bg-neo-yellow/80 px-2 py-0.5 border-2 border-border">
-            EP {episode.episodeNumber}
-          </span>
-          <span className="text-sm font-headline font-black uppercase text-foreground truncate">
-            {episode.title || `EPISODE ${episode.episodeNumber}`}
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-6 bg-neo-yellow border-2 border-border" />
+        <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
+          SELECT QUALITY
+        </span>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center gap-4 py-12 justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-foreground stroke-[3px]" />
+          <span className="text-sm font-headline font-black uppercase tracking-widest text-foreground">
+            FETCHING DOWNLOAD LINKS…
           </span>
         </div>
-        <ChevronDown
-          className={`w-5 h-5 text-foreground flex-shrink-0 transition-transform duration-200 stroke-[3px] ${isExpanded ? 'rotate-180' : ''}`}
-        />
+      ) : !qualities || qualities.length === 0 ? (
+        <div className="py-8 text-center border-[3px] border-dashed border-border/20">
+          <p className="text-sm font-headline font-black uppercase text-foreground/70">
+            No valid download formats found.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {qualities.map((q) => (
+            <a
+              key={q.quality}
+              href={q.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => triggerDownload(q.quality)}
+              className={cn(
+                'flex items-center justify-center gap-3 px-6 py-4 border-[3px] border-border font-headline font-black uppercase text-sm tracking-widest transition-all duration-150 active:scale-[0.98]',
+                downloaded === q.quality
+                  ? 'bg-primary text-primary-foreground '
+                  : 'bg-background text-foreground hover:bg-card hover:-translate-y-0.5 hover:shadow-[0_4px_0_0_rgb(0,0,0)] dark:hover:shadow-none',
+              )}
+            >
+              {downloaded === q.quality ? (
+                <Check className="w-3.5 h-3.5 stroke-[3px]" />
+              ) : (
+                <Download className="w-3.5 h-3.5 stroke-[3px]" />
+              )}
+              {q.quality}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EpisodeItem({
+  episode,
+  contentId,
+  showTitle,
+  posterUrl,
+}: {
+  episode: Episode;
+  contentId: string;
+  showTitle: string;
+  posterUrl?: string;
+}) {
+  const { isDesktopApp } = useDesktopApp();
+  const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [downloaded, setDownloaded] = useState<string | null>(null);
+  const [isElectronLoading, setElectronLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const loadLinks = async () => {
+    if (isDesktopApp) return;
+    if (qualities !== null || isLoading) return;
+    setIsLoading(true);
+    try {
+      const q = await fetchDownloadLinks(
+        contentId,
+        'series',
+        episode.seasonNumber || 1,
+        episode.episodeNumber,
+      );
+      setQualities(sortQualities(q));
+    } catch {
+      setQualities([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleExpand = () => {
+    const isNowExpanded = !isExpanded;
+    setIsExpanded(isNowExpanded);
+    if (isNowExpanded) {
+      loadLinks();
+    }
+  };
+
+  const handleElectronClick = async () => {
+    setElectronLoading(true);
+    await startElectronDownload({
+      contentId,
+      showTitle,
+      posterUrl,
+      type: 'series',
+      season: episode.seasonNumber || 1,
+      episode: episode.episodeNumber,
+    });
+    setDownloaded('desktop');
+    setTimeout(() => setDownloaded(null), 3000);
+    setElectronLoading(false);
+  };
+
+  return (
+    <div className="flex flex-col border-[3px] border-border bg-background transition-colors duration-200">
+      <button
+        type="button"
+        onClick={toggleExpand}
+        className="flex items-center justify-between p-4 sm:p-5 w-full text-left hover:bg-card transition-colors focus-visible:outline-none"
+      >
+        <div className="flex flex-col gap-1 pr-4 truncate">
+          <span className="text-foreground text-xs sm:text-sm font-headline font-black uppercase tracking-widest truncate leading-tight">
+            Episode {episode.episodeNumber}
+          </span>
+          <span className="text-foreground/70 text-[10px] sm:text-xs font-semibold truncate leading-none">
+            {episode.title || 'Untitled'}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 flex items-center justify-center border-2 border-border bg-neo-blue text-white shrink-0">
+            <Download className="w-4 h-4 stroke-[3px]" />
+          </div>
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 text-foreground/50 transition-transform duration-200',
+              isExpanded && 'rotate-180',
+            )}
+          />
+        </div>
       </button>
 
       {isExpanded && (
-        <div className="px-6 pb-4 pt-2 border-x-[3px] border-b-[3px] border-border bg-background  ml-2 mr-2 -mt-1 relative z-0">
-          {isLoading ? (
-            <div className="flex items-center gap-2 py-2 text-foreground text-xs font-headline font-black uppercase">
-              <Loader2 className="w-4 h-4 animate-spin stroke-[3px]" />
-              FETCHING LINKS…
+        <div className="p-4 sm:p-6 pb-6 border-t-[3px] border-border bg-card animate-in slide-in-from-top-2 duration-200">
+          {isDesktopApp ? (
+            downloaded === 'desktop' ? (
+              <div className="p-4 bg-green-500/20 text-green-500 border-[3px] border-green-500 font-black font-headline uppercase tracking-widest text-center text-xs">
+                Downloaded to Offline Vault!
+              </div>
+            ) : (
+              <DesktopDownloadButton
+                onClick={handleElectronClick}
+                isLoading={isElectronLoading}
+              />
+            )
+          ) : isLoading ? (
+            <div className="flex items-center justify-center p-6 gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-foreground" />
+              <span className="text-xs font-headline font-black uppercase tracking-widest">
+                Loading Qualities...
+              </span>
             </div>
           ) : !qualities || qualities.length === 0 ? (
-            <p className="text-xs font-headline font-black uppercase text-neo-red py-2">
-              NO DOWNLOAD LINKS AVAILABLE.
-            </p>
+            <div className="text-center p-4">
+              <span className="text-xs font-headline font-black uppercase text-foreground/50">
+                No formats available
+              </span>
+            </div>
           ) : (
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {qualities.map((q) => (
                 <a
                   key={q.quality}
                   href={q.url}
-                  download={`${sanitizeFilename(showTitle)}_S${seasonNumber}E${episode.episodeNumber}_${q.quality}.mp4`}
-                  referrerPolicy="no-referrer"
-                  onClick={() => triggerDownload(q.quality)}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => {
+                    setDownloaded(q.quality);
+                    setTimeout(() => setDownloaded(null), 3000);
+                  }}
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-4 py-2 border-[2px] text-xs font-headline font-black uppercase transition-[background-color,color,border-color,transform] duration-150 active:scale-95 no-underline',
-                    qualityColor(q.quality),
+                    'flex items-center justify-center gap-2 px-4 py-3 border-[2px] border-border font-headline font-black uppercase text-xs sm:text-sm tracking-widest transition-all duration-150 active:scale-[0.98]',
+                    downloaded === q.quality
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background hover:bg-card hover:-translate-y-0.5',
                   )}
                 >
                   {downloaded === q.quality ? (
@@ -206,10 +438,11 @@ export function DownloadMenu({
   const [selectedDubType, setSelectedDubType] = useState<ContentType>(
     show.contentType,
   );
+  const { isDesktopApp } = useDesktopApp();
 
-  // Only Server 2 (Balanced Server) content supports downloads
+  // Only Server 2 (Balanced Server) OR Desktop App supports downloads
   const isS2 = show.id.startsWith('s2:');
-  if (!isS2) return null;
+  if (!isS2 && !isDesktopApp) return null;
 
   const isSeries = selectedDubType === ContentType.Series;
   const seasonNumber = selectedSeason?.seasonNumber ?? 1;
@@ -222,10 +455,15 @@ export function DownloadMenu({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border bg-neo-yellow text-foreground hover:bg-neo-yellow/80 transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto"
+        className={cn(
+          'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border text-foreground transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto',
+          isDesktopApp
+            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+            : 'bg-neo-yellow hover:bg-neo-yellow/80 text-black',
+        )}
       >
         <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-        DOWNLOAD
+        {isDesktopApp ? 'NATIVE DOWNLOAD' : 'DOWNLOAD'}
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -237,7 +475,7 @@ export function DownloadMenu({
             <div className="flex flex-col gap-0.5 truncate pr-4 text-left">
               <DialogTitle className="text-foreground text-lg sm:text-xl font-headline font-black uppercase tracking-widest flex items-center gap-3 leading-none">
                 <Download className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
-                DOWNLOAD
+                {isDesktopApp ? 'OFFLINE SECURE DOWNLOAD' : 'DOWNLOAD'}
               </DialogTitle>
               <DialogDescription className="sr-only">
                 Download links for {show.title}. Choose a language and quality,
@@ -299,169 +537,45 @@ export function DownloadMenu({
               <MovieDownloadSection
                 contentId={selectedDubId}
                 showTitle={show.title}
+                posterUrl={show.posterUrl}
               />
             ) : (
-              <SeriesDownloadSection
-                contentId={selectedDubId}
-                seasonNumber={seasonNumber}
-                seasonEpisodes={seasonEpisodes}
-                allSeasonEpisodes={episodes}
-                showTitle={show.title}
-              />
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4 sticky top-0 bg-card z-10 py-2 border-b-2 border-border/20">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-headline font-black uppercase tracking-widest">
+                      SEASON {seasonNumber}
+                    </span>
+                    <span className="text-xs text-foreground/60 font-semibold tracking-wider">
+                      {seasonEpisodes.length} Episodes
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 pb-8">
+                  {seasonEpisodes.length === 0 ? (
+                    <div className="py-8 text-center border-[3px] border-dashed border-border/20">
+                      <p className="text-sm font-headline font-black uppercase text-foreground/70">
+                        No episodes available
+                      </p>
+                    </div>
+                  ) : (
+                    seasonEpisodes.map((ep) => (
+                      <EpisodeItem
+                        key={ep.episodeId}
+                        episode={ep}
+                        contentId={selectedDubId}
+                        showTitle={show.title}
+                        posterUrl={show.posterUrl}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-// ─── Movie Download Section ──────────────────────────────────────────────────
-
-function MovieDownloadSection({
-  contentId,
-  showTitle,
-}: {
-  contentId: string;
-  showTitle: string;
-}) {
-  const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [downloaded, setDownloaded] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (contentId) {
-      setQualities(null);
-      setDownloaded(null);
-    }
-  }, [contentId]);
-
-  const loadQualities = useCallback(async () => {
-    if (qualities !== null) return;
-    setIsLoading(true);
-    try {
-      const q = await fetchDownloadLinks(contentId, 'movie');
-      setQualities(sortQualities(q));
-    } catch {
-      setQualities([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [contentId, qualities]);
-
-  // Load on mount or when reset
-  if (qualities === null && !isLoading) {
-    loadQualities();
-  }
-
-  const triggerDownload = (quality: string) => {
-    setDownloaded(quality);
-    setTimeout(() => setDownloaded(null), 3000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-2 h-6 bg-neo-yellow border-2 border-border" />
-        <span className="text-xs font-headline font-black uppercase tracking-widest text-foreground">
-          SELECT QUALITY
-        </span>
-      </div>
-
-      {isLoading ? (
-        <div className="flex flex-col items-center gap-4 py-12 justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-foreground stroke-[3px]" />
-          <span className="text-sm font-headline font-black uppercase tracking-widest text-foreground">
-            FETCHING DOWNLOAD LINKS…
-          </span>
-        </div>
-      ) : !qualities || qualities.length === 0 ? (
-        <div className="py-8 text-center border-[3px] border-dashed border-border/20">
-          <p className="text-sm font-headline font-black uppercase text-foreground/70">
-            NO DOWNLOAD LINKS AVAILABLE FOR THIS TITLE.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {qualities.map((q) => (
-            <a
-              key={q.quality}
-              href={q.url}
-              download={`${sanitizeFilename(showTitle)}_${q.quality}.mp4`}
-              referrerPolicy="no-referrer"
-              onClick={() => triggerDownload(q.quality)}
-              className={cn(
-                'flex items-center justify-between w-full px-6 py-5 border-[3px] border-border transition-[background-color,color,border-color,transform] duration-150 hover: active:scale-[0.98] no-underline',
-                qualityColor(q.quality),
-              )}
-            >
-              <div className="flex items-center gap-4">
-                {downloaded === q.quality ? (
-                  <Check className="w-5 h-5 stroke-[4px]" />
-                ) : (
-                  <Download className="w-5 h-5 stroke-[4px]" />
-                )}
-                <span className="text-lg font-headline font-black uppercase tracking-tight">
-                  {q.quality}
-                  <span className="ml-3 text-xs font-bold opacity-60">
-                    {q.quality === '1080p'
-                      ? 'FULL HD'
-                      : q.quality === '720p'
-                        ? 'HD'
-                        : q.quality === '480p'
-                          ? 'SD'
-                          : 'LOW'}
-                  </span>
-                </span>
-              </div>
-              <span className="text-xs font-black font-headline uppercase tracking-widest opacity-80">
-                {downloaded === q.quality ? 'DOWNLOADING…' : 'MP4'}
-              </span>
-            </a>
-          ))}
-        </div>
-      )}
-
-      <p className="text-[10px] text-foreground/70 font-headline font-bold uppercase tracking-widest leading-loose pt-4 border-t-2 border-border/10">
-        DOWNLOADS ARE SERVED DIRECTLY FROM THE CONTENT CDN.
-      </p>
-    </div>
-  );
-}
-
-// ─── Series Download Section ─────────────────────────────────────────────────
-
-interface SeriesDownloadSectionProps {
-  contentId: string;
-  seasonNumber: number;
-  seasonEpisodes: Episode[];
-  allSeasonEpisodes: Episode[];
-  showTitle: string;
-}
-
-function SeriesDownloadSection({
-  contentId,
-  seasonNumber,
-  seasonEpisodes,
-  showTitle,
-}: SeriesDownloadSectionProps) {
-  return (
-    <div className="space-y-3">
-      {seasonEpisodes.length === 0 ? (
-        <p className="text-sm font-headline font-black uppercase text-foreground/70 py-8 text-center border-[3px] border-dashed border-border/10">
-          NO EPISODES FOUND.
-        </p>
-      ) : (
-        seasonEpisodes.map((ep) => (
-          <EpisodeDownloadItem
-            key={ep.episodeId}
-            episode={ep}
-            contentId={contentId}
-            seasonNumber={seasonNumber}
-            showTitle={showTitle}
-          />
-        ))
-      )}
-    </div>
   );
 }

@@ -1,6 +1,19 @@
 // Type definitions for the Desktop App (ElectronIPC bridge)
 // These types allow safe auto-completion when programming React in Next.js
 
+export interface DownloadItem {
+  contentId: string;
+  title: string;
+  posterUrl?: string;
+  filesize?: number;
+  downloadedBytes: number;
+  progress: number;
+  status: 'downloading' | 'completed' | 'paused' | 'error' | 'cancelled';
+  error?: string;
+  localPlaylistPath?: string;
+  createdAt: number;
+}
+
 export interface ElectronAPI {
   /** Updates the user's playing status directly in Discord */
   updateDiscordPresence: (presence: {
@@ -87,6 +100,23 @@ export interface ElectronAPI {
 
   /** Tells React when the window has regained focus */
   onWindowFocus: (callback: () => void) => () => void;
+
+  /** Start native desktop download process for videos */
+  startDownload: (params: {
+    contentId: string;
+    title: string;
+    m3u8Url: string;
+    posterUrl?: string;
+  }) => void;
+
+  /** Cancel an ongoing download */
+  cancelDownload: (contentId: string) => void;
+
+  /** Request all downloads currently monitored */
+  getDownloads: () => Promise<DownloadItem[]>;
+
+  /** Subscriber to listen for download progression updates payload */
+  onDownloadProgress: (callback: (item: DownloadItem) => void) => () => void;
 }
 
 declare global {
