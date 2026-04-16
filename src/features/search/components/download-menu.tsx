@@ -48,10 +48,10 @@ async function fetchDownloadLinks(
 
   const res = await apiFetch<{
     success: boolean;
-    data: DownloadQuality[];
-  }>(`/api/v1/download?${params.toString()}`);
+    qualities: DownloadQuality[];
+  }>(`/api/video/download-links?${params.toString()}`);
 
-  return res.success && res.data ? res.data : [];
+  return res.success && res.qualities ? res.qualities : [];
 }
 
 const QUALITY_ORDER = ['1080p', '720p', '480p', '360p'];

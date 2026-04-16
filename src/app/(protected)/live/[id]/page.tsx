@@ -409,13 +409,6 @@ export default function LiveMatchPlayerPage() {
     minute: '2-digit',
   });
 
-  console.log(
-    '[LiveMatchPlayerPage] Rendering WatchLivePlayer with sessionUrl:',
-    sessionUrl,
-    'and metadata:',
-    metadata,
-  );
-
   return (
     <div className="min-h-screen bg-background">
       <WatchLivePlayer
