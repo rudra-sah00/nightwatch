@@ -8,6 +8,7 @@ export interface DownloadItem {
   filesize?: number;
   downloadedBytes: number;
   progress: number;
+  speed?: string; // e.g. "2.4 MB/s"
   status: 'downloading' | 'completed' | 'paused' | 'error' | 'cancelled';
   error?: string;
   localPlaylistPath?: string;

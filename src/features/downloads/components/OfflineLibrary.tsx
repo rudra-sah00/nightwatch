@@ -1,9 +1,26 @@
 'use client';
 
-import { Download, MonitorDown, Play, Trash2, X } from 'lucide-react';
+import {
+  Download,
+  HardDriveDownload,
+  MonitorDown,
+  Play,
+  Trash2,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
+
+function formatBytes(bytes?: number, decimals = 2) {
+  if (!bytes || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
+}
 
 export function OfflineLibrary() {
   const { downloads, isDesktopApp, cancelDownload } = useDownloads();
@@ -34,6 +51,7 @@ export function OfflineLibrary() {
 
       {downloads.length === 0 ? (
         <div className="py-20 text-center border-[4px] border-dashed border-border/20 bg-card rounded-sm">
+          <HardDriveDownload className="w-12 h-12 stroke-[2px] text-foreground/20 mx-auto mb-4" />
           <p className="text-xl font-headline font-black uppercase text-foreground/50 tracking-widest">
             Vault is empty
           </p>
@@ -42,89 +60,138 @@ export function OfflineLibrary() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-4">
           {downloads.map((item) => (
             <div
               key={item.contentId}
-              className="flex bg-card border-[3px] border-border overflow-hidden"
+              className="flex flex-col sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors"
             >
-              <div className="w-24 shrink-0 bg-secondary relative border-r-[3px] border-border">
-                {item.posterUrl && (
+              {/* Poster */}
+              <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
+                {item.posterUrl ? (
                   <Image
                     src={item.posterUrl}
                     alt={item.title}
                     fill
-                    sizes="96px"
+                    sizes="112px"
                     className="object-cover"
                   />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-foreground/20">
+                    <MonitorDown className="w-8 h-8 stroke-[2px]" />
+                  </div>
                 )}
               </div>
-              <div className="flex-1 p-4 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-headline font-black uppercase tracking-wide text-sm line-clamp-2 leading-tight">
-                    {item.title}
-                  </h3>
-                  <div className="text-[10px] uppercase font-bold text-foreground/60 mt-1">
+
+              {/* Detail Content */}
+              <div className="flex-1 p-5 flex flex-col justify-between">
+                {/* Top Section */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="space-y-2 pr-4">
+                    <h3 className="font-headline font-black uppercase tracking-wide text-base sm:text-xl leading-tight line-clamp-1">
+                      {item.title}
+                    </h3>
+
+                    {/* Status Text & Speed */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs uppercase font-bold text-foreground/60 tracking-wider">
+                      <span
+                        className={cn(
+                          item.status === 'completed' &&
+                            'text-neo-green font-black',
+                          item.status === 'error' && 'text-neo-red font-black',
+                          item.status === 'downloading' &&
+                            'text-neo-yellow font-black',
+                          item.status === 'cancelled' && 'text-foreground/50',
+                        )}
+                      >
+                        {item.status}
+                      </span>
+
+                      {item.status === 'downloading' && (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                          <span className="text-foreground/90 tabular-nums">
+                            {formatBytes(item.downloadedBytes)}{' '}
+                            {item.filesize
+                              ? `/ ${formatBytes(item.filesize)}`
+                              : ''}
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                          <span className="text-neo-blue tabular-nums">
+                            {item.speed
+                              ? item.speed
+                              : `${item.progress.toFixed(1)}%`}
+                          </span>
+                          {item.speed && (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                              <span className="text-neo-yellow tabular-nums">
+                                {item.progress.toFixed(1)}%
+                              </span>
+                            </>
+                          )}
+                        </>
+                      )}
+
+                      {item.status === 'completed' && item.filesize && (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                          <span className="text-foreground/80">
+                            {formatBytes(item.filesize)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions Column */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
                     {item.status === 'completed' && (
-                      <span className="text-neo-green">READY</span>
+                      <Link
+                        href={`/watch/${item.contentId}`}
+                        className="flex items-center gap-2 bg-neo-green text-black uppercase font-black tracking-wider text-xs px-6 py-3 border-[3px] border-black hover:bg-neo-green/80 hover:-translate-y-0.5 active:translate-y-0 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        <Play className="w-4 h-4 fill-black stroke-[3px]" />{' '}
+                        Play
+                      </Link>
                     )}
-                    {item.status === 'downloading' &&
-                      `${Math.round(item.progress)}%`}
-                    {item.status === 'error' && (
-                      <span className="text-neo-red">ERROR</span>
-                    )}
-                    {item.status === 'cancelled' && (
-                      <span className="text-foreground/50">CANCELLED</span>
+
+                    {(item.status === 'error' ||
+                      item.status === 'cancelled' ||
+                      item.status === 'completed') && (
+                      <button
+                        type="button"
+                        onClick={() => cancelDownload(item.contentId)}
+                        className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
+                        title="Remove Download"
+                      >
+                        <Trash2 className="w-4 h-4 stroke-[3px]" />
+                      </button>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  {item.status === 'downloading' ? (
-                    <div className="w-full flex items-center gap-3">
-                      <div className="flex-1 h-2 bg-secondary border border-border overflow-hidden">
-                        <div
-                          className="h-full bg-neo-yellow transition-all duration-300"
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => cancelDownload(item.contentId)}
-                        className="text-foreground/50 hover:text-neo-red"
-                      >
-                        <X className="w-4 h-4 stroke-[3px]" />
-                      </button>
+                {/* Progress Bar Bottom Row */}
+                {item.status === 'downloading' && (
+                  <div className="mt-8 flex items-center gap-4">
+                    <div className="flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden">
+                      <div
+                        className="h-full bg-neo-yellow transition-all duration-500 ease-out"
+                        style={{
+                          width: `${Math.max(0, Math.min(100, item.progress))}%`,
+                        }}
+                      />
                     </div>
-                  ) : item.status === 'completed' ? (
-                    <div className="flex gap-2 w-full">
-                      <Link
-                        href={`/watch/${item.contentId}`}
-                        className="flex-1 flex justify-center items-center gap-2 bg-neo-green text-black uppercase font-black tracking-wider text-[10px] py-2 border-[2px] border-black hover:bg-neo-green/80"
-                      >
-                        <Play className="w-3 h-3 fill-black stroke-[3px]" />{' '}
-                        Play
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => cancelDownload(item.contentId)}
-                        className="px-3 border-[2px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3 stroke-[3px]" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-full flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => cancelDownload(item.contentId)}
-                        className="text-[10px] tracking-widest font-black uppercase border-[2px] border-border px-3 py-1 hover:bg-card"
-                      >
-                        REMOVE
-                      </button>
-                    </div>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => cancelDownload(item.contentId)}
+                      className="flex items-center justify-center bg-background border-[2px] border-border p-1.5 text-foreground/50 hover:bg-neo-red hover:text-white transition-colors"
+                      title="Cancel Download"
+                    >
+                      <X className="w-4 h-4 stroke-[3px]" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
