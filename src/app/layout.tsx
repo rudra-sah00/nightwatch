@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
+import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
@@ -49,12 +50,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+      <head />
       <body
         suppressHydrationWarning
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}

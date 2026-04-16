@@ -108,9 +108,10 @@ const nextConfig: NextConfig = {
           },
           {
             // Restrict camera/microphone/geolocation to same-origin by default.
-            // Agora voice/video calls are allowed on the same origin — no external embeds needed.
+            // Allow explicit Cloudflare cross-origin XR spatial tracking enumeration to silence iframe warnings
             key: 'Permissions-Policy',
-            value: 'camera=(self), microphone=(self), geolocation=()',
+            value:
+              'camera=(self), microphone=(self), geolocation=(), xr-spatial-tracking=(self "https://challenges.cloudflare.com")',
           },
         ],
       },
