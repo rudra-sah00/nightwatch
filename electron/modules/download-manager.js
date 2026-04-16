@@ -115,7 +115,7 @@ function formatSpeed(bytesPerSec) {
 
 async function startHlsDownload(
   eventSender,
-  { contentId, title, m3u8Url, posterUrl, subtitleTracks },
+  { contentId, title, m3u8Url, posterUrl, subtitleTracks, quality = 'high' },
 ) {
   const contentFolder = path.join(VAULT_PATH, contentId);
   if (!fs.existsSync(contentFolder))
@@ -268,7 +268,13 @@ async function startHlsDownload(
 
     if (playlists.length > 0) {
       playlists.sort((a, b) => b.bandwidth - a.bandwidth);
-      targetPlaylistUrl = playlists[0].url;
+      if (quality === 'low') {
+        targetPlaylistUrl = playlists[playlists.length - 1].url;
+      } else if (quality === 'medium') {
+        targetPlaylistUrl = playlists[Math.floor(playlists.length / 2)].url;
+      } else {
+        targetPlaylistUrl = playlists[0].url;
+      }
     }
 
     // 3. Fetch Media Playlist

@@ -115,12 +115,11 @@ export interface ElectronAPI {
     m3u8Url: string;
     posterUrl?: string;
     subtitleTracks?: { label: string; language: string; url: string }[];
+    quality?: 'low' | 'medium' | 'high';
   }) => void;
 
   /** Cancel an ongoing download */
   cancelDownload: (contentId: string) => void;
-
-  /** Request all downloads currently monitored */
   getDownloads: () => Promise<DownloadItem[]>;
 
   /** Subscriber to listen for download progression updates payload */

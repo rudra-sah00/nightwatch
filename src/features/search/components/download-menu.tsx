@@ -76,6 +76,7 @@ async function startElectronDownload({
   season,
   episode,
   directUrl,
+  quality = 'high',
 }: {
   contentId: string;
   showTitle: string;
@@ -84,6 +85,7 @@ async function startElectronDownload({
   season?: number;
   episode?: number;
   directUrl?: string;
+  quality?: 'low' | 'medium' | 'high';
 }) {
   if (directUrl && window.electronAPI) {
     window.electronAPI.startDownload({
@@ -95,6 +97,7 @@ async function startElectronDownload({
           : showTitle,
       m3u8Url: directUrl,
       posterUrl,
+      quality,
     });
     return;
   }
@@ -118,6 +121,7 @@ async function startElectronDownload({
         m3u8Url: response.masterPlaylistUrl,
         posterUrl,
         subtitleTracks: response.subtitleTracks,
+        quality,
       });
       return true;
     }
@@ -173,6 +177,19 @@ function MovieDownloadSection({
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [isElectronLoading, setElectronLoading] = useState(false);
+  const [prefQuality, setPrefQuality] = useState<'low' | 'medium' | 'high'>(
+    'high',
+  );
+
+  useEffect(() => {
+    if (window.electronAPI) {
+      window.electronAPI.storeGet('downloadQuality').then((val: unknown) => {
+        if (val === 'low' || val === 'medium' || val === 'high') {
+          setPrefQuality(val);
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (contentId) {
@@ -210,6 +227,7 @@ function MovieDownloadSection({
       posterUrl,
       type: 'movie',
       directUrl: qualityUrl,
+      quality: prefQuality,
     });
     setDownloaded(qualityLabel || 'desktop');
     setTimeout(() => setDownloaded(null), 3000);
@@ -300,6 +318,19 @@ function EpisodeItem({
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [isElectronLoading, setElectronLoading] = useState(false);
+  const [prefQuality, setPrefQuality] = useState<'low' | 'medium' | 'high'>(
+    'high',
+  );
+
+  useEffect(() => {
+    if (window.electronAPI) {
+      window.electronAPI.storeGet('downloadQuality').then((val: unknown) => {
+        if (val === 'low' || val === 'medium' || val === 'high') {
+          setPrefQuality(val);
+        }
+      });
+    }
+  }, []);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const loadLinks = async () => {
@@ -342,6 +373,7 @@ function EpisodeItem({
       season: episode.seasonNumber || 1,
       episode: episode.episodeNumber,
       directUrl: qualityUrl,
+      quality: prefQuality,
     });
     setDownloaded(qualityLabel || 'desktop');
     setTimeout(() => setDownloaded(null), 3000);
