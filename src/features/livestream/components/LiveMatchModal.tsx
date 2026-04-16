@@ -89,7 +89,7 @@ export function LiveMatchModal({
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isServer2 = match.id.startsWith('live-server2');
-  const isServer1 = match.id.startsWith('s1:');
+  const isServer1 = match.id.startsWith('live-server1:');
   const providerName = isServer1
     ? 'Live TV'
     : isServer2

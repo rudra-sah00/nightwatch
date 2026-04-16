@@ -45,7 +45,7 @@ export default function LiveMatchPlayerPage() {
     if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
       return;
 
-    const _isServer1 = match.id.startsWith('s1:');
+    const _isServer1 = match.id.startsWith('live-server1:');
     const _isDesktopApp =
       typeof window !== 'undefined' && 'electronAPI' in window;
 
@@ -56,7 +56,7 @@ export default function LiveMatchPlayerPage() {
       if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
         return;
 
-      const isServer1 = match.id.startsWith('s1:');
+      const isServer1 = match.id.startsWith('live-server1:');
       const isDesktopApp =
         typeof window !== 'undefined' && 'electronAPI' in window;
 
@@ -66,7 +66,7 @@ export default function LiveMatchPlayerPage() {
           return;
         }
 
-        const sourceUrl = match.playPath!.replace('s1://', '');
+        const sourceUrl = match.playPath!.replace('live-server1://', '');
         setSessionLoading(true);
 
         _bridgeUnsubscribe = (

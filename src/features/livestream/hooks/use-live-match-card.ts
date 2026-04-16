@@ -16,7 +16,7 @@ export function useLiveMatchCard(match: LiveMatch) {
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isServer2 = match.id.startsWith('live-server2');
-  const isServer1 = match.id.startsWith('live-server1');
+  const isServer1 = match.id.startsWith('live-server1:');
   // Server 2 & 3 always show WATCH button, S1 depends on status
   const canWatch =
     (isLive || isServer2 || isServer1) &&

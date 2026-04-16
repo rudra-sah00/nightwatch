@@ -115,8 +115,19 @@ export function Server1Channels() {
 }
 
 function ChannelRow({ channel }: { channel: Channel }) {
+  // Extract just the channel number if providerId is a daddylive URL
+  // This prevents Vercel WAF from blocking the /live/live-server1:https:/... path.
+  let cleanProviderId = channel.providerId || '';
+  const streamMatch = cleanProviderId.match(/stream-(\d+)/);
+  if (streamMatch) {
+    cleanProviderId = streamMatch[1];
+  } else {
+    const digitsMatch = cleanProviderId.match(/(\d+)/);
+    if (digitsMatch) cleanProviderId = digitsMatch[1];
+  }
+
   const pseudoMatch = {
-    id: `s1:${channel.providerId}`,
+    id: `live-server1:${cleanProviderId}`,
     team1: { name: channel.name, id: '', score: '', avatar: '' },
     team2: { name: '', id: '', score: '', avatar: '' },
     status: 'MatchIng',
