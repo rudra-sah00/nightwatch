@@ -9,6 +9,7 @@ import {
   useS2AudioTracks,
 } from '@/features/watch/player/hooks/useS2AudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
@@ -26,6 +27,7 @@ export function useWatchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { socket } = useSocket();
+  const { isDesktopApp } = useDesktopApp();
 
   const movieId = decodeURIComponent(params.id as string);
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
@@ -114,6 +116,53 @@ export function useWatchContent() {
 
       try {
         const decodedTitle = decodeURIComponent(title);
+
+        if (isDesktopApp && window.electronAPI) {
+          const fetchedDownloads = await window.electronAPI.getDownloads();
+          let offlineContentId = overrideMovieId || movieId;
+
+          if (type === 'series' && season && episode) {
+            const currentSeriesId = overrideMovieId || seriesId || movieId;
+            if (currentSeriesId) {
+              offlineContentId = `${currentSeriesId}_S${season}E${episode}`;
+            }
+          }
+
+          const downloadedItem = fetchedDownloads.find(
+            (d) => d.contentId === offlineContentId && d.status === 'completed',
+          );
+
+          if (downloadedItem?.localPlaylistPath) {
+            applyResponse(server, {
+              success: true,
+              masterPlaylistUrl: downloadedItem.localPlaylistPath,
+              title: decodedTitle,
+              type,
+              movieId: overrideMovieId || movieId || '',
+              subtitleTracks: downloadedItem.subtitleTracks?.map((t) => ({
+                label: t.label,
+                language: t.language,
+                url: t.localPath || t.url,
+              })),
+              ...(type === 'series' && season && episode
+                ? {
+                    season: parseInt(season, 10),
+                    episode: parseInt(episode, 10),
+                  }
+                : {}),
+            });
+            setIsRefetching(false);
+            if (replacingSessionTimerRef.current) {
+              clearTimeout(replacingSessionTimerRef.current);
+            }
+            replacingSessionTimerRef.current = setTimeout(() => {
+              setIsReplacingSession(false);
+              replacingSessionTimerRef.current = null;
+            }, 2000);
+            return;
+          }
+        }
+
         let response: PlayResponse;
 
         if (type === 'series' && season && episode) {
@@ -180,7 +229,17 @@ export function useWatchContent() {
         }, 2000);
       }
     },
-    [title, type, season, episode, movieId, seriesId, server, applyResponse],
+    [
+      title,
+      type,
+      season,
+      episode,
+      movieId,
+      seriesId,
+      server,
+      applyResponse,
+      isDesktopApp,
+    ],
   );
 
   const handleBeforeS2Discovery = useCallback(() => {

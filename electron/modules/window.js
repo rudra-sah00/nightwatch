@@ -126,10 +126,14 @@ class AppWindow {
       (_event, errorCode, errorDescription) => {
         // DNS / Connection errors usually fall within the -100 range in Chromium
         if (errorCode >= -199 && errorCode <= -100) {
-          console.warn('Network crash detected:', errorDescription);
-          this.mainWindow.loadFile(
-            require('node:path').join(__dirname, '../offline.html'),
+          console.warn(
+            'Network crash detected:',
+            errorDescription,
+            'but skipping native offline override to let React handle it',
           );
+          // this.mainWindow.loadFile(
+          //   require('node:path').join(__dirname, '../offline.html'),
+          // );
         }
       },
     );

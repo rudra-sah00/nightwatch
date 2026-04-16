@@ -4,6 +4,7 @@ import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
+import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
@@ -67,6 +68,7 @@ export default function RootLayout({
               <AuthProvider>
                 <Suspense fallback={null}>
                   <DiscordPresenceSync />
+                  <OfflineIndicator />
                 </Suspense>
                 {children}
                 <Toaster />

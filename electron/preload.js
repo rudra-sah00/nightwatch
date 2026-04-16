@@ -35,9 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('pip-mode-changed', subscription);
   },
 
-  // Used by the offline.html screen to instruct the main backend to map back to Next.js
-  retryConnection: () => ipcRenderer.send('retry-connection'),
-
   // Native Desktop Notifications (e.g., Party Invites)
   showNotification: (payload) => ipcRenderer.send('show-notification', payload),
 

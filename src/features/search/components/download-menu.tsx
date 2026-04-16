@@ -75,6 +75,7 @@ async function startElectronDownload({
   type,
   season,
   episode,
+  directUrl,
 }: {
   contentId: string;
   showTitle: string;
@@ -82,7 +83,22 @@ async function startElectronDownload({
   type: 'movie' | 'series';
   season?: number;
   episode?: number;
+  directUrl?: string;
 }) {
+  if (directUrl && window.electronAPI) {
+    window.electronAPI.startDownload({
+      contentId:
+        type === 'series' && episode ? `${contentId}-ep${episode}` : contentId,
+      title:
+        type === 'series' && episode
+          ? `${showTitle} - S${season}E${episode}`
+          : showTitle,
+      m3u8Url: directUrl,
+      posterUrl,
+    });
+    return;
+  }
+
   const server = contentId.split(':')[0] || 's2';
   const response = await playVideo({
     type,
@@ -101,6 +117,7 @@ async function startElectronDownload({
         title: `${showTitle}${season ? ` S${season} E${episode}` : ''}`,
         m3u8Url: response.masterPlaylistUrl,
         posterUrl,
+        subtitleTracks: response.subtitleTracks,
       });
       return true;
     }
@@ -151,7 +168,7 @@ function MovieDownloadSection({
   showTitle: string;
   posterUrl?: string;
 }) {
-  const { isDesktopApp } = useDesktopApp();
+  const isS2 = contentId.startsWith('s2:');
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
@@ -165,7 +182,7 @@ function MovieDownloadSection({
   }, [contentId]);
 
   const loadQualities = useCallback(async () => {
-    if (qualities !== null || isDesktopApp) return;
+    if (qualities !== null || !isS2) return;
     setIsLoading(true);
     try {
       const q = await fetchDownloadLinks(contentId, 'movie');
@@ -175,27 +192,31 @@ function MovieDownloadSection({
     } finally {
       setIsLoading(false);
     }
-  }, [contentId, qualities, isDesktopApp]);
+  }, [contentId, qualities, isS2]);
 
   // Load on mount or when reset (Web only)
-  if (!isDesktopApp && qualities === null && !isLoading) {
+  if (isS2 && qualities === null && !isLoading) {
     loadQualities();
   }
 
-  const handleElectronClick = async () => {
+  const handleElectronClick = async (
+    qualityUrl?: string,
+    qualityLabel?: string,
+  ) => {
     setElectronLoading(true);
     await startElectronDownload({
       contentId,
       showTitle,
       posterUrl,
       type: 'movie',
+      directUrl: qualityUrl,
     });
-    setDownloaded('desktop');
+    setDownloaded(qualityLabel || 'desktop');
     setTimeout(() => setDownloaded(null), 3000);
     setElectronLoading(false);
   };
 
-  if (isDesktopApp) {
+  if (!isS2) {
     return (
       <div className="space-y-6">
         {downloaded === 'desktop' ? (
@@ -204,18 +225,13 @@ function MovieDownloadSection({
           </div>
         ) : (
           <DesktopDownloadButton
-            onClick={handleElectronClick}
+            onClick={() => handleElectronClick()}
             isLoading={isElectronLoading}
           />
         )}
       </div>
     );
   }
-
-  const triggerDownload = (quality: string) => {
-    setDownloaded(quality);
-    setTimeout(() => setDownloaded(null), 3000);
-  };
 
   return (
     <div className="space-y-6">
@@ -242,12 +258,11 @@ function MovieDownloadSection({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {qualities.map((q) => (
-            <a
+            <button
               key={q.quality}
-              href={q.url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => triggerDownload(q.quality)}
+              type="button"
+              disabled={isElectronLoading}
+              onClick={() => handleElectronClick(q.url, q.quality)}
               className={cn(
                 'flex items-center justify-center gap-3 px-6 py-4 border-[3px] border-border font-headline font-black uppercase text-sm tracking-widest transition-all duration-150 active:scale-[0.98]',
                 downloaded === q.quality
@@ -261,7 +276,7 @@ function MovieDownloadSection({
                 <Download className="w-3.5 h-3.5 stroke-[3px]" />
               )}
               {q.quality}
-            </a>
+            </button>
           ))}
         </div>
       )}
@@ -280,7 +295,7 @@ function EpisodeItem({
   showTitle: string;
   posterUrl?: string;
 }) {
-  const { isDesktopApp } = useDesktopApp();
+  const isS2 = contentId.startsWith('s2:');
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
@@ -288,7 +303,7 @@ function EpisodeItem({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const loadLinks = async () => {
-    if (isDesktopApp) return;
+    if (!isS2) return;
     if (qualities !== null || isLoading) return;
     setIsLoading(true);
     try {
@@ -309,12 +324,15 @@ function EpisodeItem({
   const toggleExpand = () => {
     const isNowExpanded = !isExpanded;
     setIsExpanded(isNowExpanded);
-    if (isNowExpanded) {
+    if (isNowExpanded && isS2 && qualities === null) {
       loadLinks();
     }
   };
 
-  const handleElectronClick = async () => {
+  const handleElectronClick = async (
+    qualityUrl?: string,
+    qualityLabel?: string,
+  ) => {
     setElectronLoading(true);
     await startElectronDownload({
       contentId,
@@ -323,8 +341,9 @@ function EpisodeItem({
       type: 'series',
       season: episode.seasonNumber || 1,
       episode: episode.episodeNumber,
+      directUrl: qualityUrl,
     });
-    setDownloaded('desktop');
+    setDownloaded(qualityLabel || 'desktop');
     setTimeout(() => setDownloaded(null), 3000);
     setElectronLoading(false);
   };
@@ -359,14 +378,14 @@ function EpisodeItem({
 
       {isExpanded && (
         <div className="p-4 sm:p-6 pb-6 border-t-[3px] border-border bg-card animate-in slide-in-from-top-2 duration-200">
-          {isDesktopApp ? (
+          {!isS2 ? (
             downloaded === 'desktop' ? (
               <div className="p-4 bg-green-500/20 text-green-500 border-[3px] border-green-500 font-black font-headline uppercase tracking-widest text-center text-xs">
                 Downloaded to Offline Vault!
               </div>
             ) : (
               <DesktopDownloadButton
-                onClick={handleElectronClick}
+                onClick={() => handleElectronClick()}
                 isLoading={isElectronLoading}
               />
             )
@@ -386,15 +405,11 @@ function EpisodeItem({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {qualities.map((q) => (
-                <a
+                <button
                   key={q.quality}
-                  href={q.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => {
-                    setDownloaded(q.quality);
-                    setTimeout(() => setDownloaded(null), 3000);
-                  }}
+                  type="button"
+                  disabled={isElectronLoading}
+                  onClick={() => handleElectronClick(q.url, q.quality)}
                   className={cn(
                     'flex items-center justify-center gap-2 px-4 py-3 border-[2px] border-border font-headline font-black uppercase text-xs sm:text-sm tracking-widest transition-all duration-150 active:scale-[0.98]',
                     downloaded === q.quality
@@ -405,10 +420,10 @@ function EpisodeItem({
                   {downloaded === q.quality ? (
                     <Check className="w-3.5 h-3.5 stroke-[3px]" />
                   ) : (
-                    <Download className="w-3.5 h-3.5 stroke-[3px]" />
+                    <MonitorDown className="w-3.5 h-3.5 stroke-[3px]" />
                   )}
                   {q.quality}
-                </a>
+                </button>
               ))}
             </div>
           )}
@@ -440,9 +455,8 @@ export function DownloadMenu({
   );
   const { isDesktopApp } = useDesktopApp();
 
-  // Only Server 2 (Balanced Server) OR Desktop App supports downloads
-  const isS2 = show.id.startsWith('s2:');
-  if (!isS2 && !isDesktopApp) return null;
+  // Desktop App Only feature
+  if (!isDesktopApp) return null;
 
   const isSeries = selectedDubType === ContentType.Series;
   const seasonNumber = selectedSeason?.seasonNumber ?? 1;
@@ -457,13 +471,11 @@ export function DownloadMenu({
         onClick={() => setIsOpen(true)}
         className={cn(
           'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border text-foreground transition-colors duration-200 font-headline font-black uppercase tracking-widest text-base md:text-lg h-auto',
-          isDesktopApp
-            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-            : 'bg-neo-yellow hover:bg-neo-yellow/80 text-black',
+          'bg-blue-500 hover:bg-blue-600 text-white',
         )}
       >
         <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-        {isDesktopApp ? 'NATIVE DOWNLOAD' : 'DOWNLOAD'}
+        NATIVE DOWNLOAD
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -475,7 +487,7 @@ export function DownloadMenu({
             <div className="flex flex-col gap-0.5 truncate pr-4 text-left">
               <DialogTitle className="text-foreground text-lg sm:text-xl font-headline font-black uppercase tracking-widest flex items-center gap-3 leading-none">
                 <Download className="w-5 h-5 sm:w-6 sm:h-6 text-foreground stroke-[3px]" />
-                {isDesktopApp ? 'OFFLINE SECURE DOWNLOAD' : 'DOWNLOAD'}
+                OFFLINE SECURE DOWNLOAD
               </DialogTitle>
               <DialogDescription className="sr-only">
                 Download links for {show.title}. Choose a language and quality,

@@ -320,12 +320,6 @@ const startElectronApp = async () => {
     });
   });
 
-  // Re-connect logic when offline screen hits "Try Again"
-  ipcMain.on('retry-connection', () => {
-    const win = AppWindow.getInstance();
-    if (win) win.loadURL('https://watch.rudrasahoo.live');
-  });
-
   // Trigger Actionable Native Desktop Notifications (e.g. for Party Invites or Chat)
   ipcMain.on('show-notification', (_event, payload) => {
     if (Notification.isSupported()) {

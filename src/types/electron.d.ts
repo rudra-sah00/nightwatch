@@ -12,6 +12,12 @@ export interface DownloadItem {
   status: 'downloading' | 'completed' | 'paused' | 'error' | 'cancelled';
   error?: string;
   localPlaylistPath?: string;
+  subtitleTracks?: {
+    label: string;
+    language: string;
+    url: string;
+    localPath?: string;
+  }[];
   createdAt: number;
 }
 
@@ -108,6 +114,7 @@ export interface ElectronAPI {
     title: string;
     m3u8Url: string;
     posterUrl?: string;
+    subtitleTracks?: { label: string; language: string; url: string }[];
   }) => void;
 
   /** Cancel an ongoing download */

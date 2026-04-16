@@ -21,7 +21,7 @@ function getDatabase() {
   }
   try {
     return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  } catch (e) {
+  } catch (_e) {
     return { items: [] };
   }
 }
@@ -110,12 +110,12 @@ function formatSpeed(bytesPerSec) {
   const k = 1024;
   const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
   const i = Math.floor(Math.log(bytesPerSec) / Math.log(k));
-  return parseFloat((bytesPerSec / k ** i).toFixed(1)) + ' ' + sizes[i];
+  return `${parseFloat((bytesPerSec / k ** i).toFixed(1))} ${sizes[i]}`;
 }
 
 async function startHlsDownload(
   eventSender,
-  { contentId, title, m3u8Url, posterUrl },
+  { contentId, title, m3u8Url, posterUrl, subtitleTracks },
 ) {
   const contentFolder = path.join(VAULT_PATH, contentId);
   if (!fs.existsSync(contentFolder))
@@ -142,6 +142,34 @@ async function startHlsDownload(
   // Ensure missing keys
   if (!item.downloadedBytes) item.downloadedBytes = 0;
 
+  // Process subtitles
+  if (subtitleTracks && Array.isArray(subtitleTracks)) {
+    const processedTracks = [];
+    for (let i = 0; i < subtitleTracks.length; i++) {
+      const track = subtitleTracks[i];
+      try {
+        const ext = track.url.includes('.srt') ? '.srt' : '.vtt';
+        const subName = `subtitle_${track.language.replace(/[^a-z0-9]/gi, '_') || i}${ext}`;
+        const subDest = path.join(contentFolder, subName);
+
+        if (!fs.existsSync(subDest)) {
+          const subText = await fetchText(track.url);
+          fs.writeFileSync(subDest, subText, 'utf8');
+        }
+
+        processedTracks.push({
+          label: track.label,
+          language: track.language,
+          url: track.url,
+          localPath: `offline-media://${contentId}/${subName}`,
+        });
+      } catch (err) {
+        console.error(`Failed to download subtitle ${track.language}`, err);
+      }
+    }
+    item.subtitleTracks = processedTracks;
+  }
+
   saveDatabase(db);
   if (eventSender) eventSender.send('download-progress', item);
 
@@ -160,7 +188,64 @@ async function startHlsDownload(
       }
     }
 
-    // 2. Fetch Master Playlist
+    // 2. Determine if HLS or MP4
+    const isMp4 = m3u8Url.includes('.mp4') || m3u8Url.includes('/subject/play');
+
+    if (isMp4) {
+      // MP4 DOWNLOAD LOGIC
+      item.segmentsTotal = 1;
+      saveDatabase(db);
+      if (eventSender) eventSender.send('download-progress', item);
+
+      const localName = 'movie.mp4';
+      const destPath = path.join(contentFolder, localName);
+
+      let lastTime = Date.now();
+      let bytesSinceLastTick = 0;
+
+      if (!fs.existsSync(destPath) || fs.statSync(destPath).size === 0) {
+        await downloadFile(m3u8Url, destPath, (bytes) => {
+          item.downloadedBytes += bytes;
+          bytesSinceLastTick += bytes;
+
+          const now = Date.now();
+          if (now - lastTime >= 1000) {
+            item.speed = formatSpeed(bytesSinceLastTick);
+            item.progress = 50; // Just an active indicator since total size might be unknown
+            saveDatabase(db);
+            if (eventSender) eventSender.send('download-progress', item);
+            lastTime = now;
+            bytesSinceLastTick = 0;
+          }
+        });
+      } else {
+        const stat = fs.statSync(destPath);
+        item.downloadedBytes = stat.size;
+      }
+
+      item.segmentsDownloaded = 1;
+
+      if (item.status === 'CANCELLED') {
+        const currentDb = getDatabase();
+        currentDb.items = currentDb.items.filter(
+          (i) => i.contentId !== contentId,
+        );
+        saveDatabase(currentDb);
+        return;
+      }
+
+      item.status = 'COMPLETED';
+      item.progress = 100;
+      item.localPlaylistPath = `offline-media://${contentId}/${localName}`;
+      item.speed = '';
+      delete item.segmentsDownloadedSet;
+      saveDatabase(db);
+      if (eventSender) eventSender.send('download-progress', item);
+
+      return;
+    }
+
+    // HLS DOWNLOAD LOGIC
     const masterText = await fetchText(m3u8Url);
     let targetPlaylistUrl = m3u8Url;
 
@@ -172,7 +257,7 @@ async function startHlsDownload(
       const line = lines[i].trim();
       if (line.startsWith('#EXT-X-STREAM-INF')) {
         const bwMatch = line.match(/BANDWIDTH=(\d+)/);
-        if (bwMatch) currentBandwidth = parseInt(bwMatch[1]);
+        if (bwMatch) currentBandwidth = parseInt(bwMatch[1], 10);
       } else if (line && !line.startsWith('#')) {
         playlists.push({
           url: resolveUrl(m3u8Url, line),
@@ -333,7 +418,7 @@ function setupDownloadManager() {
     startHlsDownload(event.sender, args).catch(console.error);
   });
 
-  ipcMain.on('cancel-download', (event, contentId) => {
+  ipcMain.on('cancel-download', (_event, contentId) => {
     const db = getDatabase();
     const item = db.items.find((i) => i.contentId === contentId);
     if (item) {
@@ -353,7 +438,7 @@ function setupDownloadManager() {
         urlObj.hostname + urlObj.pathname,
       );
       const absolutePath = path.join(VAULT_PATH, relativePath);
-      return net.fetch('file://' + absolutePath);
+      return net.fetch(`file://${absolutePath}`);
     });
   } else {
     protocol.registerFileProtocol('offline-media', (request, callback) => {

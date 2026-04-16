@@ -10,6 +10,16 @@ import {
 import { apiFetch } from '@/lib/fetch';
 
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
+vi.mock('@/hooks/use-desktop-app', () => ({
+  useDesktopApp: () => ({
+    isDesktopApp: true,
+    openInDesktopApp: vi.fn(),
+    copyToClipboard: vi.fn(),
+    getDesktopTopPaddingClass: vi.fn(),
+    dragStyle: {},
+    noDragStyle: {},
+  }),
+}));
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -76,16 +86,18 @@ describe('DownloadMenu', () => {
   });
 
   describe('visibility', () => {
-    it('renders nothing for non-S2 content', () => {
-      const { container } = render(<DownloadMenu show={nonS2Show} />);
-      expect(container.firstChild).toBeNull();
+    it('renders NATIVE DOWNLOAD for all content', () => {
+      render(<DownloadMenu show={nonS2Show} />);
+      expect(
+        screen.getByRole('button', { name: /native download/i }),
+      ).toBeInTheDocument();
     });
 
     it('renders a Download button for S2 movie content', () => {
       vi.mocked(apiFetch).mockResolvedValue({ success: true, qualities: [] });
       render(<DownloadMenu show={s2MovieShow} />);
       expect(
-        screen.getByRole('button', { name: /download/i }),
+        screen.getByRole('button', { name: /native download/i }),
       ).toBeInTheDocument();
     });
 
@@ -98,7 +110,7 @@ describe('DownloadMenu', () => {
         />,
       );
       expect(
-        screen.getByRole('button', { name: /download/i }),
+        screen.getByRole('button', { name: /native download/i }),
       ).toBeInTheDocument();
     });
   });
@@ -107,14 +119,14 @@ describe('DownloadMenu', () => {
     it('opens dialog and calls API to fetch qualities for movie', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(<DownloadMenu show={s2MovieShow} />);
       await userEvent.click(screen.getByRole('button', { name: /download/i }));
 
       expect(apiFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/video/download-links'),
+        expect.stringContaining('/api/v1/download'),
       );
 
       await waitFor(() => {
@@ -127,7 +139,7 @@ describe('DownloadMenu', () => {
     it('quality anchors have download and no-referrer attributes', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(<DownloadMenu show={s2MovieShow} />);
@@ -137,55 +149,82 @@ describe('DownloadMenu', () => {
         screen.getByText('1080p');
       });
 
-      const anchors = screen.getAllByRole('link');
+      const anchors = screen
+        .getAllByRole('button')
+        .filter(
+          (b) =>
+            b.textContent !== 'NATIVE DOWNLOAD' &&
+            b.textContent !== 'DOWNLOAD' &&
+            b.textContent !== 'OFFLINE SECURE DOWNLOAD',
+        );
       for (const anchor of anchors) {
-        expect(anchor).toHaveAttribute('download');
-        expect(anchor).toHaveAttribute('referrerpolicy', 'no-referrer');
+        expect((anchor as HTMLButtonElement).type).toBe('button');
       }
     });
 
-    it('quality URLs include ?dl=1 from CF Worker', async () => {
+    it('quality URLs trigger electron download with URL containing ?dl=1 from CF Worker', async () => {
+      const mockElectronStart = vi.fn();
+      Object.defineProperty(window, 'electronAPI', {
+        value: { startDownload: mockElectronStart },
+        writable: true,
+      });
+
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(<DownloadMenu show={s2MovieShow} />);
-      await userEvent.click(screen.getByRole('button', { name: /download/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /native download/i }),
+      );
 
       await waitFor(() => screen.getByText('1080p'));
 
       const anchor1080 = screen
-        .getAllByRole('link')
+        .getAllByRole('button')
         .find((a) => a.textContent?.includes('1080p'));
-      expect(anchor1080).toHaveAttribute(
-        'href',
-        expect.stringContaining('?dl=1'),
-      );
+
+      expect(anchor1080).toBeDefined();
+      if (anchor1080) {
+        await userEvent.click(anchor1080);
+      }
+
+      await waitFor(() => {
+        expect(mockElectronStart).toHaveBeenCalledWith(
+          expect.objectContaining({
+            m3u8Url: expect.stringContaining('?dl=1'),
+          }),
+        );
+      });
     });
 
-    it('shows "No download links available" when API returns empty qualities', async () => {
-      vi.mocked(apiFetch).mockResolvedValue({ success: true, qualities: [] });
+    it('shows "No valid download formats found" when API returns empty qualities', async () => {
+      vi.mocked(apiFetch).mockResolvedValue({ success: true, data: [] });
 
       render(<DownloadMenu show={s2MovieShow} />);
-      await userEvent.click(screen.getByRole('button', { name: /download/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /native download/i }),
+      );
 
       await waitFor(() => {
         expect(
-          screen.getByText(/no download links available/i),
+          screen.getByText(/no valid download formats found/i),
         ).toBeInTheDocument();
       });
     });
 
-    it('shows "No download links available" when API call fails', async () => {
+    it('shows "No valid download formats found" when API call fails', async () => {
       vi.mocked(apiFetch).mockRejectedValue(new Error('Network error'));
 
       render(<DownloadMenu show={s2MovieShow} />);
-      await userEvent.click(screen.getByRole('button', { name: /download/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /native download/i }),
+      );
 
       await waitFor(() => {
         expect(
-          screen.getByText(/no download links available/i),
+          screen.getByText(/no valid download formats found/i),
         ).toBeInTheDocument();
       });
     });
@@ -217,7 +256,7 @@ describe('DownloadMenu', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows "No episodes found" when season has no episodes', async () => {
+    it('shows "No episodes available" when season has no episodes', async () => {
       render(
         <DownloadMenu
           show={s2SeriesShow}
@@ -229,17 +268,19 @@ describe('DownloadMenu', () => {
           episodes={mockEpisodes}
         />,
       );
-      await userEvent.click(screen.getByRole('button', { name: /download/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /native download/i }),
+      );
 
       await waitFor(() => {
-        expect(screen.getByText(/no episodes found/i)).toBeInTheDocument();
+        expect(screen.getByText(/no episodes available/i)).toBeInTheDocument();
       });
     });
 
     it('expands episode row and fetches qualities on click', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(
@@ -258,7 +299,7 @@ describe('DownloadMenu', () => {
       await userEvent.click(screen.getByText('Pilot'));
 
       expect(apiFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/video/download-links'),
+        expect.stringContaining('/api/v1/download'),
       );
 
       await waitFor(() => {
@@ -270,7 +311,7 @@ describe('DownloadMenu', () => {
     it('episode quality anchors have download and no-referrer attributes', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(
@@ -286,17 +327,23 @@ describe('DownloadMenu', () => {
 
       await waitFor(() => screen.getByText('1080p'));
 
-      const anchors = screen.getAllByRole('link');
+      const anchors = screen
+        .getAllByRole('button')
+        .filter(
+          (b) =>
+            b.textContent !== 'NATIVE DOWNLOAD' &&
+            b.textContent !== 'DOWNLOAD' &&
+            b.textContent !== 'OFFLINE SECURE DOWNLOAD',
+        );
       for (const anchor of anchors) {
-        expect(anchor).toHaveAttribute('download');
-        expect(anchor).toHaveAttribute('referrerpolicy', 'no-referrer');
+        expect((anchor as HTMLButtonElement).type).toBe('button');
       }
     });
 
     it('includes season and episode params in API call for episode', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
-        qualities: mockQualities,
+        data: mockQualities,
       });
 
       render(
