@@ -65,7 +65,11 @@ export function useDesktopApp() {
               'We could not open the Watch Rudra Desktop app. Is it installed?',
             action: {
               label: 'Download App',
-              onClick: () => window.open('/docs-site/DESKTOP', '_blank'),
+              onClick: () =>
+                window.open(
+                  'https://github.com/rudra-sah00/watch-rudra/releases',
+                  '_blank',
+                ),
             },
           });
         }

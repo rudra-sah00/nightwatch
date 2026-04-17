@@ -243,7 +243,10 @@ export default function LiveMatchPlayerPage() {
 
         {isDesktopError ? (
           <div className="flex gap-4">
-            <Link href="/docs-site/DESKTOP">
+            <Link
+              href="https://github.com/rudra-sah00/watch-rudra/releases"
+              target="_blank"
+            >
               <Button
                 variant="default"
                 className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors bg-blue-600 hover:bg-blue-700 text-white"
