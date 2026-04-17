@@ -1,18 +1,23 @@
 const { ipcMain, BrowserWindow, net } = require('electron');
 const http = require('node:http');
-const _https = require('node:https');
 const url = require('node:url');
 
-let extractionWindow = null;
+let extractionWindow = null; // The "Winning" window
 let proxyServer = null;
 let proxyPort = 0;
 let streamCookies = '';
 let streamUrl = '';
-let targetUrl = '';
-let _navigateReferer = 'https://funsday.cfd/'; // Updated dynamically on each bridge start
-let _channelIdState = null;
-let _lastEventSender = null; // Stored for proxy crash recovery
 const capturedKeys = new Map();
+let _lastEventSender = null;
+
+const RACER_PATHS = [
+  '/stream/',
+  '/cast/',
+  '/watch/',
+  '/casting/',
+  '/player/',
+  '/plus/',
+];
 
 function getCookieString() {
   return streamCookies || '';
@@ -188,7 +193,7 @@ function startProxyServer(_eventSender) {
     proxyPort = proxyServer.address().port;
   });
 
-  // Auto-restart the proxy if it crashes (e.g. EADDRINUSE or uncaught ECONNRESET)
+  // Auto-restart the proxy if it crashes
   proxyServer.on('error', (err) => {
     console.error(
       '[live-bridge] Proxy server error, restarting...',
@@ -202,153 +207,177 @@ function startProxyServer(_eventSender) {
   return proxyServer;
 }
 
+/**
+ * Global cleanup for all racer windows
+ */
+let racerPool = [];
+function cleanupRacers(exceptWindowId = null) {
+  racerPool.forEach((win) => {
+    if (!win.isDestroyed() && win.id !== exceptWindowId) {
+      win.close();
+    }
+  });
+  racerPool = racerPool.filter((win) => !win.isDestroyed());
+}
+
 function setupLiveBridge() {
-  ipcMain.on('start-live-bridge', async (event, { url, channelId }) => {
-    _lastEventSender = event.sender;
+  ipcMain.on(
+    'start-live-bridge',
+    async (event, { url: originalUrl, channelId }) => {
+      _lastEventSender = event.sender;
 
-    if (extractionWindow) {
-      extractionWindow.close();
-    }
-
-    // Clear previous state
-    streamUrl = '';
-    targetUrl = url;
-    _channelIdState = channelId;
-    capturedKeys.clear();
-    streamCookies = '';
-
-    const navigateUrl = targetUrl.replace(
-      /^https?:\/\/[^/]*daddylive[^/]*/i,
-      'https://dlstreams.top',
-    );
-
-    // Derive Referer dynamically from the channel page being navigated to
-    try {
-      _navigateReferer = `${new URL(navigateUrl).origin}/`;
-    } catch {
-      _navigateReferer = 'https://funsday.cfd/';
-    }
-
-    // Ensure proxy server is running
-    startProxyServer(event.sender);
-
-    extractionWindow = new BrowserWindow({
-      width: 1280,
-      height: 720,
-      show: false,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        partition: 'persist:live-bridge',
-        autoplayPolicy: 'document-user-activation-required',
-        backgroundThrottling: false,
-      },
-    });
-
-    const autoCloseTimeout = setTimeout(() => {
+      // Cleanup previous attempts
+      cleanupRacers();
       if (extractionWindow && !extractionWindow.isDestroyed()) {
         extractionWindow.close();
       }
-    }, 45000);
+      extractionWindow = null;
 
-    let hasResolved = false;
+      // State reset
+      streamUrl = '';
+      capturedKeys.clear();
+      streamCookies = '';
 
-    extractionWindow.webContents.session.webRequest.onBeforeRequest(
-      { urls: ['*://*/*'] },
-      (details, callback) => {
-        const foundUrl = details.url;
-        const type = details.resourceType || 'unknown';
+      // ID extraction
+      const match = originalUrl.match(/stream-(\d+)\.php/);
+      const streamId = match ? match[1] : '51';
 
-        if (
-          ['image', 'media', 'font', 'image/webp', 'image/jpeg'].includes(
-            type,
-          ) ||
-          (type === 'stylesheet' && !foundUrl.includes('mono.css'))
-        ) {
-          return callback({ cancel: true });
-        }
+      console.log(
+        `[live-bridge] Starting Parallel Racer for Stream ID: ${streamId}`,
+      );
 
-        if (foundUrl.includes('ad') || foundUrl.includes('track')) {
-          return callback({ cancel: false });
-        }
+      // Ensure proxy server is running
+      startProxyServer(event.sender);
 
-        if (foundUrl.includes('mono.css')) {
-          streamUrl = foundUrl; // Set state for proxy
+      let hasResolved = false;
 
-          clearTimeout(autoCloseTimeout);
+      // Create a racer for each path
+      RACER_PATHS.forEach((path, index) => {
+        setTimeout(() => {
+          if (hasResolved) return;
 
-          extractionWindow.webContents.session.cookies
-            .get({ url: foundUrl })
-            .then(async (cookies) => {
-              if (streamUrl === url || hasResolved) return; // Prevent multiple emissions for same URL
+          const racerUrl = `https://dlstreams.top${path}stream-${streamId}.php`;
+          const partition = `persist:racer-${path.replace(/\//g, '')}-${streamId}`;
 
-              hasResolved = true;
-              streamCookies = cookies
-                .map((c) => `${c.name}=${c.value}`)
-                .join('; ');
+          console.log(`[live-bridge] [Racer ${index}] Spawning: ${racerUrl}`);
 
-              // Instead of returning the raw HLS URL, return the local proxy URL!!!
-              const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?t=${Date.now()}`;
+          const win = new BrowserWindow({
+            width: 1280,
+            height: 720,
+            show: false,
+            webPreferences: {
+              nodeIntegration: false,
+              contextIsolation: true,
+              partition,
+              autoplayPolicy: 'document-user-activation-required',
+              backgroundThrottling: false,
+            },
+          });
 
-              event.sender.send('live-bridge-resolved', {
-                originalUrl: url,
-                channelId,
-                hlsUrl: proxyM3u8,
-                headers: {
-                  Cookie: streamCookies,
-                  Referer: navigateUrl,
-                },
-              });
+          racerPool.push(win);
 
-              // Leave extractionWindow open so the proxy can use its session cache implicitly if needed
-              setTimeout(() => {
-                if (extractionWindow && !extractionWindow.isDestroyed()) {
-                  extractionWindow.webContents.setAudioMuted(true);
-                  try {
-                    const pauseCode = `
-                      setInterval(() => {
-                        document.querySelectorAll('video, audio').forEach(m => {
-                          m.pause();
-                          m.removeAttribute('src');
-                          m.load();
-                        });
-                      }, 2000);
-                    `;
-                    extractionWindow.webContents.mainFrame.framesInSubtree.forEach(
-                      (frame) => {
-                        frame.executeJavaScript(pauseCode).catch(() => {});
+          // Network Interceptor
+          win.webContents.session.webRequest.onBeforeRequest(
+            { urls: ['*://*/*'] },
+            (details, callback) => {
+              const foundUrl = details.url;
+              const type = details.resourceType || 'unknown';
+
+              // Cancel non-essential traffic
+              if (
+                ['image', 'media', 'font', 'image/webp', 'image/jpeg'].includes(
+                  type,
+                ) ||
+                (type === 'stylesheet' && !foundUrl.includes('mono.css'))
+              ) {
+                return callback({ cancel: true });
+              }
+
+              if (foundUrl.includes('mono.css')) {
+                if (hasResolved) return callback({ cancel: true });
+
+                console.log(
+                  `[live-bridge] [WINNER] ${path} resolved the stream!`,
+                );
+                hasResolved = true;
+                streamUrl = foundUrl;
+                extractionWindow = win;
+
+                // Immediately kill the losers
+                cleanupRacers(win.id);
+
+                // Capture Cookies and notify UI
+                win.webContents.session.cookies
+                  .get({ url: foundUrl })
+                  .then((cookies) => {
+                    streamCookies = cookies
+                      .map((c) => `${c.name}=${c.value}`)
+                      .join('; ');
+
+                    const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?t=${Date.now()}`;
+
+                    event.sender.send('live-bridge-resolved', {
+                      originalUrl,
+                      channelId,
+                      hlsUrl: proxyM3u8,
+                      headers: {
+                        Cookie: streamCookies,
+                        Referer: racerUrl,
                       },
-                    );
-                  } catch (_e) {}
-                  extractionWindow.minimize();
-                }
-              }, 1000);
-            })
-            .catch(() => {});
+                    });
+
+                    // Optimize winner (mute/pause/minimize)
+                    setTimeout(() => {
+                      if (win && !win.isDestroyed()) {
+                        win.webContents.setAudioMuted(true);
+                        try {
+                          const pauseCode = `
+                          setInterval(() => {
+                            document.querySelectorAll('video, audio').forEach(m => {
+                              m.pause();
+                              m.removeAttribute('src');
+                              m.load();
+                            });
+                          }, 2000);
+                        `;
+                          win.webContents.mainFrame.framesInSubtree.forEach(
+                            (frame) => {
+                              frame
+                                .executeJavaScript(pauseCode)
+                                .catch(() => {});
+                            },
+                          );
+                        } catch (_e) {}
+                        win.minimize();
+                      }
+                    }, 1000);
+                  });
+              }
+
+              callback({ cancel: false });
+            },
+          );
+
+          win.loadURL(racerUrl).catch(() => {});
+        }, index * 250); // Stagger by 250ms
+      });
+
+      // Safety timeout for the entire race
+      setTimeout(() => {
+        if (!hasResolved) {
+          console.warn('[live-bridge] Race timed out. Cleaning up pool.');
+          cleanupRacers();
         }
-
-        callback({ cancel: false });
-      },
-    );
-
-    try {
-      await extractionWindow.webContents.session.clearCache();
-      if (extractionWindow && !extractionWindow.isDestroyed()) {
-        await extractionWindow.loadURL(navigateUrl);
-      }
-    } catch (_err) {}
-
-    const currentWindow = extractionWindow;
-    currentWindow.on('closed', () => {
-      if (extractionWindow === currentWindow) {
-        extractionWindow = null;
-      }
-    });
-  });
+      }, 60000);
+    },
+  );
 
   ipcMain.on('stop-live-bridge', () => {
-    if (extractionWindow) {
+    console.log('[live-bridge] Stopping all extraction processes.');
+    cleanupRacers();
+    if (extractionWindow && !extractionWindow.isDestroyed()) {
       extractionWindow.close();
+      extractionWindow = null;
     }
   });
 }
