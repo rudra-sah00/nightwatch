@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.25.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.24.1...v1.25.0) (2026-04-17)
+
+
+### Features
+
+* add global download quality setting, fix electron IPC typings, and resolve download errors ([32af034](https://github.com/rudra-sah00/watch-rudra/commit/32af03402d91aebfb43f363565a8e3f65a18ac40))
+
+
+### Bug Fixes
+
+* allow S1 and S3 to show download menu and correctly parse server prefix ([45b6d74](https://github.com/rudra-sah00/watch-rudra/commit/45b6d74122d9d144c278b49611ecbfa6f6c4319c))
+* **downloads:** allow replacing downloads with different quality, fix poster saving for MP4 downloads ([818d439](https://github.com/rudra-sah00/watch-rudra/commit/818d43934cccd981ef4e5c053f5af2ae0b065458))
+* **electron:** bypass Prod 403 Forbidden with net.fetch ([a69b48f](https://github.com/rudra-sah00/watch-rudra/commit/a69b48f2303ad4c99cbe9f99f7def766bbc4b1d9))
+* **live:** migrate s1 router paths to live-server1 prefix to prevent cloudflare 403 blocks ([f106a37](https://github.com/rudra-sah00/watch-rudra/commit/f106a37c5c41aaf55657f87bf21b7ba2c8ec896c))
+* **ui:** flatten offline vault ui and fix navbar rendering ([a7dd17f](https://github.com/rudra-sah00/watch-rudra/commit/a7dd17fab26f8dca406853ff5bd2f8357e792bc5))
+* **ui:** match Offline Vault hero and Downloads nav styling exactly ([998655d](https://github.com/rudra-sah00/watch-rudra/commit/998655d9e7565a0f2e4da4c627ac937e3d0ba6eb))
+* **ui:** update profile, downloads, whats-new design and disable prod devtools ([dad6146](https://github.com/rudra-sah00/watch-rudra/commit/dad6146e210b941bd69d49076cb582e3d6dd69c8))
+
 ## [1.24.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.24.0...v1.24.1) (2026-04-16)
 
 
