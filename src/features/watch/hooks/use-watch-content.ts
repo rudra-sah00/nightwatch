@@ -9,7 +9,6 @@ import {
   useS2AudioTracks,
 } from '@/features/watch/player/hooks/useS2AudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { WS_EVENTS } from '@/lib/constants';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
@@ -27,7 +26,6 @@ export function useWatchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { socket } = useSocket();
-  const { isDesktopApp } = useDesktopApp();
 
   const movieId = decodeURIComponent(params.id as string);
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
@@ -117,19 +115,24 @@ export function useWatchContent() {
       try {
         const decodedTitle = decodeURIComponent(title);
 
-        if (isDesktopApp && window.electronAPI) {
+        if (typeof window !== 'undefined' && window.electronAPI) {
           const fetchedDownloads = await window.electronAPI.getDownloads();
-          let offlineContentId = overrideMovieId || movieId;
+          let offlineContentId1 = overrideMovieId || movieId;
+          let offlineContentId2 = offlineContentId1;
 
           if (type === 'series' && season && episode) {
             const currentSeriesId = overrideMovieId || seriesId || movieId;
             if (currentSeriesId) {
-              offlineContentId = `${currentSeriesId}_S${season}E${episode}`;
+              offlineContentId1 = `${currentSeriesId}_S${season}E${episode}`;
+              offlineContentId2 = `${currentSeriesId}-ep${episode}`;
             }
           }
 
           const downloadedItem = fetchedDownloads.find(
-            (d) => d.contentId === offlineContentId && d.status === 'COMPLETED',
+            (d) =>
+              (d.contentId === offlineContentId1 ||
+                d.contentId === offlineContentId2) &&
+              d.status === 'COMPLETED',
           );
 
           if (downloadedItem?.localPlaylistPath) {
@@ -229,17 +232,7 @@ export function useWatchContent() {
         }, 2000);
       }
     },
-    [
-      title,
-      type,
-      season,
-      episode,
-      movieId,
-      seriesId,
-      server,
-      applyResponse,
-      isDesktopApp,
-    ],
+    [title, type, season, episode, movieId, seriesId, server, applyResponse],
   );
 
   const handleBeforeS2Discovery = useCallback(() => {

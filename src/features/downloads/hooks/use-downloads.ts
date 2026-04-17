@@ -54,10 +54,38 @@ export function useDownloads() {
     }
   }, []);
 
+  const pauseDownload = useCallback((contentId: string) => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      window.electronAPI.pauseDownload(contentId);
+
+      // Optimistically pause it instantly from the UI
+      setDownloads((prev) =>
+        prev.map((i) =>
+          i.contentId === contentId ? { ...i, status: 'PAUSED' } : i,
+        ),
+      );
+    }
+  }, []);
+
+  const resumeDownload = useCallback((contentId: string) => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      window.electronAPI.resumeDownload(contentId);
+
+      // Optimistically resume it instantly from the UI
+      setDownloads((prev) =>
+        prev.map((i) =>
+          i.contentId === contentId ? { ...i, status: 'QUEUED' } : i,
+        ),
+      );
+    }
+  }, []);
+
   return {
     downloads,
     isDesktopApp,
     isMounted,
     cancelDownload,
+    pauseDownload,
+    resumeDownload,
   };
 }

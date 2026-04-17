@@ -8,8 +8,8 @@ const {
   finalizeCancel,
   VAULT_PATH,
   store,
-} = require('./state');
-const { downloadFile, formatSpeed } = require('./network');
+} = require('../state');
+const { downloadFile, formatSpeed } = require('../network');
 
 async function startMp4Download(
   eventSender,
@@ -53,7 +53,16 @@ async function startMp4Download(
   let bytesSinceLastTick = 0;
 
   try {
-    if (posterUrl && !item.posterUrl) {
+    if (
+      posterUrl &&
+      (!posterUrl.startsWith('offline-media://') ||
+        !fs.existsSync(
+          path.join(
+            contentFolder,
+            `poster${path.extname(new URL(posterUrl.replace('offline-media://local/', 'http://localhost/')).pathname) || '.jpg'}`,
+          ),
+        ))
+    ) {
       try {
         const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
         const posterDest = path.join(contentFolder, `poster${ext}`);
@@ -63,6 +72,11 @@ async function startMp4Download(
           );
         }
         item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
+        if (item.showData) {
+          item.showData.posterUrl = item.posterUrl;
+          if (item.showData.posterHdUrl)
+            item.showData.posterHdUrl = item.posterUrl;
+        }
       } catch (err) {
         console.error(
           '[startMp4Download] Error processing poster URL:',
@@ -71,7 +85,20 @@ async function startMp4Download(
       }
     }
 
-    if (!fs.existsSync(destPath) || fs.statSync(destPath).size === 0) {
+    let startOffset = 0;
+    let needsFullDownload = true;
+
+    if (fs.existsSync(destPath)) {
+      const stat = fs.statSync(destPath);
+      if (item.progress === 100 || item.status === 'COMPLETED') {
+        item.downloadedBytes = stat.size;
+        needsFullDownload = false;
+      } else if (stat.size > 0) {
+        startOffset = stat.size;
+      }
+    }
+
+    if (needsFullDownload) {
       await downloadFile(
         url,
         destPath,
@@ -81,7 +108,7 @@ async function startMp4Download(
           const now = Date.now();
           if (now - lastTime >= 1000) {
             item.speed = formatSpeed(bytesSinceLastTick);
-            item.progress = 50;
+            item.progress = 50; // Just an arbitrary display marker since we don't have total size here
             syncDbState(item);
             sendSafeProgress(eventSender, item);
             lastTime = now;
@@ -90,13 +117,16 @@ async function startMp4Download(
         },
         item,
         store,
+        startOffset,
       );
-    } else {
-      const stat = fs.statSync(destPath);
-      item.downloadedBytes = stat.size;
     }
 
     if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+    if (item.status === 'PAUSED') {
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+      return;
+    }
 
     item.segmentsDownloaded = 1;
     item.status = 'COMPLETED';
@@ -107,7 +137,7 @@ async function startMp4Download(
     sendSafeProgress(eventSender, item);
   } catch (error) {
     console.error('[startMp4Download ERROR]', error);
-    if (item.status !== 'CANCELLED') {
+    if (item.status !== 'CANCELLED' && item.status !== 'PAUSED') {
       item.status = 'ERROR';
       syncDbState(item);
       sendSafeProgress(eventSender, item);

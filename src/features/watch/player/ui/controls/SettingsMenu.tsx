@@ -41,22 +41,24 @@ export function SettingsMenu({
   const renderMainMenu = () => (
     <div className="flex flex-col">
       {/* Quality */}
-      <button
-        type="button"
-        onClick={() => setCurrentScreen('quality')}
-        className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border text-foreground"
-      >
-        <div className="flex items-center gap-3">
-          <Gauge className="w-5 h-5 stroke-[3px]" />
-          <span className="font-black font-headline uppercase tracking-widest text-sm">
-            Quality
-          </span>
-        </div>
-        <div className="flex items-center gap-2 font-bold font-headline uppercase tracking-widest text-xs">
-          <span>{currentQuality}</span>
-          <ChevronRight className="w-4 h-4 stroke-[3px]" />
-        </div>
-      </button>
+      {!qualities || qualities.length === 0 ? null : (
+        <button
+          type="button"
+          onClick={() => setCurrentScreen('quality')}
+          className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border text-foreground"
+        >
+          <div className="flex items-center gap-3">
+            <Gauge className="w-5 h-5 stroke-[3px]" />
+            <span className="font-black font-headline uppercase tracking-widest text-sm">
+              Quality
+            </span>
+          </div>
+          <div className="flex items-center gap-2 font-bold font-headline uppercase tracking-widest text-xs">
+            <span>{currentQuality}</span>
+            <ChevronRight className="w-4 h-4 stroke-[3px]" />
+          </div>
+        </button>
+      )}
 
       {/* Playback Speed */}
       <button

@@ -59,7 +59,7 @@ export default function LoginPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      console.warn('Failed to write to clipboard');
+      // Failed to write to clipboard
     }
   };
 

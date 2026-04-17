@@ -19,6 +19,7 @@ export interface DownloadItem {
     | 'FAILED'
     | 'CANCELLED';
   error?: string;
+  showData?: unknown;
   localPlaylistPath?: string;
   subtitleTracks?: {
     label: string;
@@ -129,6 +130,10 @@ export interface ElectronAPI {
 
   /** Cancel an ongoing download */
   cancelDownload: (contentId: string) => void;
+  /** Pause an ongoing download */
+  pauseDownload: (contentId: string) => void;
+  /** Resume a paused download */
+  resumeDownload: (contentId: string) => void;
   getDownloads: () => Promise<DownloadItem[]>;
 
   /** Subscriber to listen for download progression updates payload */

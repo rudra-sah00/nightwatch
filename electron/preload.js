@@ -87,6 +87,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // --- OFFLINE HLS DOWNLOADER ---
   startDownload: (config) => ipcRenderer.send('start-download', config),
   cancelDownload: (contentId) => ipcRenderer.send('cancel-download', contentId),
+  pauseDownload: (contentId) => ipcRenderer.send('pause-download', contentId),
+  resumeDownload: (contentId) => ipcRenderer.send('resume-download', contentId),
   getDownloads: () => ipcRenderer.invoke('get-downloads'),
   onDownloadProgress: (callback) => {
     const sub = (_event, state) => callback(state);

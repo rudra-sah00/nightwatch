@@ -121,7 +121,8 @@ export function extractTokenFromUrl(
  *   fetch without an additional proxy hop.
  */
 export function wrapInProxy(url: string, token: string): string {
-  if (!url || url.startsWith('data:')) return url;
+  if (!url || url.startsWith('data:') || url.startsWith('offline-media://'))
+    return url;
   if (url.includes('/api/stream/cdn')) return url;
   // Absolute URLs are already in their final form (Worker URL, absolute CDN
   // proxy URL, or a direct-CDN URL that needs no proxying).

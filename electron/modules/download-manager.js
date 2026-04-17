@@ -1,5 +1,6 @@
-const { protocol, ipcMain, net } = require('electron');
+const { protocol, ipcMain } = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
 const {
   VAULT_PATH,
   store,
@@ -10,22 +11,33 @@ const {
   finalizeCancel,
   saveDatabase,
 } = require('./downloads/state');
-const { startMp4Download } = require('./downloads/mp4');
-const { startHlsDownload } = require('./downloads/hls');
+const { downloadS1 } = require('./downloads/providers/s1');
+const { downloadS2 } = require('./downloads/providers/s2');
+const { downloadS3 } = require('./downloads/providers/s3');
 
 let currentActiveCount = 0;
 
 async function startDownloadTask(eventSender, args) {
-  const { m3u8Url } = args;
-  const isMp4 =
-    m3u8Url.includes('.mp4') ||
-    m3u8Url.includes('/subject/play') ||
-    m3u8Url.includes('?dl=1');
+  const { contentId } = args;
+  const prefix = contentId.split(':')[0];
 
-  if (isMp4) {
-    return startMp4Download(eventSender, { ...args, url: m3u8Url });
+  if (prefix === 's1') {
+    return downloadS1(eventSender, args);
+  } else if (prefix === 's2') {
+    return downloadS2(eventSender, args);
+  } else if (prefix === 's3') {
+    return downloadS3(eventSender, args);
   } else {
-    return startHlsDownload(eventSender, args);
+    // Fallback if not prefixed
+    const { startMp4Download } = require('./downloads/processors/mp4');
+    const { startHlsDownload } = require('./downloads/processors/hls');
+    const isMp4 =
+      args.m3u8Url.includes('.mp4') ||
+      args.m3u8Url.includes('/subject/play') ||
+      args.m3u8Url.includes('?dl=1');
+    if (isMp4)
+      return startMp4Download(eventSender, { ...args, url: args.m3u8Url });
+    else return startHlsDownload(eventSender, args);
   }
 }
 
@@ -102,6 +114,33 @@ function setupDownloadManager() {
     }
     finalizeCancel({ status: 'CANCELLED' }, contentId);
   });
+  ipcMain.on('pause-download', (_event, contentId) => {
+    if (activeDownloadsMap.has(contentId)) {
+      const activeItem = activeDownloadsMap.get(contentId);
+      activeItem.status = 'PAUSED';
+      if (activeItem.reqs && Array.isArray(activeItem.reqs)) {
+        activeItem.reqs.forEach((req) => {
+          req?.destroy();
+        });
+      }
+      activeItem.speed = '';
+      require('./downloads/state').syncDbState(activeItem);
+      require('./downloads/state').sendSafeProgress(_event.sender, activeItem);
+    }
+  });
+
+  ipcMain.on('resume-download', (event, contentId) => {
+    const db = require('./downloads/state').getDatabase();
+    const item = db.items.find((i) => i.contentId === contentId);
+    if (item && (item.status === 'PAUSED' || item.status === 'ERROR')) {
+      // Re-queue the download
+      downloadQueue.push({
+        eventSender: event.sender,
+        contentId: item.contentId,
+      });
+      processQueue();
+    }
+  });
 
   ipcMain.handle('get-downloads', async () => {
     return getDatabase().items;
@@ -121,7 +160,66 @@ function setupDownloadManager() {
           request.url.replace(/^offline-media:\/\//, ''),
         );
       }
-      return net.fetch(`file://${path.join(VAULT_PATH, relativePath)}`);
+      const _url = require('node:url');
+      const finalPath = path.join(VAULT_PATH, relativePath);
+      try {
+        const stat = fs.statSync(finalPath);
+        const range = request.headers.get('range');
+        const size = stat.size;
+
+        const ext = require('node:path').extname(finalPath).toLowerCase();
+        let contentType = 'application/octet-stream';
+        if (ext === '.mp4') contentType = 'video/mp4';
+        else if (ext === '.m3u8') contentType = 'application/x-mpegURL';
+        else if (ext === '.ts') contentType = 'video/MP2T';
+        else if (ext === '.vtt') contentType = 'text/vtt';
+        else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+        else if (ext === '.png') contentType = 'image/png';
+
+        const { XorStream } = require('./downloads/cipher');
+
+        if (range) {
+          const parts = range.replace(/bytes=/, '').split('-');
+          const start = parseInt(parts[0], 10);
+          const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
+          const chunksize = end - start + 1;
+
+          let fileStream = fs.createReadStream(finalPath, { start, end });
+          if (ext === '.ts' || ext === '.mp4') {
+            fileStream = fileStream.pipe(new XorStream(start));
+          }
+          const webStream = require('node:stream').Readable.toWeb(fileStream);
+
+          return new Response(webStream, {
+            status: 206,
+            headers: {
+              'Content-Range': `bytes ${start}-${end}/${size}`,
+              'Accept-Ranges': 'bytes',
+              'Content-Length': chunksize.toString(),
+              'Content-Type': contentType,
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        } else {
+          let fileStream = fs.createReadStream(finalPath);
+          if (ext === '.ts' || ext === '.mp4') {
+            fileStream = fileStream.pipe(new XorStream(0));
+          }
+          const webStream = require('node:stream').Readable.toWeb(fileStream);
+          return new Response(webStream, {
+            status: 200,
+            headers: {
+              'Content-Length': size.toString(),
+              'Content-Type': contentType,
+              'Accept-Ranges': 'bytes',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        }
+      } catch (err) {
+        console.error('[offline-media] Error serving file:', err);
+        return new Response('File error', { status: 500 });
+      }
     });
   }
 }

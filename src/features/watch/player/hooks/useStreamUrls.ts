@@ -111,7 +111,7 @@ export function useStreamUrls({
       token,
     );
 
-    if (normalized.streamUrl) setStreamUrl(normalized.streamUrl);
+    setStreamUrl(normalized.streamUrl);
     if (normalized.captionUrl) setCaptionUrl(normalized.captionUrl);
     if (normalized.spriteVtt) setSpriteVtt(normalized.spriteVtt);
     if (normalized.qualities) setQualities(normalized.qualities);

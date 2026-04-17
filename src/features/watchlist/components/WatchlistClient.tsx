@@ -4,7 +4,6 @@ import { Film, Plus, Tv } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useWatchlist } from '../hooks/use-watchlist';
@@ -126,48 +125,52 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
   onClick: () => void;
 }) {
   return (
-    <Card className="p-4 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-      {/* Aspect Ratio Box wrapped in a button for keyboard accessibility */}
-      <button
-        type="button"
-        className="group w-full sm:w-40 xl:w-48 aspect-[2/3] border-[4px] border-border overflow-hidden relative flex-shrink-0 bg-background cursor-pointer p-0"
-        onClick={onClick}
-        aria-label={`View details for ${item.title}`}
-      >
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      aria-label={`View details for ${item.title}`}
+    >
+      {/* Poster */}
+      <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
         {item.posterUrl ? (
           <Image
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter] duration-300"
+            sizes="112px"
+            className="object-cover"
             unoptimized={item.posterUrl.includes('/api/stream/')}
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-background">
+          <div className="w-full h-full flex items-center justify-center text-foreground/20">
             {item.contentType === 'Series' ? (
-              <Tv className="w-12 h-12 text-foreground/20 stroke-[3px]" />
+              <Tv className="w-8 h-8 stroke-[2px]" />
             ) : (
-              <Film className="w-12 h-12 text-foreground/20 stroke-[3px]" />
+              <Film className="w-8 h-8 stroke-[2px]" />
             )}
           </div>
         )}
+      </div>
 
-        {/* Type Badge Overlay */}
-        <div className="absolute top-4 left-4 bg-neo-surface border-[3px] border-border px-3 py-1 font-headline font-black uppercase text-xs tracking-widest text-foreground ">
-          {item.contentType}
+      {/* Detail Content */}
+      <div className="flex-1 p-5 flex flex-col justify-between">
+        {/* Top Section */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="space-y-2 pr-4">
+            <h3 className="font-headline font-black uppercase tracking-wide text-base sm:text-xl leading-tight line-clamp-1">
+              {item.title}
+            </h3>
+
+            {/* Status Text & Speed */}
+            <div className="flex flex-wrap items-center gap-2 text-xs uppercase font-bold text-foreground/60 tracking-wider">
+              <span className="text-foreground/80 font-black">
+                {item.contentType}
+              </span>
+            </div>
+          </div>
         </div>
-      </button>
-
-      <CardContent className="p-0 flex-1 min-w-0 flex flex-col justify-center">
-        <button
-          type="button"
-          onClick={onClick}
-          className="text-left font-headline text-3xl md:text-5xl font-black uppercase tracking-tighter leading-tight text-foreground hover:text-neo-blue transition-colors line-clamp-2 mix-blend-normal"
-        >
-          {item.title}
-        </button>
-      </CardContent>
-    </Card>
+      </div>
+    </button>
   );
 });

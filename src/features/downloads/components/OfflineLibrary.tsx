@@ -4,6 +4,8 @@ import {
   Download,
   HardDriveDownload,
   MonitorDown,
+  Pause,
+  Play,
   Trash2,
   X,
 } from 'lucide-react';
@@ -15,10 +17,10 @@ import { cn } from '@/lib/utils';
 import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
 
-const ContentDetailModal = dynamic(
+const OfflineContentDetailModal = dynamic(
   () =>
-    import('@/features/search/components/content-detail-modal').then(
-      (m) => m.ContentDetailModal,
+    import('./offline-content-detail-modal').then(
+      (m) => m.OfflineContentDetailModal,
     ),
   { ssr: false },
 );
@@ -33,7 +35,14 @@ function formatBytes(bytes?: number, decimals = 2) {
 }
 
 export function OfflineLibrary() {
-  const { downloads, isDesktopApp, isMounted, cancelDownload } = useDownloads();
+  const {
+    downloads,
+    isDesktopApp,
+    isMounted,
+    cancelDownload,
+    pauseDownload,
+    resumeDownload,
+  } = useDownloads();
   const [selectedItem, setSelectedItem] = useState<{
     contentId: string;
     season?: number;
@@ -149,7 +158,7 @@ export function OfflineLibrary() {
                   type="button"
                   key={item.contentId}
                   onClick={() => handleSelect(item)}
-                  className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left"
+                  className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {/* Poster */}
                   <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
@@ -257,6 +266,32 @@ export function OfflineLibrary() {
 
                       {/* Actions Column */}
                       <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        {item.status === 'DOWNLOADING' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              pauseDownload(item.contentId);
+                            }}
+                            className="p-3 border-[3px] border-border bg-background hover:bg-neo-yellow hover:text-black transition-colors"
+                            title="Pause Download"
+                          >
+                            <Pause className="w-4 h-4 stroke-[3px]" />
+                          </button>
+                        )}
+                        {item.status === 'PAUSED' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resumeDownload(item.contentId);
+                            }}
+                            className="p-3 border-[3px] border-border bg-background hover:bg-neo-green hover:text-black transition-colors"
+                            title="Resume Download"
+                          >
+                            <Play className="w-4 h-4 stroke-[3px]" />
+                          </button>
+                        )}
                         {item.status === 'FAILED' ||
                         item.status === 'CANCELLED' ||
                         item.status === 'COMPLETED' ? (
@@ -289,23 +324,29 @@ export function OfflineLibrary() {
 
                     {/* Progress Bar Bottom Row */}
                     {(item.status === 'DOWNLOADING' ||
-                      item.status === 'QUEUED') && (
+                      item.status === 'QUEUED' ||
+                      item.status === 'PAUSED') && (
                       <div className="mt-8 flex items-center gap-4">
                         <div
                           className={cn(
                             'flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden',
-                            item.status === 'QUEUED' && 'opacity-60',
+                            (item.status === 'QUEUED' ||
+                              item.status === 'PAUSED') &&
+                              'opacity-60',
                           )}
                         >
                           <div
                             className={cn(
                               'h-full bg-neo-yellow transition-all duration-500 ease-out',
-                              (item.isMp4 || item.status === 'QUEUED') &&
+                              ((item.isMp4 && item.status !== 'PAUSED') ||
+                                item.status === 'QUEUED') &&
                                 'w-full animate-pulse',
+                              item.status === 'PAUSED' && 'opacity-50',
                             )}
                             style={{
                               width:
-                                item.isMp4 || item.status === 'QUEUED'
+                                (item.isMp4 && item.status !== 'PAUSED') ||
+                                item.status === 'QUEUED'
                                   ? '100%'
                                   : `${Math.max(0, Math.min(100, item.progress))}%`,
                             }}
@@ -323,7 +364,7 @@ export function OfflineLibrary() {
 
       {/* Content Details Modal / Sheet */}
       {selectedItem && (
-        <ContentDetailModal
+        <OfflineContentDetailModal
           contentId={selectedItem.contentId}
           initialContext={
             selectedItem.season && selectedItem.episode

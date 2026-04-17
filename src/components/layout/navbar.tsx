@@ -22,7 +22,7 @@ export function Navbar() {
         <div className="flex-1 flex justify-start items-center">
           <Link
             href="/home"
-            className="flex items-center gap-2 [-webkit-app-region:no-drag]"
+            className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
             title="Home"
           >
             {/* Mobile: Play Icon */}
@@ -46,7 +46,7 @@ export function Navbar() {
         <div className="flex items-center justify-center gap-6 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
           <Link
             href="/continue-watching"
-            className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
+            className="py-4 px-2 text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
             title="Continue Watching"
           >
             <History className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -54,7 +54,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/live"
-            className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
+            className="py-4 px-2 text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
             title="Live Matches"
           >
             <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -62,7 +62,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/watchlist"
-            className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
+            className="py-4 px-2 text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
             title="Watchlist"
           >
             <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -71,7 +71,7 @@ export function Navbar() {
           {isDesktopApp && (
             <Link
               href="/downloads"
-              className="text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
+              className="py-4 px-2 text-foreground/70 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group"
               title="Offline Downloads"
             >
               <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />

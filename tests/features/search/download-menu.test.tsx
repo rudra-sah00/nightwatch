@@ -125,13 +125,13 @@ describe('DownloadMenu', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /HIGH/i }),
+          screen.getByRole('button', { name: /1080P\+/i }),
         ).toBeInTheDocument();
         expect(
-          screen.getByRole('button', { name: /MEDIUM/i }),
+          screen.getByRole('button', { name: /720P/i }),
         ).toBeInTheDocument();
         expect(
-          screen.getByRole('button', { name: /LOW/i }),
+          screen.getByRole('button', { name: /480P/i }),
         ).toBeInTheDocument();
       });
     });
@@ -162,9 +162,9 @@ describe('DownloadMenu', () => {
         screen.getByRole('button', { name: /^download$/i }),
       );
 
-      await waitFor(() => screen.getByRole('button', { name: /HIGH/i }));
+      await waitFor(() => screen.getByRole('button', { name: /1080P\+/i }));
 
-      const highBtn = screen.getByRole('button', { name: /HIGH/i });
+      const highBtn = screen.getByRole('button', { name: /1080P\+/i });
       await userEvent.click(highBtn);
 
       await waitFor(() => {
@@ -177,7 +177,7 @@ describe('DownloadMenu', () => {
       });
     });
 
-    it('shows "No valid formats available." when API returns empty qualities', async () => {
+    it('shows "no formats available." when API returns empty qualities', async () => {
       vi.mocked(apiFetch).mockResolvedValue({ success: true, qualities: [] });
 
       render(<DownloadMenu show={s2MovieShow} />);
@@ -186,13 +186,11 @@ describe('DownloadMenu', () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/no valid formats available\./i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/no formats available/i)).toBeInTheDocument();
       });
     });
 
-    it('shows "No valid formats available." when API call fails', async () => {
+    it('shows "no formats available." when API call fails', async () => {
       vi.mocked(apiFetch).mockRejectedValue(new Error('Network error'));
 
       render(<DownloadMenu show={s2MovieShow} />);
@@ -201,9 +199,7 @@ describe('DownloadMenu', () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/no valid formats available\./i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/no formats available/i)).toBeInTheDocument();
       });
     });
   });
@@ -282,10 +278,10 @@ describe('DownloadMenu', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /HIGH/i }),
+          screen.getByRole('button', { name: /1080P\+/i }),
         ).toBeInTheDocument();
         expect(
-          screen.getByRole('button', { name: /MEDIUM/i }),
+          screen.getByRole('button', { name: /720P/i }),
         ).toBeInTheDocument();
       });
     });
@@ -325,9 +321,9 @@ describe('DownloadMenu', () => {
       await waitFor(() => screen.getByText('Pilot'));
       await userEvent.click(screen.getByText('Pilot'));
 
-      await waitFor(() => screen.getByRole('button', { name: /HIGH/i }));
+      await waitFor(() => screen.getByRole('button', { name: /1080P\+/i }));
 
-      const highBtn = screen.getByRole('button', { name: /HIGH/i });
+      const highBtn = screen.getByRole('button', { name: /1080P\+/i });
       await userEvent.click(highBtn);
 
       await waitFor(() => {

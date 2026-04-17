@@ -1,19 +1,18 @@
 'use client';
 
-import { Loader2, Users, X } from 'lucide-react';
-import Image from 'next/image';
-import { useEffect, useRef } from 'react';
+import { Loader2, X } from 'lucide-react';
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  ContentActions,
+  ContentInfo,
+} from '@/features/search/components/content-info';
+import { EpisodeList } from '@/features/search/components/episode-list';
+import { SeasonSelector } from '@/features/search/components/season-selector';
+import { ContentType } from '@/features/search/types';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
-import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
-import { useContentDetailModal } from '../hooks/use-content-detail-modal';
-import { ContentType } from '../types';
-import { ContentActions, ContentInfo } from './content-info';
-import { DownloadMenu } from './download-menu';
-import { EpisodeList } from './episode-list';
-import { SeasonSelector } from './season-selector';
+import { useOfflineContentDetailModal } from '../hooks/use-offline-content-detail-modal';
 
 interface ContentDetailModalProps {
   contentId: string;
@@ -30,16 +29,15 @@ interface ContentDetailModalProps {
   isOfflineMode?: boolean;
 }
 
-export function ContentDetailModal({
+export function OfflineContentDetailModal({
   contentId,
   initialContext,
   fromContinueWatching = false,
   onClose,
   onWatchlistChange,
   autoPlay = false,
-  isOfflineMode = false,
+  isOfflineMode = true,
 }: ContentDetailModalProps) {
-  const { isDesktopApp } = useDesktopApp();
   const {
     show,
     episodes,
@@ -56,22 +54,17 @@ export function ContentDetailModal({
     handleResume,
     inWatchlist,
     isWatchlistLoading,
-    isCreatingParty,
-    handleWatchParty,
     handleWatchlistToggle,
     imageError,
     setImageError,
     seasonDropdownOpen,
     setSeasonDropdownOpen,
-    isSetupOpen,
-    setIsSetupOpen,
-    creatingEpisodeId,
     showCountdown,
     setShowCountdown,
     countdownTarget,
     showTrailer,
     setShowTrailer,
-  } = useContentDetailModal({
+  } = useOfflineContentDetailModal({
     contentId,
     initialContext,
     fromContinueWatching,
@@ -79,18 +72,7 @@ export function ContentDetailModal({
     onClose,
   });
 
-  const isMobile = useIsMobile();
   const episodesSectionRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to episodes when party mode activates
-  useEffect(() => {
-    if (isSetupOpen && episodesSectionRef.current) {
-      episodesSectionRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }, [isSetupOpen]);
 
   // Loading state
   if (isLoading) {
@@ -138,7 +120,7 @@ export function ContentDetailModal({
   if (autoPlay) {
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/10 backdrop-blur-sm">
-        <div className="bg-white p-12 border-[4px] border-border -yellow animate-pulse motion-reduce:animate-none">
+        <div className="bg-white p-12 border-[4px] border-border border-neo-yellow animate-pulse motion-reduce:animate-none">
           <Loader2 className="w-16 h-16 animate-spin motion-reduce:animate-none text-foreground stroke-[3px]" />
         </div>
       </div>
@@ -185,7 +167,11 @@ export function ContentDetailModal({
             show.trailers[0].url ? (
               <div className="relative w-full h-full group bg-black">
                 <video
-                  src={show.trailers[0].url}
+                  src={
+                    isOfflineMode && show.trailers[0].url.startsWith('http')
+                      ? `offline-media://local/${encodeURIComponent(contentId)}/trailer.mp4`
+                      : show.trailers[0].url
+                  }
                   className="w-full h-full object-contain md:object-cover pointer-events-none select-none"
                   autoPlay
                   loop
@@ -202,25 +188,21 @@ export function ContentDetailModal({
               </div>
             ) : !imageError ? (
               <div className="relative w-full h-full bg-background">
-                <Image
-                  src={getOptimizedImageUrl(
-                    show.trailers &&
-                      show.trailers.length > 0 &&
-                      show.trailers[0].thumbnail
+                <img
+                  src={
+                    (show.trailers &&
+                    show.trailers.length > 0 &&
+                    show.trailers[0].thumbnail?.startsWith('offline-media://')
                       ? show.trailers[0].thumbnail
-                      : show.posterHdUrl || show.posterUrl || '',
-                  )}
+                      : show.posterHdUrl?.startsWith('offline-media://') ||
+                          show.posterUrl?.startsWith('offline-media://')
+                        ? show.posterHdUrl || show.posterUrl
+                        : getOptimizedImageUrl(
+                            show.posterHdUrl || show.posterUrl || '',
+                          )) || ''
+                  }
                   alt={show.title}
-                  fill
-                  className="object-cover md:object-contain object-top"
-                  priority
-                  unoptimized={(show.trailers &&
-                  show.trailers.length > 0 &&
-                  show.trailers[0].thumbnail
-                    ? show.trailers[0].thumbnail
-                    : show.posterHdUrl || show.posterUrl || ''
-                  ).includes('/api/stream/')}
-                  sizes="100vw"
+                  className="w-full h-full object-cover md:object-contain object-top"
                   onError={() => setImageError(true)}
                 />
               </div>
@@ -247,7 +229,7 @@ export function ContentDetailModal({
             <ContentActions
               isOfflineMode={isOfflineMode}
               isPlaying={isPlaying}
-              isCreatingParty={isCreatingParty}
+              isCreatingParty={false}
               isLoadingProgress={isLoadingProgress}
               hasWatchProgress={hasWatchProgress}
               watchProgress={watchProgress}
@@ -260,9 +242,9 @@ export function ContentDetailModal({
                 await handleResume();
               }}
               onWatchParty={() => {
-                handleWatchParty();
+                // watch party disabled in offline
               }}
-              isWatchPartyDisabled={isMobile}
+              isWatchPartyDisabled={true}
               onWatchlistToggle={async () => {
                 const nextState = !inWatchlist;
                 await handleWatchlistToggle();
@@ -270,15 +252,6 @@ export function ContentDetailModal({
               }}
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
-              extraActions={
-                isDesktopApp ? (
-                  <DownloadMenu
-                    show={show}
-                    selectedSeason={selectedSeason}
-                    episodes={episodes}
-                  />
-                ) : undefined
-              }
             />
           </div>
 
@@ -287,43 +260,14 @@ export function ContentDetailModal({
             <div
               ref={episodesSectionRef}
               className={cn(
-                'p-6 md:p-10 lg:p-16 min-h-[40vh] transition-colors duration-300',
-                isSetupOpen ? 'bg-neo-yellow/80' : 'bg-card',
+                'p-6 md:p-10 lg:p-16 min-h-[40vh] transition-colors duration-300 bg-card',
               )}
             >
-              {/* Party Mode Banner */}
-              {isSetupOpen ? (
-                <div className="flex items-center justify-between gap-4 mb-8 p-6 bg-card border-[4px] border-border  flex-wrap">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-neo-blue border-[3px] border-border flex items-center justify-center flex-shrink-0">
-                      <Users className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-lg md:text-xl font-black font-headline uppercase tracking-widest text-foreground leading-tight">
-                        Watch Party — Pick an episode
-                      </p>
-                      <p className="text-sm font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                        Everyone joins once you select
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSetupOpen(false)}
-                    className="p-3 bg-neo-red border-[3px] border-border hover:bg-primary text-white hover:text-primary-foreground transition-colors flex-shrink-0"
-                    aria-label="Cancel watch party"
-                  >
-                    <X className="w-6 h-6 stroke-[3px]" />
-                  </button>
-                </div>
-              ) : null}
-
               {/* Season Selector */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 md:mb-12">
                 <h2
                   className={cn(
-                    'text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter transition-colors',
-                    isSetupOpen ? 'text-foreground' : 'text-foreground',
+                    'text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter transition-colors text-foreground',
                   )}
                 >
                   Episodes
@@ -340,19 +284,13 @@ export function ContentDetailModal({
                 />
               </div>
 
-              {/* Episodes List — doubles as party episode picker when isSetupOpen */}
+              {/* Episodes List */}
               <EpisodeList
                 episodes={episodes}
                 isLoading={isLoadingEpisodes}
-                playingEpisodeId={
-                  isSetupOpen ? creatingEpisodeId : playingEpisodeId
-                }
+                playingEpisodeId={playingEpisodeId}
                 onPlayEpisode={(episode) => {
-                  if (isSetupOpen) {
-                    handleWatchParty(episode);
-                  } else {
-                    handlePlay(episode);
-                  }
+                  handlePlay(episode);
                 }}
               />
             </div>

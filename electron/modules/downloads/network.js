@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const https = require('node:https');
 const http = require('node:http');
+const path = require('node:path');
+const { XorStream } = require('./cipher');
 
 function fetchText(url) {
   if (
@@ -43,13 +45,28 @@ function fetchText(url) {
   });
 }
 
-function downloadFile(url, dest, onProgressBytes, activeItem = null, store) {
+function downloadFile(
+  url,
+  dest,
+  onProgressBytes,
+  activeItem = null,
+  store,
+  startOffset = 0,
+) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
-    const file = fs.createWriteStream(dest);
+    const file = fs.createWriteStream(dest, {
+      flags: startOffset > 0 ? 'a' : 'w',
+    });
     const req = client.get(
       url,
-      { headers: { 'User-Agent': 'Mozilla/5.0' } },
+
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0',
+          ...(startOffset > 0 ? { Range: `bytes=${startOffset}-` } : {}),
+        },
+      },
       (res) => {
         if (
           res.statusCode >= 300 &&
@@ -63,6 +80,7 @@ function downloadFile(url, dest, onProgressBytes, activeItem = null, store) {
               onProgressBytes,
               activeItem,
               store,
+              startOffset,
             ),
           );
           return;
@@ -74,6 +92,11 @@ function downloadFile(url, dest, onProgressBytes, activeItem = null, store) {
             fs.unlink(dest, () => {});
             return reject(new Error('CANCELLED_BY_USER'));
           }
+          if (activeItem && activeItem.status === 'PAUSED') {
+            res.destroy();
+            file.close();
+            return reject(new Error('PAUSED_BY_USER'));
+          }
           if (onProgressBytes) onProgressBytes(chunk.length);
           const speedLimitMB = store.get('downloadSpeedLimit') || 0;
           if (speedLimitMB > 0) {
@@ -83,13 +106,24 @@ function downloadFile(url, dest, onProgressBytes, activeItem = null, store) {
             setTimeout(() => res.resume(), waitTimeMs);
           }
         });
-        res.pipe(file);
+
+        const ext = path.extname(dest).toLowerCase();
+        if (ext === '.ts' || ext === '.mp4') {
+          res.pipe(new XorStream(startOffset)).pipe(file);
+        } else {
+          res.pipe(file);
+        }
+
         res.on('error', (err) => {
+          console.error('[network.js] res error:', err);
           file.close();
           fs.unlink(dest, () => reject(err));
         });
-        file.on('finish', () => file.close(resolve));
+        file.on('finish', () => {
+          file.close(resolve);
+        });
         file.on('error', (err) => {
+          console.error('[network.js] file error:', err);
           file.close();
           fs.unlink(dest, () => reject(err));
         });

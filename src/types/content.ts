@@ -54,6 +54,7 @@ export interface ShowDetails {
     name?: string;
     site?: string;
     type?: string;
+    thumbnail?: string;
   }[];
 }
 

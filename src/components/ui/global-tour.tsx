@@ -4,12 +4,14 @@ import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { useDesktopApp } from '@/hooks/use-desktop-app';
 
 export function GlobalTour() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const tourStarted = useRef(false);
+  const { isDesktopApp } = useDesktopApp();
 
   useEffect(() => {
     if (typeof window === 'undefined' || tourStarted.current) return;
@@ -83,6 +85,21 @@ export function GlobalTour() {
                 align: 'center',
               },
             },
+            ...(isDesktopApp
+              ? [
+                  {
+                    element: 'a[href="/downloads"]',
+                    popover: {
+                      title:
+                        '<span class="font-headline font-black text-xl uppercase tracking-tighter">Offline Vault</span>',
+                      description:
+                        '<span class="font-body text-sm font-medium opacity-80">Watch movies anywhere, anytime. Access your offline downloads here.</span>',
+                      side: 'bottom' as const,
+                      align: 'center' as const,
+                    },
+                  },
+                ]
+              : []),
             {
               element: 'a[href="/profile"]',
               popover: {
@@ -132,7 +149,7 @@ export function GlobalTour() {
 
       return () => clearTimeout(timer);
     }
-  }, [searchParams, pathname, router]);
+  }, [searchParams, pathname, router, isDesktopApp]);
 
   return null;
 }

@@ -135,10 +135,6 @@ export async function startElectronDownload({
 
       return true;
     }
-  } else {
-    console.warn(
-      '[startElectronDownload] Missing success or masterPlaylistUrl from response',
-    );
   }
 
   return false;

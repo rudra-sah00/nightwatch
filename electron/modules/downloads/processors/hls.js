@@ -8,13 +8,13 @@ const {
   finalizeCancel,
   VAULT_PATH,
   store,
-} = require('./state');
+} = require('../state');
 const {
   fetchText,
   downloadFile,
   resolveUrl,
   formatSpeed,
-} = require('./network');
+} = require('../network');
 
 const CONCURRENCY_LIMIT = 5;
 
@@ -112,6 +112,7 @@ async function startHlsDownload(
     }
 
     if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+    if (item.status === 'PAUSED') return; // state will be synced in finally block or by pause handler
 
     const masterText = await fetchText(m3u8Url);
     let targetPlaylistUrl = m3u8Url;
@@ -224,7 +225,8 @@ async function startHlsDownload(
       const active = new Set();
       return new Promise((resolve) => {
         const next = () => {
-          if (item.status === 'CANCELLED') return resolve();
+          if (item.status === 'CANCELLED' || item.status === 'PAUSED')
+            return resolve();
           if (index >= segments.length && active.size === 0) return resolve();
           while (active.size < CONCURRENCY_LIMIT && index < segments.length) {
             const seg = segments[index++];
@@ -259,6 +261,12 @@ async function startHlsDownload(
   } catch (error) {
     if (error.message === 'CANCELLED_BY_USER' || item.status === 'CANCELLED') {
       return finalizeCancel(item, contentId);
+    }
+    if (error.message === 'PAUSED_BY_USER' || item.status === 'PAUSED') {
+      item.speed = '';
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+      return;
     }
     item.status = 'FAILED';
     item.error = error.message;
