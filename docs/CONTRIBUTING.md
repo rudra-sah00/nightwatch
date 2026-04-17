@@ -6,11 +6,19 @@ With Watch Rudra's extensive ecosystem (Next.js 15, Electron, React Server Compo
 
 We do **not** use Prettier or ESLint. We exclusively use [Biome (formerly Rome)](https://biomejs.dev/). Biome is natively integrated into `package.json` (`@biomejs/biome`) and `pnpm`.
 
-Before pushing PRs or committing changes, run:
+Before pushing PRs or committing changes, ensure your codebase is completely warning-free by running:
 ```bash
-pnpm biome check src/ --write
 pnpm biome format src/ --write
+pnpm biome check src/ --write
 ```
+
+### Strict Type Safety and Linting Rules
+*   **No Explicit Any (`any`)**: Biome aggressively enforces type boundaries data contracts. Avoid using implicitly or explicitly typed `any`. Always specify a different type or use `unknown` to guarantee strict interface parsing.
+*   **Type Narrowing (`unknown`)**: When converting legacy variables typed as `any` to `unknown`, you must explicitly typecast the object structure before attempting property access (e.g., `(item.showData as ShowDetails).id`) to stop TypeScript from throwing attribute errors (`Property 'id' does not exist on type '{}'`).
+*   **No Unused Variables**: Ensure that orphaned variables, unused arguments (like `catch (e)`), and unused imports have been successfully cleaned, or prepend them with underscores (`_e`).
+*   **Strict Native Imports**: Always import Node.js built-ins using the `node:` protocol format (`require('node:fs')` or `require('node:url')`).
+*   **No Console Statement Leftovers**: Do not persist debugging `console.log` traces. Remove them completely before pushing code to avoid muddying the stdout.
+
 *   **Quotes**: Use single quotes (`'`) internally, especially for component configuration or Mermaid JS maps (which crash `docs/UI_GUIDELINES.md` if double-quotes `"default"` are used).
 *   **Spacing**: 2 spaces.
 *   **Organized Imports**: Biome manages and automatically organizes imports alphabetically based on group types (`src/features` vs `react`). Let it sort for you.

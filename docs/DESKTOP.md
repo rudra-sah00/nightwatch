@@ -19,10 +19,22 @@ xattr -cr "/Applications/Watch Rudra.app"
 The desktop structure cleanly separates the Electron `main` processes from the Next.js `renderer` layer:
 
 - **`electron/main.js`**: The entry point for the Electron application. Manages browser windows, application lifecycle, and inter-process communication (IPC).
-- **`electron/preload.js`**: (If used) Provides a secure bridge for the frontend UI to communicate with the Node.js backend.
+- **`electron/preload.js`**: Provides a secure bridge for the frontend UI to communicate safely with the Node.js backend without exposing Electron logic.
 - **`electron/modules/discord.js`**: Handles **Discord Rich Presence**, broadcasting your current Watch Party status and media playback to your Discord profile.
+- **`electron/modules/download-manager.js`** & **`electron/modules/downloads/`**: Responsible for the master **Secure Offline Download** pipeline. Processes files from providers (`s1.js`, `s2.js`, `s3.js`), downloads `.ts`/`.mp4` streams, manages DRM via cipher streams, and synchronizes offline completion.
 - **`electron/modules/splash.js`**: Renders a frameless, Neo-Brutalist styled startup splash screen to check for updates before the main application window is loaded.
 - **`electron/modules/updater.js`**: Handles the auto-update lifecycle.
+
+### Secure Offline Downloads (DRM & Vaulting)
+
+To protect the media locally while maintaining native integration capabilities, our Electron desktop layer deploys an XOR Stream mechanism (`XorStream` within `electron/modules/downloads/cipher.js`).
+
+1. **Native Electron Keychain Engine**:
+    * Instead of relying on insecure static strings for our backend vault, Electron uses `safeStorage` to leverage the host OS keyring mechanisms natively (Keychain on macOS / DPAPI on Windows / libsecret on Linux).
+2. **Byte Persisting**:
+    * During the initial startup lifecycle, `crypto.randomBytes(32)` dictates a secure sequence. The data byte entropy is written and stored persistently directly in your `app.getPath('userData')` structure via `.encryptString`.
+3. **Data Bridging**:
+    * Download states update smoothly against the Next.js web application utilizing standard React context and component polling, without exposing the raw `.mp4` payloads visually.
 
 ## Auto-Updating & ASAR Hot Replacements
 

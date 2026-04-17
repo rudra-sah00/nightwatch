@@ -18,6 +18,9 @@ We use Vitest as our primary test runner due to its native ESM and TypeScript su
 When testing individual components:
 - Isolate the component: Mock external network hooks (e.g., `useWatchPartyMembers` or `useQuery`).
 - Mock Next.js routing: `next/navigation` modules like `useRouter` should be intercepted to prevent test crashes.
+- **Wrap State Updates in `act()`**: Code that causes React state updates (like user events, async API resolutions, or timers) must be wrapped in `act(() => { ... })`. This ensures you are testing the behavior exactly as the user would see it in the browser.
+- **Accessibility Matching (a11y)**: Rely on `@testing-library/react` queries like `getByRole`, `getByText`, or `findByTitle`. Avoid assuming structural elements (e.g., test against the semantic `<button>` roles instead of `<div>` tags).
+- **Cleanup Leftover Logs**: Ensure no debugging `console.log` or `console.warn` statements are left behind in the components, as they unnecessarily bloat the CI/CD test runner outputs.
 
 ### Commands
 
