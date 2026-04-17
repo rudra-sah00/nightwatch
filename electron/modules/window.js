@@ -1,4 +1,11 @@
-const { BrowserWindow, shell, session, TouchBar, app } = require('electron');
+const {
+  BrowserWindow,
+  shell,
+  session,
+  TouchBar,
+  app,
+  net,
+} = require('electron');
 const { TouchBarButton, TouchBarSpacer } = TouchBar || {};
 const windowStateKeeper = require('electron-window-state');
 
@@ -17,6 +24,29 @@ class AppWindow {
   constructor() {
     this.mainWindow = null;
     this.isQuitting = false;
+    this._devAppUrl = null; // Cached dev URL after port detection
+  }
+
+  // Probes available ports so the app loads even when Next.js moves off :3000
+  async _detectDevPort() {
+    if (this._devAppUrl) return this._devAppUrl;
+    const candidatePorts = [3000, 3001, 3002, 3003, 3004];
+    for (const port of candidatePorts) {
+      try {
+        const res = await net.fetch(`http://localhost:${port}`, {
+          method: 'HEAD',
+          bypassCustomProtocolHandlers: true,
+        });
+        // Accept any non-server-error response — Next.js returns 200 on the root
+        if (res.status < 500) {
+          this._devAppUrl = `http://localhost:${port}`;
+          return this._devAppUrl;
+        }
+      } catch {
+        // Port not listening yet, try next
+      }
+    }
+    return 'http://localhost:3000'; // last-resort fallback
   }
 
   create() {
@@ -87,24 +117,21 @@ class AppWindow {
       },
     );
 
-    // Catch network crashes and swap to the beautiful Offline failure screen natively
     const isDev =
       process.env.NODE_ENV === 'development' ||
       !require('electron').app.isPackaged;
-    const APP_URL = isDev
-      ? 'http://localhost:3000'
-      : 'https://watch.rudrasahoo.live';
+    const PROD_URL = 'https://watch.rudrasahoo.live';
 
-    // Prevent new untracked windows from spawning! Lock internal links to the MAIN electron window wrapper
-    this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      if (url.startsWith(APP_URL)) {
-        this.mainWindow.loadURL(url);
-        return { action: 'deny' }; // Block OS from creating an unstyled pop-up popup
-      }
-      // Send Discord, GitHub, external links to default OS browser
-      shell.openExternal(url);
-      return { action: 'deny' };
-    });
+    if (isDev) {
+      // Async port probe — do not block window creation
+      this._detectDevPort().then((url) => {
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          this.mainWindow.loadURL(url);
+        }
+      });
+    } else {
+      this.mainWindow.loadURL(PROD_URL);
+    }
 
     this.mainWindow.webContents.on('will-navigate', (event, url) => {
       // Prevent drag-and-drop local file exploits
@@ -113,8 +140,10 @@ class AppWindow {
         return;
       }
 
-      // Allow internal links and deep links routing, send everything else to Mac/Windows
-      if (!url.startsWith(APP_URL) && !url.startsWith('watch-rudra://')) {
+      if (
+        !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
+        !url.startsWith('watch-rudra://')
+      ) {
         event.preventDefault();
         shell.openExternal(url);
       }
@@ -123,16 +152,19 @@ class AppWindow {
     this.mainWindow.webContents.on(
       'did-fail-load',
       (_event, errorCode, _errorDescription) => {
-        // DNS / Connection errors usually fall within the -100 range in Chromium
-        if (errorCode >= -199 && errorCode <= -100) {
-          // this.mainWindow.loadFile(
-          //   require('node:path').join(__dirname, '../offline.html'),
-          // );
+        // DNS / Connection errors (-199 to -100): In dev, this usually means
+        // Next.js hasn't started yet. Retry after a short delay.
+        if (isDev && errorCode >= -199 && errorCode <= -100) {
+          setTimeout(() => {
+            this._detectDevPort().then((url) => {
+              if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+                this.mainWindow.loadURL(url);
+              }
+            });
+          }, 2000);
         }
       },
     );
-
-    this.mainWindow.loadURL(APP_URL);
 
     this.mainWindow.once('ready-to-show', () => {
       this.mainWindow.show();
@@ -167,14 +199,14 @@ class AppWindow {
     // --- MAC TOUCH BAR SETUP ---
     if (process.platform === 'darwin' && TouchBarButton) {
       const playPauseButton = new TouchBarButton({
-        label: '⏯ Play/Pause',
+        label: 'Play/Pause',
         backgroundColor: '#09090b',
         click: () =>
           this.mainWindow.webContents.send('media-command', 'MediaPlayPause'),
       });
       const micButton = new TouchBarButton({
-        label: '🎙️ Toggle Mic',
-        backgroundColor: '#780016', // Neo-Red warning
+        label: 'Toggle Mic',
+        backgroundColor: '#780016',
         click: () =>
           this.mainWindow.webContents.send('media-command', 'toggle-ptt'),
       });

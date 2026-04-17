@@ -9,21 +9,30 @@ import { toast } from 'sonner';
  * without sprinkling raw `typeof window` across UI components.
  */
 export function useDesktopApp() {
-  const [isDesktopApp, setIsDesktopApp] = useState<boolean>(false);
-  const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [isMacOS, setIsMacOS] = useState<boolean>(false);
-  const [isWindows, setIsWindows] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  const [isDesktopApp] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? !!window.electronAPI : false,
+  );
+
+  const [isBrowser] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? !window.electronAPI : true,
+  );
+
+  const [isMacOS] = useState<boolean>(() =>
+    typeof navigator !== 'undefined'
+      ? navigator.userAgent.includes('Mac OS X')
+      : false,
+  );
+
+  const [isWindows] = useState<boolean>(() =>
+    typeof navigator !== 'undefined'
+      ? navigator.userAgent.includes('Windows NT')
+      : false,
+  );
 
   useEffect(() => {
     setIsMounted(true);
-    if (typeof window !== 'undefined') {
-      const hasElectronAPI = !!window.electronAPI;
-      setIsDesktopApp(hasElectronAPI);
-      setIsBrowser(!hasElectronAPI);
-      setIsMacOS(navigator.userAgent.includes('Mac OS X'));
-      setIsWindows(navigator.userAgent.includes('Windows NT'));
-    }
   }, []);
 
   /**

@@ -89,15 +89,88 @@ let internalAppIsQuitting = false;
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
 const startElectronApp = async () => {
-  // INJECT GLOBAL CORS BYPASS FOR THE VIDEO PLAYER TO ALLOW CROSS-ORIGIN TS STREAM LOADING
+  // SCOPED CORS FIX: Only intercept our internal backend API requests.
+  // Returning `*` globally breaks withCredentials (browser spec forbids wildcard +
+  // credentials). We now return the exact requesting origin so cookies work.
   const { session } = require('electron');
+
+  const backendUrl =
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+  let backendOrigin;
+  try {
+    backendOrigin = new URL(backendUrl).origin;
+  } catch {
+    backendOrigin = 'http://localhost:4000';
+  }
+
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    // Force CORS Allow-Origin to everything, so our React video player can fetch chunks!
+    // Only modify headers for our backend — leave third-party CDN/Cloudflare headers untouched
+    const isBackendRequest =
+      details.url.startsWith(backendOrigin) ||
+      details.url.includes('/api/stream/') ||
+      details.url.includes('/api/');
+
+    // Strip out any existing CORS headers to prevent duplicate header conflicts
+    const cleanedHeaders = { ...details.responseHeaders };
+    const corsKeys = [
+      'access-control-allow-origin',
+      'access-control-allow-credentials',
+      'access-control-allow-headers',
+      'access-control-allow-methods',
+    ];
+    for (const key of Object.keys(cleanedHeaders)) {
+      if (corsKeys.includes(key.toLowerCase())) {
+        delete cleanedHeaders[key];
+      }
+    }
+
+    if (isBackendRequest) {
+      // Derive the exact origin making the request (avoids wildcard-credentials conflict)
+      let requestOrigin = 'http://localhost:3000';
+      const rawOrigin =
+        details.requestHeaders?.Origin || details.requestHeaders?.origin;
+      if (rawOrigin) {
+        requestOrigin = Array.isArray(rawOrigin) ? rawOrigin[0] : rawOrigin;
+      } else if (details.referrer) {
+        try {
+          requestOrigin = new URL(details.referrer).origin;
+        } catch {
+          /* keep default */
+        }
+      }
+
+      return callback({
+        responseHeaders: {
+          ...cleanedHeaders,
+          // 1. Backend API Requests:
+          // Match the backend's exact CORS implementation. Dynamically echo the origin
+          // so `withCredentials=true` works everywhere, including offline-media:// or localhost:3004.
+          'Access-Control-Allow-Origin': [requestOrigin],
+          'Access-Control-Allow-Credentials': ['true'],
+          'Access-Control-Allow-Headers': [
+            'Content-Type',
+            'Authorization',
+            'Cookie',
+            'x-csrf-token',
+          ],
+          'Access-Control-Allow-Methods': [
+            'GET',
+            'POST',
+            'PATCH',
+            'DELETE',
+            'OPTIONS',
+          ],
+        },
+      });
+    }
+
+    // 2. Third-Party CDNs (TMDB images, DaddyLive TS fragments, etc.):
+    // We force `*` so that the desktop Player and Image tags don't throw CORS failures
+    // when hitting arbitrary CDNs that lack native CORS headers.
     callback({
       responseHeaders: {
-        ...details.responseHeaders,
+        ...cleanedHeaders,
         'Access-Control-Allow-Origin': ['*'],
-        'Access-Control-Allow-Headers': ['*'],
       },
     });
   });

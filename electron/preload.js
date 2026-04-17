@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Listener to hide CSS when the Native Window shrinks down to a PiP block
   onPipModeChanged: (callback) => {
+    ipcRenderer.removeAllListeners('pip-mode-changed');
     const subscription = (_event, isPip) => callback(isPip);
     ipcRenderer.on('pip-mode-changed', subscription);
     return () => ipcRenderer.removeListener('pip-mode-changed', subscription);
@@ -39,6 +40,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showNotification: (payload) => ipcRenderer.send('show-notification', payload),
 
   onNotificationAction: (callback) => {
+    ipcRenderer.removeAllListeners('notification-action');
     const subscription = (_event, payload) => callback(payload);
     ipcRenderer.on('notification-action', subscription);
     return () =>
@@ -46,6 +48,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   onNotificationClick: (callback) => {
+    ipcRenderer.removeAllListeners('notification-click');
     const clickSub = (_event, payload) => callback(payload);
     ipcRenderer.on('notification-click', clickSub);
     return () => ipcRenderer.removeListener('notification-click', clickSub);
@@ -56,6 +59,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Listen for Native Hardware Media Keys
   onMediaCommand: (callback) => {
+    ipcRenderer.removeAllListeners('media-command');
     const subscription = (_event, command) => callback(command);
     ipcRenderer.on('media-command', subscription);
     return () => ipcRenderer.removeListener('media-command', subscription);
@@ -63,12 +67,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Listen for Window Auto-PiP Triggers (Blur/Focus)
   onWindowBlur: (callback) => {
+    ipcRenderer.removeAllListeners('window-blur');
     const subscription = () => callback();
     ipcRenderer.on('window-blur', subscription);
     return () => ipcRenderer.removeListener('window-blur', subscription);
   },
 
   onWindowFocus: (callback) => {
+    ipcRenderer.removeAllListeners('window-focus');
     const subscription = () => callback();
     ipcRenderer.on('window-focus', subscription);
     return () => ipcRenderer.removeListener('window-focus', subscription);
@@ -78,6 +84,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startLiveBridge: (config) => ipcRenderer.send('start-live-bridge', config),
   stopLiveBridge: () => ipcRenderer.send('stop-live-bridge'),
   onLiveBridgeResolved: (callback) => {
+    ipcRenderer.removeAllListeners('live-bridge-resolved');
     const subscription = (_event, result) => callback(result);
     ipcRenderer.on('live-bridge-resolved', subscription);
     return () =>
@@ -91,6 +98,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resumeDownload: (contentId) => ipcRenderer.send('resume-download', contentId),
   getDownloads: () => ipcRenderer.invoke('get-downloads'),
   onDownloadProgress: (callback) => {
+    ipcRenderer.removeAllListeners('download-progress');
     const sub = (_event, state) => callback(state);
     ipcRenderer.on('download-progress', sub);
     return () => ipcRenderer.removeListener('download-progress', sub);

@@ -9,7 +9,9 @@ let proxyPort = 0;
 let streamCookies = '';
 let streamUrl = '';
 let targetUrl = '';
+let _navigateReferer = 'https://funsday.cfd/'; // Updated dynamically on each bridge start
 let _channelIdState = null;
+let _lastEventSender = null; // Stored for proxy crash recovery
 const capturedKeys = new Map();
 
 function getCookieString() {
@@ -186,11 +188,24 @@ function startProxyServer(_eventSender) {
     proxyPort = proxyServer.address().port;
   });
 
+  // Auto-restart the proxy if it crashes (e.g. EADDRINUSE or uncaught ECONNRESET)
+  proxyServer.on('error', (err) => {
+    console.error(
+      '[live-bridge] Proxy server error, restarting...',
+      err.message,
+    );
+    proxyServer = null;
+    proxyPort = 0;
+    startProxyServer(_lastEventSender);
+  });
+
   return proxyServer;
 }
 
 function setupLiveBridge() {
   ipcMain.on('start-live-bridge', async (event, { url, channelId }) => {
+    _lastEventSender = event.sender;
+
     if (extractionWindow) {
       extractionWindow.close();
     }
@@ -201,6 +216,18 @@ function setupLiveBridge() {
     _channelIdState = channelId;
     capturedKeys.clear();
     streamCookies = '';
+
+    const navigateUrl = targetUrl.replace(
+      /^https?:\/\/[^/]*daddylive[^/]*/i,
+      'https://dlstreams.top',
+    );
+
+    // Derive Referer dynamically from the channel page being navigated to
+    try {
+      _navigateReferer = `${new URL(navigateUrl).origin}/`;
+    } catch {
+      _navigateReferer = 'https://funsday.cfd/';
+    }
 
     // Ensure proxy server is running
     startProxyServer(event.sender);
@@ -223,11 +250,6 @@ function setupLiveBridge() {
         extractionWindow.close();
       }
     }, 45000);
-
-    const navigateUrl = targetUrl.replace(
-      /^https?:\/\/[^/]*daddylive[^/]*/i,
-      'https://dlstreams.top',
-    );
 
     let hasResolved = false;
 

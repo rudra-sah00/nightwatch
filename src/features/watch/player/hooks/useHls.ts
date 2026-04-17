@@ -157,9 +157,8 @@ export function useHls({
         const finalConfig = {
           ...hlsConfig,
           xhrSetup: (xhr: XMLHttpRequest, url: string) => {
-            // Smart Credentials: Only send cookies to our internal backend proxy.
-            // This fixes 401 errors for livestreams while keeping direct CDN
-            // movies working (which require anonymous access for '*' CORS).
+            // We fixed the `Access-Control-Allow-Origin: *` wildcard issue in the Electron backend.
+            // It is now safe to use withCredentials in both Desktop and Browser versions.
             if (url.includes('/api/stream/')) {
               xhr.withCredentials = true;
             }

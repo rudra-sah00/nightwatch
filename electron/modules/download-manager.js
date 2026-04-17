@@ -56,6 +56,23 @@ function processQueue() {
 }
 
 function setupDownloadManager() {
+  // Fix #9: Rehydrate pending downloads on app start
+  const initialDb = getDatabase();
+  const pendingItems = initialDb.items.filter(
+    (i) => i.status === 'QUEUED' || i.status === 'ERROR',
+  );
+  for (const item of pendingItems) {
+    downloadQueue.push({
+      // We don't have an event.sender yet on startup. The frontend will reconnect
+      // its listener when it mounts, and we rely on state polling or resumed events.
+      eventSender: null,
+      args: item,
+      isCancelled: false,
+      contentId: item.contentId,
+    });
+  }
+  processQueue();
+
   ipcMain.on('start-download', (event, args) => {
     const db = getDatabase();
     let iter = db.items.find((i) => i.contentId === args.contentId);
@@ -114,7 +131,7 @@ function setupDownloadManager() {
     }
     finalizeCancel({ status: 'CANCELLED' }, contentId);
   });
-  ipcMain.on('pause-download', (_event, contentId) => {
+  ipcMain.on('pause-download', (event, contentId) => {
     if (activeDownloadsMap.has(contentId)) {
       const activeItem = activeDownloadsMap.get(contentId);
       activeItem.status = 'PAUSED';
@@ -125,7 +142,7 @@ function setupDownloadManager() {
       }
       activeItem.speed = '';
       require('./downloads/state').syncDbState(activeItem);
-      require('./downloads/state').sendSafeProgress(_event.sender, activeItem);
+      require('./downloads/state').sendSafeProgress(event.sender, activeItem);
     }
   });
 
@@ -133,9 +150,14 @@ function setupDownloadManager() {
     const db = require('./downloads/state').getDatabase();
     const item = db.items.find((i) => i.contentId === contentId);
     if (item && (item.status === 'PAUSED' || item.status === 'ERROR')) {
-      // Re-queue the download
+      item.status = 'QUEUED';
+      require('./downloads/state').saveDatabase(db);
+
+      // Fix #11: Re-queue the download with full args payload, not just ID
       downloadQueue.push({
         eventSender: event.sender,
+        args: item,
+        isCancelled: false,
         contentId: item.contentId,
       });
       processQueue();
