@@ -67,6 +67,10 @@ function setupUpdater(splashWindow, onComplete) {
 
   // ---------- NATIVE UPDATER ----------
   autoUpdater.on('update-available', (info) => {
+    // Prevent the fast-launch timers from killing the splash screen during a large download
+    if (safetyTimer) clearTimeout(safetyTimer);
+    if (hardDeadlineTimer) clearTimeout(hardDeadlineTimer);
+
     if (splashWindow && !splashWindow.isDestroyed() && info.version) {
       splashWindow.webContents.send('updater-version', info.version);
     }
