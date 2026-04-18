@@ -14,7 +14,12 @@ export function PlayerSeekBar() {
   if (metadata.type === 'livestream') return <LiveSeekBar compact={compact} />;
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 2xl:px-10 pointer-events-auto">
+    <section
+      className="px-4 md:px-6 lg:px-8 2xl:px-10 pointer-events-auto"
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Seek Bar Interaction"
+    >
       <SeekBar
         currentTime={state.currentTime}
         duration={state.duration}
@@ -26,6 +31,6 @@ export function PlayerSeekBar() {
         allowPreview={true}
         compact={compact}
       />
-    </div>
+    </section>
   );
 }

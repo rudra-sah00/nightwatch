@@ -9,13 +9,18 @@ export function PlayerVolume() {
   if (isMobile) return null;
 
   return (
-    <div className="hidden md:block">
+    <section
+      className="hidden md:block"
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Volume Interaction"
+    >
       <Volume
         volume={state.volume}
         isMuted={state.isMuted}
         onVolumeChange={playerHandlers.setVolume}
         onMuteToggle={playerHandlers.toggleMute}
       />
-    </div>
+    </section>
   );
 }
