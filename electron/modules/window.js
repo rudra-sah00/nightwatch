@@ -139,10 +139,16 @@ class AppWindow {
     }
 
     this.mainWindow.webContents.on('will-navigate', (event, url) => {
-      // Prevent drag-and-drop local file exploits
+      // Prevent drag-and-drop local file exploits, but explicitly ALLOW our
+      // internal offline bridge so it can actually load when disconnected.
       if (url.startsWith('file://')) {
-        event.preventDefault();
-        return;
+        if (
+          !url.endsWith('offline-bridge.html') &&
+          !url.endsWith('offline.html')
+        ) {
+          event.preventDefault();
+        }
+        return; // Allow the bridge file to load, skip external browser check
       }
 
       if (
