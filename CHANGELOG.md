@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.27.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.26.0...v1.27.0) (2026-04-18)
+
+
+### Features
+
+* add missing loading boundary for main routes ([4368180](https://github.com/rudra-sah00/watch-rudra/commit/4368180ddec86219f72dfc087399e2a838c7b0d0))
+
+
+### Bug Fixes
+
+* allow local bridge file loading to bypass offline security policy ([e8d05fd](https://github.com/rudra-sah00/watch-rudra/commit/e8d05fdf1b1dd864b87f0af2b75709d17ee66f15))
+* **desktop:** bypass service worker for offline protocol, preserve local subtitles ([cec643f](https://github.com/rudra-sah00/watch-rudra/commit/cec643f0d3d86ac5f96c62f5c784e82a3b55e488))
+* **electron:** stability and robustness improvements ([a1202e4](https://github.com/rudra-sah00/watch-rudra/commit/a1202e45299f151a3ad1cdbf598382c44266fc30))
+* gracefully handle missing service worker cache by capturing secondary navigation failure ([0d180ae](https://github.com/rudra-sah00/watch-rudra/commit/0d180ae6ea15625a5ac52f0ddf99303d65880b71))
+* instantly skip updater when offline using net.isOnline() ([e8bb77b](https://github.com/rudra-sah00/watch-rudra/commit/e8bb77beac02e223a0000b5bcd25cf3d50c8bda6))
+* make offline bridge dynamically support local testing overriding Vercel firewall rules ([d382cb4](https://github.com/rudra-sah00/watch-rudra/commit/d382cb40792c142aaa7b696cda104d4d93394ae9))
+* migrate to @serwist/cli for turbopack compat, add SerwistProvider to layout ([9d61eb9](https://github.com/rudra-sah00/watch-rudra/commit/9d61eb9fc95740f03da280bf0d1172127a76398c))
+* **offline:** resolve blank video player issue by fixing ID matching and localizing HLS encryption keys ([0935ddd](https://github.com/rudra-sah00/watch-rudra/commit/0935ddd39df983aee467e8803b81974c55386c35))
+
 ## [1.26.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.25.0...v1.26.0) (2026-04-18)
 
 
