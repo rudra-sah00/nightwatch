@@ -452,7 +452,7 @@ describe('ContinueWatching', () => {
     // Check that focus handler was registered
     await waitFor(() => {
       const focusCalls = addEventListenerSpy.mock.calls.filter(
-        (call) => call[0] === 'focus',
+        (call) => (call[0] as string) === 'focus',
       );
       expect(focusCalls.length).toBeGreaterThan(0);
     });
