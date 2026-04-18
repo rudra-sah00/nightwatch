@@ -24,12 +24,18 @@ const serwist = new Serwist({
   // in the precache, attempt to serve the root "/" from cache so the React app
   // still boots and can render whatever it can locally (e.g. /downloads).
   navigationPreload: false,
+  fallbacks: {
+    entries: [
+      {
+        url: '/',
+        matcher({ request }) {
+          return request.destination === 'document';
+        },
+      },
+    ],
+  },
 
   // Runtime caching strategies for dynamic requests (API calls, images, etc.)
-  // defaultCache ships with sensible strategies:
-  //   - navigation requests → NetworkFirst (cache as fallback)
-  //   - images/fonts       → CacheFirst (long TTL)
-  //   - API responses      → NetworkFirst with 5s timeout
   runtimeCaching: defaultCache,
 });
 

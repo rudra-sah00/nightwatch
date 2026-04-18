@@ -117,30 +117,37 @@ export function useWatchContent() {
 
         if (typeof window !== 'undefined' && window.electronAPI) {
           const fetchedDownloads = await window.electronAPI.getDownloads();
-          let offlineContentId1 = overrideMovieId || movieId;
-          let offlineContentId2 = offlineContentId1;
+          // 1. Resolve base ID by stripping any existing episode suffixes or provider prefixes
+          const rawId = overrideMovieId || movieId || '';
+          const baseIdFromRaw = rawId.replace(/(_S\d+E\d+|-ep\d+)$/, '');
+          const currentSeriesId = overrideMovieId || seriesId || baseIdFromRaw;
+          const cleanSeriesId = currentSeriesId.replace(/^(s1|s2|s3):/, '');
+
+          let offlineContentId1 = rawId;
+          let offlineContentId2 = rawId;
 
           if (type === 'series' && (season || episode)) {
-            const currentSeriesId = overrideMovieId || seriesId || movieId;
-            if (currentSeriesId) {
-              // Standard format: SERIES_S1E1
-              offlineContentId1 = `${currentSeriesId}_S${season || 1}E${episode || 1}`;
-              // Legacy/S2 format: SERIES-ep1
-              offlineContentId2 = `${currentSeriesId}-ep${episode || 1}`;
-            }
+            // Re-construct IDs from clean base to avoid double-suffixing (e.g. _S1E1_S1E1)
+            offlineContentId1 = `${currentSeriesId}_S${season || 1}E${episode || 1}`;
+            offlineContentId2 = `${currentSeriesId}-ep${episode || 1}`;
           }
 
-          // Search with and without provider prefixes (s1:, s2:, s3:)
-          // to ensure a match even if IDs are inconsistent.
+          // 2. Build a comprehensive search set. We check:
+          // - The raw ID from the URL
+          // - The reconstructed standard IDs (with and without server prefixes)
+          // - The base series ID (in case the download was stored at the series level)
           const searchIds = new Set([
+            rawId,
             offlineContentId1,
             offlineContentId2,
-            `s1:${offlineContentId1}`,
-            `s1:${offlineContentId2}`,
-            `s2:${offlineContentId1}`,
-            `s2:${offlineContentId2}`,
-            `s3:${offlineContentId1}`,
-            `s3:${offlineContentId2}`,
+            `${cleanSeriesId}_S${season || 1}E${episode || 1}`,
+            `${cleanSeriesId}-ep${episode || 1}`,
+            `s1:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
+            `s1:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
+            `s2:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
+            `s2:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
+            `s3:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
+            `s3:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
           ]);
 
           const downloadedItem = fetchedDownloads.find(
