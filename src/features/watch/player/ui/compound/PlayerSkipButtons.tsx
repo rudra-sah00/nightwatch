@@ -7,7 +7,12 @@ export function PlayerSkipButtons() {
   if (metadata.type === 'livestream' || readOnly) return null;
 
   return (
-    <div className="hidden md:flex items-center gap-1 lg:gap-2">
+    <section
+      className="hidden md:flex items-center gap-1 lg:gap-2"
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Skip Controls Interaction"
+    >
       <button
         type="button"
         onClick={() => playerHandlers.skip(-10)}
@@ -24,6 +29,6 @@ export function PlayerSkipButtons() {
       >
         <SkipForward className="w-6 h-6 lg:w-7 lg:h-7 2xl:w-8 2xl:h-8 text-primary-foreground group-hover:text-primary-foreground/90" />
       </button>
-    </div>
+    </section>
   );
 }

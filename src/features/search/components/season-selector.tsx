@@ -56,7 +56,7 @@ export function SeasonSelector({
         <div
           id="season-selector-menu"
           role="menu"
-          className="absolute top-full right-0 mt-4 w-56 bg-card border-[3px] border-border -yellow overflow-hidden z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none"
+          className="absolute top-full right-0 mt-4 w-56 bg-card border-[3px] border-border overflow-y-auto max-h-72 custom-scrollbar z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none"
         >
           {seasons.map((season) => (
             <button

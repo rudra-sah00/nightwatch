@@ -13,7 +13,12 @@ export function PlayerAudioSubtitleSelectors() {
   const { state, playerHandlers } = usePlayerContext();
 
   return (
-    <>
+    <section
+      className="flex items-center"
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Audio and Subtitle Selectors Interaction"
+    >
       <SubtitleSelector
         tracks={subtitleTracksForMenu}
         currentTrack={state.currentSubtitleTrack}
@@ -27,6 +32,6 @@ export function PlayerAudioSubtitleSelectors() {
         currentTrack={state.currentAudioTrack || undefined}
         onTrackChange={playerHandlers.setAudioTrack}
       />
-    </>
+    </section>
   );
 }

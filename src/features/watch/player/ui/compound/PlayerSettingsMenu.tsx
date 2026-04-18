@@ -10,15 +10,21 @@ export function PlayerSettingsMenu() {
   const compact = isMobile && isPortrait;
 
   return (
-    <SettingsMenu
-      qualities={state.qualities}
-      currentQuality={state.currentQuality}
-      playbackRate={state.playbackRate}
-      onQualityChange={playerHandlers.setQuality}
-      onPlaybackRateChange={playerHandlers.setPlaybackRate}
-      disabled={readOnly}
-      onInteraction={playerHandlers.handleInteraction}
-      compact={compact}
-    />
+    <section
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Settings Interaction"
+    >
+      <SettingsMenu
+        qualities={state.qualities}
+        currentQuality={state.currentQuality}
+        playbackRate={state.playbackRate}
+        onQualityChange={playerHandlers.setQuality}
+        onPlaybackRateChange={playerHandlers.setPlaybackRate}
+        disabled={readOnly}
+        onInteraction={playerHandlers.handleInteraction}
+        compact={compact}
+      />
+    </section>
   );
 }

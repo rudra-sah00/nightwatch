@@ -420,12 +420,12 @@ export function DownloadMenu({
         </button>
 
         {/* Left Column: Languages */}
-        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10 p-8 md:p-16 flex flex-col justify-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-left-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-left-8 duration-700">
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10 p-8 md:p-16 flex flex-col justify-start data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-left-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-left-8 duration-700 h-full overflow-hidden">
           <h2 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40 mb-12">
             Language
           </h2>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-4">
             {show.dubs && show.dubs.length > 1 ? (
               show.dubs.map((dub) => {
                 const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
@@ -472,7 +472,7 @@ export function DownloadMenu({
         </div>
 
         {/* Right Column: Qualities or Episodes */}
-        <div className="w-full md:w-2/3 p-8 md:p-16 flex flex-col justify-center overflow-y-auto no-scrollbar">
+        <div className="w-full md:w-2/3 p-8 md:p-16 flex flex-col justify-start overflow-y-auto custom-scrollbar">
           {!isSeries ? (
             <TransparentMovieSection
               contentId={selectedDubId}

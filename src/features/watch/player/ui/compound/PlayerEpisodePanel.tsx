@@ -137,28 +137,43 @@ export function PlayerEpisodePanelOverlay() {
  */
 export function PlayerEpisodePanelTrigger() {
   const ctx = use(EpisodePanelContext);
+  const { playerHandlers } = usePlayerContext();
   if (!ctx) return null;
 
+  const handleMouseEnter = () => {
+    if (ctx.isOpen === false) playerHandlers.handleInteraction(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (ctx.isOpen === false) playerHandlers.handleInteraction(false);
+  };
+
   return (
-    <button
-      type="button"
-      onClick={ctx.toggle}
-      className={cn(
-        'p-2.5 md:p-3 transition-colors duration-200',
-        'bg-background border-[3px] border-border text-foreground ',
-        'hover:bg-background',
-        'active:bg-muted',
-        ctx.isOpen && 'bg-background shadow-none',
-      )}
-      aria-label="Show episodes"
-      title="Episodes"
+    <section
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      aria-label="Episode Panel Interaction"
     >
-      <Library
+      <button
+        type="button"
+        onClick={ctx.toggle}
         className={cn(
-          'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-200',
-          ctx.isOpen && 'scale-110',
+          'p-2.5 md:p-3 transition-colors duration-200',
+          'bg-background border-[3px] border-border text-foreground ',
+          'hover:bg-background',
+          'active:bg-muted',
+          ctx.isOpen && 'bg-background shadow-none',
         )}
-      />
-    </button>
+        aria-label="Show episodes"
+        title="Episodes"
+      >
+        <Library
+          className={cn(
+            'w-5 h-5 md:w-6 md:h-6 stroke-[3px] transition-transform duration-200',
+            ctx.isOpen && 'scale-110',
+          )}
+        />
+      </button>
+    </section>
   );
 }

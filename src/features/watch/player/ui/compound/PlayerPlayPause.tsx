@@ -29,10 +29,16 @@ export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
   }
 
   return (
-    <PlayPause
-      isPlaying={state.isPlaying}
-      onToggle={playerHandlers.togglePlay}
-      size={size}
-    />
+    <section
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Play/Pause Interaction"
+    >
+      <PlayPause
+        isPlaying={state.isPlaying}
+        onToggle={playerHandlers.togglePlay}
+        size={size}
+      />
+    </section>
   );
 }

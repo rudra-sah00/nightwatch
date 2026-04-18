@@ -10,11 +10,17 @@ export function PlayerFullscreen({ label }: { label?: string }) {
   const compact = isMobile && isPortrait;
 
   return (
-    <Fullscreen
-      isFullscreen={state.isFullscreen}
-      onToggle={playerHandlers.toggleFullscreen}
-      label={label}
-      compact={compact}
-    />
+    <section
+      onMouseEnter={() => playerHandlers.handleInteraction(true)}
+      onMouseLeave={() => playerHandlers.handleInteraction(false)}
+      aria-label="Fullscreen Interaction"
+    >
+      <Fullscreen
+        isFullscreen={state.isFullscreen}
+        onToggle={playerHandlers.toggleFullscreen}
+        label={label}
+        compact={compact}
+      />
+    </section>
   );
 }
