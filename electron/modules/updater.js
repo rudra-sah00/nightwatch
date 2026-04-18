@@ -1,5 +1,6 @@
 const { autoUpdater } = require('electron-updater');
 const { autoUpdater: asarUpdater } = require('electron-asar-hot-updater');
+const { net } = require('electron');
 const log = require('electron-log');
 
 function setupUpdater(splashWindow, onComplete) {
@@ -9,24 +10,15 @@ function setupUpdater(splashWindow, onComplete) {
   autoUpdater.autoInstallOnAppQuit = true;
 
   let updateFinished = false;
-  let asarChecked = false;
   let safetyTimer = null;
+  let asarChecked = false;
 
   const finish = () => {
     if (updateFinished) return;
     updateFinished = true;
-    // Clear the safety timer — normal completion, no need for the fallback
     if (safetyTimer) clearTimeout(safetyTimer);
-    setTimeout(onComplete, 1000); // 1s buffer so user sees it finishes
+    setTimeout(onComplete, 1000);
   };
-
-  // --- SAFETY TIMEOUT ---
-  safetyTimer = setTimeout(() => {
-    log.warn(
-      '[updater] Safety timeout reached — skipping update check (offline?).',
-    );
-    finish();
-  }, 15_000);
 
   const sendStatus = (text, percent) => {
     if (splashWindow && !splashWindow.isDestroyed()) {
@@ -36,6 +28,23 @@ function setupUpdater(splashWindow, onComplete) {
       }
     }
   };
+
+  // --- INSTANT OFFLINE CHECK ---
+  // If there's no network at all, skip the updater immediately.
+  if (!net.isOnline()) {
+    log.info('[updater] Device is offline — skipping update check instantly.');
+    sendStatus('Starting Watch Rudra...', 100);
+    finish();
+    return;
+  }
+
+  // --- SAFETY TIMEOUT (online but slow/unreachable server) ---
+  safetyTimer = setTimeout(() => {
+    log.warn(
+      '[updater] Safety timeout reached — skipping update check (offline?).',
+    );
+    finish();
+  }, 15_000);
 
   sendStatus('Checking for updates...', 10);
 
@@ -55,13 +64,11 @@ function setupUpdater(splashWindow, onComplete) {
   });
 
   autoUpdater.on('update-not-available', () => {
-    // If native doesn't need updating, check ASAR
     checkAsarUpdater();
   });
 
   autoUpdater.on('update-downloaded', () => {
     sendStatus('Installing updates...', 100);
-    // Silent restart for native update
     setTimeout(() => {
       autoUpdater.quitAndInstall(true, true);
     }, 2000);
@@ -82,14 +89,10 @@ function setupUpdater(splashWindow, onComplete) {
       asarUpdater.setFeedURL(
         'https://raw.githubusercontent.com/rudra-sah00/watch-rudra/main/update.json',
       );
-      // Monkey patch the logger of asar updater to track progress because it handles its own download
-      // For now we just await the promise
       asarUpdater
         .checkForUpdates()
         .then((res) => {
           log.info('ASAR checked:', res);
-          // It automatically prompts/restarts or returns null if no update.
-          // Since it doesn't give fine-grained progress hooks cleanly to UI yet:
           sendStatus('Ready to launch!', 100);
           finish();
         })
