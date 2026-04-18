@@ -61,6 +61,8 @@ class AppWindow {
       width: mainWindowState.width,
       height: mainWindowState.height,
       autoHideMenuBar: true,
+      minWidth: 800,
+      minHeight: 540,
 
       // Frameless Window Customizations (macOS Traffic Lights + Win11 Snap Layouts)
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', // 'hiddenInset' pushes macOS buttons slightly down for better centering, while Win uses 'hidden' with overlays.
@@ -167,10 +169,38 @@ class AppWindow {
     );
 
     this.mainWindow.once('ready-to-show', () => {
+      // Premium Fade-in Transition (#12)
+      this.mainWindow.setOpacity(0);
       this.mainWindow.show();
+
+      let opacity = 0;
+      const fadeInterval = setInterval(() => {
+        opacity += 0.1;
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          this.mainWindow.setOpacity(opacity);
+        }
+        if (opacity >= 1) clearInterval(fadeInterval);
+      }, 30);
+
       // Only open DevTools automatically in local development builds
       if (!require('electron').app.isPackaged) {
         this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+      }
+    });
+
+    // Auto-reload on renderer crash (avoids blank white screen stuck state)
+    this.mainWindow.webContents.on('render-process-gone', (_event, details) => {
+      if (details.reason !== 'clean-exit') {
+        require('electron-log').warn(
+          '[window] Renderer crashed:',
+          details.reason,
+          '— reloading',
+        );
+        setTimeout(() => {
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.reload();
+          }
+        }, 1000);
       }
     });
 

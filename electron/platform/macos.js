@@ -50,10 +50,10 @@ async function _setupMacOS() {
       {
         label: 'View',
         submenu: [
+          { role: 'reload' },
           ...(app.isPackaged
             ? []
             : [
-                { role: 'reload' },
                 { role: 'forceReload' },
                 { role: 'toggleDevTools' },
                 { type: 'separator' },

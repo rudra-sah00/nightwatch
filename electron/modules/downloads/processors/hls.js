@@ -49,6 +49,7 @@ async function startHlsDownload(
   activeDownloadsMap.set(contentId, item);
   item.reqs = [];
 
+  // Download subtitle tracks (skipped if already on disk)
   if (subtitleTracks && Array.isArray(subtitleTracks)) {
     const processedTracks = [];
     for (let i = 0; i < subtitleTracks.length; i++) {
@@ -93,6 +94,7 @@ async function startHlsDownload(
   }
 
   try {
+    // Download poster image (skip if already cached)
     if (posterUrl && !item.posterUrl) {
       try {
         const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
@@ -112,8 +114,9 @@ async function startHlsDownload(
     }
 
     if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
-    if (item.status === 'PAUSED') return; // state will be synced in finally block or by pause handler
+    if (item.status === 'PAUSED') return true;
 
+    // --- Fetch and parse the M3U8 playlist ---
     const masterText = await fetchText(m3u8Url);
     let targetPlaylistUrl = m3u8Url;
     const lines = masterText.split('\n');
@@ -164,6 +167,35 @@ async function startHlsDownload(
     }
 
     item.segmentsTotal = segments.length;
+
+    // --- RESUME LOGIC: Scan disk to restore progress state ---
+    // Instead of resetting to 0 every run, we check which segments
+    // already exist on disk and restore byte counts from their actual sizes.
+    // This is the core fix for "progress resets to 0% after pause/resume/restart".
+    {
+      let restoredBytes = 0;
+      let restoredCount = 0;
+      const restoredSet = [];
+
+      for (const seg of segments) {
+        const destPath = path.join(contentFolder, seg.localName);
+        if (fs.existsSync(destPath)) {
+          const stat = fs.statSync(destPath);
+          if (stat.size > 0) {
+            restoredBytes += stat.size;
+            restoredCount++;
+            restoredSet.push(seg.localName);
+          }
+        }
+      }
+
+      item.downloadedBytes = restoredBytes;
+      item.segmentsDownloaded = restoredCount;
+      item.segmentsDownloadedSet = restoredSet;
+      item.progress =
+        segments.length > 0 ? (restoredCount / segments.length) * 100 : 0;
+    }
+
     syncDbState(item);
     sendSafeProgress(eventSender, item);
 
@@ -176,18 +208,9 @@ async function startHlsDownload(
       const destPath = path.join(contentFolder, segment.localName);
       rewritenLines[segment.lineIndex] = segment.localName;
 
-      if (fs.existsSync(destPath)) {
-        const stat = fs.statSync(destPath);
-        if (
-          stat.size > 0 &&
-          !item.segmentsDownloadedSet?.includes(segment.localName)
-        ) {
-          item.downloadedBytes += stat.size;
-          item.segmentsDownloaded++;
-          if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
-          item.segmentsDownloadedSet.push(segment.localName);
-          return;
-        }
+      // Skip already-downloaded segments (restored from disk above)
+      if (item.segmentsDownloadedSet?.includes(segment.localName)) {
+        return;
       }
 
       await downloadFile(
@@ -212,14 +235,13 @@ async function startHlsDownload(
         item.speed = formatSpeed(bytesPerSec);
         lastTime = now;
         bytesSinceLastTick = 0;
+        // Persist progress so a crash/restart can resume from here
         syncDbState(item);
       }
       sendSafeProgress(eventSender, item);
     };
 
-    item.segmentsDownloaded = 0;
-    item.segmentsDownloadedSet = [];
-
+    // Concurrency pool
     await (async function runPool() {
       let index = 0;
       const active = new Set();
@@ -243,7 +265,36 @@ async function startHlsDownload(
     })();
 
     if (item.status === 'CANCELLED') return finalizeCancel(item, contentId);
+    if (item.status === 'PAUSED') {
+      item.speed = '';
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+      return;
+    }
 
+    // --- VERIFY COMPLETION ---
+    // Ensure all segments are actually on disk before marking as COMPLETED.
+    // If we missed segments due to network errors, mark as ERROR instead.
+    const finalRestoredSet = [];
+    for (const seg of segments) {
+      if (fs.existsSync(path.join(contentFolder, seg.localName))) {
+        finalRestoredSet.push(seg.localName);
+      }
+    }
+
+    item.segmentsDownloaded = finalRestoredSet.length;
+    item.progress = (finalRestoredSet.length / segments.length) * 100;
+
+    if (finalRestoredSet.length < segments.length) {
+      item.status = 'ERROR';
+      item.error = `Download incomplete: ${segments.length - finalRestoredSet.length} segments failed.`;
+      item.speed = '';
+      syncDbState(item);
+      sendSafeProgress(eventSender, item);
+      return;
+    }
+
+    // Write the final local m3u8 playlist only if complete
     fs.writeFileSync(
       path.join(contentFolder, 'local_playlist.m3u8'),
       rewritenLines.join('\n'),

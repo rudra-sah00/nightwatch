@@ -11,11 +11,27 @@ function setupTray(mainWindow, setQuittingCallback) {
       process.env.NODE_ENV === 'development'
         ? path.join(__dirname, '..', '..')
         : path.join(__dirname, '..');
-    const trayIconFile = path.resolve(rootDir, 'public', 'favicon.ico');
 
-    const image = fs.existsSync(trayIconFile)
-      ? nativeImage.createFromPath(trayIconFile)
+    // macOS needs a 18x18 PNG (36x36 @2x Retina) — .ico looks blurry on Retina displays.
+    // Windows & Linux use .ico for proper taskbar rendering.
+    const trayIconFile =
+      process.platform === 'darwin'
+        ? path.resolve(rootDir, 'public', 'tray-icon.png')
+        : path.resolve(rootDir, 'public', 'favicon.ico');
+
+    // Fallback to favicon.ico if tray-icon.png doesn't exist yet
+    const resolvedIcon = fs.existsSync(trayIconFile)
+      ? trayIconFile
+      : path.resolve(rootDir, 'public', 'favicon.ico');
+
+    const image = fs.existsSync(resolvedIcon)
+      ? nativeImage.createFromPath(resolvedIcon)
       : nativeImage.createEmpty();
+
+    // Mark as template image on macOS so it auto-adapts to light/dark menu bar
+    if (process.platform === 'darwin') {
+      image.setTemplateImage(true);
+    }
 
     appTray = new Tray(image);
     appTray.setToolTip('Watch Rudra - Live Desktop');
@@ -32,12 +48,12 @@ function setupTray(mainWindow, setQuittingCallback) {
       },
       { type: 'separator' },
       {
-        label: '⏯ Play/Pause Video',
+        label: 'Play / Pause Video',
         click: () =>
           mainWindow?.webContents.send('media-command', 'MediaPlayPause'),
       },
       {
-        label: '🎙️ Toggle Microphone (PTT)',
+        label: 'Toggle Microphone (PTT)',
         click: () =>
           mainWindow?.webContents.send('media-command', 'toggle-ptt'),
       },
@@ -57,13 +73,23 @@ function setupTray(mainWindow, setQuittingCallback) {
 
     appTray.setContextMenu(contextMenuTemplate);
 
-    // Clicking tray icon shows the main window directly
+    // Single click → show window on all platforms
     appTray.on('click', () => {
       if (mainWindow) {
         mainWindow.restore();
         mainWindow.show();
       }
     });
+
+    // macOS: double-click also shows window (matches OS conventions)
+    if (process.platform === 'darwin') {
+      appTray.on('double-click', () => {
+        if (mainWindow) {
+          mainWindow.restore();
+          mainWindow.show();
+        }
+      });
+    }
   } catch (_err) {}
 }
 

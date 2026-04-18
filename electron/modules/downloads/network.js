@@ -45,6 +45,17 @@ function fetchText(url) {
   });
 }
 
+/**
+ * Downloads a file from url → dest, optionally resuming from startOffset.
+ *
+ * @param {string}   url              - Remote URL to download
+ * @param {string}   dest             - Local file path to write/append to
+ * @param {Function} onProgressBytes  - Called with each chunk's byte count
+ * @param {object}   activeItem       - The download DB item (checked for PAUSED/CANCELLED)
+ * @param {object}   store            - electron-store instance (for speed limit)
+ * @param {number}   startOffset      - Byte offset to resume from (sends Range header)
+ * @param {Function} onTotalBytes     - Called once with the total file size (for accurate progress)
+ */
 function downloadFile(
   url,
   dest,
@@ -52,15 +63,16 @@ function downloadFile(
   activeItem = null,
   store,
   startOffset = 0,
+  onTotalBytes = null,
 ) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(dest, {
       flags: startOffset > 0 ? 'a' : 'w',
     });
+
     const req = client.get(
       url,
-
       {
         headers: {
           'User-Agent': 'Mozilla/5.0',
@@ -68,11 +80,13 @@ function downloadFile(
         },
       },
       (res) => {
+        // Follow redirects — close current file handle before recursing
         if (
           res.statusCode >= 300 &&
           res.statusCode < 400 &&
           res.headers.location
         ) {
+          file.close();
           resolve(
             downloadFile(
               new URL(res.headers.location, url).href,
@@ -81,19 +95,37 @@ function downloadFile(
               activeItem,
               store,
               startOffset,
+              onTotalBytes,
             ),
           );
           return;
         }
+
+        // Expose total file size so callers can compute accurate progress %.
+        // For Range requests, Content-Range gives us TOTAL: "bytes X-Y/TOTAL"
+        // For full downloads, Content-Length alone is the total.
+        if (onTotalBytes) {
+          const contentRange = res.headers['content-range'];
+          if (contentRange) {
+            const match = contentRange.match(/\/(\d+)$/);
+            if (match) onTotalBytes(parseInt(match[1], 10));
+          } else if (res.headers['content-length']) {
+            const len = parseInt(res.headers['content-length'], 10);
+            if (!Number.isNaN(len)) onTotalBytes(len + startOffset);
+          }
+        }
+
         res.on('data', (chunk) => {
           if (activeItem && activeItem.status === 'CANCELLED') {
             res.destroy();
             file.close();
+            // Remove the partial file — cancel means start fresh
             fs.unlink(dest, () => {});
             return reject(new Error('CANCELLED_BY_USER'));
           }
           if (activeItem && activeItem.status === 'PAUSED') {
             res.destroy();
+            // Keep the partial file on disk — resume will append from current size
             file.close();
             return reject(new Error('PAUSED_BY_USER'));
           }
@@ -129,9 +161,13 @@ function downloadFile(
         });
       },
     );
+
     req.on('error', (err) => {
-      fs.unlink(dest, () => reject(err));
+      file.close();
+      // Don't delete partial files for network errors — they can be resumed
+      reject(err);
     });
+
     if (activeItem && !activeItem.reqs) activeItem.reqs = [];
     if (activeItem) activeItem.reqs.push(req);
   });

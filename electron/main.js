@@ -49,11 +49,15 @@ const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
 const { setupLiveBridge } = require('./modules/live-bridge.js');
-const { setupDownloadManager } = require('./modules/download-manager.js');
+const {
+  setupOfflineMediaProtocol,
+  setupDownloadManager,
+} = require('./modules/download-manager.js');
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
 const windows = require('./platform/windows.js');
+const linux = require('./platform/linux.js');
 
 // --- 0. HARDWARE ACCELERATION TOGGLE (Crucial for weird GPU video green-screen bugs) ---
 // If a user has a command line flag --disable-gpu or saves a local setting, we fall back to CPU video decoding.
@@ -83,12 +87,17 @@ app.commandLine.appendSwitch('enable-zero-copy');
 // --- 2. DEEP LINK URL REGISTRATION ---
 // Tells the Host OS that "watch-rudra://" should be handled by this Electron binary
 windows.registerProtocol();
+linux.registerProtocol();
 
 let internalAppIsQuitting = false;
 
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
 const startElectronApp = async () => {
+  // Register offline-media:// protocol handler FIRST — before splash or main window.
+  // This ensures downloaded HLS/MP4 content is playable the instant the React app loads.
+  setupOfflineMediaProtocol();
+
   // SCOPED CORS FIX: Only intercept our internal backend API requests.
   // Returning `*` globally breaks withCredentials (browser spec forbids wildcard +
   // credentials). We now return the exact requesting origin so cookies work.
@@ -177,6 +186,44 @@ const startElectronApp = async () => {
 
   await macOS.setupMacOS();
 
+  // --- WINDOWS & LINUX MINIMAL MENU (Enables Reload Shortcuts) ---
+  if (process.platform !== 'darwin') {
+    const { Menu } = require('electron');
+    const menuTemplate = [
+      {
+        label: 'View',
+        submenu: [
+          { role: 'reload' },
+          ...(app.isPackaged
+            ? []
+            : [
+                { role: 'forceReload' },
+                { role: 'toggleDevTools' },
+                { type: 'separator' },
+              ]),
+          { role: 'resetZoom' },
+          { role: 'zoomIn' },
+          { role: 'zoomOut' },
+          { type: 'separator' },
+          { role: 'togglefullscreen' },
+        ],
+      },
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' },
+        ],
+      },
+    ];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+  }
+
   // Initialize Background Auto Updater with Discord-style Splash Screen
   const finishLaunch = () => {
     if (internalAppIsQuitting) return; // Prevent spawning zombie windows if user hit CMD+Q early
@@ -220,6 +267,7 @@ const startElectronApp = async () => {
 
   if (app.isPackaged) {
     const splash = createSplash();
+
     setupUpdater(splash, () => {
       if (!splash.isDestroyed()) {
         splash.close();
@@ -259,12 +307,14 @@ const startElectronApp = async () => {
   });
 
   // Keep screen awake while watching media!
-  let powerBlockerId = 0;
+  // -1 = no active blocker (0 is a valid Electron blocker ID, so don't use it as sentinel)
+  let powerBlockerId = -1;
   ipcMain.on('toggle-keep-awake', (_event, keepAwake) => {
-    if (keepAwake && !powerSaveBlocker.isStarted(powerBlockerId)) {
+    if (keepAwake && powerBlockerId === -1) {
       powerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
-    } else if (!keepAwake && powerSaveBlocker.isStarted(powerBlockerId)) {
+    } else if (!keepAwake && powerBlockerId !== -1) {
       powerSaveBlocker.stop(powerBlockerId);
+      powerBlockerId = -1;
     }
   });
 
@@ -297,14 +347,28 @@ const startElectronApp = async () => {
   powerMonitor.on('unlock-screen', triggerResume);
 
   // --- TRUE PICTURE-IN-PICTURE OS SNAP ---
+  let prePipBounds = null;
   ipcMain.on('set-pip', (_event, isEnabled, opacityLevel = 1.0) => {
     const win = AppWindow.getInstance();
     if (!win) return;
 
+    // Remove from taskbar when in PiP mode (feels more like a native overlay)
+    win.setSkipTaskbar(isEnabled);
+
     const { screen } = require('electron');
 
     if (isEnabled) {
-      win.setAlwaysOnTop(true, 'floating');
+      // macOS: 'screen-saver' level renders above ALL fullscreen spaces and apps.
+      // Windows/Linux: 'pop-up-menu' renders above normal apps but below system UI.
+      // 'floating' (old value) does NOT penetrate macOS fullscreen spaces — that's the bug.
+      const alwaysOnTopLevel =
+        process.platform === 'darwin' ? 'screen-saver' : 'pop-up-menu';
+      win.setAlwaysOnTop(true, alwaysOnTopLevel);
+
+      // Also tell macOS to show this window on ALL fullscreen spaces + the desktop
+      if (process.platform === 'darwin') {
+        win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      }
 
       // Hide MacOS Traffic Lights (Red/Yellow/Green window buttons) for a seamless 16:9 rectangle
       if (process.platform === 'darwin') win.setWindowButtonVisibility(false);
@@ -315,7 +379,9 @@ const startElectronApp = async () => {
       }
 
       // Calculate Bottom-Right Corner of current monitor
-      const winBounds = win.getBounds();
+      // Save bounds before we modify them so we can restore them later
+      if (!prePipBounds) prePipBounds = win.getBounds();
+      const winBounds = prePipBounds;
       const currentScreen = screen.getDisplayNearestPoint({
         x: winBounds.x,
         y: winBounds.y,
@@ -344,11 +410,20 @@ const startElectronApp = async () => {
       win.setAlwaysOnTop(false);
       win.setOpacity(1.0);
 
-      if (process.platform === 'darwin') win.setWindowButtonVisibility(true);
+      // Restore normal workspace visibility
+      if (process.platform === 'darwin') {
+        win.setVisibleOnAllWorkspaces(false);
+        win.setWindowButtonVisibility(true);
+      }
 
       win.setAspectRatio(0); // unlock aspect ratio
-      win.setSize(1280, 800, true);
-      win.center();
+      if (prePipBounds) {
+        win.setBounds(prePipBounds, true);
+        prePipBounds = null;
+      } else {
+        win.setSize(1280, 800, true);
+        win.center();
+      }
 
       win.webContents.send('pip-mode-changed', false);
     }
@@ -445,6 +520,22 @@ const startElectronApp = async () => {
   ipcMain.on('store-set', (_event, key, value) => store.set(key, value));
   ipcMain.on('store-delete', (_event, key) => store.delete(key));
 
+  // --- REAL APP VERSION (ASAR-aware) ---
+  // app.getVersion() returns the native binary's compile-time version and is NOT
+  // updated by electron-asar-hot-updater. We always read from package.json inside
+  // the ASAR so React sees the correct version after a hot update.
+  ipcMain.handle('get-app-version', () => {
+    try {
+      const fs = require('node:fs');
+      const pkgPath = _path.join(app.getAppPath(), 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        return pkg.version || app.getVersion();
+      }
+    } catch (_e) {}
+    return app.getVersion();
+  });
+
   // --- NATIVE THEMING ---
   const { nativeTheme } = require('electron');
   ipcMain.on('set-native-theme', (_event, theme) => {
@@ -494,14 +585,42 @@ const startElectronApp = async () => {
 app.whenReady().then(startElectronApp);
 
 // Re-route additional instance attempts or windows URL arguments cleanly
-windows.setupWindows(triggerDeepLink, AppWindow.getInstance());
+windows.setupWindows(triggerDeepLink, () => AppWindow.getInstance());
+linux.setupLinux(triggerDeepLink, () => AppWindow.getInstance());
 
 // Lifecycle Cleanup hook
 app.on('before-quit', () => {
   internalAppIsQuitting = true;
   AppWindow.setQuitting(true);
+  try {
+    if (discordLogic && typeof discordLogic.destroy === 'function') {
+      discordLogic.destroy();
+    }
+  } catch (_e) {}
 });
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
+
+// --- WINDOWS JUMP LIST (#13) ---
+if (process.platform === 'win32') {
+  app.setUserTasks([
+    {
+      program: process.execPath,
+      arguments: '--open-downloads',
+      iconPath: process.execPath,
+      iconIndex: 0,
+      title: 'Open Downloads',
+      description: 'View offline media',
+    },
+    {
+      program: process.execPath,
+      arguments: '--play-pause',
+      iconPath: process.execPath,
+      iconIndex: 0,
+      title: 'Play / Pause Video',
+      description: 'Toggle playback',
+    },
+  ]);
+}

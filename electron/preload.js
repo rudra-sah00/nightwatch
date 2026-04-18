@@ -14,6 +14,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   storeSet: (key, value) => ipcRenderer.send('store-set', key, value),
   storeDelete: (key) => ipcRenderer.send('store-delete', key),
 
+  // Returns the true version from package.json inside the ASAR bundle.
+  // Use this instead of process.env.npm_package_version or any hardcoded value,
+  // because app.getVersion() is frozen at native binary build time and won't
+  // reflect electron-asar-hot-updater changes until a full native reinstall.
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+
   // Sync React Native Theme with Electron Window Frame
   setNativeTheme: (theme) => ipcRenderer.send('set-native-theme', theme),
 

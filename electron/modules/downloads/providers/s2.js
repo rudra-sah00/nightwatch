@@ -62,10 +62,6 @@ async function downloadS2(eventSender, args) {
           await downloadFile(trailer.url, trailerDest, null, item, store).catch(
             (e) => {
               console.error('[downloadS2] Trailer download failed:', e);
-              require('node:fs').writeFileSync(
-                '/Users/rudra/Library/Application Support/watch-rudra/OfflineVault/debug-trailer-err.txt',
-                e.stack || e.toString(),
-              );
             },
           );
         }

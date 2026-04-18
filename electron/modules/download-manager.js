@@ -1,4 +1,90 @@
 const { protocol, ipcMain } = require('electron');
+
+/**
+ * MUST be called immediately after app.whenReady() — before the splash or main window.
+ * Registers the offline-media:// custom protocol handler so encrypted HLS segments
+ * downloaded offline can be served to the video player at any point in app lifetime.
+ */
+function setupOfflineMediaProtocol() {
+  if (!protocol.handle) return; // Safety: older Electron versions
+
+  const path = require('node:path');
+  const fs = require('node:fs');
+  const { VAULT_PATH } = require('./downloads/state');
+
+  protocol.handle('offline-media', (request) => {
+    let relativePath;
+    try {
+      const urlObj = new URL(request.url);
+      relativePath =
+        urlObj.hostname === 'local'
+          ? decodeURIComponent(urlObj.pathname.slice(1))
+          : decodeURIComponent(urlObj.hostname + urlObj.pathname);
+    } catch (_e) {
+      relativePath = decodeURIComponent(
+        request.url.replace(/^offline-media:\/\//, ''),
+      );
+    }
+    const finalPath = path.join(VAULT_PATH, relativePath);
+    try {
+      const stat = fs.statSync(finalPath);
+      const range = request.headers.get('range');
+      const size = stat.size;
+
+      const ext = path.extname(finalPath).toLowerCase();
+      let contentType = 'application/octet-stream';
+      if (ext === '.mp4') contentType = 'video/mp4';
+      else if (ext === '.m3u8') contentType = 'application/x-mpegURL';
+      else if (ext === '.ts') contentType = 'video/MP2T';
+      else if (ext === '.vtt') contentType = 'text/vtt';
+      else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+      else if (ext === '.png') contentType = 'image/png';
+
+      const { XorStream } = require('./downloads/cipher');
+
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
+        const chunksize = end - start + 1;
+
+        let fileStream = fs.createReadStream(finalPath, { start, end });
+        if (ext === '.ts' || ext === '.mp4') {
+          fileStream = fileStream.pipe(new XorStream(start));
+        }
+        const webStream = require('node:stream').Readable.toWeb(fileStream);
+        return new Response(webStream, {
+          status: 206,
+          headers: {
+            'Content-Range': `bytes ${start}-${end}/${size}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize.toString(),
+            'Content-Type': contentType,
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      } else {
+        let fileStream = fs.createReadStream(finalPath);
+        if (ext === '.ts' || ext === '.mp4') {
+          fileStream = fileStream.pipe(new XorStream(0));
+        }
+        const webStream = require('node:stream').Readable.toWeb(fileStream);
+        return new Response(webStream, {
+          status: 200,
+          headers: {
+            'Content-Length': size.toString(),
+            'Content-Type': contentType,
+            'Accept-Ranges': 'bytes',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    } catch (err) {
+      console.error('[offline-media] Error serving file:', err);
+      return new Response('File error', { status: 500 });
+    }
+  });
+}
 const path = require('node:path');
 const fs = require('node:fs');
 const {
@@ -56,16 +142,30 @@ function processQueue() {
 }
 
 function setupDownloadManager() {
-  // Fix #9: Rehydrate pending downloads on app start
+  // Rehydrate downloads on app start.
+  // - QUEUED / ERROR → re-queue automatically (user intended these to run)
+  // - PAUSED → keep as PAUSED; user will manually resume
+  // - DOWNLOADING → app crashed mid-download; mark as PAUSED so user can resume safely
   const initialDb = getDatabase();
-  const pendingItems = initialDb.items.filter(
+
+  // Fix items that were left in DOWNLOADING state from a crash
+  let needsSave = false;
+  for (const item of initialDb.items) {
+    if (item.status === 'DOWNLOADING') {
+      item.status = 'PAUSED';
+      item.speed = '';
+      needsSave = true;
+    }
+  }
+  if (needsSave) saveDatabase(initialDb);
+
+  // Only auto-restart QUEUED and ERROR items — not PAUSED
+  const autoStartItems = initialDb.items.filter(
     (i) => i.status === 'QUEUED' || i.status === 'ERROR',
   );
-  for (const item of pendingItems) {
+  for (const item of autoStartItems) {
     downloadQueue.push({
-      // We don't have an event.sender yet on startup. The frontend will reconnect
-      // its listener when it mounts, and we rely on state polling or resumed events.
-      eventSender: null,
+      eventSender: null, // No sender yet — frontend reconnects when it mounts
       args: item,
       isCancelled: false,
       contentId: item.contentId,
@@ -74,6 +174,18 @@ function setupDownloadManager() {
   processQueue();
 
   ipcMain.on('start-download', (event, args) => {
+    // Safety cap: refuse new downloads if queue is already full
+    const MAX_QUEUE = 100;
+    if (downloadQueue.length >= MAX_QUEUE) {
+      event.sender.send('download-progress', {
+        contentId: args.contentId,
+        status: 'ERROR',
+        error:
+          'Download queue is full. Please wait for current downloads to finish.',
+      });
+      return;
+    }
+
     const db = getDatabase();
     let iter = db.items.find((i) => i.contentId === args.contentId);
     if (!iter) {
@@ -85,17 +197,19 @@ function setupDownloadManager() {
         status: 'QUEUED',
         progress: 0,
         downloadedBytes: 0,
+        totalBytes: 0,
       };
       if (args.metadata) iter.showData = args.metadata;
       db.items.push(iter);
     } else {
       if (iter.quality !== args.quality) {
-        const fs = require('node:fs');
+        // Quality changed — delete existing files and restart from scratch
         const contentFolder = path.join(VAULT_PATH, args.contentId);
         if (fs.existsSync(contentFolder)) {
           fs.rmSync(contentFolder, { recursive: true, force: true });
         }
         iter.downloadedBytes = 0;
+        iter.totalBytes = 0;
         iter.progress = 0;
         iter.m3u8Url = args.m3u8Url;
       }
@@ -167,83 +281,13 @@ function setupDownloadManager() {
   ipcMain.handle('get-downloads', async () => {
     return getDatabase().items;
   });
-
-  if (protocol.handle) {
-    protocol.handle('offline-media', (request) => {
-      let relativePath;
-      try {
-        const urlObj = new URL(request.url);
-        relativePath =
-          urlObj.hostname === 'local'
-            ? decodeURIComponent(urlObj.pathname.slice(1))
-            : decodeURIComponent(urlObj.hostname + urlObj.pathname);
-      } catch (_e) {
-        relativePath = decodeURIComponent(
-          request.url.replace(/^offline-media:\/\//, ''),
-        );
-      }
-      const _url = require('node:url');
-      const finalPath = path.join(VAULT_PATH, relativePath);
-      try {
-        const stat = fs.statSync(finalPath);
-        const range = request.headers.get('range');
-        const size = stat.size;
-
-        const ext = require('node:path').extname(finalPath).toLowerCase();
-        let contentType = 'application/octet-stream';
-        if (ext === '.mp4') contentType = 'video/mp4';
-        else if (ext === '.m3u8') contentType = 'application/x-mpegURL';
-        else if (ext === '.ts') contentType = 'video/MP2T';
-        else if (ext === '.vtt') contentType = 'text/vtt';
-        else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
-        else if (ext === '.png') contentType = 'image/png';
-
-        const { XorStream } = require('./downloads/cipher');
-
-        if (range) {
-          const parts = range.replace(/bytes=/, '').split('-');
-          const start = parseInt(parts[0], 10);
-          const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
-          const chunksize = end - start + 1;
-
-          let fileStream = fs.createReadStream(finalPath, { start, end });
-          if (ext === '.ts' || ext === '.mp4') {
-            fileStream = fileStream.pipe(new XorStream(start));
-          }
-          const webStream = require('node:stream').Readable.toWeb(fileStream);
-
-          return new Response(webStream, {
-            status: 206,
-            headers: {
-              'Content-Range': `bytes ${start}-${end}/${size}`,
-              'Accept-Ranges': 'bytes',
-              'Content-Length': chunksize.toString(),
-              'Content-Type': contentType,
-              'Access-Control-Allow-Origin': '*',
-            },
-          });
-        } else {
-          let fileStream = fs.createReadStream(finalPath);
-          if (ext === '.ts' || ext === '.mp4') {
-            fileStream = fileStream.pipe(new XorStream(0));
-          }
-          const webStream = require('node:stream').Readable.toWeb(fileStream);
-          return new Response(webStream, {
-            status: 200,
-            headers: {
-              'Content-Length': size.toString(),
-              'Content-Type': contentType,
-              'Accept-Ranges': 'bytes',
-              'Access-Control-Allow-Origin': '*',
-            },
-          });
-        }
-      } catch (err) {
-        console.error('[offline-media] Error serving file:', err);
-        return new Response('File error', { status: 500 });
-      }
-    });
-  }
 }
 
-module.exports = { setupDownloadManager, startDownloadTask };
+// Note: offline-media:// protocol handler is registered separately via
+// setupOfflineMediaProtocol() which is called early in main.js (before the splash).
+
+module.exports = {
+  setupOfflineMediaProtocol,
+  setupDownloadManager,
+  startDownloadTask,
+};

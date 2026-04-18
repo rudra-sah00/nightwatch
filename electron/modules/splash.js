@@ -1,7 +1,24 @@
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, app } = require('electron');
 const _path = require('node:path');
+const _fs = require('node:fs');
 
 let splashWindow;
+
+/**
+ * Reads the real app version from package.json inside the ASAR bundle.
+ * This is needed because app.getVersion() returns the native binary's
+ * compiled version, which is NOT updated by electron-asar-hot-updater.
+ */
+function getAsarVersion() {
+  try {
+    const pkgPath = _path.join(app.getAppPath(), 'package.json');
+    if (_fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(_fs.readFileSync(pkgPath, 'utf-8'));
+      return pkg.version || app.getVersion();
+    }
+  } catch (_e) {}
+  return app.getVersion();
+}
 
 function createSplash() {
   splashWindow = new BrowserWindow({
@@ -103,7 +120,7 @@ function createSplash() {
         <div class="container">
           <div class="splash-logo"><img src="file://${iconPath}" alt="Logo" /></div>
           <div class="title">Watch Rudra</div>
-          <div id="version" class="version">v${require('electron').app.getVersion()}</div>
+          <div id="version" class="version">v${getAsarVersion()}</div>
           <div id="status" class="status">STARTING...</div>
           <div class="progress-bar-bg">
             <div id="progress" class="progress-bar"></div>
