@@ -17,9 +17,9 @@ export function PlayerHeader({
   const { metadata, playerHandlers } = usePlayerContext();
 
   return (
-    <div
+    <header
       className={cn(
-        'absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300 opacity-100',
+        'player-header absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300 opacity-100',
       )}
     >
       {!hideBackButton ? (
@@ -63,6 +63,6 @@ export function PlayerHeader({
           </p>
         ) : null}
       </div>
-    </div>
+    </header>
   );
 }
