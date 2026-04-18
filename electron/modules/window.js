@@ -187,21 +187,33 @@ class AppWindow {
         // renderer-initiated location.replace(), which correctly triggers
         // the Service Worker to serve the cached app.
         const isNetworkError = errorCode >= -199 && errorCode <= -100;
-        if (isNetworkError && offlineRetries === 0) {
-          offlineRetries++;
-          const path = require('node:path');
-          const bridgePath = path.join(
-            __dirname,
-            '../build/offline-bridge.html',
-          );
+        if (isNetworkError) {
+          if (offlineRetries === 0) {
+            offlineRetries++;
+            const path = require('node:path');
+            const bridgePath = path.join(
+              __dirname,
+              '../build/offline-bridge.html',
+            );
 
-          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-            this.mainWindow.loadFile(bridgePath);
+            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+              this.mainWindow.loadFile(bridgePath);
+            }
+          } else if (offlineRetries === 1) {
+            // The bridge's location.replace also failed (SW not installed).
+            // Prevent fallback to chrome-error:// by reloading bridge with failed flag.
+            offlineRetries++;
+            const path = require('node:path');
+            const bridgePath = path.join(
+              __dirname,
+              '../build/offline-bridge.html',
+            );
+
+            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+              this.mainWindow.loadFile(bridgePath, { search: 'failed=1' });
+            }
           }
         }
-        // If the bridge's location.replace fails (e.g. SW not installed yet),
-        // did-fail-load fires again, but offlineRetries is 1 so it stops looping
-        // and safely rests on the bridge UI.
       },
     );
 

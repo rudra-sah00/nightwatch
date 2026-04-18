@@ -83,18 +83,22 @@
   </div>
 
   <script>
-    // Switch to a failure message if the SW doesn't answer soon
-    setTimeout(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('failed')) {
+      // SW is NOT installed. Show error and stay on this bridge screen.
       document.getElementById('loader').style.display = 'none';
       document.getElementById('msg-box').style.backgroundColor = '#09090b';
       document.getElementById('msg-box').style.color = '#fb7185';
       document.getElementById('msg-box').style.borderColor = '#fb7185';
       document.getElementById('msg-text').textContent = 'OFFLINE CACHE EXPIRED';
       document.getElementById('msg-text').style.animation = 'none';
-    }, 2500);
-
-    // This triggers the Service Worker!
-    window.location.replace("https://watch.rudrasahoo.live");
+    } else {
+      setTimeout(() => {
+        // This triggers the Service Worker!
+        // If it fails, it triggers did-fail-load, which we catch and reload with ?failed=1.
+        window.location.replace("https://watch.rudrasahoo.live");
+      }, 500);
+    }
   </script>
 </body>
 </html>
