@@ -411,11 +411,10 @@ export function DownloadMenu({
       >
         <DialogTitle className="sr-only">Download {show.title}</DialogTitle>
 
-        {/* Absolute Close Button (Text only) */}
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="absolute top-8 right-8 z-50 text-black/50 dark:text-white/50 hover:text-black dark:text-white font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
+          className="absolute top-8 right-8 z-50 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
         >
           Cancel
         </button>

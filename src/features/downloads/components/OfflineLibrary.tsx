@@ -9,21 +9,13 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { ContentType, type ShowDetails } from '@/features/search/types';
 import { cn } from '@/lib/utils';
 import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
-
-const OfflineContentDetailModal = dynamic(
-  () =>
-    import('./offline-content-detail-modal').then(
-      (m) => m.OfflineContentDetailModal,
-    ),
-  { ssr: false },
-);
 
 function formatBytes(bytes?: number, decimals = 2) {
   if (!bytes || bytes === 0) return '0 Bytes';
@@ -35,6 +27,7 @@ function formatBytes(bytes?: number, decimals = 2) {
 }
 
 export function OfflineLibrary() {
+  const router = useRouter();
   const {
     downloads,
     isDesktopApp,
@@ -43,11 +36,6 @@ export function OfflineLibrary() {
     pauseDownload,
     resumeDownload,
   } = useDownloads();
-  const [selectedItem, setSelectedItem] = useState<{
-    contentId: string;
-    season?: number;
-    episode?: number;
-  } | null>(null);
 
   const handleSelect = (item: DownloadItem) => {
     if (item.status !== 'COMPLETED') {
@@ -55,25 +43,54 @@ export function OfflineLibrary() {
       return;
     }
 
-    const sEpMatch = item.contentId.match(/^(.*?)_S(\d+)E(\d+)$/);
-    if (sEpMatch) {
-      setSelectedItem({
-        contentId: sEpMatch[1],
-        season: parseInt(sEpMatch[2], 10),
-        episode: parseInt(sEpMatch[3], 10),
-      });
+    const showData = item.showData as ShowDetails;
+    if (!showData) {
+      toast.error('Offline item data is missing.');
       return;
     }
-    const epMatch = item.contentId.match(/^(.*?)-ep(\d+)$/);
-    if (epMatch) {
-      setSelectedItem({
-        contentId: epMatch[1],
-        season: 1,
-        episode: parseInt(epMatch[2], 10),
-      });
-      return;
+
+    const providerId = item.contentId.split(':')[0] || 's1';
+    const description = showData.description
+      ? encodeURIComponent(showData.description)
+      : '';
+    const year = showData.year ? encodeURIComponent(showData.year) : '';
+    const posterUrl = showData.posterUrl
+      ? encodeURIComponent(showData.posterUrl)
+      : '';
+    const title = showData.title ? encodeURIComponent(showData.title) : '';
+
+    if (showData.contentType === ContentType.Series) {
+      const sEpMatch = item.contentId.match(/^(.*?)_S(\d+)E(\d+)$/);
+      let season = 1;
+      let episode = 1;
+      let seriesId = showData.id;
+
+      if (sEpMatch) {
+        seriesId = sEpMatch[1];
+        season = parseInt(sEpMatch[2], 10);
+        episode = parseInt(sEpMatch[3], 10);
+      } else {
+        const epMatch = item.contentId.match(/^(.*?)-ep(\d+)$/);
+        if (epMatch) {
+          seriesId = epMatch[1];
+          episode = parseInt(epMatch[2], 10);
+        }
+      }
+
+      let url = `/watch/${encodeURIComponent(seriesId)}?type=series&title=${title}&season=${season}&episode=${episode}&seriesId=${encodeURIComponent(seriesId)}&server=${providerId}`;
+      if (description) url += `&description=${description}`;
+      if (year) url += `&year=${year}`;
+      if (posterUrl) url += `&poster=${posterUrl}`;
+
+      router.push(url);
+    } else {
+      let url = `/watch/${encodeURIComponent(showData.id)}?type=movie&title=${title}&server=${providerId}`;
+      if (description) url += `&description=${description}`;
+      if (year) url += `&year=${year}`;
+      if (posterUrl) url += `&poster=${posterUrl}`;
+
+      router.push(url);
     }
-    setSelectedItem({ contentId: item.contentId });
   };
 
   if (!isMounted) {
@@ -154,8 +171,16 @@ export function OfflineLibrary() {
           ) : (
             <div className="flex flex-col gap-4">
               {downloads.map((item) => (
-                <button
-                  type="button"
+                // biome-ignore lint/a11y/useSemanticElements: Nested buttons are invalid DOM, must use div
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelect(item);
+                    }
+                  }}
                   key={item.contentId}
                   onClick={() => handleSelect(item)}
                   className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -355,26 +380,12 @@ export function OfflineLibrary() {
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
-
-      {/* Content Details Modal / Sheet */}
-      {selectedItem && (
-        <OfflineContentDetailModal
-          contentId={selectedItem.contentId}
-          initialContext={
-            selectedItem.season && selectedItem.episode
-              ? { season: selectedItem.season, episode: selectedItem.episode }
-              : undefined
-          }
-          onClose={() => setSelectedItem(null)}
-          isOfflineMode={true}
-        />
-      )}
     </main>
   );
 }
