@@ -355,11 +355,14 @@ export function usePlayerRoot({
   });
 
   const [_isDesktopPip, setIsDesktopPip] = useState(false);
+  const isPipRef = useRef(false);
+
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
     if (typeof window !== 'undefined' && window.electronAPI?.onPipModeChanged) {
       unsubscribe = window.electronAPI.onPipModeChanged((isPip) => {
         setIsDesktopPip(isPip);
+        isPipRef.current = isPip;
         dispatch({ type: isPip ? 'HIDE_CONTROLS' : 'SHOW_CONTROLS' });
 
         // Let the CSS know we are in native PiP so we can strip borders
@@ -446,6 +449,9 @@ export function usePlayerRoot({
     if (typeof window !== 'undefined' && window.electronAPI) {
       if (window.electronAPI.onWindowBlur) {
         unsubscribeBlur = window.electronAPI.onWindowBlur(() => {
+          // Guard 0: Don't re-trigger if already in PiP mode
+          if (isPipRef.current) return;
+
           // Guard 1: Never auto-PiP during a native OS fullscreen transition.
           // The main process already suppresses blur IPC in this case, but this
           // ref acts as a belt-and-suspenders backstop for the React side.

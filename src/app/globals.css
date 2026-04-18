@@ -528,7 +528,8 @@
   body.is-desktop-pip nav,
   body.is-desktop-pip aside,
   body.is-desktop-pip .watch-sidebar,
-  body.is-desktop-pip .player-overlay-controls {
+  body.is-desktop-pip .player-overlay-controls,
+  body.is-desktop-pip .control-bar {
     display: none !important;
   }
 
@@ -546,8 +547,17 @@
     width: 100vw !important;
     height: 100vh !important;
     z-index: 99999 !important;
-    background: black;
-    -webkit-app-region: drag;
+    background: black !important;
+    -webkit-app-region: drag !important;
+  }
+
+  /* In PiP, the video container should be transparent to clicks so the drag region works,
+     but the inner video remains at the bottom of the stack */
+  body.is-desktop-pip .video-container * {
+    pointer-events: none !important;
+  }
+  body.is-desktop-pip .video-container video {
+    pointer-events: auto !important;
   }
 
   /* Interactive items must be clickable! */
