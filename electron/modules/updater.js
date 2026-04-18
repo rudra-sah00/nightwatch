@@ -10,12 +10,23 @@ function setupUpdater(splashWindow, onComplete) {
 
   let updateFinished = false;
   let asarChecked = false;
+  let safetyTimer = null;
 
   const finish = () => {
     if (updateFinished) return;
     updateFinished = true;
+    // Clear the safety timer — normal completion, no need for the fallback
+    if (safetyTimer) clearTimeout(safetyTimer);
     setTimeout(onComplete, 1000); // 1s buffer so user sees it finishes
   };
+
+  // --- SAFETY TIMEOUT ---
+  safetyTimer = setTimeout(() => {
+    log.warn(
+      '[updater] Safety timeout reached — skipping update check (offline?).',
+    );
+    finish();
+  }, 15_000);
 
   const sendStatus = (text, percent) => {
     if (splashWindow && !splashWindow.isDestroyed()) {

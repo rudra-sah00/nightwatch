@@ -132,6 +132,9 @@ class AppWindow {
         }
       });
     } else {
+      // Production: load the remote app. On first visit (online) the Serwist
+      // service worker installs and caches the full app shell. On subsequent
+      // launches — even offline — the SW serves every route from cache.
       this.mainWindow.loadURL(PROD_URL);
     }
 
@@ -151,20 +154,46 @@ class AppWindow {
       }
     });
 
+    // Track consecutive load failures so we don't loop forever
+    let offlineRetries = 0;
+    const MAX_RETRIES = 5;
+
     this.mainWindow.webContents.on(
       'did-fail-load',
       (_event, errorCode, _errorDescription) => {
-        // DNS / Connection errors (-199 to -100): In dev, this usually means
-        // Next.js hasn't started yet. Retry after a short delay.
-        if (isDev && errorCode >= -199 && errorCode <= -100) {
-          setTimeout(() => {
-            this._detectDevPort().then((url) => {
-              if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-                this.mainWindow.loadURL(url);
-              }
-            });
-          }, 2000);
+        if (isDev) {
+          // DNS / Connection errors in dev usually mean Next.js hasn't started yet.
+          if (errorCode >= -199 && errorCode <= -100) {
+            setTimeout(() => {
+              this._detectDevPort().then((url) => {
+                if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+                  this.mainWindow.loadURL(url);
+                }
+              });
+            }, 2000);
+          }
+          return;
         }
+
+        // Production offline handling:
+        // Network-level errors (ERR_INTERNET_DISCONNECTED, ERR_NAME_NOT_RESOLVED, etc.)
+        // are in the -100 to -199 range. On retry, the Serwist service worker
+        // intercepts the request and serves the full cached app — so /downloads,
+        // /home, and every other route loads exactly as if you were online.
+        const isNetworkError = errorCode >= -199 && errorCode <= -100;
+        if (isNetworkError && offlineRetries < MAX_RETRIES) {
+          offlineRetries++;
+          const delay = offlineRetries * 3000; // 3s, 6s, 9s, 12s, 15s back-off
+          setTimeout(() => {
+            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+              // Reload the same URL — the installed Serwist SW will intercept
+              // and serve the cached shell without hitting the network.
+              this.mainWindow.loadURL(PROD_URL);
+            }
+          }, delay);
+        }
+        // If retries exhausted or non-network error, Chromium shows its own
+        // "No internet" page — better than a silent blank screen.
       },
     );
 
