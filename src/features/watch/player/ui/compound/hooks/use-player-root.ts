@@ -256,8 +256,11 @@ export function usePlayerRoot({
     metadata.type,
   ]);
 
+  const isNavigatingRef = useRef(false);
+
   const handleNavigate = useCallback(
     (url: string) => {
+      isNavigatingRef.current = true;
       if (onNavigate) {
         onNavigate(url);
       } else {
@@ -301,6 +304,7 @@ export function usePlayerRoot({
   });
 
   const handleBack = useCallback(() => {
+    isNavigatingRef.current = true;
     if (onBackProp) {
       onBackProp();
     } else if (typeof window !== 'undefined' && window.history.length > 2) {
@@ -446,7 +450,12 @@ export function usePlayerRoot({
           // The main process already suppresses blur IPC in this case, but this
           // ref acts as a belt-and-suspenders backstop for the React side.
           if (isNativeElectronFullscreenRef.current) return;
-          // Guard 2: Only Auto-PiP if we are actively playing media.
+
+          // Guard 2: Never auto-PiP during active navigation to another page.
+          // This prevents the infinite zoom-in/out loop when clicking 'Back'.
+          if (isNavigatingRef.current) return;
+
+          // Guard 3: Only Auto-PiP if we are actively playing media.
           if (isPlayingRef.current && !isPausedRef.current) {
             window.electronAPI!.setPictureInPicture(true, 1.0);
           }
