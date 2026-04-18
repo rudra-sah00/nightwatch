@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.26.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.25.0...v1.26.0) (2026-04-18)
+
+
+### Features
+
+* **desktop:** stabilize download manager and enhance platform resilience ([544f09e](https://github.com/rudra-sah00/watch-rudra/commit/544f09ecb6caf1254038f134dea67fe0f0c3d941))
+* **desktop:** stabilize electron architecture and enhance media bridge ([f4a2ca0](https://github.com/rudra-sah00/watch-rudra/commit/f4a2ca0f6beb457b7083a893a5a8c6e0c3eeaab2))
+* implement offline mode with serwist pwa ([69cde4a](https://github.com/rudra-sah00/watch-rudra/commit/69cde4abe68eb226517719ba75c2b03a09a794a2))
+* implement parallel racer for daddylive & fix hydration mismatch ([0b32cab](https://github.com/rudra-sah00/watch-rudra/commit/0b32caba3f620bf5a903ef2079016458230c7da2))
+
+
+### Bug Fixes
+
+* **tests:** resolve TS error caused by webworker lib ([e93272e](https://github.com/rudra-sah00/watch-rudra/commit/e93272e1ce178a840db9d1082994751730686242))
+
 ## [1.25.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.24.1...v1.25.0) (2026-04-17)
 
 
