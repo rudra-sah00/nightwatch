@@ -86,6 +86,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('window-focus', subscription);
   },
 
+  // Fired when the native OS fullscreen state changes (enter or leave).
+  // React uses this to guard blur→PiP so a fullscreen transition never
+  // accidentally triggers the mini-player.
+  onWindowFullscreenChanged: (callback) => {
+    ipcRenderer.removeAllListeners('window-fullscreen-changed');
+    const subscription = (_event, isFullscreen) => callback(isFullscreen);
+    ipcRenderer.on('window-fullscreen-changed', subscription);
+    return () =>
+      ipcRenderer.removeListener('window-fullscreen-changed', subscription);
+  },
+
   // --- LIVE HLS EXTRACTOR BRIDGE (DaddyLive) ---
   startLiveBridge: (config) => ipcRenderer.send('start-live-bridge', config),
   stopLiveBridge: () => ipcRenderer.send('stop-live-bridge'),

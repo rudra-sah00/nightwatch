@@ -394,6 +394,47 @@ export function usePlayerRoot({
     };
   }, [state.isPlaying, state.isPaused]);
 
+  // --- REACT-SIDE NATIVE FULLSCREEN GUARD ---
+  // Tracks whether the Electron window is currently in (or transitioning out of)
+  // OS native fullscreen. The main process sends 'window-fullscreen-changed'
+  // on enter-full-screen and leave-full-screen events, and also suppresses
+  // blur IPC during the transition. This ref is the React-side backstop.
+  const isNativeElectronFullscreenRef = useRef(false);
+  const fullscreenExitGraceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      !window.electronAPI?.onWindowFullscreenChanged
+    ) {
+      return;
+    }
+    const unsubscribe = window.electronAPI.onWindowFullscreenChanged((isFs) => {
+      if (isFs) {
+        // Entering fullscreen — clear any pending grace timer and mark as fullscreen.
+        if (fullscreenExitGraceRef.current) {
+          clearTimeout(fullscreenExitGraceRef.current);
+          fullscreenExitGraceRef.current = null;
+        }
+        isNativeElectronFullscreenRef.current = true;
+      } else {
+        // Leaving fullscreen — hold the flag for a short grace period to absorb
+        // any trailing blur event from the OS animation (~300 ms on macOS).
+        fullscreenExitGraceRef.current = setTimeout(() => {
+          isNativeElectronFullscreenRef.current = false;
+          fullscreenExitGraceRef.current = null;
+        }, 350);
+      }
+    });
+    return () => {
+      unsubscribe();
+      if (fullscreenExitGraceRef.current)
+        clearTimeout(fullscreenExitGraceRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     let unsubscribeBlur: (() => void) | undefined;
     let unsubscribeFocus: (() => void) | undefined;
@@ -401,7 +442,11 @@ export function usePlayerRoot({
     if (typeof window !== 'undefined' && window.electronAPI) {
       if (window.electronAPI.onWindowBlur) {
         unsubscribeBlur = window.electronAPI.onWindowBlur(() => {
-          // Only Auto-PiP if we are currently playing media
+          // Guard 1: Never auto-PiP during a native OS fullscreen transition.
+          // The main process already suppresses blur IPC in this case, but this
+          // ref acts as a belt-and-suspenders backstop for the React side.
+          if (isNativeElectronFullscreenRef.current) return;
+          // Guard 2: Only Auto-PiP if we are actively playing media.
           if (isPlayingRef.current && !isPausedRef.current) {
             window.electronAPI!.setPictureInPicture(true, 1.0);
           }

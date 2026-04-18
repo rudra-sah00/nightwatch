@@ -90,6 +90,11 @@ windows.registerProtocol();
 linux.registerProtocol();
 
 let internalAppIsQuitting = false;
+// Prevents IPC handlers from being registered more than once if the main
+// window is destroyed and recreated (e.g. macOS dock reopen via app.on('activate')).
+let listenersBootstrapped = false;
+// ID for the active powerSaveBlocker so it can be cleaned up on quit
+let globalPowerBlockerId = -1;
 
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
@@ -269,10 +274,18 @@ const startElectronApp = async () => {
     const splash = createSplash();
 
     setupUpdater(splash, () => {
-      if (!splash.isDestroyed()) {
-        splash.close();
+      // Guard: splash may already be destroyed if the user force-closed it
+      // (Windows task manager, macOS Force Quit) — never let that block launch.
+      try {
+        if (!splash.isDestroyed()) splash.close();
+      } catch (err) {
+        require('electron-log').warn('[main] splash.close() failed:', err);
       }
-      finishLaunch();
+      try {
+        finishLaunch();
+      } catch (err) {
+        require('electron-log').error('[main] finishLaunch() threw:', err);
+      }
     });
   } else {
     // Skip updater in development for speed
@@ -291,10 +304,22 @@ const startElectronApp = async () => {
   // Automatically reopen closed window when clicking dock icon if it's minimized
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) AppWindow.create();
-    else AppWindow.getInstance().show();
+    else {
+      const win = AppWindow.getInstance();
+      win.show();
+      // Discard any PiP bounds saved from a previous session — monitor layout
+      // may have changed while the window was hidden, so restoring stale coords
+      // would snap the window to the wrong position or off-screen.
+      prePipBounds = null;
+    }
   });
 
-  // Start Discord RPC silently in background
+  // Guard: only register IPC handlers once. On macOS the user can close all
+  // windows (app stays in dock) and reopen via AppWindow.create() — without
+  // this flag every dock-reopen would stack another copy of each handler,
+  // causing duplicate Discord updates, double keep-awake toggles, etc.
+  if (listenersBootstrapped) return;
+  listenersBootstrapped = true;
 
   // IPC Event listener for React letting us know the user changed rooms!
   ipcMain.on('update-discord-status', (_event, presenceData) => {
@@ -308,13 +333,12 @@ const startElectronApp = async () => {
 
   // Keep screen awake while watching media!
   // -1 = no active blocker (0 is a valid Electron blocker ID, so don't use it as sentinel)
-  let powerBlockerId = -1;
   ipcMain.on('toggle-keep-awake', (_event, keepAwake) => {
-    if (keepAwake && powerBlockerId === -1) {
-      powerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
-    } else if (!keepAwake && powerBlockerId !== -1) {
-      powerSaveBlocker.stop(powerBlockerId);
-      powerBlockerId = -1;
+    if (keepAwake && globalPowerBlockerId === -1) {
+      globalPowerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
+    } else if (!keepAwake && globalPowerBlockerId !== -1) {
+      powerSaveBlocker.stop(globalPowerBlockerId);
+      globalPowerBlockerId = -1;
     }
   });
 
@@ -394,6 +418,12 @@ const startElectronApp = async () => {
 
       // Ensure 16:9 aspect ratio and snap
       win.setAspectRatio(16 / 9);
+
+      // CRITICAL: Electron clamps setBounds() to the window's minWidth/minHeight
+      // (set to 800×540 in window.js). Without unlocking the minimum size first,
+      // the 480×270 PIP target is silently ignored and the window stays huge.
+      win.setMinimumSize(0, 0);
+
       win.setBounds(
         {
           x: Math.round(x + width - pipWidth - padding),
@@ -417,6 +447,10 @@ const startElectronApp = async () => {
       }
 
       win.setAspectRatio(0); // unlock aspect ratio
+
+      // Restore minimum size constraints before expanding the window back
+      win.setMinimumSize(800, 540);
+
       if (prePipBounds) {
         win.setBounds(prePipBounds, true);
         prePipBounds = null;
@@ -592,6 +626,13 @@ linux.setupLinux(triggerDeepLink, () => AppWindow.getInstance());
 app.on('before-quit', () => {
   internalAppIsQuitting = true;
   AppWindow.setQuitting(true);
+  try {
+    const { powerSaveBlocker } = require('electron');
+    if (globalPowerBlockerId !== -1) {
+      powerSaveBlocker.stop(globalPowerBlockerId);
+      globalPowerBlockerId = -1;
+    }
+  } catch (_e) {}
   try {
     if (discordLogic && typeof discordLogic.destroy === 'function') {
       discordLogic.destroy();

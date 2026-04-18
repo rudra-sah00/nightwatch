@@ -259,9 +259,38 @@ class AppWindow {
       }
     });
 
+    // --- NATIVE FULLSCREEN STATE TRACKING ---
+    // macOS fires 'blur' on the BrowserWindow during the OS fullscreen animation.
+    // Without this guard, that spurious blur triggers Auto-PiP mid-transition,
+    // causing a visible snap to the 480×270 PiP size before snapping back.
+    let isNativeFullscreen = false;
+    // A small grace period after leaving fullscreen to absorb any trailing blur.
+    let fullscreenExitGraceTimer = null;
+
+    this.mainWindow.on('enter-full-screen', () => {
+      isNativeFullscreen = true;
+      if (fullscreenExitGraceTimer) {
+        clearTimeout(fullscreenExitGraceTimer);
+        fullscreenExitGraceTimer = null;
+      }
+      this.mainWindow.webContents.send('window-fullscreen-changed', true);
+    });
+
+    this.mainWindow.on('leave-full-screen', () => {
+      // Keep the flag set for a short grace period — the 'blur' from the OS
+      // fullscreen exit animation may arrive up to ~200 ms after this event.
+      fullscreenExitGraceTimer = setTimeout(() => {
+        isNativeFullscreen = false;
+        fullscreenExitGraceTimer = null;
+      }, 300);
+      this.mainWindow.webContents.send('window-fullscreen-changed', false);
+    });
+
     // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---
-    // Let Next.js know when the user clicks away, so it can enter a mini-player
+    // Let Next.js know when the user clicks away, so it can enter a mini-player.
+    // Guard: never fire while the native fullscreen transition is in progress.
     this.mainWindow.on('blur', () => {
+      if (isNativeFullscreen) return; // suppress — this blur is the OS animation
       this.mainWindow.webContents.send('window-blur');
     });
 

@@ -117,6 +117,13 @@ export interface ElectronAPI {
   /** Tells React when the window has regained focus */
   onWindowFocus: (callback: () => void) => () => void;
 
+  /** Fired when the OS native fullscreen state changes on the Electron window.
+   *  Use this to guard blur→PiP so a fullscreen animation never accidentally
+   *  triggers the mini-player. */
+  onWindowFullscreenChanged: (
+    callback: (isFullscreen: boolean) => void,
+  ) => () => void;
+
   /** Start native desktop download process for videos */
   startDownload: (params: {
     contentId: string;

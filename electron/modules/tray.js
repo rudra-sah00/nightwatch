@@ -1,6 +1,7 @@
 const { Tray, Menu, nativeImage, app } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
+const log = require('electron-log');
 
 let appTray = null;
 
@@ -90,7 +91,9 @@ function setupTray(mainWindow, setQuittingCallback) {
         }
       });
     }
-  } catch (_err) {}
+  } catch (err) {
+    log.warn('[tray] Failed to create system tray icon:', err.message);
+  }
 }
 
 module.exports = { setupTray };

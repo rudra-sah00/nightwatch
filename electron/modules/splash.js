@@ -43,8 +43,8 @@ function createSplash() {
     <!DOCTYPE html>
     <html>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
         <style>
+          /* System fonts only — no network request so splash never stalls offline */
           :root {
             --bg-color: #f5f0e8;
             --border-color: #1a1a1a;
@@ -86,12 +86,12 @@ function createSplash() {
             width: 100%; height: 100%; border-radius: 12px; object-fit: contain;
           }
           .title { 
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             font-size: 24px; font-weight: 900; font-style: italic;
             text-transform: uppercase; margin-bottom: 2px; letter-spacing: -0.05em; 
           }
           .version {
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             font-size: 10px;
             font-weight: 700;
             color: var(--text-color);
@@ -100,7 +100,8 @@ function createSplash() {
             letter-spacing: 0.05em;
           }
           .status { 
-            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 12px; font-weight: 900; 
             color: var(--text-color); font-style: italic;
             max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
             text-transform: uppercase; letter-spacing: 0.1em;

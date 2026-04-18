@@ -1,4 +1,5 @@
 const { ipcMain, BrowserWindow, net } = require('electron');
+const log = require('electron-log');
 const http = require('node:http');
 const url = require('node:url');
 
@@ -195,10 +196,7 @@ function startProxyServer(_eventSender) {
 
   // Auto-restart the proxy if it crashes
   proxyServer.on('error', (err) => {
-    console.error(
-      '[live-bridge] Proxy server error, restarting...',
-      err.message,
-    );
+    log.error('[live-bridge] Proxy server error, restarting...', err.message);
     proxyServer = null;
     proxyPort = 0;
     startProxyServer(_lastEventSender);
@@ -242,7 +240,7 @@ function setupLiveBridge() {
       const match = originalUrl.match(/stream-(\d+)\.php/);
       const streamId = match ? match[1] : '51';
 
-      console.log(
+      log.info(
         `[live-bridge] Starting Parallel Racer for Stream ID: ${streamId}`,
       );
 
@@ -259,7 +257,7 @@ function setupLiveBridge() {
           const racerUrl = `https://dlstreams.top${path}stream-${streamId}.php`;
           const partition = `persist:racer-${path.replace(/\//g, '')}-${streamId}`;
 
-          console.log(`[live-bridge] [Racer ${index}] Spawning: ${racerUrl}`);
+          log.info(`[live-bridge] [Racer ${index}] Spawning: ${racerUrl}`);
 
           const win = new BrowserWindow({
             width: 1280,
@@ -275,6 +273,13 @@ function setupLiveBridge() {
           });
 
           racerPool.push(win);
+
+          // Remove the window from the pool as soon as it is destroyed so it
+          // can be GC'd immediately rather than leaking until the next channel switch.
+          win.on('closed', () => {
+            const idx = racerPool.indexOf(win);
+            if (idx !== -1) racerPool.splice(idx, 1);
+          });
 
           // Network Interceptor
           win.webContents.session.webRequest.onBeforeRequest(
@@ -296,9 +301,7 @@ function setupLiveBridge() {
               if (foundUrl.includes('mono.css')) {
                 if (hasResolved) return callback({ cancel: true });
 
-                console.log(
-                  `[live-bridge] [WINNER] ${path} resolved the stream!`,
-                );
+                log.info(`[live-bridge] [WINNER] ${path} resolved the stream!`);
                 hasResolved = true;
                 streamUrl = foundUrl;
                 extractionWindow = win;
@@ -313,6 +316,10 @@ function setupLiveBridge() {
                     streamCookies = cookies
                       .map((c) => `${c.name}=${c.value}`)
                       .join('; ');
+
+                    // Guard: renderer may have navigated away during the async cookie fetch.
+                    // Sending IPC to a destroyed webContents throws and can crash main.
+                    if (!event.sender || event.sender.isDestroyed()) return;
 
                     const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?t=${Date.now()}`;
 
@@ -365,15 +372,20 @@ function setupLiveBridge() {
       // Safety timeout for the entire race
       setTimeout(() => {
         if (!hasResolved) {
-          console.warn('[live-bridge] Race timed out. Cleaning up pool.');
+          log.warn('[live-bridge] Race timed out. Cleaning up pool.');
+          hasResolved = true; // prevent any late winner from sending stale IPC
           cleanupRacers();
+          if (extractionWindow && !extractionWindow.isDestroyed()) {
+            extractionWindow.close();
+          }
+          extractionWindow = null;
         }
       }, 60000);
     },
   );
 
   ipcMain.on('stop-live-bridge', () => {
-    console.log('[live-bridge] Stopping all extraction processes.');
+    log.info('[live-bridge] Stopping all extraction processes.');
     cleanupRacers();
     if (extractionWindow && !extractionWindow.isDestroyed()) {
       extractionWindow.close();

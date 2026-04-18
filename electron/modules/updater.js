@@ -11,14 +11,30 @@ function setupUpdater(splashWindow, onComplete) {
 
   let updateFinished = false;
   let safetyTimer = null;
+  let hardDeadlineTimer = null;
   let asarChecked = false;
 
   const finish = () => {
     if (updateFinished) return;
     updateFinished = true;
     if (safetyTimer) clearTimeout(safetyTimer);
-    setTimeout(onComplete, 1000);
+    if (hardDeadlineTimer) clearTimeout(hardDeadlineTimer);
+    // Delay slightly so the progress bar reaches 100% visually before close.
+    setTimeout(() => {
+      try {
+        onComplete();
+      } catch (err) {
+        log.error('[updater] onComplete threw — launching anyway:', err);
+      }
+    }, 1000);
   };
+
+  // Absolute hard deadline — guarantees the app always launches even if every
+  // updater event silently hangs (captive-portal Wi-Fi, firewall, proxy, etc.).
+  hardDeadlineTimer = setTimeout(() => {
+    log.warn('[updater] Hard deadline reached (20 s) — forcing launch.');
+    finish();
+  }, 20_000);
 
   const sendStatus = (text, percent) => {
     if (splashWindow && !splashWindow.isDestroyed()) {
@@ -39,12 +55,13 @@ function setupUpdater(splashWindow, onComplete) {
   }
 
   // --- SAFETY TIMEOUT (online but slow/unreachable server) ---
+  // 12 s is enough for slow connections; the hard deadline at 20 s is the backstop.
   safetyTimer = setTimeout(() => {
     log.warn(
-      '[updater] Safety timeout reached — skipping update check (offline?).',
+      '[updater] Safety timeout reached — skipping update check (slow/offline?).',
     );
     finish();
-  }, 15_000);
+  }, 12_000);
 
   sendStatus('Checking for updates...', 10);
 
