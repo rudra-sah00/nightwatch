@@ -156,8 +156,6 @@ class AppWindow {
 
     // Track consecutive load failures so we don't loop forever
     let offlineRetries = 0;
-    const MAX_RETRIES = 5;
-
     this.mainWindow.webContents.on(
       'did-fail-load',
       (_event, errorCode, _errorDescription) => {
@@ -175,25 +173,28 @@ class AppWindow {
           return;
         }
 
-        // Production offline handling:
-        // Network-level errors (ERR_INTERNET_DISCONNECTED, ERR_NAME_NOT_RESOLVED, etc.)
-        // are in the -100 to -199 range. On retry, the Serwist service worker
-        // intercepts the request and serves the full cached app — so /downloads,
-        // /home, and every other route loads exactly as if you were online.
+        // Production offline handling.
+        // Electron's BrowserWindow.loadURL() completely bypasses Service Workers
+        // if the physical network adapter is disconnected (ERR_INTERNET_DISCONNECTED).
+        // To fix this, we load a local bridge file. The bridge performs a
+        // renderer-initiated location.replace(), which correctly triggers
+        // the Service Worker to serve the cached app.
         const isNetworkError = errorCode >= -199 && errorCode <= -100;
-        if (isNetworkError && offlineRetries < MAX_RETRIES) {
+        if (isNetworkError && offlineRetries === 0) {
           offlineRetries++;
-          const delay = offlineRetries * 3000; // 3s, 6s, 9s, 12s, 15s back-off
-          setTimeout(() => {
-            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-              // Reload the same URL — the installed Serwist SW will intercept
-              // and serve the cached shell without hitting the network.
-              this.mainWindow.loadURL(PROD_URL);
-            }
-          }, delay);
+          const path = require('node:path');
+          const bridgePath = path.join(
+            __dirname,
+            '../build/offline-bridge.html',
+          );
+
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.loadFile(bridgePath);
+          }
         }
-        // If retries exhausted or non-network error, Chromium shows its own
-        // "No internet" page — better than a silent blank screen.
+        // If the bridge's location.replace fails (e.g. SW not installed yet),
+        // did-fail-load fires again, but offlineRetries is 1 so it stops looping
+        // and safely rests on the bridge UI.
       },
     );
 
