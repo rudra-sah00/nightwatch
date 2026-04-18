@@ -123,7 +123,9 @@ class AppWindow {
       (process.env.NODE_ENV === 'development' ||
         !require('electron').app.isPackaged) &&
       !process.env.TEST_PROD;
-    const PROD_URL = 'https://watch.rudrasahoo.live';
+    const PROD_URL = process.env.TEST_PROD
+      ? 'http://localhost:3000'
+      : 'https://watch.rudrasahoo.live';
 
     if (isDev) {
       // Async port probe — do not block window creation
@@ -197,7 +199,9 @@ class AppWindow {
             );
 
             if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-              this.mainWindow.loadFile(bridgePath);
+              this.mainWindow.loadFile(bridgePath, {
+                search: `url=${encodeURIComponent(PROD_URL)}`,
+              });
             }
           } else if (offlineRetries === 1) {
             // The bridge's location.replace also failed (SW not installed).
@@ -210,7 +214,9 @@ class AppWindow {
             );
 
             if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-              this.mainWindow.loadFile(bridgePath, { search: 'failed=1' });
+              this.mainWindow.loadFile(bridgePath, {
+                search: `url=${encodeURIComponent(PROD_URL)}&failed=1`,
+              });
             }
           }
         }

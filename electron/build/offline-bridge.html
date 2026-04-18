@@ -84,6 +84,8 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
+    const targetUrl = params.get('url') || "https://watch.rudrasahoo.live";
+
     if (params.get('failed')) {
       // SW is NOT installed. Show error and stay on this bridge screen.
       document.getElementById('loader').style.display = 'none';
@@ -96,7 +98,7 @@
       setTimeout(() => {
         // This triggers the Service Worker!
         // If it fails, it triggers did-fail-load, which we catch and reload with ?failed=1.
-        window.location.replace("https://watch.rudrasahoo.live");
+        window.location.replace(targetUrl);
       }, 500);
     }
   </script>
