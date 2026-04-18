@@ -11,6 +11,7 @@ import { AuthProvider } from '@/providers/auth-provider';
 import { DevToolsProtectionProvider } from '@/providers/devtools-protection-provider';
 import { SocketProvider } from '@/providers/socket-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { SerwistProvider } from './serwist';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -55,23 +56,25 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
-        <DevToolsProtectionProvider>
-          {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
-          <ElectronDragRegion />
+        <SerwistProvider swUrl="/sw.js">
+          <DevToolsProtectionProvider>
+            {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
+            <ElectronDragRegion />
 
-          <ThemeProvider>
-            <SocketProvider>
-              <AuthProvider>
-                <Suspense fallback={null}>
-                  <DiscordPresenceSync />
-                  <OfflineIndicator />
-                </Suspense>
-                {children}
-                <Toaster />
-              </AuthProvider>
-            </SocketProvider>
-          </ThemeProvider>
-        </DevToolsProtectionProvider>
+            <ThemeProvider>
+              <SocketProvider>
+                <AuthProvider>
+                  <Suspense fallback={null}>
+                    <DiscordPresenceSync />
+                    <OfflineIndicator />
+                  </Suspense>
+                  {children}
+                  <Toaster />
+                </AuthProvider>
+              </SocketProvider>
+            </ThemeProvider>
+          </DevToolsProtectionProvider>
+        </SerwistProvider>
       </body>
     </html>
   );
