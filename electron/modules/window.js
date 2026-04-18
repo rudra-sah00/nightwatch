@@ -120,8 +120,9 @@ class AppWindow {
     );
 
     const isDev =
-      process.env.NODE_ENV === 'development' ||
-      !require('electron').app.isPackaged;
+      (process.env.NODE_ENV === 'development' ||
+        !require('electron').app.isPackaged) &&
+      !process.env.TEST_PROD;
     const PROD_URL = 'https://watch.rudrasahoo.live';
 
     if (isDev) {
