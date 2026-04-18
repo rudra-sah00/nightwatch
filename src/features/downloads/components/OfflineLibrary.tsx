@@ -10,12 +10,12 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { ContentType, type ShowDetails } from '@/features/search/types';
 import { cn } from '@/lib/utils';
 import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
+import { OfflineContentDetailModal } from './offline-content-detail-modal';
 
 function formatBytes(bytes?: number, decimals = 2) {
   if (!bytes || bytes === 0) return '0 Bytes';
@@ -27,7 +27,6 @@ function formatBytes(bytes?: number, decimals = 2) {
 }
 
 export function OfflineLibrary() {
-  const router = useRouter();
   const {
     downloads,
     isDesktopApp,
@@ -37,60 +36,37 @@ export function OfflineLibrary() {
     resumeDownload,
   } = useDownloads();
 
+  const [selectedItem, setSelectedItem] = useState<{
+    contentId: string;
+    season?: number;
+    episode?: number;
+  } | null>(null);
+
   const handleSelect = (item: DownloadItem) => {
     if (item.status !== 'COMPLETED') {
       toast.info('Please wait until the download is complete to view offline.');
       return;
     }
 
-    const showData = item.showData as ShowDetails;
-    if (!showData) {
-      toast.error('Offline item data is missing.');
+    const sEpMatch = item.contentId.match(/^(.*?)_S(\d+)E(\d+)$/);
+    if (sEpMatch) {
+      setSelectedItem({
+        contentId: sEpMatch[1],
+        season: parseInt(sEpMatch[2], 10),
+        episode: parseInt(sEpMatch[3], 10),
+      });
       return;
     }
-
-    const providerId = item.contentId.split(':')[0] || 's1';
-    const description = showData.description
-      ? encodeURIComponent(showData.description)
-      : '';
-    const year = showData.year ? encodeURIComponent(showData.year) : '';
-    const posterUrl = showData.posterUrl
-      ? encodeURIComponent(showData.posterUrl)
-      : '';
-    const title = showData.title ? encodeURIComponent(showData.title) : '';
-
-    if (showData.contentType === ContentType.Series) {
-      const sEpMatch = item.contentId.match(/^(.*?)_S(\d+)E(\d+)$/);
-      let season = 1;
-      let episode = 1;
-      let seriesId = showData.id;
-
-      if (sEpMatch) {
-        seriesId = sEpMatch[1];
-        season = parseInt(sEpMatch[2], 10);
-        episode = parseInt(sEpMatch[3], 10);
-      } else {
-        const epMatch = item.contentId.match(/^(.*?)-ep(\d+)$/);
-        if (epMatch) {
-          seriesId = epMatch[1];
-          episode = parseInt(epMatch[2], 10);
-        }
-      }
-
-      let url = `/watch/${encodeURIComponent(seriesId)}?type=series&title=${title}&season=${season}&episode=${episode}&seriesId=${encodeURIComponent(seriesId)}&server=${providerId}`;
-      if (description) url += `&description=${description}`;
-      if (year) url += `&year=${year}`;
-      if (posterUrl) url += `&poster=${posterUrl}`;
-
-      router.push(url);
-    } else {
-      let url = `/watch/${encodeURIComponent(showData.id)}?type=movie&title=${title}&server=${providerId}`;
-      if (description) url += `&description=${description}`;
-      if (year) url += `&year=${year}`;
-      if (posterUrl) url += `&poster=${posterUrl}`;
-
-      router.push(url);
+    const epMatch = item.contentId.match(/^(.*?)-ep(\d+)$/);
+    if (epMatch) {
+      setSelectedItem({
+        contentId: epMatch[1],
+        season: 1,
+        episode: parseInt(epMatch[2], 10),
+      });
+      return;
     }
+    setSelectedItem({ contentId: item.contentId });
   };
 
   if (!isMounted) {
@@ -386,6 +362,20 @@ export function OfflineLibrary() {
           )}
         </div>
       </div>
+
+      {/* Content Details Modal / Sheet */}
+      {selectedItem && (
+        <OfflineContentDetailModal
+          contentId={selectedItem.contentId}
+          initialContext={
+            selectedItem.season && selectedItem.episode
+              ? { season: selectedItem.season, episode: selectedItem.episode }
+              : undefined
+          }
+          onClose={() => setSelectedItem(null)}
+          isOfflineMode={true}
+        />
+      )}
     </main>
   );
 }

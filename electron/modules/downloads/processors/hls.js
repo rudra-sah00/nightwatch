@@ -163,6 +163,20 @@ async function startHlsDownload(
           localName: `segment_${segments.length}.ts`,
           lineIndex: i,
         });
+      } else if (line.startsWith('#EXT-X-KEY')) {
+        // Handle AES-128 keys
+        // Format: #EXT-X-KEY:METHOD=AES-128,URI="https://..."
+        const uriMatch = line.match(/URI=["']([^"']+)["']/);
+        if (uriMatch) {
+          const keyUrl = resolveUrl(targetPlaylistUrl, uriMatch[1]);
+          const keyName = `key_${i}.bin`;
+          segments.push({
+            originalUrl: keyUrl,
+            localName: keyName,
+            lineIndex: i,
+            isKey: true,
+          });
+        }
       }
     }
 
@@ -178,6 +192,7 @@ async function startHlsDownload(
       const restoredSet = [];
 
       for (const seg of segments) {
+        if (seg.isKey) continue; // Keys don't count towards segment progress bar
         const destPath = path.join(contentFolder, seg.localName);
         if (fs.existsSync(destPath)) {
           const stat = fs.statSync(destPath);
@@ -206,7 +221,13 @@ async function startHlsDownload(
     const downloadSegment = async (segment) => {
       if (item.status === 'CANCELLED') return;
       const destPath = path.join(contentFolder, segment.localName);
-      rewritenLines[segment.lineIndex] = segment.localName;
+      if (segment.isKey) {
+        rewritenLines[segment.lineIndex] = rewritenLines[
+          segment.lineIndex
+        ].replace(/URI=["'][^"']+["']/, `URI="${segment.localName}"`);
+      } else {
+        rewritenLines[segment.lineIndex] = segment.localName;
+      }
 
       // Skip already-downloaded segments (restored from disk above)
       if (item.segmentsDownloadedSet?.includes(segment.localName)) {
@@ -224,10 +245,12 @@ async function startHlsDownload(
         store,
       );
 
-      item.segmentsDownloaded++;
-      if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
-      item.segmentsDownloadedSet.push(segment.localName);
-      item.progress = (item.segmentsDownloaded / item.segmentsTotal) * 100;
+      if (!segment.isKey) {
+        item.segmentsDownloaded++;
+        if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
+        item.segmentsDownloadedSet.push(segment.localName);
+        item.progress = (item.segmentsDownloaded / item.segmentsTotal) * 100;
+      }
 
       const now = Date.now();
       if (now - lastTime > 1000) {
@@ -277,6 +300,7 @@ async function startHlsDownload(
     // If we missed segments due to network errors, mark as ERROR instead.
     const finalRestoredSet = [];
     for (const seg of segments) {
+      if (seg.isKey) continue;
       if (fs.existsSync(path.join(contentFolder, seg.localName))) {
         finalRestoredSet.push(seg.localName);
       }

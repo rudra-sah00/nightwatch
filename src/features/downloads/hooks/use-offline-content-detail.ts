@@ -64,12 +64,19 @@ export function useOfflineContentDetail({
     if (!downloads || downloads.length === 0) return;
 
     // Find the relevant download for the given base contentId
-    const relevantDownloads = downloads.filter(
-      (d) =>
+    // We check with and without prefixes to be as robust as possible.
+    const searchTarget = contentId.replace(/^(s1|s2|s3):/, '');
+    const relevantDownloads = downloads.filter((d) => {
+      const dbId = d.contentId.replace(/^(s1|s2|s3):/, '');
+      return (
         d.contentId === contentId ||
+        dbId === searchTarget ||
         d.contentId.startsWith(`${contentId}_S`) ||
-        d.contentId.startsWith(`${contentId}-ep`),
-    );
+        dbId.startsWith(`${searchTarget}_S`) ||
+        d.contentId.startsWith(`${contentId}-ep`) ||
+        dbId.startsWith(`${searchTarget}-ep`)
+      );
+    });
 
     const itemWithData = relevantDownloads.find((d) => d.showData);
     if (itemWithData?.showData) {

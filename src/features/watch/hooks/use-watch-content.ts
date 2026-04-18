@@ -120,19 +120,31 @@ export function useWatchContent() {
           let offlineContentId1 = overrideMovieId || movieId;
           let offlineContentId2 = offlineContentId1;
 
-          if (type === 'series' && season && episode) {
+          if (type === 'series' && (season || episode)) {
             const currentSeriesId = overrideMovieId || seriesId || movieId;
             if (currentSeriesId) {
-              offlineContentId1 = `${currentSeriesId}_S${season}E${episode}`;
-              offlineContentId2 = `${currentSeriesId}-ep${episode}`;
+              // Standard format: SERIES_S1E1
+              offlineContentId1 = `${currentSeriesId}_S${season || 1}E${episode || 1}`;
+              // Legacy/S2 format: SERIES-ep1
+              offlineContentId2 = `${currentSeriesId}-ep${episode || 1}`;
             }
           }
 
+          // Search with and without provider prefixes (s1:, s2:, s3:)
+          // to ensure a match even if IDs are inconsistent.
+          const searchIds = new Set([
+            offlineContentId1,
+            offlineContentId2,
+            `s1:${offlineContentId1}`,
+            `s1:${offlineContentId2}`,
+            `s2:${offlineContentId1}`,
+            `s2:${offlineContentId2}`,
+            `s3:${offlineContentId1}`,
+            `s3:${offlineContentId2}`,
+          ]);
+
           const downloadedItem = fetchedDownloads.find(
-            (d) =>
-              (d.contentId === offlineContentId1 ||
-                d.contentId === offlineContentId2) &&
-              d.status === 'COMPLETED',
+            (d) => searchIds.has(d.contentId) && d.status === 'COMPLETED',
           );
 
           if (downloadedItem?.localPlaylistPath) {
