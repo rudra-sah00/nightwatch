@@ -23,7 +23,7 @@ protocol.registerSchemesAsPrivileged([
       standard: true,
       secure: true,
       bypassCSP: true,
-      allowServiceWorkers: true,
+      allowServiceWorkers: false, // DO NOT let SW intercept (breaks fetch)
       supportFetchAPI: true,
       corsEnabled: true,
       stream: true,

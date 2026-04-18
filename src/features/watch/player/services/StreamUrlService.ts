@@ -38,6 +38,7 @@ export function normalizeRawUrls(
     captionUrl: string | null;
     spriteVtt?: string;
     qualities?: QualityOption[];
+    subtitleTracks?: SubtitleTrack[];
   },
   token: string | null,
 ): NormalizedUrls {
@@ -49,7 +50,7 @@ export function normalizeRawUrls(
       captionUrl: raw.captionUrl,
       spriteVtt: raw.spriteVtt,
       qualities: raw.qualities,
-      subtitleTracks: undefined,
+      subtitleTracks: raw.subtitleTracks,
     };
   }
 
@@ -59,6 +60,7 @@ export function normalizeRawUrls(
       captionUrl: raw.captionUrl,
       spriteVtt: raw.spriteVtt,
       qualities: raw.qualities,
+      subtitleTracks: raw.subtitleTracks,
     },
     token,
   );
