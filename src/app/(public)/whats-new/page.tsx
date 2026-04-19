@@ -35,7 +35,7 @@ export default async function WhatsNewPage() {
     'https://api.github.com/repos/rudra-sah00/watch-rudra/releases',
     {
       headers,
-      cache: 'force-cache',
+      next: { revalidate: 3600 }, // Revalidate every hour
     },
   );
 
