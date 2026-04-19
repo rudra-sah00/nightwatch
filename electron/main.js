@@ -106,10 +106,22 @@ const startElectronApp = async () => {
   // This ensures downloaded HLS/MP4 content is playable the instant the React app loads.
   setupOfflineMediaProtocol();
 
-  // SCOPED CORS FIX: Only intercept our internal backend API requests.
-  // Returning `*` globally breaks withCredentials (browser spec forbids wildcard +
-  // credentials). We now return the exact requesting origin so cookies work.
+  // Bust stale service worker cache after app updates. The old SW serves
+  // cached HTML/JS indefinitely in Electron — clearing it once per version
+  // forces a fresh fetch from Vercel on next load.
   const { session } = require('electron');
+  const currentVersion = getAppVersion();
+  const lastClearedVersion = store.get('sw-cleared-version');
+  if (lastClearedVersion !== currentVersion) {
+    try {
+      await session.defaultSession.clearStorageData({
+        storages: ['serviceworkers', 'cachestorage'],
+      });
+      store.set('sw-cleared-version', currentVersion);
+    } catch (_e) {}
+  }
+
+  // SCOPED CORS FIX: Only intercept our internal backend API requests.
 
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
