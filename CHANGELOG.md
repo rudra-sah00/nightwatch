@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.28.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.27.0...v1.28.0) (2026-04-19)
+
+
+### Features
+
+* implement forced loading delays and refine navigation feedback ([37658bb](https://github.com/rudra-sah00/watch-rudra/commit/37658bb9ca235a801f4206cd227bc3433d32f06f))
+* **player:** add PiP draggability and fix navigation loop ([25705c6](https://github.com/rudra-sah00/watch-rudra/commit/25705c69d255bd24dc68649513107fc53171bf97))
+* refine navigation loading UX with deterministic progress bar and theme-aware feedback ([7e4bdbe](https://github.com/rudra-sah00/watch-rudra/commit/7e4bdbef40cb4bae618fb4387edcf5c8837f9e62))
+
+
+### Bug Fixes
+
+* **pip:** resolve loop issue and improve draggability and visibility ([f4d819b](https://github.com/rudra-sah00/watch-rudra/commit/f4d819bf94fee494d025a72f3ee9192cff3b8f47))
+* **player:** fix syntax error in PlayerHeader tag mismatch ([cb0dcda](https://github.com/rudra-sah00/watch-rudra/commit/cb0dcda275f7650538f3b0d4d2031fb6cfa54cf7))
+* **player:** stabilize all button hover states and improve download menu scrolling ([19c8d42](https://github.com/rudra-sah00/watch-rudra/commit/19c8d42cc0b63786e00614b0b3bf1c952aa9da94))
+* **player:** stabilize slider hover and resolve biome a11y lint errors ([15fc402](https://github.com/rudra-sah00/watch-rudra/commit/15fc402f852446bfa8eb78f779ef12a511ae69d7))
+* resolve offline playback mismatch and enable navigation fallback ([a07e5e0](https://github.com/rudra-sah00/watch-rudra/commit/a07e5e0c03ec7c9cd16b447618b23a0aff73ed4f))
+* **updater:** prevent rapid-launch timers from interrupting download ([9f16865](https://github.com/rudra-sah00/watch-rudra/commit/9f168658533a85aa29465229a81839d60ec34d24))
+
 ## [1.27.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.26.0...v1.27.0) (2026-04-18)
 
 
