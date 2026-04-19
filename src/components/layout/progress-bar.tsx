@@ -11,6 +11,7 @@ export function ProgressBar() {
     const originalReplaceState = history.replaceState.bind(history);
 
     history.pushState = (...args) => {
+      NProgress.start();
       requestAnimationFrame(() => NProgress.done());
       originalPushState(...args);
     };
