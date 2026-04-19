@@ -327,67 +327,78 @@ function setupLiveBridge() {
                 return callback({ cancel: true });
               }
 
-              // The real signal: an actual .m3u8 HLS manifest URL
-              if (foundUrl.includes('.m3u8') && !hasResolved) {
-                log.info(
-                  `[live-bridge] [WINNER] ${path} found HLS: ${foundUrl}`,
-                );
-                hasResolved = true;
-                streamUrl = foundUrl;
-                extractionWindow = win;
+              // The real signal: mono.css means the player loaded.
+              // Verify it actually has a video element before declaring winner.
+              if (foundUrl.includes('mono.css')) {
+                if (hasResolved) return callback({ cancel: true });
 
-                // Immediately kill the losers
-                cleanupRacers(win.id);
+                setTimeout(async () => {
+                  if (hasResolved || win.isDestroyed()) return;
+                  try {
+                    const hasVideo = await win.webContents.executeJavaScript(
+                      `!!document.querySelector('video[src], video source[src]')`,
+                    );
+                    if (!hasVideo || hasResolved) return;
+                  } catch (_e) {
+                    return;
+                  }
 
-                // Capture Cookies and notify UI
-                win.webContents.session.cookies
-                  .get({ url: foundUrl })
-                  .then((cookies) => {
-                    streamCookies = cookies
-                      .map((c) => `${c.name}=${c.value}`)
-                      .join('; ');
+                  log.info(`[live-bridge] [WINNER] ${path} has video content`);
+                  hasResolved = true;
+                  streamUrl = foundUrl;
+                  extractionWindow = win;
 
-                    // Guard: renderer may have navigated away during the async cookie fetch.
-                    // Sending IPC to a destroyed webContents throws and can crash main.
-                    if (!event.sender || event.sender.isDestroyed()) return;
+                  // Immediately kill the losers
+                  cleanupRacers(win.id);
 
-                    const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?token=${proxyToken}&t=${Date.now()}`;
+                  // Capture Cookies and notify UI
+                  win.webContents.session.cookies
+                    .get({ url: foundUrl })
+                    .then((cookies) => {
+                      streamCookies = cookies
+                        .map((c) => `${c.name}=${c.value}`)
+                        .join('; ');
 
-                    event.sender.send('live-bridge-resolved', {
-                      originalUrl,
-                      channelId,
-                      hlsUrl: proxyM3u8,
-                      headers: {
-                        Cookie: streamCookies,
-                        Referer: racerUrl,
-                      },
+                      if (!event.sender || event.sender.isDestroyed()) return;
+
+                      const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?token=${proxyToken}&t=${Date.now()}`;
+
+                      event.sender.send('live-bridge-resolved', {
+                        originalUrl,
+                        channelId,
+                        hlsUrl: proxyM3u8,
+                        headers: {
+                          Cookie: streamCookies,
+                          Referer: racerUrl,
+                        },
+                      });
+
+                      // Optimize winner (mute/pause/minimize)
+                      setTimeout(() => {
+                        if (win && !win.isDestroyed()) {
+                          win.webContents.setAudioMuted(true);
+                          try {
+                            const pauseCode = `
+                            setInterval(() => {
+                              document.querySelectorAll('video, audio').forEach(m => {
+                                m.pause();
+                                m.removeAttribute('src');
+                                m.load();
+                              });
+                            }, 2000);
+                          `;
+                            win.webContents.mainFrame.framesInSubtree.forEach(
+                              (frame) => {
+                                frame
+                                  .executeJavaScript(pauseCode)
+                                  .catch(() => {});
+                              },
+                            );
+                          } catch (_e) {}
+                        }
+                      }, 1000);
                     });
-
-                    // Optimize winner (mute/pause/minimize)
-                    setTimeout(() => {
-                      if (win && !win.isDestroyed()) {
-                        win.webContents.setAudioMuted(true);
-                        try {
-                          const pauseCode = `
-                          setInterval(() => {
-                            document.querySelectorAll('video, audio').forEach(m => {
-                              m.pause();
-                              m.removeAttribute('src');
-                              m.load();
-                            });
-                          }, 2000);
-                        `;
-                          win.webContents.mainFrame.framesInSubtree.forEach(
-                            (frame) => {
-                              frame
-                                .executeJavaScript(pauseCode)
-                                .catch(() => {});
-                            },
-                          );
-                        } catch (_e) {}
-                      }
-                    }, 1000);
-                  });
+                }, 2000);
               }
 
               callback({ cancel: false });
