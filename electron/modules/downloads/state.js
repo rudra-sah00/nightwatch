@@ -99,6 +99,25 @@ function sendSafeProgress(eventSender, item) {
   } catch (_e) {
     // Sender destroyed between check and send — safe to ignore
   }
+
+  // Update Windows taskbar progress bar
+  if (process.platform === 'win32') {
+    try {
+      const { BrowserWindow } = require('electron');
+      const win = BrowserWindow.getAllWindows()[0];
+      if (win && !win.isDestroyed()) {
+        if (item.status === 'DOWNLOADING' && item.progress > 0) {
+          win.setProgressBar(item.progress / 100);
+        } else if (
+          item.status === 'COMPLETED' ||
+          item.status === 'ERROR' ||
+          item.status === 'CANCELLED'
+        ) {
+          win.setProgressBar(-1); // Remove progress bar
+        }
+      }
+    } catch (_e) {}
+  }
 }
 
 module.exports = {

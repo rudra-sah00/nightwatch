@@ -607,24 +607,32 @@ const startElectronApp = async () => {
     if (win) {
       // Setup small media buttons underneath the taskbar thumbnail preview
       try {
+        // Create 16x16 icons from the app icon for thumbnail buttons
+        const iconPath = _path.join(__dirname, 'build', 'icon.png');
+        const baseIcon = require('node:fs').existsSync(iconPath)
+          ? nativeImage
+              .createFromPath(iconPath)
+              .resize({ width: 16, height: 16 })
+          : nativeImage.createEmpty();
+
         const thumbButtons = [
           {
             tooltip: 'Previous',
-            icon: nativeImage.createEmpty(), // Replace with real asset when ready
+            icon: baseIcon,
             flags: ['enabled'],
             click: () =>
               win.webContents.send('media-command', 'MediaPreviousTrack'),
           },
           {
             tooltip: 'Play/Pause',
-            icon: nativeImage.createEmpty(),
+            icon: baseIcon,
             flags: ['enabled'],
             click: () =>
               win.webContents.send('media-command', 'MediaPlayPause'),
           },
           {
             tooltip: 'Next',
-            icon: nativeImage.createEmpty(),
+            icon: baseIcon,
             flags: ['enabled'],
             click: () =>
               win.webContents.send('media-command', 'MediaNextTrack'),
