@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 
 /**
  * Listens for service worker updates and shows a toast prompting the user to refresh.
- * Works alongside skipWaiting:true — the new SW activates immediately, but the
- * page still needs a reload to pick up the new cached assets.
+ *
+ * In Electron, the SW update cycle doesn't trigger automatically on navigation
+ * like it does in browsers. We force an update check on mount and every 5 minutes
+ * so production Electron users always get the latest cached assets.
  */
 export function SwUpdatePrompt() {
   useEffect(() => {
@@ -20,7 +22,7 @@ export function SwUpdatePrompt() {
           label: 'Refresh',
           onClick: () => window.location.reload(),
         },
-        duration: 15000,
+        duration: 30000,
       });
     };
 
@@ -28,7 +30,20 @@ export function SwUpdatePrompt() {
       'controllerchange',
       handleControllerChange,
     );
+
+    // Force SW update check on mount and every 5 minutes.
+    // Browsers do this on navigation, but Electron's loadURL() bypasses it.
+    const checkForUpdate = () => {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        reg?.update().catch(() => {});
+      });
+    };
+
+    checkForUpdate();
+    const interval = setInterval(checkForUpdate, 5 * 60 * 1000);
+
     return () => {
+      clearInterval(interval);
       navigator.serviceWorker.removeEventListener(
         'controllerchange',
         handleControllerChange,
