@@ -56,19 +56,22 @@ export function clearStorageCache(): void {
 }
 
 /**
- * Invalidate cache on external storage changes (other tabs/windows)
+ * Initialize storage cache event listeners.
+ * Call once from a client-side component/provider to avoid SSR side effects.
  */
-if (typeof window !== 'undefined') {
+let _initialized = false;
+export function initStorageCache(): void {
+  if (_initialized || typeof window === 'undefined') return;
+  _initialized = true;
+
   window.addEventListener('storage', (e) => {
     if (e.key) {
       storageCache.delete(e.key);
     } else {
-      // null key means clear() was called
       storageCache.clear();
     }
   });
 
-  // Invalidate cache when tab becomes visible (in case external changes)
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       storageCache.clear();

@@ -16,7 +16,6 @@ import {
   getSocket,
   initSocket,
   offForceLogout,
-  onForceLogout,
 } from '@/lib/socket';
 import type { ForceLogoutPayload } from '@/types';
 
@@ -103,19 +102,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     disconnectSocket();
     setSocket(null);
   }, []);
-
-  // Expose force logout registration on the current socket
-  const _registerForceLogout = useCallback(
-    (handler: (payload: ForceLogoutPayload) => void) => {
-      // Clean up previous handler
-      if (forceLogoutRef.current) {
-        offForceLogout(forceLogoutRef.current);
-      }
-      forceLogoutRef.current = handler;
-      onForceLogout(handler);
-    },
-    [],
-  );
 
   // Sync with existing module-level socket on mount
   // (covers the case where AuthProvider already called initSocket before this provider renders)

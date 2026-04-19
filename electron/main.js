@@ -1,4 +1,3 @@
-// require('v8-compile-cache');
 const {
   app,
   globalShortcut,

@@ -9,6 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { initStorageCache } from '@/lib/storage-cache';
 
 type Theme = 'light' | 'dark';
 
@@ -32,6 +33,7 @@ export function ThemeProvider({
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
   useEffect(() => {
+    initStorageCache();
     const savedTheme = localStorage.getItem('neo-theme') as Theme | null;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
