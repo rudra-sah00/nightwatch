@@ -52,5 +52,32 @@ pnpm test:e2e
 
 ## Continuous Integration (CI)
 
-Every push to the main branch is checked via GitHub Actions or the local `pnpm validate` script.
-The `pnpm validate` command sequences strict type-checking, formatting, linting, TSDoc validation, and Vitest runs before allowing a merge.
+All GitHub Actions workflows now run the full test suite before deploying or building:
+
+### Web Deploy Pipelines (`deploy.yml`, `release.yml`)
+1. `pnpm check` — Biome lint & format validation
+2. `pnpm type-check` — TypeScript strict mode compilation
+3. `pnpm test` — Full Vitest unit/component test suite (1388+ tests)
+4. Build & deploy to Vercel
+5. Post-deploy smoke test (HTTP health check on deployed URL)
+
+### Desktop Build Pipeline (`build-desktop.yml`)
+1. `pnpm check` — Biome lint & format
+2. `pnpm type-check` — TypeScript compilation
+3. `pnpm test` — Full Vitest suite
+4. `electron-builder` — Cross-platform binary compilation
+
+### PR Preview Pipeline (`pr-preview.yml`)
+Triggers on every PR to `main`:
+1. Lint + type-check + unit tests
+2. Builds and deploys a Vercel preview
+3. Comments the preview URL on the PR
+
+### Nightly E2E Pipeline (`e2e-nightly.yml`)
+Runs at 2 AM UTC daily (also manual trigger):
+1. Installs Playwright Chromium
+2. Runs full E2E test suite with test credentials from GitHub Secrets
+3. Uploads test results as artifacts (7-day retention)
+
+### Local Validation
+The `pnpm validate` command sequences type-checking, formatting, linting, and Vitest runs before allowing a merge.
