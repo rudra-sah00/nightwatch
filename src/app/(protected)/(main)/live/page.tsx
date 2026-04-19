@@ -8,8 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default async function LivePage() {
-  // Artificial delay to showcase premium loading animations
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   return <LiveClient />;
 }

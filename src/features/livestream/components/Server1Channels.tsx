@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Play, Search, Tv } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Channel } from '../api';
@@ -11,15 +11,15 @@ export function Server1Channels() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Very simple debounce for search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearch(val);
-    setPage(1); // reset to page 1 on search
+    setPage(1);
 
-    if (window.debounceTimer) clearTimeout(window.debounceTimer);
-    window.debounceTimer = setTimeout(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
       setDebouncedSearch(val);
     }, 500);
   };
@@ -115,6 +115,7 @@ export function Server1Channels() {
 }
 
 function ChannelRow({ channel }: { channel: Channel }) {
+  const [imgError, setImgError] = useState(false);
   // Extract just the channel number if providerId is a daddylive URL
   // This prevents Vercel WAF from blocking the /live/live-server1:https:/... path.
   let cleanProviderId = channel.providerId || '';
@@ -186,16 +187,12 @@ function ChannelRow({ channel }: { channel: Channel }) {
           <div className="flex w-full items-center justify-center md:justify-start gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className="w-12 h-12 md:w-16 md:h-16 bg-secondary border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-2 rounded-full transition-transform">
-                {channel.icon ? (
+                {channel.icon && !imgError ? (
                   <img
-                    src={channel.icon || undefined}
+                    src={channel.icon}
                     alt={channel.name}
                     className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML =
-                        '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-30"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></div>';
-                    }}
+                    onError={() => setImgError(true)}
                   />
                 ) : (
                   <Tv className="w-6 h-6 text-foreground/40" />
@@ -224,10 +221,4 @@ function ChannelRow({ channel }: { channel: Channel }) {
       </div>
     </>
   );
-}
-
-declare global {
-  interface Window {
-    debounceTimer?: NodeJS.Timeout;
-  }
 }

@@ -7,8 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  // Artificial delay to showcase premium loading animations
-  await new Promise((resolve) => setTimeout(resolve, 2500));
-
   return <HomeClient />;
 }

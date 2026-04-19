@@ -12,7 +12,6 @@ export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const { isDesktopApp, isMacOS, isWindows } = useDesktopApp();
-  const _isHome = pathname === '/home';
   const { isNavigating, progress, type } = useNavigationStore();
 
   return (

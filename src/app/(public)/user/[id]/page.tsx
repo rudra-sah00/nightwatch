@@ -48,9 +48,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * Logic is decoupled into PublicProfileView component.
  */
 export default async function PublicProfilePage({ params }: Props) {
-  // Artificial delay to showcase premium loading animations
-  await new Promise((resolve) => setTimeout(resolve, 2500));
-
   const { id } = await params;
   const result = await getPublicProfile(id).catch(() => null);
 

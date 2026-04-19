@@ -91,7 +91,6 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
       level: number;
       isValid: boolean;
     }[][] = [];
-    let _total = 0;
 
     const currentDate = new Date(startDate);
     const creationDay = createdAt ? new Date(createdAt) : null;
@@ -116,7 +115,6 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
         if (isAfterCreation && !isFuture) {
           const dayActivity = activityByDate.get(dateStr);
           count = dayActivity?.count || 0;
-          _total += count;
 
           if (dayActivity?.level) {
             level = dayActivity.level;
