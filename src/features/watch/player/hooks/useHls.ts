@@ -159,9 +159,27 @@ export function useHls({
           xhrSetup: (xhr: XMLHttpRequest, url: string) => {
             // We fixed the `Access-Control-Allow-Origin: *` wildcard issue in the Electron backend.
             // It is now safe to use withCredentials in both Desktop and Browser versions.
-            if (url.includes('/api/stream/')) {
+            // Do NOT set withCredentials for offline-media:// — it's a custom Electron protocol.
+            if (
+              url.includes('/api/stream/') &&
+              !url.startsWith('offline-media://')
+            ) {
               xhr.withCredentials = true;
             }
+          },
+          // HLS.js switches to FetchLoader (progressive streaming) when fetch is available.
+          // For offline-media:// URLs, the default mode:'cors' causes fetch to fail because
+          // Electron's custom protocol handler is treated as cross-origin. Override to use
+          // mode:'cors' only for real network URLs; offline-media:// gets no-cors.
+          fetchSetup: (context: { url: string }, initParams: RequestInit) => {
+            if (context.url.startsWith('offline-media://')) {
+              return new Request(context.url, {
+                ...initParams,
+                mode: 'cors',
+                credentials: 'omit',
+              });
+            }
+            return new Request(context.url, initParams);
           },
         };
 

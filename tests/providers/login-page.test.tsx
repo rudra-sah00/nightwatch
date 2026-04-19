@@ -51,6 +51,15 @@ vi.mock('next/dynamic', () => ({
   },
 }));
 
+// The real LoginPage is an async Server Component with a 2.5s delay which
+// the test environment cannot await. Mock it to render LoginClient directly.
+vi.mock('@/app/(public)/login/page', async () => {
+  const { default: LoginClient } = await import(
+    '@/app/(public)/login/LoginClient'
+  );
+  return { default: LoginClient };
+});
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('LoginPage', () => {

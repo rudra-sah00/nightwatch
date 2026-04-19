@@ -40,73 +40,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearCookiesAndRedirect('Session expired. Please login again.');
   }, [disconnect, setUser]);
 
+  // Effect 1: Socket connect/disconnect — only re-runs when the identity changes
+  // (id or sessionId). Profile updates from getProfile() must NOT trigger this
+  // effect, otherwise every profile sync causes a disconnect → reconnect cycle
+  // which is the root cause of logout-on-deploy.
+  const userId = user?.id;
+  const sessionId = user?.sessionId;
+
+  useEffect(() => {
+    if (!userId || !sessionId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const currentUser = useAuthStore.getState().user;
+    connect(
+      userId,
+      sessionId,
+      currentUser?.name,
+      currentUser?.profilePhoto ?? undefined,
+    );
+
+    forceLogoutHandlerRef.current = handleForceLogout;
+    onForceLogout(handleForceLogout);
+
+    return () => {
+      if (forceLogoutHandlerRef.current)
+        offForceLogout(forceLogoutHandlerRef.current);
+      disconnect();
+    };
+  }, [userId, sessionId, connect, disconnect, handleForceLogout, setIsLoading]);
+
+  // Effect 2: Profile sync — runs once on mount (or when identity changes) to
+  // fetch fresh profile data. Does NOT disconnect the socket on re-run.
   useEffect(() => {
     window.addEventListener('auth:expired', handleAuthExpired);
+
+    if (!userId) {
+      return () =>
+        window.removeEventListener('auth:expired', handleAuthExpired);
+    }
+
     const controller = new AbortController();
 
-    const initAuth = async () => {
-      if (user) {
-        // Hydrated from Zustand persist
-        setIsLoading(false);
+    const syncProfile = async () => {
+      try {
+        invalidateProfileCache();
+        const [{ user: profileData }] = await Promise.all([
+          getProfile({ signal: controller.signal }),
+          Promise.resolve(setTokenExpiration(15 * 60)),
+        ]);
 
-        // Connect Socket.IO
-        connect(
-          user.id,
-          user.sessionId,
-          user.name,
-          user.profilePhoto ?? undefined,
-        );
-        forceLogoutHandlerRef.current = handleForceLogout;
-        onForceLogout(handleForceLogout);
-
-        try {
-          invalidateProfileCache();
-          const [{ user: profileData }] = await Promise.all([
-            getProfile({ signal: controller.signal }),
-            Promise.resolve(setTokenExpiration(15 * 60)),
-          ]);
-
-          if (!controller.signal.aborted) {
-            useAuthStore.getState().updateUser(profileData);
-          }
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') return;
-          const err = error as { status?: number };
-          if (err.status === 401 || err.status === 404) {
-            disconnect();
-            if (!controller.signal.aborted) {
-              setUser(null);
-              setIsLoading(false);
-            }
-            clearCookiesAndRedirect('Session expired. Please login again.');
-          }
-        }
-      } else {
         if (!controller.signal.aborted) {
+          useAuthStore.getState().updateUser(profileData);
           setIsLoading(false);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        const err = error as { status?: number };
+        if (err.status === 401 || err.status === 404) {
+          disconnect();
+          if (!controller.signal.aborted) {
+            setUser(null);
+            setIsLoading(false);
+          }
+          clearCookiesAndRedirect('Session expired. Please login again.');
+        } else {
+          // Network error during deploy window — don't log out, just mark loaded
+          if (!controller.signal.aborted) setIsLoading(false);
         }
       }
     };
 
-    // Small delay to let Zustand hydrate on mount
-    setTimeout(() => initAuth(), 0);
+    setTimeout(() => syncProfile(), 0);
 
     return () => {
       controller.abort();
-      if (forceLogoutHandlerRef.current)
-        offForceLogout(forceLogoutHandlerRef.current);
-      disconnect();
       window.removeEventListener('auth:expired', handleAuthExpired);
     };
-  }, [
-    user,
-    handleForceLogout,
-    handleAuthExpired,
-    connect,
-    disconnect,
-    setUser,
-    setIsLoading,
-  ]);
+  }, [userId, handleAuthExpired, disconnect, setUser, setIsLoading]);
 
   return <>{children}</>;
 }

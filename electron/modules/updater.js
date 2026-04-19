@@ -75,6 +75,18 @@ function setupUpdater(splashWindow, onComplete) {
       splashWindow.webContents.send('updater-version', info.version);
     }
     sendStatus('Downloading update please...', 30);
+
+    // Without this, a stalled/slow download after clearing both timers above
+    // hangs the splash screen forever. 5 minutes is generous for any binary size.
+    hardDeadlineTimer = setTimeout(
+      () => {
+        log.warn(
+          '[updater] Download deadline (5 min) — forcing launch without update.',
+        );
+        finish();
+      },
+      5 * 60 * 1000,
+    );
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
@@ -89,6 +101,14 @@ function setupUpdater(splashWindow, onComplete) {
   });
 
   autoUpdater.on('update-downloaded', () => {
+    // If finish() already ran (download deadline fired), the user is already in the app.
+    // Don't interrupt their session — autoInstallOnAppQuit will handle it on next quit.
+    if (updateFinished) {
+      log.info(
+        '[updater] Update downloaded after launch — will install on next quit.',
+      );
+      return;
+    }
     sendStatus('Installing updates...', 100);
     setTimeout(() => {
       autoUpdater.quitAndInstall(true, true);
