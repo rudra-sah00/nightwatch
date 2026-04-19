@@ -294,12 +294,22 @@ class AppWindow {
     // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---
     // Let Next.js know when the user clicks away, so it can enter a mini-player.
     // Guard: never fire while the native fullscreen transition is in progress.
+    // Debounce: suppress rapid blur/focus pairs caused by PiP setBounds() animation.
+    let pipDebounceTimer = null;
+
     this.mainWindow.on('blur', () => {
-      if (isNativeFullscreen) return; // suppress — this blur is the OS animation
-      this.mainWindow.webContents.send('window-blur');
+      if (isNativeFullscreen) return;
+      if (pipDebounceTimer) clearTimeout(pipDebounceTimer);
+      pipDebounceTimer = setTimeout(() => {
+        this.mainWindow.webContents.send('window-blur');
+      }, 150);
     });
 
     this.mainWindow.on('focus', () => {
+      if (pipDebounceTimer) {
+        clearTimeout(pipDebounceTimer);
+        pipDebounceTimer = null;
+      }
       this.mainWindow.webContents.send('window-focus');
     });
 
