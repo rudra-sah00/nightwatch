@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.3](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.2...v1.29.3) (2026-04-19)
+
+
+### Bug Fixes
+
+* **electron:** add ms as direct dependency for asar inclusion ([1eb66cc](https://github.com/rudra-sah00/watch-rudra/commit/1eb66ccf63f2b50e79742c66377426b72245d1eb))
+
 ## [1.29.2](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.1...v1.29.2) (2026-04-19)
 
 
