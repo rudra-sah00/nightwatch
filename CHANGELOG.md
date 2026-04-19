@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.29.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.0...v1.29.1) (2026-04-19)
+
+
+### Bug Fixes
+
+* **ci:** prevent parallel upload race conditions in desktop builds ([426bc8b](https://github.com/rudra-sah00/watch-rudra/commit/426bc8b3464dbba62bb3c6eca9ba2eb979ca1d8d))
+* **ci:** resolve CRLF line ending failures on Windows desktop builds ([2b248a0](https://github.com/rudra-sah00/watch-rudra/commit/2b248a0fe76a3ba8b1580d347e326d7eb96ae351))
+* **electron:** resolve missing 'ms' module crash in production asar ([2a85955](https://github.com/rudra-sah00/watch-rudra/commit/2a85955e83cbac8c443de26e14a498ebe969765f))
+
 ## [1.29.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.28.0...v1.29.0) (2026-04-19)
 
 
