@@ -31,6 +31,7 @@ export function SearchClient({
   const {
     results,
     isTransitioning,
+    hasSearched,
     selectedContent,
     selectedContentId,
     fromContinueWatching,
@@ -105,7 +106,10 @@ export function SearchClient({
                   Could not reach the server. Please try again.
                 </p>
               </div>
-            ) : !isTransitioning && !isPending && results.length === 0 ? (
+            ) : !isTransitioning &&
+              !isPending &&
+              hasSearched &&
+              results.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
                 <span className="text-5xl mb-4">🔍</span>
                 <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
