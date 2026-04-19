@@ -335,10 +335,8 @@ function setupLiveBridge() {
                 streamUrl = foundUrl;
                 extractionWindow = win;
 
-                // Immediately kill the losers
                 cleanupRacers(win.id);
 
-                // Capture Cookies and notify UI
                 win.webContents.session.cookies
                   .get({ url: foundUrl })
                   .then((cookies) => {
@@ -360,7 +358,6 @@ function setupLiveBridge() {
                       },
                     });
 
-                    // Optimize winner (mute/pause/minimize)
                     setTimeout(() => {
                       if (win && !win.isDestroyed()) {
                         win.webContents.setAudioMuted(true);
@@ -388,6 +385,18 @@ function setupLiveBridge() {
               }
 
               callback({ cancel: false });
+            },
+          );
+
+          // Override headers so the upstream sees this as an iframe embed, not direct access
+          win.webContents.session.webRequest.onBeforeSendHeaders(
+            { urls: ['*://*.dlstreams.top/*'] },
+            (details, cb) => {
+              details.requestHeaders['Referer'] = 'https://daddylive.mp/';
+              details.requestHeaders['Sec-Fetch-Dest'] = 'iframe';
+              details.requestHeaders['Sec-Fetch-Mode'] = 'navigate';
+              details.requestHeaders['Sec-Fetch-Site'] = 'cross-site';
+              cb({ requestHeaders: details.requestHeaders });
             },
           );
 

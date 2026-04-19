@@ -476,7 +476,6 @@ const startElectronApp = async () => {
       // Restore normal workspace visibility
       if (process.platform === 'darwin') {
         win.setVisibleOnAllWorkspaces(false);
-        win.setWindowButtonVisibility(true);
       }
 
       win.setAspectRatio(0); // unlock aspect ratio
@@ -490,6 +489,13 @@ const startElectronApp = async () => {
       } else {
         win.setSize(1280, 800, true);
         win.center();
+      }
+
+      // Show traffic lights AFTER resize animation to prevent blinking
+      if (process.platform === 'darwin') {
+        setTimeout(() => {
+          if (win && !win.isDestroyed()) win.setWindowButtonVisibility(true);
+        }, 400);
       }
 
       win.webContents.send('pip-mode-changed', false);
