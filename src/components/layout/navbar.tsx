@@ -109,6 +109,7 @@ export function Navbar() {
           </Link>
         </div>
       </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-border" />
     </nav>
   );
 }
