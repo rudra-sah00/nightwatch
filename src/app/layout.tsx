@@ -5,6 +5,8 @@ import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
+import { GlobalLoadingOverlay } from '@/components/layout/global-loading-overlay';
+import { NavigationTransitionProvider } from '@/components/layout/navigation-transition';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
@@ -65,10 +67,13 @@ export default function RootLayout({
               <SocketProvider>
                 <AuthProvider>
                   <Suspense fallback={null}>
-                    <DiscordPresenceSync />
-                    <OfflineIndicator />
+                    <NavigationTransitionProvider>
+                      <GlobalLoadingOverlay />
+                      <DiscordPresenceSync />
+                      <OfflineIndicator />
+                      {children}
+                    </NavigationTransitionProvider>
                   </Suspense>
-                  {children}
                   <Toaster />
                 </AuthProvider>
               </SocketProvider>

@@ -567,4 +567,20 @@
   body.is-desktop-pip .no-drag {
     -webkit-app-region: no-drag !important;
   }
+
+  @keyframes indeterminate-progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(-10%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-indeterminate-progress {
+    animation: indeterminate-progress 1.5s infinite linear;
+  }
 }
