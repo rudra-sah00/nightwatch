@@ -26,6 +26,7 @@ interface InputProps
 }
 
 function Input({ className, variant, type, error, ref, ...props }: InputProps) {
+  const errorId = error && props.id ? `${props.id}-error` : undefined;
   return (
     <div className="w-full">
       <input
@@ -36,10 +37,16 @@ function Input({ className, variant, type, error, ref, ...props }: InputProps) {
           className,
         )}
         ref={ref}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={errorId}
         {...props}
       />
       {error ? (
-        <p className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-neo-red motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none">
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-1 text-[10px] font-headline font-bold uppercase tracking-widest text-neo-red motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-reduce:animate-none"
+        >
           {error}
         </p>
       ) : null}

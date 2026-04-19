@@ -44,21 +44,7 @@ export function initDevToolsProtection(): (() => void) | undefined {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
-        /* Disable text selection */
-        body {
-          -webkit-user-select: none !important;
-          -moz-user-select: none !important;
-          -ms-user-select: none !important;
-          user-select: none !important;
-        }
-        
-        /* Allow selection in input fields */
-        input, textarea, [contenteditable="true"] {
-          -webkit-user-select: text !important;
-          -moz-user-select: text !important;
-          -ms-user-select: text !important;
-          user-select: text !important;
-        }
+        /* Allow selection in input fields — user-select:none removed for accessibility */
         
         /* Disable drag */
         body * {

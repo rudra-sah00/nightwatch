@@ -1,8 +1,17 @@
 const { app } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
-const Store = require('electron-store');
-const store = new Store();
+
+// Shared store instance — set by main.js via setStore() to avoid creating a second instance
+let store = null;
+
+function setStore(sharedStore) {
+  store = sharedStore;
+}
+
+function getStore() {
+  return store;
+}
 
 const activeDownloadsMap = new Map();
 const downloadQueue = [];
@@ -14,7 +23,7 @@ if (!fs.existsSync(VAULT_PATH)) {
 
 function getDatabase() {
   try {
-    return { items: store.get('downloads', []) };
+    return { items: getStore().get('downloads', []) };
   } catch (_e) {
     return { items: [] };
   }
@@ -22,20 +31,50 @@ function getDatabase() {
 
 function saveDatabase(dbObj) {
   try {
-    store.set('downloads', dbObj.items || []);
+    getStore().set('downloads', dbObj.items || []);
   } catch (_e) {}
 }
 
+let _syncTimer = null;
+const _pendingSync = new Map();
+
 function syncDbState(updatedItem) {
   if (updatedItem.status === 'CANCELLED') return;
-  const db = getDatabase();
-  const idx = db.items.findIndex((i) => i.contentId === updatedItem.contentId);
+
+  // Buffer the latest state per contentId
   const safeClone = { ...updatedItem };
   delete safeClone.reqs;
   delete safeClone.segmentsDownloadedSet;
+  _pendingSync.set(updatedItem.contentId, safeClone);
 
-  if (idx > -1) db.items[idx] = safeClone;
-  else db.items.push(safeClone);
+  // Flush immediately for terminal states, debounce for progress updates
+  if (
+    updatedItem.status === 'COMPLETED' ||
+    updatedItem.status === 'ERROR' ||
+    updatedItem.status === 'PAUSED'
+  ) {
+    _flushSync();
+    return;
+  }
+
+  // Debounce: write at most every 3 seconds during active downloads
+  if (!_syncTimer) {
+    _syncTimer = setTimeout(() => {
+      _syncTimer = null;
+      _flushSync();
+    }, 3000);
+  }
+}
+
+function _flushSync() {
+  if (_pendingSync.size === 0) return;
+  const db = getDatabase();
+  for (const [contentId, item] of _pendingSync) {
+    const idx = db.items.findIndex((i) => i.contentId === contentId);
+    if (idx > -1) db.items[idx] = item;
+    else db.items.push(item);
+  }
+  _pendingSync.clear();
   saveDatabase(db);
 }
 
@@ -51,15 +90,20 @@ function finalizeCancel(_item, contentId) {
 }
 
 function sendSafeProgress(eventSender, item) {
-  if (!eventSender) return;
+  if (!eventSender || eventSender.isDestroyed()) return;
   const safeClone = { ...item };
   delete safeClone.reqs;
   delete safeClone.segmentsDownloadedSet;
-  eventSender.send('download-progress', safeClone);
+  try {
+    eventSender.send('download-progress', safeClone);
+  } catch (_e) {
+    // Sender destroyed between check and send — safe to ignore
+  }
 }
 
 module.exports = {
-  store,
+  setStore,
+  getStore,
   activeDownloadsMap,
   downloadQueue,
   VAULT_PATH,

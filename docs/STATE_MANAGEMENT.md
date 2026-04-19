@@ -2,14 +2,27 @@
 
 With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Electron Desktop bridges, state management in Watch Rudra runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
 
-## 1. Global Application State (React Context)
+## 1. Global Application State
 
-For state that must be globally accessible but mutates infrequently, we utilize strict React Context Providers located in `src/providers/`:
+### Zustand (Persistent Client State)
+For state that persists across page navigations and needs to survive refreshes:
+*   **`use-auth-store.ts`**: User authentication state with Zustand `persist` middleware. Uses a custom `StateStorage` adapter that syncs to both `localStorage` (web) and `electron-store` (desktop) via `window.electronAPI.storeSet/Get`.
+*   **`use-navigation-store.ts`**: Navigation transition state for page loading indicators.
 
-*   **`AuthProvider`**: Manages the `<AuthContext>` tracking `user` profiles, tokens, and active session loading boundaries. It handles seamless multi-tab authentication syncs.
-*   **`SocketProvider`**: Manages the singleton `socket.io-client` connection instance used globally for fallback room approvals and force-logout broadcasts.
-*   **`DevToolsProtectionProvider`**: Secures production environments by listening to keyboard shortcuts and native OS inspection triggers, blinding the UI if devtools are forcefully opened.
-*   **`ServerProvider`**: Scaffolds layout requirements globally at the top level.
+### React Context (Dependency Injection)
+For providing singleton instances and infrequently-changing values down the tree:
+*   **`AuthProvider`**: Thin wrapper that syncs the Zustand auth store with WebSocket connections and profile data. Exposes `useAuth()` which reads directly from the Zustand store.
+*   **`SocketProvider`**: Manages the singleton `socket.io-client` connection instance.
+*   **`ThemeProvider`**: Light/dark theme with `useMemo`-stabilized context value to prevent unnecessary re-renders.
+*   **`ServerProvider`**: Active content server selection (`s1`/`s2`/`s3`), synced from user preferences via `useEffect`.
+
+### Decision Tree
+| Need | Use |
+|------|-----|
+| Persists across refreshes, shared globally | Zustand store (`src/store/`) |
+| Singleton instance injection (socket, theme) | React Context (`src/providers/`) |
+| Form state, UI toggles, component-local | `useState` / `useReducer` |
+| Rapidly mutating player state | `useReducer` via `PlayerContext` |
 
 ## 2. Highly Mutative Domain State (`useReducer`)
 
@@ -47,3 +60,18 @@ We do not use Apollo or React Query. Instead, we lean directly into Next.js App 
 
 *   **Mutations (Server Actions)**: For forms and sensitive data updates (passwords, profiles, avatars).
 *   **Query-Level Locking**: Our `fetch.ts` implements a Mutex queue (`lockPromise`). If multiple components request a new Access Token refresh simultaneously, State is blocked globally across all components, waiting for the singular HTTP promise to resolve natively before retrying the render tree.
+
+## 6. Shared TTL Cache (`src/lib/cache.ts`)
+
+All client-side API caching uses a unified `createTTLCache<T>(ttlMs, maxSize)` utility:
+*   **Search API**: 4 caches (results 5min, suggestions 10min, show details 5min, episodes 10min)
+*   **Profile API**: Profile data cache (5min)
+*   **Watch API**: Continue-watching cache (30s), progress cache (2min) — uses custom per-server keying
+
+All caches auto-register in a global registry. `clearAllCaches()` is called on logout to prevent stale data across sessions.
+
+## 7. Shared Utilities
+
+*   **`src/lib/errors.ts`**: `isApiError()` type guard, `handleApiError()` centralized handler, `mapErrorCode()` for user-friendly messages.
+*   **`src/hooks/use-abort-controller.ts`**: Shared request cancellation hook for API calls.
+*   **`src/features/auth/hooks/use-otp-verification.ts`**: Shared OTP flow (countdown, resend, submit).

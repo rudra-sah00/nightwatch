@@ -49,6 +49,12 @@ NEXT_PUBLIC_AGORA_APP_ID=your_agora_app_id
 
 # Toggle detailed Agora SDK debug logging in the browser console
 NEXT_PUBLIC_AGORA_DEBUG=false
+
+# Cloudflare Turnstile site key (anti-bot verification on login/signup)
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
+
+# Sentry DSN for error tracking (disabled in development via enabled: false)
+NEXT_PUBLIC_SENTRY_DSN=
 ```
 
 > **Note:** Do not check `.env.local` into version control. It is ignored by Git automatically.

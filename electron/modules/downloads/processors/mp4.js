@@ -7,7 +7,7 @@ const {
   activeDownloadsMap,
   finalizeCancel,
   VAULT_PATH,
-  store,
+  getStore,
 } = require('../state');
 const { downloadFile, formatSpeed } = require('../network');
 
@@ -69,9 +69,13 @@ async function startMp4Download(
         const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
         const posterDest = path.join(contentFolder, `poster${ext}`);
         if (!fs.existsSync(posterDest)) {
-          await downloadFile(posterUrl, posterDest, null, item, store).catch(
-            () => null,
-          );
+          await downloadFile(
+            posterUrl,
+            posterDest,
+            null,
+            item,
+            getStore(),
+          ).catch(() => null);
         }
         item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
         if (item.showData) {
@@ -149,7 +153,7 @@ async function startMp4Download(
           }
         },
         item,
-        store,
+        getStore,
         startOffset,
         // onTotalBytes: called once when Content-Length header arrives
         (totalBytes) => {

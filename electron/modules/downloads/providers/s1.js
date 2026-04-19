@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { startHlsDownload } = require('../processors/hls');
-const { getDatabase, syncDbState, VAULT_PATH, store } = require('../state');
+const { getDatabase, syncDbState, VAULT_PATH } = require('../state');
 const { downloadFile } = require('../network');
 
 async function downloadS1(eventSender, args) {

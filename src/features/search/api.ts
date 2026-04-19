@@ -1,50 +1,21 @@
+import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { Episode, SearchResult, ShowDetails } from './types';
-
-/**
- * Internal caching utilities for search requests.
- */
-
-interface CacheEntry<T> {
-  data: T;
-  expiry: number;
-}
-
-// Generic cache Map factory
-function createCache<T>() {
-  return new Map<string, CacheEntry<T>>();
-}
-
-// Cache cleanup utility
-function cleanupCache<T>(cache: Map<string, CacheEntry<T>>, maxSize: number) {
-  if (cache.size > maxSize) {
-    const now = Date.now();
-    for (const [key, value] of cache) {
-      if (value.expiry < now) {
-        cache.delete(key);
-      }
-    }
-  }
-}
 
 /**
  * Content search with intelligent frontend caching.
  */
 
-// Search results cache (5 minutes frontend, 15 minutes backend)
-const searchResultsCache = createCache<SearchResult[]>();
-const SEARCH_CACHE_TTL = 5 * 60 * 1000;
+const searchResultsCache = createTTLCache<SearchResult[]>(5 * 60 * 1000, 100);
 
 export async function searchContent(
   query: string,
   server?: string,
   options?: RequestInit,
 ): Promise<SearchResult[]> {
-  const normalizedQuery = `${query.toLowerCase().trim()}:${server || 'default'}`;
-  const cached = searchResultsCache.get(normalizedQuery);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.data;
-  }
+  const cacheKey = `${query.toLowerCase().trim()}:${server || 'default'}`;
+  const cached = searchResultsCache.get(cacheKey);
+  if (cached) return cached;
 
   const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { results } = await apiFetch<{ results: SearchResult[] }>(
@@ -52,20 +23,14 @@ export async function searchContent(
     options,
   );
 
-  searchResultsCache.set(normalizedQuery, {
-    data: results,
-    expiry: Date.now() + SEARCH_CACHE_TTL,
-  });
-  cleanupCache(searchResultsCache, 100);
-
+  searchResultsCache.set(cacheKey, results);
   return results;
 }
 
 /**
  * Get search suggestions with frontend caching.
  */
-const searchSuggestionsCache = createCache<string[]>();
-const SUGGEST_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const searchSuggestionsCache = createTTLCache<string[]>(10 * 60 * 1000, 50);
 
 export async function getSearchSuggestions(
   query: string,
@@ -76,9 +41,7 @@ export async function getSearchSuggestions(
 
   const cacheKey = `${query.toLowerCase()}:${server || 'default'}`;
   const cached = searchSuggestionsCache.get(cacheKey);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.data;
-  }
+  if (cached) return cached;
 
   const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { suggestions } = await apiFetch<{ suggestions: string[] }>(
@@ -86,12 +49,7 @@ export async function getSearchSuggestions(
     options,
   );
 
-  searchSuggestionsCache.set(cacheKey, {
-    data: suggestions,
-    expiry: Date.now() + SUGGEST_CACHE_TTL,
-  });
-  cleanupCache(searchSuggestionsCache, 50);
-
+  searchSuggestionsCache.set(cacheKey, suggestions);
   return suggestions;
 }
 
@@ -99,26 +57,20 @@ export async function getSearchSuggestions(
  * Metadata retrieval for movies and series.
  */
 
-// Show details cache (5 minutes)
-const showDetailsCache = createCache<ShowDetails>();
-const SHOW_CACHE_TTL = 5 * 60 * 1000;
+const showDetailsCache = createTTLCache<ShowDetails>(5 * 60 * 1000, 50);
 
 export async function getShowDetails(
   id: string,
   options?: RequestInit,
 ): Promise<ShowDetails> {
   const cached = showDetailsCache.get(id);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.data;
-  }
+  if (cached) return cached;
 
   const { show } = await apiFetch<{ show: ShowDetails }>(
     `/api/video/show/${id}`,
     options,
   );
-  showDetailsCache.set(id, { data: show, expiry: Date.now() + SHOW_CACHE_TTL });
-  cleanupCache(showDetailsCache, 50);
-
+  showDetailsCache.set(id, show);
   return show;
 }
 
@@ -126,12 +78,10 @@ export async function getShowDetails(
  * Episode listing for series, with caching to minimize large requests.
  */
 
-// Episodes cache (10 minutes - episodes rarely change)
-const episodesCache = createCache<{
+const episodesCache = createTTLCache<{
   episodes: Episode[];
   totalEpisodes: number;
-}>();
-const EPISODES_CACHE_TTL = 10 * 60 * 1000;
+}>(10 * 60 * 1000, 30);
 
 export async function getSeriesEpisodes(
   seriesId: string,
@@ -142,9 +92,7 @@ export async function getSeriesEpisodes(
     ? `${seriesId}:${startSeasonId}`
     : `${seriesId}:all`;
   const cached = episodesCache.get(cacheKey);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.data;
-  }
+  if (cached) return cached;
 
   const url = startSeasonId
     ? `/api/video/episodes/${seriesId}?start_season_id=${startSeasonId}`
@@ -154,12 +102,7 @@ export async function getSeriesEpisodes(
     options,
   );
 
-  episodesCache.set(cacheKey, {
-    data: result,
-    expiry: Date.now() + EPISODES_CACHE_TTL,
-  });
-  cleanupCache(episodesCache, 30);
-
+  episodesCache.set(cacheKey, result);
   return result;
 }
 

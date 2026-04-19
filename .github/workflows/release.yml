@@ -13,7 +13,6 @@ permissions:
   deployments: write
 
 jobs:
-  # Check if this is a release-please version bump commit (skip everything)
   check-commit:
     runs-on: ubuntu-latest
     outputs:
@@ -27,7 +26,6 @@ jobs:
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%s)
           if [[ "$COMMIT_MSG" == "chore(main): release"* ]]; then
-            echo "This is a release-please version bump commit - skipping workflow"
             echo "is_release_commit=true" >> $GITHUB_OUTPUT
           else
             echo "is_release_commit=false" >> $GITHUB_OUTPUT
@@ -47,7 +45,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
-          
+
   deploy:
     needs: [check-commit, release-please]
     if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' }}
@@ -56,9 +54,9 @@ jobs:
       name: production
       url: https://watch.rudrasahoo.live
     env:
-      VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
-      VERCEL_PROJECT_ID: prj_GvurtLT1apyIWx5cvAa4BfLNQNni
-    
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -70,6 +68,17 @@ jobs:
       - name: Enable Corepack (for pnpm)
         run: corepack enable
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -78,6 +87,9 @@ jobs:
 
       - name: Run TypeScript check
         run: pnpm type-check
+
+      - name: Run unit tests
+        run: pnpm test
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -94,10 +106,23 @@ jobs:
           NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
 
       - name: Deploy to Vercel
         id: deploy
-        run: vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Smoke test
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://watch.rudrasahoo.live")
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            echo "✅ Smoke test passed (HTTP $STATUS)"
+          else
+            echo "⚠️ Smoke test returned HTTP $STATUS (non-blocking)"
+          fi
 
   build-desktop:
     name: Build Desktop Apps (Release)

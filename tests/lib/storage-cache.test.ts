@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   clearStorageCache,
   getCachedLocalStorage,
+  initStorageCache,
   removeCachedLocalStorage,
   setCachedLocalStorage,
 } from '@/lib/storage-cache';
@@ -181,6 +182,10 @@ describe('Storage Cache', () => {
   });
 
   describe('cache invalidation', () => {
+    beforeEach(() => {
+      initStorageCache();
+    });
+
     it('should invalidate cache on storage event with specific key', () => {
       setCachedLocalStorage('test-key', 'old-value');
       localStorageMock.getItem.mockClear();

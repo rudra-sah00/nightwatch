@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Watch Rudra</title>
+  <style>
+    :root { --bg: #f5f0e8; --fg: #1a1a1a; --accent: #ffcc00; --border: #1a1a1a; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #000; --fg: #fff; --accent: #a855f7; --border: #1a1a1a; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .card {
+      text-align: center; max-width: 360px;
+      border: 4px solid var(--border); padding: 40px 32px;
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 {
+      font-size: 20px; font-weight: 900; font-style: italic;
+      text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 8px;
+    }
+    p { font-size: 13px; opacity: 0.7; line-height: 1.5; margin-bottom: 24px; }
+    button {
+      background: var(--accent); color: var(--border); border: 3px solid var(--border);
+      padding: 12px 32px; font-weight: 900; font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📡</div>
+    <h1>You're Offline</h1>
+    <p>Check your internet connection and try again. Downloaded content is still available in the desktop app.</p>
+    <button type="button" onclick="location.reload()">Retry</button>
+  </div>
+</body>
+</html>

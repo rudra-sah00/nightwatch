@@ -13,6 +13,10 @@ interface TextSegment {
 const URL_REGEX =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi;
 
+// Non-global version for containsLinks() — avoids lastIndex mutation bug
+const URL_TEST_REGEX =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/i;
+
 /**
  * Parse text and identify URLs for clickable links
  * @param text - The text to parse
@@ -70,8 +74,7 @@ export function parseLinks(text: string): TextSegment[] {
  * @returns true if text contains at least one URL
  */
 export function containsLinks(text: string): boolean {
-  URL_REGEX.lastIndex = 0;
-  return URL_REGEX.test(text);
+  return URL_TEST_REGEX.test(text);
 }
 
 /**

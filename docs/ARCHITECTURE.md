@@ -42,10 +42,14 @@ Instead of throwing every component into a global `src/components/` folder, Watc
 
 ## 3. The `src/lib/` Utilities Layer
 
-*   **`fetch.ts`:** A wildly complex implementation of the `apiFetch` wrapper. It governs Token Expiration timestamps proactively, blocking simultaneous API requests inside a Mutex Promise Lock (`lockPromise`) if 5 React components mount at the exact same millisecond simultaneously requesting refreshed JWT credentials.
-*   **`socket.ts`:** A global singleton initialization for the older Socket.io server connection. Keeps track of force logouts and active connections if a Host needs to approve new guests hovering in the Watch Party Lobby.
+*   **`fetch.ts`:** The `apiFetch` wrapper with automatic token refresh, CSRF handling, configurable retries with linear backoff, and proper abort signal handling (user abort vs timeout are distinguished).
+*   **`cache.ts`:** Shared `createTTLCache<T>()` utility used by search, profile, and watch APIs. All caches auto-register for bulk invalidation via `clearAllCaches()` on logout.
+*   **`errors.ts`:** Centralized error handling — `isApiError()` type guard, `handleApiError()` with toast, `mapErrorCode()` for user-friendly messages.
+*   **`socket.ts`:** A global singleton initialization for the Socket.io server connection. Keeps track of force logouts and active connections.
+*   **`storage-cache.ts`:** In-memory cache for `localStorage` reads. Event listeners initialized lazily via `initStorageCache()` to avoid SSR side effects.
+*   **`linkify.ts`:** URL parsing for chat messages. Uses separate global/non-global regex to avoid `lastIndex` mutation bugs.
 *   **`constants.ts`:** Strongly typed enumerations for system-wide behaviors.
-*   **`env.ts`:** A highly validated environment configuration file validating `.env` files strictly at runtime to aggressively prevent undefined production crashes.
+*   **`env.ts`:** Validated environment configuration at runtime.
 
 ---
 

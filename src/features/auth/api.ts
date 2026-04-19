@@ -99,8 +99,10 @@ export async function resetPassword(
  */
 export async function checkUsername(
   username: string,
+  options?: RequestInit,
 ): Promise<{ available: boolean }> {
   return apiFetch<{ available: boolean }>(
     `/api/user/check-username/${encodeURIComponent(username)}`,
+    options,
   );
 }

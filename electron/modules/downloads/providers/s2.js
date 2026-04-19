@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { startMp4Download } = require('../processors/mp4');
 const { startHlsDownload } = require('../processors/hls');
-const { getDatabase, syncDbState, VAULT_PATH, store } = require('../state');
+const { getDatabase, syncDbState, VAULT_PATH, getStore } = require('../state');
 const { downloadFile } = require('../network');
 
 async function downloadS2(eventSender, args) {
@@ -59,11 +59,15 @@ async function downloadS2(eventSender, args) {
           !fs.existsSync(trailerDest) ||
           fs.statSync(trailerDest).size === 0
         ) {
-          await downloadFile(trailer.url, trailerDest, null, item, store).catch(
-            (e) => {
-              console.error('[downloadS2] Trailer download failed:', e);
-            },
-          );
+          await downloadFile(
+            trailer.url,
+            trailerDest,
+            null,
+            item,
+            getStore(),
+          ).catch((e) => {
+            console.error('[downloadS2] Trailer download failed:', e);
+          });
         }
         if (fs.existsSync(trailerDest) && fs.statSync(trailerDest).size > 0) {
           trailer.url = `offline-media://local/${encodeURIComponent(contentId)}/${encodeURIComponent(trailerName)}`;

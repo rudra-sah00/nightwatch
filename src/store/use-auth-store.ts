@@ -41,12 +41,15 @@ const customNativeStorage: StateStorage = {
   },
 };
 
+import { clearAllCaches } from '@/lib/cache';
+
 function clearCookiesAndRedirect(message?: string) {
   if (message) {
     try {
       sessionStorage.setItem('auth_flash', message);
     } catch {}
   }
+  clearAllCaches();
   logoutUser({ skipRefresh: true } as RequestInit).catch(() => {});
   if (typeof window !== 'undefined') window.location.href = '/login';
 }

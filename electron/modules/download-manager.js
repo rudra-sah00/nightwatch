@@ -26,6 +26,14 @@ function setupOfflineMediaProtocol() {
       );
     }
     const finalPath = path.join(VAULT_PATH, relativePath);
+
+    // Security: prevent path traversal — resolved path must stay inside VAULT_PATH
+    const resolvedPath = path.resolve(finalPath);
+    if (!resolvedPath.startsWith(path.resolve(VAULT_PATH))) {
+      console.error('[offline-media] Path traversal blocked:', relativePath);
+      return new Response('Forbidden', { status: 403 });
+    }
+
     try {
       const stat = fs.statSync(finalPath);
       const range = request.headers.get('range');
@@ -89,7 +97,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const {
   VAULT_PATH,
-  store,
+  getStore,
   downloadQueue,
   activeDownloadsMap,
   getDatabase,
@@ -128,7 +136,7 @@ async function startDownloadTask(eventSender, args) {
 }
 
 function processQueue() {
-  const maxActive = store.get('concurrentDownloads') || 1;
+  const maxActive = getStore().get('concurrentDownloads') || 1;
   while (currentActiveCount < maxActive && downloadQueue.length > 0) {
     const task = downloadQueue.shift();
     if (task.isCancelled) continue;
@@ -184,6 +192,24 @@ function setupDownloadManager() {
           'Download queue is full. Please wait for current downloads to finish.',
       });
       return;
+    }
+
+    // Check available disk space (require at least 500MB free)
+    try {
+      const { statfsSync } = require('node:fs');
+      const stats = statfsSync(VAULT_PATH);
+      const freeBytes = stats.bavail * stats.bsize;
+      const MIN_FREE = 500 * 1024 * 1024; // 500MB
+      if (freeBytes < MIN_FREE) {
+        event.sender.send('download-progress', {
+          contentId: args.contentId,
+          status: 'ERROR',
+          error: `Not enough disk space. ${Math.round(freeBytes / 1024 / 1024)}MB free, need at least 500MB.`,
+        });
+        return;
+      }
+    } catch (_e) {
+      // statfsSync may not be available on all platforms — proceed anyway
     }
 
     const db = getDatabase();
