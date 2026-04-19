@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.4](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.3...v1.29.4) (2026-04-19)
+
+
+### Bug Fixes
+
+* **electron:** switch to allowlist build.files with full dependency tracing ([fa55b0e](https://github.com/rudra-sah00/watch-rudra/commit/fa55b0e3060bd838e0a39280934ee3761e1277a1))
+
 ## [1.29.3](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.2...v1.29.3) (2026-04-19)
 
 
