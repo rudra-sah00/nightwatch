@@ -49,7 +49,7 @@ export function Navbar() {
         <div className="flex items-center justify-center gap-6 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
           <Link
             href="/continue-watching"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/continue-watching') ? 'text-foreground border-b-[3px] border-neo-yellow' : 'text-foreground/70'}`}
+            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/continue-watching') ? 'text-foreground' : 'text-foreground/70'}`}
             title="Continue Watching"
           >
             <History className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -57,7 +57,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/live"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/live') ? 'text-foreground border-b-[3px] border-neo-yellow' : 'text-foreground/70'}`}
+            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/live') ? 'text-foreground' : 'text-foreground/70'}`}
             title="Live Matches"
           >
             <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -65,7 +65,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/watchlist"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/watchlist') ? 'text-foreground border-b-[3px] border-neo-yellow' : 'text-foreground/70'}`}
+            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/watchlist') ? 'text-foreground' : 'text-foreground/70'}`}
             title="Watchlist"
           >
             <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
@@ -74,7 +74,7 @@ export function Navbar() {
           {isDesktopApp && (
             <Link
               href="/downloads"
-              className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground border-b-[3px] border-neo-yellow' : 'text-foreground/70'}`}
+              className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground' : 'text-foreground/70'}`}
               title="Offline Downloads"
             >
               <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
