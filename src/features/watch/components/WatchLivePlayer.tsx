@@ -94,18 +94,22 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       >
         {!useInlineMobileLayout ? mobileHeader : null}
 
-        <LivePlayerState />
+        <LivePlayerState streamUrl={props.streamUrl} />
       </Player.Root>
     </>
   );
 });
-function LivePlayerState() {
+function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
   const { state, playerHandlers, metadata } = usePlayerContext();
   const error = state.error;
+  // Treat null streamUrl (waiting for live-bridge) as loading — prevents
+  // the ErrorOverlay from flashing for a single frame before useHls runs.
+  const isWaitingForStream = !streamUrl;
+  const isLoading = state.isLoading || isWaitingForStream;
 
   return (
     <>
-      {state.isLoading ? (
+      {isLoading ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
           <LoadingOverlay isVisible={true} />
         </div>
@@ -118,13 +122,13 @@ function LivePlayerState() {
         onToggle={playerHandlers.togglePlay}
         metadata={metadata}
         disabled={false}
-        isLoading={state.isLoading}
+        isLoading={isLoading}
       />
 
-      <LiveBufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+      <LiveBufferingOverlay isVisible={state.isBuffering && !isLoading} />
 
       <ErrorOverlay
-        isVisible={!!error && !state.isLoading && !state.isBuffering}
+        isVisible={!!error && !isLoading && !state.isBuffering}
         message={error || 'Live stream unavailable'}
         onRetry={() => {
           window.location.reload();

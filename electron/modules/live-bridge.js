@@ -295,6 +295,7 @@ function setupLiveBridge() {
             width: 1280,
             height: 720,
             show: false,
+            skipTaskbar: true,
             webPreferences: {
               nodeIntegration: false,
               contextIsolation: true,
@@ -387,7 +388,6 @@ function setupLiveBridge() {
                             },
                           );
                         } catch (_e) {}
-                        win.minimize();
                       }
                     }, 1000);
                   });
