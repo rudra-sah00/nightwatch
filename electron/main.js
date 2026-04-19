@@ -48,11 +48,15 @@ const { setupTray } = require('./modules/tray.js');
 const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
+const { getAppVersion } = require('./modules/version.js');
 const { setupLiveBridge } = require('./modules/live-bridge.js');
 const {
   setupOfflineMediaProtocol,
   setupDownloadManager,
 } = require('./modules/download-manager.js');
+
+// Share the single electron-store instance with the download state module
+require('./modules/downloads/state').setStore(store);
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
@@ -236,13 +240,7 @@ const startElectronApp = async () => {
     // Force universal OS About Panels to show the live ASAR Javascript bundle version
     // instead of the outdated read-only version tied to the C++ native `.exe` or `.app` wrapper.
     try {
-      const fs = require('node:fs');
-      const pkgPath = _path.join(app.getAppPath(), 'package.json');
-      let currentVersion = app.getVersion();
-      if (fs.existsSync(pkgPath)) {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        currentVersion = pkg.version || app.getVersion();
-      }
+      const currentVersion = getAppVersion();
       app.setAboutPanelOptions({
         applicationName: 'Watch Rudra',
         applicationVersion: currentVersion,
@@ -268,6 +266,23 @@ const startElectronApp = async () => {
 
     // Setup Offline Download Manager for HLS segments
     setupDownloadManager();
+
+    // Process Windows Jump List arguments (--open-downloads, --play-pause)
+    if (process.platform === 'win32') {
+      const win = AppWindow.getInstance();
+      if (win) {
+        if (process.argv.includes('--open-downloads')) {
+          win.webContents.once('did-finish-load', () => {
+            win.webContents.send('navigate', '/downloads');
+          });
+        }
+        if (process.argv.includes('--play-pause')) {
+          win.webContents.once('did-finish-load', () => {
+            win.webContents.send('media-command', 'MediaPlayPause');
+          });
+        }
+      }
+    }
   };
 
   if (app.isPackaged) {
@@ -575,17 +590,7 @@ const startElectronApp = async () => {
   // app.getVersion() returns the native binary's compile-time version and is NOT
   // updated by electron-asar-hot-updater. We always read from package.json inside
   // the ASAR so React sees the correct version after a hot update.
-  ipcMain.handle('get-app-version', () => {
-    try {
-      const fs = require('node:fs');
-      const pkgPath = _path.join(app.getAppPath(), 'package.json');
-      if (fs.existsSync(pkgPath)) {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        return pkg.version || app.getVersion();
-      }
-    } catch (_e) {}
-    return app.getVersion();
-  });
+  ipcMain.handle('get-app-version', () => getAppVersion());
 
   // --- NATIVE THEMING ---
   const { nativeTheme } = require('electron');

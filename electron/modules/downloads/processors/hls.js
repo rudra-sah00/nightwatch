@@ -7,7 +7,7 @@ const {
   activeDownloadsMap,
   finalizeCancel,
   VAULT_PATH,
-  store,
+  getStore,
 } = require('../state');
 const {
   fetchText,
@@ -100,9 +100,13 @@ async function startHlsDownload(
         const ext = path.extname(new URL(posterUrl).pathname) || '.jpg';
         const posterDest = path.join(contentFolder, `poster${ext}`);
         if (!fs.existsSync(posterDest)) {
-          await downloadFile(posterUrl, posterDest, null, item, store).catch(
-            () => null,
-          );
+          await downloadFile(
+            posterUrl,
+            posterDest,
+            null,
+            item,
+            getStore(),
+          ).catch(() => null);
         }
         item.posterUrl = `offline-media://local/${encodeURIComponent(contentId)}/poster${ext}`;
       } catch (err) {
@@ -242,7 +246,7 @@ async function startHlsDownload(
           bytesSinceLastTick += bytes;
         },
         item,
-        store,
+        getStore,
       );
 
       if (!segment.isKey) {

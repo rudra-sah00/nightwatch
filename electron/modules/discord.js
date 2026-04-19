@@ -84,6 +84,15 @@ class DiscordIntegration {
         // Suppress API pipeline errors (e.g., if discord dies mid-update)
       });
   }
+
+  destroy() {
+    if (this.rpc) {
+      this.rpc.destroy().catch(() => {});
+      this.rpc = null;
+    }
+    this.connected = false;
+    this.isConnecting = false;
+  }
 }
 
 module.exports = new DiscordIntegration();

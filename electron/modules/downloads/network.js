@@ -4,7 +4,7 @@ const http = require('node:http');
 const path = require('node:path');
 const { XorStream } = require('./cipher');
 
-function fetchText(url) {
+function fetchText(url, _depth = 0) {
   if (
     !url ||
     typeof url !== 'string' ||
@@ -15,6 +15,9 @@ function fetchText(url) {
     return Promise.reject(
       new Error(`[fetchText] Invalid URL provided: ${url}`),
     );
+  }
+  if (_depth > 5) {
+    return Promise.reject(new Error('[fetchText] Too many redirects'));
   }
   return new Promise((resolve, reject) => {
     if (url.startsWith('//')) url = `https:${url}`;
@@ -33,7 +36,9 @@ function fetchText(url) {
             res.statusCode < 400 &&
             res.headers.location
           ) {
-            return resolve(fetchText(new URL(res.headers.location, url).href));
+            return resolve(
+              fetchText(new URL(res.headers.location, url).href, _depth + 1),
+            );
           }
           let data = '';
           res.on('error', reject);
@@ -64,7 +69,11 @@ function downloadFile(
   store,
   startOffset = 0,
   onTotalBytes = null,
+  _depth = 0,
 ) {
+  if (_depth > 5) {
+    return Promise.reject(new Error('[downloadFile] Too many redirects'));
+  }
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(dest, {
@@ -96,6 +105,7 @@ function downloadFile(
               store,
               startOffset,
               onTotalBytes,
+              _depth + 1,
             ),
           );
           return;

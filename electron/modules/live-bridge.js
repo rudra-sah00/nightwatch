@@ -423,6 +423,10 @@ function setupLiveBridge() {
       extractionWindow.close();
       extractionWindow = null;
     }
+    capturedKeys.clear();
+    _lastEventSender = null;
+    streamCookies = '';
+    streamUrl = '';
   });
 }
 
