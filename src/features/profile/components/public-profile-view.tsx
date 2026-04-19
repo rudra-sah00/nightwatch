@@ -158,7 +158,7 @@ export function PublicProfileView({
           </div>
 
           {/* App Updates / What's New */}
-          <section className="bg-card text-card-foreground border-[3px] border-border shadow-neo-sm p-8 transition-transform hover:-translate-y-1 mb-8 w-full max-w-5xl mx-auto">
+          <section className="bg-card text-card-foreground border-[4px] border-border p-8 mb-8 w-full max-w-5xl mx-auto">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex flex-col gap-2">
                 <h2 className="text-3xl font-black font-headline uppercase tracking-tighter">
@@ -172,7 +172,7 @@ export function PublicProfileView({
 
               <Link
                 href="/whats-new"
-                className="flex-shrink-0 bg-primary text-primary-foreground font-headline font-black uppercase text-sm px-6 py-4 border-[3px] border-border shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                className="flex-shrink-0 bg-primary text-primary-foreground font-headline font-black uppercase text-sm px-6 py-4 border-[3px] border-border transition-colors hover:bg-primary/90"
               >
                 VIEW WHAT'S NEW
               </Link>
