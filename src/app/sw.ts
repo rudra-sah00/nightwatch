@@ -1,6 +1,6 @@
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
-import { NetworkOnly, Serwist } from 'serwist';
+import { NetworkFirst, NetworkOnly, Serwist } from 'serwist';
 
 // Extend the Service Worker global scope with the Serwist manifest injected at build time
 declare global {
@@ -33,11 +33,28 @@ const streamingPassthrough = [
   },
 ];
 
+// Pages and RSC payloads: always fetch fresh from network, fall back to cache
+// when offline. This prevents stale HTML/JS after deployments.
+const navigationRules = [
+  {
+    matcher({ request }: { request: Request }) {
+      return request.destination === 'document';
+    },
+    handler: new NetworkFirst({ networkTimeoutSeconds: 5 }),
+  },
+  {
+    matcher({ request }: { request: Request }) {
+      return request.headers.get('RSC') === '1';
+    },
+    handler: new NetworkFirst({ networkTimeoutSeconds: 5 }),
+  },
+];
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
-  navigationPreload: false,
+  navigationPreload: true,
   fallbacks: {
     entries: [
       {
@@ -48,7 +65,11 @@ const serwist = new Serwist({
       },
     ],
   },
-  runtimeCaching: [...streamingPassthrough, ...defaultCache],
+  runtimeCaching: [
+    ...streamingPassthrough,
+    ...navigationRules,
+    ...defaultCache,
+  ],
 });
 
 serwist.addEventListeners();
