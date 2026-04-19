@@ -24,6 +24,7 @@ import {
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/providers/theme-provider';
 import { type ToolType, useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 
@@ -102,6 +103,7 @@ export function WatchPartySketch() {
   } = useSketch();
 
   const { handleMoveZ } = useSketchOverlay();
+  const { theme: appTheme } = useTheme();
 
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const customColorInputRef = useRef<HTMLInputElement>(null);
@@ -392,7 +394,7 @@ export function WatchPartySketch() {
             <div className="border-[4px] border-border ">
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
-                theme={Theme.LIGHT}
+                theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
                 emojiStyle={EmojiStyle.NATIVE}
                 lazyLoadEmojis={true}
                 searchPlaceHolder="Search stickers..."
