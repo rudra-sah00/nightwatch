@@ -11,6 +11,8 @@ env:
 
 jobs:
   preview:
+    # Skip release-please PRs — they only bump version, no preview needed
+    if: ${{ !startsWith(github.head_ref, 'release-please') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
