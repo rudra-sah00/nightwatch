@@ -59,6 +59,16 @@
       }
     },
     {
+      "includes": ["src/features/watch/player/ui/compound/PlayerRoot.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noNoninteractiveTabindex": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/hooks/useDevToolsProtection.tsx"],
       "linter": {
         "rules": {

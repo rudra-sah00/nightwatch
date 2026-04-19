@@ -32,11 +32,19 @@ export function Volume({
       aria-label="Volume control"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => !isDragging && setIsHovered(false)}
+      onFocusCapture={() => setIsHovered(true)}
+      onBlurCapture={(e) => {
+        // Only collapse if focus leaves the entire fieldset
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          !isDragging && setIsHovered(false);
+        }
+      }}
     >
       <button
         type="button"
         onClick={onMuteToggle}
         onMouseDown={(e) => e.preventDefault()}
+        aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
         className={cn(
           'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
           'bg-background border-[3px] border-border text-foreground ',

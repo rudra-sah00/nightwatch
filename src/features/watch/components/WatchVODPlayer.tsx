@@ -91,6 +91,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
       <button
         type="button"
         onClick={handleBack}
+        aria-label="Go back"
         className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
       >
         <ArrowLeft className="w-5 h-5 text-white" />

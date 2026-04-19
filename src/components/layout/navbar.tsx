@@ -3,14 +3,12 @@
 import { DownloadCloud, History, Plus, Radio, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 import { useNavigationStore } from '@/store/use-navigation-store';
 
 export function Navbar() {
   const { user } = useAuth();
-  const pathname = usePathname();
   const { isDesktopApp, isMacOS, isWindows } = useDesktopApp();
   const { isNavigating, progress, type } = useNavigationStore();
 
