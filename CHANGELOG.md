@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.30.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.5...v1.30.0) (2026-04-19)
+
+
+### Features
+
+* **nav:** replace custom progress bar with next-nprogress-bar ([57e0450](https://github.com/rudra-sah00/watch-rudra/commit/57e0450f0cbecbcfb8a9302267b09869714afba0))
+
+
+### Bug Fixes
+
+* **live:** hide bridge windows from taskbar and prevent error flash ([650fb49](https://github.com/rudra-sah00/watch-rudra/commit/650fb49036ef8db684f54d29b9101ba3e852ae92))
+* **nav:** ensure progress bar shows on instant navigations ([1c94d0a](https://github.com/rudra-sah00/watch-rudra/commit/1c94d0afd78f6ce57ca8c8da685b6bce539338ee))
+* **nav:** position progress bar at navbar bottom with theme colors ([475b950](https://github.com/rudra-sah00/watch-rudra/commit/475b9507dd83691c776498bc7c3cd2fea5d2109d))
+* **nav:** raise progress bar z-index above navbar, use skeleton loading ([820bd08](https://github.com/rudra-sah00/watch-rudra/commit/820bd08375cb29a58d7465ad7292db27aea693c6))
+* **nav:** restore navbar bottom border, simplify progress bar config ([f16f9ba](https://github.com/rudra-sah00/watch-rudra/commit/f16f9ba9dc5a0fbd4d30c8f07bbdf6bc74e8242a))
+* **nav:** restore static border line at navbar bottom ([4a49917](https://github.com/rudra-sah00/watch-rudra/commit/4a499173c5319ed596ed2c5aa4b2eb0fa8715d5b))
+* **nav:** use Next.js onRouterTransitionStart for progress bar ([7c20977](https://github.com/rudra-sah00/watch-rudra/commit/7c2097745a1445a3e88f99649d5b1f11999424f4))
+* **nav:** use raw NProgress with history.pushState monkey-patch ([33481da](https://github.com/rudra-sah00/watch-rudra/commit/33481da9db6ed075cb052974b3b4cecfb9792151))
+* **pwa:** force service worker update checks in Electron ([d8c4a6a](https://github.com/rudra-sah00/watch-rudra/commit/d8c4a6a604ce2d5aa0f7d777b0a7b18b40e25b6e))
+* **pwa:** use focus/online events for SW updates instead of polling ([8a16066](https://github.com/rudra-sah00/watch-rudra/commit/8a16066b6546f0d9fe5ae6494c91ca401070ef2c))
+* **search:** prevent 'No results' flash before search completes ([ae71d3b](https://github.com/rudra-sah00/watch-rudra/commit/ae71d3bb080b139b22dcad8a307df2dc408709ad))
+
 ## [1.29.5](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.4...v1.29.5) (2026-04-19)
 
 
