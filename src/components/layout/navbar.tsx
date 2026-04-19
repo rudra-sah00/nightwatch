@@ -6,13 +6,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
-import { useNavigationStore } from '@/store/use-navigation-store';
 
 export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const { isDesktopApp, isMacOS, isWindows } = useDesktopApp();
-  const { isNavigating, progress, type } = useNavigationStore();
 
   const isActive = (href: string) => pathname?.startsWith(href);
 
@@ -111,34 +109,6 @@ export function Navbar() {
           </Link>
         </div>
       </div>
-
-      {/* 
-          Instant Navigation Progress Bar (Finite) 
-          Acts as the permanent 3px bottom border of the navbar 
-      */}
-      <NavigationProgressBar
-        isNavigating={isNavigating && type === 'bar'}
-        progress={progress}
-      />
     </nav>
-  );
-}
-
-function NavigationProgressBar({
-  isNavigating,
-  progress,
-}: {
-  isNavigating: boolean;
-  progress: number;
-}) {
-  return (
-    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-border z-[60] pointer-events-none">
-      <div
-        className={`h-full bg-neo-yellow transition-all duration-300 ease-out origin-left ${
-          isNavigating ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{ width: `${progress}%` }}
-      />
-    </div>
   );
 }
