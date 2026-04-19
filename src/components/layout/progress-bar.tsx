@@ -58,14 +58,7 @@ export function ProgressBar() {
         height: 3px;
       }
       #nprogress .peg {
-        display: block;
-        position: absolute;
-        right: 0;
-        width: 100px;
-        height: 100%;
-        box-shadow: 0 0 10px var(--neo-yellow), 0 0 5px var(--neo-yellow);
-        opacity: 1;
-        transform: rotate(3deg) translate(0px, -4px);
+        display: none;
       }
     `}</style>
   );
