@@ -285,11 +285,13 @@ function setupLiveBridge() {
 
           log.info(`[live-bridge] [Racer ${index}] Spawning: ${racerUrl}`);
 
+          const isDev = !require('electron').app.isPackaged;
+
           const win = new BrowserWindow({
             width: 1280,
             height: 720,
-            show: false,
-            skipTaskbar: true,
+            show: isDev,
+            skipTaskbar: !isDev,
             webPreferences: {
               nodeIntegration: false,
               contextIsolation: true,
