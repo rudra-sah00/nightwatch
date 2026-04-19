@@ -1,24 +1,14 @@
-'use client';
+import type { Metadata } from 'next';
+import ProfileClient from './ProfileClient';
 
-import dynamic from 'next/dynamic';
+export const metadata: Metadata = {
+  title: 'Profile | Watch Rudra',
+  description: 'Manage your profile and viewing history.',
+};
 
-const ProfileOverview = dynamic(
-  () =>
-    import('@/features/profile/components/profile-overview').then(
-      (m) => m.ProfileOverview,
-    ),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-muted-foreground">
-          Loading profile...
-        </div>
-      </div>
-    ),
-    ssr: false,
-  },
-);
+export default async function ProfilePage() {
+  // Artificial delay to showcase premium loading animations
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-export default function ProfilePage() {
-  return <ProfileOverview />;
+  return <ProfileClient />;
 }
