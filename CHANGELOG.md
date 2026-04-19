@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.29.2](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.1...v1.29.2) (2026-04-19)
+
+
+### Bug Fixes
+
+* **dev:** allow electron postinstall script in pnpm ([58766b0](https://github.com/rudra-sah00/watch-rudra/commit/58766b09a44c04548d622356971e1e13f86124c5))
+* silence Turbopack HMR Sentry crash and AbortError console spam ([19c2ec9](https://github.com/rudra-sah00/watch-rudra/commit/19c2ec9df73b694ad24f8f1429e2b29cbe1b0f72))
+
 ## [1.29.1](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.0...v1.29.1) (2026-04-19)
 
 
