@@ -1,7 +1,8 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
@@ -14,6 +15,7 @@ export function ProfileOverview() {
   const { user, activity, loadingActivity } = useProfileOverview();
 
   const passwordForm = useChangePasswordForm();
+  const [showPasswords, setShowPasswords] = useState(false);
 
   const userCreatedAtDate = user?.createdAt
     ? new Date(user.createdAt)
@@ -39,30 +41,51 @@ export function ProfileOverview() {
         <div className="space-y-8 max-w-2xl">
           {/* Current */}
           <div className="flex flex-col gap-2">
-            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm">
+            <label
+              htmlFor="current-password"
+              className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
+            >
               Target Authorization
-            </span>
-            <input
-              type="password"
-              name="current"
-              value={passwordForm.currentPassword}
-              onChange={(e) => passwordForm.setCurrentPassword(e.target.value)}
-              placeholder="CURRENT PASSWORD"
-              required
-              className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2"
-            />
+            </label>
+            <div className="relative">
+              <input
+                id="current-password"
+                type={showPasswords ? 'text' : 'password'}
+                name="current"
+                value={passwordForm.currentPassword}
+                onChange={(e) =>
+                  passwordForm.setCurrentPassword(e.target.value)
+                }
+                placeholder="CURRENT PASSWORD"
+                required
+                className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords((p) => !p)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showPasswords ? 'Hide passwords' : 'Show passwords'}
+                tabIndex={-1}
+              >
+                {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {/* New */}
           <div className="flex flex-col gap-2 relative">
             <div className="flex justify-between items-center">
-              <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm">
+              <label
+                htmlFor="new-password"
+                className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
+              >
                 New Key
-              </span>
+              </label>
               <PasswordInfo className="text-muted-foreground" />
             </div>
             <input
-              type="password"
+              id="new-password"
+              type={showPasswords ? 'text' : 'password'}
               name="new"
               value={passwordForm.newPassword}
               onChange={(e) => passwordForm.setNewPassword(e.target.value)}
@@ -74,11 +97,15 @@ export function ProfileOverview() {
 
           {/* Confirm */}
           <div className="flex flex-col gap-2 relative">
-            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm">
+            <label
+              htmlFor="confirm-password"
+              className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
+            >
               Verify Key
-            </span>
+            </label>
             <input
-              type="password"
+              id="confirm-password"
+              type={showPasswords ? 'text' : 'password'}
               name="confirm"
               value={passwordForm.confirmPassword}
               onChange={(e) => passwordForm.setConfirmPassword(e.target.value)}
@@ -107,7 +134,10 @@ export function ProfileOverview() {
       </form>
 
       {/* Watch Activity Heatmap */}
-      <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 overflow-x-auto">
+      <section
+        className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 overflow-x-auto"
+        aria-label="Watch activity heatmap for the past year"
+      >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
             Watch Activity

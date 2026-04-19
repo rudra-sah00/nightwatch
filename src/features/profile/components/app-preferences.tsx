@@ -1,13 +1,12 @@
 'use client';
 
-import { Activity, Moon, Power, Sun, Zap } from 'lucide-react';
+import { Activity, Monitor, Moon, Power, Sun, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 
 export function AppPreferences() {
   const { theme, setTheme } = useTheme();
-  const isDark = theme === 'dark';
 
   const [runOnBoot, setRunOnBoot] = useState(false);
 
@@ -74,27 +73,34 @@ export function AppPreferences() {
             </p>
           </div>
 
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isDark}
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="relative inline-flex h-8 w-16 items-center rounded-full bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background shrink-0"
+          <div
+            role="radiogroup"
+            aria-label="Theme selection"
+            className="flex flex-row p-1 bg-secondary rounded-lg border border-border shrink-0"
           >
-            <span className="sr-only">Toggle Dark Mode</span>
-            <span
-              className={cn(
-                'inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-background shadow transition-transform',
-                isDark ? 'translate-x-9' : 'translate-x-1',
-              )}
-            >
-              {isDark ? (
-                <Moon className="h-3.5 w-3.5 text-foreground" />
-              ) : (
-                <Sun className="h-3.5 w-3.5 text-foreground" />
-              )}
-            </span>
-          </button>
+            {[
+              { id: 'light' as const, label: 'Light', Icon: Sun },
+              { id: 'dark' as const, label: 'Dark', Icon: Moon },
+              { id: 'system' as const, label: 'System', Icon: Monitor },
+            ].map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={theme === id}
+                onClick={() => setTheme(id)}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors flex items-center gap-1.5',
+                  theme === id
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Desktop Only Settings */}
@@ -148,11 +154,17 @@ export function AppPreferences() {
                 </p>
               </div>
 
-              <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
+              <div
+                role="radiogroup"
+                aria-label="Max concurrent downloads"
+                className="flex flex-row p-1 bg-secondary rounded-lg border border-border"
+              >
                 {[1, 2, 3, 5].map((val) => (
                   <button
                     key={val}
                     type="button"
+                    role="radio"
+                    aria-checked={concurrentDownloads === val}
                     onClick={() => handleConcurrentChange(val)}
                     className={cn(
                       'px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors',
@@ -179,7 +191,11 @@ export function AppPreferences() {
                 </p>
               </div>
 
-              <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border overflow-x-auto min-w-0 max-w-[250px] sm:max-w-none">
+              <div
+                role="radiogroup"
+                aria-label="Download speed limit"
+                className="flex flex-row p-1 bg-secondary rounded-lg border border-border overflow-x-auto min-w-0 max-w-[250px] sm:max-w-none"
+              >
                 {[
                   { label: 'Unlimited', val: 0 },
                   { label: '1 MB/s', val: 1 },
@@ -189,6 +205,8 @@ export function AppPreferences() {
                   <button
                     key={opt.val}
                     type="button"
+                    role="radio"
+                    aria-checked={downloadSpeedLimit === opt.val}
                     onClick={() => handleSpeedChange(opt.val)}
                     className={cn(
                       'px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors whitespace-nowrap',

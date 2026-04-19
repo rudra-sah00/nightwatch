@@ -59,6 +59,19 @@
       }
     },
     {
+      "includes": [
+        "src/features/profile/components/app-preferences.tsx",
+        "src/features/profile/components/update-profile-form.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/features/watch/player/ui/compound/PlayerRoot.tsx"],
       "linter": {
         "rules": {
