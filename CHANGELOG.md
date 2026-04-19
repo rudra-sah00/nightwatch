@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.31.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.30.0...v1.31.0) (2026-04-19)
+
+
+### Features
+
+* **live:** show racer windows in dev mode for debugging ([946f6a0](https://github.com/rudra-sah00/watch-rudra/commit/946f6a0f2582cc009953b853fb837cf034dcb330))
+* **ui:** per-page loading skeletons matching actual layouts ([a560cf6](https://github.com/rudra-sah00/watch-rudra/commit/a560cf610c13dd345e3b257c976dd75f94f89539))
+
+
+### Bug Fixes
+
+* **ci:** skip PR preview deploy for release-please PRs ([55cb7d5](https://github.com/rudra-sah00/watch-rudra/commit/55cb7d5c5563251f5bf1d8607a18404192e87f0d))
+* **electron:** clear stale SW cache on app version change ([f86ef4c](https://github.com/rudra-sah00/watch-rudra/commit/f86ef4cf0aa6fd1e323559c3642a875d1c3975ae))
+* **live+pip:** restore simple mono.css winner, add iframe headers, fix traffic light blink ([84727a6](https://github.com/rudra-sah00/watch-rudra/commit/84727a6337d654857cd45aa8157bc9516d8bda30))
+* **live:** detect actual .m3u8 URL instead of mono.css as winner signal ([2b019c7](https://github.com/rudra-sah00/watch-rudra/commit/2b019c7a57d53c4d52a5d59790dc7a677752e2ec))
+* **live:** remove strict domain allowlist blocking CDN streams ([b9b45d5](https://github.com/rudra-sah00/watch-rudra/commit/b9b45d5523f587f9b442284a340a3bfb801d011a))
+* **live:** revert to simple mono.css winner detection ([b80b955](https://github.com/rudra-sah00/watch-rudra/commit/b80b95529dcc362f1b2c9e7ebab9e6fc7e96235b))
+* **live:** verify video element exists before declaring racer winner ([82ef805](https://github.com/rudra-sah00/watch-rudra/commit/82ef805c064d79a9397a2380bfa75f0b73b2afa7))
+* **nav:** delay NProgress.done() by one frame to guarantee paint ([6d5e4ec](https://github.com/rudra-sah00/watch-rudra/commit/6d5e4ec2e83d25037a58668042b515c622912403))
+* **nav:** remove active underline from navbar buttons ([f277109](https://github.com/rudra-sah00/watch-rudra/commit/f2771096f22726bec662c3de7fb70ba320304a60))
+* **nav:** remove NProgress peg glow effect ([6ee2311](https://github.com/rudra-sah00/watch-rudra/commit/6ee2311765e4da070009db26f25f7ee1b11b73a7))
+* **nav:** trigger progress bar on programmatic router.push ([5fa321f](https://github.com/rudra-sah00/watch-rudra/commit/5fa321f06a07e5fcd140d6afcb3621af54be61c9))
+* **pip:** prevent zoom in/out loop on window switch ([5f376ad](https://github.com/rudra-sah00/watch-rudra/commit/5f376ad2c01c35d2803a80e91a63847550e8cde4))
+* **pwa:** use NetworkFirst for pages to prevent stale cache ([0ed008d](https://github.com/rudra-sah00/watch-rudra/commit/0ed008d3b0069d19d1b83877284d17e38ed36beb))
+* **search:** match skeleton to actual layout, prevent error flash ([d11f4d0](https://github.com/rudra-sah00/watch-rudra/commit/d11f4d078d770785990fd9309389df87f88fd8cb))
+* **ui:** match continue-watching skeleton to exact card layout ([ac3fa1c](https://github.com/rudra-sah00/watch-rudra/commit/ac3fa1cec0ae679797b7ddb4607ea2c5fa750c76))
+* **ui:** match watchlist and profile skeletons to exact page layouts ([1285519](https://github.com/rudra-sah00/watch-rudra/commit/12855190ba74aceda3e8eaa7fbe75ca2cd0c32d6))
+
 ## [1.30.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.5...v1.30.0) (2026-04-19)
 
 
