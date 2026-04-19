@@ -7,14 +7,10 @@ import { describe, expect, it } from 'vitest';
  * (and their deep transitive dependencies) can be resolved from the
  * project root. This catches pnpm hoisting issues that cause the
  * production asar bundle to ship with missing modules.
- *
- * If this test fails, a module is not reachable from the top-level
- * node_modules — meaning electron-builder will NOT include it in the
- * asar and the app will crash on launch.
  */
 
 const ELECTRON_REQUIRED_MODULES = [
-  // Direct requires from electron/main.js
+  // Direct requires from electron/main.js & modules
   '@sentry/electron/main',
   'electron-store',
   'electron-log',
@@ -23,10 +19,21 @@ const ELECTRON_REQUIRED_MODULES = [
   'electron-context-menu',
   'electron-asar-hot-updater',
   'discord-rpc',
-  // Deep transitive deps that have caused production crashes
+  // Transitive deps that have caused production crashes
   'debug',
   'ms',
+  'supports-color',
   'require-in-the-middle',
+  // electron-store -> conf -> ajv chain
+  'ajv',
+  'fast-uri',
+  'fast-deep-equal',
+  'json-schema-traverse',
+  'conf',
+  'env-paths',
+  'atomically',
+  'dot-prop',
+  'is-obj',
 ];
 
 describe('Electron asar module resolution', () => {
