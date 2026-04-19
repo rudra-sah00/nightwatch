@@ -65,36 +65,38 @@ export function WatchlistClient() {
         </div>
 
         <div className="container mx-auto px-6 md:px-10 flex-col flex flex-1">
-          {loading ? (
-            <div className="flex flex-col gap-6">
-              {['wl-sk-1', 'wl-sk-2', 'wl-sk-3', 'wl-sk-4'].map((id) => (
-                <div
-                  key={id}
-                  className="w-full h-40 bg-muted animate-pulse border-[4px] border-border"
-                />
-              ))}
-            </div>
-          ) : isEmpty ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
-              <Plus className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
-              <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
-                Your watchlist is empty
-              </p>
-            </div>
-          ) : (
-            <div
-              className="flex flex-col gap-6"
-              style={{ contentVisibility: 'auto' }}
-            >
-              {watchlist.map((item) => (
-                <WatchlistItemCard
-                  key={item.id}
-                  item={item}
-                  onClick={() => setSelectedId(item.contentId)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
+            {loading ? (
+              <div className="flex flex-col gap-6">
+                {['wl-sk-1', 'wl-sk-2', 'wl-sk-3', 'wl-sk-4'].map((id) => (
+                  <div
+                    key={id}
+                    className="w-full h-40 bg-muted animate-pulse border-[4px] border-border"
+                  />
+                ))}
+              </div>
+            ) : isEmpty ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
+                <Plus className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
+                <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
+                  Your watchlist is empty
+                </p>
+              </div>
+            ) : (
+              <div
+                className="flex flex-col gap-6"
+                style={{ contentVisibility: 'auto' }}
+              >
+                {watchlist.map((item) => (
+                  <WatchlistItemCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => setSelectedId(item.contentId)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
