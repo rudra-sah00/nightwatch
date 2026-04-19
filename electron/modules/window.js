@@ -101,17 +101,22 @@ class AppWindow {
     mainWindowState.manage(this.mainWindow);
     // Dynamic Media and Desktop permission handler
     session.defaultSession.setPermissionRequestHandler(
-      (_webContents, permission, callback) => {
-        // Allowed desktop permissions (Removed screen sharing display-capture per request)
+      (webContents, permission, callback) => {
+        // Only grant permissions to our own app origin
+        const requestUrl = webContents.getURL();
+        const isOwnOrigin =
+          requestUrl.startsWith('https://watch.rudrasahoo.live') ||
+          requestUrl.startsWith('http://localhost');
+
         const allowedPermissions = [
           'media',
           'camera',
           'microphone',
           'notifications',
           'clipboard-sanitized-write',
-          'fullscreen', // ALLOW STREAMING PLAYERS TO FULLSCREEN
+          'fullscreen',
         ];
-        if (allowedPermissions.includes(permission)) {
+        if (isOwnOrigin && allowedPermissions.includes(permission)) {
           callback(true);
         } else {
           callback(false);

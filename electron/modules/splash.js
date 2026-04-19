@@ -29,12 +29,16 @@ function createSplash() {
     alwaysOnTop: true,
     resizable: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false, // allow local files to load in data URI
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      preload: _path.join(__dirname, '../preload-splash.js'),
     },
   });
 
+  // Build the splash HTML with the version baked in, write to a temp file,
+  // and load it. data: URIs don't support preload scripts, so a real file is
+  // required for contextIsolation to work.
   const iconPath = require('node:path')
     .join(__dirname, '../build/icon.png')
     .replace(/\\/g, '/');
@@ -44,7 +48,6 @@ function createSplash() {
     <html>
       <head>
         <style>
-          /* System fonts only — no network request so splash never stalls offline */
           :root {
             --bg-color: #f5f0e8;
             --border-color: #1a1a1a;
@@ -55,13 +58,13 @@ function createSplash() {
           @media (prefers-color-scheme: dark) {
             :root {
               --bg-color: #000000;
-              --border-color: #1a1a1a; /* Replaced the white border with a dark subtle border */
+              --border-color: #1a1a1a;
               --text-color: #ffffff;
               --progress-bg: #0a0a0a;
               --progress-fill: #ffffff;
             }
             .splash-logo img {
-              filter: brightness(0) invert(1); /* Turns the black play icon to pure white in dark mode */
+              filter: brightness(0) invert(1);
             }
           }
           body { 
@@ -92,12 +95,9 @@ function createSplash() {
           }
           .version {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-color);
-            opacity: 0.6;
-            margin-bottom: 24px;
-            letter-spacing: 0.05em;
+            font-size: 10px; font-weight: 700;
+            color: var(--text-color); opacity: 0.6;
+            margin-bottom: 24px; letter-spacing: 0.05em;
           }
           .status { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -128,14 +128,13 @@ function createSplash() {
           </div>
         </div>
         <script>
-          const { ipcRenderer } = require('electron');
-          ipcRenderer.on('updater-message', (event, text) => {
+          window.splashAPI.onUpdaterMessage((text) => {
             document.getElementById('status').innerText = text;
           });
-          ipcRenderer.on('updater-version', (event, version) => {
+          window.splashAPI.onUpdaterVersion((version) => {
             document.getElementById('version').innerText = 'Updating to v' + version;
           });
-          ipcRenderer.on('updater-progress', (event, percent) => {
+          window.splashAPI.onUpdaterProgress((percent) => {
             document.getElementById('progress').style.width = percent + '%';
             if(percent === 100) document.getElementById('progress').style.borderRight = 'none';
           });
@@ -144,9 +143,11 @@ function createSplash() {
     </html>
 `;
 
-  splashWindow.loadURL(
-    `data:text/html;charset=utf-8,${encodeURIComponent(html)}`,
-  );
+  // Write to a temp file so the preload script can be loaded
+  const os = require('node:os');
+  const splashPath = _path.join(os.tmpdir(), 'watch-rudra-splash.html');
+  _fs.writeFileSync(splashPath, html, 'utf-8');
+  splashWindow.loadFile(splashPath);
 
   return splashWindow;
 }

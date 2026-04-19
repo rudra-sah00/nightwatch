@@ -2,6 +2,7 @@ const { ipcMain, BrowserWindow, net } = require('electron');
 const log = require('electron-log');
 const http = require('node:http');
 const url = require('node:url');
+const crypto = require('node:crypto');
 
 let extractionWindow = null; // The "Winning" window
 let proxyServer = null;
@@ -10,6 +11,9 @@ let streamCookies = '';
 let streamUrl = '';
 const capturedKeys = new Map();
 let _lastEventSender = null;
+
+// Per-session random token — prevents other local processes from using the proxy
+let proxyToken = crypto.randomBytes(16).toString('hex');
 
 const RACER_PATHS = [
   '/stream/',
@@ -46,6 +50,12 @@ function startProxyServer(_eventSender) {
 
     const reqUrl = url.parse(req.url, true);
 
+    // Validate per-session token on every request
+    if (reqUrl.query.token !== proxyToken) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      return res.end('Forbidden');
+    }
+
     if (reqUrl.pathname === '/playlist.m3u8') {
       if (!streamUrl) {
         res.writeHead(503, { 'Content-Type': 'text/plain' });
@@ -80,13 +90,13 @@ function startProxyServer(_eventSender) {
 
         // Rewrite urls to our local proxy
         m3u8Text = m3u8Text.replace(/(https?:\/\/[^\s"',]+)/g, (match) => {
-          return `http://localhost:${proxyPort}/proxy?url=${encodeURIComponent(match)}&ext=.ts`;
+          return `http://localhost:${proxyPort}/proxy?token=${proxyToken}&url=${encodeURIComponent(match)}&ext=.ts`;
         });
         m3u8Text = m3u8Text.replace(/URI="(\/[^"]+)"/g, (_match, p) => {
-          return `URI="http://localhost:${proxyPort}/proxy?url=${encodeURIComponent(fetchOrigin + p)}"`;
+          return `URI="http://localhost:${proxyPort}/proxy?token=${proxyToken}&url=${encodeURIComponent(fetchOrigin + p)}"`;
         });
         m3u8Text = m3u8Text.replace(/^(\/[^\s]+)$/gm, (_match, p) => {
-          return `http://localhost:${proxyPort}/proxy?url=${encodeURIComponent(fetchOrigin + p)}&ext=.ts`;
+          return `http://localhost:${proxyPort}/proxy?token=${proxyToken}&url=${encodeURIComponent(fetchOrigin + p)}&ext=.ts`;
         });
 
         response.headers.forEach((val, key) => {
@@ -123,7 +133,26 @@ function startProxyServer(_eventSender) {
         return res.end('Missing url');
       }
 
-      const parsedUrl = new URL(targetQueryUrl);
+      // Security: only proxy requests to known streaming CDN domains
+      let parsedUrl;
+      try {
+        parsedUrl = new URL(targetQueryUrl);
+      } catch (_e) {
+        res.writeHead(400);
+        return res.end('Invalid url');
+      }
+
+      const allowedDomains = ['dlstreams.top', 'funsday.cfd'];
+      const hostname = parsedUrl.hostname;
+      if (
+        !allowedDomains.some(
+          (d) => hostname === d || hostname.endsWith(`.${d}`),
+        )
+      ) {
+        res.writeHead(403);
+        return res.end('Domain not allowed');
+      }
+
       const isKey = parsedUrl.pathname.toLowerCase().includes('/key/');
 
       // Proxy TS chunks, Keys or nested M3U8s
@@ -224,6 +253,9 @@ function setupLiveBridge() {
     async (event, { url: originalUrl, channelId }) => {
       _lastEventSender = event.sender;
 
+      // Rotate proxy token for this session
+      proxyToken = crypto.randomBytes(16).toString('hex');
+
       // Cleanup previous attempts
       cleanupRacers();
       if (extractionWindow && !extractionWindow.isDestroyed()) {
@@ -321,7 +353,7 @@ function setupLiveBridge() {
                     // Sending IPC to a destroyed webContents throws and can crash main.
                     if (!event.sender || event.sender.isDestroyed()) return;
 
-                    const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?t=${Date.now()}`;
+                    const proxyM3u8 = `http://127.0.0.1:${proxyPort}/playlist.m3u8?token=${proxyToken}&t=${Date.now()}`;
 
                     event.sender.send('live-bridge-resolved', {
                       originalUrl,

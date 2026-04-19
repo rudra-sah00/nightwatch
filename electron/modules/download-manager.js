@@ -26,6 +26,14 @@ function setupOfflineMediaProtocol() {
       );
     }
     const finalPath = path.join(VAULT_PATH, relativePath);
+
+    // Security: prevent path traversal — resolved path must stay inside VAULT_PATH
+    const resolvedPath = path.resolve(finalPath);
+    if (!resolvedPath.startsWith(path.resolve(VAULT_PATH))) {
+      console.error('[offline-media] Path traversal blocked:', relativePath);
+      return new Response('Forbidden', { status: 403 });
+    }
+
     try {
       const stat = fs.statSync(finalPath);
       const range = request.headers.get('range');

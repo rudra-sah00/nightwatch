@@ -550,9 +550,26 @@ const startElectronApp = async () => {
   });
 
   // --- LOCAL CONFIG STORE ---
-  ipcMain.handle('store-get', (_event, key) => store.get(key));
-  ipcMain.on('store-set', (_event, key, value) => store.set(key, value));
-  ipcMain.on('store-delete', (_event, key) => store.delete(key));
+  // Only allow the renderer to access specific keys (prevent reading internal settings)
+  const ALLOWED_STORE_KEYS = new Set([
+    'runOnBoot',
+    'concurrentDownloads',
+    'downloadSpeedLimit',
+    'watch_rudra_auth',
+    'disable-gpu',
+  ]);
+  ipcMain.handle('store-get', (_event, key) => {
+    if (!ALLOWED_STORE_KEYS.has(key)) return undefined;
+    return store.get(key);
+  });
+  ipcMain.on('store-set', (_event, key, value) => {
+    if (!ALLOWED_STORE_KEYS.has(key)) return;
+    store.set(key, value);
+  });
+  ipcMain.on('store-delete', (_event, key) => {
+    if (!ALLOWED_STORE_KEYS.has(key)) return;
+    store.delete(key);
+  });
 
   // --- REAL APP VERSION (ASAR-aware) ---
   // app.getVersion() returns the native binary's compile-time version and is NOT

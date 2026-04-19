@@ -13,8 +13,8 @@ on:
           - preview
 
 env:
-  VERCEL_ORG_ID: team_sNQdK4w7XK9YIv4v71MGY8ea
-  VERCEL_PROJECT_ID: prj_GvurtLT1apyIWx5cvAa4BfLNQNni
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
 
 
