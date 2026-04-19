@@ -62,3 +62,6 @@ next-env.d.ts
 # Serwist / PWA — generated at build time, do not commit
 public/sw.js
 public/swe-worker-*.js
+
+node_modules_electron/
+desktop-build/

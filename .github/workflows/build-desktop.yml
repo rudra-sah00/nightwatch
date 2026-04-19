@@ -92,6 +92,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare Electron dependencies
+        run: node scripts/prepare-electron-deps.js
+
       - name: Inject Production Secrets
         run: |
           # Inject Sentry DSN into Electron main process
