@@ -1,4 +1,4 @@
-const { BrowserWindow, app } = require('electron');
+const { BrowserWindow } = require('electron');
 const _path = require('node:path');
 const _fs = require('node:fs');
 const { getAppVersion } = require('./version');

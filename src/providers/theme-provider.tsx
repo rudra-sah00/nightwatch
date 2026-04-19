@@ -1,7 +1,14 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -37,13 +44,12 @@ export function ThemeProvider({
       document.documentElement.classList.remove('dark');
     }
 
-    // Sync initial theme with electron window if in desktop app
     if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
       window.electronAPI.setNativeTheme(initialTheme);
     }
   }, []);
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem('neo-theme', newTheme);
     if (newTheme === 'dark') {
@@ -52,16 +58,15 @@ export function ThemeProvider({
       document.documentElement.classList.remove('dark');
     }
 
-    // Sync live theme switch with electron window
     if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
       window.electronAPI.setNativeTheme(newTheme);
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

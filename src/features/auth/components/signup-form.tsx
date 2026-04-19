@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import type React from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
@@ -10,9 +11,11 @@ import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import { PasswordInfo } from '@/components/ui/password-info';
 import type { useSignupForm } from '../hooks/use-signup-form';
+import { getPasswordStrength } from '../schema';
 import { AuthCard } from './auth-card';
 
 export function SignupForm(props: ReturnType<typeof useSignupForm>) {
+  const [showPassword, setShowPassword] = useState(false);
   const {
     step,
     setStep,
@@ -275,17 +278,50 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   <PasswordInfo />
                 </div>
               </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isPending}
+                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {formData.password && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full transition-all duration-300"
+                      style={{
+                        width: `${getPasswordStrength(formData.password).score}%`,
+                        backgroundColor: getPasswordStrength(formData.password)
+                          .color,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="text-[9px] font-headline font-bold uppercase tracking-widest"
+                    style={{
+                      color: getPasswordStrength(formData.password).color,
+                    }}
+                  >
+                    {getPasswordStrength(formData.password).label}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="w-full shrink-0">
@@ -300,7 +336,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 autoComplete="new-password"
                 value={confirmPassword}

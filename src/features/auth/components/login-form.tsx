@@ -1,6 +1,8 @@
 'use client';
 
+import { Eye, EyeOff } from 'lucide-react';
 import type React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
@@ -10,6 +12,7 @@ import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
 export function LoginForm(props: ReturnType<typeof useLoginForm>) {
+  const [showPassword, setShowPassword] = useState(false);
   const {
     step,
     setStep,
@@ -146,17 +149,28 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   Forgot?
                 </button>
               </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isPending}
+                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 

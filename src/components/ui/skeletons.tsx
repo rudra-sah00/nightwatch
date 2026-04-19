@@ -6,7 +6,10 @@
 
 export function SearchSkeleton() {
   return (
-    <div className="bg-background border-4 border-border p-2  animate-pulse flex flex-col h-full w-full">
+    <div
+      aria-hidden="true"
+      className="bg-background border-4 border-border p-2  animate-pulse flex flex-col h-full w-full"
+    >
       <div className="aspect-[2/3] border-2 border-border bg-muted mb-4 flex-shrink-0" />
       <div className="px-2 pb-2 flex flex-col flex-1">
         {/* Title skeleton */}
@@ -19,7 +22,10 @@ export function SearchSkeleton() {
 
 export function WatchProgressSkeleton() {
   return (
-    <div className="bg-background border-4 border-border p-2  animate-pulse flex flex-col h-full w-full">
+    <div
+      aria-hidden="true"
+      className="bg-background border-4 border-border p-2  animate-pulse flex flex-col h-full w-full"
+    >
       {/* Poster area matching search grid */}
       <div className="aspect-[2/3] border-2 border-border bg-muted mb-4 flex-shrink-0 relative overflow-hidden">
         {/* Progress bar skeleton at bottom of poster */}
@@ -39,7 +45,10 @@ export function WatchProgressSkeleton() {
 
 export function LiveMatchSkeleton() {
   return (
-    <div className="group relative bg-background border-b-[3px] border-border/5 animate-pulse w-full">
+    <div
+      aria-hidden="true"
+      className="group relative bg-background border-b-[3px] border-border/5 animate-pulse w-full"
+    >
       <div className="flex items-center gap-4 px-6 py-5">
         {/* Status Column */}
         <div className="w-20 flex-shrink-0 flex flex-col items-center gap-2">
