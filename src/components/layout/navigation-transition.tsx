@@ -24,6 +24,8 @@ export function NavigationTransitionProvider({
   const { start, complete, reset, isNavigating } = useNavigationStore();
   const lastUrlRef = useRef(pathname + searchParams.toString());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const minDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   // Complete and reset after navigation finishes (URL flips)
   useEffect(() => {
@@ -31,9 +33,15 @@ export function NavigationTransitionProvider({
 
     if (isNavigating && currentUrl !== lastUrlRef.current) {
       complete();
+
+      // Ensure the bar is visible for at least 300ms even on instant navigations
+      // (e.g. service-worker cached pages in production Electron)
+      const elapsed = Date.now() - startTimeRef.current;
+      const remaining = Math.max(300 - elapsed, 0);
+
       const timeout = setTimeout(() => {
         reset();
-      }, 500);
+      }, remaining + 200);
       lastUrlRef.current = currentUrl;
       return () => clearTimeout(timeout);
     }
@@ -110,6 +118,7 @@ export function NavigationTransitionProvider({
 
       // Determine feedback type based on destination
       const type = getNavigationType(targetUrl.pathname);
+      startTimeRef.current = Date.now();
       start(type);
     };
 
