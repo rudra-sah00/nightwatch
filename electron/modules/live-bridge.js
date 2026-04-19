@@ -133,7 +133,7 @@ function startProxyServer(_eventSender) {
         return res.end('Missing url');
       }
 
-      // Security: only proxy requests to known streaming CDN domains
+      // Security: only proxy HTTP/HTTPS requests (block file://, data:, etc.)
       let parsedUrl;
       try {
         parsedUrl = new URL(targetQueryUrl);
@@ -142,15 +142,9 @@ function startProxyServer(_eventSender) {
         return res.end('Invalid url');
       }
 
-      const allowedDomains = ['dlstreams.top', 'funsday.cfd'];
-      const hostname = parsedUrl.hostname;
-      if (
-        !allowedDomains.some(
-          (d) => hostname === d || hostname.endsWith(`.${d}`),
-        )
-      ) {
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
         res.writeHead(403);
-        return res.end('Domain not allowed');
+        return res.end('Protocol not allowed');
       }
 
       const isKey = parsedUrl.pathname.toLowerCase().includes('/key/');
