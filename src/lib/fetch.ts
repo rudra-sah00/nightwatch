@@ -6,6 +6,7 @@ interface FetchOptions extends RequestInit {
   timeout?: number;
   skipRefresh?: boolean; // Flag to prevent infinite refresh loops
   rawResponse?: boolean; // Flag to return raw Response object
+  retries?: number; // Number of retries on 5xx/network errors (default 0)
 }
 
 // Track if we're currently refreshing to prevent multiple simultaneous refresh calls
@@ -135,7 +136,12 @@ export async function apiFetch<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<T> {
-  const { timeout = 30000, skipRefresh = false, ...fetchOptions } = options;
+  const {
+    timeout = 30000,
+    skipRefresh = false,
+    retries = 0,
+    ...fetchOptions
+  } = options;
 
   // Use absolute URL on server, relative on client (to leverage Next.js proxying)
   const baseUrl =
@@ -149,15 +155,17 @@ export async function apiFetch<T>(
   const isAuthEndpoint =
     endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
 
+  // Track whether the user passed their own signal (for abort vs timeout distinction)
+  const userSignal = fetchOptions.signal;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-  // Handle external abort signal
-  if (fetchOptions.signal) {
-    if (fetchOptions.signal.aborted) {
+  // Handle external abort signal — propagate user abort separately
+  if (userSignal) {
+    if (userSignal.aborted) {
       controller.abort();
     } else {
-      fetchOptions.signal.addEventListener('abort', () => controller.abort());
+      userSignal.addEventListener('abort', () => controller.abort());
     }
   }
 
@@ -256,11 +264,31 @@ export async function apiFetch<T>(
     clearTimeout(timeoutId);
 
     if (error instanceof Error && error.name === 'AbortError') {
+      // Distinguish user-initiated abort from timeout
+      if (userSignal?.aborted) {
+        throw error; // Propagate the original AbortError
+      }
       const timeoutErr = new Error(
         'Request timed out. Please check your connection and try again.',
       ) as Error & ApiError;
       timeoutErr.status = 408;
       throw timeoutErr;
+    }
+
+    // Retry on network errors or 5xx if retries remain
+    if (retries > 0 && !userSignal?.aborted) {
+      const isRetryable =
+        error instanceof Error &&
+        (error.message.includes('fetch') ||
+          error.message.includes('network') ||
+          ('status' in error &&
+            (error as ApiError).status !== undefined &&
+            (error as ApiError).status! >= 500));
+      if (isRetryable) {
+        const delay = (options.retries! - retries + 1) * 1000; // 1s, 2s, ...
+        await new Promise((r) => setTimeout(r, delay));
+        return apiFetch<T>(endpoint, { ...options, retries: retries - 1 });
+      }
     }
 
     throw error;

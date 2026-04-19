@@ -1,3 +1,4 @@
+import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { ChangePasswordInput, UpdateProfileInput } from './schema';
@@ -7,31 +8,21 @@ import type { WatchActivity } from './types';
  * User profile management and caching.
  */
 
-interface CacheEntry<T> {
-  data: T;
-  expiry: number;
-}
-
-// Profile cache (5 minutes)
-let profileCache: CacheEntry<{ user: User }> | null = null;
-const PROFILE_CACHE_TTL = 5 * 60 * 1000;
+const profileCache = createTTLCache<{ user: User }>(5 * 60 * 1000, 1);
 
 export async function getProfile(
   options?: RequestInit,
 ): Promise<{ user: User }> {
-  // Check cache first
-  if (profileCache && profileCache.expiry > Date.now()) {
-    return profileCache.data;
-  }
+  const cached = profileCache.get('me');
+  if (cached) return cached;
 
   const result = await apiFetch<{ user: User }>('/api/auth/me', options);
-  profileCache = { data: result, expiry: Date.now() + PROFILE_CACHE_TTL };
+  profileCache.set('me', result);
   return result;
 }
 
-// Invalidate profile cache (call after updates)
 export function invalidateProfileCache(): void {
-  profileCache = null;
+  profileCache.clear();
 }
 
 export async function updateProfile(
@@ -44,16 +35,11 @@ export async function updateProfile(
     ...options,
   });
   // Update cache with new data
-  profileCache = { data: result, expiry: Date.now() + PROFILE_CACHE_TTL };
+  profileCache.set('me', result);
   return result;
 }
 
-export async function checkUsername(
-  username: string,
-  options?: RequestInit,
-): Promise<{ available: boolean }> {
-  return apiFetch(`/api/user/check-username/${username}`, options);
-}
+export { checkUsername } from '@/features/auth/api';
 
 /**
  * Get watch activity - always fresh from server (no client cache)
