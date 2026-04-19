@@ -34,4 +34,19 @@ try {
   // Sentry will re-initialize on the next full page load.
 }
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRouterTransitionStart = (href: string, navigateType: string) => {
+  // Trigger the navigation progress bar via Zustand store.
+  // This fires BEFORE the route transition — even for prefetched routes —
+  // so the progress bar always shows regardless of SW cache speed.
+  try {
+    const { useNavigationStore } = require('@/store/use-navigation-store');
+    const publicRoutes = ['/login', '/signup', '/user/'];
+    const isPublic = publicRoutes.some((r) => href.startsWith(r));
+    useNavigationStore.getState().start(isPublic ? 'spinner' : 'bar');
+  } catch (_e) {
+    // Store may not be available during initial load
+  }
+
+  // Also forward to Sentry for performance tracing
+  Sentry.captureRouterTransitionStart(href, navigateType);
+};
