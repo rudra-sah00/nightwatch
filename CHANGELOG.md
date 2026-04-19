@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.29.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.28.0...v1.29.0) (2026-04-19)
+
+
+### Features
+
+* **electron:** Phase I — Check for Updates, taskbar icons, macOS permissions, download progress ([2604fcf](https://github.com/rudra-sah00/watch-rudra/commit/2604fcf21259f00504bfbfefb5f441d315f04c87))
+* Phase C — navbar active routes, search UX, accessibility ([3db7a98](https://github.com/rudra-sah00/watch-rudra/commit/3db7a98310aa3258be4e2d753bf6493ac46d1644))
+* **player:** Phase B — keyboard shortcuts, accessibility, live player ([ad7cc72](https://github.com/rudra-sah00/watch-rudra/commit/ad7cc729a600dcaba38a76ed9e759b7182ab1f6d))
+* **profile:** Phase E — accessibility, System theme, password UX ([8b91cf4](https://github.com/rudra-sah00/watch-rudra/commit/8b91cf413798313e1eb0ab18516caa13dcf118fd))
+
+
+### Bug Fixes
+
+* **electron:** Phase 4 — stability fixes, architecture cleanup, missing features ([391e03a](https://github.com/rudra-sah00/watch-rudra/commit/391e03aeb40800b85e23d3c069a999005bafbd0d))
+* **livestream:** Phase F — Escape key handlers, aria-live scores ([03f1776](https://github.com/rudra-sah00/watch-rudra/commit/03f17766a84943be0de3c38c807b9cbacf991fe8))
+* navbar progress bar, offline video playback, auto-updater hang, logout-on-deploy ([449bb3d](https://github.com/rudra-sah00/watch-rudra/commit/449bb3deea691f80d416f42979f8612751951a88))
+* Phase 7 — lib fixes, provider cleanup, dependency removal ([985deab](https://github.com/rudra-sah00/watch-rudra/commit/985deab3a9459e9f25ce0cd16e0f9064d1a3331c))
+* Phase A — security fixes, remove artificial delays, dead code cleanup ([796714e](https://github.com/rudra-sah00/watch-rudra/commit/796714e9950828b8368d67d103e19c975e20f829))
+* **watch-party:** Phase D — emoji theme, accessibility, stability ([3af667a](https://github.com/rudra-sah00/watch-rudra/commit/3af667a3d12cf730ccaa02f8a7327ecbfdbfc412))
+
+
+### Performance Improvements
+
+* Phase H — caching, loading skeletons, search error handling ([08d59ab](https://github.com/rudra-sah00/watch-rudra/commit/08d59ab982f17c7ba3c49dae4ab4efc2a667a97a))
+
 ## [1.28.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.27.0...v1.28.0) (2026-04-19)
 
 
