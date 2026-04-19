@@ -15,11 +15,9 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
-
 
 jobs:
-  lint-and-deploy:
+  lint-test-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +30,17 @@ jobs:
       - name: Enable Corepack (for pnpm)
         run: corepack enable
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -41,13 +50,17 @@ jobs:
       - name: Run TypeScript check
         run: pnpm type-check
 
+      - name: Run unit tests
+        run: pnpm test
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project Artifacts
+      - name: Build Project Artifacts (Production)
+        if: inputs.environment == 'production'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NODE_ENV: ${{ secrets.NODE_ENV }}
@@ -56,7 +69,44 @@ jobs:
           NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
 
-      - name: Deploy Project Artifacts to Vercel
-        id: deploy
-        run: vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Preview)
+        if: inputs.environment == 'preview'
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
+          NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+
+      - name: Deploy to Vercel (Production)
+        if: inputs.environment == 'production'
+        id: deploy-prod
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Vercel (Preview)
+        if: inputs.environment == 'preview'
+        id: deploy-preview
+        run: |
+          URL=$(vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Smoke test deployed URL
+        run: |
+          DEPLOY_URL="${{ steps.deploy-prod.outputs.deploy_url || steps.deploy-preview.outputs.deploy_url }}"
+          if [ -n "$DEPLOY_URL" ]; then
+            echo "Smoke testing: $DEPLOY_URL"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$DEPLOY_URL")
+            if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+              echo "✅ Smoke test passed (HTTP $STATUS)"
+            else
+              echo "❌ Smoke test failed (HTTP $STATUS)"
+              exit 1
+            fi
+          fi
