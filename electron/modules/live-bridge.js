@@ -327,10 +327,11 @@ function setupLiveBridge() {
                 return callback({ cancel: true });
               }
 
-              if (foundUrl.includes('mono.css')) {
-                if (hasResolved) return callback({ cancel: true });
-
-                log.info(`[live-bridge] [WINNER] ${path} resolved the stream!`);
+              // The real signal: an actual .m3u8 HLS manifest URL
+              if (foundUrl.includes('.m3u8') && !hasResolved) {
+                log.info(
+                  `[live-bridge] [WINNER] ${path} found HLS: ${foundUrl}`,
+                );
                 hasResolved = true;
                 streamUrl = foundUrl;
                 extractionWindow = win;
