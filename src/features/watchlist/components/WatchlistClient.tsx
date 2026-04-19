@@ -75,14 +75,10 @@ export function WatchlistClient() {
               ))}
             </div>
           ) : isEmpty ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-neo-surface border-[4px] border-border  text-center max-w-2xl mx-auto w-full">
-              <Plus className="w-20 h-20 text-neo-blue mb-6 stroke-[3px]" />
-              <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-                Watchlist is Empty
-              </h3>
-              <p className="font-headline font-bold uppercase tracking-widest text-neo-muted max-w-sm px-6">
-                You haven't saved any films yet. Search for content to add them
-                to your private collection.
+            <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
+              <Plus className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
+              <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
+                Your watchlist is empty
               </p>
             </div>
           ) : (
