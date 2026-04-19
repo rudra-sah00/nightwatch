@@ -165,7 +165,9 @@ export async function apiFetch<T>(
     if (userSignal.aborted) {
       controller.abort();
     } else {
-      userSignal.addEventListener('abort', () => controller.abort());
+      userSignal.addEventListener('abort', () =>
+        controller.abort(userSignal.reason),
+      );
     }
   }
 

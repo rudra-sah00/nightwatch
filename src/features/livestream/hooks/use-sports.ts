@@ -25,6 +25,7 @@ export function useSports() {
           ]);
         }
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         console.error('Failed to load sports', err);
       } finally {
         setIsLoading(false);
