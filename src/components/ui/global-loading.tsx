@@ -15,7 +15,9 @@ export function GlobalLoading({
     <div
       className={cn(
         'flex flex-col items-center justify-center bg-background motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500 motion-reduce:animate-none',
-        fullScreen ? 'fixed inset-0 z-[100]' : 'w-full h-full p-8',
+        fullScreen
+          ? 'fixed inset-0 z-[100]'
+          : 'flex-grow w-full p-8 min-h-[400px]',
         className,
       )}
       role="status"

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description: 'Search for movies and TV shows to start watching together.',
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Artificial delay to showcase premium loading animations
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+
   return <HomeClient />;
 }
