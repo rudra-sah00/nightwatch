@@ -8,6 +8,7 @@ import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { GlobalLoadingOverlay } from '@/components/layout/global-loading-overlay';
 import { NavigationTransitionProvider } from '@/components/layout/navigation-transition';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
+import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { SocketProvider } from '@/providers/socket-provider';
@@ -29,6 +30,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'Watch Rudra',
   description: 'Your personal streaming companion',
+  manifest: '/manifest.json',
   icons: {
     icon: '/play.ico',
     shortcut: '/play.ico',
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#000000',
-  colorScheme: 'dark',
+  colorScheme: 'dark light',
   // Extend layout into the notch/Dynamic Island so safe-area-inset-* values
   // are non-zero on iOS — required for the player's bottom controls and mobile
   // header to correctly clear the home indicator and the notch.
@@ -76,6 +78,7 @@ export default function RootLayout({
                     <GlobalLoadingOverlay />
                     <DiscordPresenceSync />
                     <OfflineIndicator />
+                    <SwUpdatePrompt />
                     {children}
                   </NavigationTransitionProvider>
                 </Suspense>

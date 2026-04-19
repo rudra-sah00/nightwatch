@@ -1,0 +1,16 @@
+{
+  "name": "Watch Rudra",
+  "short_name": "Watch Rudra",
+  "description": "Your personal streaming companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/play.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

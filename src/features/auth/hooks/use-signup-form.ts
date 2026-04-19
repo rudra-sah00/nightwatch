@@ -2,6 +2,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { CaptchaHandle } from '@/components/ui/captcha';
+import { checkUsername, validateInvite } from '@/features/auth/api';
 import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
@@ -58,7 +59,6 @@ export function useSignupForm() {
     setUsernameStatus('checking');
     const timer = setTimeout(async () => {
       try {
-        const { checkUsername } = await import('@/features/auth/api');
         const { available } = await checkUsername(username);
         setUsernameStatus(available ? 'available' : 'taken');
       } catch (err) {
@@ -82,7 +82,6 @@ export function useSignupForm() {
 
     const checkInvite = async () => {
       try {
-        const { validateInvite } = await import('@/features/auth/api');
         const { valid } = await validateInvite(invite);
         setIsInviteValid(valid);
       } catch (err) {
