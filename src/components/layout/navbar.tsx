@@ -109,6 +109,8 @@ export function Navbar() {
           </Link>
         </div>
       </div>
+      {/* Bottom border */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-border z-[60]" />
     </nav>
   );
 }
