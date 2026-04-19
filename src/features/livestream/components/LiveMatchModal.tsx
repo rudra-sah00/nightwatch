@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2, Play, Users, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import type { LiveMatch } from '../types';
@@ -85,6 +86,38 @@ export function LiveMatchModal({
 
   if (!isOpen) return null;
 
+  return (
+    <LiveMatchModalContent
+      match={match}
+      isCreatingParty={isCreatingParty}
+      onClose={onClose}
+      onWatchSolo={onWatchSolo}
+      onWatchParty={onWatchParty}
+      isMobile={isMobile}
+    />
+  );
+}
+
+function LiveMatchModalContent({
+  match,
+  isCreatingParty,
+  onClose,
+  onWatchSolo,
+  onWatchParty,
+  isMobile,
+}: Omit<LiveMatchModalProps, 'isOpen'> & { isMobile: boolean }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Escape key to close + auto-focus on open
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    dialogRef.current?.focus();
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
@@ -134,7 +167,9 @@ export function LiveMatchModal({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-0 bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-reduce:animate-none outline-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-match-modal-title"

@@ -160,7 +160,10 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
                     {team1Name}
                   </span>
                   {(isLive || isEnded) && (
-                    <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
+                    <span
+                      aria-live="polite"
+                      className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1"
+                    >
                       {match.type === 'cricket'
                         ? getCricketScore(match, 1)
                         : match.team1.score}
@@ -205,7 +208,10 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
                     {team2Name}
                   </span>
                   {(isLive || isEnded) && (
-                    <span className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1">
+                    <span
+                      aria-live="polite"
+                      className="text-sm md:text-base font-black font-headline tabular-nums text-[#e63b2e] mt-1"
+                    >
                       {match.type === 'cricket'
                         ? getCricketScore(match, 2)
                         : match.team2.score}
