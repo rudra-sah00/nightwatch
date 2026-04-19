@@ -19,6 +19,29 @@ export function useSearchInput() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
 
+  // Recent search history (persisted in localStorage)
+  const HISTORY_KEY = 'wr_recent_searches';
+  const MAX_HISTORY = 5;
+
+  const getHistory = (): string[] => {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  const saveToHistory = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    const history = getHistory().filter((h) => h !== trimmed);
+    history.unshift(trimmed);
+    localStorage.setItem(
+      HISTORY_KEY,
+      JSON.stringify(history.slice(0, MAX_HISTORY)),
+    );
+  };
+
   // Suggestions are disabled on the search results page per user request
   const isSearchPage = pathname === '/search';
 
@@ -113,6 +136,7 @@ export function useSearchInput() {
 
   const handleSelect = (text: string) => {
     setQuery(text);
+    saveToHistory(text);
     setIsOpen(false);
     setSuggestions([]);
     startTransition(() => {
@@ -122,6 +146,7 @@ export function useSearchInput() {
 
   const handleManualSearch = () => {
     if (query.trim()) {
+      saveToHistory(query.trim());
       setIsOpen(false);
       startTransition(() => {
         router.push(`/search?q=${encodeURIComponent(query)}`);
@@ -176,6 +201,7 @@ export function useSearchInput() {
     isOpen,
     showSuggestions,
     hasSuggestions,
+    recentSearches: !query && isOpen && !isSearchPage ? getHistory() : [],
     handleFocus,
     handleBlur,
     suggestion: (!isSearchPage && suggestions[0]) || '',

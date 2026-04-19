@@ -60,6 +60,7 @@ export function HomeClient() {
                 {/* Real Input Layer (Upper) */}
                 <input
                   name="q"
+                  aria-label="Search movies, shows, or cinema"
                   className="w-full bg-transparent border-none focus:ring-0 font-headline text-2xl md:text-3xl font-bold uppercase placeholder:text-foreground/30 text-foreground relative z-10 outline-none p-0 leading-none h-full"
                   placeholder="SEARCH MOVIES, SHOWS, OR CINEMA..."
                   type="text"

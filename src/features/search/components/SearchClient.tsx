@@ -93,11 +93,23 @@ export function SearchClient({
           </div>
 
           <div className="space-y-6">
-            <SearchResults
-              results={results}
-              isLoading={isTransitioning || isPending}
-              onSelect={handleSelectContent}
-            />
+            {!isTransitioning && !isPending && results.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
+                <span className="text-5xl mb-4">🔍</span>
+                <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
+                  No results found
+                </p>
+                <p className="font-headline font-bold uppercase tracking-widest text-neo-muted text-sm max-w-sm">
+                  Try a different spelling or search for something else
+                </p>
+              </div>
+            ) : (
+              <SearchResults
+                results={results}
+                isLoading={isTransitioning || isPending}
+                onSelect={handleSelectContent}
+              />
+            )}
           </div>
         </div>
       </main>
