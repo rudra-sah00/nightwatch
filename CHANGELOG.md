@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.5](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.4...v1.29.5) (2026-04-19)
+
+
+### Bug Fixes
+
+* **electron:** use pre-built flat node_modules for asar bundling ([dfa2a53](https://github.com/rudra-sah00/watch-rudra/commit/dfa2a53823c02a818fe227d527ac46f87493a4d1))
+
 ## [1.29.4](https://github.com/rudra-sah00/watch-rudra/compare/v1.29.3...v1.29.4) (2026-04-19)
 
 
