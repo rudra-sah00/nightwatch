@@ -12,19 +12,10 @@ import {
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { cn, formatBytes } from '@/lib/utils';
 import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
 import { OfflineContentDetailModal } from './offline-content-detail-modal';
-
-function formatBytes(bytes?: number, decimals = 2) {
-  if (!bytes || bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
-}
 
 export function OfflineLibrary() {
   const {
@@ -275,7 +266,7 @@ export function OfflineLibrary() {
                               pauseDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-yellow hover:text-black transition-colors"
-                            title="Pause Download"
+                            aria-label="Pause Download"
                           >
                             <Pause className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -288,7 +279,7 @@ export function OfflineLibrary() {
                               resumeDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-green hover:text-black transition-colors"
-                            title="Resume Download"
+                            aria-label="Resume Download"
                           >
                             <Play className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -303,7 +294,7 @@ export function OfflineLibrary() {
                               cancelDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
-                            title="Remove Download"
+                            aria-label="Remove Download"
                           >
                             <Trash2 className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -315,7 +306,7 @@ export function OfflineLibrary() {
                               cancelDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
-                            title="Cancel Download"
+                            aria-label="Cancel Download"
                           >
                             <X className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -329,6 +320,11 @@ export function OfflineLibrary() {
                       item.status === 'PAUSED') && (
                       <div className="mt-8 flex items-center gap-4">
                         <div
+                          role="progressbar"
+                          aria-valuenow={Math.round(item.progress || 0)}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`Download progress: ${Math.round(item.progress || 0)}%`}
                           className={cn(
                             'flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden',
                             (item.status === 'QUEUED' ||

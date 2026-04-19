@@ -50,6 +50,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       <button
         type="button"
         onClick={handleBack}
+        aria-label="Go back"
         className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
       >
         <ArrowLeft className="w-5 h-5 text-white" />
@@ -141,6 +142,7 @@ function LivePlayerState() {
         <Player.ControlRow>
           <Player.PlayPause />
           <Player.Volume />
+          <Player.LiveBadge />
           <Player.Spacer />
           <div className="hidden min-[380px]:contents md:contents">
             <Player.SettingsMenu />

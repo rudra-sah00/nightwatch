@@ -33,6 +33,7 @@ export function PlayPause({
     <button
       type="button"
       onClick={onToggle}
+      aria-label={isPlaying ? 'Pause' : 'Play'}
       className={cn(
         'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
         'border-[3px] border-border bg-neo-yellow text-foreground ',

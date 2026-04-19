@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/providers/theme-provider';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useEmojiReactions } from '../hooks/use-emoji-reactions';
 
@@ -30,6 +31,7 @@ export function EmojiReactions({
 }: EmojiReactionsProps) {
   const { showPicker, setShowPicker, pickerRef, handleTriggerEmoji } =
     useEmojiReactions({ rtmSendMessage, userId, userName });
+  const { theme: appTheme } = useTheme();
 
   return (
     <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-background/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
@@ -77,7 +79,7 @@ export function EmojiReactions({
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={Theme.DARK}
+            theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
             onEmojiClick={(emojiData) => handleTriggerEmoji(emojiData.emoji)}
             lazyLoadEmojis={true}
             height={320}

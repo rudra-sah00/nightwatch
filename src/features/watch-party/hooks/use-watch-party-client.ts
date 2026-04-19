@@ -63,6 +63,7 @@ export function useWatchPartyClient({
   const isHostRef = useRef(false);
 
   const hasConnectedGuest = useRef(false);
+  const movieEndTimerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (!user && !hasConnectedGuest.current) {
       hasConnectedGuest.current = true;
@@ -162,10 +163,11 @@ export function useWatchPartyClient({
       const threeHours = 3 * 60 * 60 * 1000;
       if (duration >= threeHours) {
         toast.info('Watch party has reached 3-hour limit and will now end.');
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           leaveRoom();
           goBackOrHome();
         }, 3000);
+        movieEndTimerRef.current = timer;
       }
     };
     const interval = setInterval(checkDuration, 60 * 1000);
@@ -196,10 +198,12 @@ export function useWatchPartyClient({
 
     const handleMovieEnd = () => {
       toast.info('Movie has ended. Closing watch party...');
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         leaveRoom();
         goBackOrHome();
       }, 3000);
+      // Store for cleanup if component unmounts during the delay
+      movieEndTimerRef.current = timer;
     };
 
     video.addEventListener('timeupdate', checkMovieProgress, { passive: true });
@@ -207,6 +211,7 @@ export function useWatchPartyClient({
     return () => {
       video.removeEventListener('timeupdate', checkMovieProgress);
       video.removeEventListener('ended', handleMovieEnd);
+      if (movieEndTimerRef.current) clearTimeout(movieEndTimerRef.current);
     };
   }, [room, isHost, movieEndWarningShown, leaveRoom, goBackOrHome]);
 
@@ -308,6 +313,9 @@ export function useWatchPartyClient({
 
   const confirmLeave = () => {
     setShowLeaveDialog(false);
+    try {
+      sessionStorage.removeItem('guest_token');
+    } catch {}
     leaveRoom();
     goBackOrHome();
   };

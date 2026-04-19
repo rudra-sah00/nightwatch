@@ -1,12 +1,9 @@
-const { systemPreferences, app, Menu } = require('electron');
+const { app, Menu } = require('electron');
 
 async function _setupMacOS() {
   if (process.platform === 'darwin') {
-    try {
-      // Prompt for critical macOS media access before loading any web views
-      await systemPreferences.askForMediaAccess('camera');
-      await systemPreferences.askForMediaAccess('microphone');
-    } catch (_err) {}
+    // Camera/mic permissions are deferred to when the feature is actually needed
+    // (livestream, watch party). Requesting at startup causes users to deny reflexively.
 
     // Setup Custom macOS Application Menu
     const menuTemplate = [
@@ -14,6 +11,15 @@ async function _setupMacOS() {
         label: app.name,
         submenu: [
           { role: 'about', label: 'About Watch Rudra' },
+          {
+            label: 'Check for Updates...',
+            click: () => {
+              try {
+                const { autoUpdater } = require('electron-updater');
+                autoUpdater.checkForUpdatesAndNotify();
+              } catch (_e) {}
+            },
+          },
           { type: 'separator' },
           { role: 'services' },
           { type: 'separator' },

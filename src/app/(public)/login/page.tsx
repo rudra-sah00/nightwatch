@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 
 export default async function LoginPage() {
   // Mandatory 2.5s delay to showcase premium loading animation
-  await new Promise((resolve) => setTimeout(resolve, 2500));
 
   return <LoginClient />;
 }

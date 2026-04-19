@@ -169,8 +169,9 @@ export function PlayerRoot({
 
   return (
     <PlayerContext value={contextValue}>
-      <section
+      <div
         ref={containerRef}
+        role="application"
         className={cn(
           'video-container relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col',
           'cursor-none',
@@ -181,6 +182,59 @@ export function PlayerRoot({
         onMouseMove={showControls}
         onMouseEnter={showControls}
         aria-label="Video Player"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          // Don't capture keys when typing in an input
+          if (
+            e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement
+          )
+            return;
+
+          const { togglePlay, seek, setVolume, toggleMute, toggleFullscreen } =
+            contextValue.playerHandlers;
+          const vol = state.volume;
+
+          switch (e.key) {
+            case ' ':
+            case 'k':
+            case 'K':
+              e.preventDefault();
+              togglePlay();
+              break;
+            case 'ArrowLeft':
+            case 'j':
+            case 'J':
+              e.preventDefault();
+              seek(state.currentTime - 10);
+              break;
+            case 'ArrowRight':
+            case 'l':
+            case 'L':
+              e.preventDefault();
+              seek(state.currentTime + 10);
+              break;
+            case 'ArrowUp':
+              e.preventDefault();
+              setVolume(Math.min(1, vol + 0.1));
+              break;
+            case 'ArrowDown':
+              e.preventDefault();
+              setVolume(Math.max(0, vol - 0.1));
+              break;
+            case 'm':
+            case 'M':
+              e.preventDefault();
+              toggleMute();
+              break;
+            case 'f':
+            case 'F':
+              e.preventDefault();
+              toggleFullscreen();
+              break;
+          }
+          showControls();
+        }}
       >
         {children}
 
@@ -200,7 +254,7 @@ export function PlayerRoot({
             </div>
           </div>
         )}
-      </section>
+      </div>
     </PlayerContext>
   );
 }

@@ -356,7 +356,11 @@ export function UpdateProfileForm() {
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          role="radiogroup"
+          aria-label="Server selection"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
           {[
             { id: 's1' as const, label: 'Netflix', sub: 'Standard' },
             { id: 's2' as const, label: 'Balanced', sub: 'Performance' },
@@ -367,6 +371,8 @@ export function UpdateProfileForm() {
               <button
                 key={s.id}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => {
                   profileForm.setPreferredServer(s.id);
                   // Immediate save for server selection

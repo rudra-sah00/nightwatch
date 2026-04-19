@@ -26,11 +26,17 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <ServerProvider defaultServer={user?.preferredServer}>
       <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
+        >
+          Skip to content
+        </a>
         <Suspense fallback={null}>
           <GlobalTour />
         </Suspense>
         <Navbar />
-        <div className="flex-grow flex flex-col">
+        <div id="main-content" className="flex-grow flex flex-col">
           {showOfflineBlocker ? <OfflineState /> : children}
         </div>
       </div>

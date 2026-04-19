@@ -22,14 +22,16 @@ interface SwitchProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  label?: string;
 }
 
-function Switch({ checked, onCheckedChange, disabled }: SwitchProps) {
+function Switch({ checked, onCheckedChange, disabled, label }: SwitchProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
@@ -191,6 +193,7 @@ export function WatchPartySettings({
                   <Switch
                     checked={floatingChatEnabled}
                     onCheckedChange={() => onToggleFloatingChat?.()}
+                    label="Floating chat overlay"
                   />
                 </div>
               </div>
@@ -223,6 +226,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsDraw', v)
                       }
+                      label="Allow guests to draw"
                     />
                   </div>
 
@@ -243,6 +247,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsPlaySounds', v)
                       }
+                      label="Allow guests to play sounds"
                     />
                   </div>
 
@@ -263,6 +268,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsChat', v)
                       }
+                      label="Allow guests to chat"
                     />
                   </div>
                 </div>
@@ -309,6 +315,7 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
+                              label={`Sketch for ${guest.name}`}
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
@@ -327,6 +334,7 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
+                              label={`Sounds for ${guest.name}`}
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
@@ -345,6 +353,7 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
+                              label={`Chat for ${guest.name}`}
                             />
                           </div>
                         </div>

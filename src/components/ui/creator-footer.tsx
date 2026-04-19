@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
-import packageJson from '../../../package.json';
+
+// Read version at build time — avoids bundling entire package.json into the client
+const APP_VERSION = process.env.npm_package_version || '0.0.0';
 
 /**
  * Shared Creator Identity footer with social links.
@@ -119,7 +121,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           href="/whats-new"
           className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors hover:text-primary"
         >
-          v{packageJson.version}
+          v{APP_VERSION}
         </a>
       </div>
     </div>

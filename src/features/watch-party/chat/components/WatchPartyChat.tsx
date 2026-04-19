@@ -2,6 +2,7 @@ import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { memo, useMemo } from 'react';
+import { useTheme } from '@/providers/theme-provider';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,
@@ -98,6 +99,8 @@ export const WatchPartyChat = memo(function WatchPartyChat({
     onTypingStop,
   });
 
+  const { theme: appTheme } = useTheme();
+
   return (
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
@@ -175,7 +178,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
           className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-background  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={Theme.LIGHT}
+            theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
             emojiStyle={EmojiStyle.APPLE}
             lazyLoadEmojis={true}
             height={350}

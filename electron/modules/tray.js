@@ -64,6 +64,17 @@ function setupTray(mainWindow, setQuittingCallback) {
         click: () => app.showAboutPanel(),
       },
       {
+        label: 'Check for Updates...',
+        click: () => {
+          try {
+            const { autoUpdater } = require('electron-updater');
+            autoUpdater.checkForUpdatesAndNotify();
+          } catch (_e) {
+            log.warn('[tray] Update check failed');
+          }
+        },
+      },
+      {
         label: 'Quit Now',
         click: () => {
           setQuittingCallback(true);

@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertDialog as RadixAlertDialog } from 'radix-ui';
 import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -9,96 +10,60 @@ interface AlertDialogProps {
   children: React.ReactNode;
 }
 
-interface AlertDialogContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface AlertDialogHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface AlertDialogFooterProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface AlertDialogTitleProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface AlertDialogDescriptionProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface AlertDialogActionProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
-
-interface AlertDialogCancelProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
-
 export function AlertDialog({
   open,
   onOpenChange,
   children,
 }: AlertDialogProps) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
-      {/* Backdrop */}
-      <button
-        type="button"
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-default"
-        onClick={() => onOpenChange(false)}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') onOpenChange(false);
-        }}
-        aria-label="Close dialog"
-        tabIndex={-1}
-      />
-      {/* Content */}
-      <div className="relative z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
-        {children}
-      </div>
-    </div>
+    <RadixAlertDialog.Root open={open} onOpenChange={onOpenChange}>
+      {children}
+    </RadixAlertDialog.Root>
   );
 }
 
 export function AlertDialogContent({
   children,
   className,
-}: AlertDialogContentProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div
-      className={cn(
-        'bg-background border-[4px] border-border rounded-none  max-w-md w-full mx-4 p-8 relative',
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <RadixAlertDialog.Portal>
+      <RadixAlertDialog.Overlay className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200" />
+      <RadixAlertDialog.Content
+        className={cn(
+          'fixed left-1/2 top-1/2 z-[61] -translate-x-1/2 -translate-y-1/2',
+          'bg-background border-[4px] border-border rounded-none max-w-md w-full mx-4 p-8',
+          'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none',
+          'focus:outline-none',
+          className,
+        )}
+      >
+        {children}
+      </RadixAlertDialog.Content>
+    </RadixAlertDialog.Portal>
   );
 }
 
 export function AlertDialogHeader({
   children,
   className,
-}: AlertDialogHeaderProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={cn('space-y-4 mb-6', className)}>{children}</div>;
 }
 
 export function AlertDialogFooter({
   children,
   className,
-}: AlertDialogFooterProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={cn(
@@ -114,32 +79,38 @@ export function AlertDialogFooter({
 export function AlertDialogTitle({
   children,
   className,
-}: AlertDialogTitleProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <h2
+    <RadixAlertDialog.Title
       className={cn(
         'text-3xl font-black font-headline uppercase tracking-tighter text-foreground leading-none',
         className,
       )}
     >
       {children}
-    </h2>
+    </RadixAlertDialog.Title>
   );
 }
 
 export function AlertDialogDescription({
   children,
   className,
-}: AlertDialogDescriptionProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <p
+    <RadixAlertDialog.Description
       className={cn(
         'text-sm font-headline font-bold uppercase tracking-widest text-foreground/70 leading-relaxed',
         className,
       )}
     >
       {children}
-    </p>
+    </RadixAlertDialog.Description>
   );
 }
 
@@ -147,17 +118,19 @@ export function AlertDialogAction({
   children,
   className,
   ...props
-}: AlertDialogActionProps) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      className={cn(
-        'px-6 py-3 bg-neo-red text-primary-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
+    <RadixAlertDialog.Action asChild>
+      <button
+        className={cn(
+          'px-6 py-3 bg-neo-red text-primary-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    </RadixAlertDialog.Action>
   );
 }
 
@@ -165,16 +138,18 @@ export function AlertDialogCancel({
   children,
   className,
   ...props
-}: AlertDialogCancelProps) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      className={cn(
-        'px-6 py-3 bg-background text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
+    <RadixAlertDialog.Cancel asChild>
+      <button
+        className={cn(
+          'px-6 py-3 bg-background text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    </RadixAlertDialog.Cancel>
   );
 }

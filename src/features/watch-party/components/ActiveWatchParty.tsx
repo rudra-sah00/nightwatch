@@ -169,7 +169,9 @@ export function ActiveWatchParty({
       )}
     >
       {/* Sidebar */}
-      <div
+      <aside
+        aria-label="Party sidebar"
+        aria-hidden={!showDesktopSidebar}
         className={cn(
           'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-background z-30',
           'h-full order-1 flex-none border-r-4 border-border',
@@ -201,10 +203,10 @@ export function ActiveWatchParty({
           rtmSendMessageToPeer={rtmSendMessageToPeer}
           currentUserName={currentUserName}
         />
-      </div>
+      </aside>
 
       {/* Video Area */}
-      <div
+      <main
         className={cn(
           'relative min-w-0 bg-black transition-[width] duration-500 watch-party-video',
           'h-full flex-1 order-2',
@@ -228,7 +230,7 @@ export function ActiveWatchParty({
           userId={currentUserId}
           currentUserName={currentUserName}
         />
-      </div>
+      </main>
 
       {/* Floating chat overlay — text-only, no background, bottom-right */}
       {!showDesktopSidebar && floatingChatEnabled ? (
