@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { SearchSkeleton } from '@/components/ui/skeletons';
 import { searchContent } from '@/features/search/api';
 import { SearchClient } from '@/features/search/components/SearchClient';
 import type { SearchResult } from '@/features/search/types';
@@ -12,17 +11,29 @@ export const metadata: Metadata = {
 
 function SearchFallback() {
   return (
-    <div className="container mx-auto px-6 py-12 md:px-10 min-h-[calc(100vh-80px)]">
-      <div className="mb-12">
-        <div className="h-16 w-64 bg-muted animate-pulse mb-4" />
-        <div className="h-6 w-48 bg-muted animate-pulse" />
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          /* biome-ignore lint/suspicious/noArrayIndexKey: skeleton loading array */
-          <SearchSkeleton key={`search-sk-${i}`} />
-        ))}
-      </div>
+    <div className="w-full">
+      <main className="container mx-auto px-6 py-12 md:px-10 min-h-[calc(100vh-80px)]">
+        <div className="w-full">
+          <div className="mb-12">
+            <div className="h-14 sm:h-16 md:h-24 w-80 bg-muted animate-pulse rounded mb-4" />
+            <div className="h-6 w-56 bg-muted animate-pulse rounded" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={`search-sk-${
+                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
+                  i
+                }`}
+              >
+                <div className="aspect-[2/3] bg-muted animate-pulse rounded mb-4" />
+                <div className="h-6 w-3/4 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-4 w-1/2 bg-muted animate-pulse rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
