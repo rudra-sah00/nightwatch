@@ -42,8 +42,32 @@ export function useWatchPartySync({
 
   const handlePresenceEvent = useCallback(
     (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
-      // Only guests care about host disconnection
-      if (isHost) return;
+      // Host: proactively sync when a new guest joins
+      if (isHost) {
+        if (event.action === 'JOIN' && event.userId !== room?.hostId) {
+          if (room?.id) {
+            rtmSendMessage?.({
+              type: 'SYNC',
+              currentTime: isLiveRoom
+                ? 0
+                : (videoRef?.current?.currentTime ?? room.state.currentTime),
+              videoTime: isLiveRoom
+                ? 0
+                : (videoRef?.current?.currentTime ?? room.state.currentTime),
+              isPlaying: videoRef?.current
+                ? !videoRef.current.paused
+                : room.state.isPlaying,
+              playbackRate:
+                videoRef?.current?.playbackRate ?? room.state.playbackRate,
+              serverTime: Date.now(),
+              fromHost: true,
+            });
+          }
+        }
+        return;
+      }
+
+      // Guest: handle host disconnection/reconnection
       if (event.userId !== room?.hostId) return;
 
       if (event.action === 'LEAVE') {
@@ -57,9 +81,8 @@ export function useWatchPartySync({
         if (hostDisconnectTimerRef.current)
           clearTimeout(hostDisconnectTimerRef.current);
         hostDisconnectTimerRef.current = setTimeout(() => {
-          // Time's up! Leave the room
           toast.error('Watch party closed because the host did not return.');
-          window.location.href = '/home'; // Hard redirect is safest for cleanup
+          window.location.href = '/home';
         }, graceSeconds * 1000);
       } else if (event.action === 'JOIN') {
         setHostDisconnected(false);
@@ -68,29 +91,6 @@ export function useWatchPartySync({
           hostDisconnectTimerRef.current = null;
         }
         toast.success('Host reconnected!', { id: 'host-disconnected' });
-      }
-
-      // Proactive Sync: When a NEW guest joins, the host should proactively
-      // broadcast the current state to ensure they sync immediately.
-      if (isHost && event.action === 'JOIN' && event.userId !== room?.hostId) {
-        if (room?.id) {
-          rtmSendMessage?.({
-            type: 'SYNC',
-            currentTime: isLiveRoom
-              ? 0
-              : (videoRef?.current?.currentTime ?? room.state.currentTime),
-            videoTime: isLiveRoom
-              ? 0
-              : (videoRef?.current?.currentTime ?? room.state.currentTime),
-            isPlaying: videoRef?.current
-              ? !videoRef.current.paused
-              : room.state.isPlaying,
-            playbackRate:
-              videoRef?.current?.playbackRate ?? room.state.playbackRate,
-            serverTime: Date.now(),
-            fromHost: true,
-          });
-        }
       }
     },
     [

@@ -24,21 +24,28 @@ export function useWatchPartyHostSync({
     if (!videoElement || !isHost) return;
 
     let syncDebounceTimer: NodeJS.Timeout | null = null;
+    let playPauseDebounce: NodeJS.Timeout | null = null;
     let lastSeekTime = 0;
 
     const handlePlay = () => {
-      onPartyEvent({
-        eventType: 'play',
-        videoTime: videoElement.currentTime,
-        playbackRate: videoElement.playbackRate,
-      });
+      if (playPauseDebounce) clearTimeout(playPauseDebounce);
+      playPauseDebounce = setTimeout(() => {
+        onPartyEvent({
+          eventType: 'play',
+          videoTime: videoElement.currentTime,
+          playbackRate: videoElement.playbackRate,
+        });
+      }, 100);
     };
 
     const handlePause = () => {
-      onPartyEvent({
-        eventType: 'pause',
-        videoTime: videoElement.currentTime,
-      });
+      if (playPauseDebounce) clearTimeout(playPauseDebounce);
+      playPauseDebounce = setTimeout(() => {
+        onPartyEvent({
+          eventType: 'pause',
+          videoTime: videoElement.currentTime,
+        });
+      }, 100);
     };
 
     const handleSeek = () => {
@@ -81,6 +88,7 @@ export function useWatchPartyHostSync({
       videoElement.removeEventListener('seeked', handleSeek);
       videoElement.removeEventListener('ratechange', handleRateChange);
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+      if (playPauseDebounce) clearTimeout(playPauseDebounce);
     };
   }, [videoElement, isHost, isLive, onPartyEvent]);
 }

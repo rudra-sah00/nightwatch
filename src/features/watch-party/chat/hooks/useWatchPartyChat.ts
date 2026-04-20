@@ -132,6 +132,12 @@ export function useWatchPartyChat({
             if (prev.some((u) => u.userId === msg.userId)) return prev;
             return [...prev, { userId: msg.userId, userName: msg.userName }];
           });
+          // Auto-expire after 5s in case TYPING_STOP is never received
+          setTimeout(() => {
+            setTypingUsers((prev) =>
+              prev.filter((u) => u.userId !== msg.userId),
+            );
+          }, 5000);
           break;
         }
 

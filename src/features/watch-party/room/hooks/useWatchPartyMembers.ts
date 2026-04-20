@@ -38,6 +38,16 @@ export function useWatchPartyMembers({
   const { socket } = useSocket();
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
+  // Cleanup all disconnect timers on unmount
+  useEffect(() => {
+    return () => {
+      for (const timer of Object.values(disconnectTimersRef.current)) {
+        clearTimeout(timer);
+      }
+      disconnectTimersRef.current = {};
+    };
+  }, []);
+
   // Track latest room state for async callbacks without triggering stale closures or side-effects in setState
   const roomRef = useRef<WatchPartyRoom | null>(room);
   useEffect(() => {

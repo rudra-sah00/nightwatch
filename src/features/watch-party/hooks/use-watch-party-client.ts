@@ -229,6 +229,8 @@ export function useWatchPartyClient({
     }
   }, [user, room, requestStatus, requestJoin, roomId, roomNotFound]);
 
+  const syncTimersRef = useRef<NodeJS.Timeout[]>([]);
+
   useEffect(() => {
     if (!room) return;
     if (room.members.length > prevMemberCount.current) {
@@ -243,12 +245,19 @@ export function useWatchPartyClient({
             });
           }
         };
-        setTimeout(sendSync, 500);
-        setTimeout(sendSync, 1000);
-        setTimeout(sendSync, 2000);
+        syncTimersRef.current.forEach(clearTimeout);
+        syncTimersRef.current = [
+          setTimeout(sendSync, 500),
+          setTimeout(sendSync, 1000),
+          setTimeout(sendSync, 2000),
+        ];
       }
     }
     prevMemberCount.current = room.members.length;
+    return () => {
+      syncTimersRef.current.forEach(clearTimeout);
+      syncTimersRef.current = [];
+    };
   }, [room?.members, isHost, room, emitEvent]);
 
   useEffect(() => {
