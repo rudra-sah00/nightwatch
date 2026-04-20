@@ -140,7 +140,7 @@ function downloadFile(
             return reject(new Error('PAUSED_BY_USER'));
           }
           if (onProgressBytes) onProgressBytes(chunk.length);
-          const speedLimitMB = store.get('downloadSpeedLimit') || 0;
+          const speedLimitMB = store?.get?.('downloadSpeedLimit') || 0;
           if (speedLimitMB > 0) {
             res.pause();
             const targetBytesPerSec = speedLimitMB * 1024 * 1024;
