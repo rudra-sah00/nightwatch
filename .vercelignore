@@ -1,0 +1,8 @@
+src-tauri/
+electron/
+.github/
+tests/
+coverage/
+test-results/
+*.md
+!README.md
