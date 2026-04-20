@@ -112,9 +112,13 @@ jobs:
         id: deploy
         run: |
           for i in 1 2 3; do
-            echo "Deploy attempt $i..."
-            if URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null | grep -o 'https://[^ ]*'); then
+            echo "=== Deploy attempt $i ==="
+            OUTPUT=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || true
+            echo "$OUTPUT"
+            URL=$(echo "$OUTPUT" | grep -oE 'https://[a-zA-Z0-9._-]+\.vercel\.app' | tail -1)
+            if [ -n "$URL" ]; then
               echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+              echo "✅ Deployed: $URL"
               exit 0
             fi
             echo "Attempt $i failed, retrying in 15s..."
