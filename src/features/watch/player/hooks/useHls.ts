@@ -344,9 +344,11 @@ export function useHls({
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 // All other fatal network errors — retry
+                dispatch({ type: 'SET_BUFFERING', isBuffering: true });
                 hls.startLoad();
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
+                dispatch({ type: 'SET_BUFFERING', isBuffering: true });
                 hls.recoverMediaError();
                 break;
               default:
