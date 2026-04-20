@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/rudra-sah00/watch-rudra/compare/v2.0.0...v2.0.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* correct discord.rs path in CI, add Android and iOS mobile builds ([a22dffd](https://github.com/rudra-sah00/watch-rudra/commit/a22dffda5acbac207231c14672cc0ef17cd9bdcc))
+
 ## [2.0.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.32.0...v2.0.0) (2026-04-20)
 
 
