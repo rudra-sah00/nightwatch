@@ -1,4 +1,4 @@
-name: Build Tauri Desktop App
+name: Build Tauri Apps
 
 on:
   push:
@@ -53,8 +53,11 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
-  build:
-    name: Build on ${{ matrix.os }}
+  # ===========================================================================
+  # Desktop builds (macOS, Windows, Linux)
+  # ===========================================================================
+  build-desktop:
+    name: Desktop — ${{ matrix.os }}
     needs: quality
     runs-on: ${{ matrix.os }}
     strategy:
@@ -113,11 +116,9 @@ jobs:
 
       - name: Inject Production Secrets
         shell: bash
-        env:
-          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
         run: |
-          sed -i.bak "s#1234567890123456789#${{ secrets.DISCORD_CLIENT_ID }}#g" src-tauri/src/discord.rs
-          rm -f src-tauri/src/discord.rs.bak
+          sed -i.bak "s#1234567890123456789#${{ secrets.DISCORD_CLIENT_ID }}#g" src-tauri/src/commands/discord.rs
+          rm -f src-tauri/src/commands/discord.rs.bak
 
       - name: Delete existing release assets for this platform
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -127,9 +128,9 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           case "${{ matrix.os }}" in
-            macos-latest)  PATTERNS=("arm64.dmg" "aarch64.dmg" "x64.dmg" "latest-mac.yml") ;;
-            windows-latest) PATTERNS=(".msi" ".exe" "latest.yml") ;;
-            ubuntu-latest)  PATTERNS=(".AppImage" "_amd64.deb" "latest-linux.yml") ;;
+            macos-latest)  PATTERNS=("arm64.dmg" "aarch64.dmg" "x64.dmg") ;;
+            windows-latest) PATTERNS=(".msi" ".exe") ;;
+            ubuntu-latest)  PATTERNS=(".AppImage" "_amd64.deb") ;;
           esac
           for pattern in "${PATTERNS[@]}"; do
             gh release view "$TAG" --json assets --jq ".assets[].name" 2>/dev/null | grep "$pattern" | while read -r name; do
@@ -142,12 +143,141 @@ jobs:
         run: pnpm tauri build
 
       - name: Publish to GitHub Releases
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: tauri-apps/tauri-action@v0
         with:
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.ref_name }}
-          releaseBody: 'Desktop release'
+          releaseBody: 'Desktop & Mobile release'
           releaseDraft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ===========================================================================
+  # Mobile — Android (APK)
+  # ===========================================================================
+  build-android:
+    name: Mobile — Android
+    needs: quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: sdkmanager "ndk;27.0.12077973"
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: android-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: android-cargo-
+
+      - name: Inject Production Secrets
+        run: |
+          sed -i "s#1234567890123456789#${{ secrets.DISCORD_CLIENT_ID }}#g" src-tauri/src/commands/discord.rs
+
+      - name: Initialize Tauri Android
+        run: npx tauri android init
+
+      - name: Build Android APK
+        run: npx tauri android build --apk
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+
+      - name: Upload Android APK
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ===========================================================================
+  # Mobile — iOS (IPA, unsigned)
+  # ===========================================================================
+  build-ios:
+    name: Mobile — iOS
+    needs: quality
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,aarch64-apple-ios-sim
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ios-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ios-cargo-
+
+      - name: Inject Production Secrets
+        run: |
+          sed -i.bak "s#1234567890123456789#${{ secrets.DISCORD_CLIENT_ID }}#g" src-tauri/src/commands/discord.rs
+          rm -f src-tauri/src/commands/discord.rs.bak
+
+      - name: Initialize Tauri iOS
+        run: npx tauri ios init
+
+      - name: Build iOS (Simulator — unsigned)
+        run: npx tauri ios build
+
+      - name: Upload iOS artifact
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: src-tauri/gen/apple/build/**/*.app
+          retention-days: 30
