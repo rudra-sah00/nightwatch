@@ -14,7 +14,7 @@ export function PlayerAudioSubtitleSelectors() {
 
   return (
     <section
-      className="flex items-center"
+      className="flex items-center gap-1"
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
       aria-label="Audio and Subtitle Selectors Interaction"

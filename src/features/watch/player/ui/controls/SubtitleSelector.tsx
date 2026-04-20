@@ -358,7 +358,7 @@ export function SubtitleSelector({
         className={cn(
           'p-2.5 md:p-3 transition-colors duration-200',
           'bg-background border-[3px] border-border text-foreground ',
-          'hover:bg-background',
+          'hover:bg-muted',
           'active:bg-muted',
           isOpen && 'bg-background shadow-none',
           isActive && !isOpen && 'bg-neo-yellow',

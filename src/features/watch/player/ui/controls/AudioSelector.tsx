@@ -38,7 +38,7 @@ export function AudioSelector({
         className={cn(
           'p-2.5 md:p-3 transition-colors duration-200',
           'bg-background border-[3px] border-border text-foreground ',
-          'hover:bg-background',
+          'hover:bg-muted',
           'active:bg-muted',
           'flex items-center justify-center',
           isOpen && 'bg-background shadow-none',
