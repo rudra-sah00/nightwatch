@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.32.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.31.0...v1.32.0) (2026-04-20)
+
+
+### Features
+
+* **ui:** unify empty states across continue watching, watchlist, downloads ([48bb014](https://github.com/rudra-sah00/watch-rudra/commit/48bb014caf9ad120da8f712b9f4af8862c5327df))
+
+
+### Bug Fixes
+
+* **downloads:** fix store.get crash - providers were passing undefined store ([e07ac06](https://github.com/rudra-sah00/watch-rudra/commit/e07ac0679fe3b854ab68e9f67a98cdfbae415e7c))
+* **downloads:** guard store.get call to prevent crash on app close ([f012291](https://github.com/rudra-sah00/watch-rudra/commit/f012291e9fc6b4b7324d5c9a98558b9b07e880dd))
+* **player:** add gap between subtitle/audio buttons, fix hover ([0b426f7](https://github.com/rudra-sah00/watch-rudra/commit/0b426f73fb694acf6abb98fe9539e95215b9678f))
+* **ui:** align empty state spacing across all pages ([dc54dbe](https://github.com/rudra-sah00/watch-rudra/commit/dc54dbe50ba2cfae63afbb0fc5ee059e62630ea7))
+* **watch-party:** fix End Party button not working ([d8f31f2](https://github.com/rudra-sah00/watch-rudra/commit/d8f31f21d32575362bdf90e17a9daa2be56eddf9))
+* **watch-party:** memory leaks, sync issues, and edge cases ([567413c](https://github.com/rudra-sah00/watch-rudra/commit/567413cdc4c3e777418f983255b75d3c78de729c))
+
 ## [1.31.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.30.0...v1.31.0) (2026-04-19)
 
 
