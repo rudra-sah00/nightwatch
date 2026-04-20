@@ -128,5 +128,5 @@ jobs:
     name: Build Desktop Apps (Release)
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    uses: ./.github/workflows/build-desktop.yml
+    uses: ./.github/workflows/build-tauri.yml
     secrets: inherit
