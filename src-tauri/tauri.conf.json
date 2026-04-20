@@ -5,7 +5,7 @@
   "identifier": "com.watchrudra.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "",
     "devUrl": "http://localhost:3000"
   },
   "app": {
@@ -34,20 +34,18 @@
       "desktop": {
         "schemes": ["watch-rudra"]
       },
-      "mobile": {
-        "schemes": ["watch-rudra"],
-        "android": {
-          "hosts": [
-            {
-              "name": "watch.rudrasahoo.live",
-              "pathPrefix": "/"
-            }
-          ]
+      "mobile": [
+        {
+          "scheme": ["watch-rudra"],
+          "appLink": false
         },
-        "ios": {
-          "applinks": ["watch.rudrasahoo.live"]
+        {
+          "scheme": ["https"],
+          "host": "watch.rudrasahoo.live",
+          "pathPrefix": ["/"],
+          "appLink": true
         }
-      }
+      ]
     },
     "updater": {
       "endpoints": [
