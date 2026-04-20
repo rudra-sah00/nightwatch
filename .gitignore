@@ -65,3 +65,4 @@ public/swe-worker-*.js
 
 node_modules_electron/
 desktop-build/
+public/sw.js.map
