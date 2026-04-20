@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 
-// Read version at build time — avoids bundling entire package.json into the client
-const APP_VERSION = process.env.npm_package_version || '0.0.0';
+import pkg from '../../../package.json';
+
+const APP_VERSION = pkg.version;
 
 /**
  * Shared Creator Identity footer with social links.
