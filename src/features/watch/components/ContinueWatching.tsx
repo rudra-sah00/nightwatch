@@ -57,8 +57,8 @@ export function ContinueWatching({
     return (
       <div
         className={cn(
-          'py-12 w-full',
-          !hideTitle && 'max-w-5xl mx-auto',
+          'w-full',
+          !hideTitle && 'py-12 max-w-5xl mx-auto',
           className,
         )}
       >
