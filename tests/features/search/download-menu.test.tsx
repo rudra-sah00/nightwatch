@@ -11,6 +11,54 @@ import { apiFetch } from '@/lib/fetch';
 
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
+const mockStartDownload = vi.fn();
+vi.mock('@/lib/tauri-bridge', () => ({
+  isTauri: true,
+  isDesktop: true,
+  isMobile: false,
+  checkIsDesktop: () => true,
+  checkIsMobile: () => false,
+  desktopBridge: {
+    startDownload: (...args: unknown[]) => mockStartDownload(...args),
+    getDownloads: vi.fn().mockResolvedValue([]),
+    onDownloadProgress: () => () => {},
+    copyToClipboard: vi.fn(),
+    storeGet: vi.fn().mockResolvedValue(undefined),
+    storeSet: vi.fn(),
+    storeDelete: vi.fn(),
+    getAppVersion: vi.fn().mockResolvedValue(''),
+    setNativeTheme: vi.fn(),
+    setPictureInPicture: vi.fn(),
+    setUnreadBadge: vi.fn(),
+    setKeepAwake: vi.fn(),
+    onPipModeChanged: () => () => {},
+    showNotification: vi.fn(),
+    onNotificationAction: () => () => {},
+    onNotificationClick: () => () => {},
+    setRunOnBoot: vi.fn(),
+    retryConnection: vi.fn(),
+    onMediaCommand: () => () => {},
+    toggleFullscreen: vi.fn(),
+    onFullscreenChanged: () => () => {},
+    onWindowBlur: () => () => {},
+    onWindowFocus: () => () => {},
+    onWindowFullscreenChanged: () => () => {},
+    updateDiscordPresence: vi.fn(),
+    cancelDownload: vi.fn(),
+    pauseDownload: vi.fn(),
+    resumeDownload: vi.fn(),
+    startLiveBridge: vi.fn(),
+    stopLiveBridge: vi.fn(),
+    onLiveBridgeResolved: () => () => {},
+    readOfflineFile: vi.fn().mockResolvedValue(new Uint8Array()),
+    getOfflineMediaBase: vi.fn().mockResolvedValue('offline-media://local'),
+  },
+  resolveOfflineUrl: vi
+    .fn()
+    .mockImplementation((url: string) => Promise.resolve(url)),
+  isOfflineMediaUrl: vi.fn().mockReturnValue(false),
+}));
+
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
 const s2MovieShow: ShowDetails = {
@@ -137,21 +185,6 @@ describe('DownloadMenu', () => {
     });
 
     it('quality URLs trigger electron download with corresponding URL', async () => {
-      const mockElectronStart = vi.fn();
-      Object.defineProperty(window, 'electronAPI', {
-        value: {
-          startDownload: mockElectronStart,
-          getDownloads: vi.fn().mockResolvedValue([]),
-          onDownloadProgress: vi.fn(),
-          removeDownloadProgress: vi.fn(),
-          onDownloadComplete: vi.fn(),
-          removeDownloadComplete: vi.fn(),
-          onDownloadError: vi.fn(),
-          removeDownloadError: vi.fn(),
-        },
-        writable: true,
-      });
-
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,
@@ -168,7 +201,7 @@ describe('DownloadMenu', () => {
       await userEvent.click(highBtn);
 
       await waitFor(() => {
-        expect(mockElectronStart).toHaveBeenCalledWith(
+        expect(mockStartDownload).toHaveBeenCalledWith(
           expect.objectContaining({
             m3u8Url: expect.stringContaining('url1080?dl=1'),
             quality: 'high',
@@ -287,21 +320,6 @@ describe('DownloadMenu', () => {
     });
 
     it('episode qualities trigger electron download', async () => {
-      const mockElectronStart = vi.fn();
-      Object.defineProperty(window, 'electronAPI', {
-        value: {
-          startDownload: mockElectronStart,
-          getDownloads: vi.fn().mockResolvedValue([]),
-          onDownloadProgress: vi.fn(),
-          removeDownloadProgress: vi.fn(),
-          onDownloadComplete: vi.fn(),
-          removeDownloadComplete: vi.fn(),
-          onDownloadError: vi.fn(),
-          removeDownloadError: vi.fn(),
-        },
-        writable: true,
-      });
-
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,
@@ -327,7 +345,7 @@ describe('DownloadMenu', () => {
       await userEvent.click(highBtn);
 
       await waitFor(() => {
-        expect(mockElectronStart).toHaveBeenCalledWith(
+        expect(mockStartDownload).toHaveBeenCalledWith(
           expect.objectContaining({
             m3u8Url: expect.stringContaining('url1080?dl=1'),
             quality: 'high',
