@@ -59,7 +59,7 @@
   },
   "bundle": {
     "active": true,
-    "icon": ["icons/icon.png"],
+    "icon": ["icons/icon.png", "icons/icon.ico"],
     "targets": "all",
     "macOS": {
       "minimumSystemVersion": "10.15",
