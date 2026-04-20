@@ -113,11 +113,15 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Deploy attempt $i..."
-            URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} 2>&1) && break
+            if URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null | grep -o 'https://[^ ]*'); then
+              echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+              exit 0
+            fi
             echo "Attempt $i failed, retrying in 15s..."
             sleep 15
           done
-          echo "deploy_url=$URL" >> $GITHUB_OUTPUT
+          echo "All deploy attempts failed"
+          exit 1
 
       - name: Smoke test
         run: |
