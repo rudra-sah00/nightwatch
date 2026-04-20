@@ -392,7 +392,7 @@ function setupLiveBridge() {
           win.webContents.session.webRequest.onBeforeSendHeaders(
             { urls: ['*://*.dlstreams.top/*'] },
             (details, cb) => {
-              details.requestHeaders['Referer'] = 'https://daddylive.mp/';
+              details.requestHeaders.Referer = 'https://daddylive.mp/';
               details.requestHeaders['Sec-Fetch-Dest'] = 'iframe';
               details.requestHeaders['Sec-Fetch-Mode'] = 'navigate';
               details.requestHeaders['Sec-Fetch-Site'] = 'cross-site';

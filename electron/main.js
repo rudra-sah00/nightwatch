@@ -398,15 +398,15 @@ const startElectronApp = async () => {
 
   // --- TRUE PICTURE-IN-PICTURE OS SNAP ---
   let prePipBounds = null;
-  let pipTransitioning = false;
+  let _pipTransitioning = false;
   ipcMain.on('set-pip', (_event, isEnabled, opacityLevel = 1.0) => {
     const win = AppWindow.getInstance();
     if (!win) return;
 
     // Lock to prevent blur/focus events from re-triggering PiP during animation
-    pipTransitioning = true;
+    _pipTransitioning = true;
     setTimeout(() => {
-      pipTransitioning = false;
+      _pipTransitioning = false;
     }, 600);
 
     // Remove from taskbar when in PiP mode (feels more like a native overlay)

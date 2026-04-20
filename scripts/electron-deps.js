@@ -7,7 +7,7 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const builtins = new Set(require('module').builtinModules);
+const builtins = new Set(require('node:module').builtinModules);
 
 const ELECTRON_ENTRY_DEPS = [
   '@sentry/electron',
@@ -22,7 +22,7 @@ const ELECTRON_ENTRY_DEPS = [
 
 const seen = new Set();
 
-function traceDeps(pkgDir, prefix) {
+function traceDeps(pkgDir, _prefix) {
   let pkgJson;
   try {
     pkgJson = JSON.parse(
@@ -66,5 +66,5 @@ for (const dep of ELECTRON_ENTRY_DEPS) {
   }
 }
 
-const patterns = [...seen].sort().map((p) => p + '/**/*');
+const patterns = [...seen].sort().map((p) => `${p}/**/*`);
 console.log(JSON.stringify(patterns, null, 2));

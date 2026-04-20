@@ -33,6 +33,12 @@ export function EmojiReactions({
     useEmojiReactions({ rtmSendMessage, userId, userName });
   const { theme: appTheme } = useTheme();
 
+  const resolvedDark =
+    appTheme === 'dark' ||
+    (appTheme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   return (
     <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-background/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
       {QUICK_EMOJIS.map((emoji, index) => (
@@ -79,7 +85,7 @@ export function EmojiReactions({
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+            theme={resolvedDark ? Theme.DARK : Theme.LIGHT}
             onEmojiClick={(emojiData) => handleTriggerEmoji(emojiData.emoji)}
             lazyLoadEmojis={true}
             height={320}

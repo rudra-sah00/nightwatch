@@ -9,7 +9,7 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const builtins = new Set(require('module').builtinModules);
+const builtins = new Set(require('node:module').builtinModules);
 
 const ENTRY_DEPS = [
   '@sentry/electron',

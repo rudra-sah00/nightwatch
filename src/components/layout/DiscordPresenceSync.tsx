@@ -23,7 +23,11 @@ export function DiscordPresenceSync() {
         return;
       }
 
-      if (pathname.includes('/watch/') || pathname.includes('/party/')) {
+      if (
+        pathname.includes('/watch/') ||
+        pathname.includes('/party/') ||
+        /^\/live\/[^/]+/.test(pathname)
+      ) {
         // Let the specific player component handle the rich presence details
         return;
       }

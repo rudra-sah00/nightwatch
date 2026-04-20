@@ -101,6 +101,12 @@ export const WatchPartyChat = memo(function WatchPartyChat({
 
   const { theme: appTheme } = useTheme();
 
+  const resolvedDark =
+    appTheme === 'dark' ||
+    (appTheme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   return (
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
@@ -178,7 +184,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
           className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-background  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+            theme={resolvedDark ? Theme.DARK : Theme.LIGHT}
             emojiStyle={EmojiStyle.APPLE}
             lazyLoadEmojis={true}
             height={350}
