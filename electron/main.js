@@ -115,7 +115,7 @@ const startElectronApp = async () => {
   if (lastClearedVersion !== currentVersion) {
     try {
       await session.defaultSession.clearStorageData({
-        storages: ['serviceworkers', 'cachestorage'],
+        storages: ['serviceworkers'],
       });
       store.set('sw-cleared-version', currentVersion);
     } catch (_e) {}

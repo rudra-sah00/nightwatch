@@ -40,13 +40,13 @@ const navigationRules = [
     matcher({ request }: { request: Request }) {
       return request.destination === 'document';
     },
-    handler: new NetworkFirst({ networkTimeoutSeconds: 5 }),
+    handler: new NetworkFirst({ networkTimeoutSeconds: 2 }),
   },
   {
     matcher({ request }: { request: Request }) {
       return request.headers.get('RSC') === '1';
     },
-    handler: new NetworkFirst({ networkTimeoutSeconds: 5 }),
+    handler: new NetworkFirst({ networkTimeoutSeconds: 2 }),
   },
 ];
 
