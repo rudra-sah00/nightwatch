@@ -50,7 +50,7 @@ export function DiscordPresenceSync() {
         state,
         largeImageKey: 'watchrudra_logo',
         largeImageText: 'Watch Rudra',
-        // Omit startTimestamp so it keeps the original launch time or we can reset it
+        startTimestamp: Date.now(),
       });
     }
   }, [pathname, isAuthenticated]);

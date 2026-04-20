@@ -12,8 +12,8 @@ class DiscordIntegration {
     this.connected = false;
     this.isConnecting = false;
     this.lastReconnectAttempt = 0;
-    // 5-minute cooldown before trying to reconnect again (only triggered when an activity updates)
-    this.RECONNECT_COOLDOWN = 5 * 60 * 1000;
+    // 30-second cooldown before trying to reconnect again
+    this.RECONNECT_COOLDOWN = 30 * 1000;
   }
 
   async init() {
