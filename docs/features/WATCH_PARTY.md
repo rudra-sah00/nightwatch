@@ -11,7 +11,7 @@ The Watch Party operates identically to real-time Discord streams mapping locali
 
 ## Critical Architectural Choices
 1. **Desktop Native Window Interception**
-   - **Crucial Fix:** As mapped centrally in the `useWatchPartyFullscreen.ts` hook: Instead of attempting a DOM-native HTML5 wrapper on Chromium (which pushes the Electron drop-frame into the view, bricking the SideBar drag handles), we actively emit an IPC intercept `window.electronAPI.toggleFullscreen()` triggering native OS-level resizing.
+   - **Crucial Fix:** As mapped centrally in the `useWatchPartyFullscreen.ts` hook: Instead of attempting a DOM-native HTML5 wrapper on the system webview (which pushes the Tauri drop-frame into the view, bricking the SideBar drag handles), we actively emit a Tauri invoke `desktopBridge.toggleFullscreen()` triggering native OS-level resizing.
    - This bypasses all sandbox traps ensuring complete theater control.
 
 2. **Decoupled Route Handling**

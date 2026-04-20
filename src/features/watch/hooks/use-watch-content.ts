@@ -10,6 +10,7 @@ import {
 } from '@/features/watch/player/hooks/useS2AudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
 import type { PlayResponse } from '@/types/content';
@@ -115,8 +116,8 @@ export function useWatchContent() {
       try {
         const decodedTitle = decodeURIComponent(title);
 
-        if (typeof window !== 'undefined' && window.electronAPI) {
-          const fetchedDownloads = await window.electronAPI.getDownloads();
+        if (checkIsDesktop()) {
+          const fetchedDownloads = await desktopBridge.getDownloads();
           // 1. Resolve base ID by stripping any existing episode suffixes or provider prefixes
           const rawId = overrideMovieId || movieId || '';
           const baseIdFromRaw = rawId.replace(/(_S\d+E\d+|-ep\d+)$/, '');

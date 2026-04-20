@@ -3,6 +3,7 @@ import type {
   ChatMessage,
   WatchPartyRoom,
 } from '@/features/watch-party/room/types';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 interface UseDesktopNotificationsProps {
   room: WatchPartyRoom | null;
@@ -21,11 +22,11 @@ export function useDesktopNotifications({
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
-      window.electronAPI &&
+      checkIsDesktop() &&
       room &&
       isConnected
     ) {
-      window.electronAPI.updateDiscordPresence({
+      desktopBridge.updateDiscordPresence({
         details: `Party: ${room.title}`,
         state:
           room.type === 'series'
@@ -47,13 +48,13 @@ export function useDesktopNotifications({
   const [, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      const unsubFocus = window.electronAPI.onWindowFocus(() => {
+    if (typeof window !== 'undefined' && checkIsDesktop()) {
+      const unsubFocus = desktopBridge.onWindowFocus(() => {
         isWindowFocusedRef.current = true;
         setUnreadCount(0);
-        window.electronAPI!.setUnreadBadge(0);
+        desktopBridge.setUnreadBadge(0);
       });
-      const unsubBlur = window.electronAPI.onWindowBlur(() => {
+      const unsubBlur = desktopBridge.onWindowBlur(() => {
         isWindowFocusedRef.current = false;
       });
       return () => {
@@ -72,9 +73,7 @@ export function useDesktopNotifications({
         setUnreadCount((c) => {
           const added = messages.length - prevMessagesLength.current;
           const next = c + added;
-          if (window.electronAPI?.setUnreadBadge) {
-            window.electronAPI.setUnreadBadge(next);
-          }
+          desktopBridge.setUnreadBadge(next);
           return next;
         });
 
@@ -82,12 +81,11 @@ export function useDesktopNotifications({
         const latestMsg = messages[messages.length - 1];
         // We only want to show toasts for actual human text messages (not 'User joined' system messages)
         if (
-          window.electronAPI?.showNotification &&
           latestMsg &&
           latestMsg.userId !== currentUserId &&
           !latestMsg.isSystem
         ) {
-          window.electronAPI.showNotification({
+          desktopBridge.showNotification({
             title: latestMsg.userName || 'New Message',
             body: latestMsg.content,
           });

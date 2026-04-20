@@ -1,3 +1,2 @@
 pnpm type-check
-pnpm vitest run tests/electron/module-resolution.test.ts --reporter=dot
 npx lint-staged

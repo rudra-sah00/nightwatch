@@ -1,5 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import {
   initialPlayerState,
   playerReducer,
@@ -359,8 +360,8 @@ export function usePlayerRoot({
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
-    if (typeof window !== 'undefined' && window.electronAPI?.onPipModeChanged) {
-      unsubscribe = window.electronAPI.onPipModeChanged((isPip) => {
+    if (checkIsDesktop() && desktopBridge.onPipModeChanged) {
+      unsubscribe = desktopBridge.onPipModeChanged((isPip) => {
         setIsDesktopPip(isPip);
         isPipRef.current = isPip;
         dispatch({ type: isPip ? 'HIDE_CONTROLS' : 'SHOW_CONTROLS' });
@@ -386,17 +387,17 @@ export function usePlayerRoot({
 
   // --- NATIVE OS: KEEP AWAKE DURING PLAYBACK ---
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI?.setKeepAwake) {
+    if (checkIsDesktop() && desktopBridge.setKeepAwake) {
       if (state.isPlaying && !state.isPaused) {
-        window.electronAPI.setKeepAwake(true);
+        desktopBridge.setKeepAwake(true);
       } else {
-        window.electronAPI.setKeepAwake(false);
+        desktopBridge.setKeepAwake(false);
       }
     }
     // Cleanup on unmount or URL change
     return () => {
-      if (typeof window !== 'undefined' && window.electronAPI?.setKeepAwake) {
-        window.electronAPI.setKeepAwake(false);
+      if (checkIsDesktop() && desktopBridge.setKeepAwake) {
+        desktopBridge.setKeepAwake(false);
       }
     };
   }, [state.isPlaying, state.isPaused]);
@@ -414,11 +415,12 @@ export function usePlayerRoot({
   useEffect(() => {
     if (
       typeof window === 'undefined' ||
-      !window.electronAPI?.onWindowFullscreenChanged
+      !checkIsDesktop() ||
+      !desktopBridge.onWindowFullscreenChanged
     ) {
       return;
     }
-    const unsubscribe = window.electronAPI.onWindowFullscreenChanged((isFs) => {
+    const unsubscribe = desktopBridge.onWindowFullscreenChanged((isFs) => {
       if (isFs) {
         // Entering fullscreen — clear any pending grace timer and mark as fullscreen.
         if (fullscreenExitGraceRef.current) {
@@ -446,9 +448,9 @@ export function usePlayerRoot({
     let unsubscribeBlur: (() => void) | undefined;
     let unsubscribeFocus: (() => void) | undefined;
 
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      if (window.electronAPI.onWindowBlur) {
-        unsubscribeBlur = window.electronAPI.onWindowBlur(() => {
+    if (checkIsDesktop()) {
+      if (desktopBridge.onWindowBlur) {
+        unsubscribeBlur = desktopBridge.onWindowBlur(() => {
           // Guard 0: Don't re-trigger if already in PiP mode
           if (isPipRef.current) return;
 
@@ -463,15 +465,15 @@ export function usePlayerRoot({
 
           // Guard 3: Only Auto-PiP if we are actively playing media.
           if (isPlayingRef.current && !isPausedRef.current) {
-            window.electronAPI!.setPictureInPicture(true, 1.0);
+            desktopBridge.setPictureInPicture(true, 1.0);
           }
         });
       }
 
-      if (window.electronAPI.onWindowFocus) {
-        unsubscribeFocus = window.electronAPI.onWindowFocus(() => {
+      if (desktopBridge.onWindowFocus) {
+        unsubscribeFocus = desktopBridge.onWindowFocus(() => {
           // Restore window normally when user comes back
-          window.electronAPI!.setPictureInPicture(false);
+          desktopBridge.setPictureInPicture(false);
         });
       }
     }

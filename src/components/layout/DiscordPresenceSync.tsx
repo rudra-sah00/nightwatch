@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export function DiscordPresenceSync() {
@@ -11,9 +12,9 @@ export function DiscordPresenceSync() {
   useEffect(() => {
     // Only handle basic page routes, since Watch and Party components
     // override this with their own detailed metadata when mounted.
-    if (typeof window !== 'undefined' && window.electronAPI) {
+    if (typeof window !== 'undefined' && checkIsDesktop()) {
       if (!isAuthenticated || pathname === '/login' || pathname === '/signup') {
-        window.electronAPI.updateDiscordPresence({
+        desktopBridge.updateDiscordPresence({
           details: 'Ready to stream',
           state: 'At the Login screen',
           largeImageKey: 'watchrudra_logo',
@@ -49,7 +50,7 @@ export function DiscordPresenceSync() {
         state = 'Customizing profile';
       }
 
-      window.electronAPI.updateDiscordPresence({
+      desktopBridge.updateDiscordPresence({
         details,
         state,
         largeImageKey: 'watchrudra_logo',

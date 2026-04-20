@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
-import type { DownloadItem } from '@/types/electron';
+import type { DownloadItem } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 export function useDownloads() {
   const { isDesktopApp, isMounted } = useDesktopApp();
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   useEffect(() => {
-    if (!isDesktopApp || typeof window === 'undefined' || !window.electronAPI)
-      return;
+    if (!isDesktopApp || !checkIsDesktop()) return;
 
     // Initial load
-    window.electronAPI
+    desktopBridge
       .getDownloads()
       .then((items: DownloadItem[]) => {
         setDownloads(items || []);
@@ -21,7 +21,7 @@ export function useDownloads() {
       .catch(console.error);
 
     // Subscribe to progress
-    const unsubscribe = window.electronAPI.onDownloadProgress(
+    const unsubscribe = desktopBridge.onDownloadProgress(
       (updatedItem: DownloadItem) => {
         setDownloads((prev) => {
           if (updatedItem.status === 'CANCELLED') {
@@ -46,8 +46,8 @@ export function useDownloads() {
   }, [isDesktopApp]);
 
   const cancelDownload = useCallback((contentId: string) => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      window.electronAPI.cancelDownload(contentId);
+    if (checkIsDesktop()) {
+      desktopBridge.cancelDownload(contentId);
 
       // Optimistically remove it instantly from the UI
       setDownloads((prev) => prev.filter((i) => i.contentId !== contentId));
@@ -55,8 +55,8 @@ export function useDownloads() {
   }, []);
 
   const pauseDownload = useCallback((contentId: string) => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      window.electronAPI.pauseDownload(contentId);
+    if (checkIsDesktop()) {
+      desktopBridge.pauseDownload(contentId);
 
       // Optimistically pause it instantly from the UI
       setDownloads((prev) =>
@@ -68,8 +68,8 @@ export function useDownloads() {
   }, []);
 
   const resumeDownload = useCallback((contentId: string) => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      window.electronAPI.resumeDownload(contentId);
+    if (checkIsDesktop()) {
+      desktopBridge.resumeDownload(contentId);
 
       // Optimistically resume it instantly from the UI
       setDownloads((prev) =>

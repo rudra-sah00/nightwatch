@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { useGestureDetection } from '../interactions/hooks/useGestureDetection';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
@@ -108,8 +109,8 @@ export function useWatchPartySidebar({
 
   // --- DESKTOP PTT GLOBAL SHORTCUT ---
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI?.onMediaCommand) {
-      const unsubscribe = window.electronAPI.onMediaCommand((command) => {
+    if (typeof window !== 'undefined' && checkIsDesktop()) {
+      const unsubscribe = desktopBridge.onMediaCommand((command) => {
         if (command === 'toggle-ptt') {
           toggleAudio().catch(() => {});
         }

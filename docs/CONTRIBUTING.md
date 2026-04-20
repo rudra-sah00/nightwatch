@@ -1,6 +1,6 @@
 # Contributing to Watch Rudra
 
-With Watch Rudra's extensive ecosystem (Next.js 15, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
+With Watch Rudra's extensive ecosystem (Next.js 15, Tauri, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
 
 ## Code Formatting & Linting (Biome)
 
@@ -33,7 +33,7 @@ All UI elements must utilize `cva` (Class Variance Authority) from `src/componen
 
 Do not scatter standard React `useState` everywhere inside complex features.
 *   If managing the VOD Player, dispatch events internally through `PlayerContext.tsx` strictly.
-*   If bridging the Desktop Electron shell with the browser, never write `typeof window !== "undefined" && window.electronAPI` redundantly. Import and utilize `useDesktopApp()` from `src/hooks/use-desktop-app.ts`. This central hook includes heuristics to automatically fallback deep links.
+*   If bridging the Desktop Tauri shell with the browser, never write `typeof window !== "undefined" && window.__TAURI__` redundantly. Import and utilize `useDesktopApp()` from `src/hooks/use-desktop-app.ts`. This central hook includes heuristics to automatically fallback deep links.
 
 ## React Rendering Optimization
 

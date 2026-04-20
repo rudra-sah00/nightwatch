@@ -9,7 +9,7 @@ body:
       label: Which platform are you using?
       options:
         - label: Web Browser (Next.js)
-        - label: Desktop App (Electron Windows/Mac)
+        - label: Desktop App (Tauri — macOS/Windows/Linux)
         - label: Backend API related
   - type: textarea
     id: description

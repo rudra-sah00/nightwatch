@@ -13,8 +13,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/ui/empty-state';
+import type { DownloadItem } from '@/lib/tauri-bridge';
 import { cn, formatBytes } from '@/lib/utils';
-import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
 import { OfflineContentDetailModal } from './offline-content-detail-modal';
 

@@ -1,5 +1,6 @@
 import { playVideo } from '@/features/watch/api';
 import { apiFetch } from '@/lib/fetch';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 import type { ShowDetails } from '@/types/content';
 
@@ -82,8 +83,8 @@ export async function startElectronDownload({
   quality?: 'low' | 'medium' | 'high';
   show?: ShowDetails;
 }) {
-  if (directUrl && window.electronAPI) {
-    window.electronAPI.startDownload({
+  if (directUrl && checkIsDesktop()) {
+    desktopBridge.startDownload({
       contentId: getOfflineIdentifier({
         contentId,
         type,
@@ -116,8 +117,8 @@ export async function startElectronDownload({
   });
 
   if (response.success && response.masterPlaylistUrl) {
-    if (window.electronAPI) {
-      window.electronAPI.startDownload({
+    if (checkIsDesktop()) {
+      desktopBridge.startDownload({
         contentId: getOfflineIdentifier({
           contentId,
           type,

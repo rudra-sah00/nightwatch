@@ -2,6 +2,7 @@
 
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import type { PlayerAction } from '../context/types';
 
 interface UseKeyboardOptions {
@@ -245,8 +246,8 @@ export function useKeyboard({
     // --- ELECTRON GLOBAL MEDIA KEYS HANDLER ---
     // Listen for physical keyboard media keys if running as the Watch Rudra Desktop app!
     let unsubscribeDesktopMedia: (() => void) | undefined;
-    if (typeof window !== 'undefined' && window.electronAPI?.onMediaCommand) {
-      unsubscribeDesktopMedia = window.electronAPI.onMediaCommand((command) => {
+    if (checkIsDesktop() && desktopBridge.onMediaCommand) {
+      unsubscribeDesktopMedia = desktopBridge.onMediaCommand((command) => {
         const h = handlersRef.current;
         if (h.disabled) return;
 

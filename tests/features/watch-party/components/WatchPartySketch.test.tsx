@@ -211,7 +211,6 @@ describe('WatchPartySketch', () => {
     // Mock anchor element and its click
     const link = { click: vi.fn(), download: '', href: '' };
     vi.spyOn(document, 'createElement').mockReturnValue(
-      // @ts-expect-error Typescript infers WebviewTag due to electron-types overload
       link as unknown as HTMLAnchorElement,
     );
 

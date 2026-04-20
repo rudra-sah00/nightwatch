@@ -2,30 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 /**
- * A centralized hook to safely manage Electron Desktop App
- * detection, deep linking, and OS native bridge methods
- * without sprinkling raw `typeof window` across UI components.
+ * A centralized hook to safely manage Desktop App detection,
+ * deep linking, and OS native bridge methods.
  */
 export function useDesktopApp() {
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const [isDesktopApp] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? !!window.electronAPI : false,
-  );
+  const [isDesktopApp] = useState(() => checkIsDesktop());
+  const [isBrowser] = useState(() => !checkIsDesktop());
 
-  const [isBrowser] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? !window.electronAPI : true,
-  );
-
-  const [isMacOS] = useState<boolean>(() =>
+  const [isMacOS] = useState(() =>
     typeof navigator !== 'undefined'
       ? navigator.userAgent.includes('Mac OS X')
       : false,
   );
-
-  const [isWindows] = useState<boolean>(() =>
+  const [isWindows] = useState(() =>
     typeof navigator !== 'undefined'
       ? navigator.userAgent.includes('Windows NT')
       : false,
@@ -35,29 +29,15 @@ export function useDesktopApp() {
     setIsMounted(true);
   }, []);
 
-  /**
-   * Securely generates and opens a `watch-rudra://` deep link
-   * to transfer users seamlessly from browsers into the Desktop client.
-   * Uses a timeout heuristic to guess if the app is actually installed.
-   */
   const openInDesktopApp = (currentUrl?: string) => {
     if (typeof window !== 'undefined') {
       const urlToTransform = currentUrl || window.location.href;
-      // Convert standard web URL to desktop protocol
       const deepLink = urlToTransform.replace(
         window.location.origin,
         'watch-rudra:/',
       );
-
       const start = Date.now();
-
-      // Try to open the desktop app
       window.location.href = deepLink;
-
-      // Because browsers don't let us explicitly check if an app is installed
-      // (for security reasons), we use a standard heuristic:
-      // If the browser hasn't lost focus (document.hidden) after 2 seconds,
-      // the OS likely couldn't find the app to open.
       setTimeout(() => {
         if (Date.now() - start < 3000 && !document.hidden) {
           toast.error('App not installed', {
@@ -77,26 +57,17 @@ export function useDesktopApp() {
     }
   };
 
-  /**
-   * System clipboard API abstraction (Handles both Electron native & Web browser)
-   */
   const copyToClipboard = async (text: string) => {
-    if (isDesktopApp && window.electronAPI?.copyToClipboard) {
-      window.electronAPI.copyToClipboard(text);
+    if (isDesktopApp) {
+      desktopBridge.copyToClipboard(text);
     } else if (typeof navigator !== 'undefined') {
       await navigator.clipboard.writeText(text);
     }
   };
 
-  /**
-   * Dynamically adds top padding strictly within the Desktop App
-   * to prevent UI from hiding underneath the 32px native OS window controls.
-   */
-  const getDesktopTopPaddingClass = (isFullscreen = false) => {
-    return isDesktopApp && !isFullscreen ? 'pt-8' : '';
-  };
+  const getDesktopTopPaddingClass = (isFullscreen = false) =>
+    isDesktopApp && !isFullscreen ? 'pt-8' : '';
 
-  /** Inline style enabling/disabling the Electron native frameless window drag area. */
   const dragStyle: React.CSSProperties = {
     WebkitAppRegion: 'drag',
   } as React.CSSProperties;

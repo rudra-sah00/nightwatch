@@ -2,6 +2,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
@@ -34,8 +35,8 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      window.electronAPI.updateDiscordPresence({
+    if (checkIsDesktop()) {
+      desktopBridge.updateDiscordPresence({
         details: `Watching Live: ${props.metadata.title}`,
         state: 'Live Stream',
         largeImageText: props.metadata.title,

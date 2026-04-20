@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 interface UseWatchPartyFullscreenProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -24,8 +25,8 @@ export function useWatchPartyFullscreen({
 
   const toggleFullscreen = useCallback(async () => {
     // 1. Desktop App Native OS Fullscreen
-    if (typeof window !== 'undefined' && window.electronAPI?.toggleFullscreen) {
-      window.electronAPI.toggleFullscreen();
+    if (typeof window !== 'undefined' && checkIsDesktop()) {
+      desktopBridge.toggleFullscreen();
       return;
     }
 
@@ -62,11 +63,8 @@ export function useWatchPartyFullscreen({
 
   useEffect(() => {
     // 1. Desktop App Native OS Event Link
-    if (
-      typeof window !== 'undefined' &&
-      window.electronAPI?.onFullscreenChanged
-    ) {
-      const unsubscribe = window.electronAPI.onFullscreenChanged((isFS) => {
+    if (typeof window !== 'undefined' && checkIsDesktop()) {
+      const unsubscribe = desktopBridge.onFullscreenChanged((isFS) => {
         setIsFullscreen(isFS);
       });
       return unsubscribe;

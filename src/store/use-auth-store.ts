@@ -7,15 +7,16 @@ import {
 import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { clearStoredUser, storeUser } from '@/lib/auth';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's
-// Auth Tokens and preferences natively to their hard drive `window.electronAPI.storeSet('token', value)`.
+// Auth Tokens and preferences natively to their hard drive via desktopBridge.
 const customNativeStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    if (typeof window !== 'undefined' && window.electronAPI?.storeGet) {
+    if (checkIsDesktop()) {
       try {
-        const val = await window.electronAPI.storeGet(name);
+        const val = await desktopBridge.storeGet(name);
         if (val) return JSON.stringify(val);
       } catch {
         // Fallback
@@ -24,17 +25,17 @@ const customNativeStorage: StateStorage = {
     return localStorage.getItem(name);
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    if (typeof window !== 'undefined' && window.electronAPI?.storeSet) {
+    if (checkIsDesktop()) {
       try {
-        await window.electronAPI.storeSet(name, JSON.parse(value));
+        await desktopBridge.storeSet(name, JSON.parse(value));
       } catch {}
     }
     localStorage.setItem(name, value);
   },
   removeItem: async (name: string): Promise<void> => {
-    if (typeof window !== 'undefined' && window.electronAPI?.storeDelete) {
+    if (checkIsDesktop()) {
       try {
-        await window.electronAPI.storeDelete(name);
+        await desktopBridge.storeDelete(name);
       } catch {}
     }
     localStorage.removeItem(name);

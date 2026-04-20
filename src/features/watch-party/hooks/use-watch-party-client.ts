@@ -320,12 +320,12 @@ export function useWatchPartyClient({
 
   const handleLeave = () => setShowLeaveDialog(true);
 
-  const confirmLeave = () => {
+  const confirmLeave = async () => {
     setShowLeaveDialog(false);
     try {
       sessionStorage.removeItem('guest_token');
     } catch {}
-    leaveRoom();
+    await leaveRoom();
     goBackOrHome();
   };
 

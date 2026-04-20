@@ -2,6 +2,7 @@
 
 import { Activity, Monitor, Moon, Power, Sun, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -15,19 +16,17 @@ export function AppPreferences() {
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
+    if (checkIsDesktop()) {
       setIsDesktop(true);
       // Fetch initial state from the electron native store
-      window.electronAPI.storeGet('runOnBoot').then((val: unknown) => {
+      desktopBridge.storeGet('runOnBoot').then((val: unknown) => {
         if (typeof val === 'boolean') setRunOnBoot(val);
       });
 
-      window.electronAPI
-        .storeGet('concurrentDownloads')
-        .then((val: unknown) => {
-          if (typeof val === 'number') setConcurrentDownloads(val);
-        });
-      window.electronAPI.storeGet('downloadSpeedLimit').then((val: unknown) => {
+      desktopBridge.storeGet('concurrentDownloads').then((val: unknown) => {
+        if (typeof val === 'number') setConcurrentDownloads(val);
+      });
+      desktopBridge.storeGet('downloadSpeedLimit').then((val: unknown) => {
         if (typeof val === 'number') setDownloadSpeedLimit(val);
       });
     }
@@ -36,22 +35,20 @@ export function AppPreferences() {
   const handleToggleRunOnBoot = () => {
     const newValue = !runOnBoot;
     setRunOnBoot(newValue);
-    if (window.electronAPI?.setRunOnBoot) {
-      window.electronAPI.setRunOnBoot(newValue);
-      window.electronAPI.storeSet('runOnBoot', newValue);
+    if (desktopBridge.setRunOnBoot) {
+      desktopBridge.setRunOnBoot(newValue);
+      desktopBridge.storeSet('runOnBoot', newValue);
     }
   };
 
   const handleConcurrentChange = (val: number) => {
     setConcurrentDownloads(val);
-    if (window.electronAPI)
-      window.electronAPI.storeSet('concurrentDownloads', val);
+    if (checkIsDesktop()) desktopBridge.storeSet('concurrentDownloads', val);
   };
 
   const handleSpeedChange = (val: number) => {
     setDownloadSpeedLimit(val);
-    if (window.electronAPI)
-      window.electronAPI.storeSet('downloadSpeedLimit', val);
+    if (checkIsDesktop()) desktopBridge.storeSet('downloadSpeedLimit', val);
   };
 
   return (

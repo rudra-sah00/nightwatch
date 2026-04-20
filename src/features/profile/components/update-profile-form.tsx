@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
@@ -38,11 +39,8 @@ export function UpdateProfileForm() {
       if (!user) return;
       const url = `${window.location.origin}/user/${user.id}`;
 
-      if (
-        typeof window !== 'undefined' &&
-        window.electronAPI?.copyToClipboard
-      ) {
-        window.electronAPI.copyToClipboard(url);
+      if (checkIsDesktop() && desktopBridge.copyToClipboard) {
+        desktopBridge.copyToClipboard(url);
       } else {
         await navigator.clipboard.writeText(url);
       }

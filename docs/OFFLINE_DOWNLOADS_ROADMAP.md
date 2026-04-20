@@ -1,10 +1,10 @@
 # Offline Downloads & Download Manager Roadmap
 
-This document outlines the architecture for the current Electron-based Native Download Manager, as well as future enhancements mapped out for development.
+This document outlines the architecture for the current Tauri-based Native Download Manager, as well as future enhancements mapped out for development.
 
 ## Current Architecture
 
-Currently, the Desktop App handles offline downloads via a custom Node.js backend (`electron/modules/download-manager.js`).
+Currently, the Desktop App handles offline downloads via a custom Rust backend (`src-tauri/src/commands/download_manager.rs`).
 1. **Bypassing Web Restrictions**: Uses an OS custom protocol (`offline-media://`) to serve saved `.m3u8` and `.ts` files naturally to the browser video player without triggering Cross-Origin (CORS) or Mixed-Content blockers.
 2. **HLS Parsing**: Downloads the Master Playlist, extracts the highest quality Media Playlist, and modifies the inner `.ts` paths relative to the user's hidden local `OfflineVault`.
 3. **Databaseless State**: Uses a simple JSON object stringified to the user's `AppData/OfflineVault/downloads.json` to ensure metadata (progress, poster URL) persists across app restarts without bloating the machine with an SQLite instance.
@@ -15,14 +15,14 @@ Currently, the Desktop App handles offline downloads via a custom Node.js backen
 
 ### 1. Download Speed Throttling (Bandwidth Limiting) `[DONE]`
 Users on metered connections or shared networks may want to limit the maximum bandwidth the app consumes.
-- **How to implement:** Node's native `http`/`https` modules do not have a "max bandwidth" config natively. We will need to pipe the `res` read stream through a custom Node.js `Transform` stream.
-- **Mechanism:** The `Transform` stream counts chunk bytes passing through. If the bytes transferred in the last second exceed the limit (e.g., `2 MB/s`), it calls `await delay(...)` before passing the chunk to the `fs.createWriteStream`.
-- **UI Integration:** Add a setting in the Settings page -> `Max Download Speed: [ Unlimited | 5 MB/s | 2 MB/s ]` mapped to `window.electronAPI.storeSet('max_download_speed')`.
+- **How to implement:** The Rust backend uses controlled async stream reading with rate limiting.
+- **Mechanism:** The download stream counts chunk bytes passing through. If the bytes transferred in the last second exceed the limit (e.g., `2 MB/s`), it pauses before writing the next chunk.
+- **UI Integration:** Add a setting in the Settings page -> `Max Download Speed: [ Unlimited | 5 MB/s | 2 MB/s ]` mapped to `desktopBridge.storeSet('max_download_speed')`.
 
 ### 2. Live Speed Metrics & ETA `[DONE]`
 Display exactly how fast the current download is processing and the estimated time remaining.
 - **How to implement:** In the download loop, store `let lastBytes = 0` and `let lastTime = Date.now()`.
-- **Mechanism:** Every 1 second, calculate `(currentBytes - lastBytes) / (currentTime - lastTime)`. Convert this to `MB/s`. Use the remaining total file size to calculate `ETA = remainingBytes / bytesPerSecond`. emit this in the `download-progress` IPC payload.
+- **Mechanism:** Every 1 second, calculate `(currentBytes - lastBytes) / (currentTime - lastTime)`. Convert this to `MB/s`. Use the remaining total file size to calculate `ETA = remainingBytes / bytesPerSecond`. Emit this in the `download-progress` Tauri event payload.
 
 ### 3. Parallel Segment Downloading (Concurrency limit) `[DONE]`
 Currently, `.ts` segments download sequentially (one at a time) to ensure extreme stability. 
@@ -36,8 +36,8 @@ If the app closes or the network drops halfway through a large movie.
 
 ### 5. Background / System Tray Downloading `[DONE]`
 If the user closes the main window, the download shouldn't stop.
-- **How to implement:** Intercept the Electron `window.on('close')` event.
-- **Mechanism:** If `downloads.some(d => d.status === 'DOWNLOADING')`, hide the window to the system tray instead of destroying the Electron process. Show a native OS notification when the download fully completes, then fully close.
+- **How to implement:** Intercept the Tauri window `close_requested` event.
+- **Mechanism:** If `downloads.some(d => d.status === 'DOWNLOADING')`, hide the window to the system tray instead of destroying the process. Show a native OS notification when the download fully completes, then fully close.
 
 ### 6. DRM & Encrypted HLS Streams `[PLANNED]`
 Some future premium sources might use `#EXT-X-KEY` AES-128 encryption.

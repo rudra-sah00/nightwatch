@@ -11,23 +11,10 @@ import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 interface LiveBridgeResult {
   hlsUrl?: string;
-}
-
-interface ElectronWindowOverride {
-  electronAPI: {
-    onLiveBridgeResolved: (
-      cb: (result: LiveBridgeResult) => void,
-    ) => () => void;
-    startLiveBridge: (params: {
-      url: string;
-      channelId: string;
-      referer: string;
-    }) => void;
-    stopLiveBridge: () => void;
-  };
 }
 
 export default function LiveMatchPlayerPage() {
@@ -46,8 +33,7 @@ export default function LiveMatchPlayerPage() {
       return;
 
     const _isServer1 = match.id.startsWith('live-server1:');
-    const _isDesktopApp =
-      typeof window !== 'undefined' && 'electronAPI' in window;
+    const _isDesktopApp = checkIsDesktop();
 
     let _bridgeUnsubscribe: (() => void) | undefined;
 
@@ -57,8 +43,7 @@ export default function LiveMatchPlayerPage() {
         return;
 
       const isServer1 = match.id.startsWith('live-server1:');
-      const isDesktopApp =
-        typeof window !== 'undefined' && 'electronAPI' in window;
+      const isDesktopApp = checkIsDesktop();
 
       if (isServer1) {
         if (!isDesktopApp) {
@@ -69,9 +54,8 @@ export default function LiveMatchPlayerPage() {
         const sourceUrl = match.playPath!.replace('live-server1://', '');
         setSessionLoading(true);
 
-        _bridgeUnsubscribe = (
-          window as unknown as ElectronWindowOverride
-        ).electronAPI.onLiveBridgeResolved((result) => {
+        _bridgeUnsubscribe = desktopBridge.onLiveBridgeResolved((raw) => {
+          const result = raw as LiveBridgeResult;
           if (result?.hlsUrl) {
             setSessionUrl(result.hlsUrl);
             setSessionLoading(false);
@@ -82,12 +66,9 @@ export default function LiveMatchPlayerPage() {
           }
         });
 
-        (
-          window as unknown as ElectronWindowOverride
-        ).electronAPI.startLiveBridge({
+        desktopBridge.startLiveBridge({
           url: sourceUrl,
           channelId: match.id,
-          referer: '',
         });
         return;
       }
@@ -124,12 +105,8 @@ export default function LiveMatchPlayerPage() {
   // Clean up LiveBridge ONLY when the user physically leaves this page
   useEffect(() => {
     return () => {
-      const isDesktopApp =
-        typeof window !== 'undefined' && 'electronAPI' in window;
-      if (isDesktopApp) {
-        (
-          window as unknown as ElectronWindowOverride
-        ).electronAPI.stopLiveBridge();
+      if (checkIsDesktop()) {
+        desktopBridge.stopLiveBridge();
       }
     };
   }, []);

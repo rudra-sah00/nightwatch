@@ -1,6 +1,6 @@
 # Desktop Application
 
-Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app acts as a secure, optimized wrapper around the Next.js frontend while providing native capabilities like discord rich presence, raw media access, and offline fallback screens.
+Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Tauri v2**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
 
 ## Installation & Troubleshooting
 
@@ -16,57 +16,55 @@ xattr -cr "/Applications/Watch Rudra.app"
 
 ## Architecture
 
-The desktop structure cleanly separates the Electron `main` processes from the Next.js `renderer` layer:
+The desktop app is built with Tauri v2, using a Rust backend for native operations and the system webview for rendering:
 
-- **`electron/main.js`**: The entry point for the Electron application. Manages browser windows, application lifecycle, and inter-process communication (IPC).
-- **`electron/preload.js`**: Provides a secure bridge for the frontend UI to communicate safely with the Node.js backend without exposing Electron logic.
-- **`electron/modules/discord.js`**: Handles **Discord Rich Presence**, broadcasting your current Watch Party status and media playback to your Discord profile.
-- **`electron/modules/download-manager.js`** & **`electron/modules/downloads/`**: Responsible for the master **Secure Offline Download** pipeline. Processes files from providers (`s1.js`, `s2.js`, `s3.js`), downloads `.ts`/`.mp4` streams, manages DRM via cipher streams, and synchronizes offline completion.
-- **`electron/modules/splash.js`**: Renders a frameless, Neo-Brutalist styled startup splash screen to check for updates before the main application window is loaded.
-- **`electron/modules/updater.js`**: Handles the auto-update lifecycle with instant offline detection via `net.isOnline()`.
-- **`electron/modules/window.js`**: Controls the main application window lifecycle, navigation security policies, and offline fallback routing via the Service Worker bridge.
-- **`electron/build/offline-bridge.html`**: A local HTML proxy page that triggers the PWA Service Worker when the app launches offline.
+```
+src-tauri/
+├── tauri.conf.json          # Tauri configuration (window, plugins, bundle settings)
+├── Cargo.toml               # Rust dependencies and plugin declarations
+├── build.rs                 # Tauri build script
+├── entitlements.plist       # macOS entitlements (camera, mic, network, JIT)
+├── capabilities/
+│   └── default.json         # Permission grants for the main window + remote URLs
+├── icons/
+│   └── icon.png             # App icon
+└── src/
+    ├── main.rs              # App entry point, plugin registration, window setup, global shortcuts
+    └── commands/
+        ├── mod.rs           # Module declarations
+        ├── window.rs        # PiP, badge, keep-awake, theme, autostart, clipboard, notifications
+        ├── tray.rs          # System tray menu (Show, Play/Pause, Toggle Mic, About, Updates, Quit)
+        ├── discord.rs       # Discord Rich Presence via local IPC socket
+        ├── downloads.rs     # Secure offline download manager (HLS/MP4, pause/resume, crash recovery)
+        ├── live_bridge.rs   # Live stream relay bridge
+        └── protocol.rs      # Custom `offline-media://` protocol for offline playback
+```
 
-### Secure Offline Downloads (DRM & Vaulting)
+### Key Design Decisions
 
-To protect the media locally while maintaining native integration capabilities, our Electron desktop layer deploys an XOR Stream mechanism (`XorStream` within `electron/modules/downloads/cipher.js`).
+- **Remote URL loading**: The main window loads `https://watch.rudrasahoo.live` directly (not a local build). This means the desktop app always serves the latest deployed version without requiring app updates for frontend changes.
+- **Tauri plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Tauri v2 plugins.
+- **JS injection**: On window load, Rust injects a script that adds a drag region at the top of the page and attaches drag handlers to the nav element, with MutationObserver re-attachment for SPA navigation.
 
-1. **Native Electron Keychain Engine**:
-    * Instead of relying on insecure static strings for our backend vault, Electron uses `safeStorage` to leverage the host OS keyring mechanisms natively (Keychain on macOS / DPAPI on Windows / libsecret on Linux).
-2. **Byte Persisting**:
-    * During the initial startup lifecycle, `crypto.randomBytes(32)` dictates a secure sequence. The data byte entropy is written and stored persistently directly in your `app.getPath('userData')` structure via `.encryptString`.
-3. **Data Bridging**:
-    * Download states update smoothly against the Next.js web application utilizing standard React context and component polling, without exposing the raw `.mp4` payloads visually.
+### Secure Offline Downloads
+
+The Rust download manager (`commands/downloads.rs`) handles:
+
+1. **HLS stream downloading**: Parses `.m3u8` playlists, downloads all `.ts` segments concurrently, and rewrites the playlist to reference local files.
+2. **MP4 direct downloads**: Streams large files with progress tracking and pause/resume support.
+3. **Crash recovery**: Download state is persisted to disk. On app restart, incomplete downloads are automatically resumed.
+4. **Custom protocol**: The `offline-media://` protocol (registered in `commands/protocol.rs`) serves downloaded content directly from the local filesystem to the webview, enabling offline playback without a local HTTP server.
+5. **Encryption**: Downloaded media segments are encrypted at rest using AES-CTR with a per-installation random key stored in the app data directory.
 
 ### Offline Mode / PWA Service Worker
 
 The desktop app supports full offline startup via a PWA Service Worker powered by **[@serwist/next](https://serwist.pages.dev/docs/next)** in **configurator mode** (Turbopack-compatible).
 
-**How it works end-to-end:**
+**How it works:**
 
-1. On the first online launch, the Service Worker (`/sw.js`) installs and precaches ~87 URLs (~7MB) — all JS chunks, CSS, and statically prerendered pages.
-2. On subsequent offline launches, the updater detects no network via `net.isOnline()` and **immediately** skips the update check (no 15-second wait).
-3. The main window attempts to load `https://watch.rudrasahoo.live`. If the network is unavailable, `did-fail-load` triggers.
-4. Electron loads the local **offline bridge** (`electron/build/offline-bridge.html`), which calls `window.location.replace(productionUrl)` to trigger the Service Worker cache.
-5. The Service Worker intercepts the navigation and returns the cached app shell, loading the app instantly while offline.
-6. If the cache is empty (first-ever launch without internet), the bridge displays a **"OFFLINE CACHE EXPIRED"** error state instead of a blank screen, preventing infinite loops.
-
-**Security note:** The `will-navigate` event whitelists only `offline-bridge.html` from the `file://` protocol — dragging arbitrary local files into the window is blocked at the Electron security layer.
-
-**Testing offline locally:**
-```bash
-# 1. Build the production Next.js bundle + service worker
-pnpm build
-
-# 2. Start production server (localhost:3000)
-pnpm start
-
-# 3. Open Electron pointing to localhost (bypasses Vercel firewall entirely)
-TEST_PROD=1 pnpm desktop:start
-
-# 4. Wait for the SW to install (check DevTools → Application → Service Workers)
-# 5. Quit the app, disconnect Wi-Fi, then run step 3 again
-```
+1. On the first online launch, the Service Worker (`/sw.js`) installs and precaches all JS chunks, CSS, and statically prerendered pages.
+2. On subsequent offline launches, the webview attempts to load the production URL. The Service Worker intercepts the navigation and returns the cached app shell.
+3. If the cache is empty (first-ever launch without internet), the page displays an offline error state.
 
 **Vercel Firewall Configuration (production):**
 
@@ -79,65 +77,112 @@ The production deployment requires a Firewall bypass rule so the Service Worker 
 
 **How the service worker is built:**
 
-We use `@serwist/cli` in configurator mode (not `withSerwistInit`) because Next.js 16 uses Turbopack which is incompatible with the old webpack-based approach. The build pipeline is:
+We use `@serwist/cli` in configurator mode (not `withSerwistInit`) because Next.js 16 uses Turbopack which is incompatible with the old webpack-based approach:
 
 ```
 next build && serwist build
 ```
 
-The `serwist.config.js` file in the project root configures the CLI and `SerwistProvider` in `src/app/layout.tsx` handles client-side registration.
+The `serwist.config.js` file in the project root configures the CLI.
 
-## Auto-Updating & ASAR Hot Replacements
+## Auto-Updating
 
-The desktop app features seamless OTA (Over-The-Air) updates. We use two mechanisms depending on the scope of the update:
-1. **Major/Minor Updates**: Handled by `electron-updater` reading from the `.dmg` or `.exe` distributed via GitHub Releases.
-2. **Patch/Hotfix Updates**: To avoid forcing users to download an entire new binary, the app uses `electron-asar-hot-updater`. It quietly downloads a patched `app.asar` file in the background and gracefully prompts the user to restart, providing a frictionless "Discord-like" update flow.
+The desktop app uses `tauri-plugin-updater` for seamless OTA updates:
 
-**Instant Offline Detection:** The updater calls `net.isOnline()` synchronously at startup. If the device has no internet, the splash screen dismisses in 1 second rather than waiting for the full 15-second safety timeout.
+- The updater checks `https://github.com/rudra-sah00/watch-rudra/releases/latest/download/latest.json` for new versions.
+- When a new version is available, the app downloads and applies the update, then prompts the user to restart.
+- Since the app loads a remote URL, most frontend changes don't require a desktop update at all — only Rust-side changes or Tauri config changes necessitate a new binary release.
 
 ## Continuous Integration (CI) and Release Pipeline
 
-We enforce a highly automated build and release system:
+We enforce a highly automated build and release system via `.github/workflows/build-tauri.yml`:
 
-1. **Triggers:** No manual build is required. When a PR is merged into `main` using standard conventional commits (`feat`, `fix`), our **Release-Please** Action automatically bumps the version in `package.json` and creates a GitHub Release Tag.
-2. **Action Chaining:** Once `release.yml` successfully publishes the new version, the workflow directly calls the `build-desktop.yml` pipeline (`workflow_call`).
-3. **Cross-Platform Build:** `electron-builder` checks out the code, injects necessary secrets (`NEXT_PUBLIC_SENTRY_DSN`, `DISCORD_CLIENT_ID`), and simultaneously builds `macOS` (ARM & Intel), `Windows`, and `Linux` binaries.
-4. **Publish:** Artifacts are automatically attached directly back to the GitHub Release draft for immediate public download.
+1. **Triggers:** When a `v*` tag is pushed (typically via Release-Please after merging conventional commits), or manually via `workflow_dispatch`.
+2. **Quality Gate:** Runs Biome lint, TypeScript check, and unit tests before building.
+3. **Cross-Platform Build:** Installs Rust toolchain, system dependencies (Linux: webkit2gtk, appindicator, etc.), and runs `pnpm tauri build` on macOS, Windows, and Ubuntu runners simultaneously.
+4. **Publish:** Uses `tauri-apps/tauri-action` to attach `.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb` installers directly to the GitHub Release.
 
 ## Local Development
 
-If you want to test desktop features locally:
+To develop and test the desktop app locally:
 
-1. Start the Next.js server in development mode: `pnpm dev`
-2. Run the Electron development wrapper:
 ```bash
-pnpm run desktop:start
+# Install dependencies (includes @tauri-apps/cli)
+pnpm install
+
+# Run Tauri in development mode (starts Next.js dev server + native window)
+pnpm tauri:dev
 ```
 
-> **Note:** The Service Worker is disabled in development (`NODE_ENV !== 'production'`). To test offline mode locally you must run `pnpm build && pnpm start` and use `TEST_PROD=1 pnpm desktop:start`.
+To build a production binary locally:
+```bash
+pnpm tauri:build
+```
+
+> **Prerequisites:** You need the Rust toolchain installed (`rustup`). On Linux, install system dependencies: `libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libgtk-3-dev`.
 
 ## Native Capabilities
-- **Permissions**: Prompts native OS popups for Media and Microphone access (necessary for Agora Video/Audio chat during Watch Parties).
-- **Window Management**: Restores last window size, placement, and full-screen state via `electron-window-state`.
-- **Deep Linking**: Registers the custom `watch-rudra://` protocol handler directly with the OS so web links can spawn and join Watch Parties natively in the desktop client.
+
+| Feature | Implementation |
+|---------|---------------|
+| **Picture-in-Picture** | Resizes window to 480×270, pins always-on-top, restores original bounds on exit |
+| **System Tray** | Show/Play-Pause/Toggle Mic/About/Check Updates/Quit menu items |
+| **Discord Rich Presence** | Local IPC socket connection to Discord client, broadcasts playback state |
+| **Media Keys** | Global shortcuts for MediaPlayPause, MediaNextTrack, MediaPreviousTrack, MediaStop |
+| **Push-to-Talk** | CmdOrCtrl+Shift+M global shortcut |
+| **Dock Badge (macOS)** | Unread count via osascript |
+| **Keep Awake** | `caffeinate` on macOS, `SetThreadExecutionState` on Windows |
+| **Deep Linking** | `watch-rudra://` protocol registered with the OS |
+| **Auto-Start** | `tauri-plugin-autostart` with LaunchAgent on macOS |
+| **Clipboard** | Native clipboard write via `tauri-plugin-clipboard-manager` |
+| **Notifications** | Native OS notifications via `tauri-plugin-notification` |
+| **Persistent Store** | Key-value store via `tauri-plugin-store` (replaces localStorage for desktop-specific prefs) |
+| **Offline Downloads** | HLS/MP4 download with AES encryption, pause/resume, crash recovery |
+| **Live Bridge** | Relay bridge for livestream data |
+| **Window Dragging** | Injected drag region at top + nav element drag support |
+| **Fullscreen Events** | Emits `window-fullscreen-changed`, `window-focus`, `window-blur` to frontend |
 
 ## Integrating with the Next.js Web App
 
-Watch Rudra's web and desktop apps share the exact same Next.js codebase. To prevent polluting React components with aggressive `typeof window !== "undefined"` checks everywhere we need native OS features, we pipe all interactions through a single hook:
+The web and desktop apps share the exact same Next.js codebase. All native interactions are piped through a single bridge module:
+
+### `src/lib/tauri-bridge.ts`
+
+The bridge detects the Tauri environment via `window.__TAURI__` or `window.__TAURI_INTERNALS__` and provides a unified API. In browser environments, all methods are safe no-ops.
+
+Key exports:
+- `isDesktop` / `isTauri` — Boolean detection flags
+- `checkIsDesktop()` — Function for use in useState initializers (hydration-safe)
+- `desktopBridge` — Object with all native methods (Discord, clipboard, store, PiP, badge, downloads, etc.)
 
 ### `src/hooks/use-desktop-app.ts`
 
-This globally binds `window.electronAPI` to React.
+A React hook that wraps the bridge for component use:
 
-*   `isDesktopApp`: Boolean flag to accurately show/hide Desktop-only features natively.
-*   `openInDesktopApp()`: A deep-linking fallback heuristic utilizing `document.hidden` and asynchronous `setTimeout`. If a browser fails to redirect the custom protocol (`watch-rudra://`) within 2000 milliseconds, it alerts the user to download the `.dmg` or `.exe`.
-*   `getDesktopTopPaddingClass(isFullscreen)`: Provides strict styling logic targeting the Electron frameless 32px top-bar. It safely outputs `pt-8` padding natively, dynamically fading to `0` whenever `toggleFullscreen` triggers Chromium OS-level maximize states, preventing black gaps at the top of the Sidebar.
-*   `copyToClipboard(text)`: Abstracts OS Clipboard writes conditionally depending on the environment.
+- `isDesktopApp` — Whether running inside Tauri
+- `isBrowser` — Inverse of above
+- `isMacOS` / `isWindows` — OS detection
+- `openInDesktopApp()` — Deep-link fallback: tries `watch-rudra://` protocol, shows download prompt if app not installed
+- `getDesktopTopPaddingClass(isFullscreen)` — Returns `pt-8` for the titlebar overlay region (collapses in fullscreen)
+- `copyToClipboard(text)` — Uses native clipboard in desktop, `navigator.clipboard` in browser
+- `dragStyle` / `noDragStyle` — CSS properties for `-webkit-app-region`
 
-### Electron IPC Bridging (`src/types/electron.d.ts`)
+### Tauri Command Invocation
 
-For Typescript stability, all `ipcRenderer.send()` commands are strongly typed:
+Frontend code calls Rust commands via:
+```typescript
+import { invoke } from '@tauri-apps/api/core';
+await invoke<ReturnType>('command_name', { arg1: value1 });
+```
 
-*   **`updateDiscordPresence`**: Maps party numbers to Discord.
-*   **`toggleFullscreen`**: Discards generic Chromium HTML5 HTML bounds (`webkitRequestFullscreen`). Electron calls this explicitly so the Watch Party DOM doesn't trap the user inside a simulated video canvas.
-*   **`onFullscreenChanged`**: Allows the React tree to listen natively for OS-level Mac/Windows window maximize and minimize events.
+Event listening:
+```typescript
+import { listen } from '@tauri-apps/api/event';
+const unlisten = await listen<PayloadType>('event-name', (event) => {
+  console.log(event.payload);
+});
+```
+
+### Capabilities & Permissions
+
+The `src-tauri/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://watch.rudrasahoo.live/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.

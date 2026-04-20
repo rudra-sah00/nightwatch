@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useEffect } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';
@@ -70,8 +71,8 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
-      window.electronAPI.updateDiscordPresence({
+    if (checkIsDesktop()) {
+      desktopBridge.updateDiscordPresence({
         details: `Watching: ${props.metadata.title}`,
         state:
           props.metadata.type === 'series'

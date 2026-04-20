@@ -10,8 +10,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useDownloads } from '@/features/downloads/hooks/use-downloads';
+import type { DownloadItem } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
-import type { DownloadItem } from '@/types/electron';
 import { useDownloadMenu } from '../hooks/use-download-menu';
 import {
   ContentType,

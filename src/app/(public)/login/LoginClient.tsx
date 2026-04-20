@@ -8,6 +8,7 @@ import { GlobalLoading } from '@/components/ui/global-loading';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { LoginForm } from '@/features/auth/components/login-form';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LoginClient() {
@@ -48,11 +49,8 @@ export default function LoginClient() {
   const handleCopyEmail = () => {
     const email = 'rudranarayanaknr@gmail.com';
     try {
-      if (
-        typeof window !== 'undefined' &&
-        window.electronAPI?.copyToClipboard
-      ) {
-        window.electronAPI.copyToClipboard(email);
+      if (typeof window !== 'undefined' && checkIsDesktop()) {
+        desktopBridge.copyToClipboard(email);
       } else {
         navigator.clipboard.writeText(email);
       }

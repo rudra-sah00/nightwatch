@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import { initStorageCache } from '@/lib/storage-cache';
+import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -53,8 +54,8 @@ export function ThemeProvider({
       document.documentElement.classList.remove('dark');
     }
 
-    if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
-      window.electronAPI.setNativeTheme(
+    if (checkIsDesktop()) {
+      desktopBridge.setNativeTheme(
         initialTheme === 'system' ? 'system' : resolved,
       );
     }
@@ -90,10 +91,8 @@ export function ThemeProvider({
       document.documentElement.classList.remove('dark');
     }
 
-    if (typeof window !== 'undefined' && window.electronAPI?.setNativeTheme) {
-      window.electronAPI.setNativeTheme(
-        newTheme === 'system' ? 'system' : resolved,
-      );
+    if (checkIsDesktop()) {
+      desktopBridge.setNativeTheme(newTheme === 'system' ? 'system' : resolved);
     }
   }, []);
 

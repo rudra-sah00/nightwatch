@@ -16,7 +16,7 @@ The `watch` directory handles the core Video On-Demand (VOD) playback experience
    We do not use an off-the-shelf heavy player like Video.js by default. We natively wrap an HTML5 `<video>` element with HLS.js on the client-side to maintain maximum control over buffer health and DRM/signed-url ticket rotation.
 2. **Theater & Fullscreen Architecture**
    - The player supports normal, theater (CSS-driven expansion), and native fullscreen.
-   - **Important:** As detailed in [DESKTOP.md](../DESKTOP.md), if `isDesktopApp` is true, clicking "Fullscreen" actively triggers an IPC message (`window.electronAPI.toggleFullscreen()`) instead of the standard WebKit DOM wrapper fullscreen, guaranteeing the Chromium shell natively fills the screen without trapping UI elements.
+   - **Important:** As detailed in [DESKTOP.md](../DESKTOP.md), if `isDesktopApp` is true, clicking "Fullscreen" actively triggers a Tauri invoke (`desktopBridge.toggleFullscreen()`) instead of the standard WebKit DOM wrapper fullscreen, guaranteeing the system webview natively fills the screen without trapping UI elements.
 3. **Analytics Syncing**
    - Playback progress is periodically flushed to the server using the `apiFetch` utility to remember where the user left off.
 
