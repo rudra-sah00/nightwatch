@@ -2,7 +2,6 @@ import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -264,12 +263,13 @@ export function ActiveWatchParty({
               >
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction
+              <button
+                type="button"
                 onClick={onConfirmLeave}
-                className="bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm"
+                className="bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm px-6"
               >
                 {isHost ? 'End Party' : 'Leave'}
-              </AlertDialogAction>
+              </button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
