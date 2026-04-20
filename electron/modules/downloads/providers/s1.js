@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { startHlsDownload } = require('../processors/hls');
-const { getDatabase, syncDbState, VAULT_PATH } = require('../state');
+const { getDatabase, syncDbState, VAULT_PATH, getStore } = require('../state');
 const { downloadFile } = require('../network');
 
 async function downloadS1(eventSender, args) {
@@ -63,7 +63,7 @@ async function downloadS1(eventSender, args) {
             thumbDest,
             null,
             item,
-            store,
+            getStore(),
           ).catch((e) =>
             console.error('[downloadS1] Thumbnail download failed:', e),
           );

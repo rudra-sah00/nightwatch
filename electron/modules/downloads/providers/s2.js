@@ -94,7 +94,7 @@ async function downloadS2(eventSender, args) {
               thumbDest,
               null,
               item,
-              store,
+              getStore(),
             ).catch((e) =>
               console.error('[downloadS2] Thumbnail download failed:', e),
             );
