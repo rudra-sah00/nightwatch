@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.0.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.32.0...v2.0.0) (2026-04-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Electron has been completely removed and replaced with Tauri v2.
+
+### Features
+
+* migrate desktop app from Electron to Tauri v2 with iOS/Android support ([0e1feba](https://github.com/rudra-sah00/watch-rudra/commit/0e1febabbcc2dd3888b1df53c7cfc9ee7533cd1b))
+
+
+### Bug Fixes
+
+* add .vercelignore to exclude src-tauri/ from Vercel deploys ([25cf08c](https://github.com/rudra-sah00/watch-rudra/commit/25cf08c2899376ba78ff16ed87458b5daa4a9aae))
+* add retry logic to Vercel deploy step for transient API failures ([d3cc8dd](https://github.com/rudra-sah00/watch-rudra/commit/d3cc8dd43319ce72fcbf405abc55e858b0235416))
+* capture only deploy URL from vercel output, suppress stderr ([d0f2b51](https://github.com/rudra-sah00/watch-rudra/commit/d0f2b51ec2f0ed23784f547b97d9b802a3489a2a))
+* discord presence for livestreams, biome lint cleanup, emoji picker dark theme ([c627514](https://github.com/rudra-sah00/watch-rudra/commit/c627514e0ffa8cf1110c1fbbfc596ef019e9ecf8))
+* **discord:** reduce reconnect cooldown, reset timer on route change ([ad7197b](https://github.com/rudra-sah00/watch-rudra/commit/ad7197b1e5047dd7c6c72ad00f1570a27f0b6fb2))
+* **offline:** keep cache storage for offline, reduce network timeout ([aa55953](https://github.com/rudra-sah00/watch-rudra/commit/aa55953a907f45e7a5a14be59b61cb100ece2095))
+* **offline:** use NetworkOnly for pages so offline.html fallback shows ([aca8f98](https://github.com/rudra-sah00/watch-rudra/commit/aca8f98c2e9a011e8104af361c29edcfb81b6a0e))
+* **player:** prevent error overlay flash during HLS auto-recovery ([ec63cbb](https://github.com/rudra-sah00/watch-rudra/commit/ec63cbbb72c2e0579cbe5a8703880ab17b8a46e2))
+* show full vercel deploy output for debugging ([a608311](https://github.com/rudra-sah00/watch-rudra/commit/a608311a4ea32af4a1ffd97a3e29cf86c5f466d2))
+* **ui:** show actual app version instead of 0.0.0 ([c4a0ad4](https://github.com/rudra-sah00/watch-rudra/commit/c4a0ad49b8759e8d204117a284f2ac3a74d3ef13))
+* update release workflow to reference build-tauri.yml ([0873f39](https://github.com/rudra-sah00/watch-rudra/commit/0873f3914231b2acb22d5e19bf948ef68e184efa))
+
 ## [1.32.0](https://github.com/rudra-sah00/watch-rudra/compare/v1.31.0...v1.32.0) (2026-04-20)
 
 
