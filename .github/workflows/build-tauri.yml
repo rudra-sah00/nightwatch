@@ -219,6 +219,11 @@ jobs:
       - name: Initialize Tauri Android
         run: npx tauri android init
 
+      - name: Patch Gradle to use npx instead of npm
+        run: |
+          sed -i 's/val executable = """npm"""/val executable = """npx"""/' src-tauri/gen/android/buildSrc/src/main/java/com/watchrudra/app/kotlin/BuildTask.kt
+          sed -i 's/val args = listOf("run", "--", "tauri"/val args = listOf("tauri"/' src-tauri/gen/android/buildSrc/src/main/java/com/watchrudra/app/kotlin/BuildTask.kt
+
       - name: Build Android APK
         run: npx tauri android build --apk
         env:
