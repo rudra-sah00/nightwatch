@@ -12,6 +12,7 @@ import {
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn, formatBytes } from '@/lib/utils';
 import type { DownloadItem } from '@/types/electron';
 import { useDownloads } from '../hooks/use-downloads';
@@ -126,15 +127,11 @@ export function OfflineLibrary() {
       <div className="container mx-auto px-6 md:px-10">
         <div className="max-w-5xl mx-auto space-y-6">
           {downloads.length === 0 ? (
-            <div className="py-20 text-center border-[4px] border-dashed border-border/20 bg-card rounded-sm">
-              <HardDriveDownload className="w-12 h-12 stroke-[2px] text-foreground/20 mx-auto mb-4" />
-              <p className="text-xl font-headline font-black uppercase text-foreground/50 tracking-widest">
-                Vault is empty
-              </p>
-              <p className="text-sm font-bold text-foreground/40 mt-2">
-                Secure downloads will appear here.
-              </p>
-            </div>
+            <EmptyState
+              icon={HardDriveDownload}
+              title="Vault is empty"
+              description="Secure downloads will appear here"
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {downloads.map((item) => (

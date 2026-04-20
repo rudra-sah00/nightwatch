@@ -3,6 +3,7 @@
 import { Clock, Film, Tv, X } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
@@ -68,12 +69,11 @@ export function ContinueWatching({
             </h2>
           </div>
         )}
-        <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
-          <Clock className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
-          <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
-            Your watch history is empty
-          </p>
-        </div>
+        <EmptyState
+          icon={Clock}
+          title="Your watch history is empty"
+          description="Start watching something and it will appear here"
+        />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { Film, Plus, Tv } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import React from 'react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useWatchlist } from '../hooks/use-watchlist';
@@ -76,12 +77,11 @@ export function WatchlistClient() {
                 ))}
               </div>
             ) : isEmpty ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border  text-center">
-                <Plus className="w-16 h-16 text-foreground opacity-20 mb-4 stroke-[3px]" />
-                <p className="font-headline font-bold uppercase tracking-widest text-neo-muted">
-                  Your watchlist is empty
-                </p>
-              </div>
+              <EmptyState
+                icon={Plus}
+                title="Your watchlist is empty"
+                description="Save movies and shows to watch later"
+              />
             ) : (
               <div
                 className="flex flex-col gap-6"
