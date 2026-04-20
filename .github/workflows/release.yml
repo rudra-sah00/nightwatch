@@ -111,7 +111,12 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          for i in 1 2 3; do
+            echo "Deploy attempt $i..."
+            URL=$(vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} 2>&1) && break
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
           echo "deploy_url=$URL" >> $GITHUB_OUTPUT
 
       - name: Smoke test
