@@ -1,4 +1,15 @@
 {
+  "nav": {
+    "home": "Home",
+    "continue": "Continue",
+    "continueWatching": "Continue Watching",
+    "live": "Live",
+    "liveMatches": "Live Matches",
+    "watchlist": "Watchlist",
+    "downloads": "Downloads",
+    "offlineDownloads": "Offline Downloads",
+    "profile": "Profile"
+  },
   "language": {
     "title": "Language",
     "description": "Choose your preferred language"

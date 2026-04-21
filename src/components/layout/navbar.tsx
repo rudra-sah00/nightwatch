@@ -4,6 +4,7 @@ import { DownloadCloud, History, Plus, Radio, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -11,6 +12,7 @@ export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const { isDesktopApp, isMacOS, isWindows } = useDesktopApp();
+  const t = useTranslations('nav');
 
   const isActive = (href: string) => pathname?.startsWith(href);
 
@@ -27,7 +29,7 @@ export function Navbar() {
           <Link
             href="/home"
             className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
-            title="Home"
+            title={t('home')}
           >
             {/* Mobile: Play Icon */}
             <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
@@ -51,35 +53,35 @@ export function Navbar() {
           <Link
             href="/continue-watching"
             className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/continue-watching') ? 'text-foreground' : 'text-foreground/70'}`}
-            title="Continue Watching"
+            title={t('continueWatching')}
           >
             <History className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">Continue</span>
+            <span className="hidden md:inline">{t('continue')}</span>
           </Link>
           <Link
             href="/live"
             className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/live') ? 'text-foreground' : 'text-foreground/70'}`}
-            title="Live Matches"
+            title={t('liveMatches')}
           >
             <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">Live</span>
+            <span className="hidden md:inline">{t('live')}</span>
           </Link>
           <Link
             href="/watchlist"
             className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/watchlist') ? 'text-foreground' : 'text-foreground/70'}`}
-            title="Watchlist"
+            title={t('watchlist')}
           >
             <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">Watchlist</span>
+            <span className="hidden md:inline">{t('watchlist')}</span>
           </Link>
           {isDesktopApp && (
             <Link
               href="/downloads"
               className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground' : 'text-foreground/70'}`}
-              title="Offline Downloads"
+              title={t('offlineDownloads')}
             >
               <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-              <span className="hidden md:inline">Downloads</span>
+              <span className="hidden md:inline">{t('downloads')}</span>
             </Link>
           )}
         </div>
@@ -89,13 +91,13 @@ export function Navbar() {
           <Link
             href="/profile"
             className="flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors min-w-[72px]"
-            title="Profile"
+            title={t('profile')}
           >
             <div className="relative w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
               {user?.profilePhoto ? (
                 <Image
                   src={user.profilePhoto}
-                  alt={user?.name || 'Profile'}
+                  alt={user?.name || t('profile')}
                   fill
                   sizes="32px"
                   className="object-cover rounded-full"
@@ -105,7 +107,7 @@ export function Navbar() {
               )}
             </div>
             <span className="font-headline font-black uppercase text-[10px] hidden sm:block tracking-widest leading-none mt-0.5">
-              Profile
+              {t('profile')}
             </span>
           </Link>
         </div>

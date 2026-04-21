@@ -1,4 +1,15 @@
 {
+  "nav": {
+    "home": "होम",
+    "continue": "जारी रखें",
+    "continueWatching": "देखना जारी रखें",
+    "live": "लाइव",
+    "liveMatches": "लाइव मैच",
+    "watchlist": "वॉचलिस्ट",
+    "downloads": "डाउनलोड",
+    "offlineDownloads": "ऑफ़लाइन डाउनलोड",
+    "profile": "प्रोफ़ाइल"
+  },
   "language": {
     "title": "भाषा",
     "description": "अपनी पसंदीदा भाषा चुनें"
