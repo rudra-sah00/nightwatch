@@ -376,8 +376,8 @@ export function AppPreferences() {
                           className={cn(
                             'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                             concurrentDownloads === val
-                              ? 'bg-foreground text-background font-black'
-                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                              ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                              : 'text-foreground/30 hover:text-foreground/60',
                           )}
                         >
                           <span className="text-lg font-headline font-bold">
@@ -389,7 +389,7 @@ export function AppPreferences() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 w-full">
+                    <div className="w-full">
                       <input
                         type="number"
                         min={1}
@@ -400,15 +400,8 @@ export function AppPreferences() {
                         onKeyDown={(e) =>
                           e.key === 'Enter' && handleCustomConcurrent()
                         }
-                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                        className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 text-center"
                       />
-                      <button
-                        type="button"
-                        onClick={handleCustomConcurrent}
-                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
-                      >
-                        {t('preferences.set')}
-                      </button>
                     </div>
                   </div>
                 </DialogContent>
@@ -471,8 +464,8 @@ export function AppPreferences() {
                           className={cn(
                             'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                             downloadSpeedLimit === opt.val
-                              ? 'bg-foreground text-background font-black'
-                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                              ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                              : 'text-foreground/30 hover:text-foreground/60',
                           )}
                         >
                           <span className="text-lg font-headline font-bold">
@@ -484,7 +477,7 @@ export function AppPreferences() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 w-full">
+                    <div className="w-full">
                       <input
                         type="number"
                         min={1}
@@ -495,15 +488,8 @@ export function AppPreferences() {
                         onKeyDown={(e) =>
                           e.key === 'Enter' && handleCustomSpeed()
                         }
-                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                        className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 text-center"
                       />
-                      <button
-                        type="button"
-                        onClick={handleCustomSpeed}
-                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
-                      >
-                        {t('preferences.set')}
-                      </button>
                     </div>
                   </div>
                 </DialogContent>
