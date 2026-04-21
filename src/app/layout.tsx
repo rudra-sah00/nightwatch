@@ -48,6 +48,9 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+// Root layout reads cookies (locale, auth) — must be dynamic
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
