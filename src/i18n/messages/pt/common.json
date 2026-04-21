@@ -76,5 +76,15 @@
       "title": "Você está pronto",
       "description": "Aproveite a experiência cinematográfica pura. Sem distrações. Apenas cinema."
     }
+  },
+  "creatorFooter": {
+    "title": "Identidade do Criador",
+    "appVersion": "Versão do App"
+  },
+  "passwordInfo": {
+    "requirements": "Requisitos"
+  },
+  "actions": {
+    "close": "Fechar"
   }
 }

@@ -45,5 +45,11 @@
   "status": {
     "connected": "已连接",
     "connecting": "连接中…"
+  },
+  "sketch": {
+    "disabled": "绘图已禁用",
+    "disabledDescription": "主持人已禁用访客绘图功能。",
+    "tools": "绘图工具",
+    "captureScene": "捕获场景"
   }
 }

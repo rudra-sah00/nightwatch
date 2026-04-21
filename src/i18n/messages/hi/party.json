@@ -45,5 +45,11 @@
   "status": {
     "connected": "कनेक्टेड",
     "connecting": "कनेक्ट हो रहा है…"
+  },
+  "sketch": {
+    "disabled": "स्केचिंग अक्षम",
+    "disabledDescription": "होस्ट ने मेहमानों के लिए ड्राइंग अक्षम कर दी है।",
+    "tools": "स्केच टूल्स",
+    "captureScene": "दृश्य कैप्चर करें"
   }
 }

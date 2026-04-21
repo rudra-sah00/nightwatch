@@ -45,5 +45,11 @@
   "status": {
     "connected": "เชื่อมต่อแล้ว",
     "connecting": "กำลังเชื่อมต่อ…"
+  },
+  "sketch": {
+    "disabled": "การวาดถูกปิด",
+    "disabledDescription": "โฮสต์ได้ปิดการวาดสำหรับแขก",
+    "tools": "เครื่องมือวาด",
+    "captureScene": "จับภาพฉาก"
   }
 }

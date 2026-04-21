@@ -45,5 +45,11 @@
   "status": {
     "connected": "Connesso",
     "connecting": "Connessione…"
+  },
+  "sketch": {
+    "disabled": "Disegno Disattivato",
+    "disabledDescription": "L'host ha disattivato il disegno per gli ospiti.",
+    "tools": "Strumenti di Disegno",
+    "captureScene": "Cattura Scena"
   }
 }

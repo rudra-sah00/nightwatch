@@ -76,5 +76,15 @@
       "title": "Hazırsınız",
       "description": "Saf sinema deneyiminin tadını çıkarın. Dikkat dağıtıcı yok. Sadece film."
     }
+  },
+  "creatorFooter": {
+    "title": "Yaratıcı Kimliği",
+    "appVersion": "Uygulama Sürümü"
+  },
+  "passwordInfo": {
+    "requirements": "Gereksinimler"
+  },
+  "actions": {
+    "close": "Kapat"
   }
 }

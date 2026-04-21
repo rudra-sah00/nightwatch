@@ -76,5 +76,15 @@
       "title": "Vous êtes prêt",
       "description": "Profitez de l'expérience cinématographique pure. Pas de distractions. Juste du cinéma."
     }
+  },
+  "creatorFooter": {
+    "title": "Identité du Créateur",
+    "appVersion": "Version de l'App"
+  },
+  "passwordInfo": {
+    "requirements": "Exigences"
+  },
+  "actions": {
+    "close": "Fermer"
   }
 }

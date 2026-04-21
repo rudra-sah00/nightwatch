@@ -76,5 +76,15 @@
       "title": "準備完了",
       "description": "純粋な映画体験をお楽しみください。邪魔なし。映画だけ。"
     }
+  },
+  "creatorFooter": {
+    "title": "クリエイター情報",
+    "appVersion": "アプリバージョン"
+  },
+  "passwordInfo": {
+    "requirements": "要件"
+  },
+  "actions": {
+    "close": "閉じる"
   }
 }

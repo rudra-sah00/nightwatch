@@ -45,5 +45,11 @@
   "status": {
     "connected": "Bağlandı",
     "connecting": "Bağlanıyor…"
+  },
+  "sketch": {
+    "disabled": "Çizim Devre Dışı",
+    "disabledDescription": "Ev sahibi konuklar için çizimi devre dışı bıraktı.",
+    "tools": "Çizim Araçları",
+    "captureScene": "Sahneyi Yakala"
   }
 }

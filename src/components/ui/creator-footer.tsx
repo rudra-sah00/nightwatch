@@ -1,5 +1,7 @@
-import { Button } from '@/components/ui/button';
+'use client';
 
+import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/button';
 import pkg from '../../../package.json';
 
 const APP_VERSION = pkg.version;
@@ -9,13 +11,15 @@ const APP_VERSION = pkg.version;
  * Used on Public Profile and Private Profile pages.
  */
 export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
+  const t = useTranslations('common');
+
   return (
     <div
       id="creator-footer"
       className={`${isCompact ? 'mt-4 pt-4' : 'mt-12 pt-12'} border-t-[4px] border-border flex flex-col items-center gap-6 w-full max-w-5xl mx-auto mb-8`}
     >
       <div className="bg-primary text-primary-foreground px-3 py-1 font-headline font-black uppercase text-[10px] tracking-[0.3em] ">
-        Creator Identity
+        {t('creatorFooter.title')}
       </div>
 
       <div className="flex flex-wrap justify-center gap-6">
@@ -117,7 +121,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
       </div>
 
       <div className="text-muted-foreground font-mono text-xs uppercase tracking-widest mt-2 flex flex-col items-center gap-1">
-        <span>App Version</span>
+        <span>{t('creatorFooter.appVersion')}</span>
         <a
           href="/whats-new"
           className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors hover:text-primary"

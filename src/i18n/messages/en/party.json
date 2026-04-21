@@ -45,5 +45,11 @@
   "status": {
     "connected": "Connected",
     "connecting": "Connecting…"
+  },
+  "sketch": {
+    "disabled": "Sketching Disabled",
+    "disabledDescription": "The host has disabled drawing for guests.",
+    "tools": "Sketch Tools",
+    "captureScene": "Capture Scene"
   }
 }

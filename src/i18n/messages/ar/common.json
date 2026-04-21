@@ -76,5 +76,15 @@
       "title": "أنت جاهز",
       "description": "استمتع بالتجربة السينمائية النقية. بدون تشتيت. فقط أفلام."
     }
+  },
+  "creatorFooter": {
+    "title": "هوية المنشئ",
+    "appVersion": "إصدار التطبيق"
+  },
+  "passwordInfo": {
+    "requirements": "المتطلبات"
+  },
+  "actions": {
+    "close": "إغلاق"
   }
 }

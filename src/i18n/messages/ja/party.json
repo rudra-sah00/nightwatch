@@ -45,5 +45,11 @@
   "status": {
     "connected": "接続済み",
     "connecting": "接続中…"
+  },
+  "sketch": {
+    "disabled": "スケッチ無効",
+    "disabledDescription": "ホストがゲストの描画を無効にしました。",
+    "tools": "スケッチツール",
+    "captureScene": "シーンをキャプチャ"
   }
 }

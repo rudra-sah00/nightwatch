@@ -45,5 +45,11 @@
   "status": {
     "connected": "Verbunden",
     "connecting": "Verbinde…"
+  },
+  "sketch": {
+    "disabled": "Zeichnen Deaktiviert",
+    "disabledDescription": "Der Host hat das Zeichnen für Gäste deaktiviert.",
+    "tools": "Zeichenwerkzeuge",
+    "captureScene": "Szene Aufnehmen"
   }
 }

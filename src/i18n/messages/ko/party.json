@@ -45,5 +45,11 @@
   "status": {
     "connected": "연결됨",
     "connecting": "연결 중…"
+  },
+  "sketch": {
+    "disabled": "스케치 비활성화",
+    "disabledDescription": "호스트가 게스트의 그리기를 비활성화했습니다.",
+    "tools": "스케치 도구",
+    "captureScene": "장면 캡처"
   }
 }

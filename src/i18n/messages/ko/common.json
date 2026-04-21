@@ -76,5 +76,15 @@
       "title": "준비 완료",
       "description": "순수한 시네마 경험을 즐기세요. 방해 없이. 오직 영화만."
     }
+  },
+  "creatorFooter": {
+    "title": "크리에이터 정보",
+    "appVersion": "앱 버전"
+  },
+  "passwordInfo": {
+    "requirements": "요구사항"
+  },
+  "actions": {
+    "close": "닫기"
   }
 }

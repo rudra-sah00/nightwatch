@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Info, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +10,7 @@ interface PasswordInfoProps {
 }
 
 export function PasswordInfo({ className }: PasswordInfoProps) {
+  const t = useTranslations('common');
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -44,7 +46,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         aria-label="Password requirements"
       >
         <Info className="h-3.5 w-3.5 stroke-[3px]" />
-        <span>Requirements</span>
+        <span>{t('passwordInfo.requirements')}</span>
       </button>
 
       {isOpen ? (

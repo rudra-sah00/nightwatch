@@ -76,5 +76,15 @@
       "title": "आप तैयार हैं",
       "description": "शुद्ध सिनेमाई अनुभव का आनंद लें। कोई विकर्षण नहीं। बस फिल्म।"
     }
+  },
+  "creatorFooter": {
+    "title": "निर्माता पहचान",
+    "appVersion": "ऐप संस्करण"
+  },
+  "passwordInfo": {
+    "requirements": "आवश्यकताएं"
+  },
+  "actions": {
+    "close": "बंद करें"
   }
 }

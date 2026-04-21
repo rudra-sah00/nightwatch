@@ -76,5 +76,15 @@
       "title": "You are ready",
       "description": "Enjoy the pure cinematic experience. No distractions. Just film."
     }
+  },
+  "creatorFooter": {
+    "title": "Creator Identity",
+    "appVersion": "App Version"
+  },
+  "passwordInfo": {
+    "requirements": "Requirements"
+  },
+  "actions": {
+    "close": "Close"
   }
 }

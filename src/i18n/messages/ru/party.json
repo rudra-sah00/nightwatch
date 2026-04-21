@@ -45,5 +45,11 @@
   "status": {
     "connected": "Подключено",
     "connecting": "Подключение…"
+  },
+  "sketch": {
+    "disabled": "Рисование отключено",
+    "disabledDescription": "Хост отключил рисование для гостей.",
+    "tools": "Инструменты рисования",
+    "captureScene": "Захватить сцену"
   }
 }

@@ -21,6 +21,7 @@ import {
   Undo2,
   Zap,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -68,14 +69,16 @@ const TOOLS: { id: ToolType; label: string; icon: React.ElementType }[] = [
 ];
 
 export function WatchPartySketchDisabled() {
+  const t = useTranslations('party');
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-foreground/50 space-y-4">
       <PenTool className="w-12 h-12 opacity-50 stroke-[3px]" />
       <div className="space-y-1">
         <h3 className="text-foreground font-black font-headline uppercase tracking-widest">
-          Sketching Disabled
+          {t('sketch.disabled')}
         </h3>
-        <p className="text-sm">The host has disabled drawing for guests.</p>
+        <p className="text-sm">{t('sketch.disabledDescription')}</p>
       </div>
     </div>
   );
@@ -104,6 +107,7 @@ export function WatchPartySketch() {
 
   const { handleMoveZ } = useSketchOverlay();
   const { theme: appTheme } = useTheme();
+  const t = useTranslations('party');
 
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const customColorInputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +141,7 @@ export function WatchPartySketch() {
       <div className="p-4 border-b-[4px] border-border shrink-0 flex items-center justify-between bg-background">
         <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2">
           <PenTool className="w-4 h-4 text-foreground stroke-[3px]" />
-          Sketch Tools
+          {t('sketch.tools')}
         </h3>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
@@ -376,7 +380,7 @@ export function WatchPartySketch() {
           className="w-full flex items-center justify-center gap-2 py-3 text-sm bg-success hover:opacity-80 text-foreground"
         >
           <Camera className="w-5 h-5 stroke-[3px]" />
-          Capture Scene
+          {t('sketch.captureScene')}
         </Button>
       </div>
 

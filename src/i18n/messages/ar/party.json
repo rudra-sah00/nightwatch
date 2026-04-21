@@ -45,5 +45,11 @@
   "status": {
     "connected": "متصل",
     "connecting": "جارٍ الاتصال…"
+  },
+  "sketch": {
+    "disabled": "الرسم معطل",
+    "disabledDescription": "قام المضيف بتعطيل الرسم للضيوف.",
+    "tools": "أدوات الرسم",
+    "captureScene": "التقاط المشهد"
   }
 }

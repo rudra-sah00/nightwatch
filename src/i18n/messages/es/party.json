@@ -45,5 +45,11 @@
   "status": {
     "connected": "Conectado",
     "connecting": "Conectando…"
+  },
+  "sketch": {
+    "disabled": "Dibujo Desactivado",
+    "disabledDescription": "El anfitrión ha desactivado el dibujo para los invitados.",
+    "tools": "Herramientas de Dibujo",
+    "captureScene": "Capturar Escena"
   }
 }
