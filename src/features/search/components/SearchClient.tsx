@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { SearchResults } from '@/features/search/components/search-results';
 import type { SearchResult } from '@/features/search/types';
 import { useHomeClient } from '../hooks/use-home-client';
@@ -48,6 +49,8 @@ export function SearchClient({
 
   const { isLoading } = useAuth();
 
+  const t = useTranslations('search');
+
   if (isLoading) {
     return <GlobalLoading />;
   }
@@ -64,7 +67,9 @@ export function SearchClient({
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 mb-4">
               <h1 className="font-headline text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-foreground flex flex-wrap gap-x-4 items-baseline overflow-visible">
                 <span className="shrink-0">
-                  {isTransitioning || isPending ? 'Searching:' : 'Results:'}
+                  {isTransitioning || isPending
+                    ? t('results.searching')
+                    : t('results.resultsLabel')}
                 </span>
                 {/* Real Input Layer */}
                 <input
@@ -86,12 +91,12 @@ export function SearchClient({
                     // +2ch buffer: uppercase condensed glyphs are wider than 1ch at large sizes
                     width: `${Math.max(searchInputQuery.length + 1, 2)}ch`,
                   }}
-                  aria-label="Edit search query"
+                  aria-label={t('results.editQueryAriaLabel')}
                 />
               </h1>
             </div>
             <p className="font-headline font-bold text-xl uppercase tracking-widest text-foreground/70">
-              {results.length} Films Found in the Archives
+              {t('results.filmsFound', { count: results.length })}
             </p>
           </div>
 
@@ -100,10 +105,10 @@ export function SearchClient({
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
                 <span className="text-5xl mb-4">⚠️</span>
                 <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
-                  Search failed
+                  {t('results.searchFailed')}
                 </p>
                 <p className="font-headline font-bold uppercase tracking-widest text-neo-muted text-sm max-w-sm">
-                  Could not reach the server. Please try again.
+                  {t('results.searchFailedHint')}
                 </p>
               </div>
             ) : !isTransitioning &&
@@ -113,10 +118,10 @@ export function SearchClient({
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
                 <span className="text-5xl mb-4">🔍</span>
                 <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
-                  No results found
+                  {t('results.noResults')}
                 </p>
                 <p className="font-headline font-bold uppercase tracking-widest text-neo-muted text-sm max-w-sm">
-                  Try a different spelling or search for something else
+                  {t('results.noResultsHint')}
                 </p>
               </div>
             ) : (

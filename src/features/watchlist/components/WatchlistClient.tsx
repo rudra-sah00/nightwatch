@@ -3,6 +3,7 @@
 import { Film, Plus, Tv } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import React from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { WatchlistItem } from '@/features/watchlist/types';
@@ -27,6 +28,7 @@ const ContentDetailModal = dynamic(
 export function WatchlistClient() {
   const { watchlist, loading, selectedId, setSelectedId, isEmpty, removeItem } =
     useWatchlist();
+  const t = useTranslations('watch.watchlist');
 
   return (
     <>
@@ -41,14 +43,14 @@ export function WatchlistClient() {
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
               <div>
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-headline uppercase leading-none mb-4 min-w-0">
-                  MY
+                  {t('pageTitle')}
                   <br />
                   <span className="bg-neo-yellow text-foreground px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
-                    WATCHLIST
+                    {t('watchlist')}
                   </span>
                 </h1>
                 <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-neo-surface inline-block px-4 py-2 border-[3px] border-border">
-                  Your Curated Selection
+                  {t('subtitle')}
                 </p>
               </div>
 
@@ -56,8 +58,7 @@ export function WatchlistClient() {
               {!loading && (
                 <div className="flex flex-wrap gap-3 pb-3 xl:pb-6 h-fit">
                   <span className="text-lg md:text-2xl font-black font-headline uppercase tracking-widest text-foreground bg-neo-surface border-[4px] border-border px-6 py-3 ">
-                    {watchlist.length}{' '}
-                    {watchlist.length === 1 ? 'item' : 'items'}
+                    {t('itemCount', { count: watchlist.length })}
                   </span>
                 </div>
               )}
@@ -79,8 +80,8 @@ export function WatchlistClient() {
             ) : isEmpty ? (
               <EmptyState
                 icon={Plus}
-                title="Your watchlist is empty"
-                description="Save movies and shows to watch later"
+                title={t('emptyTitle')}
+                description={t('emptyDescription')}
               />
             ) : (
               <div
@@ -122,12 +123,14 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
   item: WatchlistItem;
   onClick: () => void;
 }) {
+  const t = useTranslations('watch.watchlist');
+
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      aria-label={`View details for ${item.title}`}
+      aria-label={t('viewDetails', { title: item.title })}
     >
       {/* Poster */}
       <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">

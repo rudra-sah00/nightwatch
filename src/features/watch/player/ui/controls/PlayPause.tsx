@@ -1,6 +1,7 @@
 'use client';
 
 import { Lock, Pause, Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
@@ -29,11 +30,13 @@ export function PlayPause({
   onToggle,
   size = 'md',
 }: PlayPauseProps) {
+  const t = useTranslations('watch.player');
+
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={isPlaying ? 'Pause' : 'Play'}
+      aria-label={isPlaying ? t('pause') : t('play')}
       className={cn(
         'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
         'border-[3px] border-border bg-neo-yellow text-foreground ',
@@ -78,6 +81,7 @@ export function CenterPlayButton({
   disabled = false,
   isLoading = false,
 }: CenterPlayButtonProps & { isLoading?: boolean }) {
+  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const isPortrait = useMobileOrientation();
   const useCompactOverlay = isMobile && isPortrait;
@@ -136,12 +140,12 @@ export function CenterPlayButton({
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/20 rounded-full">
               <Lock className="w-3.5 h-3.5 text-primary-foreground" />
               <span className="text-[10px] text-primary-foreground font-black font-headline uppercase tracking-widest">
-                Host Controls Playback
+                {t('hostControlsPlayback')}
               </span>
             </div>
           ) : (
             <span className="text-[11px] text-primary-foreground font-black font-headline uppercase tracking-widest">
-              Tap to resume
+              {t('tapToResume')}
             </span>
           )}
         </div>
@@ -169,10 +173,10 @@ export function CenterPlayButton({
               )}
             >
               {metadata.type === 'series'
-                ? 'TV Series'
+                ? t('tvSeries')
                 : metadata.type === 'livestream'
-                  ? 'Live'
-                  : 'Movie'}
+                  ? t('live')
+                  : t('movie')}
             </div>
 
             {/* Title - responsive sizing */}
@@ -215,10 +219,10 @@ export function CenterPlayButton({
                     </div>
                     <div className="flex flex-col">
                       <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
-                        Host Controls Playback
+                        {t('hostControlsPlayback')}
                       </span>
                       <span className="text-foreground/70 text-[10px] sm:text-xs font-bold font-headline uppercase mt-1">
-                        Sit back and enjoy the show
+                        {t('sitBackAndEnjoy')}
                       </span>
                     </div>
                   </div>
@@ -228,7 +232,7 @@ export function CenterPlayButton({
                 <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-neo-red border-[2px] border-border animate-pulse" />
                   <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
-                    Tap to resume
+                    {t('tapToResume')}
                   </span>
                 </div>
               )}
@@ -249,7 +253,7 @@ export function CenterPlayButton({
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-red border-[2px] border-border animate-pulse" />
                 </div>
                 <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
-                  Host Controls Playback
+                  {t('hostControlsPlayback')}
                 </span>
               </div>
             </div>
@@ -257,7 +261,7 @@ export function CenterPlayButton({
             <div className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-neo-red border-[2px] border-border animate-pulse" />
               <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest">
-                Tap to resume
+                {t('tapToResume')}
               </span>
             </div>
           )}

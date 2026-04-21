@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useSeasonSelector } from '../hooks/use-season-selector';
 import type { Season } from '../types';
@@ -21,6 +22,7 @@ export function SeasonSelector({
   onSelect,
 }: SeasonSelectorProps) {
   const { dropdownRef } = useSeasonSelector(isOpen, onToggle);
+  const t = useTranslations('search');
 
   if (seasons.length === 0) return null;
 
@@ -41,8 +43,8 @@ export function SeasonSelector({
         )}
       >
         {selectedSeason
-          ? `SEASON ${selectedSeason.seasonNumber}`
-          : 'SELECT SEASON'}
+          ? t('contentDetail.season', { number: selectedSeason.seasonNumber })
+          : t('contentDetail.selectSeason')}
         <ChevronDown
           className={cn(
             'w-5 h-5 transition-transform duration-200 stroke-[3px]',
@@ -75,7 +77,7 @@ export function SeasonSelector({
                   : 'bg-card text-foreground hover:bg-neo-yellow',
               )}
             >
-              SEASON {season.seasonNumber}
+              {t('contentDetail.season', { number: season.seasonNumber })}
               {season.episodeCount ? (
                 <span
                   className={cn(
@@ -85,7 +87,9 @@ export function SeasonSelector({
                       : 'text-foreground/70',
                   )}
                 >
-                  ({season.episodeCount} EP)
+                  {t('contentDetail.episodeCount', {
+                    count: season.episodeCount,
+                  })}
                 </span>
               ) : null}
             </button>

@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "अपनी",
+    "headline2": "फ़िल्म खोजें",
+    "searchPlaceholder": "फ़िल्में, शो, या सिनेमा खोजें...",
+    "searchButton": "खोजें",
+    "searchAriaLabel": "फ़िल्में, शो, या सिनेमा खोजें",
+    "stat1": "12k+ शीर्षक",
+    "stat2": "4K अल्ट्रा रॉ",
+    "stat3": "इंडी फोकस"
+  },
+  "results": {
+    "searching": "खोज रहे हैं:",
+    "resultsLabel": "परिणाम:",
+    "filmsFound": "संग्रह में {count} फ़िल्में मिलीं",
+    "noResults": "कोई परिणाम नहीं मिला",
+    "noResultsHint": "कोई अलग वर्तनी आज़माएं या कुछ और खोजें",
+    "searchFailed": "खोज विफल",
+    "searchFailedHint": "सर्वर से संपर्क नहीं हो सका। कृपया पुनः प्रयास करें।",
+    "noResultsArchive": "कोई परिणाम नहीं मिला",
+    "noResultsArchiveHint": "हमें संग्रह में कोई मिलान नहीं मिला। कोई अलग शीर्षक या कीवर्ड खोजें।",
+    "editQueryAriaLabel": "खोज क्वेरी संपादित करें",
+    "searchingAriaLabel": "खोज रहे हैं..."
+  },
+  "continueWatching": {
+    "title": "देखना जारी रखें",
+    "subtitle": "जहाँ छोड़ा था वहाँ से शुरू करें",
+    "emptyTitle": "आपका देखने का इतिहास खाली है",
+    "emptyDescription": "कुछ देखना शुरू करें और यह यहाँ दिखाई देगा",
+    "removeAriaLabel": "सूची से हटाएं",
+    "sectionAriaLabel": "हाल ही में देखी गई सामग्री",
+    "timeLeft": "{time} शेष"
+  },
+  "contentDetail": {
+    "series": "सीरीज़",
+    "movie": "फ़िल्म",
+    "failedToLoad": "सामग्री लोड करने में विफल",
+    "close": "बंद करें",
+    "closePreview": "प्रीव्यू बंद करें",
+    "noImageAvailable": "कोई छवि उपलब्ध नहीं",
+    "episodes": "एपिसोड",
+    "season": "सीज़न {number}",
+    "selectSeason": "सीज़न चुनें",
+    "episodeCount": "({count} एपि)",
+    "noEpisodesAvailable": "इस सीज़न के लिए कोई एपिसोड उपलब्ध नहीं",
+    "loadingEpisodes": "एपिसोड लोड हो रहे हैं",
+    "watchPartyPick": "वॉच पार्टी — एक एपिसोड चुनें",
+    "watchPartyHint": "आपके चुनने पर सभी जुड़ जाएंगे",
+    "cancelWatchParty": "वॉच पार्टी रद्द करें",
+    "continue": "जारी रखें",
+    "experienceStarting": "अनुभव शुरू हो रहा है",
+    "preparingContent": "\"{title}\" तैयार हो रहा है..."
+  },
+  "actions": {
+    "watchSolo": "अकेले देखें",
+    "resume": "फिर से शुरू करें",
+    "resumeEpisode": "S{season}:E{episode} जारी रखें",
+    "playEpisode": "S{season}:E1 चलाएं",
+    "loading": "लोड हो रहा है",
+    "watchTogether": "साथ में देखें",
+    "creating": "बना रहे हैं",
+    "toWatchlist": "वॉचलिस्ट में जोड़ें",
+    "removeFromList": "सूची से हटाएं"
+  },
+  "download": {
+    "download": "डाउनलोड",
+    "viewInVault": "वॉल्ट में देखें",
+    "cancel": "रद्द करें",
+    "language": "भाषा",
+    "original": "मूल",
+    "selectQuality": "गुणवत्ता चुनें",
+    "selectEpisode": "एपिसोड चुनें",
+    "gatheringSources": "स्रोत एकत्र हो रहे हैं...",
+    "noFormatsAvailable": "कोई प्रारूप उपलब्ध नहीं",
+    "noEpisodesAvailable": "कोई एपिसोड उपलब्ध नहीं",
+    "saved": "सहेजा गया",
+    "securelyStarting": "सुरक्षित रूप से डाउनलोड शुरू हो रहा है...",
+    "episode": "एपिसोड {number}",
+    "untitled": "शीर्षकहीन"
+  }
+}

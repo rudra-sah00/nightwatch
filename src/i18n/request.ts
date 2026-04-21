@@ -27,7 +27,23 @@ export default getRequestConfig(async () => {
       .default;
   } catch {}
 
-  const messages = { ...common, auth: authMessages, profile: profileMessages };
+  let searchMessages: Record<string, unknown> = {};
+  try {
+    searchMessages = (await import(`./messages/${locale}/search.json`)).default;
+  } catch {}
+
+  let watchMessages: Record<string, unknown> = {};
+  try {
+    watchMessages = (await import(`./messages/${locale}/watch.json`)).default;
+  } catch {}
+
+  const messages = {
+    ...common,
+    auth: authMessages,
+    profile: profileMessages,
+    search: searchMessages,
+    watch: watchMessages,
+  };
 
   return { locale, messages };
 });

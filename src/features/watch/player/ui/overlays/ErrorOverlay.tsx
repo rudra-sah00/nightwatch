@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ErrorOverlayProps {
   isVisible: boolean;
@@ -15,6 +16,8 @@ export function ErrorOverlay({
   onRetry,
   onBack,
 }: ErrorOverlayProps) {
+  const t = useTranslations('watch.player');
+
   if (!isVisible) return null;
 
   return (
@@ -24,7 +27,7 @@ export function ErrorOverlay({
           <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-destructive stroke-[2px]" />
         </div>
         <h2 className="text-foreground text-xl sm:text-2xl font-black font-headline uppercase tracking-tighter mb-2">
-          Playback Error
+          {t('playbackError')}
         </h2>
         <div className="h-[3px] sm:h-[4px] w-10 sm:w-12 bg-primary mb-3 sm:mb-4" />
         <p className="text-foreground font-bold font-headline uppercase tracking-widest text-xs sm:text-sm mb-6 sm:mb-8 break-words w-full">
@@ -38,7 +41,7 @@ export function ErrorOverlay({
               className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 py-2 sm:py-3 text-sm sm:text-base font-bold font-headline uppercase tracking-widest transition-colors rounded-md"
             >
               <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3px]" />
-              Try Again
+              {t('tryAgain')}
             </button>
           ) : null}
           {onBack ? (
@@ -47,7 +50,7 @@ export function ErrorOverlay({
               onClick={onBack}
               className="flex-1 flex items-center justify-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 py-2 sm:py-3 text-sm sm:text-base font-bold font-headline uppercase tracking-widest transition-colors rounded-md"
             >
-              Go Back
+              {t('goBack')}
             </button>
           ) : null}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, ChevronRight, Gauge, Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { Quality } from '../../context/types';
 import { useSettingsMenu } from './hooks/use-settings-menu';
@@ -37,6 +38,7 @@ export function SettingsMenu({
     toggleMenu,
     handleBack,
   } = useSettingsMenu({ onInteraction });
+  const t = useTranslations('watch.settings');
 
   const renderMainMenu = () => (
     <div className="flex flex-col">
@@ -50,7 +52,7 @@ export function SettingsMenu({
           <div className="flex items-center gap-3">
             <Gauge className="w-5 h-5 stroke-[3px]" />
             <span className="font-black font-headline uppercase tracking-widest text-sm">
-              Quality
+              {t('quality')}
             </span>
           </div>
           <div className="flex items-center gap-2 font-bold font-headline uppercase tracking-widest text-xs">
@@ -75,11 +77,11 @@ export function SettingsMenu({
         <div className="flex items-center gap-3">
           <Gauge className="w-5 h-5 stroke-[3px]" />
           <span className="font-black font-headline uppercase tracking-widest text-sm">
-            Speed
+            {t('speed')}
           </span>
         </div>
         <div className="flex items-center gap-2 font-bold font-headline uppercase tracking-widest text-xs">
-          <span>{playbackRate === 1 ? 'Normal' : `${playbackRate}x`}</span>
+          <span>{playbackRate === 1 ? t('normal') : `${playbackRate}x`}</span>
           {disabled ? (
             <svg
               className="w-4 h-4 stroke-[3px]"
@@ -87,9 +89,9 @@ export function SettingsMenu({
               stroke="currentColor"
               viewBox="0 0 24 24"
               role="img"
-              aria-label="Locked"
+              aria-label={t('locked')}
             >
-              <title>Locked</title>
+              <title>{t('locked')}</title>
               <rect
                 x="5"
                 y="11"
@@ -123,7 +125,7 @@ export function SettingsMenu({
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
         <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
-          Quality
+          {t('quality')}
         </span>
         <div className="w-8" />
       </div>
@@ -138,7 +140,7 @@ export function SettingsMenu({
         className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border text-foreground"
       >
         <span className="font-bold font-headline uppercase tracking-widest text-sm">
-          Auto
+          {t('auto')}
         </span>
         {currentQuality === 'auto' ? (
           <Check className="w-5 h-5 stroke-[3px]" />
@@ -177,7 +179,7 @@ export function SettingsMenu({
           <ChevronRight className="w-5 h-5 rotate-180 stroke-[3px]" />
         </button>
         <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
-          Speed
+          {t('speed')}
         </span>
         <div className="w-8" />
       </div>
@@ -193,7 +195,7 @@ export function SettingsMenu({
           className="w-full flex items-center justify-between p-4 hover:bg-neo-yellow/80 transition-colors border-b-[3px] border-border last:border-b-0 text-foreground"
         >
           <span className="font-bold font-headline uppercase tracking-widest text-sm">
-            {speed === 1 ? 'Normal' : `${speed}x`}
+            {speed === 1 ? t('normal') : `${speed}x`}
           </span>
           {playbackRate === speed ? (
             <Check className="w-5 h-5 stroke-[3px]" />

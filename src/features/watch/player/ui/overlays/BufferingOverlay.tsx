@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface BufferingOverlayProps {
@@ -6,6 +7,8 @@ interface BufferingOverlayProps {
 }
 
 export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
+  const t = useTranslations('watch.player');
+
   return (
     <div
       className={cn(
@@ -14,7 +17,7 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
       )}
       role="status"
       aria-live="polite"
-      aria-label="Buffering video"
+      aria-label={t('bufferingAriaLabel')}
       aria-hidden={!isVisible}
     >
       <div className="relative flex items-center justify-center drop-shadow-md">

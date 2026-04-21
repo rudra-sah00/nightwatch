@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, ChevronRight, Subtitles, Type, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useSubtitleSelector } from './hooks/use-subtitle-selector';
 import { loadSubtitleFonts } from './utils/load-subtitle-fonts';
@@ -60,6 +61,7 @@ export function SubtitleSelector({
     subtitleSettings,
     onSubtitleSettingsChange,
   });
+  const t = useTranslations('watch.subtitles');
 
   if (tracks.length === 0) {
     return null;
@@ -71,7 +73,7 @@ export function SubtitleSelector({
       <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-background">
         <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
           <Subtitles className="w-5 h-5 stroke-[3px]" />
-          Subtitles
+          {t('title')}
         </span>
         <button
           type="button"
@@ -102,7 +104,7 @@ export function SubtitleSelector({
               'text-sm font-bold font-headline uppercase tracking-widest text-foreground',
             )}
           >
-            Off
+            {t('off')}
           </span>
           {!currentTrack && !isLoading ? (
             <Check className="w-5 h-5 stroke-[3px] text-foreground" />
@@ -156,7 +158,7 @@ export function SubtitleSelector({
         <div className="flex items-center gap-3">
           <Type className="w-5 h-5 stroke-[3px] text-foreground" />
           <span className="text-sm font-black font-headline uppercase tracking-widest text-foreground">
-            Subtitle Style
+            {t('subtitleStyle')}
           </span>
         </div>
         <ChevronRight className="w-5 h-5 stroke-[3px] text-foreground" />
@@ -176,7 +178,7 @@ export function SubtitleSelector({
           <ChevronRight className="w-4 h-4 stroke-[3px] rotate-180" />
         </button>
         <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
-          Subtitle Style
+          {t('subtitleStyle')}
         </span>
         <button
           type="button"
@@ -191,7 +193,7 @@ export function SubtitleSelector({
         {/* Font Size Section */}
         <div className="px-4 py-2 bg-background border-b-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
-            Size
+            {t('size')}
           </span>
         </div>
         {SUBTITLE_FONT_SIZES.map((size) => (
@@ -218,7 +220,7 @@ export function SubtitleSelector({
         {/* Font Family Section */}
         <div className="px-4 py-2 bg-background border-y-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
-            Font
+            {t('font')}
           </span>
         </div>
         {SUBTITLE_FONTS.map((font) => (
@@ -248,7 +250,7 @@ export function SubtitleSelector({
         {/* Background Color Section */}
         <div className="px-4 py-2 bg-background border-y-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
-            Background
+            {t('background')}
           </span>
         </div>
         {BACKGROUND_COLORS.map((bg) => (
@@ -284,7 +286,7 @@ export function SubtitleSelector({
         {/* Text Color Section */}
         <div className="px-4 py-2 bg-background border-y-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
-            Text Color
+            {t('textColor')}
           </span>
         </div>
         {TEXT_COLORS.map((color) => (
@@ -317,7 +319,7 @@ export function SubtitleSelector({
         {/* Text Shadow Section */}
         <div className="px-4 py-2 bg-background border-y-[3px] border-border">
           <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
-            Text Effect
+            {t('textEffect')}
           </span>
         </div>
         {TEXT_SHADOWS.map((shadow) => (

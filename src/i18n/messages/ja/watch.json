@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "再生",
+    "pause": "一時停止",
+    "loading": "コンテンツを読み込み中...",
+    "initConnection": "安全な接続を初期化中",
+    "bufferingAriaLabel": "動画をバッファリング中",
+    "playbackError": "再生エラー",
+    "tryAgain": "再試行",
+    "goBack": "戻る",
+    "errorDefault": "エラーが発生しました",
+    "liveUnavailable": "ライブ配信は利用できません",
+    "enterFullscreen": "フルスクリーン",
+    "exitFullscreen": "フルスクリーン解除",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "volumeControl": "音量コントロール",
+    "volume": "音量",
+    "skipBack": "{seconds}秒戻る",
+    "skipForward": "{seconds}秒進む",
+    "tapToResume": "タップして再開",
+    "hostControlsPlayback": "ホストが再生を制御しています",
+    "sitBackAndEnjoy": "リラックスしてお楽しみください",
+    "goBackAriaLabel": "戻る",
+    "movie": "映画",
+    "tvSeries": "テレビシリーズ",
+    "live": "ライブ",
+    "liveBadge": "LIVE",
+    "watchingLive": "ライブ視聴中",
+    "jumpToLive": "ライブに移動"
+  },
+  "settings": {
+    "quality": "画質",
+    "speed": "速度",
+    "normal": "標準",
+    "auto": "自動",
+    "locked": "ロック"
+  },
+  "subtitles": {
+    "title": "字幕",
+    "off": "オフ",
+    "subtitleStyle": "字幕スタイル",
+    "size": "サイズ",
+    "font": "フォント",
+    "background": "背景",
+    "textColor": "テキスト色",
+    "textEffect": "テキスト効果"
+  },
+  "audio": {
+    "title": "音声",
+    "audioLanguage": "音声言語"
+  },
+  "episodes": {
+    "episode": "エピソード {number}",
+    "season": "シーズン {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "クリックして再生",
+    "loading": "読み込み中...",
+    "noEpisodes": "エピソードなし",
+    "nowPlaying": "再生中",
+    "min": "{duration}分"
+  },
+  "nextEpisode": {
+    "nextSeason": "次のシーズン",
+    "nextEpisode": "次のエピソード",
+    "inCountdown": "{seconds}秒後",
+    "play": "再生",
+    "cancel": "キャンセル",
+    "loading": "読み込み中"
+  },
+  "offline": {
+    "pageTitle": "オフライン",
+    "vault": "保管庫",
+    "yourDownloads": "ダウンロード済みコンテンツ",
+    "downloadsCount": "{count}件のダウンロード",
+    "availableOffline": "オフラインで視聴可能",
+    "emptyTitle": "保管庫は空です",
+    "emptyDescription": "安全なダウンロードがここに表示されます",
+    "desktopRequired": "デスクトップが必要",
+    "desktopRequiredDesc": "オフラインの安全なダウンロードはネイティブデスクトップアプリでのみ利用可能です。旅行用に映画やシリーズを保存するにはアプリをダウンロードしてください。",
+    "pauseDownload": "ダウンロードを一時停止",
+    "resumeDownload": "ダウンロードを再開",
+    "removeDownload": "ダウンロードを削除",
+    "cancelDownload": "ダウンロードをキャンセル",
+    "waitForComplete": "オフラインで視聴するにはダウンロードが完了するまでお待ちください。",
+    "waitingInQueue": "キューで待機中...",
+    "downloading": "ダウンロード中..."
+  },
+  "watchlist": {
+    "pageTitle": "マイ",
+    "watchlist": "ウォッチリスト",
+    "subtitle": "あなたのセレクション",
+    "itemCount": "{count}件",
+    "emptyTitle": "ウォッチリストは空です",
+    "emptyDescription": "後で見る映画やシリーズを保存しましょう",
+    "viewDetails": "{title}の詳細を見る"
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Languages, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useAudioSelector } from './hooks/use-audio-selector';
 
@@ -24,6 +25,7 @@ export function AudioSelector({
   disabled = false,
 }: AudioSelectorProps) {
   const { isOpen, setIsOpen, menuRef } = useAudioSelector();
+  const t = useTranslations('watch.audio');
 
   if (tracks.length <= 1 || disabled) {
     return null;
@@ -43,7 +45,7 @@ export function AudioSelector({
           'flex items-center justify-center',
           isOpen && 'bg-background shadow-none',
         )}
-        title="Audio Language"
+        title={t('audioLanguage')}
       >
         <Languages
           className={cn(
@@ -69,7 +71,7 @@ export function AudioSelector({
           <div className="flex items-center justify-between px-4 py-4 border-b-[3px] border-border bg-background">
             <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
               <Languages className="w-5 h-5 stroke-[3px]" />
-              Audio
+              {t('title')}
             </span>
             <button
               type="button"

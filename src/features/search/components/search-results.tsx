@@ -2,6 +2,7 @@
 
 import { Film } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SearchSkeleton } from '@/components/ui/skeletons';
@@ -25,13 +26,14 @@ export const SearchResults = React.memo(function SearchResults({
 }: SearchResultsProps) {
   // Deduplicate results by id (API can return duplicates from different sources)
   const { uniqueResults } = useSearchResults(results);
+  const t = useTranslations('search');
 
   if (isLoading) {
     return (
       <output
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
         aria-busy="true"
-        aria-label="Searching..."
+        aria-label={t('results.searchingAriaLabel')}
       >
         {['res-sk-1', 'res-sk-2', 'res-sk-3', 'res-sk-4'].map((id) => (
           <SearchSkeleton key={id} />
@@ -45,11 +47,10 @@ export const SearchResults = React.memo(function SearchResults({
       <div className="flex flex-col items-center justify-center py-24 bg-card border-[4px] border-border  text-center max-w-2xl mx-auto w-full">
         <Film className="w-20 h-20 text-neo-blue mb-6 stroke-[3px]" />
         <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-          No Results Found
+          {t('results.noResultsArchive')}
         </h3>
         <p className="font-headline font-bold uppercase tracking-widest text-foreground/70 max-w-sm px-6">
-          We couldn't find any matches in our archives. Try searching for a
-          different title or keyword.
+          {t('results.noResultsArchiveHint')}
         </p>
       </div>
     );

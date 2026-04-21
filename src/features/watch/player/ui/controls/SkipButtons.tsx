@@ -1,6 +1,7 @@
 'use client';
 
 import { SkipBack, SkipForward } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // Static icons to avoid recreation
 const skipBackIcon = (
@@ -21,6 +22,7 @@ export function SkipButton({
   seconds = 10,
   onSkip,
 }: SkipButtonProps) {
+  const t = useTranslations('watch.player');
   const Icon = direction === 'back' ? SkipBack : SkipForward;
 
   return (
@@ -28,7 +30,11 @@ export function SkipButton({
       type="button"
       onClick={onSkip}
       className="p-2.5 bg-background border-[3px] border-border text-foreground  hover:bg-neo-yellow/80 active:bg-muted transition-colors duration-200 group relative flex items-center justify-center"
-      title={`Skip ${direction === 'back' ? 'back' : 'forward'} ${seconds}s`}
+      title={
+        direction === 'back'
+          ? t('skipBack', { seconds })
+          : t('skipForward', { seconds })
+      }
     >
       <Icon className="w-5 h-5 stroke-[3px] -mb-1" />
       <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] font-black font-headline text-foreground bg-background border-[2px] border-border px-1 group-hover:bg-neo-yellow/80 transition-colors">

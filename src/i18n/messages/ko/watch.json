@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "재생",
+    "pause": "일시정지",
+    "loading": "콘텐츠 로딩 중...",
+    "initConnection": "보안 연결 초기화 중",
+    "bufferingAriaLabel": "비디오 버퍼링 중",
+    "playbackError": "재생 오류",
+    "tryAgain": "다시 시도",
+    "goBack": "뒤로 가기",
+    "errorDefault": "오류가 발생했습니다",
+    "liveUnavailable": "라이브 스트림을 사용할 수 없습니다",
+    "enterFullscreen": "전체 화면",
+    "exitFullscreen": "전체 화면 종료",
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "volumeControl": "볼륨 조절",
+    "volume": "볼륨",
+    "skipBack": "{seconds}초 뒤로",
+    "skipForward": "{seconds}초 앞으로",
+    "tapToResume": "탭하여 재개",
+    "hostControlsPlayback": "호스트가 재생을 제어합니다",
+    "sitBackAndEnjoy": "편안히 앉아 쇼를 즐기세요",
+    "goBackAriaLabel": "뒤로 가기",
+    "movie": "영화",
+    "tvSeries": "TV 시리즈",
+    "live": "라이브",
+    "liveBadge": "LIVE",
+    "watchingLive": "라이브 시청 중",
+    "jumpToLive": "라이브로 이동"
+  },
+  "settings": {
+    "quality": "화질",
+    "speed": "속도",
+    "normal": "보통",
+    "auto": "자동",
+    "locked": "잠김"
+  },
+  "subtitles": {
+    "title": "자막",
+    "off": "끄기",
+    "subtitleStyle": "자막 스타일",
+    "size": "크기",
+    "font": "글꼴",
+    "background": "배경",
+    "textColor": "텍스트 색상",
+    "textEffect": "텍스트 효과"
+  },
+  "audio": {
+    "title": "오디오",
+    "audioLanguage": "오디오 언어"
+  },
+  "episodes": {
+    "episode": "에피소드 {number}",
+    "season": "시즌 {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "클릭하여 재생",
+    "loading": "로딩 중...",
+    "noEpisodes": "에피소드 없음",
+    "nowPlaying": "재생 중",
+    "min": "{duration}분"
+  },
+  "nextEpisode": {
+    "nextSeason": "다음 시즌",
+    "nextEpisode": "다음 에피소드",
+    "inCountdown": "{seconds}초 후",
+    "play": "재생",
+    "cancel": "취소",
+    "loading": "로딩 중"
+  },
+  "offline": {
+    "pageTitle": "오프라인",
+    "vault": "보관함",
+    "yourDownloads": "다운로드한 콘텐츠",
+    "downloadsCount": "{count}개 다운로드",
+    "availableOffline": "오프라인 시청 가능",
+    "emptyTitle": "보관함이 비어 있습니다",
+    "emptyDescription": "보안 다운로드가 여기에 표시됩니다",
+    "desktopRequired": "데스크톱 필요",
+    "desktopRequiredDesc": "오프라인 보안 다운로드는 네이티브 데스크톱 앱에서만 사용할 수 있습니다. 여행을 위해 영화와 시리즈를 저장하려면 앱을 다운로드하세요.",
+    "pauseDownload": "다운로드 일시정지",
+    "resumeDownload": "다운로드 재개",
+    "removeDownload": "다운로드 삭제",
+    "cancelDownload": "다운로드 취소",
+    "waitForComplete": "오프라인으로 보려면 다운로드가 완료될 때까지 기다려 주세요.",
+    "waitingInQueue": "대기열에서 대기 중...",
+    "downloading": "다운로드 중..."
+  },
+  "watchlist": {
+    "pageTitle": "나의",
+    "watchlist": "관심목록",
+    "subtitle": "나만의 큐레이션",
+    "itemCount": "{count}개 항목",
+    "emptyTitle": "관심목록이 비어 있습니다",
+    "emptyDescription": "나중에 볼 영화와 시리즈를 저장하세요",
+    "viewDetails": "{title} 상세 보기"
+  }
+}

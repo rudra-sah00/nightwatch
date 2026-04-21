@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "మీ",
+    "headline2": "సినిమా కనుగొనండి",
+    "searchPlaceholder": "సినిమాలు, షోలు లేదా సినిమా శోధించండి...",
+    "searchButton": "శోధించు",
+    "searchAriaLabel": "సినిమాలు, షోలు లేదా సినిమా శోధించండి",
+    "stat1": "12k+ టైటిల్స్",
+    "stat2": "4K అల్ట్రా రా",
+    "stat3": "ఇండీ ఫోకస్"
+  },
+  "results": {
+    "searching": "శోధిస్తోంది:",
+    "resultsLabel": "ఫలితాలు:",
+    "filmsFound": "ఆర్కైవ్‌లో {count} సినిమాలు కనుగొనబడ్డాయి",
+    "noResults": "ఫలితాలు కనుగొనబడలేదు",
+    "noResultsHint": "వేరే స్పెల్లింగ్ ప్రయత్నించండి లేదా మరేదైనా శోధించండి",
+    "searchFailed": "శోధన విఫలమైంది",
+    "searchFailedHint": "సర్వర్‌ను చేరుకోలేకపోయాము. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+    "noResultsArchive": "ఫలితాలు కనుగొనబడలేదు",
+    "noResultsArchiveHint": "మా ఆర్కైవ్‌లో సరిపోలికలు కనుగొనబడలేదు. వేరే టైటిల్ లేదా కీవర్డ్ శోధించండి.",
+    "editQueryAriaLabel": "శోధన ప్రశ్నను సవరించు",
+    "searchingAriaLabel": "శోధిస్తోంది..."
+  },
+  "continueWatching": {
+    "title": "చూడటం కొనసాగించండి",
+    "subtitle": "మీరు ఆపిన చోట నుండి కొనసాగించండి",
+    "emptyTitle": "మీ వీక్షణ చరిత్ర ఖాళీగా ఉంది",
+    "emptyDescription": "ఏదైనా చూడటం ప్రారంభించండి, అది ఇక్కడ కనిపిస్తుంది",
+    "removeAriaLabel": "జాబితా నుండి తొలగించు",
+    "sectionAriaLabel": "ఇటీవల చూసిన కంటెంట్",
+    "timeLeft": "{time} మిగిలి ఉంది"
+  },
+  "contentDetail": {
+    "series": "సీరీస్",
+    "movie": "సినిమా",
+    "failedToLoad": "కంటెంట్ లోడ్ చేయడం విఫలమైంది",
+    "close": "మూసివేయి",
+    "closePreview": "ప్రివ్యూ మూసివేయి",
+    "noImageAvailable": "చిత్రం అందుబాటులో లేదు",
+    "episodes": "ఎపిసోడ్‌లు",
+    "season": "సీజన్ {number}",
+    "selectSeason": "సీజన్ ఎంచుకోండి",
+    "episodeCount": "({count} ఎపి)",
+    "noEpisodesAvailable": "ఈ సీజన్‌కు ఎపిసోడ్‌లు అందుబాటులో లేవు",
+    "loadingEpisodes": "ఎపిసోడ్‌లు లోడ్ అవుతున్నాయి",
+    "watchPartyPick": "వాచ్ పార్టీ — ఒక ఎపిసోడ్ ఎంచుకోండి",
+    "watchPartyHint": "మీరు ఎంచుకున్న తర్వాత అందరూ చేరతారు",
+    "cancelWatchParty": "వాచ్ పార్టీ రద్దు చేయి",
+    "continue": "కొనసాగించు",
+    "experienceStarting": "అనుభవం ప్రారంభమవుతోంది",
+    "preparingContent": "\"{title}\" సిద్ధమవుతోంది..."
+  },
+  "actions": {
+    "watchSolo": "ఒంటరిగా చూడండి",
+    "resume": "తిరిగి ప్రారంభించు",
+    "resumeEpisode": "S{season}:E{episode} కొనసాగించు",
+    "playEpisode": "S{season}:E1 ప్లే చేయి",
+    "loading": "లోడ్ అవుతోంది",
+    "watchTogether": "కలిసి చూడండి",
+    "creating": "సృష్టిస్తోంది",
+    "toWatchlist": "వాచ్‌లిస్ట్‌కు జోడించు",
+    "removeFromList": "జాబితా నుండి తొలగించు"
+  },
+  "download": {
+    "download": "డౌన్‌లోడ్",
+    "viewInVault": "వాల్ట్‌లో చూడండి",
+    "cancel": "రద్దు చేయి",
+    "language": "భాష",
+    "original": "అసలు",
+    "selectQuality": "నాణ్యత ఎంచుకోండి",
+    "selectEpisode": "ఎపిసోడ్ ఎంచుకోండి",
+    "gatheringSources": "మూలాలు సేకరిస్తోంది...",
+    "noFormatsAvailable": "ఫార్మాట్‌లు అందుబాటులో లేవు",
+    "noEpisodesAvailable": "ఎపిసోడ్‌లు అందుబాటులో లేవు",
+    "saved": "సేవ్ చేయబడింది",
+    "securelyStarting": "సురక్షితంగా డౌన్‌లోడ్ ప్రారంభమవుతోంది...",
+    "episode": "ఎపిసోడ్ {number}",
+    "untitled": "శీర్షిక లేనిది"
+  }
+}

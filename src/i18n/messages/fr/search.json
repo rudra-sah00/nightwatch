@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "TROUVEZ VOTRE",
+    "headline2": "FILM",
+    "searchPlaceholder": "RECHERCHER DES FILMS, SÉRIES OU CINÉMA...",
+    "searchButton": "RECHERCHER",
+    "searchAriaLabel": "Rechercher des films, séries ou cinéma",
+    "stat1": "12k+ Titres",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Cinéma Indé"
+  },
+  "results": {
+    "searching": "Recherche :",
+    "resultsLabel": "Résultats :",
+    "filmsFound": "{count} Films trouvés dans les archives",
+    "noResults": "Aucun résultat trouvé",
+    "noResultsHint": "Essayez une orthographe différente ou recherchez autre chose",
+    "searchFailed": "Échec de la recherche",
+    "searchFailedHint": "Impossible de contacter le serveur. Veuillez réessayer.",
+    "noResultsArchive": "Aucun résultat trouvé",
+    "noResultsArchiveHint": "Nous n'avons trouvé aucune correspondance dans nos archives. Essayez un titre ou un mot-clé différent.",
+    "editQueryAriaLabel": "Modifier la requête de recherche",
+    "searchingAriaLabel": "Recherche en cours..."
+  },
+  "continueWatching": {
+    "title": "Continuer à regarder",
+    "subtitle": "Reprenez là où vous vous êtes arrêté",
+    "emptyTitle": "Votre historique de visionnage est vide",
+    "emptyDescription": "Commencez à regarder quelque chose et cela apparaîtra ici",
+    "removeAriaLabel": "Retirer de la liste",
+    "sectionAriaLabel": "Contenu récemment visionné",
+    "timeLeft": "{time} restant"
+  },
+  "contentDetail": {
+    "series": "Série",
+    "movie": "Film",
+    "failedToLoad": "Échec du chargement du contenu",
+    "close": "Fermer",
+    "closePreview": "Fermer l'aperçu",
+    "noImageAvailable": "Aucune image disponible",
+    "episodes": "Épisodes",
+    "season": "SAISON {number}",
+    "selectSeason": "SÉLECTIONNER LA SAISON",
+    "episodeCount": "({count} ÉP)",
+    "noEpisodesAvailable": "Aucun épisode disponible pour cette saison",
+    "loadingEpisodes": "Chargement des épisodes",
+    "watchPartyPick": "Watch Party — Choisissez un épisode",
+    "watchPartyHint": "Tout le monde rejoint une fois que vous sélectionnez",
+    "cancelWatchParty": "Annuler la watch party",
+    "continue": "Continuer",
+    "experienceStarting": "Expérience en cours de démarrage",
+    "preparingContent": "Préparation de \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "Regarder seul",
+    "resume": "Reprendre",
+    "resumeEpisode": "Reprendre S{season}:E{episode}",
+    "playEpisode": "Lire S{season}:E1",
+    "loading": "Chargement",
+    "watchTogether": "Regarder ensemble",
+    "creating": "Création",
+    "toWatchlist": "À la liste",
+    "removeFromList": "Retirer de la liste"
+  },
+  "download": {
+    "download": "Télécharger",
+    "viewInVault": "Voir dans le coffre",
+    "cancel": "Annuler",
+    "language": "Langue",
+    "original": "Original",
+    "selectQuality": "Sélectionner la qualité",
+    "selectEpisode": "Sélectionner l'épisode",
+    "gatheringSources": "Collecte des sources...",
+    "noFormatsAvailable": "Aucun format disponible",
+    "noEpisodesAvailable": "Aucun épisode disponible",
+    "saved": "Enregistré",
+    "securelyStarting": "Démarrage sécurisé du téléchargement...",
+    "episode": "Épisode {number}",
+    "untitled": "Sans titre"
+  }
+}

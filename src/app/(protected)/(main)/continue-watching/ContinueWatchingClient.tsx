@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
 
@@ -16,6 +17,7 @@ export default function ContinueWatchingClient() {
   const [selectedContentId, setSelectedContentId] = useState<string | null>(
     null,
   );
+  const t = useTranslations('search');
 
   return (
     <main className="min-h-[calc(100vh-80px)] bg-background pb-32 animate-in fade-in">
@@ -29,14 +31,10 @@ export default function ContinueWatchingClient() {
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
             <div>
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-primary-foreground font-headline uppercase leading-none mb-4 min-w-0">
-                CONTINUE
-                <br />
-                <span className="bg-neo-yellow text-foreground px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
-                  WATCHING
-                </span>
+                {t('continueWatching.title')}
               </h1>
               <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-                Pick Up Where You Left Off
+                {t('continueWatching.subtitle')}
               </p>
             </div>
           </div>

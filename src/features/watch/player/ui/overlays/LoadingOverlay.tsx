@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface LoadingOverlayProps {
@@ -12,6 +13,9 @@ export function LoadingOverlay({
   text,
   bgOpacity,
 }: LoadingOverlayProps) {
+  const t = useTranslations('watch.player');
+  const displayText = text || t('initConnection');
+
   return (
     <div
       className={cn(
@@ -22,7 +26,7 @@ export function LoadingOverlay({
       )}
       role="status"
       aria-live="polite"
-      aria-label={text || 'Initializing secure connection'}
+      aria-label={displayText}
       aria-hidden={!isVisible}
     >
       <div className="flex flex-col items-center gap-6 saturate-[1.2] max-w-[calc(100vw-2rem)] md:max-w-none">
@@ -32,7 +36,7 @@ export function LoadingOverlay({
         {/* Steady Loading Text */}
         <div className="flex flex-col items-center gap-2">
           <span className="text-white text-xs min-[380px]:text-sm md:text-base font-medium tracking-wide text-center">
-            {text || 'Initializing secure connection'}
+            {displayText}
           </span>
         </div>
       </div>

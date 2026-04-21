@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "இயக்கு",
+    "pause": "இடைநிறுத்து",
+    "loading": "உள்ளடக்கம் ஏற்றப்படுகிறது...",
+    "initConnection": "பாதுகாப்பான இணைப்பு தொடங்குகிறது",
+    "bufferingAriaLabel": "வீடியோ பஃபரிங்",
+    "playbackError": "பிளேபேக் பிழை",
+    "tryAgain": "மீண்டும் முயற்சிக்கவும்",
+    "goBack": "திரும்பிச் செல்",
+    "errorDefault": "ஒரு பிழை ஏற்பட்டது",
+    "liveUnavailable": "நேரலை ஸ்ட்ரீம் கிடைக்கவில்லை",
+    "enterFullscreen": "முழுத்திரையில் நுழை",
+    "exitFullscreen": "முழுத்திரையிலிருந்து வெளியேறு",
+    "mute": "ஒலியடக்கு",
+    "unmute": "ஒலி இயக்கு",
+    "volumeControl": "ஒலி அளவு கட்டுப்பாடு",
+    "volume": "ஒலி அளவு",
+    "skipBack": "{seconds}s பின்னால் செல்",
+    "skipForward": "{seconds}s முன்னால் செல்",
+    "tapToResume": "தொடர தட்டவும்",
+    "hostControlsPlayback": "ஹோஸ்ட் பிளேபேக்கை கட்டுப்படுத்துகிறார்",
+    "sitBackAndEnjoy": "சாய்ந்து அமர்ந்து நிகழ்ச்சியை ரசியுங்கள்",
+    "goBackAriaLabel": "திரும்பிச் செல்",
+    "movie": "திரைப்படம்",
+    "tvSeries": "தொலைக்காட்சி தொடர்",
+    "live": "நேரலை",
+    "liveBadge": "LIVE",
+    "watchingLive": "நீங்கள் நேரலையில் பார்க்கிறீர்கள்",
+    "jumpToLive": "நேரலைக்கு செல்"
+  },
+  "settings": {
+    "quality": "தரம்",
+    "speed": "வேகம்",
+    "normal": "சாதாரணம்",
+    "auto": "தானியங்கி",
+    "locked": "பூட்டப்பட்டது"
+  },
+  "subtitles": {
+    "title": "வசனங்கள்",
+    "off": "அணை",
+    "subtitleStyle": "வசன பாணி",
+    "size": "அளவு",
+    "font": "எழுத்துரு",
+    "background": "பின்னணி",
+    "textColor": "எழுத்து நிறம்",
+    "textEffect": "எழுத்து விளைவு"
+  },
+  "audio": {
+    "title": "ஆடியோ",
+    "audioLanguage": "ஆடியோ மொழி"
+  },
+  "episodes": {
+    "episode": "அத்தியாயம் {number}",
+    "season": "சீசன் {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "இயக்க கிளிக் செய்யவும்",
+    "loading": "ஏற்றப்படுகிறது...",
+    "noEpisodes": "அத்தியாயங்கள் இல்லை",
+    "nowPlaying": "இப்போது இயங்குகிறது",
+    "min": "{duration} நிமிடம்"
+  },
+  "nextEpisode": {
+    "nextSeason": "அடுத்த சீசன்",
+    "nextEpisode": "அடுத்த அத்தியாயம்",
+    "inCountdown": "{seconds}s இல்",
+    "play": "இயக்கு",
+    "cancel": "ரத்துசெய்",
+    "loading": "ஏற்றப்படுகிறது"
+  },
+  "offline": {
+    "pageTitle": "ஆஃப்லைன்",
+    "vault": "வால்ட்",
+    "yourDownloads": "உங்கள் பதிவிறக்கிய உள்ளடக்கம்",
+    "downloadsCount": "{count} பதிவிறக்கம்(கள்)",
+    "availableOffline": "ஆஃப்லைனில் பார்க்க கிடைக்கும்",
+    "emptyTitle": "வால்ட் காலியாக உள்ளது",
+    "emptyDescription": "பாதுகாப்பான பதிவிறக்கங்கள் இங்கே தோன்றும்",
+    "desktopRequired": "டெஸ்க்டாப் தேவை",
+    "desktopRequiredDesc": "ஆஃப்லைன் பாதுகாப்பான பதிவிறக்கங்கள் நேட்டிவ் டெஸ்க்டாப் ஆப்பில் மட்டுமே கிடைக்கும். பயணத்திற்கு திரைப்படங்கள் மற்றும் தொடர்களை சேமிக்க ஆப்பை பதிவிறக்கவும்.",
+    "pauseDownload": "பதிவிறக்கத்தை இடைநிறுத்து",
+    "resumeDownload": "பதிவிறக்கத்தை தொடர்",
+    "removeDownload": "பதிவிறக்கத்தை நீக்கு",
+    "cancelDownload": "பதிவிறக்கத்தை ரத்துசெய்",
+    "waitForComplete": "ஆஃப்லைனில் பார்க்க பதிவிறக்கம் முடியும் வரை காத்திருக்கவும்.",
+    "waitingInQueue": "வரிசையில் காத்திருக்கிறது...",
+    "downloading": "பதிவிறக்கம் செய்யப்படுகிறது..."
+  },
+  "watchlist": {
+    "pageTitle": "எனது",
+    "watchlist": "வாட்ச்லிஸ்ட்",
+    "subtitle": "உங்கள் தேர்ந்தெடுத்த தொகுப்பு",
+    "itemCount": "{count} உருப்படி(கள்)",
+    "emptyTitle": "உங்கள் வாட்ச்லிஸ்ட் காலியாக உள்ளது",
+    "emptyDescription": "பின்னர் பார்க்க திரைப்படங்கள் மற்றும் நிகழ்ச்சிகளை சேமியுங்கள்",
+    "viewDetails": "{title} விவரங்களைக் காண்க"
+  }
+}

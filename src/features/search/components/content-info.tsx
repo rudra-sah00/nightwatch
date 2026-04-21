@@ -11,6 +11,7 @@ import {
   Tv,
   Users,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ContentProgress } from '@/types/content';
@@ -42,6 +43,7 @@ export const ContentInfo = memo(function ContentInfo({
   watchProgress,
 }: Pick<ContentInfoProps, 'show' | 'hasWatchProgress' | 'watchProgress'>) {
   const isSeries = show.contentType === ContentType.Series;
+  const t = useTranslations('search');
 
   return (
     <div className="space-y-6">
@@ -56,12 +58,12 @@ export const ContentInfo = memo(function ContentInfo({
           {isSeries ? (
             <span className="flex items-center gap-2">
               <Tv className="w-4 h-4 stroke-[3px]" />
-              Series
+              {t('contentDetail.series')}
             </span>
           ) : (
             <span className="flex items-center gap-2">
               <Film className="w-4 h-4 stroke-[3px]" />
-              Movie
+              {t('contentDetail.movie')}
             </span>
           )}
         </span>
@@ -119,7 +121,7 @@ export const ContentInfo = memo(function ContentInfo({
               watchProgress?.seasonNumber != null &&
               watchProgress?.episodeNumber != null
                 ? `S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
-                : 'Continue'}
+                : t('contentDetail.continue')}
             </span>
             <span>{Math.round(watchProgress?.progressPercent || 0)}%</span>
           </div>
@@ -156,6 +158,7 @@ export const ContentActions = memo(function ContentActions({
   isSeries: boolean;
   isOfflineMode?: boolean;
 }) {
+  const t = useTranslations('search');
   const handleButtonClick = () => {
     if (hasWatchProgress && onResume) {
       onResume();
@@ -193,19 +196,24 @@ export const ContentActions = memo(function ContentActions({
         )}
         <span className="truncate">
           {isPlaying
-            ? 'Loading'
+            ? t('actions.loading')
             : isLoadingProgress && hasWatchProgress
-              ? 'Loading'
+              ? t('actions.loading')
               : hasWatchProgress &&
                   isSeries &&
                   watchProgress?.seasonNumber != null &&
                   watchProgress?.episodeNumber != null
-                ? `Resume S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                ? t('actions.resumeEpisode', {
+                    season: watchProgress.seasonNumber,
+                    episode: watchProgress.episodeNumber,
+                  })
                 : hasWatchProgress && !isSeries
-                  ? `Resume`
+                  ? t('actions.resume')
                   : isSeries && selectedSeason
-                    ? `Play S${selectedSeason.seasonNumber}:E1`
-                    : 'Watch Solo'}
+                    ? t('actions.playEpisode', {
+                        season: selectedSeason.seasonNumber,
+                      })
+                    : t('actions.watchSolo')}
         </span>
       </button>
 
@@ -229,7 +237,9 @@ export const ContentActions = memo(function ContentActions({
             <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
           )}
           <span className="truncate">
-            {isCreatingParty ? 'Creating' : 'Watch Together'}
+            {isCreatingParty
+              ? t('actions.creating')
+              : t('actions.watchTogether')}
           </span>
         </button>
       )}
@@ -258,7 +268,9 @@ export const ContentActions = memo(function ContentActions({
             <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
           )}
           <span className="truncate">
-            {isInWatchlist ? 'Remove from List' : 'To Watchlist'}
+            {isInWatchlist
+              ? t('actions.removeFromList')
+              : t('actions.toWatchlist')}
           </span>
         </button>
       )}

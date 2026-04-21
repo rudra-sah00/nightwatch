@@ -1,6 +1,7 @@
 'use client';
 
 import { Maximize, Minimize } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface FullscreenProps {
@@ -17,8 +18,9 @@ export function Fullscreen({
   label,
   compact = false,
 }: FullscreenProps) {
+  const t = useTranslations('watch.player');
   const ariaLabel =
-    label || (isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
+    label || (isFullscreen ? t('exitFullscreen') : t('enterFullscreen'));
 
   return (
     <button

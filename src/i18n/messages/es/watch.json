@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "loading": "Cargando contenido...",
+    "initConnection": "Iniciando conexión segura",
+    "bufferingAriaLabel": "Almacenando video en búfer",
+    "playbackError": "Error de reproducción",
+    "tryAgain": "Intentar de nuevo",
+    "goBack": "Volver",
+    "errorDefault": "Ocurrió un error",
+    "liveUnavailable": "Transmisión en vivo no disponible",
+    "enterFullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "volumeControl": "Control de volumen",
+    "volume": "Volumen",
+    "skipBack": "Retroceder {seconds}s",
+    "skipForward": "Avanzar {seconds}s",
+    "tapToResume": "Toca para reanudar",
+    "hostControlsPlayback": "El anfitrión controla la reproducción",
+    "sitBackAndEnjoy": "Relájate y disfruta del show",
+    "goBackAriaLabel": "Volver",
+    "movie": "Película",
+    "tvSeries": "Serie de TV",
+    "live": "En vivo",
+    "liveBadge": "EN VIVO",
+    "watchingLive": "Estás viendo en vivo",
+    "jumpToLive": "Ir a en vivo"
+  },
+  "settings": {
+    "quality": "Calidad",
+    "speed": "Velocidad",
+    "normal": "Normal",
+    "auto": "Auto",
+    "locked": "Bloqueado"
+  },
+  "subtitles": {
+    "title": "Subtítulos",
+    "off": "Desactivado",
+    "subtitleStyle": "Estilo de subtítulos",
+    "size": "Tamaño",
+    "font": "Fuente",
+    "background": "Fondo",
+    "textColor": "Color de texto",
+    "textEffect": "Efecto de texto"
+  },
+  "audio": {
+    "title": "Audio",
+    "audioLanguage": "Idioma de audio"
+  },
+  "episodes": {
+    "episode": "Episodio {number}",
+    "season": "Temporada {number}",
+    "seasonShort": "T{number}",
+    "clickToPlay": "Clic para reproducir",
+    "loading": "Cargando...",
+    "noEpisodes": "Sin episodios",
+    "nowPlaying": "reproduciendo ahora",
+    "min": "{duration} min"
+  },
+  "nextEpisode": {
+    "nextSeason": "Siguiente temporada",
+    "nextEpisode": "Siguiente episodio",
+    "inCountdown": "en {seconds}s",
+    "play": "Reproducir",
+    "cancel": "Cancelar",
+    "loading": "Cargando"
+  },
+  "offline": {
+    "pageTitle": "SIN CONEXIÓN",
+    "vault": "BÓVEDA",
+    "yourDownloads": "Tu contenido descargado",
+    "downloadsCount": "{count} descarga(s)",
+    "availableOffline": "Disponible para ver sin conexión",
+    "emptyTitle": "La bóveda está vacía",
+    "emptyDescription": "Las descargas seguras aparecerán aquí",
+    "desktopRequired": "Se requiere escritorio",
+    "desktopRequiredDesc": "Las descargas seguras sin conexión solo están disponibles en la app de escritorio nativa. Descarga la app para guardar películas y series para viajes.",
+    "pauseDownload": "Pausar descarga",
+    "resumeDownload": "Reanudar descarga",
+    "removeDownload": "Eliminar descarga",
+    "cancelDownload": "Cancelar descarga",
+    "waitForComplete": "Espera a que se complete la descarga para ver sin conexión.",
+    "waitingInQueue": "Esperando en cola...",
+    "downloading": "Descargando..."
+  },
+  "watchlist": {
+    "pageTitle": "MI",
+    "watchlist": "LISTA",
+    "subtitle": "Tu selección curada",
+    "itemCount": "{count} {count, plural, one {elemento} other {elementos}}",
+    "emptyTitle": "Tu lista está vacía",
+    "emptyDescription": "Guarda películas y series para ver después",
+    "viewDetails": "Ver detalles de {title}"
+  }
+}

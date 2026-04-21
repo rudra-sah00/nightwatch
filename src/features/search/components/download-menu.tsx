@@ -2,6 +2,7 @@
 
 import { Check, Download, HardDriveDownload, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
@@ -38,6 +39,7 @@ function TransparentQualityOptions({
   existingDownload?: DownloadItem;
   onPick: (quality: 'high' | 'medium' | 'low', url?: string) => void;
 }) {
+  const t = useTranslations('search');
   const getQualityUrl = (
     target: 'high' | 'medium' | 'low',
   ): string | undefined => {
@@ -65,7 +67,7 @@ function TransparentQualityOptions({
       <div className="flex items-center gap-3 text-black/50 dark:text-white/50 animate-pulse">
         <Loader2 className="w-5 h-5 animate-spin" />
         <span className="text-xl font-headline font-black uppercase tracking-wider">
-          Gathering sources...
+          {t('download.gatheringSources')}
         </span>
       </div>
     );
@@ -74,7 +76,7 @@ function TransparentQualityOptions({
   if (isS2 && qualities !== null && qualities.length === 0) {
     return (
       <p className="text-xl font-headline font-black uppercase text-red-400">
-        No formats available
+        {t('download.noFormatsAvailable')}
       </p>
     );
   }
@@ -94,7 +96,7 @@ function TransparentQualityOptions({
             strokeWidth={2}
           />
           <span className="text-xl md:text-3xl font-headline font-black uppercase tracking-[0.2em] text-black dark:text-white animate-pulse">
-            Securely Starting Download...
+            {t('download.securelyStarting')}
           </span>
         </div>
       )}
@@ -146,7 +148,7 @@ function TransparentQualityOptions({
                 <div className="flex items-center gap-3 text-green-400">
                   <Check className="w-8 h-8 md:w-12 md:h-12 stroke-[3]" />
                   <span className="hidden md:inline text-xl font-black uppercase tracking-widest">
-                    Saved
+                    {t('download.saved')}
                   </span>
                 </div>
               ) : (
@@ -173,6 +175,7 @@ function TransparentMovieSection({
   onComplete: () => void;
   show: ShowDetails;
 }) {
+  const t = useTranslations('search');
   const {
     isS2,
     qualities,
@@ -199,7 +202,7 @@ function TransparentMovieSection({
     <div className="flex flex-col gap-8 flex-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-right-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
       <div className="space-y-2">
         <h3 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
-          Select Quality
+          {t('download.selectQuality')}
         </h3>
         <p className="text-2xl font-bold text-black/80 dark:text-white/80">
           {showTitle}
@@ -234,6 +237,7 @@ function TransparentEpisodeItem({
   show: ShowDetails;
 }) {
   const router = useRouter();
+  const t = useTranslations('search');
   const {
     isS2,
     qualities,
@@ -298,7 +302,9 @@ function TransparentEpisodeItem({
                 : 'text-black/40 dark:text-white/40 group-hover:text-black/60 dark:text-white/60',
             )}
           >
-            {existingDownload ? 'View in Vault' : episode.title || 'Untitled'}
+            {existingDownload
+              ? t('download.viewInVault')
+              : episode.title || t('download.untitled')}
           </span>
         </div>
       </button>
@@ -338,6 +344,7 @@ export function DownloadMenu({
   const [selectedDubType, setSelectedDubType] = useState<ContentType>(
     show.contentType,
   );
+  const t = useTranslations('search');
 
   const isSeries = selectedDubType === ContentType.Series;
   const seasonNumber = selectedSeason?.seasonNumber ?? 1;
@@ -384,7 +391,7 @@ export function DownloadMenu({
         )}
       >
         <HardDriveDownload className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-        <span className="truncate">View in Vault</span>
+        <span className="truncate">{t('download.viewInVault')}</span>
       </button>
     );
   }
@@ -401,7 +408,7 @@ export function DownloadMenu({
           )}
         >
           <Download className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-          <span className="truncate">Download</span>
+          <span className="truncate">{t('download.download')}</span>
         </button>
       </DialogTrigger>
 
@@ -416,13 +423,13 @@ export function DownloadMenu({
           onClick={() => setIsOpen(false)}
           className="absolute top-8 right-8 z-50 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
         >
-          Cancel
+          {t('download.cancel')}
         </button>
 
         {/* Left Column: Languages */}
         <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10 p-8 md:p-16 flex flex-col justify-start data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-left-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-left-8 duration-700 h-full overflow-hidden">
           <h2 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40 mb-12">
-            Language
+            {t('download.language')}
           </h2>
 
           <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-4">
@@ -465,7 +472,7 @@ export function DownloadMenu({
               </div>
             ) : (
               <div className="text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter text-black dark:text-white">
-                Original
+                {t('download.original')}
               </div>
             )}
           </div>
@@ -485,17 +492,17 @@ export function DownloadMenu({
             <div className="flex flex-col gap-6 w-full max-w-3xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-right-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
               <div className="space-y-2 mb-8">
                 <h3 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
-                  Select Episode
+                  {t('download.selectEpisode')}
                 </h3>
                 <p className="text-2xl font-bold text-black/80 dark:text-white/80">
-                  Season {seasonNumber}
+                  {t('contentDetail.season', { number: seasonNumber })}
                 </p>
               </div>
 
               <div className="flex flex-col pr-4">
                 {seasonEpisodes.length === 0 ? (
                   <p className="text-xl font-headline font-black uppercase text-black/30 dark:text-white/30">
-                    No episodes available
+                    {t('download.noEpisodesAvailable')}
                   </p>
                 ) : (
                   seasonEpisodes.map((ep) => (

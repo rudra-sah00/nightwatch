@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { memo, useEffect } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
@@ -48,6 +49,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   props: WatchPlayerProps,
 ) {
   const router = useRouter();
+  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const useInlineMobileLayout =
     isMobile && (props.mobileLayout ?? 'inline') === 'inline';
@@ -58,8 +60,8 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     props.metadata.episode != null
       ? `S${props.metadata.season}:E${props.metadata.episode}${props.metadata.episodeTitle ? ` • ${props.metadata.episodeTitle}` : ''}`
       : props.metadata.year
-        ? `Movie • ${props.metadata.year}`
-        : 'Movie';
+        ? `${t('movie')} • ${props.metadata.year}`
+        : t('movie');
 
   // Handle going back
   const handleBack = () => {
@@ -92,7 +94,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
       <button
         type="button"
         onClick={handleBack}
-        aria-label="Go back"
+        aria-label={t('goBackAriaLabel')}
         className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
       >
         <ArrowLeft className="w-5 h-5 text-white" />
@@ -144,6 +146,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 function VODPlayerState() {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
+  const t = useTranslations('watch.player');
 
   return (
     <>
@@ -161,7 +164,7 @@ function VODPlayerState() {
           ) : null}
           <LoadingOverlay
             isVisible={true}
-            text="Loading content..."
+            text={t('loading')}
             bgOpacity="bg-transparent"
           />
         </div>
@@ -173,7 +176,7 @@ function VODPlayerState() {
 
       <ErrorOverlay
         isVisible={!!state.error && !state.isLoading && !state.isBuffering}
-        message={state.error || 'An error occurred'}
+        message={state.error || t('errorDefault')}
         onRetry={() => {
           window.location.reload();
         }}

@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "FIND YOUR",
+    "headline2": "FILM",
+    "searchPlaceholder": "SEARCH MOVIES, SHOWS, OR CINEMA...",
+    "searchButton": "SEARCH",
+    "searchAriaLabel": "Search movies, shows, or cinema",
+    "stat1": "12k+ Titles",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Indie Focus"
+  },
+  "results": {
+    "searching": "Searching:",
+    "resultsLabel": "Results:",
+    "filmsFound": "{count} Films Found in the Archives",
+    "noResults": "No results found",
+    "noResultsHint": "Try a different spelling or search for something else",
+    "searchFailed": "Search failed",
+    "searchFailedHint": "Could not reach the server. Please try again.",
+    "noResultsArchive": "No Results Found",
+    "noResultsArchiveHint": "We couldn't find any matches in our archives. Try searching for a different title or keyword.",
+    "editQueryAriaLabel": "Edit search query",
+    "searchingAriaLabel": "Searching..."
+  },
+  "continueWatching": {
+    "title": "Continue Watching",
+    "subtitle": "Pick Up Where You Left Off",
+    "emptyTitle": "Your watch history is empty",
+    "emptyDescription": "Start watching something and it will appear here",
+    "removeAriaLabel": "Remove from list",
+    "sectionAriaLabel": "Recently viewed content",
+    "timeLeft": "{time} left"
+  },
+  "contentDetail": {
+    "series": "Series",
+    "movie": "Movie",
+    "failedToLoad": "Failed to load content",
+    "close": "Close",
+    "closePreview": "Close Preview",
+    "noImageAvailable": "No Image Available",
+    "episodes": "Episodes",
+    "season": "SEASON {number}",
+    "selectSeason": "SELECT SEASON",
+    "episodeCount": "({count} EP)",
+    "noEpisodesAvailable": "No episodes available for this season",
+    "loadingEpisodes": "Loading episodes",
+    "watchPartyPick": "Watch Party — Pick an episode",
+    "watchPartyHint": "Everyone joins once you select",
+    "cancelWatchParty": "Cancel watch party",
+    "continue": "Continue",
+    "experienceStarting": "Experience Starting",
+    "preparingContent": "Preparing \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "Watch Solo",
+    "resume": "Resume",
+    "resumeEpisode": "Resume S{season}:E{episode}",
+    "playEpisode": "Play S{season}:E1",
+    "loading": "Loading",
+    "watchTogether": "Watch Together",
+    "creating": "Creating",
+    "toWatchlist": "To Watchlist",
+    "removeFromList": "Remove from List"
+  },
+  "download": {
+    "download": "Download",
+    "viewInVault": "View in Vault",
+    "cancel": "Cancel",
+    "language": "Language",
+    "original": "Original",
+    "selectQuality": "Select Quality",
+    "selectEpisode": "Select Episode",
+    "gatheringSources": "Gathering sources...",
+    "noFormatsAvailable": "No formats available",
+    "noEpisodesAvailable": "No episodes available",
+    "saved": "Saved",
+    "securelyStarting": "Securely Starting Download...",
+    "episode": "Episode {number}",
+    "untitled": "Untitled"
+  }
+}

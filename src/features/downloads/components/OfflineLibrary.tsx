@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -27,6 +28,7 @@ export function OfflineLibrary() {
     pauseDownload,
     resumeDownload,
   } = useDownloads();
+  const t = useTranslations('watch.offline');
 
   const [selectedItem, setSelectedItem] = useState<{
     contentId: string;
@@ -36,7 +38,7 @@ export function OfflineLibrary() {
 
   const handleSelect = (item: DownloadItem) => {
     if (item.status !== 'COMPLETED') {
-      toast.info('Please wait until the download is complete to view offline.');
+      toast.info(t('waitForComplete'));
       return;
     }
 
@@ -74,11 +76,10 @@ export function OfflineLibrary() {
       <div className="flex flex-col items-center justify-center p-12 text-center border-[4px] border-border bg-card">
         <MonitorDown className="w-16 h-16 stroke-[2px] text-foreground/30 mb-6" />
         <h2 className="text-2xl font-headline font-black uppercase tracking-widest mb-2">
-          Desktop Required
+          {t('desktopRequired')}
         </h2>
         <p className="text-foreground/70 font-semibold max-w-md mx-auto">
-          Offline secure downloads are only available in the native desktop app.
-          Download the app to save movies and series for travel.
+          {t('desktopRequiredDesc')}
         </p>
       </div>
     );
@@ -96,14 +97,14 @@ export function OfflineLibrary() {
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
             <div>
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4 min-w-0">
-                OFFLINE
+                {t('pageTitle')}
                 <br />
                 <span className="bg-background text-foreground px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
-                  VAULT
+                  {t('vault')}
                 </span>
               </h1>
               <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-                Your Downloaded Content
+                {t('yourDownloads')}
               </p>
             </div>
 
@@ -112,10 +113,10 @@ export function OfflineLibrary() {
                 <Download className="w-10 h-10 stroke-[3px] text-neo-blue" />
                 <div className="space-y-1">
                   <h3 className="font-headline font-black uppercase text-xl md:text-2xl leading-none">
-                    {downloads.length} Download(s)
+                    {t('downloadsCount', { count: downloads.length })}
                   </h3>
                   <p className="font-body text-sm font-bold text-muted-foreground">
-                    Available for offline viewing
+                    {t('availableOffline')}
                   </p>
                 </div>
               </div>
@@ -129,8 +130,8 @@ export function OfflineLibrary() {
           {downloads.length === 0 ? (
             <EmptyState
               icon={HardDriveDownload}
-              title="Vault is empty"
-              description="Secure downloads will appear here"
+              title={t('emptyTitle')}
+              description={t('emptyDescription')}
             />
           ) : (
             <div className="flex flex-col gap-4">
@@ -219,12 +220,12 @@ export function OfflineLibrary() {
                               <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
                               <span className="text-neo-blue tabular-nums">
                                 {item.status === 'QUEUED'
-                                  ? 'Waiting in queue...'
+                                  ? t('waitingInQueue')
                                   : item.speed
                                     ? item.speed
                                     : !item.isMp4
                                       ? `${item.progress.toFixed(1)}%`
-                                      : 'Downloading...'}
+                                      : t('downloading')}
                               </span>
                               {item.speed &&
                                 !item.isMp4 &&
@@ -263,7 +264,7 @@ export function OfflineLibrary() {
                               pauseDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-yellow hover:text-black transition-colors"
-                            aria-label="Pause Download"
+                            aria-label={t('pauseDownload')}
                           >
                             <Pause className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -276,7 +277,7 @@ export function OfflineLibrary() {
                               resumeDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-green hover:text-black transition-colors"
-                            aria-label="Resume Download"
+                            aria-label={t('resumeDownload')}
                           >
                             <Play className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -291,7 +292,7 @@ export function OfflineLibrary() {
                               cancelDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
-                            aria-label="Remove Download"
+                            aria-label={t('removeDownload')}
                           >
                             <Trash2 className="w-4 h-4 stroke-[3px]" />
                           </button>
@@ -303,7 +304,7 @@ export function OfflineLibrary() {
                               cancelDownload(item.contentId);
                             }}
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
-                            aria-label="Cancel Download"
+                            aria-label={t('cancelDownload')}
                           >
                             <X className="w-4 h-4 stroke-[3px]" />
                           </button>

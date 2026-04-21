@@ -2,6 +2,7 @@
 
 import { Loader2, Users, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
@@ -81,6 +82,7 @@ export function ContentDetailModal({
 
   const isMobile = useIsMobile();
   const episodesSectionRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('search');
 
   // Scroll to episodes when party mode activates
   useEffect(() => {
@@ -116,14 +118,14 @@ export function ContentDetailModal({
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
         <p className="text-foreground text-lg font-headline font-black uppercase tracking-widest">
-          Failed to load content
+          {t('contentDetail.failedToLoad')}
         </p>
         <Button
           variant="neo-outline"
           className="mt-6 border-[3px] border-border font-black uppercase "
           onClick={onClose}
         >
-          Close
+          {t('contentDetail.close')}
         </Button>
       </div>
     );
@@ -133,8 +135,8 @@ export function ContentDetailModal({
   if (autoPlay && showCountdown) {
     return (
       <PlaybackCountdown
-        title="Experience Starting"
-        subtitle={`Preparing "${show.title}"...`}
+        title={t('contentDetail.experienceStarting')}
+        subtitle={t('contentDetail.preparingContent', { title: show.title })}
         onComplete={() => {
           countdownTarget?.();
           setShowCountdown(false);
@@ -206,7 +208,7 @@ export function ContentDetailModal({
                   className="absolute top-4 left-4 z-10 px-4 py-2 bg-card text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-neo-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                   onClick={() => setShowTrailer(false)}
                 >
-                  Close Preview
+                  {t('contentDetail.closePreview')}
                 </button>
               </div>
             ) : !imageError ? (
@@ -236,7 +238,7 @@ export function ContentDetailModal({
             ) : (
               <div className="w-full h-full bg-background flex items-center justify-center">
                 <span className="text-foreground font-black font-headline uppercase tracking-widest">
-                  No Image Available
+                  {t('contentDetail.noImageAvailable')}
                 </span>
               </div>
             )}
@@ -309,10 +311,10 @@ export function ContentDetailModal({
                     </div>
                     <div>
                       <p className="text-lg md:text-xl font-black font-headline uppercase tracking-widest text-foreground leading-tight">
-                        Watch Party — Pick an episode
+                        {t('contentDetail.watchPartyPick')}
                       </p>
                       <p className="text-sm font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                        Everyone joins once you select
+                        {t('contentDetail.watchPartyHint')}
                       </p>
                     </div>
                   </div>
@@ -320,7 +322,7 @@ export function ContentDetailModal({
                     type="button"
                     onClick={() => setIsSetupOpen(false)}
                     className="p-3 bg-neo-red border-[3px] border-border hover:bg-primary text-white hover:text-primary-foreground transition-colors flex-shrink-0"
-                    aria-label="Cancel watch party"
+                    aria-label={t('contentDetail.cancelWatchParty')}
                   >
                     <X className="w-6 h-6 stroke-[3px]" />
                   </button>
@@ -335,7 +337,7 @@ export function ContentDetailModal({
                     isSetupOpen ? 'text-foreground' : 'text-foreground',
                   )}
                 >
-                  Episodes
+                  {t('contentDetail.episodes')}
                 </h2>
                 <SeasonSelector
                   seasons={show.seasons || []}

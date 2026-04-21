@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { Episode } from '../types';
 import { EpisodeSkeleton } from './EpisodeSkeleton';
 import { EpisodeCard } from './episode-card';
@@ -17,12 +18,14 @@ export function EpisodeList({
   playingEpisodeId,
   onPlayEpisode,
 }: EpisodeListProps) {
+  const t = useTranslations('search');
+
   if (isLoading) {
     return (
       <output
         className="space-y-2 block"
         aria-busy="true"
-        aria-label="Loading episodes"
+        aria-label={t('contentDetail.loadingEpisodes')}
       >
         {['ep-sk-1', 'ep-sk-2', 'ep-sk-3'].map((id) => (
           <EpisodeSkeleton key={id} />
@@ -34,7 +37,7 @@ export function EpisodeList({
   if (episodes.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        No episodes available for this season
+        {t('contentDetail.noEpisodesAvailable')}
       </div>
     );
   }

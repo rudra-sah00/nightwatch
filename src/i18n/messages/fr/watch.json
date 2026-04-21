@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Lecture",
+    "pause": "Pause",
+    "loading": "Chargement du contenu...",
+    "initConnection": "Initialisation de la connexion sécurisée",
+    "bufferingAriaLabel": "Mise en mémoire tampon de la vidéo",
+    "playbackError": "Erreur de lecture",
+    "tryAgain": "Réessayer",
+    "goBack": "Retour",
+    "errorDefault": "Une erreur est survenue",
+    "liveUnavailable": "Diffusion en direct indisponible",
+    "enterFullscreen": "Plein écran",
+    "exitFullscreen": "Quitter le plein écran",
+    "mute": "Couper le son",
+    "unmute": "Activer le son",
+    "volumeControl": "Contrôle du volume",
+    "volume": "Volume",
+    "skipBack": "Reculer de {seconds}s",
+    "skipForward": "Avancer de {seconds}s",
+    "tapToResume": "Appuyez pour reprendre",
+    "hostControlsPlayback": "L'hôte contrôle la lecture",
+    "sitBackAndEnjoy": "Installez-vous et profitez du spectacle",
+    "goBackAriaLabel": "Retour",
+    "movie": "Film",
+    "tvSeries": "Série TV",
+    "live": "En direct",
+    "liveBadge": "EN DIRECT",
+    "watchingLive": "Vous regardez en direct",
+    "jumpToLive": "Aller au direct"
+  },
+  "settings": {
+    "quality": "Qualité",
+    "speed": "Vitesse",
+    "normal": "Normal",
+    "auto": "Auto",
+    "locked": "Verrouillé"
+  },
+  "subtitles": {
+    "title": "Sous-titres",
+    "off": "Désactivé",
+    "subtitleStyle": "Style des sous-titres",
+    "size": "Taille",
+    "font": "Police",
+    "background": "Arrière-plan",
+    "textColor": "Couleur du texte",
+    "textEffect": "Effet de texte"
+  },
+  "audio": {
+    "title": "Audio",
+    "audioLanguage": "Langue audio"
+  },
+  "episodes": {
+    "episode": "Épisode {number}",
+    "season": "Saison {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "Cliquez pour lire",
+    "loading": "Chargement...",
+    "noEpisodes": "Aucun épisode",
+    "nowPlaying": "en cours de lecture",
+    "min": "{duration} min"
+  },
+  "nextEpisode": {
+    "nextSeason": "Saison suivante",
+    "nextEpisode": "Épisode suivant",
+    "inCountdown": "dans {seconds}s",
+    "play": "Lecture",
+    "cancel": "Annuler",
+    "loading": "Chargement"
+  },
+  "offline": {
+    "pageTitle": "HORS LIGNE",
+    "vault": "COFFRE",
+    "yourDownloads": "Votre contenu téléchargé",
+    "downloadsCount": "{count} téléchargement(s)",
+    "availableOffline": "Disponible pour visionnage hors ligne",
+    "emptyTitle": "Le coffre est vide",
+    "emptyDescription": "Les téléchargements sécurisés apparaîtront ici",
+    "desktopRequired": "Bureau requis",
+    "desktopRequiredDesc": "Les téléchargements sécurisés hors ligne ne sont disponibles que dans l'application de bureau native. Téléchargez l'application pour sauvegarder des films et séries pour vos voyages.",
+    "pauseDownload": "Mettre en pause",
+    "resumeDownload": "Reprendre le téléchargement",
+    "removeDownload": "Supprimer le téléchargement",
+    "cancelDownload": "Annuler le téléchargement",
+    "waitForComplete": "Veuillez attendre la fin du téléchargement pour visionner hors ligne.",
+    "waitingInQueue": "En attente dans la file...",
+    "downloading": "Téléchargement en cours..."
+  },
+  "watchlist": {
+    "pageTitle": "MA",
+    "watchlist": "LISTE",
+    "subtitle": "Votre sélection personnalisée",
+    "itemCount": "{count} {count, plural, one {élément} other {éléments}}",
+    "emptyTitle": "Votre liste est vide",
+    "emptyDescription": "Sauvegardez des films et séries pour plus tard",
+    "viewDetails": "Voir les détails de {title}"
+  }
+}

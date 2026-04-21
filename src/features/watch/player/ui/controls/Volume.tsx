@@ -1,6 +1,7 @@
 'use client';
 
 import { Volume1, Volume2, VolumeX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useVolume } from './hooks/use-volume';
 
@@ -19,6 +20,7 @@ export function Volume({
 }: VolumeProps) {
   const { isHovered, setIsHovered, isDragging, sliderRef, handleMouseDown } =
     useVolume({ onVolumeChange });
+  const t = useTranslations('watch.player');
 
   // Determine which volume icon to show
   const VolumeIcon =
@@ -29,7 +31,7 @@ export function Volume({
   return (
     <fieldset
       className="flex items-center gap-2 group border-none p-0 m-0 min-w-0"
-      aria-label="Volume control"
+      aria-label={t('volumeControl')}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => !isDragging && setIsHovered(false)}
       onFocusCapture={() => setIsHovered(true)}
@@ -44,7 +46,7 @@ export function Volume({
         type="button"
         onClick={onMuteToggle}
         onMouseDown={(e) => e.preventDefault()}
-        aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+        aria-label={isMuted || volume === 0 ? t('unmute') : t('mute')}
         className={cn(
           'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
           'bg-background border-[3px] border-border text-foreground ',
@@ -72,7 +74,7 @@ export function Volume({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(displayVolume * 100)}
-          aria-label="Volume"
+          aria-label={t('volume')}
           onKeyDown={(e) => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
               e.preventDefault();

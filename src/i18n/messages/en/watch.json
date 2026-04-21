@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Play",
+    "pause": "Pause",
+    "loading": "Loading content...",
+    "initConnection": "Initializing secure connection",
+    "bufferingAriaLabel": "Buffering video",
+    "playbackError": "Playback Error",
+    "tryAgain": "Try Again",
+    "goBack": "Go Back",
+    "errorDefault": "An error occurred",
+    "liveUnavailable": "Live stream unavailable",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "volumeControl": "Volume control",
+    "volume": "Volume",
+    "skipBack": "Skip back {seconds}s",
+    "skipForward": "Skip forward {seconds}s",
+    "tapToResume": "Tap to resume",
+    "hostControlsPlayback": "Host Controls Playback",
+    "sitBackAndEnjoy": "Sit back and enjoy the show",
+    "goBackAriaLabel": "Go back",
+    "movie": "Movie",
+    "tvSeries": "TV Series",
+    "live": "Live",
+    "liveBadge": "LIVE",
+    "watchingLive": "You are watching live",
+    "jumpToLive": "Jump to live"
+  },
+  "settings": {
+    "quality": "Quality",
+    "speed": "Speed",
+    "normal": "Normal",
+    "auto": "Auto",
+    "locked": "Locked"
+  },
+  "subtitles": {
+    "title": "Subtitles",
+    "off": "Off",
+    "subtitleStyle": "Subtitle Style",
+    "size": "Size",
+    "font": "Font",
+    "background": "Background",
+    "textColor": "Text Color",
+    "textEffect": "Text Effect"
+  },
+  "audio": {
+    "title": "Audio",
+    "audioLanguage": "Audio Language"
+  },
+  "episodes": {
+    "episode": "Episode {number}",
+    "season": "Season {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "Click to play",
+    "loading": "Loading...",
+    "noEpisodes": "No episodes",
+    "nowPlaying": "now playing",
+    "min": "{duration} min"
+  },
+  "nextEpisode": {
+    "nextSeason": "Next Season",
+    "nextEpisode": "Next Episode",
+    "inCountdown": "in {seconds}s",
+    "play": "Play",
+    "cancel": "Cancel",
+    "loading": "Loading"
+  },
+  "offline": {
+    "pageTitle": "OFFLINE",
+    "vault": "VAULT",
+    "yourDownloads": "Your Downloaded Content",
+    "downloadsCount": "{count} Download(s)",
+    "availableOffline": "Available for offline viewing",
+    "emptyTitle": "Vault is empty",
+    "emptyDescription": "Secure downloads will appear here",
+    "desktopRequired": "Desktop Required",
+    "desktopRequiredDesc": "Offline secure downloads are only available in the native desktop app. Download the app to save movies and series for travel.",
+    "pauseDownload": "Pause Download",
+    "resumeDownload": "Resume Download",
+    "removeDownload": "Remove Download",
+    "cancelDownload": "Cancel Download",
+    "waitForComplete": "Please wait until the download is complete to view offline.",
+    "waitingInQueue": "Waiting in queue...",
+    "downloading": "Downloading..."
+  },
+  "watchlist": {
+    "pageTitle": "MY",
+    "watchlist": "WATCHLIST",
+    "subtitle": "Your Curated Selection",
+    "itemCount": "{count} {count, plural, one {item} other {items}}",
+    "emptyTitle": "Your watchlist is empty",
+    "emptyDescription": "Save movies and shows to watch later",
+    "viewDetails": "View details for {title}"
+  }
+}

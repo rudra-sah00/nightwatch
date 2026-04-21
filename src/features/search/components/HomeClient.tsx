@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useSearchInput } from '@/features/search/hooks/use-search-input';
 
 export function HomeClient() {
+  const t = useTranslations('search');
   const {
     containerRef,
     query,
@@ -23,10 +25,10 @@ export function HomeClient() {
       <div className="w-full max-w-4xl flex flex-col items-center text-center">
         {/* Central Headline */}
         <h1 className="font-headline text-6xl md:text-9xl font-black tracking-tighter text-foreground leading-none mb-8">
-          FIND YOUR
+          {t('home.headline1')}
           <br />
           <span className="bg-neo-yellow px-4 inline-block  text-foreground">
-            FILM
+            {t('home.headline2')}
           </span>
         </h1>
 
@@ -60,9 +62,9 @@ export function HomeClient() {
                 {/* Real Input Layer (Upper) */}
                 <input
                   name="q"
-                  aria-label="Search movies, shows, or cinema"
+                  aria-label={t('home.searchAriaLabel')}
                   className="w-full bg-transparent border-none focus:ring-0 font-headline text-2xl md:text-3xl font-bold uppercase placeholder:text-foreground/30 text-foreground relative z-10 outline-none p-0 leading-none h-full"
-                  placeholder="SEARCH MOVIES, SHOWS, OR CINEMA..."
+                  placeholder={t('home.searchPlaceholder')}
                   type="text"
                   autoComplete="off"
                   autoCapitalize="none"
@@ -88,7 +90,7 @@ export function HomeClient() {
               type="button"
               onClick={handleManualSearch}
             >
-              SEARCH
+              {t('home.searchButton')}
             </button>
           </div>
         </div>
@@ -97,15 +99,15 @@ export function HomeClient() {
         <div className="mt-8 flex flex-wrap justify-center gap-8 font-headline font-bold uppercase text-sm tracking-widest text-foreground">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-neo-red border-2 border-border"></span>
-            <span>12k+ Titles</span>
+            <span>{t('home.stat1')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-neo-blue border-2 border-border"></span>
-            <span>4K Ultra Raw</span>
+            <span>{t('home.stat2')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-neo-yellow border-2 border-border"></span>
-            <span>Indie Focus</span>
+            <span>{t('home.stat3')}</span>
           </div>
         </div>
       </div>

@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "चलाएं",
+    "pause": "रोकें",
+    "loading": "सामग्री लोड हो रही है...",
+    "initConnection": "सुरक्षित कनेक्शन शुरू हो रहा है",
+    "bufferingAriaLabel": "वीडियो बफ़र हो रहा है",
+    "playbackError": "प्लेबैक त्रुटि",
+    "tryAgain": "पुनः प्रयास करें",
+    "goBack": "वापस जाएं",
+    "errorDefault": "एक त्रुटि हुई",
+    "liveUnavailable": "लाइव स्ट्रीम उपलब्ध नहीं है",
+    "enterFullscreen": "फ़ुलस्क्रीन में जाएं",
+    "exitFullscreen": "फ़ुलस्क्रीन से बाहर निकलें",
+    "mute": "म्यूट करें",
+    "unmute": "अनम्यूट करें",
+    "volumeControl": "वॉल्यूम नियंत्रण",
+    "volume": "वॉल्यूम",
+    "skipBack": "{seconds}s पीछे जाएं",
+    "skipForward": "{seconds}s आगे जाएं",
+    "tapToResume": "जारी रखने के लिए टैप करें",
+    "hostControlsPlayback": "होस्ट प्लेबैक नियंत्रित करता है",
+    "sitBackAndEnjoy": "आराम से बैठें और शो का आनंद लें",
+    "goBackAriaLabel": "वापस जाएं",
+    "movie": "फ़िल्म",
+    "tvSeries": "टीवी सीरीज़",
+    "live": "लाइव",
+    "liveBadge": "LIVE",
+    "watchingLive": "आप लाइव देख रहे हैं",
+    "jumpToLive": "लाइव पर जाएं"
+  },
+  "settings": {
+    "quality": "गुणवत्ता",
+    "speed": "गति",
+    "normal": "सामान्य",
+    "auto": "स्वचालित",
+    "locked": "लॉक"
+  },
+  "subtitles": {
+    "title": "उपशीर्षक",
+    "off": "बंद",
+    "subtitleStyle": "उपशीर्षक शैली",
+    "size": "आकार",
+    "font": "फ़ॉन्ट",
+    "background": "पृष्ठभूमि",
+    "textColor": "टेक्स्ट रंग",
+    "textEffect": "टेक्स्ट प्रभाव"
+  },
+  "audio": {
+    "title": "ऑडियो",
+    "audioLanguage": "ऑडियो भाषा"
+  },
+  "episodes": {
+    "episode": "एपिसोड {number}",
+    "season": "सीज़न {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "चलाने के लिए क्लिक करें",
+    "loading": "लोड हो रहा है...",
+    "noEpisodes": "कोई एपिसोड नहीं",
+    "nowPlaying": "अभी चल रहा है",
+    "min": "{duration} मिनट"
+  },
+  "nextEpisode": {
+    "nextSeason": "अगला सीज़न",
+    "nextEpisode": "अगला एपिसोड",
+    "inCountdown": "{seconds}s में",
+    "play": "चलाएं",
+    "cancel": "रद्द करें",
+    "loading": "लोड हो रहा है"
+  },
+  "offline": {
+    "pageTitle": "ऑफ़लाइन",
+    "vault": "वॉल्ट",
+    "yourDownloads": "आपकी डाउनलोड की गई सामग्री",
+    "downloadsCount": "{count} डाउनलोड",
+    "availableOffline": "ऑफ़लाइन देखने के लिए उपलब्ध",
+    "emptyTitle": "वॉल्ट खाली है",
+    "emptyDescription": "सुरक्षित डाउनलोड यहां दिखाई देंगे",
+    "desktopRequired": "डेस्कटॉप आवश्यक",
+    "desktopRequiredDesc": "ऑफ़लाइन सुरक्षित डाउनलोड केवल नेटिव डेस्कटॉप ऐप में उपलब्ध हैं। यात्रा के लिए फ़िल्में और सीरीज़ सहेजने के लिए ऐप डाउनलोड करें।",
+    "pauseDownload": "डाउनलोड रोकें",
+    "resumeDownload": "डाउनलोड जारी रखें",
+    "removeDownload": "डाउनलोड हटाएं",
+    "cancelDownload": "डाउनलोड रद्द करें",
+    "waitForComplete": "ऑफ़लाइन देखने के लिए कृपया डाउनलोड पूरा होने तक प्रतीक्षा करें।",
+    "waitingInQueue": "कतार में प्रतीक्षा...",
+    "downloading": "डाउनलोड हो रहा है..."
+  },
+  "watchlist": {
+    "pageTitle": "मेरी",
+    "watchlist": "वॉचलिस्ट",
+    "subtitle": "आपका चुना हुआ संग्रह",
+    "itemCount": "{count} आइटम",
+    "emptyTitle": "आपकी वॉचलिस्ट खाली है",
+    "emptyDescription": "बाद में देखने के लिए फ़िल्में और शो सहेजें",
+    "viewDetails": "{title} के विवरण देखें"
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { memo, useEffect, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { Player } from '../player';
@@ -23,6 +24,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
   const router = useRouter();
+  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const useInlineMobileLayout = isMobile && props.mobileLayout === 'inline';
 
@@ -51,7 +53,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       <button
         type="button"
         onClick={handleBack}
-        aria-label="Go back"
+        aria-label={t('goBackAriaLabel')}
         className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
       >
         <ArrowLeft className="w-5 h-5 text-white" />
@@ -102,6 +104,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
 });
 function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
   const { state, playerHandlers, metadata } = usePlayerContext();
+  const t = useTranslations('watch.player');
   const error = state.error;
   // Treat null streamUrl (waiting for live-bridge) as loading — prevents
   // the ErrorOverlay from flashing for a single frame before useHls runs.
@@ -130,7 +133,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
 
       <ErrorOverlay
         isVisible={!!error && !isLoading && !state.isBuffering}
-        message={error || 'Live stream unavailable'}
+        message={error || t('liveUnavailable')}
         onRetry={() => {
           window.location.reload();
         }}

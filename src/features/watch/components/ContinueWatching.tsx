@@ -2,6 +2,7 @@
 
 import { Clock, Film, Tv, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import React from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
@@ -30,6 +31,7 @@ export function ContinueWatching({
 }: ContinueWatchingProps) {
   const { optimisticItems, isLoading, handleSelect, handleRemove } =
     useContinueWatching({ onSelectContent, onLoadComplete });
+  const t = useTranslations('search');
 
   if (isLoading) {
     return (
@@ -37,7 +39,7 @@ export function ContinueWatching({
         {!hideTitle && (
           <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
             <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
-              Continue Watching
+              {t('continueWatching.title')}
             </h2>
           </div>
         )}
@@ -65,14 +67,14 @@ export function ContinueWatching({
         {!hideTitle && (
           <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
             <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
-              Continue Watching
+              {t('continueWatching.title')}
             </h2>
           </div>
         )}
         <EmptyState
           icon={Clock}
-          title="Your watch history is empty"
-          description="Start watching something and it will appear here"
+          title={t('continueWatching.emptyTitle')}
+          description={t('continueWatching.emptyDescription')}
         />
       </div>
     );
@@ -89,14 +91,14 @@ export function ContinueWatching({
       {!hideTitle && (
         <div className="inline-block bg-neo-yellow border-[4px] border-border px-4 py-2 mb-6 ">
           <h2 className="text-xl md:text-2xl font-black font-headline text-foreground uppercase tracking-tighter m-0 leading-none">
-            Continue Watching
+            {t('continueWatching.title')}
           </h2>
         </div>
       )}
       <section
         className="flex flex-col gap-6"
         style={{ contentVisibility: 'auto' }}
-        aria-label="Recently viewed content"
+        aria-label={t('continueWatching.sectionAriaLabel')}
       >
         {optimisticItems.map((item, index) => (
           <WatchProgressItem
@@ -125,12 +127,13 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
   onSelect,
   onRemove,
 }: WatchProgressItemProps) {
+  const t = useTranslations('search');
   return (
     // biome-ignore lint/a11y/useSemanticElements: outer wrapper contains a nested <button>, can't use <button> here
     <div
       role="button"
       tabIndex={0}
-      title={`Continue watching ${item.title}`}
+      title={`${t('continueWatching.title')} - ${item.title}`}
       onClick={() => onSelect(item)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -205,7 +208,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
                 onRemove(item, e);
               }}
               className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors z-20"
-              title="Remove from list"
+              title={t('continueWatching.removeAriaLabel')}
             >
               <X className="w-4 h-4 stroke-[3px]" />
             </button>

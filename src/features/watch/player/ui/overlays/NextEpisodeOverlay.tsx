@@ -2,6 +2,7 @@
 
 import { Loader2, Play, SkipForward } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useNextEpisodeOverlay } from './use-next-episode-overlay';
 
@@ -39,6 +40,8 @@ export function NextEpisodeOverlay({
     onPlayNext,
     onCancel,
   });
+  const t = useTranslations('watch.nextEpisode');
+  const tEp = useTranslations('watch.episodes');
 
   if (!isVisible || !nextEpisode) return null;
 
@@ -47,7 +50,7 @@ export function NextEpisodeOverlay({
   return (
     <section
       className="absolute bottom-36 md:bottom-48 right-6 z-50 motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-300 motion-reduce:animate-none"
-      aria-label={isNextSeason ? 'Next season prompt' : 'Next episode prompt'}
+      aria-label={isNextSeason ? t('nextSeason') : t('nextEpisode')}
     >
       <div className="w-80 bg-background border-[4px] border-border  flex flex-col pointer-events-auto">
         {/* Header */}
@@ -55,7 +58,7 @@ export function NextEpisodeOverlay({
           <div className="flex items-center gap-2">
             <SkipForward className="w-5 h-5 text-foreground stroke-[3px]" />
             <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
-              {isNextSeason ? 'Next Season' : 'Next Episode'}
+              {isNextSeason ? t('nextSeason') : t('nextEpisode')}
             </span>
           </div>
           {!cancelled && autoPlayDelay > 0 && !isLoading ? (
@@ -63,7 +66,7 @@ export function NextEpisodeOverlay({
               className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px]"
               aria-live="polite"
             >
-              in {countdown}s
+              {t('inCountdown', { seconds: countdown })}
             </span>
           ) : null}
         </div>
@@ -100,7 +103,7 @@ export function NextEpisodeOverlay({
               </h4>
               {nextEpisode.duration ? (
                 <p className="text-foreground/70 font-bold font-headline uppercase tracking-widest text-[10px] mt-1">
-                  {nextEpisode.duration} MIN
+                  {tEp('min', { duration: nextEpisode.duration })}
                 </p>
               ) : null}
             </div>
@@ -122,12 +125,12 @@ export function NextEpisodeOverlay({
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin stroke-[3px]" />
-                  Loading
+                  {t('loading')}
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-white stroke-[3px]" />
-                  Play
+                  {t('play')}
                 </>
               )}
             </button>
@@ -142,7 +145,7 @@ export function NextEpisodeOverlay({
                 'active:bg-muted/80 transition-[background-color,opacity] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2',
               )}
             >
-              Cancel
+              {t('cancel')}
             </button>
           </div>
 

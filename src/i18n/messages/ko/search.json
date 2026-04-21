@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "당신의",
+    "headline2": "영화를 찾으세요",
+    "searchPlaceholder": "영화, 프로그램 또는 시네마 검색...",
+    "searchButton": "검색",
+    "searchAriaLabel": "영화, 프로그램 또는 시네마 검색",
+    "stat1": "12k+ 타이틀",
+    "stat2": "4K 울트라 로",
+    "stat3": "인디 포커스"
+  },
+  "results": {
+    "searching": "검색 중:",
+    "resultsLabel": "결과:",
+    "filmsFound": "아카이브에서 {count}개의 영화를 찾았습니다",
+    "noResults": "결과를 찾을 수 없습니다",
+    "noResultsHint": "다른 철자를 시도하거나 다른 것을 검색하세요",
+    "searchFailed": "검색 실패",
+    "searchFailedHint": "서버에 연결할 수 없습니다. 다시 시도해 주세요.",
+    "noResultsArchive": "결과를 찾을 수 없습니다",
+    "noResultsArchiveHint": "아카이브에서 일치하는 항목을 찾을 수 없습니다. 다른 제목이나 키워드로 검색해 보세요.",
+    "editQueryAriaLabel": "검색어 수정",
+    "searchingAriaLabel": "검색 중..."
+  },
+  "continueWatching": {
+    "title": "이어서 보기",
+    "subtitle": "멈춘 곳에서 다시 시작하세요",
+    "emptyTitle": "시청 기록이 비어 있습니다",
+    "emptyDescription": "무언가를 보기 시작하면 여기에 표시됩니다",
+    "removeAriaLabel": "목록에서 제거",
+    "sectionAriaLabel": "최근 시청한 콘텐츠",
+    "timeLeft": "{time} 남음"
+  },
+  "contentDetail": {
+    "series": "시리즈",
+    "movie": "영화",
+    "failedToLoad": "콘텐츠를 불러오지 못했습니다",
+    "close": "닫기",
+    "closePreview": "미리보기 닫기",
+    "noImageAvailable": "이미지를 사용할 수 없습니다",
+    "episodes": "에피소드",
+    "season": "시즌 {number}",
+    "selectSeason": "시즌 선택",
+    "episodeCount": "({count} 화)",
+    "noEpisodesAvailable": "이 시즌에 사용 가능한 에피소드가 없습니다",
+    "loadingEpisodes": "에피소드 로딩 중",
+    "watchPartyPick": "워치 파티 — 에피소드를 선택하세요",
+    "watchPartyHint": "선택하면 모두가 참여합니다",
+    "cancelWatchParty": "워치 파티 취소",
+    "continue": "계속",
+    "experienceStarting": "체험 시작 중",
+    "preparingContent": "\"{title}\" 준비 중..."
+  },
+  "actions": {
+    "watchSolo": "혼자 보기",
+    "resume": "이어보기",
+    "resumeEpisode": "S{season}:E{episode} 이어보기",
+    "playEpisode": "S{season}:E1 재생",
+    "loading": "로딩 중",
+    "watchTogether": "함께 보기",
+    "creating": "생성 중",
+    "toWatchlist": "관심목록에 추가",
+    "removeFromList": "목록에서 제거"
+  },
+  "download": {
+    "download": "다운로드",
+    "viewInVault": "보관함에서 보기",
+    "cancel": "취소",
+    "language": "언어",
+    "original": "원본",
+    "selectQuality": "화질 선택",
+    "selectEpisode": "에피소드 선택",
+    "gatheringSources": "소스 수집 중...",
+    "noFormatsAvailable": "사용 가능한 형식이 없습니다",
+    "noEpisodesAvailable": "사용 가능한 에피소드가 없습니다",
+    "saved": "저장됨",
+    "securelyStarting": "안전하게 다운로드 시작 중...",
+    "episode": "에피소드 {number}",
+    "untitled": "제목 없음"
+  }
+}

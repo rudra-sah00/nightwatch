@@ -2,6 +2,7 @@
 
 import { ChevronDown, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Episode, Season } from '@/features/search/types';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
@@ -44,6 +45,7 @@ export function EpisodePanel({
   const [seasonOpen, setSeasonOpen] = useState(false);
   const [padH, setPadH] = useState(0);
   const rafRef = useRef<number>(0);
+  const t = useTranslations('watch.episodes');
   // Track mount/unmount to animate out before removing from DOM
   const [visible, setVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
@@ -162,7 +164,7 @@ export function EpisodePanel({
         >
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-black font-headline text-foreground/70 uppercase tracking-widest">
-              Episode {centerEp.episodeNumber}
+              {t('episode', { number: centerEp.episodeNumber })}
             </span>
             <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-foreground leading-tight">
               {centerEp.title || `Episode ${centerEp.episodeNumber}`}
@@ -174,13 +176,13 @@ export function EpisodePanel({
             )}
             {centerEp.duration && (
               <span className="text-xs text-foreground font-bold font-headline uppercase px-2 py-0.5 border-[2px] border-border bg-background inline-block self-start mt-1">
-                {centerEp.duration} min
+                {t('min', { duration: centerEp.duration })}
               </span>
             )}
             <div className="flex items-center gap-2 mt-2">
               <Play className="w-4 h-4 text-neo-red fill-current" />
               <span className="text-[10px] text-neo-red uppercase tracking-widest font-black font-headline">
-                Click to play
+                {t('clickToPlay')}
               </span>
             </div>
           </div>
@@ -246,7 +248,7 @@ export function EpisodePanel({
                         : 'hover:bg-neo-yellow/80',
                     )}
                   >
-                    Season {s.seasonNumber}
+                    {t('season', { number: s.seasonNumber })}
                     {s.episodeCount ? (
                       <span className="text-foreground/70 ml-1.5 text-xs">
                         ({s.episodeCount})
@@ -264,13 +266,13 @@ export function EpisodePanel({
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 text-primary-foreground/25 animate-spin" />
             <span className="text-[9px] text-primary-foreground/25">
-              Loading...
+              {t('loading')}
             </span>
           </div>
         ) : episodes.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <span className="text-[10px] text-primary-foreground/20">
-              No episodes
+              {t('noEpisodes')}
             </span>
           </div>
         ) : (
