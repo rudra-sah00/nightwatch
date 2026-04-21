@@ -197,8 +197,8 @@ export function AppPreferences() {
                       className={cn(
                         'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                         theme === id
-                          ? 'bg-foreground text-background font-black'
-                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                          : 'text-foreground/30 hover:text-foreground/60',
                       )}
                     >
                       <div className="flex items-center gap-4">
@@ -271,8 +271,8 @@ export function AppPreferences() {
                       className={cn(
                         'w-full px-6 py-4 flex items-center justify-between text-left transition-all duration-200',
                         locale === l
-                          ? 'bg-foreground text-background font-black'
-                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                          : 'text-foreground/30 hover:text-foreground/60',
                       )}
                     >
                       <div className="flex flex-col">
