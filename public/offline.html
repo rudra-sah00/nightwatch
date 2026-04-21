@@ -42,10 +42,10 @@
     <button type="button" id="offline-retry" onclick="location.reload()">Retry</button>
   </div>
   <script>
-    (function(){
+    (()=>{
       var t={ar:{t:'أنت غير متصل',d:'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',r:'إعادة المحاولة'},de:{t:'Du bist offline',d:'Prüfe deine Internetverbindung und versuche es erneut.',r:'Erneut versuchen'},es:{t:'Estás sin conexión',d:'Comprueba tu conexión a internet e inténtalo de nuevo.',r:'Reintentar'},fr:{t:'Vous êtes hors ligne',d:'Vérifiez votre connexion Internet et réessayez.',r:'Réessayer'},hi:{t:'आप ऑफ़लाइन हैं',d:'अपना इंटरनेट कनेक्शन जाँचें और पुनः प्रयास करें।',r:'पुनः प्रयास'},it:{t:'Sei offline',d:'Controlla la connessione internet e riprova.',r:'Riprova'},ja:{t:'オフラインです',d:'インターネット接続を確認して、もう一度お試しください。',r:'再試行'},ko:{t:'ì¤íë¼ì¸ìëë¤',d:'ì¸í°ë· ì°ê²°ì íì¸íê³  ë¤ì ìëí´ ì£¼ì¸ì.',r:'ë¤ì ìë'},pt:{t:'Você está offline',d:'Verifique sua conexão com a internet e tente novamente.',r:'Tentar novamente'},ru:{t:'Вы офлайн',d:'Проверьте подключение к интернету и попробуйте снова.',r:'Повторить'},th:{t:'คุณออฟไลน์',d:'ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองอีกครั้ง',r:'ลองอีกครั้ง'},tr:{t:'Çevrimdışısınız',d:'İnternet bağlantınızı kontrol edin ve tekrar deneyin.',r:'Tekrar dene'},zh:{t:'您已离线',d:'请检查您的网络连接并重试。',r:'重试'}};
       var c=document.cookie.match(/NEXT_LOCALE=([^;]+)/);
-      var l=c&&c[1]||'en';
+      var l=c?.[1]||'en';
       document.documentElement.lang=l;
       if(l==='ar')document.documentElement.dir='rtl';
       if(t[l]){
