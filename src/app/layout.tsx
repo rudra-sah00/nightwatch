@@ -73,15 +73,15 @@ export default function RootLayout({
           <ThemeProvider>
             <SocketProvider>
               <AuthProvider>
-                <Suspense fallback={null}>
-                  <IntlProvider>
+                <IntlProvider>
+                  <Suspense fallback={null}>
                     <ProgressBar />
                     <DiscordPresenceSync />
                     <OfflineIndicator />
                     <SwUpdatePrompt />
-                    {children}
-                  </IntlProvider>
-                </Suspense>
+                  </Suspense>
+                  {children}
+                </IntlProvider>
                 <Toaster />
               </AuthProvider>
             </SocketProvider>

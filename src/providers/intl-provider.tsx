@@ -6,8 +6,15 @@ export async function IntlProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  let locale = 'en';
+  let messages = {};
+
+  try {
+    locale = await getLocale();
+    messages = await getMessages();
+  } catch {
+    // Fallback to English if locale detection fails
+  }
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
