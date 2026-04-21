@@ -89,7 +89,8 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_deep_link::init())
-        .plugin(tauri_plugin_shell::init());
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init());
 
     #[cfg(desktop)]
     {
@@ -160,17 +161,17 @@ pub fn run() {
         .on_menu_event(|app, event| {
             #[cfg(desktop)]
             {
-                use tauri_plugin_shell::ShellExt;
+                use tauri_plugin_opener::OpenerExt;
                 let id = event.id().as_ref();
                 if let Some(win) = app.get_webview_window("main") {
                     match id {
                         "reload" => { let _ = win.eval("window.location.reload()"); }
                         "force_reload" => { let _ = win.eval("window.location.reload()"); }
-                        "website" => { let _ = app.shell().open("https://watch.rudrasahoo.live", None::<tauri_plugin_shell::open::Program>); }
-                        "github" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra", None::<tauri_plugin_shell::open::Program>); }
-                        "report_bug" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/issues/new", None::<tauri_plugin_shell::open::Program>); }
-                        "check_updates" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/releases", None::<tauri_plugin_shell::open::Program>); }
-                        "release_notes" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/releases", None::<tauri_plugin_shell::open::Program>); }
+                        "website" => { let _ = app.opener().open_url("https://watch.rudrasahoo.live", None::<&str>); }
+                        "github" => { let _ = app.opener().open_url("https://github.com/rudra-sah00/watch-rudra", None::<&str>); }
+                        "report_bug" => { let _ = app.opener().open_url("https://github.com/rudra-sah00/watch-rudra/issues/new", None::<&str>); }
+                        "check_updates" => { let _ = app.opener().open_url("https://github.com/rudra-sah00/watch-rudra/releases", None::<&str>); }
+                        "release_notes" => { let _ = app.opener().open_url("https://github.com/rudra-sah00/watch-rudra/releases", None::<&str>); }
                         "keyboard_shortcuts" => { let _ = win.eval("document.dispatchEvent(new CustomEvent('show-shortcuts'))"); }
                         _ => {}
                     }

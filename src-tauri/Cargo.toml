@@ -30,6 +30,7 @@ uuid = { version = "1", features = ["v4"] }
 dirs = "5"
 futures-util = "0.3"
 http = "1"
+tauri-plugin-opener = "2.5.3"
 
 # Desktop-only dependencies
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
