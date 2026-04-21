@@ -66,10 +66,13 @@ export function AppPreferences() {
     }
   }, []);
 
+  const [langOpen, setLangOpen] = useState(false);
+
   const switchLocale = useCallback(
     (newLocale: string) => {
       setCookie(COOKIE_NAME, newLocale);
       localStorage.setItem('preferred-locale', newLocale);
+      setLangOpen(false);
       router.refresh();
     },
     [router],
@@ -164,7 +167,7 @@ export function AppPreferences() {
             </p>
           </div>
 
-          <Dialog>
+          <Dialog open={langOpen} onOpenChange={setLangOpen}>
             <DialogTrigger asChild>
               <button
                 type="button"
@@ -182,6 +185,14 @@ export function AppPreferences() {
               <DialogTitle className="sr-only">
                 {t('preferences.selectLanguage')}
               </DialogTitle>
+
+              <button
+                type="button"
+                onClick={() => setLangOpen(false)}
+                className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+              >
+                ✕
+              </button>
 
               <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                 <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground">
