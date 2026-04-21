@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const setIsLoading = useAuthStore((s) => s.setIsLoading);
-  const t = useTranslations('errors');
+  const t = useTranslations('common.errors');
 
   const { connect, disconnect } = useSocket();
   const forceLogoutHandlerRef = useRef<

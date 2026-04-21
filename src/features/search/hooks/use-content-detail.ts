@@ -58,7 +58,7 @@ export function useContentDetail({
   initialContext,
   fromContinueWatching = false,
 }: UseContentDetailOptions): UseContentDetailReturn {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   // 1. Fetch Show Details
   const { show, isLoading } = useShowDetails(contentId);
 

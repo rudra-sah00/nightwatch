@@ -25,7 +25,7 @@ export function useWatchPartyClient({
   initialRoomPreview,
   initialRoomNotFound,
 }: UseWatchPartyClientOptions) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
   const router = useRouter();
   const { copyToClipboard } = useDesktopApp();

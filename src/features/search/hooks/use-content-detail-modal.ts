@@ -27,7 +27,7 @@ export function useContentDetailModal({
   autoPlay = false,
   onClose,
 }: ContentDetailModalOptions) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const router = useRouter();
 
   const {

@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { ReleaseList } from './release-list';
 
 export async function generateMetadata() {
-  const t = await getTranslations('whatsNew');
+  const t = await getTranslations('common.whatsNew');
   return { title: t('title'), description: t('description') };
 }
 
@@ -22,7 +22,7 @@ interface Release {
 }
 
 export default async function WhatsNewPage() {
-  const t = await getTranslations('whatsNew');
+  const t = await getTranslations('common.whatsNew');
   const headers: HeadersInit = {};
 
   const token = process.env.WATCH_RUDRA_GH_TOKEN || process.env.GITHUB_TOKEN;

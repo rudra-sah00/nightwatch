@@ -59,7 +59,7 @@ interface UseWatchPartyOptions {
 }
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
   const tf = useTranslations('party.fallback');
   const router = useRouter();

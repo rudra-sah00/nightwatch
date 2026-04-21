@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { searchContent } from '@/features/search/api';
 import { SearchClient } from '@/features/search/components/SearchClient';
 import type { SearchResult } from '@/features/search/types';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('common.metadata');
-  return { title: t('searchTitle'), description: t('searchDescription') };
-}
+export const metadata: Metadata = {
+  title: 'Search | Watch Rudra',
+  description: 'Search for movies, TV shows, and anime.',
+};
 
 function SearchFallback() {
   return (

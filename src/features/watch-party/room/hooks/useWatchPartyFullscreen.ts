@@ -22,7 +22,7 @@ interface UseWatchPartyFullscreenReturn {
 export function useWatchPartyFullscreen({
   containerRef,
 }: UseWatchPartyFullscreenProps): UseWatchPartyFullscreenReturn {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = useCallback(async () => {

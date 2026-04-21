@@ -21,7 +21,7 @@ export function EpisodeCard({
   isPlaying,
   isAnyLoading = false,
 }: EpisodeCardProps) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const ts = useTranslations('search');
   const { imageError, setImageError } = useEpisodeCard();
   const thumbnailSrc = getOptimizedImageUrl(episode.thumbnailUrl);

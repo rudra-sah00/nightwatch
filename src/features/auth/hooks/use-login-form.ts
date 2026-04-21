@@ -17,7 +17,7 @@ interface FormState {
 const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
 
 export function useLoginForm() {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tErr = useTranslations('auth.errors');
   const tAuth = useTranslations('auth');
   const { login, verifyOtp, resendOtp } = useAuth();

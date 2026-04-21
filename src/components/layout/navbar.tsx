@@ -12,7 +12,7 @@ export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
-  const t = useTranslations('nav');
+  const t = useTranslations('common.nav');
 
   const isActive = (href: string) => pathname?.startsWith(href);
 

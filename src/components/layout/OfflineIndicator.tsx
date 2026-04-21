@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export function OfflineIndicator() {
-  const t = useTranslations('offline');
+  const t = useTranslations('common.offline');
   const [isOffline, setIsOffline] = useState(false);
   const [dismissed, _setDismissed] = useState(false);
   // Ensure we get mounted correctly on client without hydration mismatch

@@ -22,7 +22,7 @@ const INITIAL_COUNT = 3;
 
 export function ReleaseList({ releases }: { releases: Release[] }) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
-  const t = useTranslations('whatsNew');
+  const t = useTranslations('common.whatsNew');
   const visible = releases.slice(0, visibleCount);
   const hasMore = visibleCount < releases.length;
 

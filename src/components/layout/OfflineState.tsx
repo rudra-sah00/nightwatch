@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export function OfflineState() {
-  const t = useTranslations('offline');
+  const t = useTranslations('common.offline');
 
   return (
     <main className="flex-grow flex flex-col items-center justify-center p-8 text-center bg-background min-h-[calc(100vh-120px)] w-full w-full">

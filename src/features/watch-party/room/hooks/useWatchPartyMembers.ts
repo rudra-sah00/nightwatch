@@ -36,7 +36,7 @@ export function useWatchPartyMembers({
   streamToken,
   videoRef,
 }: UseWatchPartyMembersProps) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
   const tf = useTranslations('party.fallback');
   const { socket } = useSocket();

@@ -1,14 +1,11 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
 import ContinueWatchingClient from './ContinueWatchingClient';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('common.metadata');
-  return {
-    title: t('continueWatchingTitle'),
-    description: t('continueWatchingDescription'),
-  };
-}
+export const metadata: Metadata = {
+  title: 'Continue Watching | Watch Rudra',
+  description:
+    'Pick up where you left off with your recently watched movies and TV shows.',
+};
 
 export default async function ContinueWatchingPage() {
   return <ContinueWatchingClient />;

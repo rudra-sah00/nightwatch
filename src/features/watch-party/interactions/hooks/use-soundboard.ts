@@ -23,7 +23,7 @@ export function useSoundboard({
   userId,
   userName,
 }: UseSoundboardOptions = {}) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const [sounds, setSounds] = useState<SoundItem[]>([]);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(false);

@@ -13,7 +13,7 @@ export function GlobalTour() {
   const pathname = usePathname();
   const tourStarted = useRef(false);
   const { isDesktopApp } = useDesktopApp();
-  const t = useTranslations('tour');
+  const t = useTranslations('common.tour');
 
   useEffect(() => {
     if (typeof window === 'undefined' || tourStarted.current) return;

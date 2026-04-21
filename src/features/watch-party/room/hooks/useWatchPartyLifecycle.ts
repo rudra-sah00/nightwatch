@@ -55,7 +55,7 @@ export function useWatchPartyLifecycle({
   rtmSendMessage,
   setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
   useEffect(() => {
     const guestToken =

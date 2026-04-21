@@ -20,7 +20,7 @@ export function useWatchPartyChat({
   userId,
   currentUserName,
 }: UseWatchPartyChatOptions = {}) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>

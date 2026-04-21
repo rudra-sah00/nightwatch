@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
@@ -28,19 +28,16 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('common.metadata');
-  return {
-    title: t('appTitle'),
-    description: t('appDescription'),
-    manifest: '/manifest.json',
-    icons: {
-      icon: '/play.ico',
-      shortcut: '/play.ico',
-      apple: '/play.ico',
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: 'Watch Rudra',
+  description: 'Your personal streaming companion',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/play.ico',
+    shortcut: '/play.ico',
+    apple: '/play.ico',
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: '#000000',

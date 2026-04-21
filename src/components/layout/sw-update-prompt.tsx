@@ -10,7 +10,7 @@ import { toast } from 'sonner';
  * bypasses that — so we trigger it on meaningful user/network events instead.
  */
 export function SwUpdatePrompt() {
-  const t = useTranslations('swUpdate');
+  const t = useTranslations('common.swUpdate');
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator))

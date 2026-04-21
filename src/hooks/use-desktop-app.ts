@@ -11,7 +11,7 @@ import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
  */
 export function useDesktopApp() {
   const [isMounted, setIsMounted] = useState(false);
-  const t = useTranslations('desktopApp');
+  const t = useTranslations('common.desktopApp');
 
   const [isDesktopApp] = useState(() => checkIsDesktop());
   const [isBrowser] = useState(() => !checkIsDesktop());

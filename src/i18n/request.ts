@@ -48,7 +48,7 @@ export default getRequestConfig(async () => {
   } catch {}
 
   const messages = {
-    ...common,
+    common,
     auth: authMessages,
     profile: profileMessages,
     search: searchMessages,

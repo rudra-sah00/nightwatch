@@ -37,7 +37,7 @@ export function useWatchPartySync({
   isHost,
   videoRef,
 }: UseWatchPartySyncProps) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
