@@ -157,7 +157,7 @@
       }
     ]
   },
-  "version": "1.32.0",
+  "version": "2.1.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",
