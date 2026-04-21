@@ -154,7 +154,7 @@ export function AppPreferences() {
             <DialogTrigger asChild>
               <button
                 type="button"
-                className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                className="flex flex-col items-start gap-1 p-5 border rounded-lg transition-all text-left shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
               >
                 {theme === 'light' ? (
                   <Sun className="w-4 h-4" />
@@ -237,7 +237,7 @@ export function AppPreferences() {
             <DialogTrigger asChild>
               <button
                 type="button"
-                className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                className="flex flex-col items-start gap-1 p-5 border rounded-lg transition-all text-left shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
               >
                 <Globe className="w-4 h-4" />
                 {LOCALE_META[locale]?.native || 'English'}
@@ -348,7 +348,7 @@ export function AppPreferences() {
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                    className="flex flex-col items-start gap-1 p-5 border rounded-lg transition-all text-left shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
                   >
                     <Activity className="w-4 h-4" />
                     {concurrentDownloads}
@@ -431,7 +431,7 @@ export function AppPreferences() {
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                    className="flex flex-col items-start gap-1 p-5 border rounded-lg transition-all text-left shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
                   >
                     <Zap className="w-4 h-4" />
                     {downloadSpeedLimit === 0
