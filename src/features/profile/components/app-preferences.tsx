@@ -187,7 +187,7 @@ export function AppPreferences() {
             </DialogTrigger>
 
             <DialogContent
-              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-y-auto"
+              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
               showCloseButton={false}
             >
               <DialogTitle className="sr-only">
@@ -202,12 +202,12 @@ export function AppPreferences() {
                 Cancel
               </button>
 
-              <div className="flex flex-col items-center gap-6 w-full max-w-md px-6 py-16">
-                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0">
+              <div className="flex flex-col items-center w-full max-w-md px-6 h-full pt-16">
+                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
                   {t('preferences.language')}
                 </h2>
 
-                <div className="flex flex-col w-full gap-1">
+                <div className="flex flex-col w-full gap-1 overflow-y-auto flex-1 pb-16">
                   {locales.map((l) => (
                     <button
                       key={l}
