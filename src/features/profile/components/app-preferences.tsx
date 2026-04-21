@@ -1,9 +1,24 @@
 'use client';
 
-import { Activity, Globe, Monitor, Moon, Power, Sun, Zap } from 'lucide-react';
+import {
+  Activity,
+  Check,
+  Globe,
+  Monitor,
+  Moon,
+  Power,
+  Sun,
+  Zap,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { COOKIE_NAME, locales } from '@/i18n/config';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
@@ -141,23 +156,58 @@ export function AppPreferences() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
-            {locales.map((l) => (
+          <Dialog>
+            <DialogTrigger asChild>
               <button
-                key={l}
                 type="button"
-                onClick={() => switchLocale(l)}
-                className={cn(
-                  'px-3 py-2 text-xs font-bold rounded-lg border transition-colors flex items-center gap-2',
-                  locale === l
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-secondary border-border text-muted-foreground hover:text-foreground hover:border-foreground/50',
-                )}
+                className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
               >
-                <span className="tracking-wide">{LOCALE_META[l]?.native}</span>
+                <Globe className="w-4 h-4" />
+                {LOCALE_META[locale]?.native || 'English'}
               </button>
-            ))}
-          </div>
+            </DialogTrigger>
+
+            <DialogContent
+              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+              showCloseButton={false}
+            >
+              <DialogTitle className="sr-only">Select Language</DialogTitle>
+
+              <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
+                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground">
+                  Language
+                </h2>
+
+                <div className="flex flex-col w-full gap-1">
+                  {locales.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => switchLocale(l)}
+                      className={cn(
+                        'w-full px-6 py-4 flex items-center justify-between text-left transition-all duration-200',
+                        locale === l
+                          ? 'bg-foreground text-background font-black'
+                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                      )}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-lg font-headline font-bold tracking-wide">
+                          {LOCALE_META[l]?.native}
+                        </span>
+                        <span className="text-xs opacity-60 uppercase tracking-widest font-bold">
+                          {LOCALE_META[l]?.english}
+                        </span>
+                      </div>
+                      {locale === l && (
+                        <Check className="w-5 h-5 stroke-[3px]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Desktop Only Settings */}
