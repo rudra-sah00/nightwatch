@@ -25,9 +25,27 @@
     "movie": "영화",
     "tvSeries": "TV 시리즈",
     "live": "라이브",
-    "liveBadge": "LIVE",
+    "liveBadge": "라이브",
     "watchingLive": "라이브 시청 중",
-    "jumpToLive": "라이브로 이동"
+    "jumpToLive": "라이브로 이동",
+    "lockedHostControls": "잠김 - 호스트 제어",
+    "hostControls": "호스트 제어",
+    "rotateDevice": "최적의 경험을 위해 기기를 회전하세요",
+    "fullscreenNotSupported": "이 브라우저에서는 전체 화면이 지원되지 않습니다",
+    "failedEnterFullscreen": "전체 화면 전환 실패",
+    "failedExitFullscreen": "전체 화면 종료 실패",
+    "fullscreenToggleFailed": "전체 화면 전환 실패",
+    "seekTime": "탐색 시간",
+    "liveSeekBar": "라이브 스트림 탐색 바",
+    "atLiveEdge": "실시간",
+    "behindLive": "실시간보다 {seconds}초 뒤",
+    "closeSidebar": "사이드바 닫기",
+    "openSidebar": "사이드바 열기",
+    "seasonEpisodeLabel": "시즌 {season} · 에피소드 {episode}",
+    "rotateToLandscape": "가로 모드로 회전",
+    "landscapeOnlyMessage": "이 플레이어는 가로 모드에서만 사용할 수 있습니다",
+    "showEpisodes": "에피소드 보기",
+    "episodesTitle": "에피소드"
   },
   "settings": {
     "quality": "화질",
@@ -44,7 +62,24 @@
     "font": "글꼴",
     "background": "배경",
     "textColor": "텍스트 색상",
-    "textEffect": "텍스트 효과"
+    "textEffect": "텍스트 효과",
+    "sizeSmall": "작게",
+    "sizeMedium": "보통",
+    "sizeLarge": "크게",
+    "sizeExtraLarge": "매우 크게",
+    "bgBlack": "검정",
+    "bgDarkGray": "진한 회색",
+    "bgTransparent": "투명",
+    "bgSemiTransparent": "반투명",
+    "colorWhite": "흰색",
+    "colorYellow": "노란색",
+    "colorCyan": "청록색",
+    "colorLightGreen": "연두색",
+    "shadowNone": "없음",
+    "shadowDropShadow": "그림자",
+    "shadowOutline": "윤곽선",
+    "shadowGlow": "발광",
+    "fontSystemDefault": "시스템 기본값"
   },
   "audio": {
     "title": "오디오",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "에피소드 {number}",
     "season": "시즌 {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "클릭하여 재생",
     "loading": "로딩 중...",
     "noEpisodes": "에피소드 없음",
-    "nowPlaying": "재생 중",
-    "min": "{duration}분"
+    "min": "{duration}분",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "다음 시즌",
@@ -66,7 +100,9 @@
     "inCountdown": "{seconds}초 후",
     "play": "재생",
     "cancel": "취소",
-    "loading": "로딩 중"
+    "loading": "로딩 중",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "오프라인",
@@ -84,7 +120,13 @@
     "cancelDownload": "다운로드 취소",
     "waitForComplete": "오프라인으로 보려면 다운로드가 완료될 때까지 기다려 주세요.",
     "waitingInQueue": "대기열에서 대기 중...",
-    "downloading": "다운로드 중..."
+    "downloading": "다운로드 중...",
+    "statusCompleted": "완료",
+    "statusFailed": "실패",
+    "statusDownloading": "다운로드 중",
+    "statusQueued": "대기 중",
+    "statusCancelled": "취소됨",
+    "statusPaused": "일시정지"
   },
   "watchlist": {
     "pageTitle": "나의",
@@ -94,5 +136,46 @@
     "emptyTitle": "관심목록이 비어 있습니다",
     "emptyDescription": "나중에 볼 영화와 시리즈를 저장하세요",
     "viewDetails": "{title} 상세 보기"
+  },
+  "continueWatching": {
+    "failedToRemove": "목록에서 제거하지 못했습니다",
+    "minutesLeft": "{minutes}분 남음",
+    "hoursLeft": "{hours}시간 남음",
+    "hoursMinutesLeft": "{hours}시간 {minutes}분 남음"
+  },
+  "countdown": {
+    "startingExperience": "경험 시작",
+    "getReady": "최고의 영화 경험을 준비하세요",
+    "go": "시작",
+    "eliteExperience": "엘리트 AI 경험 • EMA 강화"
+  },
+  "aria": {
+    "videoPlayer": "비디오 플레이어",
+    "seekBackward": "10초 뒤로",
+    "seekForward": "10초 앞으로",
+    "playPause": "재생/일시정지",
+    "seekBar": "탐색 바",
+    "skipControls": "건너뛰기 컨트롤",
+    "fullscreen": "전체 화면",
+    "volume": "볼륨",
+    "settings": "설정",
+    "audioSubtitle": "오디오 및 자막 선택",
+    "episodePanel": "에피소드 패널",
+    "playerHeader": "플레이어 헤더",
+    "subtitle": "자막",
+    "playbackCountdown": "재생 카운트다운",
+    "countdownTitle": "재생 카운트다운"
+  },
+  "page": {
+    "seasonLabel": "시즌 {number}",
+    "unknownTitle": "알 수 없음",
+    "episodeLabel": "에피소드 {number}",
+    "noStream": "사용 가능한 스트림이 없습니다",
+    "errorLoading": "스트림을 로드하는 중 오류가 발생했습니다",
+    "startFromContent": "콘텐츠 페이지에서 재생을 시작해 주세요",
+    "tryAgain": "다시 시도",
+    "goToHome": "홈으로 이동",
+    "continuePortrait": "세로 모드로 계속 시청합니다.",
+    "movieYear": "영화 · {year}"
   }
 }

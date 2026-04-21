@@ -23,6 +23,8 @@ export function useOtpVerification({
   initialCountdown = 30,
 }: UseOtpVerificationOptions) {
   const t = useTranslations('toasts');
+  const tErr = useTranslations('auth.errors');
+  const tErrors = useTranslations('errors');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,19 +62,19 @@ export function useOtpVerification({
       startCountdown(60);
       toast.success(t('verificationResent'));
     } catch (err) {
-      const msg = handleApiError(err, 'Resend failed. Please wait.');
+      const msg = handleApiError(err, tErr('resendFailed'), tErrors);
       setError(msg);
     } finally {
       setIsLoading(false);
     }
-  }, [countdown, email, resendOtp, startCountdown, t]);
+  }, [countdown, email, resendOtp, startCountdown, t, tErr, tErrors]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
       if (!otp || otp.length !== 6) {
-        const msg = 'Please enter a valid 6-digit code.';
+        const msg = tErr('invalidOtp');
         setError(msg);
         toast.error(msg);
         return;
@@ -81,16 +83,13 @@ export function useOtpVerification({
       try {
         await verifyOtp(email, otp);
       } catch (err) {
-        const msg = handleApiError(
-          err,
-          'Verification failed. Please try again.',
-        );
+        const msg = handleApiError(err, tErr('verificationFailed'), tErrors);
         setError(msg);
       } finally {
         setIsLoading(false);
       }
     },
-    [otp, email, verifyOtp],
+    [otp, email, verifyOtp, tErr, tErrors],
   );
 
   return {

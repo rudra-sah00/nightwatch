@@ -24,9 +24,7 @@ describe('LoadingOverlay', () => {
     it('should render loading text', () => {
       render(<LoadingOverlay isVisible={true} />);
 
-      expect(
-        screen.getByText(/Initializing secure connection/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/initConnection/)).toBeInTheDocument();
     });
 
     it('should render spinner', () => {

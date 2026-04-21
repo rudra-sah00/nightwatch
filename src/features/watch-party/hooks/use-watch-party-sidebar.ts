@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useAuth } from '@/providers/auth-provider';
@@ -32,11 +33,14 @@ export function useWatchPartySidebar({
   }, [activeTab, onTabChange]);
 
   const { user } = useAuth();
+  const t = useTranslations('party');
   const currentMember = room.members.find((m) => m.id === currentUserId);
   const currentUserName =
     currentMember?.name ||
     user?.name ||
-    (currentUserId?.startsWith('guest') ? 'Guest' : 'You');
+    (currentUserId?.startsWith('guest')
+      ? t('fallback.guest')
+      : t('participant.you'));
 
   const canDraw =
     currentMember?.permissions?.canDraw ??

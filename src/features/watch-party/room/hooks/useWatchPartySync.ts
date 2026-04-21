@@ -38,6 +38,7 @@ export function useWatchPartySync({
   videoRef,
 }: UseWatchPartySyncProps) {
   const t = useTranslations('toasts');
+  const tp = useTranslations('party.toasts');
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isLiveRoom = room?.type === 'livestream';
@@ -75,10 +76,10 @@ export function useWatchPartySync({
       if (event.action === 'LEAVE') {
         setHostDisconnected(true);
         const graceSeconds = 30;
-        toast.warning(
-          `Host disconnected. Party will close in ${graceSeconds}s if they don't return.`,
-          { id: 'host-disconnected', duration: graceSeconds * 1000 },
-        );
+        toast.warning(tp('hostDisconnected', { seconds: graceSeconds }), {
+          id: 'host-disconnected',
+          duration: graceSeconds * 1000,
+        });
 
         if (hostDisconnectTimerRef.current)
           clearTimeout(hostDisconnectTimerRef.current);
@@ -92,7 +93,7 @@ export function useWatchPartySync({
           clearTimeout(hostDisconnectTimerRef.current);
           hostDisconnectTimerRef.current = null;
         }
-        toast.success('Host reconnected!', { id: 'host-disconnected' });
+        toast.success(tp('hostReconnected'), { id: 'host-disconnected' });
       }
     },
     [
@@ -106,6 +107,7 @@ export function useWatchPartySync({
       videoRef,
       room?.state.currentTime,
       t,
+      tp,
     ],
   );
 
@@ -179,10 +181,10 @@ export function useWatchPartySync({
           room: response.room,
         });
       } else {
-        toast.error(response.error || 'Failed to update content');
+        toast.error(response.error || tp('failedUpdateContent'));
       }
     },
-    [room?.id, setRoom, rtmSendMessage],
+    [room?.id, setRoom, rtmSendMessage, tp],
   );
 
   const handleIncomingRtmMessage = useCallback(
@@ -265,7 +267,7 @@ export function useWatchPartySync({
 
         case 'CONTENT_UPDATED': {
           const { room: newRoom } = msg;
-          toast.info(`Content changed to: ${newRoom.title}`);
+          toast.info(tp('contentChanged', { title: newRoom.title }));
           getPartyStreamToken(newRoom.id).then((response) => {
             const token = response.token || '';
             const normalizedRoom = normalizeRoomUrls(newRoom, token, {
@@ -278,16 +280,16 @@ export function useWatchPartySync({
 
         case 'HOST_DISCONNECTED': {
           setHostDisconnected(true);
-          toast.warning(
-            `Host disconnected. Party will close in ${msg.graceSeconds}s if they don't return.`,
-            { id: 'host-disconnected', duration: msg.graceSeconds * 1000 },
-          );
+          toast.warning(tp('hostDisconnected', { seconds: msg.graceSeconds }), {
+            id: 'host-disconnected',
+            duration: msg.graceSeconds * 1000,
+          });
           break;
         }
 
         case 'HOST_RECONNECTED': {
           setHostDisconnected(false);
-          toast.success('Host reconnected!', { id: 'host-disconnected' });
+          toast.success(tp('hostReconnected'), { id: 'host-disconnected' });
           break;
         }
 
@@ -340,6 +342,7 @@ export function useWatchPartySync({
       videoRef?.current?.paused,
       videoRef?.current?.currentTime,
       videoRef?.current,
+      tp,
     ],
   );
 

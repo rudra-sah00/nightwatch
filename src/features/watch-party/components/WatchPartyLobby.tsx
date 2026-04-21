@@ -8,6 +8,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
@@ -54,6 +55,7 @@ export function WatchPartyLobby({
 }: WatchPartyLobbyProps) {
   const router = useRouter();
   const { isBrowser, openInDesktopApp } = useDesktopApp();
+  const t = useTranslations('party.lobby');
 
   if (isMobile) {
     return (
@@ -61,11 +63,10 @@ export function WatchPartyLobby({
         <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center space-y-6">
           <Monitor className="w-16 h-16 text-foreground mx-auto" />
           <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            Desktop Only
+            {t('desktopOnly')}
           </h1>
           <p className="text-foreground font-medium leading-relaxed uppercase text-sm">
-            Watch Party is only available on desktop. Please open this link on a
-            computer to watch together.
+            {t('desktopOnlyDesc')}
           </p>
           <Button
             type="button"
@@ -73,7 +74,7 @@ export function WatchPartyLobby({
             onClick={() => router.push('/home')}
             className="w-full py-4 tracking-widest uppercase font-black border-4"
           >
-            Go Home
+            {t('goHome')}
           </Button>
         </div>
       </div>
@@ -81,7 +82,7 @@ export function WatchPartyLobby({
   }
 
   if (isLoading && !roomPreview && !roomNotFound) {
-    return <WatchPartyLoading message="Loading room…" />;
+    return <WatchPartyLoading message={t('loadingRoom')} />;
   }
 
   if (roomNotFound) {
@@ -92,10 +93,10 @@ export function WatchPartyLobby({
             <Users className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            Room Not Found
+            {t('roomNotFound')}
           </h1>
           <p className="text-foreground font-medium uppercase text-sm leading-relaxed">
-            This watch party has ended or the link is no longer valid.
+            {t('roomNotFoundDesc')}
           </p>
           <Button
             type="button"
@@ -103,7 +104,7 @@ export function WatchPartyLobby({
             onClick={() => router.push('/home')}
             className="w-full py-4 tracking-widest uppercase font-black border-4"
           >
-            Back to Home
+            {t('backToHome')}
           </Button>
         </div>
       </div>
@@ -121,7 +122,7 @@ export function WatchPartyLobby({
                 <Check className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-[10px] text-foreground font-black font-headline uppercase">
-                Sent
+                {t('sent')}
               </span>
             </div>
             <div className="w-12 h-1 bg-primary mb-6" />
@@ -130,7 +131,7 @@ export function WatchPartyLobby({
                 <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-foreground" />
               </div>
               <span className="text-[10px] text-foreground font-black font-headline uppercase">
-                Waiting
+                {t('waiting')}
               </span>
             </div>
             <div className="w-12 h-1 bg-primary/20 mb-6" />
@@ -139,16 +140,16 @@ export function WatchPartyLobby({
                 <Users className="w-5 h-5 text-foreground/40" />
               </div>
               <span className="text-[10px] text-foreground/40 font-black font-headline uppercase">
-                Joining
+                {t('joining')}
               </span>
             </div>
           </div>
 
           <h2 className="text-2xl font-black font-headline uppercase tracking-tighter text-center mb-2">
-            Waiting for Approval
+            {t('waitingForApproval')}
           </h2>
           <p className="text-foreground font-medium uppercase text-xs text-center leading-relaxed mb-8">
-            The host has been notified. You'll join automatically once approved.
+            {t('waitingForApprovalDesc')}
           </p>
           <Button
             type="button"
@@ -156,7 +157,7 @@ export function WatchPartyLobby({
             onClick={onCancelRequest || onLeave}
             className="w-full py-3 tracking-widest uppercase font-black border-4"
           >
-            Cancel Request
+            {t('cancelRequest')}
           </Button>
         </div>
       </div>
@@ -171,10 +172,10 @@ export function WatchPartyLobby({
             <UserMinus className="w-10 h-10 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
-            Request Declined
+            {t('requestDeclined')}
           </h2>
           <p className="text-foreground font-medium uppercase text-sm leading-relaxed mb-8">
-            The host has declined your request to join this party.
+            {t('requestDeclinedDesc')}
           </p>
           <div className="flex flex-col gap-3">
             <Button
@@ -183,14 +184,14 @@ export function WatchPartyLobby({
               onClick={() => window.location.reload()}
               className="w-full py-4 tracking-widest uppercase font-black border-4"
             >
-              Try Again
+              {t('tryAgain')}
             </Button>
             <Button
               variant="neo-ghost"
               onClick={() => router.push('/home')}
               className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
             >
-              Go Home
+              {t('goHome')}
             </Button>
           </div>
         </div>
@@ -206,10 +207,10 @@ export function WatchPartyLobby({
           <div className="bg-neo-yellow border-b-4 border-border p-6 text-center">
             <div className="inline-flex items-center gap-2 text-[10px] font-black font-headline uppercase text-foreground border-2 border-border bg-background px-3 py-1 mb-4">
               <div className="w-2 h-2 rounded-full bg-neo-yellow animate-pulse motion-reduce:animate-none" />
-              Live Watch Party
+              {t('liveWatchParty')}
             </div>
             <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-              You're Invited
+              {t('youreInvited')}
             </h1>
           </div>
 
@@ -221,8 +222,10 @@ export function WatchPartyLobby({
               </h2>
               {roomPreview.season ? (
                 <p className="text-xs font-bold font-headline uppercase text-foreground/60 mt-1">
-                  Season {roomPreview.season} &middot; Episode{' '}
-                  {roomPreview.episode}
+                  {t('seasonEpisode', {
+                    season: roomPreview.season,
+                    episode: roomPreview.episode ?? 0,
+                  })}
                 </p>
               ) : null}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-4">
@@ -234,7 +237,9 @@ export function WatchPartyLobby({
                 </div>
                 <div className="flex items-center gap-2 text-xs font-black font-headline uppercase text-foreground">
                   <Users className="w-4 h-4 text-neo-blue" />
-                  <span>{roomPreview.memberCount} watching</span>
+                  <span>
+                    {t('watching', { count: roomPreview.memberCount })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -246,7 +251,7 @@ export function WatchPartyLobby({
                     htmlFor="guestName"
                     className="block text-xs font-black font-headline uppercase mb-2 text-foreground"
                   >
-                    Your Display Name
+                    {t('yourDisplayName')}
                   </label>
                   <div className="relative">
                     <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40 pointer-events-none" />
@@ -255,7 +260,7 @@ export function WatchPartyLobby({
                       type="text"
                       value={guestName}
                       onChange={(e) => onGuestNameChange(e.target.value)}
-                      placeholder="ENTER YOUR NAME"
+                      placeholder={t('namePlaceholder')}
                       maxLength={30}
                       className="w-full pl-10 pr-4 py-3 bg-background border-4 border-border text-foreground outline-none font-bold placeholder:text-foreground/40 transition-colors focus:bg-neo-yellow relative"
                     />
@@ -266,14 +271,14 @@ export function WatchPartyLobby({
                 {onCaptchaVerify ? (
                   <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-300 motion-reduce:animate-none">
                     <p className="text-[10px] font-black font-headline uppercase text-foreground/60 mb-2 text-center">
-                      Security Check
+                      {t('securityCheck')}
                     </p>
                     <div className="mt-2">
                       <Captcha onVerify={onCaptchaVerify} onError={() => {}} />
                     </div>
                     {captchaToken ? (
                       <p className="text-xs text-emerald-600 font-black font-headline uppercase text-center mt-2 flex items-center justify-center gap-1">
-                        <Check className="w-4 h-4" /> Verified
+                        <Check className="w-4 h-4" /> {t('verified')}
                       </p>
                     ) : null}
                   </div>
@@ -293,7 +298,7 @@ export function WatchPartyLobby({
                 }
                 className="w-full py-4 tracking-widest uppercase font-black border-4"
               >
-                {isLoading ? 'Requesting…' : 'Request to Join'}
+                {isLoading ? t('requesting') : t('requestToJoin')}
               </Button>
 
               {isBrowser ? (
@@ -304,7 +309,7 @@ export function WatchPartyLobby({
                   className="w-full py-4 tracking-widest uppercase font-black bg-neo-yellow text-primary-foreground border-4 hover:bg-neo-yellow/80"
                 >
                   <Monitor className="w-5 h-5 mr-2" />
-                  Open in Desktop App
+                  {t('openInDesktopApp')}
                 </Button>
               ) : null}
 
@@ -314,7 +319,7 @@ export function WatchPartyLobby({
                 onClick={() => router.push('/home')}
                 className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
               >
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
 
@@ -325,7 +330,7 @@ export function WatchPartyLobby({
                 </p>
                 {errorCode ? (
                   <p className="text-[8px] uppercase tracking-widest mt-1 opacity-80">
-                    Code: {errorCode}
+                    {t('errorCode', { code: errorCode })}
                   </p>
                 ) : null}
               </div>

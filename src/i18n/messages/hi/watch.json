@@ -25,9 +25,27 @@
     "movie": "फ़िल्म",
     "tvSeries": "टीवी सीरीज़",
     "live": "लाइव",
-    "liveBadge": "LIVE",
+    "liveBadge": "लाइव",
     "watchingLive": "आप लाइव देख रहे हैं",
-    "jumpToLive": "लाइव पर जाएं"
+    "jumpToLive": "लाइव पर जाएं",
+    "lockedHostControls": "लॉक - होस्ट नियंत्रण",
+    "hostControls": "होस्ट नियंत्रण",
+    "rotateDevice": "सर्वोत्तम अनुभव के लिए अपना डिवाइस घुमाएँ",
+    "fullscreenNotSupported": "इस ब्राउज़र में फ़ुलस्क्रीन समर्थित नहीं है",
+    "failedEnterFullscreen": "फ़ुलस्क्रीन में प्रवेश करने में विफल",
+    "failedExitFullscreen": "फ़ुलस्क्रीन से बाहर निकलने में विफल",
+    "fullscreenToggleFailed": "फ़ुलस्क्रीन टॉगल विफल",
+    "seekTime": "सीक समय",
+    "liveSeekBar": "लाइव स्ट्रीम सीक बार",
+    "atLiveEdge": "लाइव पर",
+    "behindLive": "{seconds}s लाइव से पीछे",
+    "closeSidebar": "साइडबार बंद करें",
+    "openSidebar": "साइडबार खोलें",
+    "seasonEpisodeLabel": "सीज़न {season} · एपिसोड {episode}",
+    "rotateToLandscape": "लैंडस्केप में घुमाएँ",
+    "landscapeOnlyMessage": "यह प्लेयर केवल लैंडस्केप मोड में उपलब्ध है",
+    "showEpisodes": "एपिसोड दिखाएँ",
+    "episodesTitle": "एपिसोड"
   },
   "settings": {
     "quality": "गुणवत्ता",
@@ -44,7 +62,24 @@
     "font": "फ़ॉन्ट",
     "background": "पृष्ठभूमि",
     "textColor": "टेक्स्ट रंग",
-    "textEffect": "टेक्स्ट प्रभाव"
+    "textEffect": "टेक्स्ट प्रभाव",
+    "sizeSmall": "छोटा",
+    "sizeMedium": "मध्यम",
+    "sizeLarge": "बड़ा",
+    "sizeExtraLarge": "अतिरिक्त बड़ा",
+    "bgBlack": "काला",
+    "bgDarkGray": "गहरा भूरा",
+    "bgTransparent": "पारदर्शी",
+    "bgSemiTransparent": "अर्ध-पारदर्शी",
+    "colorWhite": "सफ़ेद",
+    "colorYellow": "पीला",
+    "colorCyan": "सियान",
+    "colorLightGreen": "हल्का हरा",
+    "shadowNone": "कोई नहीं",
+    "shadowDropShadow": "ड्रॉप शैडो",
+    "shadowOutline": "आउटलाइन",
+    "shadowGlow": "चमक",
+    "fontSystemDefault": "सिस्टम डिफ़ॉल्ट"
   },
   "audio": {
     "title": "ऑडियो",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "एपिसोड {number}",
     "season": "सीज़न {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "चलाने के लिए क्लिक करें",
     "loading": "लोड हो रहा है...",
     "noEpisodes": "कोई एपिसोड नहीं",
-    "nowPlaying": "अभी चल रहा है",
-    "min": "{duration} मिनट"
+    "min": "{duration} मिनट",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "अगला सीज़न",
@@ -66,7 +100,9 @@
     "inCountdown": "{seconds}s में",
     "play": "चलाएं",
     "cancel": "रद्द करें",
-    "loading": "लोड हो रहा है"
+    "loading": "लोड हो रहा है",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "ऑफ़लाइन",
@@ -84,7 +120,13 @@
     "cancelDownload": "डाउनलोड रद्द करें",
     "waitForComplete": "ऑफ़लाइन देखने के लिए कृपया डाउनलोड पूरा होने तक प्रतीक्षा करें।",
     "waitingInQueue": "कतार में प्रतीक्षा...",
-    "downloading": "डाउनलोड हो रहा है..."
+    "downloading": "डाउनलोड हो रहा है...",
+    "statusCompleted": "पूर्ण",
+    "statusFailed": "विफल",
+    "statusDownloading": "डाउनलोड हो रहा है",
+    "statusQueued": "कतार में",
+    "statusCancelled": "रद्द",
+    "statusPaused": "रुका हुआ"
   },
   "watchlist": {
     "pageTitle": "मेरी",
@@ -94,5 +136,46 @@
     "emptyTitle": "आपकी वॉचलिस्ट खाली है",
     "emptyDescription": "बाद में देखने के लिए फ़िल्में और शो सहेजें",
     "viewDetails": "{title} के विवरण देखें"
+  },
+  "continueWatching": {
+    "failedToRemove": "सूची से हटाने में विफल",
+    "minutesLeft": "{minutes}m शेष",
+    "hoursLeft": "{hours}h शेष",
+    "hoursMinutesLeft": "{hours}h {minutes}m शेष"
+  },
+  "countdown": {
+    "startingExperience": "अनुभव शुरू हो रहा है",
+    "getReady": "सिनेमाई उत्कृष्टता के लिए तैयार हो जाइए",
+    "go": "चलो",
+    "eliteExperience": "एलीट AI अनुभव • EMA हार्डेंड"
+  },
+  "aria": {
+    "videoPlayer": "वीडियो प्लेयर",
+    "seekBackward": "10 सेकंड पीछे जाएं",
+    "seekForward": "10 सेकंड आगे जाएं",
+    "playPause": "चलाएं/रोकें",
+    "seekBar": "सीक बार",
+    "skipControls": "स्किप नियंत्रण",
+    "fullscreen": "फ़ुलस्क्रीन",
+    "volume": "वॉल्यूम",
+    "settings": "सेटिंग्स",
+    "audioSubtitle": "ऑडियो और उपशीर्षक चयनकर्ता",
+    "episodePanel": "एपिसोड पैनल",
+    "playerHeader": "प्लेयर हेडर",
+    "subtitle": "उपशीर्षक",
+    "playbackCountdown": "प्लेबैक काउंटडाउन",
+    "countdownTitle": "प्लेबैक काउंटडाउन"
+  },
+  "page": {
+    "seasonLabel": "सीज़न {number}",
+    "unknownTitle": "अज्ञात",
+    "episodeLabel": "एपिसोड {number}",
+    "noStream": "कोई स्ट्रीम उपलब्ध नहीं",
+    "errorLoading": "स्ट्रीम लोड करने में त्रुटि हुई",
+    "startFromContent": "कृपया सामग्री पृष्ठ से प्लेबैक शुरू करें",
+    "tryAgain": "पुनः प्रयास करें",
+    "goToHome": "होम पर जाएं",
+    "continuePortrait": "पोर्ट्रेट मोड में देखना जारी रखें।",
+    "movieYear": "फ़िल्म · {year}"
   }
 }

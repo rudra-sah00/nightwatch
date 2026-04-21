@@ -362,7 +362,7 @@ export function UpdateProfileForm() {
         </div>
         <div
           role="radiogroup"
-          aria-label="Server selection"
+          aria-label={t('serverSelection.ariaLabel')}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {[

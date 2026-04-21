@@ -1,4 +1,20 @@
 {
+  "messages": {
+    "invalidInput": "Invalid input",
+    "passwordUpdated": "Password updated successfully",
+    "passwordFailed": "Failed to update password",
+    "usernameFailed": "Failed to check username availability",
+    "noChanges": "No changes to save",
+    "usernameNotAvailable": "Username not available",
+    "profileUpdated": "Profile updated successfully",
+    "profileFailed": "Failed to update profile",
+    "accountDeleted": "Account deleted successfully",
+    "accountDeleteFailed": "Failed to delete account",
+    "activityFailed": "Failed to load activity",
+    "imageUpdated": "Profile image updated",
+    "imageFailed": "Failed to upload image",
+    "unknown": "Unknown"
+  },
   "security": {
     "title": "Security / Password",
     "currentPassword": "Target Authorization",
@@ -17,7 +33,22 @@
     "more": "More",
     "noActivity": "No activity",
     "minSuffix": "{count} min",
-    "last365": "Last 365 days of interaction"
+    "last365": "Last 365 days of interaction",
+    "heatmapAriaLabel": "Watch activity heatmap for the past year",
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
   },
   "releaseNotes": {
     "title": "Release Notes",
@@ -47,6 +78,7 @@
   },
   "serverSelection": {
     "title": "Server Selection",
+    "ariaLabel": "Server selection",
     "netflix": "Netflix",
     "standard": "Standard",
     "balanced": "Balanced",
@@ -80,14 +112,30 @@
     "maxConcurrentDescription": "How many movies or episodes can be downloaded at the same time. Default is 3.",
     "downloadSpeedLimit": "Download Speed Limit",
     "downloadSpeedDescription": "Restrict the background download speed. Helpful if your network slows down globally!",
-    "unlimited": "Unlimited"
+    "unlimited": "Unlimited",
+    "cancel": "Cancel",
+    "set": "Set",
+    "customConcurrent": "Custom (1-10)",
+    "customSpeed": "Custom MB/s"
   },
   "publicProfile": {
     "returnBase": "Return Base",
+    "unknownUser": "unknown_user",
     "identityVerified": "Identity Profile Verified",
     "persistentIdentity": "Persistent Identity: {id}",
     "daysActive": "DAYS ACTIVE",
     "hrsTotal": "HRS TOTAL",
-    "coreVersion": "CORE VERSION: V1.0-STABLE"
+    "coreVersion": "CORE VERSION: V1.0-STABLE",
+    "userIdentity": "USER IDENTITY: {id}"
+  },
+  "validation": {
+    "nameMinLength": "Name must be at least 2 characters",
+    "usernameMinLength": "Username must be at least 3 characters",
+    "usernameFormat": "Username can only contain letters, numbers, and underscores",
+    "currentPasswordRequired": "Current password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordUppercase": "Password must contain at least one uppercase letter",
+    "passwordSpecialChar": "Password must contain at least one special character",
+    "newPasswordsMismatch": "New passwords do not match"
   }
 }

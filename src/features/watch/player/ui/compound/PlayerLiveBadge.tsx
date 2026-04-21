@@ -33,7 +33,7 @@ export function PlayerLiveBadge() {
           isAtLiveEdge ? 'bg-background animate-pulse' : 'bg-neo-red',
         )}
       />
-      LIVE
+      {t('liveBadge')}
     </button>
   );
 }

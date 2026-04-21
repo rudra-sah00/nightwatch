@@ -17,10 +17,10 @@ export interface SubtitleSettings {
 }
 
 export const SUBTITLE_FONT_SIZES = [
-  { label: 'Small', value: '1rem' },
-  { label: 'Medium', value: '1.25rem' },
-  { label: 'Large', value: '1.5rem' },
-  { label: 'Extra Large', value: '2rem' },
+  { label: 'subtitles.sizeSmall', value: '1rem' },
+  { label: 'subtitles.sizeMedium', value: '1.25rem' },
+  { label: 'subtitles.sizeLarge', value: '1.5rem' },
+  { label: 'subtitles.sizeExtraLarge', value: '2rem' },
 ] as const;
 
 export const SUBTITLE_FONTS = [
@@ -40,32 +40,38 @@ export const SUBTITLE_FONTS = [
   { label: 'Source Sans Pro', value: "'Source Sans Pro', sans-serif" },
   { label: 'Bebas Neue', value: "'Bebas Neue', sans-serif" },
   // Fallback to system fonts
-  { label: 'System Default', value: 'system-ui, -apple-system, sans-serif' },
+  {
+    label: 'subtitles.fontSystemDefault',
+    value: 'system-ui, -apple-system, sans-serif',
+  },
 ] as const;
 
 export const BACKGROUND_COLORS = [
-  { label: 'Black', value: 'rgba(0, 0, 0, 0.75)' },
-  { label: 'Dark Gray', value: 'rgba(40, 40, 40, 0.85)' },
-  { label: 'Transparent', value: 'transparent' },
-  { label: 'Semi-Transparent', value: 'rgba(0, 0, 0, 0.5)' },
+  { label: 'subtitles.bgBlack', value: 'rgba(0, 0, 0, 0.75)' },
+  { label: 'subtitles.bgDarkGray', value: 'rgba(40, 40, 40, 0.85)' },
+  { label: 'subtitles.bgTransparent', value: 'transparent' },
+  { label: 'subtitles.bgSemiTransparent', value: 'rgba(0, 0, 0, 0.5)' },
 ] as const;
 
 export const TEXT_COLORS = [
-  { label: 'White', value: 'white' },
-  { label: 'Yellow', value: '#ffff00' },
-  { label: 'Cyan', value: '#00ffff' },
-  { label: 'Light Green', value: '#90ee90' },
+  { label: 'subtitles.colorWhite', value: 'white' },
+  { label: 'subtitles.colorYellow', value: '#ffff00' },
+  { label: 'subtitles.colorCyan', value: '#00ffff' },
+  { label: 'subtitles.colorLightGreen', value: '#90ee90' },
 ] as const;
 
 export const TEXT_SHADOWS = [
-  { label: 'None', value: 'none' },
-  { label: 'Drop Shadow', value: '2px 2px 4px rgba(0, 0, 0, 0.8)' },
+  { label: 'subtitles.shadowNone', value: 'none' },
   {
-    label: 'Outline',
+    label: 'subtitles.shadowDropShadow',
+    value: '2px 2px 4px rgba(0, 0, 0, 0.8)',
+  },
+  {
+    label: 'subtitles.shadowOutline',
     value: '1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
   },
   {
-    label: 'Glow',
+    label: 'subtitles.shadowGlow',
     value: '0 0 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(0, 0, 0, 0.6)',
   },
 ] as const;

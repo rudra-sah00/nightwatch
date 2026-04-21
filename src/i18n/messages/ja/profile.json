@@ -17,7 +17,22 @@
     "more": "多い",
     "noActivity": "アクティビティなし",
     "minSuffix": "{count}分",
-    "last365": "過去365日間のインタラクション"
+    "last365": "過去365日間のインタラクション",
+    "heatmapAriaLabel": "過去1年間の視聴アクティビティヒートマップ",
+    "months": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    }
   },
   "releaseNotes": {
     "title": "リリースノート",
@@ -52,7 +67,8 @@
     "balanced": "バランス",
     "performance": "パフォーマンス",
     "highQuality": "高画質",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "サーバー選択"
   },
   "dangerZone": {
     "title": "危険ゾーン",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "同時にダウンロードできる映画やエピソードの数。デフォルトは3です。",
     "downloadSpeedLimit": "ダウンロード速度制限",
     "downloadSpeedDescription": "バックグラウンドのダウンロード速度を制限します。ネットワークが遅くなる場合に便利です！",
-    "unlimited": "無制限"
+    "unlimited": "無制限",
+    "cancel": "キャンセル",
+    "set": "設定",
+    "customConcurrent": "カスタム (1-10)",
+    "customSpeed": "カスタム MB/s"
   },
   "publicProfile": {
     "returnBase": "ベースに戻る",
+    "unknownUser": "不明なユーザー",
     "identityVerified": "アイデンティティプロフィール確認済み",
     "persistentIdentity": "永続的アイデンティティ: {id}",
     "daysActive": "アクティブ日数",
     "hrsTotal": "合計時間",
-    "coreVersion": "コアバージョン: V1.0-STABLE"
+    "coreVersion": "コアバージョン: V1.0-STABLE",
+    "userIdentity": "ユーザーID：{id}"
+  },
+  "messages": {
+    "invalidInput": "無効な入力",
+    "passwordUpdated": "パスワードが正常に更新されました",
+    "passwordFailed": "パスワードの更新に失敗しました",
+    "usernameFailed": "ユーザー名の利用可否の確認に失敗しました",
+    "noChanges": "保存する変更はありません",
+    "usernameNotAvailable": "ユーザー名は利用できません",
+    "profileUpdated": "プロフィールが正常に更新されました",
+    "profileFailed": "プロフィールの更新に失敗しました",
+    "accountDeleted": "アカウントが正常に削除されました",
+    "accountDeleteFailed": "アカウントの削除に失敗しました",
+    "activityFailed": "アクティビティの読み込みに失敗しました",
+    "imageUpdated": "プロフィール画像が更新されました",
+    "imageFailed": "画像のアップロードに失敗しました",
+    "unknown": "不明"
+  },
+  "validation": {
+    "nameMinLength": "名前は2文字以上で入力してください",
+    "usernameMinLength": "ユーザー名は3文字以上で入力してください",
+    "usernameFormat": "ユーザー名には英字、数字、アンダースコアのみ使用できます",
+    "currentPasswordRequired": "現在のパスワードは必須です",
+    "passwordMinLength": "パスワードは8文字以上で入力してください",
+    "passwordUppercase": "パスワードには大文字を1つ以上含めてください",
+    "passwordSpecialChar": "パスワードには特殊文字を1つ以上含めてください",
+    "newPasswordsMismatch": "新しいパスワードが一致しません"
   }
 }

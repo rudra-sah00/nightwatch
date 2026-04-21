@@ -1,10 +1,13 @@
-import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import LoginClient from './LoginClient';
 
-export const metadata: Metadata = {
-  title: 'Login | Watch Rudra',
-  description: 'Login to your account to start watching movies and TV shows.',
-};
+export async function generateMetadata() {
+  const t = await getTranslations('auth');
+  return {
+    title: `${t('title.entrance')} | Watch Rudra`,
+    description: t('features.solo.desc'),
+  };
+}
 
 export default async function LoginPage() {
   // Mandatory 2.5s delay to showcase premium loading animation

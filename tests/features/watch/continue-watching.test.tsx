@@ -161,7 +161,9 @@ describe('ContinueWatching', () => {
 
     render(<ContinueWatching onSelectContent={mockOnSelectContent} />);
 
-    const button = await screen.findByTitle('Continue watching Test Show');
+    const button = await screen.findByTitle(
+      'continueWatching.title - Test Show',
+    );
     await user.click(button);
 
     expect(mockOnSelectContent).toHaveBeenCalledWith('show-123');
@@ -193,7 +195,9 @@ describe('ContinueWatching', () => {
 
     await screen.findByText('Test Show');
 
-    expect(screen.getByText(/30m left/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('continueWatching.minutesLeft'),
+    ).toBeInTheDocument();
   });
 
   it('shows series badge for series content', async () => {
@@ -276,7 +280,9 @@ describe('ContinueWatching', () => {
 
     await screen.findByText('Long Movie');
 
-    expect(screen.getByText(/2h 30m left/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('continueWatching.hoursMinutesLeft'),
+    ).toBeInTheDocument();
   });
 
   it('formats exact hours without minutes', async () => {
@@ -303,7 +309,7 @@ describe('ContinueWatching', () => {
 
     await screen.findByText('Exactly Two Hours');
 
-    expect(screen.getByText(/2h left/i)).toBeInTheDocument();
+    expect(screen.getByText('continueWatching.hoursLeft')).toBeInTheDocument();
   });
 
   it('handles remove action successfully', async () => {
@@ -337,7 +343,7 @@ describe('ContinueWatching', () => {
 
     await screen.findByText('Show to Remove');
 
-    const removeButton = screen.getByTitle('Remove from list');
+    const removeButton = screen.getByTitle('continueWatching.removeAriaLabel');
     await user.click(removeButton);
 
     expect(deleteWatchProgress).toHaveBeenCalledWith(
@@ -379,10 +385,10 @@ describe('ContinueWatching', () => {
 
     await screen.findByText('Show');
 
-    const removeButton = screen.getByTitle('Remove from list');
+    const removeButton = screen.getByTitle('continueWatching.removeAriaLabel');
     await user.click(removeButton);
 
-    expect(toast.error).toHaveBeenCalledWith('Failed to remove from list');
+    expect(toast.error).toHaveBeenCalledWith('failedToRemove');
   });
 
   it('uses cached data when available', async () => {
@@ -469,7 +475,7 @@ describe('ContinueWatching', () => {
 
     render(<ContinueWatching />);
 
-    await screen.findByText(/your watch history is empty/i);
+    await screen.findByText('continueWatching.emptyTitle');
   });
 
   it('shows loading state initially', async () => {
@@ -486,7 +492,7 @@ describe('ContinueWatching', () => {
 
     const { container } = render(<ContinueWatching />);
 
-    expect(screen.getByText('Continue Watching')).toBeInTheDocument();
+    expect(screen.getByText('continueWatching.title')).toBeInTheDocument();
     // Check for loading pulse
     const loader = container.querySelector('.animate-pulse');
     expect(loader).toBeInTheDocument();

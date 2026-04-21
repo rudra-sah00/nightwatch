@@ -7,6 +7,7 @@ import AgoraRTC, {
   type IMicrophoneAudioTrack,
   type IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,21 +25,6 @@ const AGORA_LOG_LEVEL = IS_PRODUCTION
     ? 0
     : 2;
 AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
-
-// Handle autoplay restrictions (browsers block audio before user interaction).
-// This fires once if any audio/video track fails to autoplay, prompting the user.
-AgoraRTC.onAutoplayFailed = () => {
-  toast.info('Click anywhere on the page to enable audio playback', {
-    duration: 8000,
-    id: 'agora-autoplay', // prevent duplicate toasts
-    action: {
-      label: 'Enable Audio',
-      onClick: () => {
-        // User interaction satisfies browser autoplay policy
-      },
-    },
-  });
-};
 
 /**
  * Audio and Video encoding presets optimized for watch party sidebar tiles.
@@ -163,23 +149,18 @@ function _buildUidToMemberMap(members: MemberInfo[]): Map<string, MemberInfo> {
 function handleDeviceError(
   error: unknown,
   deviceType: 'Microphone' | 'Camera',
+  t: (key: string, params?: Record<string, string>) => string,
 ) {
   const message = error instanceof Error ? error.message : String(error);
   if (message.includes('Permission') || message.includes('NotAllowed')) {
-    toast.error(
-      `${deviceType} permission denied. Click the lock icon in your browser address bar to allow access.`,
-    );
+    toast.error(t('permissionDenied', { device: deviceType }));
   } else if (
     message.includes('NotFound') ||
     message.includes('Device not found')
   ) {
-    toast.error(
-      `No ${deviceType.toLowerCase()} found. Please connect a ${deviceType.toLowerCase()}.`,
-    );
+    toast.error(t('deviceNotFound', { device: deviceType.toLowerCase() }));
   } else {
-    toast.error(
-      `Failed to access ${deviceType.toLowerCase()}. Please check your browser settings.`,
-    );
+    toast.error(t('deviceAccessFailed', { device: deviceType.toLowerCase() }));
   }
 }
 
@@ -199,6 +180,22 @@ export function useAgora({
   members = [],
   userId,
 }: UseAgoraOptions) {
+  const tp = useTranslations('party.toasts');
+
+  // Register autoplay-failed handler with translated strings (once per mount)
+  useEffect(() => {
+    AgoraRTC.onAutoplayFailed = () => {
+      toast.info(tp('enableAudio'), {
+        duration: 8000,
+        id: 'agora-autoplay',
+        action: {
+          label: tp('enableAudioAction'),
+          onClick: () => {},
+        },
+      });
+    };
+  }, [tp]);
+
   // --- Refs for mutable SDK objects (not state — avoids re-renders) ---
   const clientRef = useRef<IAgoraRTCClient | null>(null);
   const localAudioTrackRef = useRef<IMicrophoneAudioTrack | null>(null);
@@ -517,14 +514,14 @@ export function useAgora({
       setConnectionState(curState);
 
       if (curState === 'RECONNECTING') {
-        toast.warning('Reconnecting to voice/video server...', {
+        toast.warning(tp('reconnectingVoice'), {
           id: 'agora-connection',
           duration: 10000,
         });
       } else if (curState === 'CONNECTED') {
         toast.dismiss('agora-connection');
       } else if (curState === 'DISCONNECTED') {
-        toast.error('Disconnected from voice/video server', {
+        toast.error(tp('disconnectedVoice'), {
           id: 'agora-connection',
         });
       }
@@ -571,7 +568,7 @@ export function useAgora({
       client.off('network-quality', handleNetworkQuality);
       client.off('exception', handleException);
     };
-  }, [isClientReady]);
+  }, [isClientReady, tp]);
 
   /**
    * Core effect that initializes the Agora RTC client, joins the channel,
@@ -641,7 +638,7 @@ export function useAgora({
         // Only show error if this effect instance is still active.
         // Stale rejections from StrictMode double-fire are silently ignored.
         if (!cleaned) {
-          toast.error('Failed to connect to voice/video server');
+          toast.error(tp('failedConnectVoice'));
         }
       });
 
@@ -678,7 +675,7 @@ export function useAgora({
       client.leave().catch(() => {});
       clientRef.current = null;
     };
-  }, [token, appId, channel, uid]);
+  }, [token, appId, channel, uid, tp]);
 
   /**
    * Toggles for local audio and video tracks.
@@ -688,7 +685,7 @@ export function useAgora({
   const toggleAudio = useCallback(async () => {
     const client = clientRef.current;
     if (!client || connectionState !== 'CONNECTED') {
-      toast.error('Not connected to voice server yet. Please wait...');
+      toast.error(tp('notConnectedVoice'));
       return;
     }
     // Snapshot whether audio was enabled AT CALL TIME (ref value is live).
@@ -739,9 +736,9 @@ export function useAgora({
         localAudioTrackRef.current.close();
         localAudioTrackRef.current = null;
       }
-      handleDeviceError(error, 'Microphone');
+      handleDeviceError(error, 'Microphone', tp);
     }
-  }, [refreshDevices, connectionState]);
+  }, [refreshDevices, connectionState, tp]);
   const toggleDeafen = useCallback(() => {
     const next = !isDeafenedRef.current;
     isDeafenedRef.current = next;
@@ -768,7 +765,7 @@ export function useAgora({
   const toggleVideo = useCallback(async () => {
     const client = clientRef.current;
     if (!client || connectionState !== 'CONNECTED') {
-      toast.error('Not connected to video server yet. Please wait...');
+      toast.error(tp('notConnectedVideo'));
       return;
     }
     // Snapshot whether video was enabled AT CALL TIME (ref value is live).
@@ -808,37 +805,43 @@ export function useAgora({
         localVideoTrackRef.current.close();
         localVideoTrackRef.current = null;
       }
-      handleDeviceError(error, 'Camera');
+      handleDeviceError(error, 'Camera', tp);
     }
-  }, [refreshDevices, connectionState]);
+  }, [refreshDevices, connectionState, tp]);
 
   /**
    * Low-level device switching without track reinitialization where possible.
    */
 
-  const switchAudioDevice = useCallback(async (deviceId: string) => {
-    setSelectedAudioDevice(deviceId);
-    if (localAudioTrackRef.current) {
-      try {
-        await localAudioTrackRef.current.setDevice(deviceId);
-        toast.success('Microphone switched');
-      } catch {
-        toast.error('Failed to switch microphone');
+  const switchAudioDevice = useCallback(
+    async (deviceId: string) => {
+      setSelectedAudioDevice(deviceId);
+      if (localAudioTrackRef.current) {
+        try {
+          await localAudioTrackRef.current.setDevice(deviceId);
+          toast.success(tp('micSwitched'));
+        } catch {
+          toast.error(tp('micSwitchFailed'));
+        }
       }
-    }
-  }, []);
+    },
+    [tp],
+  );
 
-  const switchVideoDevice = useCallback(async (deviceId: string) => {
-    setSelectedVideoDevice(deviceId);
-    if (localVideoTrackRef.current) {
-      try {
-        await localVideoTrackRef.current.setDevice(deviceId);
-        toast.success('Camera switched');
-      } catch {
-        toast.error('Failed to switch camera');
+  const switchVideoDevice = useCallback(
+    async (deviceId: string) => {
+      setSelectedVideoDevice(deviceId);
+      if (localVideoTrackRef.current) {
+        try {
+          await localVideoTrackRef.current.setDevice(deviceId);
+          toast.success(tp('camSwitched'));
+        } catch {
+          toast.error(tp('camSwitchFailed'));
+        }
       }
-    }
-  }, []);
+    },
+    [tp],
+  );
 
   /**
    * Exposed methods and states for UI components.

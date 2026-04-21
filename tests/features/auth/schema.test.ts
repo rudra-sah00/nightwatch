@@ -29,7 +29,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Email or username is required',
+          'validation.emailOrUsernameRequired',
         );
       }
     });
@@ -43,7 +43,9 @@ describe('Auth Schemas', () => {
       const result = loginSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Password is required');
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordRequired',
+        );
       }
     });
 
@@ -83,9 +85,7 @@ describe('Auth Schemas', () => {
       const result = registerSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          'Name must be at least 2 characters',
-        );
+        expect(result.error.issues[0].message).toBe('validation.nameMinLength');
       }
     });
 
@@ -100,7 +100,7 @@ describe('Auth Schemas', () => {
       const result = registerSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid email format');
+        expect(result.error.issues[0].message).toBe('validation.invalidEmail');
       }
     });
 
@@ -116,7 +116,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must be at least 8 characters',
+          'validation.passwordMinLength',
         );
       }
     });
@@ -133,7 +133,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one uppercase letter',
+          'validation.passwordUppercase',
         );
       }
     });
@@ -150,7 +150,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one special character',
+          'validation.passwordSpecialChar',
         );
       }
     });
@@ -211,7 +211,7 @@ describe('Auth Schemas', () => {
       const result = forgotPasswordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid email format');
+        expect(result.error.issues[0].message).toBe('validation.invalidEmail');
       }
     });
   });
@@ -237,7 +237,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must be at least 8 characters',
+          'validation.passwordMinLength',
         );
       }
     });
@@ -262,7 +262,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one uppercase letter',
+          'validation.passwordUppercase',
         );
       }
     });
@@ -287,7 +287,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Password must contain at least one special character',
+          'validation.passwordSpecialChar',
         );
       }
     });
@@ -301,7 +301,9 @@ describe('Auth Schemas', () => {
       const result = resetPasswordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe("Passwords don't match");
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordsMismatch',
+        );
       }
     });
   });
@@ -311,7 +313,7 @@ describe('Auth Schemas', () => {
       const result = getPasswordStrength('');
       expect(result.strength).toBe('weak');
       expect(result.score).toBe(0);
-      expect(result.label).toBe('Weak');
+      expect(result.label).toBe('passwordStrength.weak');
       expect(result.color).toBe('#ef4444');
     });
 
@@ -328,14 +330,14 @@ describe('Auth Schemas', () => {
     it('should return fair for 8+ chars with uppercase and special', () => {
       const result = getPasswordStrength('Abcdefg!');
       expect(result.strength).toBe('fair');
-      expect(result.label).toBe('Fair');
+      expect(result.label).toBe('passwordStrength.fair');
       expect(result.color).toBe('#f59e0b');
     });
 
     it('should return strong for long password with all char types', () => {
       const result = getPasswordStrength('MyStr0ngP@ssword!');
       expect(result.strength).toBe('strong');
-      expect(result.label).toBe('Strong');
+      expect(result.label).toBe('passwordStrength.strong');
       expect(result.color).toBe('#10b981');
     });
 

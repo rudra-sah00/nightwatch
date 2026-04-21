@@ -25,9 +25,27 @@
     "movie": "Фильм",
     "tvSeries": "Сериал",
     "live": "Прямой эфир",
-    "liveBadge": "LIVE",
+    "liveBadge": "ЭФИР",
     "watchingLive": "Вы смотрите в прямом эфире",
-    "jumpToLive": "Перейти к прямому эфиру"
+    "jumpToLive": "Перейти к прямому эфиру",
+    "lockedHostControls": "Заблокировано - Управление хоста",
+    "hostControls": "Управление хоста",
+    "rotateDevice": "Поверните устройство для лучшего просмотра",
+    "fullscreenNotSupported": "Полноэкранный режим не поддерживается в этом браузере",
+    "failedEnterFullscreen": "Не удалось перейти в полноэкранный режим",
+    "failedExitFullscreen": "Не удалось выйти из полноэкранного режима",
+    "fullscreenToggleFailed": "Не удалось переключить полноэкранный режим",
+    "seekTime": "Время перемотки",
+    "liveSeekBar": "Полоса перемотки прямой трансляции",
+    "atLiveEdge": "В прямом эфире",
+    "behindLive": "Отставание от эфира: {seconds}с",
+    "closeSidebar": "Закрыть боковую панель",
+    "openSidebar": "Открыть боковую панель",
+    "seasonEpisodeLabel": "Сезон {season} · Серия {episode}",
+    "rotateToLandscape": "Повернуть в альбомный режим",
+    "landscapeOnlyMessage": "Этот плеер доступен только в альбомном режиме",
+    "showEpisodes": "Показать серии",
+    "episodesTitle": "Серии"
   },
   "settings": {
     "quality": "Качество",
@@ -44,7 +62,24 @@
     "font": "Шрифт",
     "background": "Фон",
     "textColor": "Цвет текста",
-    "textEffect": "Эффект текста"
+    "textEffect": "Эффект текста",
+    "sizeSmall": "Маленький",
+    "sizeMedium": "Средний",
+    "sizeLarge": "Большой",
+    "sizeExtraLarge": "Очень большой",
+    "bgBlack": "Чёрный",
+    "bgDarkGray": "Тёмно-серый",
+    "bgTransparent": "Прозрачный",
+    "bgSemiTransparent": "Полупрозрачный",
+    "colorWhite": "Белый",
+    "colorYellow": "Жёлтый",
+    "colorCyan": "Голубой",
+    "colorLightGreen": "Светло-зелёный",
+    "shadowNone": "Нет",
+    "shadowDropShadow": "Тень",
+    "shadowOutline": "Контур",
+    "shadowGlow": "Свечение",
+    "fontSystemDefault": "Системный шрифт"
   },
   "audio": {
     "title": "Аудио",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "Эпизод {number}",
     "season": "Сезон {number}",
-    "seasonShort": "С{number}",
     "clickToPlay": "Нажмите для воспроизведения",
     "loading": "Загрузка...",
     "noEpisodes": "Нет эпизодов",
-    "nowPlaying": "сейчас воспроизводится",
-    "min": "{duration} мин"
+    "min": "{duration} мин",
+    "episodeShort": "С{number}"
   },
   "nextEpisode": {
     "nextSeason": "Следующий сезон",
@@ -66,7 +100,9 @@
     "inCountdown": "через {seconds}с",
     "play": "Воспроизвести",
     "cancel": "Отмена",
-    "loading": "Загрузка"
+    "loading": "Загрузка",
+    "seasonEpisodeLabel": "С{season} • С{episode}",
+    "episodeShort": "С{number}"
   },
   "offline": {
     "pageTitle": "ОФЛАЙН",
@@ -84,7 +120,13 @@
     "cancelDownload": "Отменить загрузку",
     "waitForComplete": "Дождитесь завершения загрузки для офлайн-просмотра.",
     "waitingInQueue": "Ожидание в очереди...",
-    "downloading": "Загрузка..."
+    "downloading": "Загрузка...",
+    "statusCompleted": "ЗАВЕРШЕНО",
+    "statusFailed": "ОШИБКА",
+    "statusDownloading": "ЗАГРУЗКА",
+    "statusQueued": "В ОЧЕРЕДИ",
+    "statusCancelled": "ОТМЕНЕНО",
+    "statusPaused": "ПРИОСТАНОВЛЕНО"
   },
   "watchlist": {
     "pageTitle": "МОЙ",
@@ -94,5 +136,46 @@
     "emptyTitle": "Ваш список просмотра пуст",
     "emptyDescription": "Сохраняйте фильмы и сериалы для просмотра позже",
     "viewDetails": "Подробнее о {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "Не удалось удалить из списка",
+    "minutesLeft": "Осталось {minutes}м",
+    "hoursLeft": "Осталось {hours}ч",
+    "hoursMinutesLeft": "Осталось {hours}ч {minutes}м"
+  },
+  "countdown": {
+    "startingExperience": "Запуск впечатлений",
+    "getReady": "Приготовьтесь к кинематографическому совершенству",
+    "go": "СТАРТ",
+    "eliteExperience": "Элитный AI-опыт • EMA Усиленный"
+  },
+  "aria": {
+    "videoPlayer": "Видеоплеер",
+    "seekBackward": "Перемотать на 10 секунд назад",
+    "seekForward": "Перемотать на 10 секунд вперёд",
+    "playPause": "Воспроизведение/Пауза",
+    "seekBar": "Полоса перемотки",
+    "skipControls": "Управление пропуском",
+    "fullscreen": "Полноэкранный режим",
+    "volume": "Громкость",
+    "settings": "Настройки",
+    "audioSubtitle": "Выбор аудио и субтитров",
+    "episodePanel": "Панель эпизодов",
+    "playerHeader": "Заголовок плеера",
+    "subtitle": "Субтитры",
+    "playbackCountdown": "Обратный отсчёт воспроизведения",
+    "countdownTitle": "Обратный Отсчёт Воспроизведения"
+  },
+  "page": {
+    "seasonLabel": "Сезон {number}",
+    "unknownTitle": "Неизвестно",
+    "episodeLabel": "Серия {number}",
+    "noStream": "Поток недоступен",
+    "errorLoading": "Произошла ошибка при загрузке потока",
+    "startFromContent": "Пожалуйста, начните воспроизведение со страницы контента",
+    "tryAgain": "Попробовать снова",
+    "goToHome": "На главную",
+    "continuePortrait": "Продолжить просмотр в портретном режиме.",
+    "movieYear": "Фильм · {year}"
   }
 }

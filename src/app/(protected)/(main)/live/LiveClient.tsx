@@ -18,15 +18,6 @@ import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useSports } from '@/features/livestream/hooks/use-sports';
 import { useLiveContent } from './use-live-content';
 
-const SERVERS = [
-  { id: 'server1', label: 'Server 1', desc: '24/7 Live TV' },
-  { id: 'server2', label: 'Server 2', desc: 'Global Sports' },
-] as const;
-
-const SERVER_1_SPORTS = [
-  { id: 'all_channels', label: 'All Channels' },
-] as const;
-
 const _SERVER_2_SPORTS_FALLBACK = [
   { id: 'all_channels', label: 'All Channels' },
 ];
@@ -35,6 +26,13 @@ function LiveContent() {
   const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const t = useTranslations('live');
+
+  const SERVERS = [
+    { id: 'server1' as const, label: t('server1'), desc: t('server1Desc') },
+    { id: 'server2' as const, label: t('server2'), desc: t('server2Desc') },
+  ];
+
+  const SERVER_1_SPORTS = [{ id: 'all_channels', label: t('allChannels') }];
 
   const {
     activeServer,

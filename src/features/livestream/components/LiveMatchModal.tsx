@@ -136,8 +136,8 @@ function LiveMatchModalContent({
       isServer2 ||
       isServer1 ||
       match.playType === 'hls');
-  const team1Name = asText(match.team1?.name, 'Team 1');
-  const team2Name = asText(match.team2?.name, 'Team 2');
+  const team1Name = asText(match.team1?.name, t('teamFallback1'));
+  const team2Name = asText(match.team2?.name, t('teamFallback2'));
   const leagueName = asText(match.league);
   const typeName = asText(match.type);
   const timeDesc = asText(match.timeDesc);
@@ -200,7 +200,7 @@ function LiveMatchModalContent({
             type="button"
             onClick={onClose}
             className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
-            aria-label="Close"
+            aria-label={t('closeModal')}
           >
             <X className="w-5 h-5 stroke-[3px]" />
           </button>

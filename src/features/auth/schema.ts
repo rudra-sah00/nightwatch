@@ -3,11 +3,11 @@ import { z } from 'zod';
 // Shared password validation: 8+ chars, 1 uppercase, 1 special character
 const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .min(8, 'validation.passwordMinLength')
+  .regex(/[A-Z]/, 'validation.passwordUppercase')
   .regex(
     /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
-    'Password must contain at least one special character',
+    'validation.passwordSpecialChar',
   );
 
 /**
@@ -18,6 +18,7 @@ type PasswordStrength = 'weak' | 'fair' | 'strong';
 export interface PasswordStrengthResult {
   strength: PasswordStrength;
   score: number; // 0-100
+  /** Translation key relative to auth namespace (e.g. 'passwordStrength.weak') */
   label: string;
   color: string;
 }
@@ -25,10 +26,16 @@ export interface PasswordStrengthResult {
 /**
  * Calculate password strength for real-time UI feedback.
  * This is a client-side helper — the server has its own validation.
+ * Returns translation keys — resolve via t(result.label) with useTranslations('auth').
  */
 export function getPasswordStrength(password: string): PasswordStrengthResult {
   if (!password) {
-    return { strength: 'weak', score: 0, label: 'Weak', color: '#ef4444' };
+    return {
+      strength: 'weak',
+      score: 0,
+      label: 'passwordStrength.weak',
+      color: '#ef4444',
+    };
   }
 
   let score = 0;
@@ -62,30 +69,46 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   score = Math.max(0, Math.min(100, score));
 
   if (score >= 70)
-    return { strength: 'strong', score, label: 'Strong', color: '#10b981' };
+    return {
+      strength: 'strong',
+      score,
+      label: 'passwordStrength.strong',
+      color: '#10b981',
+    };
   if (score >= 45)
-    return { strength: 'fair', score, label: 'Fair', color: '#f59e0b' };
-  return { strength: 'weak', score, label: 'Weak', color: '#ef4444' };
+    return {
+      strength: 'fair',
+      score,
+      label: 'passwordStrength.fair',
+      color: '#f59e0b',
+    };
+  return {
+    strength: 'weak',
+    score,
+    label: 'passwordStrength.weak',
+    color: '#ef4444',
+  };
 }
 
+/**
+ * Zod messages are translation keys relative to the `auth` namespace.
+ * Resolve them via t(err.message) where t = useTranslations('auth').
+ */
 export const loginSchema = z.object({
-  email: z.string().min(1, 'Email or username is required'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().min(1, 'validation.emailOrUsernameRequired'),
+  password: z.string().min(1, 'validation.passwordRequired'),
   captchaToken: z.string().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  name: z.string().min(2, 'validation.nameMinLength'),
   username: z
     .string()
-    .min(3, 'Username must be at least 3 characters')
-    .regex(
-      /^[a-z0-9_]+$/i,
-      'Username can only contain letters, numbers, and underscores',
-    ),
-  email: z.string().email('Invalid email format'),
+    .min(3, 'validation.usernameMinLength')
+    .regex(/^[a-z0-9_]+$/i, 'validation.usernameFormat'),
+  email: z.string().email('validation.invalidEmail'),
   password: passwordSchema,
   inviteCode: z.string().optional().or(z.literal('')),
   captchaToken: z.string().optional(),
@@ -97,18 +120,18 @@ export const forgotPasswordSchema = z
   .object({
     email: z
       .string()
-      .email('Invalid email format')
+      .email('validation.invalidEmail')
       .optional()
       .or(z.literal('')),
     username: z
       .string()
-      .min(3, 'Username must be at least 3 characters')
+      .min(3, 'validation.usernameMinLength')
       .optional()
       .or(z.literal('')),
     captchaToken: z.string().optional(),
   })
   .refine((data) => !!data.email || !!data.username, {
-    message: 'Either email or username is required',
+    message: 'validation.emailOrUsernameNeeded',
     path: ['email'],
   });
 
@@ -120,7 +143,7 @@ export const resetPasswordSchema = z
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: 'validation.passwordsMismatch',
     path: ['confirmPassword'],
   });
 

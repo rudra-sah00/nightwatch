@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useDownloads } from '@/features/downloads/hooks/use-downloads';
@@ -7,7 +8,7 @@ import {
   fetchDownloadLinks,
   getOfflineIdentifier,
   sortQualities,
-  startElectronDownload,
+  startTauriDownload,
 } from '../utils/download';
 
 interface UseDownloadOptions {
@@ -32,10 +33,11 @@ export function useDownloadMenu({
   show,
 }: UseDownloadOptions) {
   const isS2 = contentId?.startsWith('s2:');
+  const t = useTranslations('search');
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
-  const [isElectronLoading, setElectronLoading] = useState(false);
+  const [isTauriLoading, setTauriLoading] = useState(false);
   const { downloads } = useDownloads();
 
   const offlineIdentifier = useMemo(() => {
@@ -74,12 +76,12 @@ export function useDownloadMenu({
     }
   }, [contentId, qualities, isS2, isLoading, type, season, episode]);
 
-  const handleElectronClick = async (
+  const handleTauriClick = async (
     qualityLabel: 'low' | 'medium' | 'high',
     qualityUrl?: string,
   ) => {
-    setElectronLoading(true);
-    await startElectronDownload({
+    setTauriLoading(true);
+    await startTauriDownload({
       contentId,
       showTitle,
       posterUrl,
@@ -93,8 +95,11 @@ export function useDownloadMenu({
 
     setDownloaded(qualityLabel);
 
-    const epText = type === 'series' ? ` for Ep ${episode}` : '';
-    toast.success(`Downloading${epText}! Check your Offline Library.`);
+    const epText =
+      type === 'series'
+        ? t('download.downloadingEpisodeText', { episode: episode ?? 0 })
+        : '';
+    toast.success(t('download.downloadingToast', { epText }));
 
     // Immediately close window / notify complete without waiting
     if (onComplete) {
@@ -102,7 +107,7 @@ export function useDownloadMenu({
     }
 
     setTimeout(() => setDownloaded(null), 3000);
-    setElectronLoading(false);
+    setTauriLoading(false);
   };
 
   return {
@@ -110,9 +115,9 @@ export function useDownloadMenu({
     qualities,
     isLoading,
     downloaded,
-    isElectronLoading,
+    isTauriLoading,
     existingDownload,
     loadQualities,
-    handleElectronClick,
+    handleTauriClick,
   };
 }

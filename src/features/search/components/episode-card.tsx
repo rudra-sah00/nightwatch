@@ -22,6 +22,7 @@ export function EpisodeCard({
   isAnyLoading = false,
 }: EpisodeCardProps) {
   const t = useTranslations('toasts');
+  const ts = useTranslations('search');
   const { imageError, setImageError } = useEpisodeCard();
   const thumbnailSrc = getOptimizedImageUrl(episode.thumbnailUrl);
 
@@ -54,7 +55,12 @@ export function EpisodeCard({
         {!imageError && episode.thumbnailUrl ? (
           <Image
             src={thumbnailSrc}
-            alt={episode.title || `Episode ${episode.episodeNumber}`}
+            alt={
+              episode.title ||
+              ts('episodeCard.episodeFallback', {
+                number: episode.episodeNumber,
+              })
+            }
             fill
             className={cn(
               'object-cover transition-[transform,opacity] duration-700 select-none group-hover:scale-105',
@@ -83,7 +89,7 @@ export function EpisodeCard({
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="w-8 h-8 text-white animate-spin" />
               <span className="text-[10px] text-white font-semibold font-headline uppercase tracking-widest drop-shadow-md">
-                LOADING...
+                {ts('episodeCard.loading')}
               </span>
             </div>
           ) : (
@@ -98,10 +104,13 @@ export function EpisodeCard({
       <div className="flex-1 min-w-0 py-2 pl-2">
         <div className="flex items-center gap-3 mb-1.5">
           <span className="px-2.5 py-1 bg-card/50 backdrop-blur-sm border border-border text-foreground rounded-md text-[10px] font-bold font-headline uppercase tracking-tighter shrink-0 shadow-sm">
-            EP {episode.episodeNumber}
+            {ts('episodeCard.epPrefix')} {episode.episodeNumber}
           </span>
           <h4 className="font-headline font-black text-lg md:text-xl uppercase tracking-tighter text-foreground truncate leading-none">
-            {episode.title || `EPISODE ${episode.episodeNumber}`}
+            {episode.title ||
+              ts('episodeCard.episodeFallback', {
+                number: episode.episodeNumber,
+              })}
           </h4>
         </div>
 
@@ -115,7 +124,7 @@ export function EpisodeCard({
           {episode.duration ? (
             <span className="flex items-center gap-1.5 text-[10px] font-black font-headline uppercase tracking-widest text-foreground/60">
               <Clock className="w-3.5 h-3.5 stroke-[3px]" />
-              {episode.duration} MIN
+              {episode.duration} {ts('episodeCard.minSuffix')}
             </span>
           ) : null}
         </div>

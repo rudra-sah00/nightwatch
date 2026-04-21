@@ -1,10 +1,13 @@
-import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import SignupClient from './SignupClient';
 
-export const metadata: Metadata = {
-  title: 'Sign Up | Watch Rudra',
-  description: 'Create an account to start watching movies and TV shows.',
-};
+export async function generateMetadata() {
+  const t = await getTranslations('auth');
+  return {
+    title: `${t('title.discovery')} | Watch Rudra`,
+    description: t('features.party.desc'),
+  };
+}
 
 export default async function SignupPage() {
   // Mandatory 2.5s delay to showcase premium loading animation

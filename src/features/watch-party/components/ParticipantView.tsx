@@ -1,5 +1,6 @@
 import { Mic, MicOff, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,12 +24,19 @@ export function ParticipantView({
   onKick,
   isCurrentUser = false,
 }: ParticipantViewProps) {
+  const t = useTranslations('party');
   const { videoRef, videoStyle } = useParticipantView(participant);
 
   // Parse avatar from participant metadata
   const avatarUrl = parseAvatarFromMetadata(participant.metadata);
 
   const isVideoMuted = !participant.isCameraEnabled;
+
+  const displayName =
+    participant.name ||
+    (participant.identity?.startsWith('guest')
+      ? t('fallback.guest')
+      : t('fallback.member'));
 
   return (
     <div className="relative w-full h-full bg-muted/30 group">
@@ -53,31 +61,23 @@ export function ParticipantView({
             participant.isSpeaking && 'left-7', // Shift if speaking to not overlap
           )}
         >
-          You
+          {t('participant.you')}
         </div>
       ) : null}
 
       {/* Avatar Fallback (shown when video is muted/unavailable) */}
       {isVideoMuted ? (
-        <AvatarFallback
-          avatarUrl={avatarUrl}
-          name={
-            participant.name ||
-            (participant.identity?.startsWith('guest') ? 'Guest' : 'Member')
-          }
-        />
+        <AvatarFallback avatarUrl={avatarUrl} name={displayName} />
       ) : null}
 
       {/* Bottom Overlay: Name and Controls */}
       <ParticipantOverlay
-        name={
-          participant.name ||
-          (participant.identity?.startsWith('guest') ? 'Guest' : 'Member')
-        }
+        name={displayName}
         isMicEnabled={participant.isMicrophoneEnabled}
         canKick={canKick}
         onKick={onKick ? () => onKick(participant.identity) : undefined}
         isCurrentUser={isCurrentUser}
+        t={t}
       />
     </div>
   );
@@ -154,12 +154,14 @@ function ParticipantOverlay({
   canKick,
   onKick,
   isCurrentUser,
+  t,
 }: {
   name: string;
   isMicEnabled: boolean;
   canKick?: boolean;
   onKick?: () => void;
   isCurrentUser?: boolean;
+  t: ReturnType<typeof useTranslations<'party'>>;
 }) {
   const [confirmKick, setConfirmKick] = useState(false);
 
@@ -195,7 +197,7 @@ function ParticipantOverlay({
                 onClick={onKick}
                 className="px-2 py-1 bg-neo-red text-primary-foreground rounded-md text-[9px] font-bold font-headline uppercase tracking-widest hover:bg-neo-red/80 transition-colors shadow-sm"
               >
-                Kick!
+                {t('participant.kickConfirm')}
               </Button>
               <Button
                 type="button"
@@ -210,7 +212,7 @@ function ParticipantOverlay({
               type="button"
               onClick={() => setConfirmKick(true)}
               className="p-1.5 bg-neo-red text-primary-foreground rounded-md hover:bg-neo-red/80 transition-colors shadow-sm"
-              title="Kick user"
+              title={t('participant.kickUser')}
             >
               <X className="w-3 h-3 stroke-[3px]" />
             </Button>

@@ -26,7 +26,7 @@ describe('ServerProvider / useServer', () => {
       ),
     });
     expect(result.current.activeServer).toBe('s2');
-    expect(result.current.serverLabel).toBe('Balanced');
+    expect(result.current.serverLabel).toBe('server.balanced');
   });
 
   it('uses defaultServer prop as initial value', () => {
@@ -36,7 +36,7 @@ describe('ServerProvider / useServer', () => {
       ),
     });
     expect(result.current.activeServer).toBe('s1');
-    expect(result.current.serverLabel).toBe('Netflix');
+    expect(result.current.serverLabel).toBe('server.netflix');
   });
 
   it('setActiveServer updates active server and label', () => {
@@ -51,7 +51,7 @@ describe('ServerProvider / useServer', () => {
     });
 
     expect(result.current.activeServer).toBe('s2');
-    expect(result.current.serverLabel).toBe('Balanced');
+    expect(result.current.serverLabel).toBe('server.balanced');
   });
 
   it('syncs when defaultServer prop changes to a different value', () => {

@@ -60,6 +60,8 @@ interface UseWatchPartyOptions {
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const t = useTranslations('toasts');
+  const tp = useTranslations('party.toasts');
+  const tf = useTranslations('party.fallback');
   const router = useRouter();
   const { userId, roomId } = options;
 
@@ -88,7 +90,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const currentUserName =
     room?.members.find((m) => m.id === userId)?.name ||
     user?.name ||
-    (userId?.startsWith('guest') ? 'Guest' : 'Member');
+    (userId?.startsWith('guest') ? tf('guest') : tf('member'));
 
   const rtmToken = useAgoraRtmToken({
     roomId: room?.id,
@@ -158,7 +160,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         case 'JOIN_REJECTED': {
           if (requestStatusRef.current === 'pending') {
             setRequestStatus('rejected');
-            setError(msg.reason || 'Host rejected your request');
+            setError(msg.reason || tp('hostRejected'));
             setRoom(null);
             setIsConnected(false);
           }
@@ -167,7 +169,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
 
         case 'KICK': {
           if (msg.targetUserId === userId) {
-            toast.error(`You were kicked: ${msg.reason}`);
+            toast.error(tp('kicked', { reason: msg.reason }));
             setRoom(null);
             setIsConnected(false);
             setRequestStatus('idle');
@@ -316,7 +318,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         // Broadcast to all members that the party is closed
         await rtmSendMessage?.({
           type: 'PARTY_CLOSED',
-          reason: 'Host left the room',
+          reason: tp('hostLeftRoom'),
         });
         // Give RTM a small window to ensure the broadcast is sent before we disconnect
         await new Promise((resolve) => setTimeout(resolve, 300));

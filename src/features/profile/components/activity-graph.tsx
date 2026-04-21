@@ -1,19 +1,9 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { WatchActivity } from '../types';
-
-// Helper to format date
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
 
 // Helper to get ISO date string YYYY-MM-DD (Local)
 const toIso = (date: Date) => {
@@ -37,6 +27,7 @@ const ACTIVITY_LEVEL_COLORS = [
 ] as const;
 
 function ActivityGraphSkeleton() {
+  const t = useTranslations('profile');
   const skeletonIds = useMemo(
     () => Array.from({ length: 53 * 7 }).map((_, i) => `skel-id-${i}`),
     [],
@@ -53,18 +44,18 @@ function ActivityGraphSkeleton() {
         ))}
       </div>
       <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/20">
-        <span>Jan</span>
-        <span>Feb</span>
-        <span>Mar</span>
-        <span>Apr</span>
-        <span>May</span>
-        <span>Jun</span>
-        <span>Jul</span>
-        <span>Aug</span>
-        <span>Sep</span>
-        <span>Oct</span>
-        <span>Nov</span>
-        <span>Dec</span>
+        <span>{t('activity.months.jan')}</span>
+        <span>{t('activity.months.feb')}</span>
+        <span>{t('activity.months.mar')}</span>
+        <span>{t('activity.months.apr')}</span>
+        <span>{t('activity.months.may')}</span>
+        <span>{t('activity.months.jun')}</span>
+        <span>{t('activity.months.jul')}</span>
+        <span>{t('activity.months.aug')}</span>
+        <span>{t('activity.months.sep')}</span>
+        <span>{t('activity.months.oct')}</span>
+        <span>{t('activity.months.nov')}</span>
+        <span>{t('activity.months.dec')}</span>
       </div>
     </div>
   );
@@ -150,7 +141,16 @@ export function ActivityGraph({
   isLoading = false,
 }: ActivityGraphProps & { createdAt?: Date }) {
   const t = useTranslations('profile');
+  const locale = useLocale();
   const { weeks } = useActivityGraphData(activity, createdAt);
+
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString(locale, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
 
   if (isLoading) {
     return <ActivityGraphSkeleton />;
@@ -158,7 +158,11 @@ export function ActivityGraph({
 
   return (
     <>
-      <div className="grid grid-flow-col grid-rows-7 gap-1 min-w-[800px]">
+      <div
+        className="grid grid-flow-col grid-rows-7 gap-1 min-w-[800px]"
+        role="img"
+        aria-label={t('activity.heatmapAriaLabel')}
+      >
         {weeks.map((week, weekIndex) =>
           week.map((day, dayIndex) => {
             const isLeftSide = weekIndex < 10;
@@ -228,18 +232,18 @@ export function ActivityGraph({
         )}
       </div>
       <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/40">
-        <span>Jan</span>
-        <span>Feb</span>
-        <span>Mar</span>
-        <span>Apr</span>
-        <span>May</span>
-        <span>Jun</span>
-        <span>Jul</span>
-        <span>Aug</span>
-        <span>Sep</span>
-        <span>Oct</span>
-        <span>Nov</span>
-        <span>Dec</span>
+        <span>{t('activity.months.jan')}</span>
+        <span>{t('activity.months.feb')}</span>
+        <span>{t('activity.months.mar')}</span>
+        <span>{t('activity.months.apr')}</span>
+        <span>{t('activity.months.may')}</span>
+        <span>{t('activity.months.jun')}</span>
+        <span>{t('activity.months.jul')}</span>
+        <span>{t('activity.months.aug')}</span>
+        <span>{t('activity.months.sep')}</span>
+        <span>{t('activity.months.oct')}</span>
+        <span>{t('activity.months.nov')}</span>
+        <span>{t('activity.months.dec')}</span>
       </div>
     </>
   );

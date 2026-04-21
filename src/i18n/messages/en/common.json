@@ -8,11 +8,13 @@
     "watchlist": "Watchlist",
     "downloads": "Downloads",
     "offlineDownloads": "Offline Downloads",
-    "profile": "Profile"
+    "profile": "Profile",
+    "logoAlt": "Watch Rudra Logo"
   },
   "language": {
     "title": "Language",
-    "description": "Choose your preferred language"
+    "description": "Choose your preferred language",
+    "closeMenu": "Close language menu"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "Party finished",
     "messageFailed": "Failed to send message",
     "partyTimeLimit": "Watch party has reached 3-hour limit and will now end.",
-    "startFailed": "Failed to start playback",
-    "linkCopied": "Link copied!",
-    "profileUpdated": "Profile updated",
-    "passwordChanged": "Password changed successfully",
-    "accountDeleted": "Account deleted successfully",
-    "error": "Something went wrong",
-    "networkError": "Network error. Please check your connection.",
-    "sessionExpired": "Session expired. Please log in again."
+    "startFailed": "Failed to start playback"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "App Version"
   },
   "passwordInfo": {
-    "requirements": "Requirements"
+    "requirements": "Requirements",
+    "ariaLabel": "Password requirements",
+    "title": "Password Requirements",
+    "minChars": "8+ characters",
+    "uppercase": "Uppercase (A-Z)",
+    "specialChar": "Special char (!@#$%^&*)",
+    "breachNote": "We check passwords against",
+    "knownBreaches": "known breaches"
   },
   "actions": {
-    "close": "Close"
+    "close": "Close",
+    "closeModal": "Close modal"
+  },
+  "loading": "Loading...",
+  "skipToContent": "Skip to content",
+  "offline": {
+    "title": "You are Offline",
+    "description": "Watch Rudra requires a connection to explore. Go to your vault to watch downloaded titles.",
+    "openVault": "Open Offline Vault",
+    "toastOffline": "You are offline",
+    "toastOnline": "Back online!"
+  },
+  "swUpdate": {
+    "title": "New version available",
+    "description": "Refresh to get the latest updates.",
+    "refresh": "Refresh"
+  },
+  "discord": {
+    "readyToStream": "Ready to stream",
+    "atLoginScreen": "At the Login screen",
+    "browsingDashboard": "Browsing Dashboard",
+    "lookingForContent": "Looking for content",
+    "browsingHomepage": "Browsing Homepage",
+    "browsingLiveMatches": "Browsing Live Matches",
+    "findingStream": "Finding a stream...",
+    "curatingWatchlist": "Curating Watchlist",
+    "planningMarathon": "Planning the next marathon",
+    "adjustingSettings": "Adjusting Settings",
+    "customizingProfile": "Customizing profile"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "Balanced",
+    "highQuality": "High Quality Stream"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "Your personal streaming companion",
+    "homeTitle": "Home | Watch Rudra",
+    "homeDescription": "Search for movies and TV shows to start watching together.",
+    "continueWatchingTitle": "Continue Watching | Watch Rudra",
+    "continueWatchingDescription": "Pick up where you left off with your recently watched movies and TV shows.",
+    "searchTitle": "Search | Watch Rudra",
+    "searchDescription": "Search for movies, TV shows, and anime.",
+    "profileTitle": "Profile | Watch Rudra",
+    "profileDescription": "Manage your profile and viewing history.",
+    "liveTitle": "Live Matches | Watch Rudra",
+    "liveDescription": "Watch live sports matches and channels with your friends in real-time.",
+    "downloadsTitle": "Downloads | Watch Rudra",
+    "downloadsDescription": "Access your downloaded movies and TV shows for offline viewing.",
+    "watchlistTitle": "My Watchlist | Watch Rudra",
+    "watchlistDescription": "Keep track of movies and TV shows you want to watch later.",
+    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyDescription": "Join your friends and watch together in real-time."
+  },
+  "desktopApp": {
+    "notInstalled": "App not installed",
+    "notInstalledDesc": "We could not open the Watch Rudra Desktop app. Is it installed?",
+    "downloadApp": "Download App"
+  },
+  "whatsNew": {
+    "backToHome": "Back to Home",
+    "title": "What's New",
+    "description": "Latest updates, bug fixes, and features for Watch Rudra.",
+    "noReleases": "No releases found or failed to load.",
+    "noReleaseNotes": "*No release notes provided.*",
+    "showMore": "Show More ({remaining} remaining)"
+  },
+  "downloads": {
+    "failedToLoad": "Failed to load content",
+    "experienceStarting": "Experience Starting",
+    "preparingContent": "Preparing \"{title}\"...",
+    "episodes": "Episodes",
+    "noImageAvailable": "No Image Available",
+    "closePreview": "Close Preview",
+    "statusCompleted": "COMPLETED",
+    "statusFailed": "FAILED",
+    "statusDownloading": "DOWNLOADING",
+    "statusQueued": "QUEUED",
+    "statusCancelled": "CANCELLED",
+    "statusPaused": "PAUSED"
+  },
+  "errors": {
+    "sessionExpired": "Session expired. Please login again.",
+    "userExists": "An account with this email already exists.",
+    "invalidInvite": "Invite link is invalid or expired. Please request a new one.",
+    "captchaRequired": "Please complete the security verification.",
+    "captchaFailed": "Security verification failed. Please try again.",
+    "otpRateLimit": "Too many attempts. Please wait and try again.",
+    "validationError": "Some details are invalid. Please review and try again.",
+    "csrfFailed": "Security token expired. Please refresh the page.",
+    "notFound": "The requested resource was not found.",
+    "forbidden": "You do not have permission to perform this action.",
+    "networkError": "Network issue. Please check your connection and try again.",
+    "requestTimeout": "Request timed out. Please check your connection and try again."
+  },
+  "units": {
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

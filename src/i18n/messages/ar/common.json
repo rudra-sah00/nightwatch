@@ -8,11 +8,13 @@
     "watchlist": "قائمة المشاهدة",
     "downloads": "التنزيلات",
     "offlineDownloads": "التنزيلات بدون إنترنت",
-    "profile": "الملف الشخصي"
+    "profile": "الملف الشخصي",
+    "logoAlt": "شعار Watch Rudra"
   },
   "language": {
     "title": "اللغة",
-    "description": "اختر لغتك المفضلة"
+    "description": "اختر لغتك المفضلة",
+    "closeMenu": "إغلاق قائمة اللغة"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "انتهت الحفلة",
     "messageFailed": "فشل إرسال الرسالة",
     "partyTimeLimit": "وصلت حفلة المشاهدة إلى حد 3 ساعات وستنتهي الآن.",
-    "startFailed": "فشل بدء التشغيل",
-    "linkCopied": "تم نسخ الرابط!",
-    "profileUpdated": "تم تحديث الملف الشخصي",
-    "passwordChanged": "تم تغيير كلمة المرور بنجاح",
-    "accountDeleted": "تم حذف الحساب بنجاح",
-    "error": "حدث خطأ ما",
-    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
-    "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
+    "startFailed": "فشل بدء التشغيل"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "إصدار التطبيق"
   },
   "passwordInfo": {
-    "requirements": "المتطلبات"
+    "requirements": "المتطلبات",
+    "ariaLabel": "متطلبات كلمة المرور",
+    "title": "متطلبات كلمة المرور",
+    "minChars": "8 أحرف أو أكثر",
+    "uppercase": "أحرف كبيرة (A-Z)",
+    "specialChar": "حرف خاص (!@#$%^&*)",
+    "breachNote": "نتحقق من كلمات المرور ضد",
+    "knownBreaches": "الاختراقات المعروفة"
   },
   "actions": {
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "closeModal": "إغلاق النافذة"
+  },
+  "loading": "جارٍ التحميل...",
+  "skipToContent": "تخطي إلى المحتوى",
+  "offline": {
+    "title": "أنت غير متصل",
+    "description": "يتطلب Watch Rudra اتصالاً للاستكشاف. افتح خزنتك لمشاهدة العناوين المحملة.",
+    "openVault": "فتح الخزنة",
+    "toastOffline": "أنت غير متصل",
+    "toastOnline": "عدت للاتصال!"
+  },
+  "swUpdate": {
+    "title": "إصدار جديد متاح",
+    "description": "قم بالتحديث للحصول على آخر التحديثات.",
+    "refresh": "تحديث"
+  },
+  "discord": {
+    "readyToStream": "جاهز للبث",
+    "atLoginScreen": "في شاشة تسجيل الدخول",
+    "browsingDashboard": "تصفح لوحة التحكم",
+    "lookingForContent": "البحث عن محتوى",
+    "browsingHomepage": "تصفح الصفحة الرئيسية",
+    "browsingLiveMatches": "تصفح المباريات المباشرة",
+    "findingStream": "البحث عن بث...",
+    "curatingWatchlist": "تنظيم قائمة المشاهدة",
+    "planningMarathon": "التخطيط للماراثون القادم",
+    "adjustingSettings": "ضبط الإعدادات",
+    "customizingProfile": "تخصيص الملف الشخصي"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "متوازن",
+    "highQuality": "بث عالي الجودة"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "رفيقك الشخصي للبث",
+    "homeTitle": "الرئيسية | Watch Rudra",
+    "homeDescription": "ابحث عن الأفلام والمسلسلات لبدء المشاهدة معاً.",
+    "continueWatchingTitle": "متابعة المشاهدة | Watch Rudra",
+    "continueWatchingDescription": "تابع من حيث توقفت مع الأفلام والمسلسلات التي شاهدتها مؤخراً.",
+    "searchTitle": "البحث | Watch Rudra",
+    "searchDescription": "ابحث عن الأفلام والمسلسلات والأنمي.",
+    "profileTitle": "الملف الشخصي | Watch Rudra",
+    "profileDescription": "أدر ملفك الشخصي وسجل المشاهدة.",
+    "liveTitle": "المباريات المباشرة | Watch Rudra",
+    "liveDescription": "شاهد المباريات الرياضية المباشرة والقنوات مع أصدقائك في الوقت الفعلي.",
+    "downloadsTitle": "التنزيلات | Watch Rudra",
+    "downloadsDescription": "الوصول إلى الأفلام والمسلسلات المحملة للمشاهدة بدون إنترنت.",
+    "watchlistTitle": "قائمة المشاهدة | Watch Rudra",
+    "watchlistDescription": "تتبع الأفلام والمسلسلات التي تريد مشاهدتها لاحقاً.",
+    "watchPartyTitle": "حفلة المشاهدة | Watch Rudra",
+    "watchPartyDescription": "انضم إلى أصدقائك وشاهدوا معاً في الوقت الفعلي."
+  },
+  "desktopApp": {
+    "notInstalled": "التطبيق غير مثبت",
+    "notInstalledDesc": "تعذر فتح تطبيق Watch Rudra. هل هو مثبت؟",
+    "downloadApp": "تحميل التطبيق"
+  },
+  "whatsNew": {
+    "backToHome": "العودة للرئيسية",
+    "title": "ما الجديد",
+    "description": "آخر التحديثات والإصلاحات والميزات في Watch Rudra.",
+    "noReleases": "لم يتم العثور على إصدارات أو فشل التحميل.",
+    "noReleaseNotes": "*لم يتم تقديم ملاحظات الإصدار.*",
+    "showMore": "عرض المزيد ({remaining} متبقية)"
+  },
+  "downloads": {
+    "failedToLoad": "فشل تحميل المحتوى",
+    "experienceStarting": "بدء التجربة",
+    "preparingContent": "جارٍ تحضير \"{title}\"...",
+    "episodes": "الحلقات",
+    "noImageAvailable": "لا توجد صورة",
+    "closePreview": "إغلاق المعاينة",
+    "statusCompleted": "مكتمل",
+    "statusFailed": "فشل",
+    "statusDownloading": "جارٍ التحميل",
+    "statusQueued": "في الانتظار",
+    "statusCancelled": "ملغى",
+    "statusPaused": "متوقف مؤقتاً"
+  },
+  "errors": {
+    "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.",
+    "userExists": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+    "invalidInvite": "رابط الدعوة غير صالح أو منتهي. يرجى طلب رابط جديد.",
+    "captchaRequired": "يرجى إكمال التحقق الأمني.",
+    "captchaFailed": "فشل التحقق الأمني. يرجى المحاولة مرة أخرى.",
+    "otpRateLimit": "محاولات كثيرة جداً. يرجى الانتظار والمحاولة مرة أخرى.",
+    "validationError": "بعض التفاصيل غير صالحة. يرجى المراجعة والمحاولة مرة أخرى.",
+    "csrfFailed": "انتهت صلاحية رمز الأمان. يرجى تحديث الصفحة.",
+    "notFound": "المورد المطلوب غير موجود.",
+    "forbidden": "ليس لديك إذن لتنفيذ هذا الإجراء.",
+    "networkError": "مشكلة في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+    "requestTimeout": "انتهت مهلة الطلب. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
+  },
+  "units": {
+    "bytes": "بايت",
+    "kb": "كيلوبايت",
+    "mb": "ميغابايت",
+    "gb": "غيغابايت",
+    "tb": "تيرابايت"
   }
 }

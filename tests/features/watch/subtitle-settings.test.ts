@@ -36,9 +36,12 @@ describe('Subtitle Settings', () => {
 
     it('should export SUBTITLE_FONT_SIZES array', () => {
       expect(SUBTITLE_FONT_SIZES).toHaveLength(4);
-      expect(SUBTITLE_FONT_SIZES[0]).toEqual({ label: 'Small', value: '1rem' });
+      expect(SUBTITLE_FONT_SIZES[0]).toEqual({
+        label: 'subtitles.sizeSmall',
+        value: '1rem',
+      });
       expect(SUBTITLE_FONT_SIZES[1]).toEqual({
-        label: 'Medium',
+        label: 'subtitles.sizeMedium',
         value: '1.25rem',
       });
     });
@@ -46,20 +49,29 @@ describe('Subtitle Settings', () => {
     it('should export BACKGROUND_COLORS array', () => {
       expect(BACKGROUND_COLORS).toHaveLength(4);
       expect(BACKGROUND_COLORS[0]).toEqual({
-        label: 'Black',
+        label: 'subtitles.bgBlack',
         value: 'rgba(0, 0, 0, 0.75)',
       });
     });
 
     it('should export TEXT_COLORS array', () => {
       expect(TEXT_COLORS).toHaveLength(4);
-      expect(TEXT_COLORS[0]).toEqual({ label: 'White', value: 'white' });
-      expect(TEXT_COLORS[1]).toEqual({ label: 'Yellow', value: '#ffff00' });
+      expect(TEXT_COLORS[0]).toEqual({
+        label: 'subtitles.colorWhite',
+        value: 'white',
+      });
+      expect(TEXT_COLORS[1]).toEqual({
+        label: 'subtitles.colorYellow',
+        value: '#ffff00',
+      });
     });
 
     it('should export TEXT_SHADOWS array', () => {
       expect(TEXT_SHADOWS).toHaveLength(4);
-      expect(TEXT_SHADOWS[0]).toEqual({ label: 'None', value: 'none' });
+      expect(TEXT_SHADOWS[0]).toEqual({
+        label: 'subtitles.shadowNone',
+        value: 'none',
+      });
     });
   });
 

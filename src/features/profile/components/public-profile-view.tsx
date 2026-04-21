@@ -2,7 +2,7 @@
 
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
@@ -25,7 +25,8 @@ export function PublicProfileView({
   todayIso,
 }: PublicProfileViewProps) {
   const t = useTranslations('profile');
-  const joinDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
+  const locale = useLocale();
+  const joinDate = new Date(profile.createdAt).toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
@@ -99,14 +100,14 @@ export function PublicProfileView({
             <div className="flex-1 space-y-4">
               <div className="inline-block bg-primary text-primary-foreground px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-2 leading-none border-[3px] border-border">
                 {t('publicProfile.persistentIdentity', {
-                  id: profile.id.slice(0, 8) + '...',
+                  id: `${profile.id.slice(0, 8)}...`,
                 })}
               </div>
               <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
                 {profile.name}
               </h1>
               <p className="text-xl md:text-2xl font-bold text-foreground/40 font-headline uppercase tracking-tight">
-                @{profile.username || 'unknown_user'}
+                @{profile.username || t('publicProfile.unknownUser')}
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-8 pt-4">
@@ -156,7 +157,7 @@ export function PublicProfileView({
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 pb-12 opacity-50 font-black text-[10px] uppercase tracking-[0.2em]">
             <div className="flex items-center gap-4">
-              <span>USER IDENTITY: {profile.id}</span>
+              <span>{t('publicProfile.userIdentity', { id: profile.id })}</span>
             </div>
             <div className="flex items-center gap-2">
               <span>{t('publicProfile.coreVersion')}</span>

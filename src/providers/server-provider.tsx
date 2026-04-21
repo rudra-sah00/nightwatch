@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { createContext, use, useEffect, useState } from 'react';
 
@@ -11,15 +12,15 @@ interface ServerContextValue {
   setActiveServer: (server: ServerId) => void;
 }
 
-const SERVER_LABELS: Record<ServerId, string> = {
-  s1: 'Netflix',
-  s2: 'Balanced',
-  s3: 'High Quality Stream',
+const SERVER_LABEL_KEYS: Record<ServerId, string> = {
+  s1: 'server.netflix',
+  s2: 'server.balanced',
+  s3: 'server.highQuality',
 };
 
 const ServerContext = createContext<ServerContextValue>({
   activeServer: 's2',
-  serverLabel: 'Balanced',
+  serverLabel: '',
   setActiveServer: () => {},
 });
 
@@ -33,6 +34,7 @@ export function ServerProvider({
   children,
   defaultServer,
 }: ServerProviderProps) {
+  const t = useTranslations('common');
   const [activeServer, setActiveServer] = useState<ServerId>(
     defaultServer ?? 's2',
   );
@@ -48,7 +50,7 @@ export function ServerProvider({
     <ServerContext
       value={{
         activeServer,
-        serverLabel: SERVER_LABELS[activeServer],
+        serverLabel: t(SERVER_LABEL_KEYS[activeServer]),
         setActiveServer,
       }}
     >

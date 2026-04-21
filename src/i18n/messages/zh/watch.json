@@ -27,7 +27,25 @@
     "live": "直播",
     "liveBadge": "直播",
     "watchingLive": "您正在观看直播",
-    "jumpToLive": "跳转到直播"
+    "jumpToLive": "跳转到直播",
+    "lockedHostControls": "已锁定 - 主持人控制",
+    "hostControls": "主持人控制",
+    "rotateDevice": "旋转设备以获得最佳体验",
+    "fullscreenNotSupported": "此浏览器不支持全屏",
+    "failedEnterFullscreen": "进入全屏失败",
+    "failedExitFullscreen": "退出全屏失败",
+    "fullscreenToggleFailed": "全屏切换失败",
+    "seekTime": "跳转时间",
+    "liveSeekBar": "直播进度条",
+    "atLiveEdge": "直播中",
+    "behindLive": "落后直播{seconds}秒",
+    "closeSidebar": "关闭侧边栏",
+    "openSidebar": "打开侧边栏",
+    "seasonEpisodeLabel": "第{season}季 · 第{episode}集",
+    "rotateToLandscape": "旋转至横屏",
+    "landscapeOnlyMessage": "此播放器仅在横屏模式下可用",
+    "showEpisodes": "显示剧集",
+    "episodesTitle": "剧集"
   },
   "settings": {
     "quality": "画质",
@@ -44,7 +62,24 @@
     "font": "字体",
     "background": "背景",
     "textColor": "文字颜色",
-    "textEffect": "文字效果"
+    "textEffect": "文字效果",
+    "sizeSmall": "小",
+    "sizeMedium": "中",
+    "sizeLarge": "大",
+    "sizeExtraLarge": "特大",
+    "bgBlack": "黑色",
+    "bgDarkGray": "深灰色",
+    "bgTransparent": "透明",
+    "bgSemiTransparent": "半透明",
+    "colorWhite": "白色",
+    "colorYellow": "黄色",
+    "colorCyan": "青色",
+    "colorLightGreen": "浅绿色",
+    "shadowNone": "无",
+    "shadowDropShadow": "投影",
+    "shadowOutline": "描边",
+    "shadowGlow": "发光",
+    "fontSystemDefault": "系统默认"
   },
   "audio": {
     "title": "音频",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "第 {number} 集",
     "season": "第 {number} 季",
-    "seasonShort": "S{number}",
     "clickToPlay": "点击播放",
     "loading": "加载中...",
     "noEpisodes": "无剧集",
-    "nowPlaying": "正在播放",
-    "min": "{duration} 分钟"
+    "min": "{duration} 分钟",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "下一季",
@@ -66,7 +100,9 @@
     "inCountdown": "{seconds}秒后",
     "play": "播放",
     "cancel": "取消",
-    "loading": "加载中"
+    "loading": "加载中",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "离线",
@@ -84,7 +120,13 @@
     "cancelDownload": "取消下载",
     "waitForComplete": "请等待下载完成后再离线观看。",
     "waitingInQueue": "排队等待中...",
-    "downloading": "下载中..."
+    "downloading": "下载中...",
+    "statusCompleted": "已完成",
+    "statusFailed": "失败",
+    "statusDownloading": "下载中",
+    "statusQueued": "排队中",
+    "statusCancelled": "已取消",
+    "statusPaused": "已暂停"
   },
   "watchlist": {
     "pageTitle": "我的",
@@ -94,5 +136,46 @@
     "emptyTitle": "观看列表为空",
     "emptyDescription": "保存电影和剧集以便稍后观看",
     "viewDetails": "查看 {title} 的详情"
+  },
+  "continueWatching": {
+    "failedToRemove": "从列表中移除失败",
+    "minutesLeft": "剩余{minutes}分钟",
+    "hoursLeft": "剩余{hours}小时",
+    "hoursMinutesLeft": "剩余{hours}小时{minutes}分钟"
+  },
+  "countdown": {
+    "startingExperience": "正在启动体验",
+    "getReady": "准备迎接极致影院体验",
+    "go": "开始",
+    "eliteExperience": "精英AI体验 • EMA加固"
+  },
+  "aria": {
+    "videoPlayer": "视频播放器",
+    "seekBackward": "后退10秒",
+    "seekForward": "前进10秒",
+    "playPause": "播放/暂停",
+    "seekBar": "进度条",
+    "skipControls": "跳过控制",
+    "fullscreen": "全屏",
+    "volume": "音量",
+    "settings": "设置",
+    "audioSubtitle": "音频和字幕选择器",
+    "episodePanel": "剧集面板",
+    "playerHeader": "播放器标题",
+    "subtitle": "字幕",
+    "playbackCountdown": "播放倒计时",
+    "countdownTitle": "播放倒计时"
+  },
+  "page": {
+    "seasonLabel": "第{number}季",
+    "unknownTitle": "未知",
+    "episodeLabel": "第{number}集",
+    "noStream": "没有可用的流",
+    "errorLoading": "加载流时出错",
+    "startFromContent": "请从内容页面开始播放",
+    "tryAgain": "重试",
+    "goToHome": "返回首页",
+    "continuePortrait": "在竖屏模式下继续观看。",
+    "movieYear": "电影 · {year}"
   }
 }

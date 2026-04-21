@@ -1,4 +1,5 @@
 import type Konva from 'konva';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
@@ -56,6 +57,7 @@ export function useSketchOverlay({
     setCursors,
   } = useSketch();
 
+  const t = useTranslations('party');
   const lastCursorBroadcast = useRef(0);
   const [pendingText, setPendingText] = useState<PendingTextInput | null>(null);
   const isDrawing = useRef(false);
@@ -378,7 +380,7 @@ export function useSketchOverlay({
           type: 'SKETCH_CURSOR_MOVE',
           x: point.x,
           y: point.y,
-          userName: userName || 'Anonymous',
+          userName: userName || t('sketch.anonymous'),
           color,
           userId: userId || '',
         });
@@ -420,6 +422,7 @@ export function useSketchOverlay({
       color,
       rtmSendMessage,
       setActions,
+      t,
     ],
   );
 

@@ -165,8 +165,8 @@ describe('EpisodePanel', () => {
       fireEvent.click(screen.getByText('S1'));
 
       await waitFor(() => {
-        expect(screen.getByText('Season 1')).toBeInTheDocument();
-        expect(screen.getByText('Season 2')).toBeInTheDocument();
+        // All season items render as 'season' (translation key)
+        expect(screen.getAllByText('season').length).toBeGreaterThanOrEqual(2);
       });
     });
 
@@ -198,10 +198,10 @@ describe('EpisodePanel', () => {
       fireEvent.click(screen.getByText('S1'));
 
       await waitFor(() => {
-        expect(screen.getByText('Season 2')).toBeInTheDocument();
+        expect(screen.getAllByText('season').length).toBeGreaterThanOrEqual(2);
       });
 
-      fireEvent.click(screen.getByText('Season 2'));
+      fireEvent.click(screen.getAllByText('season')[1]);
       expect(onSeasonChange).toHaveBeenCalledWith(2);
     });
 
@@ -226,7 +226,7 @@ describe('EpisodePanel', () => {
       render(<EpisodePanel {...defaultProps} isLoading={true} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByText('loading')).toBeInTheDocument();
       });
     });
 
@@ -234,7 +234,7 @@ describe('EpisodePanel', () => {
       render(<EpisodePanel {...defaultProps} isLoading={true} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByText('loading')).toBeInTheDocument();
       });
 
       expect(screen.queryByText('E1')).not.toBeInTheDocument();
@@ -246,7 +246,7 @@ describe('EpisodePanel', () => {
       render(<EpisodePanel {...defaultProps} episodes={[]} />);
 
       await waitFor(() => {
-        expect(screen.getByText('No episodes')).toBeInTheDocument();
+        expect(screen.getByText('noEpisodes')).toBeInTheDocument();
       });
     });
   });
@@ -338,17 +338,17 @@ describe('EpisodePanel', () => {
       fireEvent.click(screen.getByText('S1'));
 
       await waitFor(() => {
-        expect(screen.getByText('Season 2')).toBeInTheDocument();
+        expect(screen.getAllByText('season').length).toBeGreaterThanOrEqual(2);
       });
 
       // Select season
-      fireEvent.click(screen.getByText('Season 2'));
+      fireEvent.click(screen.getAllByText('season')[1]);
 
       expect(onSeasonChange).toHaveBeenCalledWith(2);
 
-      // Should close dropdown
+      // Should close dropdown — only one 'season' text should remain (or none)
       await waitFor(() => {
-        expect(screen.queryByText('Season 1')).not.toBeInTheDocument();
+        expect(screen.queryAllByText('season').length).toBeLessThanOrEqual(0);
       });
     });
   });

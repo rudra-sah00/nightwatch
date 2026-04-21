@@ -30,6 +30,15 @@ export function OfflineLibrary() {
   } = useDownloads();
   const t = useTranslations('watch.offline');
 
+  const statusLabels: Record<string, string> = {
+    COMPLETED: t('statusCompleted'),
+    FAILED: t('statusFailed'),
+    DOWNLOADING: t('statusDownloading'),
+    QUEUED: t('statusQueued'),
+    CANCELLED: t('statusCancelled'),
+    PAUSED: t('statusPaused'),
+  };
+
   const [selectedItem, setSelectedItem] = useState<{
     contentId: string;
     season?: number;
@@ -204,7 +213,7 @@ export function OfflineLibrary() {
                                 'text-foreground/50',
                             )}
                           >
-                            {item.status}
+                            {statusLabels[item.status] || item.status}
                           </span>
 
                           {(item.status === 'DOWNLOADING' ||

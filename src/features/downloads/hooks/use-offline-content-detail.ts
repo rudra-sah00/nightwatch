@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -43,6 +44,7 @@ export function useOfflineContentDetail({
   initialContext,
 }: UseOfflineContentDetailOptions): UseOfflineContentDetailReturn {
   const router = useRouter();
+  const t = useTranslations('live');
   const { downloads } = useDownloads();
 
   const [show, setShow] = useState<ShowDetails | null>(null);
@@ -149,7 +151,7 @@ export function useOfflineContentDetail({
           );
         }
         if (!episodeToPlay) {
-          toast.error('No episodes available offline.');
+          toast.error(t('noEpisodesOffline'));
           setIsPlaying(false);
           setPlayingEpisodeId(null);
           return;
@@ -181,7 +183,7 @@ export function useOfflineContentDetail({
         }, 1500);
       }
     } catch {
-      toast.error('Failed to start playback');
+      toast.error(t('failedPlayback'));
       setIsPlaying(false);
       setPlayingEpisodeId(null);
     }

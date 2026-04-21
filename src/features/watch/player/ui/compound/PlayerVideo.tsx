@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
@@ -66,6 +67,8 @@ export function PlayerVideo() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useAmbientCanvas(videoRef, canvasRef);
 
+  const t = useTranslations('watch');
+
   // On mobile the tap-to-pause gesture is confusing and causes accidental
   // pauses. Controls are always reachable via the play/pause button instead.
   const isMobile = useMobileDetection();
@@ -120,13 +123,13 @@ export function PlayerVideo() {
           <div className="absolute inset-0 z-[2] pointer-events-none">
             <button
               type="button"
-              aria-label="Seek backward 10 seconds"
+              aria-label={t('aria.seekBackward')}
               className="absolute inset-y-0 left-0 w-1/3 pointer-events-auto bg-transparent"
               onClick={() => handleTapSeek('left')}
             />
             <button
               type="button"
-              aria-label="Seek forward 10 seconds"
+              aria-label={t('aria.seekForward')}
               className="absolute inset-y-0 right-0 w-1/3 pointer-events-auto bg-transparent"
               onClick={() => handleTapSeek('right')}
             />

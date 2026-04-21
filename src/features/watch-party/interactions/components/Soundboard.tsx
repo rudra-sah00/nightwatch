@@ -1,21 +1,23 @@
 'use client';
 
 import { Loader2, Play, Search, Volume2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useSoundboard } from '../hooks/use-soundboard';
 
 export function SoundboardDisabled() {
+  const t = useTranslations('party');
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-foreground/50 space-y-4">
       <Volume2 className="w-12 h-12 opacity-50 stroke-[3px]" />
       <div className="space-y-1">
         <h3 className="text-foreground font-black font-headline uppercase tracking-widest">
-          Soundboard Disabled
+          {t('soundboard.disabled')}
         </h3>
         <p className="text-sm font-bold font-headline tracking-wide">
-          The host has disabled soundboard for guests.
+          {t('soundboard.disabledDesc')}
         </p>
       </div>
     </div>
@@ -44,6 +46,7 @@ export function Soundboard({
     loadMore,
     handleTriggerSound,
   } = useSoundboard({ rtmSendMessage, userId, userName });
+  const t = useTranslations('party');
 
   return (
     <div className="flex flex-col h-full max-h-full overflow-hidden bg-background">
@@ -51,12 +54,12 @@ export function Soundboard({
         <h4 className="text-sm font-black text-foreground/60 font-headline uppercase tracking-widest flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Volume2 className="w-4 h-4 stroke-[3px]" aria-hidden="true" />{' '}
-            Soundboard
+            {t('soundboard.title')}
           </div>
           {isSearching ? (
             <output className="flex items-center gap-2" aria-live="polite">
               <Loader2 className="w-3 h-3 animate-spin stroke-[3px]" />
-              <span className="sr-only">Searching sounds...</span>
+              <span className="sr-only">{t('soundboard.searching')}</span>
             </output>
           ) : null}
         </h4>
@@ -64,7 +67,7 @@ export function Soundboard({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50 stroke-[3px]" />
           <Input
-            placeholder="Search sounds..."
+            placeholder={t('soundboard.searchPlaceholder')}
             className="pl-9 bg-background border-border border-[3px] h-10 text-sm font-bold font-headline tracking-wide focus-visible:ring-0 focus-visible:border-[var(--wp-send-btn,#0055ff)] text-foreground placeholder:text-foreground/50 rounded-none  transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -81,7 +84,7 @@ export function Soundboard({
               size="sm"
               onClick={() => handleTriggerSound(sound.sound, sound.name)}
               className="h-auto py-2.5 px-3 flex items-center gap-2 justify-start bg-background text-foreground hover:bg-neo-yellow/80 border-border border-[3px] transition-colors group relative overflow-hidden rounded-none"
-              aria-label={`Play ${sound.name} sound`}
+              aria-label={t('soundboard.playSound', { name: sound.name })}
             >
               <div
                 className="w-2.5 h-2.5 rounded-full shrink-0 border-[2px] border-border"
@@ -115,19 +118,19 @@ export function Soundboard({
                 className="text-xs font-black font-headline uppercase tracking-widest text-foreground/60 hover:text-foreground hover:bg-transparent"
                 onClick={loadMore}
               >
-                Load more
+                {t('soundboard.loadMore')}
               </Button>
             ) : null}
             {!loading && !hasMore && sounds.length > 0 ? (
               <span className="text-[10px] font-black font-headline text-foreground/30 uppercase tracking-widest">
-                End of results
+                {t('soundboard.endOfResults')}
               </span>
             ) : null}
           </div>
 
           {!loading && sounds.length === 0 ? (
             <div className="col-span-2 py-10 text-center text-xs font-black font-headline tracking-widest uppercase text-foreground/50">
-              No sounds found
+              {t('soundboard.noSoundsFound')}
             </div>
           ) : null}
         </div>

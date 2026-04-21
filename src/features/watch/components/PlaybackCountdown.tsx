@@ -1,6 +1,7 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { usePlaybackCountdown } from '../hooks/use-playback-countdown';
 
@@ -12,9 +13,10 @@ interface PlaybackCountdownProps {
 
 export function PlaybackCountdown({
   onComplete,
-  title = 'Starting Experience',
-  subtitle = 'Get ready for cinematic excellence',
+  title,
+  subtitle,
 }: PlaybackCountdownProps) {
+  const t = useTranslations('watch');
   const { count, progress } = usePlaybackCountdown(onComplete);
 
   return (
@@ -22,7 +24,7 @@ export function PlaybackCountdown({
       className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-reduce:animate-none pointer-events-auto select-none"
       role="status"
       aria-live="polite"
-      aria-label="Playback countdown"
+      aria-label={t('aria.playbackCountdown')}
     >
       {/* Background Glows */}
       <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse motion-reduce:animate-none" />
@@ -36,10 +38,10 @@ export function PlaybackCountdown({
 
         <div className="space-y-3">
           <h2 className="text-white font-bold text-2xl tracking-tighter">
-            {title}
+            {title ?? t('countdown.startingExperience')}
           </h2>
           <p className="text-white/40 text-sm tracking-[0.2em] uppercase font-medium">
-            {subtitle}
+            {subtitle ?? t('countdown.getReady')}
           </p>
         </div>
 
@@ -47,7 +49,7 @@ export function PlaybackCountdown({
         <div className="relative w-56 h-56 flex items-center justify-center">
           {/* SVG Progress Circle */}
           <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <title>Playback Countdown</title>
+            <title>{t('aria.countdownTitle')}</title>
             <circle
               cx="112"
               cy="112"
@@ -77,7 +79,7 @@ export function PlaybackCountdown({
               key={count}
               className="text-9xl font-black text-white motion-safe:animate-in motion-safe:zoom-in-75 motion-safe:duration-300 motion-reduce:animate-none drop-shadow-md"
             >
-              {count > 0 ? count : 'GO'}
+              {count > 0 ? count : t('countdown.go')}
             </span>
           </div>
         </div>
@@ -99,7 +101,7 @@ export function PlaybackCountdown({
       {/* Security/Hardened Note */}
       <div className="absolute bottom-12 left-0 right-0 text-center">
         <span className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-bold">
-          Elite AI Experience • EMA Hardened
+          {t('countdown.eliteExperience')}
         </span>
       </div>
     </div>

@@ -73,7 +73,7 @@ describe('LoginPage', () => {
     render(<LoginPage />);
 
     expect(
-      screen.getByRole('heading', { name: /solo viewing/i }),
+      screen.getByRole('heading', { name: /features\.solo\.title/i }),
     ).toBeInTheDocument();
   });
 

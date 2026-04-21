@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface WatchPartyLoadingProps {
@@ -6,9 +9,11 @@ interface WatchPartyLoadingProps {
 }
 
 export function WatchPartyLoading({
-  message = 'Connecting to watch party…',
+  message,
   className,
 }: WatchPartyLoadingProps) {
+  const t = useTranslations('party');
+  const displayMessage = message ?? t('loading.connecting');
   return (
     <div
       className={cn(
@@ -17,7 +22,7 @@ export function WatchPartyLoading({
       )}
       role="status"
       aria-live="polite"
-      aria-label={message}
+      aria-label={displayMessage}
     >
       <div className="bg-neo-yellow border-[4px] border-border  px-8 py-6 md:px-12 md:py-8 flex flex-col items-center gap-6 saturate-[1.2] motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
         {/* Brutalist Square Loader */}
@@ -29,7 +34,7 @@ export function WatchPartyLoading({
         {/* Steady Loading Text */}
         <div className="mt-2 flex flex-col items-center gap-3 w-full">
           <span className="text-foreground text-[10px] md:text-sm font-black font-headline tracking-widest uppercase text-center leading-tight max-w-[240px]">
-            {message}
+            {displayMessage}
           </span>
           <div className="h-[4px] w-full bg-primary" />
         </div>

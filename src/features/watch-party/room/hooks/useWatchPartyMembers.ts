@@ -37,6 +37,8 @@ export function useWatchPartyMembers({
   videoRef,
 }: UseWatchPartyMembersProps) {
   const t = useTranslations('toasts');
+  const tp = useTranslations('party.toasts');
+  const tf = useTranslations('party.fallback');
   const { socket } = useSocket();
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
@@ -121,7 +123,7 @@ export function useWatchPartyMembers({
           };
         });
       } else {
-        toast.error(response.error || 'Failed to approve member');
+        toast.error(response.error || tp('failedApprove'));
       }
     },
     [
@@ -134,6 +136,7 @@ export function useWatchPartyMembers({
       videoRef?.current,
       room?.pendingMembers,
       t,
+      tp,
     ],
   );
 
@@ -147,7 +150,7 @@ export function useWatchPartyMembers({
           if (!prev) return null;
           rtmSendMessageToPeer?.(memberId, {
             type: 'JOIN_REJECTED',
-            reason: 'Your request to join was declined.',
+            reason: tp('requestDeclined'),
           });
           return {
             ...prev,
@@ -157,10 +160,10 @@ export function useWatchPartyMembers({
           };
         });
       } else {
-        toast.error(response.error || 'Failed to reject request');
+        toast.error(response.error || tp('failedReject'));
       }
     },
-    [room?.id, rtmSendMessageToPeer, setRoom, t],
+    [room?.id, rtmSendMessageToPeer, setRoom, t, tp],
   );
 
   const kickUser = useCallback(
@@ -174,7 +177,7 @@ export function useWatchPartyMembers({
           rtmSendMessage?.({
             type: 'KICK',
             targetUserId: memberId,
-            reason: 'You were removed from the party by the host.',
+            reason: tp('kickedByHost'),
           });
           return {
             ...prev,
@@ -182,10 +185,10 @@ export function useWatchPartyMembers({
           };
         });
       } else {
-        toast.error(response.error || 'Failed to remove member');
+        toast.error(response.error || tp('failedRemove'));
       }
     },
-    [room?.id, rtmSendMessage, setRoom, t],
+    [room?.id, rtmSendMessage, setRoom, t, tp],
   );
 
   const handlePresenceEvent = useCallback(
@@ -210,7 +213,7 @@ export function useWatchPartyMembers({
             (m) => m?.id === event.userId,
           );
           if (isStillMember) {
-            toast.info(`Auto-removing dropped guest...`);
+            toast.info(tp('autoRemoving'));
             kickUser(event.userId).catch(() => {});
           }
           delete disconnectTimersRef.current[event.userId];
@@ -223,7 +226,7 @@ export function useWatchPartyMembers({
         }
       }
     },
-    [isHost, room?.id, room?.hostId, kickUser],
+    [isHost, room?.id, room?.hostId, kickUser, tp],
   );
 
   // Listen for optimistic local updates from WatchPartySettings via CustomEvent
@@ -311,9 +314,12 @@ export function useWatchPartyMembers({
 
               if (newPendingCount > 0) {
                 new Audio('/room-join.mp3').play().catch(() => {});
-                toast.success(`${newPendingCount} new request(s) to join`, {
-                  id: 'new-join-request',
-                });
+                toast.success(
+                  tp('newJoinRequests', { count: newPendingCount }),
+                  {
+                    id: 'new-join-request',
+                  },
+                );
               }
 
               return {
@@ -354,7 +360,7 @@ export function useWatchPartyMembers({
       socket.off('PENDING_MEMBERS_UPDATED');
       socket.emit('watch-party:leave_room', room.id);
     };
-  }, [room?.id, room?.hostId, userId, setRoom, socket]);
+  }, [room?.id, room?.hostId, userId, setRoom, socket, tp]);
 
   // Handle incoming member-related RTM messages
   const handleIncomingRtmMessage = useCallback(
@@ -367,9 +373,12 @@ export function useWatchPartyMembers({
           const isSelf = userId && member.id === userId;
           if (!isSelf) {
             new Audio('/room-join.mp3').play().catch(() => {});
-            toast.success(`${member.name || 'Someone'} joined!`, {
-              id: `member-joined-${member.id}`,
-            });
+            toast.success(
+              tp('memberJoined', { name: member.name || tf('someone') }),
+              {
+                id: `member-joined-${member.id}`,
+              },
+            );
           }
 
           setRoom((prev) => {
@@ -398,7 +407,7 @@ export function useWatchPartyMembers({
               (m: RoomMember) => m?.id === msg.userId,
             );
             if (member?.name) {
-              toast.info(`${member.name} left`, {
+              toast.info(tp('memberLeft', { name: member.name }), {
                 id: `member-left-${msg.userId}`,
               });
             }
@@ -446,7 +455,7 @@ export function useWatchPartyMembers({
         }
       }
     },
-    [userId, onMemberJoined, setRoom],
+    [userId, onMemberJoined, setRoom, tp, tf],
   );
 
   return {

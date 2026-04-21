@@ -62,7 +62,7 @@ export async function fetchDownloadLinks(
   return res.success && res.qualities ? res.qualities : [];
 }
 
-export async function startElectronDownload({
+export async function startTauriDownload({
   contentId,
   showTitle,
   posterUrl,

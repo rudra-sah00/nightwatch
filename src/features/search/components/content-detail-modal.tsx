@@ -180,7 +180,7 @@ export function ContentDetailModal({
             type="button"
             onClick={onClose}
             className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
-            aria-label="Close modal"
+            aria-label={t('contentDetail.closeModal')}
           >
             <X className="w-5 h-5 stroke-[3px]" />
           </button>

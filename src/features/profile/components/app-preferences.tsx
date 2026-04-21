@@ -29,8 +29,6 @@ import { useTheme } from '@/providers/theme-provider';
 const LOCALE_META: Record<string, { native: string; english: string }> = {
   en: { native: 'English', english: 'English' },
   hi: { native: 'हिन्दी', english: 'Hindi' },
-  ta: { native: 'தமிழ்', english: 'Tamil' },
-  te: { native: 'తెలుగు', english: 'Telugu' },
   es: { native: 'Español', english: 'Spanish' },
   fr: { native: 'Français', english: 'French' },
   ja: { native: '日本語', english: 'Japanese' },
@@ -180,7 +178,7 @@ export function AppPreferences() {
                 onClick={() => setThemeOpen(false)}
                 className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
               >
-                Cancel
+                {t('preferences.cancel')}
               </button>
 
               <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
@@ -241,7 +239,7 @@ export function AppPreferences() {
                 className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
               >
                 <Globe className="w-4 h-4" />
-                {LOCALE_META[locale]?.native || 'English'}
+                {LOCALE_META[locale]?.native || locale}
               </button>
             </DialogTrigger>
 
@@ -257,7 +255,7 @@ export function AppPreferences() {
                 onClick={() => setLangOpen(false)}
                 className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
               >
-                Cancel
+                {t('preferences.cancel')}
               </button>
 
               <div className="flex flex-col items-center w-full max-w-md px-6 h-full pt-16">
@@ -363,7 +361,7 @@ export function AppPreferences() {
                     {t('preferences.maxConcurrentDownloads')}
                   </DialogTitle>
                   <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
-                    Cancel
+                    {t('preferences.cancel')}
                   </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
@@ -396,7 +394,7 @@ export function AppPreferences() {
                         type="number"
                         min={1}
                         max={10}
-                        placeholder="Custom (1-10)"
+                        placeholder={t('preferences.customConcurrent')}
                         value={customConcurrent}
                         onChange={(e) => setCustomConcurrent(e.target.value)}
                         onKeyDown={(e) =>
@@ -409,7 +407,7 @@ export function AppPreferences() {
                         onClick={handleCustomConcurrent}
                         className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
                       >
-                        Set
+                        {t('preferences.set')}
                       </button>
                     </div>
                   </div>
@@ -451,7 +449,7 @@ export function AppPreferences() {
                     {t('preferences.downloadSpeedLimit')}
                   </DialogTitle>
                   <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
-                    Cancel
+                    {t('preferences.cancel')}
                   </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
@@ -491,7 +489,7 @@ export function AppPreferences() {
                         type="number"
                         min={1}
                         max={100}
-                        placeholder="Custom MB/s"
+                        placeholder={t('preferences.customSpeed')}
                         value={customSpeed}
                         onChange={(e) => setCustomSpeed(e.target.value)}
                         onKeyDown={(e) =>
@@ -504,7 +502,7 @@ export function AppPreferences() {
                         onClick={handleCustomSpeed}
                         className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
                       >
-                        Set
+                        {t('preferences.set')}
                       </button>
                     </div>
                   </div>

@@ -38,7 +38,7 @@ describe('Fullscreen', () => {
 
       expect(screen.getByRole('button')).toHaveAttribute(
         'aria-label',
-        'Enter fullscreen',
+        'enterFullscreen',
       );
     });
 
@@ -47,7 +47,7 @@ describe('Fullscreen', () => {
 
       expect(screen.getByRole('button')).toHaveAttribute(
         'aria-label',
-        'Exit fullscreen',
+        'exitFullscreen',
       );
     });
 

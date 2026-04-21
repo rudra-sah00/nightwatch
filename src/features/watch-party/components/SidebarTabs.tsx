@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useSidebarTabs } from '../hooks/use-sidebar-tabs';
 
@@ -8,6 +9,7 @@ interface SidebarTabsProps {
 
 export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
   const { tabs } = useSidebarTabs();
+  const t = useTranslations('party.tabs');
 
   return (
     <div className="flex border-b border-border bg-background shrink-0">
@@ -22,7 +24,7 @@ export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
             variant={isActive ? 'neo-yellow' : 'neo-ghost'}
             size="default"
             onClick={() => onTabChange(tab.id)}
-            aria-label={`${tab.label} Tab`}
+            aria-label={t('tabAriaLabel', { label: tab.label })}
             className="flex-1 rounded-none flex flex-col items-center justify-center gap-1.5 h-auto py-3"
           >
             <div className="relative">

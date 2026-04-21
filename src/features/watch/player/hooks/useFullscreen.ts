@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { PlayerAction } from '../context/types';
@@ -42,6 +43,7 @@ export function useFullscreen({
   dispatch,
   playerIsFullscreen,
 }: UseFullscreenOptions) {
+  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const isIOS =
     typeof navigator !== 'undefined' &&
@@ -316,7 +318,7 @@ export function useFullscreen({
         manualMobileFullscreenRef.current = true;
         lockDocumentScroll();
         dispatch({ type: 'SET_FULLSCREEN', isFullscreen: true });
-        toast('Rotate your device for best experience', { icon: '📱' });
+        toast(t('rotateDevice'), { icon: '📱' });
         return;
       }
 
@@ -324,10 +326,10 @@ export function useFullscreen({
       const target = containerRef.current || document.documentElement;
       const entered = await requestElementFullscreen(target);
       if (!entered) {
-        toast.error('Fullscreen is not supported in this browser');
+        toast.error(t('fullscreenNotSupported'));
       }
     } catch {
-      toast.error('Failed to enter fullscreen');
+      toast.error(t('failedEnterFullscreen'));
     }
   }, [
     isIOS,
@@ -339,6 +341,7 @@ export function useFullscreen({
     requestElementFullscreen,
     tryEnterIOSVideoFullscreen,
     unlockDocumentScroll,
+    t,
   ]);
 
   const exitFullscreen = useCallback(async () => {
@@ -401,9 +404,9 @@ export function useFullscreen({
         doc.webkitCancelFullScreen();
       }
     } catch {
-      toast.error('Failed to exit fullscreen');
+      toast.error(t('failedExitFullscreen'));
     }
-  }, [dispatch, isMobile, unlockDocumentScroll, videoRef]);
+  }, [dispatch, isMobile, unlockDocumentScroll, videoRef, t]);
 
   const toggleFullscreen = useCallback(async () => {
     const doc = document as DocumentWithWebkit;

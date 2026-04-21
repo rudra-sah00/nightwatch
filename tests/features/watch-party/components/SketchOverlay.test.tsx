@@ -186,7 +186,7 @@ describe('SketchOverlay', () => {
       fireEvent.mouseDown(stage);
     });
 
-    const input = screen.getByPlaceholderText('Type text...');
+    const input = screen.getByPlaceholderText('sketch.textPlaceholder');
     fireEvent.change(input, { target: { value: 'Hello' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -213,7 +213,7 @@ describe('SketchOverlay', () => {
       fireEvent.mouseDown(stage);
     });
 
-    const input = screen.getByPlaceholderText('Type text...');
+    const input = screen.getByPlaceholderText('sketch.textPlaceholder');
     fireEvent.change(input, { target: { value: 'Cancel me' } });
     fireEvent.keyDown(input, { key: 'Escape' });
 

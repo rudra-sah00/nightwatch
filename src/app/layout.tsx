@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
+import { getLocale, getTranslations } from 'next-intl/server';
 import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
-import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
+import { TauriDragRegion } from '@/components/layout/tauri-drag-region';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { IntlProvider } from '@/providers/intl-provider';
@@ -27,16 +28,19 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'Watch Rudra',
-  description: 'Your personal streaming companion',
-  manifest: '/manifest.json',
-  icons: {
-    icon: '/play.ico',
-    shortcut: '/play.ico',
-    apple: '/play.ico',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.metadata');
+  return {
+    title: t('appTitle'),
+    description: t('appDescription'),
+    manifest: '/manifest.json',
+    icons: {
+      icon: '/play.ico',
+      shortcut: '/play.ico',
+      apple: '/play.ico',
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#000000',
@@ -47,13 +51,19 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={locale === 'ar' ? 'rtl' : 'ltr'}
+      suppressHydrationWarning
+    >
       <head>
         {/* Blocking script to set dark class before React hydrates — prevents FOUC */}
         <script
@@ -67,25 +77,25 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
         <SerwistProvider swUrl="/sw.js">
-          {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
-          <ElectronDragRegion />
+          <Suspense fallback={<div className="min-h-screen" />}>
+            <IntlProvider>
+              {/* Tauri Window Drag Region (top edge where macOS/Windows controls sit) */}
+              <TauriDragRegion />
 
-          <ThemeProvider>
-            <SocketProvider>
-              <AuthProvider>
-                <Suspense fallback={<div className="min-h-screen" />}>
-                  <IntlProvider>
+              <ThemeProvider>
+                <SocketProvider>
+                  <AuthProvider>
                     <ProgressBar />
                     <DiscordPresenceSync />
                     <OfflineIndicator />
                     <SwUpdatePrompt />
                     {children}
-                  </IntlProvider>
-                </Suspense>
-                <Toaster />
-              </AuthProvider>
-            </SocketProvider>
-          </ThemeProvider>
+                    <Toaster />
+                  </AuthProvider>
+                </SocketProvider>
+              </ThemeProvider>
+            </IntlProvider>
+          </Suspense>
         </SerwistProvider>
       </body>
     </html>

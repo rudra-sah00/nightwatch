@@ -17,7 +17,22 @@
     "more": "Plus",
     "noActivity": "Aucune activité",
     "minSuffix": "{count} min",
-    "last365": "365 derniers jours d'interaction"
+    "last365": "365 derniers jours d'interaction",
+    "heatmapAriaLabel": "Carte thermique de l'activité de visionnage de l'année écoulée",
+    "months": {
+      "jan": "janv",
+      "feb": "févr",
+      "mar": "mars",
+      "apr": "avr",
+      "may": "mai",
+      "jun": "juin",
+      "jul": "juil",
+      "aug": "août",
+      "sep": "sept",
+      "oct": "oct",
+      "nov": "nov",
+      "dec": "déc"
+    }
   },
   "releaseNotes": {
     "title": "Notes de Version",
@@ -52,7 +67,8 @@
     "balanced": "Équilibré",
     "performance": "Performance",
     "highQuality": "Haute Qualité",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "Sélection du serveur"
   },
   "dangerZone": {
     "title": "Zone de Danger",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "Combien de films ou épisodes peuvent être téléchargés en même temps. Par défaut 3.",
     "downloadSpeedLimit": "Limite de Vitesse de Téléchargement",
     "downloadSpeedDescription": "Restreindre la vitesse de téléchargement en arrière-plan. Utile si votre réseau ralentit !",
-    "unlimited": "Illimité"
+    "unlimited": "Illimité",
+    "cancel": "Annuler",
+    "set": "Définir",
+    "customConcurrent": "Personnalisé (1-10)",
+    "customSpeed": "Personnalisé Mo/s"
   },
   "publicProfile": {
     "returnBase": "Retour à la Base",
+    "unknownUser": "utilisateur_inconnu",
     "identityVerified": "Profil d'Identité Vérifié",
     "persistentIdentity": "Identité Persistante : {id}",
     "daysActive": "JOURS ACTIFS",
-    "hrsTotal": "HRS TOTAL",
-    "coreVersion": "VERSION CORE : V1.0-STABLE"
+    "hrsTotal": "HRS TOTALES",
+    "coreVersion": "VERSION CORE : V1.0-STABLE",
+    "userIdentity": "IDENTITÉ UTILISATEUR : {id}"
+  },
+  "messages": {
+    "invalidInput": "Saisie invalide",
+    "passwordUpdated": "Mot de passe mis à jour avec succès",
+    "passwordFailed": "Échec de la mise à jour du mot de passe",
+    "usernameFailed": "Échec de la vérification de la disponibilité du nom d'utilisateur",
+    "noChanges": "Aucune modification à enregistrer",
+    "usernameNotAvailable": "Nom d'utilisateur non disponible",
+    "profileUpdated": "Profil mis à jour avec succès",
+    "profileFailed": "Échec de la mise à jour du profil",
+    "accountDeleted": "Compte supprimé avec succès",
+    "accountDeleteFailed": "Échec de la suppression du compte",
+    "activityFailed": "Échec du chargement de l'activité",
+    "imageUpdated": "Image de profil mise à jour",
+    "imageFailed": "Échec du téléchargement de l'image",
+    "unknown": "Inconnu"
+  },
+  "validation": {
+    "nameMinLength": "Le nom doit contenir au moins 2 caractères",
+    "usernameMinLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+    "usernameFormat": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des underscores",
+    "currentPasswordRequired": "Le mot de passe actuel est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordUppercase": "Le mot de passe doit contenir au moins une lettre majuscule",
+    "passwordSpecialChar": "Le mot de passe doit contenir au moins un caractère spécial",
+    "newPasswordsMismatch": "Les nouveaux mots de passe ne correspondent pas"
   }
 }

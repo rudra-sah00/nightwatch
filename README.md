@@ -31,7 +31,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - **Desktop Wrapper:** Tauri v2 (Rust)
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
-- **Internationalization:** next-intl (16 languages, cookie-based)
+- **Internationalization:** next-intl (14 languages, cookie-based)
 - **Real-Time Data:** Agora RTM, Socket.IO
 - **Real-Time Media:** Agora RTC (WebRTC)
 - **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)

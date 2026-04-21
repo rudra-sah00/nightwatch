@@ -28,8 +28,7 @@
     "emptyTitle": "Tu historial de visualización está vacío",
     "emptyDescription": "Empieza a ver algo y aparecerá aquí",
     "removeAriaLabel": "Eliminar de la lista",
-    "sectionAriaLabel": "Contenido visto recientemente",
-    "timeLeft": "{time} restante"
+    "sectionAriaLabel": "Contenido visto recientemente"
   },
   "contentDetail": {
     "series": "Serie",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "Cancelar watch party",
     "continue": "Continuar",
     "experienceStarting": "Experiencia iniciando",
-    "preparingContent": "Preparando \"{title}\"..."
+    "preparingContent": "Preparando \"{title}\"...",
+    "closeModal": "Cerrar modal",
+    "episodesAriaLabel": "Episodios",
+    "failedToLoadDetails": "No se pudieron cargar los detalles del programa. Por favor, verifica tu conexión e inténtalo de nuevo.",
+    "failedToLoadEpisodes": "No se pudo cargar la lista de episodios. Se usarán datos en caché si están disponibles.",
+    "watchPartyError": "Ocurrió un error inesperado al crear la watch party."
   },
   "actions": {
     "watchSolo": "Ver solo",
@@ -60,7 +64,8 @@
     "watchTogether": "Ver juntos",
     "creating": "Creando",
     "toWatchlist": "A la lista",
-    "removeFromList": "Quitar de la lista"
+    "removeFromList": "Quitar de la lista",
+    "episodeFallbackTitle": "Episodio {number}"
   },
   "download": {
     "download": "Descargar",
@@ -76,6 +81,23 @@
     "saved": "Guardado",
     "securelyStarting": "Iniciando descarga segura...",
     "episode": "Episodio {number}",
-    "untitled": "Sin título"
-  }
+    "untitled": "Sin título",
+    "downloadSrOnly": "Descargar {title}",
+    "downloadingToast": "Descargando{epText}! Revisa tu Biblioteca Sin Conexión.",
+    "downloadingEpisodeText": " del Ep {episode}",
+    "episodeLabel": "Episodio {number}",
+    "episodePrefix": "Episodio"
+  },
+  "episodeCard": {
+    "loading": "CARGANDO...",
+    "epPrefix": "EP {number}",
+    "episodeFallback": "EPISODIO {number}",
+    "minSuffix": "{duration} MIN"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Temporada} other {# Temporadas}}",
+    "seasonEpisodePrefix": "T{season}:E{episode}",
+    "minutesSuffix": "{runtime}M"
+  },
+  "marquee": "LA FORMA SIGUE A LA FUNCIÓN • RUDRA CINEMA • EL MINIMALISMO ES VERDAD • SIN DISTRACCIONES • SOLO CINE •"
 }

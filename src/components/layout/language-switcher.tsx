@@ -10,8 +10,6 @@ import { cn } from '@/lib/utils';
 const LOCALE_LABELS: Record<string, string> = {
   en: 'English',
   hi: 'हिन्दी',
-  ta: 'தமிழ்',
-  te: 'తెలుగు',
   es: 'Español',
   fr: 'Français',
   ja: '日本語',
@@ -65,7 +63,7 @@ export function LanguageSwitcher() {
             type="button"
             className="fixed inset-0 z-40 cursor-default bg-transparent"
             onClick={() => setOpen(false)}
-            aria-label="Close language menu"
+            aria-label={t('closeMenu')}
             tabIndex={-1}
           />
           <div className="absolute right-0 top-full mt-2 z-50 border-[3px] border-border bg-background shadow-lg min-w-[160px]">

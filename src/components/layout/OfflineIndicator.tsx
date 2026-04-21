@@ -2,10 +2,12 @@
 
 import { Wifi, WifiOff } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export function OfflineIndicator() {
+  const t = useTranslations('offline');
   const [isOffline, setIsOffline] = useState(false);
   const [dismissed, _setDismissed] = useState(false);
   // Ensure we get mounted correctly on client without hydration mismatch
@@ -20,7 +22,7 @@ export function OfflineIndicator() {
 
     const handleOffline = () => {
       setIsOffline(true);
-      toast('You are offline', {
+      toast(t('toastOffline'), {
         icon: <WifiOff className="w-4 h-4 text-neo-red" />,
         style: {
           backgroundColor: '#09090b',
@@ -33,7 +35,7 @@ export function OfflineIndicator() {
 
     const handleOnline = () => {
       setIsOffline(false);
-      toast('Back online!', {
+      toast(t('toastOnline'), {
         icon: <Wifi className="w-4 h-4 text-neo-green" />,
         style: {
           backgroundColor: '#09090b',
@@ -51,7 +53,7 @@ export function OfflineIndicator() {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, []);
+  }, [t]);
 
   if (!mounted) return null;
 

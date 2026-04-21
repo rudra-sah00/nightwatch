@@ -403,11 +403,11 @@ export function usePlayerRoot({
   }, [state.isPlaying, state.isPaused]);
 
   // --- REACT-SIDE NATIVE FULLSCREEN GUARD ---
-  // Tracks whether the Electron window is currently in (or transitioning out of)
+  // Tracks whether the Tauri window is currently in (or transitioning out of)
   // OS native fullscreen. The main process sends 'window-fullscreen-changed'
   // on enter-full-screen and leave-full-screen events, and also suppresses
   // blur IPC during the transition. This ref is the React-side backstop.
-  const isNativeElectronFullscreenRef = useRef(false);
+  const isNativeTauriFullscreenRef = useRef(false);
   const fullscreenExitGraceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -427,12 +427,12 @@ export function usePlayerRoot({
           clearTimeout(fullscreenExitGraceRef.current);
           fullscreenExitGraceRef.current = null;
         }
-        isNativeElectronFullscreenRef.current = true;
+        isNativeTauriFullscreenRef.current = true;
       } else {
         // Leaving fullscreen — hold the flag for a short grace period to absorb
         // any trailing blur event from the OS animation (~300 ms on macOS).
         fullscreenExitGraceRef.current = setTimeout(() => {
-          isNativeElectronFullscreenRef.current = false;
+          isNativeTauriFullscreenRef.current = false;
           fullscreenExitGraceRef.current = null;
         }, 350);
       }
@@ -457,7 +457,7 @@ export function usePlayerRoot({
           // Guard 1: Never auto-PiP during a native OS fullscreen transition.
           // The main process already suppresses blur IPC in this case, but this
           // ref acts as a belt-and-suspenders backstop for the React side.
-          if (isNativeElectronFullscreenRef.current) return;
+          if (isNativeTauriFullscreenRef.current) return;
 
           // Guard 2: Never auto-PiP during active navigation to another page.
           // This prevents the infinite zoom-in/out loop when clicking 'Back'.

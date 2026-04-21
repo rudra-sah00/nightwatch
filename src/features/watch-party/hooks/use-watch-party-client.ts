@@ -26,6 +26,7 @@ export function useWatchPartyClient({
   initialRoomNotFound,
 }: UseWatchPartyClientOptions) {
   const t = useTranslations('toasts');
+  const tp = useTranslations('party.toasts');
   const router = useRouter();
   const { copyToClipboard } = useDesktopApp();
 
@@ -189,17 +190,14 @@ export function useWatchPartyClient({
         !movieEndWarningShown
       ) {
         setMovieEndWarningShown(true);
-        toast.warning(
-          'This watch party will automatically end when the movie finishes.',
-          {
-            duration: 8000,
-          },
-        );
+        toast.warning(tp('movieEndWarning'), {
+          duration: 8000,
+        });
       }
     };
 
     const handleMovieEnd = () => {
-      toast.info('Movie has ended. Closing watch party...');
+      toast.info(tp('movieEnded'));
       const timer = setTimeout(() => {
         leaveRoom();
         goBackOrHome();
@@ -215,7 +213,7 @@ export function useWatchPartyClient({
       video.removeEventListener('ended', handleMovieEnd);
       if (movieEndTimerRef.current) clearTimeout(movieEndTimerRef.current);
     };
-  }, [room, isHost, movieEndWarningShown, leaveRoom, goBackOrHome]);
+  }, [room, isHost, movieEndWarningShown, leaveRoom, goBackOrHome, tp]);
 
   const hasAttemptedAutoJoin = useRef(false);
   useEffect(() => {
@@ -275,7 +273,7 @@ export function useWatchPartyClient({
       hasAttemptedAutoJoin.current = true;
       requestJoin(roomId);
       if (isNewParty) {
-        toast.success('Party created! Invite friends via the sidebar.', {
+        toast.success(tp('partyCreated'), {
           duration: 5000,
         });
       }
@@ -289,6 +287,7 @@ export function useWatchPartyClient({
     requestStatus,
     requestJoin,
     user,
+    tp,
   ]);
 
   useEffect(() => {
@@ -301,7 +300,7 @@ export function useWatchPartyClient({
 
   const handleJoin = async () => {
     if (!user && !guestName.trim()) {
-      toast.error('Please enter your name to join');
+      toast.error(tp('enterName'));
       return;
     }
     await requestJoin(
@@ -338,10 +337,10 @@ export function useWatchPartyClient({
     try {
       await copyToClipboard(finalUrl);
       setCopied(true);
-      toast.success('Invite link copied!');
+      toast.success(tp('inviteCopied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Failed to copy link. Try copying from URL bar manually.');
+      toast.error(tp('copyFailed'));
     }
   };
 

@@ -1,13 +1,17 @@
 import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { WatchPartyClient } from '@/features/watch-party/components/WatchPartyClient';
 import { checkRoomExists } from '@/features/watch-party/room/services/watch-party.api';
 
-export const metadata: Metadata = {
-  title: 'Watch Party | Watch Rudra',
-  description: 'Join your friends and watch together in real-time.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.metadata');
+  return {
+    title: t('watchPartyTitle'),
+    description: t('watchPartyDescription'),
+  };
+}
 
 export default async function WatchPartyPage({
   params,

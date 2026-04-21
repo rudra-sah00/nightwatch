@@ -204,7 +204,10 @@ export function usePlaybackActions({
       episodeNumber: watchProgress.episodeNumber,
       seasonNumber: watchProgress.seasonNumber,
       title:
-        watchProgress.episodeTitle || `Episode ${watchProgress.episodeNumber}`,
+        watchProgress.episodeTitle ||
+        t('actions.episodeFallbackTitle', {
+          number: watchProgress.episodeNumber,
+        }),
       thumbnailUrl: show.posterUrl || '',
       duration: 0,
     };

@@ -28,8 +28,7 @@
     "emptyTitle": "視聴履歴は空です",
     "emptyDescription": "何かを見始めると、ここに表示されます",
     "removeAriaLabel": "リストから削除",
-    "sectionAriaLabel": "最近視聴したコンテンツ",
-    "timeLeft": "残り{time}"
+    "sectionAriaLabel": "最近視聴したコンテンツ"
   },
   "contentDetail": {
     "series": "シリーズ",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "ウォッチパーティーをキャンセル",
     "continue": "続ける",
     "experienceStarting": "体験を開始しています",
-    "preparingContent": "「{title}」を準備中..."
+    "preparingContent": "「{title}」を準備中...",
+    "closeModal": "モーダルを閉じる",
+    "episodesAriaLabel": "エピソード",
+    "failedToLoadDetails": "番組の詳細を読み込めませんでした。接続を確認して再度お試しください。",
+    "failedToLoadEpisodes": "エピソードリストを読み込めませんでした。キャッシュデータがあれば使用します。",
+    "watchPartyError": "ウォッチパーティーの作成中に予期しないエラーが発生しました。"
   },
   "actions": {
     "watchSolo": "一人で見る",
@@ -60,7 +64,8 @@
     "watchTogether": "一緒に見る",
     "creating": "作成中",
     "toWatchlist": "ウォッチリストに追加",
-    "removeFromList": "リストから削除"
+    "removeFromList": "リストから削除",
+    "episodeFallbackTitle": "エピソード {number}"
   },
   "download": {
     "download": "ダウンロード",
@@ -76,6 +81,23 @@
     "saved": "保存済み",
     "securelyStarting": "安全にダウンロードを開始中...",
     "episode": "エピソード {number}",
-    "untitled": "無題"
-  }
+    "untitled": "無題",
+    "downloadSrOnly": "{title}をダウンロード",
+    "downloadingToast": "ダウンロード中{epText}！オフラインライブラリを確認してください。",
+    "downloadingEpisodeText": " Ep {episode}の",
+    "episodeLabel": "エピソード {number}",
+    "episodePrefix": "エピソード"
+  },
+  "episodeCard": {
+    "loading": "読み込み中...",
+    "epPrefix": "EP {number}",
+    "episodeFallback": "エピソード {number}",
+    "minSuffix": "{duration}分"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# シーズン} other {# シーズン}}",
+    "seasonEpisodePrefix": "S{season}:E{episode}",
+    "minutesSuffix": "{runtime}分"
+  },
+  "marquee": "形態は機能に従う • ルドラシネマ • ミニマリズムは真実 • 気を散らすものなし • ただ映画を •"
 }

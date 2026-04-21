@@ -1,4 +1,5 @@
 import { MessageSquare, PenTool, Settings, Volume2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -66,6 +67,7 @@ export function WatchPartySettings({
   onToggleFloatingChat,
   rtmSendMessage,
 }: WatchPartySettingsProps) {
+  const t = useTranslations('party');
   const { isOpen, setIsOpen } = useWatchPartySettings();
 
   const handleGlobalPermissionToggle = (
@@ -141,7 +143,7 @@ export function WatchPartySettings({
       <DialogTrigger
         type="button"
         className="px-3 flex items-center justify-center gap-2 py-2 bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 rounded-none transition-colors"
-        title="Room Access & Permissions"
+        title={t('settings.roomAccessPermissions')}
         onClick={() => setIsOpen(true)}
       >
         <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
@@ -155,7 +157,7 @@ export function WatchPartySettings({
         <DialogHeader className="p-4 md:p-6 border-b-[4px] border-border bg-neo-yellow m-0 flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl">
             <Settings aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
-            Room Settings
+            {t('settings.title')}
           </DialogTitle>
           <DialogClose asChild>
             <Button
@@ -175,7 +177,7 @@ export function WatchPartySettings({
             <div className="space-y-4">
               <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2 border-b-[3px] border-border pb-2">
                 <MessageSquare className="w-5 h-5 stroke-[3px]" />
-                Personal
+                {t('settings.personal')}
               </h3>
               <div className="bg-background border-[3px] border-border p-4 space-y-4">
                 <div className="flex items-center justify-between">
@@ -183,17 +185,17 @@ export function WatchPartySettings({
                     <MessageSquare className="w-5 h-5 text-foreground stroke-[3px]" />
                     <div className="flex flex-col">
                       <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
-                        Floating chat
+                        {t('settings.floatingChat')}
                       </p>
                       <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                        Show chat overlay when closed
+                        {t('settings.floatingChatDesc')}
                       </p>
                     </div>
                   </div>
                   <Switch
                     checked={floatingChatEnabled}
                     onCheckedChange={() => onToggleFloatingChat?.()}
-                    label="Floating chat overlay"
+                    label={t('settings.floatingChatOverlay')}
                   />
                 </div>
               </div>
@@ -205,7 +207,7 @@ export function WatchPartySettings({
               {/* Global Permissions */}
               <div className="space-y-4">
                 <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground border-b-[3px] border-border pb-2">
-                  Global Permissions for Guests
+                  {t('settings.globalPermissions')}
                 </h3>
 
                 <div className="space-y-3 bg-background border-[3px] border-border p-4">
@@ -214,10 +216,10 @@ export function WatchPartySettings({
                       <PenTool className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
-                          Sketch Board
+                          {t('settings.sketchBoard')}
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                          Allow guests to draw on video
+                          {t('settings.allowDraw')}
                         </p>
                       </div>
                     </div>
@@ -226,7 +228,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsDraw', v)
                       }
-                      label="Allow guests to draw"
+                      label={t('settings.allowDrawLabel')}
                     />
                   </div>
 
@@ -235,10 +237,10 @@ export function WatchPartySettings({
                       <Volume2 className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
-                          Soundboard
+                          {t('settings.soundboardLabel')}
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                          Allow guests to play trending sounds
+                          {t('settings.allowSounds')}
                         </p>
                       </div>
                     </div>
@@ -247,7 +249,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsPlaySounds', v)
                       }
-                      label="Allow guests to play sounds"
+                      label={t('settings.allowSoundsLabel')}
                     />
                   </div>
 
@@ -256,10 +258,10 @@ export function WatchPartySettings({
                       <MessageSquare className="w-5 h-5 text-foreground stroke-[3px]" />
                       <div className="flex flex-col">
                         <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
-                          Live Chat
+                          {t('settings.liveChat')}
                         </p>
                         <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
-                          Allow guests to send chat messages
+                          {t('settings.allowChat')}
                         </p>
                       </div>
                     </div>
@@ -268,7 +270,7 @@ export function WatchPartySettings({
                       onCheckedChange={(v) =>
                         handleGlobalPermissionToggle('canGuestsChat', v)
                       }
-                      label="Allow guests to chat"
+                      label={t('settings.allowChatLabel')}
                     />
                   </div>
                 </div>
@@ -278,7 +280,7 @@ export function WatchPartySettings({
               {guests.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground border-b-[3px] border-border pb-2">
-                    Individual Guest Overrides
+                    {t('settings.individualOverrides')}
                   </h3>
 
                   <div className="space-y-3">
@@ -301,7 +303,7 @@ export function WatchPartySettings({
                         <div className="grid grid-cols-3 gap-2">
                           <div className="flex flex-col items-center gap-3">
                             <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
-                              Sketch
+                              {t('tabs.sketch')}
                             </span>
                             <Switch
                               checked={
@@ -315,12 +317,14 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
-                              label={`Sketch for ${guest.name}`}
+                              label={t('settings.sketchFor', {
+                                name: guest.name,
+                              })}
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
                             <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
-                              Sounds
+                              {t('settings.sounds')}
                             </span>
                             <Switch
                               checked={
@@ -334,12 +338,14 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
-                              label={`Sounds for ${guest.name}`}
+                              label={t('settings.soundsFor', {
+                                name: guest.name,
+                              })}
                             />
                           </div>
                           <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
                             <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70">
-                              Chat
+                              {t('tabs.chat')}
                             </span>
                             <Switch
                               checked={
@@ -353,7 +359,9 @@ export function WatchPartySettings({
                                   v,
                                 )
                               }
-                              label={`Chat for ${guest.name}`}
+                              label={t('settings.chatFor', {
+                                name: guest.name,
+                              })}
                             />
                           </div>
                         </div>

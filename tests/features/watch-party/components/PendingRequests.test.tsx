@@ -45,7 +45,7 @@ describe('PendingRequests', () => {
     it('should render pending members count', () => {
       render(<PendingRequests {...defaultProps} />);
 
-      expect(screen.getByText('3 waiting to join')).toBeInTheDocument();
+      expect(screen.getByText('waitingToJoin')).toBeInTheDocument();
     });
 
     it('should render single member count correctly', () => {
@@ -56,7 +56,7 @@ describe('PendingRequests', () => {
         />,
       );
 
-      expect(screen.getByText('1 waiting to join')).toBeInTheDocument();
+      expect(screen.getByText('waitingToJoin')).toBeInTheDocument();
     });
 
     it('should render all pending member names', () => {
@@ -89,8 +89,8 @@ describe('PendingRequests', () => {
     it('should render approve and reject buttons for each member', () => {
       render(<PendingRequests {...defaultProps} />);
 
-      const approveButtons = screen.getAllByTitle('Approve');
-      const rejectButtons = screen.getAllByTitle('Reject');
+      const approveButtons = screen.getAllByTitle('approve');
+      const rejectButtons = screen.getAllByTitle('reject');
 
       expect(approveButtons).toHaveLength(3);
       expect(rejectButtons).toHaveLength(3);
@@ -102,7 +102,7 @@ describe('PendingRequests', () => {
       const onApprove = vi.fn();
       render(<PendingRequests {...defaultProps} onApprove={onApprove} />);
 
-      const approveButtons = screen.getAllByTitle('Approve');
+      const approveButtons = screen.getAllByTitle('approve');
       fireEvent.click(approveButtons[0]);
 
       expect(onApprove).toHaveBeenCalledWith('user-1');
@@ -112,7 +112,7 @@ describe('PendingRequests', () => {
       const onReject = vi.fn();
       render(<PendingRequests {...defaultProps} onReject={onReject} />);
 
-      const rejectButtons = screen.getAllByTitle('Reject');
+      const rejectButtons = screen.getAllByTitle('reject');
       fireEvent.click(rejectButtons[1]);
 
       expect(onReject).toHaveBeenCalledWith('user-2');
@@ -129,8 +129,8 @@ describe('PendingRequests', () => {
         />,
       );
 
-      const approveButtons = screen.getAllByTitle('Approve');
-      const rejectButtons = screen.getAllByTitle('Reject');
+      const approveButtons = screen.getAllByTitle('approve');
+      const rejectButtons = screen.getAllByTitle('reject');
 
       // Approve first, reject second, approve third
       fireEvent.click(approveButtons[0]);
@@ -164,8 +164,8 @@ describe('PendingRequests', () => {
       );
 
       // Should still render the approve/reject buttons
-      expect(screen.getByTitle('Approve')).toBeInTheDocument();
-      expect(screen.getByTitle('Reject')).toBeInTheDocument();
+      expect(screen.getByTitle('approve')).toBeInTheDocument();
+      expect(screen.getByTitle('reject')).toBeInTheDocument();
     });
 
     it('should handle member with very long name', () => {
@@ -200,9 +200,9 @@ describe('PendingRequests', () => {
         <PendingRequests {...defaultProps} pendingMembers={manyMembers} />,
       );
 
-      expect(screen.getByText('20 waiting to join')).toBeInTheDocument();
+      expect(screen.getByText('waitingToJoin')).toBeInTheDocument();
       // Container should be scrollable
-      expect(screen.getAllByTitle('Approve')).toHaveLength(20);
+      expect(screen.getAllByTitle('approve')).toHaveLength(20);
     });
   });
 });

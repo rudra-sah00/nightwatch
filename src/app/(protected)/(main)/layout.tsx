@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { OfflineState } from '@/components/layout/OfflineState';
@@ -13,6 +14,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const pathname = usePathname() || '';
   const { isOffline, mounted } = useNetworkStatus();
+  const t = useTranslations('common');
 
   // Do not show the offline blocker inside player routes or offline vault
   const bypassOfflineState =
@@ -30,7 +32,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
         >
-          Skip to content
+          {t('skipToContent')}
         </a>
         <Suspense fallback={null}>
           <GlobalTour />

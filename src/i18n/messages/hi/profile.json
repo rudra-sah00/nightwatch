@@ -17,7 +17,22 @@
     "more": "अधिक",
     "noActivity": "कोई गतिविधि नहीं",
     "minSuffix": "{count} मिनट",
-    "last365": "पिछले 365 दिनों की गतिविधि"
+    "last365": "पिछले 365 दिनों की गतिविधि",
+    "heatmapAriaLabel": "पिछले वर्ष की देखने की गतिविधि हीटमैप",
+    "months": {
+      "jan": "जन",
+      "feb": "फ़र",
+      "mar": "मार्च",
+      "apr": "अप्रै",
+      "may": "मई",
+      "jun": "जून",
+      "jul": "जुल",
+      "aug": "अग",
+      "sep": "सित",
+      "oct": "अक्टू",
+      "nov": "नव",
+      "dec": "दिस"
+    }
   },
   "releaseNotes": {
     "title": "रिलीज़ नोट्स",
@@ -52,7 +67,8 @@
     "balanced": "संतुलित",
     "performance": "प्रदर्शन",
     "highQuality": "उच्च गुणवत्ता",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "सर्वर चयन"
   },
   "dangerZone": {
     "title": "खतरा क्षेत्र",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "एक साथ कितनी फिल्में या एपिसोड डाउनलोड किए जा सकते हैं। डिफ़ॉल्ट 3 है।",
     "downloadSpeedLimit": "डाउनलोड गति सीमा",
     "downloadSpeedDescription": "पृष्ठभूमि डाउनलोड गति को प्रतिबंधित करें। यदि आपका नेटवर्क धीमा हो जाता है तो सहायक!",
-    "unlimited": "असीमित"
+    "unlimited": "असीमित",
+    "cancel": "रद्द करें",
+    "set": "सेट करें",
+    "customConcurrent": "कस्टम (1-10)",
+    "customSpeed": "कस्टम MB/s"
   },
   "publicProfile": {
     "returnBase": "वापस जाएं",
+    "unknownUser": "अज्ञात_उपयोगकर्ता",
     "identityVerified": "पहचान प्रोफ़ाइल सत्यापित",
     "persistentIdentity": "स्थायी पहचान: {id}",
     "daysActive": "सक्रिय दिन",
     "hrsTotal": "कुल घंटे",
-    "coreVersion": "कोर संस्करण: V1.0-STABLE"
+    "coreVersion": "कोर संस्करण: V1.0-STABLE",
+    "userIdentity": "उपयोगकर्ता पहचान: {id}"
+  },
+  "messages": {
+    "invalidInput": "अमान्य इनपुट",
+    "passwordUpdated": "पासवर्ड सफलतापूर्वक अपडेट किया गया",
+    "passwordFailed": "पासवर्ड अपडेट करने में विफल",
+    "usernameFailed": "उपयोगकर्ता नाम की उपलब्धता जाँचने में विफल",
+    "noChanges": "सहेजने के लिए कोई बदलाव नहीं",
+    "usernameNotAvailable": "उपयोगकर्ता नाम उपलब्ध नहीं है",
+    "profileUpdated": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
+    "profileFailed": "प्रोफ़ाइल अपडेट करने में विफल",
+    "accountDeleted": "खाता सफलतापूर्वक हटाया गया",
+    "accountDeleteFailed": "खाता हटाने में विफल",
+    "activityFailed": "गतिविधि लोड करने में विफल",
+    "imageUpdated": "प्रोफ़ाइल छवि अपडेट की गई",
+    "imageFailed": "छवि अपलोड करने में विफल",
+    "unknown": "अज्ञात"
+  },
+  "validation": {
+    "nameMinLength": "नाम कम से कम 2 अक्षरों का होना चाहिए",
+    "usernameMinLength": "उपयोगकर्ता नाम कम से कम 3 अक्षरों का होना चाहिए",
+    "usernameFormat": "उपयोगकर्ता नाम में केवल अक्षर, संख्याएँ और अंडरस्कोर हो सकते हैं",
+    "currentPasswordRequired": "वर्तमान पासवर्ड आवश्यक है",
+    "passwordMinLength": "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए",
+    "passwordUppercase": "पासवर्ड में कम से कम एक बड़ा अक्षर होना चाहिए",
+    "passwordSpecialChar": "पासवर्ड में कम से कम एक विशेष अक्षर होना चाहिए",
+    "newPasswordsMismatch": "नए पासवर्ड मेल नहीं खाते"
   }
 }

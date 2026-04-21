@@ -8,11 +8,13 @@
     "watchlist": "वॉचलिस्ट",
     "downloads": "डाउनलोड",
     "offlineDownloads": "ऑफ़लाइन डाउनलोड",
-    "profile": "प्रोफ़ाइल"
+    "profile": "प्रोफ़ाइल",
+    "logoAlt": "Watch Rudra लोगो"
   },
   "language": {
     "title": "भाषा",
-    "description": "अपनी पसंदीदा भाषा चुनें"
+    "description": "अपनी पसंदीदा भाषा चुनें",
+    "closeMenu": "भाषा मेनू बंद करें"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "पार्टी समाप्त",
     "messageFailed": "संदेश भेजने में विफल",
     "partyTimeLimit": "वॉच पार्टी 3 घंटे की सीमा पर पहुँच गई है और अब समाप्त होगी।",
-    "startFailed": "प्लेबैक शुरू करने में विफल",
-    "linkCopied": "लिंक कॉपी हो गया!",
-    "profileUpdated": "प्रोफ़ाइल अपडेट हो गई",
-    "passwordChanged": "पासवर्ड सफलतापूर्वक बदला गया",
-    "accountDeleted": "खाता सफलतापूर्वक हटाया गया",
-    "error": "कुछ गलत हो गया",
-    "networkError": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जांचें।",
-    "sessionExpired": "सत्र समाप्त हो गया। कृपया पुनः लॉगिन करें।"
+    "startFailed": "प्लेबैक शुरू करने में विफल"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "ऐप संस्करण"
   },
   "passwordInfo": {
-    "requirements": "आवश्यकताएं"
+    "requirements": "आवश्यकताएं",
+    "ariaLabel": "पासवर्ड आवश्यकताएँ",
+    "title": "पासवर्ड आवश्यकताएँ",
+    "minChars": "8+ अक्षर",
+    "uppercase": "बड़े अक्षर (A-Z)",
+    "specialChar": "विशेष अक्षर (!@#$%^&*)",
+    "breachNote": "हम पासवर्ड की जाँच करते हैं",
+    "knownBreaches": "ज्ञात उल्लंघनों से"
   },
   "actions": {
-    "close": "बंद करें"
+    "close": "बंद करें",
+    "closeModal": "मोडल बंद करें"
+  },
+  "loading": "लोड हो रहा है...",
+  "skipToContent": "सामग्री पर जाएं",
+  "offline": {
+    "title": "आप ऑफ़लाइन हैं",
+    "description": "Watch Rudra को एक्सप्लोर करने के लिए कनेक्शन आवश्यक है। डाउनलोड किए गए शीर्षक देखने के लिए अपना वॉल्ट खोलें।",
+    "openVault": "ऑफ़लाइन वॉल्ट खोलें",
+    "toastOffline": "आप ऑफ़लाइन हैं",
+    "toastOnline": "वापस ऑनलाइन!"
+  },
+  "swUpdate": {
+    "title": "नया संस्करण उपलब्ध",
+    "description": "नवीनतम अपडेट पाने के लिए रिफ्रेश करें।",
+    "refresh": "रिफ्रेश"
+  },
+  "discord": {
+    "readyToStream": "स्ट्रीम के लिए तैयार",
+    "atLoginScreen": "लॉगिन स्क्रीन पर",
+    "browsingDashboard": "डैशबोर्ड ब्राउज़ कर रहे हैं",
+    "lookingForContent": "सामग्री खोज रहे हैं",
+    "browsingHomepage": "होमपेज ब्राउज़ कर रहे हैं",
+    "browsingLiveMatches": "लाइव मैच ब्राउज़ कर रहे हैं",
+    "findingStream": "स्ट्रीम खोज रहे हैं...",
+    "curatingWatchlist": "वॉचलिस्ट तैयार कर रहे हैं",
+    "planningMarathon": "अगले मैराथन की योजना बना रहे हैं",
+    "adjustingSettings": "सेटिंग्स समायोजित कर रहे हैं",
+    "customizingProfile": "प्रोफ़ाइल कस्टमाइज़ कर रहे हैं"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "संतुलित",
+    "highQuality": "उच्च गुणवत्ता स्ट्रीम"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "आपका व्यक्तिगत स्ट्रीमिंग साथी",
+    "homeTitle": "होम | Watch Rudra",
+    "homeDescription": "एक साथ देखना शुरू करने के लिए फिल्में और टीवी शो खोजें।",
+    "continueWatchingTitle": "देखना जारी रखें | Watch Rudra",
+    "continueWatchingDescription": "अपनी हाल ही में देखी गई फिल्मों और टीवी शो के साथ जहाँ छोड़ा था वहीं से शुरू करें।",
+    "searchTitle": "खोजें | Watch Rudra",
+    "searchDescription": "फिल्में, टीवी शो और एनीमे खोजें।",
+    "profileTitle": "प्रोफ़ाइल | Watch Rudra",
+    "profileDescription": "अपनी प्रोफ़ाइल और देखने का इतिहास प्रबंधित करें।",
+    "liveTitle": "लाइव मैच | Watch Rudra",
+    "liveDescription": "अपने दोस्तों के साथ रियल-टाइम में लाइव खेल मैच और चैनल देखें।",
+    "downloadsTitle": "डाउनलोड | Watch Rudra",
+    "downloadsDescription": "ऑफ़लाइन देखने के लिए अपनी डाउनलोड की गई फिल्मों और टीवी शो तक पहुँचें।",
+    "watchlistTitle": "मेरी वॉचलिस्ट | Watch Rudra",
+    "watchlistDescription": "बाद में देखने के लिए फिल्मों और टीवी शो का ट्रैक रखें।",
+    "watchPartyTitle": "वॉच पार्टी | Watch Rudra",
+    "watchPartyDescription": "अपने दोस्तों के साथ जुड़ें और रियल-टाइम में एक साथ देखें।"
+  },
+  "desktopApp": {
+    "notInstalled": "ऐप इंस्टॉल नहीं है",
+    "notInstalledDesc": "हम Watch Rudra डेस्कटॉप ऐप नहीं खोल सके। क्या यह इंस्टॉल है?",
+    "downloadApp": "ऐप डाउनलोड करें"
+  },
+  "whatsNew": {
+    "backToHome": "होम पर वापस जाएँ",
+    "title": "नया क्या है",
+    "description": "Watch Rudra के नवीनतम अपडेट, बग फिक्स और फीचर्स।",
+    "noReleases": "कोई रिलीज़ नहीं मिली या लोड करने में विफल।",
+    "noReleaseNotes": "*कोई रिलीज़ नोट्स प्रदान नहीं किए गए।*",
+    "showMore": "और दिखाएँ ({remaining} शेष)"
+  },
+  "downloads": {
+    "failedToLoad": "सामग्री लोड करने में विफल",
+    "experienceStarting": "अनुभव शुरू हो रहा है",
+    "preparingContent": "\"{title}\" तैयार कर रहे हैं...",
+    "episodes": "एपिसोड",
+    "noImageAvailable": "कोई छवि उपलब्ध नहीं",
+    "closePreview": "प्रीव्यू बंद करें",
+    "statusCompleted": "पूर्ण",
+    "statusFailed": "विफल",
+    "statusDownloading": "डाउनलोड हो रहा है",
+    "statusQueued": "कतार में",
+    "statusCancelled": "रद्द",
+    "statusPaused": "रुका हुआ"
+  },
+  "errors": {
+    "sessionExpired": "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
+    "userExists": "इस ईमेल से एक खाता पहले से मौजूद है।",
+    "invalidInvite": "आमंत्रण लिंक अमान्य या समाप्त हो गया है। कृपया नया अनुरोध करें।",
+    "captchaRequired": "कृपया सुरक्षा सत्यापन पूरा करें।",
+    "captchaFailed": "सुरक्षा सत्यापन विफल। कृपया पुनः प्रयास करें।",
+    "otpRateLimit": "बहुत अधिक प्रयास। कृपया प्रतीक्षा करें और पुनः प्रयास करें।",
+    "validationError": "कुछ विवरण अमान्य हैं। कृपया समीक्षा करें और पुनः प्रयास करें।",
+    "csrfFailed": "सुरक्षा टोकन समाप्त हो गया। कृपया पेज रिफ्रेश करें।",
+    "notFound": "अनुरोधित संसाधन नहीं मिला।",
+    "forbidden": "आपको यह कार्य करने की अनुमति नहीं है।",
+    "networkError": "नेटवर्क समस्या। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।",
+    "requestTimeout": "अनुरोध का समय समाप्त हो गया। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।"
+  },
+  "units": {
+    "bytes": "बाइट्स",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

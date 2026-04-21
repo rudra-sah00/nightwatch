@@ -14,7 +14,7 @@ describe('ActivityGraph', () => {
   describe('rendering', () => {
     it('renders without crashing', () => {
       render(<ActivityGraph activity={[]} />);
-      expect(screen.getByText('Jan')).toBeInTheDocument();
+      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
     });
 
     it('renders loading skeleton when isLoading is true', () => {
@@ -35,8 +35,8 @@ describe('ActivityGraph', () => {
   describe('legend', () => {
     it('renders the months', () => {
       render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText('Jan')).toBeInTheDocument();
-      expect(screen.getByText('Dec')).toBeInTheDocument();
+      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
+      expect(screen.getByText('activity.months.dec')).toBeInTheDocument();
     });
   });
 
@@ -67,7 +67,7 @@ describe('ActivityGraph', () => {
     it('renders correctly with empty activity array', () => {
       render(<ActivityGraph activity={[]} />);
       // Should show Jan/Dec
-      expect(screen.getByText('Jan')).toBeInTheDocument();
+      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
     });
   });
 });

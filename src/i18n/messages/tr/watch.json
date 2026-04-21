@@ -27,7 +27,25 @@
     "live": "Canlı",
     "liveBadge": "CANLI",
     "watchingLive": "Canlı izliyorsunuz",
-    "jumpToLive": "Canlıya atla"
+    "jumpToLive": "Canlıya atla",
+    "lockedHostControls": "Kilitli - Sunucu kontrolleri",
+    "hostControls": "Sunucu kontrolleri",
+    "rotateDevice": "En iyi deneyim için cihazınızı döndürün",
+    "fullscreenNotSupported": "Bu tarayıcıda tam ekran desteklenmiyor",
+    "failedEnterFullscreen": "Tam ekrana geçilemedi",
+    "failedExitFullscreen": "Tam ekrandan çıkılamadı",
+    "fullscreenToggleFailed": "Tam ekran geçişi başarısız",
+    "seekTime": "Arama zamanı",
+    "liveSeekBar": "Canlı yayın arama çubuğu",
+    "atLiveEdge": "Canlı",
+    "behindLive": "Canlıdan {seconds}s geride",
+    "closeSidebar": "Kenar çubuğunu kapat",
+    "openSidebar": "Kenar çubuğunu aç",
+    "seasonEpisodeLabel": "Sezon {season} · Bölüm {episode}",
+    "rotateToLandscape": "Yatay moda döndür",
+    "landscapeOnlyMessage": "Bu oynatıcı yalnızca yatay modda kullanılabilir",
+    "showEpisodes": "Bölümleri göster",
+    "episodesTitle": "Bölümler"
   },
   "settings": {
     "quality": "Kalite",
@@ -44,7 +62,24 @@
     "font": "Yazı Tipi",
     "background": "Arka Plan",
     "textColor": "Metin Rengi",
-    "textEffect": "Metin Efekti"
+    "textEffect": "Metin Efekti",
+    "sizeSmall": "Küçük",
+    "sizeMedium": "Orta",
+    "sizeLarge": "Büyük",
+    "sizeExtraLarge": "Çok büyük",
+    "bgBlack": "Siyah",
+    "bgDarkGray": "Koyu gri",
+    "bgTransparent": "Şeffaf",
+    "bgSemiTransparent": "Yarı şeffaf",
+    "colorWhite": "Beyaz",
+    "colorYellow": "Sarı",
+    "colorCyan": "Camgöbeği",
+    "colorLightGreen": "Açık yeşil",
+    "shadowNone": "Yok",
+    "shadowDropShadow": "Gölge",
+    "shadowOutline": "Anahat",
+    "shadowGlow": "Parlama",
+    "fontSystemDefault": "Sistem varsayılanı"
   },
   "audio": {
     "title": "Ses",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "Bölüm {number}",
     "season": "Sezon {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "Oynatmak için tıklayın",
     "loading": "Yükleniyor...",
     "noEpisodes": "Bölüm yok",
-    "nowPlaying": "şimdi oynatılıyor",
-    "min": "{duration} dk"
+    "min": "{duration} dk",
+    "episodeShort": "B{number}"
   },
   "nextEpisode": {
     "nextSeason": "Sonraki Sezon",
@@ -66,7 +100,9 @@
     "inCountdown": "{seconds}sn içinde",
     "play": "Oynat",
     "cancel": "İptal",
-    "loading": "Yükleniyor"
+    "loading": "Yükleniyor",
+    "seasonEpisodeLabel": "S{season} • B{episode}",
+    "episodeShort": "B{number}"
   },
   "offline": {
     "pageTitle": "ÇEVRİMDIŞI",
@@ -84,7 +120,13 @@
     "cancelDownload": "İndirmeyi İptal Et",
     "waitForComplete": "Çevrimdışı izlemek için indirmenin tamamlanmasını bekleyin.",
     "waitingInQueue": "Sırada bekliyor...",
-    "downloading": "İndiriliyor..."
+    "downloading": "İndiriliyor...",
+    "statusCompleted": "TAMAMLANDI",
+    "statusFailed": "BAŞARISIZ",
+    "statusDownloading": "İNDİRİLİYOR",
+    "statusQueued": "SIRADA",
+    "statusCancelled": "İPTAL EDİLDİ",
+    "statusPaused": "DURAKLATILDI"
   },
   "watchlist": {
     "pageTitle": "BENİM",
@@ -94,5 +136,46 @@
     "emptyTitle": "İzleme listeniz boş",
     "emptyDescription": "Daha sonra izlemek için film ve dizileri kaydedin",
     "viewDetails": "{title} için detayları gör"
+  },
+  "continueWatching": {
+    "failedToRemove": "Listeden kaldırılamadı",
+    "minutesLeft": "{minutes}dk kaldı",
+    "hoursLeft": "{hours}sa kaldı",
+    "hoursMinutesLeft": "{hours}sa {minutes}dk kaldı"
+  },
+  "countdown": {
+    "startingExperience": "Deneyim başlatılıyor",
+    "getReady": "Sinematik mükemmelliğe hazır olun",
+    "go": "BAŞLA",
+    "eliteExperience": "Elit AI Deneyimi • EMA Güçlendirilmiş"
+  },
+  "aria": {
+    "videoPlayer": "Video oynatıcı",
+    "seekBackward": "10 saniye geri",
+    "seekForward": "10 saniye ileri",
+    "playPause": "Oynat/Duraklat",
+    "seekBar": "Arama çubuğu",
+    "skipControls": "Atlama kontrolleri",
+    "fullscreen": "Tam ekran",
+    "volume": "Ses",
+    "settings": "Ayarlar",
+    "audioSubtitle": "Ses ve altyazı seçicileri",
+    "episodePanel": "Bölüm paneli",
+    "playerHeader": "Oynatıcı başlığı",
+    "subtitle": "Altyazı",
+    "playbackCountdown": "Oynatma geri sayımı",
+    "countdownTitle": "Oynatma Geri Sayımı"
+  },
+  "page": {
+    "seasonLabel": "Sezon {number}",
+    "unknownTitle": "Bilinmeyen",
+    "episodeLabel": "Bölüm {number}",
+    "noStream": "Kullanılabilir yayın yok",
+    "errorLoading": "Yayın yüklenirken bir hata oluştu",
+    "startFromContent": "Lütfen içerik sayfasından oynatmayı başlatın",
+    "tryAgain": "Tekrar dene",
+    "goToHome": "Ana sayfaya git",
+    "continuePortrait": "Dikey modda izlemeye devam edin.",
+    "movieYear": "Film · {year}"
   }
 }

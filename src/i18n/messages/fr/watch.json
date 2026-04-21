@@ -27,7 +27,25 @@
     "live": "En direct",
     "liveBadge": "EN DIRECT",
     "watchingLive": "Vous regardez en direct",
-    "jumpToLive": "Aller au direct"
+    "jumpToLive": "Aller au direct",
+    "lockedHostControls": "Verrouillé - Contrôles de l'hôte",
+    "hostControls": "Contrôles de l'hôte",
+    "rotateDevice": "Tournez votre appareil pour une meilleure expérience",
+    "fullscreenNotSupported": "Le plein écran n'est pas pris en charge dans ce navigateur",
+    "failedEnterFullscreen": "Impossible de passer en plein écran",
+    "failedExitFullscreen": "Impossible de quitter le plein écran",
+    "fullscreenToggleFailed": "Échec du basculement en plein écran",
+    "seekTime": "Temps de recherche",
+    "liveSeekBar": "Barre de recherche du flux en direct",
+    "atLiveEdge": "En direct",
+    "behindLive": "{seconds}s de retard sur le direct",
+    "closeSidebar": "Fermer la barre latérale",
+    "openSidebar": "Ouvrir la barre latérale",
+    "seasonEpisodeLabel": "Saison {season} · Épisode {episode}",
+    "rotateToLandscape": "Pivoter en mode paysage",
+    "landscapeOnlyMessage": "Ce lecteur est uniquement disponible en mode paysage",
+    "showEpisodes": "Afficher les épisodes",
+    "episodesTitle": "Épisodes"
   },
   "settings": {
     "quality": "Qualité",
@@ -44,7 +62,24 @@
     "font": "Police",
     "background": "Arrière-plan",
     "textColor": "Couleur du texte",
-    "textEffect": "Effet de texte"
+    "textEffect": "Effet de texte",
+    "sizeSmall": "Petit",
+    "sizeMedium": "Moyen",
+    "sizeLarge": "Grand",
+    "sizeExtraLarge": "Très grand",
+    "bgBlack": "Noir",
+    "bgDarkGray": "Gris foncé",
+    "bgTransparent": "Transparent",
+    "bgSemiTransparent": "Semi-transparent",
+    "colorWhite": "Blanc",
+    "colorYellow": "Jaune",
+    "colorCyan": "Cyan",
+    "colorLightGreen": "Vert clair",
+    "shadowNone": "Aucun",
+    "shadowDropShadow": "Ombre portée",
+    "shadowOutline": "Contour",
+    "shadowGlow": "Lueur",
+    "fontSystemDefault": "Police système par défaut"
   },
   "audio": {
     "title": "Audio",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "Épisode {number}",
     "season": "Saison {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "Cliquez pour lire",
     "loading": "Chargement...",
     "noEpisodes": "Aucun épisode",
-    "nowPlaying": "en cours de lecture",
-    "min": "{duration} min"
+    "min": "{duration} min",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "Saison suivante",
@@ -66,7 +100,9 @@
     "inCountdown": "dans {seconds}s",
     "play": "Lecture",
     "cancel": "Annuler",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "HORS LIGNE",
@@ -84,7 +120,13 @@
     "cancelDownload": "Annuler le téléchargement",
     "waitForComplete": "Veuillez attendre la fin du téléchargement pour visionner hors ligne.",
     "waitingInQueue": "En attente dans la file...",
-    "downloading": "Téléchargement en cours..."
+    "downloading": "Téléchargement en cours...",
+    "statusCompleted": "TERMINÉ",
+    "statusFailed": "ÉCHOUÉ",
+    "statusDownloading": "TÉLÉCHARGEMENT",
+    "statusQueued": "EN FILE D'ATTENTE",
+    "statusCancelled": "ANNULÉ",
+    "statusPaused": "EN PAUSE"
   },
   "watchlist": {
     "pageTitle": "MA",
@@ -94,5 +136,46 @@
     "emptyTitle": "Votre liste est vide",
     "emptyDescription": "Sauvegardez des films et séries pour plus tard",
     "viewDetails": "Voir les détails de {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "Impossible de retirer de la liste",
+    "minutesLeft": "{minutes}m restantes",
+    "hoursLeft": "{hours}h restantes",
+    "hoursMinutesLeft": "{hours}h {minutes}m restantes"
+  },
+  "countdown": {
+    "startingExperience": "Démarrage de l'expérience",
+    "getReady": "Préparez-vous pour l'excellence cinématographique",
+    "go": "C'EST PARTI",
+    "eliteExperience": "Expérience AI Élite • EMA Renforcé"
+  },
+  "aria": {
+    "videoPlayer": "Lecteur vidéo",
+    "seekBackward": "Reculer de 10 secondes",
+    "seekForward": "Avancer de 10 secondes",
+    "playPause": "Lecture/Pause",
+    "seekBar": "Barre de recherche",
+    "skipControls": "Contrôles de saut",
+    "fullscreen": "Plein écran",
+    "volume": "Volume",
+    "settings": "Paramètres",
+    "audioSubtitle": "Sélecteurs audio et sous-titres",
+    "episodePanel": "Panneau des épisodes",
+    "playerHeader": "En-tête du lecteur",
+    "subtitle": "Sous-titre",
+    "playbackCountdown": "Compte à rebours de lecture",
+    "countdownTitle": "Compte à Rebours de Lecture"
+  },
+  "page": {
+    "seasonLabel": "Saison {number}",
+    "unknownTitle": "Inconnu",
+    "episodeLabel": "Épisode {number}",
+    "noStream": "Aucun flux disponible",
+    "errorLoading": "Une erreur est survenue lors du chargement du flux",
+    "startFromContent": "Veuillez démarrer la lecture depuis la page de contenu",
+    "tryAgain": "Réessayer",
+    "goToHome": "Aller à l'accueil",
+    "continuePortrait": "Continuer à regarder en mode portrait.",
+    "movieYear": "Film · {year}"
   }
 }

@@ -17,7 +17,22 @@
     "more": "Più",
     "noActivity": "Nessuna attività",
     "minSuffix": "{count} min",
-    "last365": "Ultimi 365 giorni di interazione"
+    "last365": "Ultimi 365 giorni di interazione",
+    "heatmapAriaLabel": "Mappa termica dell'attività di visione dell'ultimo anno",
+    "months": {
+      "jan": "gen",
+      "feb": "feb",
+      "mar": "mar",
+      "apr": "apr",
+      "may": "mag",
+      "jun": "giu",
+      "jul": "lug",
+      "aug": "ago",
+      "sep": "set",
+      "oct": "ott",
+      "nov": "nov",
+      "dec": "dic"
+    }
   },
   "releaseNotes": {
     "title": "Note di rilascio",
@@ -52,7 +67,8 @@
     "balanced": "Bilanciato",
     "performance": "Prestazioni",
     "highQuality": "Alta qualità",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "Selezione server"
   },
   "dangerZone": {
     "title": "Zona pericolosa",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "Quanti film o episodi possono essere scaricati contemporaneamente. Il valore predefinito è 3.",
     "downloadSpeedLimit": "Limite velocità download",
     "downloadSpeedDescription": "Limita la velocità di download in background. Utile se la rete rallenta globalmente!",
-    "unlimited": "Illimitato"
+    "unlimited": "Illimitato",
+    "cancel": "Annulla",
+    "set": "Imposta",
+    "customConcurrent": "Personalizzato (1-10)",
+    "customSpeed": "Personalizzato MB/s"
   },
   "publicProfile": {
     "returnBase": "Ritorna alla base",
+    "unknownUser": "utente_sconosciuto",
     "identityVerified": "Profilo identità verificato",
     "persistentIdentity": "Identità persistente: {id}",
     "daysActive": "GIORNI ATTIVI",
     "hrsTotal": "ORE TOTALI",
-    "coreVersion": "VERSIONE CORE: V1.0-STABILE"
+    "coreVersion": "VERSIONE CORE: V1.0-STABILE",
+    "userIdentity": "IDENTITÀ UTENTE: {id}"
+  },
+  "messages": {
+    "invalidInput": "Input non valido",
+    "passwordUpdated": "Password aggiornata con successo",
+    "passwordFailed": "Aggiornamento password non riuscito",
+    "usernameFailed": "Verifica disponibilità nome utente non riuscita",
+    "noChanges": "Nessuna modifica da salvare",
+    "usernameNotAvailable": "Nome utente non disponibile",
+    "profileUpdated": "Profilo aggiornato con successo",
+    "profileFailed": "Aggiornamento profilo non riuscito",
+    "accountDeleted": "Account eliminato con successo",
+    "accountDeleteFailed": "Eliminazione account non riuscita",
+    "activityFailed": "Caricamento attività non riuscito",
+    "imageUpdated": "Immagine del profilo aggiornata",
+    "imageFailed": "Caricamento immagine non riuscito",
+    "unknown": "Sconosciuto"
+  },
+  "validation": {
+    "nameMinLength": "Il nome deve contenere almeno 2 caratteri",
+    "usernameMinLength": "Il nome utente deve contenere almeno 3 caratteri",
+    "usernameFormat": "Il nome utente può contenere solo lettere, numeri e trattini bassi",
+    "currentPasswordRequired": "La password attuale è obbligatoria",
+    "passwordMinLength": "La password deve contenere almeno 8 caratteri",
+    "passwordUppercase": "La password deve contenere almeno una lettera maiuscola",
+    "passwordSpecialChar": "La password deve contenere almeno un carattere speciale",
+    "newPasswordsMismatch": "Le nuove password non corrispondono"
   }
 }

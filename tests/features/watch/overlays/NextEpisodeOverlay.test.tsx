@@ -51,7 +51,7 @@ describe('NextEpisodeOverlay', () => {
     it('should render when visible with next episode', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText('Next Episode')).toBeInTheDocument();
+      expect(screen.getByText('nextEpisode')).toBeInTheDocument();
     });
 
     it('should not render when not visible', () => {
@@ -81,13 +81,13 @@ describe('NextEpisodeOverlay', () => {
     it('should display season and episode number', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText(/S1.*E4/)).toBeInTheDocument();
+      expect(screen.getByText('seasonEpisodeLabel')).toBeInTheDocument();
     });
 
     it('should display duration', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText(/47.*MIN/i)).toBeInTheDocument();
+      expect(screen.getByText('min')).toBeInTheDocument();
     });
 
     it('should display thumbnail when available', () => {
@@ -102,7 +102,7 @@ describe('NextEpisodeOverlay', () => {
         <NextEpisodeOverlay {...defaultProps} nextEpisode={episodeNoThumb} />,
       );
 
-      expect(screen.getByText('E4')).toBeInTheDocument();
+      expect(screen.getByText('episodeShort')).toBeInTheDocument();
     });
   });
 
@@ -120,13 +120,13 @@ describe('NextEpisodeOverlay', () => {
         />,
       );
 
-      expect(screen.getByText('Next Season')).toBeInTheDocument();
+      expect(screen.getByText('nextSeason')).toBeInTheDocument();
     });
 
     it('should show "Next Episode" for non-first episode', () => {
       render(<NextEpisodeOverlay {...defaultProps} />);
 
-      expect(screen.getByText('Next Episode')).toBeInTheDocument();
+      expect(screen.getByText('nextEpisode')).toBeInTheDocument();
     });
   });
 
@@ -135,7 +135,7 @@ describe('NextEpisodeOverlay', () => {
       const onPlayNext = vi.fn();
       render(<NextEpisodeOverlay {...defaultProps} onPlayNext={onPlayNext} />);
 
-      fireEvent.click(screen.getByText(/Play/));
+      fireEvent.click(screen.getByText(/play/i));
       expect(onPlayNext).toHaveBeenCalledTimes(1);
     });
 
@@ -143,7 +143,7 @@ describe('NextEpisodeOverlay', () => {
       const onCancel = vi.fn();
       render(<NextEpisodeOverlay {...defaultProps} onCancel={onCancel} />);
 
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.click(screen.getByText('cancel'));
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
@@ -152,13 +152,13 @@ describe('NextEpisodeOverlay', () => {
     it('should show countdown when autoPlayDelay is set', () => {
       render(<NextEpisodeOverlay {...defaultProps} autoPlayDelay={10} />);
 
-      expect(screen.getByText(/in 10s/)).toBeInTheDocument();
+      expect(screen.getByText('inCountdown')).toBeInTheDocument();
     });
 
     it('should not show countdown when autoPlayDelay is 0', () => {
       render(<NextEpisodeOverlay {...defaultProps} autoPlayDelay={0} />);
 
-      expect(screen.queryByText(/in \d+s/)).not.toBeInTheDocument();
+      expect(screen.queryByText('inCountdown')).not.toBeInTheDocument();
     });
 
     it('should countdown and call onPlayNext', async () => {
@@ -171,17 +171,17 @@ describe('NextEpisodeOverlay', () => {
         />,
       );
 
-      expect(screen.getByText(/in 3s/)).toBeInTheDocument();
+      expect(screen.getByText('inCountdown')).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      expect(screen.getByText(/in 2s/)).toBeInTheDocument();
+      expect(screen.getByText('inCountdown')).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      expect(screen.getByText(/in 1s/)).toBeInTheDocument();
+      expect(screen.getByText('inCountdown')).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
@@ -201,9 +201,9 @@ describe('NextEpisodeOverlay', () => {
         />,
       );
 
-      expect(screen.getByText(/in 5s/)).toBeInTheDocument();
+      expect(screen.getByText('inCountdown')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.click(screen.getByText('cancel'));
 
       act(() => {
         vi.advanceTimersByTime(10000);
@@ -249,7 +249,7 @@ describe('NextEpisodeOverlay', () => {
         <NextEpisodeOverlay {...defaultProps} nextEpisode={episodeNoTitle} />,
       );
 
-      expect(screen.getByText('Episode 4')).toBeInTheDocument();
+      expect(screen.getByText('episode')).toBeInTheDocument();
     });
   });
 });

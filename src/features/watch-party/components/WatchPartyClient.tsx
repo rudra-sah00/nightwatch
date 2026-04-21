@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
@@ -100,10 +101,11 @@ export function WatchPartyClient({
     currentUserId,
   });
 
+  const t = useTranslations('party');
   const isMobile = useIsMobile();
 
   if (!isGuestSocketReady) {
-    return <WatchPartyLoading message="Connecting to watch party…" />;
+    return <WatchPartyLoading message={t('loading.connecting')} />;
   }
 
   if (roomNotFound) {
@@ -130,7 +132,7 @@ export function WatchPartyClient({
 
   // Creator (host) is setting up — skip the lobby pending state entirely
   if (isCreator && !isConnected) {
-    return <WatchPartyLoading message="Setting up your party…" />;
+    return <WatchPartyLoading message={t('loading.settingUp')} />;
   }
 
   if (isConnected && room) {

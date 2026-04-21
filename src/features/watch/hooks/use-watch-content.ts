@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
@@ -29,6 +30,7 @@ export function useWatchContent() {
   const { socket } = useSocket();
 
   const movieId = decodeURIComponent(params.id as string);
+  const t = useTranslations('watch');
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
@@ -39,7 +41,7 @@ export function useWatchContent() {
     setActiveServer(server);
   }, [server, setActiveServer]);
 
-  const title = searchParams.get('title') || 'Unknown';
+  const title = searchParams.get('title') || t('page.unknownTitle');
   const season = searchParams.get('season');
   const episode = searchParams.get('episode');
   const episodeTitle = searchParams.get('episodeTitle');

@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -7,6 +8,8 @@ import type { WatchActivity } from '../types';
 
 export function useProfileOverview() {
   const { user, logout, updateUser } = useAuth();
+  const t = useTranslations('profile.messages');
+  const locale = useLocale();
   const [activity, setActivity] = useState<WatchActivity[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -17,7 +20,7 @@ export function useProfileOverview() {
     setLoadingActivity(true);
     getWatchActivity()
       .then(setActivity)
-      .catch(() => toast.error('Failed to load activity'))
+      .catch(() => toast.error(t('activityFailed')))
       .finally(() => setLoadingActivity(false));
 
     const handleFocus = () => {
@@ -27,7 +30,7 @@ export function useProfileOverview() {
     };
     window.addEventListener('focus', handleFocus, { passive: true });
     return () => window.removeEventListener('focus', handleFocus);
-  }, []);
+  }, [t]);
 
   const handleFileClick = useCallback(() => {
     fileInputRef.current?.click();
@@ -46,17 +49,17 @@ export function useProfileOverview() {
         const { url } = await uploadProfileImage(file);
         updateUser({ profilePhoto: url });
         setPreviewImage(null);
-        toast.success('Profile image updated');
+        toast.success(t('imageUpdated'));
       } catch {
         setPreviewImage(null);
-        toast.error('Failed to upload image');
+        toast.error(t('imageFailed'));
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
         URL.revokeObjectURL(localPreviewUrl);
       }
     },
-    [updateUser],
+    [updateUser, t],
   );
 
   const displayImage = previewImage || user?.profilePhoto;
@@ -69,12 +72,12 @@ export function useProfileOverview() {
   const formattedJoinDate = useMemo(
     () =>
       userCreatedAtDate
-        ? userCreatedAtDate.toLocaleDateString('en-US', {
+        ? userCreatedAtDate.toLocaleDateString(locale, {
             month: 'long',
             year: 'numeric',
           })
-        : 'Unknown',
-    [userCreatedAtDate],
+        : t('unknown'),
+    [userCreatedAtDate, locale, t],
   );
 
   return {

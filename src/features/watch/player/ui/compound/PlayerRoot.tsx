@@ -1,5 +1,6 @@
 'use client';
 import { RotateCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerContext } from '../../context/PlayerContext';
@@ -109,6 +110,8 @@ export function PlayerRoot({
   providerId,
   playbackRate,
 }: PlayerRootProps) {
+  const t = useTranslations('watch.player');
+  const tAria = useTranslations('watch.aria');
   const resolvedReadOnly =
     interactionMode === 'read-only'
       ? true
@@ -181,7 +184,7 @@ export function PlayerRoot({
         style={containerStyle ?? CONTAINER_STYLE}
         onMouseMove={showControls}
         onMouseEnter={showControls}
-        aria-label="Video Player"
+        aria-label={tAria('videoPlayer')}
         tabIndex={0}
         onKeyDown={(e) => {
           // Don't capture keys when typing in an input
@@ -246,10 +249,10 @@ export function PlayerRoot({
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-foreground text-2xl font-black font-headline uppercase tracking-widest">
-                Rotate to landscape
+                {t('rotateToLandscape')}
               </p>
               <p className="text-foreground text-sm font-bold font-headline uppercase tracking-widest max-w-[250px] mx-auto">
-                This player is only available in landscape mode
+                {t('landscapeOnlyMessage')}
               </p>
             </div>
           </div>

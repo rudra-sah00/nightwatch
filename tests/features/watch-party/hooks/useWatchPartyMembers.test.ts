@@ -162,7 +162,7 @@ describe('useWatchPartyMembers', () => {
 
     expect(mockSetRoom).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalledWith(
-      'Alice joined!',
+      'memberJoined',
       expect.any(Object),
     );
   });

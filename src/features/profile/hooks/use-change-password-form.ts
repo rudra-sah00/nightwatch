@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { changePassword } from '../api';
 import { changePasswordSchema } from '../schema';
 
 export function useChangePasswordForm() {
+  const t = useTranslations('profile');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,8 +27,9 @@ export function useChangePasswordForm() {
         confirmPassword,
       });
       if (!parsed.success) {
+        const key = parsed.error.issues[0]?.message;
         return {
-          message: parsed.error.issues[0]?.message ?? 'Invalid input',
+          message: key ? t(key) : t('messages.invalidInput'),
           type: 'error',
         };
       }
@@ -34,11 +37,11 @@ export function useChangePasswordForm() {
       try {
         const { currentPassword, newPassword } = parsed.data;
         await changePassword({ currentPassword, newPassword });
-        return { message: 'Password updated successfully', type: 'success' };
+        return { message: t('messages.passwordUpdated'), type: 'success' };
       } catch (err) {
         const error = err as Error;
         return {
-          message: error.message || 'Failed to update password',
+          message: error.message || t('messages.passwordFailed'),
           type: 'error',
         };
       }

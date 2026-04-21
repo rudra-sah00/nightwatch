@@ -27,7 +27,7 @@ function TransparentQualityOptions({
   qualities,
   isLoading,
   downloaded,
-  isElectronLoading,
+  isTauriLoading,
   existingDownload,
   onPick,
 }: {
@@ -35,7 +35,7 @@ function TransparentQualityOptions({
   qualities: DownloadQuality[] | null;
   isLoading: boolean;
   downloaded: string | null;
-  isElectronLoading: boolean;
+  isTauriLoading: boolean;
   existingDownload?: DownloadItem;
   onPick: (quality: 'high' | 'medium' | 'low', url?: string) => void;
 }) {
@@ -89,7 +89,7 @@ function TransparentQualityOptions({
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {isElectronLoading && (
+      {isTauriLoading && (
         <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center bg-white/80 dark:bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
           <Loader2
             className="w-16 h-16 md:w-24 md:h-24 text-black dark:text-white animate-spin mb-6"
@@ -104,7 +104,7 @@ function TransparentQualityOptions({
         const isCurrentActive =
           downloaded === opt.value || existingDownload?.quality === opt.value;
         const isBlocked =
-          isElectronLoading ||
+          isTauriLoading ||
           downloaded !== null ||
           existingDownload?.quality === opt.value;
 
@@ -142,7 +142,7 @@ function TransparentQualityOptions({
                 isCurrentActive && 'opacity-100',
               )}
             >
-              {isElectronLoading && downloaded === opt.value ? (
+              {isTauriLoading && downloaded === opt.value ? (
                 <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-black dark:text-white animate-spin" />
               ) : isCurrentActive ? (
                 <div className="flex items-center gap-3 text-green-400">
@@ -181,10 +181,10 @@ function TransparentMovieSection({
     qualities,
     isLoading,
     downloaded,
-    isElectronLoading,
+    isTauriLoading,
     existingDownload,
     loadQualities,
-    handleElectronClick,
+    handleTauriClick,
   } = useDownloadMenu({
     contentId,
     showTitle,
@@ -213,9 +213,9 @@ function TransparentMovieSection({
         qualities={qualities}
         isLoading={isLoading}
         downloaded={downloaded}
-        isElectronLoading={isElectronLoading}
+        isTauriLoading={isTauriLoading}
         existingDownload={existingDownload}
-        onPick={handleElectronClick}
+        onPick={handleTauriClick}
       />
     </div>
   );
@@ -243,10 +243,10 @@ function TransparentEpisodeItem({
     qualities,
     isLoading,
     downloaded,
-    isElectronLoading,
+    isTauriLoading,
     existingDownload,
     loadQualities,
-    handleElectronClick,
+    handleTauriClick,
   } = useDownloadMenu({
     contentId,
     showTitle,
@@ -289,7 +289,7 @@ function TransparentEpisodeItem({
                 : 'text-black/50 dark:text-white/50 group-hover:text-black/80 dark:text-white/80',
             )}
           >
-            Episode {episode.episodeNumber}
+            {t('download.episodePrefix')} {episode.episodeNumber}
             {existingDownload && (
               <Check className="w-5 h-5 md:w-6 md:h-6 shrink-0 stroke-[3px]" />
             )}
@@ -316,9 +316,9 @@ function TransparentEpisodeItem({
             qualities={qualities}
             isLoading={isLoading}
             downloaded={downloaded}
-            isElectronLoading={isElectronLoading}
+            isTauriLoading={isTauriLoading}
             existingDownload={existingDownload}
-            onPick={handleElectronClick}
+            onPick={handleTauriClick}
           />
         </div>
       )}
@@ -416,14 +416,16 @@ export function DownloadMenu({
         className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col md:flex-row [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">Download {show.title}</DialogTitle>
+        <DialogTitle className="sr-only">
+          {t('download.download')} {show.title}
+        </DialogTitle>
 
         <button
           type="button"
           onClick={() => setIsOpen(false)}
           className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
         >
-          Cancel
+          {t('download.cancel')}
         </button>
 
         {/* Left Column: Languages */}

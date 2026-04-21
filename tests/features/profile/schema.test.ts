@@ -26,7 +26,7 @@ describe('Update Profile Schema', () => {
     const result = updateProfileSchema.safeParse({ name: 'J' });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/at least 2/i);
+      expect(result.error.issues[0].message).toBe('validation.nameMinLength');
     }
   });
 
@@ -87,7 +87,9 @@ describe('Change Password Schema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/do not match/i);
+      expect(result.error.issues[0].message).toBe(
+        'validation.newPasswordsMismatch',
+      );
     }
   });
 

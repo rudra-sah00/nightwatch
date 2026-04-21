@@ -2,7 +2,7 @@
 
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 
-export function ElectronDragRegion() {
+export function TauriDragRegion() {
   const { isDesktopApp, isMounted } = useDesktopApp();
 
   if (!isMounted || !isDesktopApp) return null;

@@ -28,8 +28,7 @@
     "emptyTitle": "История просмотра пуста",
     "emptyDescription": "Начните смотреть что-нибудь, и оно появится здесь",
     "removeAriaLabel": "Удалить из списка",
-    "sectionAriaLabel": "Недавно просмотренный контент",
-    "timeLeft": "Осталось {time}"
+    "sectionAriaLabel": "Недавно просмотренный контент"
   },
   "contentDetail": {
     "series": "Сериал",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "Отменить совместный просмотр",
     "continue": "Продолжить",
     "experienceStarting": "Запуск",
-    "preparingContent": "Подготовка \"{title}\"..."
+    "preparingContent": "Подготовка \"{title}\"...",
+    "closeModal": "Закрыть окно",
+    "episodesAriaLabel": "Эпизоды",
+    "failedToLoadDetails": "Не удалось загрузить информацию о шоу. Проверьте подключение и попробуйте снова.",
+    "failedToLoadEpisodes": "Не удалось загрузить список эпизодов. Будут использованы кэшированные данные, если доступны.",
+    "watchPartyError": "Произошла непредвиденная ошибка при создании совместного просмотра."
   },
   "actions": {
     "watchSolo": "Смотреть одному",
@@ -60,7 +64,8 @@
     "watchTogether": "Смотреть вместе",
     "creating": "Создание",
     "toWatchlist": "В список",
-    "removeFromList": "Удалить из списка"
+    "removeFromList": "Удалить из списка",
+    "episodeFallbackTitle": "Эпизод {number}"
   },
   "download": {
     "download": "Скачать",
@@ -76,6 +81,23 @@
     "saved": "Сохранено",
     "securelyStarting": "Безопасная загрузка начинается...",
     "episode": "Эпизод {number}",
-    "untitled": "Без названия"
-  }
+    "untitled": "Без названия",
+    "downloadSrOnly": "Скачать {title}",
+    "downloadingToast": "Скачивание{epText}! Проверьте вашу Офлайн Библиотеку.",
+    "downloadingEpisodeText": " эп. {episode}",
+    "episodeLabel": "Эпизод {number}",
+    "episodePrefix": "Эпизод"
+  },
+  "episodeCard": {
+    "loading": "ЗАГРУЗКА...",
+    "epPrefix": "ЭП {number}",
+    "episodeFallback": "ЭПИЗОД {number}",
+    "minSuffix": "{duration} МИН"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Сезон} few {# Сезона} other {# Сезонов}}",
+    "seasonEpisodePrefix": "С{season}:Э{episode}",
+    "minutesSuffix": "{runtime}М"
+  },
+  "marquee": "ФОРМА СЛЕДУЕТ ФУНКЦИИ • РУДРА КИНО • МИНИМАЛИЗМ — ЭТО ИСТИНА • БЕЗ ОТВЛЕЧЕНИЙ • ТОЛЬКО КИНО •"
 }

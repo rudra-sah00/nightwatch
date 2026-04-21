@@ -17,7 +17,22 @@
     "more": "มาก",
     "noActivity": "ไม่มีกิจกรรม",
     "minSuffix": "{count} นาที",
-    "last365": "365 วันล่าสุดของการโต้ตอบ"
+    "last365": "365 วันล่าสุดของการโต้ตอบ",
+    "heatmapAriaLabel": "แผนที่ความร้อนกิจกรรมการรับชมในปีที่ผ่านมา",
+    "months": {
+      "jan": "ม.ค.",
+      "feb": "ก.พ.",
+      "mar": "มี.ค.",
+      "apr": "เม.ย.",
+      "may": "พ.ค.",
+      "jun": "มิ.ย.",
+      "jul": "ก.ค.",
+      "aug": "ส.ค.",
+      "sep": "ก.ย.",
+      "oct": "ต.ค.",
+      "nov": "พ.ย.",
+      "dec": "ธ.ค."
+    }
   },
   "releaseNotes": {
     "title": "บันทึกการอัปเดต",
@@ -52,7 +67,8 @@
     "balanced": "สมดุล",
     "performance": "ประสิทธิภาพ",
     "highQuality": "คุณภาพสูง",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "เลือกเซิร์ฟเวอร์"
   },
   "dangerZone": {
     "title": "โซนอันตราย",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "จำนวนภาพยนตร์หรือตอนที่สามารถดาวน์โหลดพร้อมกันได้ ค่าเริ่มต้นคือ 3",
     "downloadSpeedLimit": "จำกัดความเร็วดาวน์โหลด",
     "downloadSpeedDescription": "จำกัดความเร็วดาวน์โหลดในพื้นหลัง มีประโยชน์หากเครือข่ายช้าลง!",
-    "unlimited": "ไม่จำกัด"
+    "unlimited": "ไม่จำกัด",
+    "cancel": "ยกเลิก",
+    "set": "ตั้งค่า",
+    "customConcurrent": "กำหนดเอง (1-10)",
+    "customSpeed": "กำหนดเอง MB/s"
   },
   "publicProfile": {
     "returnBase": "กลับฐาน",
+    "unknownUser": "ผู้ใช้ที่ไม่รู้จัก",
     "identityVerified": "ยืนยันโปรไฟล์ตัวตนแล้ว",
     "persistentIdentity": "ตัวตนถาวร: {id}",
     "daysActive": "วันที่ใช้งาน",
     "hrsTotal": "ชั่วโมงรวม",
-    "coreVersion": "เวอร์ชันหลัก: V1.0-เสถียร"
+    "coreVersion": "เวอร์ชันหลัก: V1.0-เสถียร",
+    "userIdentity": "ตัวตนผู้ใช้: {id}"
+  },
+  "messages": {
+    "invalidInput": "ข้อมูลไม่ถูกต้อง",
+    "passwordUpdated": "อัปเดตรหัสผ่านสำเร็จ",
+    "passwordFailed": "ไม่สามารถอัปเดตรหัสผ่านได้",
+    "usernameFailed": "ไม่สามารถตรวจสอบชื่อผู้ใช้ได้",
+    "noChanges": "ไม่มีการเปลี่ยนแปลงที่จะบันทึก",
+    "usernameNotAvailable": "ชื่อผู้ใช้ไม่พร้อมใช้งาน",
+    "profileUpdated": "อัปเดตโปรไฟล์สำเร็จ",
+    "profileFailed": "ไม่สามารถอัปเดตโปรไฟล์ได้",
+    "accountDeleted": "ลบบัญชีสำเร็จ",
+    "accountDeleteFailed": "ไม่สามารถลบบัญชีได้",
+    "activityFailed": "ไม่สามารถโหลดกิจกรรมได้",
+    "imageUpdated": "อัปเดตรูปโปรไฟล์แล้ว",
+    "imageFailed": "ไม่สามารถอัปโหลดรูปภาพได้",
+    "unknown": "ไม่ทราบ"
+  },
+  "validation": {
+    "nameMinLength": "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร",
+    "usernameMinLength": "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร",
+    "usernameFormat": "ชื่อผู้ใช้สามารถมีได้เฉพาะตัวอักษร ตัวเลข และขีดล่างเท่านั้น",
+    "currentPasswordRequired": "กรุณาระบุรหัสผ่านปัจจุบัน",
+    "passwordMinLength": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+    "passwordUppercase": "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว",
+    "passwordSpecialChar": "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว",
+    "newPasswordsMismatch": "รหัสผ่านใหม่ไม่ตรงกัน"
   }
 }

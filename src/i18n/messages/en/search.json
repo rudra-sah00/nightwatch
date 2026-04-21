@@ -28,24 +28,28 @@
     "emptyTitle": "Your watch history is empty",
     "emptyDescription": "Start watching something and it will appear here",
     "removeAriaLabel": "Remove from list",
-    "sectionAriaLabel": "Recently viewed content",
-    "timeLeft": "{time} left"
+    "sectionAriaLabel": "Recently viewed content"
   },
   "contentDetail": {
     "series": "Series",
     "movie": "Movie",
     "failedToLoad": "Failed to load content",
     "close": "Close",
+    "closeModal": "Close modal",
     "closePreview": "Close Preview",
     "noImageAvailable": "No Image Available",
     "episodes": "Episodes",
+    "episodesAriaLabel": "Episodes",
     "season": "SEASON {number}",
     "selectSeason": "SELECT SEASON",
     "episodeCount": "({count} EP)",
     "noEpisodesAvailable": "No episodes available for this season",
     "loadingEpisodes": "Loading episodes",
+    "failedToLoadDetails": "Failed to load show details. Please check your connection and try again.",
+    "failedToLoadEpisodes": "Failed to load episode list. Using cached data if available.",
     "watchPartyPick": "Watch Party — Pick an episode",
     "watchPartyHint": "Everyone joins once you select",
+    "watchPartyError": "An unexpected error occurred while creating the watch party.",
     "cancelWatchParty": "Cancel watch party",
     "continue": "Continue",
     "experienceStarting": "Experience Starting",
@@ -60,10 +64,12 @@
     "watchTogether": "Watch Together",
     "creating": "Creating",
     "toWatchlist": "To Watchlist",
-    "removeFromList": "Remove from List"
+    "removeFromList": "Remove from List",
+    "episodeFallbackTitle": "Episode {number}"
   },
   "download": {
     "download": "Download",
+    "downloadSrOnly": "Download {title}",
     "viewInVault": "View in Vault",
     "cancel": "Cancel",
     "language": "Language",
@@ -76,6 +82,22 @@
     "saved": "Saved",
     "securelyStarting": "Securely Starting Download...",
     "episode": "Episode {number}",
-    "untitled": "Untitled"
-  }
+    "untitled": "Untitled",
+    "downloadingToast": "Downloading{epText}! Check your Offline Library.",
+    "downloadingEpisodeText": " for Ep {episode}",
+    "episodeLabel": "Episode {number}",
+    "episodePrefix": "Episode"
+  },
+  "episodeCard": {
+    "loading": "LOADING...",
+    "epPrefix": "EP {number}",
+    "episodeFallback": "EPISODE {number}",
+    "minSuffix": "{duration} MIN"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Season} other {# Seasons}}",
+    "seasonEpisodePrefix": "S{season}:E{episode}",
+    "minutesSuffix": "{runtime}M"
+  },
+  "marquee": "FORM FOLLOWS FUNCTION • RUDRA CINEMA • MINIMALISM IS TRUTH • NO DISTRACTIONS • JUST FILM •"
 }

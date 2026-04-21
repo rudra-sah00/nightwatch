@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { useAuth } from '@/providers/auth-provider';
@@ -8,6 +9,7 @@ import { useAuth } from '@/providers/auth-provider';
 export function DiscordPresenceSync() {
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations('common');
 
   useEffect(() => {
     // Only handle basic page routes, since Watch and Party components
@@ -15,8 +17,8 @@ export function DiscordPresenceSync() {
     if (typeof window !== 'undefined' && checkIsDesktop()) {
       if (!isAuthenticated || pathname === '/login' || pathname === '/signup') {
         desktopBridge.updateDiscordPresence({
-          details: 'Ready to stream',
-          state: 'At the Login screen',
+          details: t('discord.readyToStream'),
+          state: t('discord.atLoginScreen'),
           largeImageKey: 'watchrudra_logo',
           largeImageText: 'Watch Rudra',
           startTimestamp: Date.now(), // Reset timer
@@ -34,20 +36,20 @@ export function DiscordPresenceSync() {
       }
 
       // Default authenticated states
-      let details = 'Browsing Dashboard';
-      let state = 'Looking for content';
+      let details = t('discord.browsingDashboard');
+      let state = t('discord.lookingForContent');
 
       if (pathname === '/home') {
-        details = 'Browsing Homepage';
+        details = t('discord.browsingHomepage');
       } else if (pathname === '/live') {
-        details = 'Browsing Live Matches';
-        state = 'Finding a stream...';
+        details = t('discord.browsingLiveMatches');
+        state = t('discord.findingStream');
       } else if (pathname === '/watchlist') {
-        details = 'Curating Watchlist';
-        state = 'Planning the next marathon';
+        details = t('discord.curatingWatchlist');
+        state = t('discord.planningMarathon');
       } else if (pathname === '/profile') {
-        details = 'Adjusting Settings';
-        state = 'Customizing profile';
+        details = t('discord.adjustingSettings');
+        state = t('discord.customizingProfile');
       }
 
       desktopBridge.updateDiscordPresence({
@@ -58,7 +60,7 @@ export function DiscordPresenceSync() {
         startTimestamp: Date.now(),
       });
     }
-  }, [pathname, isAuthenticated]);
+  }, [pathname, isAuthenticated, t]);
 
   return null;
 }

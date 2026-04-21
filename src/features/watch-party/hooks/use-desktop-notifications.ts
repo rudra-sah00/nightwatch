@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type {
   ChatMessage,
@@ -19,6 +20,7 @@ export function useDesktopNotifications({
   currentUserId,
 }: UseDesktopNotificationsProps) {
   // --- Discord Rich Presence ---
+  const td = useTranslations('party.desktop');
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -27,13 +29,16 @@ export function useDesktopNotifications({
       isConnected
     ) {
       desktopBridge.updateDiscordPresence({
-        details: `Party: ${room.title}`,
+        details: td('partyDetails', { title: room.title }),
         state:
           room.type === 'series'
-            ? `Season ${room.season} Episode ${room.episode}`
+            ? td('seasonEpisode', {
+                season: room.season ?? 0,
+                episode: room.episode ?? 0,
+              })
             : room.type === 'livestream'
-              ? 'Co-Watching Live Stream'
-              : 'Co-Watching Movie',
+              ? td('coWatchingLiveStream')
+              : td('coWatchingMovie'),
         largeImageText: room.title,
         largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         partySize: room.members?.length || 1,
@@ -41,7 +46,7 @@ export function useDesktopNotifications({
         startTimestamp: room.createdAt || Date.now(),
       });
     }
-  }, [room, isConnected]);
+  }, [room, isConnected, td]);
 
   // --- Taskbar Notification Icon Bounces ---
   const isWindowFocusedRef = useRef(true);
@@ -86,12 +91,12 @@ export function useDesktopNotifications({
           !latestMsg.isSystem
         ) {
           desktopBridge.showNotification({
-            title: latestMsg.userName || 'New Message',
+            title: latestMsg.userName || td('newMessage'),
             body: latestMsg.content,
           });
         }
       }
     }
     prevMessagesLength.current = messages?.length || 0;
-  }, [messages, currentUserId]);
+  }, [messages, currentUserId, td]);
 }

@@ -73,8 +73,8 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
     : isServer2
       ? t('privateServer')
       : t('sportsToday');
-  const team1Name = asText(match.team1?.name, 'Team 1');
-  const team2Name = asText(match.team2?.name, 'Team 2');
+  const team1Name = asText(match.team1?.name, t('teamFallback1'));
+  const team2Name = asText(match.team2?.name, t('teamFallback2'));
   const leagueName = asText(match.league) || asText(match.type);
   const channelName = asText(match.channelName) || team1Name;
 

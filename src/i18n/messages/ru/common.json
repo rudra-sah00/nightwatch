@@ -8,11 +8,13 @@
     "watchlist": "Список просмотра",
     "downloads": "Загрузки",
     "offlineDownloads": "Офлайн-загрузки",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "logoAlt": "Логотип Watch Rudra"
   },
   "language": {
     "title": "Язык",
-    "description": "Выберите предпочитаемый язык"
+    "description": "Выберите предпочитаемый язык",
+    "closeMenu": "Закрыть меню языка"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "Вечеринка завершена",
     "messageFailed": "Не удалось отправить сообщение",
     "partyTimeLimit": "Вечеринка достигла 3-часового лимита и будет завершена.",
-    "startFailed": "Не удалось начать воспроизведение",
-    "linkCopied": "Ссылка скопирована!",
-    "profileUpdated": "Профиль обновлён",
-    "passwordChanged": "Пароль успешно изменён",
-    "accountDeleted": "Аккаунт успешно удалён",
-    "error": "Что-то пошло не так",
-    "networkError": "Ошибка сети. Проверьте подключение.",
-    "sessionExpired": "Сессия истекла. Войдите снова."
+    "startFailed": "Не удалось начать воспроизведение"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "Версия приложения"
   },
   "passwordInfo": {
-    "requirements": "Требования"
+    "requirements": "Требования",
+    "ariaLabel": "Требования к паролю",
+    "title": "Требования к Паролю",
+    "minChars": "8+ символов",
+    "uppercase": "Заглавные буквы (A-Z)",
+    "specialChar": "Спецсимвол (!@#$%^&*)",
+    "breachNote": "Мы проверяем пароли на",
+    "knownBreaches": "известные утечки"
   },
   "actions": {
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "closeModal": "Закрыть окно"
+  },
+  "loading": "Загрузка...",
+  "skipToContent": "Перейти к содержимому",
+  "offline": {
+    "title": "Вы Офлайн",
+    "description": "Watch Rudra требует подключения для просмотра. Откройте хранилище для загруженных фильмов.",
+    "openVault": "Открыть Офлайн Хранилище",
+    "toastOffline": "Вы офлайн",
+    "toastOnline": "Снова онлайн!"
+  },
+  "swUpdate": {
+    "title": "Доступна новая версия",
+    "description": "Обновите для получения последних обновлений.",
+    "refresh": "Обновить"
+  },
+  "discord": {
+    "readyToStream": "Готов к трансляции",
+    "atLoginScreen": "На экране входа",
+    "browsingDashboard": "Просмотр Панели",
+    "lookingForContent": "Поиск контента",
+    "browsingHomepage": "Просмотр Главной",
+    "browsingLiveMatches": "Просмотр Прямых Трансляций",
+    "findingStream": "Поиск потока...",
+    "curatingWatchlist": "Составление Списка",
+    "planningMarathon": "Планирование следующего марафона",
+    "adjustingSettings": "Настройка Параметров",
+    "customizingProfile": "Настройка профиля"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "Сбалансированный",
+    "highQuality": "Высококачественный Поток"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "Ваш персональный стриминговый компаньон",
+    "homeTitle": "Главная | Watch Rudra",
+    "homeDescription": "Ищите фильмы и сериалы, чтобы начать смотреть вместе.",
+    "continueWatchingTitle": "Продолжить Просмотр | Watch Rudra",
+    "continueWatchingDescription": "Продолжите с того места, где остановились, с недавно просмотренными фильмами и сериалами.",
+    "searchTitle": "Поиск | Watch Rudra",
+    "searchDescription": "Ищите фильмы, сериалы и аниме.",
+    "profileTitle": "Профиль | Watch Rudra",
+    "profileDescription": "Управляйте профилем и историей просмотров.",
+    "liveTitle": "Прямые Трансляции | Watch Rudra",
+    "liveDescription": "Смотрите спортивные матчи и каналы в прямом эфире с друзьями в реальном времени.",
+    "downloadsTitle": "Загрузки | Watch Rudra",
+    "downloadsDescription": "Доступ к загруженным фильмам и сериалам для офлайн-просмотра.",
+    "watchlistTitle": "Мой Список | Watch Rudra",
+    "watchlistDescription": "Отслеживайте фильмы и сериалы, которые хотите посмотреть позже.",
+    "watchPartyTitle": "Совместный Просмотр | Watch Rudra",
+    "watchPartyDescription": "Присоединяйтесь к друзьям и смотрите вместе в реальном времени."
+  },
+  "desktopApp": {
+    "notInstalled": "Приложение не установлено",
+    "notInstalledDesc": "Не удалось открыть приложение Watch Rudra. Оно установлено?",
+    "downloadApp": "Скачать Приложение"
+  },
+  "whatsNew": {
+    "backToHome": "Вернуться на Главную",
+    "title": "Что Нового",
+    "description": "Последние обновления, исправления и функции Watch Rudra.",
+    "noReleases": "Релизы не найдены или не удалось загрузить.",
+    "noReleaseNotes": "*Примечания к релизу не предоставлены.*",
+    "showMore": "Показать Ещё ({remaining} осталось)"
+  },
+  "downloads": {
+    "failedToLoad": "Не удалось загрузить контент",
+    "experienceStarting": "Запуск Впечатления",
+    "preparingContent": "Подготовка \"{title}\"...",
+    "episodes": "Эпизоды",
+    "noImageAvailable": "Изображение Недоступно",
+    "closePreview": "Закрыть Предпросмотр",
+    "statusCompleted": "ЗАВЕРШЕНО",
+    "statusFailed": "ОШИБКА",
+    "statusDownloading": "ЗАГРУЗКА",
+    "statusQueued": "В ОЧЕРЕДИ",
+    "statusCancelled": "ОТМЕНЕНО",
+    "statusPaused": "ПАУЗА"
+  },
+  "errors": {
+    "sessionExpired": "Сессия истекла. Пожалуйста, войдите снова.",
+    "userExists": "Аккаунт с этим email уже существует.",
+    "invalidInvite": "Ссылка-приглашение недействительна или истекла. Запросите новую.",
+    "captchaRequired": "Пожалуйста, пройдите проверку безопасности.",
+    "captchaFailed": "Проверка безопасности не пройдена. Попробуйте снова.",
+    "otpRateLimit": "Слишком много попыток. Подождите и попробуйте снова.",
+    "validationError": "Некоторые данные недействительны. Проверьте и попробуйте снова.",
+    "csrfFailed": "Токен безопасности истёк. Обновите страницу.",
+    "notFound": "Запрашиваемый ресурс не найден.",
+    "forbidden": "У вас нет разрешения на это действие.",
+    "networkError": "Проблема с сетью. Проверьте подключение и попробуйте снова.",
+    "requestTimeout": "Время ожидания запроса истекло. Проверьте подключение и попробуйте снова."
+  },
+  "units": {
+    "bytes": "Байт",
+    "kb": "КБ",
+    "mb": "МБ",
+    "gb": "ГБ",
+    "tb": "ТБ"
   }
 }

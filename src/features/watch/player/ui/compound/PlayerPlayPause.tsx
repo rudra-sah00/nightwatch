@@ -1,8 +1,11 @@
+import { useTranslations } from 'next-intl';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { PlayPause } from '../controls/PlayPause';
 
 export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
   const { state, playerHandlers, readOnly } = usePlayerContext();
+  const t = useTranslations('watch.player');
+  const tAria = useTranslations('watch.aria');
 
   if (readOnly) {
     return (
@@ -14,7 +17,7 @@ export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            aria-label="Locked - Host controls playback"
+            aria-label={t('hostControlsPlayback')}
             role="img"
           >
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -22,7 +25,7 @@ export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
           </svg>
         </div>
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-900/95 rounded text-xs text-zinc-300 whitespace-nowrap opacity-0 group-hover/lock:opacity-100 transition-opacity pointer-events-none border border-zinc-700/50">
-          Host controls playback
+          {t('hostControlsPlayback')}
         </div>
       </div>
     );
@@ -32,7 +35,7 @@ export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
     <section
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
-      aria-label="Play/Pause Interaction"
+      aria-label={tAria('playPause')}
     >
       <PlayPause
         isPlaying={state.isPlaying}

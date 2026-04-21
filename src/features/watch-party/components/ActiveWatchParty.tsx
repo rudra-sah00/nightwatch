@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import {
   AlertDialog,
@@ -142,16 +143,17 @@ export function ActiveWatchParty({
 
   // Whether the current user is permitted to send chat messages
   const { user } = useAuth();
+  const t = useTranslations('party');
   const currentMember = room.members.find((m) => m.id === currentUserId);
   const currentUserName =
     currentMember?.name ||
     propUserName ||
     user?.name ||
     (isHost
-      ? 'Room Host'
+      ? t('roles.host')
       : currentUserId?.startsWith('guest')
-        ? 'Guest'
-        : 'Member');
+        ? t('roles.guest')
+        : t('roles.member'));
 
   const canChatInParty =
     isHost ||
@@ -248,12 +250,10 @@ export function ActiveWatchParty({
           <AlertDialogContent className="bg-background border-[4px] border-border rounded-none  sm:max-w-[425px] p-6">
             <AlertDialogHeader className="space-y-3">
               <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-foreground">
-                {isHost ? 'End Watch Party?' : 'Leave Watch Party?'}
+                {isHost ? t('dialog.endTitle') : t('dialog.leaveTitle')}
               </AlertDialogTitle>
               <AlertDialogDescription className="font-bold font-headline tracking-wide text-foreground/70 text-base">
-                {isHost
-                  ? 'As the host, ending the watch party will close the room for all members. This action cannot be undone.'
-                  : 'Are you sure you want to leave this watch party? You can rejoin if the host approves.'}
+                {isHost ? t('dialog.endDesc') : t('dialog.leaveDesc')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-6 sm:space-x-4">
@@ -261,14 +261,14 @@ export function ActiveWatchParty({
                 onClick={() => onShowLeaveDialog(false)}
                 className="bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors py-3 text-sm"
               >
-                Cancel
+                {t('dialog.cancel')}
               </AlertDialogCancel>
               <button
                 type="button"
                 onClick={onConfirmLeave}
                 className="bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm px-6"
               >
-                {isHost ? 'End Party' : 'Leave'}
+                {isHost ? t('dialog.endParty') : t('dialog.leave')}
               </button>
             </AlertDialogFooter>
           </AlertDialogContent>

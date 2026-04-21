@@ -208,8 +208,7 @@ export async function apiFetch<T>(
       }
 
       // Refresh failed - throw error to trigger logout
-      const error = new Error('Session expired. Please login again.') as Error &
-        ApiError;
+      const error = new Error('SESSION_EXPIRED') as Error & ApiError;
       error.status = 401;
       error.code = 'SESSION_EXPIRED';
 
@@ -270,10 +269,9 @@ export async function apiFetch<T>(
       if (userSignal?.aborted) {
         throw error; // Propagate the original AbortError
       }
-      const timeoutErr = new Error(
-        'Request timed out. Please check your connection and try again.',
-      ) as Error & ApiError;
+      const timeoutErr = new Error('REQUEST_TIMEOUT') as Error & ApiError;
       timeoutErr.status = 408;
+      timeoutErr.code = 'REQUEST_TIMEOUT';
       throw timeoutErr;
     }
 

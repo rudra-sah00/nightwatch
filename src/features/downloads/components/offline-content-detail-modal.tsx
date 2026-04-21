@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,6 +73,8 @@ export function OfflineContentDetailModal({
     onClose,
   });
 
+  const td = useTranslations('common.downloads');
+  const ta = useTranslations('common.actions');
   const episodesSectionRef = useRef<HTMLDivElement>(null);
 
   // Loading state
@@ -106,8 +109,8 @@ export function OfflineContentDetailModal({
   if (autoPlay && showCountdown) {
     return (
       <PlaybackCountdown
-        title="Experience Starting"
-        subtitle={`Preparing "${show.title}"...`}
+        title={td('experienceStarting')}
+        subtitle={td('preparingContent', { title: show.title })}
         onComplete={() => {
           countdownTarget?.();
           setShowCountdown(false);
@@ -151,7 +154,7 @@ export function OfflineContentDetailModal({
             type="button"
             onClick={onClose}
             className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
-            aria-label="Close modal"
+            aria-label={ta('closeModal')}
           >
             <X className="w-5 h-5 stroke-[3px]" />
           </button>
