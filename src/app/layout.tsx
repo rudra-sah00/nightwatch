@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
 import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
@@ -12,6 +10,7 @@ import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
+import { IntlProvider } from '@/providers/intl-provider';
 import { SocketProvider } from '@/providers/socket-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { SerwistProvider } from './serwist';
@@ -48,19 +47,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-// Root layout reads cookies (locale, auth) — must be dynamic
-export const dynamic = 'force-dynamic';
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Blocking script to set dark class before React hydrates — prevents FOUC */}
         <script
@@ -80,16 +73,16 @@ export default async function RootLayout({
           <ThemeProvider>
             <SocketProvider>
               <AuthProvider>
-                <NextIntlClientProvider messages={messages}>
-                  <Suspense fallback={null}>
+                <Suspense fallback={null}>
+                  <IntlProvider>
                     <ProgressBar />
                     <DiscordPresenceSync />
                     <OfflineIndicator />
                     <SwUpdatePrompt />
                     {children}
-                  </Suspense>
-                  <Toaster />
-                </NextIntlClientProvider>
+                  </IntlProvider>
+                </Suspense>
+                <Toaster />
               </AuthProvider>
             </SocketProvider>
           </ThemeProvider>
