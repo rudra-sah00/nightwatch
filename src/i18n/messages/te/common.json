@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "హోమ్",
+    "continue": "కొనసాగించు",
+    "continueWatching": "చూడటం కొనసాగించు",
+    "live": "లైవ్",
+    "liveMatches": "లైవ్ మ్యాచ్‌లు",
+    "watchlist": "వాచ్‌లిస్ట్",
+    "downloads": "డౌన్‌లోడ్‌లు",
+    "offlineDownloads": "ఆఫ్‌లైన్ డౌన్‌లోడ్‌లు",
+    "profile": "ప్రొఫైల్"
+  },
+  "language": {
+    "title": "భాష",
+    "description": "మీ ఇష్టమైన భాషను ఎంచుకోండి"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "continue": "Continuar",
+    "continueWatching": "Seguir viendo",
+    "live": "En vivo",
+    "liveMatches": "Partidos en vivo",
+    "watchlist": "Mi lista",
+    "downloads": "Descargas",
+    "offlineDownloads": "Descargas sin conexión",
+    "profile": "Perfil"
+  },
+  "language": {
+    "title": "Idioma",
+    "description": "Elige tu idioma preferido"
+  }
+}

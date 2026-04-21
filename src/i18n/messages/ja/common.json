@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "continue": "続きを見る",
+    "continueWatching": "視聴を続ける",
+    "live": "ライブ",
+    "liveMatches": "ライブ試合",
+    "watchlist": "ウォッチリスト",
+    "downloads": "ダウンロード",
+    "offlineDownloads": "オフラインダウンロード",
+    "profile": "プロフィール"
+  },
+  "language": {
+    "title": "言語",
+    "description": "お好みの言語を選択してください"
+  }
+}
