@@ -27,5 +27,54 @@
     "heading": "Qualcosa è andato storto",
     "description": "Si è verificato un errore imprevisto. Riprova.",
     "tryAgain": "Riprova"
+  },
+  "toasts": {
+    "addedToWatchlist": "Aggiunto alla lista",
+    "removedFromWatchlist": "Rimosso dalla lista",
+    "linkCopied": "Link copiato!",
+    "profileUpdated": "Profilo aggiornato",
+    "passwordChanged": "Password cambiata con successo",
+    "accountDeleted": "Account eliminato con successo",
+    "error": "Qualcosa è andato storto",
+    "networkError": "Errore di rete. Controlla la tua connessione.",
+    "sessionExpired": "Sessione scaduta. Effettua nuovamente l'accesso."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Benvenuto su Watch Rudra",
+      "description": "Lascia che ti mostriamo la tua nuova esperienza cinematografica minimalista."
+    },
+    "search": {
+      "title": "Trova il tuo film",
+      "description": "Cerca tra oltre 12k titoli. Digita il tuo film o serie preferita qui."
+    },
+    "resume": {
+      "title": "Riprendi la visione",
+      "description": "Riprendi esattamente da dove ti eri fermato. Ogni fotogramma salvato."
+    },
+    "live": {
+      "title": "Eventi in diretta",
+      "description": "Unisciti alle watch party e agli streaming in diretta in corso."
+    },
+    "watchlist": {
+      "title": "La tua coda",
+      "description": "Salva film ed episodi qui per guardarli dopo."
+    },
+    "downloads": {
+      "title": "Cassaforte offline",
+      "description": "Guarda film ovunque, in qualsiasi momento. Accedi ai tuoi download offline qui."
+    },
+    "profile": {
+      "title": "Impostazioni profilo",
+      "description": "Gestisci il tuo account, le preferenze e visualizza la tua attività qui."
+    },
+    "serverTip": {
+      "title": "Suggerimento Pro: Cambio server",
+      "description": "Nel tuo profilo, puoi passare tra Server 1, Server 2 e Server 3. Hanno librerie di contenuti diverse!"
+    },
+    "ready": {
+      "title": "Sei pronto",
+      "description": "Goditi l'esperienza cinematografica pura. Nessuna distrazione. Solo cinema."
+    }
   }
 }

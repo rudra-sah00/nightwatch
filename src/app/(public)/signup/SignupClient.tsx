@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { GlobalLoading } from '@/components/ui/global-loading';
@@ -12,6 +13,7 @@ import { useAuth } from '@/providers/auth-provider';
 
 export default function SignupClient() {
   const signupHook = useSignupForm();
+  const t = useTranslations('auth');
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLoading: hookLoading, isInviteValid } = signupHook;
 
@@ -48,14 +50,13 @@ export default function SignupClient() {
               block
             </span>
             <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 font-headline text-center">
-              Access Denied
+              {t('signup.accessDenied')}
             </h1>
             <p className="text-center font-body font-semibold text-sm text-foreground/60 uppercase tracking-tight mb-2">
-              A valid invite link is required to join this community.
+              {t('signup.inviteRequired')}
             </p>
             <p className="text-center font-body text-[10px] text-foreground opacity-50 uppercase tracking-widest max-w-[80%]">
-              If you believe this is a mistake, please contact your
-              administrator.
+              {t('signup.contactAdmin')}
             </p>
             <div className="mt-8 w-full">
               <Button
@@ -64,7 +65,7 @@ export default function SignupClient() {
                 size="neo-lg"
                 className="w-full text-center"
               >
-                <Link href="/login">Back to Login</Link>
+                <Link href="/login">{t('signup.backToLogin')}</Link>
               </Button>
             </div>
           </div>

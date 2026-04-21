@@ -27,5 +27,54 @@
     "heading": "Quelque chose s'est mal passé",
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "tryAgain": "Réessayer"
+  },
+  "toasts": {
+    "addedToWatchlist": "Ajouté à la liste",
+    "removedFromWatchlist": "Retiré de la liste",
+    "linkCopied": "Lien copié !",
+    "profileUpdated": "Profil mis à jour",
+    "passwordChanged": "Mot de passe changé avec succès",
+    "accountDeleted": "Compte supprimé avec succès",
+    "error": "Quelque chose s'est mal passé",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Bienvenue sur Watch Rudra",
+      "description": "Laissez-nous vous faire découvrir votre nouvelle expérience cinéma minimaliste."
+    },
+    "search": {
+      "title": "Trouvez votre film",
+      "description": "Recherchez parmi plus de 12k titres. Tapez votre film ou série préféré ici."
+    },
+    "resume": {
+      "title": "Reprendre le visionnage",
+      "description": "Reprenez exactement là où vous vous êtes arrêté. Chaque image sauvegardée."
+    },
+    "live": {
+      "title": "Événements en direct",
+      "description": "Rejoignez les watch parties et les streams en direct en cours."
+    },
+    "watchlist": {
+      "title": "Votre file d'attente",
+      "description": "Sauvegardez des films et épisodes ici pour les regarder plus tard."
+    },
+    "downloads": {
+      "title": "Coffre hors ligne",
+      "description": "Regardez des films n'importe où, n'importe quand. Accédez à vos téléchargements hors ligne ici."
+    },
+    "profile": {
+      "title": "Paramètres du profil",
+      "description": "Gérez votre compte, vos préférences et consultez votre activité ici."
+    },
+    "serverTip": {
+      "title": "Astuce Pro : Changement de serveur",
+      "description": "Dans votre profil, vous pouvez basculer entre Serveur 1, Serveur 2 et Serveur 3. Ils ont des bibliothèques de contenu différentes !"
+    },
+    "ready": {
+      "title": "Vous êtes prêt",
+      "description": "Profitez de l'expérience cinématographique pure. Pas de distractions. Juste du cinéma."
+    }
   }
 }

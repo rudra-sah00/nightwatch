@@ -3,6 +3,7 @@
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 
@@ -12,6 +13,7 @@ export function GlobalTour() {
   const pathname = usePathname();
   const tourStarted = useRef(false);
   const { isDesktopApp } = useDesktopApp();
+  const t = useTranslations('tour');
 
   useEffect(() => {
     if (typeof window === 'undefined' || tourStarted.current) return;
@@ -33,10 +35,8 @@ export function GlobalTour() {
           steps: [
             {
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Welcome to Watch Rudra</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Let us show you around your new minimalist cinema experience. Form follows function.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('welcome.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('welcome.description')}</span>`,
                 side: 'bottom',
                 align: 'center',
               },
@@ -44,10 +44,8 @@ export function GlobalTour() {
             {
               element: 'input[name="q"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Find Your Film</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Search across 12k+ titles. Type your favorite movie or show here.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('search.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('search.description')}</span>`,
                 side: 'bottom',
                 align: 'start',
               },
@@ -55,10 +53,8 @@ export function GlobalTour() {
             {
               element: 'a[href="/continue-watching"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Resume Watching</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Pick up right where you left off. Every frame saved.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('resume.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('resume.description')}</span>`,
                 side: 'bottom',
                 align: 'center',
               },
@@ -66,10 +62,8 @@ export function GlobalTour() {
             {
               element: 'a[href="/live"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Live Events</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Join watch parties and live streams currently happening.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('live.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('live.description')}</span>`,
                 side: 'bottom',
                 align: 'center',
               },
@@ -77,10 +71,8 @@ export function GlobalTour() {
             {
               element: 'a[href="/watchlist"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Your Queue</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Save movies and episodes here to watch later.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('watchlist.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('watchlist.description')}</span>`,
                 side: 'bottom',
                 align: 'center',
               },
@@ -90,10 +82,8 @@ export function GlobalTour() {
                   {
                     element: 'a[href="/downloads"]',
                     popover: {
-                      title:
-                        '<span class="font-headline font-black text-xl uppercase tracking-tighter">Offline Vault</span>',
-                      description:
-                        '<span class="font-body text-sm font-medium opacity-80">Watch movies anywhere, anytime. Access your offline downloads here.</span>',
+                      title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('downloads.title')}</span>`,
+                      description: `<span class="font-body text-sm font-medium opacity-80">${t('downloads.description')}</span>`,
                       side: 'bottom' as const,
                       align: 'center' as const,
                     },
@@ -103,10 +93,8 @@ export function GlobalTour() {
             {
               element: 'a[href="/profile"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">Profile Settings</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Manage your account, preferences, and view your activity here.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('profile.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('profile.description')}</span>`,
                 side: 'bottom',
                 align: 'end',
               },
@@ -114,20 +102,16 @@ export function GlobalTour() {
             {
               element: 'a[href="/profile"]',
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl text-neo-red uppercase tracking-tighter">Pro Tip: Server Change</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Inside your profile, you can switch between <strong>Server 1, Server 2, and Server 3</strong>.<br/><br/><strong>Why?</strong> They have different content libraries! If you can\'t find a movie or show on one server, try switching to another.</span>',
+                title: `<span class="font-headline font-black text-xl text-neo-red uppercase tracking-tighter">${t('serverTip.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('serverTip.description')}</span>`,
                 side: 'bottom',
                 align: 'end',
               },
             },
             {
               popover: {
-                title:
-                  '<span class="font-headline font-black text-xl uppercase tracking-tighter">You are ready</span>',
-                description:
-                  '<span class="font-body text-sm font-medium opacity-80">Enjoy the pure cinematic experience. No distractions. Just film.</span>',
+                title: `<span class="font-headline font-black text-xl uppercase tracking-tighter">${t('ready.title')}</span>`,
+                description: `<span class="font-body text-sm font-medium opacity-80">${t('ready.description')}</span>`,
                 side: 'bottom',
                 align: 'center',
               },
@@ -149,7 +133,7 @@ export function GlobalTour() {
 
       return () => clearTimeout(timer);
     }
-  }, [searchParams, pathname, router, isDesktopApp]);
+  }, [searchParams, pathname, router, isDesktopApp, t]);
 
   return null;
 }

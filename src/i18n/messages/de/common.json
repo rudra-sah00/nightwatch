@@ -27,5 +27,54 @@
     "heading": "Etwas ist schiefgelaufen",
     "description": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "tryAgain": "Erneut versuchen"
+  },
+  "toasts": {
+    "addedToWatchlist": "Zur Merkliste hinzugefügt",
+    "removedFromWatchlist": "Von der Merkliste entfernt",
+    "linkCopied": "Link kopiert!",
+    "profileUpdated": "Profil aktualisiert",
+    "passwordChanged": "Passwort erfolgreich geändert",
+    "accountDeleted": "Konto erfolgreich gelöscht",
+    "error": "Etwas ist schiefgelaufen",
+    "networkError": "Netzwerkfehler. Bitte überprüfe deine Verbindung.",
+    "sessionExpired": "Sitzung abgelaufen. Bitte erneut anmelden."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Willkommen bei Watch Rudra",
+      "description": "Lass uns dir dein neues minimalistisches Kinoerlebnis zeigen."
+    },
+    "search": {
+      "title": "Finde deinen Film",
+      "description": "Suche in über 12.000 Titeln. Gib hier deinen Lieblingsfilm oder deine Serie ein."
+    },
+    "resume": {
+      "title": "Weiterschauen",
+      "description": "Mach genau dort weiter, wo du aufgehört hast. Jedes Bild gespeichert."
+    },
+    "live": {
+      "title": "Live-Events",
+      "description": "Nimm an Watch Parties und Live-Streams teil, die gerade stattfinden."
+    },
+    "watchlist": {
+      "title": "Deine Warteschlange",
+      "description": "Speichere Filme und Episoden hier, um sie später anzusehen."
+    },
+    "downloads": {
+      "title": "Offline-Tresor",
+      "description": "Schau Filme überall und jederzeit. Greife hier auf deine Offline-Downloads zu."
+    },
+    "profile": {
+      "title": "Profileinstellungen",
+      "description": "Verwalte dein Konto, Einstellungen und sieh dir deine Aktivität an."
+    },
+    "serverTip": {
+      "title": "Profi-Tipp: Serverwechsel",
+      "description": "In deinem Profil kannst du zwischen Server 1, Server 2 und Server 3 wechseln. Sie haben unterschiedliche Inhaltsbibliotheken!"
+    },
+    "ready": {
+      "title": "Du bist bereit",
+      "description": "Genieße das pure Kinoerlebnis. Keine Ablenkungen. Nur Film."
+    }
   }
 }

@@ -27,5 +27,54 @@
     "heading": "出了点问题",
     "description": "发生了意外错误。请重试。",
     "tryAgain": "重试"
+  },
+  "toasts": {
+    "addedToWatchlist": "已添加到观看列表",
+    "removedFromWatchlist": "已从观看列表移除",
+    "linkCopied": "链接已复制！",
+    "profileUpdated": "个人资料已更新",
+    "passwordChanged": "密码修改成功",
+    "accountDeleted": "账户删除成功",
+    "error": "出了点问题",
+    "networkError": "网络错误。请检查您的连接。",
+    "sessionExpired": "会话已过期。请重新登录。"
+  },
+  "tour": {
+    "welcome": {
+      "title": "欢迎来到 Watch Rudra",
+      "description": "让我们带您了解全新的极简电影体验。"
+    },
+    "search": {
+      "title": "找到您的电影",
+      "description": "搜索超过12,000个标题。在这里输入您喜欢的电影或节目。"
+    },
+    "resume": {
+      "title": "继续观看",
+      "description": "从上次停下的地方继续。每一帧都已保存。"
+    },
+    "live": {
+      "title": "直播活动",
+      "description": "加入正在进行的观影派对和直播。"
+    },
+    "watchlist": {
+      "title": "您的队列",
+      "description": "在这里保存电影和剧集以便稍后观看。"
+    },
+    "downloads": {
+      "title": "离线保险库",
+      "description": "随时随地观看电影。在这里访问您的离线下载。"
+    },
+    "profile": {
+      "title": "个人资料设置",
+      "description": "管理您的账户、偏好设置并查看您的活动。"
+    },
+    "serverTip": {
+      "title": "专业提示：切换服务器",
+      "description": "在您的个人资料中，可以在服务器1、服务器2和服务器3之间切换。它们有不同的内容库！"
+    },
+    "ready": {
+      "title": "您已准备就绪",
+      "description": "享受纯粹的电影体验。没有干扰。只有电影。"
+    }
   }
 }

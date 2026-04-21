@@ -27,5 +27,54 @@
     "heading": "문제가 발생했습니다",
     "description": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
     "tryAgain": "다시 시도"
+  },
+  "toasts": {
+    "addedToWatchlist": "관심목록에 추가됨",
+    "removedFromWatchlist": "관심목록에서 제거됨",
+    "linkCopied": "링크가 복사되었습니다!",
+    "profileUpdated": "프로필이 업데이트되었습니다",
+    "passwordChanged": "비밀번호가 변경되었습니다",
+    "accountDeleted": "계정이 삭제되었습니다",
+    "error": "문제가 발생했습니다",
+    "networkError": "네트워크 오류. 연결을 확인해 주세요.",
+    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Watch Rudra에 오신 것을 환영합니다",
+      "description": "새로운 미니멀 시네마 경험을 안내해 드리겠습니다."
+    },
+    "search": {
+      "title": "영화 찾기",
+      "description": "12,000개 이상의 타이틀에서 검색하세요. 좋아하는 영화나 드라마를 여기에 입력하세요."
+    },
+    "resume": {
+      "title": "이어서 시청",
+      "description": "멈춘 곳에서 바로 이어보세요. 모든 프레임이 저장됩니다."
+    },
+    "live": {
+      "title": "라이브 이벤트",
+      "description": "현재 진행 중인 워치 파티와 라이브 스트림에 참여하세요."
+    },
+    "watchlist": {
+      "title": "내 대기열",
+      "description": "나중에 볼 영화와 에피소드를 여기에 저장하세요."
+    },
+    "downloads": {
+      "title": "오프라인 보관함",
+      "description": "언제 어디서나 영화를 시청하세요. 오프라인 다운로드에 여기서 접근하세요."
+    },
+    "profile": {
+      "title": "프로필 설정",
+      "description": "계정, 환경설정을 관리하고 활동을 확인하세요."
+    },
+    "serverTip": {
+      "title": "프로 팁: 서버 변경",
+      "description": "프로필에서 서버 1, 서버 2, 서버 3 사이를 전환할 수 있습니다. 각각 다른 콘텐츠 라이브러리가 있습니다!"
+    },
+    "ready": {
+      "title": "준비 완료",
+      "description": "순수한 시네마 경험을 즐기세요. 방해 없이. 오직 영화만."
+    }
   }
 }

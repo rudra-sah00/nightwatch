@@ -27,5 +27,54 @@
     "heading": "Algo deu errado",
     "description": "Ocorreu um erro inesperado. Por favor, tente novamente.",
     "tryAgain": "Tentar Novamente"
+  },
+  "toasts": {
+    "addedToWatchlist": "Adicionado à lista",
+    "removedFromWatchlist": "Removido da lista",
+    "linkCopied": "Link copiado!",
+    "profileUpdated": "Perfil atualizado",
+    "passwordChanged": "Senha alterada com sucesso",
+    "accountDeleted": "Conta excluída com sucesso",
+    "error": "Algo deu errado",
+    "networkError": "Erro de rede. Por favor, verifique sua conexão.",
+    "sessionExpired": "Sessão expirada. Por favor, faça login novamente."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Bem-vindo ao Watch Rudra",
+      "description": "Vamos mostrar sua nova experiência cinematográfica minimalista."
+    },
+    "search": {
+      "title": "Encontre seu filme",
+      "description": "Pesquise em mais de 12k títulos. Digite seu filme ou série favorita aqui."
+    },
+    "resume": {
+      "title": "Continuar assistindo",
+      "description": "Continue exatamente de onde parou. Cada frame salvo."
+    },
+    "live": {
+      "title": "Eventos ao vivo",
+      "description": "Participe de watch parties e transmissões ao vivo acontecendo agora."
+    },
+    "watchlist": {
+      "title": "Sua fila",
+      "description": "Salve filmes e episódios aqui para assistir depois."
+    },
+    "downloads": {
+      "title": "Cofre offline",
+      "description": "Assista filmes em qualquer lugar, a qualquer hora. Acesse seus downloads offline aqui."
+    },
+    "profile": {
+      "title": "Configurações do perfil",
+      "description": "Gerencie sua conta, preferências e veja sua atividade aqui."
+    },
+    "serverTip": {
+      "title": "Dica Pro: Troca de servidor",
+      "description": "No seu perfil, você pode alternar entre Servidor 1, Servidor 2 e Servidor 3. Eles têm bibliotecas de conteúdo diferentes!"
+    },
+    "ready": {
+      "title": "Você está pronto",
+      "description": "Aproveite a experiência cinematográfica pura. Sem distrações. Apenas cinema."
+    }
   }
 }

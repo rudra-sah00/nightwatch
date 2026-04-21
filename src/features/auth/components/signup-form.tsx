@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ import { AuthCard } from './auth-card';
 
 export function SignupForm(props: ReturnType<typeof useSignupForm>) {
   const [showPassword, setShowPassword] = useState(false);
+  const t = useTranslations('auth');
   const {
     step,
     setStep,
@@ -49,13 +51,13 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
   const getHeader = () => {
     switch (step) {
       case 'otp':
-        return 'VERIFY';
+        return t('title.verify');
       case 'name':
-        return 'DISCOVERY';
+        return t('title.discovery');
       case 'details':
-        return 'SECURITY';
+        return t('title.security');
       default:
-        return 'DISCOVERY';
+        return t('title.discovery');
     }
   };
 
@@ -68,7 +70,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
         >
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
-              CODE DISPATCHED TO
+              {t('otp.sentTo')}
             </p>
             <p className="font-black border-b-2 border-border text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
               {formData.email}
@@ -79,7 +81,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="otp"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  SECURITY CODE
+                  {t('otp.label')}
                 </Label>
               </div>
               <OtpInput
@@ -106,7 +108,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               disabled={isLoading || (otp?.length || 0) !== 6}
               className="w-full h-[52px] font-headline uppercase italic tracking-tighter text-sm font-black shrink-0"
             >
-              VERIFY ACCESS
+              {t('otp.verify')}
             </Button>
             <Button
               type="button"
@@ -116,7 +118,9 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               disabled={isLoading || (countdown || 0) > 0}
               className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline"
             >
-              {(countdown || 0) > 0 ? `RETRY IN ${countdown}S` : 'RESEND KEY'}
+              {(countdown || 0) > 0
+                ? t('otp.retryIn', { seconds: countdown })
+                : t('otp.resend')}
             </Button>
           </div>
         </form>
@@ -135,7 +139,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="name"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  NAME
+                  {t('signup.name')}
                 </Label>
               </div>
               <Input
@@ -157,7 +161,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="username"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  USERNAME
+                  {t('signup.username')}
                 </Label>
               </div>
               <div className="relative">
@@ -201,7 +205,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="email"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  EMAIL ADDRESS
+                  {t('signup.emailAddress')}
                 </Label>
               </div>
               <Input
@@ -238,7 +242,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              CONFIRM IDENTITY
+              {t('signup.confirmIdentity')}
             </Button>
             <div className="h-[42px] w-full shrink-0" aria-hidden="true" />
           </div>
@@ -272,7 +276,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="password"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  PASSWORD
+                  {t('signup.password')}
                 </Label>
                 <div className="flex items-center h-full">
                   <PasswordInfo />
@@ -330,7 +334,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   htmlFor="confirmPassword"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  CONFIRM PASSWORD
+                  {t('signup.confirmPassword')}
                 </Label>
               </div>
               <Input
@@ -397,7 +401,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              {isPending ? 'INITIATING...' : 'BEGIN ARCHIVE'}
+              {isPending ? t('signup.initiating') : t('signup.beginArchive')}
             </Button>
             <Button
               type="button"
@@ -407,7 +411,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline"
             >
               <ArrowLeft className="h-4 w-4 mr-2 inline" />
-              REVERT
+              {t('signup.revert')}
             </Button>
           </div>
         </form>

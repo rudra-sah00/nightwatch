@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
 export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
+  const t = useTranslations('auth');
   const {
     step,
     setStep,
@@ -23,7 +25,10 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
   const isSuccess = step === 'forgot_success';
 
   return (
-    <AuthCard title={isSuccess ? 'SUCCESS' : 'RECOVERY'} className="h-[440px]">
+    <AuthCard
+      title={isSuccess ? t('title.success') : t('title.recovery')}
+      className="h-[440px]"
+    >
       {!isSuccess && (
         <form
           action={action}
@@ -36,14 +41,14 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
                 htmlFor="identifier"
                 className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
               >
-                EMAIL OR USERNAME
+                {t('forgot.emailOrUsername')}
               </Label>
             </div>
             <Input
               id="identifier"
               name="identifier"
               type="text"
-              placeholder="ALIAS OR COMMUNICATION LINE"
+              placeholder={t('forgot.placeholder')}
               value={formData.identifier}
               onChange={handleChange}
               disabled={isPending}
@@ -78,7 +83,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              {isPending ? 'DISPATCHING...' : 'DISPATCH RESET LINK'}
+              {isPending ? t('forgot.dispatching') : t('forgot.dispatch')}
             </Button>
             <Button
               type="button"
@@ -88,7 +93,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline"
             >
               <ArrowLeft className="h-4 w-4 mr-2 inline" />
-              BACK TO LOGIN
+              {t('forgot.backToLogin')}
             </Button>
           </div>
         </form>
@@ -101,10 +106,10 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <p className="text-[13px] font-body font-black text-foreground leading-tight uppercase tracking-[0.05em]">
-              IF AN ACCOUNT EXISTS, A RESET LINK HAS BEEN SENT.
+              {t('forgot.successMessage')}
             </p>
             <span className="font-black tracking-tighter text-sm block leading-tight uppercase opacity-80">
-              CHECK YOUR EMAIL INBOX AND SPAM FOLDER.
+              {t('forgot.checkEmail')}
             </span>
           </div>
 
@@ -115,7 +120,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               size="xl"
               className="w-full h-[52px] font-headline uppercase italic tracking-tighter text-sm font-black shrink-0"
             >
-              RETURN TO ENTRANCE
+              {t('forgot.returnToEntrance')}
             </Button>
           </div>
         </div>

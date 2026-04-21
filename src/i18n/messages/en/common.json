@@ -27,5 +27,54 @@
     "heading": "Something went wrong",
     "description": "An unexpected error occurred. Please try again.",
     "tryAgain": "Try Again"
+  },
+  "toasts": {
+    "addedToWatchlist": "Added to watchlist",
+    "removedFromWatchlist": "Removed from watchlist",
+    "linkCopied": "Link copied!",
+    "profileUpdated": "Profile updated",
+    "passwordChanged": "Password changed successfully",
+    "accountDeleted": "Account deleted successfully",
+    "error": "Something went wrong",
+    "networkError": "Network error. Please check your connection.",
+    "sessionExpired": "Session expired. Please log in again."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Welcome to Watch Rudra",
+      "description": "Let us show you around your new minimalist cinema experience. Form follows function."
+    },
+    "search": {
+      "title": "Find Your Film",
+      "description": "Search across 12k+ titles. Type your favorite movie or show here."
+    },
+    "resume": {
+      "title": "Resume Watching",
+      "description": "Pick up right where you left off. Every frame saved."
+    },
+    "live": {
+      "title": "Live Events",
+      "description": "Join watch parties and live streams currently happening."
+    },
+    "watchlist": {
+      "title": "Your Queue",
+      "description": "Save movies and episodes here to watch later."
+    },
+    "downloads": {
+      "title": "Offline Vault",
+      "description": "Watch movies anywhere, anytime. Access your offline downloads here."
+    },
+    "profile": {
+      "title": "Profile Settings",
+      "description": "Manage your account, preferences, and view your activity here."
+    },
+    "serverTip": {
+      "title": "Pro Tip: Server Change",
+      "description": "Inside your profile, you can switch between Server 1, Server 2, and Server 3. They have different content libraries! If you can't find a movie or show on one server, try switching to another."
+    },
+    "ready": {
+      "title": "You are ready",
+      "description": "Enjoy the pure cinematic experience. No distractions. Just film."
+    }
   }
 }

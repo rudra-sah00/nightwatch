@@ -27,5 +27,54 @@
     "heading": "Algo salió mal",
     "description": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
     "tryAgain": "Intentar de nuevo"
+  },
+  "toasts": {
+    "addedToWatchlist": "Añadido a la lista",
+    "removedFromWatchlist": "Eliminado de la lista",
+    "linkCopied": "¡Enlace copiado!",
+    "profileUpdated": "Perfil actualizado",
+    "passwordChanged": "Contraseña cambiada exitosamente",
+    "accountDeleted": "Cuenta eliminada exitosamente",
+    "error": "Algo salió mal",
+    "networkError": "Error de red. Por favor, verifica tu conexión.",
+    "sessionExpired": "Sesión expirada. Por favor, inicia sesión de nuevo."
+  },
+  "tour": {
+    "welcome": {
+      "title": "Bienvenido a Watch Rudra",
+      "description": "Te mostramos tu nueva experiencia cinematográfica minimalista."
+    },
+    "search": {
+      "title": "Encuentra tu película",
+      "description": "Busca entre más de 12k títulos. Escribe tu película o serie favorita aquí."
+    },
+    "resume": {
+      "title": "Continuar viendo",
+      "description": "Retoma justo donde lo dejaste. Cada fotograma guardado."
+    },
+    "live": {
+      "title": "Eventos en vivo",
+      "description": "Únete a watch parties y transmisiones en vivo que están ocurriendo ahora."
+    },
+    "watchlist": {
+      "title": "Tu cola",
+      "description": "Guarda películas y episodios aquí para ver después."
+    },
+    "downloads": {
+      "title": "Bóveda offline",
+      "description": "Ve películas en cualquier lugar, en cualquier momento. Accede a tus descargas offline aquí."
+    },
+    "profile": {
+      "title": "Configuración del perfil",
+      "description": "Administra tu cuenta, preferencias y ve tu actividad aquí."
+    },
+    "serverTip": {
+      "title": "Consejo Pro: Cambio de servidor",
+      "description": "Dentro de tu perfil, puedes cambiar entre Servidor 1, Servidor 2 y Servidor 3. ¡Tienen diferentes bibliotecas de contenido!"
+    },
+    "ready": {
+      "title": "Estás listo",
+      "description": "Disfruta la experiencia cinematográfica pura. Sin distracciones. Solo cine."
+    }
   }
 }

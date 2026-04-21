@@ -27,5 +27,54 @@
     "heading": "問題が発生しました",
     "description": "予期しないエラーが発生しました。もう一度お試しください。",
     "tryAgain": "再試行"
+  },
+  "toasts": {
+    "addedToWatchlist": "ウォッチリストに追加しました",
+    "removedFromWatchlist": "ウォッチリストから削除しました",
+    "linkCopied": "リンクをコピーしました！",
+    "profileUpdated": "プロフィールを更新しました",
+    "passwordChanged": "パスワードを変更しました",
+    "accountDeleted": "アカウントを削除しました",
+    "error": "問題が発生しました",
+    "networkError": "ネットワークエラー。接続を確認してください。",
+    "sessionExpired": "セッションが期限切れです。再度ログインしてください。"
+  },
+  "tour": {
+    "welcome": {
+      "title": "Watch Rudraへようこそ",
+      "description": "新しいミニマルな映画体験をご案内します。"
+    },
+    "search": {
+      "title": "映画を探す",
+      "description": "12,000以上のタイトルから検索。お気に入りの映画やドラマをここに入力してください。"
+    },
+    "resume": {
+      "title": "視聴を再開",
+      "description": "中断したところから再開。すべてのフレームが保存されています。"
+    },
+    "live": {
+      "title": "ライブイベント",
+      "description": "現在開催中のウォッチパーティーやライブストリームに参加しましょう。"
+    },
+    "watchlist": {
+      "title": "あなたのキュー",
+      "description": "後で見る映画やエピソードをここに保存しましょう。"
+    },
+    "downloads": {
+      "title": "オフラインボールト",
+      "description": "いつでもどこでも映画を視聴。オフラインダウンロードにここからアクセス。"
+    },
+    "profile": {
+      "title": "プロフィール設定",
+      "description": "アカウント、設定を管理し、アクティビティを確認できます。"
+    },
+    "serverTip": {
+      "title": "プロのヒント：サーバー変更",
+      "description": "プロフィール内で、サーバー1、サーバー2、サーバー3を切り替えられます。それぞれ異なるコンテンツライブラリがあります！"
+    },
+    "ready": {
+      "title": "準備完了",
+      "description": "純粋な映画体験をお楽しみください。邪魔なし。映画だけ。"
+    }
   }
 }
