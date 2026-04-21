@@ -9,7 +9,13 @@ export default getRequestConfig(async () => {
     ? (raw as Locale)
     : defaultLocale;
 
-  const messages = (await import(`./messages/${locale}/common.json`)).default;
+  let messages: Record<string, unknown>;
+  try {
+    messages = (await import(`./messages/${locale}/common.json`)).default;
+  } catch {
+    // Fallback to English if translation file doesn't exist yet
+    messages = (await import('./messages/en/common.json')).default;
+  }
 
   return { locale, messages };
 });

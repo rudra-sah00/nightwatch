@@ -1,16 +1,39 @@
 'use client';
 
-import { Activity, Monitor, Moon, Power, Sun, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Activity, Globe, Monitor, Moon, Power, Sun, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { COOKIE_NAME, locales } from '@/i18n/config';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 
+const LOCALE_META: Record<
+  string,
+  { native: string; english: string; flag: string }
+> = {
+  en: { native: 'English', english: 'English', flag: '🇬🇧' },
+  hi: { native: 'हिन्दी', english: 'Hindi', flag: '🇮🇳' },
+  ta: { native: 'தமிழ்', english: 'Tamil', flag: '🇮🇳' },
+  te: { native: 'తెలుగు', english: 'Telugu', flag: '🇮🇳' },
+  es: { native: 'Español', english: 'Spanish', flag: '🇪🇸' },
+  fr: { native: 'Français', english: 'French', flag: '🇫🇷' },
+  ja: { native: '日本語', english: 'Japanese', flag: '🇯🇵' },
+  ko: { native: '한국어', english: 'Korean', flag: '🇰🇷' },
+};
+
+function setCookie(name: string, value: string) {
+  // biome-ignore lint/suspicious/noDocumentCookie: required for SSR locale detection
+  document.cookie = `${name}=${value};path=/;max-age=31536000;samesite=lax`;
+}
+
 export function AppPreferences() {
   const { theme, setTheme } = useTheme();
+  const locale = useLocale();
+  const router = useRouter();
 
   const [runOnBoot, setRunOnBoot] = useState(false);
-
   const [concurrentDownloads, setConcurrentDownloads] = useState<number>(3);
   const [downloadSpeedLimit, setDownloadSpeedLimit] = useState<number>(0);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -18,11 +41,9 @@ export function AppPreferences() {
   useEffect(() => {
     if (checkIsDesktop()) {
       setIsDesktop(true);
-      // Fetch initial state from the electron native store
       desktopBridge.storeGet('runOnBoot').then((val: unknown) => {
         if (typeof val === 'boolean') setRunOnBoot(val);
       });
-
       desktopBridge.storeGet('concurrentDownloads').then((val: unknown) => {
         if (typeof val === 'number') setConcurrentDownloads(val);
       });
@@ -31,6 +52,15 @@ export function AppPreferences() {
       });
     }
   }, []);
+
+  const switchLocale = useCallback(
+    (newLocale: string) => {
+      setCookie(COOKIE_NAME, newLocale);
+      localStorage.setItem('preferred-locale', newLocale);
+      router.refresh();
+    },
+    [router],
+  );
 
   const handleToggleRunOnBoot = () => {
     const newValue = !runOnBoot;
@@ -95,6 +125,40 @@ export function AppPreferences() {
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-px bg-border w-full" />
+
+        {/* Language Settings */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex flex-col gap-2">
+            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+              <Globe className="w-4 h-4 text-neo-blue" />
+              Language
+            </span>
+            <p className="text-muted-foreground font-body text-sm max-w-sm">
+              Choose your preferred display language.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
+            {locales.map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => switchLocale(l)}
+                className={cn(
+                  'px-3 py-2 text-xs font-bold rounded-lg border transition-colors flex items-center gap-2',
+                  locale === l
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-secondary border-border text-muted-foreground hover:text-foreground hover:border-foreground/50',
+                )}
+              >
+                <span>{LOCALE_META[l]?.flag}</span>
+                <span className="tracking-wide">{LOCALE_META[l]?.native}</span>
               </button>
             ))}
           </div>

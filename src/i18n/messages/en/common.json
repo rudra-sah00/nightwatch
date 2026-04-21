@@ -1,42 +1,6 @@
 {
-  "nav": {
-    "home": "Home",
-    "search": "Search",
-    "watchlist": "Watchlist",
-    "downloads": "Downloads",
-    "live": "Live",
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Logout"
-  },
-  "actions": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "delete": "Delete",
-    "confirm": "Confirm",
-    "retry": "Retry",
-    "loading": "Loading...",
-    "submit": "Submit",
-    "back": "Back",
-    "next": "Next",
-    "done": "Done",
-    "copy": "Copy",
-    "share": "Share",
-    "download": "Download"
-  },
-  "status": {
-    "online": "Online",
-    "offline": "You are offline",
-    "error": "Something went wrong",
-    "notFound": "Page not found",
-    "noResults": "No results found",
-    "empty": "Nothing here yet"
-  },
   "language": {
     "title": "Language",
-    "description": "Choose your preferred language",
-    "en": "English",
-    "hi": "हिन्दी"
+    "description": "Choose your preferred language"
   }
 }

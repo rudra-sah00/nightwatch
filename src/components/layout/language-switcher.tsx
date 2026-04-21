@@ -10,6 +10,12 @@ import { cn } from '@/lib/utils';
 const LOCALE_LABELS: Record<string, { native: string; flag: string }> = {
   en: { native: 'English', flag: '🇬🇧' },
   hi: { native: 'हिन्दी', flag: '🇮🇳' },
+  ta: { native: 'தமிழ்', flag: '🇮🇳' },
+  te: { native: 'తెలుగు', flag: '🇮🇳' },
+  es: { native: 'Español', flag: '🇪🇸' },
+  fr: { native: 'Français', flag: '🇫🇷' },
+  ja: { native: '日本語', flag: '🇯🇵' },
+  ko: { native: '한국어', flag: '🇰🇷' },
 };
 
 function setCookie(name: string, value: string) {
