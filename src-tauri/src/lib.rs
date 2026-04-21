@@ -179,6 +179,17 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            // Initialize logger for dev builds — writes to stderr (visible in terminal)
+            #[cfg(debug_assertions)]
+            {
+                env_logger::Builder::from_default_env()
+                    .filter_module("watch_rudra", log::LevelFilter::Debug)
+                    .filter_module("live_bridge", log::LevelFilter::Debug)
+                    .format_timestamp_millis()
+                    .init();
+                log::info!("[App] Logger initialized (dev mode)");
+            }
+
             commands::downloads::init_downloads(&app.handle());
 
             #[cfg(desktop)]

@@ -71,3 +71,4 @@ public/sw.js.map
 src-tauri/target/
 src-tauri/gen/
 src-tauri/Cargo.lock
+logs/

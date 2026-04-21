@@ -24,6 +24,7 @@ reqwest = { version = "0.12", features = ["stream", "rustls-tls"], default-featu
 aes = "0.8"
 ctr = "0.9"
 log = "0.4"
+env_logger = "0.11"
 regex = "1"
 rand = "0.8"
 uuid = { version = "1", features = ["v4"] }
