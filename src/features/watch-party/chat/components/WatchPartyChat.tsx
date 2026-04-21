@@ -111,7 +111,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
       <div
-        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-background"
+        className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 no-scrollbar bg-background"
         style={{ contentVisibility: 'auto' }}
       >
         {messages.length === 0 ? (
@@ -212,7 +212,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
       {/* Input Area */}
       <form
         onSubmit={handleSend}
-        className="p-3 border-t-[4px] border-border bg-background relative z-10"
+        className="p-3 border-t-[4px] border-border bg-background relative z-10 shrink-0"
       >
         <div className="relative flex items-center gap-2">
           <Button
