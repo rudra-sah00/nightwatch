@@ -168,7 +168,7 @@ export function AppPreferences() {
             </DialogTrigger>
 
             <DialogContent
-              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
               showCloseButton={false}
             >
               <DialogTitle className="sr-only">
@@ -245,7 +245,7 @@ export function AppPreferences() {
             </DialogTrigger>
 
             <DialogContent
-              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
+              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
               showCloseButton={false}
             >
               <DialogTitle className="sr-only">
@@ -355,7 +355,7 @@ export function AppPreferences() {
                   </button>
                 </DialogTrigger>
                 <DialogContent
-                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
                   showCloseButton={false}
                 >
                   <DialogTitle className="sr-only">
@@ -440,7 +440,7 @@ export function AppPreferences() {
                   </button>
                 </DialogTrigger>
                 <DialogContent
-                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
                   showCloseButton={false}
                 >
                   <DialogTitle className="sr-only">
