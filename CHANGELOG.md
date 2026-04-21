@@ -1,5 +1,73 @@
 # Changelog
 
+## [2.1.0](https://github.com/rudra-sah00/watch-rudra/compare/v2.0.2...v2.1.0) (2026-04-21)
+
+
+### Features
+
+* add Help menu with website, GitHub, report bug, updates, shortcuts ([75244dc](https://github.com/rudra-sah00/watch-rudra/commit/75244dce76388e927b7fca2224d43685abde9c9c))
+* add i18n infrastructure with next-intl (English + Hindi) ([233e610](https://github.com/rudra-sah00/watch-rudra/commit/233e61055ccffba170987eab6a402268e01cfa50))
+* add language selector to profile preferences with 8 languages ([98ab954](https://github.com/rudra-sah00/watch-rudra/commit/98ab954cac9f0b1e13fc8e72ad439904e6dbed2a))
+* add macOS app menu with Cmd+Q, Cmd+R, About, Edit, Window menus ([26a2c65](https://github.com/rudra-sah00/watch-rudra/commit/26a2c65227d2ed340f45fcc549896322c7fea91f))
+* **dev:** add live bridge logging + dev launch script ([bb0170b](https://github.com/rudra-sah00/watch-rudra/commit/bb0170bfb984ebd633714a66da376490c338ad8d))
+* **i18n:** add 8 more languages — German, Portuguese, Arabic, Russian, Chinese, Italian, Turkish, Thai ([d1bdfe0](https://github.com/rudra-sah00/watch-rudra/commit/d1bdfe055f9d21c0a367ab8fcd53f2b1f564d38a))
+* **i18n:** add translations for all 8 languages (Tamil, Telugu, Spanish, French, Japanese, Korean) ([3d0b22c](https://github.com/rudra-sah00/watch-rudra/commit/3d0b22cc34e862c26fed0823dd988e8968c78b57))
+* **i18n:** complete 16-language support, fix language dialog scroll + Cancel buttons ([8f9efb1](https://github.com/rudra-sah00/watch-rudra/commit/8f9efb1ad45a5ed53f847dd30f0bf70600fe3aa6))
+* **i18n:** complete internationalization coverage across all modules ([6932b1f](https://github.com/rudra-sah00/watch-rudra/commit/6932b1f4e4165fe4dd343a0331c1f7456294cfb7))
+* **i18n:** translate all 56 hardcoded toast messages + fix dependency arrays ([31755e0](https://github.com/rudra-sah00/watch-rudra/commit/31755e0c0176fdec91b60c8d30927df754263a0c))
+* **i18n:** translate entire profile module in all 8 languages ([afddfc4](https://github.com/rudra-sah00/watch-rudra/commit/afddfc4c3edfe82df191a7d8c2ef510a6c38f1ae))
+* **i18n:** translate livestream and watch-party modules (all 8 languages) ([c19117a](https://github.com/rudra-sah00/watch-rudra/commit/c19117ac9e97c4febaf9411534ea701f4312b78c))
+* **i18n:** translate login page + auth forms in all 8 languages ([652e402](https://github.com/rudra-sah00/watch-rudra/commit/652e40264d7503bdb8e6bf672a017a5615d75cc1))
+* **i18n:** translate navbar - first component using translations ([79ae222](https://github.com/rudra-sah00/watch-rudra/commit/79ae222119033c58e2c838924abc9453d7413ff1))
+* **i18n:** translate remaining edge cases - signup, forgot-password, toasts, global tour ([efb4c28](https://github.com/rudra-sah00/watch-rudra/commit/efb4c284173f33078c6fd99cdb47cf0450969c32))
+* **i18n:** translate remaining UI edge cases - creator footer, password info, dialog, sketch ([6ab8928](https://github.com/rudra-sah00/watch-rudra/commit/6ab892872f0cb7b64e5c048fa836e179758faa8c))
+* **i18n:** translate search/home, watch/player, downloads, watchlist modules ([eb77fb3](https://github.com/rudra-sah00/watch-rudra/commit/eb77fb38b4d286002da56d738f0977937a542804))
+* migrate from Tauri to Electron (keep all i18n/biome/test improvements) ([0bb8090](https://github.com/rudra-sah00/watch-rudra/commit/0bb80905e4d22785a7f69015d5e71807b59e5eb7))
+* redesign app preferences - theme as dialog, custom download inputs ([94077b9](https://github.com/rudra-sah00/watch-rudra/commit/94077b9d877aa0fda36527c148896618a04585d0))
+* redesign download settings as full-screen dialogs matching theme/language style ([ee12fd7](https://github.com/rudra-sah00/watch-rudra/commit/ee12fd77330a2787f5a62305e0bf1263856e0011))
+* redesign language selector as full-screen dialog (like download menu) ([23c7364](https://github.com/rudra-sah00/watch-rudra/commit/23c7364594d33d14ecdf96281c9c253a58a0225a))
+* **tauri:** implement parallel racer live bridge (port from Electron) ([dd84469](https://github.com/rudra-sah00/watch-rudra/commit/dd84469964fa3ea4885dbcde12c09d48dd9cf407))
+* **tauri:** two-proxy live bridge with sniffer for stream capture ([7b5a5e3](https://github.com/rudra-sah00/watch-rudra/commit/7b5a5e39b6381b528dfb6c098b1b8e308a599589))
+
+
+### Bug Fixes
+
+* add Cancel button to concurrent downloads and speed limit dialogs ([49071c5](https://github.com/rudra-sah00/watch-rudra/commit/49071c5bf34a0c6ae67dfbf33ae8e0cf954092e3))
+* add ipc: and http://ipc.localhost to CSP connect-src in next.config.ts ([c86ed18](https://github.com/rudra-sah00/watch-rudra/commit/c86ed18b64f8a2c099c838cd84ddd0e878909ec3))
+* add next-intl back, regenerate lockfile, fix electron type conflict ([488f82e](https://github.com/rudra-sah00/watch-rudra/commit/488f82e48e0b837da82f23afdb664014c8bce6f3))
+* **i18n:** nest common namespace properly, revert metadata to static ([1eee239](https://github.com/rudra-sah00/watch-rudra/commit/1eee239b51f4d1006827a32ee11ccb29f313ebe2))
+* **i18n:** use static import map for Vercel compatibility ([b7ae06c](https://github.com/rudra-sah00/watch-rudra/commit/b7ae06c357bedd37ce5804e0aeecfa33e84b1fa6))
+* keep language title fixed, only language list scrolls ([fd36449](https://github.com/rudra-sah00/watch-rudra/commit/fd3644981b1beb62d4997c080aa4fbb138b79c31))
+* language dialog auto-closes on selection, add close button ([565ee3f](https://github.com/rudra-sah00/watch-rudra/commit/565ee3f7cdd7bb11f7853bb1fca138f108a3c168))
+* live bridge emits hlsUrl (matching frontend), clean up warnings ([968fe1a](https://github.com/rudra-sah00/watch-rudra/commit/968fe1a10d2ce86af7d91a7b734152c0dc11c5e9))
+* match dialog background transparency with download menu (bg-white/80 dark:bg-black/60) ([834cb90](https://github.com/rudra-sah00/watch-rudra/commit/834cb90464c53a8f2228050aad46e335a4bf6ba3))
+* prevent blank page by adding error handling to IntlProvider ([96ff046](https://github.com/rudra-sah00/watch-rudra/commit/96ff0468bd82edcf40815b9575ea910d7c59a529))
+* prevent send button jumping up on first message in watch party chat ([d85e81b](https://github.com/rudra-sah00/watch-rudra/commit/d85e81b6d24d3d983d10bacc7968a1f1aea45975))
+* redesign preference triggers as cards (matching server selection style), add Cancel to all dialogs ([2ff7dee](https://github.com/rudra-sah00/watch-rudra/commit/2ff7deebab75d129d23d9b2a94112682c66c0965))
+* remove flags from language selector, show only language names ([3df656a](https://github.com/rudra-sah00/watch-rudra/commit/3df656a4d731204804319107eb2c8ea51bfde872))
+* remove middleware causing 404 on all routes ([7f04182](https://github.com/rudra-sah00/watch-rudra/commit/7f041822c5fc76826dc2099d133027a2dc6c0701))
+* replace deprecated tauri-plugin-shell open with tauri-plugin-opener ([321326c](https://github.com/rudra-sah00/watch-rudra/commit/321326c33b8ee9270c486ac2ce56968b19b7d51e))
+* resolve biome warnings in offline.html (arrow fn + optional chain) ([7531f2d](https://github.com/rudra-sah00/watch-rudra/commit/7531f2d64e665d9f6088a3040c4ff817cde30d1a))
+* resolve blocking route error by adding middleware + force-dynamic layout ([af39d04](https://github.com/rudra-sah00/watch-rudra/commit/af39d04e5b4ec301c76a6dd9a2f9e7e67fb85be0))
+* resolve blocking route error by removing cookies() from root layout ([21b98c2](https://github.com/rudra-sah00/watch-rudra/commit/21b98c24a2c539e17d42600c2c8980e88daf6dd0))
+* resolve cacheComponents conflict by moving i18n into Suspense-wrapped IntlProvider ([183ad98](https://github.com/rudra-sah00/watch-rudra/commit/183ad989666dd8dab5b4c84692e1c100720223c4))
+* resolve navbar hydration mismatch by using isMounted guard ([1ae85fb](https://github.com/rudra-sah00/watch-rudra/commit/1ae85fbefad4bb7037ce85c80ed275c054a4d8ea))
+* resolve nested button hydration error in ContinueWatching ([112e0e5](https://github.com/rudra-sah00/watch-rudra/commit/112e0e5efdcd7f37e2f7f8afb0514d3e91fd222b))
+* show preference buttons in one line (icon + text horizontal) ([669da65](https://github.com/rudra-sah00/watch-rudra/commit/669da65f47b37d4888b4d9302177781e48aea62d))
+* **tauri:** add ipc: and tauri: to CSP connect-src ([c70bbf9](https://github.com/rudra-sah00/watch-rudra/commit/c70bbf9d3dc5a5773f3fdef05bc301b0a3e4d382))
+* **tauri:** rewrite live bridge with proper HLS proxy + devtools ([eeb3ed9](https://github.com/rudra-sah00/watch-rudra/commit/eeb3ed94a7a3eecdd79b5c3c3b9fdd1fa993c59a))
+* **tauri:** show racer windows in 3x2 grid in dev mode with always-on-top ([9407401](https://github.com/rudra-sah00/watch-rudra/commit/940740105aca6c03574289ec90c253ae186dcbd7))
+* **tauri:** use initialization_script for stream capture like Electron ([a6f95c0](https://github.com/rudra-sah00/watch-rudra/commit/a6f95c01518f4d27fe5bbf6afa772677a11d035c))
+* **tauri:** use object CSP format with http://ipc.localhost per official docs ([78a0bfe](https://github.com/rudra-sah00/watch-rudra/commit/78a0bfe63336a1ca385efba4e63d14bf58d47c25))
+* **tauri:** use wildcard CSP to allow all ipc:// connections ([c4de41b](https://github.com/rudra-sah00/watch-rudra/commit/c4de41b2a1ce31550568542feb4b94602b4e7d11))
+* **ui:** match concurrent/speed modals to password input style ([7c9542d](https://github.com/rudra-sah00/watch-rudra/commit/7c9542d670da47188245b2f4eb1d27210ef22138))
+* **ui:** remove max-w-2xl from app preferences to align buttons to card edge ([fe01739](https://github.com/rudra-sah00/watch-rudra/commit/fe01739531b44bb6412cc0e995359897fea34c98))
+* **ui:** subtle glow for active theme/language selection instead of heavy button ([7f1d510](https://github.com/rudra-sah00/watch-rudra/commit/7f1d510f1b350ae2fa1759ef12762e05f3312be0))
+* update download menu close button to ✕ matching language dialog ([e047152](https://github.com/rudra-sah00/watch-rudra/commit/e0471522b2629ac51897934e07ac2d9ba7b45d88))
+* use devUrl for dev mode, frontendDist for production remote URL ([140164b](https://github.com/rudra-sah00/watch-rudra/commit/140164bac370eea49d06cb8a50a96061696cdbc8))
+* use empty div as Suspense fallback instead of children ([f857418](https://github.com/rudra-sah00/watch-rudra/commit/f857418beeaae024d3be938a08daa30af63586ad))
+* wrap IntlProvider in Suspense with children as fallback ([415ff8c](https://github.com/rudra-sah00/watch-rudra/commit/415ff8c39a82e8406cefb082a76a2b2a8d4c78a3))
+
 ## [2.0.1](https://github.com/rudra-sah00/watch-rudra/compare/v2.0.0...v2.0.1) (2026-04-20)
 
 
