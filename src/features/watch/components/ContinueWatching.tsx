@@ -126,10 +126,18 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
   onRemove,
 }: WatchProgressItemProps) {
   return (
-    <button
-      type="button"
+    // biome-ignore lint/a11y/useSemanticElements: outer wrapper contains a nested <button>, can't use <button> here
+    <div
+      role="button"
+      tabIndex={0}
       title={`Continue watching ${item.title}`}
       onClick={() => onSelect(item)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(item);
+        }
+      }}
       className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       {/* Poster */}
@@ -214,6 +222,6 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 });
