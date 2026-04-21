@@ -11,7 +11,7 @@ import { useAuth } from '@/providers/auth-provider';
 export function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
-  const { isDesktopApp, isMacOS, isWindows } = useDesktopApp();
+  const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
   const t = useTranslations('nav');
 
   const isActive = (href: string) => pathname?.startsWith(href);
@@ -22,7 +22,7 @@ export function Navbar() {
       className={`sticky [-webkit-app-region:drag] top-0 z-50 w-full bg-background text-foreground overflow-hidden`}
     >
       <div
-        className={`flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4 ${isDesktopApp && isMacOS ? 'pl-20' : ''} ${isDesktopApp && isWindows ? 'pr-32' : ''}`}
+        className={`flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4 ${isMounted && isDesktopApp && isMacOS ? 'pl-20' : ''} ${isMounted && isDesktopApp && isWindows ? 'pr-32' : ''}`}
       >
         {/* Left Side: Brand Logo */}
         <div className="flex-1 flex justify-start items-center">
@@ -74,16 +74,14 @@ export function Navbar() {
             <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
             <span className="hidden md:inline">{t('watchlist')}</span>
           </Link>
-          {isDesktopApp && (
-            <Link
-              href="/downloads"
-              className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground' : 'text-foreground/70'}`}
-              title={t('offlineDownloads')}
-            >
-              <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-              <span className="hidden md:inline">{t('downloads')}</span>
-            </Link>
-          )}
+          <Link
+            href="/downloads"
+            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground' : 'text-foreground/70'} ${isMounted && isDesktopApp ? '' : 'hidden'}`}
+            title={t('offlineDownloads')}
+          >
+            <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
+            <span className="hidden md:inline">{t('downloads')}</span>
+          </Link>
         </div>
 
         {/* Right Side: Profile */}
