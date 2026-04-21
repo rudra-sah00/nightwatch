@@ -69,7 +69,18 @@ pub fn run() {
                 .close_window()
                 .build()?;
 
-            Menu::with_items(app, &[&app_menu, &edit_menu, &view_menu, &window_menu])
+            let help_menu = SubmenuBuilder::new(app, "Help")
+                .item(&MenuItem::with_id(app, "website", "Visit Website", true, None::<&str>)?)
+                .item(&MenuItem::with_id(app, "github", "GitHub Repository", true, None::<&str>)?)
+                .item(&MenuItem::with_id(app, "report_bug", "Report a Bug", true, None::<&str>)?)
+                .separator()
+                .item(&MenuItem::with_id(app, "check_updates", "Check for Updates…", true, None::<&str>)?)
+                .item(&MenuItem::with_id(app, "release_notes", "Release Notes", true, None::<&str>)?)
+                .separator()
+                .item(&MenuItem::with_id(app, "keyboard_shortcuts", "Keyboard Shortcuts", true, None::<&str>)?)
+                .build()?;
+
+            Menu::with_items(app, &[&app_menu, &edit_menu, &view_menu, &window_menu, &help_menu])
         });
     }
 
@@ -149,11 +160,18 @@ pub fn run() {
         .on_menu_event(|app, event| {
             #[cfg(desktop)]
             {
+                use tauri_plugin_shell::ShellExt;
                 let id = event.id().as_ref();
                 if let Some(win) = app.get_webview_window("main") {
                     match id {
                         "reload" => { let _ = win.eval("window.location.reload()"); }
                         "force_reload" => { let _ = win.eval("window.location.reload()"); }
+                        "website" => { let _ = app.shell().open("https://watch.rudrasahoo.live", None::<tauri_plugin_shell::open::Program>); }
+                        "github" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra", None::<tauri_plugin_shell::open::Program>); }
+                        "report_bug" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/issues/new", None::<tauri_plugin_shell::open::Program>); }
+                        "check_updates" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/releases", None::<tauri_plugin_shell::open::Program>); }
+                        "release_notes" => { let _ = app.shell().open("https://github.com/rudra-sah00/watch-rudra/releases", None::<tauri_plugin_shell::open::Program>); }
+                        "keyboard_shortcuts" => { let _ = win.eval("document.dispatchEvent(new CustomEvent('show-shortcuts'))"); }
                         _ => {}
                     }
                 }
