@@ -126,8 +126,6 @@ pub async fn start_live_bridge(
         let racer_url = format!("https://dlstreams.top{}stream-{}.php", path, stream_id);
         let label = format!("racer-{}-{}", i, stream_id);
         let app_clone = app.clone();
-        let channel_id_clone = channel_id.clone();
-        let token_clone = token.clone();
 
         // Stagger racers by 250ms
         let delay = std::time::Duration::from_millis(i as u64 * 250);
@@ -158,144 +156,105 @@ pub async fn start_live_bridge(
             .visible(is_dev)
             .always_on_top(is_dev)
             .skip_taskbar(!is_dev)
+            .initialization_script(&format!(
+                r#"
+                (function() {{
+                    if (window.__lb_hooked) return;
+                    window.__lb_hooked = true;
+
+                    function report(url) {{
+                        if (url && (url.includes('mono.css') || (url.includes('.m3u8') && !url.includes('localhost')))) {{
+                            try {{
+                                var ii = window.__TAURI_INTERNALS__;
+                                if (ii && ii.invoke) {{
+                                    ii.invoke('live_bridge_found', {{ url: url, racer: '{}' }});
+                                }}
+                            }} catch(e) {{}}
+                        }}
+                    }}
+
+                    // Intercept fetch
+                    var origFetch = window.fetch;
+                    window.fetch = function() {{
+                        var url = arguments[0];
+                        if (typeof url === 'string') report(url);
+                        else if (url && url.url) report(url.url);
+                        return origFetch.apply(this, arguments);
+                    }};
+
+                    // Intercept XMLHttpRequest
+                    var origOpen = XMLHttpRequest.prototype.open;
+                    XMLHttpRequest.prototype.open = function() {{
+                        if (arguments[1]) report(String(arguments[1]));
+                        return origOpen.apply(this, arguments);
+                    }};
+
+                    // Intercept createElement for link/script tags
+                    var origCreate = document.createElement.bind(document);
+                    document.createElement = function(tag) {{
+                        var el = origCreate(tag);
+                        if (tag === 'link' || tag === 'script') {{
+                            var origSetAttr = el.setAttribute.bind(el);
+                            el.setAttribute = function(name, value) {{
+                                if ((name === 'href' || name === 'src') && typeof value === 'string') {{
+                                    report(value);
+                                }}
+                                return origSetAttr(name, value);
+                            }};
+                            var desc = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href') ||
+                                       Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+                            if (desc && desc.set) {{
+                                Object.defineProperty(el, tag === 'link' ? 'href' : 'src', {{
+                                    set: function(v) {{ report(v); desc.set.call(this, v); }},
+                                    get: desc.get,
+                                    configurable: true
+                                }});
+                            }}
+                        }}
+                        return el;
+                    }};
+
+                    // Also poll performance entries as fallback
+                    setInterval(function() {{
+                        try {{
+                            var entries = performance.getEntriesByType('resource');
+                            for (var i = entries.length - 1; i >= 0; i--) {{
+                                report(entries[i].name);
+                            }}
+                        }} catch(e) {{}}
+                    }}, 500);
+                }})();
+                "#,
+                label
+            ))
             .build();
 
             match win {
                 Ok(w) => {
-                    // Poll for mono.css by injecting JS that checks for it
                     let app_poll = app_clone.clone();
-                    let _channel_id_poll = channel_id_clone.clone();
-                    let _token_poll = token_clone.clone();
                     let label_poll = label.clone();
 
+                    // Monitor loop: just wait for resolution or timeout
                     tokio::spawn(async move {
-                        // Give the page time to load
-                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-
-                        for attempt in 0..60 {
-                            // Check if already resolved by another racer
-                            {
-                                let state = app_poll.state::<LiveBridgeState>();
-                                if *state.resolved.lock().unwrap() {
-                                    log::info!("[LiveBridge] [Racer {}] Another racer won, closing", label_poll);
-                                    let _ = w.close();
-                                    return;
-                                }
-                            }
-
-                            // Inject JS to find mono.css or any .m3u8 URL in performance entries
-                            let js = r#"
-                                (function() {
-                                    var entries = performance.getEntriesByType('resource');
-                                    for (var i = 0; i < entries.length; i++) {
-                                        var name = entries[i].name;
-                                        if (name.includes('mono.css') || (name.includes('.m3u8') && !name.includes('localhost'))) {
-                                            return name;
-                                        }
-                                    }
-                                    // Also check all iframes
-                                    var iframes = document.querySelectorAll('iframe');
-                                    for (var j = 0; j < iframes.length; j++) {
-                                        try {
-                                            var iEntries = iframes[j].contentWindow.performance.getEntriesByType('resource');
-                                            for (var k = 0; k < iEntries.length; k++) {
-                                                var iName = iEntries[k].name;
-                                                if (iName.includes('mono.css') || (iName.includes('.m3u8') && !iName.includes('localhost'))) {
-                                                    return iName;
-                                                }
-                                            }
-                                        } catch(e) {}
-                                    }
-                                    return null;
-                                })()
-                            "#;
-
-                            match w.eval(js) {
-                                Ok(_) => {}
-                                Err(_) => {
-                                    if w.is_closable().unwrap_or(false) {
-                                        // Window might be destroyed
-                                        return;
-                                    }
-                                }
-                            }
-
-                            // Use a different approach: listen for navigation events
-                            // Actually, use webview.url() to check loaded resources
-                            // The most reliable way in Tauri: use eval to return the found URL
-
-                            let _check_js = r#"
-                                (function() {
-                                    var entries = performance.getEntriesByType('resource');
-                                    for (var i = entries.length - 1; i >= 0; i--) {
-                                        var name = entries[i].name;
-                                        if (name.includes('mono.css') || (name.includes('.m3u8') && !name.includes('localhost'))) {
-                                            return name;
-                                        }
-                                    }
-                                    return '';
-                                })()
-                            "#;
-
-                            // We can't get return values from eval in Tauri directly.
-                            // Instead, have the JS post a message via __TAURI__.event.emit
-                            let emit_js = format!(
-                                r#"
-                                (function() {{
-                                    var entries = performance.getEntriesByType('resource');
-                                    for (var i = entries.length - 1; i >= 0; i--) {{
-                                        var name = entries[i].name;
-                                        if (name.includes('mono.css') || (name.includes('.m3u8') && !name.includes('localhost'))) {{
-                                            if (window.__TAURI_INTERNALS__) {{
-                                                window.__TAURI_INTERNALS__.invoke('live_bridge_found', {{ url: name, racer: '{}' }});
-                                            }}
-                                            return;
-                                        }}
-                                    }}
-                                    try {{
-                                        var iframes = document.querySelectorAll('iframe');
-                                        for (var j = 0; j < iframes.length; j++) {{
-                                            var iEntries = iframes[j].contentWindow.performance.getEntriesByType('resource');
-                                            for (var k = iEntries.length - 1; k >= 0; k--) {{
-                                                var iName = iEntries[k].name;
-                                                if (iName.includes('mono.css') || (iName.includes('.m3u8') && !iName.includes('localhost'))) {{
-                                                    if (window.__TAURI_INTERNALS__) {{
-                                                        window.__TAURI_INTERNALS__.invoke('live_bridge_found', {{ url: iName, racer: '{}' }});
-                                                    }}
-                                                    return;
-                                                }}
-                                            }}
-                                        }}
-                                    }} catch(e) {{}}
-                                }})()
-                                "#,
-                                label_poll, label_poll
-                            );
-
-                            let _ = w.eval(&emit_js);
-
+                        for attempt in 0..120 {
                             tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
-                            // Check if we got resolved via the command
-                            {
-                                let state = app_poll.state::<LiveBridgeState>();
-                                if *state.resolved.lock().unwrap() {
-                                    // Mute and close if not the winner
-                                    let _ = w.eval("document.querySelectorAll('video,audio').forEach(m=>{m.pause();m.removeAttribute('src');m.load()})");
-                                    if !is_dev {
-                                        let _ = w.close();
-                                    }
-                                    return;
+                            let state = app_poll.state::<LiveBridgeState>();
+                            if *state.resolved.lock().unwrap() {
+                                // Mute media in the winner, close losers
+                                let _ = w.eval("document.querySelectorAll('video,audio').forEach(m=>{m.pause();m.removeAttribute('src');m.load()})");
+                                if !is_dev {
+                                    let _ = w.close();
                                 }
+                                return;
                             }
 
-                            if attempt > 0 && attempt % 10 == 0 {
-                                log::debug!("[LiveBridge] [Racer {}] Still searching... (attempt {})", label_poll, attempt);
+                            if attempt > 0 && attempt % 20 == 0 {
+                                log::debug!("[LiveBridge] [{}] Still searching... ({}s)", label_poll, attempt / 2);
                             }
                         }
 
-                        // Timeout - close this racer
-                        log::warn!("[LiveBridge] [Racer {}] Timed out", label_poll);
+                        log::warn!("[LiveBridge] [{}] Timed out after 60s", label_poll);
                         let _ = w.close();
                     });
                 }
