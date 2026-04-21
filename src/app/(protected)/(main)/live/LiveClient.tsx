@@ -8,6 +8,7 @@ import {
   Globe2,
   Radio,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
@@ -33,6 +34,7 @@ const _SERVER_2_SPORTS_FALLBACK = [
 function LiveContent() {
   const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
+  const t = useTranslations('live');
 
   const {
     activeServer,
@@ -93,15 +95,15 @@ function LiveContent() {
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
             <div className="flex-shrink-0">
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
-                LIVE
+                {t('heroTitle')}
                 <br />
                 <span className="bg-background px-4 inline-block border-[4px] border-border  -rotate-1 ml-2 mt-2">
-                  STREAM
+                  {t('heroTitleStream')}
                 </span>
               </h1>
               <div className="flex items-center gap-3">
                 <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-                  Form Follows Action
+                  {t('heroSubtitle')}
                 </p>
                 <div className="w-12 h-[3px] bg-primary hidden sm:block" />
               </div>
@@ -111,7 +113,7 @@ function LiveContent() {
               {/* Server Selector Dropdown */}
               <div className="relative w-full md:w-auto shrink-0 z-50">
                 <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
-                  1. Region Provider
+                  1. {t('regionProvider')}
                 </p>
                 <button
                   type="button"
@@ -187,7 +189,7 @@ function LiveContent() {
               {/* Sport Selector Dropdown */}
               <div className="relative w-full md:w-auto flex-grow z-40">
                 <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
-                  2. Select Coverage
+                  2. {t('selectCoverage')}
                 </p>
                 <button
                   type="button"
@@ -276,13 +278,13 @@ function LiveContent() {
             <div className="bg-neo-red border-[4px] border-border  px-10 py-12 max-w-lg w-full flex flex-col items-center">
               <Radio className="w-12 h-12 text-foreground mb-6" />
               <p className="font-headline font-black text-2xl uppercase tracking-tighter text-foreground mb-8 bg-background px-4 py-2 border-[4px] border-border">
-                Failed to Load Schedule
+                {t('failedToLoadSchedule')}
               </p>
               <Button
                 onClick={refresh}
                 className="bg-background text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-muted"
               >
-                Try Again
+                {t('tryAgain')}
               </Button>
             </div>
           </div>
@@ -290,12 +292,14 @@ function LiveContent() {
           <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border  text-center max-w-2xl mx-auto">
             <Calendar className="w-20 h-20 text-neo-blue mb-6" />
             <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-              {isAllChannelsView ? 'No Channels Found' : 'No Matches Found'}
+              {isAllChannelsView ? t('noChannelsFound') : t('noMatchesFound')}
             </h3>
             <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-md">
               {isAllChannelsView
-                ? 'No always-on channels are currently available from this provider.'
-                : `No ${activeSport?.label?.toLowerCase()} matches scheduled for the upcoming days.`}
+                ? t('noChannelsAvailable')
+                : t('noMatchesScheduled', {
+                    sport: activeSport?.label?.toLowerCase() || '',
+                  })}
             </p>
           </div>
         ) : (
@@ -305,7 +309,7 @@ function LiveContent() {
                 <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
                   <Radio className="w-6 h-6 text-primary-foreground stroke-[3px]" />
                   <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
-                    All Channels
+                    {t('allChannels')}
                   </h2>
                   <span className="bg-primary text-neo-yellow px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
                     {schedule.length}
@@ -327,7 +331,7 @@ function LiveContent() {
                     <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
                       <Clock className="w-6 h-6 text-primary-foreground stroke-[3px]" />
                       <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
-                        Schedule
+                        {t('schedule')}
                       </h2>
                     </div>
                     <div className="space-y-8">
@@ -344,12 +348,14 @@ function LiveContent() {
                               <div className="flex items-center gap-3">
                                 <Calendar className="w-6 h-6 text-foreground stroke-[3px]" />
                                 <span className="text-xl md:text-2xl font-black uppercase tracking-widest text-foreground font-headline mt-1">
-                                  {isToday ? 'Today' : date}
+                                  {isToday ? t('today') : date}
                                 </span>
                               </div>
                               <span className="bg-primary text-neo-yellow px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
                                 {matches.length}{' '}
-                                {matches.length === 1 ? 'Match' : 'Matches'}
+                                {matches.length === 1
+                                  ? t('match')
+                                  : t('matches')}
                               </span>
                             </div>
                             <div className="flex flex-col gap-4">
@@ -369,11 +375,11 @@ function LiveContent() {
                     <div className="flex items-center gap-4 mb-8 bg-primary border-[4px] border-border px-5 py-3 inline-flex ">
                       <CheckCircle2 className="w-6 h-6 text-primary-foreground stroke-[3px]" />
                       <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
-                        Completed
+                        {t('completed')}
                       </h2>
                       <span className="bg-secondary text-secondary-foreground px-3 py-1 border-[3px] border-border text-sm font-black font-headline uppercase tracking-widest">
                         {endedMatches.length}{' '}
-                        {endedMatches.length === 1 ? 'Match' : 'Matches'}
+                        {endedMatches.length === 1 ? t('match') : t('matches')}
                       </span>
                     </div>
                     <div className="bg-transparent">

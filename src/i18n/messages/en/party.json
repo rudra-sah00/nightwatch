@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "No messages yet",
+    "beFirst": "Be the first to say hello! 👋",
+    "placeholder": "Message...",
+    "disabled": "Chat has been disabled by the host",
+    "isTyping": "{name} is typing",
+    "twoTyping": "{name1} and {name2} are typing",
+    "threeTyping": "{name1}, {name2}, and {name3} are typing",
+    "manyTyping": "{count} people are typing"
+  },
+  "sidebar": {
+    "participants": "Participants",
+    "chat": "Chat",
+    "soundboard": "Soundboard",
+    "sketch": "Sketch"
+  },
+  "pending": {
+    "waitingToJoin": "{count} waiting to join",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "media": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "cameraOff": "Turn Camera Off",
+    "cameraOn": "Turn Camera On",
+    "deafen": "Deafen",
+    "undeafen": "Undeafen",
+    "selectMicrophone": "Select Microphone",
+    "selectCamera": "Select Camera",
+    "noDevices": "No devices found"
+  },
+  "actions": {
+    "invite": "Invite",
+    "copied": "Copied",
+    "end": "End",
+    "leave": "Leave",
+    "kick": "Kick"
+  },
+  "video": {
+    "noOneOnCamera": "No one on camera yet",
+    "turnOnCamera": "Turn on your camera or wait for others to join"
+  },
+  "status": {
+    "connected": "Connected",
+    "connecting": "Connecting…"
+  }
+}

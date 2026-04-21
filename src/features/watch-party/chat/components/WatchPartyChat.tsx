@@ -1,6 +1,7 @@
 import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { memo, useMemo } from 'react';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -39,6 +40,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
   currentUserId,
 }: Pick<WatchPartyChatProps, 'messages' | 'currentUserId'>) {
   const { messagesEndRef } = useChatScroll();
+  const t = useTranslations('party.chat');
 
   return (
     <div className="flex flex-col h-full relative">
@@ -64,7 +66,7 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
 
       <div className="p-4 border-t-[4px] border-border bg-background text-center shrink-0">
         <p className="text-xs font-black font-headline uppercase tracking-widest text-neo-red">
-          Chat has been disabled by the host
+          {t('disabled')}
         </p>
       </div>
     </div>
@@ -100,6 +102,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
   });
 
   const { theme: appTheme } = useTheme();
+  const t = useTranslations('party.chat');
 
   const resolvedDark =
     appTheme === 'dark' ||
@@ -121,10 +124,10 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             </div>
             <div className="text-center">
               <p className="font-black font-headline uppercase tracking-widest text-lg">
-                No messages yet
+                {t('noMessages')}
               </p>
               <p className="text-xs font-headline uppercase tracking-widest font-bold text-foreground/70 mt-1">
-                Be the first to say hello! 👋
+                {t('beFirst')}
               </p>
             </div>
           </div>
@@ -158,12 +161,19 @@ export const WatchPartyChat = memo(function WatchPartyChat({
               </div>
               <span className="text-xs font-black font-headline uppercase tracking-widest text-foreground">
                 {typingUsers.length === 1
-                  ? `${typingUsers[0].userName} is typing`
+                  ? t('isTyping', { name: typingUsers[0].userName })
                   : typingUsers.length === 2
-                    ? `${typingUsers[0].userName} and ${typingUsers[1].userName} are typing`
+                    ? t('twoTyping', {
+                        name1: typingUsers[0].userName,
+                        name2: typingUsers[1].userName,
+                      })
                     : typingUsers.length === 3
-                      ? `${typingUsers[0].userName}, ${typingUsers[1].userName}, and ${typingUsers[2].userName} are typing`
-                      : `${typingUsers.length} people are typing`}
+                      ? t('threeTyping', {
+                          name1: typingUsers[0].userName,
+                          name2: typingUsers[1].userName,
+                          name3: typingUsers[2].userName,
+                        })
+                      : t('manyTyping', { count: typingUsers.length })}
               </span>
             </div>
             <div className="flex gap-1">
@@ -236,7 +246,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             value={input}
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message..."
+            placeholder={t('placeholder')}
             className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
           />
           <Button

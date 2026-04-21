@@ -1,6 +1,7 @@
 'use client';
 
 import { Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import type { CricketMatchInfo, LiveMatch } from '../api';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
@@ -59,6 +60,8 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
     handleWatchParty,
   } = useLiveMatchCard(match);
 
+  const t = useTranslations('live');
+
   const isServer2 = match.id.startsWith('live-server2');
   const isServer1 = match.id.startsWith('live-server1');
   const isChannelCard =
@@ -66,10 +69,10 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
     match.type === 'all_channels' ||
     isServer1;
   const providerName = isServer1
-    ? 'Live TV'
+    ? t('liveTV')
     : isServer2
-      ? 'Private Server'
-      : 'Sports Today';
+      ? t('privateServer')
+      : t('sportsToday');
   const team1Name = asText(match.team1?.name, 'Team 1');
   const team2Name = asText(match.team2?.name, 'Team 2');
   const leagueName = asText(match.league) || asText(match.type);
@@ -95,7 +98,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
           {isLive ? (
             <div className="animate-pulse mb-1">
               <span className="px-3 py-1 bg-neo-red text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md">
-                Live Now
+                {t('liveNow')}
               </span>
             </div>
           ) : isUpcoming ? (
@@ -104,7 +107,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             </span>
           ) : (
             <span className="text-sm font-black uppercase tracking-widest text-foreground/60 font-headline mb-1">
-              Final
+              {t('final')}
             </span>
           )}
 
@@ -232,7 +235,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors hover:bg-foreground hover:text-background"
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
-            Watch
+            {t('watch')}
           </Button>
         </div>
       </div>

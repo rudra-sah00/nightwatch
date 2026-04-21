@@ -1,5 +1,6 @@
 import { Check, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import type { RoomMember } from '../room/types';
 
@@ -18,6 +19,8 @@ export function PendingRequests({
   onApprove,
   onReject,
 }: PendingRequestsProps) {
+  const t = useTranslations('party.pending');
+
   if (pendingMembers.length === 0) {
     return null;
   }
@@ -27,7 +30,7 @@ export function PendingRequests({
       <div className="px-3 py-2 flex items-center gap-2 border-b-[4px] border-border bg-background">
         <UserPlus className="w-4 h-4 text-foreground stroke-[3px]" />
         <span className="text-[10px] font-black font-headline text-foreground uppercase tracking-widest">
-          {pendingMembers.length} waiting to join
+          {t('waitingToJoin', { count: pendingMembers.length })}
         </span>
       </div>
       <div className="p-3 space-y-3 max-h-40 overflow-y-auto custom-scrollbar bg-neo-yellow">
@@ -65,7 +68,7 @@ export function PendingRequests({
                 type="button"
                 onClick={() => onApprove(pending.id)}
                 className="p-1 border-[2px] border-border hover:bg-success hover:text-primary-foreground transition-colors bg-background text-success "
-                title="Approve"
+                title={t('approve')}
               >
                 <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
               </Button>
@@ -73,7 +76,7 @@ export function PendingRequests({
                 type="button"
                 onClick={() => onReject(pending.id)}
                 className="p-1 border-[2px] border-border hover:bg-neo-red hover:text-primary-foreground transition-colors bg-background text-neo-red "
-                title="Reject"
+                title={t('reject')}
               >
                 <X aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
               </Button>

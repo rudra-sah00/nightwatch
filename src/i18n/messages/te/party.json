@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "ఇంకా సందేశాలు లేవు",
+    "beFirst": "మొదట హలో చెప్పండి! 👋",
+    "placeholder": "సందేశం...",
+    "disabled": "హోస్ట్ చాట్‌ను నిలిపివేశారు",
+    "isTyping": "{name} టైప్ చేస్తున్నారు",
+    "twoTyping": "{name1} మరియు {name2} టైప్ చేస్తున్నారు",
+    "threeTyping": "{name1}, {name2}, మరియు {name3} టైప్ చేస్తున్నారు",
+    "manyTyping": "{count} మంది టైప్ చేస్తున్నారు"
+  },
+  "sidebar": {
+    "participants": "పాల్గొనేవారు",
+    "chat": "చాట్",
+    "soundboard": "సౌండ్‌బోర్డ్",
+    "sketch": "స్కెచ్"
+  },
+  "pending": {
+    "waitingToJoin": "{count} చేరడానికి వేచి ఉన్నారు",
+    "approve": "ఆమోదించు",
+    "reject": "తిరస్కరించు"
+  },
+  "media": {
+    "mute": "మ్యూట్",
+    "unmute": "అన్‌మ్యూట్",
+    "cameraOff": "కెమెరా ఆఫ్",
+    "cameraOn": "కెమెరా ఆన్",
+    "deafen": "డెఫెన్",
+    "undeafen": "అన్‌డెఫెన్",
+    "selectMicrophone": "మైక్రోఫోన్ ఎంచుకోండి",
+    "selectCamera": "కెమెరా ఎంచుకోండి",
+    "noDevices": "పరికరాలు కనుగొనబడలేదు"
+  },
+  "actions": {
+    "invite": "ఆహ్వానించు",
+    "copied": "కాపీ అయింది",
+    "end": "ముగించు",
+    "leave": "వెళ్ళిపో",
+    "kick": "తొలగించు"
+  },
+  "video": {
+    "noOneOnCamera": "ఇంకా ఎవరూ కెమెరాలో లేరు",
+    "turnOnCamera": "మీ కెమెరాను ఆన్ చేయండి లేదా ఇతరులు చేరే వరకు వేచి ఉండండి"
+  },
+  "status": {
+    "connected": "కనెక్ట్ అయింది",
+    "connecting": "కనెక్ట్ అవుతోంది…"
+  }
+}

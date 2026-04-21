@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "Aún no hay mensajes",
+    "beFirst": "¡Sé el primero en saludar! 👋",
+    "placeholder": "Mensaje...",
+    "disabled": "El anfitrión ha desactivado el chat",
+    "isTyping": "{name} está escribiendo",
+    "twoTyping": "{name1} y {name2} están escribiendo",
+    "threeTyping": "{name1}, {name2} y {name3} están escribiendo",
+    "manyTyping": "{count} personas están escribiendo"
+  },
+  "sidebar": {
+    "participants": "Participantes",
+    "chat": "Chat",
+    "soundboard": "Soundboard",
+    "sketch": "Dibujo"
+  },
+  "pending": {
+    "waitingToJoin": "{count} esperando unirse",
+    "approve": "Aprobar",
+    "reject": "Rechazar"
+  },
+  "media": {
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "cameraOff": "Apagar Cámara",
+    "cameraOn": "Encender Cámara",
+    "deafen": "Ensordecer",
+    "undeafen": "Desensordecer",
+    "selectMicrophone": "Seleccionar Micrófono",
+    "selectCamera": "Seleccionar Cámara",
+    "noDevices": "No se encontraron dispositivos"
+  },
+  "actions": {
+    "invite": "Invitar",
+    "copied": "Copiado",
+    "end": "Terminar",
+    "leave": "Salir",
+    "kick": "Expulsar"
+  },
+  "video": {
+    "noOneOnCamera": "Nadie en cámara aún",
+    "turnOnCamera": "Enciende tu cámara o espera a que otros se unan"
+  },
+  "status": {
+    "connected": "Conectado",
+    "connecting": "Conectando…"
+  }
+}

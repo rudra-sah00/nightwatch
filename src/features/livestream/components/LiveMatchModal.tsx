@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2, Play, Users, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
@@ -107,6 +108,7 @@ function LiveMatchModalContent({
   isMobile,
 }: Omit<LiveMatchModalProps, 'isOpen'> & { isMobile: boolean }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('live');
 
   // Escape key to close + auto-focus on open
   useEffect(() => {
@@ -124,10 +126,10 @@ function LiveMatchModalContent({
   const isServer2 = match.id.startsWith('live-server2');
   const isServer1 = match.id.startsWith('live-server1:');
   const providerName = isServer1
-    ? 'Live TV'
+    ? t('liveTV')
     : isServer2
-      ? 'Private Server'
-      : 'Sports Today';
+      ? t('privateServer')
+      : t('sportsToday');
   const canWatch =
     (isLive || isServer2 || isServer1) &&
     (match.playType === 'PlayTypeVideo' ||
@@ -182,7 +184,7 @@ function LiveMatchModalContent({
               id="live-match-modal-title"
               className="font-headline font-black uppercase tracking-widest text-foreground text-lg"
             >
-              {isChannelCard ? 'Channel Details' : 'Match Details'}
+              {isChannelCard ? t('channelDetails') : t('matchDetails')}
             </span>
             <div
               className={`px-3 py-1 border border-gray-200 text-[10px] font-black font-headline uppercase tracking-[0.2em] rounded-md hidden sm:block ${
@@ -222,7 +224,7 @@ function LiveMatchModalContent({
                       <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
                     </span>
                     <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
-                      Live
+                      {t('live')}
                     </span>
                   </div>
                 )}
@@ -252,13 +254,13 @@ function LiveMatchModalContent({
                       <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
                     </span>
                     <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
-                      Live
+                      {t('live')}
                     </span>
                   </div>
                 )}
                 {isEnded && (
                   <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-neo-yellow border-[3px] border-border px-3 py-1 ">
-                    Final
+                    {t('final')}
                   </span>
                 )}
                 {isUpcoming && (
@@ -342,10 +344,10 @@ function LiveMatchModalContent({
                 <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
                 <span className="truncate">
                   {canWatch
-                    ? 'Watch Solo'
+                    ? t('watchSolo')
                     : isUpcoming
-                      ? 'Not Started Yet'
-                      : 'Stream Unavailable'}
+                      ? t('notStartedYet')
+                      : t('streamUnavailable')}
                 </span>
               </button>
 
@@ -370,10 +372,10 @@ function LiveMatchModalContent({
                   )}
                   <span className="truncate">
                     {isServer1
-                      ? 'Coming Soon'
+                      ? t('comingSoon')
                       : isCreatingParty
-                        ? 'Creating'
-                        : 'Watch Together'}
+                        ? t('creating')
+                        : t('watchTogether')}
                   </span>
                 </button>
               )}
@@ -382,7 +384,7 @@ function LiveMatchModalContent({
             {/* Mobile-only note */}
             {isMobile && (
               <p className="text-center text-sm font-black uppercase tracking-widest text-neo-red font-headline">
-                Watch Party is only available on desktop.
+                {t('watchPartyDesktopOnly')}
               </p>
             )}
           </div>

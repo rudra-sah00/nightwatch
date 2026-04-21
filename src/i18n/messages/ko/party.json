@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "아직 메시지가 없습니다",
+    "beFirst": "먼저 인사해 보세요! 👋",
+    "placeholder": "메시지...",
+    "disabled": "호스트가 채팅을 비활성화했습니다",
+    "isTyping": "{name}님이 입력 중",
+    "twoTyping": "{name1}님과 {name2}님이 입력 중",
+    "threeTyping": "{name1}님, {name2}님, {name3}님이 입력 중",
+    "manyTyping": "{count}명이 입력 중"
+  },
+  "sidebar": {
+    "participants": "참가자",
+    "chat": "채팅",
+    "soundboard": "사운드보드",
+    "sketch": "스케치"
+  },
+  "pending": {
+    "waitingToJoin": "{count}명이 참가 대기 중",
+    "approve": "승인",
+    "reject": "거부"
+  },
+  "media": {
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "cameraOff": "카메라 끄기",
+    "cameraOn": "카메라 켜기",
+    "deafen": "소리 끄기",
+    "undeafen": "소리 켜기",
+    "selectMicrophone": "마이크 선택",
+    "selectCamera": "카메라 선택",
+    "noDevices": "장치를 찾을 수 없음"
+  },
+  "actions": {
+    "invite": "초대",
+    "copied": "복사됨",
+    "end": "종료",
+    "leave": "나가기",
+    "kick": "추방"
+  },
+  "video": {
+    "noOneOnCamera": "아직 카메라를 켠 사람이 없습니다",
+    "turnOnCamera": "카메라를 켜거나 다른 사람이 참가할 때까지 기다리세요"
+  },
+  "status": {
+    "connected": "연결됨",
+    "connecting": "연결 중…"
+  }
+}

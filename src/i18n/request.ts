@@ -37,12 +37,24 @@ export default getRequestConfig(async () => {
     watchMessages = (await import(`./messages/${locale}/watch.json`)).default;
   } catch {}
 
+  let liveMessages: Record<string, unknown> = {};
+  try {
+    liveMessages = (await import(`./messages/${locale}/live.json`)).default;
+  } catch {}
+
+  let partyMessages: Record<string, unknown> = {};
+  try {
+    partyMessages = (await import(`./messages/${locale}/party.json`)).default;
+  } catch {}
+
   const messages = {
     ...common,
     auth: authMessages,
     profile: profileMessages,
     search: searchMessages,
     watch: watchMessages,
+    live: liveMessages,
+    party: partyMessages,
   };
 
   return { locale, messages };

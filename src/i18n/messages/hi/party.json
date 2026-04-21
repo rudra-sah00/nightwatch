@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "अभी तक कोई संदेश नहीं",
+    "beFirst": "सबसे पहले नमस्ते कहें! 👋",
+    "placeholder": "संदेश...",
+    "disabled": "होस्ट ने चैट अक्षम कर दी है",
+    "isTyping": "{name} टाइप कर रहा है",
+    "twoTyping": "{name1} और {name2} टाइप कर रहे हैं",
+    "threeTyping": "{name1}, {name2}, और {name3} टाइप कर रहे हैं",
+    "manyTyping": "{count} लोग टाइप कर रहे हैं"
+  },
+  "sidebar": {
+    "participants": "प्रतिभागी",
+    "chat": "चैट",
+    "soundboard": "साउंडबोर्ड",
+    "sketch": "स्केच"
+  },
+  "pending": {
+    "waitingToJoin": "{count} शामिल होने की प्रतीक्षा में",
+    "approve": "स्वीकार करें",
+    "reject": "अस्वीकार करें"
+  },
+  "media": {
+    "mute": "म्यूट",
+    "unmute": "अनम्यूट",
+    "cameraOff": "कैमरा बंद करें",
+    "cameraOn": "कैमरा चालू करें",
+    "deafen": "डेफ़न",
+    "undeafen": "अनडेफ़न",
+    "selectMicrophone": "माइक्रोफ़ोन चुनें",
+    "selectCamera": "कैमरा चुनें",
+    "noDevices": "कोई डिवाइस नहीं मिला"
+  },
+  "actions": {
+    "invite": "आमंत्रित करें",
+    "copied": "कॉपी हो गया",
+    "end": "समाप्त",
+    "leave": "छोड़ें",
+    "kick": "निकालें"
+  },
+  "video": {
+    "noOneOnCamera": "अभी कोई कैमरे पर नहीं",
+    "turnOnCamera": "अपना कैमरा चालू करें या दूसरों के शामिल होने की प्रतीक्षा करें"
+  },
+  "status": {
+    "connected": "कनेक्टेड",
+    "connecting": "कनेक्ट हो रहा है…"
+  }
+}

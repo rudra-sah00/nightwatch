@@ -11,6 +11,7 @@ import {
   VideoOff,
   X,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
@@ -90,6 +91,8 @@ export function MediaControls({
     setShowVideoDevices,
   } = useMediaControls();
 
+  const t = useTranslations('party');
+
   return (
     <div className="border-t-[4px] border-border bg-background relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
@@ -117,7 +120,7 @@ export function MediaControls({
               <Copy aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
             )}
             <span className="hidden xl:inline">
-              {linkCopied ? 'Copied' : 'Invite'}
+              {linkCopied ? t('actions.copied') : t('actions.invite')}
             </span>
           </Button>
         ) : null}
@@ -133,7 +136,9 @@ export function MediaControls({
           )}
         >
           <LogOut aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
-          <span className="hidden xl:inline">{isHost ? 'End' : 'Leave'}</span>
+          <span className="hidden xl:inline">
+            {isHost ? t('actions.end') : t('actions.leave')}
+          </span>
         </Button>
       </div>
 
@@ -166,7 +171,9 @@ export function MediaControls({
                       : 'bg-neo-red animate-[pulse_1.5s_ease-in-out_infinite]',
                   )}
                 />
-                {isAgoraConnected ? 'Connected' : 'Connecting…'}
+                {isAgoraConnected
+                  ? t('status.connected')
+                  : t('status.connecting')}
               </span>
             </div>
           </div>
@@ -177,7 +184,7 @@ export function MediaControls({
             <div className="flex items-center relative">
               {showAudioDevices ? (
                 <DeviceDropdown
-                  title="Select Microphone"
+                  title={t('media.selectMicrophone')}
                   devices={audioInputDevices}
                   selectedDevice={selectedAudioDevice}
                   onSelect={(deviceId) => {
@@ -195,7 +202,7 @@ export function MediaControls({
                 className={cn(
                   'rounded-r-none border-r-0 z-10 h-7 px-2 sm:px-2.5 sm:h-8 w-auto',
                 )}
-                title={audioEnabled ? 'Mute' : 'Unmute'}
+                title={audioEnabled ? t('media.mute') : t('media.unmute')}
               >
                 {audioEnabled ? (
                   <Mic
@@ -220,7 +227,7 @@ export function MediaControls({
                 className={cn(
                   'rounded-l-none w-5 h-7 sm:h-8 sm:w-6 px-0 border-l-0',
                 )}
-                title="Select Microphone"
+                title={t('media.selectMicrophone')}
               >
                 {showAudioDevices ? (
                   <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
@@ -234,7 +241,7 @@ export function MediaControls({
             <div className="flex items-center relative">
               {showVideoDevices ? (
                 <DeviceDropdown
-                  title="Select Camera"
+                  title={t('media.selectCamera')}
                   devices={videoInputDevices}
                   selectedDevice={selectedVideoDevice}
                   onSelect={(deviceId) => {
@@ -252,7 +259,9 @@ export function MediaControls({
                 className={cn(
                   'rounded-r-none border-r-0 z-10 h-7 px-2 sm:px-2.5 sm:h-8 w-auto',
                 )}
-                title={videoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
+                title={
+                  videoEnabled ? t('media.cameraOff') : t('media.cameraOn')
+                }
               >
                 {videoEnabled ? (
                   <Video
@@ -277,7 +286,7 @@ export function MediaControls({
                 className={cn(
                   'rounded-l-none w-5 h-7 sm:h-8 sm:w-6 px-0 border-l-0',
                 )}
-                title="Select Camera"
+                title={t('media.selectCamera')}
               >
                 {showVideoDevices ? (
                   <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3px]" />
@@ -293,7 +302,7 @@ export function MediaControls({
               size="sm"
               onClick={onToggleDeafen}
               className="relative h-7 w-7 sm:h-8 sm:w-8 px-0"
-              title={isDeafened ? 'Undeafen' : 'Deafen'}
+              title={isDeafened ? t('media.undeafen') : t('media.deafen')}
             >
               {isDeafened ? (
                 <HeadphoneOff

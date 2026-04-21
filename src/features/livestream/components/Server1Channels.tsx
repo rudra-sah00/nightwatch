@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Play, Search, Tv } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ export function Server1Channels() {
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const t = useTranslations('live');
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -33,7 +35,7 @@ export function Server1Channels() {
   if (error) {
     return (
       <div className="text-neo-red py-10 font-headline font-black text-center text-xl uppercase tracking-widest border-[4px] border-border bg-background p-6">
-        Failed to load channels: {error.message}
+        {t('failedToLoadChannels')}: {error.message}
       </div>
     );
   }
@@ -46,7 +48,7 @@ export function Server1Channels() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/50" />
           <Input
             className="pl-14 h-14 bg-background border-[3px] border-border font-headline font-bold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 uppercase tracking-widest placeholder:text-foreground/30 rounded-md transition-all"
-            placeholder="SEARCH 900+ 24/7 CHANNELS..."
+            placeholder={t('searchChannels')}
             value={search}
             onChange={handleSearch}
           />
@@ -54,7 +56,7 @@ export function Server1Channels() {
 
         {total > 0 && (
           <div className="text-foreground font-headline font-black text-xl uppercase tracking-[0.2em] whitespace-nowrap bg-neo-yellow px-4 py-2 border-[3px] border-border rounded-md">
-            {total} <span className="text-sm">CHANNELS</span>
+            {total} <span className="text-sm">{t('channels')}</span>
           </div>
         )}
       </div>
@@ -73,7 +75,7 @@ export function Server1Channels() {
         <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card mb-10">
           <Tv className="w-16 h-16 text-foreground/20 mb-6" />
           <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
-            No Channels Found
+            {t('noChannelsFoundSearch')}
           </p>
         </div>
       ) : (
@@ -94,10 +96,11 @@ export function Server1Channels() {
             disabled={page === 1 || isLoading}
             className="flex-1 sm:flex-none border-[3px] border-border font-headline font-black text-xl uppercase tracking-[0.2em] w-full sm:w-48 h-14"
           >
-            <ChevronLeft className="w-6 h-6 mr-2" /> PREV
+            <ChevronLeft className="w-6 h-6 mr-2" /> {t('prev')}
           </Button>
           <span className="font-headline font-black text-lg md:text-2xl uppercase tracking-widest px-6 py-2 bg-secondary border-[3px] border-border rounded-md">
-            PAGE {page} <span className="opacity-40 px-1">OF</span> {totalPages}
+            {t('page')} {page}{' '}
+            <span className="opacity-40 px-1">{t('of')}</span> {totalPages}
           </span>
           <Button
             variant="neo-outline"
@@ -106,7 +109,7 @@ export function Server1Channels() {
             disabled={page === totalPages || isLoading}
             className="flex-1 sm:flex-none border-[3px] border-border font-headline font-black text-xl uppercase tracking-[0.2em] w-full sm:w-48 h-14"
           >
-            NEXT <ChevronRight className="w-6 h-6 ml-2" />
+            {t('next')} <ChevronRight className="w-6 h-6 ml-2" />
           </Button>
         </div>
       )}
@@ -116,6 +119,7 @@ export function Server1Channels() {
 
 function ChannelRow({ channel }: { channel: Channel }) {
   const [imgError, setImgError] = useState(false);
+  const t = useTranslations('live');
   // Extract just the channel number if providerId is a daddylive URL
   // This prevents Vercel WAF from blocking the /live/live-server1:https:/... path.
   let cleanProviderId = channel.providerId || '';
@@ -169,15 +173,15 @@ function ChannelRow({ channel }: { channel: Channel }) {
         <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
           <div className="flex gap-2 animate-pulse mb-1">
             <span className="px-3 py-1 bg-neo-red text-white text-[10px] font-black uppercase tracking-widest border-[2px] border-border font-headline rounded-md inline-flex">
-              24/7 LIVE
+              {t('twentyFourSeven')}
             </span>
           </div>
           <div className="flex flex-col items-center md:items-start gap-1 w-full mt-1">
             <span className="px-2 py-0.5 bg-neo-blue text-white border-[2px] border-border text-[9px] font-black uppercase tracking-widest rounded-sm">
-              DESKTOP ONLY
+              {t('desktopOnly')}
             </span>
             <span className="px-2 py-0.5 bg-secondary border-[2px] border-border text-[9px] font-bold uppercase tracking-[0.1em] text-foreground truncate max-w-full rounded-sm">
-              {channel.category || 'TV Channel'}
+              {channel.category || t('tvChannel')}
             </span>
           </div>
         </div>
@@ -215,7 +219,7 @@ function ChannelRow({ channel }: { channel: Channel }) {
             className="w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors hover:bg-foreground hover:text-background"
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
-            Watch
+            {t('watch')}
           </Button>
         </div>
       </div>

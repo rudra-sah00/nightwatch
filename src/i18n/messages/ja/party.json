@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "まだメッセージはありません",
+    "beFirst": "最初に挨拶しましょう！ 👋",
+    "placeholder": "メッセージ...",
+    "disabled": "ホストがチャットを無効にしました",
+    "isTyping": "{name}が入力中",
+    "twoTyping": "{name1}と{name2}が入力中",
+    "threeTyping": "{name1}、{name2}、{name3}が入力中",
+    "manyTyping": "{count}人が入力中"
+  },
+  "sidebar": {
+    "participants": "参加者",
+    "chat": "チャット",
+    "soundboard": "サウンドボード",
+    "sketch": "スケッチ"
+  },
+  "pending": {
+    "waitingToJoin": "{count}人が参加待ち",
+    "approve": "承認",
+    "reject": "拒否"
+  },
+  "media": {
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "cameraOff": "カメラオフ",
+    "cameraOn": "カメラオン",
+    "deafen": "消音",
+    "undeafen": "消音解除",
+    "selectMicrophone": "マイクを選択",
+    "selectCamera": "カメラを選択",
+    "noDevices": "デバイスが見つかりません"
+  },
+  "actions": {
+    "invite": "招待",
+    "copied": "コピー済み",
+    "end": "終了",
+    "leave": "退出",
+    "kick": "キック"
+  },
+  "video": {
+    "noOneOnCamera": "まだ誰もカメラをオンにしていません",
+    "turnOnCamera": "カメラをオンにするか、他の人が参加するのを待ちましょう"
+  },
+  "status": {
+    "connected": "接続済み",
+    "connecting": "接続中…"
+  }
+}

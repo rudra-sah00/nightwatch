@@ -1,4 +1,5 @@
 import { Video } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { ParticipantView } from './ParticipantView';
 
@@ -28,6 +29,8 @@ export function VideoGrid({
     return 0;
   });
 
+  const t = useTranslations('party.video');
+
   if (sorted.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-12 text-center px-4">
@@ -35,10 +38,10 @@ export function VideoGrid({
           <Video className="w-8 h-8 text-muted-foreground stroke-2" />
         </div>
         <p className="font-semibold font-headline uppercase tracking-widest text-lg text-foreground">
-          No one on camera yet
+          {t('noOneOnCamera')}
         </p>
         <p className="text-muted-foreground text-xs font-medium mt-2 max-w-[200px]">
-          Turn on your camera or wait for others to join
+          {t('turnOnCamera')}
         </p>
       </div>
     );
