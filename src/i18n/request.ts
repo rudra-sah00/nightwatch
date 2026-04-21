@@ -9,12 +9,19 @@ export default getRequestConfig(async () => {
     ? (raw as Locale)
     : defaultLocale;
 
-  let messages: Record<string, unknown>;
+  let common: Record<string, unknown>;
   try {
-    messages = (await import(`./messages/${locale}/common.json`)).default;
+    common = (await import(`./messages/${locale}/common.json`)).default;
   } catch {
-    messages = (await import('./messages/en/common.json')).default;
+    common = (await import('./messages/en/common.json')).default;
   }
+
+  let authMessages: Record<string, unknown> = {};
+  try {
+    authMessages = (await import(`./messages/${locale}/auth.json`)).default;
+  } catch {}
+
+  const messages = { ...common, auth: authMessages };
 
   return { locale, messages };
 });

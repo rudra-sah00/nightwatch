@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { AuthCard } from './auth-card';
 
 export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   const [showPassword, setShowPassword] = useState(false);
+  const t = useTranslations('auth');
   const {
     step,
     setStep,
@@ -33,9 +35,9 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   const getHeader = () => {
     switch (step) {
       case 'otp':
-        return 'VERIFY';
+        return t('title.verify');
       default:
-        return 'ENTRANCE';
+        return t('title.entrance');
     }
   };
 
@@ -48,7 +50,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
         >
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
-              CODE DISPATCHED TO
+              {t('otp.sentTo')}
             </p>
             <p className="font-black border-b-2 border-border text-center py-1.5 tracking-tighter text-lg italic mb-5 leading-tight">
               {formData.email}
@@ -59,7 +61,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   htmlFor="otp"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  SECURITY CODE
+                  {t('otp.label')}
                 </Label>
               </div>
               <OtpInput
@@ -86,7 +88,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               disabled={isLoading || (otp?.length || 0) !== 6}
               className="w-full h-[52px] font-headline uppercase italic tracking-tighter text-sm font-black shrink-0"
             >
-              VERIFY ACCESS
+              {t('otp.verify')}
             </Button>
             <Button
               type="button"
@@ -96,7 +98,9 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               disabled={isLoading || (countdown || 0) > 0}
               className="w-full h-[42px] text-sm font-black tracking-widest py-0 box-border shrink-0 uppercase italic font-headline"
             >
-              {(countdown || 0) > 0 ? `RETRY IN ${countdown}S` : 'RESEND KEY'}
+              {(countdown || 0) > 0
+                ? t('otp.retryIn', { seconds: countdown })
+                : t('otp.resend')}
             </Button>
           </div>
         </form>
@@ -115,14 +119,14 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   htmlFor="email"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  EMAIL OR USERNAME
+                  {t('email.label')}
                 </Label>
               </div>
               <Input
                 id="email"
                 name="email"
                 type="text"
-                placeholder="ARCHITECT@BAUHAUS.DE OR WALTER_1919"
+                placeholder={t('email.placeholder')}
                 autoComplete="username"
                 autoCapitalize="none"
                 spellCheck={false}
@@ -139,14 +143,14 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   htmlFor="password"
                   className="text-[11px] whitespace-nowrap leading-none uppercase tracking-tighter font-bold opacity-80"
                 >
-                  PASSWORD
+                  {t('password.label')}
                 </Label>
                 <button
                   type="button"
                   onClick={() => setStep('forgot')}
                   className="font-headline font-bold uppercase text-[9px] tracking-widest text-neo-red hover:underline focus-visible:underline focus-visible:outline-none whitespace-nowrap leading-none"
                 >
-                  Forgot?
+                  {t('password.forgot')}
                 </button>
               </div>
               <div className="relative">
@@ -204,7 +208,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              {isPending ? 'SYNCING...' : 'ESTABLISH LINK'}
+              {isPending ? 'SYNCING...' : t('submit')}
             </Button>
             {/* The Login form has no second 'Back' button, returning to uniform styling */}
           </div>

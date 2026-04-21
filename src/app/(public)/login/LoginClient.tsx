@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { GlobalLoading } from '@/components/ui/global-loading';
@@ -16,6 +17,7 @@ export default function LoginClient() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLoading: hookLoading } = loginHook;
   const router = useRouter();
+  const t = useTranslations('auth');
 
   const isLoading = authLoading || hookLoading;
   const [copied, setCopied] = useState(false);
@@ -85,11 +87,10 @@ export default function LoginClient() {
                   person
                 </span>
                 <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-1 font-headline">
-                  Solo Viewing
+                  {t('features.solo.title')}
                 </h3>
                 <p className="font-body opacity-80 leading-tight text-xs">
-                  Pure focus. High fidelity. Minimalist immersion for the cinema
-                  purist.
+                  {t('features.solo.desc')}
                 </p>
               </div>
             </div>
@@ -102,11 +103,10 @@ export default function LoginClient() {
                   video_call
                 </span>
                 <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-1 font-headline">
-                  Watch Parties
+                  {t('features.party.title')}
                 </h3>
                 <p className="font-body text-foreground leading-tight text-xs">
-                  Integrated video calls. React in real-time without leaving the
-                  frame.
+                  {t('features.party.desc')}
                 </p>
               </div>
             </div>
@@ -119,11 +119,10 @@ export default function LoginClient() {
               </span>
               <div>
                 <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter font-headline">
-                  Real-Time Sync
+                  {t('features.sync.title')}
                 </h3>
                 <p className="font-body font-medium text-xs">
-                  Frame-perfect synchronization across every device. No lag, no
-                  spoilers.
+                  {t('features.sync.desc')}
                 </p>
               </div>
             </div>
@@ -148,7 +147,7 @@ export default function LoginClient() {
       {/* Footer - Aligned with Signup for Parity */}
       <footer className="bg-primary dark:bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
         <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-primary-foreground/80 dark:text-muted-foreground opacity-80 text-left">
-          © 2026 WATCH RUDRA — FORM FOLLOWS FUNCTION
+          {t('footer.copyright')}
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
           <Link
@@ -156,10 +155,10 @@ export default function LoginClient() {
             className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary dark:ring-offset-background"
           >
             <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-primary-foreground/80 dark:text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              STAY UPDATED
+              {t('footer.stayUpdated')}
             </span>
             <span className="font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest text-neo-yellow group-hover:text-white underline decoration-neo-yellow/30 underline-offset-4 transition-colors whitespace-nowrap">
-              WHAT'S NEW
+              {t('footer.whatsNew')}
             </span>
           </Link>
 
@@ -169,17 +168,17 @@ export default function LoginClient() {
             className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary dark:ring-offset-background"
           >
             <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-primary-foreground/80 dark:text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              WANT AN ACCOUNT?
+              {t('footer.wantAccount')}
             </span>
             <span
               className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-colors ${copied ? 'text-success' : 'text-neo-yellow group-hover:text-white underline decoration-neo-yellow/30 underline-offset-4'}`}
             >
-              {copied ? '✓ EMAIL COPIED' : 'REQUEST @ RUDRASAHOO'}
+              {copied ? t('footer.emailCopied') : t('footer.requestEmail')}
             </span>
           </button>
 
           <p className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-neo-red text-center md:text-left">
-            PRIVATE ACCESS ONLY
+            {t('footer.privateAccess')}
           </p>
         </div>
       </footer>
