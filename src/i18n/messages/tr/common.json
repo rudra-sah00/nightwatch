@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "continue": "Devam",
+    "continueWatching": "İzlemeye Devam Et",
+    "live": "Canlı",
+    "liveMatches": "Canlı Maçlar",
+    "watchlist": "İzleme Listesi",
+    "downloads": "İndirmeler",
+    "offlineDownloads": "Çevrimdışı İndirmeler",
+    "profile": "Profil"
+  },
+  "language": {
+    "title": "Dil",
+    "description": "Tercih ettiğiniz dili seçin"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "GÖREV BAŞARISIZ",
+    "heading": "SEKTÖRDE KAYIP",
+    "description": "ARADIĞINIZ SAYFA MEVCUT DEĞİL VEYA YÜKSEK KOMUTA TARAFINDAN YERİ DEĞİŞTİRİLDİ.",
+    "homeButton": "ANA SAYFAYA DÖN",
+    "backButton": "ÖNCEKİ SEKTÖR",
+    "scanHint": "Sinyaller taranıyor... Veri parçası bulunamadı."
+  },
+  "error": {
+    "heading": "Bir şeyler ters gitti",
+    "description": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+    "tryAgain": "Tekrar Dene"
+  }
+}

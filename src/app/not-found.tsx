@@ -2,9 +2,12 @@
 
 import { ArrowLeft, Home, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
+  const t = useTranslations('common');
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-neo-yellow selection:text-foreground flex items-center justify-center p-6 font-headline overflow-hidden">
       {/* Dynamic Background Patterns */}
@@ -17,20 +20,19 @@ export default function NotFound() {
         {/* Massive 404 text with neo-brutal treatment */}
         <div className="relative inline-block mb-12">
           <h1 className="text-[12rem] md:text-[20rem] font-black uppercase tracking-tighter leading-none select-none text-foreground animate-in slide-in-from-bottom-12 duration-500">
-            404
+            {t('notFound.title')}
           </h1>
           <div className="absolute -bottom-4 right-0 md:right-4 bg-primary text-primary-foreground px-6 py-2 rounded-xl border border-border font-bold text-xl md:text-2xl uppercase tracking-tighter">
-            MISSION FAILED
+            {t('notFound.badge')}
           </div>
         </div>
 
         <div className="space-y-6 animate-in fade-in duration-700 delay-300">
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-tight">
-            LOST IN THE SECTOR
+            {t('notFound.heading')}
           </h2>
           <p className="text-lg md:text-xl font-bold uppercase tracking-wide text-foreground/60 max-w-lg mx-auto leading-relaxed">
-            THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST OR WAS RELOCATED BY HIGH
-            COMMAND.
+            {t('notFound.description')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-12">
@@ -42,7 +44,7 @@ export default function NotFound() {
             >
               <Link href="/">
                 <Home className="w-6 h-6 group-hover:scale-110 transition-transform mr-3" />
-                ABORT TO HOME
+                {t('notFound.homeButton')}
               </Link>
             </Button>
 
@@ -54,7 +56,7 @@ export default function NotFound() {
               className="px-10 py-5 text-lg tracking-widest bg-background"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform mr-3" />
-              PREVIOUS SECTOR
+              {t('notFound.backButton')}
             </Button>
           </div>
         </div>
@@ -62,7 +64,7 @@ export default function NotFound() {
         {/* Humorous search hint */}
         <div className="mt-20 flex items-center justify-center gap-2 text-foreground/30 font-black uppercase tracking-widest text-[10px] md:text-xs">
           <Search className="w-4 h-4" />
-          <span>Scanning for signals... No data fragments found.</span>
+          <span>{t('notFound.scanHint')}</span>
         </div>
       </div>
     </div>

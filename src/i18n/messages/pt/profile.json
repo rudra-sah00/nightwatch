@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Segurança / Senha",
+    "currentPassword": "Autorização Atual",
+    "currentPasswordPlaceholder": "SENHA ATUAL",
+    "newPassword": "Nova Chave",
+    "newPasswordPlaceholder": "NOVA SENHA",
+    "confirmPassword": "Confirmar Chave",
+    "confirmPasswordPlaceholder": "CONFIRMAR NOVA SENHA",
+    "hidePasswords": "Ocultar senhas",
+    "showPasswords": "Mostrar senhas",
+    "submit": "ALTERAR SENHA"
+  },
+  "activity": {
+    "title": "Atividade",
+    "less": "Menos",
+    "more": "Mais",
+    "noActivity": "Sem atividade",
+    "minSuffix": "{count} min",
+    "last365": "Últimos 365 dias de interação"
+  },
+  "releaseNotes": {
+    "title": "Notas de Versão",
+    "description": "Descubra os recursos mais recentes, melhorias e correções adicionados ao Watch Rudra.",
+    "viewButton": "VER NOVIDADES"
+  },
+  "updateForm": {
+    "updatePhoto": "Atualizar Foto",
+    "displayName": "Nome de Exibição",
+    "mobileHandle": "Celular",
+    "username": "Nome de Usuário",
+    "joined": "ENTROU EM {date}",
+    "minChars": "Mín. 3 caracteres",
+    "alreadyTaken": "Já em uso",
+    "available": "Disponível",
+    "checking": "Verificando...",
+    "saving": "Salvando...",
+    "signOut": "Sair",
+    "saveChanges": "Salvar Alterações",
+    "publicLinkCopied": "Link do perfil público copiado",
+    "publicLinkFailed": "Falha ao copiar link do perfil público"
+  },
+  "publicIdentity": {
+    "title": "Identidade Pública",
+    "description": "Compartilhe seu legado de visualização publicamente através do seu ID único.",
+    "copyLink": "COPIAR LINK PÚBLICO"
+  },
+  "serverSelection": {
+    "title": "Seleção de Servidor",
+    "netflix": "Netflix",
+    "standard": "Padrão",
+    "balanced": "Equilibrado",
+    "performance": "Desempenho",
+    "highQuality": "Alta Qualidade",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Zona de Perigo",
+    "description": "Ações irreversíveis. Prossiga com cautela.",
+    "deleteAccount": "EXCLUIR CONTA",
+    "dialogTitle": "Exclusão Terminal",
+    "dialogDescription": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser revertida. Todos os seus dados, lista, histórico e preferências serão permanentemente apagados do servidor.",
+    "cancel": "CANCELAR",
+    "confirmDelete": "CONFIRMAR EXCLUSÃO",
+    "erasing": "EXCLUINDO..."
+  },
+  "preferences": {
+    "title": "Preferências do App",
+    "themeSelection": "Seleção de Tema",
+    "themeDescription": "Alterne entre modo claro e escuro para conforto visual ideal.",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "language": "Idioma",
+    "languageDescription": "Escolha seu idioma de exibição preferido.",
+    "selectLanguage": "Selecionar Idioma",
+    "launchOnStartup": "Iniciar com o Sistema",
+    "launchDescription": "Iniciar Watch Rudra automaticamente em segundo plano quando o computador ligar.",
+    "maxConcurrentDownloads": "Downloads Simultâneos Máx.",
+    "maxConcurrentDescription": "Quantos filmes ou episódios podem ser baixados ao mesmo tempo. Padrão é 3.",
+    "downloadSpeedLimit": "Limite de Velocidade de Download",
+    "downloadSpeedDescription": "Restrinja a velocidade de download em segundo plano. Útil se sua rede ficar lenta globalmente!",
+    "unlimited": "Ilimitado"
+  },
+  "publicProfile": {
+    "returnBase": "Retornar à Base",
+    "identityVerified": "Perfil de Identidade Verificado",
+    "persistentIdentity": "Identidade Persistente: {id}",
+    "daysActive": "DIAS ATIVOS",
+    "hrsTotal": "HRS TOTAL",
+    "coreVersion": "VERSÃO CORE: V1.0-ESTÁVEL"
+  }
+}

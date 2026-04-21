@@ -13,5 +13,19 @@
   "language": {
     "title": "言語",
     "description": "お好みの言語を選択してください"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "ミッション失敗",
+    "heading": "セクターで迷子",
+    "description": "お探しのページは存在しないか、上級司令部により移動されました。",
+    "homeButton": "ホームに戻る",
+    "backButton": "前のセクター",
+    "scanHint": "信号をスキャン中... データフラグメントが見つかりません。"
+  },
+  "error": {
+    "heading": "問題が発生しました",
+    "description": "予期しないエラーが発生しました。もう一度お試しください。",
+    "tryAgain": "再試行"
   }
 }

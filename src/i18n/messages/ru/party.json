@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "Сообщений пока нет",
+    "beFirst": "Будьте первым, кто скажет привет! 👋",
+    "placeholder": "Сообщение...",
+    "disabled": "Чат отключён хостом",
+    "isTyping": "{name} печатает",
+    "twoTyping": "{name1} и {name2} печатают",
+    "threeTyping": "{name1}, {name2} и {name3} печатают",
+    "manyTyping": "{count} человек печатают"
+  },
+  "sidebar": {
+    "participants": "Участники",
+    "chat": "Чат",
+    "soundboard": "Звуковая панель",
+    "sketch": "Рисование"
+  },
+  "pending": {
+    "waitingToJoin": "{count} ожидают присоединения",
+    "approve": "Одобрить",
+    "reject": "Отклонить"
+  },
+  "media": {
+    "mute": "Выключить микрофон",
+    "unmute": "Включить микрофон",
+    "cameraOff": "Выключить камеру",
+    "cameraOn": "Включить камеру",
+    "deafen": "Отключить звук",
+    "undeafen": "Включить звук",
+    "selectMicrophone": "Выбрать микрофон",
+    "selectCamera": "Выбрать камеру",
+    "noDevices": "Устройства не найдены"
+  },
+  "actions": {
+    "invite": "Пригласить",
+    "copied": "Скопировано",
+    "end": "Завершить",
+    "leave": "Покинуть",
+    "kick": "Исключить"
+  },
+  "video": {
+    "noOneOnCamera": "Пока никого перед камерой",
+    "turnOnCamera": "Включите камеру или подождите, пока другие присоединятся"
+  },
+  "status": {
+    "connected": "Подключено",
+    "connecting": "Подключение…"
+  }
+}

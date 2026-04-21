@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "暂无消息",
+    "beFirst": "成为第一个打招呼的人！👋",
+    "placeholder": "消息...",
+    "disabled": "主持人已禁用聊天",
+    "isTyping": "{name} 正在输入",
+    "twoTyping": "{name1} 和 {name2} 正在输入",
+    "threeTyping": "{name1}、{name2} 和 {name3} 正在输入",
+    "manyTyping": "{count} 人正在输入"
+  },
+  "sidebar": {
+    "participants": "参与者",
+    "chat": "聊天",
+    "soundboard": "音效板",
+    "sketch": "画板"
+  },
+  "pending": {
+    "waitingToJoin": "{count} 人等待加入",
+    "approve": "批准",
+    "reject": "拒绝"
+  },
+  "media": {
+    "mute": "静音",
+    "unmute": "取消静音",
+    "cameraOff": "关闭摄像头",
+    "cameraOn": "开启摄像头",
+    "deafen": "全部静音",
+    "undeafen": "取消全部静音",
+    "selectMicrophone": "选择麦克风",
+    "selectCamera": "选择摄像头",
+    "noDevices": "未找到设备"
+  },
+  "actions": {
+    "invite": "邀请",
+    "copied": "已复制",
+    "end": "结束",
+    "leave": "离开",
+    "kick": "踢出"
+  },
+  "video": {
+    "noOneOnCamera": "还没有人开启摄像头",
+    "turnOnCamera": "打开您的摄像头或等待其他人加入"
+  },
+  "status": {
+    "connected": "已连接",
+    "connecting": "连接中…"
+  }
+}

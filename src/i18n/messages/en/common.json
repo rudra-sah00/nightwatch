@@ -13,5 +13,19 @@
   "language": {
     "title": "Language",
     "description": "Choose your preferred language"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISSION FAILED",
+    "heading": "LOST IN THE SECTOR",
+    "description": "THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST OR WAS RELOCATED BY HIGH COMMAND.",
+    "homeButton": "ABORT TO HOME",
+    "backButton": "PREVIOUS SECTOR",
+    "scanHint": "Scanning for signals... No data fragments found."
+  },
+  "error": {
+    "heading": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try Again"
   }
 }

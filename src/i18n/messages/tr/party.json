@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "Henüz mesaj yok",
+    "beFirst": "İlk merhaba diyen siz olun! 👋",
+    "placeholder": "Mesaj...",
+    "disabled": "Sohbet ev sahibi tarafından devre dışı bırakıldı",
+    "isTyping": "{name} yazıyor",
+    "twoTyping": "{name1} ve {name2} yazıyor",
+    "threeTyping": "{name1}, {name2} ve {name3} yazıyor",
+    "manyTyping": "{count} kişi yazıyor"
+  },
+  "sidebar": {
+    "participants": "Katılımcılar",
+    "chat": "Sohbet",
+    "soundboard": "Ses Tahtası",
+    "sketch": "Çizim"
+  },
+  "pending": {
+    "waitingToJoin": "{count} katılmayı bekliyor",
+    "approve": "Onayla",
+    "reject": "Reddet"
+  },
+  "media": {
+    "mute": "Sessize Al",
+    "unmute": "Sesi Aç",
+    "cameraOff": "Kamerayı Kapat",
+    "cameraOn": "Kamerayı Aç",
+    "deafen": "Tümünü Sustur",
+    "undeafen": "Susturmayı Kaldır",
+    "selectMicrophone": "Mikrofon Seç",
+    "selectCamera": "Kamera Seç",
+    "noDevices": "Cihaz bulunamadı"
+  },
+  "actions": {
+    "invite": "Davet Et",
+    "copied": "Kopyalandı",
+    "end": "Bitir",
+    "leave": "Ayrıl",
+    "kick": "At"
+  },
+  "video": {
+    "noOneOnCamera": "Henüz kimse kamerada değil",
+    "turnOnCamera": "Kameranızı açın veya başkalarının katılmasını bekleyin"
+  },
+  "status": {
+    "connected": "Bağlandı",
+    "connecting": "Bağlanıyor…"
+  }
+}

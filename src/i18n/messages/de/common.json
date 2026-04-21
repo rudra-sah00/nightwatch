@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "continue": "Fortsetzen",
+    "continueWatching": "Weiterschauen",
+    "live": "Live",
+    "liveMatches": "Live-Spiele",
+    "watchlist": "Merkliste",
+    "downloads": "Downloads",
+    "offlineDownloads": "Offline-Downloads",
+    "profile": "Profil"
+  },
+  "language": {
+    "title": "Sprache",
+    "description": "Wähle deine bevorzugte Sprache"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISSION FEHLGESCHLAGEN",
+    "heading": "IM SEKTOR VERLOREN",
+    "description": "DIE SEITE, DIE DU SUCHST, EXISTIERT NICHT ODER WURDE VOM OBERKOMMANDO VERLEGT.",
+    "homeButton": "ZURÜCK ZUR BASIS",
+    "backButton": "VORHERIGER SEKTOR",
+    "scanHint": "Scanne nach Signalen... Keine Datenfragmente gefunden."
+  },
+  "error": {
+    "heading": "Etwas ist schiefgelaufen",
+    "description": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "tryAgain": "Erneut versuchen"
+  }
+}

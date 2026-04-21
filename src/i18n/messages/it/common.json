@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Home",
+    "continue": "Continua",
+    "continueWatching": "Continua a guardare",
+    "live": "In diretta",
+    "liveMatches": "Partite in diretta",
+    "watchlist": "Lista",
+    "downloads": "Download",
+    "offlineDownloads": "Download offline",
+    "profile": "Profilo"
+  },
+  "language": {
+    "title": "Lingua",
+    "description": "Scegli la tua lingua preferita"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISSIONE FALLITA",
+    "heading": "PERSO NEL SETTORE",
+    "description": "LA PAGINA CHE STAI CERCANDO NON ESISTE O È STATA RICOLLOCATA DAL COMANDO SUPERIORE.",
+    "homeButton": "TORNA ALLA BASE",
+    "backButton": "SETTORE PRECEDENTE",
+    "scanHint": "Scansione segnali... Nessun frammento di dati trovato."
+  },
+  "error": {
+    "heading": "Qualcosa è andato storto",
+    "description": "Si è verificato un errore imprevisto. Riprova.",
+    "tryAgain": "Riprova"
+  }
+}

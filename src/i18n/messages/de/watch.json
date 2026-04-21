@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Abspielen",
+    "pause": "Pause",
+    "loading": "Inhalt wird geladen...",
+    "initConnection": "Sichere Verbindung wird hergestellt",
+    "bufferingAriaLabel": "Video wird gepuffert",
+    "playbackError": "Wiedergabefehler",
+    "tryAgain": "Erneut versuchen",
+    "goBack": "Zurück",
+    "errorDefault": "Ein Fehler ist aufgetreten",
+    "liveUnavailable": "Livestream nicht verfügbar",
+    "enterFullscreen": "Vollbild aktivieren",
+    "exitFullscreen": "Vollbild beenden",
+    "mute": "Stumm",
+    "unmute": "Ton an",
+    "volumeControl": "Lautstärkeregler",
+    "volume": "Lautstärke",
+    "skipBack": "{seconds}s zurückspulen",
+    "skipForward": "{seconds}s vorspulen",
+    "tapToResume": "Tippen zum Fortsetzen",
+    "hostControlsPlayback": "Host steuert die Wiedergabe",
+    "sitBackAndEnjoy": "Lehne dich zurück und genieße die Show",
+    "goBackAriaLabel": "Zurück",
+    "movie": "Film",
+    "tvSeries": "TV-Serie",
+    "live": "Live",
+    "liveBadge": "LIVE",
+    "watchingLive": "Du schaust live",
+    "jumpToLive": "Zum Live-Signal springen"
+  },
+  "settings": {
+    "quality": "Qualität",
+    "speed": "Geschwindigkeit",
+    "normal": "Normal",
+    "auto": "Auto",
+    "locked": "Gesperrt"
+  },
+  "subtitles": {
+    "title": "Untertitel",
+    "off": "Aus",
+    "subtitleStyle": "Untertitel-Stil",
+    "size": "Größe",
+    "font": "Schriftart",
+    "background": "Hintergrund",
+    "textColor": "Textfarbe",
+    "textEffect": "Texteffekt"
+  },
+  "audio": {
+    "title": "Audio",
+    "audioLanguage": "Audiosprache"
+  },
+  "episodes": {
+    "episode": "Episode {number}",
+    "season": "Staffel {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "Zum Abspielen klicken",
+    "loading": "Laden...",
+    "noEpisodes": "Keine Episoden",
+    "nowPlaying": "wird abgespielt",
+    "min": "{duration} Min"
+  },
+  "nextEpisode": {
+    "nextSeason": "Nächste Staffel",
+    "nextEpisode": "Nächste Episode",
+    "inCountdown": "in {seconds}s",
+    "play": "Abspielen",
+    "cancel": "Abbrechen",
+    "loading": "Laden"
+  },
+  "offline": {
+    "pageTitle": "OFFLINE",
+    "vault": "TRESOR",
+    "yourDownloads": "Deine heruntergeladenen Inhalte",
+    "downloadsCount": "{count} Download(s)",
+    "availableOffline": "Verfügbar für Offline-Wiedergabe",
+    "emptyTitle": "Tresor ist leer",
+    "emptyDescription": "Sichere Downloads erscheinen hier",
+    "desktopRequired": "Desktop erforderlich",
+    "desktopRequiredDesc": "Sichere Offline-Downloads sind nur in der nativen Desktop-App verfügbar. Lade die App herunter, um Filme und Serien für unterwegs zu speichern.",
+    "pauseDownload": "Download pausieren",
+    "resumeDownload": "Download fortsetzen",
+    "removeDownload": "Download entfernen",
+    "cancelDownload": "Download abbrechen",
+    "waitForComplete": "Bitte warte, bis der Download abgeschlossen ist, um offline zu schauen.",
+    "waitingInQueue": "Wartet in der Warteschlange...",
+    "downloading": "Wird heruntergeladen..."
+  },
+  "watchlist": {
+    "pageTitle": "MEINE",
+    "watchlist": "MERKLISTE",
+    "subtitle": "Deine kuratierte Auswahl",
+    "itemCount": "{count} {count, plural, one {Eintrag} other {Einträge}}",
+    "emptyTitle": "Deine Merkliste ist leer",
+    "emptyDescription": "Speichere Filme und Serien zum späteren Anschauen",
+    "viewDetails": "Details anzeigen für {title}"
+  }
+}

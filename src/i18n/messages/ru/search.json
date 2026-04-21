@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "НАЙДИ СВОЙ",
+    "headline2": "ФИЛЬМ",
+    "searchPlaceholder": "ПОИСК ФИЛЬМОВ, СЕРИАЛОВ ИЛИ КИНО...",
+    "searchButton": "ПОИСК",
+    "searchAriaLabel": "Поиск фильмов, сериалов или кино",
+    "stat1": "12k+ Наименований",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Инди-фокус"
+  },
+  "results": {
+    "searching": "Поиск:",
+    "resultsLabel": "Результаты:",
+    "filmsFound": "{count} фильмов найдено в архивах",
+    "noResults": "Ничего не найдено",
+    "noResultsHint": "Попробуйте другое написание или поищите что-то другое",
+    "searchFailed": "Поиск не удался",
+    "searchFailedHint": "Не удалось связаться с сервером. Попробуйте снова.",
+    "noResultsArchive": "Результатов не найдено",
+    "noResultsArchiveHint": "Мы не нашли совпадений в наших архивах. Попробуйте поискать другое название или ключевое слово.",
+    "editQueryAriaLabel": "Редактировать поисковый запрос",
+    "searchingAriaLabel": "Идёт поиск..."
+  },
+  "continueWatching": {
+    "title": "Продолжить просмотр",
+    "subtitle": "Продолжите с того места, где остановились",
+    "emptyTitle": "История просмотра пуста",
+    "emptyDescription": "Начните смотреть что-нибудь, и оно появится здесь",
+    "removeAriaLabel": "Удалить из списка",
+    "sectionAriaLabel": "Недавно просмотренный контент",
+    "timeLeft": "Осталось {time}"
+  },
+  "contentDetail": {
+    "series": "Сериал",
+    "movie": "Фильм",
+    "failedToLoad": "Не удалось загрузить контент",
+    "close": "Закрыть",
+    "closePreview": "Закрыть превью",
+    "noImageAvailable": "Изображение недоступно",
+    "episodes": "Эпизоды",
+    "season": "СЕЗОН {number}",
+    "selectSeason": "ВЫБРАТЬ СЕЗОН",
+    "episodeCount": "({count} ЭП)",
+    "noEpisodesAvailable": "Нет эпизодов для этого сезона",
+    "loadingEpisodes": "Загрузка эпизодов",
+    "watchPartyPick": "Совместный просмотр — Выберите эпизод",
+    "watchPartyHint": "Все присоединятся после вашего выбора",
+    "cancelWatchParty": "Отменить совместный просмотр",
+    "continue": "Продолжить",
+    "experienceStarting": "Запуск",
+    "preparingContent": "Подготовка \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "Смотреть одному",
+    "resume": "Продолжить",
+    "resumeEpisode": "Продолжить S{season}:E{episode}",
+    "playEpisode": "Воспроизвести S{season}:E1",
+    "loading": "Загрузка",
+    "watchTogether": "Смотреть вместе",
+    "creating": "Создание",
+    "toWatchlist": "В список",
+    "removeFromList": "Удалить из списка"
+  },
+  "download": {
+    "download": "Скачать",
+    "viewInVault": "Открыть в хранилище",
+    "cancel": "Отмена",
+    "language": "Язык",
+    "original": "Оригинал",
+    "selectQuality": "Выбрать качество",
+    "selectEpisode": "Выбрать эпизод",
+    "gatheringSources": "Сбор источников...",
+    "noFormatsAvailable": "Нет доступных форматов",
+    "noEpisodesAvailable": "Нет доступных эпизодов",
+    "saved": "Сохранено",
+    "securelyStarting": "Безопасная загрузка начинается...",
+    "episode": "Эпизод {number}",
+    "untitled": "Без названия"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "TROVA IL TUO",
+    "headline2": "FILM",
+    "searchPlaceholder": "CERCA FILM, SERIE O CINEMA...",
+    "searchButton": "CERCA",
+    "searchAriaLabel": "Cerca film, serie o cinema",
+    "stat1": "12k+ Titoli",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Focus Indie"
+  },
+  "results": {
+    "searching": "Ricerca:",
+    "resultsLabel": "Risultati:",
+    "filmsFound": "{count} Film trovati negli archivi",
+    "noResults": "Nessun risultato trovato",
+    "noResultsHint": "Prova un'ortografia diversa o cerca qualcos'altro",
+    "searchFailed": "Ricerca fallita",
+    "searchFailedHint": "Impossibile raggiungere il server. Riprova.",
+    "noResultsArchive": "Nessun risultato trovato",
+    "noResultsArchiveHint": "Non abbiamo trovato corrispondenze nei nostri archivi. Prova a cercare un titolo o una parola chiave diversa.",
+    "editQueryAriaLabel": "Modifica ricerca",
+    "searchingAriaLabel": "Ricerca in corso..."
+  },
+  "continueWatching": {
+    "title": "Continua a guardare",
+    "subtitle": "Riprendi da dove hai lasciato",
+    "emptyTitle": "La cronologia è vuota",
+    "emptyDescription": "Inizia a guardare qualcosa e apparirà qui",
+    "removeAriaLabel": "Rimuovi dalla lista",
+    "sectionAriaLabel": "Contenuti visualizzati di recente",
+    "timeLeft": "{time} rimanenti"
+  },
+  "contentDetail": {
+    "series": "Serie",
+    "movie": "Film",
+    "failedToLoad": "Impossibile caricare il contenuto",
+    "close": "Chiudi",
+    "closePreview": "Chiudi anteprima",
+    "noImageAvailable": "Nessuna immagine disponibile",
+    "episodes": "Episodi",
+    "season": "STAGIONE {number}",
+    "selectSeason": "SELEZIONA STAGIONE",
+    "episodeCount": "({count} EP)",
+    "noEpisodesAvailable": "Nessun episodio disponibile per questa stagione",
+    "loadingEpisodes": "Caricamento episodi",
+    "watchPartyPick": "Watch Party — Scegli un episodio",
+    "watchPartyHint": "Tutti si uniscono quando selezioni",
+    "cancelWatchParty": "Annulla watch party",
+    "continue": "Continua",
+    "experienceStarting": "Esperienza in avvio",
+    "preparingContent": "Preparazione di \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "Guarda da solo",
+    "resume": "Riprendi",
+    "resumeEpisode": "Riprendi S{season}:E{episode}",
+    "playEpisode": "Riproduci S{season}:E1",
+    "loading": "Caricamento",
+    "watchTogether": "Guarda insieme",
+    "creating": "Creazione",
+    "toWatchlist": "Alla lista",
+    "removeFromList": "Rimuovi dalla lista"
+  },
+  "download": {
+    "download": "Scarica",
+    "viewInVault": "Vedi nel vault",
+    "cancel": "Annulla",
+    "language": "Lingua",
+    "original": "Originale",
+    "selectQuality": "Seleziona qualità",
+    "selectEpisode": "Seleziona episodio",
+    "gatheringSources": "Raccolta fonti...",
+    "noFormatsAvailable": "Nessun formato disponibile",
+    "noEpisodesAvailable": "Nessun episodio disponibile",
+    "saved": "Salvato",
+    "securelyStarting": "Avvio download sicuro...",
+    "episode": "Episodio {number}",
+    "untitled": "Senza titolo"
+  }
+}

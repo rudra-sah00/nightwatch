@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "เล่น",
+    "pause": "หยุดชั่วคราว",
+    "loading": "กำลังโหลดเนื้อหา...",
+    "initConnection": "กำลังเริ่มการเชื่อมต่อที่ปลอดภัย",
+    "bufferingAriaLabel": "กำลังบัฟเฟอร์วิดีโอ",
+    "playbackError": "ข้อผิดพลาดในการเล่น",
+    "tryAgain": "ลองอีกครั้ง",
+    "goBack": "ย้อนกลับ",
+    "errorDefault": "เกิดข้อผิดพลาด",
+    "liveUnavailable": "สตรีมสดไม่พร้อมใช้งาน",
+    "enterFullscreen": "เต็มหน้าจอ",
+    "exitFullscreen": "ออกจากเต็มหน้าจอ",
+    "mute": "ปิดเสียง",
+    "unmute": "เปิดเสียง",
+    "volumeControl": "ควบคุมระดับเสียง",
+    "volume": "ระดับเสียง",
+    "skipBack": "ย้อนกลับ {seconds} วินาที",
+    "skipForward": "ข้ามไป {seconds} วินาที",
+    "tapToResume": "แตะเพื่อเล่นต่อ",
+    "hostControlsPlayback": "โฮสต์ควบคุมการเล่น",
+    "sitBackAndEnjoy": "นั่งพักผ่อนและเพลิดเพลินกับรายการ",
+    "goBackAriaLabel": "ย้อนกลับ",
+    "movie": "ภาพยนตร์",
+    "tvSeries": "ซีรีส์ทีวี",
+    "live": "สด",
+    "liveBadge": "สด",
+    "watchingLive": "คุณกำลังดูสด",
+    "jumpToLive": "ข้ามไปสด"
+  },
+  "settings": {
+    "quality": "คุณภาพ",
+    "speed": "ความเร็ว",
+    "normal": "ปกติ",
+    "auto": "อัตโนมัติ",
+    "locked": "ล็อค"
+  },
+  "subtitles": {
+    "title": "คำบรรยาย",
+    "off": "ปิด",
+    "subtitleStyle": "สไตล์คำบรรยาย",
+    "size": "ขนาด",
+    "font": "ฟอนต์",
+    "background": "พื้นหลัง",
+    "textColor": "สีข้อความ",
+    "textEffect": "เอฟเฟกต์ข้อความ"
+  },
+  "audio": {
+    "title": "เสียง",
+    "audioLanguage": "ภาษาเสียง"
+  },
+  "episodes": {
+    "episode": "ตอนที่ {number}",
+    "season": "ซีซัน {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "คลิกเพื่อเล่น",
+    "loading": "กำลังโหลด...",
+    "noEpisodes": "ไม่มีตอน",
+    "nowPlaying": "กำลังเล่น",
+    "min": "{duration} นาที"
+  },
+  "nextEpisode": {
+    "nextSeason": "ซีซันถัดไป",
+    "nextEpisode": "ตอนถัดไป",
+    "inCountdown": "ใน {seconds} วินาที",
+    "play": "เล่น",
+    "cancel": "ยกเลิก",
+    "loading": "กำลังโหลด"
+  },
+  "offline": {
+    "pageTitle": "ออฟไลน์",
+    "vault": "ตู้เซฟ",
+    "yourDownloads": "เนื้อหาที่ดาวน์โหลดของคุณ",
+    "downloadsCount": "{count} ดาวน์โหลด",
+    "availableOffline": "พร้อมดูแบบออฟไลน์",
+    "emptyTitle": "ตู้เซฟว่างเปล่า",
+    "emptyDescription": "ดาวน์โหลดที่ปลอดภัยจะปรากฏที่นี่",
+    "desktopRequired": "ต้องใช้เดสก์ท็อป",
+    "desktopRequiredDesc": "ดาวน์โหลดออฟไลน์ที่ปลอดภัยมีเฉพาะในแอปเดสก์ท็อป ดาวน์โหลดแอปเพื่อบันทึกภาพยนตร์และซีรีส์สำหรับการเดินทาง",
+    "pauseDownload": "หยุดดาวน์โหลดชั่วคราว",
+    "resumeDownload": "ดาวน์โหลดต่อ",
+    "removeDownload": "ลบดาวน์โหลด",
+    "cancelDownload": "ยกเลิกดาวน์โหลด",
+    "waitForComplete": "กรุณารอจนกว่าดาวน์โหลดจะเสร็จเพื่อดูแบบออฟไลน์",
+    "waitingInQueue": "รอคิว...",
+    "downloading": "กำลังดาวน์โหลด..."
+  },
+  "watchlist": {
+    "pageTitle": "รายการ",
+    "watchlist": "ดูของฉัน",
+    "subtitle": "คอลเลกชันที่คัดสรร",
+    "itemCount": "{count} รายการ",
+    "emptyTitle": "รายการดูว่างเปล่า",
+    "emptyDescription": "บันทึกภาพยนตร์และซีรีส์เพื่อดูภายหลัง",
+    "viewDetails": "ดูรายละเอียดของ {title}"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "لا توجد رسائل بعد",
+    "beFirst": "كن أول من يقول مرحباً! 👋",
+    "placeholder": "رسالة...",
+    "disabled": "تم تعطيل الدردشة من قبل المضيف",
+    "isTyping": "{name} يكتب",
+    "twoTyping": "{name1} و {name2} يكتبان",
+    "threeTyping": "{name1} و {name2} و {name3} يكتبون",
+    "manyTyping": "{count} أشخاص يكتبون"
+  },
+  "sidebar": {
+    "participants": "المشاركون",
+    "chat": "الدردشة",
+    "soundboard": "لوحة الأصوات",
+    "sketch": "رسم"
+  },
+  "pending": {
+    "waitingToJoin": "{count} بانتظار الانضمام",
+    "approve": "قبول",
+    "reject": "رفض"
+  },
+  "media": {
+    "mute": "كتم",
+    "unmute": "إلغاء الكتم",
+    "cameraOff": "إيقاف الكاميرا",
+    "cameraOn": "تشغيل الكاميرا",
+    "deafen": "كتم الكل",
+    "undeafen": "إلغاء كتم الكل",
+    "selectMicrophone": "اختر الميكروفون",
+    "selectCamera": "اختر الكاميرا",
+    "noDevices": "لم يتم العثور على أجهزة"
+  },
+  "actions": {
+    "invite": "دعوة",
+    "copied": "تم النسخ",
+    "end": "إنهاء",
+    "leave": "مغادرة",
+    "kick": "طرد"
+  },
+  "video": {
+    "noOneOnCamera": "لا أحد أمام الكاميرا بعد",
+    "turnOnCamera": "شغّل الكاميرا أو انتظر انضمام الآخرين"
+  },
+  "status": {
+    "connected": "متصل",
+    "connecting": "جارٍ الاتصال…"
+  }
+}

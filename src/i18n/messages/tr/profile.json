@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Güvenlik / Şifre",
+    "currentPassword": "Mevcut Yetkilendirme",
+    "currentPasswordPlaceholder": "MEVCUT ŞİFRE",
+    "newPassword": "Yeni Anahtar",
+    "newPasswordPlaceholder": "YENİ ŞİFRE",
+    "confirmPassword": "Anahtarı Onayla",
+    "confirmPasswordPlaceholder": "YENİ ŞİFREYİ ONAYLA",
+    "hidePasswords": "Şifreleri gizle",
+    "showPasswords": "Şifreleri göster",
+    "submit": "ŞİFREYİ DEĞİŞTİR"
+  },
+  "activity": {
+    "title": "İzleme Aktivitesi",
+    "less": "Az",
+    "more": "Çok",
+    "noActivity": "Aktivite yok",
+    "minSuffix": "{count} dk",
+    "last365": "Son 365 günlük etkileşim"
+  },
+  "releaseNotes": {
+    "title": "Sürüm Notları",
+    "description": "Watch Rudra'ya eklenen en son özellikler, iyileştirmeler ve hata düzeltmelerini keşfedin.",
+    "viewButton": "YENİLİKLERİ GÖR"
+  },
+  "updateForm": {
+    "updatePhoto": "Fotoğrafı Güncelle",
+    "displayName": "Görünen Ad",
+    "mobileHandle": "Mobil Numara",
+    "username": "Kullanıcı Adı",
+    "joined": "KATILIM {date}",
+    "minChars": "Min 3 karakter",
+    "alreadyTaken": "Zaten alınmış",
+    "available": "Müsait",
+    "checking": "Kontrol ediliyor...",
+    "saving": "Kaydediliyor...",
+    "signOut": "Çıkış Yap",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "publicLinkCopied": "Herkese açık profil linki kopyalandı",
+    "publicLinkFailed": "Herkese açık profil linki kopyalanamadı"
+  },
+  "publicIdentity": {
+    "title": "Herkese Açık Kimlik",
+    "description": "İzleme mirasınızı benzersiz ID'niz aracılığıyla herkese açık paylaşın.",
+    "copyLink": "HERKESE AÇIK LİNKİ KOPYALA"
+  },
+  "serverSelection": {
+    "title": "Sunucu Seçimi",
+    "netflix": "Netflix",
+    "standard": "Standart",
+    "balanced": "Dengeli",
+    "performance": "Performans",
+    "highQuality": "Yüksek Kalite",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Tehlikeli Bölge",
+    "description": "Geri dönüşü olmayan işlemler. Dikkatli ilerleyin.",
+    "deleteAccount": "HESABI SİL",
+    "dialogTitle": "Kalıcı Silme",
+    "dialogDescription": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz. Tüm verileriniz, listeniz, geçmişiniz ve tercihleriniz sunucudan kalıcı olarak silinecektir.",
+    "cancel": "İPTAL",
+    "confirmDelete": "SİLMEYİ ONAYLA",
+    "erasing": "SİLİNİYOR..."
+  },
+  "preferences": {
+    "title": "Uygulama Tercihleri",
+    "themeSelection": "Tema Seçimi",
+    "themeDescription": "Optimum izleme konforu için açık ve koyu mod arasında geçiş yapın.",
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem",
+    "language": "Dil",
+    "languageDescription": "Tercih ettiğiniz görüntüleme dilini seçin.",
+    "selectLanguage": "Dil Seçin",
+    "launchOnStartup": "Başlangıçta Aç",
+    "launchDescription": "Bilgisayarınız açıldığında Watch Rudra'yı otomatik olarak arka planda başlatın.",
+    "maxConcurrentDownloads": "Maks. Eşzamanlı İndirme",
+    "maxConcurrentDescription": "Aynı anda kaç film veya bölüm indirilebilir. Varsayılan 3'tür.",
+    "downloadSpeedLimit": "İndirme Hız Limiti",
+    "downloadSpeedDescription": "Arka plan indirme hızını kısıtlayın. Ağınız genel olarak yavaşlıyorsa faydalıdır!",
+    "unlimited": "Sınırsız"
+  },
+  "publicProfile": {
+    "returnBase": "Üsse Dön",
+    "identityVerified": "Kimlik Profili Doğrulandı",
+    "persistentIdentity": "Kalıcı Kimlik: {id}",
+    "daysActive": "AKTİF GÜN",
+    "hrsTotal": "TOPLAM SAAT",
+    "coreVersion": "ÇEKİRDEK SÜRÜM: V1.0-KARALI"
+  }
+}

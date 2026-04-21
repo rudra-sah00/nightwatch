@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "ابحث عن",
+    "headline2": "فيلمك",
+    "searchPlaceholder": "ابحث عن أفلام، مسلسلات، أو سينما...",
+    "searchButton": "بحث",
+    "searchAriaLabel": "البحث عن أفلام، مسلسلات، أو سينما",
+    "stat1": "+12 ألف عنوان",
+    "stat2": "4K Ultra Raw",
+    "stat3": "تركيز مستقل"
+  },
+  "results": {
+    "searching": "جارٍ البحث:",
+    "resultsLabel": "النتائج:",
+    "filmsFound": "تم العثور على {count} فيلم في الأرشيف",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsHint": "جرّب إملاءً مختلفاً أو ابحث عن شيء آخر",
+    "searchFailed": "فشل البحث",
+    "searchFailedHint": "تعذر الوصول إلى الخادم. يرجى المحاولة مرة أخرى.",
+    "noResultsArchive": "لم يتم العثور على نتائج",
+    "noResultsArchiveHint": "لم نتمكن من العثور على تطابقات في أرشيفنا. جرّب البحث عن عنوان أو كلمة مفتاحية مختلفة.",
+    "editQueryAriaLabel": "تعديل استعلام البحث",
+    "searchingAriaLabel": "جارٍ البحث..."
+  },
+  "continueWatching": {
+    "title": "متابعة المشاهدة",
+    "subtitle": "أكمل من حيث توقفت",
+    "emptyTitle": "سجل المشاهدة فارغ",
+    "emptyDescription": "ابدأ بمشاهدة شيء وسيظهر هنا",
+    "removeAriaLabel": "إزالة من القائمة",
+    "sectionAriaLabel": "المحتوى المشاهد مؤخراً",
+    "timeLeft": "{time} متبقي"
+  },
+  "contentDetail": {
+    "series": "مسلسل",
+    "movie": "فيلم",
+    "failedToLoad": "فشل تحميل المحتوى",
+    "close": "إغلاق",
+    "closePreview": "إغلاق المعاينة",
+    "noImageAvailable": "لا توجد صورة متاحة",
+    "episodes": "الحلقات",
+    "season": "الموسم {number}",
+    "selectSeason": "اختر الموسم",
+    "episodeCount": "({count} حلقة)",
+    "noEpisodesAvailable": "لا توجد حلقات متاحة لهذا الموسم",
+    "loadingEpisodes": "جارٍ تحميل الحلقات",
+    "watchPartyPick": "حفلة المشاهدة — اختر حلقة",
+    "watchPartyHint": "الجميع ينضم عند اختيارك",
+    "cancelWatchParty": "إلغاء حفلة المشاهدة",
+    "continue": "متابعة",
+    "experienceStarting": "التجربة تبدأ",
+    "preparingContent": "جارٍ تحضير \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "مشاهدة فردية",
+    "resume": "استئناف",
+    "resumeEpisode": "استئناف م{season}:ح{episode}",
+    "playEpisode": "تشغيل م{season}:ح1",
+    "loading": "جارٍ التحميل",
+    "watchTogether": "مشاهدة معاً",
+    "creating": "جارٍ الإنشاء",
+    "toWatchlist": "إلى القائمة",
+    "removeFromList": "إزالة من القائمة"
+  },
+  "download": {
+    "download": "تنزيل",
+    "viewInVault": "عرض في الخزنة",
+    "cancel": "إلغاء",
+    "language": "اللغة",
+    "original": "أصلي",
+    "selectQuality": "اختر الجودة",
+    "selectEpisode": "اختر الحلقة",
+    "gatheringSources": "جارٍ جمع المصادر...",
+    "noFormatsAvailable": "لا توجد صيغ متاحة",
+    "noEpisodesAvailable": "لا توجد حلقات متاحة",
+    "saved": "تم الحفظ",
+    "securelyStarting": "جارٍ بدء التنزيل الآمن...",
+    "episode": "الحلقة {number}",
+    "untitled": "بدون عنوان"
+  }
+}

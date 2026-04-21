@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "安全 / 密码",
+    "currentPassword": "当前授权",
+    "currentPasswordPlaceholder": "当前密码",
+    "newPassword": "新密钥",
+    "newPasswordPlaceholder": "新密码",
+    "confirmPassword": "确认密钥",
+    "confirmPasswordPlaceholder": "确认新密码",
+    "hidePasswords": "隐藏密码",
+    "showPasswords": "显示密码",
+    "submit": "更改密码"
+  },
+  "activity": {
+    "title": "观看活动",
+    "less": "更少",
+    "more": "更多",
+    "noActivity": "无活动",
+    "minSuffix": "{count} 分钟",
+    "last365": "最近365天的互动"
+  },
+  "releaseNotes": {
+    "title": "版本说明",
+    "description": "了解 Watch Rudra 最新添加的功能、改进和错误修复。",
+    "viewButton": "查看新功能"
+  },
+  "updateForm": {
+    "updatePhoto": "更新头像",
+    "displayName": "显示名称",
+    "mobileHandle": "手机号码",
+    "username": "用户名",
+    "joined": "加入于 {date}",
+    "minChars": "最少3个字符",
+    "alreadyTaken": "已被占用",
+    "available": "可用",
+    "checking": "检查中...",
+    "saving": "保存中...",
+    "signOut": "退出登录",
+    "saveChanges": "保存更改",
+    "publicLinkCopied": "公开资料链接已复制",
+    "publicLinkFailed": "复制公开资料链接失败"
+  },
+  "publicIdentity": {
+    "title": "公开身份",
+    "description": "通过您的唯一ID公开分享您的观看记录。",
+    "copyLink": "复制公开链接"
+  },
+  "serverSelection": {
+    "title": "服务器选择",
+    "netflix": "Netflix",
+    "standard": "标准",
+    "balanced": "均衡",
+    "performance": "性能",
+    "highQuality": "高画质",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "危险区域",
+    "description": "不可逆操作。请谨慎操作。",
+    "deleteAccount": "删除账户",
+    "dialogTitle": "永久删除",
+    "dialogDescription": "确定要删除您的账户吗？此操作无法撤销。您的所有数据、观看列表、历史记录和偏好设置将从服务器永久删除。",
+    "cancel": "取消",
+    "confirmDelete": "确认删除",
+    "erasing": "删除中..."
+  },
+  "preferences": {
+    "title": "应用偏好",
+    "themeSelection": "主题选择",
+    "themeDescription": "在浅色和深色模式之间切换，获得最佳观看舒适度。",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统",
+    "language": "语言",
+    "languageDescription": "选择您的首选显示语言。",
+    "selectLanguage": "选择语言",
+    "launchOnStartup": "开机启动",
+    "launchDescription": "电脑启动时自动在后台启动 Watch Rudra。",
+    "maxConcurrentDownloads": "最大同时下载数",
+    "maxConcurrentDescription": "可以同时下载多少部电影或剧集。默认为3。",
+    "downloadSpeedLimit": "下载速度限制",
+    "downloadSpeedDescription": "限制后台下载速度。如果您的网络整体变慢时很有用！",
+    "unlimited": "无限制"
+  },
+  "publicProfile": {
+    "returnBase": "返回基地",
+    "identityVerified": "身份已验证",
+    "persistentIdentity": "持久身份: {id}",
+    "daysActive": "活跃天数",
+    "hrsTotal": "总小时数",
+    "coreVersion": "核心版本: V1.0-稳定版"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "FINDE DEINEN",
+    "headline2": "FILM",
+    "searchPlaceholder": "FILME, SERIEN ODER KINO SUCHEN...",
+    "searchButton": "SUCHEN",
+    "searchAriaLabel": "Filme, Serien oder Kino suchen",
+    "stat1": "12k+ Titel",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Indie-Fokus"
+  },
+  "results": {
+    "searching": "Suche:",
+    "resultsLabel": "Ergebnisse:",
+    "filmsFound": "{count} Filme im Archiv gefunden",
+    "noResults": "Keine Ergebnisse gefunden",
+    "noResultsHint": "Versuche eine andere Schreibweise oder suche nach etwas anderem",
+    "searchFailed": "Suche fehlgeschlagen",
+    "searchFailedHint": "Server nicht erreichbar. Bitte versuche es erneut.",
+    "noResultsArchive": "Keine Ergebnisse gefunden",
+    "noResultsArchiveHint": "Wir konnten keine Treffer in unseren Archiven finden. Versuche einen anderen Titel oder ein anderes Stichwort.",
+    "editQueryAriaLabel": "Suchanfrage bearbeiten",
+    "searchingAriaLabel": "Suche läuft..."
+  },
+  "continueWatching": {
+    "title": "Weiterschauen",
+    "subtitle": "Dort weitermachen, wo du aufgehört hast",
+    "emptyTitle": "Dein Verlauf ist leer",
+    "emptyDescription": "Beginne etwas zu schauen und es erscheint hier",
+    "removeAriaLabel": "Von der Liste entfernen",
+    "sectionAriaLabel": "Zuletzt angesehene Inhalte",
+    "timeLeft": "{time} übrig"
+  },
+  "contentDetail": {
+    "series": "Serie",
+    "movie": "Film",
+    "failedToLoad": "Inhalt konnte nicht geladen werden",
+    "close": "Schließen",
+    "closePreview": "Vorschau schließen",
+    "noImageAvailable": "Kein Bild verfügbar",
+    "episodes": "Episoden",
+    "season": "STAFFEL {number}",
+    "selectSeason": "STAFFEL AUSWÄHLEN",
+    "episodeCount": "({count} EP)",
+    "noEpisodesAvailable": "Keine Episoden für diese Staffel verfügbar",
+    "loadingEpisodes": "Episoden werden geladen",
+    "watchPartyPick": "Watch Party — Wähle eine Episode",
+    "watchPartyHint": "Alle treten bei, sobald du auswählst",
+    "cancelWatchParty": "Watch Party abbrechen",
+    "continue": "Fortsetzen",
+    "experienceStarting": "Erlebnis startet",
+    "preparingContent": "Bereite \"{title}\" vor..."
+  },
+  "actions": {
+    "watchSolo": "Alleine schauen",
+    "resume": "Fortsetzen",
+    "resumeEpisode": "Fortsetzen S{season}:E{episode}",
+    "playEpisode": "Abspielen S{season}:E1",
+    "loading": "Laden",
+    "watchTogether": "Zusammen schauen",
+    "creating": "Erstelle",
+    "toWatchlist": "Zur Merkliste",
+    "removeFromList": "Von Liste entfernen"
+  },
+  "download": {
+    "download": "Herunterladen",
+    "viewInVault": "Im Tresor ansehen",
+    "cancel": "Abbrechen",
+    "language": "Sprache",
+    "original": "Original",
+    "selectQuality": "Qualität auswählen",
+    "selectEpisode": "Episode auswählen",
+    "gatheringSources": "Quellen werden gesammelt...",
+    "noFormatsAvailable": "Keine Formate verfügbar",
+    "noEpisodesAvailable": "Keine Episoden verfügbar",
+    "saved": "Gespeichert",
+    "securelyStarting": "Sicherer Download wird gestartet...",
+    "episode": "Episode {number}",
+    "untitled": "Ohne Titel"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Воспроизвести",
+    "pause": "Пауза",
+    "loading": "Загрузка контента...",
+    "initConnection": "Инициализация безопасного соединения",
+    "bufferingAriaLabel": "Буферизация видео",
+    "playbackError": "Ошибка воспроизведения",
+    "tryAgain": "Попробовать снова",
+    "goBack": "Назад",
+    "errorDefault": "Произошла ошибка",
+    "liveUnavailable": "Прямой эфир недоступен",
+    "enterFullscreen": "Полноэкранный режим",
+    "exitFullscreen": "Выйти из полноэкранного режима",
+    "mute": "Выключить звук",
+    "unmute": "Включить звук",
+    "volumeControl": "Регулировка громкости",
+    "volume": "Громкость",
+    "skipBack": "Назад на {seconds}с",
+    "skipForward": "Вперёд на {seconds}с",
+    "tapToResume": "Нажмите для продолжения",
+    "hostControlsPlayback": "Хост управляет воспроизведением",
+    "sitBackAndEnjoy": "Расслабьтесь и наслаждайтесь шоу",
+    "goBackAriaLabel": "Назад",
+    "movie": "Фильм",
+    "tvSeries": "Сериал",
+    "live": "Прямой эфир",
+    "liveBadge": "LIVE",
+    "watchingLive": "Вы смотрите в прямом эфире",
+    "jumpToLive": "Перейти к прямому эфиру"
+  },
+  "settings": {
+    "quality": "Качество",
+    "speed": "Скорость",
+    "normal": "Обычная",
+    "auto": "Авто",
+    "locked": "Заблокировано"
+  },
+  "subtitles": {
+    "title": "Субтитры",
+    "off": "Выкл",
+    "subtitleStyle": "Стиль субтитров",
+    "size": "Размер",
+    "font": "Шрифт",
+    "background": "Фон",
+    "textColor": "Цвет текста",
+    "textEffect": "Эффект текста"
+  },
+  "audio": {
+    "title": "Аудио",
+    "audioLanguage": "Язык аудио"
+  },
+  "episodes": {
+    "episode": "Эпизод {number}",
+    "season": "Сезон {number}",
+    "seasonShort": "С{number}",
+    "clickToPlay": "Нажмите для воспроизведения",
+    "loading": "Загрузка...",
+    "noEpisodes": "Нет эпизодов",
+    "nowPlaying": "сейчас воспроизводится",
+    "min": "{duration} мин"
+  },
+  "nextEpisode": {
+    "nextSeason": "Следующий сезон",
+    "nextEpisode": "Следующий эпизод",
+    "inCountdown": "через {seconds}с",
+    "play": "Воспроизвести",
+    "cancel": "Отмена",
+    "loading": "Загрузка"
+  },
+  "offline": {
+    "pageTitle": "ОФЛАЙН",
+    "vault": "ХРАНИЛИЩЕ",
+    "yourDownloads": "Ваш загруженный контент",
+    "downloadsCount": "{count} загрузка(и)",
+    "availableOffline": "Доступно для офлайн-просмотра",
+    "emptyTitle": "Хранилище пусто",
+    "emptyDescription": "Безопасные загрузки появятся здесь",
+    "desktopRequired": "Требуется десктоп",
+    "desktopRequiredDesc": "Безопасные офлайн-загрузки доступны только в нативном десктоп-приложении. Скачайте приложение для сохранения фильмов и сериалов в дорогу.",
+    "pauseDownload": "Приостановить загрузку",
+    "resumeDownload": "Возобновить загрузку",
+    "removeDownload": "Удалить загрузку",
+    "cancelDownload": "Отменить загрузку",
+    "waitForComplete": "Дождитесь завершения загрузки для офлайн-просмотра.",
+    "waitingInQueue": "Ожидание в очереди...",
+    "downloading": "Загрузка..."
+  },
+  "watchlist": {
+    "pageTitle": "МОЙ",
+    "watchlist": "СПИСОК",
+    "subtitle": "Ваша подборка",
+    "itemCount": "{count} {count, plural, one {элемент} few {элемента} other {элементов}}",
+    "emptyTitle": "Ваш список просмотра пуст",
+    "emptyDescription": "Сохраняйте фильмы и сериалы для просмотра позже",
+    "viewDetails": "Подробнее о {title}"
+  }
+}

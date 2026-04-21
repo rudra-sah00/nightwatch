@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Безопасность / Пароль",
+    "currentPassword": "Текущая авторизация",
+    "currentPasswordPlaceholder": "ТЕКУЩИЙ ПАРОЛЬ",
+    "newPassword": "Новый ключ",
+    "newPasswordPlaceholder": "НОВЫЙ ПАРОЛЬ",
+    "confirmPassword": "Подтвердить ключ",
+    "confirmPasswordPlaceholder": "ПОДТВЕРДИТЬ НОВЫЙ ПАРОЛЬ",
+    "hidePasswords": "Скрыть пароли",
+    "showPasswords": "Показать пароли",
+    "submit": "ИЗМЕНИТЬ ПАРОЛЬ"
+  },
+  "activity": {
+    "title": "Активность просмотра",
+    "less": "Меньше",
+    "more": "Больше",
+    "noActivity": "Нет активности",
+    "minSuffix": "{count} мин",
+    "last365": "Последние 365 дней взаимодействия"
+  },
+  "releaseNotes": {
+    "title": "Примечания к выпуску",
+    "description": "Узнайте о новейших функциях, улучшениях и исправлениях Watch Rudra.",
+    "viewButton": "ПОСМОТРЕТЬ НОВОЕ"
+  },
+  "updateForm": {
+    "updatePhoto": "Обновить фото",
+    "displayName": "Отображаемое имя",
+    "mobileHandle": "Мобильный номер",
+    "username": "Имя пользователя",
+    "joined": "ПРИСОЕДИНИЛСЯ {date}",
+    "minChars": "Мин. 3 символа",
+    "alreadyTaken": "Уже занято",
+    "available": "Доступно",
+    "checking": "Проверка...",
+    "saving": "Сохранение...",
+    "signOut": "Выйти",
+    "saveChanges": "Сохранить изменения",
+    "publicLinkCopied": "Публичная ссылка профиля скопирована",
+    "publicLinkFailed": "Не удалось скопировать публичную ссылку профиля"
+  },
+  "publicIdentity": {
+    "title": "Публичная идентичность",
+    "description": "Поделитесь своим наследием просмотра публично через уникальный ID.",
+    "copyLink": "КОПИРОВАТЬ ПУБЛИЧНУЮ ССЫЛКУ"
+  },
+  "serverSelection": {
+    "title": "Выбор сервера",
+    "netflix": "Netflix",
+    "standard": "Стандарт",
+    "balanced": "Сбалансированный",
+    "performance": "Производительность",
+    "highQuality": "Высокое качество",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Опасная зона",
+    "description": "Необратимые действия. Действуйте с осторожностью.",
+    "deleteAccount": "УДАЛИТЬ АККАУНТ",
+    "dialogTitle": "Полное удаление",
+    "dialogDescription": "Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить. Все ваши данные, список просмотра, история и настройки будут навсегда удалены с сервера.",
+    "cancel": "ОТМЕНА",
+    "confirmDelete": "ПОДТВЕРДИТЬ УДАЛЕНИЕ",
+    "erasing": "УДАЛЕНИЕ..."
+  },
+  "preferences": {
+    "title": "Настройки приложения",
+    "themeSelection": "Выбор темы",
+    "themeDescription": "Переключайтесь между светлым и тёмным режимом для оптимального комфорта.",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная",
+    "language": "Язык",
+    "languageDescription": "Выберите предпочитаемый язык отображения.",
+    "selectLanguage": "Выбрать язык",
+    "launchOnStartup": "Запуск при старте",
+    "launchDescription": "Автоматически запускать Watch Rudra в фоновом режиме при загрузке компьютера.",
+    "maxConcurrentDownloads": "Макс. одновременных загрузок",
+    "maxConcurrentDescription": "Сколько фильмов или эпизодов можно загружать одновременно. По умолчанию 3.",
+    "downloadSpeedLimit": "Ограничение скорости загрузки",
+    "downloadSpeedDescription": "Ограничьте фоновую скорость загрузки. Полезно, если сеть замедляется глобально!",
+    "unlimited": "Без ограничений"
+  },
+  "publicProfile": {
+    "returnBase": "Вернуться на базу",
+    "identityVerified": "Профиль идентичности подтверждён",
+    "persistentIdentity": "Постоянная идентичность: {id}",
+    "daysActive": "ДНЕЙ АКТИВНОСТИ",
+    "hrsTotal": "ЧАСОВ ВСЕГО",
+    "coreVersion": "ВЕРСИЯ ЯДРА: V1.0-СТАБИЛЬНАЯ"
+  }
+}

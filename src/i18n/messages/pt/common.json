@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Início",
+    "continue": "Continuar",
+    "continueWatching": "Continuar Assistindo",
+    "live": "Ao Vivo",
+    "liveMatches": "Jogos ao Vivo",
+    "watchlist": "Lista",
+    "downloads": "Downloads",
+    "offlineDownloads": "Downloads Offline",
+    "profile": "Perfil"
+  },
+  "language": {
+    "title": "Idioma",
+    "description": "Escolha seu idioma preferido"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISSÃO FALHOU",
+    "heading": "PERDIDO NO SETOR",
+    "description": "A PÁGINA QUE VOCÊ PROCURA NÃO EXISTE OU FOI REALOCADA PELO ALTO COMANDO.",
+    "homeButton": "ABORTAR PARA INÍCIO",
+    "backButton": "SETOR ANTERIOR",
+    "scanHint": "Escaneando sinais... Nenhum fragmento de dados encontrado."
+  },
+  "error": {
+    "heading": "Algo deu errado",
+    "description": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+    "tryAgain": "Tentar Novamente"
+  }
+}

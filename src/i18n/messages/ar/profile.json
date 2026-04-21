@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "الأمان / كلمة المرور",
+    "currentPassword": "التفويض الحالي",
+    "currentPasswordPlaceholder": "كلمة المرور الحالية",
+    "newPassword": "مفتاح جديد",
+    "newPasswordPlaceholder": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد المفتاح",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
+    "hidePasswords": "إخفاء كلمات المرور",
+    "showPasswords": "إظهار كلمات المرور",
+    "submit": "تغيير كلمة المرور"
+  },
+  "activity": {
+    "title": "نشاط المشاهدة",
+    "less": "أقل",
+    "more": "أكثر",
+    "noActivity": "لا يوجد نشاط",
+    "minSuffix": "{count} دقيقة",
+    "last365": "آخر 365 يوماً من التفاعل"
+  },
+  "releaseNotes": {
+    "title": "ملاحظات الإصدار",
+    "description": "اكتشف أحدث الميزات والتحسينات وإصلاحات الأخطاء المضافة إلى Watch Rudra.",
+    "viewButton": "عرض الجديد"
+  },
+  "updateForm": {
+    "updatePhoto": "تحديث الصورة",
+    "displayName": "الاسم المعروض",
+    "mobileHandle": "رقم الجوال",
+    "username": "اسم المستخدم",
+    "joined": "انضم في {date}",
+    "minChars": "3 أحرف كحد أدنى",
+    "alreadyTaken": "مستخدم بالفعل",
+    "available": "متاح",
+    "checking": "جارٍ التحقق...",
+    "saving": "جارٍ الحفظ...",
+    "signOut": "تسجيل الخروج",
+    "saveChanges": "حفظ التغييرات",
+    "publicLinkCopied": "تم نسخ رابط الملف الشخصي العام",
+    "publicLinkFailed": "فشل نسخ رابط الملف الشخصي العام"
+  },
+  "publicIdentity": {
+    "title": "الهوية العامة",
+    "description": "شارك إرث مشاهدتك علنياً عبر معرّفك الفريد.",
+    "copyLink": "نسخ الرابط العام"
+  },
+  "serverSelection": {
+    "title": "اختيار الخادم",
+    "netflix": "Netflix",
+    "standard": "قياسي",
+    "balanced": "متوازن",
+    "performance": "أداء",
+    "highQuality": "جودة عالية",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "منطقة الخطر",
+    "description": "إجراءات لا رجعة فيها. تابع بحذر.",
+    "deleteAccount": "حذف الحساب",
+    "dialogTitle": "حذف نهائي",
+    "dialogDescription": "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء. سيتم مسح جميع بياناتك وقائمتك وسجلك وتفضيلاتك نهائياً من الخادم.",
+    "cancel": "إلغاء",
+    "confirmDelete": "تأكيد الحذف",
+    "erasing": "جارٍ الحذف..."
+  },
+  "preferences": {
+    "title": "تفضيلات التطبيق",
+    "themeSelection": "اختيار المظهر",
+    "themeDescription": "التبديل بين الوضع الفاتح والداكن لراحة المشاهدة المثلى.",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "language": "اللغة",
+    "languageDescription": "اختر لغة العرض المفضلة لديك.",
+    "selectLanguage": "اختر اللغة",
+    "launchOnStartup": "التشغيل عند بدء التشغيل",
+    "launchDescription": "تشغيل Watch Rudra تلقائياً في الخلفية عند تشغيل الكمبيوتر.",
+    "maxConcurrentDownloads": "الحد الأقصى للتنزيلات المتزامنة",
+    "maxConcurrentDescription": "عدد الأفلام أو الحلقات التي يمكن تنزيلها في نفس الوقت. الافتراضي هو 3.",
+    "downloadSpeedLimit": "حد سرعة التنزيل",
+    "downloadSpeedDescription": "تقييد سرعة التنزيل في الخلفية. مفيد إذا أصبحت شبكتك بطيئة!",
+    "unlimited": "غير محدود"
+  },
+  "publicProfile": {
+    "returnBase": "العودة للقاعدة",
+    "identityVerified": "تم التحقق من الهوية",
+    "persistentIdentity": "الهوية الدائمة: {id}",
+    "daysActive": "أيام النشاط",
+    "hrsTotal": "ساعات الإجمالي",
+    "coreVersion": "الإصدار الأساسي: V1.0-مستقر"
+  }
+}

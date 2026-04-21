@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "寻找你的",
+    "headline2": "电影",
+    "searchPlaceholder": "搜索电影、剧集或影院...",
+    "searchButton": "搜索",
+    "searchAriaLabel": "搜索电影、剧集或影院",
+    "stat1": "12k+ 片源",
+    "stat2": "4K Ultra Raw",
+    "stat3": "独立电影"
+  },
+  "results": {
+    "searching": "搜索中：",
+    "resultsLabel": "结果：",
+    "filmsFound": "在档案中找到 {count} 部影片",
+    "noResults": "未找到结果",
+    "noResultsHint": "尝试不同的拼写或搜索其他内容",
+    "searchFailed": "搜索失败",
+    "searchFailedHint": "无法连接服务器。请重试。",
+    "noResultsArchive": "未找到结果",
+    "noResultsArchiveHint": "我们在档案中未找到匹配项。请尝试搜索不同的标题或关键词。",
+    "editQueryAriaLabel": "编辑搜索查询",
+    "searchingAriaLabel": "搜索中..."
+  },
+  "continueWatching": {
+    "title": "继续观看",
+    "subtitle": "从上次停下的地方继续",
+    "emptyTitle": "观看历史为空",
+    "emptyDescription": "开始观看内容后将显示在此处",
+    "removeAriaLabel": "从列表中移除",
+    "sectionAriaLabel": "最近观看的内容",
+    "timeLeft": "剩余 {time}"
+  },
+  "contentDetail": {
+    "series": "剧集",
+    "movie": "电影",
+    "failedToLoad": "内容加载失败",
+    "close": "关闭",
+    "closePreview": "关闭预览",
+    "noImageAvailable": "无可用图片",
+    "episodes": "剧集",
+    "season": "第 {number} 季",
+    "selectSeason": "选择季",
+    "episodeCount": "({count} 集)",
+    "noEpisodesAvailable": "本季无可用剧集",
+    "loadingEpisodes": "加载剧集中",
+    "watchPartyPick": "观影派对 — 选择一集",
+    "watchPartyHint": "您选择后所有人将加入",
+    "cancelWatchParty": "取消观影派对",
+    "continue": "继续",
+    "experienceStarting": "体验启动中",
+    "preparingContent": "正在准备 \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "独自观看",
+    "resume": "继续",
+    "resumeEpisode": "继续 S{season}:E{episode}",
+    "playEpisode": "播放 S{season}:E1",
+    "loading": "加载中",
+    "watchTogether": "一起观看",
+    "creating": "创建中",
+    "toWatchlist": "加入列表",
+    "removeFromList": "从列表移除"
+  },
+  "download": {
+    "download": "下载",
+    "viewInVault": "在保险库中查看",
+    "cancel": "取消",
+    "language": "语言",
+    "original": "原始",
+    "selectQuality": "选择画质",
+    "selectEpisode": "选择剧集",
+    "gatheringSources": "正在收集资源...",
+    "noFormatsAvailable": "无可用格式",
+    "noEpisodesAvailable": "无可用剧集",
+    "saved": "已保存",
+    "securelyStarting": "正在安全启动下载...",
+    "episode": "第 {number} 集",
+    "untitled": "无标题"
+  }
+}

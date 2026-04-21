@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "Noch keine Nachrichten",
+    "beFirst": "Sei der Erste, der Hallo sagt! 👋",
+    "placeholder": "Nachricht...",
+    "disabled": "Chat wurde vom Host deaktiviert",
+    "isTyping": "{name} tippt",
+    "twoTyping": "{name1} und {name2} tippen",
+    "threeTyping": "{name1}, {name2} und {name3} tippen",
+    "manyTyping": "{count} Personen tippen"
+  },
+  "sidebar": {
+    "participants": "Teilnehmer",
+    "chat": "Chat",
+    "soundboard": "Soundboard",
+    "sketch": "Zeichnen"
+  },
+  "pending": {
+    "waitingToJoin": "{count} warten auf Beitritt",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen"
+  },
+  "media": {
+    "mute": "Stumm",
+    "unmute": "Ton an",
+    "cameraOff": "Kamera ausschalten",
+    "cameraOn": "Kamera einschalten",
+    "deafen": "Stummschalten",
+    "undeafen": "Stummschaltung aufheben",
+    "selectMicrophone": "Mikrofon auswählen",
+    "selectCamera": "Kamera auswählen",
+    "noDevices": "Keine Geräte gefunden"
+  },
+  "actions": {
+    "invite": "Einladen",
+    "copied": "Kopiert",
+    "end": "Beenden",
+    "leave": "Verlassen",
+    "kick": "Rauswerfen"
+  },
+  "video": {
+    "noOneOnCamera": "Noch niemand vor der Kamera",
+    "turnOnCamera": "Schalte deine Kamera ein oder warte, bis andere beitreten"
+  },
+  "status": {
+    "connected": "Verbunden",
+    "connecting": "Verbinde…"
+  }
+}

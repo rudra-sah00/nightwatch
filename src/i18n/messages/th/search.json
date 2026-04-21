@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "ค้นหา",
+    "headline2": "ภาพยนตร์",
+    "searchPlaceholder": "ค้นหาภาพยนตร์ ซีรีส์ หรือโรงภาพยนตร์...",
+    "searchButton": "ค้นหา",
+    "searchAriaLabel": "ค้นหาภาพยนตร์ ซีรีส์ หรือโรงภาพยนตร์",
+    "stat1": "12k+ เรื่อง",
+    "stat2": "4K Ultra Raw",
+    "stat3": "อินดี้โฟกัส"
+  },
+  "results": {
+    "searching": "กำลังค้นหา:",
+    "resultsLabel": "ผลลัพธ์:",
+    "filmsFound": "พบ {count} ภาพยนตร์ในคลัง",
+    "noResults": "ไม่พบผลลัพธ์",
+    "noResultsHint": "ลองสะกดแบบอื่นหรือค้นหาสิ่งอื่น",
+    "searchFailed": "การค้นหาล้มเหลว",
+    "searchFailedHint": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองอีกครั้ง",
+    "noResultsArchive": "ไม่พบผลลัพธ์",
+    "noResultsArchiveHint": "เราไม่พบรายการที่ตรงกันในคลัง ลองค้นหาชื่อเรื่องหรือคำสำคัญอื่น",
+    "editQueryAriaLabel": "แก้ไขคำค้นหา",
+    "searchingAriaLabel": "กำลังค้นหา..."
+  },
+  "continueWatching": {
+    "title": "ดูต่อ",
+    "subtitle": "ดูต่อจากที่ค้างไว้",
+    "emptyTitle": "ประวัติการดูว่างเปล่า",
+    "emptyDescription": "เริ่มดูอะไรสักอย่างแล้วจะปรากฏที่นี่",
+    "removeAriaLabel": "ลบออกจากรายการ",
+    "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด",
+    "timeLeft": "เหลือ {time}"
+  },
+  "contentDetail": {
+    "series": "ซีรีส์",
+    "movie": "ภาพยนตร์",
+    "failedToLoad": "โหลดเนื้อหาไม่สำเร็จ",
+    "close": "ปิด",
+    "closePreview": "ปิดตัวอย่าง",
+    "noImageAvailable": "ไม่มีรูปภาพ",
+    "episodes": "ตอน",
+    "season": "ซีซัน {number}",
+    "selectSeason": "เลือกซีซัน",
+    "episodeCount": "({count} ตอน)",
+    "noEpisodesAvailable": "ไม่มีตอนสำหรับซีซันนี้",
+    "loadingEpisodes": "กำลังโหลดตอน",
+    "watchPartyPick": "ปาร์ตี้ดูหนัง — เลือกตอน",
+    "watchPartyHint": "ทุกคนจะเข้าร่วมเมื่อคุณเลือก",
+    "cancelWatchParty": "ยกเลิกปาร์ตี้ดูหนัง",
+    "continue": "ดูต่อ",
+    "experienceStarting": "กำลังเริ่มประสบการณ์",
+    "preparingContent": "กำลังเตรียม \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "ดูคนเดียว",
+    "resume": "ดูต่อ",
+    "resumeEpisode": "ดูต่อ S{season}:E{episode}",
+    "playEpisode": "เล่น S{season}:E1",
+    "loading": "กำลังโหลด",
+    "watchTogether": "ดูด้วยกัน",
+    "creating": "กำลังสร้าง",
+    "toWatchlist": "เพิ่มในรายการ",
+    "removeFromList": "ลบออกจากรายการ"
+  },
+  "download": {
+    "download": "ดาวน์โหลด",
+    "viewInVault": "ดูในตู้เซฟ",
+    "cancel": "ยกเลิก",
+    "language": "ภาษา",
+    "original": "ต้นฉบับ",
+    "selectQuality": "เลือกคุณภาพ",
+    "selectEpisode": "เลือกตอน",
+    "gatheringSources": "กำลังรวบรวมแหล่งข้อมูล...",
+    "noFormatsAvailable": "ไม่มีรูปแบบที่ใช้ได้",
+    "noEpisodesAvailable": "ไม่มีตอนที่ใช้ได้",
+    "saved": "บันทึกแล้ว",
+    "securelyStarting": "กำลังเริ่มดาวน์โหลดอย่างปลอดภัย...",
+    "episode": "ตอนที่ {number}",
+    "untitled": "ไม่มีชื่อ"
+  }
+}

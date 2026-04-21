@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "loading": "جارٍ تحميل المحتوى...",
+    "initConnection": "جارٍ تهيئة الاتصال الآمن",
+    "bufferingAriaLabel": "جارٍ تخزين الفيديو مؤقتاً",
+    "playbackError": "خطأ في التشغيل",
+    "tryAgain": "حاول مرة أخرى",
+    "goBack": "رجوع",
+    "errorDefault": "حدث خطأ",
+    "liveUnavailable": "البث المباشر غير متاح",
+    "enterFullscreen": "ملء الشاشة",
+    "exitFullscreen": "الخروج من ملء الشاشة",
+    "mute": "كتم",
+    "unmute": "إلغاء الكتم",
+    "volumeControl": "التحكم بالصوت",
+    "volume": "مستوى الصوت",
+    "skipBack": "رجوع {seconds} ثانية",
+    "skipForward": "تقديم {seconds} ثانية",
+    "tapToResume": "انقر للاستئناف",
+    "hostControlsPlayback": "المضيف يتحكم بالتشغيل",
+    "sitBackAndEnjoy": "استرخِ واستمتع بالعرض",
+    "goBackAriaLabel": "رجوع",
+    "movie": "فيلم",
+    "tvSeries": "مسلسل تلفزيوني",
+    "live": "مباشر",
+    "liveBadge": "مباشر",
+    "watchingLive": "أنت تشاهد مباشرة",
+    "jumpToLive": "الانتقال للبث المباشر"
+  },
+  "settings": {
+    "quality": "الجودة",
+    "speed": "السرعة",
+    "normal": "عادي",
+    "auto": "تلقائي",
+    "locked": "مقفل"
+  },
+  "subtitles": {
+    "title": "الترجمة",
+    "off": "إيقاف",
+    "subtitleStyle": "نمط الترجمة",
+    "size": "الحجم",
+    "font": "الخط",
+    "background": "الخلفية",
+    "textColor": "لون النص",
+    "textEffect": "تأثير النص"
+  },
+  "audio": {
+    "title": "الصوت",
+    "audioLanguage": "لغة الصوت"
+  },
+  "episodes": {
+    "episode": "الحلقة {number}",
+    "season": "الموسم {number}",
+    "seasonShort": "م{number}",
+    "clickToPlay": "انقر للتشغيل",
+    "loading": "جارٍ التحميل...",
+    "noEpisodes": "لا توجد حلقات",
+    "nowPlaying": "يعرض الآن",
+    "min": "{duration} دقيقة"
+  },
+  "nextEpisode": {
+    "nextSeason": "الموسم التالي",
+    "nextEpisode": "الحلقة التالية",
+    "inCountdown": "خلال {seconds} ثانية",
+    "play": "تشغيل",
+    "cancel": "إلغاء",
+    "loading": "جارٍ التحميل"
+  },
+  "offline": {
+    "pageTitle": "بدون إنترنت",
+    "vault": "الخزنة",
+    "yourDownloads": "المحتوى المنزّل",
+    "downloadsCount": "{count} تنزيل(ات)",
+    "availableOffline": "متاح للمشاهدة بدون إنترنت",
+    "emptyTitle": "الخزنة فارغة",
+    "emptyDescription": "التنزيلات الآمنة ستظهر هنا",
+    "desktopRequired": "يتطلب سطح المكتب",
+    "desktopRequiredDesc": "التنزيلات الآمنة بدون إنترنت متاحة فقط في تطبيق سطح المكتب. حمّل التطبيق لحفظ الأفلام والمسلسلات للسفر.",
+    "pauseDownload": "إيقاف التنزيل مؤقتاً",
+    "resumeDownload": "استئناف التنزيل",
+    "removeDownload": "إزالة التنزيل",
+    "cancelDownload": "إلغاء التنزيل",
+    "waitForComplete": "يرجى الانتظار حتى اكتمال التنزيل للمشاهدة بدون إنترنت.",
+    "waitingInQueue": "في انتظار الدور...",
+    "downloading": "جارٍ التنزيل..."
+  },
+  "watchlist": {
+    "pageTitle": "قائمة",
+    "watchlist": "المشاهدة",
+    "subtitle": "اختيارك المنسّق",
+    "itemCount": "{count} {count, plural, one {عنصر} other {عناصر}}",
+    "emptyTitle": "قائمة المشاهدة فارغة",
+    "emptyDescription": "احفظ الأفلام والمسلسلات لمشاهدتها لاحقاً",
+    "viewDetails": "عرض تفاصيل {title}"
+  }
+}

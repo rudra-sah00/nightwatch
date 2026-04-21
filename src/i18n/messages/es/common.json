@@ -13,5 +13,19 @@
   "language": {
     "title": "Idioma",
     "description": "Elige tu idioma preferido"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISIÓN FALLIDA",
+    "heading": "PERDIDO EN EL SECTOR",
+    "description": "LA PÁGINA QUE BUSCAS NO EXISTE O FUE REUBICADA POR EL ALTO MANDO.",
+    "homeButton": "VOLVER AL INICIO",
+    "backButton": "SECTOR ANTERIOR",
+    "scanHint": "Escaneando señales... No se encontraron fragmentos de datos."
+  },
+  "error": {
+    "heading": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+    "tryAgain": "Intentar de nuevo"
   }
 }

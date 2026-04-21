@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "播放",
+    "pause": "暂停",
+    "loading": "正在加载内容...",
+    "initConnection": "正在初始化安全连接",
+    "bufferingAriaLabel": "视频缓冲中",
+    "playbackError": "播放错误",
+    "tryAgain": "重试",
+    "goBack": "返回",
+    "errorDefault": "发生错误",
+    "liveUnavailable": "直播不可用",
+    "enterFullscreen": "进入全屏",
+    "exitFullscreen": "退出全屏",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "volumeControl": "音量控制",
+    "volume": "音量",
+    "skipBack": "后退 {seconds} 秒",
+    "skipForward": "前进 {seconds} 秒",
+    "tapToResume": "点击继续",
+    "hostControlsPlayback": "主持人控制播放",
+    "sitBackAndEnjoy": "放松享受节目",
+    "goBackAriaLabel": "返回",
+    "movie": "电影",
+    "tvSeries": "电视剧",
+    "live": "直播",
+    "liveBadge": "直播",
+    "watchingLive": "您正在观看直播",
+    "jumpToLive": "跳转到直播"
+  },
+  "settings": {
+    "quality": "画质",
+    "speed": "速度",
+    "normal": "正常",
+    "auto": "自动",
+    "locked": "已锁定"
+  },
+  "subtitles": {
+    "title": "字幕",
+    "off": "关闭",
+    "subtitleStyle": "字幕样式",
+    "size": "大小",
+    "font": "字体",
+    "background": "背景",
+    "textColor": "文字颜色",
+    "textEffect": "文字效果"
+  },
+  "audio": {
+    "title": "音频",
+    "audioLanguage": "音频语言"
+  },
+  "episodes": {
+    "episode": "第 {number} 集",
+    "season": "第 {number} 季",
+    "seasonShort": "S{number}",
+    "clickToPlay": "点击播放",
+    "loading": "加载中...",
+    "noEpisodes": "无剧集",
+    "nowPlaying": "正在播放",
+    "min": "{duration} 分钟"
+  },
+  "nextEpisode": {
+    "nextSeason": "下一季",
+    "nextEpisode": "下一集",
+    "inCountdown": "{seconds}秒后",
+    "play": "播放",
+    "cancel": "取消",
+    "loading": "加载中"
+  },
+  "offline": {
+    "pageTitle": "离线",
+    "vault": "保险库",
+    "yourDownloads": "您的下载内容",
+    "downloadsCount": "{count} 个下载",
+    "availableOffline": "可离线观看",
+    "emptyTitle": "保险库为空",
+    "emptyDescription": "安全下载将显示在此处",
+    "desktopRequired": "需要桌面端",
+    "desktopRequiredDesc": "安全离线下载仅在原生桌面应用中可用。下载应用以保存电影和剧集供旅途观看。",
+    "pauseDownload": "暂停下载",
+    "resumeDownload": "恢复下载",
+    "removeDownload": "移除下载",
+    "cancelDownload": "取消下载",
+    "waitForComplete": "请等待下载完成后再离线观看。",
+    "waitingInQueue": "排队等待中...",
+    "downloading": "下载中..."
+  },
+  "watchlist": {
+    "pageTitle": "我的",
+    "watchlist": "观看列表",
+    "subtitle": "您的精选内容",
+    "itemCount": "{count} 个项目",
+    "emptyTitle": "观看列表为空",
+    "emptyDescription": "保存电影和剧集以便稍后观看",
+    "viewDetails": "查看 {title} 的详情"
+  }
+}

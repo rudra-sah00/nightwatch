@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "ENCONTRE SEU",
+    "headline2": "FILME",
+    "searchPlaceholder": "BUSCAR FILMES, SÉRIES OU CINEMA...",
+    "searchButton": "BUSCAR",
+    "searchAriaLabel": "Buscar filmes, séries ou cinema",
+    "stat1": "12k+ Títulos",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Foco Indie"
+  },
+  "results": {
+    "searching": "Buscando:",
+    "resultsLabel": "Resultados:",
+    "filmsFound": "{count} Filmes Encontrados nos Arquivos",
+    "noResults": "Nenhum resultado encontrado",
+    "noResultsHint": "Tente uma grafia diferente ou busque outra coisa",
+    "searchFailed": "Busca falhou",
+    "searchFailedHint": "Não foi possível conectar ao servidor. Tente novamente.",
+    "noResultsArchive": "Nenhum Resultado Encontrado",
+    "noResultsArchiveHint": "Não encontramos correspondências em nossos arquivos. Tente buscar um título ou palavra-chave diferente.",
+    "editQueryAriaLabel": "Editar busca",
+    "searchingAriaLabel": "Buscando..."
+  },
+  "continueWatching": {
+    "title": "Continuar Assistindo",
+    "subtitle": "Continue de Onde Parou",
+    "emptyTitle": "Seu histórico está vazio",
+    "emptyDescription": "Comece a assistir algo e aparecerá aqui",
+    "removeAriaLabel": "Remover da lista",
+    "sectionAriaLabel": "Conteúdo visualizado recentemente",
+    "timeLeft": "{time} restante"
+  },
+  "contentDetail": {
+    "series": "Série",
+    "movie": "Filme",
+    "failedToLoad": "Falha ao carregar conteúdo",
+    "close": "Fechar",
+    "closePreview": "Fechar Prévia",
+    "noImageAvailable": "Nenhuma Imagem Disponível",
+    "episodes": "Episódios",
+    "season": "TEMPORADA {number}",
+    "selectSeason": "SELECIONAR TEMPORADA",
+    "episodeCount": "({count} EP)",
+    "noEpisodesAvailable": "Nenhum episódio disponível para esta temporada",
+    "loadingEpisodes": "Carregando episódios",
+    "watchPartyPick": "Watch Party — Escolha um episódio",
+    "watchPartyHint": "Todos entram quando você selecionar",
+    "cancelWatchParty": "Cancelar watch party",
+    "continue": "Continuar",
+    "experienceStarting": "Experiência Iniciando",
+    "preparingContent": "Preparando \"{title}\"..."
+  },
+  "actions": {
+    "watchSolo": "Assistir Solo",
+    "resume": "Retomar",
+    "resumeEpisode": "Retomar S{season}:E{episode}",
+    "playEpisode": "Reproduzir S{season}:E1",
+    "loading": "Carregando",
+    "watchTogether": "Assistir Juntos",
+    "creating": "Criando",
+    "toWatchlist": "À Lista",
+    "removeFromList": "Remover da Lista"
+  },
+  "download": {
+    "download": "Baixar",
+    "viewInVault": "Ver no Cofre",
+    "cancel": "Cancelar",
+    "language": "Idioma",
+    "original": "Original",
+    "selectQuality": "Selecionar Qualidade",
+    "selectEpisode": "Selecionar Episódio",
+    "gatheringSources": "Coletando fontes...",
+    "noFormatsAvailable": "Nenhum formato disponível",
+    "noEpisodesAvailable": "Nenhum episódio disponível",
+    "saved": "Salvo",
+    "securelyStarting": "Iniciando Download Seguro...",
+    "episode": "Episódio {number}",
+    "untitled": "Sem título"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Sicherheit / Passwort",
+    "currentPassword": "Aktuelle Autorisierung",
+    "currentPasswordPlaceholder": "AKTUELLES PASSWORT",
+    "newPassword": "Neuer Schlüssel",
+    "newPasswordPlaceholder": "NEUES PASSWORT",
+    "confirmPassword": "Schlüssel bestätigen",
+    "confirmPasswordPlaceholder": "NEUES PASSWORT BESTÄTIGEN",
+    "hidePasswords": "Passwörter ausblenden",
+    "showPasswords": "Passwörter anzeigen",
+    "submit": "PASSWORT ÜBERSCHREIBEN"
+  },
+  "activity": {
+    "title": "Aktivität",
+    "less": "Weniger",
+    "more": "Mehr",
+    "noActivity": "Keine Aktivität",
+    "minSuffix": "{count} Min",
+    "last365": "Letzte 365 Tage der Interaktion"
+  },
+  "releaseNotes": {
+    "title": "Versionshinweise",
+    "description": "Entdecke die neuesten Funktionen, Verbesserungen und Fehlerbehebungen von Watch Rudra.",
+    "viewButton": "NEUIGKEITEN ANSEHEN"
+  },
+  "updateForm": {
+    "updatePhoto": "Foto aktualisieren",
+    "displayName": "Anzeigename",
+    "mobileHandle": "Mobilnummer",
+    "username": "Benutzername",
+    "joined": "BEIGETRETEN {date}",
+    "minChars": "Min. 3 Zeichen",
+    "alreadyTaken": "Bereits vergeben",
+    "available": "Verfügbar",
+    "checking": "Prüfe...",
+    "saving": "Speichere...",
+    "signOut": "Abmelden",
+    "saveChanges": "Änderungen speichern",
+    "publicLinkCopied": "Öffentlicher Profillink kopiert",
+    "publicLinkFailed": "Kopieren des öffentlichen Profillinks fehlgeschlagen"
+  },
+  "publicIdentity": {
+    "title": "Öffentliche Identität",
+    "description": "Teile dein Zuschauer-Vermächtnis öffentlich über deine einzigartige ID.",
+    "copyLink": "ÖFFENTLICHEN LINK KOPIEREN"
+  },
+  "serverSelection": {
+    "title": "Serverauswahl",
+    "netflix": "Netflix",
+    "standard": "Standard",
+    "balanced": "Ausgewogen",
+    "performance": "Leistung",
+    "highQuality": "Hohe Qualität",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Gefahrenzone",
+    "description": "Unumkehrbare Aktionen. Mit Vorsicht fortfahren.",
+    "deleteAccount": "KONTO LÖSCHEN",
+    "dialogTitle": "Endgültige Löschung",
+    "dialogDescription": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten, Merkliste, Verlauf und Einstellungen werden dauerhaft vom Server gelöscht.",
+    "cancel": "ABBRECHEN",
+    "confirmDelete": "LÖSCHEN BESTÄTIGEN",
+    "erasing": "LÖSCHE..."
+  },
+  "preferences": {
+    "title": "App-Einstellungen",
+    "themeSelection": "Design-Auswahl",
+    "themeDescription": "Wechsle zwischen hellem und dunklem Modus für optimalen Sehkomfort.",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "language": "Sprache",
+    "languageDescription": "Wähle deine bevorzugte Anzeigesprache.",
+    "selectLanguage": "Sprache auswählen",
+    "launchOnStartup": "Beim Start öffnen",
+    "launchDescription": "Watch Rudra automatisch im Hintergrund starten, wenn dein Computer hochfährt.",
+    "maxConcurrentDownloads": "Max. gleichzeitige Downloads",
+    "maxConcurrentDescription": "Wie viele Filme oder Episoden gleichzeitig heruntergeladen werden können. Standard ist 3.",
+    "downloadSpeedLimit": "Download-Geschwindigkeitslimit",
+    "downloadSpeedDescription": "Begrenze die Hintergrund-Downloadgeschwindigkeit. Hilfreich wenn dein Netzwerk global langsamer wird!",
+    "unlimited": "Unbegrenzt"
+  },
+  "publicProfile": {
+    "returnBase": "Zurück zur Basis",
+    "identityVerified": "Identitätsprofil verifiziert",
+    "persistentIdentity": "Persistente Identität: {id}",
+    "daysActive": "TAGE AKTIV",
+    "hrsTotal": "STD GESAMT",
+    "coreVersion": "KERNVERSION: V1.0-STABIL"
+  }
+}

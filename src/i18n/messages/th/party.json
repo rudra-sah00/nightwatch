@@ -1,0 +1,49 @@
+{
+  "chat": {
+    "noMessages": "ยังไม่มีข้อความ",
+    "beFirst": "เป็นคนแรกที่ทักทาย! 👋",
+    "placeholder": "ข้อความ...",
+    "disabled": "โฮสต์ปิดการใช้งานแชท",
+    "isTyping": "{name} กำลังพิมพ์",
+    "twoTyping": "{name1} และ {name2} กำลังพิมพ์",
+    "threeTyping": "{name1}, {name2} และ {name3} กำลังพิมพ์",
+    "manyTyping": "{count} คนกำลังพิมพ์"
+  },
+  "sidebar": {
+    "participants": "ผู้เข้าร่วม",
+    "chat": "แชท",
+    "soundboard": "แผงเสียง",
+    "sketch": "วาดรูป"
+  },
+  "pending": {
+    "waitingToJoin": "{count} รอเข้าร่วม",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ"
+  },
+  "media": {
+    "mute": "ปิดเสียง",
+    "unmute": "เปิดเสียง",
+    "cameraOff": "ปิดกล้อง",
+    "cameraOn": "เปิดกล้อง",
+    "deafen": "ปิดเสียงทั้งหมด",
+    "undeafen": "เปิดเสียงทั้งหมด",
+    "selectMicrophone": "เลือกไมโครโฟน",
+    "selectCamera": "เลือกกล้อง",
+    "noDevices": "ไม่พบอุปกรณ์"
+  },
+  "actions": {
+    "invite": "เชิญ",
+    "copied": "คัดลอกแล้ว",
+    "end": "สิ้นสุด",
+    "leave": "ออก",
+    "kick": "เตะออก"
+  },
+  "video": {
+    "noOneOnCamera": "ยังไม่มีใครเปิดกล้อง",
+    "turnOnCamera": "เปิดกล้องของคุณหรือรอให้คนอื่นเข้าร่วม"
+  },
+  "status": {
+    "connected": "เชื่อมต่อแล้ว",
+    "connecting": "กำลังเชื่อมต่อ…"
+  }
+}

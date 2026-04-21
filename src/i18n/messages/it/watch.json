@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "loading": "Caricamento contenuto...",
+    "initConnection": "Inizializzazione connessione sicura",
+    "bufferingAriaLabel": "Buffering video",
+    "playbackError": "Errore di riproduzione",
+    "tryAgain": "Riprova",
+    "goBack": "Indietro",
+    "errorDefault": "Si è verificato un errore",
+    "liveUnavailable": "Diretta non disponibile",
+    "enterFullscreen": "Schermo intero",
+    "exitFullscreen": "Esci da schermo intero",
+    "mute": "Muto",
+    "unmute": "Riattiva audio",
+    "volumeControl": "Controllo volume",
+    "volume": "Volume",
+    "skipBack": "Indietro di {seconds}s",
+    "skipForward": "Avanti di {seconds}s",
+    "tapToResume": "Tocca per riprendere",
+    "hostControlsPlayback": "L'host controlla la riproduzione",
+    "sitBackAndEnjoy": "Rilassati e goditi lo spettacolo",
+    "goBackAriaLabel": "Indietro",
+    "movie": "Film",
+    "tvSeries": "Serie TV",
+    "live": "In diretta",
+    "liveBadge": "LIVE",
+    "watchingLive": "Stai guardando in diretta",
+    "jumpToLive": "Vai alla diretta"
+  },
+  "settings": {
+    "quality": "Qualità",
+    "speed": "Velocità",
+    "normal": "Normale",
+    "auto": "Auto",
+    "locked": "Bloccato"
+  },
+  "subtitles": {
+    "title": "Sottotitoli",
+    "off": "Off",
+    "subtitleStyle": "Stile sottotitoli",
+    "size": "Dimensione",
+    "font": "Font",
+    "background": "Sfondo",
+    "textColor": "Colore testo",
+    "textEffect": "Effetto testo"
+  },
+  "audio": {
+    "title": "Audio",
+    "audioLanguage": "Lingua audio"
+  },
+  "episodes": {
+    "episode": "Episodio {number}",
+    "season": "Stagione {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "Clicca per riprodurre",
+    "loading": "Caricamento...",
+    "noEpisodes": "Nessun episodio",
+    "nowPlaying": "in riproduzione",
+    "min": "{duration} min"
+  },
+  "nextEpisode": {
+    "nextSeason": "Prossima stagione",
+    "nextEpisode": "Prossimo episodio",
+    "inCountdown": "tra {seconds}s",
+    "play": "Riproduci",
+    "cancel": "Annulla",
+    "loading": "Caricamento"
+  },
+  "offline": {
+    "pageTitle": "OFFLINE",
+    "vault": "VAULT",
+    "yourDownloads": "I tuoi contenuti scaricati",
+    "downloadsCount": "{count} Download",
+    "availableOffline": "Disponibile per la visione offline",
+    "emptyTitle": "Il vault è vuoto",
+    "emptyDescription": "I download sicuri appariranno qui",
+    "desktopRequired": "Desktop richiesto",
+    "desktopRequiredDesc": "I download offline sicuri sono disponibili solo nell'app desktop nativa. Scarica l'app per salvare film e serie per il viaggio.",
+    "pauseDownload": "Pausa download",
+    "resumeDownload": "Riprendi download",
+    "removeDownload": "Rimuovi download",
+    "cancelDownload": "Annulla download",
+    "waitForComplete": "Attendi il completamento del download per la visione offline.",
+    "waitingInQueue": "In attesa nella coda...",
+    "downloading": "Download in corso..."
+  },
+  "watchlist": {
+    "pageTitle": "LA MIA",
+    "watchlist": "LISTA",
+    "subtitle": "La tua selezione curata",
+    "itemCount": "{count} {count, plural, one {elemento} other {elementi}}",
+    "emptyTitle": "La tua lista è vuota",
+    "emptyDescription": "Salva film e serie da guardare dopo",
+    "viewDetails": "Vedi dettagli per {title}"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "ความปลอดภัย / รหัสผ่าน",
+    "currentPassword": "การอนุญาตปัจจุบัน",
+    "currentPasswordPlaceholder": "รหัสผ่านปัจจุบัน",
+    "newPassword": "คีย์ใหม่",
+    "newPasswordPlaceholder": "รหัสผ่านใหม่",
+    "confirmPassword": "ยืนยันคีย์",
+    "confirmPasswordPlaceholder": "ยืนยันรหัสผ่านใหม่",
+    "hidePasswords": "ซ่อนรหัสผ่าน",
+    "showPasswords": "แสดงรหัสผ่าน",
+    "submit": "เปลี่ยนรหัสผ่าน"
+  },
+  "activity": {
+    "title": "กิจกรรมการดู",
+    "less": "น้อย",
+    "more": "มาก",
+    "noActivity": "ไม่มีกิจกรรม",
+    "minSuffix": "{count} นาที",
+    "last365": "365 วันล่าสุดของการโต้ตอบ"
+  },
+  "releaseNotes": {
+    "title": "บันทึกการอัปเดต",
+    "description": "ค้นพบฟีเจอร์ล่าสุด การปรับปรุง และการแก้ไขข้อบกพร่องที่เพิ่มใน Watch Rudra",
+    "viewButton": "ดูสิ่งใหม่"
+  },
+  "updateForm": {
+    "updatePhoto": "อัปเดตรูปภาพ",
+    "displayName": "ชื่อที่แสดง",
+    "mobileHandle": "เบอร์มือถือ",
+    "username": "ชื่อผู้ใช้",
+    "joined": "เข้าร่วมเมื่อ {date}",
+    "minChars": "อย่างน้อย 3 ตัวอักษร",
+    "alreadyTaken": "ถูกใช้แล้ว",
+    "available": "ใช้ได้",
+    "checking": "กำลังตรวจสอบ...",
+    "saving": "กำลังบันทึก...",
+    "signOut": "ออกจากระบบ",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "publicLinkCopied": "คัดลอกลิงก์โปรไฟล์สาธารณะแล้ว",
+    "publicLinkFailed": "ไม่สามารถคัดลอกลิงก์โปรไฟล์สาธารณะ"
+  },
+  "publicIdentity": {
+    "title": "ตัวตนสาธารณะ",
+    "description": "แชร์ประวัติการดูของคุณผ่าน ID เฉพาะ",
+    "copyLink": "คัดลอกลิงก์สาธารณะ"
+  },
+  "serverSelection": {
+    "title": "เลือกเซิร์ฟเวอร์",
+    "netflix": "Netflix",
+    "standard": "มาตรฐาน",
+    "balanced": "สมดุล",
+    "performance": "ประสิทธิภาพ",
+    "highQuality": "คุณภาพสูง",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "โซนอันตราย",
+    "description": "การดำเนินการที่ไม่สามารถย้อนกลับได้ ดำเนินการด้วยความระมัดระวัง",
+    "deleteAccount": "ลบบัญชี",
+    "dialogTitle": "ลบถาวร",
+    "dialogDescription": "คุณแน่ใจหรือไม่ว่าต้องการลบบัญชี? การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลทั้งหมด รายการดู ประวัติ และการตั้งค่าจะถูกลบออกจากเซิร์ฟเวอร์อย่างถาวร",
+    "cancel": "ยกเลิก",
+    "confirmDelete": "ยืนยันการลบ",
+    "erasing": "กำลังลบ..."
+  },
+  "preferences": {
+    "title": "การตั้งค่าแอป",
+    "themeSelection": "เลือกธีม",
+    "themeDescription": "สลับระหว่างโหมดสว่างและมืดเพื่อความสบายในการดูที่เหมาะสม",
+    "light": "สว่าง",
+    "dark": "มืด",
+    "system": "ระบบ",
+    "language": "ภาษา",
+    "languageDescription": "เลือกภาษาที่ต้องการแสดงผล",
+    "selectLanguage": "เลือกภาษา",
+    "launchOnStartup": "เปิดเมื่อเริ่มระบบ",
+    "launchDescription": "เปิด Watch Rudra อัตโนมัติในพื้นหลังเมื่อคอมพิวเตอร์เริ่มทำงาน",
+    "maxConcurrentDownloads": "ดาวน์โหลดพร้อมกันสูงสุด",
+    "maxConcurrentDescription": "จำนวนภาพยนตร์หรือตอนที่สามารถดาวน์โหลดพร้อมกันได้ ค่าเริ่มต้นคือ 3",
+    "downloadSpeedLimit": "จำกัดความเร็วดาวน์โหลด",
+    "downloadSpeedDescription": "จำกัดความเร็วดาวน์โหลดในพื้นหลัง มีประโยชน์หากเครือข่ายช้าลง!",
+    "unlimited": "ไม่จำกัด"
+  },
+  "publicProfile": {
+    "returnBase": "กลับฐาน",
+    "identityVerified": "ยืนยันโปรไฟล์ตัวตนแล้ว",
+    "persistentIdentity": "ตัวตนถาวร: {id}",
+    "daysActive": "วันที่ใช้งาน",
+    "hrsTotal": "ชั่วโมงรวม",
+    "coreVersion": "เวอร์ชันหลัก: V1.0-เสถียร"
+  }
+}

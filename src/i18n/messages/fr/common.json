@@ -13,5 +13,19 @@
   "language": {
     "title": "Langue",
     "description": "Choisissez votre langue préférée"
+  },
+  "notFound": {
+    "title": "404",
+    "badge": "MISSION ÉCHOUÉE",
+    "heading": "PERDU DANS LE SECTEUR",
+    "description": "LA PAGE QUE VOUS RECHERCHEZ N'EXISTE PAS OU A ÉTÉ DÉPLACÉE PAR LE HAUT COMMANDEMENT.",
+    "homeButton": "RETOUR À L'ACCUEIL",
+    "backButton": "SECTEUR PRÉCÉDENT",
+    "scanHint": "Scan des signaux... Aucun fragment de données trouvé."
+  },
+  "error": {
+    "heading": "Quelque chose s'est mal passé",
+    "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "tryAgain": "Réessayer"
   }
 }

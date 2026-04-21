@@ -1,0 +1,98 @@
+{
+  "player": {
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "loading": "İçerik yükleniyor...",
+    "initConnection": "Güvenli bağlantı başlatılıyor",
+    "bufferingAriaLabel": "Video arabelleğe alınıyor",
+    "playbackError": "Oynatma Hatası",
+    "tryAgain": "Tekrar Dene",
+    "goBack": "Geri",
+    "errorDefault": "Bir hata oluştu",
+    "liveUnavailable": "Canlı yayın kullanılamıyor",
+    "enterFullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
+    "mute": "Sessize al",
+    "unmute": "Sesi aç",
+    "volumeControl": "Ses kontrolü",
+    "volume": "Ses",
+    "skipBack": "{seconds}sn geri",
+    "skipForward": "{seconds}sn ileri",
+    "tapToResume": "Devam etmek için dokunun",
+    "hostControlsPlayback": "Ev sahibi oynatmayı kontrol ediyor",
+    "sitBackAndEnjoy": "Arkanıza yaslanın ve keyfini çıkarın",
+    "goBackAriaLabel": "Geri",
+    "movie": "Film",
+    "tvSeries": "TV Dizisi",
+    "live": "Canlı",
+    "liveBadge": "CANLI",
+    "watchingLive": "Canlı izliyorsunuz",
+    "jumpToLive": "Canlıya atla"
+  },
+  "settings": {
+    "quality": "Kalite",
+    "speed": "Hız",
+    "normal": "Normal",
+    "auto": "Otomatik",
+    "locked": "Kilitli"
+  },
+  "subtitles": {
+    "title": "Altyazılar",
+    "off": "Kapalı",
+    "subtitleStyle": "Altyazı Stili",
+    "size": "Boyut",
+    "font": "Yazı Tipi",
+    "background": "Arka Plan",
+    "textColor": "Metin Rengi",
+    "textEffect": "Metin Efekti"
+  },
+  "audio": {
+    "title": "Ses",
+    "audioLanguage": "Ses Dili"
+  },
+  "episodes": {
+    "episode": "Bölüm {number}",
+    "season": "Sezon {number}",
+    "seasonShort": "S{number}",
+    "clickToPlay": "Oynatmak için tıklayın",
+    "loading": "Yükleniyor...",
+    "noEpisodes": "Bölüm yok",
+    "nowPlaying": "şimdi oynatılıyor",
+    "min": "{duration} dk"
+  },
+  "nextEpisode": {
+    "nextSeason": "Sonraki Sezon",
+    "nextEpisode": "Sonraki Bölüm",
+    "inCountdown": "{seconds}sn içinde",
+    "play": "Oynat",
+    "cancel": "İptal",
+    "loading": "Yükleniyor"
+  },
+  "offline": {
+    "pageTitle": "ÇEVRİMDIŞI",
+    "vault": "KASA",
+    "yourDownloads": "İndirilen İçerikleriniz",
+    "downloadsCount": "{count} İndirme",
+    "availableOffline": "Çevrimdışı izleme için kullanılabilir",
+    "emptyTitle": "Kasa boş",
+    "emptyDescription": "Güvenli indirmeler burada görünecek",
+    "desktopRequired": "Masaüstü Gerekli",
+    "desktopRequiredDesc": "Güvenli çevrimdışı indirmeler yalnızca yerel masaüstü uygulamasında kullanılabilir. Film ve dizileri seyahat için kaydetmek üzere uygulamayı indirin.",
+    "pauseDownload": "İndirmeyi Duraklat",
+    "resumeDownload": "İndirmeyi Sürdür",
+    "removeDownload": "İndirmeyi Kaldır",
+    "cancelDownload": "İndirmeyi İptal Et",
+    "waitForComplete": "Çevrimdışı izlemek için indirmenin tamamlanmasını bekleyin.",
+    "waitingInQueue": "Sırada bekliyor...",
+    "downloading": "İndiriliyor..."
+  },
+  "watchlist": {
+    "pageTitle": "BENİM",
+    "watchlist": "LİSTEM",
+    "subtitle": "Seçilmiş Koleksiyonunuz",
+    "itemCount": "{count} öğe",
+    "emptyTitle": "İzleme listeniz boş",
+    "emptyDescription": "Daha sonra izlemek için film ve dizileri kaydedin",
+    "viewDetails": "{title} için detayları gör"
+  }
+}

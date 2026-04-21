@@ -1,0 +1,81 @@
+{
+  "home": {
+    "headline1": "FİLMİNİ",
+    "headline2": "BUL",
+    "searchPlaceholder": "FİLM, DİZİ VEYA SİNEMA ARA...",
+    "searchButton": "ARA",
+    "searchAriaLabel": "Film, dizi veya sinema ara",
+    "stat1": "12k+ Başlık",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Bağımsız Odak"
+  },
+  "results": {
+    "searching": "Aranıyor:",
+    "resultsLabel": "Sonuçlar:",
+    "filmsFound": "Arşivlerde {count} Film Bulundu",
+    "noResults": "Sonuç bulunamadı",
+    "noResultsHint": "Farklı bir yazım deneyin veya başka bir şey arayın",
+    "searchFailed": "Arama başarısız",
+    "searchFailedHint": "Sunucuya ulaşılamadı. Lütfen tekrar deneyin.",
+    "noResultsArchive": "Sonuç Bulunamadı",
+    "noResultsArchiveHint": "Arşivlerimizde eşleşme bulamadık. Farklı bir başlık veya anahtar kelime aramayı deneyin.",
+    "editQueryAriaLabel": "Arama sorgusunu düzenle",
+    "searchingAriaLabel": "Aranıyor..."
+  },
+  "continueWatching": {
+    "title": "İzlemeye Devam Et",
+    "subtitle": "Kaldığınız Yerden Devam Edin",
+    "emptyTitle": "İzleme geçmişiniz boş",
+    "emptyDescription": "Bir şey izlemeye başlayın ve burada görünecek",
+    "removeAriaLabel": "Listeden kaldır",
+    "sectionAriaLabel": "Son izlenen içerikler",
+    "timeLeft": "{time} kaldı"
+  },
+  "contentDetail": {
+    "series": "Dizi",
+    "movie": "Film",
+    "failedToLoad": "İçerik yüklenemedi",
+    "close": "Kapat",
+    "closePreview": "Önizlemeyi Kapat",
+    "noImageAvailable": "Görsel Mevcut Değil",
+    "episodes": "Bölümler",
+    "season": "SEZON {number}",
+    "selectSeason": "SEZON SEÇ",
+    "episodeCount": "({count} BLM)",
+    "noEpisodesAvailable": "Bu sezon için bölüm mevcut değil",
+    "loadingEpisodes": "Bölümler yükleniyor",
+    "watchPartyPick": "İzleme Partisi — Bir bölüm seçin",
+    "watchPartyHint": "Siz seçtiğinizde herkes katılır",
+    "cancelWatchParty": "İzleme partisini iptal et",
+    "continue": "Devam",
+    "experienceStarting": "Deneyim Başlıyor",
+    "preparingContent": "\"{title}\" hazırlanıyor..."
+  },
+  "actions": {
+    "watchSolo": "Tek Başına İzle",
+    "resume": "Devam Et",
+    "resumeEpisode": "Devam S{season}:B{episode}",
+    "playEpisode": "Oynat S{season}:B1",
+    "loading": "Yükleniyor",
+    "watchTogether": "Birlikte İzle",
+    "creating": "Oluşturuluyor",
+    "toWatchlist": "Listeye Ekle",
+    "removeFromList": "Listeden Kaldır"
+  },
+  "download": {
+    "download": "İndir",
+    "viewInVault": "Kasada Görüntüle",
+    "cancel": "İptal",
+    "language": "Dil",
+    "original": "Orijinal",
+    "selectQuality": "Kalite Seçin",
+    "selectEpisode": "Bölüm Seçin",
+    "gatheringSources": "Kaynaklar toplanıyor...",
+    "noFormatsAvailable": "Format mevcut değil",
+    "noEpisodesAvailable": "Bölüm mevcut değil",
+    "saved": "Kaydedildi",
+    "securelyStarting": "Güvenli İndirme Başlatılıyor...",
+    "episode": "Bölüm {number}",
+    "untitled": "Başlıksız"
+  }
+}
