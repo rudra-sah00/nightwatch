@@ -343,39 +343,77 @@ export function AppPreferences() {
                   {t('preferences.maxConcurrentDescription')}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
-                  {[1, 2, 3, 5].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => handleConcurrentChange(val)}
-                      className={cn(
-                        'px-3 py-1.5 text-xs font-bold rounded-md transition-colors',
-                        concurrentDownloads === val && !customConcurrent
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground',
-                      )}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  placeholder="Custom"
-                  value={customConcurrent}
-                  onChange={(e) => setCustomConcurrent(e.target.value)}
-                  onBlur={handleCustomConcurrent}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && handleCustomConcurrent()
-                  }
-                  className="w-20 px-2 py-1.5 text-xs font-bold border-[2px] border-border bg-background rounded-md text-center placeholder:text-muted-foreground/50"
-                />
-              </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                  >
+                    <Activity className="w-4 h-4" />
+                    {concurrentDownloads}
+                  </button>
+                </DialogTrigger>
+                <DialogContent
+                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+                  showCloseButton={false}
+                >
+                  <DialogTitle className="sr-only">
+                    {t('preferences.maxConcurrentDownloads')}
+                  </DialogTitle>
+                  <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
+                    <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
+                      {t('preferences.maxConcurrentDownloads')}
+                    </h2>
+                    <div className="flex flex-col w-full gap-1">
+                      {[1, 2, 3, 5, 8, 10].map((val) => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => handleConcurrentChange(val)}
+                          className={cn(
+                            'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
+                            concurrentDownloads === val
+                              ? 'bg-foreground text-background font-black'
+                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          )}
+                        >
+                          <span className="text-lg font-headline font-bold">
+                            {val}
+                          </span>
+                          {concurrentDownloads === val && (
+                            <Check className="w-5 h-5 stroke-[3px]" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3 w-full">
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        placeholder="Custom (1-10)"
+                        value={customConcurrent}
+                        onChange={(e) => setCustomConcurrent(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && handleCustomConcurrent()
+                        }
+                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCustomConcurrent}
+                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
+                      >
+                        Set
+                      </button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
+
+            <div className="h-px bg-border w-full" />
 
             {/* Download Speed Limit */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -388,41 +426,83 @@ export function AppPreferences() {
                   {t('preferences.downloadSpeedDescription')}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
-                  {[
-                    { label: t('preferences.unlimited'), val: 0 },
-                    { label: '5', val: 5 },
-                    { label: '10', val: 10 },
-                    { label: '20', val: 20 },
-                  ].map((opt) => (
-                    <button
-                      key={opt.val}
-                      type="button"
-                      onClick={() => handleSpeedChange(opt.val)}
-                      className={cn(
-                        'px-3 py-1.5 text-xs font-bold rounded-md transition-colors whitespace-nowrap',
-                        downloadSpeedLimit === opt.val && !customSpeed
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground',
-                      )}
-                    >
-                      {opt.val === 0 ? opt.label : `${opt.label} MB/s`}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="number"
-                  min={1}
-                  max={100}
-                  placeholder="MB/s"
-                  value={customSpeed}
-                  onChange={(e) => setCustomSpeed(e.target.value)}
-                  onBlur={handleCustomSpeed}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCustomSpeed()}
-                  className="w-20 px-2 py-1.5 text-xs font-bold border-[2px] border-border bg-background rounded-md text-center placeholder:text-muted-foreground/50"
-                />
-              </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
+                  >
+                    <Zap className="w-4 h-4" />
+                    {downloadSpeedLimit === 0
+                      ? t('preferences.unlimited')
+                      : `${downloadSpeedLimit} MB/s`}
+                  </button>
+                </DialogTrigger>
+                <DialogContent
+                  className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+                  showCloseButton={false}
+                >
+                  <DialogTitle className="sr-only">
+                    {t('preferences.downloadSpeedLimit')}
+                  </DialogTitle>
+                  <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
+                    <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
+                      {t('preferences.downloadSpeedLimit')}
+                    </h2>
+                    <div className="flex flex-col w-full gap-1">
+                      {[
+                        { val: 0, label: t('preferences.unlimited') },
+                        { val: 1, label: '1 MB/s' },
+                        { val: 5, label: '5 MB/s' },
+                        { val: 10, label: '10 MB/s' },
+                        { val: 20, label: '20 MB/s' },
+                        { val: 50, label: '50 MB/s' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.val}
+                          type="button"
+                          onClick={() => handleSpeedChange(opt.val)}
+                          className={cn(
+                            'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
+                            downloadSpeedLimit === opt.val
+                              ? 'bg-foreground text-background font-black'
+                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          )}
+                        >
+                          <span className="text-lg font-headline font-bold">
+                            {opt.label}
+                          </span>
+                          {downloadSpeedLimit === opt.val && (
+                            <Check className="w-5 h-5 stroke-[3px]" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3 w-full">
+                      <input
+                        type="number"
+                        min={1}
+                        max={100}
+                        placeholder="Custom MB/s"
+                        value={customSpeed}
+                        onChange={(e) => setCustomSpeed(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && handleCustomSpeed()
+                        }
+                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCustomSpeed}
+                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
+                      >
+                        Set
+                      </button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </>
         )}
