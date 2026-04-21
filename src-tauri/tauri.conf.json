@@ -6,7 +6,8 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "",
-    "devUrl": "http://localhost:3000"
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "https://watch.rudrasahoo.live"
   },
   "app": {
     "withGlobalTauri": true,
@@ -21,8 +22,7 @@
         "center": true,
         "visible": false,
         "decorations": true,
-        "titleBarStyle": "Overlay",
-        "url": "https://watch.rudrasahoo.live"
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {
