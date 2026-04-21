@@ -212,6 +212,9 @@ pub fn run() {
                     std::thread::spawn(move || {
                         std::thread::sleep(std::time::Duration::from_millis(300));
                         let _ = win_show.show();
+                        // Open devtools in dev mode for debugging
+                        #[cfg(debug_assertions)]
+                        win_show.open_devtools();
                     });
 
                     std::thread::spawn(move || {
