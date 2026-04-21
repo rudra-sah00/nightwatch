@@ -17,7 +17,7 @@
 6. [Phase F: Livestream & Channels (Weeks 23-26)](#phase-f-livestream--channels-weeks-23-26)
 7. [Phase G: Component Library & Deduplication (Weeks 27-30)](#phase-g-component-library--deduplication-weeks-27-30)
 8. [Phase H: Performance & SSR (Weeks 31-34)](#phase-h-performance--ssr-weeks-31-34)
-9. [Phase I: Tauri Desktop Features (Weeks 35-38)](#phase-i-tauri-desktop-features-weeks-35-38)
+9. [Phase I: Electron Desktop Features (Weeks 35-38)](#phase-i-electron-desktop-features-weeks-35-38)
 
 ---
 
@@ -80,7 +80,7 @@
 |---|------|---------|---------|
 | 6 | Add "Jump to Live Edge" button | `src/features/watch/components/WatchLivePlayer.tsx` | Critical for DVR-capable live players. When user scrubs back, show a "LIVE" button that seeks to the live edge. |
 | 7 | Add `Player.LiveBadge` to live player | `src/features/watch/components/WatchLivePlayer.tsx` | The component exists in the Player namespace but is not used. Add it to indicate live status. |
-| 8 | Add PiP button to player controls | `src/features/watch/components/WatchVODPlayer.tsx`, `WatchLivePlayer.tsx` | Tauri already supports PiP via `set-pip` Tauri invoke/listen. Add a PiP toggle button to the player controls bar. |
+| 8 | Add PiP button to player controls | `src/features/watch/components/WatchVODPlayer.tsx`, `WatchLivePlayer.tsx` | Electron already supports PiP via `set-pip` Electron invoke/listen. Add a PiP toggle button to the player controls bar. |
 
 ### B.3 Player Polish
 
@@ -218,19 +218,19 @@
 
 ---
 
-## Phase I: Tauri Desktop Features (Weeks 35-38)
+## Phase I: Electron Desktop Features (Weeks 35-38)
 
 > **Priority:** 🔵 NORMAL — Desktop-specific enhancements.
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 1 | Migrate Tauri commands to TypeScript bridge | `src-tauri/src/commands/*.rs` → `src/lib/tauri-bridge.ts` | All Tauri command files need typed bridge definitions. Start with `main.rs`, Tauri invoke/listen type definitions, then modules. |
-| 2 | Add "Check for Updates" menu item | `src-tauri/src/commands/tray.rs`, `src-tauri/src/platform/macos.rs` | No manual update check option. Add to tray menu and macOS app menu. |
-| 3 | Add Windows taskbar download progress | `src-tauri/src/commands/download-manager.rs` | Use Tauri webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
-| 4 | Fix Windows taskbar thumbnail icons | `src-tauri/src/main.rs` | Buttons use empty icons — no visible icons. Create proper icon assets. |
-| 5 | Defer macOS permission requests | `src-tauri/src/platform/macos.rs` | Camera/mic permissions requested at startup. Defer to when the feature is actually needed. |
-| 6 | Add configurable download location | `src-tauri/src/commands/download-manager.rs` | All platforms use `OfflineVault` in app data. Let users choose a custom directory. |
-| 7 | Optimize live-bridge racer memory | `src-tauri/src/commands/live-bridge.rs` | 6 concurrent hidden Tauri webview windows consume ~600MB. Extract cookies from winner and destroy it. |
+| 1 | Migrate Electron commands to TypeScript bridge | `src-electron/src/commands/*.js` → `src/lib/electron-bridge.ts` | All Electron command files need typed bridge definitions. Start with `main.js`, Electron invoke/listen type definitions, then modules. |
+| 2 | Add "Check for Updates" menu item | `src-electron/src/commands/tray.js`, `src-electron/src/platform/macos.js` | No manual update check option. Add to tray menu and macOS app menu. |
+| 3 | Add Windows taskbar download progress | `src-electron/src/commands/download-manager.js` | Use Electron webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
+| 4 | Fix Windows taskbar thumbnail icons | `src-electron/src/main.js` | Buttons use empty icons — no visible icons. Create proper icon assets. |
+| 5 | Defer macOS permission requests | `src-electron/src/platform/macos.js` | Camera/mic permissions requested at startup. Defer to when the feature is actually needed. |
+| 6 | Add configurable download location | `src-electron/src/commands/download-manager.js` | All platforms use `OfflineVault` in app data. Let users choose a custom directory. |
+| 7 | Optimize live-bridge racer memory | `src-electron/src/commands/live-bridge.js` | 6 concurrent hidden Electron webview windows consume ~600MB. Extract cookies from winner and destroy it. |
 
 ---
 
@@ -246,7 +246,7 @@
 | F. Livestream | 23–26 | 6 | Focus traps, modal optimization, channels |
 | G. Component Library | 27–30 | 6 | AlertDialog, deduplication, shared utilities |
 | H. Performance & SSR | 31–34 | 6 | Server-side prefetching, lazy loading |
-| I. Tauri Desktop | 35–38 | 7 | TypeScript migration, native features |
+| I. Electron Desktop | 35–38 | 7 | TypeScript migration, native features |
 | **Total** | **38** | **79** | |
 
 ---

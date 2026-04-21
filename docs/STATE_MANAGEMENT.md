@@ -1,12 +1,12 @@
 # Comprehensive State Management Strategy
 
-With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Tauri Desktop bridges, state management in Watch Rudra runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
+With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Electron Desktop bridges, state management in Watch Rudra runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
 
 ## 1. Global Application State
 
 ### Zustand (Persistent Client State)
 For state that persists across page navigations and needs to survive refreshes:
-*   **`use-auth-store.ts`**: User authentication state with Zustand `persist` middleware. Uses a custom `StateStorage` adapter that syncs to both `localStorage` (web) and `tauri-plugin-store` (desktop) via `desktopBridge.storeSet/storeGet`.
+*   **`use-auth-store.ts`**: User authentication state with Zustand `persist` middleware. Uses a custom `StateStorage` adapter that syncs to both `localStorage` (web) and `electron-plugin-store` (desktop) via `desktopBridge.storeSet/storeGet`.
 *   **`use-navigation-store.ts`**: Navigation transition state for page loading indicators.
 
 ### React Context (Dependency Injection)
@@ -48,7 +48,7 @@ useEffect(() => {
 ```
 When an Agora `RTMMessage` arrives triggering `onMessage(msg)`, the listener uniquely reads `roomRef.current` without causing an infinite re-render loop on the listener itself.
 
-## 4. Tauri Desktop State (`useDesktopApp.ts`)
+## 4. Electron Desktop State (`useDesktopApp.ts`)
 
 Instead of throwing `typeof window` and `desktopBridge` checks sporadically across UI components, we funnel OS state detection through `src/hooks/use-desktop-app.ts`.
 

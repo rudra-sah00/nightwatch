@@ -65,7 +65,7 @@ All GitHub Actions workflows now run the full test suite before deploying or bui
 1. `pnpm check` — Biome lint & format
 2. `pnpm type-check` — TypeScript compilation
 3. `pnpm test` — Full Vitest suite
-4. Tauri build pipeline — Cross-platform binary compilation
+4. Electron build pipeline — Cross-platform binary compilation
 
 ### PR Preview Pipeline (`pr-preview.yml`)
 Triggers on every PR to `main`:

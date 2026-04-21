@@ -54,7 +54,7 @@ Hosts have granular control over what Guests are allowed to do.
 
 ## Secure Offline Downloads (Desktop Only)
 
-For users on our native Tauri client, the platform supports securely pulling full HD movies and multi-season episodic content directly to the device for offline viewing without requiring aggressive persistent network connectivity.
+For users on our native Electron client, the platform supports securely pulling full HD movies and multi-season episodic content directly to the device for offline viewing without requiring aggressive persistent network connectivity.
 
 ### 1. Robust Download Pipelines
 The system adapts intelligently to `s1`, `s2`, and `s3` master source providers. It calculates master playlist configurations and iteratively streams AES / raw HLS segments natively within Rust backend pipelines mapping directly down to local directories.

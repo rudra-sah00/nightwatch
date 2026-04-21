@@ -1,7 +1,7 @@
 # Watch Rudra — 6-12 Month Improvement Roadmap
 
 > **Created:** April 19, 2026
-> **Scope:** Security hardening, refactoring, feature additions, UI/UX improvements, Tauri app stability, CI/CD, accessibility, SEO, and documentation.
+> **Scope:** Security hardening, refactoring, feature additions, UI/UX improvements, Electron app stability, CI/CD, accessibility, SEO, and documentation.
 > **Approach:** Execute phases sequentially. Each phase builds on the previous one. Items within a phase can be parallelized.
 
 ---
@@ -11,7 +11,7 @@
 1. [Phase 1: Critical Security Fixes (Weeks 1–3)](#phase-1-critical-security-fixes-weeks-13)
 2. [Phase 2: CI/CD & Testing Foundation (Weeks 4–6)](#phase-2-cicd--testing-foundation-weeks-46)
 3. [Phase 3: Core Architecture Refactors (Weeks 7–12)](#phase-3-core-architecture-refactors-weeks-712)
-4. [Phase 4: Tauri App Overhaul (Weeks 13–20)](#phase-4-tauri-app-overhaul-weeks-1320)
+4. [Phase 4: Electron App Overhaul (Weeks 13–20)](#phase-4-electron-app-overhaul-weeks-1320)
 5. [Phase 5: UI/UX & Accessibility (Weeks 21–28)](#phase-5-uiux--accessibility-weeks-2128)
 6. [Phase 6: Performance & PWA (Weeks 29–34)](#phase-6-performance--pwa-weeks-2934)
 7. [Phase 7: New Features (Weeks 35–42)](#phase-7-new-features-weeks-3542)
@@ -23,17 +23,17 @@
 
 > **Priority:** 🔴 CRITICAL — Do these before anything else.
 
-### 1.1 Tauri Security Hardening
+### 1.1 Electron Security Hardening
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 1 | Remove `nodeIntegration: true` from splash window | `src-tauri/src/commands/splash.rs` | Splash uses `nodeIntegration: true`, `contextIsolation: false`, `webSecurity: false`. Rewrite splash to use `contextIsolation: true` and communicate via Tauri invoke/listen. |
-| 2 | Fix path traversal in `offline-media://` protocol | `src-tauri/src/commands/download-manager.rs` | The protocol handler joins user-supplied URL paths with `VAULT_PATH` without sanitizing `..` sequences. Add `path.resolve()` + verify the resolved path starts with `VAULT_PATH`. |
-| 3 | Add URL allowlist to deep link handler | `src-tauri/src/commands/deep-link.rs` | `handleDeepLink` blindly transforms `watch-rudra://` to `https://` with no validation. Add an allowlist of permitted hostnames and path patterns. |
-| 4 | Secure the live-bridge proxy server | `src-tauri/src/commands/live-bridge.rs` | The local HTTP proxy at `127.0.0.1:{port}/proxy?url=...` has no authentication and no URL allowlist. Any local process can use it as an open SSRF proxy. Add: (a) a per-session random token required in requests, (b) URL allowlist restricting to known streaming CDN domains. |
-| 5 | Replace XOR cipher with AES-256-GCM | `src-tauri/src/commands/cipher.rs` | XOR encryption is trivially breakable. Replace with Rust `aes-gcm` crate. Remove the hardcoded fallback key — if `safeStorage` is unavailable, warn the user and store unencrypted with a clear disclaimer. |
-| 6 | Add Tauri invoke/listen key allowlist for tauri-plugin-store | `src-tauri/src/main.rs` | `store-get`, `store-set`, `store-delete` command handlers accept arbitrary keys. Add an allowlist of permitted keys the webview can access. |
-| 7 | Add origin validation to permission handler | `src-tauri/src/commands/window.rs` | Permission requests for camera/mic/notifications are granted for ALL origins. Restrict to the app's own origin only. |
+| 1 | Remove `nodeIntegration: true` from splash window | `src-electron/src/commands/splash.js` | Splash uses `nodeIntegration: true`, `contextIsolation: false`, `webSecurity: false`. Rewrite splash to use `contextIsolation: true` and communicate via Electron invoke/listen. |
+| 2 | Fix path traversal in `offline-media://` protocol | `src-electron/src/commands/download-manager.js` | The protocol handler joins user-supplied URL paths with `VAULT_PATH` without sanitizing `..` sequences. Add `path.resolve()` + verify the resolved path starts with `VAULT_PATH`. |
+| 3 | Add URL allowlist to deep link handler | `src-electron/src/commands/deep-link.js` | `handleDeepLink` blindly transforms `watch-rudra://` to `https://` with no validation. Add an allowlist of permitted hostnames and path patterns. |
+| 4 | Secure the live-bridge proxy server | `src-electron/src/commands/live-bridge.js` | The local HTTP proxy at `127.0.0.1:{port}/proxy?url=...` has no authentication and no URL allowlist. Any local process can use it as an open SSRF proxy. Add: (a) a per-session random token required in requests, (b) URL allowlist restricting to known streaming CDN domains. |
+| 5 | Replace XOR cipher with AES-256-GCM | `src-electron/src/commands/cipher.js` | XOR encryption is trivially breakable. Replace with Rust `aes-gcm` crate. Remove the hardcoded fallback key — if `safeStorage` is unavailable, warn the user and store unencrypted with a clear disclaimer. |
+| 6 | Add Electron invoke/listen key allowlist for electron-plugin-store | `src-electron/src/main.js` | `store-get`, `store-set`, `store-delete` command handlers accept arbitrary keys. Add an allowlist of permitted keys the webview can access. |
+| 7 | Add origin validation to permission handler | `src-electron/src/commands/window.js` | Permission requests for camera/mic/notifications are granted for ALL origins. Restrict to the app's own origin only. |
 
 ### 1.2 Web Security Fixes
 
@@ -59,7 +59,7 @@
 |---|------|---------|---------|
 | 1 | Add `pnpm test` step to deploy workflow | `.github/workflows/deploy.yml` | Currently only runs `pnpm check` and `pnpm type-check`. Add `pnpm test` before the build step. Fail the deploy if tests fail. |
 | 2 | Add `pnpm test` step to release workflow | `.github/workflows/release.yml` | Same gap — no tests run before release. |
-| 3 | Add lint + type-check to desktop build | `.github/workflows/build-desktop.yml` | Goes straight from `pnpm install` to Tauri build pipeline with zero validation. Add `pnpm check` and `pnpm type-check`. |
+| 3 | Add lint + type-check to desktop build | `.github/workflows/build-desktop.yml` | Goes straight from `pnpm install` to Electron build pipeline with zero validation. Add `pnpm check` and `pnpm type-check`. |
 | 4 | Add pnpm store caching to web workflows | `.github/workflows/deploy.yml`, `release.yml` | `build-desktop.yml` caches the pnpm store but web workflows don't. Add `actions/cache` for `~/.pnpm-store`. |
 | 5 | Replace `sed` secret injection with env vars | `.github/workflows/build-desktop.yml` | Using `sed` to inject secrets into source files is fragile. Use build-time environment variables or a config template instead. |
 
@@ -77,7 +77,7 @@
 |---|------|---------|
 | 9 | Add error boundary tests | No tests exist for `error.tsx`, `global-error.tsx`, or `not-found.tsx`. Add tests verifying they render correctly and report to Sentry. |
 | 10 | Add provider integration tests | `AuthProvider`, `SocketProvider`, and `ThemeProvider` need tests for error states, reconnection, and edge cases. |
-| 11 | Add Tauri command tests | Zero test coverage for the Tauri layer. Add unit tests for Tauri command handlers, download manager state, and cipher module using mock-based testing. |
+| 11 | Add Electron command tests | Zero test coverage for the Electron layer. Add unit tests for Electron command handlers, download manager state, and cipher module using mock-based testing. |
 
 ---
 
@@ -132,56 +132,56 @@
 
 ---
 
-## Phase 4: Tauri App Overhaul (Weeks 13–20)
+## Phase 4: Electron App Overhaul (Weeks 13–20)
 
-> **Priority:** 🟡 MEDIUM-HIGH — The Tauri layer has the most accumulated tech debt.
+> **Priority:** 🟡 MEDIUM-HIGH — The Electron layer has the most accumulated tech debt.
 
 ### 4.1 Migrate to TypeScript
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 1 | Set up TypeScript for Tauri commands | `src-tauri/src/commands/` | All Tauri command files need proper type safety. Ensure typed command signatures and response types are defined in `src/lib/tauri-bridge.ts`. |
-| 2 | Migrate `main.rs` types | `src-tauri/src/main.rs` | Start with the entry point. Define typed Tauri invoke/listen channel names and handler signatures in the bridge. |
-| 3 | Migrate all modules to typed commands | `src-tauri/src/commands/*.rs` | Define interfaces for download state, bridge config, window options, etc. in `src/lib/tauri-bridge.ts`. |
-| 4 | Migrate platform files to typed commands | `src-tauri/src/platform/*.rs` | Convert platform-specific files. |
-| 5 | Add typed Tauri invoke/listen channel definitions | `src/lib/tauri-bridge.ts` | Create a shared type file defining all Tauri invoke/listen channel names and their payload types. Use in both Rust backend and frontend bridge. |
+| 1 | Set up TypeScript for Electron commands | `src-electron/src/commands/` | All Electron command files need proper type safety. Ensure typed command signatures and response types are defined in `src/lib/electron-bridge.ts`. |
+| 2 | Migrate `main.js` types | `src-electron/src/main.js` | Start with the entry point. Define typed Electron invoke/listen channel names and handler signatures in the bridge. |
+| 3 | Migrate all modules to typed commands | `src-electron/src/commands/*.js` | Define interfaces for download state, bridge config, window options, etc. in `src/lib/electron-bridge.ts`. |
+| 4 | Migrate platform files to typed commands | `src-electron/src/platform/*.js` | Convert platform-specific files. |
+| 5 | Add typed Electron invoke/listen channel definitions | `src/lib/electron-bridge.ts` | Create a shared type file defining all Electron invoke/listen channel names and their payload types. Use in both Rust backend and frontend bridge. |
 
 ### 4.2 Architecture Cleanup
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 6 | Split monolithic `main.rs` | `src-tauri/src/main.rs` | Extract into: `commands/ipc_handlers.rs` (command registration), `commands/cors.rs` (CORS overrides), `commands/media_controls.rs` (Windows taskbar, media keys), `commands/lifecycle.rs` (app events, power monitor). Target: `main.rs` under 100 lines. |
-| 7 | Separate protocol handler from download manager | `src-tauri/src/commands/download-manager.rs` | `setupOfflineMediaProtocol` and `setupDownloadManager` are separate concerns sharing a vault path. Extract protocol handler to its own module. |
-| 8 | Consolidate tauri-plugin-store instances | `src-tauri/src/commands/state.rs`, `src-tauri/src/main.rs` | Two separate `tauri-plugin-store` instances write to the same JSON file. Create a single shared store instance exported from a `store.rs` module. |
-| 9 | Merge duplicate platform files | `src-tauri/src/platform/windows.rs`, `linux.rs` | These files are nearly identical. Extract shared logic into a `platform/common.rs` and keep only platform-specific overrides. |
+| 6 | Split monolithic `main.js` | `src-electron/src/main.js` | Extract into: `commands/ipc_handlers.js` (command registration), `commands/cors.js` (CORS overrides), `commands/media_controls.js` (Windows taskbar, media keys), `commands/lifecycle.js` (app events, power monitor). Target: `main.js` under 100 lines. |
+| 7 | Separate protocol handler from download manager | `src-electron/src/commands/download-manager.js` | `setupOfflineMediaProtocol` and `setupDownloadManager` are separate concerns sharing a vault path. Extract protocol handler to its own module. |
+| 8 | Consolidate electron-plugin-store instances | `src-electron/src/commands/state.js`, `src-electron/src/main.js` | Two separate `electron-plugin-store` instances write to the same JSON file. Create a single shared store instance exported from a `store.js` module. |
+| 9 | Merge duplicate platform files | `src-electron/src/platform/windows.js`, `linux.js` | These files are nearly identical. Extract shared logic into a `platform/common.js` and keep only platform-specific overrides. |
 | 10 | Extract version reading utility | Multiple files | `getAsarVersion()` / package.json version reading is duplicated in 3 places. Create a shared `getAppVersion()` utility. |
 
 ### 4.3 Stability & Memory Fixes
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 11 | Fix `discord.js` missing `destroy()` method | `src-tauri/src/commands/discord.rs` | `main.rs` calls `discordLogic.destroy()` on quit, but the method doesn't exist. RPC connection is never cleaned up, leaving Discord presence stuck. |
-| 12 | Add `isDestroyed()` checks before event sends | `src-tauri/src/commands/state.rs`, `download-manager.rs` | `sendSafeProgress` and download progress handlers don't check if the webview is destroyed before calling `.emit()`. Causes unhandled exceptions when window closes during downloads. |
-| 13 | Fix redirect loop in `downloadFile` | `src-tauri/src/commands/network.rs` | Recursive redirect following has no depth limit. Add a max redirect count (5). |
-| 14 | Clear `capturedKeys` Map on bridge stop | `src-tauri/src/commands/live-bridge.rs` | The Map is populated but never cleared except on new `start-live-bridge` calls. Add cleanup on `stop-live-bridge`. |
-| 15 | Fix stale `_lastEventSender` reference | `src-tauri/src/commands/live-bridge.rs` | Holds a reference to a `WebContents` object that prevents GC after window destruction. Null out on window close. |
-| 16 | Clean up `activeDownloadsMap` on completion | `src-tauri/src/commands/state.rs` | Download entries including HTTP request objects are only cleaned up on cancel, not on successful completion. |
-| 17 | Debounce `syncDbState` writes | `src-tauri/src/commands/state.rs` | Currently writes the entire download database to disk on every progress chunk. Debounce to every 2-5 seconds. |
-| 18 | Add disk space check before downloads | `src-tauri/src/commands/download-manager.rs` | Downloads fail mid-way if disk is full. Check available space before starting and warn the user. |
+| 11 | Fix `discord.js` missing `destroy()` method | `src-electron/src/commands/discord.js` | `main.js` calls `discordLogic.destroy()` on quit, but the method doesn't exist. RPC connection is never cleaned up, leaving Discord presence stuck. |
+| 12 | Add `isDestroyed()` checks before event sends | `src-electron/src/commands/state.js`, `download-manager.js` | `sendSafeProgress` and download progress handlers don't check if the webview is destroyed before calling `.emit()`. Causes unhandled exceptions when window closes during downloads. |
+| 13 | Fix redirect loop in `downloadFile` | `src-electron/src/commands/network.js` | Recursive redirect following has no depth limit. Add a max redirect count (5). |
+| 14 | Clear `capturedKeys` Map on bridge stop | `src-electron/src/commands/live-bridge.js` | The Map is populated but never cleared except on new `start-live-bridge` calls. Add cleanup on `stop-live-bridge`. |
+| 15 | Fix stale `_lastEventSender` reference | `src-electron/src/commands/live-bridge.js` | Holds a reference to a `WebContents` object that prevents GC after window destruction. Null out on window close. |
+| 16 | Clean up `activeDownloadsMap` on completion | `src-electron/src/commands/state.js` | Download entries including HTTP request objects are only cleaned up on cancel, not on successful completion. |
+| 17 | Debounce `syncDbState` writes | `src-electron/src/commands/state.js` | Currently writes the entire download database to disk on every progress chunk. Debounce to every 2-5 seconds. |
+| 18 | Add disk space check before downloads | `src-electron/src/commands/download-manager.js` | Downloads fail mid-way if disk is full. Check available space before starting and warn the user. |
 
-### 4.4 Missing Tauri Features
+### 4.4 Missing Electron Features
 
 | # | Task | Details |
 |---|------|---------|
 | 19 | Add "Check for Updates" menu item | Add to tray menu and macOS app menu. Show release notes when an update is available. |
 | 20 | Add update failure UI | Currently if both native and ASAR updaters fail, the user sees "Starting Watch Rudra..." forever. Show a clear error with retry option. |
-| 21 | Add Sentry to webview process | `src-tauri/src/main.rs` | Sentry is initialized for Rust backend only. Webview JS errors aren't captured. |
-| 22 | Fix Windows taskbar thumbnail buttons | `src-tauri/src/main.rs` | Buttons use empty icons — no visible icons. Create proper icon assets. |
-| 23 | Process Jump List arguments | `src-tauri/src/main.rs` | `--open-downloads` and `--play-pause` args are registered in Jump List but never processed on app launch. |
-| 24 | Add Windows download progress bar | Use Tauri webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
-| 25 | Defer macOS permission requests | `src-tauri/src/platform/macos.rs` | Camera/mic permissions are requested at startup. Defer to when the feature is actually needed (livestream, watch party). |
-| 26 | Optimize racer window memory | `src-tauri/src/commands/live-bridge.rs` | 6 concurrent hidden Tauri webview windows consume ~600MB. Extract cookies from the winning window and destroy it, keeping only the proxy server. |
-| 27 | Add `backgroundThrottling` toggle | `src-tauri/src/commands/window.rs` | Currently always `false`. Enable throttling when not playing media to save CPU. |
+| 21 | Add Sentry to webview process | `src-electron/src/main.js` | Sentry is initialized for Rust backend only. Webview JS errors aren't captured. |
+| 22 | Fix Windows taskbar thumbnail buttons | `src-electron/src/main.js` | Buttons use empty icons — no visible icons. Create proper icon assets. |
+| 23 | Process Jump List arguments | `src-electron/src/main.js` | `--open-downloads` and `--play-pause` args are registered in Jump List but never processed on app launch. |
+| 24 | Add Windows download progress bar | Use Electron webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
+| 25 | Defer macOS permission requests | `src-electron/src/platform/macos.js` | Camera/mic permissions are requested at startup. Defer to when the feature is actually needed (livestream, watch party). |
+| 26 | Optimize racer window memory | `src-electron/src/commands/live-bridge.js` | 6 concurrent hidden Electron webview windows consume ~600MB. Extract cookies from the winning window and destroy it, keeping only the proxy server. |
+| 27 | Add `backgroundThrottling` toggle | `src-electron/src/commands/window.js` | Currently always `false`. Enable throttling when not playing media to save CPU. |
 
 ---
 
@@ -248,14 +248,14 @@
 | 11 | Enable navigation preload | `src/app/sw.ts` | `navigationPreload: false` means offline navigation relies entirely on cache. Enable it for faster online navigation. |
 | 12 | Add SW update prompt | `src/app/serwist.ts` | Verify the service worker registration handles update prompts gracefully. Show a "New version available — refresh" toast when a new SW is waiting. |
 
-### 6.3 Tauri Startup Performance
+### 6.3 Electron Startup Performance
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 13 | Lazy-load Sentry in Tauri | `src-tauri/src/main.rs` | Sentry is loaded synchronously at startup. Defer to after splash is shown. |
-| 14 | Remove `nodeIntegration` from splash | `src-tauri/src/commands/splash.rs` | Loading the full Node.js runtime into the splash renderer is unnecessary overhead for a simple progress display. |
-| 15 | Defer context menu loading | `src-tauri/src/commands/window.rs` | Loaded via top-level async IIFE before app is ready. Defer to after window creation. |
-| 16 | Reduce speed throttle timer creation | `src-tauri/src/commands/network.rs` | `setTimeout(() => res.resume(), waitTimeMs)` creates a new timer for every chunk. Batch or use a single recurring timer. |
+| 13 | Lazy-load Sentry in Electron | `src-electron/src/main.js` | Sentry is loaded synchronously at startup. Defer to after splash is shown. |
+| 14 | Remove `nodeIntegration` from splash | `src-electron/src/commands/splash.js` | Loading the full Node.js runtime into the splash renderer is unnecessary overhead for a simple progress display. |
+| 15 | Defer context menu loading | `src-electron/src/commands/window.js` | Loaded via top-level async IIFE before app is ready. Defer to after window creation. |
+| 16 | Reduce speed throttle timer creation | `src-electron/src/commands/network.js` | `setTimeout(() => res.resume(), waitTimeMs)` creates a new timer for every chunk. Batch or use a single recurring timer. |
 
 ---
 
@@ -282,13 +282,13 @@
 | 8 | Replace brute-force sync with acknowledgment | When a new member joins a watch party, the host sends sync events 3 times with `setTimeout(500/1000/2000)`. Replace with an ack-based protocol: send once, resend only if no ack received. |
 | 9 | Add keyboard shortcuts for player controls | Volume, seek, fullscreen, PiP — add keyboard shortcuts with a discoverable shortcut overlay (press `?` to show). |
 
-### 8.3 Tauri Enhancements
+### 8.3 Electron Enhancements
 
 | # | Task | Details |
 |---|------|---------|
 | 10 | Add Discord Rich Presence join/spectate buttons | Support Watch Party invites via Discord "Join" button using Rich Presence party features. |
 | 11 | Add dynamic Discord presence images | Show content poster/thumbnail as the large image in Discord Rich Presence based on what's being watched. |
-| 12 | Add Windows toast notifications | Replace generic Tauri notifications with native Windows toast notifications with Action Center support. |
+| 12 | Add Windows toast notifications | Replace generic Electron notifications with native Windows toast notifications with Action Center support. |
 | 13 | Add Linux XDG integration | Improve `.desktop` file generation and XDG compliance for better Linux DE integration. |
 | 14 | Add macOS Touch Bar enhancements | Currently only Play/Pause and Toggle Mic. Add track info, seek bar, volume control. |
 | 15 | Add configurable download location | All platforms use `app.getPath('userData')/OfflineVault`. Let users choose a custom download directory. |
@@ -326,7 +326,7 @@
 
 | # | Task | Details |
 |---|------|---------|
-| 9 | Remove `.DS_Store` files from repo | `.DS_Store` files exist in `src-tauri/` and `src/features/downloads/components/`. Add to `.gitignore` and remove from tracking. |
+| 9 | Remove `.DS_Store` files from repo | `.DS_Store` files exist in `src-electron/` and `src/features/downloads/components/`. Add to `.gitignore` and remove from tracking. |
 | 10 | Remove dead `_CardHeader` etc. from Card component | `src/components/ui/card.tsx` defines internal components with underscore prefixes that are never exported. Remove or export them. |
 | 11 | Clean up `frontend.log` from repo | `frontend.log` is committed to the repo. Add to `.gitignore`. |
 | 12 | Audit and pin dependency versions | `package.json` uses `^` ranges for all dependencies. Pin exact versions for production dependencies to prevent unexpected breaking changes. |
@@ -340,13 +340,13 @@
 
 | Phase | Weeks | Items | Focus |
 |-------|-------|-------|-------|
-| 1. Critical Security | 1–3 | 14 | Tauri + web security vulnerabilities |
+| 1. Critical Security | 1–3 | 14 | Electron + web security vulnerabilities |
 | 2. CI/CD & Testing | 4–6 | 11 | Pipeline reliability, test coverage |
 | 3. Core Refactors | 7–12 | 20 | Error handling, caching, state, API layer |
-| 4. Tauri Overhaul | 13–20 | 27 | TypeScript migration, architecture, stability |
+| 4. Electron Overhaul | 13–20 | 27 | TypeScript migration, architecture, stability |
 | 5. UI/UX & A11y | 21–28 | 21 | Accessibility compliance, UI polish |
 | 6. Performance & PWA | 29–34 | 16 | React perf, service worker, startup time |
-| 7. New Features | 35–42 | 20 | Offline resilience, watch UX, Tauri features |
+| 7. New Features | 35–42 | 20 | Offline resilience, watch UX, Electron features |
 | 8. Docs & Polish | 43–48 | 15 | Documentation, code cleanup, dependency audit |
 | **Total** | **48** | **144** | |
 

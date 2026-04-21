@@ -11,7 +11,7 @@
 ## Video & Infrastructure
 * [VOD Streaming Engine](STREAMING.md)
 * [Agora RTM & RTC Real-Time](AGORA_RTM_RTC.md)
-* [Desktop & Tauri App](DESKTOP.md)
+* [Desktop & Electron App](DESKTOP.md)
 
 ## Domains & Features
 * [Overview](FEATURES.md)

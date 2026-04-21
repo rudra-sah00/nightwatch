@@ -1,6 +1,6 @@
 # Desktop Application
 
-Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Tauri v2**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
+Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
 
 ## Installation & Troubleshooting
 
@@ -16,44 +16,44 @@ xattr -cr "/Applications/Watch Rudra.app"
 
 ## Architecture
 
-The desktop app is built with Tauri v2, using a Rust backend for native operations and the system webview for rendering:
+The desktop app is built with Electron, using a Rust backend for native operations and the system webview for rendering:
 
 ```
-src-tauri/
-├── tauri.conf.json          # Tauri configuration (window, plugins, bundle settings)
+src-electron/
+├── electron.conf.json          # Electron configuration (window, plugins, bundle settings)
 ├── Cargo.toml               # Rust dependencies and plugin declarations
-├── build.rs                 # Tauri build script
+├── build.js                 # Electron build script
 ├── entitlements.plist       # macOS entitlements (camera, mic, network, JIT)
 ├── capabilities/
 │   └── default.json         # Permission grants for the main window + remote URLs
 ├── icons/
 │   └── icon.png             # App icon
 └── src/
-    ├── main.rs              # App entry point, plugin registration, window setup, global shortcuts
+    ├── main.js              # App entry point, plugin registration, window setup, global shortcuts
     └── commands/
-        ├── mod.rs           # Module declarations
-        ├── window.rs        # PiP, badge, keep-awake, theme, autostart, clipboard, notifications
-        ├── tray.rs          # System tray menu (Show, Play/Pause, Toggle Mic, About, Updates, Quit)
-        ├── discord.rs       # Discord Rich Presence via local IPC socket
-        ├── downloads.rs     # Secure offline download manager (HLS/MP4, pause/resume, crash recovery)
-        ├── live_bridge.rs   # Live stream relay bridge
-        └── protocol.rs      # Custom `offline-media://` protocol for offline playback
+        ├── mod.js           # Module declarations
+        ├── window.js        # PiP, badge, keep-awake, theme, autostart, clipboard, notifications
+        ├── tray.js          # System tray menu (Show, Play/Pause, Toggle Mic, About, Updates, Quit)
+        ├── discord.js       # Discord Rich Presence via local IPC socket
+        ├── downloads.js     # Secure offline download manager (HLS/MP4, pause/resume, crash recovery)
+        ├── live_bridge.js   # Live stream relay bridge
+        └── protocol.js      # Custom `offline-media://` protocol for offline playback
 ```
 
 ### Key Design Decisions
 
 - **Remote URL loading**: The main window loads `https://watch.rudrasahoo.live` directly (not a local build). This means the desktop app always serves the latest deployed version without requiring app updates for frontend changes.
-- **Tauri plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Tauri v2 plugins.
+- **Electron plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Electron plugins.
 - **JS injection**: On window load, Rust injects a script that adds a drag region at the top of the page and attaches drag handlers to the nav element, with MutationObserver re-attachment for SPA navigation.
 
 ### Secure Offline Downloads
 
-The Rust download manager (`commands/downloads.rs`) handles:
+The Rust download manager (`commands/downloads.js`) handles:
 
 1. **HLS stream downloading**: Parses `.m3u8` playlists, downloads all `.ts` segments concurrently, and rewrites the playlist to reference local files.
 2. **MP4 direct downloads**: Streams large files with progress tracking and pause/resume support.
 3. **Crash recovery**: Download state is persisted to disk. On app restart, incomplete downloads are automatically resumed.
-4. **Custom protocol**: The `offline-media://` protocol (registered in `commands/protocol.rs`) serves downloaded content directly from the local filesystem to the webview, enabling offline playback without a local HTTP server.
+4. **Custom protocol**: The `offline-media://` protocol (registered in `commands/protocol.js`) serves downloaded content directly from the local filesystem to the webview, enabling offline playback without a local HTTP server.
 5. **Encryption**: Downloaded media segments are encrypted at rest using AES-CTR with a per-installation random key stored in the app data directory.
 
 ### Offline Mode / PWA Service Worker
@@ -87,36 +87,36 @@ The `serwist.config.js` file in the project root configures the CLI.
 
 ## Auto-Updating
 
-The desktop app uses `tauri-plugin-updater` for seamless OTA updates:
+The desktop app uses `electron-plugin-updater` for seamless OTA updates:
 
 - The updater checks `https://github.com/rudra-sah00/watch-rudra/releases/latest/download/latest.json` for new versions.
 - When a new version is available, the app downloads and applies the update, then prompts the user to restart.
-- Since the app loads a remote URL, most frontend changes don't require a desktop update at all — only Rust-side changes or Tauri config changes necessitate a new binary release.
+- Since the app loads a remote URL, most frontend changes don't require a desktop update at all — only Rust-side changes or Electron config changes necessitate a new binary release.
 
 ## Continuous Integration (CI) and Release Pipeline
 
-We enforce a highly automated build and release system via `.github/workflows/build-tauri.yml`:
+We enforce a highly automated build and release system via `.github/workflows/build-electron.yml`:
 
 1. **Triggers:** When a `v*` tag is pushed (typically via Release-Please after merging conventional commits), or manually via `workflow_dispatch`.
 2. **Quality Gate:** Runs Biome lint, TypeScript check, and unit tests before building.
-3. **Cross-Platform Build:** Installs Rust toolchain, system dependencies (Linux: webkit2gtk, appindicator, etc.), and runs `pnpm tauri build` on macOS, Windows, and Ubuntu runners simultaneously.
-4. **Publish:** Uses `tauri-apps/tauri-action` to attach `.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb` installers directly to the GitHub Release.
+3. **Cross-Platform Build:** Installs Rust toolchain, system dependencies (Linux: webkit2gtk, appindicator, etc.), and runs `pnpm electron build` on macOS, Windows, and Ubuntu runners simultaneously.
+4. **Publish:** Uses `electron-apps/electron-action` to attach `.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb` installers directly to the GitHub Release.
 
 ## Local Development
 
 To develop and test the desktop app locally:
 
 ```bash
-# Install dependencies (includes @tauri-apps/cli)
+# Install dependencies (includes @electron-apps/cli)
 pnpm install
 
-# Run Tauri in development mode (starts Next.js dev server + native window)
-pnpm tauri:dev
+# Run Electron in development mode (starts Next.js dev server + native window)
+pnpm electron:dev
 ```
 
 To build a production binary locally:
 ```bash
-pnpm tauri:build
+pnpm electron:build
 ```
 
 > **Prerequisites:** You need the Rust toolchain installed (`rustup`). On Linux, install system dependencies: `libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libgtk-3-dev`.
@@ -133,10 +133,10 @@ pnpm tauri:build
 | **Dock Badge (macOS)** | Unread count via osascript |
 | **Keep Awake** | `caffeinate` on macOS, `SetThreadExecutionState` on Windows |
 | **Deep Linking** | `watch-rudra://` protocol registered with the OS |
-| **Auto-Start** | `tauri-plugin-autostart` with LaunchAgent on macOS |
-| **Clipboard** | Native clipboard write via `tauri-plugin-clipboard-manager` |
-| **Notifications** | Native OS notifications via `tauri-plugin-notification` |
-| **Persistent Store** | Key-value store via `tauri-plugin-store` (replaces localStorage for desktop-specific prefs) |
+| **Auto-Start** | `electron-plugin-autostart` with LaunchAgent on macOS |
+| **Clipboard** | Native clipboard write via `electron-plugin-clipboard-manager` |
+| **Notifications** | Native OS notifications via `electron-plugin-notification` |
+| **Persistent Store** | Key-value store via `electron-plugin-store` (replaces localStorage for desktop-specific prefs) |
 | **Offline Downloads** | HLS/MP4 download with AES encryption, pause/resume, crash recovery |
 | **Live Bridge** | Relay bridge for livestream data |
 | **Window Dragging** | Injected drag region at top + nav element drag support |
@@ -146,12 +146,12 @@ pnpm tauri:build
 
 The web and desktop apps share the exact same Next.js codebase. All native interactions are piped through a single bridge module:
 
-### `src/lib/tauri-bridge.ts`
+### `src/lib/electron-bridge.ts`
 
-The bridge detects the Tauri environment via `window.__TAURI__` or `window.__TAURI_INTERNALS__` and provides a unified API. In browser environments, all methods are safe no-ops.
+The bridge detects the Electron environment via `window.electronAPI` or `window.electronAPI` and provides a unified API. In browser environments, all methods are safe no-ops.
 
 Key exports:
-- `isDesktop` / `isTauri` — Boolean detection flags
+- `isDesktop` / `isElectron` — Boolean detection flags
 - `checkIsDesktop()` — Function for use in useState initializers (hydration-safe)
 - `desktopBridge` — Object with all native methods (Discord, clipboard, store, PiP, badge, downloads, etc.)
 
@@ -159,7 +159,7 @@ Key exports:
 
 A React hook that wraps the bridge for component use:
 
-- `isDesktopApp` — Whether running inside Tauri
+- `isDesktopApp` — Whether running inside Electron
 - `isBrowser` — Inverse of above
 - `isMacOS` / `isWindows` — OS detection
 - `openInDesktopApp()` — Deep-link fallback: tries `watch-rudra://` protocol, shows download prompt if app not installed
@@ -167,17 +167,17 @@ A React hook that wraps the bridge for component use:
 - `copyToClipboard(text)` — Uses native clipboard in desktop, `navigator.clipboard` in browser
 - `dragStyle` / `noDragStyle` — CSS properties for `-webkit-app-region`
 
-### Tauri Command Invocation
+### Electron Command Invocation
 
 Frontend code calls Rust commands via:
 ```typescript
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '@electron-apps/api/core';
 await invoke<ReturnType>('command_name', { arg1: value1 });
 ```
 
 Event listening:
 ```typescript
-import { listen } from '@tauri-apps/api/event';
+import { listen } from '@electron-apps/api/event';
 const unlisten = await listen<PayloadType>('event-name', (event) => {
   console.log(event.payload);
 });
@@ -185,4 +185,4 @@ const unlisten = await listen<PayloadType>('event-name', (event) => {
 
 ### Capabilities & Permissions
 
-The `src-tauri/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://watch.rudrasahoo.live/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.
+The `src-electron/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://watch.rudrasahoo.live/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.

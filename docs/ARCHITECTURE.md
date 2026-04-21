@@ -1,6 +1,6 @@
 # Real-World Codebase Architecture
 
-Watch Rudra is not a simple Next.js boilerplate; it's a massive, multi-environment monorepo architecture bridging browser clients explicitly with native Tauri (OS) hooks, complex HLS streaming, and real-time P2P networking protocols.
+Watch Rudra is not a simple Next.js boilerplate; it's a massive, multi-environment monorepo architecture bridging browser clients explicitly with native Electron (OS) hooks, complex HLS streaming, and real-time P2P networking protocols.
 
 ## High-Level Tech Stack
 
@@ -9,7 +9,7 @@ Watch Rudra is not a simple Next.js boilerplate; it's a massive, multi-environme
 *   **Styling**: Tailwind CSS (Custom Neo-Brutalist Theme with variables in `tailwind.config`).
 *   **Real-time Infrastructure**: Agora RTM (Signaling / UI State), Agora RTC (WebRTC Video/Audio Calls), and Socket.io (`socket.ts` legacy fallbacks).
 *   **Video Engine**: Custom HLS abstractions over `hls.js` supporting dynamic manifest swapping.
-*   **Native Bridge**: Tauri invoke/listen via `desktopBridge` (`src/lib/tauri-bridge.ts`).
+*   **Native Bridge**: Electron invoke/listen via `desktopBridge` (`src/lib/electron-bridge.ts`).
 *   **Quality Config**: `biome.json` (Lint/Format entirely replacing ESLint/Prettier), Vitest (Unit), Playwright (E2E).
 
 ---
@@ -61,7 +61,7 @@ Inside Next.js `src/proxy.ts` (mapped in Edge infrastructure), our frontend inte
 
 ---
 
-## 5. The Tauri Sandbox (`src/hooks/use-desktop-app.ts`)
+## 5. The Electron Sandbox (`src/hooks/use-desktop-app.ts`)
 
 Instead of rendering a normal web app in a system webview, the Watch Rudra standard browser experience contains fallback abstractions checking for custom protocol handlers (`watch-rudra://`).
-If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/lib/tauri-bridge.ts`.
+If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/lib/electron-bridge.ts`.
