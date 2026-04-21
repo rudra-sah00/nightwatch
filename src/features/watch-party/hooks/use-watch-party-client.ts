@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { usePredictiveSync } from '@/features/watch-party/room/hooks/usePredictiveSync';
@@ -24,6 +25,7 @@ export function useWatchPartyClient({
   initialRoomPreview,
   initialRoomNotFound,
 }: UseWatchPartyClientOptions) {
+  const t = useTranslations('toasts');
   const router = useRouter();
   const { copyToClipboard } = useDesktopApp();
 
@@ -162,7 +164,7 @@ export function useWatchPartyClient({
       const duration = now - roomCreationTimeRef.current;
       const threeHours = 3 * 60 * 60 * 1000;
       if (duration >= threeHours) {
-        toast.info('Watch party has reached 3-hour limit and will now end.');
+        toast.info(t('partyTimeLimit'));
         const timer = setTimeout(() => {
           leaveRoom();
           goBackOrHome();
@@ -172,7 +174,7 @@ export function useWatchPartyClient({
     };
     const interval = setInterval(checkDuration, 60 * 1000);
     return () => clearInterval(interval);
-  }, [room, isHost, leaveRoom, goBackOrHome]);
+  }, [room, isHost, leaveRoom, goBackOrHome, t]);
 
   useEffect(() => {
     if (!room || !isHost || room.type !== 'movie' || !videoRef.current) return;

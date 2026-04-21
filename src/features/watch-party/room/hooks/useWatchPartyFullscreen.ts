@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
@@ -21,6 +22,7 @@ interface UseWatchPartyFullscreenReturn {
 export function useWatchPartyFullscreen({
   containerRef,
 }: UseWatchPartyFullscreenProps): UseWatchPartyFullscreenReturn {
+  const t = useTranslations('toasts');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = useCallback(async () => {
@@ -57,9 +59,9 @@ export function useWatchPartyFullscreen({
         }
       }
     } catch {
-      toast.error('Failed to toggle fullscreen');
+      toast.error(t('fullscreenFailed'));
     }
-  }, [containerRef]);
+  }, [containerRef, t]);
 
   useEffect(() => {
     // 1. Desktop App Native OS Event Link

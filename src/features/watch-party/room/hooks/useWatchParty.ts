@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
@@ -58,6 +59,7 @@ interface UseWatchPartyOptions {
 }
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
+  const t = useTranslations('toasts');
   const router = useRouter();
   const { userId, roomId } = options;
 
@@ -177,7 +179,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         }
 
         case 'PARTY_CLOSED': {
-          toast.info('Party finished');
+          toast.info(t('partyFinished'));
           setRoom(null);
           setIsConnected(false);
           setRequestStatus('idle');

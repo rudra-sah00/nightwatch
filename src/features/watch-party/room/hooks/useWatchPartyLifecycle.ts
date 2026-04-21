@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { toast } from 'sonner';
@@ -54,6 +55,7 @@ export function useWatchPartyLifecycle({
   rtmSendMessage,
   setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
+  const t = useTranslations('toasts');
   // --- REAL-TIME APPROVAL LISTENER (Socket.IO for Guests) ---
   useEffect(() => {
     const guestToken =
@@ -132,7 +134,7 @@ export function useWatchPartyLifecycle({
               }
               setIsConnected(true);
               setRequestStatus('joined');
-              toast.success('Your request was approved!');
+              toast.success(t('requestApproved'));
             } else {
               setError('Failed to fetch room details after approval.');
             }
@@ -174,6 +176,7 @@ export function useWatchPartyLifecycle({
     setRequestStatus,
     setError,
     setAgoraRtmToken,
+    t,
   ]);
 
   const createRoom = useCallback(
@@ -319,11 +322,11 @@ export function useWatchPartyLifecycle({
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('guest_token');
         }
-        toast.info('Join request cancelled');
+        toast.info(t('requestCancelled'));
         onComplete?.();
       }
     },
-    [requestStatus, setRoom, setIsConnected, setRequestStatus, setMessages],
+    [requestStatus, setRoom, setIsConnected, setRequestStatus, setMessages, t],
   );
 
   return {

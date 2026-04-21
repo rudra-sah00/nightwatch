@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { cacheSeriesData } from '@/features/watch/player/hooks/useNextEpisode';
@@ -27,6 +28,7 @@ export function usePlaybackActions({
   watchProgress,
   fromContinueWatching,
 }: UsePlaybackActionsProps): UsePlaybackActionsReturn {
+  const t = useTranslations('toasts');
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingEpisodeId, setPlayingEpisodeId] = useState<
@@ -73,7 +75,7 @@ export function usePlaybackActions({
 
           // Set 8-second timeout to reset loading state if navigation fails
           const timeoutId = setTimeout(() => {
-            toast.error('Playback failed to start. Please try again.');
+            toast.error(t('playbackFailed'));
             setIsPlaying(false);
             setPlayingEpisodeId(null);
           }, 8000);
@@ -100,7 +102,7 @@ export function usePlaybackActions({
           }
 
           if (!episodeToPlay) {
-            toast.error('No episodes available to play.');
+            toast.error(t('noEpisodes'));
             setIsPlaying(false);
             setPlayingEpisodeId(null);
             return;
@@ -139,7 +141,7 @@ export function usePlaybackActions({
 
           // Set 8-second timeout to reset loading state if navigation fails
           const timeoutId = setTimeout(() => {
-            toast.error('Playback failed to start. Please try again.');
+            toast.error(t('playbackFailed'));
             setIsPlaying(false);
             setPlayingEpisodeId(null);
           }, 8000);
@@ -151,12 +153,12 @@ export function usePlaybackActions({
         }
       } catch {
         // Navigation error
-        toast.error('Failed to start playback');
+        toast.error(t('startFailed'));
         setIsPlaying(false);
         setPlayingEpisodeId(null);
       }
     },
-    [router],
+    [router, t],
   );
 
   const handlePlay = useCallback(
@@ -169,7 +171,7 @@ export function usePlaybackActions({
 
   const handleResume = useCallback(async () => {
     if (!show) {
-      toast.error('Unable to resume - content data not available.');
+      toast.error(t('resumeUnavailable'));
       return;
     }
 
@@ -182,17 +184,17 @@ export function usePlaybackActions({
     // Series resume - requires watchProgress with episode information
     // If watchProgress is not loaded yet but we're from continue watching, wait briefly
     if (!watchProgress && fromContinueWatching) {
-      toast.error('Loading progress data, please wait...');
+      toast.error(t('loadingProgress'));
       return;
     }
 
     if (!watchProgress) {
-      toast.error('Unable to resume - progress data not available.');
+      toast.error(t('progressUnavailable'));
       return;
     }
 
     if (!watchProgress.seasonNumber || !watchProgress.episodeNumber) {
-      toast.error('Unable to resume - episode information missing.');
+      toast.error(t('episodeMissing'));
       return;
     }
 
@@ -207,7 +209,14 @@ export function usePlaybackActions({
       duration: 0,
     };
     await handlePlayInternal(show, episodes, resumeEpisode);
-  }, [show, watchProgress, episodes, handlePlayInternal, fromContinueWatching]);
+  }, [
+    show,
+    watchProgress,
+    episodes,
+    handlePlayInternal,
+    fromContinueWatching,
+    t,
+  ]);
 
   return { isPlaying, playingEpisodeId, handlePlay, handleResume };
 }

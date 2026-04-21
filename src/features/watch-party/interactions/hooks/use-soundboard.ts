@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
@@ -22,6 +23,7 @@ export function useSoundboard({
   userId,
   userName,
 }: UseSoundboardOptions = {}) {
+  const t = useTranslations('toasts');
   const [sounds, setSounds] = useState<SoundItem[]>([]);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(false);
@@ -47,14 +49,14 @@ export function useSoundboard({
         );
         setHasMore(!!data.next);
       } catch (_error) {
-        toast.error('Failed to load sounds');
+        toast.error(t('soundsFailed'));
       } finally {
         loadingRef.current = false;
         setLoading(false);
         setIsSearching(false);
       }
     },
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export function useSoundboard({
   const handleTriggerSound = useCallback(
     (soundUrl: string, name: string) => {
       if (!rtmSendMessage || !userId) {
-        toast.error('You must be in the party to use the soundboard');
+        toast.error(t('soundboardAuth'));
         return;
       }
 
@@ -134,7 +136,7 @@ export function useSoundboard({
           userName || (userId?.startsWith('guest') ? 'Guest' : 'Member'),
       });
     },
-    [rtmSendMessage, userId, userName, playSoundEffect],
+    [rtmSendMessage, userId, userName, playSoundEffect, t],
   );
 
   useEffect(() => {

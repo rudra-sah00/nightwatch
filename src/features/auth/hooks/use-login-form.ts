@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { forgotPassword } from '@/features/auth/api';
@@ -16,6 +17,7 @@ interface FormState {
 const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
 
 export function useLoginForm() {
+  const t = useTranslations('toasts');
   const { login, verifyOtp, resendOtp } = useAuth();
   const [step, setStep] = useState<Step>('initial');
   const [isLoading, setIsLoading] = useState(false);
@@ -209,7 +211,7 @@ export function useLoginForm() {
           return prev - 1;
         });
       }, 1000);
-      toast.success('Verification code resent');
+      toast.success(t('verificationResent'));
     } catch (err: unknown) {
       const apiError = err as ApiError;
       const msg = apiError.message || 'Resend failed. Please wait.';

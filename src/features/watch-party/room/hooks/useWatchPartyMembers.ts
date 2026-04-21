@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useSocket } from '@/providers/socket-provider';
@@ -35,6 +36,7 @@ export function useWatchPartyMembers({
   streamToken,
   videoRef,
 }: UseWatchPartyMembersProps) {
+  const t = useTranslations('toasts');
   const { socket } = useSocket();
   const disconnectTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
@@ -67,7 +69,7 @@ export function useWatchPartyMembers({
 
       const response = await approveJoinRequest(room.id, memberId);
       if (response.success) {
-        toast.success('Member approved');
+        toast.success(t('memberApproved'));
         setRoom((prev) => {
           if (!prev) return null;
           const isAlreadyMember = prev.members.some((m) => m?.id === memberId);
@@ -131,6 +133,7 @@ export function useWatchPartyMembers({
       videoRef?.current?.paused,
       videoRef?.current,
       room?.pendingMembers,
+      t,
     ],
   );
 
@@ -139,7 +142,7 @@ export function useWatchPartyMembers({
       if (!room?.id) return;
       const response = await rejectJoinRequest(room.id, memberId);
       if (response.success) {
-        toast.success('Request rejected');
+        toast.success(t('memberRejected'));
         setRoom((prev) => {
           if (!prev) return null;
           rtmSendMessageToPeer?.(memberId, {
@@ -157,7 +160,7 @@ export function useWatchPartyMembers({
         toast.error(response.error || 'Failed to reject request');
       }
     },
-    [room?.id, rtmSendMessageToPeer, setRoom],
+    [room?.id, rtmSendMessageToPeer, setRoom, t],
   );
 
   const kickUser = useCallback(
@@ -165,7 +168,7 @@ export function useWatchPartyMembers({
       if (!room?.id) return;
       const response = await kickMember(room.id, memberId);
       if (response.success) {
-        toast.success('Member removed');
+        toast.success(t('memberRemoved'));
         setRoom((prev) => {
           if (!prev) return null;
           rtmSendMessage?.({
@@ -182,7 +185,7 @@ export function useWatchPartyMembers({
         toast.error(response.error || 'Failed to remove member');
       }
     },
-    [room?.id, rtmSendMessage, setRoom],
+    [room?.id, rtmSendMessage, setRoom, t],
   );
 
   const handlePresenceEvent = useCallback(

@@ -2,6 +2,7 @@
 
 import { Clock, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useEpisodeCard } from '../hooks/use-episode-card';
@@ -20,12 +21,13 @@ export function EpisodeCard({
   isPlaying,
   isAnyLoading = false,
 }: EpisodeCardProps) {
+  const t = useTranslations('toasts');
   const { imageError, setImageError } = useEpisodeCard();
   const thumbnailSrc = getOptimizedImageUrl(episode.thumbnailUrl);
 
   const handleClick = () => {
     if (isAnyLoading && !isPlaying) {
-      toast.error('Please wait for the current episode to load');
+      toast.error(t('episodeLoading'));
       return;
     }
     onPlay();

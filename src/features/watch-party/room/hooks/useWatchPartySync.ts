@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
@@ -36,6 +37,7 @@ export function useWatchPartySync({
   isHost,
   videoRef,
 }: UseWatchPartySyncProps) {
+  const t = useTranslations('toasts');
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isLiveRoom = room?.type === 'livestream';
@@ -81,7 +83,7 @@ export function useWatchPartySync({
         if (hostDisconnectTimerRef.current)
           clearTimeout(hostDisconnectTimerRef.current);
         hostDisconnectTimerRef.current = setTimeout(() => {
-          toast.error('Watch party closed because the host did not return.');
+          toast.error(t('hostTimeout'));
           window.location.href = '/home';
         }, graceSeconds * 1000);
       } else if (event.action === 'JOIN') {
@@ -103,6 +105,7 @@ export function useWatchPartySync({
       rtmSendMessage,
       videoRef,
       room?.state.currentTime,
+      t,
     ],
   );
 

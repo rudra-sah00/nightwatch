@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
@@ -26,6 +27,7 @@ export function useContentDetailModal({
   autoPlay = false,
   onClose,
 }: ContentDetailModalOptions) {
+  const t = useTranslations('toasts');
   const router = useRouter();
 
   const {
@@ -145,7 +147,7 @@ export function useContentDetailModal({
 
   const handleWatchParty = async (episode?: Episode) => {
     if (!show) {
-      toast.error('Unable to create party: Content details missing');
+      toast.error(t('partyMissing'));
       return;
     }
 
@@ -181,10 +183,10 @@ export function useContentDetailModal({
       const room = await createRoom(roomId, roomPayload);
 
       if (room) {
-        toast.success('Party room created! Redirecting...');
+        toast.success(t('partyCreated'));
         router.push(`/watch-party/${room.id}?new=true`);
       } else {
-        toast.error('Failed to create party room. Please try again.');
+        toast.error(t('partyFailed'));
       }
     } catch (_err) {
       toast.error(

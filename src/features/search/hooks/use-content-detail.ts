@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -57,6 +58,7 @@ export function useContentDetail({
   initialContext,
   fromContinueWatching = false,
 }: UseContentDetailOptions): UseContentDetailReturn {
+  const t = useTranslations('toasts');
   // 1. Fetch Show Details
   const { show, isLoading } = useShowDetails(contentId);
 
@@ -110,7 +112,7 @@ export function useContentDetail({
         if (inWatchlist) {
           await removeFromWatchlist(show.id, providerId);
           setInWatchlist(false);
-          toast.success('Removed from watchlist');
+          toast.success(t('removedFromWatchlist'));
         } else {
           await addToWatchlist({
             contentId: show.id,
@@ -121,10 +123,10 @@ export function useContentDetail({
             providerId,
           });
           setInWatchlist(true);
-          toast.success('Added to watchlist');
+          toast.success(t('addedToWatchlist'));
         }
       } catch (_error) {
-        toast.error('Failed to update watchlist');
+        toast.error(t('watchlistFailed'));
         // State will automatically roll back on failure due to useOptimistic
       }
     });

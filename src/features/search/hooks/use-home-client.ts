@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { searchContent } from '@/features/search/api';
@@ -18,6 +19,7 @@ export function useHomeClient({
   initialResults,
   initialQuery,
 }: UseHomeClientOptions) {
+  const t = useTranslations('toasts');
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || initialQuery;
 
@@ -71,7 +73,7 @@ export function useHomeClient({
         }
       } catch (_error: unknown) {
         if (!controller.signal.aborted) {
-          toast.error('Search failed');
+          toast.error(t('searchFailed'));
           startTransition(() => setResults([]));
         }
       } finally {
@@ -81,7 +83,7 @@ export function useHomeClient({
 
     fetchResults();
     return () => controller.abort();
-  }, [query, initialQuery, initialResults, activeServer]);
+  }, [query, initialQuery, initialResults, activeServer, t]);
 
   useEffect(() => {
     setIsContinueWatchingLoading(true);

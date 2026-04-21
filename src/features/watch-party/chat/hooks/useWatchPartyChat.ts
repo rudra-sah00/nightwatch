@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
@@ -19,6 +20,7 @@ export function useWatchPartyChat({
   userId,
   currentUserName,
 }: UseWatchPartyChatOptions = {}) {
+  const t = useTranslations('toasts');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>
@@ -55,7 +57,7 @@ export function useWatchPartyChat({
       // Persist to backend
       const response = await sendPartyMessage(room.id, content);
       if (response.error) {
-        toast.error('Failed to send message');
+        toast.error(t('messageFailed'));
         // Rollback optimistic update
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       } else if (response.message) {
@@ -69,7 +71,7 @@ export function useWatchPartyChat({
         );
       }
     },
-    [room?.id, userId, currentUserName, rtmSendMessage],
+    [room?.id, userId, currentUserName, rtmSendMessage, t],
   );
 
   const handleTypingStart = useCallback(() => {

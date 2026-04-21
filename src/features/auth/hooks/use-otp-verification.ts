@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { handleApiError } from '@/lib/errors';
@@ -21,6 +22,7 @@ export function useOtpVerification({
   verifyOtp,
   initialCountdown = 30,
 }: UseOtpVerificationOptions) {
+  const t = useTranslations('toasts');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,14 +58,14 @@ export function useOtpVerification({
     try {
       await resendOtp(email);
       startCountdown(60);
-      toast.success('Verification code resent');
+      toast.success(t('verificationResent'));
     } catch (err) {
       const msg = handleApiError(err, 'Resend failed. Please wait.');
       setError(msg);
     } finally {
       setIsLoading(false);
     }
-  }, [countdown, email, resendOtp, startCountdown]);
+  }, [countdown, email, resendOtp, startCountdown, t]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
