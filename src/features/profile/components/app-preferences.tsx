@@ -16,6 +16,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
@@ -361,6 +362,9 @@ export function AppPreferences() {
                   <DialogTitle className="sr-only">
                     {t('preferences.maxConcurrentDownloads')}
                   </DialogTitle>
+                  <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
+                    Cancel
+                  </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
                       {t('preferences.maxConcurrentDownloads')}
@@ -446,6 +450,9 @@ export function AppPreferences() {
                   <DialogTitle className="sr-only">
                     {t('preferences.downloadSpeedLimit')}
                   </DialogTitle>
+                  <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
+                    Cancel
+                  </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
                       {t('preferences.downloadSpeedLimit')}
