@@ -29,7 +29,48 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder.menu(|_app| tauri::menu::Menu::new(_app));
+        builder = builder.menu(|app| {
+            use tauri::menu::*;
+
+            let app_menu = SubmenuBuilder::new(app, "Watch Rudra")
+                .about(Some(AboutMetadataBuilder::new()
+                    .name(Some("Watch Rudra"))
+                    .version(Some(env!("CARGO_PKG_VERSION")))
+                    .copyright(Some("© 2026 Rudra Sahoo"))
+                    .website(Some("https://watch.rudrasahoo.live"))
+                    .build()))
+                .separator()
+                .hide()
+                .hide_others()
+                .show_all()
+                .separator()
+                .quit()
+                .build()?;
+
+            let edit_menu = SubmenuBuilder::new(app, "Edit")
+                .undo()
+                .redo()
+                .separator()
+                .cut()
+                .copy()
+                .paste()
+                .select_all()
+                .build()?;
+
+            let view_menu = SubmenuBuilder::new(app, "View")
+                .item(&MenuItem::with_id(app, "reload", "Reload", true, Some("CmdOrCtrl+R"))?)
+                .item(&MenuItem::with_id(app, "force_reload", "Force Reload", true, Some("CmdOrCtrl+Shift+R"))?)
+                .separator()
+                .fullscreen()
+                .build()?;
+
+            let window_menu = SubmenuBuilder::new(app, "Window")
+                .minimize()
+                .close_window()
+                .build()?;
+
+            Menu::with_items(app, &[&app_menu, &edit_menu, &view_menu, &window_menu])
+        });
     }
 
     builder = builder
@@ -105,6 +146,19 @@ pub fn run() {
     ]);
 
     builder
+        .on_menu_event(|app, event| {
+            #[cfg(desktop)]
+            {
+                let id = event.id().as_ref();
+                if let Some(win) = app.get_webview_window("main") {
+                    match id {
+                        "reload" => { let _ = win.eval("window.location.reload()"); }
+                        "force_reload" => { let _ = win.eval("window.location.reload()"); }
+                        _ => {}
+                    }
+                }
+            }
+        })
         .setup(|app| {
             commands::downloads::init_downloads(&app.handle());
 
