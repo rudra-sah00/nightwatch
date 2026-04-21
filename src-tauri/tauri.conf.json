@@ -26,14 +26,8 @@
       }
     ],
     "security": {
-      "csp": {
-        "default-src": "'self' customprotocol: asset: tauri:",
-        "connect-src": "ipc: http://ipc.localhost https: http: ws: wss: data: blob: tauri:",
-        "img-src": "'self' asset: http://asset.localhost https: http: data: blob:",
-        "media-src": "'self' asset: http://asset.localhost https: http: data: blob: offline-media:",
-        "font-src": "'self' https: data:",
-        "style-src": "'unsafe-inline' 'self' https:"
-      }
+      "csp": null,
+      "dangerousDisableAssetCspModification": true
     }
   },
   "plugins": {
