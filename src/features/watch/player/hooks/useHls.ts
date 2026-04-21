@@ -157,9 +157,9 @@ export function useHls({
         const finalConfig = {
           ...hlsConfig,
           xhrSetup: (xhr: XMLHttpRequest, url: string) => {
-            // We fixed the `Access-Control-Allow-Origin: *` wildcard issue in the Tauri backend.
+            // We fixed the `Access-Control-Allow-Origin: *` wildcard issue in the Electron backend.
             // It is now safe to use withCredentials in both Desktop and Browser versions.
-            // Do NOT set withCredentials for offline-media:// — it's a custom Tauri protocol.
+            // Do NOT set withCredentials for offline-media:// — it's a custom Electron protocol.
             if (
               url.includes('/api/stream/') &&
               !url.startsWith('offline-media://')
@@ -169,7 +169,7 @@ export function useHls({
           },
           // HLS.js switches to FetchLoader (progressive streaming) when fetch is available.
           // For offline-media:// URLs, the default mode:'cors' causes fetch to fail because
-          // Tauri's custom protocol handler is treated as cross-origin. Override to use
+          // Electron's custom protocol handler is treated as cross-origin. Override to use
           // mode:'cors' only for real network URLs; offline-media:// gets no-cors.
           fetchSetup: (context: { url: string }, initParams: RequestInit) => {
             if (context.url.startsWith('offline-media://')) {

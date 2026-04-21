@@ -27,7 +27,7 @@ function TransparentQualityOptions({
   qualities,
   isLoading,
   downloaded,
-  isTauriLoading,
+  isDesktopLoading,
   existingDownload,
   onPick,
 }: {
@@ -35,7 +35,7 @@ function TransparentQualityOptions({
   qualities: DownloadQuality[] | null;
   isLoading: boolean;
   downloaded: string | null;
-  isTauriLoading: boolean;
+  isDesktopLoading: boolean;
   existingDownload?: DownloadItem;
   onPick: (quality: 'high' | 'medium' | 'low', url?: string) => void;
 }) {
@@ -89,7 +89,7 @@ function TransparentQualityOptions({
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {isTauriLoading && (
+      {isDesktopLoading && (
         <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center bg-white/80 dark:bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
           <Loader2
             className="w-16 h-16 md:w-24 md:h-24 text-black dark:text-white animate-spin mb-6"
@@ -104,7 +104,7 @@ function TransparentQualityOptions({
         const isCurrentActive =
           downloaded === opt.value || existingDownload?.quality === opt.value;
         const isBlocked =
-          isTauriLoading ||
+          isDesktopLoading ||
           downloaded !== null ||
           existingDownload?.quality === opt.value;
 
@@ -142,7 +142,7 @@ function TransparentQualityOptions({
                 isCurrentActive && 'opacity-100',
               )}
             >
-              {isTauriLoading && downloaded === opt.value ? (
+              {isDesktopLoading && downloaded === opt.value ? (
                 <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-black dark:text-white animate-spin" />
               ) : isCurrentActive ? (
                 <div className="flex items-center gap-3 text-green-400">
@@ -181,10 +181,10 @@ function TransparentMovieSection({
     qualities,
     isLoading,
     downloaded,
-    isTauriLoading,
+    isDesktopLoading,
     existingDownload,
     loadQualities,
-    handleTauriClick,
+    handleDesktopClick,
   } = useDownloadMenu({
     contentId,
     showTitle,
@@ -213,9 +213,9 @@ function TransparentMovieSection({
         qualities={qualities}
         isLoading={isLoading}
         downloaded={downloaded}
-        isTauriLoading={isTauriLoading}
+        isDesktopLoading={isDesktopLoading}
         existingDownload={existingDownload}
-        onPick={handleTauriClick}
+        onPick={handleDesktopClick}
       />
     </div>
   );
@@ -243,10 +243,10 @@ function TransparentEpisodeItem({
     qualities,
     isLoading,
     downloaded,
-    isTauriLoading,
+    isDesktopLoading,
     existingDownload,
     loadQualities,
-    handleTauriClick,
+    handleDesktopClick,
   } = useDownloadMenu({
     contentId,
     showTitle,
@@ -316,9 +316,9 @@ function TransparentEpisodeItem({
             qualities={qualities}
             isLoading={isLoading}
             downloaded={downloaded}
-            isTauriLoading={isTauriLoading}
+            isDesktopLoading={isDesktopLoading}
             existingDownload={existingDownload}
-            onPick={handleTauriClick}
+            onPick={handleDesktopClick}
           />
         </div>
       )}

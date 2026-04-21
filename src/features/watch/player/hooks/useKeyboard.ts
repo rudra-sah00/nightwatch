@@ -245,7 +245,7 @@ export function useKeyboard({
     // Register once — no dependencies, reads via ref
     window.addEventListener('keydown', handleKeyDown);
 
-    // --- TAURI GLOBAL MEDIA KEYS HANDLER ---
+    // --- ELECTRON GLOBAL MEDIA KEYS HANDLER ---
     // Listen for physical keyboard media keys if running as the Watch Rudra Desktop app!
     let unsubscribeDesktopMedia: (() => void) | undefined;
     if (checkIsDesktop() && desktopBridge.onMediaCommand) {

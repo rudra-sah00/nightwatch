@@ -69,7 +69,7 @@ export default function RootLayout({
         <SerwistProvider swUrl="/sw.js">
           <Suspense fallback={<div className="min-h-screen" />}>
             <IntlProvider>
-              {/* Tauri Window Drag Region (top edge where macOS/Windows controls sit) */}
+              {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
               <ElectronDragRegion />
 
               <ThemeProvider>

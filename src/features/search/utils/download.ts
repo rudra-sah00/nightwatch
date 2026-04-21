@@ -62,7 +62,7 @@ export async function fetchDownloadLinks(
   return res.success && res.qualities ? res.qualities : [];
 }
 
-export async function startTauriDownload({
+export async function startDesktopDownload({
   contentId,
   showTitle,
   posterUrl,

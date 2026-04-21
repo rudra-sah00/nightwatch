@@ -13,7 +13,6 @@ vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 const mockStartDownload = vi.fn();
 vi.mock('@/lib/electron-bridge', () => ({
-  isTauri: true,
   isDesktop: true,
   isMobile: false,
   checkIsDesktop: () => true,

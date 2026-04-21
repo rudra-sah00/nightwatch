@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 /**
  * Checks for service worker updates on app focus and network reconnect.
- * Browsers do this automatically on navigation, but Tauri's loadURL()
+ * Browsers do this automatically on navigation, but Electron's loadURL()
  * bypasses that — so we trigger it on meaningful user/network events instead.
  */
 export function SwUpdatePrompt() {

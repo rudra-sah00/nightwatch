@@ -8,7 +8,7 @@ import {
   fetchDownloadLinks,
   getOfflineIdentifier,
   sortQualities,
-  startTauriDownload,
+  startDesktopDownload,
 } from '../utils/download';
 
 interface UseDownloadOptions {
@@ -37,7 +37,7 @@ export function useDownloadMenu({
   const [qualities, setQualities] = useState<DownloadQuality[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [downloaded, setDownloaded] = useState<string | null>(null);
-  const [isTauriLoading, setTauriLoading] = useState(false);
+  const [isDesktopLoading, setDesktopLoading] = useState(false);
   const { downloads } = useDownloads();
 
   const offlineIdentifier = useMemo(() => {
@@ -76,12 +76,12 @@ export function useDownloadMenu({
     }
   }, [contentId, qualities, isS2, isLoading, type, season, episode]);
 
-  const handleTauriClick = async (
+  const handleDesktopClick = async (
     qualityLabel: 'low' | 'medium' | 'high',
     qualityUrl?: string,
   ) => {
-    setTauriLoading(true);
-    await startTauriDownload({
+    setDesktopLoading(true);
+    await startDesktopDownload({
       contentId,
       showTitle,
       posterUrl,
@@ -107,7 +107,7 @@ export function useDownloadMenu({
     }
 
     setTimeout(() => setDownloaded(null), 3000);
-    setTauriLoading(false);
+    setDesktopLoading(false);
   };
 
   return {
@@ -115,9 +115,9 @@ export function useDownloadMenu({
     qualities,
     isLoading,
     downloaded,
-    isTauriLoading,
+    isDesktopLoading,
     existingDownload,
     loadQualities,
-    handleTauriClick,
+    handleDesktopClick,
   };
 }
