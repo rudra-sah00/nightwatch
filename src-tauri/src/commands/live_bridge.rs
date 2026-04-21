@@ -14,8 +14,9 @@ impl Default for LiveBridgeState {
 }
 
 #[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 struct BridgeResolved {
-    url: String,
+    hls_url: String,
     channel_id: String,
 }
 
@@ -80,7 +81,7 @@ pub async fn start_live_bridge(
     app.emit(
         "live-bridge-resolved",
         BridgeResolved {
-            url: resolved_url.clone(),
+            hls_url: resolved_url.clone(),
             channel_id,
         },
     )

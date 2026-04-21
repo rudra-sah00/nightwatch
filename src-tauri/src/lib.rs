@@ -9,7 +9,10 @@ use commands::{
     offline_media::{get_offline_media_base, OfflineMediaState},
     window::{copy_to_clipboard, get_app_version, read_offline_file, set_native_theme, set_pip, show_notification},
 };
-use tauri::{Emitter, Manager};
+use tauri::Manager;
+
+#[cfg(desktop)]
+use tauri::Emitter;
 
 #[cfg(desktop)]
 use commands::{

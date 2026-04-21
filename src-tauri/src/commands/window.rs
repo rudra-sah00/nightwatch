@@ -1,5 +1,7 @@
-use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager};
+
+#[cfg(desktop)]
+use serde::{Deserialize, Serialize};
 
 #[cfg(desktop)]
 use std::sync::Mutex;
