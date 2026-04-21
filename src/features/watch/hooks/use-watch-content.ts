@@ -11,7 +11,7 @@ import {
 } from '@/features/watch/player/hooks/useS2AudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
 import type { PlayResponse } from '@/types/content';

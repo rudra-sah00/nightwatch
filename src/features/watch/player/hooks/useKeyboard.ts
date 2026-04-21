@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import type { PlayerAction } from '../context/types';
 
 interface UseKeyboardOptions {

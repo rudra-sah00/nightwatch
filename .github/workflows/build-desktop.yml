@@ -1,0 +1,148 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Force LF line endings
+        run: git config --global core.autocrlf false
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Biome Check
+        run: pnpm check
+
+      - name: Run TypeScript check
+        run: pnpm type-check
+
+      - name: Run unit tests
+        run: pnpm test
+
+  build:
+    name: Build on ${{ matrix.os }}
+    needs: quality
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Force LF line endings
+        run: git config --global core.autocrlf false
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare Electron dependencies
+        run: node scripts/prepare-electron-deps.js
+
+      - name: Inject Production Secrets
+        run: |
+          # Inject Sentry DSN into Electron main process
+          sed -i.bak "s#process.env.VITE_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN || ''#'${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}'#g" electron/main.js
+          # Inject Discord RPC Client ID
+          sed -i.bak "s#'1234567890123456789'#'${{ secrets.DISCORD_CLIENT_ID }}'#g" electron/modules/discord.js
+          # Verify injections succeeded
+          if grep -q "1234567890123456789" electron/modules/discord.js; then
+            echo "⚠️ Discord Client ID injection may have failed (placeholder still present)"
+          fi
+          rm -f electron/main.js.bak electron/modules/discord.js.bak
+        shell: bash
+
+      - name: Delete existing release assets for this platform
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # Map runner OS to asset name patterns
+          case "${{ matrix.os }}" in
+            macos-latest)  PATTERNS=("arm64.dmg" "arm64-mac.zip" "latest-mac.yml") ;;
+            windows-latest) PATTERNS=("Setup*.exe" "latest.yml") ;;
+            ubuntu-latest)  PATTERNS=(".AppImage" "_amd64.deb" "latest-linux.yml") ;;
+          esac
+          # Delete matching assets to prevent 422 conflicts
+          for pattern in "${PATTERNS[@]}"; do
+            gh release view "$TAG" --json assets --jq ".assets[].name" 2>/dev/null | grep "$pattern" | while read -r name; do
+              echo "Deleting stale asset: $name"
+              gh release delete-asset "$TAG" "$name" --yes 2>/dev/null || true
+            done
+          done
+
+      - name: Build and Publish (macOS)
+        if: matrix.os == 'macos-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec electron-builder --mac --publish always
+
+      - name: Build and Publish (Windows)
+        if: matrix.os == 'windows-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec electron-builder --win --publish always
+
+      - name: Build and Publish (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec electron-builder --linux --publish always

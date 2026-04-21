@@ -4,7 +4,7 @@ import type {
   ChatMessage,
   WatchPartyRoom,
 } from '@/features/watch-party/room/types';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 interface UseDesktopNotificationsProps {
   room: WatchPartyRoom | null;

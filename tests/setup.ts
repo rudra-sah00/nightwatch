@@ -132,17 +132,37 @@ const createStorageMock = () => {
 Object.defineProperty(window, 'localStorage', { value: createStorageMock() });
 Object.defineProperty(window, 'sessionStorage', { value: createStorageMock() });
 
-// Mock tauriAPI globally
-Object.defineProperty(window, 'tauriAPI', {
+// Mock electronAPI globally
+Object.defineProperty(window, 'electronAPI', {
   value: {
+    updateDiscordPresence: vi.fn(),
+    copyToClipboard: vi.fn(),
+    storeGet: vi.fn().mockResolvedValue(undefined),
+    storeSet: vi.fn(),
+    storeDelete: vi.fn(),
+    getAppVersion: vi.fn().mockResolvedValue(''),
+    setNativeTheme: vi.fn(),
+    setPictureInPicture: vi.fn(),
+    setUnreadBadge: vi.fn(),
+    setKeepAwake: vi.fn(),
+    onPipModeChanged: vi.fn().mockReturnValue(vi.fn()),
+    showNotification: vi.fn(),
+    onNotificationAction: vi.fn().mockReturnValue(vi.fn()),
+    onNotificationClick: vi.fn().mockReturnValue(vi.fn()),
+    setRunOnBoot: vi.fn(),
+    onMediaCommand: vi.fn().mockReturnValue(vi.fn()),
+    onWindowBlur: vi.fn().mockReturnValue(vi.fn()),
+    onWindowFocus: vi.fn().mockReturnValue(vi.fn()),
+    onWindowFullscreenChanged: vi.fn().mockReturnValue(vi.fn()),
+    startLiveBridge: vi.fn(),
+    stopLiveBridge: vi.fn(),
+    onLiveBridgeResolved: vi.fn().mockReturnValue(vi.fn()),
     startDownload: vi.fn(),
+    cancelDownload: vi.fn(),
+    pauseDownload: vi.fn(),
+    resumeDownload: vi.fn(),
     getDownloads: vi.fn().mockResolvedValue([]),
-    onDownloadProgress: vi.fn(),
-    removeDownloadProgress: vi.fn(),
-    onDownloadComplete: vi.fn(),
-    removeDownloadComplete: vi.fn(),
-    onDownloadError: vi.fn(),
-    removeDownloadError: vi.fn(),
+    onDownloadProgress: vi.fn().mockReturnValue(vi.fn()),
   },
   writable: true,
 });

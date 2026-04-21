@@ -9,7 +9,7 @@ import { GlobalLoading } from '@/components/ui/global-loading';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { LoginForm } from '@/features/auth/components/login-form';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LoginClient() {

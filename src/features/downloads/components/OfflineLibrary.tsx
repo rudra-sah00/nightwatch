@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/ui/empty-state';
-import type { DownloadItem } from '@/lib/tauri-bridge';
+import type { DownloadItem } from '@/lib/electron-bridge';
 import { cn, formatBytes } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
 import { OfflineContentDetailModal } from './offline-content-detail-modal';

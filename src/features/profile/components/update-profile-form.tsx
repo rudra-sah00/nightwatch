@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';

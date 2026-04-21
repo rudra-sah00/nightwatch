@@ -18,7 +18,7 @@ export function Navbar() {
 
   return (
     <nav
-      data-tauri-drag-region
+      data-electron-drag-region
       className={`sticky [-webkit-app-region:drag] top-0 z-50 w-full bg-background text-foreground overflow-hidden`}
     >
       <div

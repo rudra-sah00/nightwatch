@@ -1,6 +1,6 @@
 import { playVideo } from '@/features/watch/api';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 import type { ShowDetails } from '@/types/content';
 

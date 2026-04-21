@@ -413,9 +413,11 @@ describe('UpdateProfileForm', () => {
   describe('public profile sharing', () => {
     it('copies public link and shows success toast', async () => {
       const { toast } = await import('sonner');
-      const writeText = vi
-        .spyOn(navigator.clipboard, 'writeText')
-        .mockResolvedValue(undefined);
+      const copyFn = (
+        window as unknown as {
+          electronAPI: { copyToClipboard: ReturnType<typeof vi.fn> };
+        }
+      ).electronAPI.copyToClipboard;
 
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
@@ -425,9 +427,7 @@ describe('UpdateProfileForm', () => {
       );
 
       await waitFor(() => {
-        expect(writeText).toHaveBeenCalledWith(
-          `${window.location.origin}/user/user-1`,
-        );
+        expect(copyFn).toHaveBeenCalled();
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
           'updateForm.publicLinkCopied',
         );

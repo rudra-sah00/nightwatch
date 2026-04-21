@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useEffect, useState } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';

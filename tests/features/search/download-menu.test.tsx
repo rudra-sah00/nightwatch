@@ -12,7 +12,7 @@ import { apiFetch } from '@/lib/fetch';
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 
 const mockStartDownload = vi.fn();
-vi.mock('@/lib/tauri-bridge', () => ({
+vi.mock('@/lib/electron-bridge', () => ({
   isTauri: true,
   isDesktop: true,
   isMobile: false,
@@ -184,7 +184,7 @@ describe('DownloadMenu', () => {
       });
     });
 
-    it('quality URLs trigger tauri download with corresponding URL', async () => {
+    it('quality URLs trigger electron download with corresponding URL', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,
@@ -325,7 +325,7 @@ describe('DownloadMenu', () => {
       });
     });
 
-    it('episode qualities trigger tauri download', async () => {
+    it('episode qualities trigger electron download', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,

@@ -9,8 +9,8 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { initStorageCache } from '@/lib/storage-cache';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 
 type Theme = 'light' | 'dark' | 'system';
 

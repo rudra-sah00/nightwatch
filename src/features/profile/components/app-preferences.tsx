@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { COOKIE_NAME, locales } from '@/i18n/config';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 

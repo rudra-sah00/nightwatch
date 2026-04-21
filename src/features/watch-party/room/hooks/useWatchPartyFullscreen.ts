@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 interface UseWatchPartyFullscreenProps {
   containerRef: React.RefObject<HTMLDivElement | null>;

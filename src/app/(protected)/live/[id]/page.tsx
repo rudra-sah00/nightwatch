@@ -12,7 +12,7 @@ import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 interface LiveBridgeResult {
   hlsUrl?: string;

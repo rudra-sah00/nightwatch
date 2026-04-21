@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
-import type { DownloadItem } from '@/lib/tauri-bridge';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import type { DownloadItem } from '@/lib/electron-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 export function useDownloads() {
   const { isDesktopApp, isMounted } = useDesktopApp();

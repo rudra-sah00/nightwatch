@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useEffect } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';

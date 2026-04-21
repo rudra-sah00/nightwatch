@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import {
   initialPlayerState,
   playerReducer,

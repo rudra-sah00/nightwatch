@@ -7,7 +7,7 @@ import {
 import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { clearStoredUser, storeUser } from '@/lib/auth';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's

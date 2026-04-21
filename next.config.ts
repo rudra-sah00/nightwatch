@@ -96,7 +96,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https:",
               `img-src 'self' blob: data: https: ${backendOrigin} offline-media:`,
               "font-src 'self' data: https:",
-              `connect-src 'self' data: wss: ws: https: http: ipc: http://ipc.localhost tauri: offline-media: ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
+              `connect-src 'self' data: wss: ws: https: http: offline-media: ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
               "frame-src 'self' https: blob: data: about: https://challenges.cloudflare.com",
               "worker-src 'self' blob: https:",
               `media-src 'self' blob: data: https: offline-media: ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,

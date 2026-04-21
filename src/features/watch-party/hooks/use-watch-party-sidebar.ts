@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { useGestureDetection } from '../interactions/hooks/useGestureDetection';
 import type { AgoraParticipant } from '../media/hooks/useAgora';

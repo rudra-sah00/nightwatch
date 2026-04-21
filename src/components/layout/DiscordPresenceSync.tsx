@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export function DiscordPresenceSync() {
