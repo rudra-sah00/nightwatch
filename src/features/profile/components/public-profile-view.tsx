@@ -1,5 +1,8 @@
+'use client';
+
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
@@ -21,6 +24,7 @@ export function PublicProfileView({
   profile,
   todayIso,
 }: PublicProfileViewProps) {
+  const t = useTranslations('profile');
   const joinDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -65,10 +69,10 @@ export function PublicProfileView({
             className="group flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight hover:bg-primary/90"
           >
             <Home className="w-4 h-4" />
-            <span>Return Base</span>
+            <span>{t('publicProfile.returnBase')}</span>
           </Link>
           <div className="hidden md:block bg-neo-yellow border-[3px] border-border px-5 py-2  font-headline font-black uppercase text-sm tracking-widest">
-            Identity Profile Verified
+            {t('publicProfile.identityVerified')}
           </div>
         </div>
 
@@ -94,7 +98,9 @@ export function PublicProfileView({
             {/* User Info Section */}
             <div className="flex-1 space-y-4">
               <div className="inline-block bg-primary text-primary-foreground px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-2 leading-none border-[3px] border-border">
-                Persistent Identity: {profile.id.slice(0, 8)}...
+                {t('publicProfile.persistentIdentity', {
+                  id: profile.id.slice(0, 8) + '...',
+                })}
               </div>
               <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
                 {profile.name}
@@ -106,7 +112,7 @@ export function PublicProfileView({
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-8 pt-4">
                 <div className="flex items-center gap-2 text-foreground/60 font-headline font-bold text-xs md:text-sm uppercase tracking-widest">
                   <Calendar className="w-4 h-4" />
-                  Joined {joinDate}
+                  {t('updateForm.joined', { date: joinDate })}
                 </div>
               </div>
             </div>
@@ -116,7 +122,7 @@ export function PublicProfileView({
               <div className="bg-neo-blue text-foreground border-[3px] border-border p-4 text-center ">
                 <div className="text-2xl font-black mb-1">{watchStreak}</div>
                 <div className="text-[10px] uppercase font-black opacity-80">
-                  DAYS ACTIVE
+                  {t('publicProfile.daysActive')}
                 </div>
               </div>
               <div className="bg-neo-orange text-foreground border-[3px] border-border p-4 text-center ">
@@ -124,7 +130,7 @@ export function PublicProfileView({
                   {totalWatchHours}
                 </div>
                 <div className="text-[10px] uppercase font-black opacity-80">
-                  HRS TOTAL
+                  {t('publicProfile.hrsTotal')}
                 </div>
               </div>
             </div>
@@ -135,10 +141,10 @@ export function PublicProfileView({
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-[4px] border-border pb-6">
             <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
-              WATCH ACTIVITY
+              {t('activity.title')}
             </h2>
             <div className="text-sm font-bold opacity-40 uppercase tracking-widest font-headline">
-              Last 365 days of interaction
+              {t('activity.last365')}
             </div>
           </div>
 
@@ -153,7 +159,7 @@ export function PublicProfileView({
               <span>USER IDENTITY: {profile.id}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>CORE VERSION: V1.0-STABLE</span>
+              <span>{t('publicProfile.coreVersion')}</span>
             </div>
           </div>
 
@@ -162,11 +168,10 @@ export function PublicProfileView({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex flex-col gap-2">
                 <h2 className="text-3xl font-black font-headline uppercase tracking-tighter">
-                  Release Notes
+                  {t('releaseNotes.title')}
                 </h2>
                 <p className="text-muted-foreground font-body text-sm max-w-sm">
-                  Discover the latest features, improvements, and bug fixes
-                  added to Watch Rudra.
+                  {t('releaseNotes.description')}
                 </p>
               </div>
 
@@ -174,7 +179,7 @@ export function PublicProfileView({
                 href="/whats-new"
                 className="flex-shrink-0 bg-primary text-primary-foreground font-headline font-black uppercase text-sm px-6 py-4 border-[3px] border-border transition-colors hover:bg-primary/90"
               >
-                VIEW WHAT'S NEW
+                {t('releaseNotes.viewButton')}
               </Link>
             </div>
           </section>

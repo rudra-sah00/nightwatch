@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Security / Password",
+    "currentPassword": "Target Authorization",
+    "currentPasswordPlaceholder": "CURRENT PASSWORD",
+    "newPassword": "New Key",
+    "newPasswordPlaceholder": "NEW PASSWORD",
+    "confirmPassword": "Verify Key",
+    "confirmPasswordPlaceholder": "CONFIRM NEW PASSWORD",
+    "hidePasswords": "Hide passwords",
+    "showPasswords": "Show passwords",
+    "submit": "OVERRIDE PASSWORD"
+  },
+  "activity": {
+    "title": "Watch Activity",
+    "less": "Less",
+    "more": "More",
+    "noActivity": "No activity",
+    "minSuffix": "{count} min",
+    "last365": "Last 365 days of interaction"
+  },
+  "releaseNotes": {
+    "title": "Release Notes",
+    "description": "Discover the latest features, improvements, and bug fixes added to Watch Rudra.",
+    "viewButton": "VIEW WHAT'S NEW"
+  },
+  "updateForm": {
+    "updatePhoto": "Update Photo",
+    "displayName": "Display Name",
+    "mobileHandle": "Mobile Handle",
+    "username": "Username",
+    "joined": "JOINED {date}",
+    "minChars": "Min 3 chars",
+    "alreadyTaken": "Already taken",
+    "available": "Available",
+    "checking": "Checking...",
+    "saving": "Saving...",
+    "signOut": "Sign Out",
+    "saveChanges": "Save Changes",
+    "publicLinkCopied": "Public profile link copied",
+    "publicLinkFailed": "Failed to copy public profile link"
+  },
+  "publicIdentity": {
+    "title": "Public Identity",
+    "description": "Share your watching legacy publicly via your unique ID.",
+    "copyLink": "COPY PUBLIC LINK"
+  },
+  "serverSelection": {
+    "title": "Server Selection",
+    "netflix": "Netflix",
+    "standard": "Standard",
+    "balanced": "Balanced",
+    "performance": "Performance",
+    "highQuality": "High Quality",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Danger Zone",
+    "description": "Irreversible Actions. Proceed with Caution.",
+    "deleteAccount": "DELETE ACCOUNT",
+    "dialogTitle": "Terminal Erase",
+    "dialogDescription": "Are you sure you want to delete your account? This action cannot be reversed. All your data, watchlist, history, and preferences will be permanently wiped from the server.",
+    "cancel": "CANCEL",
+    "confirmDelete": "CONFIRM DELETE",
+    "erasing": "ERASING..."
+  },
+  "preferences": {
+    "title": "App Preferences",
+    "themeSelection": "Theme Selection",
+    "themeDescription": "Switch between light mode and dark mode for optimal viewing comfort.",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "language": "Language",
+    "languageDescription": "Choose your preferred display language.",
+    "selectLanguage": "Select Language",
+    "launchOnStartup": "Launch on Startup",
+    "launchDescription": "Automatically start Watch Rudra silently in the background when your computer boots up.",
+    "maxConcurrentDownloads": "Max Concurrent Downloads",
+    "maxConcurrentDescription": "How many movies or episodes can be downloaded at the same time. Default is 3.",
+    "downloadSpeedLimit": "Download Speed Limit",
+    "downloadSpeedDescription": "Restrict the background download speed. Helpful if your network slows down globally!",
+    "unlimited": "Unlimited"
+  },
+  "publicProfile": {
+    "returnBase": "Return Base",
+    "identityVerified": "Identity Profile Verified",
+    "persistentIdentity": "Persistent Identity: {id}",
+    "daysActive": "DAYS ACTIVE",
+    "hrsTotal": "HRS TOTAL",
+    "coreVersion": "CORE VERSION: V1.0-STABLE"
+  }
+}

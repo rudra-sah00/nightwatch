@@ -1,6 +1,7 @@
 'use client';
 
 import { Camera, Loader2, LogOut } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import {
@@ -20,6 +21,7 @@ import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
 
 export function UpdateProfileForm() {
+  const t = useTranslations('profile');
   const {
     user,
     logout,
@@ -44,9 +46,9 @@ export function UpdateProfileForm() {
       } else {
         await navigator.clipboard.writeText(url);
       }
-      toast.success('Public profile link copied');
+      toast.success(t('updateForm.publicLinkCopied'));
     } catch {
-      toast.error('Failed to copy public profile link');
+      toast.error(t('updateForm.publicLinkFailed'));
     }
   };
 
@@ -83,7 +85,7 @@ export function UpdateProfileForm() {
             onClick={handleFileClick}
             disabled={isUploading}
             className="absolute -bottom-2 -right-2 p-3 bg-card border border-border rounded-full shadow-md text-gray-700 hover:text-primary hover:border-blue-300 transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            title="Update Photo"
+            title={t('updateForm.updatePhoto')}
           >
             {isUploading ? (
               <Loader2 className="w-6 h-6 animate-spin text-foreground" />
@@ -168,7 +170,7 @@ export function UpdateProfileForm() {
                       Math.max(profileForm.username.length, 3),
                       20,
                     )}
-                    aria-label="Mobile Handle"
+                    aria-label={t('updateForm.mobileHandle')}
                   />
                 </label>
               </div>
@@ -209,7 +211,7 @@ export function UpdateProfileForm() {
                       }
                     }}
                     className="col-start-1 row-start-1 w-full text-left text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-8 underline-offset-8 focus:bg-accent focus:text-foreground rounded-sm font-black font-headline uppercase leading-none tracking-tighter transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
-                    aria-label="Username"
+                    aria-label={t('updateForm.username')}
                   />
                 </div>
               </span>
@@ -242,7 +244,7 @@ export function UpdateProfileForm() {
                     }
                   }}
                   className="col-start-1 row-start-1 w-full text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-accent focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100 placeholder:text-transparent"
-                  aria-label="Display Name"
+                  aria-label={t('updateForm.displayName')}
                 />
                 <input type="hidden" name="name" value={profileForm.name} />
               </div>
@@ -251,7 +253,9 @@ export function UpdateProfileForm() {
             <div className="w-full min-w-0 text-base md:text-lg font-headline font-medium text-foreground md:max-w-lg uppercase">
               <span className="opacity-80 flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 md:justify-start md:flex-nowrap">
                 <span className="min-w-0 truncate">{user.email}</span>
-                <span className="shrink-0">• JOINED {formattedJoinDate}</span>
+                <span className="shrink-0">
+                  • {t('updateForm.joined', { date: formattedJoinDate })}
+                </span>
               </span>
             </div>
 
@@ -272,12 +276,12 @@ export function UpdateProfileForm() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   )}
                   {profileForm.username.length < 3
-                    ? 'Min 3 chars'
+                    ? t('updateForm.minChars')
                     : profileForm.isAvailable === false
-                      ? 'Already taken'
+                      ? t('updateForm.alreadyTaken')
                       : profileForm.isAvailable
-                        ? 'Available'
-                        : 'Checking...'}
+                        ? t('updateForm.available')
+                        : t('updateForm.checking')}
                 </p>
               )}
           </div>
@@ -286,7 +290,7 @@ export function UpdateProfileForm() {
             {profileForm.isPending && (
               <div className="flex items-center gap-2 px-4 py-2 bg-accent text-foreground font-headline font-bold uppercase border-2 border-border  animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Saving...</span>
+                <span>{t('updateForm.saving')}</span>
               </div>
             )}
             <Button
@@ -298,10 +302,12 @@ export function UpdateProfileForm() {
                 logout();
               }}
               className="gap-2 shrink-0 md:self-start self-center w-full max-w-xs md:w-auto min-w-[140px]"
-              title="Sign Out"
+              title={t('updateForm.signOut')}
             >
               <LogOut className="w-5 h-5 stroke-[3px]" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <span className="hidden sm:inline">
+                {t('updateForm.signOut')}
+              </span>
             </Button>
             <button
               type="submit"
@@ -313,7 +319,7 @@ export function UpdateProfileForm() {
                 profileForm.isAvailable === false
               }
             >
-              Save Changes
+              {t('updateForm.saveChanges')}
             </button>
           </div>
         </div>
@@ -323,10 +329,10 @@ export function UpdateProfileForm() {
       <section className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
         <div className="space-y-2 text-center md:text-left">
           <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            Public Identity
+            {t('publicIdentity.title')}
           </h2>
           <p className="text-sm font-bold uppercase font-headline text-foreground/40">
-            Share your watching legacy publicly via your unique ID.
+            {t('publicIdentity.description')}
           </p>
           <div className="bg-background border border-border px-4 py-2 mt-4 font-mono text-xs md:text-sm font-semibold break-all text-foreground/60 select-all rounded-md">
             {user.id}
@@ -340,7 +346,7 @@ export function UpdateProfileForm() {
           onClick={handleCopyPublicLink}
           className="w-full md:w-auto"
         >
-          COPY PUBLIC LINK
+          {t('publicIdentity.copyLink')}
         </Button>
       </section>
 
@@ -348,7 +354,7 @@ export function UpdateProfileForm() {
       <section className="bg-card border border-border rounded-xl shadow-sm p-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            Server Selection
+            {t('serverSelection.title')}
           </h2>
           {profileForm.isPending && (
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -360,9 +366,21 @@ export function UpdateProfileForm() {
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {[
-            { id: 's1' as const, label: 'Netflix', sub: 'Standard' },
-            { id: 's2' as const, label: 'Balanced', sub: 'Performance' },
-            { id: 's3' as const, label: 'High Quality', sub: 'HLS 4K' },
+            {
+              id: 's1' as const,
+              label: t('serverSelection.netflix'),
+              sub: t('serverSelection.standard'),
+            },
+            {
+              id: 's2' as const,
+              label: t('serverSelection.balanced'),
+              sub: t('serverSelection.performance'),
+            },
+            {
+              id: 's3' as const,
+              label: t('serverSelection.highQuality'),
+              sub: t('serverSelection.hls4k'),
+            },
           ].map((s) => {
             const isSelected = profileForm.preferredServer === s.id;
             return (
@@ -405,10 +423,10 @@ export function UpdateProfileForm() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-neo-red mb-2">
-              Danger Zone
+              {t('dangerZone.title')}
             </h2>
             <p className="text-neo-red font-bold font-headline uppercase tracking-widest text-sm opacity-80">
-              Irreversible Actions. Proceed with Caution.
+              {t('dangerZone.description')}
             </p>
           </div>
 
@@ -418,7 +436,7 @@ export function UpdateProfileForm() {
             variant="neo-red"
             className="w-full md:w-auto shrink-0"
           >
-            DELETE ACCOUNT
+            {t('dangerZone.deleteAccount')}
           </Button>
         </div>
       </section>
@@ -430,12 +448,10 @@ export function UpdateProfileForm() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-neo-red">
-              Terminal Erase
+              {t('dangerZone.dialogTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete your account? This action cannot
-              be reversed. All your data, watchlist, history, and preferences
-              will be permanently wiped from the server.
+              {t('dangerZone.dialogDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8">
@@ -444,7 +460,7 @@ export function UpdateProfileForm() {
               onClick={() => profileForm.setShowDeleteDialog(false)}
               disabled={profileForm.isDeleting}
             >
-              CANCEL
+              {t('dangerZone.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
@@ -457,10 +473,10 @@ export function UpdateProfileForm() {
               {profileForm.isDeleting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ERASING...
+                  {t('dangerZone.erasing')}
                 </>
               ) : (
-                'CONFIRM DELETE'
+                t('dangerZone.confirmDelete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

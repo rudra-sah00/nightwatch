@@ -11,7 +11,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
@@ -41,6 +41,7 @@ function setCookie(name: string, value: string) {
 }
 
 export function AppPreferences() {
+  const t = useTranslations('profile');
   const { theme, setTheme } = useTheme();
   const locale = useLocale();
   const router = useRouter();
@@ -96,7 +97,7 @@ export function AppPreferences() {
   return (
     <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 mb-12">
       <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8">
-        App Preferences
+        {t('preferences.title')}
       </h2>
 
       <div className="flex flex-col gap-10 max-w-2xl">
@@ -104,11 +105,10 @@ export function AppPreferences() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex flex-col gap-2">
             <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm">
-              Theme Selection
+              {t('preferences.themeSelection')}
             </span>
             <p className="text-muted-foreground font-body text-sm max-w-sm">
-              Switch between light mode and dark mode for optimal viewing
-              comfort.
+              {t('preferences.themeDescription')}
             </p>
           </div>
 
@@ -118,9 +118,17 @@ export function AppPreferences() {
             className="flex flex-row p-1 bg-secondary rounded-lg border border-border shrink-0"
           >
             {[
-              { id: 'light' as const, label: 'Light', Icon: Sun },
-              { id: 'dark' as const, label: 'Dark', Icon: Moon },
-              { id: 'system' as const, label: 'System', Icon: Monitor },
+              {
+                id: 'light' as const,
+                label: t('preferences.light'),
+                Icon: Sun,
+              },
+              { id: 'dark' as const, label: t('preferences.dark'), Icon: Moon },
+              {
+                id: 'system' as const,
+                label: t('preferences.system'),
+                Icon: Monitor,
+              },
             ].map(({ id, label, Icon }) => (
               <button
                 key={id}
@@ -149,10 +157,10 @@ export function AppPreferences() {
           <div className="flex flex-col gap-2">
             <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
               <Globe className="w-4 h-4 text-neo-blue" />
-              Language
+              {t('preferences.language')}
             </span>
             <p className="text-muted-foreground font-body text-sm max-w-sm">
-              Choose your preferred display language.
+              {t('preferences.languageDescription')}
             </p>
           </div>
 
@@ -171,11 +179,13 @@ export function AppPreferences() {
               className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
               showCloseButton={false}
             >
-              <DialogTitle className="sr-only">Select Language</DialogTitle>
+              <DialogTitle className="sr-only">
+                {t('preferences.selectLanguage')}
+              </DialogTitle>
 
               <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                 <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground">
-                  Language
+                  {t('preferences.language')}
                 </h2>
 
                 <div className="flex flex-col w-full gap-1">
@@ -219,11 +229,10 @@ export function AppPreferences() {
               <div className="flex flex-col gap-2">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Power className="w-4 h-4 text-neo-blue" />
-                  Launch on Startup
+                  {t('preferences.launchOnStartup')}
                 </span>
                 <p className="text-muted-foreground font-body text-sm max-w-sm">
-                  Automatically start Watch Rudra silently in the background
-                  when your computer boots up.
+                  {t('preferences.launchDescription')}
                 </p>
               </div>
 
@@ -253,11 +262,10 @@ export function AppPreferences() {
               <div className="flex flex-col gap-2">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Activity className="w-4 h-4 text-neo-yellow" />
-                  Max Concurrent Downloads
+                  {t('preferences.maxConcurrentDownloads')}
                 </span>
                 <p className="text-muted-foreground font-body text-sm max-w-sm">
-                  How many movies or episodes can be downloaded at the same
-                  time. Default is 3.
+                  {t('preferences.maxConcurrentDescription')}
                 </p>
               </div>
 
@@ -290,11 +298,10 @@ export function AppPreferences() {
               <div className="flex flex-col gap-2">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Zap className="w-4 h-4 text-neo-green" />
-                  Download Speed Limit
+                  {t('preferences.downloadSpeedLimit')}
                 </span>
                 <p className="text-muted-foreground font-body text-sm max-w-sm">
-                  Restrict the background download speed. Helpful if your
-                  network slows down globally!
+                  {t('preferences.downloadSpeedDescription')}
                 </p>
               </div>
 
@@ -304,7 +311,7 @@ export function AppPreferences() {
                 className="flex flex-row p-1 bg-secondary rounded-lg border border-border overflow-x-auto min-w-0 max-w-[250px] sm:max-w-none"
               >
                 {[
-                  { label: 'Unlimited', val: 0 },
+                  { label: t('preferences.unlimited'), val: 0 },
                   { label: '1 MB/s', val: 1 },
                   { label: '3 MB/s', val: 3 },
                   { label: '10 MB/s', val: 10 },

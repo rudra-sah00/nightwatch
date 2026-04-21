@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "భద్రత / పాస్‌వర్డ్",
+    "currentPassword": "లక్ష్య అధికారం",
+    "currentPasswordPlaceholder": "ప్రస్తుత పాస్‌వర్డ్",
+    "newPassword": "కొత్త కీ",
+    "newPasswordPlaceholder": "కొత్త పాస్‌వర్డ్",
+    "confirmPassword": "కీని ధృవీకరించండి",
+    "confirmPasswordPlaceholder": "కొత్త పాస్‌వర్డ్‌ను నిర్ధారించండి",
+    "hidePasswords": "పాస్‌వర్డ్‌లను దాచు",
+    "showPasswords": "పాస్‌వర్డ్‌లను చూపించు",
+    "submit": "పాస్‌వర్డ్ మార్చు"
+  },
+  "activity": {
+    "title": "వీక్షణ కార్యకలాపం",
+    "less": "తక్కువ",
+    "more": "ఎక్కువ",
+    "noActivity": "కార్యకలాపం లేదు",
+    "minSuffix": "{count} నిమిషాలు",
+    "last365": "గత 365 రోజుల పరస్పర చర్య"
+  },
+  "releaseNotes": {
+    "title": "విడుదల గమనికలు",
+    "description": "Watch Rudra కు జోడించిన తాజా ఫీచర్లు, మెరుగుదలలు మరియు బగ్ ఫిక్స్‌లను కనుగొనండి.",
+    "viewButton": "కొత్తవి చూడండి"
+  },
+  "updateForm": {
+    "updatePhoto": "ఫోటో అప్‌డేట్ చేయండి",
+    "displayName": "ప్రదర్శన పేరు",
+    "mobileHandle": "మొబైల్ హ్యాండిల్",
+    "username": "వినియోగదారు పేరు",
+    "joined": "చేరారు {date}",
+    "minChars": "కనీసం 3 అక్షరాలు",
+    "alreadyTaken": "ఇప్పటికే తీసుకోబడింది",
+    "available": "అందుబాటులో ఉంది",
+    "checking": "తనిఖీ చేస్తోంది...",
+    "saving": "సేవ్ చేస్తోంది...",
+    "signOut": "సైన్ అవుట్",
+    "saveChanges": "మార్పులను సేవ్ చేయండి",
+    "publicLinkCopied": "పబ్లిక్ ప్రొఫైల్ లింక్ కాపీ చేయబడింది",
+    "publicLinkFailed": "పబ్లిక్ ప్రొఫైల్ లింక్ కాపీ చేయడం విఫలమైంది"
+  },
+  "publicIdentity": {
+    "title": "పబ్లిక్ గుర్తింపు",
+    "description": "మీ ప్రత్యేక ID ద్వారా మీ వీక్షణ వారసత్వాన్ని బహిరంగంగా పంచుకోండి.",
+    "copyLink": "పబ్లిక్ లింక్ కాపీ చేయండి"
+  },
+  "serverSelection": {
+    "title": "సర్వర్ ఎంపిక",
+    "netflix": "Netflix",
+    "standard": "ప్రామాణికం",
+    "balanced": "సమతుల్యం",
+    "performance": "పనితీరు",
+    "highQuality": "అధిక నాణ్యత",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "ప్రమాద జోన్",
+    "description": "తిరిగి మార్చలేని చర్యలు. జాగ్రత్తగా కొనసాగించండి.",
+    "deleteAccount": "ఖాతాను తొలగించండి",
+    "dialogTitle": "టెర్మినల్ ఎరేజ్",
+    "dialogDescription": "మీ ఖాతాను తొలగించాలనుకుంటున్నారా? ఈ చర్యను రద్దు చేయలేరు. మీ మొత్తం డేటా, వాచ్‌లిస్ట్, చరిత్ర మరియు ప్రాధాన్యతలు సర్వర్ నుండి శాశ్వతంగా తొలగించబడతాయి.",
+    "cancel": "రద్దు చేయండి",
+    "confirmDelete": "తొలగింపును నిర్ధారించండి",
+    "erasing": "తొలగిస్తోంది..."
+  },
+  "preferences": {
+    "title": "యాప్ ప్రాధాన్యతలు",
+    "themeSelection": "థీమ్ ఎంపిక",
+    "themeDescription": "సౌకర్యవంతమైన వీక్షణ కోసం లైట్ మోడ్ మరియు డార్క్ మోడ్ మధ్య మారండి.",
+    "light": "లైట్",
+    "dark": "డార్క్",
+    "system": "సిస్టమ్",
+    "language": "భాష",
+    "languageDescription": "మీ ఇష్టమైన ప్రదర్శన భాషను ఎంచుకోండి.",
+    "selectLanguage": "భాషను ఎంచుకోండి",
+    "launchOnStartup": "స్టార్టప్‌లో ప్రారంభించండి",
+    "launchDescription": "మీ కంప్యూటర్ బూట్ అయినప్పుడు Watch Rudra ను నేపథ్యంలో స్వయంచాలకంగా ప్రారంభించండి.",
+    "maxConcurrentDownloads": "గరిష్ట ఏకకాల డౌన్‌లోడ్‌లు",
+    "maxConcurrentDescription": "ఒకే సమయంలో ఎన్ని సినిమాలు లేదా ఎపిసోడ్‌లను డౌన్‌లోడ్ చేయవచ్చు. డిఫాల్ట్ 3.",
+    "downloadSpeedLimit": "డౌన్‌లోడ్ వేగ పరిమితి",
+    "downloadSpeedDescription": "నేపథ్య డౌన్‌లోడ్ వేగాన్ని పరిమితం చేయండి. మీ నెట్‌వర్క్ నెమ్మదిగా మారితే సహాయకరం!",
+    "unlimited": "అపరిమితం"
+  },
+  "publicProfile": {
+    "returnBase": "తిరిగి వెళ్ళు",
+    "identityVerified": "గుర్తింపు ప్రొఫైల్ ధృవీకరించబడింది",
+    "persistentIdentity": "శాశ్వత గుర్తింపు: {id}",
+    "daysActive": "సక్రియ రోజులు",
+    "hrsTotal": "మొత్తం గంటలు",
+    "coreVersion": "కోర్ వెర్షన్: V1.0-STABLE"
+  }
+}

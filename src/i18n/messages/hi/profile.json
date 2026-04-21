@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "सुरक्षा / पासवर्ड",
+    "currentPassword": "लक्ष्य प्राधिकरण",
+    "currentPasswordPlaceholder": "वर्तमान पासवर्ड",
+    "newPassword": "नई कुंजी",
+    "newPasswordPlaceholder": "नया पासवर्ड",
+    "confirmPassword": "कुंजी सत्यापित करें",
+    "confirmPasswordPlaceholder": "नया पासवर्ड पुष्टि करें",
+    "hidePasswords": "पासवर्ड छुपाएं",
+    "showPasswords": "पासवर्ड दिखाएं",
+    "submit": "पासवर्ड बदलें"
+  },
+  "activity": {
+    "title": "देखने की गतिविधि",
+    "less": "कम",
+    "more": "अधिक",
+    "noActivity": "कोई गतिविधि नहीं",
+    "minSuffix": "{count} मिनट",
+    "last365": "पिछले 365 दिनों की गतिविधि"
+  },
+  "releaseNotes": {
+    "title": "रिलीज़ नोट्स",
+    "description": "Watch Rudra में जोड़ी गई नवीनतम सुविधाओं, सुधारों और बग फिक्स की खोज करें।",
+    "viewButton": "नया क्या है देखें"
+  },
+  "updateForm": {
+    "updatePhoto": "फोटो अपडेट करें",
+    "displayName": "प्रदर्शन नाम",
+    "mobileHandle": "मोबाइल हैंडल",
+    "username": "उपयोगकर्ता नाम",
+    "joined": "शामिल हुए {date}",
+    "minChars": "न्यूनतम 3 अक्षर",
+    "alreadyTaken": "पहले से लिया गया",
+    "available": "उपलब्ध",
+    "checking": "जांच रहे हैं...",
+    "saving": "सहेज रहे हैं...",
+    "signOut": "साइन आउट",
+    "saveChanges": "परिवर्तन सहेजें",
+    "publicLinkCopied": "सार्वजनिक प्रोफ़ाइल लिंक कॉपी किया गया",
+    "publicLinkFailed": "सार्वजनिक प्रोफ़ाइल लिंक कॉपी करने में विफल"
+  },
+  "publicIdentity": {
+    "title": "सार्वजनिक पहचान",
+    "description": "अपनी अनूठी आईडी के माध्यम से अपनी देखने की विरासत सार्वजनिक रूप से साझा करें।",
+    "copyLink": "सार्वजनिक लिंक कॉपी करें"
+  },
+  "serverSelection": {
+    "title": "सर्वर चयन",
+    "netflix": "Netflix",
+    "standard": "मानक",
+    "balanced": "संतुलित",
+    "performance": "प्रदर्शन",
+    "highQuality": "उच्च गुणवत्ता",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "खतरा क्षेत्र",
+    "description": "अपरिवर्तनीय कार्य। सावधानी से आगे बढ़ें।",
+    "deleteAccount": "खाता हटाएं",
+    "dialogTitle": "टर्मिनल इरेज़",
+    "dialogDescription": "क्या आप वाकई अपना खाता हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती। आपका सारा डेटा, वॉचलिस्ट, इतिहास और प्राथमिकताएं सर्वर से स्थायी रूप से मिटा दी जाएंगी।",
+    "cancel": "रद्द करें",
+    "confirmDelete": "हटाने की पुष्टि करें",
+    "erasing": "मिटा रहे हैं..."
+  },
+  "preferences": {
+    "title": "ऐप प्राथमिकताएं",
+    "themeSelection": "थीम चयन",
+    "themeDescription": "आरामदायक देखने के लिए लाइट मोड और डार्क मोड के बीच स्विच करें।",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "system": "सिस्टम",
+    "language": "भाषा",
+    "languageDescription": "अपनी पसंदीदा प्रदर्शन भाषा चुनें।",
+    "selectLanguage": "भाषा चुनें",
+    "launchOnStartup": "स्टार्टअप पर लॉन्च करें",
+    "launchDescription": "जब आपका कंप्यूटर बूट हो तो Watch Rudra को स्वचालित रूप से पृष्ठभूमि में शुरू करें।",
+    "maxConcurrentDownloads": "अधिकतम समवर्ती डाउनलोड",
+    "maxConcurrentDescription": "एक साथ कितनी फिल्में या एपिसोड डाउनलोड किए जा सकते हैं। डिफ़ॉल्ट 3 है।",
+    "downloadSpeedLimit": "डाउनलोड गति सीमा",
+    "downloadSpeedDescription": "पृष्ठभूमि डाउनलोड गति को प्रतिबंधित करें। यदि आपका नेटवर्क धीमा हो जाता है तो सहायक!",
+    "unlimited": "असीमित"
+  },
+  "publicProfile": {
+    "returnBase": "वापस जाएं",
+    "identityVerified": "पहचान प्रोफ़ाइल सत्यापित",
+    "persistentIdentity": "स्थायी पहचान: {id}",
+    "daysActive": "सक्रिय दिन",
+    "hrsTotal": "कुल घंटे",
+    "coreVersion": "कोर संस्करण: V1.0-STABLE"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "Sécurité / Mot de passe",
+    "currentPassword": "Autorisation Cible",
+    "currentPasswordPlaceholder": "MOT DE PASSE ACTUEL",
+    "newPassword": "Nouvelle Clé",
+    "newPasswordPlaceholder": "NOUVEAU MOT DE PASSE",
+    "confirmPassword": "Vérifier la Clé",
+    "confirmPasswordPlaceholder": "CONFIRMER LE NOUVEAU MOT DE PASSE",
+    "hidePasswords": "Masquer les mots de passe",
+    "showPasswords": "Afficher les mots de passe",
+    "submit": "CHANGER LE MOT DE PASSE"
+  },
+  "activity": {
+    "title": "Activité de Visionnage",
+    "less": "Moins",
+    "more": "Plus",
+    "noActivity": "Aucune activité",
+    "minSuffix": "{count} min",
+    "last365": "365 derniers jours d'interaction"
+  },
+  "releaseNotes": {
+    "title": "Notes de Version",
+    "description": "Découvrez les dernières fonctionnalités, améliorations et corrections de bugs ajoutées à Watch Rudra.",
+    "viewButton": "VOIR LES NOUVEAUTÉS"
+  },
+  "updateForm": {
+    "updatePhoto": "Mettre à jour la Photo",
+    "displayName": "Nom d'affichage",
+    "mobileHandle": "Handle Mobile",
+    "username": "Nom d'utilisateur",
+    "joined": "INSCRIT {date}",
+    "minChars": "Min 3 caractères",
+    "alreadyTaken": "Déjà pris",
+    "available": "Disponible",
+    "checking": "Vérification...",
+    "saving": "Enregistrement...",
+    "signOut": "Déconnexion",
+    "saveChanges": "Enregistrer les Modifications",
+    "publicLinkCopied": "Lien du profil public copié",
+    "publicLinkFailed": "Échec de la copie du lien du profil public"
+  },
+  "publicIdentity": {
+    "title": "Identité Publique",
+    "description": "Partagez votre héritage de visionnage publiquement via votre ID unique.",
+    "copyLink": "COPIER LE LIEN PUBLIC"
+  },
+  "serverSelection": {
+    "title": "Sélection du Serveur",
+    "netflix": "Netflix",
+    "standard": "Standard",
+    "balanced": "Équilibré",
+    "performance": "Performance",
+    "highQuality": "Haute Qualité",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "Zone de Danger",
+    "description": "Actions Irréversibles. Procédez avec Prudence.",
+    "deleteAccount": "SUPPRIMER LE COMPTE",
+    "dialogTitle": "Effacement Terminal",
+    "dialogDescription": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible. Toutes vos données, liste de suivi, historique et préférences seront définitivement effacées du serveur.",
+    "cancel": "ANNULER",
+    "confirmDelete": "CONFIRMER LA SUPPRESSION",
+    "erasing": "SUPPRESSION..."
+  },
+  "preferences": {
+    "title": "Préférences de l'App",
+    "themeSelection": "Sélection du Thème",
+    "themeDescription": "Basculez entre le mode clair et le mode sombre pour un confort de visionnage optimal.",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "language": "Langue",
+    "languageDescription": "Choisissez votre langue d'affichage préférée.",
+    "selectLanguage": "Sélectionner la Langue",
+    "launchOnStartup": "Lancer au Démarrage",
+    "launchDescription": "Démarrer Watch Rudra automatiquement en arrière-plan au démarrage de votre ordinateur.",
+    "maxConcurrentDownloads": "Téléchargements Simultanés Maximum",
+    "maxConcurrentDescription": "Combien de films ou épisodes peuvent être téléchargés en même temps. Par défaut 3.",
+    "downloadSpeedLimit": "Limite de Vitesse de Téléchargement",
+    "downloadSpeedDescription": "Restreindre la vitesse de téléchargement en arrière-plan. Utile si votre réseau ralentit !",
+    "unlimited": "Illimité"
+  },
+  "publicProfile": {
+    "returnBase": "Retour à la Base",
+    "identityVerified": "Profil d'Identité Vérifié",
+    "persistentIdentity": "Identité Persistante : {id}",
+    "daysActive": "JOURS ACTIFS",
+    "hrsTotal": "HRS TOTAL",
+    "coreVersion": "VERSION CORE : V1.0-STABLE"
+  }
+}

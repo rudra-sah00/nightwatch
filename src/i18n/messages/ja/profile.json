@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "セキュリティ / パスワード",
+    "currentPassword": "ターゲット認証",
+    "currentPasswordPlaceholder": "現在のパスワード",
+    "newPassword": "新しいキー",
+    "newPasswordPlaceholder": "新しいパスワード",
+    "confirmPassword": "キーを確認",
+    "confirmPasswordPlaceholder": "新しいパスワードを確認",
+    "hidePasswords": "パスワードを隠す",
+    "showPasswords": "パスワードを表示",
+    "submit": "パスワードを変更"
+  },
+  "activity": {
+    "title": "視聴アクティビティ",
+    "less": "少ない",
+    "more": "多い",
+    "noActivity": "アクティビティなし",
+    "minSuffix": "{count}分",
+    "last365": "過去365日間のインタラクション"
+  },
+  "releaseNotes": {
+    "title": "リリースノート",
+    "description": "Watch Rudraに追加された最新の機能、改善、バグ修正をご覧ください。",
+    "viewButton": "新着情報を見る"
+  },
+  "updateForm": {
+    "updatePhoto": "写真を更新",
+    "displayName": "表示名",
+    "mobileHandle": "モバイルハンドル",
+    "username": "ユーザー名",
+    "joined": "参加日 {date}",
+    "minChars": "最低3文字",
+    "alreadyTaken": "既に使用中",
+    "available": "利用可能",
+    "checking": "確認中...",
+    "saving": "保存中...",
+    "signOut": "サインアウト",
+    "saveChanges": "変更を保存",
+    "publicLinkCopied": "公開プロフィールリンクをコピーしました",
+    "publicLinkFailed": "公開プロフィールリンクのコピーに失敗しました"
+  },
+  "publicIdentity": {
+    "title": "公開アイデンティティ",
+    "description": "ユニークIDを通じて視聴レガシーを公開で共有しましょう。",
+    "copyLink": "公開リンクをコピー"
+  },
+  "serverSelection": {
+    "title": "サーバー選択",
+    "netflix": "Netflix",
+    "standard": "スタンダード",
+    "balanced": "バランス",
+    "performance": "パフォーマンス",
+    "highQuality": "高画質",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "危険ゾーン",
+    "description": "不可逆的な操作。注意して進めてください。",
+    "deleteAccount": "アカウントを削除",
+    "dialogTitle": "ターミナル消去",
+    "dialogDescription": "本当にアカウントを削除しますか？この操作は元に戻せません。すべてのデータ、ウォッチリスト、履歴、設定がサーバーから完全に消去されます。",
+    "cancel": "キャンセル",
+    "confirmDelete": "削除を確認",
+    "erasing": "消去中..."
+  },
+  "preferences": {
+    "title": "アプリ設定",
+    "themeSelection": "テーマ選択",
+    "themeDescription": "快適な視聴のためにライトモードとダークモードを切り替えます。",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "language": "言語",
+    "languageDescription": "お好みの表示言語を選択してください。",
+    "selectLanguage": "言語を選択",
+    "launchOnStartup": "起動時に開始",
+    "launchDescription": "コンピューター起動時にWatch Rudraをバックグラウンドで自動的に開始します。",
+    "maxConcurrentDownloads": "最大同時ダウンロード数",
+    "maxConcurrentDescription": "同時にダウンロードできる映画やエピソードの数。デフォルトは3です。",
+    "downloadSpeedLimit": "ダウンロード速度制限",
+    "downloadSpeedDescription": "バックグラウンドのダウンロード速度を制限します。ネットワークが遅くなる場合に便利です！",
+    "unlimited": "無制限"
+  },
+  "publicProfile": {
+    "returnBase": "ベースに戻る",
+    "identityVerified": "アイデンティティプロフィール確認済み",
+    "persistentIdentity": "永続的アイデンティティ: {id}",
+    "daysActive": "アクティブ日数",
+    "hrsTotal": "合計時間",
+    "coreVersion": "コアバージョン: V1.0-STABLE"
+  }
+}

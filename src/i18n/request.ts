@@ -21,7 +21,13 @@ export default getRequestConfig(async () => {
     authMessages = (await import(`./messages/${locale}/auth.json`)).default;
   } catch {}
 
-  const messages = { ...common, auth: authMessages };
+  let profileMessages: Record<string, unknown> = {};
+  try {
+    profileMessages = (await import(`./messages/${locale}/profile.json`))
+      .default;
+  } catch {}
+
+  const messages = { ...common, auth: authMessages, profile: profileMessages };
 
   return { locale, messages };
 });

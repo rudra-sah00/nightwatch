@@ -1,0 +1,93 @@
+{
+  "security": {
+    "title": "보안 / 비밀번호",
+    "currentPassword": "대상 인증",
+    "currentPasswordPlaceholder": "현재 비밀번호",
+    "newPassword": "새 키",
+    "newPasswordPlaceholder": "새 비밀번호",
+    "confirmPassword": "키 확인",
+    "confirmPasswordPlaceholder": "새 비밀번호 확인",
+    "hidePasswords": "비밀번호 숨기기",
+    "showPasswords": "비밀번호 표시",
+    "submit": "비밀번호 변경"
+  },
+  "activity": {
+    "title": "시청 활동",
+    "less": "적음",
+    "more": "많음",
+    "noActivity": "활동 없음",
+    "minSuffix": "{count}분",
+    "last365": "지난 365일간의 활동"
+  },
+  "releaseNotes": {
+    "title": "릴리스 노트",
+    "description": "Watch Rudra에 추가된 최신 기능, 개선 사항 및 버그 수정을 확인하세요.",
+    "viewButton": "새로운 소식 보기"
+  },
+  "updateForm": {
+    "updatePhoto": "사진 업데이트",
+    "displayName": "표시 이름",
+    "mobileHandle": "모바일 핸들",
+    "username": "사용자 이름",
+    "joined": "가입일 {date}",
+    "minChars": "최소 3자",
+    "alreadyTaken": "이미 사용 중",
+    "available": "사용 가능",
+    "checking": "확인 중...",
+    "saving": "저장 중...",
+    "signOut": "로그아웃",
+    "saveChanges": "변경 사항 저장",
+    "publicLinkCopied": "공개 프로필 링크가 복사되었습니다",
+    "publicLinkFailed": "공개 프로필 링크 복사에 실패했습니다"
+  },
+  "publicIdentity": {
+    "title": "공개 신원",
+    "description": "고유 ID를 통해 시청 레거시를 공개적으로 공유하세요.",
+    "copyLink": "공개 링크 복사"
+  },
+  "serverSelection": {
+    "title": "서버 선택",
+    "netflix": "Netflix",
+    "standard": "표준",
+    "balanced": "균형",
+    "performance": "성능",
+    "highQuality": "고화질",
+    "hls4k": "HLS 4K"
+  },
+  "dangerZone": {
+    "title": "위험 구역",
+    "description": "되돌릴 수 없는 작업. 주의하여 진행하세요.",
+    "deleteAccount": "계정 삭제",
+    "dialogTitle": "터미널 삭제",
+    "dialogDescription": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다. 모든 데이터, 관심 목록, 기록 및 환경설정이 서버에서 영구적으로 삭제됩니다.",
+    "cancel": "취소",
+    "confirmDelete": "삭제 확인",
+    "erasing": "삭제 중..."
+  },
+  "preferences": {
+    "title": "앱 환경설정",
+    "themeSelection": "테마 선택",
+    "themeDescription": "최적의 시청 편의를 위해 라이트 모드와 다크 모드를 전환하세요.",
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템",
+    "language": "언어",
+    "languageDescription": "선호하는 표시 언어를 선택하세요.",
+    "selectLanguage": "언어 선택",
+    "launchOnStartup": "시작 시 실행",
+    "launchDescription": "컴퓨터 부팅 시 Watch Rudra를 백그라운드에서 자동으로 시작합니다.",
+    "maxConcurrentDownloads": "최대 동시 다운로드",
+    "maxConcurrentDescription": "동시에 다운로드할 수 있는 영화 또는 에피소드 수. 기본값은 3입니다.",
+    "downloadSpeedLimit": "다운로드 속도 제한",
+    "downloadSpeedDescription": "백그라운드 다운로드 속도를 제한합니다. 네트워크가 느려질 때 유용합니다!",
+    "unlimited": "무제한"
+  },
+  "publicProfile": {
+    "returnBase": "돌아가기",
+    "identityVerified": "신원 프로필 인증됨",
+    "persistentIdentity": "영구 신원: {id}",
+    "daysActive": "활동 일수",
+    "hrsTotal": "총 시간",
+    "coreVersion": "코어 버전: V1.0-STABLE"
+  }
+}

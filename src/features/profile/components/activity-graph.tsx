@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { WatchActivity } from '../types';
@@ -148,6 +149,7 @@ export function ActivityGraph({
   createdAt,
   isLoading = false,
 }: ActivityGraphProps & { createdAt?: Date }) {
+  const t = useTranslations('profile');
   const { weeks } = useActivityGraphData(activity, createdAt);
 
   if (isLoading) {
@@ -203,8 +205,10 @@ export function ActivityGraph({
                   >
                     <span>
                       {day.count > 0
-                        ? `${Math.ceil(day.count)} min`
-                        : 'No activity'}
+                        ? t('activity.minSuffix', {
+                            count: Math.ceil(day.count),
+                          })
+                        : t('activity.noActivity')}
                     </span>
                     <span className="text-primary-foreground/60 ml-2">
                       {formatDate(day.date)}

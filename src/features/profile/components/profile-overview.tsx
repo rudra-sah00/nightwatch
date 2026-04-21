@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
@@ -12,6 +13,7 @@ import { AppPreferences } from './app-preferences';
 import { UpdateProfileForm } from './update-profile-form';
 
 export function ProfileOverview() {
+  const t = useTranslations('profile');
   const { user, activity, loadingActivity } = useProfileOverview();
 
   const passwordForm = useChangePasswordForm();
@@ -35,7 +37,7 @@ export function ProfileOverview() {
         className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 "
       >
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8">
-          Security / Password
+          {t('security.title')}
         </h2>
 
         <div className="space-y-8 max-w-2xl">
@@ -45,7 +47,7 @@ export function ProfileOverview() {
               htmlFor="current-password"
               className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
             >
-              Target Authorization
+              {t('security.currentPassword')}
             </label>
             <div className="relative">
               <input
@@ -56,7 +58,7 @@ export function ProfileOverview() {
                 onChange={(e) =>
                   passwordForm.setCurrentPassword(e.target.value)
                 }
-                placeholder="CURRENT PASSWORD"
+                placeholder={t('security.currentPasswordPlaceholder')}
                 required
                 className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 pr-10"
               />
@@ -64,7 +66,11 @@ export function ProfileOverview() {
                 type="button"
                 onClick={() => setShowPasswords((p) => !p)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={showPasswords ? 'Hide passwords' : 'Show passwords'}
+                aria-label={
+                  showPasswords
+                    ? t('security.hidePasswords')
+                    : t('security.showPasswords')
+                }
                 tabIndex={-1}
               >
                 {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -79,7 +85,7 @@ export function ProfileOverview() {
                 htmlFor="new-password"
                 className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
               >
-                New Key
+                {t('security.newPassword')}
               </label>
               <PasswordInfo className="text-muted-foreground" />
             </div>
@@ -89,7 +95,7 @@ export function ProfileOverview() {
               name="new"
               value={passwordForm.newPassword}
               onChange={(e) => passwordForm.setNewPassword(e.target.value)}
-              placeholder="NEW PASSWORD"
+              placeholder={t('security.newPasswordPlaceholder')}
               required
               className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-destructive focus:bg-destructive/10 focus:text-destructive transition-colors py-2"
             />
@@ -101,7 +107,7 @@ export function ProfileOverview() {
               htmlFor="confirm-password"
               className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm"
             >
-              Verify Key
+              {t('security.confirmPassword')}
             </label>
             <input
               id="confirm-password"
@@ -109,7 +115,7 @@ export function ProfileOverview() {
               name="confirm"
               value={passwordForm.confirmPassword}
               onChange={(e) => passwordForm.setConfirmPassword(e.target.value)}
-              placeholder="CONFIRM NEW PASSWORD"
+              placeholder={t('security.confirmPasswordPlaceholder')}
               required
               className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-destructive focus:bg-destructive/10 focus:text-destructive transition-colors py-2"
             />
@@ -125,7 +131,7 @@ export function ProfileOverview() {
                 {passwordForm.isPending ? (
                   <Loader2 className="w-8 h-8 animate-spin mx-auto" />
                 ) : (
-                  'OVERRIDE PASSWORD'
+                  t('security.submit')
                 )}
               </button>
             </div>
@@ -140,11 +146,11 @@ export function ProfileOverview() {
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
-            Watch Activity
+            {t('activity.title')}
           </h2>
           <div className="flex gap-2 items-center">
             <span className="text-xs font-bold uppercase font-headline text-muted-foreground">
-              Less
+              {t('activity.less')}
             </span>
             <div className="w-4 h-4 bg-muted"></div>
             <div className="w-4 h-4 bg-primary/30"></div>
@@ -152,7 +158,7 @@ export function ProfileOverview() {
             <div className="w-4 h-4 bg-primary"></div>
             <div className="w-4 h-4 bg-destructive"></div>
             <span className="text-xs font-bold uppercase font-headline text-muted-foreground">
-              More
+              {t('activity.more')}
             </span>
           </div>
         </div>
@@ -169,11 +175,10 @@ export function ProfileOverview() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-3xl font-black font-headline uppercase tracking-tighter">
-              Release Notes
+              {t('releaseNotes.title')}
             </h2>
             <p className="text-muted-foreground font-body text-sm max-w-sm">
-              Discover the latest features, improvements, and bug fixes added to
-              Watch Rudra.
+              {t('releaseNotes.description')}
             </p>
           </div>
 
@@ -181,7 +186,7 @@ export function ProfileOverview() {
             href="/whats-new"
             className="flex-shrink-0 py-3 px-8 bg-primary text-primary-foreground font-semibold font-headline tracking-widest rounded-lg hover:bg-primary/90 transition-colors shadow-sm text-sm uppercase"
           >
-            VIEW WHAT'S NEW
+            {t('releaseNotes.viewButton')}
           </Link>
         </div>
       </section>
