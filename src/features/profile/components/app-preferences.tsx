@@ -33,6 +33,14 @@ const LOCALE_META: Record<string, { native: string; english: string }> = {
   fr: { native: 'Français', english: 'French' },
   ja: { native: '日本語', english: 'Japanese' },
   ko: { native: '한국어', english: 'Korean' },
+  de: { native: 'Deutsch', english: 'German' },
+  pt: { native: 'Português', english: 'Portuguese' },
+  ar: { native: 'العربية', english: 'Arabic' },
+  ru: { native: 'Русский', english: 'Russian' },
+  zh: { native: '中文', english: 'Chinese' },
+  it: { native: 'Italiano', english: 'Italian' },
+  tr: { native: 'Türkçe', english: 'Turkish' },
+  th: { native: 'ไทย', english: 'Thai' },
 };
 
 function setCookie(name: string, value: string) {

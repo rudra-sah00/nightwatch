@@ -16,6 +16,14 @@ const LOCALE_LABELS: Record<string, string> = {
   fr: 'Français',
   ja: '日本語',
   ko: '한국어',
+  de: 'Deutsch',
+  pt: 'Português',
+  ar: 'العربية',
+  ru: 'Русский',
+  zh: '中文',
+  it: 'Italiano',
+  tr: 'Türkçe',
+  th: 'ไทย',
 };
 
 function setCookie(name: string, value: string) {
