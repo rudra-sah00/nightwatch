@@ -53,6 +53,7 @@
     "electron-updater": "^6.8.3",
     "electron-window-state": "^5.0.3",
     "emoji-picker-react": "^4.17.1",
+    "fast-uri": "^3.1.0",
     "hls.js": "^1.6.15",
     "konva": "^10.2.0",
     "lucide-react": "^0.575.0",
