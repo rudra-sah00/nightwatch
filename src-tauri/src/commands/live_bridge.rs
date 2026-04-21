@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
@@ -6,7 +5,7 @@ pub struct LiveBridgeState {
     pub shutdown_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
     pub stream_url: Arc<Mutex<String>>,
     pub stream_cookies: Arc<Mutex<String>>,
-    pub proxy_port: Arc<Mutex<u16>>,
+    pub hls_port: Arc<Mutex<u16>>,
     pub proxy_token: Arc<Mutex<String>>,
     pub resolved: Arc<Mutex<bool>>,
 }
@@ -17,7 +16,7 @@ impl Default for LiveBridgeState {
             shutdown_tx: Mutex::new(None),
             stream_url: Arc::new(Mutex::new(String::new())),
             stream_cookies: Arc::new(Mutex::new(String::new())),
-            proxy_port: Arc::new(Mutex::new(0)),
+            hls_port: Arc::new(Mutex::new(0)),
             proxy_token: Arc::new(Mutex::new(String::new())),
             resolved: Arc::new(Mutex::new(false)),
         }
@@ -31,31 +30,158 @@ struct BridgeResolved {
     channel_id: String,
 }
 
-const RACER_PATHS: &[&str] = &[
-    "/stream/",
-    "/cast/",
-    "/watch/",
-    "/casting/",
-    "/player/",
-    "/plus/",
-];
+const RACER_PATHS: &[&str] = &["/stream/", "/cast/", "/watch/", "/casting/", "/player/", "/plus/"];
+const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+const REFERER: &str = "https://funsday.cfd/";
+
+/// Sniffer proxy: transparent HTTP CONNECT proxy that inspects URLs for mono.css
+async fn run_sniffer_proxy(
+    listener: tokio::net::TcpListener,
+    resolved: Arc<Mutex<bool>>,
+    stream_url: Arc<Mutex<String>>,
+    stream_cookies: Arc<Mutex<String>>,
+    app: AppHandle,
+    hls_port: u16,
+    token: String,
+    mut shutdown_rx: tokio::sync::oneshot::Receiver<()>,
+) {
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::limited(10))
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .unwrap_or_default();
+
+    loop {
+        tokio::select! {
+            _ = &mut shutdown_rx => { log::info!("[Sniffer] Shutdown"); break; }
+            accepted = listener.accept() => {
+                if let Ok((stream, _)) = accepted {
+                    let client = client.clone();
+                    let resolved = resolved.clone();
+                    let stream_url = stream_url.clone();
+                    let stream_cookies = stream_cookies.clone();
+                    let app = app.clone();
+                    let token = token.clone();
+                    tokio::spawn(async move {
+                        handle_sniffer_request(stream, &client, &resolved, &stream_url, &stream_cookies, &app, hls_port, &token).await;
+                    });
+                }
+            }
+        }
+    }
+}
+
+async fn handle_sniffer_request(
+    mut stream: tokio::net::TcpStream,
+    client: &reqwest::Client,
+    resolved: &Arc<Mutex<bool>>,
+    stream_url_state: &Arc<Mutex<String>>,
+    stream_cookies_state: &Arc<Mutex<String>>,
+    app: &AppHandle,
+    hls_port: u16,
+    token: &str,
+) {
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+
+    let mut reader = BufReader::new(&mut stream);
+    let mut request_line = String::new();
+    if reader.read_line(&mut request_line).await.is_err() { return; }
+
+    let parts: Vec<&str> = request_line.split_whitespace().collect();
+    if parts.len() < 3 { return; }
+    let method = parts[0];
+    let url_str = parts[1];
+
+    // Read headers
+    let mut headers: Vec<(String, String)> = Vec::new();
+    loop {
+        let mut line = String::new();
+        if reader.read_line(&mut line).await.is_err() || line == "\r\n" || line.is_empty() { break; }
+        if let Some((k, v)) = line.trim().split_once(':') {
+            headers.push((k.trim().to_lowercase(), v.trim().to_string()));
+        }
+    }
+
+    // CONNECT method (HTTPS tunneling)
+    if method == "CONNECT" {
+        // For HTTPS, we just tunnel — we can't inspect the content, but we CAN see the hostname
+        let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
+        if let Ok(target) = tokio::net::TcpStream::connect(url_str).await {
+            let (mut client_read, mut client_write) = tokio::io::split(stream);
+            let (mut server_read, mut server_write) = tokio::io::split(target);
+            tokio::select! {
+                _ = tokio::io::copy(&mut client_read, &mut server_write) => {}
+                _ = tokio::io::copy(&mut server_read, &mut client_write) => {}
+            }
+        }
+        return;
+    }
+
+    // HTTP GET/POST — we can inspect the full URL
+    // Check if this URL contains mono.css or .m3u8
+    if !*resolved.lock().unwrap() && (url_str.contains("mono.css") || (url_str.contains(".m3u8") && !url_str.contains("localhost"))) {
+        log::info!("[Sniffer] CAPTURED stream URL: {}", &url_str[..url_str.len().min(120)]);
+        *resolved.lock().unwrap() = true;
+        *stream_url_state.lock().unwrap() = url_str.to_string();
+
+        // Extract cookies from request headers
+        let cookie_val = headers.iter()
+            .find(|(k, _)| k == "cookie")
+            .map(|(_, v)| v.clone())
+            .unwrap_or_default();
+        *stream_cookies_state.lock().unwrap() = cookie_val;
+
+        // Emit resolved event to frontend
+        let proxy_url = format!("http://127.0.0.1:{}/playlist.m3u8?token={}&t={}", hls_port, token, now_ms());
+        let _ = app.emit("live-bridge-resolved", BridgeResolved {
+            hls_url: proxy_url,
+            channel_id: String::new(),
+        });
+    }
+
+    // Forward the request to the actual server
+    let resp = match client.get(url_str).header("User-Agent", UA).send().await {
+        Ok(r) => r,
+        Err(_) => {
+            let _ = stream.write_all(b"HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n").await;
+            return;
+        }
+    };
+
+    let status = resp.status();
+    let ct = resp.headers().get("content-type").and_then(|v| v.to_str().ok()).unwrap_or("application/octet-stream").to_string();
+    let bytes = resp.bytes().await.unwrap_or_default();
+
+    let resp_line = format!(
+        "HTTP/1.1 {} {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nAccess-Control-Allow-Origin: *\r\n\r\n",
+        status.as_u16(), status.canonical_reason().unwrap_or("OK"), ct, bytes.len()
+    );
+    let _ = stream.write_all(resp_line.as_bytes()).await;
+    let _ = stream.write_all(&bytes).await;
+}
+
+fn now_ms() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as u64
+}
+
+fn extract_stream_id(url: &str) -> String {
+    if let Some(caps) = regex::Regex::new(r"stream-(\d+)").ok().and_then(|re| re.captures(url)) {
+        return caps[1].to_string();
+    }
+    if let Some(caps) = regex::Regex::new(r"(\d+)").ok().and_then(|re| re.captures(url)) {
+        return caps[1].to_string();
+    }
+    url.to_string()
+}
 
 #[tauri::command]
-pub async fn start_live_bridge(
-    app: AppHandle,
-    url: String,
-    channel_id: String,
-) -> Result<String, String> {
+pub async fn start_live_bridge(app: AppHandle, url: String, channel_id: String) -> Result<String, String> {
     log::info!("[LiveBridge] Starting for channel={} url={}", channel_id, url);
-
-    // Stop existing bridge
     stop_live_bridge_inner(&app);
 
-    // Extract stream ID from URL
     let stream_id = extract_stream_id(&url);
     log::info!("[LiveBridge] Stream ID: {}", stream_id);
 
-    // Generate new proxy token
     let token: String = {
         use rand::Rng;
         let mut rng = rand::thread_rng();
@@ -71,601 +197,296 @@ pub async fn start_live_bridge(
         *state.resolved.lock().unwrap() = false;
     }
 
-    // Start proxy server
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
-        .await
-        .map_err(|e| { log::error!("[LiveBridge] Bind failed: {}", e); e.to_string() })?;
-    let port = listener.local_addr().map_err(|e| e.to_string())?.port();
-    log::info!("[LiveBridge] Proxy on port {}", port);
-
+    // Start HLS proxy (Port 2 — serves rewritten playlists to the frontend player)
+    let hls_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.map_err(|e| e.to_string())?;
+    let hls_port = hls_listener.local_addr().map_err(|e| e.to_string())?.port();
+    log::info!("[LiveBridge] HLS proxy on port {}", hls_port);
     {
         let state = app.state::<LiveBridgeState>();
-        *state.proxy_port.lock().unwrap() = port;
+        *state.hls_port.lock().unwrap() = hls_port;
     }
 
-    let (shutdown_tx, mut shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+    // Start sniffer proxy (Port 1 — intercepts racer webview traffic)
+    let sniffer_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.map_err(|e| e.to_string())?;
+    let sniffer_port = sniffer_listener.local_addr().map_err(|e| e.to_string())?.port();
+    log::info!("[LiveBridge] Sniffer proxy on port {}", sniffer_port);
+
+    let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+    let (_hls_shutdown_tx, hls_shutdown_rx) = tokio::sync::oneshot::channel::<()>();
     {
         let state = app.state::<LiveBridgeState>();
         *state.shutdown_tx.lock().unwrap() = Some(shutdown_tx);
     }
 
-    // Spawn proxy server
-    let app_proxy = app.clone();
-    let token_proxy = token.clone();
+    // Spawn sniffer proxy
+    let resolved = app.state::<LiveBridgeState>().resolved.clone();
+    let stream_url_arc = app.state::<LiveBridgeState>().stream_url.clone();
+    let cookies_arc = app.state::<LiveBridgeState>().stream_cookies.clone();
+    let app_sniffer = app.clone();
+    let token_sniffer = token.clone();
     tokio::spawn(async move {
-        let client = reqwest::Client::builder()
-            .redirect(reqwest::redirect::Policy::limited(10))
-            .timeout(std::time::Duration::from_secs(15))
-            .build()
-            .unwrap_or_default();
-
-        loop {
-            tokio::select! {
-                _ = &mut shutdown_rx => {
-                    log::info!("[LiveBridge] Proxy shutdown");
-                    break;
-                }
-                accepted = listener.accept() => {
-                    if let Ok((stream, _)) = accepted {
-                        let client = client.clone();
-                        let token = token_proxy.clone();
-                        let app = app_proxy.clone();
-                        tokio::spawn(async move {
-                            handle_proxy_connection(stream, &client, &token, &app).await;
-                        });
-                    }
-                }
-            }
-        }
+        run_sniffer_proxy(sniffer_listener, resolved, stream_url_arc, cookies_arc, app_sniffer, hls_port, token_sniffer, shutdown_rx).await;
     });
 
-    // Spawn racer windows
+    // Spawn HLS proxy
+    let app_hls = app.clone();
+    let token_hls = token.clone();
+    tokio::spawn(async move {
+        run_hls_proxy(hls_listener, app_hls, token_hls, hls_shutdown_rx).await;
+    });
+
+    // Store hls_shutdown_tx so we can stop it later (piggyback on the main shutdown)
+    // We'll just let it live — it'll die when the app exits or next start_live_bridge
+
+    // Spawn racer windows with proxy_url pointing to sniffer
     let is_dev = cfg!(debug_assertions);
+    let sniffer_url = format!("http://127.0.0.1:{}", sniffer_port);
+
     for (i, path) in RACER_PATHS.iter().enumerate() {
         let stream_id = stream_id.clone();
         let racer_url = format!("https://dlstreams.top{}stream-{}.php", path, stream_id);
         let label = format!("racer-{}-{}", i, stream_id);
         let app_clone = app.clone();
+        let sniffer_url = sniffer_url.clone();
 
-        // Stagger racers by 250ms
         let delay = std::time::Duration::from_millis(i as u64 * 250);
         tokio::spawn(async move {
             tokio::time::sleep(delay).await;
 
-            // Check if already resolved
             {
                 let state = app_clone.state::<LiveBridgeState>();
-                if *state.resolved.lock().unwrap() {
-                    return;
-                }
+                if *state.resolved.lock().unwrap() { return; }
             }
 
-            log::info!("[LiveBridge] [Racer {}] Spawning: {}", i, racer_url);
+            log::info!("[LiveBridge] [Racer {}] {} -> proxy {}", i, racer_url, sniffer_url);
 
             let win = WebviewWindowBuilder::new(
-                &app_clone,
-                &label,
+                &app_clone, &label,
                 WebviewUrl::External(racer_url.parse().unwrap()),
             )
             .title(format!("[Racer {}] {} — {}", i, path, stream_id))
             .inner_size(640.0, 360.0)
-            .position(
-                if is_dev { (i as f64 % 3.0) * 650.0 } else { 0.0 },
-                if is_dev { (i as f64 / 3.0).floor() * 380.0 } else { 0.0 },
-            )
+            .position((i as f64 % 3.0) * 650.0, (i as f64 / 3.0).floor() * 380.0)
             .visible(is_dev)
             .always_on_top(is_dev)
             .skip_taskbar(!is_dev)
-            .initialization_script(&format!(
-                r#"
-                (function() {{
-                    if (window.__lb_hooked) return;
-                    window.__lb_hooked = true;
-
-                    function report(url) {{
-                        if (url && (url.includes('mono.css') || (url.includes('.m3u8') && !url.includes('localhost')))) {{
-                            try {{
-                                var ii = window.__TAURI_INTERNALS__;
-                                if (ii && ii.invoke) {{
-                                    ii.invoke('live_bridge_found', {{ url: url, racer: '{}' }});
-                                }}
-                            }} catch(e) {{}}
-                        }}
-                    }}
-
-                    // Intercept fetch
-                    var origFetch = window.fetch;
-                    window.fetch = function() {{
-                        var url = arguments[0];
-                        if (typeof url === 'string') report(url);
-                        else if (url && url.url) report(url.url);
-                        return origFetch.apply(this, arguments);
-                    }};
-
-                    // Intercept XMLHttpRequest
-                    var origOpen = XMLHttpRequest.prototype.open;
-                    XMLHttpRequest.prototype.open = function() {{
-                        if (arguments[1]) report(String(arguments[1]));
-                        return origOpen.apply(this, arguments);
-                    }};
-
-                    // Intercept createElement for link/script tags
-                    var origCreate = document.createElement.bind(document);
-                    document.createElement = function(tag) {{
-                        var el = origCreate(tag);
-                        if (tag === 'link' || tag === 'script') {{
-                            var origSetAttr = el.setAttribute.bind(el);
-                            el.setAttribute = function(name, value) {{
-                                if ((name === 'href' || name === 'src') && typeof value === 'string') {{
-                                    report(value);
-                                }}
-                                return origSetAttr(name, value);
-                            }};
-                            var desc = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href') ||
-                                       Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
-                            if (desc && desc.set) {{
-                                Object.defineProperty(el, tag === 'link' ? 'href' : 'src', {{
-                                    set: function(v) {{ report(v); desc.set.call(this, v); }},
-                                    get: desc.get,
-                                    configurable: true
-                                }});
-                            }}
-                        }}
-                        return el;
-                    }};
-
-                    // Also poll performance entries as fallback
-                    setInterval(function() {{
-                        try {{
-                            var entries = performance.getEntriesByType('resource');
-                            for (var i = entries.length - 1; i >= 0; i--) {{
-                                report(entries[i].name);
-                            }}
-                        }} catch(e) {{}}
-                    }}, 500);
-                }})();
-                "#,
-                label
-            ))
+            .proxy_url(sniffer_url.parse().unwrap())
             .build();
 
             match win {
                 Ok(w) => {
                     let app_poll = app_clone.clone();
                     let label_poll = label.clone();
-
-                    // Monitor loop: just wait for resolution or timeout
                     tokio::spawn(async move {
-                        for attempt in 0..120 {
+                        for tick in 0..120 {
                             tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-
-                            let state = app_poll.state::<LiveBridgeState>();
-                            if *state.resolved.lock().unwrap() {
-                                // Mute media in the winner, close losers
+                            let done = *app_poll.state::<LiveBridgeState>().resolved.lock().unwrap();
+                            if done {
                                 let _ = w.eval("document.querySelectorAll('video,audio').forEach(m=>{m.pause();m.removeAttribute('src');m.load()})");
-                                if !is_dev {
-                                    let _ = w.close();
-                                }
+                                if !is_dev { let _ = w.close(); }
                                 return;
                             }
-
-                            if attempt > 0 && attempt % 20 == 0 {
-                                log::debug!("[LiveBridge] [{}] Still searching... ({}s)", label_poll, attempt / 2);
+                            if tick > 0 && tick % 20 == 0 {
+                                log::debug!("[LiveBridge] [{}] Still searching... ({}s)", label_poll, tick / 2);
                             }
                         }
-
-                        log::warn!("[LiveBridge] [{}] Timed out after 60s", label_poll);
+                        log::warn!("[LiveBridge] [{}] Timed out", label_poll);
                         let _ = w.close();
                     });
                 }
-                Err(e) => {
-                    log::error!("[LiveBridge] [Racer {}] Failed to create window: {}", i, e);
-                }
+                Err(e) => log::error!("[LiveBridge] [Racer {}] Window failed: {}", i, e),
             }
         });
     }
 
-    // Return empty for now - the actual URL comes via the live-bridge-resolved event
     Ok(String::new())
 }
 
-/// Called from JS when a racer finds mono.css or .m3u8
-#[tauri::command]
-pub async fn live_bridge_found(
+/// HLS proxy: serves rewritten playlists and proxied segments to the frontend player
+async fn run_hls_proxy(
+    listener: tokio::net::TcpListener,
     app: AppHandle,
-    url: String,
-    racer: String,
-) -> Result<(), String> {
-    let state = app.state::<LiveBridgeState>();
+    token: String,
+    mut shutdown_rx: tokio::sync::oneshot::Receiver<()>,
+) {
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::limited(10))
+        .timeout(std::time::Duration::from_secs(15))
+        .build().unwrap_or_default();
 
-    // Check if already resolved
-    {
-        let mut resolved = state.resolved.lock().unwrap();
-        if *resolved {
-            return Ok(());
-        }
-        *resolved = true;
-    }
-
-    log::info!("[LiveBridge] [WINNER] {} found stream: {}", racer, &url[..url.len().min(100)]);
-
-    // Store the stream URL
-    *state.stream_url.lock().unwrap() = url;
-
-    let port = *state.proxy_port.lock().unwrap();
-    let token = state.proxy_token.lock().unwrap().clone();
-
-    let proxy_url = format!("http://127.0.0.1:{}/playlist.m3u8?token={}&t={}", port, token, chrono_now());
-
-    // Emit to frontend
-    app.emit(
-        "live-bridge-resolved",
-        BridgeResolved {
-            hls_url: proxy_url,
-            channel_id: String::new(), // Will be matched by the frontend
-        },
-    )
-    .map_err(|e| e.to_string())?;
-
-    // Close non-winner racers and mute the winner
-    close_racer_windows(&app, Some(&racer));
-
-    Ok(())
-}
-
-fn chrono_now() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as u64
-}
-
-fn close_racer_windows(app: &AppHandle, keep_label: Option<&str>) {
-    for (i, _) in RACER_PATHS.iter().enumerate() {
-        // Try multiple stream IDs since we don't track which one
-        for sid in 0..1000 {
-            let label = format!("racer-{}-{}", i, sid);
-            if let Some(keep) = keep_label {
-                if label == keep {
-                    // Mute the winner instead of closing
-                    if let Some(win) = app.get_webview_window(&label) {
-                        let _ = win.eval("document.querySelectorAll('video,audio').forEach(m=>{m.pause();m.removeAttribute('src');m.load()})");
-                        if !cfg!(debug_assertions) {
-                            let _ = win.hide();
-                        }
-                    }
-                    continue;
+    loop {
+        tokio::select! {
+            _ = &mut shutdown_rx => { log::info!("[HLS] Shutdown"); break; }
+            accepted = listener.accept() => {
+                if let Ok((stream, _)) = accepted {
+                    let client = client.clone();
+                    let app = app.clone();
+                    let token = token.clone();
+                    tokio::spawn(async move {
+                        handle_hls_request(stream, &client, &app, &token).await;
+                    });
                 }
             }
-            if let Some(win) = app.get_webview_window(&label) {
-                let _ = win.close();
-            }
         }
     }
 }
 
-fn extract_stream_id(url: &str) -> String {
-    // Try to extract from "stream-123.php" pattern
-    if let Some(caps) = regex::Regex::new(r"stream-(\d+)")
-        .ok()
-        .and_then(|re| re.captures(url))
-    {
-        return caps[1].to_string();
-    }
-    // Try just digits
-    if let Some(caps) = regex::Regex::new(r"(\d+)")
-        .ok()
-        .and_then(|re| re.captures(url))
-    {
-        return caps[1].to_string();
-    }
-    url.to_string()
-}
-
-async fn handle_proxy_connection(
+async fn handle_hls_request(
     mut stream: tokio::net::TcpStream,
     client: &reqwest::Client,
-    token: &str,
     app: &AppHandle,
+    token: &str,
 ) {
     use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
     let mut reader = BufReader::new(&mut stream);
     let mut request_line = String::new();
-    if reader.read_line(&mut request_line).await.is_err() {
-        return;
-    }
-
-    // Read headers
-    let mut headers_map: HashMap<String, String> = HashMap::new();
-    loop {
-        let mut line = String::new();
-        if reader.read_line(&mut line).await.is_err() || line == "\r\n" || line.is_empty() {
-            break;
-        }
-        if let Some((k, v)) = line.trim().split_once(':') {
-            headers_map.insert(k.trim().to_lowercase(), v.trim().to_string());
-        }
-    }
+    if reader.read_line(&mut request_line).await.is_err() { return; }
+    loop { let mut l = String::new(); if reader.read_line(&mut l).await.is_err() || l == "\r\n" || l.is_empty() { break; } }
 
     let parts: Vec<&str> = request_line.split_whitespace().collect();
-    if parts.len() < 2 {
-        return;
-    }
+    if parts.len() < 2 { return; }
     let method = parts[0];
     let path = parts[1];
 
-    // CORS preflight
     if method == "OPTIONS" {
-        let resp = "HTTP/1.1 204 No Content\r\n\
-            Access-Control-Allow-Origin: *\r\n\
-            Access-Control-Allow-Methods: GET, OPTIONS\r\n\
-            Access-Control-Allow-Headers: *\r\n\
-            Access-Control-Max-Age: 86400\r\n\
-            Content-Length: 0\r\n\r\n";
-        let _ = stream.write_all(resp.as_bytes()).await;
+        let _ = stream.write_all(b"HTTP/1.1 204 No Content\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, OPTIONS\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: 0\r\n\r\n").await;
         return;
     }
 
-    // Validate token
     if !path.contains(&format!("token={}", token)) {
-        let resp = "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
-        let _ = stream.write_all(resp.as_bytes()).await;
+        let _ = stream.write_all(b"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n").await;
         return;
     }
 
     let state = app.state::<LiveBridgeState>();
     let stream_url = state.stream_url.lock().unwrap().clone();
     let cookies = state.stream_cookies.lock().unwrap().clone();
-    let port = *state.proxy_port.lock().unwrap();
+    let port = *state.hls_port.lock().unwrap();
 
     if path.starts_with("/playlist.m3u8") {
         if stream_url.is_empty() {
-            let body = "Initializing...";
-            let resp = format!(
-                "HTTP/1.1 503 Service Unavailable\r\nAccess-Control-Allow-Origin: *\r\nRetry-After: 2\r\nContent-Length: {}\r\n\r\n{}",
-                body.len(), body
-            );
-            let _ = stream.write_all(resp.as_bytes()).await;
+            let _ = stream.write_all(b"HTTP/1.1 503 Service Unavailable\r\nAccess-Control-Allow-Origin: *\r\nRetry-After: 2\r\nContent-Length: 15\r\n\r\nInitializing...").await;
             return;
         }
-        serve_playlist(&mut stream, client, &stream_url, &cookies, port, token).await;
+        serve_hls_playlist(&mut stream, client, &stream_url, &cookies, port, token).await;
     } else if path.starts_with("/proxy") {
         if let Some(url) = extract_query_param(path, "url") {
-            proxy_segment(&mut stream, client, &url, &cookies).await;
+            proxy_hls_segment(&mut stream, client, &url, &cookies).await;
         }
-    } else {
-        let resp = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-        let _ = stream.write_all(resp.as_bytes()).await;
     }
 }
 
-async fn serve_playlist(
-    stream: &mut tokio::net::TcpStream,
-    client: &reqwest::Client,
-    upstream_url: &str,
-    cookies: &str,
-    port: u16,
-    token: &str,
-) {
+async fn serve_hls_playlist(stream: &mut tokio::net::TcpStream, client: &reqwest::Client, upstream: &str, cookies: &str, port: u16, token: &str) {
     use tokio::io::AsyncWriteExt;
-
-    let resp = match client
-        .get(upstream_url)
-        .header("Referer", "https://funsday.cfd/")
-        .header("Cookie", cookies)
-        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-        .send()
-        .await
-    {
-        Ok(r) => r,
-        Err(e) => {
-            log::error!("[LiveBridge] Playlist fetch failed: {}", e);
-            let body = format!("Fetch failed: {}", e);
-            let resp = format!("HTTP/1.1 502 Bad Gateway\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}", body.len(), body);
-            let _ = stream.write_all(resp.as_bytes()).await;
-            return;
-        }
+    let resp = match client.get(upstream).header("Referer", REFERER).header("Cookie", cookies).header("User-Agent", UA).send().await {
+        Ok(r) => r, Err(e) => { log::error!("[HLS] Playlist fetch failed: {}", e); return; }
     };
-
     let final_url = resp.url().to_string();
-    let body = match resp.text().await {
-        Ok(b) => b,
-        Err(_) => return,
-    };
+    let body = match resp.text().await { Ok(b) => b, Err(_) => return };
 
-    let fetch_origin = final_url
-        .split("://")
-        .nth(1)
-        .and_then(|s| s.split('/').next())
-        .map(|host| {
-            if final_url.starts_with("https") {
-                format!("https://{}", host)
-            } else {
-                format!("http://{}", host)
-            }
-        })
-        .unwrap_or_default();
+    let origin = extract_origin(&final_url);
+    let _base = final_url.rsplit_once('/').map(|(b, _)| b).unwrap_or(&final_url);
 
-    let base_url = final_url
-        .rsplit_once('/')
-        .map(|(b, _)| b)
-        .unwrap_or(&final_url);
+    // Rewrite using same regex patterns as Electron
+    let mut text = body.clone();
+    // Full URLs
+    text = regex::Regex::new(r#"(https?://[^\s"',]+)"#).unwrap()
+        .replace_all(&text, |caps: &regex::Captures| {
+            format!("http://127.0.0.1:{}/proxy?token={}&url={}", port, token, urlenc(&caps[1]))
+        }).to_string();
+    // URI="/path"
+    let origin2 = origin.clone();
+    let port2 = port;
+    let token2 = token.to_string();
+    text = regex::Regex::new(r#"URI="(/[^"]+)""#).unwrap()
+        .replace_all(&text, |caps: &regex::Captures| {
+            format!(r#"URI="http://127.0.0.1:{}/proxy?token={}&url={}""#, port2, token2, urlenc(&format!("{}{}", origin2, &caps[1])))
+        }).to_string();
+    // Bare /path lines
+    let origin3 = origin.clone();
+    let port3 = port;
+    let token3 = token.to_string();
+    text = regex::Regex::new(r"(?m)^(/[^\s]+)$").unwrap()
+        .replace_all(&text, |caps: &regex::Captures| {
+            format!("http://127.0.0.1:{}/proxy?token={}&url={}", port3, token3, urlenc(&format!("{}{}", origin3, &caps[1])))
+        }).to_string();
 
-    // Rewrite URLs to proxy through us
-    let mut rewritten = String::new();
-    for line in body.lines() {
-        if line.starts_with('#') {
-            // Rewrite URI="..." in tags
-            let rewritten_line = rewrite_uri_in_tag(line, base_url, &fetch_origin, port, token);
-            rewritten.push_str(&rewritten_line);
-        } else if !line.trim().is_empty() {
-            let full = resolve_url(base_url, &fetch_origin, line);
-            let encoded = urlencoding_encode(&full);
-            rewritten.push_str(&format!(
-                "http://127.0.0.1:{}/proxy?token={}&url={}",
-                port, token, encoded
-            ));
-        }
-        rewritten.push('\n');
-    }
-
-    let headers = format!(
-        "HTTP/1.1 200 OK\r\n\
-        Content-Type: application/vnd.apple.mpegurl\r\n\
-        Access-Control-Allow-Origin: *\r\n\
-        Cache-Control: no-cache, no-store\r\n\
-        Content-Length: {}\r\n\r\n",
-        rewritten.len()
-    );
-    let _ = stream.write_all(headers.as_bytes()).await;
-    let _ = stream.write_all(rewritten.as_bytes()).await;
+    let hdr = format!("HTTP/1.1 200 OK\r\nContent-Type: application/vnd.apple.mpegurl\r\nAccess-Control-Allow-Origin: *\r\nCache-Control: no-cache\r\nContent-Length: {}\r\n\r\n", text.len());
+    let _ = stream.write_all(hdr.as_bytes()).await;
+    let _ = stream.write_all(text.as_bytes()).await;
 }
 
-async fn proxy_segment(
-    stream: &mut tokio::net::TcpStream,
-    client: &reqwest::Client,
-    url: &str,
-    cookies: &str,
-) {
+async fn proxy_hls_segment(stream: &mut tokio::net::TcpStream, client: &reqwest::Client, url: &str, cookies: &str) {
     use tokio::io::AsyncWriteExt;
-
     let is_key = url.to_lowercase().contains("/key/");
-    let is_m3u8 = url.contains(".m3u8");
-
-    let resp = match client
-        .get(url)
-        .header("Referer", "https://funsday.cfd/")
-        .header("Cookie", cookies)
-        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-        .send()
-        .await
-    {
-        Ok(r) => r,
-        Err(e) => {
-            log::error!("[LiveBridge] Segment fetch failed: {}", e);
-            let body = format!("Fetch failed: {}", e);
-            let resp = format!("HTTP/1.1 502 Bad Gateway\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}", body.len(), body);
-            let _ = stream.write_all(resp.as_bytes()).await;
-            return;
-        }
+    let resp = match client.get(url).header("Referer", REFERER).header("Cookie", cookies).header("User-Agent", UA).send().await {
+        Ok(r) => r, Err(e) => { log::error!("[HLS] Segment failed: {}", e); return; }
     };
-
     let status = resp.status();
-    let content_type = if is_key {
-        "application/octet-stream"
-    } else if is_m3u8 {
-        "application/vnd.apple.mpegurl"
-    } else {
-        "video/MP2T"
-    };
-
-    let bytes = match resp.bytes().await {
-        Ok(b) => b,
-        Err(_) => return,
-    };
-
-    let headers = format!(
-        "HTTP/1.1 {} {}\r\n\
-        Content-Type: {}\r\n\
-        Access-Control-Allow-Origin: *\r\n\
-        Content-Length: {}\r\n\r\n",
-        status.as_u16(),
-        status.canonical_reason().unwrap_or("OK"),
-        content_type,
-        bytes.len()
-    );
-    let _ = stream.write_all(headers.as_bytes()).await;
+    let ct = if is_key { "application/octet-stream" } else if url.contains(".m3u8") { "application/vnd.apple.mpegurl" } else { "video/MP2T" };
+    let bytes = resp.bytes().await.unwrap_or_default();
+    let hdr = format!("HTTP/1.1 {} {}\r\nContent-Type: {}\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n", status.as_u16(), status.canonical_reason().unwrap_or("OK"), ct, bytes.len());
+    let _ = stream.write_all(hdr.as_bytes()).await;
     let _ = stream.write_all(&bytes).await;
 }
 
-fn rewrite_uri_in_tag(line: &str, base_url: &str, origin: &str, port: u16, token: &str) -> String {
-    if !line.contains("URI=") {
-        return line.to_string();
-    }
-    let mut result = line.to_string();
-    for quote in ['"', '\''] {
-        let pattern = format!("URI={}", quote);
-        if let Some(start) = result.find(&pattern) {
-            let uri_start = start + pattern.len();
-            if let Some(end) = result[uri_start..].find(quote) {
-                let uri = &result[uri_start..uri_start + end].to_string();
-                let full = resolve_url(base_url, origin, uri);
-                let encoded = urlencoding_encode(&full);
-                let new_uri = format!("http://127.0.0.1:{}/proxy?token={}&url={}", port, token, encoded);
-                result = format!(
-                    "{}URI={}{}{}{}",
-                    &result[..start], quote, new_uri, quote, &result[uri_start + end + 1..]
-                );
-            }
-        }
-    }
-    result
-}
-
-fn resolve_url(base: &str, origin: &str, url: &str) -> String {
-    if url.starts_with("http://") || url.starts_with("https://") {
-        url.to_string()
-    } else if url.starts_with('/') {
-        format!("{}{}", origin, url)
-    } else {
-        format!("{}/{}", base, url)
-    }
+fn extract_origin(url: &str) -> String {
+    url.split("://").nth(1).and_then(|s| s.split('/').next())
+        .map(|h| if url.starts_with("https") { format!("https://{}", h) } else { format!("http://{}", h) })
+        .unwrap_or_default()
 }
 
 fn extract_query_param(path: &str, key: &str) -> Option<String> {
     let query = path.split_once('?')?.1;
     for pair in query.split('&') {
         if let Some((k, v)) = pair.split_once('=') {
-            if k == key {
-                return Some(urlencoding_decode(v));
-            }
+            if k == key { return Some(urldec(v)); }
         }
     }
     None
 }
 
-fn urlencoding_encode(s: &str) -> String {
-    let mut out = String::new();
+fn urlenc(s: &str) -> String {
+    let mut o = String::new();
     for b in s.bytes() {
         match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
-                out.push(b as char)
-            }
-            _ => out.push_str(&format!("%{:02X}", b)),
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => o.push(b as char),
+            _ => o.push_str(&format!("%{:02X}", b)),
         }
     }
-    out
+    o
 }
 
-fn urlencoding_decode(s: &str) -> String {
+fn urldec(s: &str) -> String {
     let mut out = Vec::new();
-    let bytes = s.as_bytes();
+    let b = s.as_bytes();
     let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] == b'%' && i + 2 < bytes.len() {
-            if let Ok(val) = u8::from_str_radix(
-                std::str::from_utf8(&bytes[i + 1..i + 3]).unwrap_or("00"),
-                16,
-            ) {
-                out.push(val);
-                i += 3;
-                continue;
+    while i < b.len() {
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let Ok(v) = u8::from_str_radix(std::str::from_utf8(&b[i+1..i+3]).unwrap_or("00"), 16) {
+                out.push(v); i += 3; continue;
             }
         }
-        out.push(bytes[i]);
-        i += 1;
+        out.push(b[i]); i += 1;
     }
     String::from_utf8_lossy(&out).into_owned()
 }
 
+fn close_racer_windows(app: &AppHandle) {
+    for i in 0..RACER_PATHS.len() {
+        for sid in 0..1000 {
+            let label = format!("racer-{}-{}", i, sid);
+            if let Some(win) = app.get_webview_window(&label) { let _ = win.close(); }
+        }
+    }
+}
+
 fn stop_live_bridge_inner(app: &AppHandle) {
     let state = app.state::<LiveBridgeState>();
-    if let Some(tx) = state.shutdown_tx.lock().unwrap().take() {
-        let _ = tx.send(());
-    }
+    if let Some(tx) = state.shutdown_tx.lock().unwrap().take() { let _ = tx.send(()); }
     *state.resolved.lock().unwrap() = false;
-    close_racer_windows(app, None);
+    close_racer_windows(app);
 }
 
 #[tauri::command]

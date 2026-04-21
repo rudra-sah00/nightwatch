@@ -5,7 +5,7 @@ use commands::{
         cancel_download, get_downloads, pause_download, resume_download, start_download,
         DownloadManagerState,
     },
-    live_bridge::{start_live_bridge, stop_live_bridge, live_bridge_found, LiveBridgeState},
+    live_bridge::{start_live_bridge, stop_live_bridge, LiveBridgeState},
     offline_media::{get_offline_media_base, OfflineMediaState},
     window::{copy_to_clipboard, get_app_version, read_offline_file, set_native_theme, set_pip, show_notification},
 };
@@ -131,7 +131,6 @@ pub fn run() {
         get_downloads,
         start_live_bridge,
         stop_live_bridge,
-        live_bridge_found,
         set_badge,
         toggle_keep_awake,
         set_run_on_boot,
@@ -156,7 +155,6 @@ pub fn run() {
         get_downloads,
         start_live_bridge,
         stop_live_bridge,
-        live_bridge_found,
     ]);
 
     builder
