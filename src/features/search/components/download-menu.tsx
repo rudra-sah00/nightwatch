@@ -421,9 +421,9 @@ export function DownloadMenu({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="absolute top-8 right-8 z-50 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
+          className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
         >
-          {t('download.cancel')}
+          ✕
         </button>
 
         {/* Left Column: Languages */}
