@@ -122,6 +122,7 @@ pub async fn start_live_bridge(
     // Spawn racer windows
     let is_dev = cfg!(debug_assertions);
     for (i, path) in RACER_PATHS.iter().enumerate() {
+        let stream_id = stream_id.clone();
         let racer_url = format!("https://dlstreams.top{}stream-{}.php", path, stream_id);
         let label = format!("racer-{}-{}", i, stream_id);
         let app_clone = app.clone();
@@ -148,9 +149,14 @@ pub async fn start_live_bridge(
                 &label,
                 WebviewUrl::External(racer_url.parse().unwrap()),
             )
-            .title(format!("LiveBridge Racer {}", i))
-            .inner_size(1280.0, 720.0)
+            .title(format!("[Racer {}] {} — {}", i, path, stream_id))
+            .inner_size(640.0, 360.0)
+            .position(
+                if is_dev { (i as f64 % 3.0) * 650.0 } else { 0.0 },
+                if is_dev { (i as f64 / 3.0).floor() * 380.0 } else { 0.0 },
+            )
             .visible(is_dev)
+            .always_on_top(is_dev)
             .skip_taskbar(!is_dev)
             .build();
 
