@@ -211,7 +211,7 @@ describe('WatchPartySketch', () => {
     // Mock anchor element and its click
     const link = { click: vi.fn(), download: '', href: '' };
     vi.spyOn(document, 'createElement').mockReturnValue(
-      link as unknown as HTMLAnchorElement,
+      link as unknown as ReturnType<typeof document.createElement>,
     );
 
     vi.useFakeTimers();
