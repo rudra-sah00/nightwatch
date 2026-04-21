@@ -7,15 +7,15 @@ import { useCallback, useState } from 'react';
 import { COOKIE_NAME, locales } from '@/i18n/config';
 import { cn } from '@/lib/utils';
 
-const LOCALE_LABELS: Record<string, { native: string; flag: string }> = {
-  en: { native: 'English', flag: '🇬🇧' },
-  hi: { native: 'हिन्दी', flag: '🇮🇳' },
-  ta: { native: 'தமிழ்', flag: '🇮🇳' },
-  te: { native: 'తెలుగు', flag: '🇮🇳' },
-  es: { native: 'Español', flag: '🇪🇸' },
-  fr: { native: 'Français', flag: '🇫🇷' },
-  ja: { native: '日本語', flag: '🇯🇵' },
-  ko: { native: '한국어', flag: '🇰🇷' },
+const LOCALE_LABELS: Record<string, string> = {
+  en: 'English',
+  hi: 'हिन्दी',
+  ta: 'தமிழ்',
+  te: 'తెలుగు',
+  es: 'Español',
+  fr: 'Français',
+  ja: '日本語',
+  ko: '한국어',
 };
 
 function setCookie(name: string, value: string) {
@@ -71,9 +71,8 @@ export function LanguageSwitcher() {
                   locale === l && 'bg-foreground/10 font-bold',
                 )}
               >
-                <span className="text-lg">{LOCALE_LABELS[l].flag}</span>
                 <span className="text-sm font-headline font-bold tracking-wide">
-                  {LOCALE_LABELS[l].native}
+                  {LOCALE_LABELS[l]}
                 </span>
               </button>
             ))}

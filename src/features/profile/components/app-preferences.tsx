@@ -9,18 +9,15 @@ import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 
-const LOCALE_META: Record<
-  string,
-  { native: string; english: string; flag: string }
-> = {
-  en: { native: 'English', english: 'English', flag: '🇬🇧' },
-  hi: { native: 'हिन्दी', english: 'Hindi', flag: '🇮🇳' },
-  ta: { native: 'தமிழ்', english: 'Tamil', flag: '🇮🇳' },
-  te: { native: 'తెలుగు', english: 'Telugu', flag: '🇮🇳' },
-  es: { native: 'Español', english: 'Spanish', flag: '🇪🇸' },
-  fr: { native: 'Français', english: 'French', flag: '🇫🇷' },
-  ja: { native: '日本語', english: 'Japanese', flag: '🇯🇵' },
-  ko: { native: '한국어', english: 'Korean', flag: '🇰🇷' },
+const LOCALE_META: Record<string, { native: string; english: string }> = {
+  en: { native: 'English', english: 'English' },
+  hi: { native: 'हिन्दी', english: 'Hindi' },
+  ta: { native: 'தமிழ்', english: 'Tamil' },
+  te: { native: 'తెలుగు', english: 'Telugu' },
+  es: { native: 'Español', english: 'Spanish' },
+  fr: { native: 'Français', english: 'French' },
+  ja: { native: '日本語', english: 'Japanese' },
+  ko: { native: '한국어', english: 'Korean' },
 };
 
 function setCookie(name: string, value: string) {
@@ -157,7 +154,6 @@ export function AppPreferences() {
                     : 'bg-secondary border-border text-muted-foreground hover:text-foreground hover:border-foreground/50',
                 )}
               >
-                <span>{LOCALE_META[l]?.flag}</span>
                 <span className="tracking-wide">{LOCALE_META[l]?.native}</span>
               </button>
             ))}
