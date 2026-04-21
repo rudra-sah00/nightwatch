@@ -73,7 +73,7 @@ export default function RootLayout({
           <ThemeProvider>
             <SocketProvider>
               <AuthProvider>
-                <Suspense fallback={children}>
+                <Suspense fallback={<div className="min-h-screen" />}>
                   <IntlProvider>
                     <ProgressBar />
                     <DiscordPresenceSync />
