@@ -6,6 +6,7 @@ import {
   Globe,
   Monitor,
   Moon,
+  Palette,
   Power,
   Sun,
   Zap,
@@ -43,6 +44,12 @@ const LOCALE_META: Record<string, { native: string; english: string }> = {
   th: { native: 'ไทย', english: 'Thai' },
 };
 
+const THEME_META = [
+  { id: 'light' as const, label: 'Light', Icon: Sun },
+  { id: 'dark' as const, label: 'Dark', Icon: Moon },
+  { id: 'system' as const, label: 'System', Icon: Monitor },
+];
+
 function setCookie(name: string, value: string) {
   // biome-ignore lint/suspicious/noDocumentCookie: required for SSR locale detection
   document.cookie = `${name}=${value};path=/;max-age=31536000;samesite=lax`;
@@ -56,8 +63,12 @@ export function AppPreferences() {
 
   const [runOnBoot, setRunOnBoot] = useState(false);
   const [concurrentDownloads, setConcurrentDownloads] = useState<number>(3);
+  const [customConcurrent, setCustomConcurrent] = useState('');
   const [downloadSpeedLimit, setDownloadSpeedLimit] = useState<number>(0);
+  const [customSpeed, setCustomSpeed] = useState('');
   const [isDesktop, setIsDesktop] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
 
   useEffect(() => {
     if (checkIsDesktop()) {
@@ -74,8 +85,6 @@ export function AppPreferences() {
     }
   }, []);
 
-  const [langOpen, setLangOpen] = useState(false);
-
   const switchLocale = useCallback(
     (newLocale: string) => {
       setCookie(COOKIE_NAME, newLocale);
@@ -89,21 +98,38 @@ export function AppPreferences() {
   const handleToggleRunOnBoot = () => {
     const newValue = !runOnBoot;
     setRunOnBoot(newValue);
-    if (desktopBridge.setRunOnBoot) {
-      desktopBridge.setRunOnBoot(newValue);
-      desktopBridge.storeSet('runOnBoot', newValue);
-    }
+    desktopBridge.setRunOnBoot(newValue);
+    desktopBridge.storeSet('runOnBoot', newValue);
   };
 
   const handleConcurrentChange = (val: number) => {
     setConcurrentDownloads(val);
+    setCustomConcurrent('');
     if (checkIsDesktop()) desktopBridge.storeSet('concurrentDownloads', val);
+  };
+
+  const handleCustomConcurrent = () => {
+    const val = Number.parseInt(customConcurrent, 10);
+    if (val > 0 && val <= 10) handleConcurrentChange(val);
   };
 
   const handleSpeedChange = (val: number) => {
     setDownloadSpeedLimit(val);
+    setCustomSpeed('');
     if (checkIsDesktop()) desktopBridge.storeSet('downloadSpeedLimit', val);
   };
+
+  const handleCustomSpeed = () => {
+    const val = Number.parseInt(customSpeed, 10);
+    if (val > 0 && val <= 100) handleSpeedChange(val);
+  };
+
+  const themeLabel =
+    theme === 'light'
+      ? t('preferences.light')
+      : theme === 'dark'
+        ? t('preferences.dark')
+        : t('preferences.system');
 
   return (
     <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 mb-12">
@@ -111,11 +137,12 @@ export function AppPreferences() {
         {t('preferences.title')}
       </h2>
 
-      <div className="flex flex-col gap-10 max-w-2xl">
-        {/* Theme Settings */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2">
-            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm">
+      <div className="flex flex-col gap-8 max-w-2xl">
+        {/* Theme */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+              <Palette className="w-4 h-4 text-neo-yellow" />
               {t('preferences.themeSelection')}
             </span>
             <p className="text-muted-foreground font-body text-sm max-w-sm">
@@ -123,49 +150,80 @@ export function AppPreferences() {
             </p>
           </div>
 
-          <div
-            role="radiogroup"
-            aria-label="Theme selection"
-            className="flex flex-row p-1 bg-secondary rounded-lg border border-border shrink-0"
-          >
-            {[
-              {
-                id: 'light' as const,
-                label: t('preferences.light'),
-                Icon: Sun,
-              },
-              { id: 'dark' as const, label: t('preferences.dark'), Icon: Moon },
-              {
-                id: 'system' as const,
-                label: t('preferences.system'),
-                Icon: Monitor,
-              },
-            ].map(({ id, label, Icon }) => (
+          <Dialog open={themeOpen} onOpenChange={setThemeOpen}>
+            <DialogTrigger asChild>
               <button
-                key={id}
                 type="button"
-                role="radio"
-                aria-checked={theme === id}
-                onClick={() => setTheme(id)}
-                className={cn(
-                  'px-3 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors flex items-center gap-1.5',
-                  theme === id
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
+                className="px-5 py-2.5 border-[3px] border-border bg-background hover:bg-foreground/5 font-headline font-bold uppercase tracking-widest text-sm transition-colors flex items-center gap-3"
               >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
+                {theme === 'light' ? (
+                  <Sun className="w-4 h-4" />
+                ) : theme === 'dark' ? (
+                  <Moon className="w-4 h-4" />
+                ) : (
+                  <Monitor className="w-4 h-4" />
+                )}
+                {themeLabel}
               </button>
-            ))}
-          </div>
+            </DialogTrigger>
+
+            <DialogContent
+              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/90 dark:bg-black/80 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+              showCloseButton={false}
+            >
+              <DialogTitle className="sr-only">
+                {t('preferences.themeSelection')}
+              </DialogTitle>
+              <button
+                type="button"
+                onClick={() => setThemeOpen(false)}
+                className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+              >
+                Cancel
+              </button>
+
+              <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
+                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground">
+                  {t('preferences.themeSelection')}
+                </h2>
+                <div className="flex flex-col w-full gap-1">
+                  {THEME_META.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => {
+                        setTheme(id);
+                        setThemeOpen(false);
+                      }}
+                      className={cn(
+                        'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
+                        theme === id
+                          ? 'bg-foreground text-background font-black'
+                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                      )}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Icon className="w-6 h-6" />
+                        <span className="text-lg font-headline font-bold tracking-wide">
+                          {label}
+                        </span>
+                      </div>
+                      {theme === id && (
+                        <Check className="w-5 h-5 stroke-[3px]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="h-px bg-border w-full" />
 
-        {/* Language Settings */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2">
+        {/* Language */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
             <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
               <Globe className="w-4 h-4 text-neo-blue" />
               {t('preferences.language')}
@@ -193,7 +251,6 @@ export function AppPreferences() {
               <DialogTitle className="sr-only">
                 {t('preferences.selectLanguage')}
               </DialogTitle>
-
               <button
                 type="button"
                 onClick={() => setLangOpen(false)}
@@ -206,7 +263,6 @@ export function AppPreferences() {
                 <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
                   {t('preferences.language')}
                 </h2>
-
                 <div className="flex flex-col w-full gap-1 overflow-y-auto flex-1 pb-16">
                   {locales.map((l) => (
                     <button
@@ -244,8 +300,9 @@ export function AppPreferences() {
           <>
             <div className="h-px bg-border w-full" />
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2">
+            {/* Launch on Startup */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Power className="w-4 h-4 text-neo-blue" />
                   {t('preferences.launchOnStartup')}
@@ -254,21 +311,19 @@ export function AppPreferences() {
                   {t('preferences.launchDescription')}
                 </p>
               </div>
-
               <button
                 type="button"
                 role="switch"
                 aria-checked={runOnBoot}
                 onClick={handleToggleRunOnBoot}
                 className={cn(
-                  'relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background shrink-0',
+                  'relative inline-flex h-8 w-16 items-center rounded-full transition-colors shrink-0',
                   runOnBoot ? 'bg-neo-blue' : 'bg-secondary',
                 )}
               >
-                <span className="sr-only">Toggle Launch on Boot</span>
                 <span
                   className={cn(
-                    'inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-background shadow transition-transform',
+                    'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
                     runOnBoot ? 'translate-x-9' : 'translate-x-1',
                   )}
                 />
@@ -277,8 +332,9 @@ export function AppPreferences() {
 
             <div className="h-px bg-border w-full" />
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2">
+            {/* Max Concurrent Downloads */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Activity className="w-4 h-4 text-neo-yellow" />
                   {t('preferences.maxConcurrentDownloads')}
@@ -287,34 +343,43 @@ export function AppPreferences() {
                   {t('preferences.maxConcurrentDescription')}
                 </p>
               </div>
-
-              <div
-                role="radiogroup"
-                aria-label="Max concurrent downloads"
-                className="flex flex-row p-1 bg-secondary rounded-lg border border-border"
-              >
-                {[1, 2, 3, 5].map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    role="radio"
-                    aria-checked={concurrentDownloads === val}
-                    onClick={() => handleConcurrentChange(val)}
-                    className={cn(
-                      'px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors',
-                      concurrentDownloads === val
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {val}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
+                  {[1, 2, 3, 5].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => handleConcurrentChange(val)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs font-bold rounded-md transition-colors',
+                        concurrentDownloads === val && !customConcurrent
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  placeholder="Custom"
+                  value={customConcurrent}
+                  onChange={(e) => setCustomConcurrent(e.target.value)}
+                  onBlur={handleCustomConcurrent}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && handleCustomConcurrent()
+                  }
+                  className="w-20 px-2 py-1.5 text-xs font-bold border-[2px] border-border bg-background rounded-md text-center placeholder:text-muted-foreground/50"
+                />
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2">
+            {/* Download Speed Limit */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
                 <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
                   <Zap className="w-4 h-4 text-neo-green" />
                   {t('preferences.downloadSpeedLimit')}
@@ -323,34 +388,40 @@ export function AppPreferences() {
                   {t('preferences.downloadSpeedDescription')}
                 </p>
               </div>
-
-              <div
-                role="radiogroup"
-                aria-label="Download speed limit"
-                className="flex flex-row p-1 bg-secondary rounded-lg border border-border overflow-x-auto min-w-0 max-w-[250px] sm:max-w-none"
-              >
-                {[
-                  { label: t('preferences.unlimited'), val: 0 },
-                  { label: '1 MB/s', val: 1 },
-                  { label: '3 MB/s', val: 3 },
-                  { label: '10 MB/s', val: 10 },
-                ].map((opt) => (
-                  <button
-                    key={opt.val}
-                    type="button"
-                    role="radio"
-                    aria-checked={downloadSpeedLimit === opt.val}
-                    onClick={() => handleSpeedChange(opt.val)}
-                    className={cn(
-                      'px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-colors whitespace-nowrap',
-                      downloadSpeedLimit === opt.val
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <div className="flex flex-row p-1 bg-secondary rounded-lg border border-border">
+                  {[
+                    { label: t('preferences.unlimited'), val: 0 },
+                    { label: '5', val: 5 },
+                    { label: '10', val: 10 },
+                    { label: '20', val: 20 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.val}
+                      type="button"
+                      onClick={() => handleSpeedChange(opt.val)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs font-bold rounded-md transition-colors whitespace-nowrap',
+                        downloadSpeedLimit === opt.val && !customSpeed
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {opt.val === 0 ? opt.label : `${opt.label} MB/s`}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  placeholder="MB/s"
+                  value={customSpeed}
+                  onChange={(e) => setCustomSpeed(e.target.value)}
+                  onBlur={handleCustomSpeed}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCustomSpeed()}
+                  className="w-20 px-2 py-1.5 text-xs font-bold border-[2px] border-border bg-background rounded-md text-center placeholder:text-muted-foreground/50"
+                />
               </div>
             </div>
           </>
