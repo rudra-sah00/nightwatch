@@ -8,11 +8,13 @@
     "watchlist": "ウォッチリスト",
     "downloads": "ダウンロード",
     "offlineDownloads": "オフラインダウンロード",
-    "profile": "プロフィール"
+    "profile": "プロフィール",
+    "logoAlt": "Watch Rudra ロゴ"
   },
   "language": {
     "title": "言語",
-    "description": "お好みの言語を選択してください"
+    "description": "お好みの言語を選択してください",
+    "closeMenu": "言語メニューを閉じる"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "パーティーが終了しました",
     "messageFailed": "メッセージの送信に失敗しました",
     "partyTimeLimit": "ウォッチパーティーが3時間の制限に達しました。終了します。",
-    "startFailed": "再生の開始に失敗しました",
-    "linkCopied": "リンクをコピーしました！",
-    "profileUpdated": "プロフィールを更新しました",
-    "passwordChanged": "パスワードを変更しました",
-    "accountDeleted": "アカウントを削除しました",
-    "error": "問題が発生しました",
-    "networkError": "ネットワークエラー。接続を確認してください。",
-    "sessionExpired": "セッションが期限切れです。再度ログインしてください。"
+    "startFailed": "再生の開始に失敗しました"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "アプリバージョン"
   },
   "passwordInfo": {
-    "requirements": "要件"
+    "requirements": "要件",
+    "ariaLabel": "パスワード要件",
+    "title": "パスワード要件",
+    "minChars": "8文字以上",
+    "uppercase": "大文字 (A-Z)",
+    "specialChar": "特殊文字 (!@#$%^&*)",
+    "breachNote": "パスワードを確認しています",
+    "knownBreaches": "既知の漏洩"
   },
   "actions": {
-    "close": "閉じる"
+    "close": "閉じる",
+    "closeModal": "モーダルを閉じる"
+  },
+  "loading": "読み込み中...",
+  "skipToContent": "コンテンツへスキップ",
+  "offline": {
+    "title": "オフラインです",
+    "description": "Watch Rudraの閲覧にはインターネット接続が必要です。ダウンロード済みの作品はボールトからご覧ください。",
+    "openVault": "オフラインボールトを開く",
+    "toastOffline": "オフラインです",
+    "toastOnline": "オンラインに復帰しました！"
+  },
+  "swUpdate": {
+    "title": "新しいバージョンが利用可能",
+    "description": "最新のアップデートを取得するにはリフレッシュしてください。",
+    "refresh": "リフレッシュ"
+  },
+  "discord": {
+    "readyToStream": "配信準備完了",
+    "atLoginScreen": "ログイン画面",
+    "browsingDashboard": "ダッシュボードを閲覧中",
+    "lookingForContent": "コンテンツを探しています",
+    "browsingHomepage": "ホームページを閲覧中",
+    "browsingLiveMatches": "ライブマッチを閲覧中",
+    "findingStream": "ストリームを検索中...",
+    "curatingWatchlist": "ウォッチリストを整理中",
+    "planningMarathon": "次のマラソンを計画中",
+    "adjustingSettings": "設定を調整中",
+    "customizingProfile": "プロフィールをカスタマイズ中"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "バランス",
+    "highQuality": "高画質ストリーム"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "あなたのパーソナルストリーミングコンパニオン",
+    "homeTitle": "ホーム | Watch Rudra",
+    "homeDescription": "映画やテレビ番組を検索して一緒に視聴を始めましょう。",
+    "continueWatchingTitle": "視聴を続ける | Watch Rudra",
+    "continueWatchingDescription": "最近視聴した映画やテレビ番組の続きから再開しましょう。",
+    "searchTitle": "検索 | Watch Rudra",
+    "searchDescription": "映画、テレビ番組、アニメを検索。",
+    "profileTitle": "プロフィール | Watch Rudra",
+    "profileDescription": "プロフィールと視聴履歴を管理。",
+    "liveTitle": "ライブ試合 | Watch Rudra",
+    "liveDescription": "友達とリアルタイムでライブスポーツの試合やチャンネルを視聴。",
+    "downloadsTitle": "ダウンロード | Watch Rudra",
+    "downloadsDescription": "オフライン視聴用にダウンロードした映画やテレビ番組にアクセス。",
+    "watchlistTitle": "マイウォッチリスト | Watch Rudra",
+    "watchlistDescription": "後で見たい映画やテレビ番組を管理。",
+    "watchPartyTitle": "ウォッチパーティー | Watch Rudra",
+    "watchPartyDescription": "友達と一緒にリアルタイムで視聴しましょう。"
+  },
+  "desktopApp": {
+    "notInstalled": "アプリ未インストール",
+    "notInstalledDesc": "Watch Rudraデスクトップアプリを開けませんでした。インストールされていますか？",
+    "downloadApp": "アプリをダウンロード"
+  },
+  "whatsNew": {
+    "backToHome": "ホームに戻る",
+    "title": "新着情報",
+    "description": "Watch Rudraの最新アップデート、バグ修正、新機能。",
+    "noReleases": "リリースが見つからないか、読み込みに失敗しました。",
+    "noReleaseNotes": "*リリースノートはありません。*",
+    "showMore": "もっと見る（残り{remaining}件）"
+  },
+  "downloads": {
+    "failedToLoad": "コンテンツの読み込みに失敗",
+    "experienceStarting": "体験を開始中",
+    "preparingContent": "「{title}」を準備中...",
+    "episodes": "エピソード",
+    "noImageAvailable": "画像なし",
+    "closePreview": "プレビューを閉じる",
+    "statusCompleted": "完了",
+    "statusFailed": "失敗",
+    "statusDownloading": "ダウンロード中",
+    "statusQueued": "待機中",
+    "statusCancelled": "キャンセル済み",
+    "statusPaused": "一時停止"
+  },
+  "errors": {
+    "sessionExpired": "セッションが期限切れです。再度ログインしてください。",
+    "userExists": "このメールアドレスのアカウントは既に存在します。",
+    "invalidInvite": "招待リンクが無効または期限切れです。新しいリンクをリクエストしてください。",
+    "captchaRequired": "セキュリティ認証を完了してください。",
+    "captchaFailed": "セキュリティ認証に失敗しました。再試行してください。",
+    "otpRateLimit": "試行回数が多すぎます。しばらく待ってから再試行してください。",
+    "validationError": "一部の情報が無効です。確認して再試行してください。",
+    "csrfFailed": "セキュリティトークンが期限切れです。ページを更新してください。",
+    "notFound": "リクエストされたリソースが見つかりません。",
+    "forbidden": "この操作を実行する権限がありません。",
+    "networkError": "ネットワークの問題です。接続を確認して再試行してください。",
+    "requestTimeout": "リクエストがタイムアウトしました。接続を確認して再試行してください。"
+  },
+  "units": {
+    "bytes": "バイト",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

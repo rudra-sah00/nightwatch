@@ -1,4 +1,5 @@
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { CaptchaHandle } from '@/components/ui/captcha';
@@ -17,6 +18,8 @@ interface FormState {
 
 export function useSignupForm() {
   const { register, verifyOtp, resendOtp } = useAuth();
+  const tErr = useTranslations('auth.errors');
+  const tAuth = useTranslations('auth');
   const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>('name');
   const [isLoading, setIsLoading] = useState(false);
@@ -122,13 +125,13 @@ export function useSignupForm() {
       const captchaToken = formData.get('captchaToken') as string;
 
       if (!captchaToken) {
-        return { error: 'Please complete the security verification.' };
+        return { error: tErr('captchaRequired') };
       }
 
       if (password !== confirmPassword) {
         return {
-          fieldErrors: { confirmPassword: 'Passwords do not match' },
-          error: 'Please make sure both passwords match.',
+          fieldErrors: { confirmPassword: tErr('passwordsMismatch') },
+          error: tErr('passwordsMismatchDetail'),
         };
       }
 
@@ -145,14 +148,13 @@ export function useSignupForm() {
         const errors: Record<string, string> = {};
         for (const err of result.error.issues) {
           const field = err.path[0];
-          if (typeof field === 'string') errors[field] = err.message;
+          if (typeof field === 'string') errors[field] = tAuth(err.message);
         }
         const firstIssue = result.error.issues[0]?.message;
         return {
           fieldErrors: errors,
           error:
-            firstIssue ||
-            'Some details look invalid. Please review the form and try again.',
+            (firstIssue ? tAuth(firstIssue) : undefined) || tErr('formInvalid'),
         };
       }
 
@@ -215,9 +217,7 @@ export function useSignupForm() {
           }
 
           return {
-            error:
-              fallbackMessage ||
-              'Some details are invalid. Please review your information and try again.',
+            error: fallbackMessage || tErr('detailsInvalid'),
           };
         }
 
@@ -226,9 +226,9 @@ export function useSignupForm() {
           captchaRef.current?.reset();
           return {
             fieldErrors: {
-              email: 'An account with this email already exists',
+              email: tErr('emailExists'),
             },
-            error: 'An account with this email already exists.',
+            error: tErr('emailExistsDetail'),
           };
         }
 
@@ -236,8 +236,7 @@ export function useSignupForm() {
           setCaptchaToken(null);
           captchaRef.current?.reset();
           return {
-            error:
-              'Invite link is invalid or expired. Please request a new invite link.',
+            error: tErr('inviteInvalid'),
           };
         }
 
@@ -248,8 +247,7 @@ export function useSignupForm() {
           setCaptchaToken(null);
           captchaRef.current?.reset();
           return {
-            error:
-              'Security verification failed. Please complete the captcha again and retry.',
+            error: tErr('captchaFailed'),
           };
         }
 
@@ -257,9 +255,7 @@ export function useSignupForm() {
           setCaptchaToken(null);
           captchaRef.current?.reset();
           return {
-            error:
-              apiError.message ||
-              'Too many attempts. Please wait a little and try again.',
+            error: apiError.message || tErr('tooManyAttempts'),
           };
         }
 
@@ -277,16 +273,13 @@ export function useSignupForm() {
 
         if (isNetworkLikeError) {
           return {
-            error:
-              'Network issue detected. Please check your connection (or disable VPN/ad-blocker) and try again.',
+            error: tErr('networkError'),
           };
         }
 
         return {
           error:
-            err instanceof Error
-              ? err.message
-              : 'Registration failed. Please try again.',
+            err instanceof Error ? err.message : tErr('registrationFailed'),
         };
       }
     },
@@ -344,7 +337,7 @@ export function useSignupForm() {
       }, 1000);
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      const msg = apiError.message || 'Resend failed. Please wait.';
+      const msg = apiError.message || tErr('resendFailed');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -356,7 +349,7 @@ export function useSignupForm() {
     e.preventDefault();
     setError(null);
     if (!otp || otp.length !== 6) {
-      const msg = 'Please enter a valid 6-digit code.';
+      const msg = tErr('invalidOtp');
       setError(msg);
       toast.error(msg);
       return;
@@ -367,7 +360,7 @@ export function useSignupForm() {
       await verifyOtp(formData.email, otp, 'register');
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      const msg = apiError.message || 'Verification failed. Please try again.';
+      const msg = apiError.message || tErr('verificationFailed');
       setError(msg);
       toast.error(msg);
     } finally {

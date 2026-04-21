@@ -64,14 +64,18 @@ describe('UpdateProfileForm', () => {
     it('renders all form fields', () => {
       render(<UpdateProfileForm />);
 
-      expect(screen.getByLabelText(/Display Name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/updateForm\.displayName/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/updateForm\.username/i),
+      ).toBeInTheDocument();
     });
 
     it('renders submit button', () => {
       render(<UpdateProfileForm />);
       expect(
-        screen.getByRole('button', { name: /Save Changes/i }),
+        screen.getByRole('button', { name: /updateForm\.saveChanges/i }),
       ).toBeInTheDocument();
     });
 
@@ -83,8 +87,12 @@ describe('UpdateProfileForm', () => {
     it('initializes with user data', () => {
       render(<UpdateProfileForm />);
 
-      expect(screen.getByLabelText(/Display Name/i)).toHaveValue('Test User');
-      expect(screen.getByLabelText(/Username/i)).toHaveValue('testuser');
+      expect(screen.getByLabelText(/updateForm\.displayName/i)).toHaveValue(
+        'Test User',
+      );
+      expect(screen.getByLabelText(/updateForm\.username/i)).toHaveValue(
+        'testuser',
+      );
     });
   });
 
@@ -93,18 +101,18 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'ab');
 
-      expect(screen.getByText(/Min 3 chars/i)).toBeInTheDocument();
+      expect(screen.getByText(/updateForm\.minChars/i)).toBeInTheDocument();
     });
 
     it('filters invalid characters from username', async () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'Test@User!123');
 
@@ -121,12 +129,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'newusername');
 
       await waitFor(() => {
-        expect(screen.getByText(/Available/i)).toBeInTheDocument();
+        expect(screen.getByText(/updateForm\.available/i)).toBeInTheDocument();
       });
     });
 
@@ -139,12 +147,14 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'takenname');
 
       await waitFor(() => {
-        expect(screen.getByText(/Already taken/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/updateForm\.alreadyTaken/i),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -165,12 +175,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
@@ -199,21 +209,23 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
       await waitFor(() => {
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          'Profile updated successfully',
+          'messages.profileUpdated',
         );
       });
-      expect(screen.queryByText(/Profile updated/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/messages\.profileUpdated/i),
+      ).not.toBeInTheDocument();
     });
 
     it('calls updateUser after successful submission', async () => {
@@ -230,12 +242,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
@@ -265,11 +277,13 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const server2Button = screen.getByRole('radio', { name: /Balanced/i });
+      const server2Button = screen.getByRole('radio', {
+        name: /serverSelection\.balanced/i,
+      });
       await user.click(server2Button);
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
@@ -298,12 +312,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
@@ -318,12 +332,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'ab');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       expect(submitButton).toBeDisabled();
     });
@@ -337,16 +351,18 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const usernameInput = screen.getByLabelText(/Username/i);
+      const usernameInput = screen.getByLabelText(/updateForm\.username/i);
       await user.clear(usernameInput);
       await user.type(usernameInput, 'takenname');
 
       await waitFor(() => {
-        expect(screen.getByText(/Already taken/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/updateForm\.alreadyTaken/i),
+        ).toBeInTheDocument();
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       expect(submitButton).toBeDisabled();
     });
@@ -373,12 +389,12 @@ describe('UpdateProfileForm', () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
       const submitButton = screen.getByRole('button', {
-        name: /Save Changes/i,
+        name: /updateForm\.saveChanges/i,
       });
       await user.click(submitButton);
 
@@ -405,7 +421,7 @@ describe('UpdateProfileForm', () => {
       render(<UpdateProfileForm />);
 
       await user.click(
-        screen.getByRole('button', { name: /COPY PUBLIC LINK/i }),
+        screen.getByRole('button', { name: /publicIdentity\.copyLink/i }),
       );
 
       await waitFor(() => {
@@ -413,7 +429,7 @@ describe('UpdateProfileForm', () => {
           `${window.location.origin}/user/user-1`,
         );
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          'Public profile link copied',
+          'updateForm.publicLinkCopied',
         );
       });
     });
@@ -422,14 +438,14 @@ describe('UpdateProfileForm', () => {
   describe('input fields', () => {
     it('name input is required', () => {
       render(<UpdateProfileForm />);
-      expect(screen.getByLabelText(/Display Name/i)).toBeRequired();
+      expect(screen.getByLabelText(/updateForm\.displayName/i)).toBeRequired();
     });
 
     it('updates name value on input', async () => {
       const user = userEvent.setup();
       render(<UpdateProfileForm />);
 
-      const nameInput = screen.getByLabelText(/Display Name/i);
+      const nameInput = screen.getByLabelText(/updateForm\.displayName/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'New Name');
 
@@ -444,7 +460,7 @@ describe('UpdateProfileForm', () => {
 
       // Find Danger Zone button
       const deleteButton = screen.getByRole('button', {
-        name: /DELETE ACCOUNT/i,
+        name: /dangerZone\.deleteAccount/i,
       });
       expect(deleteButton).toBeInTheDocument();
 
@@ -452,25 +468,29 @@ describe('UpdateProfileForm', () => {
       await user.click(deleteButton);
 
       // Verify dialog content
-      expect(screen.getByText('Terminal Erase')).toBeInTheDocument();
+      expect(screen.getByText('dangerZone.dialogTitle')).toBeInTheDocument();
       expect(
-        screen.getByText(/Are you sure you want to delete your account\?/i),
+        screen.getByText(/dangerZone\.dialogDescription/i),
       ).toBeInTheDocument();
 
       // Verify cancel button
-      const cancelButton = screen.getByRole('button', { name: /CANCEL/i });
+      const cancelButton = screen.getByRole('button', {
+        name: /dangerZone\.cancel/i,
+      });
       expect(cancelButton).toBeInTheDocument();
 
       // Verify confirm button
       const confirmButton = screen.getByRole('button', {
-        name: /CONFIRM DELETE/i,
+        name: /dangerZone\.confirmDelete/i,
       });
       expect(confirmButton).toBeInTheDocument();
 
       // Click cancel should close dialog
       await user.click(cancelButton);
       await waitFor(() => {
-        expect(screen.queryByText('Terminal Erase')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('dangerZone.dialogTitle'),
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -490,15 +510,19 @@ describe('UpdateProfileForm', () => {
       render(<UpdateProfileForm />);
 
       // Open dialog and confirm
-      await user.click(screen.getByRole('button', { name: /DELETE ACCOUNT/i }));
-      await user.click(screen.getByRole('button', { name: /CONFIRM DELETE/i }));
+      await user.click(
+        screen.getByRole('button', { name: /dangerZone\.deleteAccount/i }),
+      );
+      await user.click(
+        screen.getByRole('button', { name: /dangerZone\.confirmDelete/i }),
+      );
 
       // Wait for success actions
       await waitFor(() => {
         expect(deleteAccount).toHaveBeenCalled();
         expect(mockLogout).toHaveBeenCalled();
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          'Account deleted successfully',
+          'messages.accountDeleted',
         );
       });
     });
@@ -515,8 +539,12 @@ describe('UpdateProfileForm', () => {
       render(<UpdateProfileForm />);
 
       // Open dialog and confirm
-      await user.click(screen.getByRole('button', { name: /DELETE ACCOUNT/i }));
-      await user.click(screen.getByRole('button', { name: /CONFIRM DELETE/i }));
+      await user.click(
+        screen.getByRole('button', { name: /dangerZone\.deleteAccount/i }),
+      );
+      await user.click(
+        screen.getByRole('button', { name: /dangerZone\.confirmDelete/i }),
+      );
 
       // Wait for error actions
       await waitFor(() => {

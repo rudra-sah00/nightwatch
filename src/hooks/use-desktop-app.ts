@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
@@ -10,6 +11,7 @@ import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
  */
 export function useDesktopApp() {
   const [isMounted, setIsMounted] = useState(false);
+  const t = useTranslations('common.desktopApp');
 
   const [isDesktopApp] = useState(() => checkIsDesktop());
   const [isBrowser] = useState(() => !checkIsDesktop());
@@ -40,11 +42,10 @@ export function useDesktopApp() {
       window.location.href = deepLink;
       setTimeout(() => {
         if (Date.now() - start < 3000 && !document.hidden) {
-          toast.error('App not installed', {
-            description:
-              'We could not open the Watch Rudra Desktop app. Is it installed?',
+          toast.error(t('notInstalled'), {
+            description: t('notInstalledDesc'),
             action: {
-              label: 'Download App',
+              label: t('downloadApp'),
               onClick: () =>
                 window.open(
                   'https://github.com/rudra-sah00/watch-rudra/releases',

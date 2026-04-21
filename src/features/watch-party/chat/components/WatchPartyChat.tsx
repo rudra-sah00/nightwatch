@@ -236,7 +236,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
                 ? 'bg-primary text-[var(--wp-accent,var(--neo-yellow))]'
                 : 'bg-background text-foreground hover:bg-neo-yellow/80',
             )}
-            title="Add emoji"
+            title={t('addEmoji')}
           >
             <Smile className="w-5 h-5 stroke-[3px]" />
           </Button>
@@ -395,7 +395,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
               isSingleEmoji ? '-bottom-6' : '-mb-6',
             )}
           >
-            {isSingleEmoji ? 'SENT AT ' : ''}
+            {isSingleEmoji ? '' : ''}
             {new Date(message.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',

@@ -10,44 +10,53 @@ export function isApiError(err: unknown): err is ApiError {
   );
 }
 
-/** Map backend error codes to user-friendly messages. */
-const ERROR_MESSAGES: Record<string, string> = {
-  SESSION_EXPIRED: 'Session expired. Please login again.',
-  USER_EXISTS: 'An account with this email already exists.',
-  INVALID_INVITE:
-    'Invite link is invalid or expired. Please request a new one.',
-  CAPTCHA_REQUIRED: 'Please complete the security verification.',
-  CAPTCHA_FAILED: 'Security verification failed. Please try again.',
-  OTP_RATE_LIMIT: 'Too many attempts. Please wait and try again.',
-  VALIDATION_ERROR: 'Some details are invalid. Please review and try again.',
-  CSRF_FAILED: 'Security token expired. Please refresh the page.',
-  NOT_FOUND: 'The requested resource was not found.',
-  FORBIDDEN: 'You do not have permission to perform this action.',
+/**
+ * Map backend error codes to i18n keys (under the `errors` namespace in common.json).
+ * Consumers resolve these via `t(key)` from `useTranslations()`.
+ */
+const ERROR_KEY_MAP: Record<string, string> = {
+  SESSION_EXPIRED: 'sessionExpired',
+  REQUEST_TIMEOUT: 'requestTimeout',
+  USER_EXISTS: 'userExists',
+  INVALID_INVITE: 'invalidInvite',
+  CAPTCHA_REQUIRED: 'captchaRequired',
+  CAPTCHA_FAILED: 'captchaFailed',
+  OTP_RATE_LIMIT: 'otpRateLimit',
+  VALIDATION_ERROR: 'validationError',
+  CSRF_FAILED: 'csrfFailed',
+  NOT_FOUND: 'notFound',
+  FORBIDDEN: 'forbidden',
 };
 
-/** Get a user-friendly message for an API error code. */
+/** Get an i18n key for an API error code (under the `errors` namespace). */
 export function mapErrorCode(code: string | undefined): string | undefined {
-  return code ? ERROR_MESSAGES[code] : undefined;
+  return code ? ERROR_KEY_MAP[code] : undefined;
 }
 
 /**
- * Centralized API error handler. Extracts a user-friendly message,
+ * Centralized API error handler. Resolves a user-friendly message,
  * shows a toast, and returns the message string.
+ *
+ * @param err - The caught error
+ * @param fallback - Pre-translated fallback message string
+ * @param t - Optional translation function scoped to `errors` namespace.
+ *            When provided, backend error codes are resolved via i18n keys.
  */
 export function handleApiError(
   err: unknown,
-  fallback = 'Something went wrong. Please try again.',
+  fallback: string,
+  t?: (key: string) => string,
 ): string {
   if (isApiError(err)) {
-    const mapped = mapErrorCode(err.code);
-    const msg = mapped || err.message || fallback;
+    const key = mapErrorCode(err.code);
+    const msg = (key && t ? t(key) : undefined) || err.message || fallback;
     toast.error(msg);
     return msg;
   }
 
   if (err instanceof Error) {
     if (/(failed to fetch|networkerror|timed out)/i.test(err.message)) {
-      const msg = 'Network issue. Please check your connection and try again.';
+      const msg = t ? t('networkError') : fallback;
       toast.error(msg);
       return msg;
     }

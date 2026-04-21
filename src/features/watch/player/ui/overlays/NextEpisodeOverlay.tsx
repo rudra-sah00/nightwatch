@@ -87,7 +87,7 @@ export function NextEpisodeOverlay({
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-background">
                   <span className="text-foreground font-black font-headline uppercase text-xl">
-                    E{nextEpisode.episodeNumber}
+                    {t('episodeShort', { number: nextEpisode.episodeNumber })}
                   </span>
                 </div>
               )}
@@ -96,10 +96,14 @@ export function NextEpisodeOverlay({
             {/* Info */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <p className="text-foreground font-bold font-headline uppercase tracking-widest text-[10px] mb-1">
-                S{nextEpisode.seasonNumber} • E{nextEpisode.episodeNumber}
+                {t('seasonEpisodeLabel', {
+                  season: nextEpisode.seasonNumber,
+                  episode: nextEpisode.episodeNumber,
+                })}
               </p>
               <h4 className="text-foreground font-black font-headline uppercase tracking-tighter text-sm line-clamp-2 leading-tight">
-                {nextEpisode.title || `Episode ${nextEpisode.episodeNumber}`}
+                {nextEpisode.title ||
+                  tEp('episode', { number: nextEpisode.episodeNumber })}
               </h4>
               {nextEpisode.duration ? (
                 <p className="text-foreground/70 font-bold font-headline uppercase tracking-widest text-[10px] mt-1">

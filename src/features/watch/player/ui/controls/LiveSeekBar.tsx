@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
@@ -33,6 +34,7 @@ function formatBehind(s: number): string {
  */
 export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
   const { videoRef, playerHandlers, readOnly } = usePlayerContext();
+  const t = useTranslations('watch.player');
   const barRef = useRef<HTMLDivElement>(null);
 
   /** Absolute time (s) of the DVR window start and live edge */
@@ -324,14 +326,14 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
           onTouchStart={handleTouchStart}
           role="slider"
           tabIndex={readOnly ? -1 : 0}
-          aria-label="Live stream seek bar"
+          aria-label={t('liveStreamSeekBar')}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progress)}
           aria-valuetext={
             isAtLiveEdge
-              ? 'At live edge'
-              : `${Math.round(dvr.end - currentTime)}s behind live`
+              ? t('atLiveEdge')
+              : t('behindLive', { seconds: Math.round(dvr.end - currentTime) })
           }
           onKeyDown={(e) => {
             if (readOnly) return;
@@ -390,7 +392,7 @@ export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
 
         {/* LIVE label pinned to the right edge */}
         <div className="absolute right-0 top-full mt-2 font-black font-headline tracking-widest text-foreground text-[10px] uppercase pointer-events-none">
-          LIVE
+          {t('liveBadge')}
         </div>
       </div>
     </div>

@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface GlobalLoadingProps {
@@ -8,9 +11,12 @@ interface GlobalLoadingProps {
 
 export function GlobalLoading({
   className,
-  message = 'LOADING...',
+  message,
   fullScreen = true,
 }: GlobalLoadingProps) {
+  const t = useTranslations('common');
+  const displayMessage = message ?? t('loading');
+
   return (
     <div
       className={cn(
@@ -22,7 +28,7 @@ export function GlobalLoading({
       )}
       role="status"
       aria-live="polite"
-      aria-label={message}
+      aria-label={displayMessage}
     >
       <div className="flex flex-col items-center gap-6">
         {/* Neo-brutalist custom spinner */}
@@ -32,10 +38,10 @@ export function GlobalLoading({
           <div className="absolute inset-2 border-[4px] border-transparent border-b-neo-red rounded-full animate-[spin_1.5s_linear_infinite_reverse] motion-reduce:animate-none" />
         </div>
 
-        {message && (
+        {displayMessage && (
           <div className="bg-primary text-primary-foreground px-4 py-2 border-[3px] border-border ">
             <span className="font-headline font-black uppercase text-sm tracking-[0.2em] animate-pulse motion-reduce:animate-none">
-              {message}
+              {displayMessage}
             </span>
           </div>
         )}

@@ -4,7 +4,7 @@
     "pause": "Pausa",
     "loading": "Caricamento contenuto...",
     "initConnection": "Inizializzazione connessione sicura",
-    "bufferingAriaLabel": "Buffering video",
+    "bufferingAriaLabel": "Buffering del video",
     "playbackError": "Errore di riproduzione",
     "tryAgain": "Riprova",
     "goBack": "Indietro",
@@ -27,7 +27,25 @@
     "live": "In diretta",
     "liveBadge": "LIVE",
     "watchingLive": "Stai guardando in diretta",
-    "jumpToLive": "Vai alla diretta"
+    "jumpToLive": "Vai alla diretta",
+    "lockedHostControls": "Bloccato - Controlli dell'host",
+    "hostControls": "Controlli dell'host",
+    "rotateDevice": "Ruota il dispositivo per la migliore esperienza",
+    "fullscreenNotSupported": "Lo schermo intero non è supportato in questo browser",
+    "failedEnterFullscreen": "Impossibile attivare lo schermo intero",
+    "failedExitFullscreen": "Impossibile uscire dallo schermo intero",
+    "fullscreenToggleFailed": "Cambio schermo intero fallito",
+    "seekTime": "Tempo di ricerca",
+    "liveSeekBar": "Barra di ricerca dello streaming live",
+    "atLiveEdge": "In diretta",
+    "behindLive": "{seconds}s in ritardo sulla diretta",
+    "closeSidebar": "Chiudi barra laterale",
+    "openSidebar": "Apri barra laterale",
+    "seasonEpisodeLabel": "Stagione {season} · Episodio {episode}",
+    "rotateToLandscape": "Ruota in orizzontale",
+    "landscapeOnlyMessage": "Questo player è disponibile solo in modalità orizzontale",
+    "showEpisodes": "Mostra episodi",
+    "episodesTitle": "Episodi"
   },
   "settings": {
     "quality": "Qualità",
@@ -44,7 +62,24 @@
     "font": "Font",
     "background": "Sfondo",
     "textColor": "Colore testo",
-    "textEffect": "Effetto testo"
+    "textEffect": "Effetto testo",
+    "sizeSmall": "Piccolo",
+    "sizeMedium": "Medio",
+    "sizeLarge": "Grande",
+    "sizeExtraLarge": "Extra grande",
+    "bgBlack": "Nero",
+    "bgDarkGray": "Grigio scuro",
+    "bgTransparent": "Trasparente",
+    "bgSemiTransparent": "Semi-trasparente",
+    "colorWhite": "Bianco",
+    "colorYellow": "Giallo",
+    "colorCyan": "Ciano",
+    "colorLightGreen": "Verde chiaro",
+    "shadowNone": "Nessuno",
+    "shadowDropShadow": "Ombra esterna",
+    "shadowOutline": "Contorno",
+    "shadowGlow": "Bagliore",
+    "fontSystemDefault": "Predefinito di sistema"
   },
   "audio": {
     "title": "Audio",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "Episodio {number}",
     "season": "Stagione {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "Clicca per riprodurre",
     "loading": "Caricamento...",
     "noEpisodes": "Nessun episodio",
-    "nowPlaying": "in riproduzione",
-    "min": "{duration} min"
+    "min": "{duration} min",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "Prossima stagione",
@@ -66,11 +100,13 @@
     "inCountdown": "tra {seconds}s",
     "play": "Riproduci",
     "cancel": "Annulla",
-    "loading": "Caricamento"
+    "loading": "Caricamento",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "OFFLINE",
-    "vault": "VAULT",
+    "vault": "ARCHIVIO",
     "yourDownloads": "I tuoi contenuti scaricati",
     "downloadsCount": "{count} Download",
     "availableOffline": "Disponibile per la visione offline",
@@ -84,7 +120,13 @@
     "cancelDownload": "Annulla download",
     "waitForComplete": "Attendi il completamento del download per la visione offline.",
     "waitingInQueue": "In attesa nella coda...",
-    "downloading": "Download in corso..."
+    "downloading": "Download in corso...",
+    "statusCompleted": "COMPLETATO",
+    "statusFailed": "FALLITO",
+    "statusDownloading": "IN DOWNLOAD",
+    "statusQueued": "IN CODA",
+    "statusCancelled": "ANNULLATO",
+    "statusPaused": "IN PAUSA"
   },
   "watchlist": {
     "pageTitle": "LA MIA",
@@ -94,5 +136,46 @@
     "emptyTitle": "La tua lista è vuota",
     "emptyDescription": "Salva film e serie da guardare dopo",
     "viewDetails": "Vedi dettagli per {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "Impossibile rimuovere dalla lista",
+    "minutesLeft": "{minutes}m rimanenti",
+    "hoursLeft": "{hours}h rimanenti",
+    "hoursMinutesLeft": "{hours}h {minutes}m rimanenti"
+  },
+  "countdown": {
+    "startingExperience": "Avvio dell'esperienza",
+    "getReady": "Preparati per l'eccellenza cinematografica",
+    "go": "VIA",
+    "eliteExperience": "Esperienza AI Elite • EMA Rinforzato"
+  },
+  "aria": {
+    "videoPlayer": "Lettore video",
+    "seekBackward": "Indietro di 10 secondi",
+    "seekForward": "Avanti di 10 secondi",
+    "playPause": "Riproduci/Pausa",
+    "seekBar": "Barra di ricerca",
+    "skipControls": "Controlli di salto",
+    "fullscreen": "Schermo intero",
+    "volume": "Volume",
+    "settings": "Impostazioni",
+    "audioSubtitle": "Selettori audio e sottotitoli",
+    "episodePanel": "Pannello episodi",
+    "playerHeader": "Intestazione del lettore",
+    "subtitle": "Sottotitolo",
+    "playbackCountdown": "Conto alla rovescia riproduzione",
+    "countdownTitle": "Conto alla Rovescia Riproduzione"
+  },
+  "page": {
+    "seasonLabel": "Stagione {number}",
+    "unknownTitle": "Sconosciuto",
+    "episodeLabel": "Episodio {number}",
+    "noStream": "Nessuno stream disponibile",
+    "errorLoading": "Si è verificato un errore durante il caricamento dello stream",
+    "startFromContent": "Avvia la riproduzione dalla pagina dei contenuti",
+    "tryAgain": "Riprova",
+    "goToHome": "Vai alla home",
+    "continuePortrait": "Continua a guardare in modalità verticale.",
+    "movieYear": "Film · {year}"
   }
 }

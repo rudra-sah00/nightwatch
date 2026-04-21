@@ -55,6 +55,8 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
 }) {
+  const t = useTranslations('common.actions');
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -73,7 +75,7 @@ function DialogContent({
             className="absolute top-4 right-4 bg-background border-[3px] border-border p-1.5 text-foreground hover:bg-neo-red hover:text-primary-foreground transition-[background-color,color,border-color,opacity,transform]"
           >
             <X className="h-4 w-4 stroke-[3px]" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('close')}</span>
           </DialogPrimitive.Close>
         ) : null}
       </DialogPrimitive.Content>

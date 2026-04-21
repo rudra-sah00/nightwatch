@@ -69,10 +69,8 @@ describe('VideoGrid', () => {
     it('should show empty state when no participants', () => {
       render(<VideoGrid {...defaultProps} participants={[]} />);
 
-      expect(screen.getByText('No one on camera yet')).toBeInTheDocument();
-      expect(
-        screen.getByText('Turn on your camera or wait for others to join'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('noOneOnCamera')).toBeInTheDocument();
+      expect(screen.getByText('turnOnCamera')).toBeInTheDocument();
     });
 
     it('should show video icon in empty state', () => {

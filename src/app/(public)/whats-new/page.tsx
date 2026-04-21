@@ -1,12 +1,12 @@
 import { ArrowLeft } from 'lucide-react';
-import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { ReleaseList } from './release-list';
 
-export const metadata: Metadata = {
-  title: "What's New",
-  description: 'Release notes and updates for Watch Rudra.',
-};
+export async function generateMetadata() {
+  const t = await getTranslations('common.whatsNew');
+  return { title: t('title'), description: t('description') };
+}
 
 interface Release {
   id: number;
@@ -22,6 +22,7 @@ interface Release {
 }
 
 export default async function WhatsNewPage() {
+  const t = await getTranslations('common.whatsNew');
   const headers: HeadersInit = {};
 
   const token = process.env.WATCH_RUDRA_GH_TOKEN || process.env.GITHUB_TOKEN;
@@ -50,14 +51,12 @@ export default async function WhatsNewPage() {
           className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground hover:underline font-mono text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          {t('backToHome')}
         </Link>
         <h1 className="text-4xl font-headline font-black mb-4 uppercase tracking-tighter">
-          What's New
+          {t('title')}
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Latest updates, bug fixes, and features for Watch Rudra.
-        </p>
+        <p className="text-muted-foreground text-lg">{t('description')}</p>
       </div>
 
       <ReleaseList releases={releases} />

@@ -169,7 +169,9 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={
+                    showPassword ? t('hidePassword') : t('showPassword')
+                  }
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -208,7 +210,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              {isPending ? 'SYNCING...' : t('submit')}
+              {isPending ? t('syncing') : t('submit')}
             </Button>
             {/* The Login form has no second 'Back' button, returning to uniform styling */}
           </div>

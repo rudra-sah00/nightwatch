@@ -28,7 +28,7 @@ export function usePlaybackActions({
   watchProgress,
   fromContinueWatching,
 }: UsePlaybackActionsProps): UsePlaybackActionsReturn {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingEpisodeId, setPlayingEpisodeId] = useState<
@@ -204,7 +204,10 @@ export function usePlaybackActions({
       episodeNumber: watchProgress.episodeNumber,
       seasonNumber: watchProgress.seasonNumber,
       title:
-        watchProgress.episodeTitle || `Episode ${watchProgress.episodeNumber}`,
+        watchProgress.episodeTitle ||
+        t('actions.episodeFallbackTitle', {
+          number: watchProgress.episodeNumber,
+        }),
       thumbnailUrl: show.posterUrl || '',
       duration: 0,
     };

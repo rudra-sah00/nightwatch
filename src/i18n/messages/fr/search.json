@@ -28,8 +28,7 @@
     "emptyTitle": "Votre historique de visionnage est vide",
     "emptyDescription": "Commencez à regarder quelque chose et cela apparaîtra ici",
     "removeAriaLabel": "Retirer de la liste",
-    "sectionAriaLabel": "Contenu récemment visionné",
-    "timeLeft": "{time} restant"
+    "sectionAriaLabel": "Contenu récemment visionné"
   },
   "contentDetail": {
     "series": "Série",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "Annuler la watch party",
     "continue": "Continuer",
     "experienceStarting": "Expérience en cours de démarrage",
-    "preparingContent": "Préparation de \"{title}\"..."
+    "preparingContent": "Préparation de \"{title}\"...",
+    "closeModal": "Fermer la fenêtre",
+    "episodesAriaLabel": "Épisodes",
+    "failedToLoadDetails": "Impossible de charger les détails de l'émission. Veuillez vérifier votre connexion et réessayer.",
+    "failedToLoadEpisodes": "Impossible de charger la liste des épisodes. Les données en cache seront utilisées si disponibles.",
+    "watchPartyError": "Une erreur inattendue s'est produite lors de la création de la watch party."
   },
   "actions": {
     "watchSolo": "Regarder seul",
@@ -60,7 +64,8 @@
     "watchTogether": "Regarder ensemble",
     "creating": "Création",
     "toWatchlist": "À la liste",
-    "removeFromList": "Retirer de la liste"
+    "removeFromList": "Retirer de la liste",
+    "episodeFallbackTitle": "Épisode {number}"
   },
   "download": {
     "download": "Télécharger",
@@ -76,6 +81,23 @@
     "saved": "Enregistré",
     "securelyStarting": "Démarrage sécurisé du téléchargement...",
     "episode": "Épisode {number}",
-    "untitled": "Sans titre"
-  }
+    "untitled": "Sans titre",
+    "downloadSrOnly": "Télécharger {title}",
+    "downloadingToast": "Téléchargement{epText} en cours ! Consultez votre Bibliothèque Hors Ligne.",
+    "downloadingEpisodeText": " de l'Ép {episode}",
+    "episodeLabel": "Épisode {number}",
+    "episodePrefix": "Épisode"
+  },
+  "episodeCard": {
+    "loading": "CHARGEMENT...",
+    "epPrefix": "ÉP {number}",
+    "episodeFallback": "ÉPISODE {number}",
+    "minSuffix": "{duration} MIN"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Saison} other {# Saisons}}",
+    "seasonEpisodePrefix": "S{season}:É{episode}",
+    "minutesSuffix": "{runtime}M"
+  },
+  "marquee": "LA FORME SUIT LA FONCTION • RUDRA CINÉMA • LE MINIMALISME EST VÉRITÉ • AUCUNE DISTRACTION • JUSTE DU CINÉMA •"
 }

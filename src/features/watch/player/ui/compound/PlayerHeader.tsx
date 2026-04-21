@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
@@ -15,6 +16,8 @@ export function PlayerHeader({
   hideBackButton,
 }: PlayerHeaderProps) {
   const { metadata, playerHandlers } = usePlayerContext();
+  const t = useTranslations('watch.player');
+  const tAria = useTranslations('watch.aria');
 
   return (
     <section
@@ -23,7 +26,7 @@ export function PlayerHeader({
       )}
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
-      aria-label="Player Header"
+      aria-label={tAria('playerHeader')}
     >
       {!hideBackButton ? (
         <Button
@@ -46,7 +49,7 @@ export function PlayerHeader({
           onClick={onSidebarToggle}
           onMouseDown={(e) => e.preventDefault()}
           className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-primary-foreground transition-colors cursor-pointer border-transparent"
-          title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          title={isSidebarOpen ? t('closeSidebar') : t('openSidebar')}
         >
           {isSidebarOpen ? (
             <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
@@ -62,7 +65,10 @@ export function PlayerHeader({
         </h1>
         {metadata.type === 'series' && metadata.season && metadata.episode ? (
           <p className="text-neo-yellow font-black font-headline uppercase tracking-widest text-sm md:text-base lg:text-xl mt-1 drop-shadow-md">
-            Season {metadata.season} · Episode {metadata.episode}
+            {t('seasonEpisodeLabel', {
+              season: metadata.season,
+              episode: metadata.episode,
+            })}
           </p>
         ) : null}
       </div>

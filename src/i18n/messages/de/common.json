@@ -8,11 +8,13 @@
     "watchlist": "Merkliste",
     "downloads": "Downloads",
     "offlineDownloads": "Offline-Downloads",
-    "profile": "Profil"
+    "profile": "Profil",
+    "logoAlt": "Watch Rudra Logo"
   },
   "language": {
     "title": "Sprache",
-    "description": "Wähle deine bevorzugte Sprache"
+    "description": "Wähle deine bevorzugte Sprache",
+    "closeMenu": "Sprachmenü schließen"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "Party beendet",
     "messageFailed": "Nachricht konnte nicht gesendet werden",
     "partyTimeLimit": "Watch Party hat das 3-Stunden-Limit erreicht und wird jetzt beendet.",
-    "startFailed": "Wiedergabe konnte nicht gestartet werden",
-    "linkCopied": "Link kopiert!",
-    "profileUpdated": "Profil aktualisiert",
-    "passwordChanged": "Passwort erfolgreich geändert",
-    "accountDeleted": "Konto erfolgreich gelöscht",
-    "error": "Etwas ist schiefgelaufen",
-    "networkError": "Netzwerkfehler. Bitte überprüfe deine Verbindung.",
-    "sessionExpired": "Sitzung abgelaufen. Bitte erneut anmelden."
+    "startFailed": "Wiedergabe konnte nicht gestartet werden"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "App-Version"
   },
   "passwordInfo": {
-    "requirements": "Anforderungen"
+    "requirements": "Anforderungen",
+    "ariaLabel": "Passwortanforderungen",
+    "title": "Passwortanforderungen",
+    "minChars": "8+ Zeichen",
+    "uppercase": "Großbuchstaben (A-Z)",
+    "specialChar": "Sonderzeichen (!@#$%^&*)",
+    "breachNote": "Wir prüfen Passwörter gegen",
+    "knownBreaches": "bekannte Datenlecks"
   },
   "actions": {
-    "close": "Schließen"
+    "close": "Schließen",
+    "closeModal": "Modal schließen"
+  },
+  "loading": "Laden...",
+  "skipToContent": "Zum Inhalt springen",
+  "offline": {
+    "title": "Sie sind Offline",
+    "description": "Watch Rudra benötigt eine Verbindung zum Erkunden. Öffnen Sie Ihren Tresor für heruntergeladene Titel.",
+    "openVault": "Offline-Tresor öffnen",
+    "toastOffline": "Sie sind offline",
+    "toastOnline": "Wieder online!"
+  },
+  "swUpdate": {
+    "title": "Neue Version verfügbar",
+    "description": "Aktualisieren Sie für die neuesten Updates.",
+    "refresh": "Aktualisieren"
+  },
+  "discord": {
+    "readyToStream": "Bereit zum Streamen",
+    "atLoginScreen": "Am Anmeldebildschirm",
+    "browsingDashboard": "Dashboard durchsuchen",
+    "lookingForContent": "Inhalte suchen",
+    "browsingHomepage": "Startseite durchsuchen",
+    "browsingLiveMatches": "Live-Spiele durchsuchen",
+    "findingStream": "Stream wird gesucht...",
+    "curatingWatchlist": "Merkliste zusammenstellen",
+    "planningMarathon": "Den nächsten Marathon planen",
+    "adjustingSettings": "Einstellungen anpassen",
+    "customizingProfile": "Profil anpassen"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "Ausgewogen",
+    "highQuality": "Hochqualitäts-Stream"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "Dein persönlicher Streaming-Begleiter",
+    "homeTitle": "Startseite | Watch Rudra",
+    "homeDescription": "Suche nach Filmen und Serien, um gemeinsam zu schauen.",
+    "continueWatchingTitle": "Weiterschauen | Watch Rudra",
+    "continueWatchingDescription": "Mach weiter, wo du bei deinen zuletzt gesehenen Filmen und Serien aufgehört hast.",
+    "searchTitle": "Suche | Watch Rudra",
+    "searchDescription": "Suche nach Filmen, Serien und Anime.",
+    "profileTitle": "Profil | Watch Rudra",
+    "profileDescription": "Verwalte dein Profil und deinen Wiedergabeverlauf.",
+    "liveTitle": "Live-Spiele | Watch Rudra",
+    "liveDescription": "Schau dir Live-Sportspiele und Kanäle mit deinen Freunden in Echtzeit an.",
+    "downloadsTitle": "Downloads | Watch Rudra",
+    "downloadsDescription": "Greife auf deine heruntergeladenen Filme und Serien für die Offline-Wiedergabe zu.",
+    "watchlistTitle": "Meine Merkliste | Watch Rudra",
+    "watchlistDescription": "Behalte den Überblick über Filme und Serien, die du später sehen möchtest.",
+    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyDescription": "Triff dich mit Freunden und schaut gemeinsam in Echtzeit."
+  },
+  "desktopApp": {
+    "notInstalled": "App nicht installiert",
+    "notInstalledDesc": "Die Watch Rudra Desktop-App konnte nicht geöffnet werden. Ist sie installiert?",
+    "downloadApp": "App herunterladen"
+  },
+  "whatsNew": {
+    "backToHome": "Zurück zur Startseite",
+    "title": "Neuigkeiten",
+    "description": "Neueste Updates, Fehlerbehebungen und Funktionen für Watch Rudra.",
+    "noReleases": "Keine Versionen gefunden oder Laden fehlgeschlagen.",
+    "noReleaseNotes": "*Keine Versionshinweise vorhanden.*",
+    "showMore": "Mehr anzeigen ({remaining} übrig)"
+  },
+  "downloads": {
+    "failedToLoad": "Inhalt konnte nicht geladen werden",
+    "experienceStarting": "Erlebnis startet",
+    "preparingContent": "\"{title}\" wird vorbereitet...",
+    "episodes": "Episoden",
+    "noImageAvailable": "Kein Bild verfügbar",
+    "closePreview": "Vorschau schließen",
+    "statusCompleted": "ABGESCHLOSSEN",
+    "statusFailed": "FEHLGESCHLAGEN",
+    "statusDownloading": "WIRD HERUNTERGELADEN",
+    "statusQueued": "IN WARTESCHLANGE",
+    "statusCancelled": "ABGEBROCHEN",
+    "statusPaused": "PAUSIERT"
+  },
+  "errors": {
+    "sessionExpired": "Sitzung abgelaufen. Bitte erneut anmelden.",
+    "userExists": "Ein Konto mit dieser E-Mail existiert bereits.",
+    "invalidInvite": "Einladungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+    "captchaRequired": "Bitte vervollständigen Sie die Sicherheitsüberprüfung.",
+    "captchaFailed": "Sicherheitsüberprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "otpRateLimit": "Zu viele Versuche. Bitte warten und erneut versuchen.",
+    "validationError": "Einige Angaben sind ungültig. Bitte überprüfen und erneut versuchen.",
+    "csrfFailed": "Sicherheitstoken abgelaufen. Bitte Seite aktualisieren.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "forbidden": "Sie haben keine Berechtigung für diese Aktion.",
+    "networkError": "Netzwerkproblem. Bitte Verbindung prüfen und erneut versuchen.",
+    "requestTimeout": "Zeitüberschreitung der Anfrage. Bitte Verbindung prüfen und erneut versuchen."
+  },
+  "units": {
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

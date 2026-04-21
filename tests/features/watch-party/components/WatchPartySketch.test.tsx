@@ -121,21 +121,21 @@ describe('WatchPartySketch', () => {
 
   it('should render all tools', () => {
     render(<WatchPartySketch />);
-    expect(screen.getByTitle('Pen')).toBeInTheDocument();
-    expect(screen.getByTitle('Pencil')).toBeInTheDocument();
-    expect(screen.getByTitle('Eraser')).toBeInTheDocument();
-    expect(screen.getByTitle('Box')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.toolPen')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.toolPencil')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.toolEraser')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.toolBox')).toBeInTheDocument();
   });
 
   it('should change tool when clicked', () => {
     render(<WatchPartySketch />);
-    fireEvent.click(screen.getByTitle('Pencil'));
+    fireEvent.click(screen.getByTitle('sketch.toolPencil'));
     expect(mockContext.setCurrentTool).toHaveBeenCalledWith('pencil');
   });
 
   it('should change color when clicked', () => {
     render(<WatchPartySketch />);
-    const colorBtn = screen.getByLabelText(/Select color #ef4444/);
+    const colorBtn = screen.getAllByLabelText(/sketch\.selectColor/)[0];
     fireEvent.click(colorBtn);
     expect(mockContext.setColor).toHaveBeenCalledWith('#ef4444');
   });
@@ -146,13 +146,13 @@ describe('WatchPartySketch', () => {
       currentTool: 'rectangle' as ToolType,
     });
     render(<WatchPartySketch />);
-    fireEvent.click(screen.getByText('Outline Only'));
+    fireEvent.click(screen.getByText('sketch.outlineOnly'));
     expect(mockContext.setIsFilled).toHaveBeenCalledWith(true);
   });
 
   it('should handle custom color change', () => {
     render(<WatchPartySketch />);
-    const customBtn = screen.getByTitle('Custom Color');
+    const customBtn = screen.getByTitle('sketch.customColor');
     const input = customBtn.querySelector('input')!;
     fireEvent.change(input, { target: { value: '#0000ff' } });
     expect(mockContext.setColor).toHaveBeenCalledWith('#0000ff');
@@ -160,38 +160,38 @@ describe('WatchPartySketch', () => {
 
   it('should handle stroke width change', () => {
     render(<WatchPartySketch />);
-    const slider = screen.getByLabelText('Thickness');
+    const slider = screen.getByLabelText('sketch.thickness');
     fireEvent.change(slider, { target: { value: '10' } });
     expect(mockContext.setStrokeWidth).toHaveBeenCalledWith(10);
   });
 
   it('should toggle sketch mode and show disabled message', () => {
     render(<WatchPartySketchDisabled />);
-    expect(screen.getByText('Sketching Disabled')).toBeInTheDocument();
+    expect(screen.getByText('sketch.disabled')).toBeInTheDocument();
   });
 
   it('should trigger clear and undo', () => {
     render(<WatchPartySketch />);
-    fireEvent.click(screen.getByTitle('Undo last action'));
+    fireEvent.click(screen.getByTitle('sketch.undoTitle'));
     expect(mockContext.triggerUndo).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByTitle('Clear only your drawings'));
+    fireEvent.click(screen.getByTitle('sketch.clearMineTitle'));
     expect(mockContext.triggerClearSelf).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByTitle('Host only: Clear everything'));
+    fireEvent.click(screen.getByTitle('sketch.clearAllTitle'));
     expect(mockContext.triggerClear).toHaveBeenCalled();
   });
 
   it('should show opacity slider and handle change', () => {
     render(<WatchPartySketch />);
-    const slider = screen.getByLabelText('Opacity');
+    const slider = screen.getByLabelText('sketch.opacity');
     fireEvent.change(slider, { target: { value: '0.5' } });
     expect(mockContext.setOpacity).toHaveBeenCalledWith(0.5);
   });
 
   it('should show sticker selection and pick emoji', () => {
     render(<WatchPartySketch />);
-    fireEvent.click(screen.getByTitle('Reaction'));
+    fireEvent.click(screen.getByTitle('sketch.toolReaction'));
     expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
   });
 
@@ -215,7 +215,7 @@ describe('WatchPartySketch', () => {
     );
 
     vi.useFakeTimers();
-    fireEvent.click(screen.getByText('Capture Scene'));
+    fireEvent.click(screen.getByText('sketch.captureScene'));
     vi.advanceTimersByTime(100);
     vi.useRealTimers();
 
@@ -230,7 +230,7 @@ describe('WatchPartySketch', () => {
       selectedId: 'rect1',
     });
     render(<WatchPartySketch />);
-    expect(screen.getByTitle('Bring to Front')).toBeInTheDocument();
-    expect(screen.getByTitle('Send to Back')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.bringToFront')).toBeInTheDocument();
+    expect(screen.getByTitle('sketch.sendToBack')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { formatTime } from '../../utils/format-time';
 import { useSeekBar } from './hooks/use-seek-bar';
@@ -39,6 +40,7 @@ export function SeekBar({
   allowPreview = false,
   compact = false,
 }: SeekBarProps) {
+  const t = useTranslations('watch.player');
   const {
     canPreview,
     progress,
@@ -157,7 +159,7 @@ export function SeekBar({
         aria-valuemax={duration}
         aria-valuenow={currentTime}
         aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
-        aria-label="Seek time"
+        aria-label={t('seekTime')}
         aria-disabled={disabled}
         onKeyDown={(e) => {
           if (disabled) return;
@@ -219,13 +221,13 @@ export function SeekBar({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            aria-label="Locked - Host controls"
+            aria-label={t('lockedHostControls')}
             role="img"
           >
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
-          <span className="hidden sm:inline">Host controls</span>
+          <span className="hidden sm:inline">{t('hostControls')}</span>
         </div>
       ) : null}
     </div>

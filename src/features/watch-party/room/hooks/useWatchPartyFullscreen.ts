@@ -15,14 +15,14 @@ interface UseWatchPartyFullscreenReturn {
 /**
  * Manages native browser fullscreen for a container element,
  * with Safari/WebKit fallback support.
- * In the Electron Desktop App, delegates exactly to OS window fullscreen
+ * In the Tauri Desktop App, delegates exactly to OS window fullscreen
  * APIs rather than Chromium HTML5 bounds, ensuring the Watch Party
  * Sidebar can gracefully sit under dragging logic without being consumed.
  */
 export function useWatchPartyFullscreen({
   containerRef,
 }: UseWatchPartyFullscreenProps): UseWatchPartyFullscreenReturn {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = useCallback(async () => {

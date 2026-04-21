@@ -27,7 +27,25 @@
     "live": "สด",
     "liveBadge": "สด",
     "watchingLive": "คุณกำลังดูสด",
-    "jumpToLive": "ข้ามไปสด"
+    "jumpToLive": "ข้ามไปสด",
+    "lockedHostControls": "ล็อค - การควบคุมของโฮสต์",
+    "hostControls": "การควบคุมของโฮสต์",
+    "rotateDevice": "หมุนอุปกรณ์เพื่อประสบการณ์ที่ดีที่สุด",
+    "fullscreenNotSupported": "เบราว์เซอร์นี้ไม่รองรับโหมดเต็มหน้าจอ",
+    "failedEnterFullscreen": "เข้าสู่โหมดเต็มหน้าจอไม่สำเร็จ",
+    "failedExitFullscreen": "ออกจากโหมดเต็มหน้าจอไม่สำเร็จ",
+    "fullscreenToggleFailed": "สลับโหมดเต็มหน้าจอไม่สำเร็จ",
+    "seekTime": "เวลาค้นหา",
+    "liveSeekBar": "แถบค้นหาสตรีมสด",
+    "atLiveEdge": "ถ่ายทอดสด",
+    "behindLive": "ช้ากว่าสด {seconds} วินาที",
+    "closeSidebar": "ปิดแถบด้านข้าง",
+    "openSidebar": "เปิดแถบด้านข้าง",
+    "seasonEpisodeLabel": "ซีซัน {season} · ตอนที่ {episode}",
+    "rotateToLandscape": "หมุนเป็นแนวนอน",
+    "landscapeOnlyMessage": "เครื่องเล่นนี้ใช้ได้เฉพาะในโหมดแนวนอนเท่านั้น",
+    "showEpisodes": "แสดงตอน",
+    "episodesTitle": "ตอน"
   },
   "settings": {
     "quality": "คุณภาพ",
@@ -44,7 +62,24 @@
     "font": "ฟอนต์",
     "background": "พื้นหลัง",
     "textColor": "สีข้อความ",
-    "textEffect": "เอฟเฟกต์ข้อความ"
+    "textEffect": "เอฟเฟกต์ข้อความ",
+    "sizeSmall": "เล็ก",
+    "sizeMedium": "กลาง",
+    "sizeLarge": "ใหญ่",
+    "sizeExtraLarge": "ใหญ่พิเศษ",
+    "bgBlack": "ดำ",
+    "bgDarkGray": "เทาเข้ม",
+    "bgTransparent": "โปร่งใส",
+    "bgSemiTransparent": "กึ่งโปร่งใส",
+    "colorWhite": "ขาว",
+    "colorYellow": "เหลือง",
+    "colorCyan": "ฟ้าอมเขียว",
+    "colorLightGreen": "เขียวอ่อน",
+    "shadowNone": "ไม่มี",
+    "shadowDropShadow": "เงาตกกระทบ",
+    "shadowOutline": "เส้นขอบ",
+    "shadowGlow": "เรืองแสง",
+    "fontSystemDefault": "ค่าเริ่มต้นของระบบ"
   },
   "audio": {
     "title": "เสียง",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "ตอนที่ {number}",
     "season": "ซีซัน {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "คลิกเพื่อเล่น",
     "loading": "กำลังโหลด...",
     "noEpisodes": "ไม่มีตอน",
-    "nowPlaying": "กำลังเล่น",
-    "min": "{duration} นาที"
+    "min": "{duration} นาที",
+    "episodeShort": "ตอน{number}"
   },
   "nextEpisode": {
     "nextSeason": "ซีซันถัดไป",
@@ -66,7 +100,9 @@
     "inCountdown": "ใน {seconds} วินาที",
     "play": "เล่น",
     "cancel": "ยกเลิก",
-    "loading": "กำลังโหลด"
+    "loading": "กำลังโหลด",
+    "seasonEpisodeLabel": "S{season} • ตอน{episode}",
+    "episodeShort": "ตอน{number}"
   },
   "offline": {
     "pageTitle": "ออฟไลน์",
@@ -84,7 +120,13 @@
     "cancelDownload": "ยกเลิกดาวน์โหลด",
     "waitForComplete": "กรุณารอจนกว่าดาวน์โหลดจะเสร็จเพื่อดูแบบออฟไลน์",
     "waitingInQueue": "รอคิว...",
-    "downloading": "กำลังดาวน์โหลด..."
+    "downloading": "กำลังดาวน์โหลด...",
+    "statusCompleted": "เสร็จสิ้น",
+    "statusFailed": "ล้มเหลว",
+    "statusDownloading": "กำลังดาวน์โหลด",
+    "statusQueued": "อยู่ในคิว",
+    "statusCancelled": "ยกเลิกแล้ว",
+    "statusPaused": "หยุดชั่วคราว"
   },
   "watchlist": {
     "pageTitle": "รายการ",
@@ -94,5 +136,46 @@
     "emptyTitle": "รายการดูว่างเปล่า",
     "emptyDescription": "บันทึกภาพยนตร์และซีรีส์เพื่อดูภายหลัง",
     "viewDetails": "ดูรายละเอียดของ {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "ลบออกจากรายการไม่สำเร็จ",
+    "minutesLeft": "เหลือ {minutes} นาที",
+    "hoursLeft": "เหลือ {hours} ชม.",
+    "hoursMinutesLeft": "เหลือ {hours} ชม. {minutes} นาที"
+  },
+  "countdown": {
+    "startingExperience": "กำลังเริ่มประสบการณ์",
+    "getReady": "เตรียมพร้อมสำหรับประสบการณ์ภาพยนตร์ชั้นเลิศ",
+    "go": "เริ่ม",
+    "eliteExperience": "ประสบการณ์ AI ระดับสูง • EMA เสริมแกร่ง"
+  },
+  "aria": {
+    "videoPlayer": "เครื่องเล่นวิดีโอ",
+    "seekBackward": "ย้อนกลับ 10 วินาที",
+    "seekForward": "ข้ามไป 10 วินาที",
+    "playPause": "เล่น/หยุดชั่วคราว",
+    "seekBar": "แถบค้นหา",
+    "skipControls": "ปุ่มข้าม",
+    "fullscreen": "เต็มหน้าจอ",
+    "volume": "ระดับเสียง",
+    "settings": "การตั้งค่า",
+    "audioSubtitle": "ตัวเลือกเสียงและคำบรรยาย",
+    "episodePanel": "แผงตอน",
+    "playerHeader": "ส่วนหัวเครื่องเล่น",
+    "subtitle": "คำบรรยาย",
+    "playbackCountdown": "นับถอยหลังการเล่น",
+    "countdownTitle": "นับถอยหลังการเล่น"
+  },
+  "page": {
+    "seasonLabel": "ซีซัน {number}",
+    "unknownTitle": "ไม่ทราบ",
+    "episodeLabel": "ตอนที่ {number}",
+    "noStream": "ไม่มีสตรีมที่พร้อมใช้งาน",
+    "errorLoading": "เกิดข้อผิดพลาดในการโหลดสตรีม",
+    "startFromContent": "กรุณาเริ่มเล่นจากหน้าเนื้อหา",
+    "tryAgain": "ลองอีกครั้ง",
+    "goToHome": "ไปหน้าหลัก",
+    "continuePortrait": "ดูต่อในโหมดแนวตั้ง",
+    "movieYear": "ภาพยนตร์ · {year}"
   }
 }

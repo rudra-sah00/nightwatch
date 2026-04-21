@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
@@ -11,6 +12,8 @@ import type { LiveMatch } from '../types';
 export function useLiveMatchCard(match: LiveMatch) {
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('live');
+  const tp = useTranslations('party.toasts');
 
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
@@ -56,7 +59,7 @@ export function useLiveMatchCard(match: LiveMatch) {
 
   const handleWatchParty = () => {
     if (!user) {
-      toast.error('You must be logged in to host a watch party.');
+      toast.error(t('loginRequired'));
       setShowPrompt(false);
       return;
     }
@@ -80,10 +83,10 @@ export function useLiveMatchCard(match: LiveMatch) {
       setIsCreatingParty(false);
       setShowPrompt(false);
       if (response.room) {
-        toast.success('Party room created! Redirecting...');
+        toast.success(t('creating'));
         router.push(`/watch-party/${response.room.id}?new=true`);
       } else {
-        toast.error(response.error || 'Failed to create party room');
+        toast.error(response.error || tp('failedCreateRoom'));
       }
     });
   };

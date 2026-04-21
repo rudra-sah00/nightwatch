@@ -8,11 +8,13 @@
     "watchlist": "Lista",
     "downloads": "Download",
     "offlineDownloads": "Download offline",
-    "profile": "Profilo"
+    "profile": "Profilo",
+    "logoAlt": "Logo Watch Rudra"
   },
   "language": {
     "title": "Lingua",
-    "description": "Scegli la tua lingua preferita"
+    "description": "Scegli la tua lingua preferita",
+    "closeMenu": "Chiudi menu lingua"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "Festa terminata",
     "messageFailed": "Invio messaggio fallito",
     "partyTimeLimit": "La festa ha raggiunto il limite di 3 ore e terminerà ora.",
-    "startFailed": "Avvio riproduzione fallito",
-    "linkCopied": "Link copiato!",
-    "profileUpdated": "Profilo aggiornato",
-    "passwordChanged": "Password cambiata con successo",
-    "accountDeleted": "Account eliminato con successo",
-    "error": "Qualcosa è andato storto",
-    "networkError": "Errore di rete. Controlla la tua connessione.",
-    "sessionExpired": "Sessione scaduta. Effettua nuovamente l'accesso."
+    "startFailed": "Avvio riproduzione fallito"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "Versione App"
   },
   "passwordInfo": {
-    "requirements": "Requisiti"
+    "requirements": "Requisiti",
+    "ariaLabel": "Requisiti password",
+    "title": "Requisiti della Password",
+    "minChars": "8+ caratteri",
+    "uppercase": "Maiuscole (A-Z)",
+    "specialChar": "Carattere speciale (!@#$%^&*)",
+    "breachNote": "Controlliamo le password contro",
+    "knownBreaches": "violazioni note"
   },
   "actions": {
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "closeModal": "Chiudi finestra"
+  },
+  "loading": "Caricamento...",
+  "skipToContent": "Vai al contenuto",
+  "offline": {
+    "title": "Sei Offline",
+    "description": "Watch Rudra richiede una connessione per esplorare. Apri il tuo vault per i titoli scaricati.",
+    "openVault": "Apri Vault Offline",
+    "toastOffline": "Sei offline",
+    "toastOnline": "Di nuovo online!"
+  },
+  "swUpdate": {
+    "title": "Nuova versione disponibile",
+    "description": "Aggiorna per ottenere gli ultimi aggiornamenti.",
+    "refresh": "Aggiorna"
+  },
+  "discord": {
+    "readyToStream": "Pronto per lo streaming",
+    "atLoginScreen": "Nella schermata di accesso",
+    "browsingDashboard": "Navigazione Dashboard",
+    "lookingForContent": "Ricerca contenuti",
+    "browsingHomepage": "Navigazione Homepage",
+    "browsingLiveMatches": "Navigazione Partite Live",
+    "findingStream": "Ricerca stream...",
+    "curatingWatchlist": "Organizzazione Lista",
+    "planningMarathon": "Pianificazione prossima maratona",
+    "adjustingSettings": "Regolazione Impostazioni",
+    "customizingProfile": "Personalizzazione profilo"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "Bilanciato",
+    "highQuality": "Stream Alta Qualità"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "Il tuo compagno di streaming personale",
+    "homeTitle": "Home | Watch Rudra",
+    "homeDescription": "Cerca film e serie TV per iniziare a guardare insieme.",
+    "continueWatchingTitle": "Continua a Guardare | Watch Rudra",
+    "continueWatchingDescription": "Riprendi da dove avevi interrotto con i film e le serie TV visti di recente.",
+    "searchTitle": "Cerca | Watch Rudra",
+    "searchDescription": "Cerca film, serie TV e anime.",
+    "profileTitle": "Profilo | Watch Rudra",
+    "profileDescription": "Gestisci il tuo profilo e la cronologia di visione.",
+    "liveTitle": "Partite in Diretta | Watch Rudra",
+    "liveDescription": "Guarda partite sportive in diretta e canali con i tuoi amici in tempo reale.",
+    "downloadsTitle": "Download | Watch Rudra",
+    "downloadsDescription": "Accedi ai film e alle serie TV scaricati per la visione offline.",
+    "watchlistTitle": "La Mia Lista | Watch Rudra",
+    "watchlistDescription": "Tieni traccia dei film e delle serie TV che vuoi guardare dopo.",
+    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyDescription": "Unisciti ai tuoi amici e guardate insieme in tempo reale."
+  },
+  "desktopApp": {
+    "notInstalled": "App non installata",
+    "notInstalledDesc": "Impossibile aprire l'app Watch Rudra. È installata?",
+    "downloadApp": "Scarica App"
+  },
+  "whatsNew": {
+    "backToHome": "Torna alla Home",
+    "title": "Novità",
+    "description": "Ultimi aggiornamenti, correzioni e funzionalità di Watch Rudra.",
+    "noReleases": "Nessuna versione trovata o caricamento fallito.",
+    "noReleaseNotes": "*Nessuna nota di rilascio fornita.*",
+    "showMore": "Mostra Altro ({remaining} rimanenti)"
+  },
+  "downloads": {
+    "failedToLoad": "Caricamento contenuto fallito",
+    "experienceStarting": "Avvio Esperienza",
+    "preparingContent": "Preparazione di \"{title}\"...",
+    "episodes": "Episodi",
+    "noImageAvailable": "Nessuna Immagine Disponibile",
+    "closePreview": "Chiudi Anteprima",
+    "statusCompleted": "COMPLETATO",
+    "statusFailed": "FALLITO",
+    "statusDownloading": "SCARICAMENTO",
+    "statusQueued": "IN CODA",
+    "statusCancelled": "ANNULLATO",
+    "statusPaused": "IN PAUSA"
+  },
+  "errors": {
+    "sessionExpired": "Sessione scaduta. Effettua nuovamente l'accesso.",
+    "userExists": "Esiste già un account con questa email.",
+    "invalidInvite": "Link di invito non valido o scaduto. Richiedine uno nuovo.",
+    "captchaRequired": "Completa la verifica di sicurezza.",
+    "captchaFailed": "Verifica di sicurezza fallita. Riprova.",
+    "otpRateLimit": "Troppi tentativi. Attendi e riprova.",
+    "validationError": "Alcuni dati non sono validi. Controlla e riprova.",
+    "csrfFailed": "Token di sicurezza scaduto. Aggiorna la pagina.",
+    "notFound": "La risorsa richiesta non è stata trovata.",
+    "forbidden": "Non hai il permesso per eseguire questa azione.",
+    "networkError": "Problema di rete. Controlla la connessione e riprova.",
+    "requestTimeout": "Richiesta scaduta. Controlla la connessione e riprova."
+  },
+  "units": {
+    "bytes": "Byte",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

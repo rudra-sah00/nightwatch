@@ -256,7 +256,7 @@ describe('PlayerEpisodePanelTrigger', () => {
       </PlayerEpisodePanel>,
     );
 
-    expect(screen.getByLabelText('Show episodes')).toBeInTheDocument();
+    expect(screen.getByLabelText('showEpisodes')).toBeInTheDocument();
   });
 
   it('should render nothing outside of context', () => {
@@ -272,7 +272,7 @@ describe('PlayerEpisodePanelTrigger', () => {
       </PlayerEpisodePanel>,
     );
 
-    fireEvent.click(screen.getByLabelText('Show episodes'));
+    fireEvent.click(screen.getByLabelText('showEpisodes'));
     expect(mockPanel.toggle).toHaveBeenCalledTimes(1);
   });
 
@@ -285,7 +285,7 @@ describe('PlayerEpisodePanelTrigger', () => {
       </PlayerEpisodePanel>,
     );
 
-    const button = screen.getByLabelText('Show episodes');
+    const button = screen.getByLabelText('showEpisodes');
     expect(button).toHaveClass('bg-background');
     expect(button).toHaveClass('shadow-none');
     expect(button).toHaveClass('shadow-none');
@@ -300,7 +300,7 @@ describe('PlayerEpisodePanelTrigger', () => {
       </PlayerEpisodePanel>,
     );
 
-    const button = screen.getByLabelText('Show episodes');
+    const button = screen.getByLabelText('showEpisodes');
     expect(button).toHaveClass('bg-background');
     expect(button).toHaveClass('border-border');
   });
@@ -312,6 +312,6 @@ describe('PlayerEpisodePanelTrigger', () => {
       </PlayerEpisodePanel>,
     );
 
-    expect(screen.getByTitle('Episodes')).toBeInTheDocument();
+    expect(screen.getByTitle('episodesTitle')).toBeInTheDocument();
   });
 });

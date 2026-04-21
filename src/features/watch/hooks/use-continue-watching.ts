@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useServer } from '@/providers/server-provider';
@@ -21,6 +22,7 @@ export function useContinueWatching({
   onLoadComplete,
 }: UseContinueWatchingOptions) {
   const { activeServer } = useServer();
+  const t = useTranslations('watch.continueWatching');
   const [items, setItems] = useState<WatchProgress[]>([]);
   const [optimisticItems, addOptimisticItem] = React.useOptimistic(
     items,
@@ -126,11 +128,11 @@ export function useContinueWatching({
         if (success) {
           setItems((prev) => prev.filter((i) => i.id !== item.id));
         } else {
-          toast.error('Failed to remove from list');
+          toast.error(t('failedToRemove'));
         }
       });
     },
-    [addOptimisticItem, activeServer],
+    [addOptimisticItem, activeServer, t],
   );
 
   return {

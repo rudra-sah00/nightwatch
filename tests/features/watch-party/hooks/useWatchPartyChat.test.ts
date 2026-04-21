@@ -116,7 +116,7 @@ describe('useWatchPartyChat', () => {
       await result.current.sendMessage('Hi');
     });
 
-    expect(toast.error).toHaveBeenCalledWith('Failed to send message');
+    expect(toast.error).toHaveBeenCalledWith('messageFailed');
     expect(result.current.messages).toHaveLength(0); // Rolled back
   });
 });

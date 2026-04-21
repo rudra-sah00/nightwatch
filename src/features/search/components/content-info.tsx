@@ -88,12 +88,12 @@ export const ContentInfo = memo(function ContentInfo({
         {show.runtime ? (
           <span className="flex items-center gap-1.5 bg-background border-[3px] border-border px-3 py-1">
             <Clock className="w-4 h-4 stroke-[3px]" />
-            {show.runtime} M
+            {t('contentInfo.minutesSuffix', { runtime: show.runtime })}
           </span>
         ) : null}
         {isSeries && show.seasons && show.seasons.length > 0 ? (
           <span className="hidden md:inline bg-neo-yellow border-[3px] border-border px-3 py-1">
-            {show.seasons.length} Season{show.seasons.length > 1 ? 's' : ''}
+            {t('contentInfo.seasonCount', { count: show.seasons.length })}
           </span>
         ) : null}
         {show.genre ? (
@@ -120,7 +120,10 @@ export const ContentInfo = memo(function ContentInfo({
               {isSeries &&
               watchProgress?.seasonNumber != null &&
               watchProgress?.episodeNumber != null
-                ? `S${watchProgress.seasonNumber}:E${watchProgress.episodeNumber}`
+                ? t('contentInfo.seasonEpisodePrefix', {
+                    season: watchProgress.seasonNumber,
+                    episode: watchProgress.episodeNumber,
+                  })
                 : t('contentDetail.continue')}
             </span>
             <span>{Math.round(watchProgress?.progressPercent || 0)}%</span>

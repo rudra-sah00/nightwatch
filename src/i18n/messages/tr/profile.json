@@ -17,7 +17,22 @@
     "more": "Çok",
     "noActivity": "Aktivite yok",
     "minSuffix": "{count} dk",
-    "last365": "Son 365 günlük etkileşim"
+    "last365": "Son 365 günlük etkileşim",
+    "heatmapAriaLabel": "Son bir yılın izleme etkinliği ısı haritası",
+    "months": {
+      "jan": "Oca",
+      "feb": "Şub",
+      "mar": "Mar",
+      "apr": "Nis",
+      "may": "May",
+      "jun": "Haz",
+      "jul": "Tem",
+      "aug": "Ağu",
+      "sep": "Eyl",
+      "oct": "Eki",
+      "nov": "Kas",
+      "dec": "Ara"
+    }
   },
   "releaseNotes": {
     "title": "Sürüm Notları",
@@ -52,7 +67,8 @@
     "balanced": "Dengeli",
     "performance": "Performans",
     "highQuality": "Yüksek Kalite",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "Sunucu seçimi"
   },
   "dangerZone": {
     "title": "Tehlikeli Bölge",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "Aynı anda kaç film veya bölüm indirilebilir. Varsayılan 3'tür.",
     "downloadSpeedLimit": "İndirme Hız Limiti",
     "downloadSpeedDescription": "Arka plan indirme hızını kısıtlayın. Ağınız genel olarak yavaşlıyorsa faydalıdır!",
-    "unlimited": "Sınırsız"
+    "unlimited": "Sınırsız",
+    "cancel": "İptal",
+    "set": "Ayarla",
+    "customConcurrent": "Özel (1-10)",
+    "customSpeed": "Özel MB/s"
   },
   "publicProfile": {
     "returnBase": "Üsse Dön",
+    "unknownUser": "bilinmeyen_kullanıcı",
     "identityVerified": "Kimlik Profili Doğrulandı",
     "persistentIdentity": "Kalıcı Kimlik: {id}",
     "daysActive": "AKTİF GÜN",
     "hrsTotal": "TOPLAM SAAT",
-    "coreVersion": "ÇEKİRDEK SÜRÜM: V1.0-KARALI"
+    "coreVersion": "ÇEKİRDEK SÜRÜM: V1.0-KARALI",
+    "userIdentity": "KULLANICI KİMLİĞİ: {id}"
+  },
+  "messages": {
+    "invalidInput": "Geçersiz giriş",
+    "passwordUpdated": "Şifre başarıyla güncellendi",
+    "passwordFailed": "Şifre güncellenemedi",
+    "usernameFailed": "Kullanıcı adı uygunluğu kontrol edilemedi",
+    "noChanges": "Kaydedilecek değişiklik yok",
+    "usernameNotAvailable": "Kullanıcı adı mevcut değil",
+    "profileUpdated": "Profil başarıyla güncellendi",
+    "profileFailed": "Profil güncellenemedi",
+    "accountDeleted": "Hesap başarıyla silindi",
+    "accountDeleteFailed": "Hesap silinemedi",
+    "activityFailed": "Etkinlik yüklenemedi",
+    "imageUpdated": "Profil resmi güncellendi",
+    "imageFailed": "Resim yüklenemedi",
+    "unknown": "Bilinmiyor"
+  },
+  "validation": {
+    "nameMinLength": "Ad en az 2 karakter olmalıdır",
+    "usernameMinLength": "Kullanıcı adı en az 3 karakter olmalıdır",
+    "usernameFormat": "Kullanıcı adı yalnızca harf, rakam ve alt çizgi içerebilir",
+    "currentPasswordRequired": "Mevcut şifre gereklidir",
+    "passwordMinLength": "Şifre en az 8 karakter olmalıdır",
+    "passwordUppercase": "Şifre en az bir büyük harf içermelidir",
+    "passwordSpecialChar": "Şifre en az bir özel karakter içermelidir",
+    "newPasswordsMismatch": "Yeni şifreler eşleşmiyor"
   }
 }

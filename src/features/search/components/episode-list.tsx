@@ -43,7 +43,7 @@ export function EpisodeList({
   }
 
   return (
-    <ul className="space-y-2" aria-label="Episodes">
+    <ul className="space-y-2" aria-label={t('contentDetail.episodesAriaLabel')}>
       {episodes.map((episode) => (
         <li
           key={episode.episodeId || episode.episodeNumber}

@@ -86,7 +86,7 @@ describe('WatchPartySettings', () => {
   it('renders settings panel', () => {
     render(<WatchPartySettings room={mockRoom} isHost={true} />);
     fireEvent.click(screen.getByRole('button'));
-    expect(screen.getByText(/Room Settings/i)).toBeInTheDocument();
+    expect(screen.getByText('settings.title')).toBeInTheDocument();
   });
 
   it('handles permission toggles', () => {

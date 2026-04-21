@@ -34,7 +34,7 @@ describe('Volume', () => {
       expect(slider).toHaveAttribute('aria-valuemin', '0');
       expect(slider).toHaveAttribute('aria-valuemax', '100');
       expect(slider).toHaveAttribute('aria-valuenow', '70');
-      expect(slider).toHaveAttribute('aria-label', 'Volume');
+      expect(slider).toHaveAttribute('aria-label', 'volume');
     });
   });
 
@@ -237,7 +237,7 @@ describe('Volume', () => {
       const { container } = render(<Volume {...defaultProps} />);
 
       const fieldset = container.querySelector('fieldset');
-      expect(fieldset).toHaveAttribute('aria-label', 'Volume control');
+      expect(fieldset).toHaveAttribute('aria-label', 'volumeControl');
     });
 
     it('should update aria-valuenow based on volume', () => {

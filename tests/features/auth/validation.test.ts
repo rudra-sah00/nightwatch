@@ -73,7 +73,9 @@ describe('Register Schema', () => {
     const result = registerSchema.safeParse(data);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/uppercase/i);
+      expect(result.error.issues[0].message).toBe(
+        'validation.passwordUppercase',
+      );
     }
   });
 
@@ -88,7 +90,9 @@ describe('Register Schema', () => {
     const result = registerSchema.safeParse(data);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/special/i);
+      expect(result.error.issues[0].message).toBe(
+        'validation.passwordSpecialChar',
+      );
     }
   });
 
@@ -103,7 +107,9 @@ describe('Register Schema', () => {
     const result = registerSchema.safeParse(data);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/at least 8/i);
+      expect(result.error.issues[0].message).toBe(
+        'validation.passwordMinLength',
+      );
     }
   });
 
@@ -190,7 +196,9 @@ describe('Reset Password Schema', () => {
     const result = resetPasswordSchema.safeParse(data);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/match/i);
+      expect(result.error.issues[0].message).toBe(
+        'validation.passwordsMismatch',
+      );
     }
   });
 

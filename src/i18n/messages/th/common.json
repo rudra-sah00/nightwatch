@@ -8,11 +8,13 @@
     "watchlist": "รายการดู",
     "downloads": "ดาวน์โหลด",
     "offlineDownloads": "ดาวน์โหลดออฟไลน์",
-    "profile": "โปรไฟล์"
+    "profile": "โปรไฟล์",
+    "logoAlt": "โลโก้ Watch Rudra"
   },
   "language": {
     "title": "ภาษา",
-    "description": "เลือกภาษาที่คุณต้องการ"
+    "description": "เลือกภาษาที่คุณต้องการ",
+    "closeMenu": "ปิดเมนูภาษา"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "ปาร์ตี้จบแล้ว",
     "messageFailed": "ส่งข้อความล้มเหลว",
     "partyTimeLimit": "ปาร์ตี้ดูหนังถึงขีดจำกัด 3 ชั่วโมงแล้ว จะสิ้นสุดในตอนนี้",
-    "startFailed": "เริ่มเล่นล้มเหลว",
-    "linkCopied": "คัดลอกลิงก์แล้ว!",
-    "profileUpdated": "อัปเดตโปรไฟล์แล้ว",
-    "passwordChanged": "เปลี่ยนรหัสผ่านสำเร็จ",
-    "accountDeleted": "ลบบัญชีสำเร็จ",
-    "error": "เกิดข้อผิดพลาด",
-    "networkError": "ข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่อ",
-    "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"
+    "startFailed": "เริ่มเล่นล้มเหลว"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "เวอร์ชันแอป"
   },
   "passwordInfo": {
-    "requirements": "ข้อกำหนด"
+    "requirements": "ข้อกำหนด",
+    "ariaLabel": "ข้อกำหนดรหัสผ่าน",
+    "title": "ข้อกำหนดรหัสผ่าน",
+    "minChars": "8 ตัวอักษรขึ้นไป",
+    "uppercase": "ตัวพิมพ์ใหญ่ (A-Z)",
+    "specialChar": "อักขระพิเศษ (!@#$%^&*)",
+    "breachNote": "เราตรวจสอบรหัสผ่านกับ",
+    "knownBreaches": "การรั่วไหลที่ทราบ"
   },
   "actions": {
-    "close": "ปิด"
+    "close": "ปิด",
+    "closeModal": "ปิดหน้าต่าง"
+  },
+  "loading": "กำลังโหลด...",
+  "skipToContent": "ข้ามไปยังเนื้อหา",
+  "offline": {
+    "title": "คุณออฟไลน์อยู่",
+    "description": "Watch Rudra ต้องการการเชื่อมต่อเพื่อสำรวจ เปิดห้องนิรภัยเพื่อดูเนื้อหาที่ดาวน์โหลดไว้",
+    "openVault": "เปิดห้องนิรภัยออฟไลน์",
+    "toastOffline": "คุณออฟไลน์อยู่",
+    "toastOnline": "กลับมาออนไลน์แล้ว!"
+  },
+  "swUpdate": {
+    "title": "มีเวอร์ชันใหม่",
+    "description": "รีเฟรชเพื่อรับการอัปเดตล่าสุด",
+    "refresh": "รีเฟรช"
+  },
+  "discord": {
+    "readyToStream": "พร้อมสตรีม",
+    "atLoginScreen": "ที่หน้าเข้าสู่ระบบ",
+    "browsingDashboard": "เรียกดูแดชบอร์ด",
+    "lookingForContent": "กำลังค้นหาเนื้อหา",
+    "browsingHomepage": "เรียกดูหน้าแรก",
+    "browsingLiveMatches": "เรียกดูการแข่งขันสด",
+    "findingStream": "กำลังค้นหาสตรีม...",
+    "curatingWatchlist": "จัดการรายการรับชม",
+    "planningMarathon": "วางแผนมาราธอนถัดไป",
+    "adjustingSettings": "ปรับการตั้งค่า",
+    "customizingProfile": "ปรับแต่งโปรไฟล์"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "สมดุล",
+    "highQuality": "สตรีมคุณภาพสูง"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "เพื่อนร่วมสตรีมมิ่งส่วนตัวของคุณ",
+    "homeTitle": "หน้าแรก | Watch Rudra",
+    "homeDescription": "ค้นหาภาพยนตร์และซีรีส์เพื่อเริ่มดูด้วยกัน",
+    "continueWatchingTitle": "ดูต่อ | Watch Rudra",
+    "continueWatchingDescription": "ดูต่อจากที่ค้างไว้กับภาพยนตร์และซีรีส์ที่ดูล่าสุด",
+    "searchTitle": "ค้นหา | Watch Rudra",
+    "searchDescription": "ค้นหาภาพยนตร์ ซีรีส์ และอนิเมะ",
+    "profileTitle": "โปรไฟล์ | Watch Rudra",
+    "profileDescription": "จัดการโปรไฟล์และประวัติการรับชม",
+    "liveTitle": "แมตช์สด | Watch Rudra",
+    "liveDescription": "ดูการแข่งขันกีฬาสดและช่องต่างๆ กับเพื่อนแบบเรียลไทม์",
+    "downloadsTitle": "ดาวน์โหลด | Watch Rudra",
+    "downloadsDescription": "เข้าถึงภาพยนตร์และซีรีส์ที่ดาวน์โหลดไว้สำหรับดูแบบออฟไลน์",
+    "watchlistTitle": "รายการดูของฉัน | Watch Rudra",
+    "watchlistDescription": "ติดตามภาพยนตร์และซีรีส์ที่คุณต้องการดูทีหลัง",
+    "watchPartyTitle": "ปาร์ตี้ดูหนัง | Watch Rudra",
+    "watchPartyDescription": "เข้าร่วมกับเพื่อนและดูด้วยกันแบบเรียลไทม์"
+  },
+  "desktopApp": {
+    "notInstalled": "ยังไม่ได้ติดตั้งแอป",
+    "notInstalledDesc": "ไม่สามารถเปิดแอป Watch Rudra ได้ ติดตั้งแล้วหรือยัง?",
+    "downloadApp": "ดาวน์โหลดแอป"
+  },
+  "whatsNew": {
+    "backToHome": "กลับหน้าแรก",
+    "title": "มีอะไรใหม่",
+    "description": "อัปเดตล่าสุด การแก้ไขบั๊ก และฟีเจอร์ของ Watch Rudra",
+    "noReleases": "ไม่พบรุ่นหรือโหลดล้มเหลว",
+    "noReleaseNotes": "*ไม่มีบันทึกรุ่น*",
+    "showMore": "แสดงเพิ่มเติม (เหลือ {remaining})"
+  },
+  "downloads": {
+    "failedToLoad": "โหลดเนื้อหาล้มเหลว",
+    "experienceStarting": "กำลังเริ่มประสบการณ์",
+    "preparingContent": "กำลังเตรียม \"{title}\"...",
+    "episodes": "ตอน",
+    "noImageAvailable": "ไม่มีรูปภาพ",
+    "closePreview": "ปิดตัวอย่าง",
+    "statusCompleted": "เสร็จสิ้น",
+    "statusFailed": "ล้มเหลว",
+    "statusDownloading": "กำลังดาวน์โหลด",
+    "statusQueued": "อยู่ในคิว",
+    "statusCancelled": "ยกเลิกแล้ว",
+    "statusPaused": "หยุดชั่วคราว"
+  },
+  "errors": {
+    "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง",
+    "userExists": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว",
+    "invalidInvite": "ลิงก์เชิญไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่",
+    "captchaRequired": "กรุณาทำการยืนยันความปลอดภัย",
+    "captchaFailed": "การยืนยันความปลอดภัยล้มเหลว กรุณาลองอีกครั้ง",
+    "otpRateLimit": "ลองมากเกินไป กรุณารอแล้วลองอีกครั้ง",
+    "validationError": "ข้อมูลบางส่วนไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง",
+    "csrfFailed": "โทเค็นความปลอดภัยหมดอายุ กรุณารีเฟรชหน้า",
+    "notFound": "ไม่พบทรัพยากรที่ร้องขอ",
+    "forbidden": "คุณไม่มีสิทธิ์ดำเนินการนี้",
+    "networkError": "ปัญหาเครือข่าย กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+    "requestTimeout": "คำขอหมดเวลา กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+  },
+  "units": {
+    "bytes": "ไบต์",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

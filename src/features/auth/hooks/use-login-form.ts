@@ -17,7 +17,9 @@ interface FormState {
 const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
 
 export function useLoginForm() {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
+  const tErr = useTranslations('auth.errors');
+  const tAuth = useTranslations('auth');
   const { login, verifyOtp, resendOtp } = useAuth();
   const [step, setStep] = useState<Step>('initial');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +73,7 @@ export function useLoginForm() {
       const captchaTokenVal = formDataObj.get('captchaToken') as string;
 
       if (!captchaTokenVal) {
-        return { error: 'Please complete the security verification.' };
+        return { error: tErr('captchaRequired') };
       }
 
       const result = loginSchema.safeParse({ email, password });
@@ -79,7 +81,7 @@ export function useLoginForm() {
         const errors: Record<string, string> = {};
         for (const err of result.error.issues) {
           const field = err.path[0];
-          if (typeof field === 'string') errors[field] = err.message;
+          if (typeof field === 'string') errors[field] = tAuth(err.message);
         }
         return { fieldErrors: errors };
       }
@@ -115,10 +117,7 @@ export function useLoginForm() {
           return { fieldErrors: errors };
         }
         return {
-          error:
-            err instanceof Error
-              ? err.message
-              : 'Login failed. Please try again.',
+          error: err instanceof Error ? err.message : tErr('loginFailed'),
         };
       }
     },
@@ -130,11 +129,11 @@ export function useLoginForm() {
     const captchaTokenVal = formDataObj.get('captchaToken') as string;
 
     if (!captchaTokenVal) {
-      return { error: 'Please complete the security verification.' };
+      return { error: tErr('captchaRequired') };
     }
 
     if (!identifier) {
-      return { error: 'Please provide either an email or a username.' };
+      return { error: tErr('forgotIdentifierRequired') };
     }
 
     try {
@@ -155,8 +154,7 @@ export function useLoginForm() {
         return { fieldErrors: errors };
       }
       return {
-        error:
-          apiError.message || 'Failed to send reset link. Please try again.',
+        error: apiError.message || tErr('forgotFailed'),
       };
     }
   };
@@ -214,7 +212,7 @@ export function useLoginForm() {
       toast.success(t('verificationResent'));
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      const msg = apiError.message || 'Resend failed. Please wait.';
+      const msg = apiError.message || tErr('resendFailed');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -226,7 +224,7 @@ export function useLoginForm() {
     e.preventDefault();
     setError(null);
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit code.');
+      setError(tErr('invalidOtp'));
       return;
     }
 
@@ -239,8 +237,7 @@ export function useLoginForm() {
         sessionStorage.getItem(MOBILE_LOGIN_STATE_KEY);
 
       if (mobileMode && !mobileState) {
-        const msg =
-          'Mobile login session expired on web. Please restart login from the app.';
+        const msg = tErr('mobileSessionExpired');
         setError(msg);
         toast.error(msg);
         return;
@@ -260,14 +257,13 @@ export function useLoginForm() {
       }
 
       if (mobileMode) {
-        const msg =
-          'Login verified, but app redirect was missing. Please restart from the app.';
+        const msg = tErr('mobileRedirectMissing');
         setError(msg);
         toast.error(msg);
       }
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      const msg = apiError.message || 'Verification failed. Please try again.';
+      const msg = apiError.message || tErr('verificationFailed');
       setError(msg);
       toast.error(msg);
     } finally {

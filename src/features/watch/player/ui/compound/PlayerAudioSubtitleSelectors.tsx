@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { AudioSelector } from '../controls/AudioSelector';
 import { SubtitleSelector } from '../controls/SubtitleSelector';
@@ -11,13 +12,14 @@ export function PlayerAudioSubtitleSelectors() {
     subtitleTracksForMenu,
   } = usePlayerAudioSubtitleSelectors();
   const { state, playerHandlers } = usePlayerContext();
+  const t = useTranslations('watch');
 
   return (
     <section
       className="flex items-center gap-1"
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
-      aria-label="Audio and Subtitle Selectors Interaction"
+      aria-label={t('aria.audioSubtitle')}
     >
       <SubtitleSelector
         tracks={subtitleTracksForMenu}

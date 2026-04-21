@@ -17,7 +17,22 @@
     "more": "많음",
     "noActivity": "활동 없음",
     "minSuffix": "{count}분",
-    "last365": "지난 365일간의 활동"
+    "last365": "지난 365일간의 활동",
+    "heatmapAriaLabel": "지난 1년간의 시청 활동 히트맵",
+    "months": {
+      "jan": "1월",
+      "feb": "2월",
+      "mar": "3월",
+      "apr": "4월",
+      "may": "5월",
+      "jun": "6월",
+      "jul": "7월",
+      "aug": "8월",
+      "sep": "9월",
+      "oct": "10월",
+      "nov": "11월",
+      "dec": "12월"
+    }
   },
   "releaseNotes": {
     "title": "릴리스 노트",
@@ -52,7 +67,8 @@
     "balanced": "균형",
     "performance": "성능",
     "highQuality": "고화질",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "서버 선택"
   },
   "dangerZone": {
     "title": "위험 구역",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "동시에 다운로드할 수 있는 영화 또는 에피소드 수. 기본값은 3입니다.",
     "downloadSpeedLimit": "다운로드 속도 제한",
     "downloadSpeedDescription": "백그라운드 다운로드 속도를 제한합니다. 네트워크가 느려질 때 유용합니다!",
-    "unlimited": "무제한"
+    "unlimited": "무제한",
+    "cancel": "취소",
+    "set": "설정",
+    "customConcurrent": "사용자 지정 (1-10)",
+    "customSpeed": "사용자 지정 MB/s"
   },
   "publicProfile": {
     "returnBase": "돌아가기",
+    "unknownUser": "알수없는_사용자",
     "identityVerified": "신원 프로필 인증됨",
     "persistentIdentity": "영구 신원: {id}",
     "daysActive": "활동 일수",
     "hrsTotal": "총 시간",
-    "coreVersion": "코어 버전: V1.0-STABLE"
+    "coreVersion": "코어 버전: V1.0-STABLE",
+    "userIdentity": "사용자 ID: {id}"
+  },
+  "messages": {
+    "invalidInput": "잘못된 입력",
+    "passwordUpdated": "비밀번호가 성공적으로 업데이트되었습니다",
+    "passwordFailed": "비밀번호 업데이트에 실패했습니다",
+    "usernameFailed": "사용자 이름 사용 가능 여부 확인에 실패했습니다",
+    "noChanges": "저장할 변경 사항이 없습니다",
+    "usernameNotAvailable": "사용자 이름을 사용할 수 없습니다",
+    "profileUpdated": "프로필이 성공적으로 업데이트되었습니다",
+    "profileFailed": "프로필 업데이트에 실패했습니다",
+    "accountDeleted": "계정이 성공적으로 삭제되었습니다",
+    "accountDeleteFailed": "계정 삭제에 실패했습니다",
+    "activityFailed": "활동을 불러오는 데 실패했습니다",
+    "imageUpdated": "프로필 이미지가 업데이트되었습니다",
+    "imageFailed": "이미지 업로드에 실패했습니다",
+    "unknown": "알 수 없음"
+  },
+  "validation": {
+    "nameMinLength": "이름은 최소 2자 이상이어야 합니다",
+    "usernameMinLength": "사용자 이름은 최소 3자 이상이어야 합니다",
+    "usernameFormat": "사용자 이름은 영문자, 숫자, 밑줄만 포함할 수 있습니다",
+    "currentPasswordRequired": "현재 비밀번호는 필수입니다",
+    "passwordMinLength": "비밀번호는 최소 8자 이상이어야 합니다",
+    "passwordUppercase": "비밀번호에 대문자가 하나 이상 포함되어야 합니다",
+    "passwordSpecialChar": "비밀번호에 특수 문자가 하나 이상 포함되어야 합니다",
+    "newPasswordsMismatch": "새 비밀번호가 일치하지 않습니다"
   }
 }

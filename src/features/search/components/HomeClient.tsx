@@ -126,22 +126,10 @@ export function HomeClient() {
       </style>
       <div className="absolute bottom-6 md:bottom-8 inset-x-4 md:inset-x-8 lg:inset-x-12 flex overflow-hidden border-[3px] border-border py-4 bg-primary text-primary-foreground font-headline font-black uppercase text-xl md:text-2xl tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap  z-10">
         <div className="flex animate-marquee w-max">
-          <span className="pr-8">
-            FORM FOLLOWS FUNCTION • RUDRA CINEMA • MINIMALISM IS TRUTH • NO
-            DISTRACTIONS • JUST FILM •
-          </span>
-          <span className="pr-8">
-            FORM FOLLOWS FUNCTION • RUDRA CINEMA • MINIMALISM IS TRUTH • NO
-            DISTRACTIONS • JUST FILM •
-          </span>
-          <span className="pr-8">
-            FORM FOLLOWS FUNCTION • RUDRA CINEMA • MINIMALISM IS TRUTH • NO
-            DISTRACTIONS • JUST FILM •
-          </span>
-          <span className="pr-8">
-            FORM FOLLOWS FUNCTION • RUDRA CINEMA • MINIMALISM IS TRUTH • NO
-            DISTRACTIONS • JUST FILM •
-          </span>
+          <span className="pr-8">{t('marquee')}</span>
+          <span className="pr-8">{t('marquee')}</span>
+          <span className="pr-8">{t('marquee')}</span>
+          <span className="pr-8">{t('marquee')}</span>
         </div>
       </div>
     </main>

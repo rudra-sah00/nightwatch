@@ -19,7 +19,7 @@ export function useHomeClient({
   initialResults,
   initialQuery,
 }: UseHomeClientOptions) {
-  const t = useTranslations('toasts');
+  const t = useTranslations('common.toasts');
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || initialQuery;
 

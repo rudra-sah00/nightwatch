@@ -17,7 +17,22 @@
     "more": "更多",
     "noActivity": "无活动",
     "minSuffix": "{count} 分钟",
-    "last365": "最近365天的互动"
+    "last365": "最近365天的互动",
+    "heatmapAriaLabel": "过去一年的观看活动热力图",
+    "months": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    }
   },
   "releaseNotes": {
     "title": "版本说明",
@@ -52,7 +67,8 @@
     "balanced": "均衡",
     "performance": "性能",
     "highQuality": "高画质",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "服务器选择"
   },
   "dangerZone": {
     "title": "危险区域",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "可以同时下载多少部电影或剧集。默认为3。",
     "downloadSpeedLimit": "下载速度限制",
     "downloadSpeedDescription": "限制后台下载速度。如果您的网络整体变慢时很有用！",
-    "unlimited": "无限制"
+    "unlimited": "无限制",
+    "cancel": "取消",
+    "set": "设置",
+    "customConcurrent": "自定义 (1-10)",
+    "customSpeed": "自定义 MB/s"
   },
   "publicProfile": {
     "returnBase": "返回基地",
+    "unknownUser": "未知用户",
     "identityVerified": "身份已验证",
     "persistentIdentity": "持久身份: {id}",
     "daysActive": "活跃天数",
     "hrsTotal": "总小时数",
-    "coreVersion": "核心版本: V1.0-稳定版"
+    "coreVersion": "核心版本: V1.0-稳定版",
+    "userIdentity": "用户身份: {id}"
+  },
+  "messages": {
+    "invalidInput": "输入无效",
+    "passwordUpdated": "密码更新成功",
+    "passwordFailed": "密码更新失败",
+    "usernameFailed": "用户名可用性检查失败",
+    "noChanges": "没有需要保存的更改",
+    "usernameNotAvailable": "用户名不可用",
+    "profileUpdated": "个人资料更新成功",
+    "profileFailed": "个人资料更新失败",
+    "accountDeleted": "账户删除成功",
+    "accountDeleteFailed": "账户删除失败",
+    "activityFailed": "活动加载失败",
+    "imageUpdated": "头像已更新",
+    "imageFailed": "图片上传失败",
+    "unknown": "未知"
+  },
+  "validation": {
+    "nameMinLength": "名称至少需要2个字符",
+    "usernameMinLength": "用户名至少需要3个字符",
+    "usernameFormat": "用户名只能包含字母、数字和下划线",
+    "currentPasswordRequired": "请输入当前密码",
+    "passwordMinLength": "密码至少需要8个字符",
+    "passwordUppercase": "密码必须包含至少一个大写字母",
+    "passwordSpecialChar": "密码必须包含至少一个特殊字符",
+    "newPasswordsMismatch": "两次输入的新密码不一致"
   }
 }

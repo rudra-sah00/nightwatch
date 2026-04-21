@@ -28,8 +28,7 @@
     "emptyTitle": "观看历史为空",
     "emptyDescription": "开始观看内容后将显示在此处",
     "removeAriaLabel": "从列表中移除",
-    "sectionAriaLabel": "最近观看的内容",
-    "timeLeft": "剩余 {time}"
+    "sectionAriaLabel": "最近观看的内容"
   },
   "contentDetail": {
     "series": "剧集",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "取消观影派对",
     "continue": "继续",
     "experienceStarting": "体验启动中",
-    "preparingContent": "正在准备 \"{title}\"..."
+    "preparingContent": "正在准备 \"{title}\"...",
+    "closeModal": "关闭弹窗",
+    "episodesAriaLabel": "剧集",
+    "failedToLoadDetails": "无法加载节目详情。请检查网络连接后重试。",
+    "failedToLoadEpisodes": "无法加载剧集列表。如有缓存数据将自动使用。",
+    "watchPartyError": "创建观影派对时发生意外错误。"
   },
   "actions": {
     "watchSolo": "独自观看",
@@ -60,7 +64,8 @@
     "watchTogether": "一起观看",
     "creating": "创建中",
     "toWatchlist": "加入列表",
-    "removeFromList": "从列表移除"
+    "removeFromList": "从列表移除",
+    "episodeFallbackTitle": "第{number}集"
   },
   "download": {
     "download": "下载",
@@ -76,6 +81,23 @@
     "saved": "已保存",
     "securelyStarting": "正在安全启动下载...",
     "episode": "第 {number} 集",
-    "untitled": "无标题"
-  }
+    "untitled": "无标题",
+    "downloadSrOnly": "下载{title}",
+    "downloadingToast": "正在下载{epText}！请查看离线库。",
+    "downloadingEpisodeText": "第{episode}集",
+    "episodeLabel": "第{number}集",
+    "episodePrefix": "第集"
+  },
+  "episodeCard": {
+    "loading": "加载中...",
+    "epPrefix": "EP {number}",
+    "episodeFallback": "第{number}集",
+    "minSuffix": "{duration}分钟"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# 季} other {# 季}}",
+    "seasonEpisodePrefix": "S{season}:E{episode}",
+    "minutesSuffix": "{runtime}分钟"
+  },
+  "marquee": "形式追随功能 • 鲁德拉影院 • 极简即真理 • 零干扰 • 唯有电影 •"
 }

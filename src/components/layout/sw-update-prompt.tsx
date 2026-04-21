@@ -1,23 +1,26 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 
 /**
  * Checks for service worker updates on app focus and network reconnect.
- * Browsers do this automatically on navigation, but Electron's loadURL()
+ * Browsers do this automatically on navigation, but Tauri's loadURL()
  * bypasses that — so we trigger it on meaningful user/network events instead.
  */
 export function SwUpdatePrompt() {
+  const t = useTranslations('common.swUpdate');
+
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator))
       return;
 
     const handleControllerChange = () => {
-      toast('New version available', {
-        description: 'Refresh to get the latest updates.',
+      toast(t('title'), {
+        description: t('description'),
         action: {
-          label: 'Refresh',
+          label: t('refresh'),
           onClick: () => window.location.reload(),
         },
         duration: 30000,
@@ -48,7 +51,7 @@ export function SwUpdatePrompt() {
       window.removeEventListener('focus', checkForUpdate);
       window.removeEventListener('online', checkForUpdate);
     };
-  }, []);
+  }, [t]);
 
   return null;
 }

@@ -8,11 +8,13 @@
     "watchlist": "İzleme Listesi",
     "downloads": "İndirmeler",
     "offlineDownloads": "Çevrimdışı İndirmeler",
-    "profile": "Profil"
+    "profile": "Profil",
+    "logoAlt": "Watch Rudra Logosu"
   },
   "language": {
     "title": "Dil",
-    "description": "Tercih ettiğiniz dili seçin"
+    "description": "Tercih ettiğiniz dili seçin",
+    "closeMenu": "Dil menüsünü kapat"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "Parti sona erdi",
     "messageFailed": "Mesaj gönderilemedi",
     "partyTimeLimit": "İzleme partisi 3 saatlik sınıra ulaştı ve şimdi sona erecek.",
-    "startFailed": "Oynatma başlatılamadı",
-    "linkCopied": "Bağlantı kopyalandı!",
-    "profileUpdated": "Profil güncellendi",
-    "passwordChanged": "Şifre başarıyla değiştirildi",
-    "accountDeleted": "Hesap başarıyla silindi",
-    "error": "Bir şeyler ters gitti",
-    "networkError": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
-    "sessionExpired": "Oturum süresi doldu. Lütfen tekrar giriş yapın."
+    "startFailed": "Oynatma başlatılamadı"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "Uygulama Sürümü"
   },
   "passwordInfo": {
-    "requirements": "Gereksinimler"
+    "requirements": "Gereksinimler",
+    "ariaLabel": "Şifre gereksinimleri",
+    "title": "Şifre Gereksinimleri",
+    "minChars": "8+ karakter",
+    "uppercase": "Büyük harf (A-Z)",
+    "specialChar": "Özel karakter (!@#$%^&*)",
+    "breachNote": "Şifreleri kontrol ediyoruz",
+    "knownBreaches": "bilinen ihlaller"
   },
   "actions": {
-    "close": "Kapat"
+    "close": "Kapat",
+    "closeModal": "Pencereyi kapat"
+  },
+  "loading": "Yükleniyor...",
+  "skipToContent": "İçeriğe geç",
+  "offline": {
+    "title": "Çevrimdışısınız",
+    "description": "Watch Rudra keşfetmek için bağlantı gerektirir. İndirilen içerikleri izlemek için kasanızı açın.",
+    "openVault": "Çevrimdışı Kasayı Aç",
+    "toastOffline": "Çevrimdışısınız",
+    "toastOnline": "Tekrar çevrimiçi!"
+  },
+  "swUpdate": {
+    "title": "Yeni sürüm mevcut",
+    "description": "En son güncellemeleri almak için yenileyin.",
+    "refresh": "Yenile"
+  },
+  "discord": {
+    "readyToStream": "Yayına hazır",
+    "atLoginScreen": "Giriş ekranında",
+    "browsingDashboard": "Paneli geziniyor",
+    "lookingForContent": "İçerik arıyor",
+    "browsingHomepage": "Ana sayfayı geziniyor",
+    "browsingLiveMatches": "Canlı maçları geziniyor",
+    "findingStream": "Yayın aranıyor...",
+    "curatingWatchlist": "İzleme listesi düzenleniyor",
+    "planningMarathon": "Sonraki maraton planlanıyor",
+    "adjustingSettings": "Ayarlar düzenleniyor",
+    "customizingProfile": "Profil özelleştiriliyor"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "Dengeli",
+    "highQuality": "Yüksek Kalite Yayın"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "Kişisel yayın arkadaşınız",
+    "homeTitle": "Ana Sayfa | Watch Rudra",
+    "homeDescription": "Birlikte izlemeye başlamak için film ve dizileri arayın.",
+    "continueWatchingTitle": "İzlemeye Devam Et | Watch Rudra",
+    "continueWatchingDescription": "Son izlediğiniz film ve dizilerle kaldığınız yerden devam edin.",
+    "searchTitle": "Arama | Watch Rudra",
+    "searchDescription": "Film, dizi ve anime arayın.",
+    "profileTitle": "Profil | Watch Rudra",
+    "profileDescription": "Profilinizi ve izleme geçmişinizi yönetin.",
+    "liveTitle": "Canlı Maçlar | Watch Rudra",
+    "liveDescription": "Arkadaşlarınızla gerçek zamanlı olarak canlı spor maçları ve kanalları izleyin.",
+    "downloadsTitle": "İndirmeler | Watch Rudra",
+    "downloadsDescription": "Çevrimdışı izleme için indirdiğiniz film ve dizilere erişin.",
+    "watchlistTitle": "İzleme Listem | Watch Rudra",
+    "watchlistDescription": "Daha sonra izlemek istediğiniz film ve dizileri takip edin.",
+    "watchPartyTitle": "İzleme Partisi | Watch Rudra",
+    "watchPartyDescription": "Arkadaşlarınıza katılın ve gerçek zamanlı birlikte izleyin."
+  },
+  "desktopApp": {
+    "notInstalled": "Uygulama yüklü değil",
+    "notInstalledDesc": "Watch Rudra masaüstü uygulaması açılamadı. Yüklü mü?",
+    "downloadApp": "Uygulamayı İndir"
+  },
+  "whatsNew": {
+    "backToHome": "Ana Sayfaya Dön",
+    "title": "Yenilikler",
+    "description": "Watch Rudra'nın son güncellemeleri, hata düzeltmeleri ve özellikleri.",
+    "noReleases": "Sürüm bulunamadı veya yükleme başarısız.",
+    "noReleaseNotes": "*Sürüm notları sağlanmadı.*",
+    "showMore": "Daha Fazla Göster ({remaining} kalan)"
+  },
+  "downloads": {
+    "failedToLoad": "İçerik yüklenemedi",
+    "experienceStarting": "Deneyim Başlıyor",
+    "preparingContent": "\"{title}\" hazırlanıyor...",
+    "episodes": "Bölümler",
+    "noImageAvailable": "Görsel Yok",
+    "closePreview": "Önizlemeyi Kapat",
+    "statusCompleted": "TAMAMLANDI",
+    "statusFailed": "BAŞARISIZ",
+    "statusDownloading": "İNDİRİLİYOR",
+    "statusQueued": "SIRADA",
+    "statusCancelled": "İPTAL EDİLDİ",
+    "statusPaused": "DURAKLATILDI"
+  },
+  "errors": {
+    "sessionExpired": "Oturum süresi doldu. Lütfen tekrar giriş yapın.",
+    "userExists": "Bu e-posta ile bir hesap zaten mevcut.",
+    "invalidInvite": "Davet bağlantısı geçersiz veya süresi dolmuş. Yeni bir tane talep edin.",
+    "captchaRequired": "Lütfen güvenlik doğrulamasını tamamlayın.",
+    "captchaFailed": "Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.",
+    "otpRateLimit": "Çok fazla deneme. Lütfen bekleyin ve tekrar deneyin.",
+    "validationError": "Bazı bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.",
+    "csrfFailed": "Güvenlik jetonu süresi doldu. Lütfen sayfayı yenileyin.",
+    "notFound": "İstenen kaynak bulunamadı.",
+    "forbidden": "Bu işlemi gerçekleştirme izniniz yok.",
+    "networkError": "Ağ sorunu. Bağlantınızı kontrol edip tekrar deneyin.",
+    "requestTimeout": "İstek zaman aşımına uğradı. Bağlantınızı kontrol edip tekrar deneyin."
+  },
+  "units": {
+    "bytes": "Bayt",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

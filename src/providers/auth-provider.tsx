@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
@@ -17,6 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const setIsLoading = useAuthStore((s) => s.setIsLoading);
+  const t = useTranslations('common.errors');
 
   const { connect, disconnect } = useSocket();
   const forceLogoutHandlerRef = useRef<
@@ -27,18 +29,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (payload: ForceLogoutPayload) => {
       disconnect();
       setUser(null);
-      clearCookiesAndRedirect(
-        payload.message || 'You have been logged out from another device.',
-      );
+      clearCookiesAndRedirect(payload.message || t('sessionExpired'));
     },
-    [disconnect, setUser],
+    [disconnect, setUser, t],
   );
 
   const handleAuthExpired = useCallback(() => {
     disconnect();
     setUser(null);
-    clearCookiesAndRedirect('Session expired. Please login again.');
-  }, [disconnect, setUser]);
+    clearCookiesAndRedirect(t('sessionExpired'));
+  }, [disconnect, setUser, t]);
 
   // Effect 1: Socket connect/disconnect — only re-runs when the identity changes
   // (id or sessionId). Profile updates from getProfile() must NOT trigger this
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
             setIsLoading(false);
           }
-          clearCookiesAndRedirect('Session expired. Please login again.');
+          clearCookiesAndRedirect(t('sessionExpired'));
         } else {
           // Network error during deploy window — don't log out, just mark loaded
           if (!controller.signal.aborted) setIsLoading(false);
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       controller.abort();
       window.removeEventListener('auth:expired', handleAuthExpired);
     };
-  }, [userId, handleAuthExpired, disconnect, setUser, setIsLoading]);
+  }, [userId, handleAuthExpired, disconnect, setUser, setIsLoading, t]);
 
   return <>{children}</>;
 }

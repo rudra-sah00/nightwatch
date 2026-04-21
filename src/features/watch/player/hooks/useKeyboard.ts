@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { checkIsDesktop, desktopBridge } from '@/lib/tauri-bridge';
@@ -36,6 +37,7 @@ export function useKeyboard({
   onInteraction,
   onToggleFullscreen,
 }: UseKeyboardOptions) {
+  const t = useTranslations('watch.player');
   const seek = useCallback(
     (seconds: number) => {
       if (disabled) return;
@@ -117,9 +119,9 @@ export function useKeyboard({
         await containerRef.current.requestFullscreen();
       }
     } catch {
-      toast.error('Fullscreen toggle failed');
+      toast.error(t('fullscreenToggleFailed'));
     }
-  }, [containerRef, onToggleFullscreen]);
+  }, [containerRef, onToggleFullscreen, t]);
 
   // ── useLatest pattern (rule: advanced-use-latest) ──────────────────────────
   // Store all handler callbacks in a stable ref so the effect only registers
@@ -243,7 +245,7 @@ export function useKeyboard({
     // Register once — no dependencies, reads via ref
     window.addEventListener('keydown', handleKeyDown);
 
-    // --- ELECTRON GLOBAL MEDIA KEYS HANDLER ---
+    // --- TAURI GLOBAL MEDIA KEYS HANDLER ---
     // Listen for physical keyboard media keys if running as the Watch Rudra Desktop app!
     let unsubscribeDesktopMedia: (() => void) | undefined;
     if (checkIsDesktop() && desktopBridge.onMediaCommand) {

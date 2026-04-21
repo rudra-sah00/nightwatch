@@ -7,6 +7,63 @@ afterEach(() => {
   cleanup();
 });
 
+// Mock next-intl — returns the key (or interpolates {placeholders}) so tests can assert on translation keys
+vi.mock('next-intl', () => {
+  const createT = () => {
+    const t = (key: string, values?: Record<string, unknown>) => {
+      if (values) {
+        let result = key;
+        for (const [k, v] of Object.entries(values)) {
+          result = result.replace(`{${k}}`, String(v));
+        }
+        return result;
+      }
+      return key;
+    };
+    t.rich = t;
+    t.raw = (key: string) => key;
+    t.has = () => true;
+    return t;
+  };
+  return {
+    useTranslations: () => createT(),
+    useLocale: () => 'en',
+    useMessages: () => ({}),
+    useNow: () => new Date(),
+    useTimeZone: () => 'UTC',
+    useFormatter: () => ({
+      number: (n: number) => String(n),
+      dateTime: (d: Date) => d.toISOString(),
+      relativeTime: (d: Date) => d.toISOString(),
+    }),
+    NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+      children,
+  };
+});
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: async () => {
+    const t = (key: string, values?: Record<string, unknown>) => {
+      if (values) {
+        let result = key;
+        for (const [k, v] of Object.entries(values)) {
+          result = result.replace(`{${k}}`, String(v));
+        }
+        return result;
+      }
+      return key;
+    };
+    t.rich = t;
+    t.raw = (key: string) => key;
+    t.has = () => true;
+    return t;
+  },
+  getLocale: async () => 'en',
+  getMessages: async () => ({}),
+  getNow: async () => new Date(),
+  getTimeZone: async () => 'UTC',
+}));
+
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -75,8 +132,8 @@ const createStorageMock = () => {
 Object.defineProperty(window, 'localStorage', { value: createStorageMock() });
 Object.defineProperty(window, 'sessionStorage', { value: createStorageMock() });
 
-// Mock electronAPI globally
-Object.defineProperty(window, 'electronAPI', {
+// Mock tauriAPI globally
+Object.defineProperty(window, 'tauriAPI', {
   value: {
     startDownload: vi.fn(),
     getDownloads: vi.fn().mockResolvedValue([]),

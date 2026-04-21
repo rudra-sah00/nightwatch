@@ -228,7 +228,7 @@ describe('useWatchPartySync', () => {
 
     expect(result.current.hostDisconnected).toBe(false);
     expect(toast.success).toHaveBeenCalledWith(
-      'Host reconnected!',
+      'hostReconnected',
       expect.any(Object),
     );
   });

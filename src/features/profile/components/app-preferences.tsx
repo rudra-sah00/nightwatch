@@ -29,8 +29,6 @@ import { useTheme } from '@/providers/theme-provider';
 const LOCALE_META: Record<string, { native: string; english: string }> = {
   en: { native: 'English', english: 'English' },
   hi: { native: 'हिन्दी', english: 'Hindi' },
-  ta: { native: 'தமிழ்', english: 'Tamil' },
-  te: { native: 'తెలుగు', english: 'Telugu' },
   es: { native: 'Español', english: 'Spanish' },
   fr: { native: 'Français', english: 'French' },
   ja: { native: '日本語', english: 'Japanese' },
@@ -138,7 +136,7 @@ export function AppPreferences() {
         {t('preferences.title')}
       </h2>
 
-      <div className="flex flex-col gap-8 max-w-2xl">
+      <div className="flex flex-col gap-8">
         {/* Theme */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
@@ -180,7 +178,7 @@ export function AppPreferences() {
                 onClick={() => setThemeOpen(false)}
                 className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
               >
-                Cancel
+                {t('preferences.cancel')}
               </button>
 
               <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
@@ -199,8 +197,8 @@ export function AppPreferences() {
                       className={cn(
                         'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                         theme === id
-                          ? 'bg-foreground text-background font-black'
-                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                          : 'text-foreground/30 hover:text-foreground/60',
                       )}
                     >
                       <div className="flex items-center gap-4">
@@ -241,7 +239,7 @@ export function AppPreferences() {
                 className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
               >
                 <Globe className="w-4 h-4" />
-                {LOCALE_META[locale]?.native || 'English'}
+                {LOCALE_META[locale]?.native || locale}
               </button>
             </DialogTrigger>
 
@@ -257,7 +255,7 @@ export function AppPreferences() {
                 onClick={() => setLangOpen(false)}
                 className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
               >
-                Cancel
+                {t('preferences.cancel')}
               </button>
 
               <div className="flex flex-col items-center w-full max-w-md px-6 h-full pt-16">
@@ -273,8 +271,8 @@ export function AppPreferences() {
                       className={cn(
                         'w-full px-6 py-4 flex items-center justify-between text-left transition-all duration-200',
                         locale === l
-                          ? 'bg-foreground text-background font-black'
-                          : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                          ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                          : 'text-foreground/30 hover:text-foreground/60',
                       )}
                     >
                       <div className="flex flex-col">
@@ -363,7 +361,7 @@ export function AppPreferences() {
                     {t('preferences.maxConcurrentDownloads')}
                   </DialogTitle>
                   <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
-                    Cancel
+                    {t('preferences.cancel')}
                   </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
@@ -378,8 +376,8 @@ export function AppPreferences() {
                           className={cn(
                             'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                             concurrentDownloads === val
-                              ? 'bg-foreground text-background font-black'
-                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                              ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                              : 'text-foreground/30 hover:text-foreground/60',
                           )}
                         >
                           <span className="text-lg font-headline font-bold">
@@ -391,26 +389,19 @@ export function AppPreferences() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 w-full">
+                    <div className="w-full">
                       <input
                         type="number"
                         min={1}
                         max={10}
-                        placeholder="Custom (1-10)"
+                        placeholder={t('preferences.customConcurrent')}
                         value={customConcurrent}
                         onChange={(e) => setCustomConcurrent(e.target.value)}
                         onKeyDown={(e) =>
                           e.key === 'Enter' && handleCustomConcurrent()
                         }
-                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                        className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 text-center"
                       />
-                      <button
-                        type="button"
-                        onClick={handleCustomConcurrent}
-                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
-                      >
-                        Set
-                      </button>
                     </div>
                   </div>
                 </DialogContent>
@@ -451,7 +442,7 @@ export function AppPreferences() {
                     {t('preferences.downloadSpeedLimit')}
                   </DialogTitle>
                   <DialogClose className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors">
-                    Cancel
+                    {t('preferences.cancel')}
                   </DialogClose>
                   <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
                     <h2 className="text-2xl md:text-4xl font-black font-headline uppercase tracking-tighter text-foreground text-center">
@@ -473,8 +464,8 @@ export function AppPreferences() {
                           className={cn(
                             'w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-200',
                             downloadSpeedLimit === opt.val
-                              ? 'bg-foreground text-background font-black'
-                              : 'hover:bg-foreground/5 text-foreground/80 hover:text-foreground',
+                              ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
+                              : 'text-foreground/30 hover:text-foreground/60',
                           )}
                         >
                           <span className="text-lg font-headline font-bold">
@@ -486,26 +477,19 @@ export function AppPreferences() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 w-full">
+                    <div className="w-full">
                       <input
                         type="number"
                         min={1}
                         max={100}
-                        placeholder="Custom MB/s"
+                        placeholder={t('preferences.customSpeed')}
                         value={customSpeed}
                         onChange={(e) => setCustomSpeed(e.target.value)}
                         onKeyDown={(e) =>
                           e.key === 'Enter' && handleCustomSpeed()
                         }
-                        className="flex-1 px-4 py-3 text-sm font-bold border-[3px] border-border bg-background text-center placeholder:text-muted-foreground/50"
+                        className="w-full bg-transparent border-none outline-none text-xl sm:text-4xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 rounded-md border-border/50 focus:border-primary focus:bg-primary focus:text-primary-foreground transition-colors py-2 text-center"
                       />
-                      <button
-                        type="button"
-                        onClick={handleCustomSpeed}
-                        className="px-5 py-3 border-[3px] border-border bg-foreground text-background font-headline font-bold uppercase tracking-widest text-sm"
-                      >
-                        Set
-                      </button>
                     </div>
                   </div>
                 </DialogContent>

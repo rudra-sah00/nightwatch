@@ -3,6 +3,32 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSoundboard } from '@/features/watch-party/interactions/hooks/use-soundboard';
 import * as api from '@/features/watch-party/room/services/watch-party.api';
 
+// Override global next-intl mock with a stable reference to prevent infinite re-render loops
+const stableT = (key: string, values?: Record<string, unknown>) => {
+  if (values) {
+    let result = key;
+    for (const [k, v] of Object.entries(values)) {
+      result = result.replace(`{${k}}`, String(v));
+    }
+    return result;
+  }
+  return key;
+};
+vi.mock('next-intl', () => ({
+  useTranslations: () => stableT,
+  useLocale: () => 'en',
+  useMessages: () => ({}),
+  useNow: () => new Date(),
+  useTimeZone: () => 'UTC',
+  useFormatter: () => ({
+    number: (n: number) => String(n),
+    dateTime: (d: Date) => d.toISOString(),
+    relativeTime: (d: Date) => d.toISOString(),
+  }),
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
+
 vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   getTrendingSounds: vi.fn(),
   searchSounds: vi.fn(),

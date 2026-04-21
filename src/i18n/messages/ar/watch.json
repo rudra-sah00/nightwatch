@@ -27,7 +27,25 @@
     "live": "مباشر",
     "liveBadge": "مباشر",
     "watchingLive": "أنت تشاهد مباشرة",
-    "jumpToLive": "الانتقال للبث المباشر"
+    "jumpToLive": "الانتقال للبث المباشر",
+    "lockedHostControls": "مقفل - تحكم المضيف",
+    "hostControls": "تحكم المضيف",
+    "rotateDevice": "قم بتدوير جهازك للحصول على أفضل تجربة",
+    "fullscreenNotSupported": "ملء الشاشة غير مدعوم في هذا المتصفح",
+    "failedEnterFullscreen": "فشل الدخول إلى وضع ملء الشاشة",
+    "failedExitFullscreen": "فشل الخروج من وضع ملء الشاشة",
+    "fullscreenToggleFailed": "فشل تبديل ملء الشاشة",
+    "seekTime": "وقت التقديم",
+    "liveSeekBar": "شريط تقديم البث المباشر",
+    "atLiveEdge": "على البث المباشر",
+    "behindLive": "{seconds} ثانية خلف البث المباشر",
+    "closeSidebar": "إغلاق الشريط الجانبي",
+    "openSidebar": "فتح الشريط الجانبي",
+    "seasonEpisodeLabel": "الموسم {season} · الحلقة {episode}",
+    "rotateToLandscape": "تدوير إلى الوضع الأفقي",
+    "landscapeOnlyMessage": "هذا المشغل متاح فقط في الوضع الأفقي",
+    "showEpisodes": "عرض الحلقات",
+    "episodesTitle": "الحلقات"
   },
   "settings": {
     "quality": "الجودة",
@@ -44,7 +62,24 @@
     "font": "الخط",
     "background": "الخلفية",
     "textColor": "لون النص",
-    "textEffect": "تأثير النص"
+    "textEffect": "تأثير النص",
+    "sizeSmall": "صغير",
+    "sizeMedium": "متوسط",
+    "sizeLarge": "كبير",
+    "sizeExtraLarge": "كبير جداً",
+    "bgBlack": "أسود",
+    "bgDarkGray": "رمادي داكن",
+    "bgTransparent": "شفاف",
+    "bgSemiTransparent": "شبه شفاف",
+    "colorWhite": "أبيض",
+    "colorYellow": "أصفر",
+    "colorCyan": "سماوي",
+    "colorLightGreen": "أخضر فاتح",
+    "shadowNone": "بدون",
+    "shadowDropShadow": "ظل ساقط",
+    "shadowOutline": "حدود",
+    "shadowGlow": "توهج",
+    "fontSystemDefault": "الخط الافتراضي للنظام"
   },
   "audio": {
     "title": "الصوت",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "الحلقة {number}",
     "season": "الموسم {number}",
-    "seasonShort": "م{number}",
     "clickToPlay": "انقر للتشغيل",
     "loading": "جارٍ التحميل...",
     "noEpisodes": "لا توجد حلقات",
-    "nowPlaying": "يعرض الآن",
-    "min": "{duration} دقيقة"
+    "min": "{duration} دقيقة",
+    "episodeShort": "ح{number}"
   },
   "nextEpisode": {
     "nextSeason": "الموسم التالي",
@@ -66,7 +100,9 @@
     "inCountdown": "خلال {seconds} ثانية",
     "play": "تشغيل",
     "cancel": "إلغاء",
-    "loading": "جارٍ التحميل"
+    "loading": "جارٍ التحميل",
+    "seasonEpisodeLabel": "م{season} • ح{episode}",
+    "episodeShort": "ح{number}"
   },
   "offline": {
     "pageTitle": "بدون إنترنت",
@@ -84,7 +120,13 @@
     "cancelDownload": "إلغاء التنزيل",
     "waitForComplete": "يرجى الانتظار حتى اكتمال التنزيل للمشاهدة بدون إنترنت.",
     "waitingInQueue": "في انتظار الدور...",
-    "downloading": "جارٍ التنزيل..."
+    "downloading": "جارٍ التنزيل...",
+    "statusCompleted": "مكتمل",
+    "statusFailed": "فشل",
+    "statusDownloading": "جارٍ التحميل",
+    "statusQueued": "في الانتظار",
+    "statusCancelled": "ملغى",
+    "statusPaused": "متوقف مؤقتاً"
   },
   "watchlist": {
     "pageTitle": "قائمة",
@@ -94,5 +136,46 @@
     "emptyTitle": "قائمة المشاهدة فارغة",
     "emptyDescription": "احفظ الأفلام والمسلسلات لمشاهدتها لاحقاً",
     "viewDetails": "عرض تفاصيل {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "فشل الإزالة من القائمة",
+    "minutesLeft": "{minutes}د متبقية",
+    "hoursLeft": "{hours}س متبقية",
+    "hoursMinutesLeft": "{hours}س {minutes}د متبقية"
+  },
+  "countdown": {
+    "startingExperience": "بدء التجربة",
+    "getReady": "استعد لتجربة سينمائية استثنائية",
+    "go": "انطلق",
+    "eliteExperience": "تجربة AI متميزة • EMA محصّن"
+  },
+  "aria": {
+    "videoPlayer": "مشغل الفيديو",
+    "seekBackward": "الرجوع 10 ثوانٍ",
+    "seekForward": "التقديم 10 ثوانٍ",
+    "playPause": "تشغيل/إيقاف مؤقت",
+    "seekBar": "شريط التقديم",
+    "skipControls": "أزرار التخطي",
+    "fullscreen": "ملء الشاشة",
+    "volume": "مستوى الصوت",
+    "settings": "الإعدادات",
+    "audioSubtitle": "محددات الصوت والترجمة",
+    "episodePanel": "لوحة الحلقات",
+    "playerHeader": "رأس المشغل",
+    "subtitle": "الترجمة",
+    "playbackCountdown": "العد التنازلي للتشغيل",
+    "countdownTitle": "العد التنازلي للتشغيل"
+  },
+  "page": {
+    "seasonLabel": "الموسم {number}",
+    "unknownTitle": "غير معروف",
+    "episodeLabel": "الحلقة {number}",
+    "noStream": "لا يوجد بث متاح",
+    "errorLoading": "حدث خطأ أثناء تحميل البث",
+    "startFromContent": "يرجى بدء التشغيل من صفحة المحتوى",
+    "tryAgain": "حاول مرة أخرى",
+    "goToHome": "الذهاب إلى الرئيسية",
+    "continuePortrait": "متابعة المشاهدة في الوضع العمودي.",
+    "movieYear": "فيلم · {year}"
   }
 }

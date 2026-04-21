@@ -55,8 +55,8 @@ export function useWatchPartyLifecycle({
   rtmSendMessage,
   setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
-  const t = useTranslations('toasts');
-  // --- REAL-TIME APPROVAL LISTENER (Socket.IO for Guests) ---
+  const t = useTranslations('common.toasts');
+  const tp = useTranslations('party.toasts');
   useEffect(() => {
     const guestToken =
       typeof window !== 'undefined'
@@ -136,11 +136,11 @@ export function useWatchPartyLifecycle({
               setRequestStatus('joined');
               toast.success(t('requestApproved'));
             } else {
-              setError('Failed to fetch room details after approval.');
+              setError(tp('failedFetchRoom'));
             }
           } else if (payload.status === 'rejected') {
             setRequestStatus('rejected');
-            setError('The host declined your request to join.');
+            setError(tp('hostDeclined'));
           }
 
           tempSocket?.off('JOIN_RESULT', handleJoinResult);
@@ -177,6 +177,7 @@ export function useWatchPartyLifecycle({
     setError,
     setAgoraRtmToken,
     t,
+    tp,
   ]);
 
   const createRoom = useCallback(
@@ -196,7 +197,7 @@ export function useWatchPartyLifecycle({
         setRequestStatus('joined');
         return normalizedRoom;
       } else {
-        setError(response.error || 'Failed to create room');
+        setError(response.error || tp('failedCreateRoom'));
         return null;
       }
     },
@@ -208,6 +209,7 @@ export function useWatchPartyLifecycle({
       setIsConnected,
       setRequestStatus,
       normalizeRoomUrls,
+      tp,
     ],
   );
 
@@ -282,7 +284,7 @@ export function useWatchPartyLifecycle({
       // Broadcast to RTM channel before calling backend
       rtmSendMessage({
         type: 'PARTY_CLOSED',
-        reason: 'The host has ended the party.',
+        reason: tp('hostEndedParty'),
       });
       // Small buffer to ensure message delivery before backend destroys room
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -307,6 +309,7 @@ export function useWatchPartyLifecycle({
     setIsConnected,
     setRequestStatus,
     setMessages,
+    tp,
   ]);
 
   const cancelRequest = useCallback(

@@ -8,6 +8,33 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAgora } from '@/features/watch-party/media/hooks/useAgora';
 
+// Override global next-intl mock with a stable reference to prevent infinite re-render loops
+// caused by useTranslations() returning a new function on every call.
+const stableT = (key: string, values?: Record<string, unknown>) => {
+  if (values) {
+    let result = key;
+    for (const [k, v] of Object.entries(values)) {
+      result = result.replace(`{${k}}`, String(v));
+    }
+    return result;
+  }
+  return key;
+};
+vi.mock('next-intl', () => ({
+  useTranslations: () => stableT,
+  useLocale: () => 'en',
+  useMessages: () => ({}),
+  useNow: () => new Date(),
+  useTimeZone: () => 'UTC',
+  useFormatter: () => ({
+    number: (n: number) => String(n),
+    dateTime: (d: Date) => d.toISOString(),
+    relativeTime: (d: Date) => d.toISOString(),
+  }),
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
+
 vi.mock('sonner', () => ({
   toast: {
     success: vi.fn(),

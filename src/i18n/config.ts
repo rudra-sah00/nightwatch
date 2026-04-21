@@ -1,8 +1,6 @@
 export const locales = [
   'en',
   'hi',
-  'ta',
-  'te',
   'es',
   'fr',
   'ja',

@@ -128,14 +128,14 @@ describe('DownloadMenu', () => {
       render(<DownloadMenu show={nonS2Show} />);
       // We look for EXACT match in name, wait, there's SVG inside, so byRole works with regex.
       expect(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       ).toBeInTheDocument();
     });
 
     it('renders a Download button for S2 movie content', () => {
       render(<DownloadMenu show={s2MovieShow} />);
       expect(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       ).toBeInTheDocument();
     });
 
@@ -148,7 +148,7 @@ describe('DownloadMenu', () => {
         />,
       );
       expect(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       ).toBeInTheDocument();
     });
   });
@@ -163,7 +163,7 @@ describe('DownloadMenu', () => {
       render(<DownloadMenu show={s2MovieShow} />);
       // Open dialog
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       // Wait for fetch qualities api to be called
@@ -184,7 +184,7 @@ describe('DownloadMenu', () => {
       });
     });
 
-    it('quality URLs trigger electron download with corresponding URL', async () => {
+    it('quality URLs trigger tauri download with corresponding URL', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,
@@ -192,7 +192,7 @@ describe('DownloadMenu', () => {
 
       render(<DownloadMenu show={s2MovieShow} />);
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => screen.getByRole('button', { name: /1080P\+/i }));
@@ -215,11 +215,13 @@ describe('DownloadMenu', () => {
 
       render(<DownloadMenu show={s2MovieShow} />);
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/no formats available/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/download\.noFormatsAvailable/i),
+        ).toBeInTheDocument();
       });
     });
 
@@ -228,11 +230,13 @@ describe('DownloadMenu', () => {
 
       render(<DownloadMenu show={s2MovieShow} />);
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/no formats available/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/download\.noFormatsAvailable/i),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -247,7 +251,7 @@ describe('DownloadMenu', () => {
         />,
       );
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => {
@@ -274,11 +278,13 @@ describe('DownloadMenu', () => {
         />,
       );
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/no episodes available/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/download\.noEpisodesAvailable/i),
+        ).toBeInTheDocument();
       });
     });
 
@@ -296,7 +302,7 @@ describe('DownloadMenu', () => {
         />,
       );
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       // Wait for episode row to appear
@@ -319,7 +325,7 @@ describe('DownloadMenu', () => {
       });
     });
 
-    it('episode qualities trigger electron download', async () => {
+    it('episode qualities trigger tauri download', async () => {
       vi.mocked(apiFetch).mockResolvedValue({
         success: true,
         qualities: mockQualities,
@@ -333,7 +339,7 @@ describe('DownloadMenu', () => {
         />,
       );
       await userEvent.click(
-        screen.getByRole('button', { name: /^download$/i }),
+        screen.getByRole('button', { name: /download\.download/i }),
       );
 
       await waitFor(() => screen.getByText('Pilot'));

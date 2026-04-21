@@ -9,11 +9,16 @@ import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
 
-function formatRemainingTime(minutes: number) {
-  if (minutes < 60) return `${minutes}m left`;
+function formatRemainingTime(
+  minutes: number,
+  t: (key: string, values?: Record<string, string | number | Date>) => string,
+) {
+  if (minutes < 60) return t('continueWatching.minutesLeft', { minutes });
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m left` : `${hours}h left`;
+  return mins > 0
+    ? t('continueWatching.hoursMinutesLeft', { hours, minutes: mins })
+    : t('continueWatching.hoursLeft', { hours });
 }
 
 interface ContinueWatchingProps {
@@ -128,6 +133,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
   onRemove,
 }: WatchProgressItemProps) {
   const t = useTranslations('search');
+  const tw = useTranslations('watch');
   return (
     // biome-ignore lint/a11y/useSemanticElements: outer wrapper contains a nested <button>, can't use <button> here
     <div
@@ -194,7 +200,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
 
               <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
               <span className="text-neo-blue">
-                {formatRemainingTime(item.remainingMinutes)}
+                {formatRemainingTime(item.remainingMinutes, tw)}
               </span>
             </div>
           </div>

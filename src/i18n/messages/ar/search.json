@@ -28,8 +28,7 @@
     "emptyTitle": "سجل المشاهدة فارغ",
     "emptyDescription": "ابدأ بمشاهدة شيء وسيظهر هنا",
     "removeAriaLabel": "إزالة من القائمة",
-    "sectionAriaLabel": "المحتوى المشاهد مؤخراً",
-    "timeLeft": "{time} متبقي"
+    "sectionAriaLabel": "المحتوى المشاهد مؤخراً"
   },
   "contentDetail": {
     "series": "مسلسل",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "إلغاء حفلة المشاهدة",
     "continue": "متابعة",
     "experienceStarting": "التجربة تبدأ",
-    "preparingContent": "جارٍ تحضير \"{title}\"..."
+    "preparingContent": "جارٍ تحضير \"{title}\"...",
+    "closeModal": "إغلاق النافذة",
+    "episodesAriaLabel": "الحلقات",
+    "failedToLoadDetails": "فشل تحميل تفاصيل العرض. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+    "failedToLoadEpisodes": "فشل تحميل قائمة الحلقات. سيتم استخدام البيانات المخزنة مؤقتاً إن توفرت.",
+    "watchPartyError": "حدث خطأ غير متوقع أثناء إنشاء حفلة المشاهدة."
   },
   "actions": {
     "watchSolo": "مشاهدة فردية",
@@ -60,7 +64,8 @@
     "watchTogether": "مشاهدة معاً",
     "creating": "جارٍ الإنشاء",
     "toWatchlist": "إلى القائمة",
-    "removeFromList": "إزالة من القائمة"
+    "removeFromList": "إزالة من القائمة",
+    "episodeFallbackTitle": "الحلقة {number}"
   },
   "download": {
     "download": "تنزيل",
@@ -76,6 +81,23 @@
     "saved": "تم الحفظ",
     "securelyStarting": "جارٍ بدء التنزيل الآمن...",
     "episode": "الحلقة {number}",
-    "untitled": "بدون عنوان"
-  }
+    "untitled": "بدون عنوان",
+    "downloadSrOnly": "تحميل {title}",
+    "downloadingToast": "جارٍ التحميل{epText}! تحقق من مكتبتك بدون اتصال.",
+    "downloadingEpisodeText": " للحلقة {episode}",
+    "episodeLabel": "الحلقة {number}",
+    "episodePrefix": "الحلقة"
+  },
+  "episodeCard": {
+    "loading": "جارٍ التحميل...",
+    "epPrefix": "ح {number}",
+    "episodeFallback": "الحلقة {number}",
+    "minSuffix": "{duration} د"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {موسم #} other {# مواسم}}",
+    "seasonEpisodePrefix": "م{season}:ح{episode}",
+    "minutesSuffix": "{runtime}د"
+  },
+  "marquee": "الشكل يتبع الوظيفة • سينما رودرا • البساطة هي الحقيقة • بلا تشتيت • فقط أفلام •"
 }

@@ -4,10 +4,10 @@ import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
-import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
+import { TauriDragRegion } from '@/components/layout/tauri-drag-region';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/providers/auth-provider';
 import { IntlProvider } from '@/providers/intl-provider';
@@ -67,25 +67,25 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
         <SerwistProvider swUrl="/sw.js">
-          {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
-          <ElectronDragRegion />
+          <Suspense fallback={<div className="min-h-screen" />}>
+            <IntlProvider>
+              {/* Tauri Window Drag Region (top edge where macOS/Windows controls sit) */}
+              <TauriDragRegion />
 
-          <ThemeProvider>
-            <SocketProvider>
-              <AuthProvider>
-                <Suspense fallback={<div className="min-h-screen" />}>
-                  <IntlProvider>
+              <ThemeProvider>
+                <SocketProvider>
+                  <AuthProvider>
                     <ProgressBar />
                     <DiscordPresenceSync />
                     <OfflineIndicator />
                     <SwUpdatePrompt />
                     {children}
-                  </IntlProvider>
-                </Suspense>
-                <Toaster />
-              </AuthProvider>
-            </SocketProvider>
-          </ThemeProvider>
+                    <Toaster />
+                  </AuthProvider>
+                </SocketProvider>
+              </ThemeProvider>
+            </IntlProvider>
+          </Suspense>
         </SerwistProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@
 import { Theme } from 'emoji-picker-react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
@@ -32,6 +33,7 @@ export function EmojiReactions({
   const { showPicker, setShowPicker, pickerRef, handleTriggerEmoji } =
     useEmojiReactions({ rtmSendMessage, userId, userName });
   const { theme: appTheme } = useTheme();
+  const t = useTranslations('party');
 
   const resolvedDark =
     appTheme === 'dark' ||
@@ -70,8 +72,8 @@ export function EmojiReactions({
             ? 'bg-background/20 text-primary-foreground'
             : 'text-primary-foreground/40 hover:text-primary-foreground/10',
         )}
-        title="Full Emoji Library"
-        aria-label="Open emoji picker"
+        title={t('emoji.fullLibrary')}
+        aria-label={t('emoji.openPicker')}
         aria-expanded={showPicker}
         aria-haspopup="dialog"
       >

@@ -25,9 +25,27 @@
     "movie": "映画",
     "tvSeries": "テレビシリーズ",
     "live": "ライブ",
-    "liveBadge": "LIVE",
+    "liveBadge": "ライブ",
     "watchingLive": "ライブ視聴中",
-    "jumpToLive": "ライブに移動"
+    "jumpToLive": "ライブに移動",
+    "lockedHostControls": "ロック中 - ホスト操作",
+    "hostControls": "ホスト操作",
+    "rotateDevice": "最適な体験のためにデバイスを回転してください",
+    "fullscreenNotSupported": "このブラウザではフルスクリーンがサポートされていません",
+    "failedEnterFullscreen": "フルスクリーンへの切り替えに失敗しました",
+    "failedExitFullscreen": "フルスクリーンの解除に失敗しました",
+    "fullscreenToggleFailed": "フルスクリーンの切り替えに失敗しました",
+    "seekTime": "シーク時間",
+    "liveSeekBar": "ライブ配信シークバー",
+    "atLiveEdge": "ライブ配信中",
+    "behindLive": "ライブから{seconds}秒遅れ",
+    "closeSidebar": "サイドバーを閉じる",
+    "openSidebar": "サイドバーを開く",
+    "seasonEpisodeLabel": "シーズン{season} · エピソード{episode}",
+    "rotateToLandscape": "横向きに回転",
+    "landscapeOnlyMessage": "このプレーヤーは横向きモードでのみ利用可能です",
+    "showEpisodes": "エピソードを表示",
+    "episodesTitle": "エピソード"
   },
   "settings": {
     "quality": "画質",
@@ -44,7 +62,24 @@
     "font": "フォント",
     "background": "背景",
     "textColor": "テキスト色",
-    "textEffect": "テキスト効果"
+    "textEffect": "テキスト効果",
+    "sizeSmall": "小",
+    "sizeMedium": "中",
+    "sizeLarge": "大",
+    "sizeExtraLarge": "特大",
+    "bgBlack": "黒",
+    "bgDarkGray": "ダークグレー",
+    "bgTransparent": "透明",
+    "bgSemiTransparent": "半透明",
+    "colorWhite": "白",
+    "colorYellow": "黄色",
+    "colorCyan": "シアン",
+    "colorLightGreen": "ライトグリーン",
+    "shadowNone": "なし",
+    "shadowDropShadow": "ドロップシャドウ",
+    "shadowOutline": "アウトライン",
+    "shadowGlow": "グロー",
+    "fontSystemDefault": "システムデフォルト"
   },
   "audio": {
     "title": "音声",
@@ -53,12 +88,11 @@
   "episodes": {
     "episode": "エピソード {number}",
     "season": "シーズン {number}",
-    "seasonShort": "S{number}",
     "clickToPlay": "クリックして再生",
     "loading": "読み込み中...",
     "noEpisodes": "エピソードなし",
-    "nowPlaying": "再生中",
-    "min": "{duration}分"
+    "min": "{duration}分",
+    "episodeShort": "E{number}"
   },
   "nextEpisode": {
     "nextSeason": "次のシーズン",
@@ -66,7 +100,9 @@
     "inCountdown": "{seconds}秒後",
     "play": "再生",
     "cancel": "キャンセル",
-    "loading": "読み込み中"
+    "loading": "読み込み中",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "オフライン",
@@ -84,7 +120,13 @@
     "cancelDownload": "ダウンロードをキャンセル",
     "waitForComplete": "オフラインで視聴するにはダウンロードが完了するまでお待ちください。",
     "waitingInQueue": "キューで待機中...",
-    "downloading": "ダウンロード中..."
+    "downloading": "ダウンロード中...",
+    "statusCompleted": "完了",
+    "statusFailed": "失敗",
+    "statusDownloading": "ダウンロード中",
+    "statusQueued": "待機中",
+    "statusCancelled": "キャンセル済み",
+    "statusPaused": "一時停止"
   },
   "watchlist": {
     "pageTitle": "マイ",
@@ -94,5 +136,46 @@
     "emptyTitle": "ウォッチリストは空です",
     "emptyDescription": "後で見る映画やシリーズを保存しましょう",
     "viewDetails": "{title}の詳細を見る"
+  },
+  "continueWatching": {
+    "failedToRemove": "リストからの削除に失敗しました",
+    "minutesLeft": "残り{minutes}分",
+    "hoursLeft": "残り{hours}時間",
+    "hoursMinutesLeft": "残り{hours}時間{minutes}分"
+  },
+  "countdown": {
+    "startingExperience": "体験を開始",
+    "getReady": "最高の映画体験に備えよう",
+    "go": "スタート",
+    "eliteExperience": "エリートAI体験 • EMAハードニング"
+  },
+  "aria": {
+    "videoPlayer": "ビデオプレーヤー",
+    "seekBackward": "10秒戻る",
+    "seekForward": "10秒進む",
+    "playPause": "再生/一時停止",
+    "seekBar": "シークバー",
+    "skipControls": "スキップ操作",
+    "fullscreen": "フルスクリーン",
+    "volume": "音量",
+    "settings": "設定",
+    "audioSubtitle": "音声・字幕セレクター",
+    "episodePanel": "エピソードパネル",
+    "playerHeader": "プレーヤーヘッダー",
+    "subtitle": "字幕",
+    "playbackCountdown": "再生カウントダウン",
+    "countdownTitle": "再生カウントダウン"
+  },
+  "page": {
+    "seasonLabel": "シーズン{number}",
+    "unknownTitle": "不明",
+    "episodeLabel": "エピソード{number}",
+    "noStream": "利用可能なストリームがありません",
+    "errorLoading": "ストリームの読み込み中にエラーが発生しました",
+    "startFromContent": "コンテンツページから再生を開始してください",
+    "tryAgain": "再試行",
+    "goToHome": "ホームへ",
+    "continuePortrait": "縦向きモードで視聴を続ける。",
+    "movieYear": "映画 · {year}"
   }
 }

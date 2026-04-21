@@ -81,7 +81,7 @@ describe('WatchPartyLobby', () => {
       );
 
       // Should have a loading message
-      expect(screen.getByText('Loading room…')).toBeInTheDocument();
+      expect(screen.getByText('loadingRoom')).toBeInTheDocument();
     });
   });
 
@@ -89,18 +89,14 @@ describe('WatchPartyLobby', () => {
     it('should show room not found message', () => {
       render(<WatchPartyLobby {...defaultProps} roomNotFound={true} />);
 
-      expect(screen.getByText('Room Not Found')).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'This watch party has ended or the link is no longer valid.',
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText('roomNotFound')).toBeInTheDocument();
+      expect(screen.getByText('roomNotFoundDesc')).toBeInTheDocument();
     });
 
     it('should navigate to home when Go Home clicked', () => {
       render(<WatchPartyLobby {...defaultProps} roomNotFound={true} />);
 
-      fireEvent.click(screen.getByText('Back to Home'));
+      fireEvent.click(screen.getByText('backToHome'));
       expect(mockPush).toHaveBeenCalledWith('/home');
     });
   });
@@ -109,18 +105,14 @@ describe('WatchPartyLobby', () => {
     it('should show waiting for approval message', () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="pending" />);
 
-      expect(screen.getByText('Waiting for Approval')).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "The host has been notified. You'll join automatically once approved.",
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText('waitingForApproval')).toBeInTheDocument();
+      expect(screen.getByText('waitingForApprovalDesc')).toBeInTheDocument();
     });
 
     it('should show cancel request button', () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="pending" />);
 
-      expect(screen.getByText('Cancel Request')).toBeInTheDocument();
+      expect(screen.getByText('cancelRequest')).toBeInTheDocument();
     });
 
     it('should call onCancelRequest when cancel is clicked', () => {
@@ -133,7 +125,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      fireEvent.click(screen.getByText('Cancel Request'));
+      fireEvent.click(screen.getByText('cancelRequest'));
       expect(onCancelRequest).toHaveBeenCalled();
     });
 
@@ -148,7 +140,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      fireEvent.click(screen.getByText('Cancel Request'));
+      fireEvent.click(screen.getByText('cancelRequest'));
       expect(onLeave).toHaveBeenCalled();
     });
   });
@@ -157,18 +149,14 @@ describe('WatchPartyLobby', () => {
     it('should show rejection message', () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="rejected" />);
 
-      expect(screen.getByText('Request Declined')).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'The host has declined your request to join this party.',
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText('requestDeclined')).toBeInTheDocument();
+      expect(screen.getByText('requestDeclinedDesc')).toBeInTheDocument();
     });
 
     it('should navigate to home when Go Home is clicked', async () => {
       render(<WatchPartyLobby {...defaultProps} requestStatus="rejected" />);
 
-      const goHomeButton = screen.getByRole('button', { name: /go home/i });
+      const goHomeButton = screen.getByRole('button', { name: /goHome/i });
       await userEvent.click(goHomeButton);
 
       expect(mockPush).toHaveBeenCalledWith('/home');
@@ -180,37 +168,29 @@ describe('WatchPartyLobby', () => {
       render(<WatchPartyLobby {...defaultProps} />);
 
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
-      // Season/episode rendered with middot entity — target the <p> element directly
-      expect(
-        screen.getByText(
-          (_, el) =>
-            el?.tagName === 'P' &&
-            (el?.textContent?.includes('Season 1') ?? false) &&
-            (el?.textContent?.includes('Episode 3') ?? false),
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText('seasonEpisode')).toBeInTheDocument();
       expect(screen.getByText('Walter White')).toBeInTheDocument();
-      expect(screen.getByText('3 watching')).toBeInTheDocument();
+      expect(screen.getByText('watching')).toBeInTheDocument();
     });
 
     it('should show Request to Join button for authenticated user', () => {
       render(<WatchPartyLobby {...defaultProps} />);
 
-      expect(screen.getByText('Request to Join')).toBeInTheDocument();
+      expect(screen.getByText('requestToJoin')).toBeInTheDocument();
     });
 
     it('should call onJoin when join button is clicked', () => {
       const onJoin = vi.fn();
       render(<WatchPartyLobby {...defaultProps} onJoin={onJoin} />);
 
-      fireEvent.click(screen.getByText('Request to Join'));
+      fireEvent.click(screen.getByText('requestToJoin'));
       expect(onJoin).toHaveBeenCalled();
     });
 
     it('should navigate to home when Cancel is clicked', () => {
       render(<WatchPartyLobby {...defaultProps} />);
 
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.click(screen.getByText('cancel'));
       expect(mockPush).toHaveBeenCalledWith('/home');
     });
   });
@@ -220,7 +200,7 @@ describe('WatchPartyLobby', () => {
       render(<WatchPartyLobby {...defaultProps} user={null} />);
 
       expect(
-        screen.getByPlaceholderText('ENTER YOUR NAME'),
+        screen.getByPlaceholderText('namePlaceholder'),
       ).toBeInTheDocument();
     });
 
@@ -234,7 +214,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      const input = screen.getByPlaceholderText('ENTER YOUR NAME');
+      const input = screen.getByPlaceholderText('namePlaceholder');
       fireEvent.change(input, { target: { value: 'John' } });
 
       expect(onGuestNameChange).toHaveBeenCalledWith('John');
@@ -269,7 +249,7 @@ describe('WatchPartyLobby', () => {
         screen.getByText(
           (_, el) =>
             el?.tagName === 'P' &&
-            (el?.textContent?.includes('Verified') ?? false),
+            (el?.textContent?.includes('verified') ?? false),
         ),
       ).toBeInTheDocument();
     });
@@ -277,7 +257,7 @@ describe('WatchPartyLobby', () => {
     it('should disable join for guest without name', () => {
       render(<WatchPartyLobby {...defaultProps} user={null} guestName="" />);
 
-      const joinButton = screen.getByText('Request to Join');
+      const joinButton = screen.getByText('requestToJoin');
       expect(joinButton.closest('button')).toBeDisabled();
     });
 
@@ -291,7 +271,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      const joinButton = screen.getByText('Request to Join');
+      const joinButton = screen.getByText('requestToJoin');
       expect(joinButton.closest('button')).toBeDisabled();
     });
 
@@ -305,7 +285,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      const joinButton = screen.getByText('Request to Join');
+      const joinButton = screen.getByText('requestToJoin');
       expect(joinButton.closest('button')).not.toBeDisabled();
     });
   });
@@ -314,14 +294,13 @@ describe('WatchPartyLobby', () => {
     it('should show loading spinner when joining', () => {
       render(<WatchPartyLobby {...defaultProps} isLoading={true} />);
 
-      // The ellipsis is a unicode character, not "..."
-      expect(screen.getByText('Requesting\u2026')).toBeInTheDocument();
+      expect(screen.getByText('requesting')).toBeInTheDocument();
     });
 
     it('should disable join button when loading', () => {
       render(<WatchPartyLobby {...defaultProps} isLoading={true} />);
 
-      const button = screen.getByText('Requesting\u2026').closest('button');
+      const button = screen.getByText('requesting').closest('button');
       expect(button).toBeDisabled();
     });
   });
@@ -342,7 +321,7 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      expect(screen.getByText('Code: ROOM_FULL')).toBeInTheDocument();
+      expect(screen.getByText('errorCode')).toBeInTheDocument();
     });
   });
 
@@ -350,38 +329,36 @@ describe('WatchPartyLobby', () => {
     it('should show Desktop Only screen when isMobile is true', () => {
       render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
 
-      expect(screen.getByText('Desktop Only')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Watch Party is only available on desktop/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText('desktopOnly')).toBeInTheDocument();
+      expect(screen.getByText(/desktopOnlyDesc/i)).toBeInTheDocument();
     });
 
     it('should show Go Home button on mobile block screen', () => {
       render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
 
       expect(
-        screen.getByRole('button', { name: /go home/i }),
+        screen.getByRole('button', { name: /goHome/i }),
       ).toBeInTheDocument();
     });
 
     it('should navigate to home when Go Home clicked on mobile block', () => {
       render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
 
-      fireEvent.click(screen.getByRole('button', { name: /go home/i }));
+      fireEvent.click(screen.getByRole('button', { name: /goHome/i }));
       expect(mockPush).toHaveBeenCalledWith('/home');
     });
 
     it('should not show room preview content on mobile', () => {
       render(<WatchPartyLobby {...defaultProps} isMobile={true} />);
 
-      expect(screen.queryByText('Request to Join')).not.toBeInTheDocument();
+      expect(screen.queryByText('requestToJoin')).not.toBeInTheDocument();
       expect(screen.queryByText('Breaking Bad')).not.toBeInTheDocument();
     });
 
     it('should render normally when isMobile is false', () => {
       render(<WatchPartyLobby {...defaultProps} isMobile={false} />);
 
-      expect(screen.queryByText('Desktop Only')).not.toBeInTheDocument();
+      expect(screen.queryByText('desktopOnly')).not.toBeInTheDocument();
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
     });
   });
@@ -397,7 +374,7 @@ describe('WatchPartyLobby', () => {
       render(<WatchPartyLobby {...defaultProps} roomPreview={simpleRoom} />);
 
       expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
-      expect(screen.queryByText(/Season/)).not.toBeInTheDocument();
+      expect(screen.queryByText('seasonEpisode')).not.toBeInTheDocument();
     });
 
     it('should return null when no room preview and not loading/not found', () => {

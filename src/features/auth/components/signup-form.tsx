@@ -146,7 +146,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 id="name"
                 name="name"
                 type="text"
-                placeholder="WALTER GROPIUS"
+                placeholder={t('signup.namePlaceholder')}
                 autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
@@ -169,7 +169,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   id="username"
                   name="username"
                   type="text"
-                  placeholder="WALTER_1919"
+                  placeholder={t('signup.usernamePlaceholder')}
                   autoComplete="username"
                   autoCapitalize="none"
                   spellCheck={false}
@@ -212,7 +212,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="DIRECTOR@BAUHAUS.DE"
+                placeholder={t('signup.emailPlaceholder')}
                 autoComplete="email"
                 autoCapitalize="none"
                 inputMode="email"
@@ -298,7 +298,9 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={
+                    showPassword ? t('hidePassword') : t('showPassword')
+                  }
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -322,7 +324,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                       color: getPasswordStrength(formData.password).color,
                     }}
                   >
-                    {getPasswordStrength(formData.password).label}
+                    {t(getPasswordStrength(formData.password).label)}
                   </span>
                 </div>
               )}
@@ -370,15 +372,13 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               }}
               onError={() => {
                 setCaptchaToken(null);
-                const message =
-                  'Security verification could not load. Please disable blockers/VPN and retry.';
+                const message = t('errors.captchaLoadFailed');
                 setError(message);
                 toast.error(message);
               }}
               onExpire={() => {
                 setCaptchaToken(null);
-                const message =
-                  'Security verification expired. Please complete it again.';
+                const message = t('errors.captchaExpired');
                 setError(message);
                 toast.error(message);
               }}

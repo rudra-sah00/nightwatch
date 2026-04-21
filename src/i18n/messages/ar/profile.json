@@ -17,7 +17,22 @@
     "more": "أكثر",
     "noActivity": "لا يوجد نشاط",
     "minSuffix": "{count} دقيقة",
-    "last365": "آخر 365 يوماً من التفاعل"
+    "last365": "آخر 365 يوماً من التفاعل",
+    "heatmapAriaLabel": "خريطة حرارية لنشاط المشاهدة خلال العام الماضي",
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو",
+      "jul": "يوليو",
+      "aug": "أغسطس",
+      "sep": "سبتمبر",
+      "oct": "أكتوبر",
+      "nov": "نوفمبر",
+      "dec": "ديسمبر"
+    }
   },
   "releaseNotes": {
     "title": "ملاحظات الإصدار",
@@ -52,7 +67,8 @@
     "balanced": "متوازن",
     "performance": "أداء",
     "highQuality": "جودة عالية",
-    "hls4k": "HLS 4K"
+    "hls4k": "HLS 4K",
+    "ariaLabel": "اختيار الخادم"
   },
   "dangerZone": {
     "title": "منطقة الخطر",
@@ -80,14 +96,46 @@
     "maxConcurrentDescription": "عدد الأفلام أو الحلقات التي يمكن تنزيلها في نفس الوقت. الافتراضي هو 3.",
     "downloadSpeedLimit": "حد سرعة التنزيل",
     "downloadSpeedDescription": "تقييد سرعة التنزيل في الخلفية. مفيد إذا أصبحت شبكتك بطيئة!",
-    "unlimited": "غير محدود"
+    "unlimited": "غير محدود",
+    "cancel": "إلغاء",
+    "set": "تعيين",
+    "customConcurrent": "مخصص (1-10)",
+    "customSpeed": "مخصص ميجابايت/ث"
   },
   "publicProfile": {
     "returnBase": "العودة للقاعدة",
+    "unknownUser": "مستخدم_مجهول",
     "identityVerified": "تم التحقق من الهوية",
     "persistentIdentity": "الهوية الدائمة: {id}",
     "daysActive": "أيام النشاط",
     "hrsTotal": "ساعات الإجمالي",
-    "coreVersion": "الإصدار الأساسي: V1.0-مستقر"
+    "coreVersion": "الإصدار الأساسي: V1.0-مستقر",
+    "userIdentity": "هوية المستخدم: {id}"
+  },
+  "messages": {
+    "invalidInput": "إدخال غير صالح",
+    "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
+    "passwordFailed": "فشل تحديث كلمة المرور",
+    "usernameFailed": "فشل التحقق من توفر اسم المستخدم",
+    "noChanges": "لا توجد تغييرات للحفظ",
+    "usernameNotAvailable": "اسم المستخدم غير متاح",
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "profileFailed": "فشل تحديث الملف الشخصي",
+    "accountDeleted": "تم حذف الحساب بنجاح",
+    "accountDeleteFailed": "فشل حذف الحساب",
+    "activityFailed": "فشل تحميل النشاط",
+    "imageUpdated": "تم تحديث صورة الملف الشخصي",
+    "imageFailed": "فشل رفع الصورة",
+    "unknown": "غير معروف"
+  },
+  "validation": {
+    "nameMinLength": "يجب أن يتكون الاسم من حرفين على الأقل",
+    "usernameMinLength": "يجب أن يتكون اسم المستخدم من 3 أحرف على الأقل",
+    "usernameFormat": "يمكن أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات سفلية فقط",
+    "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
+    "passwordMinLength": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+    "passwordUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+    "passwordSpecialChar": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل",
+    "newPasswordsMismatch": "كلمتا المرور الجديدتان غير متطابقتين"
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { Send } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '../../room/types';
@@ -31,6 +32,7 @@ export function FloatingChat({
   canChat = true,
 }: FloatingChatProps) {
   const [input, setInput] = useState('');
+  const t = useTranslations('party');
   const listRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef(0);
 
@@ -103,8 +105,8 @@ export function FloatingChat({
               >
                 {isMe
                   ? currentUserName
-                    ? `You (${currentUserName})`
-                    : 'You'
+                    ? t('chat.youWithName', { name: currentUserName })
+                    : t('chat.you')
                   : msg.userName}
                 :
               </span>
@@ -121,16 +123,16 @@ export function FloatingChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="TYPE SOMETHING..."
+            placeholder={t('chat.typeSomething')}
             maxLength={200}
-            aria-label="Send a chat message"
+            aria-label={t('chat.sendMessage')}
             className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-white placeholder:text-white/50 bg-black/80 backdrop-blur-sm border-[3px] border-white/20 px-3 py-2.5 outline-none focus:bg-black transition-colors min-w-0 rounded-md"
           />
           <Button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
-            aria-label="Send"
+            aria-label={t('chat.send')}
             className="p-2.5 bg-neo-yellow border-[3px] border-black text-black font-black active:bg-neo-yellow/80 hover:bg-neo-yellow/90 hover:text-black transition-colors disabled:opacity-50 disabled:grayscale rounded-md"
           >
             <Send className="w-4 h-4 stroke-[3px]" />

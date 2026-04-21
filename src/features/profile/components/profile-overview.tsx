@@ -142,7 +142,7 @@ export function ProfileOverview() {
       {/* Watch Activity Heatmap */}
       <section
         className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 overflow-x-auto"
-        aria-label="Watch activity heatmap for the past year"
+        aria-label={t('activity.heatmapAriaLabel')}
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">

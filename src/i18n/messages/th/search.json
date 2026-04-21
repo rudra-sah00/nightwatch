@@ -28,8 +28,7 @@
     "emptyTitle": "ประวัติการดูว่างเปล่า",
     "emptyDescription": "เริ่มดูอะไรสักอย่างแล้วจะปรากฏที่นี่",
     "removeAriaLabel": "ลบออกจากรายการ",
-    "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด",
-    "timeLeft": "เหลือ {time}"
+    "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด"
   },
   "contentDetail": {
     "series": "ซีรีส์",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "ยกเลิกปาร์ตี้ดูหนัง",
     "continue": "ดูต่อ",
     "experienceStarting": "กำลังเริ่มประสบการณ์",
-    "preparingContent": "กำลังเตรียม \"{title}\"..."
+    "preparingContent": "กำลังเตรียม \"{title}\"...",
+    "closeModal": "ปิดหน้าต่าง",
+    "episodesAriaLabel": "ตอน",
+    "failedToLoadDetails": "ไม่สามารถโหลดรายละเอียดรายการได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+    "failedToLoadEpisodes": "ไม่สามารถโหลดรายการตอนได้ จะใช้ข้อมูลแคชหากมี",
+    "watchPartyError": "เกิดข้อผิดพลาดที่ไม่คาดคิดขณะสร้างวอทช์ปาร์ตี้"
   },
   "actions": {
     "watchSolo": "ดูคนเดียว",
@@ -60,7 +64,8 @@
     "watchTogether": "ดูด้วยกัน",
     "creating": "กำลังสร้าง",
     "toWatchlist": "เพิ่มในรายการ",
-    "removeFromList": "ลบออกจากรายการ"
+    "removeFromList": "ลบออกจากรายการ",
+    "episodeFallbackTitle": "ตอนที่ {number}"
   },
   "download": {
     "download": "ดาวน์โหลด",
@@ -76,6 +81,23 @@
     "saved": "บันทึกแล้ว",
     "securelyStarting": "กำลังเริ่มดาวน์โหลดอย่างปลอดภัย...",
     "episode": "ตอนที่ {number}",
-    "untitled": "ไม่มีชื่อ"
-  }
+    "untitled": "ไม่มีชื่อ",
+    "downloadSrOnly": "ดาวน์โหลด {title}",
+    "downloadingToast": "กำลังดาวน์โหลด{epText}! ตรวจสอบคลังออฟไลน์ของคุณ",
+    "downloadingEpisodeText": " ตอนที่ {episode}",
+    "episodeLabel": "ตอนที่ {number}",
+    "episodePrefix": "ตอนที่"
+  },
+  "episodeCard": {
+    "loading": "กำลังโหลด...",
+    "epPrefix": "ตอน {number}",
+    "episodeFallback": "ตอนที่ {number}",
+    "minSuffix": "{duration} นาที"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# ซีซัน} other {# ซีซัน}}",
+    "seasonEpisodePrefix": "S{season}:E{episode}",
+    "minutesSuffix": "{runtime}น."
+  },
+  "marquee": "รูปแบบตามหน้าที่ • รุทระ ซีเนม่า • มินิมอลคือความจริง • ไร้สิ่งรบกวน • มีแต่ภาพยนตร์ •"
 }

@@ -8,11 +8,13 @@
     "watchlist": "관심목록",
     "downloads": "다운로드",
     "offlineDownloads": "오프라인 다운로드",
-    "profile": "프로필"
+    "profile": "프로필",
+    "logoAlt": "Watch Rudra 로고"
   },
   "language": {
     "title": "언어",
-    "description": "선호하는 언어를 선택하세요"
+    "description": "선호하는 언어를 선택하세요",
+    "closeMenu": "언어 메뉴 닫기"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "파티 종료",
     "messageFailed": "메시지 전송 실패",
     "partyTimeLimit": "워치 파티가 3시간 제한에 도달하여 종료됩니다.",
-    "startFailed": "재생 시작 실패",
-    "linkCopied": "링크가 복사되었습니다!",
-    "profileUpdated": "프로필이 업데이트되었습니다",
-    "passwordChanged": "비밀번호가 변경되었습니다",
-    "accountDeleted": "계정이 삭제되었습니다",
-    "error": "문제가 발생했습니다",
-    "networkError": "네트워크 오류. 연결을 확인해 주세요.",
-    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요."
+    "startFailed": "재생 시작 실패"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "앱 버전"
   },
   "passwordInfo": {
-    "requirements": "요구사항"
+    "requirements": "요구사항",
+    "ariaLabel": "비밀번호 요구사항",
+    "title": "비밀번호 요구사항",
+    "minChars": "8자 이상",
+    "uppercase": "대문자 (A-Z)",
+    "specialChar": "특수문자 (!@#$%^&*)",
+    "breachNote": "비밀번호를 확인합니다",
+    "knownBreaches": "알려진 유출"
   },
   "actions": {
-    "close": "닫기"
+    "close": "닫기",
+    "closeModal": "모달 닫기"
+  },
+  "loading": "로딩 중...",
+  "skipToContent": "콘텐츠로 건너뛰기",
+  "offline": {
+    "title": "오프라인 상태입니다",
+    "description": "Watch Rudra를 탐색하려면 연결이 필요합니다. 다운로드한 콘텐츠를 보려면 보관함을 여세요.",
+    "openVault": "오프라인 보관함 열기",
+    "toastOffline": "오프라인 상태입니다",
+    "toastOnline": "다시 온라인!"
+  },
+  "swUpdate": {
+    "title": "새 버전 사용 가능",
+    "description": "최신 업데이트를 받으려면 새로고침하세요.",
+    "refresh": "새로고침"
+  },
+  "discord": {
+    "readyToStream": "스트리밍 준비 완료",
+    "atLoginScreen": "로그인 화면",
+    "browsingDashboard": "대시보드 탐색 중",
+    "lookingForContent": "콘텐츠 검색 중",
+    "browsingHomepage": "홈페이지 탐색 중",
+    "browsingLiveMatches": "라이브 경기 탐색 중",
+    "findingStream": "스트림 찾는 중...",
+    "curatingWatchlist": "관심목록 정리 중",
+    "planningMarathon": "다음 마라톤 계획 중",
+    "adjustingSettings": "설정 조정 중",
+    "customizingProfile": "프로필 커스터마이징 중"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "균형",
+    "highQuality": "고화질 스트림"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "나만의 스트리밍 동반자",
+    "homeTitle": "홈 | Watch Rudra",
+    "homeDescription": "영화와 TV 프로그램을 검색하여 함께 시청을 시작하세요.",
+    "continueWatchingTitle": "이어서 시청 | Watch Rudra",
+    "continueWatchingDescription": "최근 시청한 영화와 TV 프로그램을 이어서 보세요.",
+    "searchTitle": "검색 | Watch Rudra",
+    "searchDescription": "영화, TV 프로그램, 애니메이션을 검색하세요.",
+    "profileTitle": "프로필 | Watch Rudra",
+    "profileDescription": "프로필과 시청 기록을 관리하세요.",
+    "liveTitle": "라이브 경기 | Watch Rudra",
+    "liveDescription": "친구들과 실시간으로 라이브 스포츠 경기와 채널을 시청하세요.",
+    "downloadsTitle": "다운로드 | Watch Rudra",
+    "downloadsDescription": "오프라인 시청을 위해 다운로드한 영화와 TV 프로그램에 접근하세요.",
+    "watchlistTitle": "내 관심목록 | Watch Rudra",
+    "watchlistDescription": "나중에 볼 영화와 TV 프로그램을 관리하세요.",
+    "watchPartyTitle": "워치 파티 | Watch Rudra",
+    "watchPartyDescription": "친구들과 함께 실시간으로 시청하세요."
+  },
+  "desktopApp": {
+    "notInstalled": "앱 미설치",
+    "notInstalledDesc": "Watch Rudra 데스크톱 앱을 열 수 없습니다. 설치되어 있나요?",
+    "downloadApp": "앱 다운로드"
+  },
+  "whatsNew": {
+    "backToHome": "홈으로 돌아가기",
+    "title": "새로운 소식",
+    "description": "Watch Rudra의 최신 업데이트, 버그 수정 및 기능.",
+    "noReleases": "릴리스를 찾을 수 없거나 로드에 실패했습니다.",
+    "noReleaseNotes": "*릴리스 노트가 제공되지 않았습니다.*",
+    "showMore": "더 보기 (나머지 {remaining}개)"
+  },
+  "downloads": {
+    "failedToLoad": "콘텐츠 로드 실패",
+    "experienceStarting": "체험 시작 중",
+    "preparingContent": "\"{title}\" 준비 중...",
+    "episodes": "에피소드",
+    "noImageAvailable": "이미지 없음",
+    "closePreview": "미리보기 닫기",
+    "statusCompleted": "완료",
+    "statusFailed": "실패",
+    "statusDownloading": "다운로드 중",
+    "statusQueued": "대기 중",
+    "statusCancelled": "취소됨",
+    "statusPaused": "일시정지"
+  },
+  "errors": {
+    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요.",
+    "userExists": "이 이메일로 등록된 계정이 이미 있습니다.",
+    "invalidInvite": "초대 링크가 유효하지 않거나 만료되었습니다. 새 링크를 요청하세요.",
+    "captchaRequired": "보안 인증을 완료해 주세요.",
+    "captchaFailed": "보안 인증에 실패했습니다. 다시 시도해 주세요.",
+    "otpRateLimit": "시도 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+    "validationError": "일부 정보가 유효하지 않습니다. 확인 후 다시 시도해 주세요.",
+    "csrfFailed": "보안 토큰이 만료되었습니다. 페이지를 새로고침해 주세요.",
+    "notFound": "요청한 리소스를 찾을 수 없습니다.",
+    "forbidden": "이 작업을 수행할 권한이 없습니다.",
+    "networkError": "네트워크 문제입니다. 연결을 확인하고 다시 시도해 주세요.",
+    "requestTimeout": "요청 시간이 초과되었습니다. 연결을 확인하고 다시 시도해 주세요."
+  },
+  "units": {
+    "bytes": "바이트",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

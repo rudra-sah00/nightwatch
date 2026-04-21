@@ -8,11 +8,13 @@
     "watchlist": "观看列表",
     "downloads": "下载",
     "offlineDownloads": "离线下载",
-    "profile": "个人资料"
+    "profile": "个人资料",
+    "logoAlt": "Watch Rudra 标志"
   },
   "language": {
     "title": "语言",
-    "description": "选择您的首选语言"
+    "description": "选择您的首选语言",
+    "closeMenu": "关闭语言菜单"
   },
   "notFound": {
     "title": "404",
@@ -56,14 +58,7 @@
     "partyFinished": "派对已结束",
     "messageFailed": "发送消息失败",
     "partyTimeLimit": "观看派对已达到3小时限制，即将结束。",
-    "startFailed": "播放启动失败",
-    "linkCopied": "链接已复制！",
-    "profileUpdated": "个人资料已更新",
-    "passwordChanged": "密码修改成功",
-    "accountDeleted": "账户删除成功",
-    "error": "出了点问题",
-    "networkError": "网络错误。请检查您的连接。",
-    "sessionExpired": "会话已过期。请重新登录。"
+    "startFailed": "播放启动失败"
   },
   "tour": {
     "welcome": {
@@ -108,9 +103,117 @@
     "appVersion": "应用版本"
   },
   "passwordInfo": {
-    "requirements": "要求"
+    "requirements": "要求",
+    "ariaLabel": "密码要求",
+    "title": "密码要求",
+    "minChars": "8个以上字符",
+    "uppercase": "大写字母 (A-Z)",
+    "specialChar": "特殊字符 (!@#$%^&*)",
+    "breachNote": "我们会检查密码是否存在于",
+    "knownBreaches": "已知泄露"
   },
   "actions": {
-    "close": "关闭"
+    "close": "关闭",
+    "closeModal": "关闭弹窗"
+  },
+  "loading": "加载中...",
+  "skipToContent": "跳至内容",
+  "offline": {
+    "title": "您已离线",
+    "description": "Watch Rudra需要网络连接才能浏览。请打开保险库查看已下载的内容。",
+    "openVault": "打开离线保险库",
+    "toastOffline": "您已离线",
+    "toastOnline": "已恢复在线！"
+  },
+  "swUpdate": {
+    "title": "新版本可用",
+    "description": "刷新以获取最新更新。",
+    "refresh": "刷新"
+  },
+  "discord": {
+    "readyToStream": "准备就绪",
+    "atLoginScreen": "在登录界面",
+    "browsingDashboard": "浏览仪表板",
+    "lookingForContent": "搜索内容",
+    "browsingHomepage": "浏览主页",
+    "browsingLiveMatches": "浏览直播赛事",
+    "findingStream": "正在寻找流媒体...",
+    "curatingWatchlist": "整理观看列表",
+    "planningMarathon": "规划下一次马拉松",
+    "adjustingSettings": "调整设置",
+    "customizingProfile": "自定义个人资料"
+  },
+  "server": {
+    "netflix": "Netflix",
+    "balanced": "均衡",
+    "highQuality": "高质量流媒体"
+  },
+  "metadata": {
+    "appTitle": "Watch Rudra",
+    "appDescription": "您的个人流媒体伴侣",
+    "homeTitle": "首页 | Watch Rudra",
+    "homeDescription": "搜索电影和电视节目，开始一起观看。",
+    "continueWatchingTitle": "继续观看 | Watch Rudra",
+    "continueWatchingDescription": "从上次停下的地方继续观看最近的电影和电视节目。",
+    "searchTitle": "搜索 | Watch Rudra",
+    "searchDescription": "搜索电影、电视节目和动漫。",
+    "profileTitle": "个人资料 | Watch Rudra",
+    "profileDescription": "管理您的个人资料和观看历史。",
+    "liveTitle": "直播赛事 | Watch Rudra",
+    "liveDescription": "与朋友实时观看体育直播赛事和频道。",
+    "downloadsTitle": "下载 | Watch Rudra",
+    "downloadsDescription": "访问已下载的电影和电视节目以供离线观看。",
+    "watchlistTitle": "我的观看列表 | Watch Rudra",
+    "watchlistDescription": "跟踪您想稍后观看的电影和电视节目。",
+    "watchPartyTitle": "观影派对 | Watch Rudra",
+    "watchPartyDescription": "加入朋友，实时一起观看。"
+  },
+  "desktopApp": {
+    "notInstalled": "应用未安装",
+    "notInstalledDesc": "无法打开Watch Rudra桌面应用。是否已安装？",
+    "downloadApp": "下载应用"
+  },
+  "whatsNew": {
+    "backToHome": "返回首页",
+    "title": "最新动态",
+    "description": "Watch Rudra的最新更新、修复和功能。",
+    "noReleases": "未找到版本或加载失败。",
+    "noReleaseNotes": "*未提供版本说明。*",
+    "showMore": "显示更多（剩余{remaining}个）"
+  },
+  "downloads": {
+    "failedToLoad": "内容加载失败",
+    "experienceStarting": "体验启动中",
+    "preparingContent": "正在准备\"{title}\"...",
+    "episodes": "剧集",
+    "noImageAvailable": "无可用图片",
+    "closePreview": "关闭预览",
+    "statusCompleted": "已完成",
+    "statusFailed": "失败",
+    "statusDownloading": "下载中",
+    "statusQueued": "排队中",
+    "statusCancelled": "已取消",
+    "statusPaused": "已暂停"
+  },
+  "errors": {
+    "sessionExpired": "会话已过期。请重新登录。",
+    "userExists": "此邮箱已注册账户。",
+    "invalidInvite": "邀请链接无效或已过期。请申请新链接。",
+    "captchaRequired": "请完成安全验证。",
+    "captchaFailed": "安全验证失败。请重试。",
+    "otpRateLimit": "尝试次数过多。请稍后重试。",
+    "validationError": "部分信息无效。请检查后重试。",
+    "csrfFailed": "安全令牌已过期。请刷新页面。",
+    "notFound": "未找到请求的资源。",
+    "forbidden": "您没有执行此操作的权限。",
+    "networkError": "网络问题。请检查连接后重试。",
+    "requestTimeout": "请求超时。请检查连接后重试。"
+  },
+  "units": {
+    "bytes": "字节",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
   }
 }

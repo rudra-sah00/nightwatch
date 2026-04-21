@@ -1,6 +1,7 @@
 'use client';
 
 import { Library } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback } from 'react';
 import type { Episode } from '@/features/search/types';
@@ -138,6 +139,8 @@ export function PlayerEpisodePanelOverlay() {
 export function PlayerEpisodePanelTrigger() {
   const ctx = use(EpisodePanelContext);
   const { playerHandlers } = usePlayerContext();
+  const t = useTranslations('watch.player');
+  const tAria = useTranslations('watch.aria');
   if (!ctx) return null;
 
   const handleMouseEnter = () => {
@@ -152,7 +155,7 @@ export function PlayerEpisodePanelTrigger() {
     <section
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      aria-label="Episode Panel Interaction"
+      aria-label={tAria('episodePanel')}
     >
       <button
         type="button"
@@ -164,8 +167,8 @@ export function PlayerEpisodePanelTrigger() {
           'active:bg-muted',
           ctx.isOpen && 'bg-background shadow-none',
         )}
-        aria-label="Show episodes"
-        title="Episodes"
+        aria-label={t('showEpisodes')}
+        title={t('episodesTitle')}
       >
         <Library
           className={cn(

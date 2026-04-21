@@ -339,6 +339,7 @@ function DeviceDropdown({
   onSelect,
   onClose,
 }: DeviceDropdownProps) {
+  const t = useTranslations('party');
   return (
     <div className="absolute bottom-full right-0 mb-3 w-[240px] bg-background border-[4px] border-border  z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none flex flex-col">
       <div className="p-3 border-b-[4px] border-border flex items-center justify-between bg-background">
@@ -361,7 +362,7 @@ function DeviceDropdown({
       <div className="p-2 max-h-48 overflow-y-auto no-scrollbar flex flex-col gap-2">
         {devices.length === 0 ? (
           <div className="text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 p-4 text-center border-[2px] border-transparent">
-            No devices found
+            {t('media.noDevicesFound')}
           </div>
         ) : (
           devices.map((device) => (

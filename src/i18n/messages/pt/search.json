@@ -28,8 +28,7 @@
     "emptyTitle": "Seu histórico está vazio",
     "emptyDescription": "Comece a assistir algo e aparecerá aqui",
     "removeAriaLabel": "Remover da lista",
-    "sectionAriaLabel": "Conteúdo visualizado recentemente",
-    "timeLeft": "{time} restante"
+    "sectionAriaLabel": "Conteúdo visualizado recentemente"
   },
   "contentDetail": {
     "series": "Série",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "Cancelar watch party",
     "continue": "Continuar",
     "experienceStarting": "Experiência Iniciando",
-    "preparingContent": "Preparando \"{title}\"..."
+    "preparingContent": "Preparando \"{title}\"...",
+    "closeModal": "Fechar modal",
+    "episodesAriaLabel": "Episódios",
+    "failedToLoadDetails": "Falha ao carregar os detalhes do programa. Verifique sua conexão e tente novamente.",
+    "failedToLoadEpisodes": "Falha ao carregar a lista de episódios. Dados em cache serão usados, se disponíveis.",
+    "watchPartyError": "Ocorreu um erro inesperado ao criar a watch party."
   },
   "actions": {
     "watchSolo": "Assistir Solo",
@@ -60,7 +64,8 @@
     "watchTogether": "Assistir Juntos",
     "creating": "Criando",
     "toWatchlist": "À Lista",
-    "removeFromList": "Remover da Lista"
+    "removeFromList": "Remover da Lista",
+    "episodeFallbackTitle": "Episódio {number}"
   },
   "download": {
     "download": "Baixar",
@@ -76,6 +81,23 @@
     "saved": "Salvo",
     "securelyStarting": "Iniciando Download Seguro...",
     "episode": "Episódio {number}",
-    "untitled": "Sem título"
-  }
+    "untitled": "Sem título",
+    "downloadSrOnly": "Baixar {title}",
+    "downloadingToast": "Baixando{epText}! Confira sua Biblioteca Offline.",
+    "downloadingEpisodeText": " do Ep {episode}",
+    "episodeLabel": "Episódio {number}",
+    "episodePrefix": "Episódio"
+  },
+  "episodeCard": {
+    "loading": "CARREGANDO...",
+    "epPrefix": "EP {number}",
+    "episodeFallback": "EPISÓDIO {number}",
+    "minSuffix": "{duration} MIN"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Temporada} other {# Temporadas}}",
+    "seasonEpisodePrefix": "T{season}:E{episode}",
+    "minutesSuffix": "{runtime}M"
+  },
+  "marquee": "A FORMA SEGUE A FUNÇÃO • RUDRA CINEMA • MINIMALISMO É VERDADE • SEM DISTRAÇÕES • APENAS CINEMA •"
 }

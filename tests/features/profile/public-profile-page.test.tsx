@@ -54,10 +54,10 @@ describe('PublicProfilePage (Server Component)', () => {
     // Assert using the new UI texts from PublicProfileView
     expect(screen.getByText('Test User')).toBeInTheDocument();
     expect(screen.getByText('@testuser')).toBeInTheDocument();
-    expect(screen.getByText(/Joined January 2024/i)).toBeInTheDocument();
+    expect(screen.getByText(/updateForm\.joined/i)).toBeInTheDocument();
 
     // Check for activity statistics (new labels)
-    expect(screen.getByText('HRS TOTAL')).toBeInTheDocument();
+    expect(screen.getByText('publicProfile.hrsTotal')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // (3600 + 7200) / 3600 = 3
 
     // Check for mocked components
@@ -100,6 +100,6 @@ describe('PublicProfilePage (Server Component)', () => {
 
     render(page);
     expect(screen.getAllByText('0')).toHaveLength(2); // Streak and Total Hours
-    expect(screen.getByText('DAYS ACTIVE')).toBeInTheDocument();
+    expect(screen.getByText('publicProfile.daysActive')).toBeInTheDocument();
   });
 });

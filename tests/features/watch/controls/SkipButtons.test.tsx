@@ -16,13 +16,13 @@ describe('SkipButton', () => {
       render(<SkipButton {...defaultProps} direction="forward" />);
 
       expect(screen.getByRole('button')).toBeInTheDocument();
-      expect(screen.getByTitle('Skip forward 10s')).toBeInTheDocument();
+      expect(screen.getByTitle('skipForward')).toBeInTheDocument();
     });
 
     it('should render back skip button', () => {
       render(<SkipButton {...defaultProps} direction="back" />);
 
-      expect(screen.getByTitle('Skip back 10s')).toBeInTheDocument();
+      expect(screen.getByTitle('skipBack')).toBeInTheDocument();
     });
 
     it('should show default 10 seconds', () => {
@@ -35,7 +35,7 @@ describe('SkipButton', () => {
       render(<SkipButton {...defaultProps} seconds={30} />);
 
       expect(screen.getByText('30')).toBeInTheDocument();
-      expect(screen.getByTitle('Skip forward 30s')).toBeInTheDocument();
+      expect(screen.getByTitle('skipForward')).toBeInTheDocument();
     });
   });
 

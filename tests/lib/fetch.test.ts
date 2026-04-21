@@ -167,7 +167,7 @@ describe('apiFetch', () => {
     } as Response);
 
     await expect(apiFetch('/api/protected')).rejects.toMatchObject({
-      message: 'Session expired. Please login again.',
+      message: 'SESSION_EXPIRED',
       status: 401,
       code: 'SESSION_EXPIRED',
     });
@@ -304,8 +304,9 @@ describe('apiFetch', () => {
     vi.mocked(fetch).mockRejectedValueOnce(error);
 
     await expect(apiFetch('/api/test')).rejects.toMatchObject({
-      message: 'Request timed out. Please check your connection and try again.',
+      message: 'REQUEST_TIMEOUT',
       status: 408,
+      code: 'REQUEST_TIMEOUT',
     });
   });
 
@@ -565,7 +566,7 @@ describe('Token refresh', () => {
       } as Response);
 
     await expect(apiFetch('/api/protected')).rejects.toMatchObject({
-      message: 'Session expired. Please login again.',
+      message: 'SESSION_EXPIRED',
       status: 401,
       code: 'SESSION_EXPIRED',
     });

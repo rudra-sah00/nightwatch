@@ -75,7 +75,7 @@ describe('Soundboard', () => {
     } as unknown as ReturnType<typeof useSoundboard>);
 
     render(<Soundboard rtmSendMessage={mockRtmSendMessage} />);
-    const input = screen.getByPlaceholderText('Search sounds...');
+    const input = screen.getByPlaceholderText('soundboard.searchPlaceholder');
     fireEvent.change(input, { target: { value: 'airhorn' } });
     expect(mockSetSearch).toHaveBeenCalledWith('airhorn');
   });

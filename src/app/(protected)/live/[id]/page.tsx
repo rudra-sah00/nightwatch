@@ -3,6 +3,7 @@
 import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ export default function LiveMatchPlayerPage() {
   const matchId = params.id as string;
   const titleFromRoute = searchParams.get('title')?.trim() ?? '';
   const { match, isLoading, error } = useLiveMatch(matchId);
+  const t = useTranslations('live');
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -47,7 +49,7 @@ export default function LiveMatchPlayerPage() {
 
       if (isServer1) {
         if (!isDesktopApp) {
-          setSessionError('Premium channels require the Desktop App.');
+          setSessionError('premium_desktop_only');
           return;
         }
 
@@ -61,7 +63,7 @@ export default function LiveMatchPlayerPage() {
             setSessionLoading(false);
             // if (bridgeUnsubscribe) bridgeUnsubscribe(); <--- DO NOT UNSUBSCRIBE IMMEDIATELY, LET IT BE!
           } else {
-            setSessionError('Failed to extract stream URL via LiveBridge.');
+            setSessionError('failed_live_bridge');
             setSessionLoading(false);
           }
         });
@@ -84,10 +86,10 @@ export default function LiveMatchPlayerPage() {
         if (response.success && response.masterPlaylistUrl) {
           setSessionUrl(response.masterPlaylistUrl);
         } else {
-          setSessionError('Failed to initialize secure stream session.');
+          setSessionError('failed_stream_session');
         }
       } catch (_err) {
-        setSessionError('Error connecting to stream server.');
+        setSessionError('error_stream_server');
       } finally {
         if (!isServer1) setSessionLoading(false);
       }
@@ -119,17 +121,18 @@ export default function LiveMatchPlayerPage() {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-          Stream Unavailable
+          {t('streamUnavailableHeading')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
-          {error?.message || 'Match not found or stream unavailable.'}
+          {error?.message || t('matchNotFoundDesc')}
         </p>
         <Link href="/live">
           <Button
             variant="default"
             className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
           >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+            {t('backToSchedule')}
           </Button>
         </Link>
       </div>
@@ -149,18 +152,18 @@ export default function LiveMatchPlayerPage() {
       <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
         <Calendar className="w-20 h-20 text-muted-foreground mb-6 stroke-[3px]" />
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2 text-center px-4">
-          Match Has Not Started
+          {t('matchNotStarted')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-sm text-center px-4">
-          Prepare for the event. Please check back closer to the scheduled start
-          time.
+          {t('matchNotStartedDesc')}
         </p>
         <Link href="/live">
           <Button
             variant="default"
             className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
           >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+            {t('backToSchedule')}
           </Button>
         </Link>
       </div>
@@ -172,10 +175,10 @@ export default function LiveMatchPlayerPage() {
       <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
         <Loader2 className="w-16 h-16 text-muted-foreground animate-spin mb-6 stroke-[3px]" />
         <h2 className="text-3xl font-black font-headline uppercase tracking-tighter mb-2">
-          Waiting for Feed...
+          {t('waitingForFeed')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-xs text-center">
-          The stream URL has not been broadcasted by the source yet.
+          {t('waitingForFeedDesc')}
         </p>
       </div>
     );
@@ -186,18 +189,22 @@ export default function LiveMatchPlayerPage() {
       <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
         <Trophy className="w-20 h-20 text-neo-yellow mb-6 stroke-[3px]" />
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2">
-          Match Concluded
+          {t('matchConcluded')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-md text-center px-4">
           {activeMatch.matchResult ||
-            `${activeMatch.team1.name} vs ${activeMatch.team2.name} has ended.`}
+            t('matchEndedDefault', {
+              team1: activeMatch.team1.name,
+              team2: activeMatch.team2.name,
+            })}
         </p>
         <Link href="/live">
           <Button
             variant="default"
             className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
           >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to Schedule
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+            {t('backToSchedule')}
           </Button>
         </Link>
       </div>
@@ -205,17 +212,22 @@ export default function LiveMatchPlayerPage() {
   }
 
   if (!sessionLoading && sessionError) {
-    const isDesktopError = sessionError.includes(
-      'Premium channels require the Desktop App',
-    );
+    const isDesktopError = sessionError === 'premium_desktop_only';
+
+    const sessionErrorMessages: Record<string, string> = {
+      premium_desktop_only: t('premiumDesktopOnly'),
+      failed_live_bridge: t('failedLiveBridge'),
+      failed_stream_session: t('failedStreamSession'),
+      error_stream_server: t('errorStreamServer'),
+    };
 
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-          {isDesktopError ? 'Desktop App Required' : 'Access Denied'}
+          {isDesktopError ? t('desktopAppRequired') : t('accessDenied')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
-          {sessionError}
+          {sessionErrorMessages[sessionError] || sessionError}
         </p>
 
         {isDesktopError ? (
@@ -228,7 +240,7 @@ export default function LiveMatchPlayerPage() {
                 variant="default"
                 className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Download App
+                {t('downloadApp')}
               </Button>
             </Link>
             <Link href="/live">
@@ -236,7 +248,7 @@ export default function LiveMatchPlayerPage() {
                 variant="default"
                 className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
               >
-                Back
+                {t('back')}
               </Button>
             </Link>
           </div>
@@ -246,8 +258,8 @@ export default function LiveMatchPlayerPage() {
               variant="default"
               className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
             >
-              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" /> Back to
-              Schedule
+              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+              {t('backToSchedule')}
             </Button>
           </Link>
         )}
@@ -292,7 +304,7 @@ export default function LiveMatchPlayerPage() {
     normalizedTeam2Lower === 'team 2' ||
     isGenericLivePair;
 
-  const channelDisplayName = channelLabel || team1Name || 'LIVE STREAM';
+  const channelDisplayName = channelLabel || team1Name || t('liveStream');
 
   let displayTitle = '';
 
@@ -302,7 +314,7 @@ export default function LiveMatchPlayerPage() {
     team1Name.toUpperCase() === 'LIVE' &&
     team2Name.toUpperCase() === 'STREAM'
   ) {
-    displayTitle = channelLabel || 'LIVE STREAM';
+    displayTitle = channelLabel || t('liveStream');
   } else {
     const isChannelOrEvent =
       !team2Name ||
@@ -328,7 +340,7 @@ export default function LiveMatchPlayerPage() {
     <div className="flex items-center gap-3 ml-auto">
       {isEffectivelyLive && (
         <Badge variant="red" className="animate-pulse">
-          LIVE
+          {t('liveStream')}
         </Badge>
       )}
       {isChannelCard ? (
@@ -362,7 +374,7 @@ export default function LiveMatchPlayerPage() {
             </span>
           )}
           <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-            VS
+            {t('vs')}
           </span>
           {activeMatch.team2.avatar ? (
             <img
@@ -408,7 +420,7 @@ export default function LiveMatchPlayerPage() {
           </div>
           {isEffectivelyLive ? (
             <Badge variant="red" className="animate-pulse shrink-0">
-              LIVE
+              {t('liveStream')}
             </Badge>
           ) : null}
         </div>
@@ -451,7 +463,7 @@ export default function LiveMatchPlayerPage() {
               </div>
 
               <span className="font-black font-headline text-sm uppercase tracking-widest text-muted-foreground">
-                VS
+                {t('vs')}
               </span>
 
               <div className="flex flex-col items-center gap-2 min-w-0 flex-1">

@@ -316,7 +316,9 @@ describe('WatchPartySidebar', () => {
       render(
         <WatchPartySidebar {...defaultProps} currentUserId="unknown-user" />,
       );
-      expect(screen.getByTestId('user-name')).toHaveTextContent('You');
+      expect(screen.getByTestId('user-name')).toHaveTextContent(
+        'participant.you',
+      );
     });
   });
 
@@ -533,7 +535,9 @@ describe('WatchPartySidebar', () => {
   describe('edge cases', () => {
     it('should handle undefined currentUserId', () => {
       render(<WatchPartySidebar {...defaultProps} currentUserId={undefined} />);
-      expect(screen.getByTestId('user-name')).toHaveTextContent('You');
+      expect(screen.getByTestId('user-name')).toHaveTextContent(
+        'participant.you',
+      );
     });
 
     it('should handle empty messages array', () => {

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -7,6 +8,7 @@ import { checkUsername, deleteAccount, updateProfile } from '../api';
 import { updateProfileSchema } from '../schema';
 
 export function useUpdateProfileForm() {
+  const t = useTranslations('profile');
   const { user, updateUser, logout } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -60,10 +62,10 @@ export function useUpdateProfileForm() {
         const { available } = await checkUsername(debouncedUsername);
         setIsAvailable(available);
       } catch {
-        toast.error('Failed to check username availability');
+        toast.error(t('messages.usernameFailed'));
       }
     });
-  }, [debouncedUsername, isAvailable, user?.username]);
+  }, [debouncedUsername, isAvailable, user?.username, t]);
 
   const [state, action, isPending] = React.useActionState(
     async (
@@ -82,11 +84,11 @@ export function useUpdateProfileForm() {
         usernameVal === (user?.username || '') &&
         preferredServerVal === (user?.preferredServer || 's2')
       ) {
-        return { message: 'No changes to save', type: 'info' };
+        return { message: t('messages.noChanges'), type: 'info' };
       }
 
       if (usernameVal !== (user?.username || '') && !isAvailable) {
-        return { message: 'Username not available', type: 'error' };
+        return { message: t('messages.usernameNotAvailable'), type: 'error' };
       }
 
       const parsed = updateProfileSchema.safeParse({
@@ -95,8 +97,9 @@ export function useUpdateProfileForm() {
         preferredServer: preferredServerVal,
       });
       if (!parsed.success) {
+        const key = parsed.error.issues[0]?.message;
         return {
-          message: parsed.error.issues[0]?.message ?? 'Invalid input',
+          message: key ? t(key) : t('messages.invalidInput'),
           type: 'error',
         };
       }
@@ -104,11 +107,11 @@ export function useUpdateProfileForm() {
       try {
         const result = await updateProfile(parsed.data);
         updateUser(result.user);
-        return { message: 'Profile updated successfully', type: 'success' };
+        return { message: t('messages.profileUpdated'), type: 'success' };
       } catch (err) {
         const apiError = err as ApiError;
         return {
-          message: apiError.message || 'Failed to update profile',
+          message: apiError.message || t('messages.profileFailed'),
           type: 'error',
         };
       }
@@ -145,12 +148,12 @@ export function useUpdateProfileForm() {
     try {
       setIsDeleting(true);
       await deleteAccount();
-      toast.success('Account deleted successfully');
+      toast.success(t('messages.accountDeleted'));
       setShowDeleteDialog(false);
       logout();
     } catch (err) {
       const apiError = err as ApiError;
-      toast.error(apiError.message || 'Failed to delete account');
+      toast.error(apiError.message || t('messages.accountDeleteFailed'));
       setIsDeleting(false);
     }
   };

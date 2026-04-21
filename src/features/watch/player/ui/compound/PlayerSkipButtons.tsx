@@ -1,8 +1,10 @@
 import { SkipBack, SkipForward } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { usePlayerContext } from '../../context/PlayerContext';
 
 export function PlayerSkipButtons() {
   const { playerHandlers, metadata, readOnly } = usePlayerContext();
+  const t = useTranslations('watch');
 
   if (metadata.type === 'livestream' || readOnly) return null;
 
@@ -11,7 +13,7 @@ export function PlayerSkipButtons() {
       className="hidden md:flex items-center gap-1 lg:gap-2"
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
-      aria-label="Skip Controls Interaction"
+      aria-label={t('aria.skipControls')}
     >
       <button
         type="button"

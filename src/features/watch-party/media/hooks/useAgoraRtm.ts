@@ -1,6 +1,7 @@
 'use client';
 
 import type AgoraRTMType from 'agora-rtm-sdk';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../room/types/rtm-messages';
@@ -62,6 +63,7 @@ interface UseAgoraRtmOptions {
  */
 export function useAgoraRtm(options: UseAgoraRtmOptions) {
   const { appId, token, channel, userId, onMessage } = options;
+  const tp = useTranslations('party.toasts');
   // --- Refs for SDK objects ---
   const clientRef = useRef<typeof AgoraRTMType.RTM.prototype | null>(null);
   const channelRef = useRef<string | null>(null);
@@ -178,14 +180,14 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           setIsConnected(state === 'CONNECTED');
 
           if (state === 'RECONNECTING') {
-            toast.warning('Reconnecting to signaling server…', {
+            toast.warning(tp('reconnectingSignaling'), {
               id: 'rtm-connection',
               duration: 10000,
             });
           } else if (state === 'CONNECTED') {
             toast.dismiss('rtm-connection');
           } else if (state === 'DISCONNECTED' && event.reason !== 'LOGOUT') {
-            toast.error('Disconnected from signaling server', {
+            toast.error(tp('disconnectedSignaling'), {
               id: 'rtm-connection',
             });
           }
@@ -278,7 +280,7 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           const _msg = error instanceof Error ? error.message : 'Unknown error';
           if (process.env.NODE_ENV !== 'production') {
           }
-          toast.error('Failed to connect to signaling server');
+          toast.error(tp('failedConnectSignaling'));
           setConnectionState('DISCONNECTED');
           setIsConnected(false);
         }
@@ -292,7 +294,7 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
       fallbackCleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, appId, channel, userId]);
+  }, [token, appId, channel, userId, tp]);
 
   return {
     /** Send a channel message to all watch party participants */

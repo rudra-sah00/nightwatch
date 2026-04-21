@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
@@ -27,6 +28,8 @@ function WatchContent() {
     refetchStream,
   } = useWatchContent();
 
+  const t = useTranslations('watch');
+
   // No stream URL after refetch has settled
   if (!isRefetching && !streamUrl) {
     return (
@@ -35,12 +38,10 @@ function WatchContent() {
           <span className="text-4xl">⚠️</span>
         </div>
         <h2 className="text-white text-xl font-semibold mb-2">
-          {refetchError || 'No Stream Available'}
+          {refetchError || t('page.noStream')}
         </h2>
         <p className="text-white/60 mb-6">
-          {refetchError
-            ? 'There was an error loading the stream'
-            : 'Please start playback from the content page'}
+          {refetchError ? t('page.errorLoading') : t('page.startFromContent')}
         </p>
         <div className="flex gap-3">
           {refetchError ? (
@@ -49,7 +50,7 @@ function WatchContent() {
               onClick={() => refetchStream()}
               className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
             >
-              Try Again
+              {t('page.tryAgain')}
             </button>
           ) : null}
           <button
@@ -57,7 +58,7 @@ function WatchContent() {
             onClick={() => router.push('/home')}
             className="px-6 py-2 bg-white text-black rounded-lg font-medium/90 transition-colors"
           >
-            Go to Home
+            {t('page.goToHome')}
           </button>
         </div>
       </div>
@@ -70,14 +71,18 @@ function WatchContent() {
 
   const metaLabel = isSeries
     ? [
-        metadata.season != null ? `Season ${metadata.season}` : null,
-        metadata.episode != null ? `Episode ${metadata.episode}` : null,
+        metadata.season != null
+          ? t('page.seasonLabel', { number: metadata.season })
+          : null,
+        metadata.episode != null
+          ? t('page.episodeLabel', { number: metadata.episode })
+          : null,
       ]
         .filter(Boolean)
         .join(' • ')
     : metadata.year
-      ? `Movie • ${metadata.year}`
-      : 'Movie';
+      ? t('page.movieYear', { year: metadata.year })
+      : t('player.movie');
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,7 +123,7 @@ function WatchContent() {
           </p>
         ) : (
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Continue watching in portrait mode.
+            {t('page.continuePortrait')}
           </p>
         )}
       </section>

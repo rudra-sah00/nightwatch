@@ -101,7 +101,7 @@ describe('WatchPartyChat', () => {
     it('should render message input', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       expect(input).toBeInTheDocument();
     });
 
@@ -115,7 +115,7 @@ describe('WatchPartyChat', () => {
     it('should render emoji button', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('Add emoji');
+      const emojiButton = screen.getByTitle('addEmoji');
       expect(emojiButton).toBeInTheDocument();
     });
   });
@@ -231,7 +231,7 @@ describe('WatchPartyChat', () => {
     it('should not show typing indicator when no one is typing', () => {
       render(<WatchPartyChat {...defaultProps} typingUsers={[]} />);
 
-      expect(screen.queryByText(/is typing/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/isTyping/i)).not.toBeInTheDocument();
     });
 
     it('should show single user typing', () => {
@@ -239,7 +239,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(screen.getByText(/User Two is typing/i)).toBeInTheDocument();
+      expect(screen.getByText(/isTyping/i)).toBeInTheDocument();
     });
 
     it('should show two users typing', () => {
@@ -250,9 +250,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(
-        screen.getByText(/User Two and User Three are typing/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/twoTyping/i)).toBeInTheDocument();
     });
 
     it('should show three users typing', () => {
@@ -264,9 +262,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(
-        screen.getByText(/User Two, User Three, and User Four are typing/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/threeTyping/i)).toBeInTheDocument();
     });
 
     it('should show "X people are typing" for more than 3 users', () => {
@@ -279,7 +275,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(screen.getByText(/4 people are typing/i)).toBeInTheDocument();
+      expect(screen.getByText(/manyTyping/i)).toBeInTheDocument();
     });
 
     it('should show animated dots for typing indicator', () => {
@@ -299,7 +295,7 @@ describe('WatchPartyChat', () => {
     it('should not show typing indicator when no one is typing', () => {
       render(<WatchPartyChat {...defaultProps} typingUsers={[]} />);
 
-      expect(screen.queryByText(/is typing/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/isTyping/i)).not.toBeInTheDocument();
     });
 
     it('should show single user typing', () => {
@@ -307,7 +303,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(screen.getByText(/User Two is typing/i)).toBeInTheDocument();
+      expect(screen.getByText(/isTyping/i)).toBeInTheDocument();
     });
 
     it('should show two users typing', () => {
@@ -318,9 +314,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(
-        screen.getByText(/User Two and User Three are typing/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/twoTyping/i)).toBeInTheDocument();
     });
 
     it('should show three users typing', () => {
@@ -332,9 +326,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(
-        screen.getByText(/User Two, User Three, and User Four are typing/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/threeTyping/i)).toBeInTheDocument();
     });
 
     it('should show "X people are typing" for more than 3 users', () => {
@@ -347,7 +339,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...defaultProps} typingUsers={typingUsers} />);
 
-      expect(screen.getByText(/4 people are typing/i)).toBeInTheDocument();
+      expect(screen.getByText(/manyTyping/i)).toBeInTheDocument();
     });
 
     it('should show animated dots for typing indicator', () => {
@@ -367,10 +359,8 @@ describe('WatchPartyChat', () => {
     it('should render empty state when no messages', () => {
       render(<WatchPartyChat {...defaultProps} messages={[]} />);
 
-      expect(screen.getByText('No messages yet')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Be the first to say hello!/),
-      ).toBeInTheDocument();
+      expect(screen.getByText('noMessages')).toBeInTheDocument();
+      expect(screen.getByText(/beFirst/)).toBeInTheDocument();
     });
 
     it('should show message headers when messages are from different users or have time gap', () => {
@@ -440,7 +430,7 @@ describe('WatchPartyChat', () => {
 
       render(<WatchPartyChat {...propsWithoutTyping} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       expect(input).toBeInTheDocument();
     });
   });
@@ -457,7 +447,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStart when user types', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'H' } });
 
       expect(defaultProps.onTypingStart).toHaveBeenCalled();
@@ -466,7 +456,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStop when input is cleared', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.change(input, { target: { value: '' } });
 
@@ -476,7 +466,7 @@ describe('WatchPartyChat', () => {
     it('should auto-stop typing after 3 seconds', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'H' } });
 
       expect(defaultProps.onTypingStart).toHaveBeenCalled();
@@ -490,7 +480,7 @@ describe('WatchPartyChat', () => {
     it('should reset timeout when user continues typing', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
 
       // Type first character
       fireEvent.change(input, { target: { value: 'H' } });
@@ -516,7 +506,7 @@ describe('WatchPartyChat', () => {
     it('should call onTypingStop when sending message', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'Hello' } });
 
       const submitButton = screen
@@ -531,7 +521,7 @@ describe('WatchPartyChat', () => {
     it('should send message when Enter key is pressed', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.keyDown(input, { key: 'Enter', shiftKey: false });
 
@@ -542,7 +532,7 @@ describe('WatchPartyChat', () => {
     it('should not send message when Shift+Enter is pressed', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
 
@@ -553,7 +543,7 @@ describe('WatchPartyChat', () => {
     it('should cleanup typing timeout on unmount', () => {
       const { unmount } = render(<WatchPartyChat {...defaultProps} />);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       fireEvent.change(input, { target: { value: 'H' } });
 
       unmount();
@@ -567,7 +557,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('Add emoji');
+      const emojiButton = screen.getByTitle('addEmoji');
       await user.click(emojiButton);
 
       expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
@@ -577,7 +567,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('Add emoji');
+      const emojiButton = screen.getByTitle('addEmoji');
       await user.click(emojiButton);
 
       expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
@@ -594,10 +584,10 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('Add emoji');
+      const emojiButton = screen.getByTitle('addEmoji');
       await user.click(emojiButton);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       await user.type(input, 'Hello');
 
       const submitButton = screen
@@ -612,13 +602,13 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('Add emoji');
+      const emojiButton = screen.getByTitle('addEmoji');
       await user.click(emojiButton);
 
       const emojiToClick = screen.getByTestId('emoji-😊');
       await user.click(emojiToClick);
 
-      const input = screen.getByPlaceholderText('Message...');
+      const input = screen.getByPlaceholderText('placeholder');
       expect(input).toHaveValue('😊');
     });
   });

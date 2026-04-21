@@ -12,7 +12,7 @@ describe('ErrorOverlay', () => {
     it('should render when visible', () => {
       render(<ErrorOverlay {...defaultProps} />);
 
-      expect(screen.getByText('Playback Error')).toBeInTheDocument();
+      expect(screen.getByText('playbackError')).toBeInTheDocument();
     });
 
     it('should not render when not visible', () => {
@@ -41,7 +41,7 @@ describe('ErrorOverlay', () => {
     it('should display title', () => {
       render(<ErrorOverlay {...defaultProps} />);
 
-      expect(screen.getByText('Playback Error')).toBeInTheDocument();
+      expect(screen.getByText('playbackError')).toBeInTheDocument();
     });
   });
 
@@ -49,20 +49,20 @@ describe('ErrorOverlay', () => {
     it('should show retry button when onRetry is provided', () => {
       render(<ErrorOverlay {...defaultProps} onRetry={vi.fn()} />);
 
-      expect(screen.getByText('Try Again')).toBeInTheDocument();
+      expect(screen.getByText('tryAgain')).toBeInTheDocument();
     });
 
     it('should not show retry button when onRetry is not provided', () => {
       render(<ErrorOverlay {...defaultProps} />);
 
-      expect(screen.queryByText('Try Again')).not.toBeInTheDocument();
+      expect(screen.queryByText('tryAgain')).not.toBeInTheDocument();
     });
 
     it('should call onRetry when retry button is clicked', () => {
       const onRetry = vi.fn();
       render(<ErrorOverlay {...defaultProps} onRetry={onRetry} />);
 
-      fireEvent.click(screen.getByText('Try Again'));
+      fireEvent.click(screen.getByText('tryAgain'));
       expect(onRetry).toHaveBeenCalledTimes(1);
     });
   });
@@ -71,20 +71,20 @@ describe('ErrorOverlay', () => {
     it('should show back button when onBack is provided', () => {
       render(<ErrorOverlay {...defaultProps} onBack={vi.fn()} />);
 
-      expect(screen.getByText('Go Back')).toBeInTheDocument();
+      expect(screen.getByText('goBack')).toBeInTheDocument();
     });
 
     it('should not show back button when onBack is not provided', () => {
       render(<ErrorOverlay {...defaultProps} />);
 
-      expect(screen.queryByText('Go Back')).not.toBeInTheDocument();
+      expect(screen.queryByText('goBack')).not.toBeInTheDocument();
     });
 
     it('should call onBack when back button is clicked', () => {
       const onBack = vi.fn();
       render(<ErrorOverlay {...defaultProps} onBack={onBack} />);
 
-      fireEvent.click(screen.getByText('Go Back'));
+      fireEvent.click(screen.getByText('goBack'));
       expect(onBack).toHaveBeenCalledTimes(1);
     });
   });
@@ -95,8 +95,8 @@ describe('ErrorOverlay', () => {
         <ErrorOverlay {...defaultProps} onRetry={vi.fn()} onBack={vi.fn()} />,
       );
 
-      expect(screen.getByText('Try Again')).toBeInTheDocument();
-      expect(screen.getByText('Go Back')).toBeInTheDocument();
+      expect(screen.getByText('tryAgain')).toBeInTheDocument();
+      expect(screen.getByText('goBack')).toBeInTheDocument();
     });
   });
 });

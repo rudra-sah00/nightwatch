@@ -28,8 +28,7 @@
     "emptyTitle": "İzleme geçmişiniz boş",
     "emptyDescription": "Bir şey izlemeye başlayın ve burada görünecek",
     "removeAriaLabel": "Listeden kaldır",
-    "sectionAriaLabel": "Son izlenen içerikler",
-    "timeLeft": "{time} kaldı"
+    "sectionAriaLabel": "Son izlenen içerikler"
   },
   "contentDetail": {
     "series": "Dizi",
@@ -49,7 +48,12 @@
     "cancelWatchParty": "İzleme partisini iptal et",
     "continue": "Devam",
     "experienceStarting": "Deneyim Başlıyor",
-    "preparingContent": "\"{title}\" hazırlanıyor..."
+    "preparingContent": "\"{title}\" hazırlanıyor...",
+    "closeModal": "Pencereyi kapat",
+    "episodesAriaLabel": "Bölümler",
+    "failedToLoadDetails": "Program detayları yüklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
+    "failedToLoadEpisodes": "Bölüm listesi yüklenemedi. Varsa önbellek verileri kullanılacak.",
+    "watchPartyError": "İzleme partisi oluşturulurken beklenmeyen bir hata oluştu."
   },
   "actions": {
     "watchSolo": "Tek Başına İzle",
@@ -60,7 +64,8 @@
     "watchTogether": "Birlikte İzle",
     "creating": "Oluşturuluyor",
     "toWatchlist": "Listeye Ekle",
-    "removeFromList": "Listeden Kaldır"
+    "removeFromList": "Listeden Kaldır",
+    "episodeFallbackTitle": "Bölüm {number}"
   },
   "download": {
     "download": "İndir",
@@ -76,6 +81,23 @@
     "saved": "Kaydedildi",
     "securelyStarting": "Güvenli İndirme Başlatılıyor...",
     "episode": "Bölüm {number}",
-    "untitled": "Başlıksız"
-  }
+    "untitled": "Başlıksız",
+    "downloadSrOnly": "{title} indir",
+    "downloadingToast": "İndiriliyor{epText}! Çevrimdışı Kütüphanenizi kontrol edin.",
+    "downloadingEpisodeText": " Böl {episode} için",
+    "episodeLabel": "Bölüm {number}",
+    "episodePrefix": "Bölüm"
+  },
+  "episodeCard": {
+    "loading": "YÜKLENİYOR...",
+    "epPrefix": "BÖL {number}",
+    "episodeFallback": "BÖLÜM {number}",
+    "minSuffix": "{duration} DK"
+  },
+  "contentInfo": {
+    "seasonCount": "{count, plural, one {# Sezon} other {# Sezon}}",
+    "seasonEpisodePrefix": "S{season}:B{episode}",
+    "minutesSuffix": "{runtime}DK"
+  },
+  "marquee": "BİÇİM İŞLEVİ TAKİP EDER • RUDRA SİNEMA • MİNİMALİZM GERÇEKTİR • DİKKAT DAĞITICI YOK • SADECE FİLM •"
 }

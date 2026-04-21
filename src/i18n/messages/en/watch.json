@@ -20,6 +20,8 @@
     "skipForward": "Skip forward {seconds}s",
     "tapToResume": "Tap to resume",
     "hostControlsPlayback": "Host Controls Playback",
+    "lockedHostControls": "Locked - Host controls",
+    "hostControls": "Host controls",
     "sitBackAndEnjoy": "Sit back and enjoy the show",
     "goBackAriaLabel": "Go back",
     "movie": "Movie",
@@ -27,7 +29,23 @@
     "live": "Live",
     "liveBadge": "LIVE",
     "watchingLive": "You are watching live",
-    "jumpToLive": "Jump to live"
+    "jumpToLive": "Jump to live",
+    "rotateDevice": "Rotate your device for best experience",
+    "fullscreenNotSupported": "Fullscreen is not supported in this browser",
+    "failedEnterFullscreen": "Failed to enter fullscreen",
+    "failedExitFullscreen": "Failed to exit fullscreen",
+    "fullscreenToggleFailed": "Fullscreen toggle failed",
+    "seekTime": "Seek time",
+    "liveSeekBar": "Live stream seek bar",
+    "atLiveEdge": "At live edge",
+    "behindLive": "{seconds}s behind live",
+    "closeSidebar": "Close sidebar",
+    "openSidebar": "Open sidebar",
+    "seasonEpisodeLabel": "Season {season} · Episode {episode}",
+    "rotateToLandscape": "Rotate to landscape",
+    "landscapeOnlyMessage": "This player is only available in landscape mode",
+    "showEpisodes": "Show episodes",
+    "episodesTitle": "Episodes"
   },
   "settings": {
     "quality": "Quality",
@@ -44,7 +62,24 @@
     "font": "Font",
     "background": "Background",
     "textColor": "Text Color",
-    "textEffect": "Text Effect"
+    "textEffect": "Text Effect",
+    "sizeSmall": "Small",
+    "sizeMedium": "Medium",
+    "sizeLarge": "Large",
+    "sizeExtraLarge": "Extra Large",
+    "bgBlack": "Black",
+    "bgDarkGray": "Dark Gray",
+    "bgTransparent": "Transparent",
+    "bgSemiTransparent": "Semi-Transparent",
+    "colorWhite": "White",
+    "colorYellow": "Yellow",
+    "colorCyan": "Cyan",
+    "colorLightGreen": "Light Green",
+    "shadowNone": "None",
+    "shadowDropShadow": "Drop Shadow",
+    "shadowOutline": "Outline",
+    "shadowGlow": "Glow",
+    "fontSystemDefault": "System Default"
   },
   "audio": {
     "title": "Audio",
@@ -53,11 +88,10 @@
   "episodes": {
     "episode": "Episode {number}",
     "season": "Season {number}",
-    "seasonShort": "S{number}",
+    "episodeShort": "E{number}",
     "clickToPlay": "Click to play",
     "loading": "Loading...",
     "noEpisodes": "No episodes",
-    "nowPlaying": "now playing",
     "min": "{duration} min"
   },
   "nextEpisode": {
@@ -66,7 +100,9 @@
     "inCountdown": "in {seconds}s",
     "play": "Play",
     "cancel": "Cancel",
-    "loading": "Loading"
+    "loading": "Loading",
+    "seasonEpisodeLabel": "S{season} • E{episode}",
+    "episodeShort": "E{number}"
   },
   "offline": {
     "pageTitle": "OFFLINE",
@@ -84,7 +120,13 @@
     "cancelDownload": "Cancel Download",
     "waitForComplete": "Please wait until the download is complete to view offline.",
     "waitingInQueue": "Waiting in queue...",
-    "downloading": "Downloading..."
+    "downloading": "Downloading...",
+    "statusCompleted": "COMPLETED",
+    "statusFailed": "FAILED",
+    "statusDownloading": "DOWNLOADING",
+    "statusQueued": "QUEUED",
+    "statusCancelled": "CANCELLED",
+    "statusPaused": "PAUSED"
   },
   "watchlist": {
     "pageTitle": "MY",
@@ -94,5 +136,46 @@
     "emptyTitle": "Your watchlist is empty",
     "emptyDescription": "Save movies and shows to watch later",
     "viewDetails": "View details for {title}"
+  },
+  "continueWatching": {
+    "failedToRemove": "Failed to remove from list",
+    "minutesLeft": "{minutes}m left",
+    "hoursLeft": "{hours}h left",
+    "hoursMinutesLeft": "{hours}h {minutes}m left"
+  },
+  "countdown": {
+    "startingExperience": "Starting Experience",
+    "getReady": "Get ready for cinematic excellence",
+    "go": "GO",
+    "eliteExperience": "Elite AI Experience • EMA Hardened"
+  },
+  "aria": {
+    "videoPlayer": "Video Player",
+    "seekBackward": "Seek backward 10 seconds",
+    "seekForward": "Seek forward 10 seconds",
+    "playPause": "Play/Pause Interaction",
+    "seekBar": "Seek Bar Interaction",
+    "skipControls": "Skip Controls Interaction",
+    "fullscreen": "Fullscreen Interaction",
+    "volume": "Volume Interaction",
+    "settings": "Settings Interaction",
+    "audioSubtitle": "Audio and Subtitle Selectors Interaction",
+    "episodePanel": "Episode Panel Interaction",
+    "playerHeader": "Player Header",
+    "subtitle": "Subtitle",
+    "playbackCountdown": "Playback countdown",
+    "countdownTitle": "Playback Countdown"
+  },
+  "page": {
+    "seasonLabel": "Season {number}",
+    "unknownTitle": "Unknown",
+    "episodeLabel": "Episode {number}",
+    "noStream": "No Stream Available",
+    "errorLoading": "There was an error loading the stream",
+    "startFromContent": "Please start playback from the content page",
+    "tryAgain": "Try Again",
+    "goToHome": "Go to Home",
+    "continuePortrait": "Continue watching in portrait mode.",
+    "movieYear": "Movie · {year}"
   }
 }

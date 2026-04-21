@@ -43,7 +43,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center gap-1.5 text-xs font-headline font-black uppercase tracking-widest text-foreground/70 hover:text-neo-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
-        aria-label="Password requirements"
+        aria-label={t('passwordInfo.ariaLabel')}
       >
         <Info className="h-3.5 w-3.5 stroke-[3px]" />
         <span>{t('passwordInfo.requirements')}</span>
@@ -56,7 +56,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
             type="button"
             className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm cursor-pointer w-full h-full border-none"
             onClick={() => setIsOpen(false)}
-            aria-label="Close modal"
+            aria-label={t('actions.closeModal')}
           />
 
           {/* Centered Modal */}
@@ -72,7 +72,7 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="absolute top-4 right-4 bg-background border-[3px] border-border p-1.5 text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
-                aria-label="Close"
+                aria-label={t('actions.close')}
               >
                 <X className="h-4 w-4 stroke-[3px]" />
               </button>
@@ -83,26 +83,26 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                   id="password-requirements-title"
                   className="font-black font-headline text-2xl uppercase tracking-tighter pr-8 text-foreground"
                 >
-                  Password Requirements
+                  {t('passwordInfo.title')}
                 </h4>
 
                 {/* Requirements List */}
                 <div className="space-y-3">
-                  <RequirementItem text="8+ characters" />
-                  <RequirementItem text="Uppercase (A-Z)" />
-                  <RequirementItem text="Special char (!@#$%^&*)" />
+                  <RequirementItem text={t('passwordInfo.minChars')} />
+                  <RequirementItem text={t('passwordInfo.uppercase')} />
+                  <RequirementItem text={t('passwordInfo.specialChar')} />
                 </div>
 
                 {/* Breach note */}
                 <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-foreground/70 pt-4 border-t-[3px] border-border">
-                  We check passwords against{' '}
+                  {t('passwordInfo.breachNote')}{' '}
                   <a
                     href="https://haveibeenpwned.com/Passwords"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-neo-blue underline hover:text-neo-red transition-colors"
                   >
-                    known breaches
+                    {t('passwordInfo.knownBreaches')}
                   </a>
                   .
                 </p>

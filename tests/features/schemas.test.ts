@@ -97,9 +97,7 @@ describe('Profile Schema', () => {
       const result = updateProfileSchema.safeParse({ name: 'T' });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          'Name must be at least 2 characters',
-        );
+        expect(result.error.issues[0].message).toBe('validation.nameMinLength');
       }
     });
 
@@ -108,7 +106,7 @@ describe('Profile Schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Username must be at least 3 characters',
+          'validation.usernameMinLength',
         );
       }
     });
@@ -118,7 +116,7 @@ describe('Profile Schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'Username can only contain letters, numbers, and underscores',
+          'validation.usernameFormat',
         );
       }
     });
@@ -167,7 +165,7 @@ describe('Profile Schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe(
-          'New passwords do not match',
+          'validation.newPasswordsMismatch',
         );
       }
     });

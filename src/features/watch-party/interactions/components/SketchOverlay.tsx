@@ -1,4 +1,5 @@
 import type Konva from 'konva';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Arrow,
@@ -37,6 +38,7 @@ export function SketchOverlay({
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const t = useTranslations('party');
 
   const {
     actions,
@@ -708,7 +710,7 @@ export function SketchOverlay({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
               onBlur={handleInputBlur}
-              placeholder="Type text..."
+              placeholder={t('sketch.textPlaceholder')}
               className="bg-background/95 backdrop-blur-sm placeholder:text-muted-foreground outline-none px-3 py-1.5 min-w-[140px] max-w-[260px] rounded-none border-[3px] border-border font-black font-headline uppercase tracking-widest text-foreground"
               style={{
                 borderColor: color,
@@ -718,10 +720,10 @@ export function SketchOverlay({
             />
             <div className="flex gap-1.5 px-0.5">
               <span className="bg-primary text-primary-foreground px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-border">
-                ↵ place
+                {t('sketch.placeHint')}
               </span>
               <span className="bg-background text-foreground px-1.5 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-[2px] border-border">
-                Esc cancel
+                {t('sketch.cancelHint')}
               </span>
             </div>
           </div>

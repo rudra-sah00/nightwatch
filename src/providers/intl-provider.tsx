@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { HtmlLangSetter } from './html-lang-setter';
 
 export async function IntlProvider({
   children,
@@ -18,6 +19,7 @@ export async function IntlProvider({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
+      <HtmlLangSetter locale={locale} />
       {children}
     </NextIntlClientProvider>
   );

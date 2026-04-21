@@ -38,7 +38,7 @@ describe('ContentInfo', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: /play s2:e1/i }),
+      screen.getByRole('button', { name: /actions\.playEpisode/i }),
     ).toBeInTheDocument();
   });
 
@@ -73,7 +73,7 @@ describe('ContentInfo', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: /resume s5:e10/i }),
+      screen.getByRole('button', { name: /actions\.resumeEpisode/i }),
     ).toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe('ContentInfo', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: /watch solo/i }),
+      screen.getByRole('button', { name: /actions\.watchSolo/i }),
     ).toBeInTheDocument();
   });
 
@@ -104,7 +104,7 @@ describe('ContentInfo', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: /watch solo/i }),
+      screen.getByRole('button', { name: /actions\.watchSolo/i }),
     ).toBeInTheDocument();
   });
 
@@ -260,9 +260,11 @@ describe('ContentInfo', () => {
 
     // Use within to find the text in the progress indicator specifically
     const progressIndicator = screen.getByText(/45%/i).closest('.space-y-3');
-    expect(progressIndicator).toHaveTextContent(/s3:e7/i);
+    expect(progressIndicator).toHaveTextContent(
+      /contentInfo\.seasonEpisodePrefix/i,
+    );
     expect(
-      screen.getByRole('button', { name: /resume s3:e7/i }),
+      screen.getByRole('button', { name: /actions\.resumeEpisode/i }),
     ).toBeInTheDocument();
   });
 
@@ -298,7 +300,7 @@ describe('ContentInfo', () => {
 
     // Button should show season 9 episode 10 from watch progress, not season 2
     expect(
-      screen.getByRole('button', { name: /resume s9:e10/i }),
+      screen.getByRole('button', { name: /actions\.resumeEpisode/i }),
     ).toBeInTheDocument();
   });
 
@@ -332,7 +334,7 @@ describe('ContentInfo', () => {
     );
 
     const watchTogetherBtn = screen.getByRole('button', {
-      name: /Watch Together/i,
+      name: /actions\.watchTogether/i,
     });
     expect(watchTogetherBtn).toBeInTheDocument();
 
@@ -353,7 +355,9 @@ describe('ContentInfo', () => {
     );
 
     // Button is hidden entirely when disabled to keep mobile UI clean
-    expect(screen.queryByText(/Watch Together/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/actions\.watchTogether/i),
+    ).not.toBeInTheDocument();
   });
 
   it('shows creating party state', () => {
@@ -368,7 +372,7 @@ describe('ContentInfo', () => {
       />,
     );
 
-    expect(screen.getByText('Creating')).toBeInTheDocument();
+    expect(screen.getByText('actions.creating')).toBeInTheDocument();
   });
 
   it('renders Add to Watchlist button when onWatchlistToggle provided', async () => {
@@ -471,7 +475,7 @@ describe('ContentInfo', () => {
     );
 
     // Progress bar shows "Continue" for a movie (no season/episode numbers)
-    expect(screen.getByText('Continue')).toBeInTheDocument();
+    expect(screen.getByText('contentDetail.continue')).toBeInTheDocument();
 
     // The progress percentage appears in both the bar and the resume button
     // We check that the progress bar container has it
