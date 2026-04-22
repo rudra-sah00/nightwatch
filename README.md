@@ -24,6 +24,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Watch Content](./docs/features/WATCH.md): VOD operations, HLS bitrates, and Redis heartbeat synchronization.
 - [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.
 - [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
+- [Friends & Messaging](./docs/features/FRIENDS.md): Friend system, DM messaging, voice calls, and online presence.
 
 ## Technology Stack
 
@@ -32,8 +33,8 @@ Due to the scale of the application, our detailed technical documentation is spl
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
 - **Internationalization:** next-intl (14 languages, cookie-based)
-- **Real-Time Data:** Agora RTM, Socket.IO
-- **Real-Time Media:** Agora RTC (WebRTC)
+- **Real-Time Data:** Agora RTM, Socket.IO (friends, messaging, presence)
+- **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
 - **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)
 - **Package Manager:** pnpm
 
@@ -45,7 +46,7 @@ The `src` directory governs all application code, rigidly separated by domain lo
 src/
 ├── app/               # Next.js App Router (Pages, Layouts, Server forms)
 ├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
-├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream)
+├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, friends)
 ├── hooks/             # Global generic hooks
 ├── lib/               # Shared utilities, formatting scripts, and global singletons
 ├── providers/         # Global React Contexts (Socket, Session, Theme)
