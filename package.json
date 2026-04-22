@@ -131,7 +131,6 @@
       "output": "desktop-build"
     },
     "mac": {
-      "identity": null,
       "entitlements": "electron/build/entitlements.mac.plist",
       "entitlementsInherit": "electron/build/entitlements.mac.plist",
       "extendInfo": {

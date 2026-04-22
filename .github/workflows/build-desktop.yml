@@ -1,9 +1,6 @@
 name: Build Desktop Apps
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
   workflow_call:
 
@@ -13,67 +10,38 @@ permissions:
 jobs:
   quality:
     name: Quality Checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Force LF line endings
-        run: git config --global core.autocrlf false
-
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Enable Corepack (for pnpm)
-        run: corepack enable
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-store-
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Biome Check
-        run: pnpm check
-
-      - name: Run TypeScript check
-        run: pnpm type-check
-
-      - name: Run unit tests
-        run: pnpm test
-
-      - name: Validate i18n translations
-        run: pnpm vitest run tests/i18n/
+    uses: ./.github/workflows/quality.yml
 
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build (${{ matrix.platform }})
     needs: quality
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            platform: macOS-arm64
+            build_args: --mac --arm64
+          - os: macos-13
+            platform: macOS-x64
+            build_args: --mac --x64
+          - os: windows-latest
+            platform: Windows-x64
+            build_args: --win
+          - os: ubuntu-latest
+            platform: Linux-x64
+            build_args: --linux
 
     steps:
       - name: Force LF line endings
         run: git config --global core.autocrlf false
 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
 
@@ -86,7 +54,7 @@ jobs:
         shell: bash
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -98,54 +66,13 @@ jobs:
       - name: Prepare Electron dependencies
         run: node scripts/prepare-electron-deps.js
 
-      - name: Inject Production Secrets
-        run: |
-          # Inject Sentry DSN into Electron main process
-          sed -i.bak "s#process.env.VITE_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN || ''#'${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}'#g" electron/main.js
-          # Inject Discord RPC Client ID
-          sed -i.bak "s#'1234567890123456789'#'${{ secrets.DISCORD_CLIENT_ID }}'#g" electron/modules/discord.js
-          # Verify injections succeeded
-          if grep -q "1234567890123456789" electron/modules/discord.js; then
-            echo "⚠️ Discord Client ID injection may have failed (placeholder still present)"
-          fi
-          rm -f electron/main.js.bak electron/modules/discord.js.bak
-        shell: bash
-
-      - name: Delete existing release assets for this platform
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        shell: bash
+      - name: Build and Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          # Map runner OS to asset name patterns
-          case "${{ matrix.os }}" in
-            macos-latest)  PATTERNS=("arm64.dmg" "arm64-mac.zip" "latest-mac.yml") ;;
-            windows-latest) PATTERNS=("Setup*.exe" "latest.yml") ;;
-            ubuntu-latest)  PATTERNS=(".AppImage" "_amd64.deb" "latest-linux.yml") ;;
-          esac
-          # Delete matching assets to prevent 422 conflicts
-          for pattern in "${PATTERNS[@]}"; do
-            gh release view "$TAG" --json assets --jq ".assets[].name" 2>/dev/null | grep "$pattern" | while read -r name; do
-              echo "Deleting stale asset: $name"
-              gh release delete-asset "$TAG" "$name" --yes 2>/dev/null || true
-            done
-          done
-
-      - name: Build and Publish (macOS)
-        if: matrix.os == 'macos-latest'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec electron-builder --mac --publish always
-
-      - name: Build and Publish (Windows)
-        if: matrix.os == 'windows-latest'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec electron-builder --win --publish always
-
-      - name: Build and Publish (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec electron-builder --linux --publish always
+          SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+        run: pnpm exec electron-builder ${{ matrix.build_args }} --publish always

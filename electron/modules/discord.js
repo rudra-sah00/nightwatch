@@ -1,8 +1,8 @@
 const DiscordRPC = require('discord-rpc');
-// Application ID from discord developer portal - Make sure you replace this with your actual Discord App ID eventually!
-const clientId = '1234567890123456789'; // Please swap with your real Client ID
+// Application ID from discord developer portal — injected via DISCORD_CLIENT_ID env var in CI
+const clientId = process.env.DISCORD_CLIENT_ID || '';
 
-DiscordRPC.register(clientId);
+if (clientId) DiscordRPC.register(clientId);
 
 class DiscordIntegration {
   constructor() {
@@ -22,7 +22,7 @@ class DiscordIntegration {
   }
 
   async connect() {
-    if (this.connected || this.isConnecting) return;
+    if (!this.clientId || this.connected || this.isConnecting) return;
 
     this.isConnecting = true;
     this.lastReconnectAttempt = Date.now();

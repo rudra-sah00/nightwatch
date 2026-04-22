@@ -18,7 +18,7 @@ jobs:
     outputs:
       is_release_commit: ${{ steps.check.outputs.is_release_commit }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 2
       - name: Check if release-please commit
@@ -31,24 +31,29 @@ jobs:
             echo "is_release_commit=false" >> $GITHUB_OUTPUT
           fi
 
-  release-please:
+  quality:
     needs: check-commit
     if: ${{ needs.check-commit.outputs.is_release_commit != 'true' }}
+    uses: ./.github/workflows/quality.yml
+
+  release-please:
+    needs: [check-commit, quality]
+    if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' && needs.quality.result == 'success' }}
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
 
   deploy:
-    needs: [check-commit, release-please]
-    if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' }}
+    needs: [check-commit, quality]
+    if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' && needs.quality.result == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -58,10 +63,10 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
 
@@ -73,7 +78,7 @@ jobs:
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -81,18 +86,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Run Biome Check
-        run: pnpm check
-
-      - name: Run TypeScript check
-        run: pnpm type-check
-
-      - name: Run unit tests
-        run: pnpm test
-
-      - name: Validate i18n translations
-        run: pnpm vitest run tests/i18n/
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -124,7 +117,8 @@ jobs:
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
             echo "✅ Smoke test passed (HTTP $STATUS)"
           else
-            echo "⚠️ Smoke test returned HTTP $STATUS (non-blocking)"
+            echo "❌ Smoke test failed (HTTP $STATUS)"
+            exit 1
           fi
 
   build-desktop:
