@@ -146,6 +146,17 @@ class AppWindow {
       this.mainWindow.loadURL(PROD_URL);
     }
 
+    // Intercept window.open() / target="_blank" — open in default browser, not a new Electron window
+    this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+      if (
+        !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
+        !url.startsWith('watch-rudra://')
+      ) {
+        shell.openExternal(url);
+      }
+      return { action: 'deny' };
+    });
+
     this.mainWindow.webContents.on('will-navigate', (event, url) => {
       // Prevent drag-and-drop local file exploits, but explicitly ALLOW our
       // internal offline bridge so it can actually load when disconnected.
