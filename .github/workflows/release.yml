@@ -113,13 +113,17 @@ jobs:
       - name: Smoke test
         run: |
           sleep 10
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://watch.rudrasahoo.live")
-          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
-            echo "✅ Smoke test passed (HTTP $STATUS)"
-          else
-            echo "❌ Smoke test failed (HTTP $STATUS)"
-            exit 1
-          fi
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://watch.rudrasahoo.live")
+            if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+              echo "✅ Smoke test passed (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — retrying in 15s..."
+            sleep 15
+          done
+          echo "❌ Smoke test failed after 3 attempts (last HTTP $STATUS)"
+          exit 1
 
   build-desktop:
     name: Build Desktop Apps (Release)
