@@ -22,10 +22,7 @@ jobs:
         include:
           - os: macos-latest
             platform: macOS-arm64
-            build_args: --mac --arm64
-          - os: macos-13
-            platform: macOS-x64
-            build_args: --mac --x64
+            build_args: --mac
           - os: windows-latest
             platform: Windows-x64
             build_args: --win
