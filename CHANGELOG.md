@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.1](https://github.com/rudra-sah00/watch-rudra/compare/v2.1.0...v2.1.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* **electron:** add fast-uri as explicit dep for electron-store/ajv ([09d441e](https://github.com/rudra-sah00/watch-rudra/commit/09d441e304cf253144acbaac9474e0d4dbfff0e8))
+* **electron:** add missing transitive deps for asar bundle ([67628f9](https://github.com/rudra-sah00/watch-rudra/commit/67628f9020250468e8af63d9dedeed51018ed73f))
+* **i18n:** add missing watch.player.liveStreamSeekBar key to all locales ([0b32984](https://github.com/rudra-sah00/watch-rudra/commit/0b32984d97ae53e12bd9a90d66afcdfdef3a93f0))
+* **live-bridge:** reduce racers from 6 to 2 to avoid Cloudflare block ([68c0ab9](https://github.com/rudra-sah00/watch-rudra/commit/68c0ab97cd8f599141c9f94b8d3ff35cccd6e5fb))
+* **live-bridge:** update domains - dlstreams.top→.com, daddylive.mp→.stream ([cf7734b](https://github.com/rudra-sah00/watch-rudra/commit/cf7734b089469a22c972ab440ee62e4ca45c22dd))
+* **live:** pass channel icon as team1.avatar for Server 1 channels ([b9b4129](https://github.com/rudra-sah00/watch-rudra/commit/b9b41296746611ed841638a65ad2deb0ac179759))
+
 ## [2.1.0](https://github.com/rudra-sah00/watch-rudra/compare/v2.0.2...v2.1.0) (2026-04-21)
 
 
