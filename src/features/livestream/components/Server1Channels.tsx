@@ -133,7 +133,12 @@ function ChannelRow({ channel }: { channel: Channel }) {
 
   const pseudoMatch = {
     id: `live-server1:${cleanProviderId}`,
-    team1: { name: channel.name, id: '', score: '', avatar: '' },
+    team1: {
+      name: channel.name,
+      id: '',
+      score: '',
+      avatar: channel.icon || '',
+    },
     team2: { name: '', id: '', score: '', avatar: '' },
     status: 'MatchIng',
     startTime: Date.now(),
