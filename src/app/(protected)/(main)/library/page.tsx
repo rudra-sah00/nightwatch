@@ -1,6 +1,6 @@
 export default function LibraryPage() {
   return (
-    <main className="min-h-full bg-background pb-32">
+    <main className="min-h-full pb-32">
       {/* Hero Header */}
       <div className="mb-12 bg-neo-orange relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-20" />

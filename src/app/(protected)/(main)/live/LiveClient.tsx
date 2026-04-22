@@ -93,7 +93,7 @@ function LiveContent() {
   );
 
   return (
-    <div className="min-h-full bg-background pb-32 overflow-x-hidden">
+    <div className="min-h-full pb-32 overflow-x-hidden">
       {/* Hero Header */}
       <div className="mb-12 bg-neo-yellow relative z-40 rounded-2xl overflow-hidden">
         {/* Abstract background shapes */}

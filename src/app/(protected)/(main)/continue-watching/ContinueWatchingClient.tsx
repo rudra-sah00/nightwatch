@@ -20,7 +20,7 @@ export default function ContinueWatchingClient() {
   const t = useTranslations('search');
 
   return (
-    <main className="min-h-full bg-background pb-32 animate-in fade-in">
+    <main className="min-h-full pb-32 animate-in fade-in">
       {/* Hero Header */}
       <div className="mb-12 bg-neo-blue relative overflow-hidden rounded-2xl">
         {/* Abstract background shapes */}

@@ -1,7 +1,7 @@
 export default function DownloadsLoading() {
   const row = 'flex gap-4 p-4 border-[3px] border-border';
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background pb-32 animate-pulse">
+    <div className="min-h-[calc(100vh-80px)] pb-32 animate-pulse">
       <div className="container mx-auto px-6 py-12 md:px-10">
         <div className="h-14 w-56 bg-muted rounded mb-2" />
         <div className="h-5 w-36 bg-muted rounded mb-10" />

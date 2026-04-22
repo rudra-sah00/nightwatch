@@ -1,7 +1,7 @@
 export default function LiveLoading() {
   const row = 'flex items-center gap-4 p-4 border-[3px] border-border';
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background pb-32 animate-pulse">
+    <div className="min-h-[calc(100vh-80px)] pb-32 animate-pulse">
       <div className="mb-12 bg-neo-yellow rounded-2xl">
         <div className="container mx-auto px-6 py-12 md:px-10">
           <div className="h-20 md:h-32 w-64 bg-foreground/10 rounded mb-4" />

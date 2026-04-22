@@ -13,11 +13,13 @@ import { useServer } from '@/providers/server-provider';
 interface UseHomeClientOptions {
   initialResults: SearchResult[];
   initialQuery: string;
+  initialServer?: string;
 }
 
 export function useHomeClient({
   initialResults,
   initialQuery,
+  initialServer,
 }: UseHomeClientOptions) {
   const t = useTranslations('common.toasts');
   const searchParams = useSearchParams();
@@ -55,7 +57,11 @@ export function useHomeClient({
       startTransition(() => setResults([]));
       return;
     }
-    if (query === initialQuery && initialResults.length > 0) {
+    if (
+      query === initialQuery &&
+      initialResults.length > 0 &&
+      activeServer === (initialServer || 's1')
+    ) {
       return;
     }
 
@@ -83,7 +89,7 @@ export function useHomeClient({
 
     fetchResults();
     return () => controller.abort();
-  }, [query, initialQuery, initialResults, activeServer, t]);
+  }, [query, initialQuery, initialResults, activeServer, initialServer, t]);
 
   useEffect(() => {
     setIsContinueWatchingLoading(true);

@@ -32,7 +32,7 @@ export function WatchlistClient() {
 
   return (
     <>
-      <div className="min-h-full bg-background pb-32 animate-in fade-in flex flex-col">
+      <div className="min-h-full pb-32 animate-in fade-in flex flex-col">
         {/* Hero Header */}
         <div className="mb-12 bg-neo-red relative overflow-hidden shrink-0 rounded-2xl">
           {/* Abstract background shapes */}

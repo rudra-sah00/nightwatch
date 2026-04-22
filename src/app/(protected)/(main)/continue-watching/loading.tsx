@@ -1,6 +1,6 @@
 export default function ContinueWatchingLoading() {
   return (
-    <main className="min-h-[calc(100vh-80px)] bg-background pb-32">
+    <main className="min-h-[calc(100vh-80px)] pb-32">
       {/* Hero Header - exact match */}
       <div className="mb-12 bg-neo-blue relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-20" />
