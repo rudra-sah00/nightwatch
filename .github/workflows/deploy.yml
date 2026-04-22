@@ -53,6 +53,9 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
+      - name: Validate i18n translations
+        run: pnpm vitest run tests/i18n/
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
