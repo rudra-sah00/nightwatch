@@ -1,7 +1,6 @@
 'use client';
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { CreatorFooter } from '@/components/ui/creator-footer';
@@ -168,27 +167,6 @@ export function ProfileOverview() {
           createdAt={userCreatedAtDate}
           isLoading={loadingActivity}
         />
-      </section>
-
-      {/* App Updates / What's New */}
-      <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-black font-headline uppercase tracking-tighter">
-              {t('releaseNotes.title')}
-            </h2>
-            <p className="text-muted-foreground font-body text-sm max-w-sm">
-              {t('releaseNotes.description')}
-            </p>
-          </div>
-
-          <Link
-            href="/whats-new"
-            className="flex-shrink-0 py-3 px-8 bg-primary text-primary-foreground font-semibold font-headline tracking-widest rounded-lg hover:bg-primary/90 transition-colors shadow-sm text-sm uppercase"
-          >
-            {t('releaseNotes.viewButton')}
-          </Link>
-        </div>
       </section>
 
       <CreatorFooter isCompact={false} />

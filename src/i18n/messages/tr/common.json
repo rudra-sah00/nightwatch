@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "Uygulama yüklü değil",
     "notInstalledDesc": "Watch Rudra masaüstü uygulaması açılamadı. Yüklü mü?",
-    "downloadApp": "Uygulamayı İndir"
+    "downloadApp": "Uygulamayı İndir",
+    "downloadFor": "{os} için İndir"
   },
   "whatsNew": {
     "backToHome": "Ana Sayfaya Dön",

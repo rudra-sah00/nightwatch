@@ -118,7 +118,7 @@ export function AppPreferences() {
             <DialogTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
+                className="flex items-center gap-3 px-5 py-3 bg-transparent text-foreground border border-border hover:bg-primary hover:text-primary-foreground rounded-md font-headline font-medium tracking-normal transition-[background-color,color,border-color,opacity,transform] cursor-pointer"
               >
                 {theme === 'light' ? (
                   <Sun className="w-4 h-4" />
@@ -201,7 +201,7 @@ export function AppPreferences() {
             trigger={
               <button
                 type="button"
-                className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
+                className="flex items-center gap-3 px-5 py-3 bg-transparent text-foreground border border-border hover:bg-primary hover:text-primary-foreground rounded-md font-headline font-medium tracking-normal transition-[background-color,color,border-color,opacity,transform] cursor-pointer"
               >
                 <Globe className="w-4 h-4" />
                 {locale}
@@ -263,7 +263,7 @@ export function AppPreferences() {
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
+                    className="flex items-center gap-3 px-5 py-3 bg-transparent text-foreground border border-border hover:bg-primary hover:text-primary-foreground rounded-md font-headline font-medium tracking-normal transition-[background-color,color,border-color,opacity,transform] cursor-pointer"
                   >
                     <Activity className="w-4 h-4" />
                     {concurrentDownloads}
@@ -342,7 +342,7 @@ export function AppPreferences() {
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
+                    className="flex items-center gap-3 px-5 py-3 bg-transparent text-foreground border border-border hover:bg-primary hover:text-primary-foreground rounded-md font-headline font-medium tracking-normal transition-[background-color,color,border-color,opacity,transform] cursor-pointer"
                   >
                     <Zap className="w-4 h-4" />
                     {downloadSpeedLimit === 0

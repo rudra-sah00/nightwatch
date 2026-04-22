@@ -1,8 +1,8 @@
 export default function WatchlistLoading() {
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background pb-32 flex flex-col">
+    <div className="min-h-[calc(100vh-80px)] pb-32 flex flex-col">
       {/* Hero - red bg, same as real page */}
-      <div className="border-b-[4px] border-border mb-12 bg-neo-red relative overflow-hidden shrink-0">
+      <div className="mb-12 bg-neo-red relative overflow-hidden shrink-0 rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-20" />
         <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-yellow border-[4px] border-border opacity-30 rotate-12" />
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">

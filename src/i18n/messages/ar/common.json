@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "التطبيق غير مثبت",
     "notInstalledDesc": "تعذر فتح تطبيق Watch Rudra. هل هو مثبت؟",
-    "downloadApp": "تحميل التطبيق"
+    "downloadApp": "تحميل التطبيق",
+    "downloadFor": "تحميل لـ {os}"
   },
   "whatsNew": {
     "backToHome": "العودة للرئيسية",

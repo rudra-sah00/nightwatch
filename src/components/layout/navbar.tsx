@@ -1,20 +1,16 @@
 'use client';
 
-import { DownloadCloud, History, Plus, Radio, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 
 export function Navbar() {
   const { user } = useAuth();
-  const pathname = usePathname();
   const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
   const t = useTranslations('common.nav');
-
-  const isActive = (href: string) => pathname?.startsWith(href);
 
   return (
     <nav
@@ -31,7 +27,6 @@ export function Navbar() {
             className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
             title={t('home')}
           >
-            {/* Mobile: Play Icon */}
             <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
               <img
                 src="/play.ico"
@@ -41,46 +36,9 @@ export function Navbar() {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            {/* Desktop: Text Logo */}
             <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
               WATCH RUDRA
             </span>
-          </Link>
-        </div>
-
-        {/* Middle: Global Navigation - Icons only on mobile, text only on desktop */}
-        <div className="flex items-center justify-center gap-6 sm:gap-8 font-headline uppercase font-bold tracking-tighter text-sm md:text-base md:flex-1">
-          <Link
-            href="/continue-watching"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/continue-watching') ? 'text-foreground' : 'text-foreground/70'}`}
-            title={t('continueWatching')}
-          >
-            <History className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">{t('continue')}</span>
-          </Link>
-          <Link
-            href="/live"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/live') ? 'text-foreground' : 'text-foreground/70'}`}
-            title={t('liveMatches')}
-          >
-            <Radio className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">{t('live')}</span>
-          </Link>
-          <Link
-            href="/watchlist"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/watchlist') ? 'text-foreground' : 'text-foreground/70'}`}
-            title={t('watchlist')}
-          >
-            <Plus className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">{t('watchlist')}</span>
-          </Link>
-          <Link
-            href="/downloads"
-            className={`py-4 px-2 [-webkit-app-region:no-drag] hover:text-foreground transition-colors flex items-center gap-2 group ${isActive('/downloads') ? 'text-foreground' : 'text-foreground/70'} ${isMounted && isDesktopApp ? '' : 'hidden'}`}
-            title={t('offlineDownloads')}
-          >
-            <DownloadCloud className="md:hidden w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] group-hover:scale-110" />
-            <span className="hidden md:inline">{t('downloads')}</span>
           </Link>
         </div>
 

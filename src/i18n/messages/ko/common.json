@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "앱 미설치",
     "notInstalledDesc": "Watch Rudra 데스크톱 앱을 열 수 없습니다. 설치되어 있나요?",
-    "downloadApp": "앱 다운로드"
+    "downloadApp": "앱 다운로드",
+    "downloadFor": "{os}용 다운로드"
   },
   "whatsNew": {
     "backToHome": "홈으로 돌아가기",

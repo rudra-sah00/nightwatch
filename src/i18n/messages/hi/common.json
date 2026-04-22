@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "ऐप इंस्टॉल नहीं है",
     "notInstalledDesc": "हम Watch Rudra डेस्कटॉप ऐप नहीं खोल सके। क्या यह इंस्टॉल है?",
-    "downloadApp": "ऐप डाउनलोड करें"
+    "downloadApp": "ऐप डाउनलोड करें",
+    "downloadFor": "{os} के लिए डाउनलोड करें"
   },
   "whatsNew": {
     "backToHome": "होम पर वापस जाएँ",

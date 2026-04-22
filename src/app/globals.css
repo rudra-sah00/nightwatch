@@ -15,6 +15,9 @@
   --color-neo-yellow: var(--neo-yellow);
   --color-neo-red: var(--neo-red);
   --color-neo-blue: var(--neo-blue);
+  --color-neo-green: var(--neo-green);
+  --color-neo-orange: var(--neo-orange);
+  --color-neo-cyan: var(--neo-cyan);
   --color-neo-muted: var(--neo-muted);
   --color-neo-text: var(--neo-text);
 
@@ -104,6 +107,9 @@
     --neo-yellow: #ffcc00;
     --neo-red: #e63b2e;
     --neo-blue: #0055ff;
+    --neo-green: #10b981;
+    --neo-orange: #f97316;
+    --neo-cyan: #06b6d4;
     --neo-muted: #d4d4d8;
     --neo-text: #1a1a1a;
 
@@ -307,6 +313,9 @@
     --neo-yellow: #a855f7; /* Changed yellow to purple in dark mode! */
     --neo-red: #fb7185;
     --neo-blue: #38bdf8;
+    --neo-green: #34d399;
+    --neo-orange: #c084fc;
+    --neo-cyan: #facc15;
     --neo-muted: #3f3f46;
     --neo-text: #f4f4f5;
 

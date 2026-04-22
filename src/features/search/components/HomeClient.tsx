@@ -17,7 +17,7 @@ export function HomeClient() {
   } = useSearchInput();
 
   return (
-    <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 relative h-[calc(100dvh-120px)] min-h-[600px] w-full overflow-hidden bg-background">
+    <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 relative h-[calc(100dvh-120px)] min-h-[600px] w-full overflow-hidden">
       {/* Abstract Bauhaus Background Elements */}
       <div className="absolute top-20 left-10 w-32 h-32 border-[3px] border-border opacity-20 -z-10 rotate-12"></div>
       <div className="absolute bottom-20 right-10 w-48 h-48 bg-neo-red opacity-10 -z-10 rounded-full"></div>
