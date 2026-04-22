@@ -45,7 +45,8 @@
     "rotateToLandscape": "Girar a horizontal",
     "landscapeOnlyMessage": "Este reproductor solo está disponible en modo horizontal",
     "showEpisodes": "Mostrar episodios",
-    "episodesTitle": "Episodios"
+    "episodesTitle": "Episodios",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Calidad",

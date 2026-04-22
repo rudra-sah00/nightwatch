@@ -45,7 +45,8 @@
     "rotateToLandscape": "تدوير إلى الوضع الأفقي",
     "landscapeOnlyMessage": "هذا المشغل متاح فقط في الوضع الأفقي",
     "showEpisodes": "عرض الحلقات",
-    "episodesTitle": "الحلقات"
+    "episodesTitle": "الحلقات",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "الجودة",

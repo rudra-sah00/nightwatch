@@ -45,7 +45,8 @@
     "rotateToLandscape": "横向きに回転",
     "landscapeOnlyMessage": "このプレーヤーは横向きモードでのみ利用可能です",
     "showEpisodes": "エピソードを表示",
-    "episodesTitle": "エピソード"
+    "episodesTitle": "エピソード",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "画質",

@@ -45,7 +45,8 @@
     "rotateToLandscape": "Yatay moda döndür",
     "landscapeOnlyMessage": "Bu oynatıcı yalnızca yatay modda kullanılabilir",
     "showEpisodes": "Bölümleri göster",
-    "episodesTitle": "Bölümler"
+    "episodesTitle": "Bölümler",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Kalite",

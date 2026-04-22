@@ -45,7 +45,8 @@
     "rotateToLandscape": "Ruota in orizzontale",
     "landscapeOnlyMessage": "Questo player è disponibile solo in modalità orizzontale",
     "showEpisodes": "Mostra episodi",
-    "episodesTitle": "Episodi"
+    "episodesTitle": "Episodi",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Qualità",

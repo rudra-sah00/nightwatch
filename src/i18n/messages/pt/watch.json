@@ -45,7 +45,8 @@
     "rotateToLandscape": "Girar para paisagem",
     "landscapeOnlyMessage": "Este player está disponível apenas no modo paisagem",
     "showEpisodes": "Mostrar episódios",
-    "episodesTitle": "Episódios"
+    "episodesTitle": "Episódios",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Qualidade",

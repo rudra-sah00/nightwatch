@@ -45,7 +45,8 @@
     "rotateToLandscape": "หมุนเป็นแนวนอน",
     "landscapeOnlyMessage": "เครื่องเล่นนี้ใช้ได้เฉพาะในโหมดแนวนอนเท่านั้น",
     "showEpisodes": "แสดงตอน",
-    "episodesTitle": "ตอน"
+    "episodesTitle": "ตอน",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "คุณภาพ",

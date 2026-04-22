@@ -45,7 +45,8 @@
     "rotateToLandscape": "लैंडस्केप में घुमाएँ",
     "landscapeOnlyMessage": "यह प्लेयर केवल लैंडस्केप मोड में उपलब्ध है",
     "showEpisodes": "एपिसोड दिखाएँ",
-    "episodesTitle": "एपिसोड"
+    "episodesTitle": "एपिसोड",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "गुणवत्ता",

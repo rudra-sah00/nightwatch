@@ -45,7 +45,8 @@
     "rotateToLandscape": "Pivoter en mode paysage",
     "landscapeOnlyMessage": "Ce lecteur est uniquement disponible en mode paysage",
     "showEpisodes": "Afficher les épisodes",
-    "episodesTitle": "Épisodes"
+    "episodesTitle": "Épisodes",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Qualité",

@@ -45,7 +45,8 @@
     "rotateToLandscape": "Повернуть в альбомный режим",
     "landscapeOnlyMessage": "Этот плеер доступен только в альбомном режиме",
     "showEpisodes": "Показать серии",
-    "episodesTitle": "Серии"
+    "episodesTitle": "Серии",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Качество",

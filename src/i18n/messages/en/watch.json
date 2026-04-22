@@ -45,7 +45,8 @@
     "rotateToLandscape": "Rotate to landscape",
     "landscapeOnlyMessage": "This player is only available in landscape mode",
     "showEpisodes": "Show episodes",
-    "episodesTitle": "Episodes"
+    "episodesTitle": "Episodes",
+    "liveStreamSeekBar": "Live stream seek bar"
   },
   "settings": {
     "quality": "Quality",
