@@ -109,7 +109,7 @@
     "pageTitle": "离线",
     "vault": "保险库",
     "yourDownloads": "您的下载内容",
-    "downloadsCount": "{count} 个下载",
+    "downloadsCount": "{count, plural, other {# 个下载}}",
     "availableOffline": "可离线观看",
     "emptyTitle": "保险库为空",
     "emptyDescription": "安全下载将显示在此处",

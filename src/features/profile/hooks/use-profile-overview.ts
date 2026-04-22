@@ -1,4 +1,4 @@
-import { useLocale, useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import type { WatchActivity } from '../types';
 export function useProfileOverview() {
   const { user, logout, updateUser } = useAuth();
   const t = useTranslations('profile.messages');
-  const locale = useLocale();
+  const format = useFormatter();
   const [activity, setActivity] = useState<WatchActivity[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -72,12 +72,12 @@ export function useProfileOverview() {
   const formattedJoinDate = useMemo(
     () =>
       userCreatedAtDate
-        ? userCreatedAtDate.toLocaleDateString(locale, {
+        ? format.dateTime(userCreatedAtDate, {
             month: 'long',
             year: 'numeric',
           })
         : t('unknown'),
-    [userCreatedAtDate, locale, t],
+    [userCreatedAtDate, format, t],
   );
 
   return {

@@ -555,7 +555,9 @@ export function useAgora({
       type?: string;
     }) => {
       if (evt.type === 'error' || (evt.code && evt.code >= 1000)) {
-        toast.error(`Media Error: ${evt.msg || 'An unknown error occurred'}`);
+        toast.error(
+          tp('mediaError', { message: evt.msg || tp('unknownMediaError') }),
+        );
       }
     };
 

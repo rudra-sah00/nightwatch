@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "언어",
-    "description": "선호하는 언어를 선택하세요",
-    "closeMenu": "언어 메뉴 닫기"
+    "description": "선호하는 언어를 선택하세요"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "내 관심목록 | Watch Rudra",
     "watchlistDescription": "나중에 볼 영화와 TV 프로그램을 관리하세요.",
     "watchPartyTitle": "워치 파티 | Watch Rudra",
-    "watchPartyDescription": "친구들과 함께 실시간으로 시청하세요."
+    "watchPartyDescription": "친구들과 함께 실시간으로 시청하세요.",
+    "userNotFoundTitle": "사용자를 찾을 수 없습니다 | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "{name}의 시청 활동 및 프로필을 확인하세요.",
+    "userProfileOgTitle": "{name} - Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "앱 미설치",
@@ -215,5 +218,11 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB"
+  },
+  "fallbacks": {
+    "guest": "게스트",
+    "member": "멤버",
+    "roomHost": "방장",
+    "user": "사용자"
   }
 }

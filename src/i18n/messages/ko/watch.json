@@ -109,7 +109,7 @@
     "pageTitle": "오프라인",
     "vault": "보관함",
     "yourDownloads": "다운로드한 콘텐츠",
-    "downloadsCount": "{count}개 다운로드",
+    "downloadsCount": "{count, plural, other {다운로드 #개}}",
     "availableOffline": "오프라인 시청 가능",
     "emptyTitle": "보관함이 비어 있습니다",
     "emptyDescription": "보안 다운로드가 여기에 표시됩니다",

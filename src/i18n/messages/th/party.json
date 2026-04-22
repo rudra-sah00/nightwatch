@@ -198,7 +198,9 @@
     "hostRejected": "โฮสต์ปฏิเสธคำขอของคุณ",
     "hostLeftRoom": "โฮสต์ออกจากห้องแล้ว",
     "failedCreateRoom": "ไม่สามารถสร้างห้องได้",
-    "hostEndedParty": "โฮสต์ได้สิ้นสุดปาร์ตี้แล้ว"
+    "hostEndedParty": "โฮสต์ได้สิ้นสุดปาร์ตี้แล้ว",
+    "mediaError": "ข้อผิดพลาดสื่อ: {message}",
+    "unknownMediaError": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"
   },
   "desktop": {
     "coWatchingLiveStream": "ดูไลฟ์สตรีมด้วยกัน",
@@ -249,5 +251,9 @@
     "sketchFor": "วาดสำหรับ {name}",
     "soundsFor": "เสียงสำหรับ {name}",
     "chatFor": "แชทสำหรับ {name}"
+  },
+  "aria": {
+    "partySidebar": "แถบด้านข้างปาร์ตี้",
+    "sendReaction": "ส่งรีแอคชัน {emoji}"
   }
 }

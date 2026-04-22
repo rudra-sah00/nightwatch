@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "Язык",
-    "description": "Выберите предпочитаемый язык",
-    "closeMenu": "Закрыть меню языка"
+    "description": "Выберите предпочитаемый язык"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "Мой Список | Watch Rudra",
     "watchlistDescription": "Отслеживайте фильмы и сериалы, которые хотите посмотреть позже.",
     "watchPartyTitle": "Совместный Просмотр | Watch Rudra",
-    "watchPartyDescription": "Присоединяйтесь к друзьям и смотрите вместе в реальном времени."
+    "watchPartyDescription": "Присоединяйтесь к друзьям и смотрите вместе в реальном времени.",
+    "userNotFoundTitle": "Пользователь не найден | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "Просмотр активности и профиля {name} на Watch Rudra.",
+    "userProfileOgTitle": "{name} на Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "Приложение не установлено",
@@ -215,5 +218,11 @@
     "mb": "МБ",
     "gb": "ГБ",
     "tb": "ТБ"
+  },
+  "fallbacks": {
+    "guest": "Гость",
+    "member": "Участник",
+    "roomHost": "Хост комнаты",
+    "user": "Пользователь"
   }
 }

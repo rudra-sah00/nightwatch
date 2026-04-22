@@ -198,7 +198,9 @@
     "hostRejected": "O anfitrião rejeitou sua solicitação",
     "hostLeftRoom": "O anfitrião saiu da sala",
     "failedCreateRoom": "Falha ao criar sala",
-    "hostEndedParty": "O anfitrião encerrou a festa."
+    "hostEndedParty": "O anfitrião encerrou a festa.",
+    "mediaError": "Erro de mídia: {message}",
+    "unknownMediaError": "Ocorreu um erro desconhecido"
   },
   "desktop": {
     "coWatchingLiveStream": "Assistindo transmissão ao vivo juntos",
@@ -249,5 +251,9 @@
     "sketchFor": "Desenho para {name}",
     "soundsFor": "Sons para {name}",
     "chatFor": "Chat para {name}"
+  },
+  "aria": {
+    "partySidebar": "Barra lateral da festa",
+    "sendReaction": "Enviar reação {emoji}"
   }
 }

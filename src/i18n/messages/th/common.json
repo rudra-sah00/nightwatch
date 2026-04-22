@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "ภาษา",
-    "description": "เลือกภาษาที่คุณต้องการ",
-    "closeMenu": "ปิดเมนูภาษา"
+    "description": "เลือกภาษาที่คุณต้องการ"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "รายการดูของฉัน | Watch Rudra",
     "watchlistDescription": "ติดตามภาพยนตร์และซีรีส์ที่คุณต้องการดูทีหลัง",
     "watchPartyTitle": "ปาร์ตี้ดูหนัง | Watch Rudra",
-    "watchPartyDescription": "เข้าร่วมกับเพื่อนและดูด้วยกันแบบเรียลไทม์"
+    "watchPartyDescription": "เข้าร่วมกับเพื่อนและดูด้วยกันแบบเรียลไทม์",
+    "userNotFoundTitle": "ไม่พบผู้ใช้ | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "ดูกิจกรรมการรับชมและโปรไฟล์ของ {name}",
+    "userProfileOgTitle": "{name} บน Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "ยังไม่ได้ติดตั้งแอป",
@@ -215,5 +218,11 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB"
+  },
+  "fallbacks": {
+    "guest": "ผู้เยี่ยมชม",
+    "member": "สมาชิก",
+    "roomHost": "เจ้าของห้อง",
+    "user": "ผู้ใช้"
   }
 }

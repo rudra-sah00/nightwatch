@@ -20,7 +20,8 @@
     "noResultsArchive": "Результатов не найдено",
     "noResultsArchiveHint": "Мы не нашли совпадений в наших архивах. Попробуйте поискать другое название или ключевое слово.",
     "editQueryAriaLabel": "Редактировать поисковый запрос",
-    "searchingAriaLabel": "Идёт поиск..."
+    "searchingAriaLabel": "Идёт поиск...",
+    "viewDetailsFor": "Подробнее о {title}"
   },
   "continueWatching": {
     "title": "Продолжить просмотр",

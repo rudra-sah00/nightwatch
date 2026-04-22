@@ -20,7 +20,8 @@
     "noResultsArchive": "No se encontraron resultados",
     "noResultsArchiveHint": "No encontramos coincidencias en nuestros archivos. Intenta buscar un título o palabra clave diferente.",
     "editQueryAriaLabel": "Editar consulta de búsqueda",
-    "searchingAriaLabel": "Buscando..."
+    "searchingAriaLabel": "Buscando...",
+    "viewDetailsFor": "Ver detalles de {title}"
   },
   "continueWatching": {
     "title": "Seguir viendo",

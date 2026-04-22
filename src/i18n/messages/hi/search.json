@@ -20,7 +20,8 @@
     "noResultsArchive": "कोई परिणाम नहीं मिला",
     "noResultsArchiveHint": "हमें संग्रह में कोई मिलान नहीं मिला। कोई अलग शीर्षक या कीवर्ड खोजें।",
     "editQueryAriaLabel": "खोज क्वेरी संपादित करें",
-    "searchingAriaLabel": "खोज रहे हैं..."
+    "searchingAriaLabel": "खोज रहे हैं...",
+    "viewDetailsFor": "{title} के विवरण देखें"
   },
   "continueWatching": {
     "title": "देखना जारी रखें",

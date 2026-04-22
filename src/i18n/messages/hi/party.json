@@ -198,7 +198,9 @@
     "hostRejected": "होस्ट ने आपका अनुरोध अस्वीकार कर दिया",
     "hostLeftRoom": "होस्ट ने रूम छोड़ दिया",
     "failedCreateRoom": "रूम बनाने में विफल",
-    "hostEndedParty": "होस्ट ने पार्टी समाप्त कर दी है।"
+    "hostEndedParty": "होस्ट ने पार्टी समाप्त कर दी है।",
+    "mediaError": "मीडिया त्रुटि: {message}",
+    "unknownMediaError": "एक अज्ञात त्रुटि हुई"
   },
   "desktop": {
     "coWatchingLiveStream": "लाइव स्ट्रीम साथ देख रहे हैं",
@@ -249,5 +251,9 @@
     "sketchFor": "{name} के लिए स्केच",
     "soundsFor": "{name} के लिए ध्वनियाँ",
     "chatFor": "{name} के लिए चैट"
+  },
+  "aria": {
+    "partySidebar": "पार्टी साइडबार",
+    "sendReaction": "{emoji} रिएक्शन भेजें"
   }
 }

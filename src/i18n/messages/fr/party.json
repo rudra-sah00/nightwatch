@@ -198,7 +198,9 @@
     "hostRejected": "L'hôte a rejeté votre demande",
     "hostLeftRoom": "L'hôte a quitté le salon",
     "failedCreateRoom": "Échec de la création du salon",
-    "hostEndedParty": "L'hôte a mis fin à la fête."
+    "hostEndedParty": "L'hôte a mis fin à la fête.",
+    "mediaError": "Erreur média : {message}",
+    "unknownMediaError": "Une erreur inconnue est survenue"
   },
   "desktop": {
     "coWatchingLiveStream": "Visionnage en direct ensemble",
@@ -249,5 +251,9 @@
     "sketchFor": "Dessin pour {name}",
     "soundsFor": "Sons pour {name}",
     "chatFor": "Chat pour {name}"
+  },
+  "aria": {
+    "partySidebar": "Barre latérale de la fête",
+    "sendReaction": "Envoyer la réaction {emoji}"
   }
 }

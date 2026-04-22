@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "اللغة",
-    "description": "اختر لغتك المفضلة",
-    "closeMenu": "إغلاق قائمة اللغة"
+    "description": "اختر لغتك المفضلة"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "قائمة المشاهدة | Watch Rudra",
     "watchlistDescription": "تتبع الأفلام والمسلسلات التي تريد مشاهدتها لاحقاً.",
     "watchPartyTitle": "حفلة المشاهدة | Watch Rudra",
-    "watchPartyDescription": "انضم إلى أصدقائك وشاهدوا معاً في الوقت الفعلي."
+    "watchPartyDescription": "انضم إلى أصدقائك وشاهدوا معاً في الوقت الفعلي.",
+    "userNotFoundTitle": "المستخدم غير موجود | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "عرض نشاط المشاهدة والملف الشخصي لـ {name}.",
+    "userProfileOgTitle": "{name} على Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "التطبيق غير مثبت",
@@ -215,5 +218,11 @@
     "mb": "ميغابايت",
     "gb": "غيغابايت",
     "tb": "تيرابايت"
+  },
+  "fallbacks": {
+    "guest": "ضيف",
+    "member": "عضو",
+    "roomHost": "مضيف الغرفة",
+    "user": "مستخدم"
   }
 }

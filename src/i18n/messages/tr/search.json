@@ -20,7 +20,8 @@
     "noResultsArchive": "Sonuç Bulunamadı",
     "noResultsArchiveHint": "Arşivlerimizde eşleşme bulamadık. Farklı bir başlık veya anahtar kelime aramayı deneyin.",
     "editQueryAriaLabel": "Arama sorgusunu düzenle",
-    "searchingAriaLabel": "Aranıyor..."
+    "searchingAriaLabel": "Aranıyor...",
+    "viewDetailsFor": "{title} detaylarını görüntüle"
   },
   "continueWatching": {
     "title": "İzlemeye Devam Et",

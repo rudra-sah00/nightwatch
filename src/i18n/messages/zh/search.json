@@ -20,7 +20,8 @@
     "noResultsArchive": "未找到结果",
     "noResultsArchiveHint": "我们在档案中未找到匹配项。请尝试搜索不同的标题或关键词。",
     "editQueryAriaLabel": "编辑搜索查询",
-    "searchingAriaLabel": "搜索中..."
+    "searchingAriaLabel": "搜索中...",
+    "viewDetailsFor": "查看 {title} 的详情"
   },
   "continueWatching": {
     "title": "继续观看",

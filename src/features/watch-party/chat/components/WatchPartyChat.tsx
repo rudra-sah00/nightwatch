@@ -1,7 +1,7 @@
 import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { memo, useMemo } from 'react';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -278,6 +278,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
   isMe,
   showHeader,
 }: ChatMessageItemProps) {
+  const format = useFormatter();
   // Detect if message is a single emoji
   const isSingleEmoji = useMemo(() => {
     const trimmed = message.content.trim();
@@ -328,7 +329,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
             {message.userName}
           </span>
           <span className="text-[10px] text-foreground/70 font-bold font-headline uppercase tracking-widest">
-            {new Date(message.timestamp).toLocaleTimeString([], {
+            {format.dateTime(new Date(message.timestamp), {
               hour: '2-digit',
               minute: '2-digit',
             })}
@@ -396,7 +397,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
             )}
           >
             {isSingleEmoji ? '' : ''}
-            {new Date(message.timestamp).toLocaleTimeString([], {
+            {format.dateTime(new Date(message.timestamp), {
               hour: '2-digit',
               minute: '2-digit',
             })}

@@ -24,8 +24,9 @@ describe('EmojiReactions', () => {
 
   it('renders quick emojis', () => {
     render(<EmojiReactions rtmSendMessage={mockRtmSendMessage} />);
-    expect(screen.getByLabelText('Send ❤️ reaction')).toBeInTheDocument();
-    expect(screen.getByLabelText('Send 😂 reaction')).toBeInTheDocument();
+    // All emoji buttons share the same mocked aria-label key
+    const buttons = screen.getAllByLabelText('sendReaction');
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
   });
 
   it('calls handleTriggerEmoji when a quick emoji is clicked', async () => {
@@ -41,7 +42,7 @@ describe('EmojiReactions', () => {
     });
 
     render(<EmojiReactions rtmSendMessage={mockRtmSendMessage} />);
-    fireEvent.click(screen.getByLabelText('Send ❤️ reaction'));
+    fireEvent.click(screen.getAllByLabelText('sendReaction')[0]);
     expect(mockHandleTrigger).toHaveBeenCalledWith('❤️');
   });
 });

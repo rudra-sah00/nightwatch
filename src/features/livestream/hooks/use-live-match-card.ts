@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
@@ -14,6 +14,7 @@ export function useLiveMatchCard(match: LiveMatch) {
   const { user } = useAuth();
   const t = useTranslations('live');
   const tp = useTranslations('party.toasts');
+  const format = useFormatter();
 
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
@@ -29,11 +30,11 @@ export function useLiveMatchCard(match: LiveMatch) {
       match.playType === 'hls');
 
   const startTime = new Date(match.startTime);
-  const formattedTime = startTime.toLocaleTimeString([], {
+  const formattedTime = format.dateTime(startTime, {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const formattedDate = startTime.toLocaleDateString([], {
+  const formattedDate = format.dateTime(startTime, {
     month: 'short',
     day: 'numeric',
   });

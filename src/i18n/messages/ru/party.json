@@ -198,7 +198,9 @@
     "hostRejected": "Организатор отклонил ваш запрос",
     "hostLeftRoom": "Организатор покинул комнату",
     "failedCreateRoom": "Не удалось создать комнату",
-    "hostEndedParty": "Организатор завершил вечеринку."
+    "hostEndedParty": "Организатор завершил вечеринку.",
+    "mediaError": "Ошибка медиа: {message}",
+    "unknownMediaError": "Произошла неизвестная ошибка"
   },
   "desktop": {
     "coWatchingLiveStream": "Совместный просмотр трансляции",
@@ -249,5 +251,9 @@
     "sketchFor": "Рисование для {name}",
     "soundsFor": "Звуки для {name}",
     "chatFor": "Чат для {name}"
+  },
+  "aria": {
+    "partySidebar": "Боковая панель вечеринки",
+    "sendReaction": "Отправить реакцию {emoji}"
   }
 }

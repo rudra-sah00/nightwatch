@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "Sprache",
-    "description": "Wähle deine bevorzugte Sprache",
-    "closeMenu": "Sprachmenü schließen"
+    "description": "Wähle deine bevorzugte Sprache"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "Meine Merkliste | Watch Rudra",
     "watchlistDescription": "Behalte den Überblick über Filme und Serien, die du später sehen möchtest.",
     "watchPartyTitle": "Watch Party | Watch Rudra",
-    "watchPartyDescription": "Triff dich mit Freunden und schaut gemeinsam in Echtzeit."
+    "watchPartyDescription": "Triff dich mit Freunden und schaut gemeinsam in Echtzeit.",
+    "userNotFoundTitle": "Benutzer nicht gefunden | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "Sehen Sie sich die Aktivität und das Profil von {name} an.",
+    "userProfileOgTitle": "{name} auf Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "App nicht installiert",
@@ -215,5 +218,11 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB"
+  },
+  "fallbacks": {
+    "guest": "Gast",
+    "member": "Mitglied",
+    "roomHost": "Raumhost",
+    "user": "Benutzer"
   }
 }

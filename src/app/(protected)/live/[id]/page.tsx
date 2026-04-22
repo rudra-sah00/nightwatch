@@ -3,7 +3,7 @@
 import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ export default function LiveMatchPlayerPage() {
   const titleFromRoute = searchParams.get('title')?.trim() ?? '';
   const { match, isLoading, error } = useLiveMatch(matchId);
   const t = useTranslations('live');
+  const format = useFormatter();
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -392,7 +393,7 @@ export default function LiveMatchPlayerPage() {
     </div>
   );
 
-  const startLabel = new Date(activeMatch.startTime).toLocaleString([], {
+  const startLabel = format.dateTime(new Date(activeMatch.startTime), {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',

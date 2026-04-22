@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getPublicProfile } from '@/features/profile/api';
 import { PublicProfileView } from '@/features/profile/components/public-profile-view';
 
@@ -12,30 +13,30 @@ interface Props {
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const t = await getTranslations('common.metadata');
   const result = await getPublicProfile(id).catch(() => null);
 
   if (!result?.profile) {
-    return {
-      title: 'User Not Found | Rudra Watch',
-    };
+    return { title: t('userNotFoundTitle') };
   }
 
   const profile = result.profile;
   const displayName = profile.name || profile.username || 'User';
+  const username = profile.username || displayName;
 
   return {
-    title: `${displayName} (@${profile.username}) | Rudra Watch`,
-    description: `View ${displayName}'s watch activity and profile on Rudra Watch.`,
+    title: t('userProfileTitle', { name: displayName, username }),
+    description: t('userProfileDescription', { name: displayName }),
     openGraph: {
-      title: `${displayName} on Rudra Watch`,
-      description: `Watch history and activity profile for ${displayName}.`,
+      title: t('userProfileOgTitle', { name: displayName }),
+      description: t('userProfileDescription', { name: displayName }),
       images: profile.profilePhoto ? [profile.profilePhoto] : [],
       type: 'profile',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${displayName} | Rudra Watch`,
-      description: `Watch history and activity profile for ${displayName}.`,
+      title: t('userProfileTitle', { name: displayName, username }),
+      description: t('userProfileDescription', { name: displayName }),
       images: profile.profilePhoto ? [profile.profilePhoto] : [],
     },
   };
