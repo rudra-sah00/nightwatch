@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "ยังไม่ได้ติดตั้งแอป",
     "notInstalledDesc": "ไม่สามารถเปิดแอป Watch Rudra ได้ ติดตั้งแล้วหรือยัง?",
-    "downloadApp": "ดาวน์โหลดแอป"
+    "downloadApp": "ดาวน์โหลดแอป",
+    "downloadFor": "ดาวน์โหลดสำหรับ {os}"
   },
   "whatsNew": {
     "backToHome": "กลับหน้าแรก",

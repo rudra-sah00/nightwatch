@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "应用未安装",
     "notInstalledDesc": "无法打开Watch Rudra桌面应用。是否已安装？",
-    "downloadApp": "下载应用"
+    "downloadApp": "下载应用",
+    "downloadFor": "下载 {os} 版"
   },
   "whatsNew": {
     "backToHome": "返回首页",

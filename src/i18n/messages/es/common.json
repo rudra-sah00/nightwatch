@@ -174,7 +174,8 @@
   "desktopApp": {
     "notInstalled": "App no instalada",
     "notInstalledDesc": "No pudimos abrir la app de escritorio Watch Rudra. ¿Está instalada?",
-    "downloadApp": "Descargar App"
+    "downloadApp": "Descargar App",
+    "downloadFor": "Descargar para {os}"
   },
   "whatsNew": {
     "backToHome": "Volver al Inicio",

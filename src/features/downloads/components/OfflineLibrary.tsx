@@ -97,7 +97,7 @@ export function OfflineLibrary() {
   return (
     <main className="min-h-[calc(100vh-80px)] bg-background pb-32 animate-in fade-in">
       {/* Hero Header */}
-      <div className="border-b-[4px] border-border mb-12 bg-neo-yellow relative overflow-hidden">
+      <div className="mb-12 bg-neo-cyan relative overflow-hidden rounded-2xl">
         {/* Abstract background shapes */}
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-20" />
         <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-blue border-[4px] border-border opacity-30 rotate-12" />

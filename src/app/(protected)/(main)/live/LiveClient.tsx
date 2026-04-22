@@ -29,8 +29,18 @@ function LiveContent() {
   const format = useFormatter();
 
   const SERVERS = [
-    { id: 'server1' as const, label: t('server1'), desc: t('server1Desc') },
-    { id: 'server2' as const, label: t('server2'), desc: t('server2Desc') },
+    {
+      id: 'server1' as const,
+      label: t('server1'),
+      short: 'S1',
+      desc: t('server1Desc'),
+    },
+    {
+      id: 'server2' as const,
+      label: t('server2'),
+      short: 'S2',
+      desc: t('server2Desc'),
+    },
   ];
 
   const SERVER_1_SPORTS = [{ id: 'all_channels', label: t('allChannels') }];
@@ -83,15 +93,15 @@ function LiveContent() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background pb-32 overflow-x-hidden">
+    <div className="min-h-full bg-background pb-32 overflow-x-hidden">
       {/* Hero Header */}
-      <div className="border-b-[4px] border-border mb-12 bg-neo-yellow relative z-40">
+      <div className="mb-12 bg-neo-yellow relative z-40 rounded-2xl overflow-hidden">
         {/* Abstract background shapes */}
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
         <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
 
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
-          <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
             <div className="flex-shrink-0">
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
                 {t('heroTitle')}
@@ -108,9 +118,9 @@ function LiveContent() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-start md:items-end gap-6 w-full max-w-full xl:max-w-4xl relative">
+            <div className="flex flex-col md:flex-row items-start md:items-end gap-6 w-full min-w-0 relative">
               {/* Server Selector Dropdown */}
-              <div className="relative w-full md:w-auto shrink-0 z-50">
+              <div className="relative w-full md:w-auto shrink-0 md:shrink min-w-0 z-50">
                 <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
                   1. {t('regionProvider')}
                 </p>
@@ -123,22 +133,27 @@ function LiveContent() {
                   aria-haspopup="menu"
                   aria-expanded={isServerMenuOpen}
                   aria-controls="live-server-menu"
-                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap min-w-[220px] md:min-w-[260px] hover:bg-muted hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 ${
+                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full min-w-0 hover:bg-muted hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 ${
                     isServerMenuOpen || activeServer
                       ? 'bg-muted text-foreground'
                       : 'bg-background'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     {activeServer === 'server1' ? (
-                      <Radio className="w-6 h-6" />
+                      <Radio className="w-6 h-6 shrink-0" />
                     ) : (
-                      <Globe2 className="w-6 h-6" />
+                      <Globe2 className="w-6 h-6 shrink-0" />
                     )}
-                    {SERVERS.find((s) => s.id === activeServer)?.label}
+                    <span className="truncate hidden lg:inline">
+                      {SERVERS.find((s) => s.id === activeServer)?.label}
+                    </span>
+                    <span className="truncate lg:hidden">
+                      {SERVERS.find((s) => s.id === activeServer)?.short}
+                    </span>
                   </div>
                   <ChevronDown
-                    className={`w-6 h-6 transition-transform duration-300 ${
+                    className={`w-6 h-6 shrink-0 transition-transform duration-300 ${
                       isServerMenuOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -186,7 +201,7 @@ function LiveContent() {
               </div>
 
               {/* Sport Selector Dropdown */}
-              <div className="relative w-full md:w-auto flex-grow z-40">
+              <div className="relative w-full md:w-auto flex-grow min-w-0 z-40">
                 <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
                   2. {t('selectCoverage')}
                 </p>
@@ -199,14 +214,14 @@ function LiveContent() {
                   aria-haspopup="menu"
                   aria-expanded={isSportMenuOpen}
                   aria-controls="live-sport-menu"
-                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border whitespace-nowrap w-full md:min-w-[300px] bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
+                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 min-w-0"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <span className="w-3 h-3 bg-neo-red border-[2px] border-border rounded-full animate-pulse shrink-0" />
-                    {activeSport?.label}
+                    <span className="truncate">{activeSport?.label}</span>
                   </div>
                   <ChevronDown
-                    className={`w-6 h-6 transition-transform duration-300 ${
+                    className={`w-6 h-6 shrink-0 transition-transform duration-300 ${
                       isSportMenuOpen ? 'rotate-180' : ''
                     }`}
                   />
