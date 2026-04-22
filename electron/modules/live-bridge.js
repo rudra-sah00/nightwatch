@@ -280,7 +280,7 @@ function setupLiveBridge() {
         setTimeout(() => {
           if (hasResolved) return;
 
-          const racerUrl = `https://dlstreams.top${path}stream-${streamId}.php`;
+          const racerUrl = `https://dlstreams.com${path}stream-${streamId}.php`;
           const partition = `persist:racer-${path.replace(/\//g, '')}-${streamId}`;
 
           log.info(`[live-bridge] [Racer ${index}] Spawning: ${racerUrl}`);
@@ -390,9 +390,9 @@ function setupLiveBridge() {
 
           // Override headers so the upstream sees this as an iframe embed, not direct access
           win.webContents.session.webRequest.onBeforeSendHeaders(
-            { urls: ['*://*.dlstreams.top/*'] },
+            { urls: ['*://*.dlstreams.com/*'] },
             (details, cb) => {
-              details.requestHeaders.Referer = 'https://daddylive.mp/';
+              details.requestHeaders.Referer = 'https://daddylive.stream/';
               details.requestHeaders['Sec-Fetch-Dest'] = 'iframe';
               details.requestHeaders['Sec-Fetch-Mode'] = 'navigate';
               details.requestHeaders['Sec-Fetch-Site'] = 'cross-site';
