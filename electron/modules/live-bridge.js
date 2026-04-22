@@ -15,14 +15,7 @@ let _lastEventSender = null;
 // Per-session random token — prevents other local processes from using the proxy
 let proxyToken = crypto.randomBytes(16).toString('hex');
 
-const RACER_PATHS = [
-  '/stream/',
-  '/cast/',
-  '/watch/',
-  '/casting/',
-  '/player/',
-  '/plus/',
-];
+const RACER_PATHS = ['/stream/', '/cast/'];
 
 function getCookieString() {
   return streamCookies || '';
