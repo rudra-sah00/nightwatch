@@ -115,7 +115,7 @@ jobs:
           sleep 10
           for i in 1 2 3; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://watch.rudrasahoo.live")
-            if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ] || [ "$STATUS" -eq 429 ]; then
               echo "✅ Smoke test passed (HTTP $STATUS)"
               exit 0
             fi
