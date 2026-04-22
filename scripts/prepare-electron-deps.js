@@ -24,6 +24,22 @@ const ENTRY_DEPS = [
 
 const projectRoot = process.cwd();
 
+function resolvePkg(name, fromDir) {
+  // Try require.resolve from the parent package's directory — works with pnpm symlinks
+  try {
+    const pkgJson = require.resolve(`${name}/package.json`, {
+      paths: [fromDir],
+    });
+    return path.dirname(pkgJson);
+  } catch {}
+  // Fallback: nested node_modules, then top-level
+  const nested = path.join(fromDir, 'node_modules', name);
+  if (fs.existsSync(nested)) return fs.realpathSync(nested);
+  const topLevel = path.join(projectRoot, 'node_modules', name);
+  if (fs.existsSync(topLevel)) return fs.realpathSync(topLevel);
+  return null;
+}
+
 function collectDeps(pkgDir, collected) {
   let pkgJson;
   try {
@@ -39,14 +55,7 @@ function collectDeps(pkgDir, collected) {
       continue;
     if (collected.has(dep)) continue;
 
-    // Resolve: nested first, then top-level
-    const nested = path.join(pkgDir, 'node_modules', dep);
-    const topLevel = path.join(projectRoot, 'node_modules', dep);
-    const resolved = fs.existsSync(nested)
-      ? nested
-      : fs.existsSync(topLevel)
-        ? topLevel
-        : null;
+    const resolved = resolvePkg(dep, pkgDir);
 
     if (resolved) {
       collected.set(dep, resolved);
@@ -58,8 +67,8 @@ function collectDeps(pkgDir, collected) {
 // Collect all deps
 const collected = new Map();
 for (const dep of ENTRY_DEPS) {
-  const depDir = path.join(projectRoot, 'node_modules', dep);
-  if (fs.existsSync(depDir)) {
+  const depDir = resolvePkg(dep, projectRoot);
+  if (depDir) {
     collected.set(dep, depDir);
     collectDeps(depDir, collected);
   }
