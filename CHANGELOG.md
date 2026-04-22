@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/rudra-sah00/watch-rudra/compare/v2.1.1...v2.2.0) (2026-04-22)
+
+
+### Features
+
+* **i18n:** comprehensive i18n audit improvements ([b7840d5](https://github.com/rudra-sah00/watch-rudra/commit/b7840d519f37124f4737f0cac50e0fed92614c0f))
+* **i18n:** comprehensive i18n audit improvements across 14 locales ([8e15166](https://github.com/rudra-sah00/watch-rudra/commit/8e151669b4b0c6648efc95b9a54a7cb485f1da68))
+
 ## [2.1.1](https://github.com/rudra-sah00/watch-rudra/compare/v2.1.0...v2.1.1) (2026-04-22)
 
 
