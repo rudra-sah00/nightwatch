@@ -2,7 +2,7 @@
 
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
@@ -25,8 +25,8 @@ export function PublicProfileView({
   todayIso,
 }: PublicProfileViewProps) {
   const t = useTranslations('profile');
-  const locale = useLocale();
-  const joinDate = new Date(profile.createdAt).toLocaleDateString(locale, {
+  const format = useFormatter();
+  const joinDate = format.dateTime(new Date(profile.createdAt), {
     month: 'long',
     year: 'numeric',
   });

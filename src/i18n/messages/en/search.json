@@ -20,7 +20,8 @@
     "noResultsArchive": "No Results Found",
     "noResultsArchiveHint": "We couldn't find any matches in our archives. Try searching for a different title or keyword.",
     "editQueryAriaLabel": "Edit search query",
-    "searchingAriaLabel": "Searching..."
+    "searchingAriaLabel": "Searching...",
+    "viewDetailsFor": "View details for {title}"
   },
   "continueWatching": {
     "title": "Continue Watching",

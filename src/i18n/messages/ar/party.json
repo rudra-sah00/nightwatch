@@ -198,7 +198,9 @@
     "hostRejected": "رفض المضيف طلبك",
     "hostLeftRoom": "غادر المضيف الغرفة",
     "failedCreateRoom": "فشل في إنشاء الغرفة",
-    "hostEndedParty": "أنهى المضيف الحفلة."
+    "hostEndedParty": "أنهى المضيف الحفلة.",
+    "mediaError": "خطأ في الوسائط: {message}",
+    "unknownMediaError": "حدث خطأ غير معروف"
   },
   "desktop": {
     "coWatchingLiveStream": "مشاهدة البث المباشر معاً",
@@ -249,5 +251,9 @@
     "sketchFor": "الرسم لـ {name}",
     "soundsFor": "الأصوات لـ {name}",
     "chatFor": "الدردشة لـ {name}"
+  },
+  "aria": {
+    "partySidebar": "الشريط الجانبي للحفلة",
+    "sendReaction": "إرسال تفاعل {emoji}"
   }
 }

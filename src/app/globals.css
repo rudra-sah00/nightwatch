@@ -425,6 +425,179 @@
     @apply bg-background text-foreground;
   }
 
+  /* ── RTL support ─────────────────────────────────────────── */
+  /* When dir="rtl" is set on <html>, flip directional layout */
+  [dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+
+  [dir="rtl"] .flex-row {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .space-x-1 > :not(:last-child),
+  [dir="rtl"] .space-x-2 > :not(:last-child),
+  [dir="rtl"] .space-x-3 > :not(:last-child),
+  [dir="rtl"] .space-x-4 > :not(:last-child),
+  [dir="rtl"] .space-x-6 > :not(:last-child) {
+    margin-right: 0;
+    margin-left: var(--tw-space-x-reverse);
+  }
+
+  /* Mirror directional margins and paddings */
+  [dir="rtl"] .ml-auto {
+    margin-left: unset;
+    margin-right: auto;
+  }
+  [dir="rtl"] .mr-auto {
+    margin-right: unset;
+    margin-left: auto;
+  }
+  [dir="rtl"] .ml-1 {
+    margin-left: unset;
+    margin-right: 0.25rem;
+  }
+  [dir="rtl"] .ml-2 {
+    margin-left: unset;
+    margin-right: 0.5rem;
+  }
+  [dir="rtl"] .ml-3 {
+    margin-left: unset;
+    margin-right: 0.75rem;
+  }
+  [dir="rtl"] .ml-4 {
+    margin-left: unset;
+    margin-right: 1rem;
+  }
+  [dir="rtl"] .mr-1 {
+    margin-right: unset;
+    margin-left: 0.25rem;
+  }
+  [dir="rtl"] .mr-2 {
+    margin-right: unset;
+    margin-left: 0.5rem;
+  }
+  [dir="rtl"] .mr-3 {
+    margin-right: unset;
+    margin-left: 0.75rem;
+  }
+  [dir="rtl"] .mr-4 {
+    margin-right: unset;
+    margin-left: 1rem;
+  }
+  [dir="rtl"] .pl-2 {
+    padding-left: unset;
+    padding-right: 0.5rem;
+  }
+  [dir="rtl"] .pl-3 {
+    padding-left: unset;
+    padding-right: 0.75rem;
+  }
+  [dir="rtl"] .pl-4 {
+    padding-left: unset;
+    padding-right: 1rem;
+  }
+  [dir="rtl"] .pl-6 {
+    padding-left: unset;
+    padding-right: 1.5rem;
+  }
+  [dir="rtl"] .pr-2 {
+    padding-right: unset;
+    padding-left: 0.5rem;
+  }
+  [dir="rtl"] .pr-3 {
+    padding-right: unset;
+    padding-left: 0.75rem;
+  }
+  [dir="rtl"] .pr-4 {
+    padding-right: unset;
+    padding-left: 1rem;
+  }
+  [dir="rtl"] .pr-6 {
+    padding-right: unset;
+    padding-left: 1.5rem;
+  }
+
+  /* Mirror text alignment */
+  [dir="rtl"] .text-left {
+    text-align: right;
+  }
+  [dir="rtl"] .text-right {
+    text-align: left;
+  }
+
+  /* Mirror absolute/fixed positioning */
+  [dir="rtl"] .left-0 {
+    left: unset;
+    right: 0;
+  }
+  [dir="rtl"] .right-0 {
+    right: unset;
+    left: 0;
+  }
+  [dir="rtl"] .left-2 {
+    left: unset;
+    right: 0.5rem;
+  }
+  [dir="rtl"] .right-2 {
+    right: unset;
+    left: 0.5rem;
+  }
+  [dir="rtl"] .left-4 {
+    left: unset;
+    right: 1rem;
+  }
+  [dir="rtl"] .right-4 {
+    right: unset;
+    left: 1rem;
+  }
+
+  /* Mirror translate-x transforms */
+  [dir="rtl"] .translate-x-full {
+    --tw-translate-x: -100%;
+  }
+  [dir="rtl"] .-translate-x-full {
+    --tw-translate-x: 100%;
+  }
+
+  /* Mirror rounded corners */
+  [dir="rtl"] .rounded-l-md {
+    border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0;
+  }
+  [dir="rtl"] .rounded-r-md {
+    border-radius: calc(var(--radius) - 2px) 0 0 calc(var(--radius) - 2px);
+  }
+  [dir="rtl"] .rounded-l-lg {
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  [dir="rtl"] .rounded-r-lg {
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  /* Mirror border sides */
+  [dir="rtl"] .border-l {
+    border-left: 0;
+    border-right: 1px solid;
+  }
+  [dir="rtl"] .border-r {
+    border-right: 0;
+    border-left: 1px solid;
+  }
+
+  /* Ensure gap-based layouts (flex gap, grid gap) work without mirroring */
+  /* gap is direction-agnostic, so no override needed */
+
+  /* Electron title bar padding flips */
+  [dir="rtl"] .pl-20 {
+    padding-left: unset;
+    padding-right: 5rem;
+  }
+  [dir="rtl"] .pr-32 {
+    padding-right: unset;
+    padding-left: 8rem;
+  }
+
   /* Hide scrollbar globally but maintain functionality */
   html,
   body,

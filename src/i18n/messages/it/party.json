@@ -198,7 +198,9 @@
     "hostRejected": "L'host ha rifiutato la tua richiesta",
     "hostLeftRoom": "L'host ha lasciato la stanza",
     "failedCreateRoom": "Impossibile creare la stanza",
-    "hostEndedParty": "L'host ha terminato la festa."
+    "hostEndedParty": "L'host ha terminato la festa.",
+    "mediaError": "Errore media: {message}",
+    "unknownMediaError": "Si è verificato un errore sconosciuto"
   },
   "desktop": {
     "coWatchingLiveStream": "Visione condivisa della diretta",
@@ -249,5 +251,9 @@
     "sketchFor": "Disegno per {name}",
     "soundsFor": "Suoni per {name}",
     "chatFor": "Chat per {name}"
+  },
+  "aria": {
+    "partySidebar": "Barra laterale della festa",
+    "sendReaction": "Invia reazione {emoji}"
   }
 }

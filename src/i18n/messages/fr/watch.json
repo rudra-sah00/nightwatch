@@ -109,7 +109,7 @@
     "pageTitle": "HORS LIGNE",
     "vault": "COFFRE",
     "yourDownloads": "Votre contenu téléchargé",
-    "downloadsCount": "{count} téléchargement(s)",
+    "downloadsCount": "{count, plural, one {# Téléchargement} other {# Téléchargements}}",
     "availableOffline": "Disponible pour visionnage hors ligne",
     "emptyTitle": "Le coffre est vide",
     "emptyDescription": "Les téléchargements sécurisés apparaîtront ici",

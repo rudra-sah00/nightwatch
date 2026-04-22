@@ -20,7 +20,8 @@
     "noResultsArchive": "Nessun risultato trovato",
     "noResultsArchiveHint": "Non abbiamo trovato corrispondenze nei nostri archivi. Prova a cercare un titolo o una parola chiave diversa.",
     "editQueryAriaLabel": "Modifica ricerca",
-    "searchingAriaLabel": "Ricerca in corso..."
+    "searchingAriaLabel": "Ricerca in corso...",
+    "viewDetailsFor": "Visualizza dettagli di {title}"
   },
   "continueWatching": {
     "title": "Continua a guardare",

@@ -8,7 +8,7 @@ import {
   Globe2,
   Radio,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
@@ -26,6 +26,7 @@ function LiveContent() {
   const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const t = useTranslations('live');
+  const format = useFormatter();
 
   const SERVERS = [
     { id: 'server1' as const, label: t('server1'), desc: t('server1Desc') },
@@ -65,7 +66,7 @@ function LiveContent() {
 
   const upcomingByDate = activeMatches.reduce(
     (acc, match) => {
-      const date = new Date(match.startTime).toLocaleDateString([], {
+      const date = format.dateTime(new Date(match.startTime), {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -335,7 +336,7 @@ function LiveContent() {
                     <div className="space-y-8">
                       {Object.entries(upcomingByDate).map(([date, matches]) => {
                         const isToday =
-                          new Date().toLocaleDateString([], {
+                          format.dateTime(new Date(), {
                             weekday: 'short',
                             month: 'short',
                             day: 'numeric',

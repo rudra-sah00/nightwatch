@@ -109,7 +109,7 @@
     "pageTitle": "オフライン",
     "vault": "保管庫",
     "yourDownloads": "ダウンロード済みコンテンツ",
-    "downloadsCount": "{count}件のダウンロード",
+    "downloadsCount": "{count, plural, other {# ダウンロード}}",
     "availableOffline": "オフラインで視聴可能",
     "emptyTitle": "保管庫は空です",
     "emptyDescription": "安全なダウンロードがここに表示されます",

@@ -109,7 +109,7 @@
     "pageTitle": "ออฟไลน์",
     "vault": "ตู้เซฟ",
     "yourDownloads": "เนื้อหาที่ดาวน์โหลดของคุณ",
-    "downloadsCount": "{count} ดาวน์โหลด",
+    "downloadsCount": "{count, plural, other {# ดาวน์โหลด}}",
     "availableOffline": "พร้อมดูแบบออฟไลน์",
     "emptyTitle": "ตู้เซฟว่างเปล่า",
     "emptyDescription": "ดาวน์โหลดที่ปลอดภัยจะปรากฏที่นี่",

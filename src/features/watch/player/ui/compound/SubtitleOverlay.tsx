@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useSubtitleOverlay } from './hooks/use-subtitle-overlay';
 
 interface SubtitleOverlayProps {
@@ -35,6 +36,7 @@ export function SubtitleOverlay({
   currentTrackId,
 }: SubtitleOverlayProps) {
   const { cueText } = useSubtitleOverlay({ videoRef, currentTrackId });
+  const tAria = useTranslations('watch.aria');
 
   if (!cueText) return null;
 
@@ -42,7 +44,7 @@ export function SubtitleOverlay({
     <section
       className="absolute bottom-[12%] left-0 right-0 flex justify-center pointer-events-none z-20 px-4"
       aria-live="polite"
-      aria-label="Subtitle"
+      aria-label={tAria('subtitle')}
     >
       <div
         className="max-w-[80%] text-center leading-snug"

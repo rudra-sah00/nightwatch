@@ -11,9 +11,9 @@ import {
   Sun,
   Zap,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import {
   Dialog,
   DialogClose,
@@ -21,27 +21,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { COOKIE_NAME, locales } from '@/i18n/config';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
-
-const LOCALE_META: Record<string, { native: string; english: string }> = {
-  en: { native: 'English', english: 'English' },
-  hi: { native: 'हिन्दी', english: 'Hindi' },
-  es: { native: 'Español', english: 'Spanish' },
-  fr: { native: 'Français', english: 'French' },
-  ja: { native: '日本語', english: 'Japanese' },
-  ko: { native: '한국어', english: 'Korean' },
-  de: { native: 'Deutsch', english: 'German' },
-  pt: { native: 'Português', english: 'Portuguese' },
-  ar: { native: 'العربية', english: 'Arabic' },
-  ru: { native: 'Русский', english: 'Russian' },
-  zh: { native: '中文', english: 'Chinese' },
-  it: { native: 'Italiano', english: 'Italian' },
-  tr: { native: 'Türkçe', english: 'Turkish' },
-  th: { native: 'ไทย', english: 'Thai' },
-};
 
 const THEME_META = [
   { id: 'light' as const, label: 'Light', Icon: Sun },
@@ -49,16 +31,10 @@ const THEME_META = [
   { id: 'system' as const, label: 'System', Icon: Monitor },
 ];
 
-function setCookie(name: string, value: string) {
-  // biome-ignore lint/suspicious/noDocumentCookie: required for SSR locale detection
-  document.cookie = `${name}=${value};path=/;max-age=31536000;samesite=lax`;
-}
-
 export function AppPreferences() {
   const t = useTranslations('profile');
   const { theme, setTheme } = useTheme();
   const locale = useLocale();
-  const router = useRouter();
 
   const [runOnBoot, setRunOnBoot] = useState(false);
   const [concurrentDownloads, setConcurrentDownloads] = useState<number>(3);
@@ -66,7 +42,6 @@ export function AppPreferences() {
   const [downloadSpeedLimit, setDownloadSpeedLimit] = useState<number>(0);
   const [customSpeed, setCustomSpeed] = useState('');
   const [isDesktop, setIsDesktop] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
 
   useEffect(() => {
@@ -83,16 +58,6 @@ export function AppPreferences() {
       });
     }
   }, []);
-
-  const switchLocale = useCallback(
-    (newLocale: string) => {
-      setCookie(COOKIE_NAME, newLocale);
-      localStorage.setItem('preferred-locale', newLocale);
-      setLangOpen(false);
-      router.refresh();
-    },
-    [router],
-  );
 
   const handleToggleRunOnBoot = () => {
     const newValue = !runOnBoot;
@@ -232,66 +197,17 @@ export function AppPreferences() {
             </p>
           </div>
 
-          <Dialog open={langOpen} onOpenChange={setLangOpen}>
-            <DialogTrigger asChild>
+          <LanguageSwitcher
+            trigger={
               <button
                 type="button"
                 className="flex items-center gap-3 px-5 py-3 border rounded-lg transition-all shadow-sm cursor-pointer bg-card text-card-foreground border-border hover:border-primary/50 hover:shadow-md"
               >
                 <Globe className="w-4 h-4" />
-                {LOCALE_META[locale]?.native || locale}
+                {locale}
               </button>
-            </DialogTrigger>
-
-            <DialogContent
-              className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-screen m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
-              showCloseButton={false}
-            >
-              <DialogTitle className="sr-only">
-                {t('preferences.selectLanguage')}
-              </DialogTitle>
-              <button
-                type="button"
-                onClick={() => setLangOpen(false)}
-                className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
-              >
-                {t('preferences.cancel')}
-              </button>
-
-              <div className="flex flex-col items-center w-full max-w-md px-6 h-full pt-16">
-                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
-                  {t('preferences.language')}
-                </h2>
-                <div className="flex flex-col w-full gap-1 overflow-y-auto flex-1 pb-16">
-                  {locales.map((l) => (
-                    <button
-                      key={l}
-                      type="button"
-                      onClick={() => switchLocale(l)}
-                      className={cn(
-                        'w-full px-6 py-4 flex items-center justify-between text-left transition-all duration-200',
-                        locale === l
-                          ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
-                          : 'text-foreground/30 hover:text-foreground/60',
-                      )}
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-lg font-headline font-bold tracking-wide">
-                          {LOCALE_META[l]?.native}
-                        </span>
-                        <span className="text-xs opacity-60 uppercase tracking-widest font-bold">
-                          {LOCALE_META[l]?.english}
-                        </span>
-                      </div>
-                      {locale === l && (
-                        <Check className="w-5 h-5 stroke-[3px]" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+            }
+          />
         </div>
 
         {/* Desktop Only Settings */}

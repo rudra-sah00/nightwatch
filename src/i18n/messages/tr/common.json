@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "Dil",
-    "description": "Tercih ettiğiniz dili seçin",
-    "closeMenu": "Dil menüsünü kapat"
+    "description": "Tercih ettiğiniz dili seçin"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "İzleme Listem | Watch Rudra",
     "watchlistDescription": "Daha sonra izlemek istediğiniz film ve dizileri takip edin.",
     "watchPartyTitle": "İzleme Partisi | Watch Rudra",
-    "watchPartyDescription": "Arkadaşlarınıza katılın ve gerçek zamanlı birlikte izleyin."
+    "watchPartyDescription": "Arkadaşlarınıza katılın ve gerçek zamanlı birlikte izleyin.",
+    "userNotFoundTitle": "Kullanıcı bulunamadı | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "{name} adlı kullanıcının izleme etkinliğini ve profilini görüntüleyin.",
+    "userProfileOgTitle": "{name} - Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "Uygulama yüklü değil",
@@ -215,5 +218,11 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB"
+  },
+  "fallbacks": {
+    "guest": "Misafir",
+    "member": "Üye",
+    "roomHost": "Oda Sahibi",
+    "user": "Kullanıcı"
   }
 }

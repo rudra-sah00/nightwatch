@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Play, Users, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
@@ -109,6 +109,7 @@ function LiveMatchModalContent({
 }: Omit<LiveMatchModalProps, 'isOpen'> & { isMobile: boolean }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('live');
+  const format = useFormatter();
 
   // Escape key to close + auto-focus on open
   useEffect(() => {
@@ -157,11 +158,11 @@ function LiveMatchModalContent({
   };
 
   const startTime = new Date(match.startTime);
-  const formattedTime = startTime.toLocaleTimeString([], {
+  const formattedTime = format.dateTime(startTime, {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const formattedDate = startTime.toLocaleDateString([], {
+  const formattedDate = format.dateTime(startTime, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

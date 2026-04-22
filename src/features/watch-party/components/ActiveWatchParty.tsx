@@ -144,6 +144,7 @@ export function ActiveWatchParty({
   // Whether the current user is permitted to send chat messages
   const { user } = useAuth();
   const t = useTranslations('party');
+  const tAria = useTranslations('party.aria');
   const currentMember = room.members.find((m) => m.id === currentUserId);
   const currentUserName =
     currentMember?.name ||
@@ -171,7 +172,7 @@ export function ActiveWatchParty({
     >
       {/* Sidebar */}
       <aside
-        aria-label="Party sidebar"
+        aria-label={tAria('partySidebar')}
         aria-hidden={!showDesktopSidebar}
         className={cn(
           'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-background z-30',

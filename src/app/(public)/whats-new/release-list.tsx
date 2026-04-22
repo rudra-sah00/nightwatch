@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
@@ -23,6 +23,7 @@ const INITIAL_COUNT = 3;
 export function ReleaseList({ releases }: { releases: Release[] }) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const t = useTranslations('common.whatsNew');
+  const format = useFormatter();
   const visible = releases.slice(0, visibleCount);
   const hasMore = visibleCount < releases.length;
 
@@ -59,14 +60,11 @@ export function ReleaseList({ releases }: { releases: Release[] }) {
                 </span>
                 <span>•</span>
                 <time dateTime={release.published_at}>
-                  {new Date(release.published_at).toLocaleDateString(
-                    undefined,
-                    {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    },
-                  )}
+                  {format.dateTime(new Date(release.published_at), {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </time>
               </div>
             </div>

@@ -109,7 +109,7 @@
     "pageTitle": "بدون إنترنت",
     "vault": "الخزنة",
     "yourDownloads": "المحتوى المنزّل",
-    "downloadsCount": "{count} تنزيل(ات)",
+    "downloadsCount": "{count, plural, zero {# تنزيلات} one {تنزيل واحد} two {تنزيلان} few {# تنزيلات} many {# تنزيلًا} other {# تنزيل}}",
     "availableOffline": "متاح للمشاهدة بدون إنترنت",
     "emptyTitle": "الخزنة فارغة",
     "emptyDescription": "التنزيلات الآمنة ستظهر هنا",

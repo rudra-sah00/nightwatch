@@ -20,7 +20,8 @@
     "noResultsArchive": "لم يتم العثور على نتائج",
     "noResultsArchiveHint": "لم نتمكن من العثور على تطابقات في أرشيفنا. جرّب البحث عن عنوان أو كلمة مفتاحية مختلفة.",
     "editQueryAriaLabel": "تعديل استعلام البحث",
-    "searchingAriaLabel": "جارٍ البحث..."
+    "searchingAriaLabel": "جارٍ البحث...",
+    "viewDetailsFor": "عرض تفاصيل {title}"
   },
   "continueWatching": {
     "title": "متابعة المشاهدة",

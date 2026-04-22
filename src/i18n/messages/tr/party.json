@@ -198,7 +198,9 @@
     "hostRejected": "Ev sahibi isteğinizi reddetti",
     "hostLeftRoom": "Ev sahibi odadan ayrıldı",
     "failedCreateRoom": "Oda oluşturulamadı",
-    "hostEndedParty": "Ev sahibi partiyi sonlandırdı."
+    "hostEndedParty": "Ev sahibi partiyi sonlandırdı.",
+    "mediaError": "Medya Hatası: {message}",
+    "unknownMediaError": "Bilinmeyen bir hata oluştu"
   },
   "desktop": {
     "coWatchingLiveStream": "Birlikte Canlı Yayın İzleniyor",
@@ -249,5 +251,9 @@
     "sketchFor": "{name} için çizim",
     "soundsFor": "{name} için sesler",
     "chatFor": "{name} için sohbet"
+  },
+  "aria": {
+    "partySidebar": "Parti kenar çubuğu",
+    "sendReaction": "{emoji} tepkisi gönder"
   }
 }

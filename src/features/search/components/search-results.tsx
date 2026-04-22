@@ -85,6 +85,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
   index,
 }: SearchResultItemProps) {
   const { imageError, setImageError } = useSearchResultItem();
+  const t = useTranslations('search');
 
   return (
     <Card className="p-2">
@@ -93,7 +94,7 @@ const SearchResultItem = React.memo(function SearchResultItem({
         type="button"
         className="group aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-background"
         onClick={() => onSelect(result)}
-        aria-label={`View details for ${result.title}`}
+        aria-label={t('results.viewDetailsFor', { title: result.title })}
       >
         {imageError ? (
           <div className="absolute inset-0 flex items-center justify-center bg-background">

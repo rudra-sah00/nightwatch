@@ -13,8 +13,7 @@
   },
   "language": {
     "title": "语言",
-    "description": "选择您的首选语言",
-    "closeMenu": "关闭语言菜单"
+    "description": "选择您的首选语言"
   },
   "notFound": {
     "title": "404",
@@ -166,7 +165,11 @@
     "watchlistTitle": "我的观看列表 | Watch Rudra",
     "watchlistDescription": "跟踪您想稍后观看的电影和电视节目。",
     "watchPartyTitle": "观影派对 | Watch Rudra",
-    "watchPartyDescription": "加入朋友，实时一起观看。"
+    "watchPartyDescription": "加入朋友，实时一起观看。",
+    "userNotFoundTitle": "未找到用户 | Watch Rudra",
+    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "userProfileDescription": "查看 {name} 的观看活动和个人资料。",
+    "userProfileOgTitle": "{name} - Watch Rudra"
   },
   "desktopApp": {
     "notInstalled": "应用未安装",
@@ -215,5 +218,11 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB"
+  },
+  "fallbacks": {
+    "guest": "访客",
+    "member": "成员",
+    "roomHost": "房间主持人",
+    "user": "用户"
   }
 }

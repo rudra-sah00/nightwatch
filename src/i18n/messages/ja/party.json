@@ -198,7 +198,9 @@
     "hostRejected": "ホストがリクエストを拒否しました",
     "hostLeftRoom": "ホストがルームを退出しました",
     "failedCreateRoom": "ルームの作成に失敗しました",
-    "hostEndedParty": "ホストがパーティーを終了しました。"
+    "hostEndedParty": "ホストがパーティーを終了しました。",
+    "mediaError": "メディアエラー: {message}",
+    "unknownMediaError": "不明なエラーが発生しました"
   },
   "desktop": {
     "coWatchingLiveStream": "ライブ配信を一緒に視聴中",
@@ -249,5 +251,9 @@
     "sketchFor": "{name}のスケッチ",
     "soundsFor": "{name}のサウンド",
     "chatFor": "{name}のチャット"
+  },
+  "aria": {
+    "partySidebar": "パーティーサイドバー",
+    "sendReaction": "{emoji} リアクションを送信"
   }
 }

@@ -198,7 +198,9 @@
     "hostRejected": "Gastgeber hat deine Anfrage abgelehnt",
     "hostLeftRoom": "Gastgeber hat den Raum verlassen",
     "failedCreateRoom": "Raum konnte nicht erstellt werden",
-    "hostEndedParty": "Der Gastgeber hat die Party beendet."
+    "hostEndedParty": "Der Gastgeber hat die Party beendet.",
+    "mediaError": "Medienfehler: {message}",
+    "unknownMediaError": "Ein unbekannter Fehler ist aufgetreten"
   },
   "desktop": {
     "coWatchingLiveStream": "Gemeinsam Livestream schauen",
@@ -249,5 +251,9 @@
     "sketchFor": "Zeichnen für {name}",
     "soundsFor": "Sounds für {name}",
     "chatFor": "Chat für {name}"
+  },
+  "aria": {
+    "partySidebar": "Party-Seitenleiste",
+    "sendReaction": "{emoji} Reaktion senden"
   }
 }

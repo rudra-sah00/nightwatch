@@ -20,7 +20,8 @@
     "noResultsArchive": "ไม่พบผลลัพธ์",
     "noResultsArchiveHint": "เราไม่พบรายการที่ตรงกันในคลัง ลองค้นหาชื่อเรื่องหรือคำสำคัญอื่น",
     "editQueryAriaLabel": "แก้ไขคำค้นหา",
-    "searchingAriaLabel": "กำลังค้นหา..."
+    "searchingAriaLabel": "กำลังค้นหา...",
+    "viewDetailsFor": "ดูรายละเอียดของ {title}"
   },
   "continueWatching": {
     "title": "ดูต่อ",

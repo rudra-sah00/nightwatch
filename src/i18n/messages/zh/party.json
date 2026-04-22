@@ -198,7 +198,9 @@
     "hostRejected": "主持人拒绝了你的请求",
     "hostLeftRoom": "主持人离开了房间",
     "failedCreateRoom": "创建房间失败",
-    "hostEndedParty": "主持人已结束派对。"
+    "hostEndedParty": "主持人已结束派对。",
+    "mediaError": "媒体错误：{message}",
+    "unknownMediaError": "发生未知错误"
   },
   "desktop": {
     "coWatchingLiveStream": "一起观看直播",
@@ -249,5 +251,9 @@
     "sketchFor": "{name} 的画板",
     "soundsFor": "{name} 的音效",
     "chatFor": "{name} 的聊天"
+  },
+  "aria": {
+    "partySidebar": "派对侧边栏",
+    "sendReaction": "发送 {emoji} 反应"
   }
 }

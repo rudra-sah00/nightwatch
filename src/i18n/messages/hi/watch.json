@@ -109,7 +109,7 @@
     "pageTitle": "ऑफ़लाइन",
     "vault": "वॉल्ट",
     "yourDownloads": "आपकी डाउनलोड की गई सामग्री",
-    "downloadsCount": "{count} डाउनलोड",
+    "downloadsCount": "{count, plural, one {# डाउनलोड} other {# डाउनलोड}}",
     "availableOffline": "ऑफ़लाइन देखने के लिए उपलब्ध",
     "emptyTitle": "वॉल्ट खाली है",
     "emptyDescription": "सुरक्षित डाउनलोड यहां दिखाई देंगे",

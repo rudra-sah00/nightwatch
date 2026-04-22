@@ -109,7 +109,7 @@
     "pageTitle": "SIN CONEXIÓN",
     "vault": "BÓVEDA",
     "yourDownloads": "Tu contenido descargado",
-    "downloadsCount": "{count} descarga(s)",
+    "downloadsCount": "{count, plural, one {# Descarga} other {# Descargas}}",
     "availableOffline": "Disponible para ver sin conexión",
     "emptyTitle": "La bóveda está vacía",
     "emptyDescription": "Las descargas seguras aparecerán aquí",

@@ -109,7 +109,7 @@
     "pageTitle": "OFFLINE",
     "vault": "TRESOR",
     "yourDownloads": "Deine heruntergeladenen Inhalte",
-    "downloadsCount": "{count} Download(s)",
+    "downloadsCount": "{count, plural, one {# Download} other {# Downloads}}",
     "availableOffline": "Verfügbar für Offline-Wiedergabe",
     "emptyTitle": "Tresor ist leer",
     "emptyDescription": "Sichere Downloads erscheinen hier",

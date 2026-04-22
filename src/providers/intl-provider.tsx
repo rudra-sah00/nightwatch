@@ -1,6 +1,7 @@
-import { NextIntlClientProvider } from 'next-intl';
+import type { AbstractIntlMessages } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { HtmlLangSetter } from './html-lang-setter';
+import { IntlClientWrapper } from './intl-client-wrapper';
 
 export async function IntlProvider({
   children,
@@ -8,19 +9,22 @@ export async function IntlProvider({
   children: React.ReactNode;
 }) {
   let locale = 'en';
-  let messages = {};
+  let messages: AbstractIntlMessages = {};
 
   try {
     locale = await getLocale();
     messages = await getMessages();
-  } catch {
-    // Fallback to English if locale detection fails
+  } catch (err) {
+    console.error(
+      '[IntlProvider] Failed to load messages, falling back to en:',
+      err,
+    );
   }
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <IntlClientWrapper locale={locale} messages={messages}>
       <HtmlLangSetter locale={locale} />
       {children}
-    </NextIntlClientProvider>
+    </IntlClientWrapper>
   );
 }

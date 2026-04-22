@@ -109,7 +109,7 @@
     "pageTitle": "ОФЛАЙН",
     "vault": "ХРАНИЛИЩЕ",
     "yourDownloads": "Ваш загруженный контент",
-    "downloadsCount": "{count} загрузка(и)",
+    "downloadsCount": "{count, plural, one {# загрузка} few {# загрузки} many {# загрузок} other {# загрузок}}",
     "availableOffline": "Доступно для офлайн-просмотра",
     "emptyTitle": "Хранилище пусто",
     "emptyDescription": "Безопасные загрузки появятся здесь",

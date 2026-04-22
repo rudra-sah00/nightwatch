@@ -20,7 +20,8 @@
     "noResultsArchive": "결과를 찾을 수 없습니다",
     "noResultsArchiveHint": "아카이브에서 일치하는 항목을 찾을 수 없습니다. 다른 제목이나 키워드로 검색해 보세요.",
     "editQueryAriaLabel": "검색어 수정",
-    "searchingAriaLabel": "검색 중..."
+    "searchingAriaLabel": "검색 중...",
+    "viewDetailsFor": "{title} 상세 보기"
   },
   "continueWatching": {
     "title": "이어서 보기",

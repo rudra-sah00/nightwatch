@@ -109,7 +109,7 @@
     "pageTitle": "OFFLINE",
     "vault": "COFRE",
     "yourDownloads": "Seu Conteúdo Baixado",
-    "downloadsCount": "{count} Download(s)",
+    "downloadsCount": "{count, plural, one {# Download} other {# Downloads}}",
     "availableOffline": "Disponível para visualização offline",
     "emptyTitle": "Cofre está vazio",
     "emptyDescription": "Downloads seguros aparecerão aqui",

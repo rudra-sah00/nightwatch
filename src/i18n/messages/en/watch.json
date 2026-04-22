@@ -109,7 +109,7 @@
     "pageTitle": "OFFLINE",
     "vault": "VAULT",
     "yourDownloads": "Your Downloaded Content",
-    "downloadsCount": "{count} Download(s)",
+    "downloadsCount": "{count, plural, one {# Download} other {# Downloads}}",
     "availableOffline": "Available for offline viewing",
     "emptyTitle": "Vault is empty",
     "emptyDescription": "Secure downloads will appear here",

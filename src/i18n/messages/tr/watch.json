@@ -109,7 +109,7 @@
     "pageTitle": "ÇEVRİMDIŞI",
     "vault": "KASA",
     "yourDownloads": "İndirilen İçerikleriniz",
-    "downloadsCount": "{count} İndirme",
+    "downloadsCount": "{count, plural, one {# İndirme} other {# İndirme}}",
     "availableOffline": "Çevrimdışı izleme için kullanılabilir",
     "emptyTitle": "Kasa boş",
     "emptyDescription": "Güvenli indirmeler burada görünecek",

@@ -20,7 +20,8 @@
     "noResultsArchive": "Keine Ergebnisse gefunden",
     "noResultsArchiveHint": "Wir konnten keine Treffer in unseren Archiven finden. Versuche einen anderen Titel oder ein anderes Stichwort.",
     "editQueryAriaLabel": "Suchanfrage bearbeiten",
-    "searchingAriaLabel": "Suche läuft..."
+    "searchingAriaLabel": "Suche läuft...",
+    "viewDetailsFor": "Details für {title} anzeigen"
   },
   "continueWatching": {
     "title": "Weiterschauen",

@@ -34,6 +34,7 @@ export function EmojiReactions({
     useEmojiReactions({ rtmSendMessage, userId, userName });
   const { theme: appTheme } = useTheme();
   const t = useTranslations('party');
+  const tAria = useTranslations('party.aria');
 
   const resolvedDark =
     appTheme === 'dark' ||
@@ -53,7 +54,7 @@ export function EmojiReactions({
             index > 2 && 'hidden md:block', // Show only 3 emojis on small screens
             index > 4 && 'hidden lg:block',
           )}
-          aria-label={`Send ${emoji} reaction`}
+          aria-label={tAria('sendReaction', { emoji })}
         >
           {emoji}
         </Button>
