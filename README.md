@@ -1,4 +1,14 @@
-# Nightwatch - Frontend Application
+<p align="center">
+  <img src="public/logo-ico.png" alt="Nightwatch" width="120" />
+</p>
+
+<h1 align="center">Nightwatch</h1>
+
+<p align="center">
+  <strong>Your personal streaming companion — synchronized playback, watch parties, live streaming, and messaging.</strong>
+</p>
+
+---
 
 Welcome to the Nightwatch frontend repository. This is a Next.js (App Router) application designed for real-time, synchronized media playback and interactive collaboration.
 
