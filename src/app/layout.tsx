@@ -9,7 +9,9 @@ import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
 import { Toaster } from '@/components/ui/sonner';
+import { SplashScreen } from '@/components/ui/splash-screen';
 import { AuthProvider } from '@/providers/auth-provider';
+
 import { IntlProvider } from '@/providers/intl-provider';
 import { SocketProvider } from '@/providers/socket-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -79,6 +81,7 @@ export default async function RootLayout({
                     <DiscordPresenceSync />
                     <OfflineIndicator />
                     <SwUpdatePrompt />
+                    <SplashScreen />
                     {children}
                     <Toaster />
                   </AuthProvider>

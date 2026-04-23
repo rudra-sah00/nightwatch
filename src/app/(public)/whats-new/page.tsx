@@ -48,7 +48,7 @@ export default async function WhatsNewPage() {
       <div className="mb-12">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground hover:underline font-mono text-sm"
+          className="inline-flex items-center gap-2 mb-10 text-muted-foreground hover:text-foreground text-sm font-headline font-bold uppercase tracking-widest"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('backToHome')}

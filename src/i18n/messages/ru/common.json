@@ -95,7 +95,22 @@
     "ready": {
       "title": "Вы готовы",
       "description": "Наслаждайтесь чистым кинематографическим опытом. Без отвлечений. Только кино."
-    }
+    },
+    "sidebar": {
+      "title": "Navigation",
+      "description": "Your main menu lives here. Hover the left edge anytime to open it."
+    },
+    "friends": {
+      "title": "Friends & Social",
+      "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Send direct messages, make voice calls, and stay connected with friends."
+    },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Личность создателя",
@@ -283,6 +298,74 @@
       "reply": "Ответить",
       "emoji": "Эмодзи",
       "callButton": "Позвонить"
+    }
+  },
+  "landing": {
+    "brand": "Nightwatch",
+    "badge": "Invite Only Beta",
+    "heroTitle1": "Watch Anything",
+    "heroTitle2": "Together",
+    "heroSubtitle": "Synchronized playback, real-time watch parties, live streaming, voice calls, and messaging — all in one place.",
+    "login": "Login",
+    "features": {
+      "watchTogether": {
+        "title": "Watch Together",
+        "desc": "Synchronized playback with friends in real-time."
+      },
+      "watchParties": {
+        "title": "Watch Parties",
+        "desc": "Video calls and shared controls over WebRTC."
+      },
+      "goLive": {
+        "title": "Go Live",
+        "desc": "Stream to your audience with RTMP and live chat."
+      },
+      "messaging": {
+        "title": "Messaging",
+        "desc": "DMs, voice calls, and online presence."
+      },
+      "offline": {
+        "title": "Offline Mode",
+        "desc": "Download and watch anywhere, anytime."
+      },
+      "secure": {
+        "title": "Private & Secure",
+        "desc": "Encrypted sessions with invite-only access."
+      }
+    },
+    "bentoTitle": "Everything You Need",
+    "bento": {
+      "sync": {
+        "title": "Synchronized Playback",
+        "desc": "Watch movies, shows, and videos perfectly in sync with anyone. Play, pause, and seek — everyone stays on the same frame."
+      },
+      "party": {
+        "title": "Watch Parties",
+        "desc": "Peer-to-peer video calls with shared controls. See reactions in real-time over WebRTC."
+      },
+      "live": {
+        "title": "Go Live",
+        "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
+      },
+      "friends": {
+        "title": "Friends & Messaging",
+        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      },
+      "downloads": {
+        "title": "Offline Downloads",
+        "desc": "Download content to your device. Watch anywhere — no internet required."
+      }
+    },
+    "downloadTitle": "Get the Desktop App",
+    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
+    "ctaTitle": "Ready to Watch?",
+    "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
+    "footer": {
+      "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "whatsNew": "What's New",
+      "copyright": "© {year} Nightwatch. All rights reserved."
     }
   }
 }

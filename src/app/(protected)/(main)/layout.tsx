@@ -34,11 +34,15 @@ const CallOverlay = dynamic(
 type SidebarContextType = {
   leftOpen: boolean;
   rightOpen: boolean;
+  setLeftOpen: (open: boolean) => void;
+  setRightOpen: (open: boolean) => void;
 };
 
 const SidebarContext = createContext<SidebarContextType>({
   leftOpen: false,
   rightOpen: false,
+  setLeftOpen: () => {},
+  setRightOpen: () => {},
 });
 
 export const useSidebar = () => useContext(SidebarContext);
@@ -108,7 +112,9 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const showOfflineBlocker = mounted && isOffline && !bypassOfflineState;
 
   return (
-    <SidebarContext.Provider value={{ leftOpen, rightOpen }}>
+    <SidebarContext.Provider
+      value={{ leftOpen, rightOpen, setLeftOpen, setRightOpen }}
+    >
       <ServerProvider defaultServer={user?.preferredServer}>
         <CallProvider>
           <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">
