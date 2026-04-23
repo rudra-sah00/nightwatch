@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.2.0](https://github.com/rudra-sah00/watch-rudra/compare/v2.1.5...v2.2.0) (2026-04-23)
+
+
+### Features
+
+* add sidebar navigation, friends panel, and home layout redesign ([d773ccd](https://github.com/rudra-sah00/watch-rudra/commit/d773ccd9896e4e0cb96d82b481ed850453236201))
+* friends, messaging, voice calls & online presence UI ([a63308d](https://github.com/rudra-sah00/watch-rudra/commit/a63308d38b2f7f0a4328b723f8bc5e8709abcbed))
+* **friends:** add call overlay, DM calling, i18n, and refactor friends module ([1ad5df5](https://github.com/rudra-sah00/watch-rudra/commit/1ad5df56e55d13a9453c29d55ceb448f1118cf3b))
+* **friends:** call overlay, DM calling, i18n & refactor ([8887d0a](https://github.com/rudra-sah00/watch-rudra/commit/8887d0a93f6b13738bde05482d66d79727e825a4))
+* reply-to-message, blocked users, search filter, call UI, unread fix ([df00970](https://github.com/rudra-sah00/watch-rudra/commit/df00970a852b0ba63990085609bee420b2e5c34b))
+
+
+### Bug Fixes
+
+* **ci:** add retry logic to smoke test for transient 429 errors ([2b98ff7](https://github.com/rudra-sah00/watch-rudra/commit/2b98ff7c65bc7c9f56184a5ecf14e527dea9f646))
+* **ci:** production-grade CI/CD pipeline overhaul ([18e361b](https://github.com/rudra-sah00/watch-rudra/commit/18e361b4fd8d9dd78b730bec1dcdc6769e232147))
+* **ci:** remove macos-13 Intel build (runners deprecated, queue forever) ([20d356e](https://github.com/rudra-sah00/watch-rudra/commit/20d356ece2a164c5f6bf83fd37fda0c170a97bf5))
+* **ci:** treat HTTP 429 as smoke test pass (Cloudflare rate-limit) ([995f192](https://github.com/rudra-sah00/watch-rudra/commit/995f1922da4e0b38b63ba0f8037b190f956c4438))
+* **electron:** pnpm-compatible dep tracing + exclude build artifacts from tsc ([2b7f4c1](https://github.com/rudra-sah00/watch-rudra/commit/2b7f4c15717ca41539a46fdf1001898fa4d50950))
+* open target=_blank links in default browser instead of new Electron window ([c160af5](https://github.com/rudra-sah00/watch-rudra/commit/c160af56d561cb9570616aec87ab974f3e551420))
+* open target=_blank links in default browser instead of new Electron window ([3f84122](https://github.com/rudra-sah00/watch-rudra/commit/3f841229e891fe4da4654bb24bc507153113b65c))
+* search error flash on server 2/3 and remove redundant bg-background ([46ca892](https://github.com/rudra-sah00/watch-rudra/commit/46ca892590a12c4de063aa8c30d744bde75342b0))
+* **watch-party:** update MediaControls component ([efa011c](https://github.com/rudra-sah00/watch-rudra/commit/efa011c237a712c2d7bfb4b9362e1e34891cf0d7))
+
 ## [2.1.1](https://github.com/rudra-sah00/watch-rudra/compare/v2.1.0...v2.1.1) (2026-04-22)
 
 
