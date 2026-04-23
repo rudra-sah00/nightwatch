@@ -150,9 +150,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "uninstallDisplayName": "Nightwatch",
-      "installerIcon": "electron/build/icon.png",
-      "uninstallerIcon": "electron/build/icon.png"
+      "uninstallDisplayName": "Nightwatch"
     },
     "linux": {
       "target": [
