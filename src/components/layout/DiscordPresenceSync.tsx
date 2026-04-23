@@ -19,8 +19,8 @@ export function DiscordPresenceSync() {
         desktopBridge.updateDiscordPresence({
           details: t('discord.readyToStream'),
           state: t('discord.atLoginScreen'),
-          largeImageKey: 'watchrudra_logo',
-          largeImageText: 'Watch Rudra',
+          largeImageKey: 'nightwatch_logo',
+          largeImageText: 'Nightwatch',
           startTimestamp: Date.now(), // Reset timer
         });
         return;
@@ -55,8 +55,8 @@ export function DiscordPresenceSync() {
       desktopBridge.updateDiscordPresence({
         details,
         state,
-        largeImageKey: 'watchrudra_logo',
-        largeImageText: 'Watch Rudra',
+        largeImageKey: 'nightwatch_logo',
+        largeImageText: 'Nightwatch',
         startTimestamp: Date.now(),
       });
     }

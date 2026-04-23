@@ -40,7 +40,7 @@ export function useDesktopNotifications({
               ? td('coWatchingLiveStream')
               : td('coWatchingMovie'),
         largeImageText: room.title,
-        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
+        largeImageKey: 'nightwatch_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         partySize: room.members?.length || 1,
         partyMax: 10,
         startTimestamp: room.createdAt || Date.now(),

@@ -36,7 +36,7 @@
   },
   "releaseNotes": {
     "title": "リリースノート",
-    "description": "Watch Rudraに追加された最新の機能、改善、バグ修正をご覧ください。",
+    "description": "Nightwatchに追加された最新の機能、改善、バグ修正をご覧ください。",
     "viewButton": "新着情報を見る"
   },
   "updateForm": {
@@ -91,7 +91,7 @@
     "languageDescription": "お好みの表示言語を選択してください。",
     "selectLanguage": "言語を選択",
     "launchOnStartup": "起動時に開始",
-    "launchDescription": "コンピューター起動時にWatch Rudraをバックグラウンドで自動的に開始します。",
+    "launchDescription": "コンピューター起動時にNightwatchをバックグラウンドで自動的に開始します。",
     "maxConcurrentDownloads": "最大同時ダウンロード数",
     "maxConcurrentDescription": "同時にダウンロードできる映画やエピソードの数。デフォルトは3です。",
     "downloadSpeedLimit": "ダウンロード速度制限",

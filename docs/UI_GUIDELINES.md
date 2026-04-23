@@ -1,6 +1,6 @@
 # UI and Styling Guidelines
 
-Watch Rudra follows a cohesive Neo-Brutalist design system. This document outlines the rules, tools, and component APIs required to maintain visual consistency across the frontend application.
+Nightwatch follows a cohesive Neo-Brutalist design system. This document outlines the rules, tools, and component APIs required to maintain visual consistency across the frontend application.
 
 ## Design Philosophy: Neo-Brutalism
 

@@ -1,20 +1,20 @@
 # Setup and Local Development Guide
 
-This guide covers everything needed to set up and run the Watch Rudra frontend application on your local machine.
+This guide covers everything needed to set up and run the Nightwatch frontend application on your local machine.
 
 ## Prerequisites
 
 Before starting, ensure you have the following installed:
 - Node.js (version 20 or higher)
 - [pnpm](https://pnpm.io/) (used for package management)
-- A running instance of the [watch-rudra-backend](https://github.com/rudra-sah00/watch-rudra-backend) and its Redis dependencies.
+- A running instance of the [nightwatch-backend](https://github.com/rudra-sah00/nightwatch-backend) and its Redis dependencies.
 
 ## Installation
 
 1. Clone the repository and navigate into the project directory:
    ```bash
-   git clone https://github.com/rudra-sah00/watch-rudra.git
-   cd watch-rudra
+   git clone https://github.com/rudra-sah00/nightwatch.git
+   cd nightwatch
    ```
 
 2. Install all dependencies using pnpm:
@@ -35,7 +35,7 @@ cp .env.example .env.local
 Your `.env.local` file should be configured strictly according to where your backend services are running. Here are the core variables required for local development:
 
 ```env
-# The URL pointing to your locally running watch-rudra-backend instance
+# The URL pointing to your locally running nightwatch-backend instance
 NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
 
 # The URL pointing to your local Cloudflare Worker proxy (if applicable)
@@ -98,7 +98,7 @@ The project utilizes `husky` to ensure basic checks pass before any commit.
 
 ## Testing
 
-Watch Rudra uses Vitest for component unit testing and Playwright for End-to-End flows.
+Nightwatch uses Vitest for component unit testing and Playwright for End-to-End flows.
 
 - **Run unit tests:** `pnpm test`
 - **Run the UI test dashboard:** `pnpm test:ui`

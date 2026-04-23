@@ -5,7 +5,7 @@ import { WatchPartyClient } from '@/features/watch-party/components/WatchPartyCl
 import { checkRoomExists } from '@/features/watch-party/room/services/watch-party.api';
 
 export const metadata: Metadata = {
-  title: 'Watch Party | Watch Rudra',
+  title: 'Watch Party | Nightwatch',
   description: 'Join your friends and watch together in real-time.',
 };
 

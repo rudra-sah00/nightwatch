@@ -90,7 +90,7 @@ export function LeftSidebar() {
           )}
           {showDownloadApp && (
             <a
-              href="https://github.com/rudra-sah00/watch-rudra/releases/latest"
+              href="https://github.com/rudra-sah00/nightwatch/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"

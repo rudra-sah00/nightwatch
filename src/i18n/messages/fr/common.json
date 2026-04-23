@@ -9,7 +9,7 @@
     "downloads": "Téléchargements",
     "offlineDownloads": "Téléchargements hors ligne",
     "profile": "Profil",
-    "logoAlt": "Logo Watch Rudra"
+    "logoAlt": "Logo Nightwatch"
   },
   "language": {
     "title": "Langue",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Bienvenue sur Watch Rudra",
+      "title": "Bienvenue sur Nightwatch",
       "description": "Laissez-nous vous faire découvrir votre nouvelle expérience cinéma minimaliste."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Aller au contenu",
   "offline": {
     "title": "Vous êtes Hors Ligne",
-    "description": "Watch Rudra nécessite une connexion pour explorer. Accédez à votre coffre pour voir les titres téléchargés.",
+    "description": "Nightwatch nécessite une connexion pour explorer. Accédez à votre coffre pour voir les titres téléchargés.",
     "openVault": "Ouvrir le Coffre Hors Ligne",
     "toastOffline": "Vous êtes hors ligne",
     "toastOnline": "De retour en ligne !"
@@ -148,40 +148,40 @@
     "highQuality": "Flux Haute Qualité"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Votre compagnon de streaming personnel",
-    "homeTitle": "Accueil | Watch Rudra",
+    "homeTitle": "Accueil | Nightwatch",
     "homeDescription": "Recherchez des films et séries pour commencer à regarder ensemble.",
-    "continueWatchingTitle": "Continuer à Regarder | Watch Rudra",
+    "continueWatchingTitle": "Continuer à Regarder | Nightwatch",
     "continueWatchingDescription": "Reprenez là où vous vous êtes arrêté avec vos films et séries récemment regardés.",
-    "searchTitle": "Recherche | Watch Rudra",
+    "searchTitle": "Recherche | Nightwatch",
     "searchDescription": "Recherchez des films, séries et anime.",
-    "profileTitle": "Profil | Watch Rudra",
+    "profileTitle": "Profil | Nightwatch",
     "profileDescription": "Gérez votre profil et votre historique de visionnage.",
-    "liveTitle": "Matchs en Direct | Watch Rudra",
+    "liveTitle": "Matchs en Direct | Nightwatch",
     "liveDescription": "Regardez des matchs sportifs en direct et des chaînes avec vos amis en temps réel.",
-    "downloadsTitle": "Téléchargements | Watch Rudra",
+    "downloadsTitle": "Téléchargements | Nightwatch",
     "downloadsDescription": "Accédez à vos films et séries téléchargés pour le visionnage hors ligne.",
-    "watchlistTitle": "Ma Liste | Watch Rudra",
+    "watchlistTitle": "Ma Liste | Nightwatch",
     "watchlistDescription": "Gardez une trace des films et séries que vous souhaitez regarder plus tard.",
-    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyTitle": "Watch Party | Nightwatch",
     "watchPartyDescription": "Rejoignez vos amis et regardez ensemble en temps réel.",
-    "messagesTitle": "Messages | Watch Rudra",
-    "userNotFoundTitle": "Utilisateur introuvable | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
-    "userProfileDescription": "Voir l'activité et le profil de {name} sur Watch Rudra.",
-    "userProfileOgTitle": "{name} sur Watch Rudra"
+    "messagesTitle": "Messages | Nightwatch",
+    "userNotFoundTitle": "Utilisateur introuvable | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
+    "userProfileDescription": "Voir l'activité et le profil de {name} sur Nightwatch.",
+    "userProfileOgTitle": "{name} sur Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "App non installée",
-    "notInstalledDesc": "Impossible d'ouvrir l'app Watch Rudra. Est-elle installée ?",
+    "notInstalledDesc": "Impossible d'ouvrir l'app Nightwatch. Est-elle installée ?",
     "downloadApp": "Télécharger l'App",
     "downloadFor": "Télécharger pour {os}"
   },
   "whatsNew": {
     "backToHome": "Retour à l'Accueil",
     "title": "Nouveautés",
-    "description": "Dernières mises à jour, corrections et fonctionnalités de Watch Rudra.",
+    "description": "Dernières mises à jour, corrections et fonctionnalités de Nightwatch.",
     "noReleases": "Aucune version trouvée ou échec du chargement.",
     "noReleaseNotes": "*Aucune note de version fournie.*",
     "showMore": "Afficher Plus ({remaining} restants)"

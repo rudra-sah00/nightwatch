@@ -1,6 +1,6 @@
 # Core Features Overview
 
-This document breaks down the primary feature sets within the Watch Rudra frontend application, how they are structured, and their intended behavior.
+This document breaks down the primary feature sets within the Nightwatch frontend application, how they are structured, and their intended behavior.
 
 ## Authentication System
 
@@ -60,7 +60,7 @@ For users on our native Electron client, the platform supports securely pulling 
 The system adapts intelligently to `s1`, `s2`, and `s3` master source providers. It calculates master playlist configurations and iteratively streams AES / raw HLS segments natively within Rust backend pipelines mapping directly down to local directories.
 
 ### 2. DRM and File Vaulting
-Watch Rudra strictly protects raw media content boundaries from casual file browsing.
+Nightwatch strictly protects raw media content boundaries from casual file browsing.
 - **Dynamic Key Generation:** During startup, a high-entropy 32-byte symmetric XOR buffer sequence is established.
 - **Secure Persistence:** The 32-byte master key is vaulted using OS-native encryption APIs (macOS Keychains or Windows Credential Guards).
 - **Encrypted Streaming:** Each byte pulled off the active network request undergoes an XOR transform against the key stream natively before ever touching the physical hard drive.

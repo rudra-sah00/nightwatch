@@ -8,7 +8,7 @@ test.describe('Watch Party Smoke Test', () => {
 
     // Check for a common element like "Watch Party" or "Sign In"
     // Adjust based on the actual UI text found in SearchClient or Landing
-    await expect(page).toHaveTitle(/Watch Rudra/i);
+    await expect(page).toHaveTitle(/Nightwatch/i);
 
     // If there is a login button, verify it exists
     const loginLink = page

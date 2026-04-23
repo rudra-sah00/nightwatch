@@ -29,7 +29,7 @@ export function Navbar() {
           >
             <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
               <img
-                src="/play.ico"
+                src="/logo-ico.png"
                 alt={t('logoAlt')}
                 width={24}
                 height={24}
@@ -37,7 +37,7 @@ export function Navbar() {
               />
             </div>
             <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
-              WATCH RUDRA
+              NIGHTWATCH
             </span>
           </Link>
         </div>

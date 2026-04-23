@@ -83,7 +83,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
               ? `Movie (${props.metadata.year})`
               : 'Feature Film',
         largeImageText: props.metadata.title,
-        largeImageKey: 'watchrudra_logo', // Safe fallback, external URLs usually break discord-rpc
+        largeImageKey: 'nightwatch_logo', // Safe fallback, external URLs usually break discord-rpc
         startTimestamp: Date.now(),
       });
     }

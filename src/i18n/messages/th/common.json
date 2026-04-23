@@ -9,7 +9,7 @@
     "downloads": "ดาวน์โหลด",
     "offlineDownloads": "ดาวน์โหลดออฟไลน์",
     "profile": "โปรไฟล์",
-    "logoAlt": "โลโก้ Watch Rudra"
+    "logoAlt": "โลโก้ Nightwatch"
   },
   "language": {
     "title": "ภาษา",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "ยินดีต้อนรับสู่ Watch Rudra",
+      "title": "ยินดีต้อนรับสู่ Nightwatch",
       "description": "ให้เราพาคุณชมประสบการณ์ภาพยนตร์มินิมอลใหม่ของคุณ"
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "ข้ามไปยังเนื้อหา",
   "offline": {
     "title": "คุณออฟไลน์อยู่",
-    "description": "Watch Rudra ต้องการการเชื่อมต่อเพื่อสำรวจ เปิดห้องนิรภัยเพื่อดูเนื้อหาที่ดาวน์โหลดไว้",
+    "description": "Nightwatch ต้องการการเชื่อมต่อเพื่อสำรวจ เปิดห้องนิรภัยเพื่อดูเนื้อหาที่ดาวน์โหลดไว้",
     "openVault": "เปิดห้องนิรภัยออฟไลน์",
     "toastOffline": "คุณออฟไลน์อยู่",
     "toastOnline": "กลับมาออนไลน์แล้ว!"
@@ -148,40 +148,40 @@
     "highQuality": "สตรีมคุณภาพสูง"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "เพื่อนร่วมสตรีมมิ่งส่วนตัวของคุณ",
-    "homeTitle": "หน้าแรก | Watch Rudra",
+    "homeTitle": "หน้าแรก | Nightwatch",
     "homeDescription": "ค้นหาภาพยนตร์และซีรีส์เพื่อเริ่มดูด้วยกัน",
-    "continueWatchingTitle": "ดูต่อ | Watch Rudra",
+    "continueWatchingTitle": "ดูต่อ | Nightwatch",
     "continueWatchingDescription": "ดูต่อจากที่ค้างไว้กับภาพยนตร์และซีรีส์ที่ดูล่าสุด",
-    "searchTitle": "ค้นหา | Watch Rudra",
+    "searchTitle": "ค้นหา | Nightwatch",
     "searchDescription": "ค้นหาภาพยนตร์ ซีรีส์ และอนิเมะ",
-    "profileTitle": "โปรไฟล์ | Watch Rudra",
+    "profileTitle": "โปรไฟล์ | Nightwatch",
     "profileDescription": "จัดการโปรไฟล์และประวัติการรับชม",
-    "liveTitle": "แมตช์สด | Watch Rudra",
+    "liveTitle": "แมตช์สด | Nightwatch",
     "liveDescription": "ดูการแข่งขันกีฬาสดและช่องต่างๆ กับเพื่อนแบบเรียลไทม์",
-    "downloadsTitle": "ดาวน์โหลด | Watch Rudra",
+    "downloadsTitle": "ดาวน์โหลด | Nightwatch",
     "downloadsDescription": "เข้าถึงภาพยนตร์และซีรีส์ที่ดาวน์โหลดไว้สำหรับดูแบบออฟไลน์",
-    "watchlistTitle": "รายการดูของฉัน | Watch Rudra",
+    "watchlistTitle": "รายการดูของฉัน | Nightwatch",
     "watchlistDescription": "ติดตามภาพยนตร์และซีรีส์ที่คุณต้องการดูทีหลัง",
-    "watchPartyTitle": "ปาร์ตี้ดูหนัง | Watch Rudra",
+    "watchPartyTitle": "ปาร์ตี้ดูหนัง | Nightwatch",
     "watchPartyDescription": "เข้าร่วมกับเพื่อนและดูด้วยกันแบบเรียลไทม์",
-    "messagesTitle": "ข้อความ | Watch Rudra",
-    "userNotFoundTitle": "ไม่พบผู้ใช้ | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "ข้อความ | Nightwatch",
+    "userNotFoundTitle": "ไม่พบผู้ใช้ | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "ดูกิจกรรมการรับชมและโปรไฟล์ของ {name}",
-    "userProfileOgTitle": "{name} บน Watch Rudra"
+    "userProfileOgTitle": "{name} บน Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "ยังไม่ได้ติดตั้งแอป",
-    "notInstalledDesc": "ไม่สามารถเปิดแอป Watch Rudra ได้ ติดตั้งแล้วหรือยัง?",
+    "notInstalledDesc": "ไม่สามารถเปิดแอป Nightwatch ได้ ติดตั้งแล้วหรือยัง?",
     "downloadApp": "ดาวน์โหลดแอป",
     "downloadFor": "ดาวน์โหลดสำหรับ {os}"
   },
   "whatsNew": {
     "backToHome": "กลับหน้าแรก",
     "title": "มีอะไรใหม่",
-    "description": "อัปเดตล่าสุด การแก้ไขบั๊ก และฟีเจอร์ของ Watch Rudra",
+    "description": "อัปเดตล่าสุด การแก้ไขบั๊ก และฟีเจอร์ของ Nightwatch",
     "noReleases": "ไม่พบรุ่นหรือโหลดล้มเหลว",
     "noReleaseNotes": "*ไม่มีบันทึกรุ่น*",
     "showMore": "แสดงเพิ่มเติม (เหลือ {remaining})"

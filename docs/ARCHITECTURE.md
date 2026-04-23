@@ -1,6 +1,6 @@
 # Real-World Codebase Architecture
 
-Watch Rudra is not a simple Next.js boilerplate; it's a massive, multi-environment monorepo architecture bridging browser clients explicitly with native Electron (OS) hooks, complex HLS streaming, and real-time P2P networking protocols.
+Nightwatch is not a simple Next.js boilerplate; it's a massive, multi-environment monorepo architecture bridging browser clients explicitly with native Electron (OS) hooks, complex HLS streaming, and real-time P2P networking protocols.
 
 ## High-Level Tech Stack
 
@@ -27,7 +27,7 @@ We strategically compartmentalize routes using parenthesis:
 
 ## 2. Feature-Sliced Design (`src/features/`)
 
-Instead of throwing every component into a global `src/components/` folder, Watch Rudra embraces a deeply nested Feature-Pattern architecture. A generic `Button` lives in `src/components/ui/`, but business logic lives in `src/features/[domain]/`:
+Instead of throwing every component into a global `src/components/` folder, Nightwatch embraces a deeply nested Feature-Pattern architecture. A generic `Button` lives in `src/components/ui/`, but business logic lives in `src/features/[domain]/`:
 
 *   **`auth/`**: Sign In, Sign Up, JWT handling UI.
 *   **`watch/`**: The complete VOD engine, storing `src/features/watch/player/` for parsing m3u8 manifests into `HTMLVideoElement` contexts cleanly.
@@ -63,5 +63,5 @@ Inside Next.js `src/proxy.ts` (mapped in Edge infrastructure), our frontend inte
 
 ## 5. The Electron Sandbox (`src/hooks/use-desktop-app.ts`)
 
-Instead of rendering a normal web app in a system webview, the Watch Rudra standard browser experience contains fallback abstractions checking for custom protocol handlers (`watch-rudra://`).
+Instead of rendering a normal web app in a system webview, the Nightwatch standard browser experience contains fallback abstractions checking for custom protocol handlers (`nightwatch://`).
 If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/lib/electron-bridge.ts`.

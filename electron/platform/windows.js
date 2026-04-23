@@ -7,7 +7,7 @@ function _setupWindows(handleDeepLinkCallback, getMainWindow) {
   // Single Instance Lock handling specifically for Windows Deep Links via command arg
   app.on('second-instance', (_event, commandLine) => {
     // If the user launched a second arg via a URL deep link, catch it
-    const url = commandLine.find((arg) => arg.startsWith('watch-rudra://'));
+    const url = commandLine.find((arg) => arg.startsWith('nightwatch://'));
     if (url) handleDeepLinkCallback(url);
 
     // Keep only one primary instance running
@@ -23,12 +23,12 @@ function _setupWindows(handleDeepLinkCallback, getMainWindow) {
 function _registerProtocol() {
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient('watch-rudra', process.execPath, [
+      app.setAsDefaultProtocolClient('nightwatch', process.execPath, [
         path.resolve(process.argv[1]),
       ]);
     }
   } else {
-    app.setAsDefaultProtocolClient('watch-rudra');
+    app.setAsDefaultProtocolClient('nightwatch');
   }
 }
 

@@ -1,6 +1,6 @@
-# Watch Rudra - Frontend Application
+# Nightwatch - Frontend Application
 
-Welcome to the Watch Rudra frontend repository. This is a Next.js (App Router) application designed for real-time, synchronized media playback and interactive collaboration.
+Welcome to the Nightwatch frontend repository. This is a Next.js (App Router) application designed for real-time, synchronized media playback and interactive collaboration.
 
 With over 400+ modules spanning complex real-time domains, this project implements a highly optimized, edge-ready architecture mixing Server-Side Rendering (SSR) with heavy client-side Peer-to-Peer data sharing via WebRTC and Real-Time Messaging.
 
@@ -95,4 +95,4 @@ gh release create v1.32.0 --title "v1.32.0 - Major Update" --notes "Release note
 As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Rust + Next.js binaries, and attach the installer links automatically to the GitHub Releases page.
 
 ---
-*For issues regarding the backend services or database administration, see the respective `watch-rudra-backend` or `admin-watch-rudra` repositories.*
+*For issues regarding the backend services or database administration, see the respective `nightwatch-backend` or `admin-nightwatch` repositories.*

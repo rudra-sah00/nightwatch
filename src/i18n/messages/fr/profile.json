@@ -36,7 +36,7 @@
   },
   "releaseNotes": {
     "title": "Notes de Version",
-    "description": "Découvrez les dernières fonctionnalités, améliorations et corrections de bugs ajoutées à Watch Rudra.",
+    "description": "Découvrez les dernières fonctionnalités, améliorations et corrections de bugs ajoutées à Nightwatch.",
     "viewButton": "VOIR LES NOUVEAUTÉS"
   },
   "updateForm": {
@@ -91,7 +91,7 @@
     "languageDescription": "Choisissez votre langue d'affichage préférée.",
     "selectLanguage": "Sélectionner la Langue",
     "launchOnStartup": "Lancer au Démarrage",
-    "launchDescription": "Démarrer Watch Rudra automatiquement en arrière-plan au démarrage de votre ordinateur.",
+    "launchDescription": "Démarrer Nightwatch automatiquement en arrière-plan au démarrage de votre ordinateur.",
     "maxConcurrentDownloads": "Téléchargements Simultanés Maximum",
     "maxConcurrentDescription": "Combien de films ou épisodes peuvent être téléchargés en même temps. Par défaut 3.",
     "downloadSpeedLimit": "Limite de Vitesse de Téléchargement",

@@ -9,7 +9,7 @@
     "downloads": "डाउनलोड",
     "offlineDownloads": "ऑफ़लाइन डाउनलोड",
     "profile": "प्रोफ़ाइल",
-    "logoAlt": "Watch Rudra लोगो"
+    "logoAlt": "Nightwatch लोगो"
   },
   "language": {
     "title": "भाषा",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Watch Rudra में आपका स्वागत है",
+      "title": "Nightwatch में आपका स्वागत है",
       "description": "आइए आपको आपके नए न्यूनतम सिनेमा अनुभव से परिचित कराते हैं।"
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "सामग्री पर जाएं",
   "offline": {
     "title": "आप ऑफ़लाइन हैं",
-    "description": "Watch Rudra को एक्सप्लोर करने के लिए कनेक्शन आवश्यक है। डाउनलोड किए गए शीर्षक देखने के लिए अपना वॉल्ट खोलें।",
+    "description": "Nightwatch को एक्सप्लोर करने के लिए कनेक्शन आवश्यक है। डाउनलोड किए गए शीर्षक देखने के लिए अपना वॉल्ट खोलें।",
     "openVault": "ऑफ़लाइन वॉल्ट खोलें",
     "toastOffline": "आप ऑफ़लाइन हैं",
     "toastOnline": "वापस ऑनलाइन!"
@@ -148,40 +148,40 @@
     "highQuality": "उच्च गुणवत्ता स्ट्रीम"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "आपका व्यक्तिगत स्ट्रीमिंग साथी",
-    "homeTitle": "होम | Watch Rudra",
+    "homeTitle": "होम | Nightwatch",
     "homeDescription": "एक साथ देखना शुरू करने के लिए फिल्में और टीवी शो खोजें।",
-    "continueWatchingTitle": "देखना जारी रखें | Watch Rudra",
+    "continueWatchingTitle": "देखना जारी रखें | Nightwatch",
     "continueWatchingDescription": "अपनी हाल ही में देखी गई फिल्मों और टीवी शो के साथ जहाँ छोड़ा था वहीं से शुरू करें।",
-    "searchTitle": "खोजें | Watch Rudra",
+    "searchTitle": "खोजें | Nightwatch",
     "searchDescription": "फिल्में, टीवी शो और एनीमे खोजें।",
-    "profileTitle": "प्रोफ़ाइल | Watch Rudra",
+    "profileTitle": "प्रोफ़ाइल | Nightwatch",
     "profileDescription": "अपनी प्रोफ़ाइल और देखने का इतिहास प्रबंधित करें।",
-    "liveTitle": "लाइव मैच | Watch Rudra",
+    "liveTitle": "लाइव मैच | Nightwatch",
     "liveDescription": "अपने दोस्तों के साथ रियल-टाइम में लाइव खेल मैच और चैनल देखें।",
-    "downloadsTitle": "डाउनलोड | Watch Rudra",
+    "downloadsTitle": "डाउनलोड | Nightwatch",
     "downloadsDescription": "ऑफ़लाइन देखने के लिए अपनी डाउनलोड की गई फिल्मों और टीवी शो तक पहुँचें।",
-    "watchlistTitle": "मेरी वॉचलिस्ट | Watch Rudra",
+    "watchlistTitle": "मेरी वॉचलिस्ट | Nightwatch",
     "watchlistDescription": "बाद में देखने के लिए फिल्मों और टीवी शो का ट्रैक रखें।",
-    "watchPartyTitle": "वॉच पार्टी | Watch Rudra",
+    "watchPartyTitle": "वॉच पार्टी | Nightwatch",
     "watchPartyDescription": "अपने दोस्तों के साथ जुड़ें और रियल-टाइम में एक साथ देखें।",
-    "messagesTitle": "संदेश | Watch Rudra",
-    "userNotFoundTitle": "उपयोगकर्ता नहीं मिला | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "संदेश | Nightwatch",
+    "userNotFoundTitle": "उपयोगकर्ता नहीं मिला | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "{name} की वॉच गतिविधि और प्रोफ़ाइल देखें।",
-    "userProfileOgTitle": "{name} Watch Rudra पर"
+    "userProfileOgTitle": "{name} Nightwatch पर"
   },
   "desktopApp": {
     "notInstalled": "ऐप इंस्टॉल नहीं है",
-    "notInstalledDesc": "हम Watch Rudra डेस्कटॉप ऐप नहीं खोल सके। क्या यह इंस्टॉल है?",
+    "notInstalledDesc": "हम Nightwatch डेस्कटॉप ऐप नहीं खोल सके। क्या यह इंस्टॉल है?",
     "downloadApp": "ऐप डाउनलोड करें",
     "downloadFor": "{os} के लिए डाउनलोड करें"
   },
   "whatsNew": {
     "backToHome": "होम पर वापस जाएँ",
     "title": "नया क्या है",
-    "description": "Watch Rudra के नवीनतम अपडेट, बग फिक्स और फीचर्स।",
+    "description": "Nightwatch के नवीनतम अपडेट, बग फिक्स और फीचर्स।",
     "noReleases": "कोई रिलीज़ नहीं मिली या लोड करने में विफल।",
     "noReleaseNotes": "*कोई रिलीज़ नोट्स प्रदान नहीं किए गए।*",
     "showMore": "और दिखाएँ ({remaining} शेष)"

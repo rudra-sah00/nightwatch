@@ -90,12 +90,12 @@ class AppWindow {
     });
 
     // Custom User Agent to inform Next.js that the user is running the Desktop App
-    // (You can check this in Next.js via navigator.userAgent.includes('WatchRudraDesktop'))
+    // (You can check this in Next.js via navigator.userAgent.includes('NightwatchDesktop'))
     /* 
       DO NOT MODIFY USER AGENT: Cloudflare Turnstile explicitly blocks custom padded
       User Agents as "Bot" activity, preventing Electron logins. We use window.electronAPI instead.
       const defaultUserAgent = this.mainWindow.webContents.userAgent;
-      this.mainWindow.webContents.userAgent = `${defaultUserAgent} WatchRudraDesktop/1.0.0`;
+      this.mainWindow.webContents.userAgent = `${defaultUserAgent} NightwatchDesktop/1.0.0`;
     */
 
     mainWindowState.manage(this.mainWindow);
@@ -105,7 +105,7 @@ class AppWindow {
         // Only grant permissions to our own app origin
         const requestUrl = webContents.getURL();
         const isOwnOrigin =
-          requestUrl.startsWith('https://watch.rudrasahoo.live') ||
+          requestUrl.startsWith('https://nightwatch.in') ||
           requestUrl.startsWith('http://localhost');
 
         const allowedPermissions = [
@@ -130,7 +130,7 @@ class AppWindow {
       !process.env.TEST_PROD;
     const PROD_URL = process.env.TEST_PROD
       ? 'http://localhost:3000'
-      : 'https://watch.rudrasahoo.live';
+      : 'https://nightwatch.in';
 
     if (isDev) {
       // Async port probe — do not block window creation
@@ -150,7 +150,7 @@ class AppWindow {
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       if (
         !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
-        !url.startsWith('watch-rudra://')
+        !url.startsWith('nightwatch://')
       ) {
         shell.openExternal(url);
       }
@@ -172,7 +172,7 @@ class AppWindow {
 
       if (
         !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
-        !url.startsWith('watch-rudra://')
+        !url.startsWith('nightwatch://')
       ) {
         event.preventDefault();
         shell.openExternal(url);

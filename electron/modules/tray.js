@@ -18,12 +18,12 @@ function setupTray(mainWindow, setQuittingCallback) {
     const trayIconFile =
       process.platform === 'darwin'
         ? path.resolve(rootDir, 'public', 'tray-icon.png')
-        : path.resolve(rootDir, 'public', 'favicon.ico');
+        : path.resolve(rootDir, 'public', 'logo-ico.png');
 
-    // Fallback to favicon.ico if tray-icon.png doesn't exist yet
+    // Fallback to logo-ico.png if tray-icon.png doesn't exist yet
     const resolvedIcon = fs.existsSync(trayIconFile)
       ? trayIconFile
-      : path.resolve(rootDir, 'public', 'favicon.ico');
+      : path.resolve(rootDir, 'public', 'logo-ico.png');
 
     const image = fs.existsSync(resolvedIcon)
       ? nativeImage.createFromPath(resolvedIcon)
@@ -35,7 +35,7 @@ function setupTray(mainWindow, setQuittingCallback) {
     }
 
     appTray = new Tray(image);
-    appTray.setToolTip('Watch Rudra - Live Desktop');
+    appTray.setToolTip('Nightwatch - Live Desktop');
 
     const contextMenuTemplate = Menu.buildFromTemplate([
       {
@@ -60,7 +60,7 @@ function setupTray(mainWindow, setQuittingCallback) {
       },
       { type: 'separator' },
       {
-        label: 'About Watch Rudra',
+        label: 'About Nightwatch',
         click: () => app.showAboutPanel(),
       },
       {

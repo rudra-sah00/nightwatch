@@ -1,6 +1,6 @@
 # Comprehensive State Management Strategy
 
-With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Electron Desktop bridges, state management in Watch Rudra runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
+With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams, complex Video Player lifecycles, and Electron Desktop bridges, state management in Nightwatch runs on a heavily scaled, multi-tiered approach to ensure predictable renders and eliminate stale closures.
 
 ## 1. Global Application State
 
@@ -52,7 +52,7 @@ When an Agora `RTMMessage` arrives triggering `onMessage(msg)`, the listener uni
 
 Instead of throwing `typeof window` and `desktopBridge` checks sporadically across UI components, we funnel OS state detection through `src/hooks/use-desktop-app.ts`.
 
-It exposes reactive booleans (`isDesktopApp`, `isBrowser`) and provides fallback DOM timeouts to gracefully error-trap if an OS custom protocol deep link (`watch-rudra://`) fails to acquire focus.
+It exposes reactive booleans (`isDesktopApp`, `isBrowser`) and provides fallback DOM timeouts to gracefully error-trap if an OS custom protocol deep link (`nightwatch://`) fails to acquire focus.
 
 ## 5. Server State (Next.js Data Fetching layer)
 

@@ -9,7 +9,7 @@
     "downloads": "下载",
     "offlineDownloads": "离线下载",
     "profile": "个人资料",
-    "logoAlt": "Watch Rudra 标志"
+    "logoAlt": "Nightwatch 标志"
   },
   "language": {
     "title": "语言",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "欢迎来到 Watch Rudra",
+      "title": "欢迎来到 Nightwatch",
       "description": "让我们带您了解全新的极简电影体验。"
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "跳至内容",
   "offline": {
     "title": "您已离线",
-    "description": "Watch Rudra需要网络连接才能浏览。请打开保险库查看已下载的内容。",
+    "description": "Nightwatch需要网络连接才能浏览。请打开保险库查看已下载的内容。",
     "openVault": "打开离线保险库",
     "toastOffline": "您已离线",
     "toastOnline": "已恢复在线！"
@@ -148,40 +148,40 @@
     "highQuality": "高质量流媒体"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "您的个人流媒体伴侣",
-    "homeTitle": "首页 | Watch Rudra",
+    "homeTitle": "首页 | Nightwatch",
     "homeDescription": "搜索电影和电视节目，开始一起观看。",
-    "continueWatchingTitle": "继续观看 | Watch Rudra",
+    "continueWatchingTitle": "继续观看 | Nightwatch",
     "continueWatchingDescription": "从上次停下的地方继续观看最近的电影和电视节目。",
-    "searchTitle": "搜索 | Watch Rudra",
+    "searchTitle": "搜索 | Nightwatch",
     "searchDescription": "搜索电影、电视节目和动漫。",
-    "profileTitle": "个人资料 | Watch Rudra",
+    "profileTitle": "个人资料 | Nightwatch",
     "profileDescription": "管理您的个人资料和观看历史。",
-    "liveTitle": "直播赛事 | Watch Rudra",
+    "liveTitle": "直播赛事 | Nightwatch",
     "liveDescription": "与朋友实时观看体育直播赛事和频道。",
-    "downloadsTitle": "下载 | Watch Rudra",
+    "downloadsTitle": "下载 | Nightwatch",
     "downloadsDescription": "访问已下载的电影和电视节目以供离线观看。",
-    "watchlistTitle": "我的观看列表 | Watch Rudra",
+    "watchlistTitle": "我的观看列表 | Nightwatch",
     "watchlistDescription": "跟踪您想稍后观看的电影和电视节目。",
-    "watchPartyTitle": "观影派对 | Watch Rudra",
+    "watchPartyTitle": "观影派对 | Nightwatch",
     "watchPartyDescription": "加入朋友，实时一起观看。",
-    "messagesTitle": "消息 | Watch Rudra",
-    "userNotFoundTitle": "未找到用户 | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "消息 | Nightwatch",
+    "userNotFoundTitle": "未找到用户 | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "查看 {name} 的观看活动和个人资料。",
-    "userProfileOgTitle": "{name} - Watch Rudra"
+    "userProfileOgTitle": "{name} - Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "应用未安装",
-    "notInstalledDesc": "无法打开Watch Rudra桌面应用。是否已安装？",
+    "notInstalledDesc": "无法打开Nightwatch桌面应用。是否已安装？",
     "downloadApp": "下载应用",
     "downloadFor": "下载 {os} 版"
   },
   "whatsNew": {
     "backToHome": "返回首页",
     "title": "最新动态",
-    "description": "Watch Rudra的最新更新、修复和功能。",
+    "description": "Nightwatch的最新更新、修复和功能。",
     "noReleases": "未找到版本或加载失败。",
     "noReleaseNotes": "*未提供版本说明。*",
     "showMore": "显示更多（剩余{remaining}个）"

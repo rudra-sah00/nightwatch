@@ -9,7 +9,7 @@
     "downloads": "İndirmeler",
     "offlineDownloads": "Çevrimdışı İndirmeler",
     "profile": "Profil",
-    "logoAlt": "Watch Rudra Logosu"
+    "logoAlt": "Nightwatch Logosu"
   },
   "language": {
     "title": "Dil",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Watch Rudra'ya Hoş Geldiniz",
+      "title": "Nightwatch'ya Hoş Geldiniz",
       "description": "Yeni minimalist sinema deneyiminizi size tanıtalım."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "İçeriğe geç",
   "offline": {
     "title": "Çevrimdışısınız",
-    "description": "Watch Rudra keşfetmek için bağlantı gerektirir. İndirilen içerikleri izlemek için kasanızı açın.",
+    "description": "Nightwatch keşfetmek için bağlantı gerektirir. İndirilen içerikleri izlemek için kasanızı açın.",
     "openVault": "Çevrimdışı Kasayı Aç",
     "toastOffline": "Çevrimdışısınız",
     "toastOnline": "Tekrar çevrimiçi!"
@@ -148,40 +148,40 @@
     "highQuality": "Yüksek Kalite Yayın"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Kişisel yayın arkadaşınız",
-    "homeTitle": "Ana Sayfa | Watch Rudra",
+    "homeTitle": "Ana Sayfa | Nightwatch",
     "homeDescription": "Birlikte izlemeye başlamak için film ve dizileri arayın.",
-    "continueWatchingTitle": "İzlemeye Devam Et | Watch Rudra",
+    "continueWatchingTitle": "İzlemeye Devam Et | Nightwatch",
     "continueWatchingDescription": "Son izlediğiniz film ve dizilerle kaldığınız yerden devam edin.",
-    "searchTitle": "Arama | Watch Rudra",
+    "searchTitle": "Arama | Nightwatch",
     "searchDescription": "Film, dizi ve anime arayın.",
-    "profileTitle": "Profil | Watch Rudra",
+    "profileTitle": "Profil | Nightwatch",
     "profileDescription": "Profilinizi ve izleme geçmişinizi yönetin.",
-    "liveTitle": "Canlı Maçlar | Watch Rudra",
+    "liveTitle": "Canlı Maçlar | Nightwatch",
     "liveDescription": "Arkadaşlarınızla gerçek zamanlı olarak canlı spor maçları ve kanalları izleyin.",
-    "downloadsTitle": "İndirmeler | Watch Rudra",
+    "downloadsTitle": "İndirmeler | Nightwatch",
     "downloadsDescription": "Çevrimdışı izleme için indirdiğiniz film ve dizilere erişin.",
-    "watchlistTitle": "İzleme Listem | Watch Rudra",
+    "watchlistTitle": "İzleme Listem | Nightwatch",
     "watchlistDescription": "Daha sonra izlemek istediğiniz film ve dizileri takip edin.",
-    "watchPartyTitle": "İzleme Partisi | Watch Rudra",
+    "watchPartyTitle": "İzleme Partisi | Nightwatch",
     "watchPartyDescription": "Arkadaşlarınıza katılın ve gerçek zamanlı birlikte izleyin.",
-    "messagesTitle": "Mesajlar | Watch Rudra",
-    "userNotFoundTitle": "Kullanıcı bulunamadı | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "Mesajlar | Nightwatch",
+    "userNotFoundTitle": "Kullanıcı bulunamadı | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "{name} adlı kullanıcının izleme etkinliğini ve profilini görüntüleyin.",
-    "userProfileOgTitle": "{name} - Watch Rudra"
+    "userProfileOgTitle": "{name} - Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "Uygulama yüklü değil",
-    "notInstalledDesc": "Watch Rudra masaüstü uygulaması açılamadı. Yüklü mü?",
+    "notInstalledDesc": "Nightwatch masaüstü uygulaması açılamadı. Yüklü mü?",
     "downloadApp": "Uygulamayı İndir",
     "downloadFor": "{os} için İndir"
   },
   "whatsNew": {
     "backToHome": "Ana Sayfaya Dön",
     "title": "Yenilikler",
-    "description": "Watch Rudra'nın son güncellemeleri, hata düzeltmeleri ve özellikleri.",
+    "description": "Nightwatch'nın son güncellemeleri, hata düzeltmeleri ve özellikleri.",
     "noReleases": "Sürüm bulunamadı veya yükleme başarısız.",
     "noReleaseNotes": "*Sürüm notları sağlanmadı.*",
     "showMore": "Daha Fazla Göster ({remaining} kalan)"

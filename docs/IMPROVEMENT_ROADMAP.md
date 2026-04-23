@@ -1,4 +1,4 @@
-# Watch Rudra — 6-12 Month Improvement Roadmap
+# Nightwatch — 6-12 Month Improvement Roadmap
 
 > **Created:** April 19, 2026
 > **Scope:** Security hardening, refactoring, feature additions, UI/UX improvements, Electron app stability, CI/CD, accessibility, SEO, and documentation.
@@ -29,7 +29,7 @@
 |---|------|---------|---------|
 | 1 | Remove `nodeIntegration: true` from splash window | `src-electron/src/commands/splash.js` | Splash uses `nodeIntegration: true`, `contextIsolation: false`, `webSecurity: false`. Rewrite splash to use `contextIsolation: true` and communicate via Electron invoke/listen. |
 | 2 | Fix path traversal in `offline-media://` protocol | `src-electron/src/commands/download-manager.js` | The protocol handler joins user-supplied URL paths with `VAULT_PATH` without sanitizing `..` sequences. Add `path.resolve()` + verify the resolved path starts with `VAULT_PATH`. |
-| 3 | Add URL allowlist to deep link handler | `src-electron/src/commands/deep-link.js` | `handleDeepLink` blindly transforms `watch-rudra://` to `https://` with no validation. Add an allowlist of permitted hostnames and path patterns. |
+| 3 | Add URL allowlist to deep link handler | `src-electron/src/commands/deep-link.js` | `handleDeepLink` blindly transforms `nightwatch://` to `https://` with no validation. Add an allowlist of permitted hostnames and path patterns. |
 | 4 | Secure the live-bridge proxy server | `src-electron/src/commands/live-bridge.js` | The local HTTP proxy at `127.0.0.1:{port}/proxy?url=...` has no authentication and no URL allowlist. Any local process can use it as an open SSRF proxy. Add: (a) a per-session random token required in requests, (b) URL allowlist restricting to known streaming CDN domains. |
 | 5 | Replace XOR cipher with AES-256-GCM | `src-electron/src/commands/cipher.js` | XOR encryption is trivially breakable. Replace with Rust `aes-gcm` crate. Remove the hardcoded fallback key — if `safeStorage` is unavailable, warn the user and store unencrypted with a clear disclaimer. |
 | 6 | Add Electron invoke/listen key allowlist for electron-plugin-store | `src-electron/src/main.js` | `store-get`, `store-set`, `store-delete` command handlers accept arbitrary keys. Add an allowlist of permitted keys the webview can access. |
@@ -174,7 +174,7 @@
 | # | Task | Details |
 |---|------|---------|
 | 19 | Add "Check for Updates" menu item | Add to tray menu and macOS app menu. Show release notes when an update is available. |
-| 20 | Add update failure UI | Currently if both native and ASAR updaters fail, the user sees "Starting Watch Rudra..." forever. Show a clear error with retry option. |
+| 20 | Add update failure UI | Currently if both native and ASAR updaters fail, the user sees "Starting Nightwatch..." forever. Show a clear error with retry option. |
 | 21 | Add Sentry to webview process | `src-electron/src/main.js` | Sentry is initialized for Rust backend only. Webview JS errors aren't captured. |
 | 22 | Fix Windows taskbar thumbnail buttons | `src-electron/src/main.js` | Buttons use empty icons — no visible icons. Create proper icon assets. |
 | 23 | Process Jump List arguments | `src-electron/src/main.js` | `--open-downloads` and `--play-pause` args are registered in Jump List but never processed on app launch. |

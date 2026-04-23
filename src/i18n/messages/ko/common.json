@@ -9,7 +9,7 @@
     "downloads": "다운로드",
     "offlineDownloads": "오프라인 다운로드",
     "profile": "프로필",
-    "logoAlt": "Watch Rudra 로고"
+    "logoAlt": "Nightwatch 로고"
   },
   "language": {
     "title": "언어",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Watch Rudra에 오신 것을 환영합니다",
+      "title": "Nightwatch에 오신 것을 환영합니다",
       "description": "새로운 미니멀 시네마 경험을 안내해 드리겠습니다."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "콘텐츠로 건너뛰기",
   "offline": {
     "title": "오프라인 상태입니다",
-    "description": "Watch Rudra를 탐색하려면 연결이 필요합니다. 다운로드한 콘텐츠를 보려면 보관함을 여세요.",
+    "description": "Nightwatch를 탐색하려면 연결이 필요합니다. 다운로드한 콘텐츠를 보려면 보관함을 여세요.",
     "openVault": "오프라인 보관함 열기",
     "toastOffline": "오프라인 상태입니다",
     "toastOnline": "다시 온라인!"
@@ -148,40 +148,40 @@
     "highQuality": "고화질 스트림"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "나만의 스트리밍 동반자",
-    "homeTitle": "홈 | Watch Rudra",
+    "homeTitle": "홈 | Nightwatch",
     "homeDescription": "영화와 TV 프로그램을 검색하여 함께 시청을 시작하세요.",
-    "continueWatchingTitle": "이어서 시청 | Watch Rudra",
+    "continueWatchingTitle": "이어서 시청 | Nightwatch",
     "continueWatchingDescription": "최근 시청한 영화와 TV 프로그램을 이어서 보세요.",
-    "searchTitle": "검색 | Watch Rudra",
+    "searchTitle": "검색 | Nightwatch",
     "searchDescription": "영화, TV 프로그램, 애니메이션을 검색하세요.",
-    "profileTitle": "프로필 | Watch Rudra",
+    "profileTitle": "프로필 | Nightwatch",
     "profileDescription": "프로필과 시청 기록을 관리하세요.",
-    "liveTitle": "라이브 경기 | Watch Rudra",
+    "liveTitle": "라이브 경기 | Nightwatch",
     "liveDescription": "친구들과 실시간으로 라이브 스포츠 경기와 채널을 시청하세요.",
-    "downloadsTitle": "다운로드 | Watch Rudra",
+    "downloadsTitle": "다운로드 | Nightwatch",
     "downloadsDescription": "오프라인 시청을 위해 다운로드한 영화와 TV 프로그램에 접근하세요.",
-    "watchlistTitle": "내 관심목록 | Watch Rudra",
+    "watchlistTitle": "내 관심목록 | Nightwatch",
     "watchlistDescription": "나중에 볼 영화와 TV 프로그램을 관리하세요.",
-    "watchPartyTitle": "워치 파티 | Watch Rudra",
+    "watchPartyTitle": "워치 파티 | Nightwatch",
     "watchPartyDescription": "친구들과 함께 실시간으로 시청하세요.",
-    "messagesTitle": "메시지 | Watch Rudra",
-    "userNotFoundTitle": "사용자를 찾을 수 없습니다 | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "메시지 | Nightwatch",
+    "userNotFoundTitle": "사용자를 찾을 수 없습니다 | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "{name}의 시청 활동 및 프로필을 확인하세요.",
-    "userProfileOgTitle": "{name} - Watch Rudra"
+    "userProfileOgTitle": "{name} - Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "앱 미설치",
-    "notInstalledDesc": "Watch Rudra 데스크톱 앱을 열 수 없습니다. 설치되어 있나요?",
+    "notInstalledDesc": "Nightwatch 데스크톱 앱을 열 수 없습니다. 설치되어 있나요?",
     "downloadApp": "앱 다운로드",
     "downloadFor": "{os}용 다운로드"
   },
   "whatsNew": {
     "backToHome": "홈으로 돌아가기",
     "title": "새로운 소식",
-    "description": "Watch Rudra의 최신 업데이트, 버그 수정 및 기능.",
+    "description": "Nightwatch의 최신 업데이트, 버그 수정 및 기능.",
     "noReleases": "릴리스를 찾을 수 없거나 로드에 실패했습니다.",
     "noReleaseNotes": "*릴리스 노트가 제공되지 않았습니다.*",
     "showMore": "더 보기 (나머지 {remaining}개)"

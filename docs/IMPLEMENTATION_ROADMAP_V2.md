@@ -1,4 +1,4 @@
-# Watch Rudra — Next Implementation Roadmap (v2)
+# Nightwatch — Next Implementation Roadmap (v2)
 
 > **Created:** April 19, 2026
 > **Prerequisite:** Phases 1-8 of the original roadmap are complete.

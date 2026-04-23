@@ -234,7 +234,7 @@ export default function LiveMatchPlayerPage() {
         {isDesktopError ? (
           <div className="flex gap-4">
             <Link
-              href="https://github.com/rudra-sah00/watch-rudra/releases"
+              href="https://github.com/rudra-sah00/nightwatch/releases"
               target="_blank"
             >
               <Button

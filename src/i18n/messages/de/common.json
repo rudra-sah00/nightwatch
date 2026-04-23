@@ -9,7 +9,7 @@
     "downloads": "Downloads",
     "offlineDownloads": "Offline-Downloads",
     "profile": "Profil",
-    "logoAlt": "Watch Rudra Logo"
+    "logoAlt": "Nightwatch Logo"
   },
   "language": {
     "title": "Sprache",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Willkommen bei Watch Rudra",
+      "title": "Willkommen bei Nightwatch",
       "description": "Lass uns dir dein neues minimalistisches Kinoerlebnis zeigen."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Zum Inhalt springen",
   "offline": {
     "title": "Sie sind Offline",
-    "description": "Watch Rudra benötigt eine Verbindung zum Erkunden. Öffnen Sie Ihren Tresor für heruntergeladene Titel.",
+    "description": "Nightwatch benötigt eine Verbindung zum Erkunden. Öffnen Sie Ihren Tresor für heruntergeladene Titel.",
     "openVault": "Offline-Tresor öffnen",
     "toastOffline": "Sie sind offline",
     "toastOnline": "Wieder online!"
@@ -148,40 +148,40 @@
     "highQuality": "Hochqualitäts-Stream"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Dein persönlicher Streaming-Begleiter",
-    "homeTitle": "Startseite | Watch Rudra",
+    "homeTitle": "Startseite | Nightwatch",
     "homeDescription": "Suche nach Filmen und Serien, um gemeinsam zu schauen.",
-    "continueWatchingTitle": "Weiterschauen | Watch Rudra",
+    "continueWatchingTitle": "Weiterschauen | Nightwatch",
     "continueWatchingDescription": "Mach weiter, wo du bei deinen zuletzt gesehenen Filmen und Serien aufgehört hast.",
-    "searchTitle": "Suche | Watch Rudra",
+    "searchTitle": "Suche | Nightwatch",
     "searchDescription": "Suche nach Filmen, Serien und Anime.",
-    "profileTitle": "Profil | Watch Rudra",
+    "profileTitle": "Profil | Nightwatch",
     "profileDescription": "Verwalte dein Profil und deinen Wiedergabeverlauf.",
-    "liveTitle": "Live-Spiele | Watch Rudra",
+    "liveTitle": "Live-Spiele | Nightwatch",
     "liveDescription": "Schau dir Live-Sportspiele und Kanäle mit deinen Freunden in Echtzeit an.",
-    "downloadsTitle": "Downloads | Watch Rudra",
+    "downloadsTitle": "Downloads | Nightwatch",
     "downloadsDescription": "Greife auf deine heruntergeladenen Filme und Serien für die Offline-Wiedergabe zu.",
-    "watchlistTitle": "Meine Merkliste | Watch Rudra",
+    "watchlistTitle": "Meine Merkliste | Nightwatch",
     "watchlistDescription": "Behalte den Überblick über Filme und Serien, die du später sehen möchtest.",
-    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyTitle": "Watch Party | Nightwatch",
     "watchPartyDescription": "Triff dich mit Freunden und schaut gemeinsam in Echtzeit.",
-    "messagesTitle": "Nachrichten | Watch Rudra",
-    "userNotFoundTitle": "Benutzer nicht gefunden | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "Nachrichten | Nightwatch",
+    "userNotFoundTitle": "Benutzer nicht gefunden | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "Sehen Sie sich die Aktivität und das Profil von {name} an.",
-    "userProfileOgTitle": "{name} auf Watch Rudra"
+    "userProfileOgTitle": "{name} auf Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "App nicht installiert",
-    "notInstalledDesc": "Die Watch Rudra Desktop-App konnte nicht geöffnet werden. Ist sie installiert?",
+    "notInstalledDesc": "Die Nightwatch Desktop-App konnte nicht geöffnet werden. Ist sie installiert?",
     "downloadApp": "App herunterladen",
     "downloadFor": "Für {os} herunterladen"
   },
   "whatsNew": {
     "backToHome": "Zurück zur Startseite",
     "title": "Neuigkeiten",
-    "description": "Neueste Updates, Fehlerbehebungen und Funktionen für Watch Rudra.",
+    "description": "Neueste Updates, Fehlerbehebungen und Funktionen für Nightwatch.",
     "noReleases": "Keine Versionen gefunden oder Laden fehlgeschlagen.",
     "noReleaseNotes": "*Keine Versionshinweise vorhanden.*",
     "showMore": "Mehr anzeigen ({remaining} übrig)"
