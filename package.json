@@ -144,6 +144,16 @@
       "target": "nsis",
       "icon": "electron/build/icon.png"
     },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "uninstallDisplayName": "Nightwatch",
+      "installerIcon": "electron/build/icon.png",
+      "uninstallerIcon": "electron/build/icon.png"
+    },
     "linux": {
       "target": [
         "AppImage",
