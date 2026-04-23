@@ -43,6 +43,7 @@ describe('useConversations', () => {
       username: 'alice',
       profilePhoto: null,
       isOnline: true,
+      activity: null,
     },
     {
       id: 'f2',
@@ -50,6 +51,7 @@ describe('useConversations', () => {
       username: 'bob',
       profilePhoto: null,
       isOnline: false,
+      activity: null,
     },
   ];
 

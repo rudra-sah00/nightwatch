@@ -298,7 +298,9 @@
       "reply": "Répondre",
       "emoji": "Emoji",
       "callButton": "Appeler"
-    }
+    },
+    "watching": "Watching {title}",
+    "watchingSeries": "Watching {title} S{season}E{episode}"
   },
   "landing": {
     "brand": "Nightwatch",

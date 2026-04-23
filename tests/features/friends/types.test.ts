@@ -16,6 +16,7 @@ describe('Friends Types', () => {
       username: 'alice',
       profilePhoto: null,
       isOnline: true,
+      activity: null,
     };
     expect(friend.id).toBe('1');
     expect(friend.isOnline).toBe(true);
@@ -69,6 +70,7 @@ describe('Friends Types', () => {
       lastMessageAt: '2026-01-01',
       unreadCount: 3,
       isOnline: false,
+      activity: null,
     };
     expect(conv.unreadCount).toBe(3);
   });

@@ -35,6 +35,7 @@ export function MessagesClient() {
             lastMessage: '',
             lastMessageAt: '',
             unreadCount: 0,
+            activity: match.activity ?? null,
           });
           router.replace('/messages', { scroll: false });
         }

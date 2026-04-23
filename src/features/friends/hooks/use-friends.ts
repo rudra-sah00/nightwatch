@@ -14,6 +14,7 @@ import {
   unblockUser,
 } from '@/features/friends/api';
 import type {
+  FriendActivity,
   FriendProfile,
   FriendRequest,
   SentRequest,
@@ -62,17 +63,30 @@ export function useFriends() {
       );
     };
 
+    const onActivity = (data: {
+      userId: string;
+      activity: FriendActivity | null;
+    }) => {
+      setFriends((prev) =>
+        prev.map((f) =>
+          f.id === data.userId ? { ...f, activity: data.activity } : f,
+        ),
+      );
+    };
+
     const onRefresh = () => {
       invalidateFriendsCache();
       fetchAll();
     };
 
     socket.on('friend:status', onStatus);
+    socket.on('friend:activity', onActivity);
     socket.on('friend:request_received', onRefresh);
     socket.on('friend:request_accepted', onRefresh);
 
     return () => {
       socket.off('friend:status', onStatus);
+      socket.off('friend:activity', onActivity);
       socket.off('friend:request_received', onRefresh);
       socket.off('friend:request_accepted', onRefresh);
     };

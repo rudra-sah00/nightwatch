@@ -298,7 +298,9 @@
       "reply": "返信",
       "emoji": "絵文字",
       "callButton": "通話"
-    }
+    },
+    "watching": "Watching {title}",
+    "watchingSeries": "Watching {title} S{season}E{episode}"
   },
   "landing": {
     "brand": "Nightwatch",

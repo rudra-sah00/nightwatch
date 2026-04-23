@@ -8,7 +8,11 @@ import {
   markAsRead,
   sendMessage,
 } from '@/features/friends/api';
-import type { ConversationPreview, Message } from '@/features/friends/types';
+import type {
+  ConversationPreview,
+  FriendActivity,
+  Message,
+} from '@/features/friends/types';
 import { useSocket } from '@/providers/socket-provider';
 
 export function useConversations() {
@@ -36,6 +40,7 @@ export function useConversations() {
           lastMessageAt: '',
           unreadCount: 0,
           isOnline: f.isOnline,
+          activity: f.activity,
         }));
 
       setConversations([...convos, ...friendsWithoutMessages]);
@@ -75,6 +80,17 @@ export function useConversations() {
       );
     };
 
+    const onActivityChange = (data: {
+      userId: string;
+      activity: FriendActivity | null;
+    }) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.friendId === data.userId ? { ...c, activity: data.activity } : c,
+        ),
+      );
+    };
+
     const onRead = (data: { friendId: string }) => {
       setConversations((prev) =>
         prev.map((c) =>
@@ -86,11 +102,13 @@ export function useConversations() {
     socket.on('message:new', onNewMessage);
     socket.on('message:read', onRead);
     socket.on('friend:status', onStatusChange);
+    socket.on('friend:activity', onActivityChange);
 
     return () => {
       socket.off('message:new', onNewMessage);
       socket.off('message:read', onRead);
       socket.off('friend:status', onStatusChange);
+      socket.off('friend:activity', onActivityChange);
     };
   }, [socket]);
 

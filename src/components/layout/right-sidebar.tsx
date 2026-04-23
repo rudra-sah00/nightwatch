@@ -20,6 +20,7 @@ import {
   searchUsers,
   sendFriendRequest,
 } from '@/features/friends/api';
+import { formatActivity } from '@/features/friends/format-activity';
 import { useCall } from '@/features/friends/hooks/use-call';
 import { useFriends } from '@/features/friends/hooks/use-friends';
 
@@ -384,6 +385,9 @@ export function RightSidebar() {
                           name={f.name}
                           photo={f.profilePhoto}
                           isOnline
+                          activity={
+                            f.activity ? formatActivity(f.activity) : null
+                          }
                         />
                       ))}
                     </div>
@@ -402,6 +406,7 @@ export function RightSidebar() {
                           name={f.name}
                           photo={f.profilePhoto}
                           isOnline={false}
+                          activity={null}
                         />
                       ))}
                     </div>
@@ -508,11 +513,13 @@ function FriendRow({
   name,
   photo,
   isOnline,
+  activity,
 }: {
   id: string;
   name: string;
   photo: string | null;
   isOnline: boolean;
+  activity: string | null;
 }) {
   const { initiateCall, callState } = useCall();
 
@@ -524,11 +531,18 @@ function FriendRow({
           <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-card rounded-full" />
         )}
       </div>
-      <span
-        className={`text-sm font-headline font-bold truncate flex-1 ${isOnline ? '' : 'text-foreground/40'}`}
-      >
-        {name}
-      </span>
+      <div className="flex-1 min-w-0">
+        <span
+          className={`text-sm font-headline font-bold truncate block ${isOnline ? '' : 'text-foreground/40'}`}
+        >
+          {name}
+        </span>
+        {activity && (
+          <span className="text-[10px] text-foreground/40 truncate block leading-tight">
+            {activity}
+          </span>
+        )}
+      </div>
       <button
         type="button"
         onClick={() => initiateCall({ id, name, photo })}

@@ -33,6 +33,7 @@ describe('useFriends', () => {
       username: 'alice',
       profilePhoto: null,
       isOnline: true,
+      activity: null,
     },
     {
       id: 'f2',
@@ -40,6 +41,7 @@ describe('useFriends', () => {
       username: 'bob',
       profilePhoto: null,
       isOnline: false,
+      activity: null,
     },
   ];
   const mockPending = [
@@ -155,6 +157,10 @@ describe('useFriends', () => {
         expect.any(Function),
       );
       expect(mockSocket.on).toHaveBeenCalledWith(
+        'friend:activity',
+        expect.any(Function),
+      );
+      expect(mockSocket.on).toHaveBeenCalledWith(
         'friend:request_received',
         expect.any(Function),
       );
@@ -188,6 +194,69 @@ describe('useFriends', () => {
     expect(result.current.onlineFriends).toHaveLength(2);
   });
 
+  it('updates activity via socket event', async () => {
+    const { result } = renderHook(() => useFriends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const activityCall = vi
+      .mocked(mockSocket.on)
+      .mock.calls.find((c) => c[0] === 'friend:activity');
+    const activityHandler = activityCall?.[1] as (data: {
+      userId: string;
+      activity: {
+        type: string;
+        title: string;
+        season: number | null;
+        episode: number | null;
+        episodeTitle: string | null;
+      } | null;
+    }) => void;
+
+    act(() => {
+      activityHandler({
+        userId: 'f1',
+        activity: {
+          type: 'movie',
+          title: 'Inception',
+          season: null,
+          episode: null,
+          episodeTitle: null,
+        },
+      });
+    });
+
+    expect(result.current.friends.find((f) => f.id === 'f1')?.activity).toEqual(
+      {
+        type: 'movie',
+        title: 'Inception',
+        season: null,
+        episode: null,
+        episodeTitle: null,
+      },
+    );
+  });
+
+  it('clears activity via socket event', async () => {
+    const { result } = renderHook(() => useFriends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const activityCall = vi
+      .mocked(mockSocket.on)
+      .mock.calls.find((c) => c[0] === 'friend:activity');
+    const activityHandler = activityCall?.[1] as (data: {
+      userId: string;
+      activity: null;
+    }) => void;
+
+    act(() => {
+      activityHandler({ userId: 'f1', activity: null });
+    });
+
+    expect(
+      result.current.friends.find((f) => f.id === 'f1')?.activity,
+    ).toBeNull();
+  });
+
   it('cleans up socket listeners on unmount', async () => {
     const { unmount } = renderHook(() => useFriends());
     await waitFor(() => expect(mockSocket.on).toHaveBeenCalled());
@@ -196,6 +265,10 @@ describe('useFriends', () => {
 
     expect(mockSocket.off).toHaveBeenCalledWith(
       'friend:status',
+      expect.any(Function),
+    );
+    expect(mockSocket.off).toHaveBeenCalledWith(
+      'friend:activity',
       expect.any(Function),
     );
     expect(mockSocket.off).toHaveBeenCalledWith(

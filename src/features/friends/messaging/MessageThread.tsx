@@ -26,6 +26,7 @@ import {
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 import { useTheme } from '@/providers/theme-provider';
+import { formatActivity } from '../format-activity';
 import { useCall } from '../hooks/use-call';
 import { useMessageThread } from '../hooks/use-messages';
 import type { ConversationPreview } from '../types';
@@ -181,9 +182,11 @@ export function MessageThread({
               <p className="text-xs text-foreground/50 font-headline uppercase tracking-widest">
                 {isTyping
                   ? t('typing')
-                  : friend.isOnline
-                    ? t('online')
-                    : t('offline')}
+                  : friend.activity
+                    ? formatActivity(friend.activity)
+                    : friend.isOnline
+                      ? t('online')
+                      : t('offline')}
               </p>
             </div>
           </button>

@@ -1,9 +1,18 @@
+export interface FriendActivity {
+  type: string;
+  title: string;
+  season: number | null;
+  episode: number | null;
+  episodeTitle: string | null;
+}
+
 export interface FriendProfile {
   id: string;
   name: string;
   username: string | null;
   profilePhoto: string | null;
   isOnline: boolean;
+  activity: FriendActivity | null;
 }
 
 export interface FriendRequest {
@@ -43,6 +52,7 @@ export interface ConversationPreview {
   lastMessageAt: string;
   unreadCount: number;
   isOnline: boolean;
+  activity: FriendActivity | null;
 }
 
 export interface MessagesResponse {

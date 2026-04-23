@@ -9,9 +9,10 @@ The friends system provides social features: friend requests, direct messaging w
 ```
 src/features/friends/
 ├── api.ts                          # API layer with TTL caching
-├── types.ts                        # TypeScript interfaces
+├── types.ts                        # TypeScript interfaces (FriendProfile, FriendActivity, etc.)
+├── format-activity.ts              # Utility to format activity into display string
 ├── hooks/
-│   ├── use-friends.ts              # Friends list, requests, accept/reject/cancel
+│   ├── use-friends.ts              # Friends list, requests, accept/reject/cancel, activity
 │   ├── use-messages.ts             # Conversations, message thread, cursor pagination
 │   └── use-call.tsx                # CallProvider context, Agora RTC, call state machine
 └── components/
@@ -125,6 +126,46 @@ The sidebar also includes:
 | `online:{userId}` | 300s (refreshed every 120s) | User is online |
 | `call:busy:{userId}` | 120s (ringing) / 3600s (active) | User is in a call |
 
+## Activity Status
+
+### How It Works
+
+1. **Backend broadcasts** `friend:activity` when a user starts/stops/changes what they're watching
+2. **Frontend listens** in `use-friends.ts` and `use-messages.ts` — updates the `activity` field on `FriendProfile` / `ConversationPreview`
+3. **Right sidebar** shows activity text below the friend's name (e.g., "Watching Breaking Bad S2E3")
+4. **Chat header** shows activity instead of "online" when available (priority: typing > activity > online > offline)
+5. **Broadcast only on change** — not every heartbeat. Friends get 1 event on start, 1 on content switch, 1 on stop
+
+### Data Structure
+
+```ts
+interface FriendActivity {
+  type: string;          // 'movie' | 'series' | 'livestream'
+  title: string;         // Content title
+  season: number | null; // Series season (null for movies)
+  episode: number | null;// Series episode (null for movies)
+  episodeTitle: string | null;
+}
+```
+
+### Backend Requirements
+
+| Action | Redis | Socket Broadcast |
+|--------|-------|-----------------|
+| User starts watching | `SET user:activity:{userId}` (60s TTL) | `friend:activity { userId, activity }` to online friends |
+| Content changes | Update Redis key + refresh TTL | Broadcast only if activity differs from current |
+| User stops watching | `DEL user:activity:{userId}` | `friend:activity { userId, activity: null }` |
+| Socket disconnect | `DEL user:activity:{userId}` | `friend:activity { userId, activity: null }` |
+| `GET /api/friends` | `MGET user:activity:{friendId}` | Include `activity` field in response |
+
+### Display Format
+
+- Movie: "Watching Inception"
+- Series: "Watching Breaking Bad S2E3"
+- Livestream: "Watching Live Event"
+
+Formatted by `formatActivity()` utility in `src/features/friends/format-activity.ts`.
+
 ## Voice Calls
 
 ### Call State Machine
@@ -168,6 +209,7 @@ active → idle (ended by either party)
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `friend:status` | `{ userId, isOnline }` | Friend online/offline |
+| `friend:activity` | `{ userId, activity }` | Friend activity changed (watching content or null) |
 | `friend:request_received` | `{ id, senderId }` | New incoming request |
 | `friend:request_accepted` | `{ id, acceptedBy }` | Request accepted |
 | `message:new` | `{ id, senderId, content, createdAt }` | New DM received |
@@ -205,7 +247,7 @@ active → idle (ended by either party)
 
 All UI strings are translated across 14 languages under the `common.friends` namespace:
 
-`title`, `messagesTitle`, `conversations`, `selectConversation`, `noConversations`, `noMessages`, `noFriends`, `online`, `offline`, `typing`, `typeMessage`, `send`, `back`, `accept`, `reject`, `pendingRequests`, `openMessages`, `addFriend`, `addFriendPlaceholder`, `requestSent`, `requestFailed`, `unfriend`, `block`, `unfriended`, `blocked`, `actionFailed`, `noUsersFound`, `sentRequests`, `cancelRequest`, `alreadyFriends`, `requestSentLabel`, `requestReceived`
+`title`, `messagesTitle`, `conversations`, `selectConversation`, `noConversations`, `noMessages`, `noFriends`, `online`, `offline`, `typing`, `watching`, `watchingSeries`, `typeMessage`, `send`, `back`, `accept`, `reject`, `pendingRequests`, `openMessages`, `addFriend`, `addFriendPlaceholder`, `requestSent`, `requestFailed`, `unfriend`, `block`, `unfriended`, `blocked`, `actionFailed`, `noUsersFound`, `sentRequests`, `cancelRequest`, `alreadyFriends`, `requestSentLabel`, `requestReceived`
 
 ## Testing
 
@@ -213,6 +255,7 @@ All UI strings are translated across 14 languages under the `common.friends` nam
 |-----------|-------|---------|
 | `api.test.ts` | 27 | All endpoints, cache invalidation, edge cases |
 | `types.test.ts` | 7 | All interfaces |
-| `hooks/use-friends.test.ts` | 9 | Mount, online/offline, accept/reject/cancel, socket events |
+| `format-activity.test.ts` | 4 | Movie, series, livestream, fallback formatting |
+| `hooks/use-friends.test.ts` | 12 | Mount, online/offline, accept/reject/cancel, socket events, activity |
 | `hooks/use-messages.test.ts` | 17 | Conversations, pagination, send, typing, real-time, dedup |
-| **Total** | **60** | |
+| **Total** | **67** | |
