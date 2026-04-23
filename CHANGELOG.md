@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.4.0](https://github.com/rudra-sah00/nightwatch/compare/v2.3.0...v2.4.0) (2026-04-23)
+
+
+### Features
+
+* direct download in sidebar, What's New for all platforms ([1d3df80](https://github.com/rudra-sah00/nightwatch/commit/1d3df80ea91945af7ae927ce4e42556d38a54020))
+
+
+### Bug Fixes
+
+* video not showing in call overlay and popup ([cab09d7](https://github.com/rudra-sah00/nightwatch/commit/cab09d74a935f67b471d8d3f6300bc595649d6d9))
+
 ## [2.3.0](https://github.com/rudra-sah00/nightwatch/compare/v2.2.0...v2.3.0) (2026-04-23)
 
 
