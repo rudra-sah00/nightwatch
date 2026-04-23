@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { useCurrentOSDownload } from '@/hooks/use-download-links';
 
 function useOSName() {
   return useMemo(() => {
@@ -36,6 +37,7 @@ export function LeftSidebar() {
   const td = useTranslations('common.desktopApp');
   const tw = useTranslations('common.whatsNew');
   const osName = useOSName();
+  const downloadUrl = useCurrentOSDownload();
 
   const isActive = (href: string) => pathname?.startsWith(href);
 
@@ -46,11 +48,9 @@ export function LeftSidebar() {
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
     { href: '/library', label: 'Library', icon: Library },
     { href: '/ask-ai', label: 'Ask AI', icon: Bot },
-    ...(isMounted && isDesktopApp
-      ? [{ href: '/changelog', label: tw('title'), icon: Sparkles }]
-      : []),
   ];
 
+  const whatsNewHref = isMounted && isDesktopApp ? '/changelog' : '/whats-new';
   const showDownloadApp = isMounted && !isDesktopApp && osName;
 
   return (
@@ -75,24 +75,20 @@ export function LeftSidebar() {
               {label}
             </Link>
           ))}
-          {showDownloadApp && (
-            <Link
-              href="/changelog"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap mt-auto ${
-                isActive('/changelog')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5'
-              }`}
-            >
-              <Sparkles className="w-5 h-5 stroke-[2.5px] shrink-0" />
-              {tw('title')}
-            </Link>
-          )}
-          {showDownloadApp && (
+          <Link
+            href={whatsNewHref}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap mt-auto ${
+              isActive('/changelog') || isActive('/whats-new')
+                ? 'bg-primary text-primary-foreground'
+                : 'text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5'
+            }`}
+          >
+            <Sparkles className="w-5 h-5 stroke-[2.5px] shrink-0" />
+            {tw('title')}
+          </Link>
+          {showDownloadApp && downloadUrl && (
             <a
-              href="https://github.com/rudra-sah00/nightwatch/releases/latest"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={downloadUrl}
               className="flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
             >
               <Monitor className="w-5 h-5 stroke-[2.5px] shrink-0" />
