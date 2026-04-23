@@ -48,7 +48,7 @@ export function MessagesClient() {
   }, [friendParam, router]);
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-8rem)] max-w-5xl mx-auto w-full">
+    <div className="flex gap-4 h-[calc(100vh-8rem)] w-full p-4">
       <ConversationList
         selected={selectedFriend}
         onSelect={setSelectedFriend}
