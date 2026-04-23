@@ -51,6 +51,7 @@ describe('Friends Types', () => {
       senderId: 's1',
       receiverId: 'r1',
       content: 'hello',
+      replyToId: null,
       readAt: null,
       createdAt: '2026-01-01',
     };
@@ -89,6 +90,7 @@ describe('Friends Types', () => {
           senderId: 's1',
           receiverId: 'r1',
           content: 'test',
+          replyToId: null,
           readAt: null,
           createdAt: '2026-01-01',
         },

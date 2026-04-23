@@ -68,16 +68,29 @@ export function useConversations() {
       );
     };
 
+    const onRead = () => {
+      invalidateFriendsCache();
+      fetchConversations();
+    };
+
     socket.on('message:new', onNewMessage);
+    socket.on('message:read', onRead);
     socket.on('friend:status', onStatusChange);
 
     return () => {
       socket.off('message:new', onNewMessage);
+      socket.off('message:read', onRead);
       socket.off('friend:status', onStatusChange);
     };
   }, [socket, fetchConversations]);
 
-  return { conversations, isLoading, refetch: fetchConversations };
+  const clearUnread = useCallback((friendId: string) => {
+    setConversations((prev) =>
+      prev.map((c) => (c.friendId === friendId ? { ...c, unreadCount: 0 } : c)),
+    );
+  }, []);
+
+  return { conversations, isLoading, refetch: fetchConversations, clearUnread };
 }
 
 export function useMessageThread(friendId: string | null) {
@@ -136,12 +149,12 @@ export function useMessageThread(friendId: string | null) {
 
   // Send message
   const send = useCallback(
-    async (content: string) => {
+    async (content: string, replyToId?: string) => {
       if (!friendId || !content.trim() || isSending) return;
 
       setIsSending(true);
       try {
-        await sendMessage(friendId, content.trim());
+        await sendMessage(friendId, content.trim(), replyToId);
         // Optimistic: refetch to get the server-assigned ID
         const data = await getMessages(friendId, undefined, 50);
         setMessages(data.messages);
@@ -164,6 +177,7 @@ export function useMessageThread(friendId: string | null) {
       id: string;
       senderId: string;
       content: string;
+      replyToId?: string;
       createdAt: string;
     }) => {
       if (data.senderId !== friendId) return;
@@ -176,6 +190,7 @@ export function useMessageThread(friendId: string | null) {
             senderId: data.senderId,
             receiverId: '',
             content: data.content,
+            replyToId: data.replyToId ?? null,
             readAt: null,
             createdAt: data.createdAt,
           },

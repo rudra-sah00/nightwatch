@@ -155,10 +155,15 @@ export async function getMessages(
 export async function sendMessage(
   receiverId: string,
   content: string,
+  replyToId?: string,
 ): Promise<void> {
   await apiFetch('/api/messages/send', {
     method: 'POST',
-    body: JSON.stringify({ receiverId, content }),
+    body: JSON.stringify({
+      receiverId,
+      content,
+      ...(replyToId && { replyToId }),
+    }),
   });
   conversationsCache.clear();
 }

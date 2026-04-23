@@ -29,6 +29,7 @@ export interface Message {
   senderId: string;
   receiverId: string;
   content: string;
+  replyToId: string | null;
   readAt: string | null;
   createdAt: string;
 }

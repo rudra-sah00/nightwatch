@@ -43,8 +43,13 @@ src/features/friends/
 |---------|-------------|
 | **Requests** | Incoming friend requests with Accept ✓ / Reject ✗ buttons |
 | **Sent** | Outgoing requests with Cancel button |
-| **Online** | Accepted friends currently online (green dot) |
-| **Offline** | Accepted friends currently offline |
+| **Online** | Accepted friends currently online (green dot) — call + message buttons |
+| **Offline** | Accepted friends currently offline — call + message buttons |
+| **Blocked** | Blocked users with Unblock button (strikethrough name) |
+
+The sidebar also includes:
+- **Search filter** input to filter friends by name
+- **Spotlight search** (+ icon) — full-screen overlay with debounced username search, shows status badges (Friends / Sent / Incoming / Add Friend)
 
 ### API Endpoints (Backend)
 
@@ -54,6 +59,7 @@ src/features/friends/
 | `GET` | `/api/friends/search?q=` | Search users by username (max 10) |
 | `GET` | `/api/friends/requests/pending` | Incoming requests (max 100) |
 | `GET` | `/api/friends/requests/sent` | Outgoing requests (max 100) |
+| `GET` | `/api/friends/blocked` | List blocked users |
 | `POST` | `/api/friends/request` | Send request `{ username }` |
 | `POST` | `/api/friends/accept` | Accept `{ friendshipId }` |
 | `POST` | `/api/friends/reject` | Reject `{ friendshipId }` |
@@ -82,8 +88,16 @@ src/features/friends/
 
 - Shows **all accepted friends** (not just those with messages)
 - Friends with messages sorted by most recent, friends without messages listed after
-- Unread count badges on conversations
-- Online status indicators (green dot)
+- Unread count badges on conversations — cleared instantly on click + server-side `markAsRead`
+- Online status indicators (green dot), updated in real-time via socket
+- URL-driven: clicking a conversation navigates to `/messages?f={id}`
+
+### Reply to Message
+
+- Hover any message → reply button appears (Telegram-style)
+- Click reply → preview bar slides in above input with "Replying" label + quoted text + cancel button
+- Reply quote renders inside the bubble: **blue vertical bar** + sender name + truncated text (Telegram-style)
+- `replyToId` stored in DB, included in socket events and API responses
 
 ### API Endpoints (Backend)
 
@@ -91,7 +105,7 @@ src/features/friends/
 |--------|----------|-------------|
 | `GET` | `/api/messages/conversations` | Conversation list with last message + unread count |
 | `GET` | `/api/messages/:friendId?cursor=&limit=` | Messages with cursor pagination |
-| `POST` | `/api/messages/send` | Send message `{ receiverId, content }` (30/min rate limit) |
+| `POST` | `/api/messages/send` | Send message `{ receiverId, content, replyToId? }` (30/min rate limit) |
 | `POST` | `/api/messages/read` | Mark as read `{ friendId }` |
 
 ## Online Presence

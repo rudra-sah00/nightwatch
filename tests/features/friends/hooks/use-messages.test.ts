@@ -142,6 +142,7 @@ describe('useMessageThread', () => {
         senderId: 's1',
         receiverId: 'r1',
         content: 'hello',
+        replyToId: null,
         readAt: null,
         createdAt: '2026-01-01',
       },
@@ -150,6 +151,7 @@ describe('useMessageThread', () => {
         senderId: 'r1',
         receiverId: 's1',
         content: 'hi',
+        replyToId: null,
         readAt: null,
         createdAt: '2026-01-01',
       },
@@ -207,7 +209,11 @@ describe('useMessageThread', () => {
       await result.current.send('new message');
     });
 
-    expect(friendsApi.sendMessage).toHaveBeenCalledWith('f1', 'new message');
+    expect(friendsApi.sendMessage).toHaveBeenCalledWith(
+      'f1',
+      'new message',
+      undefined,
+    );
     expect(friendsApi.invalidateFriendsCache).toHaveBeenCalled();
   });
 
@@ -235,6 +241,7 @@ describe('useMessageThread', () => {
             senderId: 's1',
             receiverId: 'r1',
             content: 'old',
+            replyToId: null,
             readAt: null,
             createdAt: '2025-12-01',
           },

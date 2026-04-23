@@ -7,9 +7,11 @@ import {
   Loader2,
   MessageSquare,
   Phone,
+  Reply,
   ShieldBan,
   Smile,
   UserMinus,
+  X,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -73,7 +75,9 @@ export function MessagesClient() {
         {/* Conversation List */}
         <ConversationList
           selected={selectedFriend}
-          onSelect={(conv) => router.push(`/messages?f=${conv.friendId}`)}
+          onSelect={(conv) => {
+            router.push(`/messages?f=${conv.friendId}`);
+          }}
           className={selectedFriend ? 'hidden md:flex' : 'flex'}
         />
 
@@ -109,7 +113,7 @@ function ConversationList({
   onSelect: (c: ConversationPreview) => void;
   className?: string;
 }) {
-  const { conversations, isLoading } = useConversations();
+  const { conversations, isLoading, clearUnread } = useConversations();
   const t = useTranslations('common.friends');
 
   return (
@@ -145,7 +149,10 @@ function ConversationList({
               <button
                 key={conv.friendId}
                 type="button"
-                onClick={() => onSelect(conv)}
+                onClick={() => {
+                  clearUnread(conv.friendId);
+                  onSelect(conv);
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 ${
                   selected?.friendId === conv.friendId ? 'bg-muted' : ''
                 }`}
@@ -221,6 +228,10 @@ function MessageThread({
   const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    content: string;
+  } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -287,9 +298,11 @@ function MessageThread({
   const handleSend = async () => {
     if (!input.trim()) return;
     const msg = input;
+    const rid = replyTo?.id;
     setInput('');
+    setReplyTo(null);
     emitTypingStop();
-    await send(msg);
+    await send(msg, rid);
   };
 
   return (
@@ -434,20 +447,73 @@ function MessageThread({
             )}
             {messages.map((msg) => {
               const isMine = msg.senderId === user?.id;
+              const repliedMsg = msg.replyToId
+                ? messages.find((m) => m.id === msg.replyToId)
+                : null;
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                  className={`group flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
                 >
+                  {isMine && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setReplyTo({ id: msg.id, content: msg.content })
+                      }
+                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-foreground/25 hover:text-foreground/60 hover:bg-muted"
+                      aria-label="Reply"
+                    >
+                      <Reply className="w-4 h-4" />
+                    </button>
+                  )}
+
                   <div
-                    className={`max-w-[75%] px-3 py-2 rounded-xl text-sm break-words ${
+                    className={`max-w-[75%] rounded-2xl text-sm ${
                       isMine
-                        ? 'bg-neo-blue text-white rounded-br-sm'
+                        ? 'bg-foreground text-background rounded-br-sm'
                         : 'bg-muted text-foreground rounded-bl-sm'
                     }`}
                   >
-                    {msg.content}
+                    {/* Telegram-style reply quote */}
+                    {repliedMsg && (
+                      <div
+                        className={`mx-2 mt-2 flex items-stretch gap-2 rounded-lg px-2.5 py-1.5 cursor-pointer ${
+                          isMine ? 'bg-background/10' : 'bg-foreground/[0.04]'
+                        }`}
+                      >
+                        <div className="w-[3px] shrink-0 rounded-full bg-neo-blue" />
+                        <div className="min-w-0">
+                          <p
+                            className={`text-[11px] font-bold leading-tight ${isMine ? 'text-neo-blue/80' : 'text-neo-blue'}`}
+                          >
+                            {repliedMsg.senderId === user?.id
+                              ? 'You'
+                              : friend.name}
+                          </p>
+                          <p
+                            className={`text-xs leading-tight truncate ${isMine ? 'text-background/50' : 'text-foreground/40'}`}
+                          >
+                            {repliedMsg.content}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="px-3.5 py-2 break-words">{msg.content}</div>
                   </div>
+
+                  {!isMine && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setReplyTo({ id: msg.id, content: msg.content })
+                      }
+                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-foreground/25 hover:text-foreground/60 hover:bg-muted"
+                      aria-label="Reply"
+                    >
+                      <Reply className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -456,8 +522,30 @@ function MessageThread({
       </div>
 
       {/* Input */}
-      <div className="border-t-[3px] border-border p-3">
-        <div className="flex items-center gap-2 relative">
+      <div className="border-t-[3px] border-border">
+        {/* Reply Preview */}
+        {replyTo && (
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-muted/30 animate-in slide-in-from-bottom-2 duration-150">
+            <div className="w-0.5 h-8 bg-neo-blue rounded-full shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-foreground/40 mb-0.5">
+                Replying
+              </p>
+              <p className="text-xs text-foreground/60 truncate">
+                {replyTo.content}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setReplyTo(null)}
+              className="p-1 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground/60 transition-colors"
+              aria-label="Cancel reply"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2 relative p-3">
           <div ref={emojiRef} className="relative">
             <button
               type="button"
