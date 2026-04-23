@@ -24,6 +24,7 @@ export function CallOverlay() {
     participants,
     isMuted,
     isVideoOn,
+    isRemoteVideoOn,
     remoteVideoRef,
     localVideoRef,
     callDuration,
@@ -104,7 +105,7 @@ export function CallOverlay() {
   }, []);
 
   const isActive = callState !== 'idle' && !!peer;
-  const hasRemoteVideo = callState === 'active' && isVideoOn;
+  const hasRemoteVideo = callState === 'active' && isRemoteVideoOn;
   const allPeers = peer
     ? [peer, ...participants.filter((p) => p.id !== peer.id)]
     : [];

@@ -2,6 +2,7 @@ import type {
   IAgoraRTCClient,
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
+  IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import { apiFetch } from '@/lib/fetch';
 import {
@@ -23,7 +24,10 @@ export async function connectToAgoraCall(
   token: string,
   appId: string,
   uid: number,
-  remoteVideoRef: React.RefObject<HTMLDivElement | null>,
+  callbacks: {
+    onRemoteVideo: (track: IRemoteVideoTrack) => void;
+    onRemoteVideoStopped: () => void;
+  },
 ): Promise<{
   client: IAgoraRTCClient;
   audioTrack: IMicrophoneAudioTrack;
@@ -44,8 +48,14 @@ export async function connectToAgoraCall(
     if (mediaType === 'audio') {
       remoteUser.audioTrack?.play();
     }
-    if (mediaType === 'video' && remoteVideoRef.current) {
-      remoteUser.videoTrack?.play(remoteVideoRef.current);
+    if (mediaType === 'video' && remoteUser.videoTrack) {
+      callbacks.onRemoteVideo(remoteUser.videoTrack);
+    }
+  });
+
+  client.on('user-unpublished', (_remoteUser, mediaType) => {
+    if (mediaType === 'video') {
+      callbacks.onRemoteVideoStopped();
     }
   });
 

@@ -4,6 +4,7 @@ import type {
   IAgoraRTCClient,
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
+  IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import {
   createContext,
@@ -35,6 +36,7 @@ interface CallContextType {
   participants: CallPeer[];
   isMuted: boolean;
   isVideoOn: boolean;
+  isRemoteVideoOn: boolean;
   remoteVideoRef: React.RefObject<HTMLDivElement | null>;
   localVideoRef: React.RefObject<HTMLDivElement | null>;
   callDuration: number;
@@ -53,6 +55,7 @@ const CallContext = createContext<CallContextType>({
   participants: [],
   isMuted: false,
   isVideoOn: false,
+  isRemoteVideoOn: false,
   remoteVideoRef: { current: null },
   localVideoRef: { current: null },
   callDuration: 0,
@@ -74,6 +77,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [participants, setParticipants] = useState<CallPeer[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
 
   const callStateRef = useRef<CallState>('idle');
@@ -87,6 +91,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const localVideoTrackRef = useRef<ICameraVideoTrack | null>(null);
   const remoteVideoRef = useRef<HTMLDivElement | null>(null);
   const localVideoRef = useRef<HTMLDivElement | null>(null);
+  const remoteVideoTrackRef = useRef<IRemoteVideoTrack | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const restoreVolumeRef = useRef<(() => void) | null>(null);
   const ringtoneRef = useRef<{
@@ -165,7 +170,17 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
   }, [callState]);
 
+  // ── Re-play remote video when ref target changes ────────────────
+  useEffect(() => {
+    const track = remoteVideoTrackRef.current;
+    const el = remoteVideoRef.current;
+    if (track && el && isRemoteVideoOn) {
+      track.play(el);
+    }
+  });
+
   // ── Cleanup ───────────────────────────────────────────────────────
+
   const cleanup = useCallback(() => {
     if (localTrackRef.current) {
       localTrackRef.current.stop();
@@ -177,6 +192,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       localVideoTrackRef.current.close();
       localVideoTrackRef.current = null;
     }
+    remoteVideoTrackRef.current = null;
     if (agoraClientRef.current) {
       agoraClientRef.current.leave().catch(() => {});
       agoraClientRef.current = null;
@@ -190,6 +206,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     setPeer(null);
     setParticipants([]);
     setIsVideoOn(false);
+    setIsRemoteVideoOn(false);
     setIsMuted(false);
   }, [updateCallState]);
 
@@ -201,7 +218,19 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         token,
         appId,
         uid,
-        remoteVideoRef,
+        {
+          onRemoteVideo: (track) => {
+            remoteVideoTrackRef.current = track;
+            setIsRemoteVideoOn(true);
+            if (remoteVideoRef.current) {
+              track.play(remoteVideoRef.current);
+            }
+          },
+          onRemoteVideoStopped: () => {
+            remoteVideoTrackRef.current = null;
+            setIsRemoteVideoOn(false);
+          },
+        },
       );
       localTrackRef.current = audioTrack;
       agoraClientRef.current = client;
@@ -389,6 +418,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         participants,
         isMuted,
         isVideoOn,
+        isRemoteVideoOn,
         remoteVideoRef,
         localVideoRef,
         callDuration,
