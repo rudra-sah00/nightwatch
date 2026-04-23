@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.0](https://github.com/rudra-sah00/nightwatch/compare/v2.2.0...v2.3.0) (2026-04-23)
+
+
+### Features
+
+* landing page, splash screen, onboarding tour, legal pages & UI … ([5a6528d](https://github.com/rudra-sah00/nightwatch/commit/5a6528d7da584f54b65208d7051e06b3810d6ae1))
+* landing page, splash screen, onboarding tour, legal pages & UI fixes ([4f12463](https://github.com/rudra-sah00/nightwatch/commit/4f12463a0073434e024d08c7697cef0bd8c9f6ab))
+* landing page, splash screen, onboarding tour, legal pages & UI fixes ([3855e1b](https://github.com/rudra-sah00/nightwatch/commit/3855e1bd8e095db43c53b50cf9b35b2d8dfd0344))
+
 ## [2.2.0](https://github.com/rudra-sah00/nightwatch/compare/v2.1.5...v2.2.0) (2026-04-23)
 
 
