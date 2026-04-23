@@ -36,7 +36,7 @@
   },
   "releaseNotes": {
     "title": "Sürüm Notları",
-    "description": "Watch Rudra'ya eklenen en son özellikler, iyileştirmeler ve hata düzeltmelerini keşfedin.",
+    "description": "Nightwatch'ya eklenen en son özellikler, iyileştirmeler ve hata düzeltmelerini keşfedin.",
     "viewButton": "YENİLİKLERİ GÖR"
   },
   "updateForm": {
@@ -91,7 +91,7 @@
     "languageDescription": "Tercih ettiğiniz görüntüleme dilini seçin.",
     "selectLanguage": "Dil Seçin",
     "launchOnStartup": "Başlangıçta Aç",
-    "launchDescription": "Bilgisayarınız açıldığında Watch Rudra'yı otomatik olarak arka planda başlatın.",
+    "launchDescription": "Bilgisayarınız açıldığında Nightwatch'yı otomatik olarak arka planda başlatın.",
     "maxConcurrentDownloads": "Maks. Eşzamanlı İndirme",
     "maxConcurrentDescription": "Aynı anda kaç film veya bölüm indirilebilir. Varsayılan 3'tür.",
     "downloadSpeedLimit": "İndirme Hız Limiti",

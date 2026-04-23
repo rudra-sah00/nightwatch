@@ -10,7 +10,7 @@ async function _setupMacOS() {
       {
         label: app.name,
         submenu: [
-          { role: 'about', label: 'About Watch Rudra' },
+          { role: 'about', label: 'About Nightwatch' },
           {
             label: 'Check for Updates...',
             click: () => {
@@ -23,11 +23,11 @@ async function _setupMacOS() {
           { type: 'separator' },
           { role: 'services' },
           { type: 'separator' },
-          { role: 'hide', label: 'Hide Watch Rudra' },
+          { role: 'hide', label: 'Hide Nightwatch' },
           { role: 'hideOthers' },
           { role: 'unhide' },
           { type: 'separator' },
-          { role: 'quit', label: 'Quit Watch Rudra' },
+          { role: 'quit', label: 'Quit Nightwatch' },
         ],
       },
       {

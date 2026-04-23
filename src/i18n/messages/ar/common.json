@@ -9,7 +9,7 @@
     "downloads": "التنزيلات",
     "offlineDownloads": "التنزيلات بدون إنترنت",
     "profile": "الملف الشخصي",
-    "logoAlt": "شعار Watch Rudra"
+    "logoAlt": "شعار Nightwatch"
   },
   "language": {
     "title": "اللغة",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "مرحباً بك في Watch Rudra",
+      "title": "مرحباً بك في Nightwatch",
       "description": "دعنا نعرّفك على تجربتك السينمائية البسيطة الجديدة."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "تخطي إلى المحتوى",
   "offline": {
     "title": "أنت غير متصل",
-    "description": "يتطلب Watch Rudra اتصالاً للاستكشاف. افتح خزنتك لمشاهدة العناوين المحملة.",
+    "description": "يتطلب Nightwatch اتصالاً للاستكشاف. افتح خزنتك لمشاهدة العناوين المحملة.",
     "openVault": "فتح الخزنة",
     "toastOffline": "أنت غير متصل",
     "toastOnline": "عدت للاتصال!"
@@ -148,40 +148,40 @@
     "highQuality": "بث عالي الجودة"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "رفيقك الشخصي للبث",
-    "homeTitle": "الرئيسية | Watch Rudra",
+    "homeTitle": "الرئيسية | Nightwatch",
     "homeDescription": "ابحث عن الأفلام والمسلسلات لبدء المشاهدة معاً.",
-    "continueWatchingTitle": "متابعة المشاهدة | Watch Rudra",
+    "continueWatchingTitle": "متابعة المشاهدة | Nightwatch",
     "continueWatchingDescription": "تابع من حيث توقفت مع الأفلام والمسلسلات التي شاهدتها مؤخراً.",
-    "searchTitle": "البحث | Watch Rudra",
+    "searchTitle": "البحث | Nightwatch",
     "searchDescription": "ابحث عن الأفلام والمسلسلات والأنمي.",
-    "profileTitle": "الملف الشخصي | Watch Rudra",
+    "profileTitle": "الملف الشخصي | Nightwatch",
     "profileDescription": "أدر ملفك الشخصي وسجل المشاهدة.",
-    "liveTitle": "المباريات المباشرة | Watch Rudra",
+    "liveTitle": "المباريات المباشرة | Nightwatch",
     "liveDescription": "شاهد المباريات الرياضية المباشرة والقنوات مع أصدقائك في الوقت الفعلي.",
-    "downloadsTitle": "التنزيلات | Watch Rudra",
+    "downloadsTitle": "التنزيلات | Nightwatch",
     "downloadsDescription": "الوصول إلى الأفلام والمسلسلات المحملة للمشاهدة بدون إنترنت.",
-    "watchlistTitle": "قائمة المشاهدة | Watch Rudra",
+    "watchlistTitle": "قائمة المشاهدة | Nightwatch",
     "watchlistDescription": "تتبع الأفلام والمسلسلات التي تريد مشاهدتها لاحقاً.",
-    "watchPartyTitle": "حفلة المشاهدة | Watch Rudra",
+    "watchPartyTitle": "حفلة المشاهدة | Nightwatch",
     "watchPartyDescription": "انضم إلى أصدقائك وشاهدوا معاً في الوقت الفعلي.",
-    "messagesTitle": "الرسائل | Watch Rudra",
-    "userNotFoundTitle": "المستخدم غير موجود | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
+    "messagesTitle": "الرسائل | Nightwatch",
+    "userNotFoundTitle": "المستخدم غير موجود | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "عرض نشاط المشاهدة والملف الشخصي لـ {name}.",
-    "userProfileOgTitle": "{name} على Watch Rudra"
+    "userProfileOgTitle": "{name} على Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "التطبيق غير مثبت",
-    "notInstalledDesc": "تعذر فتح تطبيق Watch Rudra. هل هو مثبت؟",
+    "notInstalledDesc": "تعذر فتح تطبيق Nightwatch. هل هو مثبت؟",
     "downloadApp": "تحميل التطبيق",
     "downloadFor": "تحميل لـ {os}"
   },
   "whatsNew": {
     "backToHome": "العودة للرئيسية",
     "title": "ما الجديد",
-    "description": "آخر التحديثات والإصلاحات والميزات في Watch Rudra.",
+    "description": "آخر التحديثات والإصلاحات والميزات في Nightwatch.",
     "noReleases": "لم يتم العثور على إصدارات أو فشل التحميل.",
     "noReleaseNotes": "*لم يتم تقديم ملاحظات الإصدار.*",
     "showMore": "عرض المزيد ({remaining} متبقية)"

@@ -36,7 +36,7 @@
   },
   "releaseNotes": {
     "title": "Примечания к выпуску",
-    "description": "Узнайте о новейших функциях, улучшениях и исправлениях Watch Rudra.",
+    "description": "Узнайте о новейших функциях, улучшениях и исправлениях Nightwatch.",
     "viewButton": "ПОСМОТРЕТЬ НОВОЕ"
   },
   "updateForm": {
@@ -91,7 +91,7 @@
     "languageDescription": "Выберите предпочитаемый язык отображения.",
     "selectLanguage": "Выбрать язык",
     "launchOnStartup": "Запуск при старте",
-    "launchDescription": "Автоматически запускать Watch Rudra в фоновом режиме при загрузке компьютера.",
+    "launchDescription": "Автоматически запускать Nightwatch в фоновом режиме при загрузке компьютера.",
     "maxConcurrentDownloads": "Макс. одновременных загрузок",
     "maxConcurrentDescription": "Сколько фильмов или эпизодов можно загружать одновременно. По умолчанию 3.",
     "downloadSpeedLimit": "Ограничение скорости загрузки",

@@ -35,7 +35,7 @@ function setupTray(mainWindow, setQuittingCallback) {
     }
 
     appTray = new Tray(image);
-    appTray.setToolTip('Watch Rudra - Live Desktop');
+    appTray.setToolTip('Nightwatch - Live Desktop');
 
     const contextMenuTemplate = Menu.buildFromTemplate([
       {
@@ -60,7 +60,7 @@ function setupTray(mainWindow, setQuittingCallback) {
       },
       { type: 'separator' },
       {
-        label: 'About Watch Rudra',
+        label: 'About Nightwatch',
         click: () => app.showAboutPanel(),
       },
       {

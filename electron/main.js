@@ -92,7 +92,7 @@ app.commandLine.appendSwitch('ignore-gpu-blocklist');
 app.commandLine.appendSwitch('enable-zero-copy');
 
 // --- 2. DEEP LINK URL REGISTRATION ---
-// Tells the Host OS that "watch-rudra://" should be handled by this Electron binary
+// Tells the Host OS that "nightwatch://" should be handled by this Electron binary
 windows.registerProtocol();
 linux.registerProtocol();
 
@@ -257,10 +257,10 @@ const startElectronApp = async () => {
     try {
       const currentVersion = getAppVersion();
       app.setAboutPanelOptions({
-        applicationName: 'Watch Rudra',
+        applicationName: 'Nightwatch',
         applicationVersion: currentVersion,
         version: currentVersion,
-        copyright: '© Watch Rudra',
+        copyright: '© Nightwatch',
       });
     } catch (_e) {}
 
@@ -598,7 +598,7 @@ const startElectronApp = async () => {
     'runOnBoot',
     'concurrentDownloads',
     'downloadSpeedLimit',
-    'watch_rudra_auth',
+    'nightwatch_auth',
     'disable-gpu',
   ]);
   ipcMain.handle('store-get', (_event, key) => {

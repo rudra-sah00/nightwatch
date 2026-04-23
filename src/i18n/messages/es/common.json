@@ -9,7 +9,7 @@
     "downloads": "Descargas",
     "offlineDownloads": "Descargas sin conexión",
     "profile": "Perfil",
-    "logoAlt": "Logo de Watch Rudra"
+    "logoAlt": "Logo de Nightwatch"
   },
   "language": {
     "title": "Idioma",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Bienvenido a Watch Rudra",
+      "title": "Bienvenido a Nightwatch",
       "description": "Te mostramos tu nueva experiencia cinematográfica minimalista."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Saltar al contenido",
   "offline": {
     "title": "Estás Desconectado",
-    "description": "Watch Rudra requiere conexión para explorar. Ve a tu bóveda para ver títulos descargados.",
+    "description": "Nightwatch requiere conexión para explorar. Ve a tu bóveda para ver títulos descargados.",
     "openVault": "Abrir Bóveda Offline",
     "toastOffline": "Estás desconectado",
     "toastOnline": "¡De vuelta en línea!"
@@ -148,40 +148,40 @@
     "highQuality": "Transmisión de Alta Calidad"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Tu compañero personal de streaming",
-    "homeTitle": "Inicio | Watch Rudra",
+    "homeTitle": "Inicio | Nightwatch",
     "homeDescription": "Busca películas y series para empezar a ver juntos.",
-    "continueWatchingTitle": "Seguir Viendo | Watch Rudra",
+    "continueWatchingTitle": "Seguir Viendo | Nightwatch",
     "continueWatchingDescription": "Retoma donde lo dejaste con tus películas y series vistas recientemente.",
-    "searchTitle": "Buscar | Watch Rudra",
+    "searchTitle": "Buscar | Nightwatch",
     "searchDescription": "Busca películas, series y anime.",
-    "profileTitle": "Perfil | Watch Rudra",
+    "profileTitle": "Perfil | Nightwatch",
     "profileDescription": "Administra tu perfil e historial de visualización.",
-    "liveTitle": "Partidos en Vivo | Watch Rudra",
+    "liveTitle": "Partidos en Vivo | Nightwatch",
     "liveDescription": "Mira partidos deportivos en vivo y canales con tus amigos en tiempo real.",
-    "downloadsTitle": "Descargas | Watch Rudra",
+    "downloadsTitle": "Descargas | Nightwatch",
     "downloadsDescription": "Accede a tus películas y series descargadas para ver sin conexión.",
-    "watchlistTitle": "Mi Lista | Watch Rudra",
+    "watchlistTitle": "Mi Lista | Nightwatch",
     "watchlistDescription": "Lleva un registro de las películas y series que quieres ver después.",
-    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyTitle": "Watch Party | Nightwatch",
     "watchPartyDescription": "Únete a tus amigos y vean juntos en tiempo real.",
-    "messagesTitle": "Mensajes | Watch Rudra",
-    "userNotFoundTitle": "Usuario no encontrado | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
-    "userProfileDescription": "Ver la actividad y perfil de {name} en Watch Rudra.",
-    "userProfileOgTitle": "{name} en Watch Rudra"
+    "messagesTitle": "Mensajes | Nightwatch",
+    "userNotFoundTitle": "Usuario no encontrado | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
+    "userProfileDescription": "Ver la actividad y perfil de {name} en Nightwatch.",
+    "userProfileOgTitle": "{name} en Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "App no instalada",
-    "notInstalledDesc": "No pudimos abrir la app de escritorio Watch Rudra. ¿Está instalada?",
+    "notInstalledDesc": "No pudimos abrir la app de escritorio Nightwatch. ¿Está instalada?",
     "downloadApp": "Descargar App",
     "downloadFor": "Descargar para {os}"
   },
   "whatsNew": {
     "backToHome": "Volver al Inicio",
     "title": "Novedades",
-    "description": "Últimas actualizaciones, correcciones y funciones de Watch Rudra.",
+    "description": "Últimas actualizaciones, correcciones y funciones de Nightwatch.",
     "noReleases": "No se encontraron versiones o falló la carga.",
     "noReleaseNotes": "*No se proporcionaron notas de versión.*",
     "showMore": "Mostrar Más ({remaining} restantes)"

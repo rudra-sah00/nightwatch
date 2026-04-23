@@ -42,7 +42,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         details: `Watching Live: ${props.metadata.title}`,
         state: 'Live Stream',
         largeImageText: props.metadata.title,
-        largeImageKey: 'watchrudra_logo', // Safe fallback because discord-rpc drops invalid keys/urls
+        largeImageKey: 'nightwatch_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         startTimestamp: Date.now(),
       });
     }

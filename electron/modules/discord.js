@@ -69,8 +69,8 @@ class DiscordIntegration {
     if (!this.connected || !this.rpc) return;
 
     const defaultPresence = {
-      largeImageKey: 'watchrudra_logo', // Upload in Discord Dev Portal
-      largeImageText: 'Watch Rudra App',
+      largeImageKey: 'nightwatch_logo', // Upload in Discord Dev Portal
+      largeImageText: 'Nightwatch App',
       startTimestamp: this.startTimestamp,
       instance: false,
     };

@@ -207,7 +207,7 @@ export function usePlayerRoot({
         : [];
 
       let mediaTitle = metadata.title;
-      let mediaArtist = 'Watch Rudra';
+      let mediaArtist = 'Nightwatch';
 
       if (metadata.type === 'series') {
         mediaTitle = metadata.episodeTitle
@@ -222,7 +222,7 @@ export function usePlayerRoot({
       navigator.mediaSession.metadata = new MediaMetadata({
         title: mediaTitle,
         artist: mediaArtist,
-        album: 'Watch Rudra',
+        album: 'Nightwatch',
         artwork: art,
       });
     }

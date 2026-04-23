@@ -37,7 +37,7 @@ export function Navbar() {
               />
             </div>
             <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
-              WATCH RUDRA
+              NIGHTWATCH
             </span>
           </Link>
         </div>

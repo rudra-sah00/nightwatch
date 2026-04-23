@@ -4,7 +4,7 @@ import LoginClient from './LoginClient';
 export async function generateMetadata() {
   const t = await getTranslations('auth');
   return {
-    title: `${t('title.entrance')} | Watch Rudra`,
+    title: `${t('title.entrance')} | Nightwatch`,
     description: t('features.solo.desc'),
   };
 }

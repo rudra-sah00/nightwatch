@@ -105,7 +105,7 @@ function createSplash() {
       <body>
         <div class="container">
           <div class="splash-logo"><img src="file://${iconPath}" alt="Logo" /></div>
-          <div class="title">Watch Rudra</div>
+          <div class="title">Nightwatch</div>
           <div id="version" class="version">v${getAppVersion()}</div>
           <div id="status" class="status">STARTING...</div>
           <div class="progress-bar-bg">
@@ -130,7 +130,7 @@ function createSplash() {
 
   // Write to a temp file so the preload script can be loaded
   const os = require('node:os');
-  const splashPath = _path.join(os.tmpdir(), 'watch-rudra-splash.html');
+  const splashPath = _path.join(os.tmpdir(), 'nightwatch-splash.html');
   _fs.writeFileSync(splashPath, html, 'utf-8');
   splashWindow.loadFile(splashPath);
 

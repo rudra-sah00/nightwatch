@@ -36,7 +36,7 @@
   },
   "releaseNotes": {
     "title": "版本说明",
-    "description": "了解 Watch Rudra 最新添加的功能、改进和错误修复。",
+    "description": "了解 Nightwatch 最新添加的功能、改进和错误修复。",
     "viewButton": "查看新功能"
   },
   "updateForm": {
@@ -91,7 +91,7 @@
     "languageDescription": "选择您的首选显示语言。",
     "selectLanguage": "选择语言",
     "launchOnStartup": "开机启动",
-    "launchDescription": "电脑启动时自动在后台启动 Watch Rudra。",
+    "launchDescription": "电脑启动时自动在后台启动 Nightwatch。",
     "maxConcurrentDownloads": "最大同时下载数",
     "maxConcurrentDescription": "可以同时下载多少部电影或剧集。默认为3。",
     "downloadSpeedLimit": "下载速度限制",

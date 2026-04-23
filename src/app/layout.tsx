@@ -28,7 +28,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Watch Rudra',
+  title: 'Nightwatch',
   description: 'Your personal streaming companion',
   manifest: '/manifest.json',
   icons: {

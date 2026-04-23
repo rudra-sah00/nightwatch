@@ -1,14 +1,14 @@
-const ALLOWED_HOST = 'watch.rudrasahoo.live';
+const ALLOWED_HOST = 'nightwatch.in';
 
-// Extracts watch-rudra:// link variables to the web view properly
+// Extracts nightwatch:// link variables to the web view properly
 function handleDeepLink(url, mainWindow) {
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
 
-    // Map watch-rudra://party/123 to https://watch.rudrasahoo.live/party/123
-    const secureUrl = url.replace('watch-rudra://', `https://${ALLOWED_HOST}/`);
+    // Map nightwatch://party/123 to https://nightwatch.in/party/123
+    const secureUrl = url.replace('nightwatch://', `https://${ALLOWED_HOST}/`);
 
     // Validate the resulting URL points to our domain only
     try {

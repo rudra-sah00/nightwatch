@@ -9,7 +9,7 @@
     "downloads": "Download",
     "offlineDownloads": "Download offline",
     "profile": "Profilo",
-    "logoAlt": "Logo Watch Rudra"
+    "logoAlt": "Logo Nightwatch"
   },
   "language": {
     "title": "Lingua",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Benvenuto su Watch Rudra",
+      "title": "Benvenuto su Nightwatch",
       "description": "Lascia che ti mostriamo la tua nuova esperienza cinematografica minimalista."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Vai al contenuto",
   "offline": {
     "title": "Sei Offline",
-    "description": "Watch Rudra richiede una connessione per esplorare. Apri il tuo vault per i titoli scaricati.",
+    "description": "Nightwatch richiede una connessione per esplorare. Apri il tuo vault per i titoli scaricati.",
     "openVault": "Apri Vault Offline",
     "toastOffline": "Sei offline",
     "toastOnline": "Di nuovo online!"
@@ -148,40 +148,40 @@
     "highQuality": "Stream Alta Qualità"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Il tuo compagno di streaming personale",
-    "homeTitle": "Home | Watch Rudra",
+    "homeTitle": "Home | Nightwatch",
     "homeDescription": "Cerca film e serie TV per iniziare a guardare insieme.",
-    "continueWatchingTitle": "Continua a Guardare | Watch Rudra",
+    "continueWatchingTitle": "Continua a Guardare | Nightwatch",
     "continueWatchingDescription": "Riprendi da dove avevi interrotto con i film e le serie TV visti di recente.",
-    "searchTitle": "Cerca | Watch Rudra",
+    "searchTitle": "Cerca | Nightwatch",
     "searchDescription": "Cerca film, serie TV e anime.",
-    "profileTitle": "Profilo | Watch Rudra",
+    "profileTitle": "Profilo | Nightwatch",
     "profileDescription": "Gestisci il tuo profilo e la cronologia di visione.",
-    "liveTitle": "Partite in Diretta | Watch Rudra",
+    "liveTitle": "Partite in Diretta | Nightwatch",
     "liveDescription": "Guarda partite sportive in diretta e canali con i tuoi amici in tempo reale.",
-    "downloadsTitle": "Download | Watch Rudra",
+    "downloadsTitle": "Download | Nightwatch",
     "downloadsDescription": "Accedi ai film e alle serie TV scaricati per la visione offline.",
-    "watchlistTitle": "La Mia Lista | Watch Rudra",
+    "watchlistTitle": "La Mia Lista | Nightwatch",
     "watchlistDescription": "Tieni traccia dei film e delle serie TV che vuoi guardare dopo.",
-    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyTitle": "Watch Party | Nightwatch",
     "watchPartyDescription": "Unisciti ai tuoi amici e guardate insieme in tempo reale.",
-    "messagesTitle": "Messaggi | Watch Rudra",
-    "userNotFoundTitle": "Utente non trovato | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
-    "userProfileDescription": "Visualizza l'attività e il profilo di {name} su Watch Rudra.",
-    "userProfileOgTitle": "{name} su Watch Rudra"
+    "messagesTitle": "Messaggi | Nightwatch",
+    "userNotFoundTitle": "Utente non trovato | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
+    "userProfileDescription": "Visualizza l'attività e il profilo di {name} su Nightwatch.",
+    "userProfileOgTitle": "{name} su Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "App non installata",
-    "notInstalledDesc": "Impossibile aprire l'app Watch Rudra. È installata?",
+    "notInstalledDesc": "Impossibile aprire l'app Nightwatch. È installata?",
     "downloadApp": "Scarica App",
     "downloadFor": "Scarica per {os}"
   },
   "whatsNew": {
     "backToHome": "Torna alla Home",
     "title": "Novità",
-    "description": "Ultimi aggiornamenti, correzioni e funzionalità di Watch Rudra.",
+    "description": "Ultimi aggiornamenti, correzioni e funzionalità di Nightwatch.",
     "noReleases": "Nessuna versione trovata o caricamento fallito.",
     "noReleaseNotes": "*Nessuna nota di rilascio fornita.*",
     "showMore": "Mostra Altro ({remaining} rimanenti)"

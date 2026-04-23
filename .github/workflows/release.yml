@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://watch.rudrasahoo.live
+      url: https://nightwatch.in
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -114,7 +114,7 @@ jobs:
         run: |
           sleep 10
           for i in 1 2 3; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://watch.rudrasahoo.live")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://nightwatch.in")
             if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ] || [ "$STATUS" -eq 429 ]; then
               echo "✅ Smoke test passed (HTTP $STATUS)"
               exit 0

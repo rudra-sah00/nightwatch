@@ -1,6 +1,6 @@
-# Contributing to Watch Rudra
+# Contributing to Nightwatch
 
-With Watch Rudra's extensive ecosystem (Next.js 15, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
+With Nightwatch's extensive ecosystem (Next.js 15, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
 
 ## Code Formatting & Linting (Biome)
 

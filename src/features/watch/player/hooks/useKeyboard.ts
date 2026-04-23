@@ -246,7 +246,7 @@ export function useKeyboard({
     window.addEventListener('keydown', handleKeyDown);
 
     // --- ELECTRON GLOBAL MEDIA KEYS HANDLER ---
-    // Listen for physical keyboard media keys if running as the Watch Rudra Desktop app!
+    // Listen for physical keyboard media keys if running as the Nightwatch Desktop app!
     let unsubscribeDesktopMedia: (() => void) | undefined;
     if (checkIsDesktop() && desktopBridge.onMediaCommand) {
       unsubscribeDesktopMedia = desktopBridge.onMediaCommand((command) => {

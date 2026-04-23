@@ -1,6 +1,6 @@
 {
-  "name": "Watch Rudra",
-  "short_name": "Watch Rudra",
+  "name": "Nightwatch",
+  "short_name": "Nightwatch",
   "description": "Your personal streaming companion",
   "start_url": "/",
   "display": "standalone",

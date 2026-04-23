@@ -21,7 +21,7 @@ export function AuthCard({
       {/* ── BRAND ROW — 32px ── */}
       <div className="shrink-0 h-8 flex items-end">
         <h1 className="text-xl md:text-[22px] font-black italic tracking-[-0.05em] uppercase text-foreground leading-none font-headline whitespace-nowrap">
-          WATCH RUDRA
+          NIGHTWATCH
         </h1>
       </div>
 

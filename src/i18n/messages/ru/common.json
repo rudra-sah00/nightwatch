@@ -9,7 +9,7 @@
     "downloads": "Загрузки",
     "offlineDownloads": "Офлайн-загрузки",
     "profile": "Профиль",
-    "logoAlt": "Логотип Watch Rudra"
+    "logoAlt": "Логотип Nightwatch"
   },
   "language": {
     "title": "Язык",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Добро пожаловать в Watch Rudra",
+      "title": "Добро пожаловать в Nightwatch",
       "description": "Позвольте показать вам ваш новый минималистичный кинематографический опыт."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Перейти к содержимому",
   "offline": {
     "title": "Вы Офлайн",
-    "description": "Watch Rudra требует подключения для просмотра. Откройте хранилище для загруженных фильмов.",
+    "description": "Nightwatch требует подключения для просмотра. Откройте хранилище для загруженных фильмов.",
     "openVault": "Открыть Офлайн Хранилище",
     "toastOffline": "Вы офлайн",
     "toastOnline": "Снова онлайн!"
@@ -148,40 +148,40 @@
     "highQuality": "Высококачественный Поток"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Ваш персональный стриминговый компаньон",
-    "homeTitle": "Главная | Watch Rudra",
+    "homeTitle": "Главная | Nightwatch",
     "homeDescription": "Ищите фильмы и сериалы, чтобы начать смотреть вместе.",
-    "continueWatchingTitle": "Продолжить Просмотр | Watch Rudra",
+    "continueWatchingTitle": "Продолжить Просмотр | Nightwatch",
     "continueWatchingDescription": "Продолжите с того места, где остановились, с недавно просмотренными фильмами и сериалами.",
-    "searchTitle": "Поиск | Watch Rudra",
+    "searchTitle": "Поиск | Nightwatch",
     "searchDescription": "Ищите фильмы, сериалы и аниме.",
-    "profileTitle": "Профиль | Watch Rudra",
+    "profileTitle": "Профиль | Nightwatch",
     "profileDescription": "Управляйте профилем и историей просмотров.",
-    "liveTitle": "Прямые Трансляции | Watch Rudra",
+    "liveTitle": "Прямые Трансляции | Nightwatch",
     "liveDescription": "Смотрите спортивные матчи и каналы в прямом эфире с друзьями в реальном времени.",
-    "downloadsTitle": "Загрузки | Watch Rudra",
+    "downloadsTitle": "Загрузки | Nightwatch",
     "downloadsDescription": "Доступ к загруженным фильмам и сериалам для офлайн-просмотра.",
-    "watchlistTitle": "Мой Список | Watch Rudra",
+    "watchlistTitle": "Мой Список | Nightwatch",
     "watchlistDescription": "Отслеживайте фильмы и сериалы, которые хотите посмотреть позже.",
-    "watchPartyTitle": "Совместный Просмотр | Watch Rudra",
+    "watchPartyTitle": "Совместный Просмотр | Nightwatch",
     "watchPartyDescription": "Присоединяйтесь к друзьям и смотрите вместе в реальном времени.",
-    "messagesTitle": "Сообщения | Watch Rudra",
-    "userNotFoundTitle": "Пользователь не найден | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
-    "userProfileDescription": "Просмотр активности и профиля {name} на Watch Rudra.",
-    "userProfileOgTitle": "{name} на Watch Rudra"
+    "messagesTitle": "Сообщения | Nightwatch",
+    "userNotFoundTitle": "Пользователь не найден | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
+    "userProfileDescription": "Просмотр активности и профиля {name} на Nightwatch.",
+    "userProfileOgTitle": "{name} на Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "Приложение не установлено",
-    "notInstalledDesc": "Не удалось открыть приложение Watch Rudra. Оно установлено?",
+    "notInstalledDesc": "Не удалось открыть приложение Nightwatch. Оно установлено?",
     "downloadApp": "Скачать Приложение",
     "downloadFor": "Скачать для {os}"
   },
   "whatsNew": {
     "backToHome": "Вернуться на Главную",
     "title": "Что Нового",
-    "description": "Последние обновления, исправления и функции Watch Rudra.",
+    "description": "Последние обновления, исправления и функции Nightwatch.",
     "noReleases": "Релизы не найдены или не удалось загрузить.",
     "noReleaseNotes": "*Примечания к релизу не предоставлены.*",
     "showMore": "Показать Ещё ({remaining} осталось)"

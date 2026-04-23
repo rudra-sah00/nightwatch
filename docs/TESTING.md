@@ -1,6 +1,6 @@
 # Testing Methodology
 
-Watch Rudra handles complex state synchronization across distributed WebRTC clients and backend systems. This documentation explains how the testing suites are structured to ensure absolute reliability across 400+ modules and real-time domains.
+Nightwatch handles complex state synchronization across distributed WebRTC clients and backend systems. This documentation explains how the testing suites are structured to ensure absolute reliability across 400+ modules and real-time domains.
 
 ## Overview
 
@@ -31,7 +31,7 @@ When testing individual components:
 
 ## Playwright (End-to-End Testing)
 
-E2E testing is uniquely challenging for a real-time, authenticated, and rate-limited application like Watch Rudra. We use Playwright to simulate actual browser interactions, test WebSockets, and assert UI flows (e.g., Watch Party creation and lobby approval).
+E2E testing is uniquely challenging for a real-time, authenticated, and rate-limited application like Nightwatch. We use Playwright to simulate actual browser interactions, test WebSockets, and assert UI flows (e.g., Watch Party creation and lobby approval).
 
 ### The E2E Command (`test:e2e`)
 

@@ -81,7 +81,7 @@ const nextConfig: NextConfig = {
     // production CSP headers (localhost is harmless in prod but noisy).
     const backendOrigin =
       process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-    // CF Worker origin — localhost:8787 in dev, cdn.rudrasahoo.live in prod
+    // CF Worker origin — localhost:8787 in dev, cdn.nightwatch.in in prod
     const cfWorkerOrigin = process.env.NEXT_PUBLIC_CF_WORKER_URL || '';
 
     return [
@@ -138,7 +138,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
 
   org: 'personal-oew',
 
-  project: 'watch-rudra-web',
+  project: 'nightwatch-web',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

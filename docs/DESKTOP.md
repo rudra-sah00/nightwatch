@@ -1,16 +1,16 @@
 # Desktop Application
 
-Watch Rudra provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
+Nightwatch provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
 
 ## Installation & Troubleshooting
 
 ### macOS "App is damaged" Error
 Since our project does not currently use a paid $99/yr Apple Developer Account to officially notarize the macOS builds, Apple's Gatekeeper will quarantine the app when downloaded from our GitHub releases.
 
-If you see an error stating **"Watch Rudra is damaged and can't be opened. You should move it to the Bin."**, you can bypass this security flag easily by opening your Terminal and running:
+If you see an error stating **"Nightwatch is damaged and can't be opened. You should move it to the Bin."**, you can bypass this security flag easily by opening your Terminal and running:
 
 ```bash
-xattr -cr "/Applications/Watch Rudra.app"
+xattr -cr "/Applications/Nightwatch.app"
 ```
 *(Note: If you extracted the app directly to your Downloads folder instead of Applications, adjust the path accordingly: `xattr -cr ~/Downloads/Watch\ Rudra.app`)*
 
@@ -42,7 +42,7 @@ src-electron/
 
 ### Key Design Decisions
 
-- **Remote URL loading**: The main window loads `https://watch.rudrasahoo.live` directly (not a local build). This means the desktop app always serves the latest deployed version without requiring app updates for frontend changes.
+- **Remote URL loading**: The main window loads `https://nightwatch.in` directly (not a local build). This means the desktop app always serves the latest deployed version without requiring app updates for frontend changes.
 - **Electron plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Electron plugins.
 - **JS injection**: On window load, Rust injects a script that adds a drag region at the top of the page and attaches drag handlers to the nav element, with MutationObserver re-attachment for SPA navigation.
 
@@ -70,7 +70,7 @@ The desktop app supports full offline startup via a PWA Service Worker powered b
 
 The production deployment requires a Firewall bypass rule so the Service Worker file and Next.js static chunks are served without being challenged by Vercel's Attack Challenge Mode:
 
-- **Vercel Dashboard → `watch-rudra` project → Firewall → Rules → Custom Rules → Add Rule**
+- **Vercel Dashboard → `nightwatch` project → Firewall → Rules → Custom Rules → Add Rule**
   - Name: `Allow SW & Static Assets`
   - If: `Request Path` starts with `/_next/` → **Bypass**
   - **OR** If: `Request Path` equals `/sw.js` → **Bypass**
@@ -89,7 +89,7 @@ The `serwist.config.js` file in the project root configures the CLI.
 
 The desktop app uses `electron-plugin-updater` for seamless OTA updates:
 
-- The updater checks `https://github.com/rudra-sah00/watch-rudra/releases/latest/download/latest.json` for new versions.
+- The updater checks `https://github.com/rudra-sah00/nightwatch/releases/latest/download/latest.json` for new versions.
 - When a new version is available, the app downloads and applies the update, then prompts the user to restart.
 - Since the app loads a remote URL, most frontend changes don't require a desktop update at all — only Rust-side changes or Electron config changes necessitate a new binary release.
 
@@ -132,7 +132,7 @@ pnpm electron:build
 | **Push-to-Talk** | CmdOrCtrl+Shift+M global shortcut |
 | **Dock Badge (macOS)** | Unread count via osascript |
 | **Keep Awake** | `caffeinate` on macOS, `SetThreadExecutionState` on Windows |
-| **Deep Linking** | `watch-rudra://` protocol registered with the OS |
+| **Deep Linking** | `nightwatch://` protocol registered with the OS |
 | **Auto-Start** | `electron-plugin-autostart` with LaunchAgent on macOS |
 | **Clipboard** | Native clipboard write via `electron-plugin-clipboard-manager` |
 | **Notifications** | Native OS notifications via `electron-plugin-notification` |
@@ -162,7 +162,7 @@ A React hook that wraps the bridge for component use:
 - `isDesktopApp` — Whether running inside Electron
 - `isBrowser` — Inverse of above
 - `isMacOS` / `isWindows` — OS detection
-- `openInDesktopApp()` — Deep-link fallback: tries `watch-rudra://` protocol, shows download prompt if app not installed
+- `openInDesktopApp()` — Deep-link fallback: tries `nightwatch://` protocol, shows download prompt if app not installed
 - `getDesktopTopPaddingClass(isFullscreen)` — Returns `pt-8` for the titlebar overlay region (collapses in fullscreen)
 - `copyToClipboard(text)` — Uses native clipboard in desktop, `navigator.clipboard` in browser
 - `dragStyle` / `noDragStyle` — CSS properties for `-webkit-app-region`
@@ -185,4 +185,4 @@ const unlisten = await listen<PayloadType>('event-name', (event) => {
 
 ### Capabilities & Permissions
 
-The `src-electron/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://watch.rudrasahoo.live/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.
+The `src-electron/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://nightwatch.in/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.

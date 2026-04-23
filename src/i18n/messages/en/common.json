@@ -9,7 +9,7 @@
     "downloads": "Downloads",
     "offlineDownloads": "Offline Downloads",
     "profile": "Profile",
-    "logoAlt": "Watch Rudra Logo"
+    "logoAlt": "Nightwatch Logo"
   },
   "language": {
     "title": "Language",
@@ -61,7 +61,7 @@
   },
   "tour": {
     "welcome": {
-      "title": "Welcome to Watch Rudra",
+      "title": "Welcome to Nightwatch",
       "description": "Let us show you around your new minimalist cinema experience. Form follows function."
     },
     "search": {
@@ -119,7 +119,7 @@
   "skipToContent": "Skip to content",
   "offline": {
     "title": "You are Offline",
-    "description": "Watch Rudra requires a connection to explore. Go to your vault to watch downloaded titles.",
+    "description": "Nightwatch requires a connection to explore. Go to your vault to watch downloaded titles.",
     "openVault": "Open Offline Vault",
     "toastOffline": "You are offline",
     "toastOnline": "Back online!"
@@ -148,40 +148,40 @@
     "highQuality": "High Quality Stream"
   },
   "metadata": {
-    "appTitle": "Watch Rudra",
+    "appTitle": "Nightwatch",
     "appDescription": "Your personal streaming companion",
-    "homeTitle": "Home | Watch Rudra",
+    "homeTitle": "Home | Nightwatch",
     "homeDescription": "Search for movies and TV shows to start watching together.",
-    "continueWatchingTitle": "Continue Watching | Watch Rudra",
+    "continueWatchingTitle": "Continue Watching | Nightwatch",
     "continueWatchingDescription": "Pick up where you left off with your recently watched movies and TV shows.",
-    "searchTitle": "Search | Watch Rudra",
+    "searchTitle": "Search | Nightwatch",
     "searchDescription": "Search for movies, TV shows, and anime.",
-    "profileTitle": "Profile | Watch Rudra",
+    "profileTitle": "Profile | Nightwatch",
     "profileDescription": "Manage your profile and viewing history.",
-    "liveTitle": "Live Matches | Watch Rudra",
+    "liveTitle": "Live Matches | Nightwatch",
     "liveDescription": "Watch live sports matches and channels with your friends in real-time.",
-    "downloadsTitle": "Downloads | Watch Rudra",
+    "downloadsTitle": "Downloads | Nightwatch",
     "downloadsDescription": "Access your downloaded movies and TV shows for offline viewing.",
-    "watchlistTitle": "My Watchlist | Watch Rudra",
+    "watchlistTitle": "My Watchlist | Nightwatch",
     "watchlistDescription": "Keep track of movies and TV shows you want to watch later.",
-    "watchPartyTitle": "Watch Party | Watch Rudra",
+    "watchPartyTitle": "Watch Party | Nightwatch",
     "watchPartyDescription": "Join your friends and watch together in real-time.",
-    "messagesTitle": "Messages | Watch Rudra",
-    "userNotFoundTitle": "User Not Found | Watch Rudra",
-    "userProfileTitle": "{name} (@{username}) | Watch Rudra",
-    "userProfileDescription": "View {name}'s watch activity and profile on Watch Rudra.",
-    "userProfileOgTitle": "{name} on Watch Rudra"
+    "messagesTitle": "Messages | Nightwatch",
+    "userNotFoundTitle": "User Not Found | Nightwatch",
+    "userProfileTitle": "{name} (@{username}) | Nightwatch",
+    "userProfileDescription": "View {name}'s watch activity and profile on Nightwatch.",
+    "userProfileOgTitle": "{name} on Nightwatch"
   },
   "desktopApp": {
     "notInstalled": "App not installed",
-    "notInstalledDesc": "We could not open the Watch Rudra Desktop app. Is it installed?",
+    "notInstalledDesc": "We could not open the Nightwatch Desktop app. Is it installed?",
     "downloadApp": "Download App",
     "downloadFor": "Download for {os}"
   },
   "whatsNew": {
     "backToHome": "Back to Home",
     "title": "What's New",
-    "description": "Latest updates, bug fixes, and features for Watch Rudra.",
+    "description": "Latest updates, bug fixes, and features for Nightwatch.",
     "noReleases": "No releases found or failed to load.",
     "noReleaseNotes": "*No release notes provided.*",
     "showMore": "Show More ({remaining} remaining)"

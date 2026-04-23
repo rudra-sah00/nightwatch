@@ -49,7 +49,7 @@ function setupUpdater(splashWindow, onComplete) {
   // If there's no network at all, skip the updater immediately.
   if (!net.isOnline()) {
     log.info('[updater] Device is offline — skipping update check instantly.');
-    sendStatus('Starting Watch Rudra...', 100);
+    sendStatus('Starting Nightwatch...', 100);
     finish();
     return;
   }
@@ -128,7 +128,7 @@ function setupUpdater(splashWindow, onComplete) {
 
     try {
       asarUpdater.setFeedURL(
-        'https://raw.githubusercontent.com/rudra-sah00/watch-rudra/main/update.json',
+        'https://raw.githubusercontent.com/rudra-sah00/nightwatch/main/update.json',
       );
       asarUpdater
         .checkForUpdates()
@@ -139,7 +139,7 @@ function setupUpdater(splashWindow, onComplete) {
         })
         .catch((err) => {
           log.warn('ASAR update error/no-update:', err);
-          sendStatus('Starting Watch Rudra...', 100);
+          sendStatus('Starting Nightwatch...', 100);
           finish();
         });
     } catch (err) {

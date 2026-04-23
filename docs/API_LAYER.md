@@ -1,6 +1,6 @@
 # API Layer and Communication
 
-This document outlines the client-side API architecture in Watch Rudra, governed primarily by the custom `apiFetch` wrapper in `src/lib/fetch.ts`. Unlike standard Next.js boilerplate, this project employs a rigorous, self-managing fetch pipeline with proactive token refreshing to ensure sessions never visibly expire during active Watch Party or playback sessions.
+This document outlines the client-side API architecture in Nightwatch, governed primarily by the custom `apiFetch` wrapper in `src/lib/fetch.ts`. Unlike standard Next.js boilerplate, this project employs a rigorous, self-managing fetch pipeline with proactive token refreshing to ensure sessions never visibly expire during active Watch Party or playback sessions.
 
 ## Overview of Services
 
@@ -16,7 +16,7 @@ Rather than using raw `fetch()`, all interactions with our backend **must** funn
 
 ### Automatic Token Refresh (Proactive)
 
-Most applications wait for an API call to fail with a `401 Unauthorized`, and *then* attempt a token refresh. Watch Rudra explicitly avoids this "lazy refresh" pattern because it causes visual stuttering or failed network cascades in streaming apps. 
+Most applications wait for an API call to fail with a `401 Unauthorized`, and *then* attempt a token refresh. Nightwatch explicitly avoids this "lazy refresh" pattern because it causes visual stuttering or failed network cascades in streaming apps. 
 
 Inside `fetch.ts`, we maintain a `tokenExpiresAt` state. A background interval (`scheduleTokenRefresh()`) is fired whenever a new token is received. The client automatically re-authenticates **1 minute before expiration**, ensuring the user's active session is never interrupted by a 401.
 
@@ -39,5 +39,5 @@ export async function apiFetch<T>(
 
 ## Server Actions vs. API Routes
 
-In Watch Rudra, we prefer Next.js Server Actions for secure form mutations (e.g. Profile editing or Logins). When passing through a Server Action, we do not hit Next.js `/api/` folders. We execute `apiFetch` directly inside the Action bounds before returning the result down to the Client Component, minimizing client-side bandwidth and obscuring the upstream REST signatures.
+In Nightwatch, we prefer Next.js Server Actions for secure form mutations (e.g. Profile editing or Logins). When passing through a Server Action, we do not hit Next.js `/api/` folders. We execute `apiFetch` directly inside the Action bounds before returning the result down to the Client Component, minimizing client-side bandwidth and obscuring the upstream REST signatures.
 

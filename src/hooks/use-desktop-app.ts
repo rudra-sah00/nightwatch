@@ -36,7 +36,7 @@ export function useDesktopApp() {
       const urlToTransform = currentUrl || window.location.href;
       const deepLink = urlToTransform.replace(
         window.location.origin,
-        'watch-rudra:/',
+        'nightwatch:/',
       );
       const start = Date.now();
       window.location.href = deepLink;
@@ -48,7 +48,7 @@ export function useDesktopApp() {
               label: t('downloadApp'),
               onClick: () =>
                 window.open(
-                  'https://github.com/rudra-sah00/watch-rudra/releases',
+                  'https://github.com/rudra-sah00/nightwatch/releases',
                   '_blank',
                 ),
             },

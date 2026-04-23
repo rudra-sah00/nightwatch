@@ -25,13 +25,13 @@ export default async function WhatsNewPage() {
   const t = await getTranslations('common.whatsNew');
   const headers: HeadersInit = {};
 
-  const token = process.env.WATCH_RUDRA_GH_TOKEN || process.env.GITHUB_TOKEN;
+  const token = process.env.NIGHTWATCH_GH_TOKEN || process.env.GITHUB_TOKEN;
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
   const res = await fetch(
-    'https://api.github.com/repos/rudra-sah00/watch-rudra/releases',
+    'https://api.github.com/repos/rudra-sah00/nightwatch/releases',
     {
       headers,
       next: { revalidate: 3600 },

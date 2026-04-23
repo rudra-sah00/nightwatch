@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'watch_rudra_auth',
+      name: 'nightwatch_auth',
       storage: createJSONStorage(() => customNativeStorage),
       partialize: (state) => ({
         user: state.user,

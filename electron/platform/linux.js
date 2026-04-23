@@ -9,8 +9,8 @@ function _setupLinux(handleDeepLinkCallback, getMainWindow) {
   if (process.platform !== 'linux') return;
 
   app.on('second-instance', (_event, commandLine) => {
-    // If the user launched a second instance with a watch-rudra:// URL, catch it
-    const url = commandLine.find((arg) => arg.startsWith('watch-rudra://'));
+    // If the user launched a second instance with a nightwatch:// URL, catch it
+    const url = commandLine.find((arg) => arg.startsWith('nightwatch://'));
     if (url) handleDeepLinkCallback(url);
 
     // Focus the existing window
@@ -31,12 +31,12 @@ function _registerProtocol() {
 
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient('watch-rudra', process.execPath, [
+      app.setAsDefaultProtocolClient('nightwatch', process.execPath, [
         path.resolve(process.argv[1]),
       ]);
     }
   } else {
-    app.setAsDefaultProtocolClient('watch-rudra');
+    app.setAsDefaultProtocolClient('nightwatch');
   }
 }
 
