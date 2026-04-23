@@ -262,6 +262,27 @@
     "requestReceived": "وارد",
     "blockedLabel": "محظور",
     "unblockLabel": "إلغاء الحظر",
-    "searchFriends": "بحث عن أصدقاء..."
+    "searchFriends": "بحث عن أصدقاء...",
+    "call": {
+      "incoming": "مكالمة واردة...",
+      "outgoing": "جارٍ الاتصال...",
+      "decline": "رفض",
+      "accept": "قبول",
+      "end": "إنهاء",
+      "mute": "كتم",
+      "unmute": "إلغاء الكتم",
+      "cameraOn": "إيقاف الكاميرا",
+      "cameraOff": "تشغيل الكاميرا",
+      "invite": "دعوة صديق",
+      "searchFriends": "ابحث عن أصدقاء لإضافتهم...",
+      "noFriendsFound": "لم يتم العثور على أصدقاء",
+      "participants": "{count, plural, one {مشارك #} other {# مشاركين}}",
+      "you": "أنت",
+      "callOverlay": "نافذة المكالمة",
+      "replying": "الرد",
+      "reply": "رد",
+      "emoji": "إيموجي",
+      "callButton": "اتصال"
+    }
   }
 }

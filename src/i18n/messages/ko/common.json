@@ -262,6 +262,27 @@
     "requestReceived": "수신",
     "blockedLabel": "차단됨",
     "unblockLabel": "차단 해제",
-    "searchFriends": "친구 검색..."
+    "searchFriends": "친구 검색...",
+    "call": {
+      "incoming": "수신 전화...",
+      "outgoing": "발신 중...",
+      "decline": "거절",
+      "accept": "수락",
+      "end": "통화 종료",
+      "mute": "음소거",
+      "unmute": "음소거 해제",
+      "cameraOn": "카메라 끄기",
+      "cameraOff": "카메라 켜기",
+      "invite": "친구 초대",
+      "searchFriends": "추가할 친구 검색...",
+      "noFriendsFound": "친구를 찾을 수 없습니다",
+      "participants": "{count, plural, other {참가자 #명}}",
+      "you": "나",
+      "callOverlay": "통화 오버레이",
+      "replying": "답장 중",
+      "reply": "답장",
+      "emoji": "이모지",
+      "callButton": "전화"
+    }
   }
 }

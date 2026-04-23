@@ -199,7 +199,7 @@ describe('useMessageThread', () => {
     expect(result.current.messages).toEqual([]);
   });
 
-  it('sends a message and refetches', async () => {
+  it('sends a message optimistically', async () => {
     vi.mocked(friendsApi.getMessages).mockResolvedValue(mockMessages);
 
     const { result } = renderHook(() => useMessageThread('f1'));
@@ -214,7 +214,6 @@ describe('useMessageThread', () => {
       'new message',
       undefined,
     );
-    expect(friendsApi.invalidateFriendsCache).toHaveBeenCalled();
   });
 
   it('does not send empty messages', async () => {

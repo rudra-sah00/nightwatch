@@ -1,104 +1,419 @@
 'use client';
 
-import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import {
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
+  Plus,
+  Video,
+  VideoOff,
+  X,
+} from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { formatDuration } from '@/features/friends/call/call.utils';
+import { InviteSpotlight } from '@/features/friends/call/InviteSpotlight';
+import { PeerAvatar } from '@/features/friends/call/PeerAvatar';
 import { useCall } from '@/features/friends/hooks/use-call';
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
 
 export function CallOverlay() {
   const {
     callState,
     peer,
+    participants,
     isMuted,
+    isVideoOn,
+    remoteVideoRef,
+    localVideoRef,
     callDuration,
     acceptCall,
     rejectCall,
     endCall,
     toggleMute,
+    toggleVideo,
+    inviteFriend,
   } = useCall();
+
+  const t = useTranslations('common.friends.call');
 
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [swapped, setSwapped] = useState(false);
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+    w: number;
+    h: number;
+    dragging: boolean;
+  } | null>(null);
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: rect.left,
+      origY: rect.top,
+      w: rect.width,
+      h: rect.height,
+      dragging: false,
+    };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }, []);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    if (!dragRef.current.dragging && Math.abs(dx) + Math.abs(dy) > 4) {
+      dragRef.current.dragging = true;
+    }
+    if (dragRef.current.dragging) {
+      const { w, h } = dragRef.current;
+      setDragPos({
+        x: Math.max(
+          0,
+          Math.min(window.innerWidth - w, dragRef.current.origX + dx),
+        ),
+        y: Math.max(
+          0,
+          Math.min(window.innerHeight - h, dragRef.current.origY + dy),
+        ),
+      });
+    }
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    if (dragRef.current?.dragging) {
+      requestAnimationFrame(() => {
+        dragRef.current = null;
+      });
+    } else if (dragRef.current) {
+      // It was a tap, not a drag — expand
+      dragRef.current = null;
+      setExpanded(true);
+    }
+  }, []);
 
   const isActive = callState !== 'idle' && !!peer;
+  const hasRemoteVideo = callState === 'active' && isVideoOn;
+  const allPeers = peer
+    ? [peer, ...participants.filter((p) => p.id !== peer.id)]
+    : [];
 
-  // Enter animation
   useEffect(() => {
     if (isActive) {
       setExiting(false);
-      // Small delay for mount → animate
       requestAnimationFrame(() => setVisible(true));
     }
   }, [isActive]);
 
-  // Exit animation
   useEffect(() => {
     if (!isActive && visible) {
       setExiting(true);
       const timer = setTimeout(() => {
         setVisible(false);
         setExiting(false);
+        setExpanded(false);
+        setShowInvite(false);
+        setDragPos(null);
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [isActive, visible]);
 
+  useEffect(() => {
+    if (!hasRemoteVideo) {
+      setShowControls(true);
+      return;
+    }
+    setShowControls(true);
+    const timer = setTimeout(() => setShowControls(false), 3000);
+    return () => clearTimeout(timer);
+  }, [hasRemoteVideo]);
+
   if (!visible && !isActive) return null;
 
-  return (
-    <div
-      className={`fixed top-4 right-4 z-[90] transition-all duration-300 ease-out ${
-        exiting
-          ? 'opacity-0 translate-y-[-20px] scale-95'
-          : isActive
-            ? 'opacity-100 translate-y-0 scale-100'
-            : 'opacity-0 translate-y-[-20px] scale-95'
-      }`}
-    >
-      <div className="w-72 bg-black/30 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl overflow-hidden">
-        {peer && (
-          <>
-            <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-              {peer.photo ? (
-                <Image
-                  src={peer.photo}
-                  alt={peer.name}
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-white/20 object-cover"
-                  unoptimized
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center font-headline font-black text-sm uppercase text-white">
-                  {peer.name[0]}
+  // Expanded full popup view
+  if (expanded) {
+    return (
+      <div
+        className={`fixed inset-0 z-[95] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 ${
+          exiting
+            ? 'opacity-0 scale-95'
+            : 'animate-in fade-in zoom-in-95 duration-200'
+        }`}
+      >
+        <div className="w-[80vw] h-[80vh] bg-black/40 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <div>
+              <p className="text-white font-headline font-bold text-lg">
+                {callState === 'active'
+                  ? formatDuration(callDuration)
+                  : t('outgoing')}
+              </p>
+              <p className="text-white/50 text-xs font-headline uppercase tracking-widest">
+                {t('participants', { count: allPeers.length })}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Participant area */}
+          {allPeers.length <= 1 ? (
+            <div className="relative mx-5 my-4 flex-1 rounded-2xl overflow-hidden bg-white/5">
+              {/* Main video (remote by default, local when swapped) */}
+              <div
+                ref={swapped ? localVideoRef : remoteVideoRef}
+                className={`absolute inset-0 ${(swapped ? isVideoOn : hasRemoteVideo) ? 'block' : 'hidden'}`}
+              />
+              {!(swapped ? isVideoOn : hasRemoteVideo) && peer && (
+                <div className="flex flex-col items-center justify-center h-full gap-4">
+                  <PeerAvatar
+                    peer={
+                      swapped
+                        ? { id: 'local', name: t('you'), photo: null }
+                        : peer
+                    }
+                    size={120}
+                  />
+                  <p className="text-white text-xl font-headline font-bold">
+                    {swapped ? t('you') : peer.name}
+                  </p>
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="font-headline font-bold text-sm truncate text-white">
-                  {peer.name}
-                </p>
-                <p className="text-xs text-white/60 font-headline uppercase tracking-widest">
-                  {callState === 'incoming' && 'Incoming call...'}
-                  {callState === 'outgoing' && 'Calling...'}
-                  {callState === 'active' && formatDuration(callDuration)}
-                </p>
-              </div>
+              {/* PiP small video (local by default, remote when swapped) */}
+              {callState === 'active' && (
+                <button
+                  type="button"
+                  onClick={() => setSwapped((s) => !s)}
+                  className="absolute bottom-3 right-3 w-36 h-24 rounded-xl overflow-hidden border-2 border-white/20 bg-black/60 cursor-pointer hover:border-white/40 transition-colors"
+                >
+                  <div
+                    ref={swapped ? remoteVideoRef : localVideoRef}
+                    className={`absolute inset-0 ${(swapped ? hasRemoteVideo : isVideoOn) ? 'block' : 'hidden'}`}
+                  />
+                  {!(swapped ? hasRemoteVideo : isVideoOn) && (
+                    <div className="flex items-center justify-center h-full">
+                      <PeerAvatar
+                        peer={
+                          swapped
+                            ? (peer ?? { id: 'local', name: '', photo: null })
+                            : { id: 'local', name: t('you'), photo: null }
+                        }
+                        size={32}
+                      />
+                    </div>
+                  )}
+                </button>
+              )}
             </div>
+          ) : (
+            <div
+              className={`grid gap-4 px-5 py-4 flex-1 content-center ${
+                allPeers.length + 1 <= 2
+                  ? 'grid-cols-2'
+                  : allPeers.length + 1 <= 4
+                    ? 'grid-cols-2'
+                    : 'grid-cols-3'
+              }`}
+            >
+              {/* Local user */}
+              <div className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/5 p-6 overflow-hidden">
+                <div
+                  ref={localVideoRef}
+                  className={`absolute inset-0 ${isVideoOn ? 'block' : 'hidden'}`}
+                />
+                {!isVideoOn && (
+                  <>
+                    <PeerAvatar
+                      peer={{ id: 'local', name: t('you'), photo: null }}
+                      size={80}
+                    />
+                    <p className="text-white text-sm font-headline font-bold">
+                      {t('you')}
+                    </p>
+                  </>
+                )}
+              </div>
+              {allPeers.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/5 p-6"
+                >
+                  <PeerAvatar peer={p} size={80} />
+                  <p className="text-white text-sm font-headline font-bold truncate max-w-[120px]">
+                    {p.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
 
-            <div className="flex items-center justify-center gap-3 px-4 pb-4">
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-4 px-5 pb-5">
+            <button
+              type="button"
+              onClick={toggleMute}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                isMuted
+                  ? 'bg-red-500/30 text-red-400'
+                  : 'bg-white/15 text-white'
+              }`}
+            >
+              {isMuted ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
+            </button>
+            {callState === 'active' && (
+              <button
+                type="button"
+                onClick={toggleVideo}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                  isVideoOn
+                    ? 'bg-white/15 text-white'
+                    : 'bg-white/15 text-white/40'
+                }`}
+              >
+                {isVideoOn ? (
+                  <Video className="w-5 h-5" />
+                ) : (
+                  <VideoOff className="w-5 h-5" />
+                )}
+              </button>
+            )}
+            {callState === 'active' && (
+              <button
+                type="button"
+                onClick={() => setShowInvite(true)}
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 text-white/60 hover:text-white transition-colors"
+                aria-label={t('invite')}
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={endCall}
+              className="w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+            >
+              <PhoneOff className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Invite Friend Popup */}
+        {showInvite && (
+          <InviteSpotlight
+            onClose={() => setShowInvite(false)}
+            onInvite={(p) => {
+              inviteFriend(p);
+              setShowInvite(false);
+            }}
+            existing={allPeers}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Compact overlay (top-right)
+  return (
+    <>
+      <div
+        className={`fixed z-[90] transition-opacity duration-300 ease-out ${
+          !dragPos ? 'top-4 right-4' : ''
+        } ${
+          exiting
+            ? 'opacity-0 scale-95'
+            : isActive
+              ? 'opacity-100 scale-100'
+              : 'opacity-0 scale-95'
+        }`}
+        style={
+          dragPos
+            ? { left: dragPos.x, top: dragPos.y, touchAction: 'none' }
+            : { touchAction: 'none' }
+        }
+      >
+        <section
+          aria-label={t('callOverlay')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setExpanded(true);
+            }
+          }}
+          onMouseEnter={() => setShowControls(true)}
+          onMouseLeave={() => hasRemoteVideo && setShowControls(false)}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          className={`bg-black/30 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl overflow-hidden text-left transition-all duration-300 cursor-grab active:cursor-grabbing select-none ${
+            hasRemoteVideo ? 'w-80 h-56' : 'w-72'
+          }`}
+        >
+          <div
+            ref={remoteVideoRef}
+            className={`absolute inset-0 rounded-2xl overflow-hidden ${hasRemoteVideo ? 'block' : 'hidden'}`}
+          />
+
+          <div
+            className={`relative z-10 flex flex-col h-full transition-opacity duration-200 ${hasRemoteVideo && !showControls ? 'opacity-0' : 'opacity-100'}`}
+          >
+            {peer && (
+              <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+                {!hasRemoteVideo && <PeerAvatar peer={peer} />}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-headline font-bold text-sm truncate text-white">
+                      {peer.name}
+                    </p>
+                    {participants.length > 0 && (
+                      <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-bold">
+                        +{participants.length}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-white/60 font-headline uppercase tracking-widest">
+                    {callState === 'incoming' && t('incoming')}
+                    {callState === 'outgoing' && t('outgoing')}
+                    {callState === 'active' && formatDuration(callDuration)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div
+              className={`flex items-center justify-center gap-3 px-4 ${hasRemoteVideo ? 'mt-auto' : ''} pb-4`}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="toolbar"
+            >
               {callState === 'incoming' && (
                 <>
                   <button
                     type="button"
                     onClick={rejectCall}
                     className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
-                    aria-label="Decline"
+                    aria-label={t('decline')}
                   >
                     <PhoneOff className="w-4 h-4" />
                   </button>
@@ -106,24 +421,19 @@ export function CallOverlay() {
                     type="button"
                     onClick={acceptCall}
                     className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors"
-                    aria-label="Accept"
+                    aria-label={t('accept')}
                   >
                     <Phone className="w-4 h-4" />
                   </button>
                 </>
               )}
-
               {(callState === 'outgoing' || callState === 'active') && (
                 <>
                   <button
                     type="button"
                     onClick={toggleMute}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                      isMuted
-                        ? 'bg-red-500/30 text-red-400'
-                        : 'bg-white/15 text-white'
-                    }`}
-                    aria-label={isMuted ? 'Unmute' : 'Mute'}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isMuted ? 'bg-red-500/30 text-red-400' : 'bg-white/15 text-white'}`}
+                    aria-label={isMuted ? t('unmute') : t('mute')}
                   >
                     {isMuted ? (
                       <MicOff className="w-4 h-4" />
@@ -131,22 +441,55 @@ export function CallOverlay() {
                       <Mic className="w-4 h-4" />
                     )}
                   </button>
+                  {callState === 'active' && (
+                    <button
+                      type="button"
+                      onClick={toggleVideo}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isVideoOn ? 'bg-white/15 text-white' : 'bg-white/15 text-white/40'}`}
+                      aria-label={isVideoOn ? t('cameraOn') : t('cameraOff')}
+                    >
+                      {isVideoOn ? (
+                        <Video className="w-4 h-4" />
+                      ) : (
+                        <VideoOff className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+                  {callState === 'active' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowInvite(true)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-white/15 text-white/60 hover:text-white transition-colors"
+                      aria-label={t('invite')}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={endCall}
                     className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
-                    aria-label={
-                      callState === 'outgoing' ? 'Cancel' : 'End call'
-                    }
+                    aria-label={t('end')}
                   >
                     <PhoneOff className="w-4 h-4" />
                   </button>
                 </>
               )}
             </div>
-          </>
-        )}
+          </div>
+        </section>
       </div>
-    </div>
+
+      {showInvite && (
+        <InviteSpotlight
+          onClose={() => setShowInvite(false)}
+          onInvite={(p) => {
+            inviteFriend(p);
+            setShowInvite(false);
+          }}
+          existing={allPeers}
+        />
+      )}
+    </>
   );
 }

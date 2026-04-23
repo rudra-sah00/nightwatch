@@ -262,6 +262,27 @@
     "requestReceived": "Ricevuta",
     "blockedLabel": "Bloccati",
     "unblockLabel": "Sblocca",
-    "searchFriends": "Cerca amici..."
+    "searchFriends": "Cerca amici...",
+    "call": {
+      "incoming": "Chiamata in arrivo...",
+      "outgoing": "Chiamata in corso...",
+      "decline": "Rifiuta",
+      "accept": "Accetta",
+      "end": "Termina",
+      "mute": "Disattiva mic",
+      "unmute": "Attiva mic",
+      "cameraOn": "Fotocamera spenta",
+      "cameraOff": "Fotocamera accesa",
+      "invite": "Invita amico",
+      "searchFriends": "Cerca amici da aggiungere...",
+      "noFriendsFound": "Nessun amico trovato",
+      "participants": "{count, plural, one {# partecipante} other {# partecipanti}}",
+      "you": "Tu",
+      "callOverlay": "Finestra chiamata",
+      "replying": "Rispondendo",
+      "reply": "Rispondi",
+      "emoji": "Emoji",
+      "callButton": "Chiama"
+    }
   }
 }

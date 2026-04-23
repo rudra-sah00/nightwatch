@@ -262,6 +262,27 @@
     "requestReceived": "受信",
     "blockedLabel": "ブロック中",
     "unblockLabel": "ブロック解除",
-    "searchFriends": "フレンドを検索..."
+    "searchFriends": "フレンドを検索...",
+    "call": {
+      "incoming": "着信中...",
+      "outgoing": "発信中...",
+      "decline": "拒否",
+      "accept": "応答",
+      "end": "通話終了",
+      "mute": "ミュート",
+      "unmute": "ミュート解除",
+      "cameraOn": "カメラオフ",
+      "cameraOff": "カメラオン",
+      "invite": "友達を招待",
+      "searchFriends": "追加する友達を検索...",
+      "noFriendsFound": "友達が見つかりません",
+      "participants": "{count, plural, other {#人の参加者}}",
+      "you": "あなた",
+      "callOverlay": "通話オーバーレイ",
+      "replying": "返信中",
+      "reply": "返信",
+      "emoji": "絵文字",
+      "callButton": "通話"
+    }
   }
 }

@@ -96,7 +96,7 @@ export function MediaControls({
   return (
     <div className="border-t-[4px] border-border bg-background relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="p-4 flex gap-3 border-b-[4px] border-border bg-background">
+      <div className="px-3 py-2 flex gap-2 border-b-[4px] border-border bg-background">
         {/* Settings */}
         <WatchPartySettings
           room={room}
@@ -112,12 +112,12 @@ export function MediaControls({
             variant="none"
             size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs bg-background text-foreground border-[2px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors"
           >
             {linkCopied ? (
-              <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
+              <Check aria-hidden="true" className="w-3.5 h-3.5 stroke-[3px]" />
             ) : (
-              <Copy aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
+              <Copy aria-hidden="true" className="w-3.5 h-3.5 stroke-[3px]" />
             )}
             <span className="hidden xl:inline">
               {linkCopied ? t('actions.copied') : t('actions.invite')}
@@ -131,11 +131,11 @@ export function MediaControls({
           size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-2 py-3 text-xs md:text-sm bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors',
+            'flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs bg-neo-red text-primary-foreground border-[2px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors',
             isHost ? 'flex-1' : 'w-full',
           )}
         >
-          <LogOut aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
+          <LogOut aria-hidden="true" className="w-3.5 h-3.5 stroke-[3px]" />
           <span className="hidden xl:inline">
             {isHost ? t('actions.end') : t('actions.leave')}
           </span>

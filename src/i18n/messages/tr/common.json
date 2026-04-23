@@ -262,6 +262,27 @@
     "requestReceived": "Gelen",
     "blockedLabel": "Engellenen",
     "unblockLabel": "Engeli kaldır",
-    "searchFriends": "Arkadaş ara..."
+    "searchFriends": "Arkadaş ara...",
+    "call": {
+      "incoming": "Gelen arama...",
+      "outgoing": "Aranıyor...",
+      "decline": "Reddet",
+      "accept": "Kabul et",
+      "end": "Sonlandır",
+      "mute": "Sessize al",
+      "unmute": "Sesi aç",
+      "cameraOn": "Kamera kapat",
+      "cameraOff": "Kamera aç",
+      "invite": "Arkadaş davet et",
+      "searchFriends": "Eklenecek arkadaş ara...",
+      "noFriendsFound": "Arkadaş bulunamadı",
+      "participants": "{count, plural, one {# katılımcı} other {# katılımcı}}",
+      "you": "Sen",
+      "callOverlay": "Arama penceresi",
+      "replying": "Yanıtlanıyor",
+      "reply": "Yanıtla",
+      "emoji": "Emoji",
+      "callButton": "Ara"
+    }
   }
 }

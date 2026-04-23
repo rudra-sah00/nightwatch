@@ -1,6 +1,10 @@
 'use client';
 
-import type { IAgoraRTCClient, IMicrophoneAudioTrack } from 'agora-rtc-sdk-ng';
+import type {
+  IAgoraRTCClient,
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+} from 'agora-rtc-sdk-ng';
 import {
   createContext,
   useCallback,
@@ -9,8 +13,13 @@ import {
   useRef,
   useState,
 } from 'react';
-import { apiFetch } from '@/lib/fetch';
 import { useSocket } from '@/providers/socket-provider';
+import {
+  connectToAgoraCall,
+  createCallVideoTrack,
+  fetchCallToken,
+} from '../call/call.service';
+import { duckMediaElements } from '../call/call.utils';
 
 export type CallState = 'idle' | 'outgoing' | 'incoming' | 'active';
 
@@ -23,71 +32,97 @@ export interface CallPeer {
 interface CallContextType {
   callState: CallState;
   peer: CallPeer | null;
+  participants: CallPeer[];
   isMuted: boolean;
+  isVideoOn: boolean;
+  remoteVideoRef: React.RefObject<HTMLDivElement | null>;
+  localVideoRef: React.RefObject<HTMLDivElement | null>;
   callDuration: number;
   initiateCall: (peer: CallPeer) => void;
   acceptCall: () => void;
   rejectCall: () => void;
   endCall: () => void;
   toggleMute: () => void;
+  toggleVideo: () => void;
+  inviteFriend: (peer: CallPeer) => void;
 }
 
 const CallContext = createContext<CallContextType>({
   callState: 'idle',
   peer: null,
+  participants: [],
   isMuted: false,
+  isVideoOn: false,
+  remoteVideoRef: { current: null },
+  localVideoRef: { current: null },
   callDuration: 0,
   initiateCall: () => {},
   acceptCall: () => {},
   rejectCall: () => {},
   endCall: () => {},
   toggleMute: () => {},
+  toggleVideo: () => {},
+  inviteFriend: () => {},
 });
 
 export const useCall = () => useContext(CallContext);
-
-/**
- * Duck all <video> and <audio> elements on the page during a call.
- * Restores original volumes when the call ends.
- */
-function duckMediaElements(factor: number): () => void {
-  const saved: { el: HTMLMediaElement; vol: number }[] = [];
-  for (const el of document.querySelectorAll<HTMLMediaElement>(
-    'video, audio',
-  )) {
-    saved.push({ el, vol: el.volume });
-    el.volume = Math.max(0, el.volume * factor);
-  }
-  return () => {
-    for (const { el, vol } of saved) {
-      try {
-        el.volume = vol;
-      } catch {
-        // Element may have been removed
-      }
-    }
-  };
-}
 
 export function CallProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocket();
   const [callState, setCallState] = useState<CallState>('idle');
   const [peer, setPeer] = useState<CallPeer | null>(null);
+  const [participants, setParticipants] = useState<CallPeer[]>([]);
   const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
+
+  const callStateRef = useRef<CallState>('idle');
+  const updateCallState = useCallback((state: CallState) => {
+    callStateRef.current = state;
+    setCallState(state);
+  }, []);
 
   const agoraClientRef = useRef<IAgoraRTCClient | null>(null);
   const localTrackRef = useRef<IMicrophoneAudioTrack | null>(null);
+  const localVideoTrackRef = useRef<ICameraVideoTrack | null>(null);
+  const remoteVideoRef = useRef<HTMLDivElement | null>(null);
+  const localVideoRef = useRef<HTMLDivElement | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const restoreVolumeRef = useRef<(() => void) | null>(null);
+  const ringtoneRef = useRef<{
+    incoming: HTMLAudioElement;
+    outgoing: HTMLAudioElement;
+  } | null>(null);
 
-  // Duration timer
+  // ── Ringtone preload ──────────────────────────────────────────────
+  useEffect(() => {
+    const incoming = new Audio('/incoming-call.mp3');
+    incoming.loop = true;
+    incoming.volume = 0.5;
+    incoming.preload = 'auto';
+    incoming.load();
+
+    const outgoing = new Audio('/outgoing-call.mp3');
+    outgoing.loop = true;
+    outgoing.volume = 0.4;
+    outgoing.preload = 'auto';
+    outgoing.load();
+
+    ringtoneRef.current = { incoming, outgoing };
+    return () => {
+      incoming.pause();
+      outgoing.pause();
+    };
+  }, []);
+
+  // ── Duration timer ────────────────────────────────────────────────
   useEffect(() => {
     if (callState === 'active') {
       setCallDuration(0);
-      durationIntervalRef.current = setInterval(() => {
-        setCallDuration((d) => d + 1);
-      }, 1000);
+      durationIntervalRef.current = setInterval(
+        () => setCallDuration((d) => d + 1),
+        1000,
+      );
     } else {
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
@@ -101,15 +136,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
   }, [callState]);
 
-  // Duck media when call becomes active, restore when idle
+  // ── Media ducking ─────────────────────────────────────────────────
   useEffect(() => {
     if (callState === 'active') {
-      // Duck all playing media to 20% volume
       restoreVolumeRef.current = duckMediaElements(0.2);
-      // Notify watch party (if active) that a DM call started
       window.dispatchEvent(new CustomEvent('dm-call:start'));
     }
-
     return () => {
       if (restoreVolumeRef.current) {
         restoreVolumeRef.current();
@@ -118,103 +150,131 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
   }, [callState]);
 
+  // ── Ringtone playback ─────────────────────────────────────────────
+  useEffect(() => {
+    if (callState !== 'incoming' && callState !== 'outgoing') return;
+    const tones = ringtoneRef.current;
+    if (!tones) return;
+
+    const audio = callState === 'incoming' ? tones.incoming : tones.outgoing;
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [callState]);
+
+  // ── Cleanup ───────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
-    // Leave Agora channel (separate client from watch party — no conflict)
     if (localTrackRef.current) {
       localTrackRef.current.stop();
       localTrackRef.current.close();
       localTrackRef.current = null;
     }
+    if (localVideoTrackRef.current) {
+      localVideoTrackRef.current.stop();
+      localVideoTrackRef.current.close();
+      localVideoTrackRef.current = null;
+    }
     if (agoraClientRef.current) {
       agoraClientRef.current.leave().catch(() => {});
       agoraClientRef.current = null;
     }
-    // Restore ducked volumes
     if (restoreVolumeRef.current) {
       restoreVolumeRef.current();
       restoreVolumeRef.current = null;
     }
-    // Notify watch party that DM call ended
     window.dispatchEvent(new CustomEvent('dm-call:end'));
-
-    setCallState('idle');
+    updateCallState('idle');
     setPeer(null);
+    setParticipants([]);
+    setIsVideoOn(false);
     setIsMuted(false);
-  }, []);
+  }, [updateCallState]);
 
-  const joinAgoraChannel = useCallback(
-    async (channel: string) => {
+  // ── Agora connection ──────────────────────────────────────────────
+  const connectAgora = useCallback(
+    async (channel: string, token: string, appId: string, uid: number) => {
+      const { client, audioTrack } = await connectToAgoraCall(
+        channel,
+        token,
+        appId,
+        uid,
+        remoteVideoRef,
+      );
+      localTrackRef.current = audioTrack;
+      agoraClientRef.current = client;
+      updateCallState('active');
+      new Audio('/room-join.mp3').play().catch(() => {});
+    },
+    [updateCallState],
+  );
+
+  const joinAgoraWithToken = useCallback(
+    async (channel: string, token: string, appId: string, uid: number) => {
       try {
-        const { token, appId, uid } = await apiFetch<{
-          token: string;
-          appId: string;
-          uid: number;
-        }>(`/api/agora/call-token?channelName=${encodeURIComponent(channel)}`);
-
-        // Create a NEW Agora client — separate from any watch party client.
-        // Agora SDK supports multiple clients in the same page.
-        const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
-        const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-
-        await client.join(appId, channel, token, uid);
-
-        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await client.publish([localAudioTrack]);
-
-        localTrackRef.current = localAudioTrack;
-        agoraClientRef.current = client;
-
-        // Auto-subscribe to remote audio
-        client.on('user-published', async (remoteUser, mediaType) => {
-          if (mediaType === 'audio') {
-            await client.subscribe(remoteUser, mediaType);
-            remoteUser.audioTrack?.play();
-          }
-        });
-
-        setCallState('active');
+        await connectAgora(channel, token, appId, uid);
       } catch {
         cleanup();
       }
     },
-    [cleanup],
+    [connectAgora, cleanup],
   );
 
+  const joinAgoraChannel = useCallback(
+    async (channel: string) => {
+      try {
+        const data = await fetchCallToken(channel);
+        await connectAgora(channel, data.token, data.appId, data.uid);
+      } catch {
+        cleanup();
+      }
+    },
+    [connectAgora, cleanup],
+  );
+
+  // ── Call actions ──────────────────────────────────────────────────
   const initiateCall = useCallback(
     (callPeer: CallPeer) => {
-      if (!socket || callState !== 'idle') return;
-
+      if (!socket || callStateRef.current !== 'idle') return;
       setPeer(callPeer);
-      setCallState('outgoing');
-
+      updateCallState('outgoing');
       socket.emit(
         'call:initiate',
         { receiverId: callPeer.id },
-        (res: { success: boolean; channelName?: string; error?: string }) => {
-          if (!res.success) {
-            cleanup();
-          }
+        (res: { success: boolean }) => {
+          if (!res.success) cleanup();
         },
       );
     },
-    [socket, callState, cleanup],
+    [socket, cleanup, updateCallState],
   );
 
   const acceptCall = useCallback(() => {
-    if (!socket || !peer || callState !== 'incoming') return;
-
+    if (!socket || !peer || callStateRef.current !== 'incoming') return;
     socket.emit(
       'call:accept',
       { callerId: peer.id },
-      (res: { success: boolean; channelName?: string }) => {
-        if (res.success && res.channelName) {
-          joinAgoraChannel(res.channelName);
-        } else {
+      (res: {
+        success: boolean;
+        channelName?: string;
+        token?: string;
+        appId?: string;
+        uid?: number;
+      }) => {
+        if (!res.success || !res.channelName) {
           cleanup();
+          return;
+        }
+        if (res.token && res.appId && res.uid) {
+          joinAgoraWithToken(res.channelName, res.token, res.appId, res.uid);
+        } else {
+          joinAgoraChannel(res.channelName);
         }
       },
     );
-  }, [socket, peer, callState, joinAgoraChannel, cleanup]);
+  }, [socket, peer, joinAgoraChannel, joinAgoraWithToken, cleanup]);
 
   const rejectCall = useCallback(() => {
     if (!socket || !peer) return;
@@ -230,13 +290,49 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const toggleMute = useCallback(() => {
     if (localTrackRef.current) {
-      const newMuted = !isMuted;
-      localTrackRef.current.setEnabled(!newMuted);
-      setIsMuted(newMuted);
+      const next = !isMuted;
+      localTrackRef.current.setEnabled(!next);
+      setIsMuted(next);
     }
   }, [isMuted]);
 
-  // Socket event listeners
+  const toggleVideo = useCallback(async () => {
+    if (!agoraClientRef.current) return;
+    if (isVideoOn) {
+      if (localVideoTrackRef.current) {
+        await agoraClientRef.current.unpublish([localVideoTrackRef.current]);
+        localVideoTrackRef.current.stop();
+        localVideoTrackRef.current.close();
+        localVideoTrackRef.current = null;
+      }
+      setIsVideoOn(false);
+    } else {
+      const videoTrack = await createCallVideoTrack(agoraClientRef.current);
+      localVideoTrackRef.current = videoTrack;
+      if (localVideoRef.current) videoTrack.play(localVideoRef.current);
+      setIsVideoOn(true);
+    }
+  }, [isVideoOn]);
+
+  const inviteFriend = useCallback(
+    (invitee: CallPeer) => {
+      if (!socket || callStateRef.current !== 'active') return;
+      socket.emit(
+        'call:invite',
+        { inviteeId: invitee.id },
+        (res: { success: boolean }) => {
+          if (res.success) {
+            setParticipants((prev) =>
+              prev.some((p) => p.id === invitee.id) ? prev : [...prev, invitee],
+            );
+          }
+        },
+      );
+    },
+    [socket],
+  );
+
+  // ── Socket event listeners ────────────────────────────────────────
   useEffect(() => {
     if (!socket) return;
 
@@ -244,54 +340,65 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callerId: string;
       callerName: string;
       callerPhoto: string | null;
-      channelName: string;
     }) => {
-      if (callState !== 'idle') return;
+      if (callStateRef.current !== 'idle') return;
       setPeer({
         id: data.callerId,
         name: data.callerName,
         photo: data.callerPhoto,
       });
-      setCallState('incoming');
+      updateCallState('incoming');
     };
 
     const onAccepted = (data: { channelName: string }) => {
-      if (callState === 'outgoing') {
+      if (callStateRef.current === 'outgoing') {
         joinAgoraChannel(data.channelName);
       }
     };
 
     const onRejected = () => {
-      if (callState === 'outgoing') cleanup();
+      if (callStateRef.current === 'outgoing') cleanup();
     };
 
     const onEnded = () => cleanup();
+
+    const onParticipantLeft = (data: { userId: string }) => {
+      setParticipants((prev) => prev.filter((p) => p.id !== data.userId));
+    };
 
     socket.on('call:incoming', onIncoming);
     socket.on('call:accepted', onAccepted);
     socket.on('call:rejected', onRejected);
     socket.on('call:ended', onEnded);
+    socket.on('call:participant_left', onParticipantLeft);
 
     return () => {
       socket.off('call:incoming', onIncoming);
       socket.off('call:accepted', onAccepted);
       socket.off('call:rejected', onRejected);
       socket.off('call:ended', onEnded);
+      socket.off('call:participant_left', onParticipantLeft);
     };
-  }, [socket, callState, joinAgoraChannel, cleanup]);
+  }, [socket, joinAgoraChannel, cleanup, updateCallState]);
 
   return (
     <CallContext.Provider
       value={{
         callState,
         peer,
+        participants,
         isMuted,
+        isVideoOn,
+        remoteVideoRef,
+        localVideoRef,
         callDuration,
         initiateCall,
         acceptCall,
         rejectCall,
         endCall,
         toggleMute,
+        toggleVideo,
+        inviteFriend,
       }}
     >
       {children}

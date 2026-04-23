@@ -262,6 +262,27 @@
     "requestReceived": "收到",
     "blockedLabel": "已屏蔽",
     "unblockLabel": "取消屏蔽",
-    "searchFriends": "搜索好友..."
+    "searchFriends": "搜索好友...",
+    "call": {
+      "incoming": "来电中...",
+      "outgoing": "呼叫中...",
+      "decline": "拒绝",
+      "accept": "接听",
+      "end": "挂断",
+      "mute": "静音",
+      "unmute": "取消静音",
+      "cameraOn": "关闭摄像头",
+      "cameraOff": "开启摄像头",
+      "invite": "邀请好友",
+      "searchFriends": "搜索要添加的好友...",
+      "noFriendsFound": "未找到好友",
+      "participants": "{count, plural, other {#位参与者}}",
+      "you": "你",
+      "callOverlay": "通话窗口",
+      "replying": "回复中",
+      "reply": "回复",
+      "emoji": "表情",
+      "callButton": "通话"
+    }
   }
 }

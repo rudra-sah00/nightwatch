@@ -262,6 +262,27 @@
     "requestReceived": "आया हुआ",
     "blockedLabel": "ब्लॉक किए गए",
     "unblockLabel": "अनब्लॉक",
-    "searchFriends": "दोस्त खोजें..."
+    "searchFriends": "दोस्त खोजें...",
+    "call": {
+      "incoming": "इनकमिंग कॉल...",
+      "outgoing": "कॉल कर रहे हैं...",
+      "decline": "अस्वीकार",
+      "accept": "स्वीकार",
+      "end": "कॉल समाप्त",
+      "mute": "म्यूट",
+      "unmute": "अनम्यूट",
+      "cameraOn": "कैमरा बंद",
+      "cameraOff": "कैमरा चालू",
+      "invite": "दोस्त को आमंत्रित करें",
+      "searchFriends": "जोड़ने के लिए दोस्त खोजें...",
+      "noFriendsFound": "कोई दोस्त नहीं मिला",
+      "participants": "{count, plural, one {# प्रतिभागी} other {# प्रतिभागी}}",
+      "you": "आप",
+      "callOverlay": "कॉल ओवरले",
+      "replying": "जवाब दे रहे हैं",
+      "reply": "जवाब",
+      "emoji": "इमोजी",
+      "callButton": "कॉल"
+    }
   }
 }
