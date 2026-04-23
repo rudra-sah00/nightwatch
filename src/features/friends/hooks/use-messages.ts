@@ -5,7 +5,6 @@ import {
   getConversations,
   getFriends,
   getMessages,
-  invalidateFriendsCache,
   markAsRead,
   sendMessage,
 } from '@/features/friends/api';
@@ -55,9 +54,17 @@ export function useConversations() {
   useEffect(() => {
     if (!socket) return;
 
-    const onNewMessage = () => {
-      invalidateFriendsCache();
-      fetchConversations();
+    const onNewMessage = (data: { senderId: string; content: string }) => {
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.friendId === data.senderId);
+        if (idx === -1) return prev;
+        const updated = {
+          ...prev[idx],
+          lastMessage: data.content,
+          unreadCount: prev[idx].unreadCount + 1,
+        };
+        return [updated, ...prev.filter((_, i) => i !== idx)];
+      });
     };
 
     const onStatusChange = (data: { userId: string; isOnline: boolean }) => {
@@ -68,9 +75,12 @@ export function useConversations() {
       );
     };
 
-    const onRead = () => {
-      invalidateFriendsCache();
-      fetchConversations();
+    const onRead = (data: { friendId: string }) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.friendId === data.friendId ? { ...c, unreadCount: 0 } : c,
+        ),
+      );
     };
 
     socket.on('message:new', onNewMessage);
@@ -82,7 +92,7 @@ export function useConversations() {
       socket.off('message:read', onRead);
       socket.off('friend:status', onStatusChange);
     };
-  }, [socket, fetchConversations]);
+  }, [socket]);
 
   const clearUnread = useCallback((friendId: string) => {
     setConversations((prev) =>
@@ -147,21 +157,31 @@ export function useMessageThread(friendId: string | null) {
     }
   }, [friendId, nextCursor, isLoadingMore]);
 
-  // Send message
+  // Send message — optimistic append
   const send = useCallback(
     async (content: string, replyToId?: string) => {
       if (!friendId || !content.trim() || isSending) return;
 
+      const trimmed = content.trim();
+      const optimisticId = `tmp-${Date.now()}`;
+
+      setMessages((prev) => [
+        {
+          id: optimisticId,
+          senderId: '',
+          receiverId: friendId,
+          content: trimmed,
+          replyToId: replyToId ?? null,
+          readAt: null,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
       setIsSending(true);
       try {
-        await sendMessage(friendId, content.trim(), replyToId);
-        // Optimistic: refetch to get the server-assigned ID
-        const data = await getMessages(friendId, undefined, 50);
-        setMessages(data.messages);
-        setNextCursor(data.nextCursor);
-        invalidateFriendsCache();
+        await sendMessage(friendId, trimmed, replyToId);
       } catch {
-        // Non-fatal
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       } finally {
         setIsSending(false);
       }

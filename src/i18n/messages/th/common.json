@@ -262,6 +262,27 @@
     "requestReceived": "ได้รับ",
     "blockedLabel": "ถูกบล็อก",
     "unblockLabel": "ปลดบล็อก",
-    "searchFriends": "ค้นหาเพื่อน..."
+    "searchFriends": "ค้นหาเพื่อน...",
+    "call": {
+      "incoming": "สายเรียกเข้า...",
+      "outgoing": "กำลังโทร...",
+      "decline": "ปฏิเสธ",
+      "accept": "รับสาย",
+      "end": "วางสาย",
+      "mute": "ปิดเสียง",
+      "unmute": "เปิดเสียง",
+      "cameraOn": "ปิดกล้อง",
+      "cameraOff": "เปิดกล้อง",
+      "invite": "เชิญเพื่อน",
+      "searchFriends": "ค้นหาเพื่อนเพื่อเพิ่ม...",
+      "noFriendsFound": "ไม่พบเพื่อน",
+      "participants": "{count, plural, other {ผู้เข้าร่วม # คน}}",
+      "you": "คุณ",
+      "callOverlay": "หน้าต่างสาย",
+      "replying": "กำลังตอบ",
+      "reply": "ตอบ",
+      "emoji": "อิโมจิ",
+      "callButton": "โทร"
+    }
   }
 }

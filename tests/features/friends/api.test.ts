@@ -3,17 +3,20 @@ import {
   acceptFriendRequest,
   blockUser,
   cancelFriendRequest,
+  getBlockedUsers,
   getConversations,
   getFriends,
   getMessages,
   getPendingRequests,
   getSentRequests,
+  invalidateFriendsCache,
   markAsRead,
   rejectFriendRequest,
   removeFriend,
   searchUsers,
   sendFriendRequest,
   sendMessage,
+  unblockUser,
 } from '@/features/friends/api';
 import { apiFetch } from '@/lib/fetch';
 
@@ -328,6 +331,76 @@ describe('Friends API', () => {
         '/api/messages/read',
         expect.any(Object),
       );
+    });
+  });
+
+  describe('unblockUser', () => {
+    it('unblocks with userId', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({});
+      await unblockUser('u1');
+      expect(apiFetch).toHaveBeenCalledWith('/api/friends/unblock', {
+        method: 'POST',
+        body: JSON.stringify({ userId: 'u1' }),
+      });
+    });
+  });
+
+  describe('getBlockedUsers', () => {
+    it('fetches blocked users list', async () => {
+      const blocked = [
+        {
+          id: 'b1',
+          userId: 'u1',
+          name: 'Bob',
+          username: null,
+          profilePhoto: null,
+        },
+      ];
+      vi.mocked(apiFetch).mockResolvedValueOnce({ data: blocked });
+      const result = await getBlockedUsers();
+      expect(apiFetch).toHaveBeenCalledWith('/api/friends/blocked', undefined);
+      expect(result).toEqual(blocked);
+    });
+
+    it('passes request options through', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({ data: [] });
+      const signal = new AbortController().signal;
+      await getBlockedUsers({ signal });
+      expect(apiFetch).toHaveBeenCalledWith('/api/friends/blocked', { signal });
+    });
+  });
+
+  describe('invalidateFriendsCache', () => {
+    it('causes next getFriends call to re-fetch', async () => {
+      // Populate cache
+      vi.mocked(apiFetch).mockResolvedValueOnce({ data: [{ id: '1' }] });
+      await getFriends();
+      const callCount = vi.mocked(apiFetch).mock.calls.length;
+
+      // Invalidate
+      invalidateFriendsCache();
+
+      // Next call should hit API again
+      vi.mocked(apiFetch).mockResolvedValueOnce({ data: [{ id: '2' }] });
+      const result = await getFriends();
+      expect(vi.mocked(apiFetch).mock.calls.length).toBeGreaterThan(callCount);
+      expect(result).toEqual([{ id: '2' }]);
+    });
+  });
+
+  describe('getFriends caching', () => {
+    it('returns cached data on second call within TTL', async () => {
+      // Invalidate first to ensure clean state
+      invalidateFriendsCache();
+
+      vi.mocked(apiFetch).mockResolvedValueOnce({ data: [{ id: 'cached' }] });
+      const first = await getFriends();
+      const callCount = vi.mocked(apiFetch).mock.calls.length;
+
+      // Second call should use cache — no new API call
+      const second = await getFriends();
+      expect(vi.mocked(apiFetch).mock.calls.length).toBe(callCount);
+      expect(second).toEqual(first);
     });
   });
 });

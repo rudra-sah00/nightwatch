@@ -262,6 +262,27 @@
     "requestReceived": "Входящий",
     "blockedLabel": "Заблокированные",
     "unblockLabel": "Разблокировать",
-    "searchFriends": "Поиск друзей..."
+    "searchFriends": "Поиск друзей...",
+    "call": {
+      "incoming": "Входящий звонок...",
+      "outgoing": "Вызов...",
+      "decline": "Отклонить",
+      "accept": "Принять",
+      "end": "Завершить",
+      "mute": "Выкл. микрофон",
+      "unmute": "Вкл. микрофон",
+      "cameraOn": "Выкл. камеру",
+      "cameraOff": "Вкл. камеру",
+      "invite": "Пригласить друга",
+      "searchFriends": "Найти друзей для добавления...",
+      "noFriendsFound": "Друзья не найдены",
+      "participants": "{count, plural, one {# участник} few {# участника} other {# участников}}",
+      "you": "Вы",
+      "callOverlay": "Окно звонка",
+      "replying": "Ответ",
+      "reply": "Ответить",
+      "emoji": "Эмодзи",
+      "callButton": "Позвонить"
+    }
   }
 }

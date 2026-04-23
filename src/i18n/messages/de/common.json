@@ -262,6 +262,27 @@
     "requestReceived": "Eingehend",
     "blockedLabel": "Blockiert",
     "unblockLabel": "Entsperren",
-    "searchFriends": "Freunde suchen..."
+    "searchFriends": "Freunde suchen...",
+    "call": {
+      "incoming": "Eingehender Anruf...",
+      "outgoing": "Anruf läuft...",
+      "decline": "Ablehnen",
+      "accept": "Annehmen",
+      "end": "Auflegen",
+      "mute": "Stumm",
+      "unmute": "Laut",
+      "cameraOn": "Kamera aus",
+      "cameraOff": "Kamera an",
+      "invite": "Freund einladen",
+      "searchFriends": "Freunde zum Hinzufügen suchen...",
+      "noFriendsFound": "Keine Freunde gefunden",
+      "participants": "{count, plural, one {# Teilnehmer} other {# Teilnehmer}}",
+      "you": "Du",
+      "callOverlay": "Anruf-Overlay",
+      "replying": "Antworten",
+      "reply": "Antworten",
+      "emoji": "Emoji",
+      "callButton": "Anrufen"
+    }
   }
 }
