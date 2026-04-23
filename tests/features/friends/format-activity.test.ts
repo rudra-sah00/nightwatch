@@ -10,6 +10,7 @@ describe('formatActivity', () => {
         season: null,
         episode: null,
         episodeTitle: null,
+        posterUrl: null,
       }),
     ).toBe('Watching Inception');
   });
@@ -22,6 +23,7 @@ describe('formatActivity', () => {
         season: 2,
         episode: 3,
         episodeTitle: 'Bit by a Dead Bee',
+        posterUrl: 'https://example.com/poster.jpg',
       }),
     ).toBe('Watching Breaking Bad S2E3');
   });
@@ -34,6 +36,7 @@ describe('formatActivity', () => {
         season: null,
         episode: null,
         episodeTitle: null,
+        posterUrl: null,
       }),
     ).toBe('Watching Stranger Things');
   });
@@ -46,6 +49,7 @@ describe('formatActivity', () => {
         season: null,
         episode: null,
         episodeTitle: null,
+        posterUrl: null,
       }),
     ).toBe('Watching Live Event');
   });

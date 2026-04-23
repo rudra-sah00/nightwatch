@@ -4,6 +4,7 @@ export interface FriendActivity {
   season: number | null;
   episode: number | null;
   episodeTitle: string | null;
+  posterUrl: string | null;
 }
 
 export interface FriendProfile {
