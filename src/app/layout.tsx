@@ -32,9 +32,9 @@ export const metadata: Metadata = {
   description: 'Your personal streaming companion',
   manifest: '/manifest.json',
   icons: {
-    icon: '/play.ico',
-    shortcut: '/play.ico',
-    apple: '/play.ico',
+    icon: '/logo-ico.png',
+    shortcut: '/logo-ico.png',
+    apple: '/logo-ico.png',
   },
 };
 

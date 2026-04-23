@@ -6,7 +6,7 @@ This document outlines the client-side API architecture in Nightwatch, governed 
 
 The Next.js application communicates across several data planes:
 
-1. **Watch-Rudra Backend**: Our primary monolithic Node.js/Express server handling the primary Database features.
+1. **Nightwatch Backend**: Our primary monolithic Node.js/Express server handling the primary Database features.
 2. **Agora (RTC)**: Real-time Audio/Video streams.
 3. **Cloudflare Workers (Optional)**: Proxies for specific HLS/m3u8 CDN streams to circumvent scraping attacks.
 
