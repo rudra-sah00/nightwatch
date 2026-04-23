@@ -21,10 +21,6 @@ function createSplash() {
     },
   });
 
-  const iconPath = require('node:path')
-    .join(__dirname, '../build/icon.png')
-    .replace(/\\/g, '/');
-
   const html = `
     <!DOCTYPE html>
     <html>
@@ -36,6 +32,8 @@ function createSplash() {
             --text-color: #1a1a1a;
             --progress-bg: white;
             --progress-fill: #ffcc00;
+            --shimmer-base: #1a1a1a;
+            --shimmer-highlight: rgba(26,26,26,0.15);
           }
           @media (prefers-color-scheme: dark) {
             :root {
@@ -44,8 +42,9 @@ function createSplash() {
               --text-color: #ffffff;
               --progress-bg: #0a0a0a;
               --progress-fill: #ffffff;
+              --shimmer-base: #ffffff;
+              --shimmer-highlight: rgba(255,255,255,0.15);
             }
-            .splash-logo img { filter: brightness(0) invert(1); }
           }
           body {
             margin: 0; padding: 0; background: transparent; overflow: hidden;
@@ -58,53 +57,23 @@ function createSplash() {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; color: var(--text-color); text-align: center;
           }
-          .splash-logo {
-            width: 80px; height: 80px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 16px; background-color: transparent;
-          }
-          .splash-logo img {
-            width: 100%; height: 100%; border-radius: 12px; object-fit: contain;
-          }
-
-          /* Brand animation */
-          .brand-wrap {
-            display: flex; align-items: center; justify-content: center;
+          .brand {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            font-size: 24px; font-weight: 900; font-style: italic;
+            font-size: 28px; font-weight: 900; font-style: italic;
             text-transform: uppercase; letter-spacing: -0.05em;
-            margin-bottom: 2px; overflow: hidden;
+            margin-bottom: 4px; padding-right: 0.15em;
+            -webkit-text-stroke: 1.5px var(--text-color);
+            color: transparent;
+            background: linear-gradient(110deg, transparent 35%, var(--shimmer-highlight) 50%, transparent 65%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 2s ease-in-out infinite;
           }
-          .brand-n {
-            display: inline-block;
-            animation: n-drop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-                       n-bounce 0.5s 0.7s ease forwards;
-            transform: translateY(-80px);
-            opacity: 0;
+          @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
           }
-          .brand-rest {
-            display: inline-block;
-            max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0;
-            animation: rest-reveal 0.5s 1.4s ease-out forwards;
-          }
-          @keyframes n-drop {
-            0% { transform: translateY(-80px); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translateY(0); opacity: 1; }
-          }
-          @keyframes n-bounce {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(-14px); }
-            55% { transform: translateY(0); }
-            75% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
-          }
-          @keyframes rest-reveal {
-            0% { max-width: 0; opacity: 0; }
-            30% { opacity: 1; }
-            100% { max-width: 200px; opacity: 1; }
-          }
-
           .version {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             font-size: 10px; font-weight: 700;
@@ -131,10 +100,7 @@ function createSplash() {
       </head>
       <body>
         <div class="container">
-          <div class="splash-logo"><img src="file://${iconPath}" alt="Logo" /></div>
-          <div class="brand-wrap">
-            <span class="brand-n">N</span><span class="brand-rest">IGHTWATCH</span>
-          </div>
+          <div class="brand">NIGHTWATCH</div>
           <div id="version" class="version">v${getAppVersion()}</div>
           <div id="status" class="status">STARTING...</div>
           <div class="progress-bar-bg">
