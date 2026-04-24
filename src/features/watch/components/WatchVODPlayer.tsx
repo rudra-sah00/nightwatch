@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useEffect } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { useSocket } from '@/providers/socket-provider';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player } from '../player';
 import type { VideoMetadata } from '../player/context/types';
@@ -88,6 +89,23 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
       });
     }
   }, [props.metadata]);
+
+  // Broadcast VOD activity to friends (set once, clear on unmount)
+  const { socket } = useSocket();
+  useEffect(() => {
+    if (!socket?.connected) return;
+    socket.emit('watch:set_activity', {
+      type: props.metadata.type ?? 'movie',
+      title: props.metadata.title,
+      season: props.metadata.season ?? null,
+      episode: props.metadata.episode ?? null,
+      episodeTitle: props.metadata.episodeTitle ?? null,
+      posterUrl: props.metadata.posterUrl ?? null,
+    });
+    return () => {
+      socket.emit('watch:clear_activity');
+    };
+  }, [socket, props.metadata]);
 
   const mobileHeader = (
     <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">

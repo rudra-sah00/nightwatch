@@ -2,7 +2,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import { Player } from '../player';
@@ -49,24 +49,17 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     }
   }, [props.metadata]);
 
-  // Broadcast live activity to friends
+  // Broadcast live activity to friends (set once, clear on unmount)
   const { socket } = useSocket();
-  const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (!socket?.connected) return;
-    const payload = {
+    socket.emit('watch:set_activity', {
       type: 'live',
       title: props.metadata.title,
       posterUrl: props.metadata.posterUrl ?? null,
-    };
-    socket.emit('watch:set_activity', payload);
-    // Refresh every 45s to keep the activity alive (TTL is 60s)
-    activityIntervalRef.current = setInterval(() => {
-      socket.emit('watch:set_activity', payload);
-    }, 45_000);
+    });
     return () => {
-      if (activityIntervalRef.current)
-        clearInterval(activityIntervalRef.current);
+      socket.emit('watch:clear_activity');
     };
   }, [socket, props.metadata.title, props.metadata.posterUrl]);
 
