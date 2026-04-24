@@ -685,6 +685,14 @@ const startElectronApp = async () => {
 // Lifecycle Start hook
 app.whenReady().then(startElectronApp);
 
+// Prevent app from quitting when all windows are closed (tray keeps it alive)
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    // On Windows/Linux, keep the app running in the tray
+    // Users can quit via tray → "Quit Now"
+  }
+});
+
 // Re-route additional instance attempts or windows URL arguments cleanly
 windows.setupWindows(triggerDeepLink, () => AppWindow.getInstance());
 linux.setupLinux(triggerDeepLink, () => AppWindow.getInstance());

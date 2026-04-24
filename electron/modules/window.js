@@ -63,6 +63,7 @@ class AppWindow {
       autoHideMenuBar: true,
       minWidth: 800,
       minHeight: 540,
+      icon: require('node:path').join(__dirname, '../build/icon.png'),
 
       // Frameless Window Customizations (macOS Traffic Lights + Win11 Snap Layouts)
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', // 'hiddenInset' pushes macOS buttons slightly down for better centering, while Win uses 'hidden' with overlays.
@@ -324,20 +325,16 @@ class AppWindow {
       this.mainWindow.webContents.send('window-focus');
     });
 
-    // Minimize to tray on close for macOS (standard behavior), but quit on Windows/Linux
+    // Minimize to tray on close for all platforms (standard behavior)
     this.mainWindow.on('close', (event) => {
       if (!this.isQuitting) {
-        if (process.platform === 'darwin') {
-          event.preventDefault();
-          this.mainWindow.hide();
-          // Clear Discord presence when hiding to tray
-          try {
-            const discord = require('./discord.js');
-            discord.destroy();
-          } catch (_e) {}
-        } else {
-          // Allow the window to close normally, which triggers window-all-closed and app.quit()
-        }
+        event.preventDefault();
+        this.mainWindow.hide();
+        // Clear Discord presence when hiding to tray
+        try {
+          const discord = require('./discord.js');
+          discord.destroy();
+        } catch (_e) {}
       }
     });
 
