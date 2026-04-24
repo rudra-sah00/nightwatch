@@ -322,7 +322,24 @@ export function useFullscreen({
         return;
       }
 
-      // Desktop: use container fullscreen so custom controls remain visible.
+      // Desktop Electron: use native BrowserWindow fullscreen
+      if (
+        typeof window !== 'undefined' &&
+        (
+          window as unknown as {
+            electronAPI?: { toggleFullscreen?: () => Promise<void> };
+          }
+        ).electronAPI?.toggleFullscreen
+      ) {
+        await (
+          window as unknown as {
+            electronAPI: { toggleFullscreen: () => Promise<void> };
+          }
+        ).electronAPI.toggleFullscreen();
+        return;
+      }
+
+      // Browser: use container fullscreen so custom controls remain visible.
       const target = containerRef.current || document.documentElement;
       const entered = await requestElementFullscreen(target);
       if (!entered) {
@@ -409,6 +426,23 @@ export function useFullscreen({
   }, [dispatch, isMobile, unlockDocumentScroll, videoRef, t]);
 
   const toggleFullscreen = useCallback(async () => {
+    // Electron: delegate to native BrowserWindow fullscreen toggle
+    if (
+      typeof window !== 'undefined' &&
+      (
+        window as unknown as {
+          electronAPI?: { toggleFullscreen?: () => Promise<void> };
+        }
+      ).electronAPI?.toggleFullscreen
+    ) {
+      await (
+        window as unknown as {
+          electronAPI: { toggleFullscreen: () => Promise<void> };
+        }
+      ).electronAPI.toggleFullscreen();
+      return;
+    }
+
     const doc = document as DocumentWithWebkit;
     const video = videoRef?.current as VideoElementWithWebkit | undefined;
     const isNativeFullscreen =

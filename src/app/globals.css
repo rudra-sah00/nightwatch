@@ -682,6 +682,15 @@
     display: none !important;
   }
 
+  /* Keep the PiP header overlay visible */
+  body.is-desktop-pip .pip-header-overlay {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
+  body.is-desktop-pip .pip-header-overlay * {
+    pointer-events: auto !important;
+  }
+
   body.is-desktop-pip main,
   body.is-desktop-pip #root,
   body.is-desktop-pip .player-container,

@@ -130,39 +130,50 @@ The sidebar also includes:
 
 ### How It Works
 
-1. **Backend broadcasts** `friend:activity` when a user starts/stops/changes what they're watching
-2. **Frontend listens** in `use-friends.ts` and `use-messages.ts` — updates the `activity` field on `FriendProfile` / `ConversationPreview`
-3. **Right sidebar** shows activity text below the friend's name (e.g., "Watching Breaking Bad S2E3")
-4. **Chat header** shows activity instead of "online" when available (priority: typing > activity > online > offline)
-5. **Broadcast only on change** — not every heartbeat. Friends get 1 event on start, 1 on content switch, 1 on stop
+1. **Frontend emits** `watch:set_activity` once when playback starts (both VOD and live)
+2. **Frontend emits** `watch:clear_activity` on component unmount (navigation away)
+3. **Backend broadcasts** `friend:activity` to all online friends on set/clear
+4. **Right sidebar** shows activity text below the friend's name (e.g., "Watching Breaking Bad S2E3")
+5. **Chat header** shows activity instead of "online" when available (priority: typing > activity > online > offline)
+6. **Broadcast only on change** — deduplication built in. Same activity re-emitted only refreshes TTL
 
 ### Data Structure
 
 ```ts
 interface FriendActivity {
-  type: string;          // 'movie' | 'series' | 'livestream'
+  type: string;          // 'movie' | 'series' | 'live'
   title: string;         // Content title
-  season: number | null; // Series season (null for movies)
-  episode: number | null;// Series episode (null for movies)
+  season: number | null; // Series season (null for movies/live)
+  episode: number | null;// Series episode (null for movies/live)
   episodeTitle: string | null;
+  posterUrl: string | null;
 }
 ```
+
+### Socket Events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `watch:set_activity` | Client → Server | `{ type, title, season?, episode?, episodeTitle?, posterUrl? }` |
+| `watch:clear_activity` | Client → Server | (none) |
+| `friend:activity` | Server → Client | `{ userId, activity }` (activity is null on clear) |
 
 ### Backend Requirements
 
 | Action | Redis | Socket Broadcast |
 |--------|-------|-----------------|
-| User starts watching | `SET user:activity:{userId}` (60s TTL) | `friend:activity { userId, activity }` to online friends |
+| User starts watching | `SET user:activity:{userId}` (300s TTL) | `friend:activity { userId, activity }` to online friends |
 | Content changes | Update Redis key + refresh TTL | Broadcast only if activity differs from current |
 | User stops watching | `DEL user:activity:{userId}` | `friend:activity { userId, activity: null }` |
-| Socket disconnect | `DEL user:activity:{userId}` | `friend:activity { userId, activity: null }` |
+| Stream ends (stream:stop) | `DEL user:activity:{userId}` | `friend:activity { userId, activity: null }` |
+| Socket disconnect | `DEL user:activity:{userId}` (via friends handler) | Offline broadcast |
 | `GET /api/friends` | `MGET user:activity:{friendId}` | Include `activity` field in response |
 
 ### Display Format
 
 - Movie: "Watching Inception"
 - Series: "Watching Breaking Bad S2E3"
-- Livestream: "Watching Live Event"
+- Live: "Watching Live: IPL 2026"
 
 Formatted by `formatActivity()` utility in `src/features/friends/format-activity.ts`.
 

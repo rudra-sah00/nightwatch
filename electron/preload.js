@@ -86,6 +86,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('window-focus', subscription);
   },
 
+  // Toggle native OS fullscreen on the BrowserWindow
+  toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
+
   // Fired when the native OS fullscreen state changes (enter or leave).
   // React uses this to guard blur→PiP so a fullscreen transition never
   // accidentally triggers the mini-player.

@@ -94,7 +94,11 @@ export function useFriends() {
 
   const accept = useCallback(
     async (friendshipId: string) => {
-      await acceptFriendRequest(friendshipId);
+      try {
+        await acceptFriendRequest(friendshipId);
+      } catch {
+        // Request already processed or expired — just refresh the list
+      }
       invalidateFriendsCache();
       fetchAll();
     },
@@ -103,7 +107,11 @@ export function useFriends() {
 
   const reject = useCallback(
     async (friendshipId: string) => {
-      await rejectFriendRequest(friendshipId);
+      try {
+        await rejectFriendRequest(friendshipId);
+      } catch {
+        // Request already processed or expired
+      }
       invalidateFriendsCache();
       fetchAll();
     },
@@ -112,7 +120,11 @@ export function useFriends() {
 
   const cancel = useCallback(
     async (friendshipId: string) => {
-      await cancelFriendRequest(friendshipId);
+      try {
+        await cancelFriendRequest(friendshipId);
+      } catch {
+        // Already cancelled or expired
+      }
       invalidateFriendsCache();
       fetchAll();
     },

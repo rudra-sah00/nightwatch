@@ -624,6 +624,11 @@ const startElectronApp = async () => {
   // the ASAR so React sees the correct version after a hot update.
   ipcMain.handle('get-app-version', () => getAppVersion());
 
+  ipcMain.handle('toggle-fullscreen', () => {
+    const win = AppWindow.getInstance();
+    if (win) win.setFullScreen(!win.isFullScreen());
+  });
+
   // --- NATIVE THEMING ---
   const { nativeTheme } = require('electron');
   ipcMain.on('set-native-theme', (_event, theme) => {

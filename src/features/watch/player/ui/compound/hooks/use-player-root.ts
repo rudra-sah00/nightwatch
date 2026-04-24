@@ -421,6 +421,7 @@ export function usePlayerRoot({
       return;
     }
     const unsubscribe = desktopBridge.onWindowFullscreenChanged((isFs) => {
+      dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFs });
       if (isFs) {
         // Entering fullscreen — clear any pending grace timer and mark as fullscreen.
         if (fullscreenExitGraceRef.current) {
