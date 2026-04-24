@@ -52,14 +52,20 @@ export function MessagesClient() {
     <div className="flex gap-4 h-[calc(100vh-8rem)] w-full p-4">
       <ConversationList
         selected={selectedFriend}
-        onSelect={setSelectedFriend}
+        onSelect={(conv) => {
+          setSelectedFriend(conv);
+          router.replace(`/messages?f=${conv.friendId}`, { scroll: false });
+        }}
         className={`${selectedFriend ? 'hidden md:flex' : 'flex'}`}
       />
 
       {selectedFriend ? (
         <MessageThread
           friend={selectedFriend}
-          onBack={() => setSelectedFriend(null)}
+          onBack={() => {
+            setSelectedFriend(null);
+            router.replace('/messages', { scroll: false });
+          }}
         />
       ) : (
         <div className="hidden md:flex flex-1 items-center justify-center border-[3px] border-border rounded-xl bg-background">
