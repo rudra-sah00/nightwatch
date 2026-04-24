@@ -13,6 +13,7 @@ import type {
   FriendActivity,
   Message,
 } from '@/features/friends/types';
+import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 
 export function useConversations() {
@@ -128,6 +129,7 @@ export function useMessageThread(friendId: string | null) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { socket } = useSocket();
+  const { user } = useAuth();
   const friendIdRef = useRef(friendId);
 
   friendIdRef.current = friendId;
@@ -186,7 +188,7 @@ export function useMessageThread(friendId: string | null) {
       setMessages((prev) => [
         {
           id: optimisticId,
-          senderId: '',
+          senderId: user?.id ?? '',
           receiverId: friendId,
           content: trimmed,
           replyToId: replyToId ?? null,
@@ -204,7 +206,7 @@ export function useMessageThread(friendId: string | null) {
         setIsSending(false);
       }
     },
-    [friendId, isSending],
+    [friendId, isSending, user?.id],
   );
 
   // Real-time incoming messages
