@@ -26,6 +26,8 @@ export function useLoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  const captchaRef = useRef<{ reset: () => void } | null>(null);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -101,6 +103,9 @@ export function useLoginForm() {
         }
         return { success: true };
       } catch (err: unknown) {
+        setCaptchaToken(null);
+        captchaRef.current?.reset();
+
         if (
           err &&
           typeof err === 'object' &&
@@ -144,6 +149,9 @@ export function useLoginForm() {
       setStep('forgot_success');
       return { success: true };
     } catch (err: unknown) {
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
+
       const apiError = err as ApiError;
       if (apiError.code === 'VALIDATION_ERROR' && apiError.details) {
         const errors: Record<string, string> = {};
@@ -278,6 +286,7 @@ export function useLoginForm() {
     error,
     captchaToken,
     setCaptchaToken,
+    captchaRef,
     formData,
     otp,
     setOtp,

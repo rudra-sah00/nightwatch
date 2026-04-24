@@ -24,6 +24,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
     action,
     captchaToken,
     setCaptchaToken,
+    captchaRef,
     otp,
     setOtp,
     handleOtpSubmit,
@@ -188,6 +189,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               value={captchaToken || ''}
             />
             <Captcha
+              ref={captchaRef}
               onVerify={setCaptchaToken}
               onError={() => setCaptchaToken(null)}
               onExpire={() => setCaptchaToken(null)}
