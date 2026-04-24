@@ -330,6 +330,11 @@ class AppWindow {
         if (process.platform === 'darwin') {
           event.preventDefault();
           this.mainWindow.hide();
+          // Clear Discord presence when hiding to tray
+          try {
+            const discord = require('./discord.js');
+            discord.destroy();
+          } catch (_e) {}
         } else {
           // Allow the window to close normally, which triggers window-all-closed and app.quit()
         }

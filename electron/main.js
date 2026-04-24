@@ -341,6 +341,10 @@ const startElectronApp = async () => {
       // may have changed while the window was hidden, so restoring stale coords
       // would snap the window to the wrong position or off-screen.
       prePipBounds = null;
+      // Reconnect Discord presence when window is restored
+      try {
+        discordLogic.connect();
+      } catch (_e) {}
     }
   });
 
