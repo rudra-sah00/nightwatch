@@ -37,7 +37,6 @@ export function MessagesClient() {
             unreadCount: 0,
             activity: match.activity ?? null,
           });
-          router.replace('/messages', { scroll: false });
         }
       } catch {
         // ignore
@@ -46,7 +45,7 @@ export function MessagesClient() {
     return () => {
       cancelled = true;
     };
-  }, [friendParam, router]);
+  }, [friendParam]);
 
   return (
     <div className="flex gap-4 h-[calc(100vh-8rem)] w-full p-4">
