@@ -1,15 +1,7 @@
-import dynamic from 'next/dynamic';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
-
-const CallOverlay = dynamic(
-  () =>
-    import('@/features/friends/components/CallOverlay').then(
-      (m) => m.CallOverlay,
-    ),
-  { ssr: false },
-);
 
 export default async function ProtectedLayout({
   children,
@@ -19,7 +11,6 @@ export default async function ProtectedLayout({
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refreshToken');
 
-  // If no refresh token is present, user is definitely not authenticated
   if (!refreshToken) {
     redirect('/login');
   }
