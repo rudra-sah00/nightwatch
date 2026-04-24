@@ -2,8 +2,9 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { useSocket } from '@/providers/socket-provider';
 import { Player } from '../player';
 import { usePlayerContext } from '../player/context/PlayerContext';
 import type { VideoMetadata } from '../player/context/types';
@@ -47,6 +48,27 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       });
     }
   }, [props.metadata]);
+
+  // Broadcast live activity to friends
+  const { socket } = useSocket();
+  const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!socket?.connected) return;
+    const payload = {
+      type: 'live',
+      title: props.metadata.title,
+      posterUrl: props.metadata.posterUrl ?? null,
+    };
+    socket.emit('watch:set_activity', payload);
+    // Refresh every 45s to keep the activity alive (TTL is 60s)
+    activityIntervalRef.current = setInterval(() => {
+      socket.emit('watch:set_activity', payload);
+    }, 45_000);
+    return () => {
+      if (activityIntervalRef.current)
+        clearInterval(activityIntervalRef.current);
+    };
+  }, [socket, props.metadata.title, props.metadata.posterUrl]);
 
   const mobileHeader = (
     <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
