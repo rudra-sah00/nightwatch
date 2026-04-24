@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@electron/asar": "^4.2.0",
     "@electron/fuses": "^2.1.1",
     "@electron/rebuild": "^4.0.3",
     "@playwright/test": "^1.58.2",
