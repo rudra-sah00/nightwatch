@@ -1,5 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useOfflineContentDetail } from './use-offline-content-detail';
 
 interface ContentDetailModalOptions {
@@ -23,6 +24,13 @@ export function useOfflineContentDetailModal({
   onClose,
 }: ContentDetailModalOptions) {
   const _router = useRouter();
+  const { setSidebarsDisabled } = useSidebar();
+
+  // Disable sidebars while modal is open
+  useEffect(() => {
+    setSidebarsDisabled(true);
+    return () => setSidebarsDisabled(false);
+  }, [setSidebarsDisabled]);
 
   const {
     show,

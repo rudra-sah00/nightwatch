@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useWatchParty } from '@/features/watch-party/room/hooks/useWatchParty';
 import { generateRoomId } from '@/features/watch-party/room/utils';
 import { ContentType, type Episode } from '../types';
@@ -50,6 +51,13 @@ export function useContentDetailModal({
   } = useContentDetail({ contentId, initialContext, fromContinueWatching });
 
   const { createRoom, isLoading: isCreatingParty } = useWatchParty();
+  const { setSidebarsDisabled } = useSidebar();
+
+  // Disable sidebars while modal is open
+  useEffect(() => {
+    setSidebarsDisabled(true);
+    return () => setSidebarsDisabled(false);
+  }, [setSidebarsDisabled]);
 
   const [imageError, setImageError] = useState(false);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);

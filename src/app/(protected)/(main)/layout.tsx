@@ -26,6 +26,8 @@ type SidebarContextType = {
   rightOpen: boolean;
   setLeftOpen: (open: boolean) => void;
   setRightOpen: (open: boolean) => void;
+  sidebarsDisabled: boolean;
+  setSidebarsDisabled: (disabled: boolean) => void;
 };
 
 const SidebarContext = createContext<SidebarContextType>({
@@ -33,6 +35,8 @@ const SidebarContext = createContext<SidebarContextType>({
   rightOpen: false,
   setLeftOpen: () => {},
   setRightOpen: () => {},
+  sidebarsDisabled: false,
+  setSidebarsDisabled: () => {},
 });
 
 export const useSidebar = () => useContext(SidebarContext);
@@ -50,10 +54,29 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const t = useTranslations('common');
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
+  const [sidebarsDisabled, _setSidebarsDisabled] = useState(false);
+  const disabledRef = useRef(false);
+  const cooldownRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const setSidebarsDisabled = useCallback((disabled: boolean) => {
+    disabledRef.current = disabled;
+    _setSidebarsDisabled(disabled);
+    if (disabled) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    } else {
+      // Brief cooldown so the next mousemove doesn't immediately open a sidebar
+      cooldownRef.current = true;
+      setTimeout(() => {
+        cooldownRef.current = false;
+      }, 300);
+    }
+  }, []);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      if (disabledRef.current || cooldownRef.current) return;
       const container = containerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
@@ -103,7 +126,14 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarContext.Provider
-      value={{ leftOpen, rightOpen, setLeftOpen, setRightOpen }}
+      value={{
+        leftOpen,
+        rightOpen,
+        setLeftOpen,
+        setRightOpen,
+        sidebarsDisabled,
+        setSidebarsDisabled,
+      }}
     >
       <ServerProvider defaultServer={user?.preferredServer}>
         <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">

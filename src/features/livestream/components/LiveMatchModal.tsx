@@ -3,6 +3,7 @@
 import { Loader2, Play, Users, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
+import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import type { LiveMatch } from '../types';
@@ -110,6 +111,13 @@ function LiveMatchModalContent({
   const dialogRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('live');
   const format = useFormatter();
+  const { setSidebarsDisabled } = useSidebar();
+
+  // Disable sidebars while modal is open
+  useEffect(() => {
+    setSidebarsDisabled(true);
+    return () => setSidebarsDisabled(false);
+  }, [setSidebarsDisabled]);
 
   // Escape key to close + auto-focus on open
   useEffect(() => {
