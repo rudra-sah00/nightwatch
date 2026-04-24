@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@electron/fuses": "^2.1.1",
     "@electron/rebuild": "^4.0.3",
     "@playwright/test": "^1.58.2",
     "@serwist/cli": "^9.5.7",
@@ -102,6 +103,7 @@
     "electron-rebuild": "^3.2.9",
     "happy-dom": "^20.4.0",
     "husky": "^9.1.7",
+    "javascript-obfuscator": "^5.4.2",
     "jsdom": "26.0.0",
     "lint-staged": "^16.2.7",
     "postcss": "^8.5.9",
@@ -113,6 +115,9 @@
   },
   "main": "electron/main.js",
   "build": {
+    "afterPack": "./scripts/afterPack.cjs",
+    "afterSign": "./scripts/afterSign.cjs",
+    "asar": true,
     "files": [
       "electron/**/*",
       "package.json",
