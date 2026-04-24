@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.5.0](https://github.com/rudra-sah00/nightwatch/compare/v2.4.0...v2.5.0) (2026-04-24)
+
+
+### Features
+
+* activity hover card with thumbnail on friend row ([39069d7](https://github.com/rudra-sah00/nightwatch/commit/39069d70f7d6e56a8c077b6f78bd24160fc96680))
+* add JS obfuscation and Electron fuse hardening to desktop build ([78b9ac7](https://github.com/rudra-sah00/nightwatch/commit/78b9ac76a443d89a5b1be709ed51fab1104431e0))
+* friend activity status - show what friends are watching ([1bfb086](https://github.com/rudra-sah00/nightwatch/commit/1bfb0867b256dd78c2dac61f340e50de7d759e60))
+
+
+### Bug Fixes
+
+* activity hover card only triggers on name area, not entire row ([b665fc5](https://github.com/rudra-sah00/nightwatch/commit/b665fc50604d54827195c475038d56d628ac7435))
+* add icon.ico for NSIS installer/uninstaller icons ([c949634](https://github.com/rudra-sah00/nightwatch/commit/c949634127bfa217ac57637f97e2de083d591c77))
+* calls not received during watch/live - move CallProvider to protected layout ([3c39964](https://github.com/rudra-sah00/nightwatch/commit/3c399641ee794bcc46c01fe11ea349e1ca8c1bd1))
+* correct ASAR extract/repack path for obfuscation on all platforms ([cc6c607](https://github.com/rudra-sah00/nightwatch/commit/cc6c607ff02ef50e83a2cab9d0a0b68b797cc4a7))
+* deep-link was stripping ?f= param causing chat to close ([92990bc](https://github.com/rudra-sah00/nightwatch/commit/92990bcae626e3a18df2cea66622d578c42b3271))
+* destroy Discord RPC when window hides to tray on macOS ([8ec1f77](https://github.com/rudra-sah00/nightwatch/commit/8ec1f77ccd1104a63100d86dcd265b4cdde1950e))
+* disable sidebars when content modal is open ([3f065b8](https://github.com/rudra-sah00/nightwatch/commit/3f065b8bcd9fc6f7353a8a09989eb308d94f9b19))
+* live page dropdowns hidden behind hero - remove overflow-hidden ([0b3ffb6](https://github.com/rudra-sah00/nightwatch/commit/0b3ffb6a796ec642d4e22b5a128060f942b9f530))
+* remove dynamic import with ssr:false from server component ([261a391](https://github.com/rudra-sah00/nightwatch/commit/261a391fdb6d06b8edea60830e42e3880c52d6e4))
+* remove NSIS icon fields - PNG not supported, use defaults ([2b041b3](https://github.com/rudra-sah00/nightwatch/commit/2b041b31c52c0dbdd38d5e2108457561eba6a0d0))
+* reset captcha token on login/forgot-password errors to prevent stale token reuse ([9ab407e](https://github.com/rudra-sah00/nightwatch/commit/9ab407e7a51f574971012d36b9e4d8266e7cdda8))
+* sent messages appearing on wrong side - optimistic senderId was empty ([414bbdf](https://github.com/rudra-sah00/nightwatch/commit/414bbdf18713a72b3683a59db99e2917270d4bc3))
+* update URL when selecting conversation in messages page ([9f1fcc7](https://github.com/rudra-sah00/nightwatch/commit/9f1fcc77bef82288aeb093515c9267a3c54f0e13))
+
 ## [2.4.0](https://github.com/rudra-sah00/nightwatch/compare/v2.3.0...v2.4.0) (2026-04-23)
 
 
