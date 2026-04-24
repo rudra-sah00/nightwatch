@@ -132,6 +132,12 @@ class AppWindow {
     const PROD_URL = process.env.TEST_PROD
       ? 'http://localhost:3000'
       : 'https://nightwatch.in';
+    const PROD_URL_WWW = 'https://www.nightwatch.in';
+
+    const isInternalUrl = (url) =>
+      url.startsWith(isDev ? 'http://localhost' : PROD_URL) ||
+      url.startsWith(PROD_URL_WWW) ||
+      url.startsWith('nightwatch://');
 
     if (isDev) {
       // Async port probe — do not block window creation
@@ -149,12 +155,7 @@ class AppWindow {
 
     // Intercept window.open() / target="_blank" — open external links in default browser
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      const isInternal =
-        url.startsWith(isDev ? 'http://localhost' : PROD_URL) ||
-        url.startsWith('nightwatch://');
-
-      if (isInternal) {
-        // Navigate in the same window instead of opening a new one
+      if (isInternalUrl(url)) {
         this.mainWindow.loadURL(url);
       } else {
         shell.openExternal(url);
@@ -175,10 +176,7 @@ class AppWindow {
         return; // Allow the bridge file to load, skip external browser check
       }
 
-      if (
-        !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
-        !url.startsWith('nightwatch://')
-      ) {
+      if (!isInternalUrl(url)) {
         event.preventDefault();
         shell.openExternal(url);
       }
