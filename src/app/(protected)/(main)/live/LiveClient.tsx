@@ -95,10 +95,12 @@ function LiveContent() {
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
       {/* Hero Header */}
-      <div className="mb-12 bg-neo-yellow relative z-40 rounded-2xl overflow-hidden">
+      <div className="mb-12 bg-neo-yellow relative z-40 rounded-2xl overflow-visible">
         {/* Abstract background shapes */}
-        <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
-        <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
+        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
+          <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
+        </div>
 
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
