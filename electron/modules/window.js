@@ -147,12 +147,16 @@ class AppWindow {
       this.mainWindow.loadURL(PROD_URL);
     }
 
-    // Intercept window.open() / target="_blank" — open in default browser, not a new Electron window
+    // Intercept window.open() / target="_blank" — open external links in default browser
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      if (
-        !url.startsWith(isDev ? 'http://localhost' : PROD_URL) &&
-        !url.startsWith('nightwatch://')
-      ) {
+      const isInternal =
+        url.startsWith(isDev ? 'http://localhost' : PROD_URL) ||
+        url.startsWith('nightwatch://');
+
+      if (isInternal) {
+        // Navigate in the same window instead of opening a new one
+        this.mainWindow.loadURL(url);
+      } else {
         shell.openExternal(url);
       }
       return { action: 'deny' };
