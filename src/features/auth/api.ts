@@ -48,11 +48,12 @@ export async function verifyOtp(
   otp: string,
   context: 'login' | 'register',
   mobileState?: string,
+  desktopCode?: string,
   options?: RequestInit,
 ): Promise<LoginResponse> {
   return apiFetch<LoginResponse>('/api/auth/verify-otp', {
     method: 'POST',
-    body: JSON.stringify({ email, otp, context, mobileState }),
+    body: JSON.stringify({ email, otp, context, mobileState, desktopCode }),
     ...options,
   });
 }
@@ -105,4 +106,19 @@ export async function checkUsername(
     `/api/user/check-username/${encodeURIComponent(username)}`,
     options,
   );
+}
+
+// ── Desktop Auth (browser-to-app login) ─────────────────────────
+
+export async function desktopAuthInitiate(): Promise<{ code: string }> {
+  return apiFetch('/api/auth/desktop/initiate', { method: 'POST' });
+}
+
+export async function desktopAuthExchange(
+  code: string,
+): Promise<LoginResponse> {
+  return apiFetch('/api/auth/desktop/exchange', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
 }

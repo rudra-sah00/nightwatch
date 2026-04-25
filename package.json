@@ -1,7 +1,7 @@
 {
   "name": "nightwatch",
   "description": "Nightwatch Desktop Application",
-  "author": "Rudra Sah00 <rudranarayanaknr@gmail.com>",
+  "author": "Nightwatch Labs <rudranarayanaknr@gmail.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/rudra-sah00/nightwatch.git"
@@ -132,6 +132,7 @@
     "npmRebuild": false,
     "appId": "com.nightwatch.app",
     "productName": "Nightwatch",
+    "copyright": "© 2025 Nightwatch Labs",
     "directories": {
       "output": "desktop-build"
     },
@@ -147,7 +148,8 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "electron/build/icon.png"
+      "icon": "electron/build/icon.png",
+      "publisherName": "Nightwatch Labs"
     },
     "nsis": {
       "oneClick": false,
@@ -164,7 +166,8 @@
         "AppImage",
         "deb"
       ],
-      "icon": "electron/build/icon.png"
+      "icon": "electron/build/icon.png",
+      "vendor": "Nightwatch Labs"
     },
     "publish": [
       {

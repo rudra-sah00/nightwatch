@@ -280,7 +280,7 @@ const startElectronApp = async () => {
         applicationName: 'Nightwatch',
         applicationVersion: currentVersion,
         version: currentVersion,
-        copyright: '© Nightwatch',
+        copyright: '© 2025 Nightwatch Labs',
       });
 
       // Patch Info.plist so macOS About panel shows the ASAR version

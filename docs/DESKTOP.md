@@ -186,3 +186,31 @@ const unlisten = await listen<PayloadType>('event-name', (event) => {
 ### Capabilities & Permissions
 
 The `src-electron/capabilities/default.json` file grants permissions to the main window for both local (`http://localhost:*/*`) and production (`https://nightwatch.in/*`) URLs. All window manipulation, plugin access, and drag operations are explicitly permitted here.
+
+## Desktop Browser Login
+
+Since the Electron app loads a remote URL, it cannot rely on browser cookies for authentication. Instead, it delegates login to the user's default browser via a one-time code exchange:
+
+1. The app calls `POST /api/auth/desktop/initiate` to get a one-time `code`.
+2. It opens the default browser to `https://nightwatch.in/login?desktopCode={code}`.
+3. The user authenticates normally (email + OTP). The `desktopCode` is forwarded during OTP verification, linking the code to the user on the backend.
+4. The app polls `POST /api/auth/desktop/exchange` with the code until it receives tokens.
+5. Tokens are stored in the Electron persistent store (`electron-plugin-store`) and injected into subsequent webview requests.
+
+### Why not in-app login?
+
+The remote URL approach means the webview shares the production domain's cookies, but Electron's webview cookie jar is sandboxed differently across platforms. Delegating to the system browser ensures Turnstile bot protection works correctly and avoids cross-origin cookie issues.
+
+## ASAR Differential Updater
+
+Starting with v1.32.0, the desktop app uses **ASAR differential updates** instead of full binary downloads:
+
+- On update check, the updater downloads only the binary diff between the current and new ASAR archive.
+- The diff is applied locally using `bsdiff`/`bspatch` to reconstruct the new ASAR.
+- This reduces typical update sizes from ~80 MB to ~2–5 MB.
+
+### How it works
+
+1. The CI pipeline generates `.asar.diff` files alongside full installers during the release build.
+2. `latest.json` now includes a `differentialUpdate` field with the diff URL and expected hash.
+3. The Electron updater checks if a diff is available for the current version. If so, it downloads the diff, patches the local ASAR, and verifies the SHA-256 hash. If verification fails, it falls back to a full download.

@@ -19,6 +19,7 @@ export interface LoginResponse {
   accessToken?: string;
   refreshToken?: string;
   mobileAuthRedirectUrl?: string;
+  desktopAuthorized?: boolean;
 }
 
 export interface LogoutResponse {

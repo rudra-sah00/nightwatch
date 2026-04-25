@@ -74,6 +74,9 @@ function createBridge() {
       windowMinimize: noop,
       windowMaximize: noop,
       windowClose: noop,
+      onDesktopAuthCallback: noopListen as (
+        cb: (code: string) => void,
+      ) => UnlistenFn,
       onPipModeChanged: noopListen as (
         cb: (isPip: boolean) => void,
       ) => UnlistenFn,
@@ -138,6 +141,8 @@ function createBridge() {
     windowMinimize: () => e.windowMinimize(),
     windowMaximize: () => e.windowMaximize(),
     windowClose: () => e.windowClose(),
+    onDesktopAuthCallback: (cb: (code: string) => void) =>
+      e.onDesktopAuthCallback(cb) as UnlistenFn,
     onPipModeChanged: (cb: (isPip: boolean) => void) =>
       e.onPipModeChanged(cb) as UnlistenFn,
     showNotification: (p: {

@@ -36,6 +36,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   windowMinimize: () => ipcRenderer.send('window-minimize'),
   windowMaximize: () => ipcRenderer.send('window-maximize'),
   windowClose: () => ipcRenderer.send('window-close'),
+  onDesktopAuthCallback: (callback) => {
+    ipcRenderer.removeAllListeners('desktop-auth-callback');
+    const handler = (_e, code) => callback(code);
+    ipcRenderer.on('desktop-auth-callback', handler);
+    return () => ipcRenderer.removeListener('desktop-auth-callback', handler);
+  },
 
   // Listener to hide CSS when the Native Window shrinks down to a PiP block
   onPipModeChanged: (callback) => {

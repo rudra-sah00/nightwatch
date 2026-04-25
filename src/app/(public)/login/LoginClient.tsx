@@ -24,6 +24,7 @@ export default function LoginClient() {
   const [copied, setCopied] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
+  const [_desktopWaiting, setDesktopWaiting] = useState(false);
 
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)
@@ -48,6 +49,59 @@ export default function LoginClient() {
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, initialAuthCheck, router]);
+
+  // Desktop auth: initiate browser login flow when running in Electron
+  useEffect(() => {
+    if (!checkIsDesktop() || isAuthenticated || authLoading) return;
+
+    let cancelled = false;
+
+    const startDesktopAuth = async () => {
+      try {
+        const { desktopAuthInitiate, desktopAuthExchange } = await import(
+          '@/features/auth/api'
+        );
+        const { code } = await desktopAuthInitiate();
+
+        // Open default browser for login
+        const loginUrl = `https://nightwatch.in/login?desktop=1&code=${encodeURIComponent(code)}`;
+        window.open(loginUrl, '_blank');
+        setDesktopWaiting(true);
+
+        // Listen for the deep link callback
+        const unlisten = desktopBridge.onDesktopAuthCallback(async (cbCode) => {
+          if (cancelled) return;
+          try {
+            const response = await desktopAuthExchange(cbCode);
+            if (response.user) {
+              const { storeUser } = await import('@/lib/auth');
+              const { useAuthStore } = await import('@/store/use-auth-store');
+              storeUser(response.user);
+              useAuthStore.getState().updateUser(response.user);
+              useAuthStore.setState({
+                user: response.user,
+                isAuthenticated: true,
+              });
+            }
+          } catch {
+            toast.error('Desktop login failed. Please try again.');
+          } finally {
+            setDesktopWaiting(false);
+          }
+        });
+
+        return unlisten;
+      } catch {
+        // If initiate fails, fall through to normal login form
+      }
+    };
+
+    const cleanup = startDesktopAuth();
+    return () => {
+      cancelled = true;
+      cleanup?.then((unlisten) => unlisten?.());
+    };
+  }, [isAuthenticated, authLoading]);
 
   const handleCopyEmail = () => {
     const email = 'rudranarayanaknr@gmail.com';

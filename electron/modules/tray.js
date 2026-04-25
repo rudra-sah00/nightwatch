@@ -1,5 +1,4 @@
 const { Tray, Menu, nativeImage, app } = require('electron');
-const fs = require('node:fs');
 const path = require('node:path');
 const log = require('electron-log');
 
@@ -7,35 +6,20 @@ let appTray = null;
 
 function setupTray(mainWindow, setQuittingCallback) {
   try {
-    // Determine the icon source dynamically based on build vs dev output roots
-    const rootDir =
-      process.env.NODE_ENV === 'development'
-        ? path.join(__dirname, '..', '..')
-        : path.join(__dirname, '..');
+    const iconPath = path.join(__dirname, '..', 'build', 'icon.png');
+    let image = nativeImage.createFromPath(iconPath);
 
-    // macOS needs a 18x18 PNG (36x36 @2x Retina) — .ico looks blurry on Retina displays.
-    // Windows & Linux use .ico for proper taskbar rendering.
-    const trayIconFile =
-      process.platform === 'darwin'
-        ? path.resolve(rootDir, 'public', 'tray-icon.png')
-        : path.resolve(rootDir, 'public', 'logo-ico.png');
-
-    // Fallback to logo-ico.png if tray-icon.png doesn't exist yet
-    const resolvedIcon = fs.existsSync(trayIconFile)
-      ? trayIconFile
-      : path.resolve(rootDir, 'public', 'logo-ico.png');
-
-    const image = fs.existsSync(resolvedIcon)
-      ? nativeImage.createFromPath(resolvedIcon)
-      : nativeImage.createEmpty();
-
-    // Mark as template image on macOS so it auto-adapts to light/dark menu bar
     if (process.platform === 'darwin') {
+      // macOS menu bar needs 18x18 (36x36 @2x) template image
+      image = image.resize({ width: 18, height: 18 });
       image.setTemplateImage(true);
+    } else {
+      // Windows/Linux tray needs 16x16 or 32x32
+      image = image.resize({ width: 32, height: 32 });
     }
 
     appTray = new Tray(image);
-    appTray.setToolTip('Nightwatch - Live Desktop');
+    appTray.setToolTip('Nightwatch');
 
     const contextMenuTemplate = Menu.buildFromTemplate([
       {
@@ -85,7 +69,6 @@ function setupTray(mainWindow, setQuittingCallback) {
 
     appTray.setContextMenu(contextMenuTemplate);
 
-    // Single click → show window on all platforms
     appTray.on('click', () => {
       if (mainWindow) {
         mainWindow.restore();
@@ -93,7 +76,6 @@ function setupTray(mainWindow, setQuittingCallback) {
       }
     });
 
-    // macOS: double-click also shows window (matches OS conventions)
     if (process.platform === 'darwin') {
       appTray.on('double-click', () => {
         if (mainWindow) {
