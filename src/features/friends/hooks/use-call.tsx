@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import {
   connectToAgoraCall,
@@ -146,12 +147,14 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     if (callState === 'active') {
       restoreVolumeRef.current = duckMediaElements(0.2);
       window.dispatchEvent(new CustomEvent('dm-call:start'));
+      desktopBridge.setCallActive(true);
     }
     return () => {
       if (restoreVolumeRef.current) {
         restoreVolumeRef.current();
         restoreVolumeRef.current = null;
       }
+      desktopBridge.setCallActive(false);
     };
   }, [callState]);
 

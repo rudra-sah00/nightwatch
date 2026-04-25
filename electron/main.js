@@ -396,6 +396,13 @@ const startElectronApp = async () => {
     }
   });
 
+  // --- CALL-ACTIVE FLAG ---
+  // Suppresses window-blur IPC during active calls to prevent socket
+  // reconnection races that cause desktop-to-desktop call auto-disconnect.
+  ipcMain.on('set-call-active', (_event, active) => {
+    AppWindow.callActive = !!active;
+  });
+
   // --- SMART POWER & BANDWIDTH SAVER ---
   // If the user folds their laptop or locks their PC, forcefully pause the movie and show Away on Discord!
   const triggerSleepPause = () => {
