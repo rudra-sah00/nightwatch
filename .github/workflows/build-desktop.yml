@@ -72,7 +72,24 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          # Skip electron-builder's built-in signing on macOS when no cert is
+          # provided — afterPack.cjs already handles obfuscation + fuses, and
+          # we re-sign with entitlements in the next step.
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' && 'true' || 'false' }}
         run: pnpm exec electron-builder ${{ matrix.build_args }} --publish always
+
+      # Re-sign the macOS .app with entitlements so the ad-hoc signature
+      # covers the post-obfuscation ASAR and flipped fuses.
+      - name: Re-sign macOS app with entitlements
+        if: matrix.platform == 'macOS-arm64'
+        run: |
+          APP=$(find desktop-build/mac-arm64 -name "*.app" -maxdepth 1 | head -1)
+          if [ -z "$APP" ]; then
+            echo "❌ .app bundle not found"
+            exit 1
+          fi
+          echo "Re-signing: $APP"
+          bash scripts/resign-mac.sh "$APP"
 
       - name: Upload app.asar to GitHub Release (macOS only)
         if: matrix.platform == 'macOS-arm64'

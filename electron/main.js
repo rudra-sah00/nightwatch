@@ -283,27 +283,11 @@ const startElectronApp = async () => {
         copyright: '© 2025 Nightwatch Labs',
       });
 
-      // Patch Info.plist so macOS About panel shows the ASAR version
-      // instead of the stale native binary version after a differential update.
-      if (process.platform === 'darwin') {
-        const plistPath = _path.join(
-          _path.dirname(_path.dirname(app.getAppPath())),
-          'Info.plist',
-        );
-        const _fs = require('node:fs');
-        if (_fs.existsSync(plistPath)) {
-          let plist = _fs.readFileSync(plistPath, 'utf-8');
-          const replace = (key, val) => {
-            const re = new RegExp(
-              `(<key>${key}</key>\\s*<string>)[^<]*(</string>)`,
-            );
-            plist = plist.replace(re, `$1${val}$2`);
-          };
-          replace('CFBundleShortVersionString', currentVersion);
-          replace('CFBundleVersion', currentVersion);
-          _fs.writeFileSync(plistPath, plist, 'utf-8');
-        }
-      }
+      // NOTE: Do NOT patch Info.plist at runtime. Writing to Info.plist
+      // invalidates the macOS code signature, causing SIGKILL crashes
+      // (termination namespace: CODESIGNING, indicator: Invalid Page).
+      // The About panel version is already set correctly via
+      // app.setAboutPanelOptions() above, which is the safe approach.
     } catch (_e) {}
 
     // Create main UI Chromium window

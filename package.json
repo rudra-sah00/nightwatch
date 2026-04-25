@@ -23,7 +23,7 @@
     "test:e2e": "for key in $(redis-cli --scan --pattern 'security:*' 2>/dev/null); do redis-cli del $key; done; for key in $(redis-cli --scan --pattern 'auth:otp_limit*' 2>/dev/null); do redis-cli del $key; done; npx playwright test",
     "version": "node -p \"require('./package.json').version\"",
     "desktop:start": "electron .",
-    "desktop:build": "electron-builder --mac --win --linux"
+    "desktop:build": "electron-builder --mac --win --linux && bash scripts/resign-mac.sh desktop-build/mac-arm64/Nightwatch.app"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}": [
