@@ -27,11 +27,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Signal to Electron that the React app booted successfully.
   // This resets the crash counter in main.js so the app knows it's healthy.
+  // Only fires once per session — subsequent navigations don't re-signal.
   useEffect(() => {
     if (typeof window !== 'undefined' && 'electronAPI' in window) {
-      (
-        window as unknown as { electronAPI: { signalReady?: () => void } }
-      ).electronAPI.signalReady?.();
+      if (!(window as unknown as Record<string, boolean>).__nw_ready) {
+        (window as unknown as Record<string, boolean>).__nw_ready = true;
+        (
+          window as unknown as { electronAPI: { signalReady?: () => void } }
+        ).electronAPI.signalReady?.();
+      }
     }
   }, []);
 

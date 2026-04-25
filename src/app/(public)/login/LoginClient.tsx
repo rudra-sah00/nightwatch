@@ -52,8 +52,13 @@ export default function LoginClient() {
 
   // Desktop auth: open the default browser for login, then receive
   // the auth callback via deep link back into the Electron app.
+  // Runs once on mount — guarded by a window flag to prevent re-triggering
+  // on React re-renders or navigation.
   useEffect(() => {
     if (!checkIsDesktop() || isAuthenticated || authLoading) return;
+    if ((window as unknown as Record<string, boolean>).__nw_desktop_auth)
+      return;
+    (window as unknown as Record<string, boolean>).__nw_desktop_auth = true;
 
     let cancelled = false;
 
