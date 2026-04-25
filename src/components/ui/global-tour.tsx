@@ -124,15 +124,6 @@ export function GlobalTour() {
             setRightOpen(true);
           },
         },
-        {
-          element: 'a[href="/messages"]',
-          popover: {
-            title: title(t('messages.title')),
-            description: desc(t('messages.description')),
-            side: 'left',
-            align: 'center',
-          },
-        },
         // Close right sidebar, show profile
         {
           element: 'a[href="/profile"]',

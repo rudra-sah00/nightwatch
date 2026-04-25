@@ -5,7 +5,7 @@
 <h1 align="center">Nightwatch</h1>
 
 <p align="center">
-  <strong>Your personal streaming companion — synchronized playback, watch parties, live streaming, and messaging.</strong>
+  <strong>Your personal streaming companion — synchronized playback, watch parties, live streaming, and voice calls.</strong>
 </p>
 
 ---
@@ -34,7 +34,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Watch Content](./docs/features/WATCH.md): VOD operations, HLS bitrates, and Redis heartbeat synchronization.
 - [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.
 - [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
-- [Friends & Messaging](./docs/features/FRIENDS.md): Friend system, DM messaging, voice calls, and online presence.
+- [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, and online presence.
 
 ## Technology Stack
 
@@ -43,7 +43,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
 - **Internationalization:** next-intl (14 languages, cookie-based)
-- **Real-Time Data:** Agora RTM, Socket.IO (friends, messaging, presence)
+- **Real-Time Data:** Agora RTM, Socket.IO (friends, presence, voice calls)
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
 - **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)
 - **Package Manager:** pnpm

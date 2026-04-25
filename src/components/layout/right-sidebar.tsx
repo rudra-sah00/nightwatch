@@ -1,16 +1,7 @@
 'use client';
 
-import {
-  Check,
-  Loader2,
-  MessageSquare,
-  Phone,
-  Search,
-  UserPlus,
-  X,
-} from 'lucide-react';
+import { Check, Loader2, Phone, Search, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -582,13 +573,6 @@ function FriendRow({
       >
         <Phone className="w-4 h-4 text-foreground/40" />
       </button>
-      <Link
-        href={`/messages?f=${id}`}
-        className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-        aria-label={`Message ${name}`}
-      >
-        <MessageSquare className="w-4 h-4 text-foreground/40" />
-      </Link>
     </div>
   );
 }

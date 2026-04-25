@@ -4,18 +4,14 @@ import {
   blockUser,
   cancelFriendRequest,
   getBlockedUsers,
-  getConversations,
   getFriends,
-  getMessages,
   getPendingRequests,
   getSentRequests,
   invalidateFriendsCache,
-  markAsRead,
   rejectFriendRequest,
   removeFriend,
   searchUsers,
   sendFriendRequest,
-  sendMessage,
   unblockUser,
 } from '@/features/friends/api';
 import { apiFetch } from '@/lib/fetch';
@@ -138,66 +134,6 @@ describe('Friends API', () => {
     });
   });
 
-  describe('getConversations', () => {
-    it('fetches conversations', async () => {
-      const convos = [{ friendId: 'f1', lastMessage: 'hi' }];
-      vi.mocked(apiFetch).mockResolvedValueOnce({ data: convos });
-
-      const result = await getConversations();
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/conversations',
-        undefined,
-      );
-      expect(result).toEqual(convos);
-    });
-  });
-
-  describe('getMessages', () => {
-    it('fetches messages without cursor', async () => {
-      const data = { messages: [{ id: 'm1' }], nextCursor: null };
-      vi.mocked(apiFetch).mockResolvedValueOnce({ data });
-
-      const result = await getMessages('f1');
-      expect(apiFetch).toHaveBeenCalledWith('/api/messages/f1', undefined);
-      expect(result).toEqual(data);
-    });
-
-    it('fetches messages with cursor and limit', async () => {
-      const data = { messages: [], nextCursor: null };
-      vi.mocked(apiFetch).mockResolvedValueOnce({ data });
-
-      await getMessages('f1', 'cursor123', 25);
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/f1?cursor=cursor123&limit=25',
-        undefined,
-      );
-    });
-  });
-
-  describe('sendMessage', () => {
-    it('sends message', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({});
-
-      await sendMessage('r1', 'hello');
-      expect(apiFetch).toHaveBeenCalledWith('/api/messages/send', {
-        method: 'POST',
-        body: JSON.stringify({ receiverId: 'r1', content: 'hello' }),
-      });
-    });
-  });
-
-  describe('markAsRead', () => {
-    it('marks messages as read', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({});
-
-      await markAsRead('f1');
-      expect(apiFetch).toHaveBeenCalledWith('/api/messages/read', {
-        method: 'POST',
-        body: JSON.stringify({ friendId: 'f1' }),
-      });
-    });
-  });
-
   describe('searchUsers', () => {
     it('returns empty for short queries', async () => {
       const result = await searchUsers('a');
@@ -234,51 +170,6 @@ describe('Friends API', () => {
     });
   });
 
-  describe('getMessages edge cases', () => {
-    it('default limit is 50 (no limit param in URL)', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        data: { messages: [], nextCursor: null },
-      });
-
-      await getMessages('f1');
-      expect(apiFetch).toHaveBeenCalledWith('/api/messages/f1', undefined);
-    });
-
-    it('includes only cursor when limit is default', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        data: { messages: [], nextCursor: null },
-      });
-
-      await getMessages('f1', 'c1');
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/f1?cursor=c1',
-        undefined,
-      );
-    });
-
-    it('includes both cursor and limit', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        data: { messages: [], nextCursor: null },
-      });
-
-      await getMessages('f1', 'c1', 25);
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/f1?cursor=c1&limit=25',
-        undefined,
-      );
-    });
-
-    it('passes request options through', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({
-        data: { messages: [], nextCursor: null },
-      });
-      const signal = new AbortController().signal;
-
-      await getMessages('f1', undefined, 50, { signal });
-      expect(apiFetch).toHaveBeenCalledWith('/api/messages/f1', { signal });
-    });
-  });
-
   describe('cache invalidation', () => {
     it('sendFriendRequest clears friends cache', async () => {
       vi.mocked(apiFetch).mockResolvedValue({});
@@ -311,24 +202,6 @@ describe('Friends API', () => {
       await blockUser('u1');
       expect(apiFetch).toHaveBeenCalledWith(
         '/api/friends/block',
-        expect.any(Object),
-      );
-    });
-
-    it('sendMessage clears conversations cache', async () => {
-      vi.mocked(apiFetch).mockResolvedValue({});
-      await sendMessage('r1', 'test');
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/send',
-        expect.any(Object),
-      );
-    });
-
-    it('markAsRead clears conversations cache', async () => {
-      vi.mocked(apiFetch).mockResolvedValue({});
-      await markAsRead('f1');
-      expect(apiFetch).toHaveBeenCalledWith(
-        '/api/messages/read',
         expect.any(Object),
       );
     });

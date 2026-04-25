@@ -1,15 +1,8 @@
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
-import type {
-  ConversationPreview,
-  FriendProfile,
-  FriendRequest,
-  MessagesResponse,
-  SentRequest,
-} from './types';
+import type { FriendProfile, FriendRequest, SentRequest } from './types';
 
 const friendsCache = createTTLCache<FriendProfile[]>(30_000, 1);
-const conversationsCache = createTTLCache<ConversationPreview[]>(15_000, 1);
 
 export async function getFriends(
   options?: RequestInit,
@@ -118,67 +111,8 @@ export async function getBlockedUsers(
   return data;
 }
 
-// === Messages ===
-
-export async function getConversations(
-  options?: RequestInit,
-): Promise<ConversationPreview[]> {
-  const cached = conversationsCache.get('all');
-  if (cached) return cached;
-
-  const { data } = await apiFetch<{ data: ConversationPreview[] }>(
-    '/api/messages/conversations',
-    options,
-  );
-  conversationsCache.set('all', data);
-  return data;
-}
-
-export async function getMessages(
-  friendId: string,
-  cursor?: string,
-  limit = 50,
-  options?: RequestInit,
-): Promise<MessagesResponse> {
-  const params = new URLSearchParams();
-  if (cursor) params.set('cursor', cursor);
-  if (limit !== 50) params.set('limit', String(limit));
-  const qs = params.toString();
-
-  const { data } = await apiFetch<{ data: MessagesResponse }>(
-    `/api/messages/${friendId}${qs ? `?${qs}` : ''}`,
-    options,
-  );
-  return data;
-}
-
-export async function sendMessage(
-  receiverId: string,
-  content: string,
-  replyToId?: string,
-): Promise<void> {
-  await apiFetch('/api/messages/send', {
-    method: 'POST',
-    body: JSON.stringify({
-      receiverId,
-      content,
-      ...(replyToId && { replyToId }),
-    }),
-  });
-  conversationsCache.clear();
-}
-
-export async function markAsRead(friendId: string): Promise<void> {
-  await apiFetch('/api/messages/read', {
-    method: 'POST',
-    body: JSON.stringify({ friendId }),
-  });
-  conversationsCache.clear();
-}
-
 export function invalidateFriendsCache() {
   friendsCache.clear();
-  conversationsCache.clear();
 }
 
 export interface SearchUserResult {

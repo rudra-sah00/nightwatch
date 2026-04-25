@@ -33,30 +33,3 @@ export interface SentRequest {
   username: string | null;
   profilePhoto: string | null;
 }
-
-export interface Message {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  replyToId: string | null;
-  readAt: string | null;
-  createdAt: string;
-}
-
-export interface ConversationPreview {
-  friendId: string;
-  name: string;
-  username: string | null;
-  profilePhoto: string | null;
-  lastMessage: string;
-  lastMessageAt: string;
-  unreadCount: number;
-  isOnline: boolean;
-  activity: FriendActivity | null;
-}
-
-export interface MessagesResponse {
-  messages: Message[];
-  nextCursor: string | null;
-}

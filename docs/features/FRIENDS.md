@@ -1,8 +1,8 @@
-# Friends, Messaging & Voice Calls
+# Friends & Voice Calls
 
 ## Overview
 
-The friends system provides social features: friend requests, direct messaging with emoji support, online presence tracking, and 1-on-1 voice calls via Agora RTC. The right sidebar displays the friends list with real-time online/offline status, and the `/messages` route provides a full DM interface.
+The friends system provides social features: friend requests, online presence tracking, and 1-on-1 voice calls via Agora RTC. The right sidebar displays the friends list with real-time online/offline status and activity tracking.
 
 ## Architecture
 
@@ -13,18 +13,15 @@ src/features/friends/
 ├── format-activity.ts              # Utility to format activity into display string
 ├── hooks/
 │   ├── use-friends.ts              # Friends list, requests, accept/reject/cancel, activity
-│   ├── use-messages.ts             # Conversations, message thread, cursor pagination
 │   └── use-call.tsx                # CallProvider context, Agora RTC, call state machine
 └── components/
-    ├── MessagesClient.tsx          # Full DM page (conversation list + message thread)
     └── CallOverlay.tsx             # Global floating call card (top-right corner)
 ```
 
 ### Integration Points
 
-- **Right Sidebar** (`src/components/layout/right-sidebar.tsx`): Friends list with online/offline sections, pending/sent requests, call + message buttons per friend, Spotlight search for adding friends by username.
+- **Right Sidebar** (`src/components/layout/right-sidebar.tsx`): Friends list with online/offline sections, pending/sent requests, call button per friend, Spotlight search for adding friends by username.
 - **Main Layout** (`src/app/(protected)/(main)/layout.tsx`): `CallProvider` wraps all routes, `CallOverlay` renders globally.
-- **Messages Route** (`src/app/(protected)/(main)/messages/page.tsx`): DM page with `?f={userId}` deep linking.
 
 ## Friend System
 
@@ -73,41 +70,6 @@ The sidebar also includes:
 
 - Friend requests / block: **20 per 15 minutes**
 - General API limiter on all other endpoints
-
-## Direct Messaging
-
-### Message Thread
-
-- Messages loaded with **cursor-based pagination** (50 per page)
-- Scroll to top loads older messages via `loadMore()`
-- New messages arrive in real-time via `message:new` socket event
-- Messages auto-marked as read when thread is open
-- Emoji picker (`emoji-picker-react`) follows current theme (light/dark)
-- Message content sanitized server-side via `sanitizeChatMessage()` (XSS prevention)
-
-### Conversation List
-
-- Shows **all accepted friends** (not just those with messages)
-- Friends with messages sorted by most recent, friends without messages listed after
-- Unread count badges on conversations — cleared instantly on click + server-side `markAsRead`
-- Online status indicators (green dot), updated in real-time via socket
-- URL-driven: clicking a conversation navigates to `/messages?f={id}`
-
-### Reply to Message
-
-- Hover any message → reply button appears (Telegram-style)
-- Click reply → preview bar slides in above input with "Replying" label + quoted text + cancel button
-- Reply quote renders inside the bubble: **blue vertical bar** + sender name + truncated text (Telegram-style)
-- `replyToId` stored in DB, included in socket events and API responses
-
-### API Endpoints (Backend)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/messages/conversations` | Conversation list with last message + unread count |
-| `GET` | `/api/messages/:friendId?cursor=&limit=` | Messages with cursor pagination |
-| `POST` | `/api/messages/send` | Send message `{ receiverId, content, replyToId? }` (30/min rate limit) |
-| `POST` | `/api/messages/read` | Mark as read `{ friendId }` |
 
 ## Online Presence
 
@@ -223,10 +185,6 @@ active → idle (ended by either party)
 | `friend:activity` | `{ userId, activity }` | Friend activity changed (watching content or null) |
 | `friend:request_received` | `{ id, senderId }` | New incoming request |
 | `friend:request_accepted` | `{ id, acceptedBy }` | Request accepted |
-| `message:new` | `{ id, senderId, content, createdAt }` | New DM received |
-| `message:read` | `{ readBy }` | Messages marked as read |
-| `message:typing_start` | `{ userId }` | Friend started typing |
-| `message:typing_stop` | `{ userId }` | Friend stopped typing |
 | `call:incoming` | `{ callerId, callerName, callerPhoto, channelName }` | Incoming call |
 | `call:accepted` | `{ acceptedBy, channelName }` | Call accepted |
 | `call:rejected` | `{ rejectedBy }` | Call rejected |
@@ -236,8 +194,6 @@ active → idle (ended by either party)
 
 | Event | Payload | Callback | Description |
 |-------|---------|----------|-------------|
-| `message:typing_start` | `{ receiverId }` | — | Typing indicator (validated against friendship) |
-| `message:typing_stop` | `{ receiverId }` | — | Stop typing |
 | `call:initiate` | `{ receiverId }` | `{ success, channelName?, error? }` | Start call |
 | `call:accept` | `{ callerId }` | `{ success, channelName? }` | Accept call |
 | `call:reject` | `{ callerId }` | — | Reject call |
@@ -268,5 +224,4 @@ All UI strings are translated across 14 languages under the `common.friends` nam
 | `types.test.ts` | 7 | All interfaces |
 | `format-activity.test.ts` | 4 | Movie, series, livestream, fallback formatting |
 | `hooks/use-friends.test.ts` | 12 | Mount, online/offline, accept/reject/cancel, socket events, activity |
-| `hooks/use-messages.test.ts` | 17 | Conversations, pagination, send, typing, real-time, dedup |
 | **Total** | **67** | |

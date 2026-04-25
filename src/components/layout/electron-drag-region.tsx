@@ -20,7 +20,6 @@ const ROUTE_NAMES: Record<string, string> = {
   '/continue-watching': 'Continue Watching',
   '/library': 'Library',
   '/ask-ai': 'Ask AI',
-  '/messages': 'Messages',
   '/changelog': 'Changelog',
 };
 
