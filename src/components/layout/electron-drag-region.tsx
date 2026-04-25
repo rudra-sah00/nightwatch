@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { desktopBridge } from '@/lib/electron-bridge';
 
 const ROUTE_NAMES: Record<string, string> = {
   '/home': 'Home',
@@ -26,6 +27,58 @@ function getRouteTitle(pathname: string): string {
   if (pathname.startsWith('/live/')) return 'Live';
   if (pathname.startsWith('/user/')) return 'Profile';
   return 'Nightwatch';
+}
+
+function WindowControls() {
+  return (
+    <div className="absolute right-0 top-0 h-8 flex items-stretch [-webkit-app-region:no-drag]">
+      <button
+        type="button"
+        onClick={() => desktopBridge.windowMinimize()}
+        className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-foreground/10 transition-colors"
+        aria-label="Minimize"
+      >
+        <svg width="10" height="1" viewBox="0 0 10 1" className="fill-current">
+          <title>Minimize</title>
+          <rect width="10" height="1" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={() => desktopBridge.windowMaximize()}
+        className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-foreground/10 transition-colors"
+        aria-label="Maximize"
+      >
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          className="stroke-current"
+        >
+          <title>Maximize</title>
+          <rect x="0.5" y="0.5" width="9" height="9" strokeWidth="1" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={() => desktopBridge.windowClose()}
+        className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-neo-red hover:text-white transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          className="stroke-current"
+        >
+          <title>Close</title>
+          <path d="M1 1L9 9M9 1L1 9" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
+  );
 }
 
 export function ElectronDragRegion() {
@@ -110,6 +163,7 @@ export function ElectronDragRegion() {
       <span className="absolute left-1/2 -translate-x-1/2 text-[11px] font-headline font-bold uppercase tracking-[0.15em] text-foreground/70 select-none pointer-events-none">
         {title}
       </span>
+      {isWindows && <WindowControls />}
     </div>
   );
 }

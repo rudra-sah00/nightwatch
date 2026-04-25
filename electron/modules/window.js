@@ -65,16 +65,9 @@ class AppWindow {
       minHeight: 540,
       icon: require('node:path').join(__dirname, '../build/icon.png'),
 
-      // Frameless Window Customizations (macOS Traffic Lights + Win11 Snap Layouts)
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', // 'hiddenInset' pushes macOS buttons slightly down for better centering, while Win uses 'hidden' with overlays.
-      titleBarOverlay:
-        process.platform === 'win32'
-          ? {
-              color: '#09090b', // Dark tailwind background matching Next.js
-              symbolColor: '#ffffff', // White Windows symbols (X, □, -)
-              height: 32, // Standard native height
-            }
-          : false, // Mac uses traffic lights automatically on 'hidden'
+      // Frameless Window Customizations (macOS Traffic Lights + Custom Win Controls)
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+      titleBarOverlay: false,
 
       show: false, // Prevents white flash via ready-to-show
       backgroundColor: '#09090b', // Matches dark mode themes

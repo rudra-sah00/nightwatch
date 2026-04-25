@@ -11,7 +11,7 @@ function createSplash() {
     height: 350,
     transparent: true,
     frame: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: false,
     webPreferences: {
       nodeIntegration: false,
@@ -49,13 +49,15 @@ function createSplash() {
           body {
             margin: 0; padding: 0; background: transparent; overflow: hidden;
             display: flex; align-items: center; justify-content: center; height: 100vh;
+            -webkit-app-region: drag;
           }
           .container {
-            width: 280px; height: 330px;
+            width: 100%; height: 100%;
             background: var(--bg-color);
             border-radius: 12px; border: 4px solid var(--border-color);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; color: var(--text-color); text-align: center;
+            box-sizing: border-box;
           }
           .brand {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;

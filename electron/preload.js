@@ -33,6 +33,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setKeepAwake: (shouldKeepAwake) =>
     ipcRenderer.send('toggle-keep-awake', shouldKeepAwake),
   setCallActive: (active) => ipcRenderer.send('set-call-active', active),
+  windowMinimize: () => ipcRenderer.send('window-minimize'),
+  windowMaximize: () => ipcRenderer.send('window-maximize'),
+  windowClose: () => ipcRenderer.send('window-close'),
 
   // Listener to hide CSS when the Native Window shrinks down to a PiP block
   onPipModeChanged: (callback) => {

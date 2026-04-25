@@ -677,6 +677,23 @@ const startElectronApp = async () => {
     if (win) win.setFullScreen(!win.isFullScreen());
   });
 
+  // --- CUSTOM WINDOW CONTROLS (Windows) ---
+  ipcMain.on('window-minimize', () => {
+    const win = AppWindow.getInstance();
+    if (win) win.minimize();
+  });
+  ipcMain.on('window-maximize', () => {
+    const win = AppWindow.getInstance();
+    if (win) {
+      if (win.isMaximized()) win.unmaximize();
+      else win.maximize();
+    }
+  });
+  ipcMain.on('window-close', () => {
+    const win = AppWindow.getInstance();
+    if (win) win.close();
+  });
+
   // --- NATIVE THEMING ---
   const { nativeTheme } = require('electron');
   ipcMain.on('set-native-theme', (_event, theme) => {
