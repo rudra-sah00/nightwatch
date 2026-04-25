@@ -1,6 +1,6 @@
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
-import { NetworkOnly, Serwist } from 'serwist';
+import { NetworkFirst, NetworkOnly, Serwist } from 'serwist';
 
 // Extend the Service Worker global scope with the Serwist manifest injected at build time
 declare global {
@@ -33,20 +33,26 @@ const streamingPassthrough = [
   },
 ];
 
-// Pages: always fetch from network. When offline, the fallback config
-// serves /offline.html which shows the offline UI with downloads access.
+// Pages: try network first, fall back to cache. This lets pages like
+// /downloads work offline while always fetching fresh content when online.
 const navigationRules = [
   {
     matcher({ request }: { request: Request }) {
       return request.destination === 'document';
     },
-    handler: new NetworkOnly(),
+    handler: new NetworkFirst({
+      cacheName: 'pages-html',
+      networkTimeoutSeconds: 5,
+    }),
   },
   {
     matcher({ request }: { request: Request }) {
       return request.headers.get('RSC') === '1';
     },
-    handler: new NetworkOnly(),
+    handler: new NetworkFirst({
+      cacheName: 'pages-rsc',
+      networkTimeoutSeconds: 5,
+    }),
   },
 ];
 

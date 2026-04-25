@@ -9,12 +9,9 @@ export function SerwistProvider({
   children: React.ReactNode;
   swUrl: string;
 }) {
-  // Skip service worker in Electron — not needed and causes evaluation errors
-  if (
-    typeof navigator !== 'undefined' &&
-    navigator.userAgent.includes('Electron')
-  ) {
-    return <>{children}</>;
-  }
+  // SW is enabled in both browser and Electron. It caches the app shell
+  // so pages like /downloads work offline. Navigation uses NetworkOnly
+  // with /offline.html fallback, so the SW never interferes with normal
+  // loading — it only serves cached assets when the network is down.
   return <BaseSerwistProvider swUrl={swUrl}>{children}</BaseSerwistProvider>;
 }
