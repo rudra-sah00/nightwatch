@@ -114,7 +114,7 @@ export function usePlayerRoot({
     },
   );
 
-  const { setQuality, setAudioTrack } = usePlayerEngine({
+  const { setQuality, setAudioTrack, hlsRef } = usePlayerEngine({
     videoRef,
     streamUrl,
     dispatch,
@@ -541,6 +541,7 @@ export function usePlayerRoot({
     videoRef,
     videoCallbackRef: handleVideoCallbackRef,
     containerRef,
+    hlsRef,
     spriteSheet,
     spriteVtt,
     readOnly,

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ClipsGrid } from './ClipsGrid';
 
 export const metadata: Metadata = {
   title: 'Library | Nightwatch',
@@ -23,7 +24,7 @@ export default function LibraryPage() {
                 </span>
               </h1>
               <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-                All your content in one place
+                Your clips and saved moments
               </p>
             </div>
           </div>
@@ -31,11 +32,7 @@ export default function LibraryPage() {
       </div>
 
       <div className="container mx-auto px-6 md:px-10">
-        <div className="flex flex-col items-center justify-center py-24">
-          <p className="text-sm text-foreground/30 font-headline uppercase tracking-widest">
-            Coming soon
-          </p>
-        </div>
+        <ClipsGrid />
       </div>
     </main>
   );

@@ -1,3 +1,4 @@
+import type HlsType from 'hls.js';
 import { createContext, use } from 'react';
 import type { PlayerAction, PlayerState, VideoMetadata } from './types';
 
@@ -7,6 +8,8 @@ interface PlayerContextValue {
   metadata: VideoMetadata;
   streamUrl: string | null;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  /** HLS.js instance ref — used by clip recorder to tap into fragment events */
+  hlsRef: React.RefObject<HlsType | null>;
   /** Callback ref for the DOM <video> element — use this on the <video> tag, not videoRef */
   videoCallbackRef: (el: HTMLVideoElement | null) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;

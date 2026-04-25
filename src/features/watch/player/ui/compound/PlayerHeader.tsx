@@ -8,12 +8,14 @@ interface PlayerHeaderProps {
   onSidebarToggle?: () => void;
   isSidebarOpen?: boolean;
   hideBackButton?: boolean;
+  rightContent?: React.ReactNode;
 }
 
 export function PlayerHeader({
   onSidebarToggle,
   isSidebarOpen,
   hideBackButton,
+  rightContent,
 }: PlayerHeaderProps) {
   const { metadata, playerHandlers } = usePlayerContext();
   const t = useTranslations('watch.player');
@@ -72,6 +74,9 @@ export function PlayerHeader({
           </p>
         ) : null}
       </div>
+      {rightContent ? (
+        <div className="flex-shrink-0">{rightContent}</div>
+      ) : null}
     </section>
   );
 }

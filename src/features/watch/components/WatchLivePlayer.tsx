@@ -3,6 +3,9 @@ import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { RecordButton } from '@/features/clips/components/RecordButton';
+import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import { Player } from '../player';
@@ -118,13 +121,38 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   );
 });
 function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
-  const { state, playerHandlers, metadata } = usePlayerContext();
+  const { state, playerHandlers, metadata, hlsRef } = usePlayerContext();
   const t = useTranslations('watch.player');
   const error = state.error;
-  // Treat null streamUrl (waiting for live-bridge) as loading — prevents
-  // the ErrorOverlay from flashing for a single frame before useHls runs.
   const isWaitingForStream = !streamUrl;
   const isLoading = state.isLoading || isWaitingForStream;
+
+  const clip = useClipRecorder({
+    hlsRef,
+    matchId: metadata.movieId,
+    title: `${metadata.title} - Clip`,
+    streamUrl,
+  });
+
+  const handleStart = () => {
+    clip.start();
+    toast.info('Recording started');
+  };
+
+  const handleStop = async () => {
+    await clip.stop();
+    toast.success('Clip saved! Processing...');
+  };
+
+  const recordButton = (
+    <RecordButton
+      isRecording={clip.isRecording}
+      duration={clip.duration}
+      canStop={clip.canStop}
+      onStart={handleStart}
+      onStop={handleStop}
+    />
+  );
 
   return (
     <>
@@ -156,7 +184,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
       />
 
       <Player.Controls>
-        <Player.Header />
+        <Player.Header rightContent={recordButton} />
 
         {/* DVR seek bar — scrub within the live buffer window */}
         <Player.SeekBar />

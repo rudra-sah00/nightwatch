@@ -24,4 +24,5 @@ export const WS_EVENTS = {
   WATCH_RECORD_TIME: 'watch:record_time',
   WATCH_UPDATE_PROGRESS: 'watch:update_progress',
   WATCH_GET_CONTINUE: 'watch:get_continue_watching',
+  CLIP_READY: 'clip:ready',
 } as const;
