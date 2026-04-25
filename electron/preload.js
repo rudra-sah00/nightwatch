@@ -138,4 +138,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   signalReady: () => ipcRenderer.send('app-ready'),
   // Offline bridge calls this to nuke caches and retry from network.
   clearCacheAndReload: () => ipcRenderer.send('clear-cache-reload'),
+  // Open URL in the default OS browser (bypasses setWindowOpenHandler)
+  openExternal: (url) => ipcRenderer.send('open-external', url),
 });

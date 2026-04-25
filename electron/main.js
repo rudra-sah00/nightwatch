@@ -419,6 +419,17 @@ const startElectronApp = async () => {
     require('electron-log').info('[health] App ready — crash counter reset');
   });
 
+  // --- OPEN EXTERNAL URL (default browser) ---
+  ipcMain.on('open-external', (_event, url) => {
+    const { shell } = require('electron');
+    if (
+      typeof url === 'string' &&
+      (url.startsWith('http://') || url.startsWith('https://'))
+    ) {
+      shell.openExternal(url);
+    }
+  });
+
   // --- CLEAR CACHE & RELOAD (exposed to offline-bridge.html) ---
   ipcMain.on('clear-cache-reload', async () => {
     const ses = require('electron').session.defaultSession;

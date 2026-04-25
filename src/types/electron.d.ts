@@ -145,6 +145,13 @@ export interface ElectronAPI {
 
   /** Subscriber to listen for download progression updates payload */
   onDownloadProgress: (callback: (item: DownloadItem) => void) => () => void;
+
+  /** Signal that the React app has successfully booted */
+  signalReady: () => void;
+  /** Clear all caches and reload the app */
+  clearCacheAndReload: () => void;
+  /** Open a URL in the default OS browser */
+  openExternal: (url: string) => void;
 }
 
 declare global {

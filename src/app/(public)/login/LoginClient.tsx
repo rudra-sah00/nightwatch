@@ -75,7 +75,15 @@ export default function LoginClient() {
             ? `http://localhost:${window.location.port || 3000}`
             : 'https://nightwatch.in';
         const loginUrl = `${baseUrl}/login?desktop=1&code=${encodeURIComponent(code)}`;
-        window.open(loginUrl, '_blank');
+        // Use shell.openExternal via the Electron preload to guarantee
+        // the URL opens in the default browser, not inside the Electron window.
+        // window.open() is intercepted by setWindowOpenHandler which reloads
+        // the Electron window for internal URLs, causing a redirect loop.
+        if (window.electronAPI?.openExternal) {
+          window.electronAPI.openExternal(loginUrl);
+        } else {
+          window.open(loginUrl, '_blank');
+        }
         setDesktopWaiting(true);
 
         // Listen for the deep link callback
