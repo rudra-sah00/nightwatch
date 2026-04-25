@@ -30,8 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'electronAPI' in window) {
       (
-        window as unknown as { electronAPI: { signalReady: () => void } }
-      ).electronAPI.signalReady();
+        window as unknown as { electronAPI: { signalReady?: () => void } }
+      ).electronAPI.signalReady?.();
     }
   }, []);
 

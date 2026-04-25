@@ -79,7 +79,7 @@
     }
 
     document.getElementById('retry-btn').addEventListener('click', function() {
-      if (window.electronAPI && window.electronAPI.clearCacheAndReload) {
+      if (window.electronAPI?.clearCacheAndReload) {
         window.electronAPI.clearCacheAndReload();
       } else {
         window.location.replace(targetUrl);
