@@ -136,7 +136,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
       }}
     >
       <ServerProvider defaultServer={user?.preferredServer}>
-        <div className="min-h-[100dvh] w-full bg-background text-foreground font-body flex flex-col">
+        <div className="min-h-full w-full bg-background text-foreground font-body flex flex-col">
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
@@ -150,7 +150,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           <div
             ref={containerRef}
             id="main-content"
-            className="flex-grow flex flex-row min-h-0 gap-2 p-2 h-[calc(100dvh-5rem-var(--electron-titlebar-height,0px))] overflow-hidden"
+            className="flex-grow flex flex-row min-h-0 gap-2 p-2 overflow-hidden"
           >
             <LeftSidebar />
             <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full">

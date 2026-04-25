@@ -82,7 +82,16 @@ export default async function RootLayout({
                     <OfflineIndicator />
                     <SwUpdatePrompt />
                     <SplashScreen />
-                    {children}
+                    <div
+                      className="flex flex-col overflow-y-auto overflow-x-hidden"
+                      style={{
+                        height:
+                          'calc(100dvh - var(--electron-titlebar-height, 0px))',
+                        marginTop: 'var(--electron-titlebar-height, 0px)',
+                      }}
+                    >
+                      {children}
+                    </div>
                     <Toaster />
                   </AuthProvider>
                 </SocketProvider>

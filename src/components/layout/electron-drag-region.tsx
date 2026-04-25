@@ -115,64 +115,59 @@ export function ElectronDragRegion() {
   if (!isMounted || !isDesktopApp) return null;
 
   return (
-    <>
-      {/* Fixed title bar */}
-      <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-background [-webkit-app-region:drag] flex items-center">
-        <div
-          className={`flex items-center gap-0.5 [-webkit-app-region:no-drag] ${isMacOS ? 'ml-[80px]' : 'ml-2'}`}
+    <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-background [-webkit-app-region:drag] flex items-center">
+      <div
+        className={`flex items-center gap-0.5 [-webkit-app-region:no-drag] ${isMacOS ? 'ml-[80px]' : 'ml-2'}`}
+      >
+        <button
+          type="button"
+          onClick={goBack}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
+          aria-label="Go back"
         >
-          <button
-            type="button"
-            onClick={goBack}
-            className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
-            aria-label="Go back"
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            className="stroke-current"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              className="stroke-current"
-            >
-              <title>Back</title>
-              <path
-                d="M10 3L5 8L10 13"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={goForward}
-            className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
-            aria-label="Go forward"
+            <title>Back</title>
+            <path
+              d="M10 3L5 8L10 13"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={goForward}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
+          aria-label="Go forward"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            className="stroke-current"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              className="stroke-current"
-            >
-              <title>Forward</title>
-              <path
-                d="M6 3L11 8L6 13"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-        <span className="absolute left-1/2 -translate-x-1/2 text-[11px] font-headline font-bold uppercase tracking-[0.15em] text-foreground/70 select-none pointer-events-none">
-          {title}
-        </span>
-        {isWindows && <WindowControls />}
+            <title>Forward</title>
+            <path
+              d="M6 3L11 8L6 13"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
-      {/* Flow spacer — pushes content below the fixed title bar without overflow */}
-      <div className="h-8 shrink-0" />
-    </>
+      <span className="absolute left-1/2 -translate-x-1/2 text-[11px] font-headline font-bold uppercase tracking-[0.15em] text-foreground/70 select-none pointer-events-none">
+        {title}
+      </span>
+      {isWindows && <WindowControls />}
+    </div>
   );
 }

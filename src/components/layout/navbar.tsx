@@ -13,7 +13,7 @@ export function Navbar() {
   return (
     <nav
       data-electron-drag-region
-      className={`sticky [-webkit-app-region:drag] top-[var(--electron-titlebar-height,0px)] z-50 w-full bg-background text-foreground overflow-hidden`}
+      className={`sticky [-webkit-app-region:drag] top-0 z-50 w-full bg-background text-foreground overflow-hidden`}
     >
       <div
         className="flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4"
