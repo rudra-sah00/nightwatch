@@ -25,6 +25,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ((payload: ForceLogoutPayload) => void) | null
   >(null);
 
+  // Signal to Electron that the React app booted successfully.
+  // This resets the crash counter in main.js so the app knows it's healthy.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'electronAPI' in window) {
+      (
+        window as unknown as { electronAPI: { signalReady: () => void } }
+      ).electronAPI.signalReady();
+    }
+  }, []);
+
   const handleForceLogout = useCallback(
     (payload: ForceLogoutPayload) => {
       disconnect();

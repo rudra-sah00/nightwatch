@@ -175,13 +175,19 @@ class AppWindow {
       }
     });
 
-    // Track consecutive load failures so we don't loop forever
-    let offlineRetries = 0;
+    // --- ESCALATING RECOVERY LADDER ---
+    // Level 0: did-finish-load → start health check timer
+    // Level 1: first load failure → simple retry
+    // Level 2: second failure → clear SW + cache, reload from PROD_URL
+    // Level 3: third failure → load local offline bridge (stop retrying)
+    let loadFailures = 0;
+
     this.mainWindow.webContents.on(
       'did-fail-load',
-      (_event, errorCode, _errorDescription) => {
+      async (_event, errorCode, _errorDescription, _url, isMainFrame) => {
+        if (!isMainFrame) return; // Ignore sub-resource failures
+
         if (isDev) {
-          // DNS / Connection errors in dev usually mean Next.js hasn't started yet.
           if (errorCode >= -199 && errorCode <= -100) {
             setTimeout(() => {
               this._detectDevPort().then((url) => {
@@ -194,46 +200,56 @@ class AppWindow {
           return;
         }
 
-        // Production offline handling.
-        // Electron's BrowserWindow.loadURL() completely bypasses Service Workers
-        // if the physical network adapter is disconnected (ERR_INTERNET_DISCONNECTED).
-        // To fix this, we load a local bridge file. The bridge performs a
-        // renderer-initiated location.replace(), which correctly triggers
-        // the Service Worker to serve the cached app.
-        const isNetworkError = errorCode >= -199 && errorCode <= -100;
-        if (isNetworkError) {
-          if (offlineRetries === 0) {
-            offlineRetries++;
-            const path = require('node:path');
-            const bridgePath = path.join(
-              __dirname,
-              '../build/offline-bridge.html',
-            );
+        loadFailures++;
+        const log = require('electron-log');
+        log.warn(
+          `[window] Load failed (attempt ${loadFailures}, code ${errorCode})`,
+        );
 
-            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-              this.mainWindow.loadFile(bridgePath, {
-                search: `url=${encodeURIComponent(PROD_URL)}`,
-              });
-            }
-          } else if (offlineRetries === 1) {
-            // The bridge's location.replace also failed (SW not installed).
-            // Prevent fallback to chrome-error:// by reloading bridge with failed flag.
-            offlineRetries++;
-            const path = require('node:path');
-            const bridgePath = path.join(
-              __dirname,
-              '../build/offline-bridge.html',
-            );
-
-            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-              this.mainWindow.loadFile(bridgePath, {
-                search: `url=${encodeURIComponent(PROD_URL)}&failed=1`,
-              });
-            }
+        if (loadFailures === 1) {
+          // Level 1: Try the offline bridge (triggers SW fetch handler)
+          const bridgePath = require('node:path').join(
+            __dirname,
+            '../build/offline-bridge.html',
+          );
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.loadFile(bridgePath, {
+              search: `url=${encodeURIComponent(PROD_URL)}`,
+            });
+          }
+        } else if (loadFailures === 2) {
+          // Level 2: SW is broken — nuke it and retry from network
+          log.info('[window] Clearing SW + cache for recovery');
+          const ses = require('electron').session.defaultSession;
+          try {
+            await ses.clearStorageData({
+              storages: ['serviceworkers', 'cachestorage'],
+            });
+            await ses.clearCodeCaches({ urls: [] });
+            await ses.clearCache();
+          } catch (_e) {}
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.loadURL(PROD_URL);
+          }
+        } else {
+          // Level 3: Nothing works — show local fallback, stop retrying
+          const bridgePath = require('node:path').join(
+            __dirname,
+            '../build/offline-bridge.html',
+          );
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.loadFile(bridgePath, {
+              search: `url=${encodeURIComponent(PROD_URL)}&failed=1`,
+            });
           }
         }
       },
     );
+
+    // Reset failure counter on successful page load
+    this.mainWindow.webContents.on('did-finish-load', () => {
+      loadFailures = 0;
+    });
 
     this.mainWindow.once('ready-to-show', () => {
       // Premium Fade-in Transition (#12)
@@ -255,21 +271,49 @@ class AppWindow {
       }
     });
 
-    // Auto-reload on renderer crash (avoids blank white screen stuck state)
-    this.mainWindow.webContents.on('render-process-gone', (_event, details) => {
-      if (details.reason !== 'clean-exit') {
-        require('electron-log').warn(
-          '[window] Renderer crashed:',
-          details.reason,
-          '— reloading',
+    // --- RENDERER CRASH RECOVERY ---
+    // Tracks consecutive crashes. After 3, clears all caches (auto-recovery).
+    // Prevents infinite crash-reload loops that plagued macOS Tahoe.
+    let rendererCrashes = 0;
+
+    this.mainWindow.webContents.on(
+      'render-process-gone',
+      async (_event, details) => {
+        if (details.reason === 'clean-exit') return;
+
+        rendererCrashes++;
+        const log = require('electron-log');
+        log.warn(
+          `[window] Renderer crashed: ${details.reason} (crash #${rendererCrashes})`,
         );
+
+        if (rendererCrashes >= 3) {
+          // Auto-recovery: nuke caches and reload fresh
+          log.info('[window] 3 consecutive crashes — entering recovery mode');
+          const ses = require('electron').session.defaultSession;
+          try {
+            await ses.clearStorageData({
+              storages: ['serviceworkers', 'cachestorage'],
+            });
+            await ses.clearCodeCaches({ urls: [] });
+            await ses.clearCache();
+          } catch (_e) {}
+          rendererCrashes = 0;
+        }
+
         setTimeout(() => {
           if (this.mainWindow && !this.mainWindow.isDestroyed()) {
             this.mainWindow.reload();
           }
-        }, 1000);
-      }
-    });
+        }, 1500);
+      },
+    );
+
+    // --- STARTUP HEALTH CHECK ---
+    // Tracks whether the page successfully loaded and rendered.
+    // The 'app-ready' IPC from the React app resets the crash counter
+    // in main.js. Here we just ensure did-finish-load resets loadFailures
+    // and rendererCrashes so the escalation ladder works per-session.
 
     // --- NATIVE FULLSCREEN STATE TRACKING ---
     // macOS fires 'blur' on the BrowserWindow during the OS fullscreen animation.

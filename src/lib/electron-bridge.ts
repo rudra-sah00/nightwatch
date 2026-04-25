@@ -119,6 +119,7 @@ function createBridge() {
       readOfflineFile: async (_path: string): Promise<Uint8Array> =>
         new Uint8Array(),
       getOfflineMediaBase: async (): Promise<string> => '',
+      signalReady: noop,
     };
   }
 
@@ -180,6 +181,7 @@ function createBridge() {
     readOfflineFile: async (_path: string): Promise<Uint8Array> =>
       new Uint8Array(),
     getOfflineMediaBase: async (): Promise<string> => '',
+    signalReady: () => e.signalReady(),
   };
 }
 

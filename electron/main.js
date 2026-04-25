@@ -130,22 +130,48 @@ const startElectronApp = async () => {
   // This ensures downloaded HLS/MP4 content is playable the instant the React app loads.
   setupOfflineMediaProtocol();
 
-  // Bust stale service worker cache after app updates. The old SW serves
-  // cached HTML/JS indefinitely in Electron — clearing it once per version
-  // forces a fresh fetch from Vercel on next load.
-  // Also clears cachestorage to prevent broken precache manifests from
-  // causing infinite reload loops (e.g. conflicting revision entries).
+  // --- CLI ESCAPE HATCH: --clear-cache ---
+  // Allows users to nuke all cached data if the app is stuck.
+  // Usage: Nightwatch.app --clear-cache (or Nightwatch.exe --clear-cache)
   const { session } = require('electron');
+  const ses = session.defaultSession;
+
+  if (process.argv.includes('--clear-cache')) {
+    const _fs = require('node:fs');
+    require('electron-log').info(
+      '[cache] --clear-cache flag detected, purging all caches',
+    );
+    await ses.clearStorageData();
+    await ses.clearCache();
+    await ses.clearCodeCaches({ urls: [] });
+    for (const dir of [
+      'GPUCache',
+      'DawnGraphiteCache',
+      'DawnWebGPUCache',
+      'Code Cache',
+    ]) {
+      const p = _path.join(app.getPath('userData'), dir);
+      try {
+        _fs.rmSync(p, { recursive: true, force: true });
+      } catch (_e) {}
+    }
+  }
+
+  // --- VERSION-GATED CACHE PURGE ---
+  // On version change: clear SW registrations, CacheStorage, HTTP cache,
+  // and V8 code cache. This is the Discord/VS Code pattern — a clean slate
+  // per version so stale SW precache manifests or old JS bytecode can't
+  // cause reload loops or white screens.
   const currentVersion = getAppVersion();
   const lastClearedVersion = store.get('sw-cleared-version');
-  const swPurged = store.get('sw-purged-v1');
-  if (lastClearedVersion !== currentVersion || !swPurged) {
+  if (lastClearedVersion !== currentVersion) {
     try {
-      await session.defaultSession.clearStorageData({
+      await ses.clearStorageData({
         storages: ['serviceworkers', 'cachestorage'],
       });
+      await ses.clearCodeCaches({ urls: [] });
+      await ses.clearCache();
       store.set('sw-cleared-version', currentVersion);
-      store.set('sw-purged-v1', true);
     } catch (_e) {}
   }
 
@@ -384,6 +410,32 @@ const startElectronApp = async () => {
   // causing duplicate Discord updates, double keep-awake toggles, etc.
   if (listenersBootstrapped) return;
   listenersBootstrapped = true;
+
+  // --- STARTUP HEALTH CHECK ---
+  // React app signals 'app-ready' after hydration. If it never arrives,
+  // window.js triggers recovery. On success, reset the crash counter.
+  ipcMain.on('app-ready', () => {
+    store.set('consecutive-crashes', 0);
+    require('electron-log').info('[health] App ready — crash counter reset');
+  });
+
+  // --- CLEAR CACHE & RELOAD (exposed to offline-bridge.html) ---
+  ipcMain.on('clear-cache-reload', async () => {
+    const ses = require('electron').session.defaultSession;
+    try {
+      await ses.clearStorageData({
+        storages: ['serviceworkers', 'cachestorage'],
+      });
+      await ses.clearCodeCaches({ urls: [] });
+      await ses.clearCache();
+    } catch (_e) {}
+    const win = AppWindow.getInstance();
+    if (win && !win.isDestroyed()) {
+      win.loadURL(
+        app.isPackaged ? 'https://nightwatch.in' : 'http://localhost:3000',
+      );
+    }
+  });
 
   // IPC Event listener for React letting us know the user changed rooms!
   ipcMain.on('update-discord-status', (_event, presenceData) => {

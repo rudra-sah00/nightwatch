@@ -132,4 +132,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('download-progress', sub);
     return () => ipcRenderer.removeListener('download-progress', sub);
   },
+
+  // --- HEALTH & RECOVERY ---
+  // React app calls this after hydration to confirm successful boot.
+  signalReady: () => ipcRenderer.send('app-ready'),
+  // Offline bridge calls this to nuke caches and retry from network.
+  clearCacheAndReload: () => ipcRenderer.send('clear-cache-reload'),
 });
