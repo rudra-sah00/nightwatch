@@ -14,7 +14,6 @@ const ELECTRON_ENTRY_DEPS = [
   'electron-store',
   'electron-log',
   'electron-updater',
-  'electron-asar-hot-updater',
   'electron-window-state',
   'electron-context-menu',
   'discord-rpc',

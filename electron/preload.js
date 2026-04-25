@@ -16,8 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Returns the true version from package.json inside the ASAR bundle.
   // Use this instead of process.env.npm_package_version or any hardcoded value,
-  // because app.getVersion() is frozen at native binary build time and won't
-  // reflect electron-asar-hot-updater changes until a full native reinstall.
+  // because app.getVersion() is frozen at native binary build time.
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
 
   // Sync React Native Theme with Electron Window Frame

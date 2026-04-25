@@ -1,8 +1,94 @@
 const { autoUpdater } = require('electron-updater');
-const { autoUpdater: asarUpdater } = require('electron-asar-hot-updater');
-const { net } = require('electron');
+const { app, net } = require('electron');
+const path = require('node:path');
+const fs = require('node:fs');
+const { createGunzip } = require('node:zlib');
+const { pipeline } = require('node:stream/promises');
+const { Readable } = require('node:stream');
 const log = require('electron-log');
+const { getAppVersion } = require('./version');
 
+const GH_OWNER = 'rudra-sah00';
+const GH_REPO = 'nightwatch';
+const ASAR_ASSET_NAME = 'app.asar.gz';
+
+/**
+ * Fetches the latest GitHub Release and returns its version + app.asar.gz URL.
+ * No hardcoded versions — always queries the API dynamically.
+ */
+async function fetchLatestAsarInfo() {
+  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/latest`;
+  const res = await net.fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'Nightwatch-Desktop',
+    },
+  });
+  if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+  const release = await res.json();
+  const version = release.tag_name?.replace(/^v/, '');
+  const asset = release.assets?.find((a) => a.name === ASAR_ASSET_NAME);
+  return { version, asarUrl: asset?.browser_download_url || null };
+}
+
+/**
+ * Downloads a gzipped ASAR from url, decompresses it, and writes to destPath.
+ * Reports progress via onProgress(percent).
+ */
+async function downloadAndDecompress(url, destPath, onProgress) {
+  const res = await net.fetch(url, {
+    headers: { 'User-Agent': 'Nightwatch-Desktop' },
+  });
+  if (!res.ok) throw new Error(`Download failed: HTTP ${res.status}`);
+
+  const total = Number.parseInt(res.headers.get('content-length') || '0', 10);
+  let downloaded = 0;
+
+  // Convert web ReadableStream → Node Readable so we can pipe through gunzip
+  const webStream = res.body;
+  const nodeStream = Readable.fromWeb(webStream);
+
+  // Track download progress
+  const tracker = new (require('node:stream').Transform)({
+    transform(chunk, _encoding, cb) {
+      downloaded += chunk.length;
+      if (total > 0 && onProgress) {
+        onProgress(Math.floor((downloaded / total) * 100));
+      }
+      cb(null, chunk);
+    },
+  });
+
+  const gunzip = createGunzip();
+  const output = fs.createWriteStream(destPath);
+
+  await pipeline(nodeStream, tracker, gunzip, output);
+}
+
+/**
+ * Returns true if remote semver > local semver.
+ */
+function isNewer(remote, local) {
+  if (!remote || !local) return false;
+  const r = remote.split('.').map(Number);
+  const l = local.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((r[i] || 0) > (l[i] || 0)) return true;
+    if ((r[i] || 0) < (l[i] || 0)) return false;
+  }
+  return false;
+}
+
+/**
+ * Two-layer update system:
+ *
+ * Layer 1 — Native binary (electron-updater):
+ *   Full .dmg/.exe/.AppImage for Electron version bumps or native module changes.
+ *
+ * Layer 2 — ASAR differential (GitHub Releases API):
+ *   Downloads only the gzipped app.asar (~154MB vs 584MB raw, vs 292MB full DMG).
+ *   Swaps the ASAR in place and relaunches. No hardcoded versions.
+ */
 function setupUpdater(splashWindow, onComplete) {
   log.transports.file.level = 'info';
   autoUpdater.logger = log;
@@ -12,14 +98,12 @@ function setupUpdater(splashWindow, onComplete) {
   let updateFinished = false;
   let safetyTimer = null;
   let hardDeadlineTimer = null;
-  let asarChecked = false;
 
   const finish = () => {
     if (updateFinished) return;
     updateFinished = true;
     if (safetyTimer) clearTimeout(safetyTimer);
     if (hardDeadlineTimer) clearTimeout(hardDeadlineTimer);
-    // Delay slightly so the progress bar reaches 100% visually before close.
     setTimeout(() => {
       try {
         onComplete();
@@ -29,8 +113,6 @@ function setupUpdater(splashWindow, onComplete) {
     }, 1000);
   };
 
-  // Absolute hard deadline — guarantees the app always launches even if every
-  // updater event silently hangs (captive-portal Wi-Fi, firewall, proxy, etc.).
   hardDeadlineTimer = setTimeout(() => {
     log.warn('[updater] Hard deadline reached (20 s) — forcing launch.');
     finish();
@@ -45,44 +127,103 @@ function setupUpdater(splashWindow, onComplete) {
     }
   };
 
-  // --- INSTANT OFFLINE CHECK ---
-  // If there's no network at all, skip the updater immediately.
+  const sendVersion = (version) => {
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.webContents.send('updater-version', version);
+    }
+  };
+
   if (!net.isOnline()) {
-    log.info('[updater] Device is offline — skipping update check instantly.');
+    log.info('[updater] Device is offline — skipping update check.');
     sendStatus('Starting Nightwatch...', 100);
     finish();
     return;
   }
 
-  // --- SAFETY TIMEOUT (online but slow/unreachable server) ---
-  // 12 s is enough for slow connections; the hard deadline at 20 s is the backstop.
   safetyTimer = setTimeout(() => {
-    log.warn(
-      '[updater] Safety timeout reached — skipping update check (slow/offline?).',
-    );
+    log.warn('[updater] Safety timeout (12 s) — skipping update check.');
     finish();
   }, 12_000);
 
   sendStatus('Checking for updates...', 10);
 
-  // ---------- NATIVE UPDATER ----------
+  // ==================== LAYER 2: ASAR DIFFERENTIAL ====================
+  const checkAsarUpdate = async () => {
+    sendStatus('Checking resources...', 60);
+    try {
+      const { version: remoteVersion, asarUrl } = await fetchLatestAsarInfo();
+      const localVersion = getAppVersion();
+
+      log.info(
+        `[asar-updater] Local: ${localVersion}, Remote: ${remoteVersion}, Asset: ${asarUrl ? 'yes' : 'no'}`,
+      );
+
+      if (!asarUrl || !isNewer(remoteVersion, localVersion)) {
+        log.info('[asar-updater] No ASAR update needed.');
+        sendStatus('Starting Nightwatch...', 100);
+        finish();
+        return;
+      }
+
+      // Clear safety timers — we're downloading
+      if (safetyTimer) clearTimeout(safetyTimer);
+      if (hardDeadlineTimer) clearTimeout(hardDeadlineTimer);
+
+      sendVersion(remoteVersion);
+      sendStatus('Downloading update...', 65);
+
+      // Download deadline (3 min for ~154MB gzipped)
+      hardDeadlineTimer = setTimeout(() => {
+        log.warn('[asar-updater] Download deadline (3 min) — forcing launch.');
+        finish();
+      }, 180_000);
+
+      const asarPath = path.join(path.dirname(app.getAppPath()), 'app.asar');
+      const tempPath = `${asarPath}.update`;
+
+      await downloadAndDecompress(asarUrl, tempPath, (percent) => {
+        const scaled = 65 + Math.floor(percent * 0.3); // 65% → 95%
+        sendStatus(`Downloading update... ${percent}%`, scaled);
+      });
+
+      // Swap: on Windows the running ASAR is locked, stage as .pending
+      if (process.platform === 'win32') {
+        const pendingPath = `${asarPath}.pending`;
+        fs.renameSync(tempPath, pendingPath);
+        log.info('[asar-updater] Staged for next launch (Windows).');
+      } else {
+        fs.renameSync(tempPath, asarPath);
+        log.info('[asar-updater] ASAR swapped. Restarting...');
+      }
+
+      sendStatus('Update installed — restarting...', 100);
+      setTimeout(() => {
+        app.relaunch();
+        app.exit(0);
+      }, 1500);
+    } catch (err) {
+      log.warn('[asar-updater] Failed:', err);
+      // Clean up partial download
+      try {
+        const asarPath = path.join(path.dirname(app.getAppPath()), 'app.asar');
+        fs.rmSync(`${asarPath}.update`, { force: true });
+      } catch (_e) {}
+      sendStatus('Starting Nightwatch...', 100);
+      finish();
+    }
+  };
+
+  // ==================== LAYER 1: NATIVE BINARY ====================
   autoUpdater.on('update-available', (info) => {
-    // Prevent the fast-launch timers from killing the splash screen during a large download
     if (safetyTimer) clearTimeout(safetyTimer);
     if (hardDeadlineTimer) clearTimeout(hardDeadlineTimer);
 
-    if (splashWindow && !splashWindow.isDestroyed() && info.version) {
-      splashWindow.webContents.send('updater-version', info.version);
-    }
+    sendVersion(info.version);
     sendStatus('Downloading update please...', 30);
 
-    // Without this, a stalled/slow download after clearing both timers above
-    // hangs the splash screen forever. 5 minutes is generous for any binary size.
     hardDeadlineTimer = setTimeout(
       () => {
-        log.warn(
-          '[updater] Download deadline (5 min) — forcing launch without update.',
-        );
+        log.warn('[updater] Download deadline (5 min) — forcing launch.');
         finish();
       },
       5 * 60 * 1000,
@@ -97,12 +238,10 @@ function setupUpdater(splashWindow, onComplete) {
   });
 
   autoUpdater.on('update-not-available', () => {
-    checkAsarUpdater();
+    checkAsarUpdate();
   });
 
   autoUpdater.on('update-downloaded', () => {
-    // If finish() already ran (download deadline fired), the user is already in the app.
-    // Don't interrupt their session — autoInstallOnAppQuit will handle it on next quit.
     if (updateFinished) {
       log.info(
         '[updater] Update downloaded after launch — will install on next quit.',
@@ -116,44 +255,15 @@ function setupUpdater(splashWindow, onComplete) {
   });
 
   autoUpdater.on('error', (err) => {
-    log.error('Error in auto-updater:', err);
-    checkAsarUpdater();
+    log.error('[updater] Native updater error:', err);
+    checkAsarUpdate();
   });
 
-  // ---------- ASAR HOT UPDATER ----------
-  const checkAsarUpdater = () => {
-    if (asarChecked) return;
-    asarChecked = true;
-    sendStatus('Checking resources...', 80);
-
-    try {
-      asarUpdater.setFeedURL(
-        'https://raw.githubusercontent.com/rudra-sah00/nightwatch/main/update.json',
-      );
-      asarUpdater
-        .checkForUpdates()
-        .then((res) => {
-          log.info('ASAR checked:', res);
-          sendStatus('Ready to launch!', 100);
-          finish();
-        })
-        .catch((err) => {
-          log.warn('ASAR update error/no-update:', err);
-          sendStatus('Starting Nightwatch...', 100);
-          finish();
-        });
-    } catch (err) {
-      log.warn('ASAR catch:', err);
-      sendStatus('Loading local files...', 100);
-      finish();
-    }
-  };
-
-  // Kickoff Native Updater first
   try {
     autoUpdater.checkForUpdates();
-  } catch (_e) {
-    checkAsarUpdater();
+  } catch (err) {
+    log.error('[updater] checkForUpdates threw:', err);
+    checkAsarUpdate();
   }
 }
 

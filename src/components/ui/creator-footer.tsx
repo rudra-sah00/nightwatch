@@ -1,10 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { desktopBridge, isDesktop } from '@/lib/electron-bridge';
 import pkg from '../../../package.json';
-
-const APP_VERSION = pkg.version;
 
 /**
  * Shared Creator Identity footer with social links.
@@ -12,6 +12,15 @@ const APP_VERSION = pkg.version;
  */
 export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
   const t = useTranslations('common');
+  const [appVersion, setAppVersion] = useState(pkg.version);
+
+  useEffect(() => {
+    if (isDesktop) {
+      desktopBridge.getAppVersion().then((v) => {
+        if (v) setAppVersion(v);
+      });
+    }
+  }, []);
 
   return (
     <div
@@ -126,7 +135,7 @@ export function CreatorFooter({ isCompact = false }: { isCompact?: boolean }) {
           href="/whats-new"
           className="font-bold border border-border px-2 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors hover:text-primary"
         >
-          v{APP_VERSION}
+          v{appVersion}
         </a>
       </div>
     </div>

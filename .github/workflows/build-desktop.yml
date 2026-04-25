@@ -73,3 +73,26 @@ jobs:
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: pnpm exec electron-builder ${{ matrix.build_args }} --publish always
+
+      - name: Upload app.asar to GitHub Release (macOS only)
+        if: matrix.platform == 'macOS-arm64'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Extract app.asar from the built .app bundle
+          ASAR_PATH=$(find desktop-build/mac-arm64 -name "app.asar" -path "*/Resources/*" | head -1)
+          if [ -z "$ASAR_PATH" ]; then
+            echo "❌ app.asar not found in build output"
+            exit 1
+          fi
+          echo "Found app.asar at: $ASAR_PATH ($(du -h "$ASAR_PATH" | cut -f1))"
+
+          # Gzip for smaller download (584MB → ~154MB)
+          gzip -c "$ASAR_PATH" > "${ASAR_PATH}.gz"
+          echo "Compressed: $(du -h "${ASAR_PATH}.gz" | cut -f1)"
+
+          # Get the latest release tag
+          TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          echo "Uploading app.asar.gz to release: $TAG"
+
+          gh release upload "$TAG" "${ASAR_PATH}.gz" --clobber

@@ -4,9 +4,8 @@ const fs = require('node:fs');
 
 /**
  * Reads the real app version from package.json inside the ASAR bundle.
- * app.getVersion() returns the native binary's compiled version, which is
- * NOT updated by electron-asar-hot-updater. This function always returns
- * the live JS bundle version.
+ * app.getVersion() returns the native binary's compiled version which
+ * may lag behind the actual bundle version.
  */
 function getAppVersion() {
   try {
