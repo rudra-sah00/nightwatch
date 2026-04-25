@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.6.0](https://github.com/rudra-sah00/nightwatch/compare/v2.5.0...v2.6.0) (2026-04-25)
+
+
+### Features
+
+* broadcast live stream activity to friends sidebar ([3407221](https://github.com/rudra-sah00/nightwatch/commit/3407221145b04e9ffdf1ba5403835d1a288cada2))
+* desktop titlebar with back/forward nav, route title, and CSS variable insets ([3f17f50](https://github.com/rudra-sah00/nightwatch/commit/3f17f50a01e44b445421289c2a3c89b83421fd83))
+* electron fullscreen fix, PiP header overlay, downloads sidebar, SW skip in electron, captcha reset on login error, friend request error handling ([d52479a](https://github.com/rudra-sah00/nightwatch/commit/d52479ab14cedc32f2d26fca1c7b7b7dc2e6651c))
+
+
+### Bug Fixes
+
+* compute activity graph month labels dynamically ([ac9d179](https://github.com/rudra-sah00/nightwatch/commit/ac9d179f6b91544464af8a9bf026a44801064358))
+* compute activity graph month labels dynamically from date range ([8e47c95](https://github.com/rudra-sah00/nightwatch/commit/8e47c95e12e43dc44a4956d57e28a29833cf0eb8))
+* handle www.nightwatch.in URLs as internal, prevent opening in default browser ([08cd2ef](https://github.com/rudra-sah00/nightwatch/commit/08cd2efaa8872dbded6ff2a9af6874d3516617ad))
+* minimize to tray on all platforms, add app icon, prevent quit on window close ([4eae55c](https://github.com/rudra-sah00/nightwatch/commit/4eae55c33b06aa9824100ab3408fcf1d899ce937))
+* navigate internal URLs in same window instead of opening default browser ([fbdddad](https://github.com/rudra-sah00/nightwatch/commit/fbdddad285ff04e90be281ca23b26cc2e9b266f7))
+* prevent desktop-to-desktop call auto-disconnect on window blur ([080bcb8](https://github.com/rudra-sah00/nightwatch/commit/080bcb89465e9eb20b802187a3b55b2fafa0c394))
+* prevent footer overflow on ultrawide screens ([7e89c69](https://github.com/rudra-sah00/nightwatch/commit/7e89c691bd53b78bfd6ac207cbfd45fd374354de))
+* replace broken ASAR hot-updater with two-layer differential system ([70d3ac4](https://github.com/rudra-sah00/nightwatch/commit/70d3ac40ec173a4259b34329a4d99e466cfda71d))
+* two-layer ASAR differential updater for desktop ([62a4637](https://github.com/rudra-sah00/nightwatch/commit/62a4637d64848cd9f723a5c59147f18d8dace30c))
+
 ## [2.5.0](https://github.com/rudra-sah00/nightwatch/compare/v2.4.0...v2.5.0) (2026-04-24)
 
 
