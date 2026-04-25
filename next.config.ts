@@ -138,7 +138,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
 
   org: 'personal-oew',
 
-  project: 'nightwatch-web',
+  project: 'nightwatch-prod',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

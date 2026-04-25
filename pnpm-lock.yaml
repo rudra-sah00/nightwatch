@@ -24,7 +24,7 @@ importers:
         specifier: ^7.11.0
         version: 7.11.0
       '@sentry/nextjs':
-        specifier: ^10.47.0
+        specifier: ^10
         version: 10.47.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.105.4(esbuild@0.27.2))
       '@serwist/next':
         specifier: ^9.5.7
