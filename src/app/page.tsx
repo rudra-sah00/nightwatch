@@ -294,6 +294,40 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 bg-primary dark:bg-card border-t-4 border-border">
+        <div className="px-6 md:px-12 pb-10 pt-10 max-w-2xl">
+          <p className="text-[11px] text-primary-foreground/40 dark:text-foreground/30 leading-relaxed font-body">
+            {t('footer.disclaimer')}
+          </p>
+        </div>
+        <div className="border-t border-primary-foreground/10 dark:border-foreground/10 px-6 md:px-12 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link
+              href="/terms"
+              className="font-headline font-bold uppercase text-[10px] tracking-widest text-primary-foreground/50 dark:text-foreground/40 hover:text-neo-yellow transition-colors"
+            >
+              {t('footer.terms')}
+            </Link>
+            <Link
+              href="/privacy"
+              className="font-headline font-bold uppercase text-[10px] tracking-widest text-primary-foreground/50 dark:text-foreground/40 hover:text-neo-yellow transition-colors"
+            >
+              {t('footer.privacy')}
+            </Link>
+            <Link
+              href="/whats-new"
+              className="font-headline font-bold uppercase text-[10px] tracking-widest text-primary-foreground/50 dark:text-foreground/40 hover:text-neo-yellow transition-colors"
+            >
+              {t('footer.whatsNew')}
+            </Link>
+          </div>
+          <p className="font-headline font-medium uppercase text-[10px] tracking-[0.25em] text-primary-foreground/30 dark:text-foreground/20">
+            {t('footer.copyright', { year: new Date().getFullYear() })}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
