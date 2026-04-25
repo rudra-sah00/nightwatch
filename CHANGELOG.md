@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.7.0](https://github.com/rudra-sah00/nightwatch/compare/v2.6.0...v2.7.0) (2026-04-25)
+
+
+### Features
+
+* custom Windows controls, fix splash border/drag/always-on-top ([7239267](https://github.com/rudra-sah00/nightwatch/commit/7239267faae1b33321d111e8cceb0b48bd861896))
+* desktop browser-to-app login + publisher update ([336ee11](https://github.com/rudra-sah00/nightwatch/commit/336ee1127f871198188c09c79e1f963bb743c345))
+
+
+### Bug Fixes
+
+* patch Info.plist on macOS to show ASAR version in About panel ([96e2198](https://github.com/rudra-sah00/nightwatch/commit/96e219890174b7e58723d89543418330d6267557))
+* restore footer without large NIGHTWATCH text ([992253b](https://github.com/rudra-sah00/nightwatch/commit/992253b3bcfa439b21afdb688387dcaefbcd3c1b))
+
 ## [2.6.0](https://github.com/rudra-sah00/nightwatch/compare/v2.5.0...v2.6.0) (2026-04-25)
 
 
