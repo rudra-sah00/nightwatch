@@ -24,7 +24,7 @@ export default function LoginClient() {
   const [copied, setCopied] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
-  const [_desktopWaiting, setDesktopWaiting] = useState(false);
+  const [desktopWaiting, setDesktopWaiting] = useState(false);
 
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)
@@ -206,7 +206,18 @@ export default function LoginClient() {
           <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
             <div className="bg-background border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
               <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
-                {hookLoading ? null : loginHook.step === 'forgot' ||
+                {desktopWaiting ? (
+                  <div className="flex-grow flex flex-col items-center justify-center gap-4 py-8">
+                    <div className="w-12 h-12 border-4 border-border border-t-neo-yellow rounded-full animate-spin" />
+                    <h2 className="font-headline font-black uppercase text-lg tracking-tight text-center">
+                      {t('title.entrance')}
+                    </h2>
+                    <p className="text-sm text-muted-foreground text-center max-w-xs">
+                      Complete login in your browser. This window will update
+                      automatically.
+                    </p>
+                  </div>
+                ) : hookLoading ? null : loginHook.step === 'forgot' ||
                   loginHook.step === 'forgot_success' ? (
                   <ForgotPasswordForm {...loginHook} />
                 ) : (
