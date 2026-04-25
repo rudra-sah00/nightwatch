@@ -50,9 +50,12 @@ export default function LoginClient() {
     }
   }, [isAuthenticated, initialAuthCheck, router]);
 
-  // Desktop auth: initiate browser login flow when running in Electron
+  // Desktop auth: initiate browser login flow when running in Electron.
+  // In development, skip this — the app loads localhost so the normal
+  // login form works directly without needing a browser redirect.
   useEffect(() => {
     if (!checkIsDesktop() || isAuthenticated || authLoading) return;
+    if (process.env.NODE_ENV === 'development') return;
 
     let cancelled = false;
 
