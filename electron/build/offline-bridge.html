@@ -55,7 +55,8 @@
     <div class="message-box" id="msg-box">
       <span class="message-text" id="msg-text">LOADING...</span>
     </div>
-    <button class="retry-btn" id="retry-btn">Clear Cache & Retry</button>
+    <button type="button" class="retry-btn" id="retry-btn">Clear Cache & Retry</button>
+    <button type="button" class="retry-btn" id="downloads-btn" style="background:#a855f7;color:#fff;border-color:#a855f7">View Downloads</button>
   </div>
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -69,6 +70,10 @@
       document.getElementById('msg-text').textContent = 'UNABLE TO CONNECT';
       document.getElementById('msg-text').style.animation = 'none';
       document.getElementById('retry-btn').style.display = 'inline-block';
+      // Only show downloads button in Electron (has offline content)
+      if (window.electronAPI) {
+        document.getElementById('downloads-btn').style.display = 'inline-block';
+      }
     } else {
       setTimeout(function() { window.location.replace(targetUrl); }, 500);
     }
@@ -79,6 +84,12 @@
       } else {
         window.location.replace(targetUrl);
       }
+    });
+
+    document.getElementById('downloads-btn').addEventListener('click', function() {
+      // Try loading the downloads page — if network came back it'll work.
+      // The did-fail-load handler will catch it if still offline.
+      window.location.replace(targetUrl.replace(/\/$/, '') + '/downloads');
     });
   </script>
 </body>
