@@ -50,12 +50,10 @@ export default function LoginClient() {
     }
   }, [isAuthenticated, initialAuthCheck, router]);
 
-  // Desktop auth: initiate browser login flow when running in Electron.
-  // In development, skip this — the app loads localhost so the normal
-  // login form works directly without needing a browser redirect.
+  // Desktop auth: open the default browser for login, then receive
+  // the auth callback via deep link back into the Electron app.
   useEffect(() => {
     if (!checkIsDesktop() || isAuthenticated || authLoading) return;
-    if (process.env.NODE_ENV === 'development') return;
 
     let cancelled = false;
 
@@ -66,8 +64,12 @@ export default function LoginClient() {
         );
         const { code } = await desktopAuthInitiate();
 
-        // Open default browser for login
-        const loginUrl = `https://nightwatch.in/login?desktop=1&code=${encodeURIComponent(code)}`;
+        // Use localhost in dev, production domain in builds
+        const baseUrl =
+          process.env.NODE_ENV === 'development'
+            ? `http://localhost:${window.location.port || 3000}`
+            : 'https://nightwatch.in';
+        const loginUrl = `${baseUrl}/login?desktop=1&code=${encodeURIComponent(code)}`;
         window.open(loginUrl, '_blank');
         setDesktopWaiting(true);
 
