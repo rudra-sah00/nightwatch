@@ -70,6 +70,7 @@ function createBridge() {
       setPictureInPicture: noop as (e: boolean, o?: number) => void,
       setUnreadBadge: noop as (c: number) => void,
       setKeepAwake: noop as (k: boolean) => void,
+      setCallActive: noop as (active: boolean) => void,
       onPipModeChanged: noopListen as (
         cb: (isPip: boolean) => void,
       ) => UnlistenFn,
@@ -130,6 +131,7 @@ function createBridge() {
       e.setPictureInPicture(enabled, opacity),
     setUnreadBadge: (c: number) => e.setUnreadBadge(c),
     setKeepAwake: (k: boolean) => e.setKeepAwake(k),
+    setCallActive: (active: boolean) => e.setCallActive(active),
     onPipModeChanged: (cb: (isPip: boolean) => void) =>
       e.onPipModeChanged(cb) as UnlistenFn,
     showNotification: (p: {

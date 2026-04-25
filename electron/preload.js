@@ -16,8 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Returns the true version from package.json inside the ASAR bundle.
   // Use this instead of process.env.npm_package_version or any hardcoded value,
-  // because app.getVersion() is frozen at native binary build time and won't
-  // reflect electron-asar-hot-updater changes until a full native reinstall.
+  // because app.getVersion() is frozen at native binary build time.
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
 
   // Sync React Native Theme with Electron Window Frame
@@ -33,6 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Keep screen awake while a Watch Party stream is playing (prevents lock screens!)
   setKeepAwake: (shouldKeepAwake) =>
     ipcRenderer.send('toggle-keep-awake', shouldKeepAwake),
+  setCallActive: (active) => ipcRenderer.send('set-call-active', active),
 
   // Listener to hide CSS when the Native Window shrinks down to a PiP block
   onPipModeChanged: (callback) => {

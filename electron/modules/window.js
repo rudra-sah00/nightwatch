@@ -313,6 +313,7 @@ class AppWindow {
 
     this.mainWindow.on('blur', () => {
       if (isNativeFullscreen) return;
+      if (this.callActive) return;
       if (pipDebounceTimer) clearTimeout(pipDebounceTimer);
       pipDebounceTimer = setTimeout(() => {
         this.mainWindow.webContents.send('window-blur');

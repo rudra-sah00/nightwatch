@@ -597,15 +597,7 @@
   /* Ensure gap-based layouts (flex gap, grid gap) work without mirroring */
   /* gap is direction-agnostic, so no override needed */
 
-  /* Electron title bar padding flips */
-  [dir="rtl"] .pl-20 {
-    padding-left: unset;
-    padding-right: 5rem;
-  }
-  [dir="rtl"] .pr-32 {
-    padding-right: unset;
-    padding-left: 8rem;
-  }
+  /* Electron title bar insets are handled via CSS variables on body */
 
   /* Hide scrollbar globally but maintain functionality */
   html,
@@ -670,6 +662,7 @@
   /* TRUE DESKTOP PIP MODE - Strip out borders and sidebars to make video strictly full bleed */
   body.is-desktop-pip {
     overflow: hidden !important;
+    padding: 0 !important;
   }
   body.is-desktop-pip header,
   body.is-desktop-pip .player-header,

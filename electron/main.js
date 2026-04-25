@@ -106,6 +106,26 @@ let globalPowerBlockerId = -1;
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
 const startElectronApp = async () => {
+  // --- PENDING ASAR SWAP (Windows) ---
+  // On Windows the running app.asar is file-locked, so ASAR updates are staged
+  // as app.asar.pending. Apply the swap before anything reads from the ASAR.
+  if (app.isPackaged) {
+    const _fs = require('node:fs');
+    const asarPath = _path.join(_path.dirname(app.getAppPath()), 'app.asar');
+    const pendingPath = `${asarPath}.pending`;
+    if (_fs.existsSync(pendingPath)) {
+      try {
+        _fs.renameSync(pendingPath, asarPath);
+        app.relaunch();
+        app.exit(0);
+        return;
+      } catch (err) {
+        require('electron-log').error('[asar-swap] Failed:', err);
+        _fs.rmSync(pendingPath, { force: true });
+      }
+    }
+  }
+
   // Register offline-media:// protocol handler FIRST — before splash or main window.
   // This ensures downloaded HLS/MP4 content is playable the instant the React app loads.
   setupOfflineMediaProtocol();
@@ -376,6 +396,13 @@ const startElectronApp = async () => {
     }
   });
 
+  // --- CALL-ACTIVE FLAG ---
+  // Suppresses window-blur IPC during active calls to prevent socket
+  // reconnection races that cause desktop-to-desktop call auto-disconnect.
+  ipcMain.on('set-call-active', (_event, active) => {
+    AppWindow.callActive = !!active;
+  });
+
   // --- SMART POWER & BANDWIDTH SAVER ---
   // If the user folds their laptop or locks their PC, forcefully pause the movie and show Away on Discord!
   const triggerSleepPause = () => {
@@ -618,10 +645,9 @@ const startElectronApp = async () => {
     store.delete(key);
   });
 
-  // --- REAL APP VERSION (ASAR-aware) ---
-  // app.getVersion() returns the native binary's compile-time version and is NOT
-  // updated by electron-asar-hot-updater. We always read from package.json inside
-  // the ASAR so React sees the correct version after a hot update.
+  // --- REAL APP VERSION ---
+  // app.getVersion() returns the native binary's compile-time version.
+  // We read from package.json inside the ASAR for accuracy.
   ipcMain.handle('get-app-version', () => getAppVersion());
 
   ipcMain.handle('toggle-fullscreen', () => {

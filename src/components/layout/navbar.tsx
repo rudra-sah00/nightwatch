@@ -4,12 +4,10 @@ import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 
 export function Navbar() {
   const { user } = useAuth();
-  const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
   const t = useTranslations('common.nav');
 
   return (
@@ -18,7 +16,11 @@ export function Navbar() {
       className={`sticky [-webkit-app-region:drag] top-0 z-50 w-full bg-background text-foreground overflow-hidden`}
     >
       <div
-        className={`flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4 ${isMounted && isDesktopApp && isMacOS ? 'pl-20' : ''} ${isMounted && isDesktopApp && isWindows ? 'pr-32' : ''}`}
+        className="flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4"
+        style={{
+          paddingLeft: `max(1rem, var(--electron-inset-left, 0px))`,
+          paddingRight: `max(1rem, var(--electron-inset-right, 0px))`,
+        }}
       >
         {/* Left Side: Brand Logo */}
         <div className="flex-1 flex justify-start items-center">

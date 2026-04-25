@@ -75,7 +75,7 @@ export default function LoginClient() {
     <div
       className={`bg-background text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
-      <LanguageSwitcher className="absolute top-4 right-4 z-50" />
+      <LanguageSwitcher className="absolute top-[calc(1rem+var(--electron-titlebar-height,0px))] right-[calc(1rem+var(--electron-inset-right,0px))] z-50" />
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
           {/* Features Bento Box - Identical to Signup for Parity */}
