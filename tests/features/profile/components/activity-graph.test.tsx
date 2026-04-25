@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ActivityGraph } from '@/features/profile/components/activity-graph';
 import type { WatchActivity } from '@/features/profile/types';
@@ -14,7 +14,11 @@ describe('ActivityGraph', () => {
   describe('rendering', () => {
     it('renders without crashing', () => {
       render(<ActivityGraph activity={[]} />);
-      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
+      // Month labels are now dynamic based on the 53-week range ending today
+      const monthContainer = document.querySelector(
+        '.flex.justify-between.mt-4',
+      );
+      expect(monthContainer).toBeInTheDocument();
     });
 
     it('renders loading skeleton when isLoading is true', () => {
@@ -33,10 +37,17 @@ describe('ActivityGraph', () => {
   });
 
   describe('legend', () => {
-    it('renders the months', () => {
+    it('renders dynamic month labels matching the date range', () => {
       render(<ActivityGraph activity={mockActivity} />);
-      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
-      expect(screen.getByText('activity.months.dec')).toBeInTheDocument();
+      // The graph covers ~53 weeks ending today, so it should show
+      // roughly 12-13 month labels spanning that range, not a fixed Jan-Dec
+      const monthContainer = document.querySelector(
+        '.flex.justify-between.mt-4',
+      );
+      expect(monthContainer).toBeInTheDocument();
+      const spans = monthContainer!.querySelectorAll('span');
+      expect(spans.length).toBeGreaterThanOrEqual(12);
+      expect(spans.length).toBeLessThanOrEqual(14);
     });
   });
 
@@ -66,8 +77,11 @@ describe('ActivityGraph', () => {
   describe('empty state', () => {
     it('renders correctly with empty activity array', () => {
       render(<ActivityGraph activity={[]} />);
-      // Should show Jan/Dec
-      expect(screen.getByText('activity.months.jan')).toBeInTheDocument();
+      // Should show dynamic month labels
+      const monthContainer = document.querySelector(
+        '.flex.justify-between.mt-4',
+      );
+      expect(monthContainer).toBeInTheDocument();
     });
   });
 });
