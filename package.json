@@ -149,7 +149,7 @@
     "win": {
       "target": "nsis",
       "icon": "electron/build/icon.png",
-      "publisherName": "Nightwatch Labs"
+      "legalTrademarks": "© 2025 Nightwatch Labs"
     },
     "nsis": {
       "oneClick": false,
@@ -166,8 +166,7 @@
         "AppImage",
         "deb"
       ],
-      "icon": "electron/build/icon.png",
-      "vendor": "Nightwatch Labs"
+      "icon": "electron/build/icon.png"
     },
     "publish": [
       {
