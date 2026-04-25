@@ -150,7 +150,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           <div
             ref={containerRef}
             id="main-content"
-            className="flex-grow flex flex-row min-h-0 gap-2 p-2 h-[calc(100dvh-5rem)] overflow-hidden"
+            className="flex-grow flex flex-row min-h-0 gap-2 p-2 h-[calc(100dvh-5rem-var(--electron-titlebar-height,0px))] overflow-hidden"
           >
             <LeftSidebar />
             <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full">
