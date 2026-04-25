@@ -133,15 +133,19 @@ const startElectronApp = async () => {
   // Bust stale service worker cache after app updates. The old SW serves
   // cached HTML/JS indefinitely in Electron — clearing it once per version
   // forces a fresh fetch from Vercel on next load.
+  // Also clears cachestorage to prevent broken precache manifests from
+  // causing infinite reload loops (e.g. conflicting revision entries).
   const { session } = require('electron');
   const currentVersion = getAppVersion();
   const lastClearedVersion = store.get('sw-cleared-version');
-  if (lastClearedVersion !== currentVersion) {
+  const swPurged = store.get('sw-purged-v1');
+  if (lastClearedVersion !== currentVersion || !swPurged) {
     try {
       await session.defaultSession.clearStorageData({
-        storages: ['serviceworkers'],
+        storages: ['serviceworkers', 'cachestorage'],
       });
       store.set('sw-cleared-version', currentVersion);
+      store.set('sw-purged-v1', true);
     } catch (_e) {}
   }
 
