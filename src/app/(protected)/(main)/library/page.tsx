@@ -1,3 +1,9 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Library | Nightwatch',
+};
+
 export default function LibraryPage() {
   return (
     <main className="min-h-full pb-32">

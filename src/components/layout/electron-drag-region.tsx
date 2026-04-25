@@ -18,6 +18,10 @@ const ROUTE_NAMES: Record<string, string> = {
   '/privacy': 'Privacy',
   '/terms': 'Terms',
   '/continue-watching': 'Continue Watching',
+  '/library': 'Library',
+  '/ask-ai': 'Ask AI',
+  '/messages': 'Messages',
+  '/changelog': 'Changelog',
 };
 
 function getRouteTitle(pathname: string): string {

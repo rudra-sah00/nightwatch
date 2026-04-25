@@ -1,3 +1,9 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Ask AI | Nightwatch',
+};
+
 export default function AskAiPage() {
   return (
     <main className="flex-grow flex flex-col items-center justify-center p-8">
