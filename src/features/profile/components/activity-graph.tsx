@@ -26,12 +26,69 @@ const ACTIVITY_LEVEL_COLORS = [
   'bg-neo-red', // Level 4
 ] as const;
 
+const MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const;
+
+function getMonthLabelsFromWeeks(
+  weeks: { date: Date }[][],
+  t: (key: string) => string,
+) {
+  const labels: { key: string; label: string }[] = [];
+  let lastMonth = -1;
+  for (const week of weeks) {
+    const month = week[0].date.getMonth();
+    if (month !== lastMonth) {
+      lastMonth = month;
+      labels.push({
+        key: `${month}-${week[0].date.getFullYear()}`,
+        label: t(`activity.months.${MONTH_KEYS[month]}`),
+      });
+    }
+  }
+  return labels;
+}
+
+function getMonthLabelsForSkeleton(t: (key: string) => string) {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const start = new Date(today);
+  start.setDate(today.getDate() - (52 * 7 + dayOfWeek));
+  const labels: { key: string; label: string }[] = [];
+  let lastMonth = -1;
+  for (let w = 0; w < 53; w++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + w * 7);
+    const month = d.getMonth();
+    if (month !== lastMonth) {
+      lastMonth = month;
+      labels.push({
+        key: `${month}-${d.getFullYear()}`,
+        label: t(`activity.months.${MONTH_KEYS[month]}`),
+      });
+    }
+  }
+  return labels;
+}
+
 function ActivityGraphSkeleton() {
   const t = useTranslations('profile');
   const skeletonIds = useMemo(
     () => Array.from({ length: 53 * 7 }).map((_, i) => `skel-id-${i}`),
     [],
   );
+  const monthLabels = useMemo(() => getMonthLabelsForSkeleton(t), [t]);
 
   return (
     <div className="w-full animate-pulse">
@@ -44,18 +101,9 @@ function ActivityGraphSkeleton() {
         ))}
       </div>
       <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/20">
-        <span>{t('activity.months.jan')}</span>
-        <span>{t('activity.months.feb')}</span>
-        <span>{t('activity.months.mar')}</span>
-        <span>{t('activity.months.apr')}</span>
-        <span>{t('activity.months.may')}</span>
-        <span>{t('activity.months.jun')}</span>
-        <span>{t('activity.months.jul')}</span>
-        <span>{t('activity.months.aug')}</span>
-        <span>{t('activity.months.sep')}</span>
-        <span>{t('activity.months.oct')}</span>
-        <span>{t('activity.months.nov')}</span>
-        <span>{t('activity.months.dec')}</span>
+        {monthLabels.map((m) => (
+          <span key={m.key}>{m.label}</span>
+        ))}
       </div>
     </div>
   );
@@ -143,6 +191,10 @@ export function ActivityGraph({
   const t = useTranslations('profile');
   const locale = useLocale();
   const { weeks } = useActivityGraphData(activity, createdAt);
+  const monthLabels = useMemo(
+    () => getMonthLabelsFromWeeks(weeks, t),
+    [weeks, t],
+  );
 
   const formatDate = (date: Date) =>
     date.toLocaleDateString(locale, {
@@ -232,18 +284,9 @@ export function ActivityGraph({
         )}
       </div>
       <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/40">
-        <span>{t('activity.months.jan')}</span>
-        <span>{t('activity.months.feb')}</span>
-        <span>{t('activity.months.mar')}</span>
-        <span>{t('activity.months.apr')}</span>
-        <span>{t('activity.months.may')}</span>
-        <span>{t('activity.months.jun')}</span>
-        <span>{t('activity.months.jul')}</span>
-        <span>{t('activity.months.aug')}</span>
-        <span>{t('activity.months.sep')}</span>
-        <span>{t('activity.months.oct')}</span>
-        <span>{t('activity.months.nov')}</span>
-        <span>{t('activity.months.dec')}</span>
+        {monthLabels.map((m) => (
+          <span key={m.key}>{m.label}</span>
+        ))}
       </div>
     </>
   );
