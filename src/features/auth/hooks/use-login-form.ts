@@ -15,7 +15,6 @@ interface FormState {
 }
 
 const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
-const DESKTOP_CODE_KEY = 'desktop_login_code';
 
 export function useLoginForm() {
   const t = useTranslations('common.toasts');
@@ -50,12 +49,6 @@ export function useLoginForm() {
 
     if (mobileMode && mobileState) {
       sessionStorage.setItem(MOBILE_LOGIN_STATE_KEY, mobileState);
-    }
-
-    const desktopMode = searchParams.get('desktop') === '1';
-    const desktopCode = searchParams.get('code');
-    if (desktopMode && desktopCode) {
-      sessionStorage.setItem(DESKTOP_CODE_KEY, desktopCode);
     }
   }, []);
 
@@ -258,30 +251,16 @@ export function useLoginForm() {
         return;
       }
 
-      const desktopMode = searchParams.get('desktop') === '1';
-      const desktopCode =
-        searchParams.get('code') || sessionStorage.getItem(DESKTOP_CODE_KEY);
-
       const response = await verifyOtp(
         formData.email,
         otp,
         'login',
         mobileMode && mobileState ? mobileState : undefined,
-        desktopMode && desktopCode ? desktopCode : undefined,
       );
 
       if (response.mobileAuthRedirectUrl) {
         sessionStorage.removeItem(MOBILE_LOGIN_STATE_KEY);
         window.location.assign(response.mobileAuthRedirectUrl);
-        return;
-      }
-
-      // Desktop auth: redirect back to the Electron app via deep link
-      if (desktopMode && desktopCode && response.desktopAuthorized) {
-        sessionStorage.removeItem(DESKTOP_CODE_KEY);
-        window.location.assign(
-          `nightwatch://auth/callback?code=${encodeURIComponent(desktopCode)}`,
-        );
         return;
       }
 

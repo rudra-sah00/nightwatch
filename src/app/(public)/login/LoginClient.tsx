@@ -24,7 +24,6 @@ export default function LoginClient() {
   const [copied, setCopied] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
-  const [desktopWaiting, setDesktopWaiting] = useState(false);
 
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)
@@ -49,77 +48,6 @@ export default function LoginClient() {
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, initialAuthCheck, router]);
-
-  // Desktop auth: open the default browser for login, then receive
-  // the auth callback via deep link back into the Electron app.
-  // Runs once on mount — guarded by a window flag to prevent re-triggering
-  // on React re-renders or navigation.
-  useEffect(() => {
-    if (!checkIsDesktop() || isAuthenticated || authLoading) return;
-    if ((window as unknown as Record<string, boolean>).__nw_desktop_auth)
-      return;
-    (window as unknown as Record<string, boolean>).__nw_desktop_auth = true;
-
-    let cancelled = false;
-
-    const startDesktopAuth = async () => {
-      try {
-        const { desktopAuthInitiate, desktopAuthExchange } = await import(
-          '@/features/auth/api'
-        );
-        const { code } = await desktopAuthInitiate();
-
-        // Use localhost in dev, production domain in builds
-        const baseUrl =
-          process.env.NODE_ENV === 'development'
-            ? `http://localhost:${window.location.port || 3000}`
-            : 'https://nightwatch.in';
-        const loginUrl = `${baseUrl}/login?desktop=1&code=${encodeURIComponent(code)}`;
-        // Use shell.openExternal via the Electron preload to guarantee
-        // the URL opens in the default browser, not inside the Electron window.
-        // window.open() is intercepted by setWindowOpenHandler which reloads
-        // the Electron window for internal URLs, causing a redirect loop.
-        if (window.electronAPI?.openExternal) {
-          window.electronAPI.openExternal(loginUrl);
-        } else {
-          window.open(loginUrl, '_blank');
-        }
-        setDesktopWaiting(true);
-
-        // Listen for the deep link callback
-        const unlisten = desktopBridge.onDesktopAuthCallback(async (cbCode) => {
-          if (cancelled) return;
-          try {
-            const response = await desktopAuthExchange(cbCode);
-            if (response.user) {
-              const { storeUser } = await import('@/lib/auth');
-              const { useAuthStore } = await import('@/store/use-auth-store');
-              storeUser(response.user);
-              useAuthStore.getState().updateUser(response.user);
-              useAuthStore.setState({
-                user: response.user,
-                isAuthenticated: true,
-              });
-            }
-          } catch {
-            toast.error('Desktop login failed. Please try again.');
-          } finally {
-            setDesktopWaiting(false);
-          }
-        });
-
-        return unlisten;
-      } catch {
-        // If initiate fails, fall through to normal login form
-      }
-    };
-
-    const cleanup = startDesktopAuth();
-    return () => {
-      cancelled = true;
-      cleanup?.then((unlisten) => unlisten?.());
-    };
-  }, [isAuthenticated, authLoading]);
 
   const handleCopyEmail = () => {
     const email = 'rudranarayanaknr@gmail.com';
@@ -206,18 +134,7 @@ export default function LoginClient() {
           <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
             <div className="bg-background border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
               <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
-                {desktopWaiting ? (
-                  <div className="flex-grow flex flex-col items-center justify-center gap-4 py-8">
-                    <div className="w-12 h-12 border-4 border-border border-t-neo-yellow rounded-full animate-spin" />
-                    <h2 className="font-headline font-black uppercase text-lg tracking-tight text-center">
-                      {t('title.entrance')}
-                    </h2>
-                    <p className="text-sm text-muted-foreground text-center max-w-xs">
-                      Complete login in your browser. This window will update
-                      automatically.
-                    </p>
-                  </div>
-                ) : hookLoading ? null : loginHook.step === 'forgot' ||
+                {hookLoading ? null : loginHook.step === 'forgot' ||
                   loginHook.step === 'forgot_success' ? (
                   <ForgotPasswordForm {...loginHook} />
                 ) : (

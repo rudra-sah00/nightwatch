@@ -7,19 +7,6 @@ function handleDeepLink(url, mainWindow) {
   mainWindow.show();
   mainWindow.focus();
 
-  // Auth callback: nightwatch://auth/callback?code=CODE
-  // Send to renderer for token exchange instead of navigating
-  if (url.startsWith('nightwatch://auth/callback')) {
-    try {
-      const parsed = new URL(url.replace('nightwatch://', 'https://x/'));
-      const code = parsed.searchParams.get('code');
-      if (code) {
-        mainWindow.webContents.send('desktop-auth-callback', code);
-        return;
-      }
-    } catch (_e) {}
-  }
-
   // Standard deep links: map nightwatch://path to https://nightwatch.in/path
   const secureUrl = url.replace('nightwatch://', `https://${ALLOWED_HOST}/`);
 

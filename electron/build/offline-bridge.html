@@ -75,10 +75,10 @@
         document.getElementById('downloads-btn').style.display = 'inline-block';
       }
     } else {
-      setTimeout(function() { window.location.replace(targetUrl); }, 500);
+      setTimeout(() => { window.location.replace(targetUrl); }, 500);
     }
 
-    document.getElementById('retry-btn').addEventListener('click', function() {
+    document.getElementById('retry-btn').addEventListener('click', () => {
       if (window.electronAPI?.clearCacheAndReload) {
         window.electronAPI.clearCacheAndReload();
       } else {
@@ -86,7 +86,7 @@
       }
     });
 
-    document.getElementById('downloads-btn').addEventListener('click', function() {
+    document.getElementById('downloads-btn').addEventListener('click', () => {
       // Try loading the downloads page — if network came back it'll work.
       // The did-fail-load handler will catch it if still offline.
       window.location.replace(targetUrl.replace(/\/$/, '') + '/downloads');

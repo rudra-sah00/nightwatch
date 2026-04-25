@@ -70,7 +70,6 @@ export interface AuthState {
     otp: string,
     context: 'login' | 'register',
     mobileState?: string,
-    desktopCode?: string,
   ) => Promise<LoginResponse>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -101,15 +100,9 @@ export const useAuthStore = create<AuthState>()(
 
       register: async (data: RegisterInput) => registerUser(data),
 
-      verifyOtp: async (email, otp, context, mobileState, desktopCode) => {
+      verifyOtp: async (email, otp, context, mobileState) => {
         const { verifyOtp: apiVerifyOtp } = await import('@/features/auth/api');
-        const response = await apiVerifyOtp(
-          email,
-          otp,
-          context,
-          mobileState,
-          desktopCode,
-        );
+        const response = await apiVerifyOtp(email, otp, context, mobileState);
         if (response.user) {
           storeUser(response.user);
           sessionStorage.removeItem('guest_token');
