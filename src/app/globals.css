@@ -430,8 +430,14 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    overflow: hidden;
+    height: 100dvh;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-hidden m-0;
+    height: 100dvh;
   }
 
   /* ── RTL support ─────────────────────────────────────────── */

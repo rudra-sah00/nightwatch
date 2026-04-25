@@ -77,22 +77,20 @@ export default async function RootLayout({
               <ThemeProvider>
                 <SocketProvider>
                   <AuthProvider>
-                    <ProgressBar />
-                    <DiscordPresenceSync />
-                    <OfflineIndicator />
-                    <SwUpdatePrompt />
-                    <SplashScreen />
                     <div
-                      className="flex flex-col overflow-y-auto overflow-x-hidden"
+                      className="flex flex-col overflow-hidden h-[100dvh] box-border"
                       style={{
-                        height:
-                          'calc(100dvh - var(--electron-titlebar-height, 0px))',
-                        marginTop: 'var(--electron-titlebar-height, 0px)',
+                        paddingTop: 'var(--electron-titlebar-height, 0px)',
                       }}
                     >
+                      <ProgressBar />
+                      <DiscordPresenceSync />
+                      <OfflineIndicator />
+                      <SwUpdatePrompt />
+                      <SplashScreen />
                       {children}
+                      <Toaster />
                     </div>
-                    <Toaster />
                   </AuthProvider>
                 </SocketProvider>
               </ThemeProvider>

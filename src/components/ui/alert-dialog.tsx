@@ -31,7 +31,7 @@ export function AlertDialogContent({
 }) {
   return (
     <RadixAlertDialog.Portal>
-      <RadixAlertDialog.Overlay className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200" />
+      <RadixAlertDialog.Overlay className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[60] bg-black/80 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200" />
       <RadixAlertDialog.Content
         className={cn(
           'fixed left-1/2 top-1/2 z-[61] -translate-x-1/2 -translate-y-1/2',
