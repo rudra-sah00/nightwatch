@@ -296,10 +296,10 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 bg-primary dark:bg-card border-t-4 border-border overflow-hidden">
-        <div className="px-6 md:px-12 pt-20 md:pt-28 pb-6 overflow-hidden">
+      <footer className="relative z-10 bg-primary dark:bg-card border-t-4 border-border overflow-hidden w-full max-w-[100vw]">
+        <div className="px-6 md:px-12 pt-20 md:pt-28 pb-6 overflow-hidden max-w-full">
           <p
-            className="font-headline font-black italic uppercase text-[clamp(4rem,16vw,15rem)] leading-[0.78] tracking-tighter select-none text-transparent [-webkit-text-stroke:1.5px_var(--stroke-color)]"
+            className="font-headline font-black italic uppercase text-[clamp(4rem,16vw,15rem)] leading-[0.78] tracking-tighter select-none text-transparent [-webkit-text-stroke:1.5px_var(--stroke-color)] whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
             style={
               {
                 '--stroke-color': 'rgba(255,255,255,0.08)',
