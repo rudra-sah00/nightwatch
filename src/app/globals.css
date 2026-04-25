@@ -744,3 +744,8 @@
     animation: indeterminate-progress 1.5s infinite linear;
   }
 }
+
+/* Electron desktop: push all content below the fixed title bar */
+body {
+  padding-top: var(--electron-titlebar-height, 0px);
+}
