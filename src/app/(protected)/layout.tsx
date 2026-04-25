@@ -20,7 +20,7 @@ export default async function ProtectedLayout({
     <CallProvider>
       <CallOverlay />
       <PipOverlay />
-      <div className="min-h-full bg-background flex flex-col">
+      <div className="h-full bg-background flex flex-col">
         <main className="flex-1 w-full">{children}</main>
       </div>
     </CallProvider>
