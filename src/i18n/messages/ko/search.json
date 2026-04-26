@@ -29,7 +29,9 @@
     "emptyTitle": "시청 기록이 비어 있습니다",
     "emptyDescription": "무언가를 보기 시작하면 여기에 표시됩니다",
     "removeAriaLabel": "목록에서 제거",
-    "sectionAriaLabel": "최근 시청한 콘텐츠"
+    "sectionAriaLabel": "최근 시청한 콘텐츠",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "시리즈",

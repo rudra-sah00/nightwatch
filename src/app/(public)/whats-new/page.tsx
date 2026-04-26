@@ -44,7 +44,7 @@ export default async function WhatsNewPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-12 mx-auto px-4">
+    <div className="container max-w-4xl py-12 mx-auto px-4 h-full overflow-y-auto">
       <div className="mb-12">
         <Link
           href="/"

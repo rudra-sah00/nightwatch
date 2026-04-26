@@ -75,7 +75,10 @@ interface PlayerRootProps {
   playbackRate?: number;
 }
 
-const CONTAINER_STYLE = { width: '100%', height: '100dvh' } as const;
+const CONTAINER_STYLE = {
+  width: '100%',
+  height: 'calc(100dvh - var(--electron-titlebar-height, 0px))',
+} as const;
 
 export function PlayerRoot({
   children,
@@ -176,7 +179,7 @@ export function PlayerRoot({
         ref={containerRef}
         role="application"
         className={cn(
-          'video-container relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col',
+          'video-container relative w-full bg-black overflow-hidden flex flex-col',
           'cursor-none',
           state.showControls && !resolvedHideControls && 'cursor-auto',
           className,

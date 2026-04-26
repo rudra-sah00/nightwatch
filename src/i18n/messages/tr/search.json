@@ -29,7 +29,9 @@
     "emptyTitle": "İzleme geçmişiniz boş",
     "emptyDescription": "Bir şey izlemeye başlayın ve burada görünecek",
     "removeAriaLabel": "Listeden kaldır",
-    "sectionAriaLabel": "Son izlenen içerikler"
+    "sectionAriaLabel": "Son izlenen içerikler",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Dizi",

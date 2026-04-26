@@ -2,9 +2,9 @@
 
 import type HlsType from 'hls.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { finalizeClip, pushSegment, startClip } from '../api';
+import { finalizeClip, pushSegment, pushSegmentData, startClip } from '../api';
 
-const MAX_DURATION = 300; // 5 minutes
+const MAX_DURATION = 300;
 const MIN_DURATION = 5;
 
 interface UseClipRecorderOptions {
@@ -12,6 +12,8 @@ interface UseClipRecorderOptions {
   matchId: string;
   title: string;
   streamUrl: string | null;
+  /** Server 1 streams require client-side download + binary upload */
+  clientDownload?: boolean;
 }
 
 export function useClipRecorder({
@@ -19,6 +21,7 @@ export function useClipRecorder({
   matchId,
   title,
   streamUrl,
+  clientDownload = false,
 }: UseClipRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -28,8 +31,40 @@ export function useClipRecorder({
   const seenUrls = useRef(new Set<string>());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
-  // biome-ignore lint/suspicious/noExplicitAny: hls.js event handler type varies across versions
+  // biome-ignore lint/suspicious/noExplicitAny: hls.js event handler type varies
   const fragHandlerRef = useRef<((...args: any[]) => void) | null>(null);
+
+  /**
+   * Push a segment — either URL (Server 2) or fetch + upload binary (Server 1).
+   */
+  const pushFrag = useCallback(
+    async (
+      id: string,
+      url: string,
+      fragStart: number,
+      fragDuration: number,
+    ) => {
+      if (clientDownload) {
+        // Server 1: fetch segment locally in the browser, upload raw bytes
+        try {
+          const res = await fetch(url);
+          if (!res.ok) return;
+          const data = await res.arrayBuffer();
+          await pushSegmentData(id, data, fragStart, fragDuration);
+        } catch {
+          // silent — segment lost
+        }
+      } else {
+        // Server 2: send URL, backend downloads via CF worker
+        await pushSegment(id, {
+          url,
+          startTime: fragStart,
+          duration: fragDuration,
+        }).catch(() => {});
+      }
+    },
+    [clientDownload],
+  );
 
   const stop = useCallback(async () => {
     const hls = hlsRef.current;
@@ -80,18 +115,39 @@ export function useClipRecorder({
       const hls = hlsRef.current;
       const Hls = (await import('hls.js')).default;
 
+      // Capture the currently playing segment
+      // biome-ignore lint/suspicious/noExplicitAny: hls.js internal types
+      const levels = hls.levels as any[];
+      const currentLevel = hls.currentLevel >= 0 ? hls.currentLevel : 0;
+      const details = levels?.[currentLevel]?.details;
+      const video = document.querySelector('video');
+      const currentTime = video?.currentTime ?? 0;
+
+      if (details?.fragments) {
+        for (const frag of details.fragments) {
+          if (!frag?.url) continue;
+          const fragEnd = (frag.start ?? 0) + (frag.duration ?? 0);
+          if (fragEnd >= currentTime && !seenUrls.current.has(frag.url)) {
+            seenUrls.current.add(frag.url);
+            pushFrag(id, frag.url, frag.start ?? 0, frag.duration ?? 0);
+            break;
+          }
+        }
+      }
+
+      // Listen for new segments during recording
       // biome-ignore lint/suspicious/noExplicitAny: hls.js FRAG_LOADED data shape
       const handler = (_event: any, data: any) => {
         const frag = data?.frag;
         if (!frag?.url || !clipIdRef.current) return;
         if (seenUrls.current.has(frag.url)) return;
         seenUrls.current.add(frag.url);
-
-        pushSegment(clipIdRef.current, {
-          url: frag.url,
-          startTime: frag.start ?? 0,
-          duration: frag.duration ?? 0,
-        }).catch(() => {});
+        pushFrag(
+          clipIdRef.current,
+          frag.url,
+          frag.start ?? 0,
+          frag.duration ?? 0,
+        );
       };
 
       fragHandlerRef.current = handler;
@@ -99,7 +155,7 @@ export function useClipRecorder({
     } catch {
       setIsRecording(false);
     }
-  }, [hlsRef, matchId, title, streamUrl, stop]);
+  }, [hlsRef, matchId, title, streamUrl, stop, pushFrag]);
 
   useEffect(() => {
     return () => {

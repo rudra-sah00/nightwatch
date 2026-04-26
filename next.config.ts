@@ -51,6 +51,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**',
       },
+      {
+        // MinIO (S3-compatible) in development — clip thumbnails
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9000',
+      },
     ],
     localPatterns: [
       {
@@ -94,12 +100,12 @@ const nextConfig: NextConfig = {
               "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: blob: https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline' https:",
-              `img-src 'self' blob: data: https: ${backendOrigin} offline-media:`,
+              `img-src 'self' blob: data: https: http://localhost:9000 ${backendOrigin} offline-media:`,
               "font-src 'self' data: https:",
-              `connect-src 'self' data: wss: ws: https: http: offline-media: ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
+              `connect-src 'self' data: wss: ws: https: http: offline-media: http://localhost:9000 ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
               "frame-src 'self' https: blob: data: about: https://challenges.cloudflare.com",
               "worker-src 'self' blob: https:",
-              `media-src 'self' blob: data: https: offline-media: ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
+              `media-src 'self' blob: data: https: offline-media: http://localhost:9000 ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
               "object-src 'none'",
               // Prevent this page from being embedded in external iframes (clickjacking)
               "frame-ancestors 'self'",

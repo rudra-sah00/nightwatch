@@ -127,7 +127,9 @@
     "statusDownloading": "BAIXANDO",
     "statusQueued": "NA FILA",
     "statusCancelled": "CANCELADO",
-    "statusPaused": "PAUSADO"
+    "statusPaused": "PAUSADO",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "MINHA",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {item} other {itens}}",
     "emptyTitle": "Sua lista está vazia",
     "emptyDescription": "Salve filmes e séries para assistir depois",
-    "viewDetails": "Ver detalhes de {title}"
+    "viewDetails": "Ver detalhes de {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Falha ao remover da lista",

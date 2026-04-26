@@ -3,8 +3,7 @@
 import { Clock, Film, Tv, X } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import React from 'react';
-import { EmptyState } from '@/components/ui/empty-state';
+import React, { useMemo } from 'react';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
@@ -24,6 +23,7 @@ function formatRemainingTime(
 interface ContinueWatchingProps {
   className?: string;
   hideTitle?: boolean;
+  searchQuery?: string;
   onSelectContent?: (contentId: string) => void;
   onLoadComplete?: (itemCount: number) => void;
 }
@@ -31,12 +31,21 @@ interface ContinueWatchingProps {
 export function ContinueWatching({
   className,
   hideTitle = false,
+  searchQuery,
   onSelectContent,
   onLoadComplete,
 }: ContinueWatchingProps) {
   const { optimisticItems, isLoading, handleSelect, handleRemove } =
     useContinueWatching({ onSelectContent, onLoadComplete });
   const t = useTranslations('search');
+
+  const filtered = useMemo(() => {
+    if (!searchQuery?.trim()) return optimisticItems;
+    const q = searchQuery.toLowerCase();
+    return optimisticItems.filter((item) =>
+      item.title.toLowerCase().includes(q),
+    );
+  }, [optimisticItems, searchQuery]);
 
   if (isLoading) {
     return (
@@ -60,7 +69,7 @@ export function ContinueWatching({
     );
   }
 
-  if (!isLoading && optimisticItems.length === 0) {
+  if (!isLoading && filtered.length === 0) {
     return (
       <div
         className={cn(
@@ -76,11 +85,19 @@ export function ContinueWatching({
             </h2>
           </div>
         )}
-        <EmptyState
-          icon={Clock}
-          title={t('continueWatching.emptyTitle')}
-          description={t('continueWatching.emptyDescription')}
-        />
+        <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
+          <Clock className="w-16 h-16 text-foreground/20 mb-6" />
+          <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
+            {searchQuery
+              ? t('continueWatching.noResults')
+              : t('continueWatching.emptyTitle')}
+          </p>
+          {!searchQuery && (
+            <p className="font-headline font-bold uppercase tracking-widest text-foreground/20 text-sm mt-3 max-w-sm">
+              {t('continueWatching.emptyDescription')}
+            </p>
+          )}
+        </div>
       </div>
     );
   }
@@ -105,7 +122,7 @@ export function ContinueWatching({
         style={{ contentVisibility: 'auto' }}
         aria-label={t('continueWatching.sectionAriaLabel')}
       >
-        {optimisticItems.map((item, index) => (
+        {filtered.map((item, index) => (
           <WatchProgressItem
             key={item.id}
             item={item}

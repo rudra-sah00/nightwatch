@@ -127,7 +127,9 @@
     "statusDownloading": "DOWNLOADING",
     "statusQueued": "QUEUED",
     "statusCancelled": "CANCELLED",
-    "statusPaused": "PAUSED"
+    "statusPaused": "PAUSED",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "MY",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {item} other {items}}",
     "emptyTitle": "Your watchlist is empty",
     "emptyDescription": "Save movies and shows to watch later",
-    "viewDetails": "View details for {title}"
+    "viewDetails": "View details for {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Failed to remove from list",

@@ -29,7 +29,9 @@
     "emptyTitle": "La cronologia è vuota",
     "emptyDescription": "Inizia a guardare qualcosa e apparirà qui",
     "removeAriaLabel": "Rimuovi dalla lista",
-    "sectionAriaLabel": "Contenuti visualizzati di recente"
+    "sectionAriaLabel": "Contenuti visualizzati di recente",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Serie",

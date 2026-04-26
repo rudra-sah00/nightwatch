@@ -29,7 +29,9 @@
     "emptyTitle": "История просмотра пуста",
     "emptyDescription": "Начните смотреть что-нибудь, и оно появится здесь",
     "removeAriaLabel": "Удалить из списка",
-    "sectionAriaLabel": "Недавно просмотренный контент"
+    "sectionAriaLabel": "Недавно просмотренный контент",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Сериал",

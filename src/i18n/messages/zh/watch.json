@@ -127,7 +127,9 @@
     "statusDownloading": "下载中",
     "statusQueued": "排队中",
     "statusCancelled": "已取消",
-    "statusPaused": "已暂停"
+    "statusPaused": "已暂停",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "我的",
@@ -136,7 +138,9 @@
     "itemCount": "{count} 个项目",
     "emptyTitle": "观看列表为空",
     "emptyDescription": "保存电影和剧集以便稍后观看",
-    "viewDetails": "查看 {title} 的详情"
+    "viewDetails": "查看 {title} 的详情",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "从列表中移除失败",

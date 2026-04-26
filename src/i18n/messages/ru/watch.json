@@ -127,7 +127,9 @@
     "statusDownloading": "ЗАГРУЗКА",
     "statusQueued": "В ОЧЕРЕДИ",
     "statusCancelled": "ОТМЕНЕНО",
-    "statusPaused": "ПРИОСТАНОВЛЕНО"
+    "statusPaused": "ПРИОСТАНОВЛЕНО",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "МОЙ",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {элемент} few {элемента} other {элементов}}",
     "emptyTitle": "Ваш список просмотра пуст",
     "emptyDescription": "Сохраняйте фильмы и сериалы для просмотра позже",
-    "viewDetails": "Подробнее о {title}"
+    "viewDetails": "Подробнее о {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Не удалось удалить из списка",

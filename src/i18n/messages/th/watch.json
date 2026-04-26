@@ -127,7 +127,9 @@
     "statusDownloading": "กำลังดาวน์โหลด",
     "statusQueued": "อยู่ในคิว",
     "statusCancelled": "ยกเลิกแล้ว",
-    "statusPaused": "หยุดชั่วคราว"
+    "statusPaused": "หยุดชั่วคราว",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "รายการ",
@@ -136,7 +138,9 @@
     "itemCount": "{count} รายการ",
     "emptyTitle": "รายการดูว่างเปล่า",
     "emptyDescription": "บันทึกภาพยนตร์และซีรีส์เพื่อดูภายหลัง",
-    "viewDetails": "ดูรายละเอียดของ {title}"
+    "viewDetails": "ดูรายละเอียดของ {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "ลบออกจากรายการไม่สำเร็จ",

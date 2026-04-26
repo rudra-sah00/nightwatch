@@ -29,7 +29,9 @@
     "emptyTitle": "Seu histórico está vazio",
     "emptyDescription": "Comece a assistir algo e aparecerá aqui",
     "removeAriaLabel": "Remover da lista",
-    "sectionAriaLabel": "Conteúdo visualizado recentemente"
+    "sectionAriaLabel": "Conteúdo visualizado recentemente",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Série",

@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { EmptyState } from '@/components/ui/empty-state';
+import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { cn, formatBytes } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
@@ -29,6 +29,13 @@ export function OfflineLibrary() {
     resumeDownload,
   } = useDownloads();
   const t = useTranslations('watch.offline');
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return downloads;
+    const q = search.toLowerCase();
+    return downloads.filter((d) => d.title.toLowerCase().includes(q));
+  }, [downloads, search]);
 
   const statusLabels: Record<string, string> = {
     COMPLETED: t('statusCompleted'),
@@ -95,7 +102,7 @@ export function OfflineLibrary() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-80px)] bg-background pb-32 animate-in fade-in">
+    <main className="pb-32 animate-in fade-in">
       {/* Hero Header */}
       <div className="mb-12 bg-neo-cyan relative overflow-hidden rounded-2xl">
         {/* Abstract background shapes */}
@@ -136,15 +143,28 @@ export function OfflineLibrary() {
 
       <div className="container mx-auto px-6 md:px-10">
         <div className="max-w-5xl mx-auto space-y-6">
-          {downloads.length === 0 ? (
-            <EmptyState
-              icon={HardDriveDownload}
-              title={t('emptyTitle')}
-              description={t('emptyDescription')}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+            <NeoSearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('searchPlaceholder')}
             />
+          </div>
+          {filtered.length === 0 ? (
+            <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
+              <HardDriveDownload className="w-16 h-16 text-foreground/20 mb-6" />
+              <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
+                {search ? t('noResults') : t('emptyTitle')}
+              </p>
+              {!search && (
+                <p className="font-headline font-bold uppercase tracking-widest text-foreground/20 text-sm mt-3 max-w-sm">
+                  {t('emptyDescription')}
+                </p>
+              )}
+            </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {downloads.map((item) => (
+              {filtered.map((item) => (
                 // biome-ignore lint/a11y/useSemanticElements: Nested buttons are invalid DOM, must use div
                 <div
                   role="button"

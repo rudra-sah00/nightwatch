@@ -29,7 +29,9 @@
     "emptyTitle": "視聴履歴は空です",
     "emptyDescription": "何かを見始めると、ここに表示されます",
     "removeAriaLabel": "リストから削除",
-    "sectionAriaLabel": "最近視聴したコンテンツ"
+    "sectionAriaLabel": "最近視聴したコンテンツ",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "シリーズ",

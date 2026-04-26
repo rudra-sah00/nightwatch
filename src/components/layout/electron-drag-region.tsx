@@ -27,6 +27,7 @@ function getRouteTitle(pathname: string): string {
   if (ROUTE_NAMES[pathname]) return ROUTE_NAMES[pathname];
   if (pathname.startsWith('/watch-party/')) return 'Watch Party';
   if (pathname.startsWith('/watch/')) return 'Watch';
+  if (pathname.startsWith('/clip/')) return 'Clip';
   if (pathname.startsWith('/live/')) return 'Live';
   if (pathname.startsWith('/user/')) return 'Profile';
   return 'Nightwatch';

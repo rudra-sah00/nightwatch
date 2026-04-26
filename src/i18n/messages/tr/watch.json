@@ -127,7 +127,9 @@
     "statusDownloading": "İNDİRİLİYOR",
     "statusQueued": "SIRADA",
     "statusCancelled": "İPTAL EDİLDİ",
-    "statusPaused": "DURAKLATILDI"
+    "statusPaused": "DURAKLATILDI",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "BENİM",
@@ -136,7 +138,9 @@
     "itemCount": "{count} öğe",
     "emptyTitle": "İzleme listeniz boş",
     "emptyDescription": "Daha sonra izlemek için film ve dizileri kaydedin",
-    "viewDetails": "{title} için detayları gör"
+    "viewDetails": "{title} için detayları gör",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Listeden kaldırılamadı",

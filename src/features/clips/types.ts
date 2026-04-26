@@ -14,6 +14,8 @@ export interface Clip {
   duration: number;
   status: ClipStatus;
   matchId: string;
+  isPublic: boolean;
+  shareId: string | null;
   createdAt: string;
 }
 

@@ -29,7 +29,9 @@
     "emptyTitle": "观看历史为空",
     "emptyDescription": "开始观看内容后将显示在此处",
     "removeAriaLabel": "从列表中移除",
-    "sectionAriaLabel": "最近观看的内容"
+    "sectionAriaLabel": "最近观看的内容",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "剧集",

@@ -127,7 +127,9 @@
     "statusDownloading": "डाउनलोड हो रहा है",
     "statusQueued": "कतार में",
     "statusCancelled": "रद्द",
-    "statusPaused": "रुका हुआ"
+    "statusPaused": "रुका हुआ",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "मेरी",
@@ -136,7 +138,9 @@
     "itemCount": "{count} आइटम",
     "emptyTitle": "आपकी वॉचलिस्ट खाली है",
     "emptyDescription": "बाद में देखने के लिए फ़िल्में और शो सहेजें",
-    "viewDetails": "{title} के विवरण देखें"
+    "viewDetails": "{title} के विवरण देखें",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "सूची से हटाने में विफल",

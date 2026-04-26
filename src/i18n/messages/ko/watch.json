@@ -127,7 +127,9 @@
     "statusDownloading": "다운로드 중",
     "statusQueued": "대기 중",
     "statusCancelled": "취소됨",
-    "statusPaused": "일시정지"
+    "statusPaused": "일시정지",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "나의",
@@ -136,7 +138,9 @@
     "itemCount": "{count}개 항목",
     "emptyTitle": "관심목록이 비어 있습니다",
     "emptyDescription": "나중에 볼 영화와 시리즈를 저장하세요",
-    "viewDetails": "{title} 상세 보기"
+    "viewDetails": "{title} 상세 보기",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "목록에서 제거하지 못했습니다",

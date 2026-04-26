@@ -1,32 +1,62 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { deleteClip, getClips, renameClip } from '../api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { type ClipFilters, deleteClip, getClips, renameClip } from '../api';
 import type { Clip } from '../types';
 
-export function useClips() {
+export function useClips(filters?: ClipFilters) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
-  const fetch = useCallback(async (p = 1) => {
-    setIsLoading(true);
-    try {
-      const res = await getClips(p);
-      setClips(res.clips);
-      setTotalPages(res.totalPages);
-      setPage(p);
-    } catch {
-      /* silent */
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fetchPage = useCallback(
+    async (p: number, append: boolean) => {
+      if (p === 1) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
+      try {
+        const res = await getClips(p, 12, filtersRef.current);
+        setClips((prev) => (append ? [...prev, ...res.clips] : res.clips));
+        setPage(p);
+        setHasMore(p < res.totalPages);
+      } catch {
+        /* silent */
+      } finally {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [], // filtersRef is a ref, stable across renders
+  );
+
+  const filterKey = `${filters?.search}|${filters?.sort}|${filters?.dateFrom}|${filters?.dateTo}`;
+
+  // Reset and fetch when filters change
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    // filterKey triggers this effect when any filter value changes
+    void filterKey;
+    setClips([]);
+    setPage(1);
+    setHasMore(true);
+    fetchPage(1, false);
+  }, [filterKey, fetchPage]);
+
+  const loadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore) {
+      fetchPage(page + 1, true);
+    }
+  }, [isLoadingMore, hasMore, page, fetchPage]);
+
+  const refetch = useCallback(() => {
+    fetchPage(1, false);
+  }, [fetchPage]);
 
   const remove = useCallback(async (id: string) => {
     try {
@@ -46,9 +76,14 @@ export function useClips() {
     }
   }, []);
 
-  const addClip = useCallback((clip: Clip) => {
-    setClips((prev) => [clip, ...prev]);
-  }, []);
-
-  return { clips, isLoading, page, totalPages, fetch, remove, rename, addClip };
+  return {
+    clips,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refetch,
+    remove,
+    rename,
+  };
 }

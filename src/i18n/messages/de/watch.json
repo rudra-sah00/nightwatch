@@ -127,7 +127,9 @@
     "statusDownloading": "WIRD HERUNTERGELADEN",
     "statusQueued": "IN WARTESCHLANGE",
     "statusCancelled": "ABGEBROCHEN",
-    "statusPaused": "PAUSIERT"
+    "statusPaused": "PAUSIERT",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "MEINE",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {Eintrag} other {Einträge}}",
     "emptyTitle": "Deine Merkliste ist leer",
     "emptyDescription": "Speichere Filme und Serien zum späteren Anschauen",
-    "viewDetails": "Details anzeigen für {title}"
+    "viewDetails": "Details anzeigen für {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Konnte nicht aus der Liste entfernt werden",

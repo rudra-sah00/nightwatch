@@ -89,7 +89,7 @@
     document.getElementById('downloads-btn').addEventListener('click', () => {
       // Try loading the downloads page — if network came back it'll work.
       // The did-fail-load handler will catch it if still offline.
-      window.location.replace(targetUrl.replace(/\/$/, '') + '/downloads');
+      window.location.replace(`${targetUrl.replace(/\/$/, '')}/downloads`);
     });
   </script>
 </body>

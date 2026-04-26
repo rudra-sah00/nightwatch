@@ -1,8 +1,8 @@
-import { ChevronLeft, ChevronRight, Play, Search, Tv } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Tv } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import type { Channel } from '../api';
 import { useChannels } from '../hooks/use-channels';
 import { useLiveMatchCard } from '../hooks/use-live-match-card';
@@ -41,18 +41,14 @@ export function Server1Channels() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search Bar matching neo-brutalist style */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 mb-10 transition-colors rounded-md">
-        <div className="relative w-full max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/50" />
-          <Input
-            className="pl-14 h-14 bg-background border-[3px] border-border font-headline font-bold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 uppercase tracking-widest placeholder:text-foreground/30 rounded-md transition-all"
-            placeholder={t('searchChannels')}
-            value={search}
-            onChange={handleSearch}
-          />
-        </div>
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+        <NeoSearchBar
+          value={search}
+          onChange={handleSearch}
+          placeholder={t('searchChannels')}
+        />
 
         {total > 0 && (
           <div className="text-foreground font-headline font-black text-xl uppercase tracking-[0.2em] whitespace-nowrap bg-neo-yellow px-4 py-2 border-[3px] border-border rounded-md">
@@ -72,7 +68,7 @@ export function Server1Channels() {
           ))}
         </div>
       ) : channels.length === 0 ? (
-        <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card mb-10">
+        <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
           <Tv className="w-16 h-16 text-foreground/20 mb-6" />
           <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
             {t('noChannelsFoundSearch')}

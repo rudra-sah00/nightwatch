@@ -29,7 +29,9 @@
     "emptyTitle": "Dein Verlauf ist leer",
     "emptyDescription": "Beginne etwas zu schauen und es erscheint hier",
     "removeAriaLabel": "Von der Liste entfernen",
-    "sectionAriaLabel": "Zuletzt angesehene Inhalte"
+    "sectionAriaLabel": "Zuletzt angesehene Inhalte",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Serie",

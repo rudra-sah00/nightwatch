@@ -29,7 +29,9 @@
     "emptyTitle": "Your watch history is empty",
     "emptyDescription": "Start watching something and it will appear here",
     "removeAriaLabel": "Remove from list",
-    "sectionAriaLabel": "Recently viewed content"
+    "sectionAriaLabel": "Recently viewed content",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Series",

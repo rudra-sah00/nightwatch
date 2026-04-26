@@ -4,8 +4,8 @@ import { Film, Plus, Tv } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import React from 'react';
-import { EmptyState } from '@/components/ui/empty-state';
+import React, { useMemo, useState } from 'react';
+import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useWatchlist } from '../hooks/use-watchlist';
@@ -26,13 +26,20 @@ const ContentDetailModal = dynamic(
  * - Integration with ContentDetailModal.
  */
 export function WatchlistClient() {
-  const { watchlist, loading, selectedId, setSelectedId, isEmpty, removeItem } =
+  const { watchlist, loading, selectedId, setSelectedId, removeItem } =
     useWatchlist();
   const t = useTranslations('watch.watchlist');
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return watchlist;
+    const q = search.toLowerCase();
+    return watchlist.filter((item) => item.title.toLowerCase().includes(q));
+  }, [watchlist, search]);
 
   return (
     <>
-      <div className="min-h-full pb-32 animate-in fade-in flex flex-col">
+      <div className="pb-32 animate-in fade-in">
         {/* Hero Header */}
         <div className="mb-12 bg-neo-red relative overflow-hidden shrink-0 rounded-2xl">
           {/* Abstract background shapes */}
@@ -66,8 +73,17 @@ export function WatchlistClient() {
           </div>
         </div>
 
-        <div className="container mx-auto px-6 md:px-10 flex-col flex flex-1">
-          <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
+        <div className="container mx-auto px-6 md:px-10">
+          <div className="max-w-5xl mx-auto w-full space-y-6">
+            {!loading && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+                <NeoSearchBar
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('searchPlaceholder')}
+                />
+              </div>
+            )}
             {loading ? (
               <div className="flex flex-col gap-6">
                 {['wl-sk-1', 'wl-sk-2', 'wl-sk-3', 'wl-sk-4'].map((id) => (
@@ -77,18 +93,24 @@ export function WatchlistClient() {
                   />
                 ))}
               </div>
-            ) : isEmpty ? (
-              <EmptyState
-                icon={Plus}
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-              />
+            ) : filtered.length === 0 ? (
+              <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
+                <Plus className="w-16 h-16 text-foreground/20 mb-6" />
+                <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
+                  {search ? t('noResults') : t('emptyTitle')}
+                </p>
+                {!search && (
+                  <p className="font-headline font-bold uppercase tracking-widest text-foreground/20 text-sm mt-3 max-w-sm">
+                    {t('emptyDescription')}
+                  </p>
+                )}
+              </div>
             ) : (
               <div
                 className="flex flex-col gap-6"
                 style={{ contentVisibility: 'auto' }}
               >
-                {watchlist.map((item) => (
+                {filtered.map((item) => (
                   <WatchlistItemCard
                     key={item.id}
                     item={item}

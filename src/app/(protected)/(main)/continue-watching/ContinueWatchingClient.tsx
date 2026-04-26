@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { ContinueWatching } from '@/features/watch/components/ContinueWatching';
 
 const ContentDetailModal = dynamic(
@@ -17,10 +18,11 @@ export default function ContinueWatchingClient() {
   const [selectedContentId, setSelectedContentId] = useState<string | null>(
     null,
   );
+  const [search, setSearch] = useState('');
   const t = useTranslations('search');
 
   return (
-    <main className="min-h-full pb-32 animate-in fade-in">
+    <main className="pb-32 animate-in fade-in">
       {/* Hero Header */}
       <div className="mb-12 bg-neo-blue relative overflow-hidden rounded-2xl">
         {/* Abstract background shapes */}
@@ -47,8 +49,16 @@ export default function ContinueWatchingClient() {
 
       <div className="container mx-auto px-6 md:px-10">
         <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+            <NeoSearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('continueWatching.searchPlaceholder')}
+            />
+          </div>
           <ContinueWatching
             hideTitle={true}
+            searchQuery={search}
             onSelectContent={(contentId: string) =>
               setSelectedContentId(contentId)
             }

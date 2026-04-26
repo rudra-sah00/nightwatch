@@ -29,7 +29,9 @@
     "emptyTitle": "आपका देखने का इतिहास खाली है",
     "emptyDescription": "कुछ देखना शुरू करें और यह यहाँ दिखाई देगा",
     "removeAriaLabel": "सूची से हटाएं",
-    "sectionAriaLabel": "हाल ही में देखी गई सामग्री"
+    "sectionAriaLabel": "हाल ही में देखी गई सामग्री",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "सीरीज़",

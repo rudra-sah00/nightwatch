@@ -29,7 +29,9 @@
     "emptyTitle": "سجل المشاهدة فارغ",
     "emptyDescription": "ابدأ بمشاهدة شيء وسيظهر هنا",
     "removeAriaLabel": "إزالة من القائمة",
-    "sectionAriaLabel": "المحتوى المشاهد مؤخراً"
+    "sectionAriaLabel": "المحتوى المشاهد مؤخراً",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "مسلسل",

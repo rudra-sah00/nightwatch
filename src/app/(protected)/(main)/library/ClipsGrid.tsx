@@ -1,54 +1,181 @@
 'use client';
 
-import { Scissors } from 'lucide-react';
+import { Loader2, Scissors } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { NeoSearchBar } from '@/components/ui/neo-search-bar';
+import { NeoSelect } from '@/components/ui/neo-select';
+import { type ClipFilters, toggleClipPublic } from '@/features/clips/api';
 import { ClipCard } from '@/features/clips/components/ClipCard';
 import { useClips } from '@/features/clips/hooks/use-clips';
+import type { Clip } from '@/features/clips/types';
+import { WS_EVENTS } from '@/lib/constants';
+import { useSocket } from '@/providers/socket-provider';
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+  { value: 'longest', label: 'Longest' },
+  { value: 'shortest', label: 'Shortest' },
+];
 
 export function ClipsGrid() {
-  const { clips, isLoading, remove, rename } = useClips();
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sort, setSort] = useState('newest');
+  const router = useRouter();
+  const { socket } = useSocket();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {['cs1', 'cs2', 'cs3', 'cs4'].map((id) => (
-          <div key={id} className="p-2">
-            <div className="aspect-video border-[3px] border-border bg-muted animate-pulse mb-4" />
-            <div className="px-2 space-y-2">
-              <div className="h-6 bg-muted animate-pulse rounded w-3/4" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  if (clips.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 bg-card border-[4px] border-border text-center max-w-2xl mx-auto w-full">
-        <Scissors className="w-20 h-20 text-neo-blue mb-6 stroke-[3px]" />
-        <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-          No clips yet
-        </h3>
-        <p className="font-headline font-bold uppercase tracking-widest text-foreground/70 max-w-sm px-6">
-          Record moments from live streams to build your collection
-        </p>
-      </div>
+  const filters = useMemo<ClipFilters>(
+    () => ({
+      search: debouncedSearch || undefined,
+      sort: sort as ClipFilters['sort'],
+    }),
+    [debouncedSearch, sort],
+  );
+
+  const { clips, isLoading, isLoadingMore, loadMore, refetch, remove, rename } =
+    useClips(filters);
+
+  useEffect(() => {
+    if (!socket) return;
+    const onClipReady = () => {
+      refetch();
+      toast.success('Clip is ready!');
+    };
+    socket.on(WS_EVENTS.CLIP_READY, onClipReady);
+    return () => {
+      socket.off(WS_EVENTS.CLIP_READY, onClipReady);
+    };
+  }, [socket, refetch]);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: '200px' },
     );
-  }
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const handlePlay = useCallback(
+    (clip: Clip) => {
+      if (clip.videoUrl) {
+        router.push(
+          `/clip/${clip.id}?src=${encodeURIComponent(clip.videoUrl)}&title=${encodeURIComponent(clip.title)}`,
+        );
+      }
+    },
+    [router],
+  );
+
+  const handleShare = useCallback(
+    async (clip: Clip) => {
+      if (clip.isPublic && clip.shareId) {
+        // Already public — copy link
+        const url = `${window.location.origin}/clip/share/${clip.shareId}`;
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied!');
+      } else {
+        // Make public and copy link
+        try {
+          const result = await toggleClipPublic(clip.id);
+          if (result.isPublic && result.shareId) {
+            const url = `${window.location.origin}/clip/share/${result.shareId}`;
+            await navigator.clipboard.writeText(url);
+            toast.success('Clip shared! Link copied.');
+            refetch();
+          }
+        } catch {
+          toast.error('Failed to share clip');
+        }
+      }
+    },
+    [refetch],
+  );
 
   return (
-    <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-      style={{ contentVisibility: 'auto' }}
-    >
-      {clips.map((clip) => (
-        <ClipCard
-          key={clip.id}
-          clip={clip}
-          onDelete={remove}
-          onRename={rename}
-        />
-      ))}
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Filters — only show when not loading */}
+      {!isLoading && (
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+          <NeoSearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search clips..."
+          />
+          <NeoSelect value={sort} options={SORT_OPTIONS} onChange={setSort} />
+        </div>
+      )}
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {['cs1', 'cs2', 'cs3'].map((id) => (
+            <div key={id} className="bg-card border-[3px] border-border p-2">
+              <div className="aspect-video bg-muted animate-pulse mb-4 border-[3px] border-border" />
+              <div className="px-2 pb-2 space-y-2">
+                <div className="h-7 bg-muted animate-pulse w-3/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && clips.length === 0 && (
+        <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
+          <Scissors className="w-16 h-16 text-foreground/20 mb-6" />
+          <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
+            {debouncedSearch ? 'No clips found' : 'No clips yet'}
+          </p>
+          {!debouncedSearch && (
+            <p className="font-headline font-bold uppercase tracking-widest text-foreground/20 text-sm mt-3 max-w-sm">
+              Record moments from live streams to build your collection
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Grid */}
+      {!isLoading && clips.length > 0 && (
+        <>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            style={{ contentVisibility: 'auto' }}
+          >
+            {clips.map((clip) => (
+              <ClipCard
+                key={clip.id}
+                clip={clip}
+                onDelete={remove}
+                onRename={rename}
+                onPlay={handlePlay}
+                onShare={handleShare}
+              />
+            ))}
+          </div>
+          <div ref={loadMoreRef} className="h-1" />
+          {isLoadingMore && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

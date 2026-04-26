@@ -127,7 +127,9 @@
     "statusDownloading": "ダウンロード中",
     "statusQueued": "待機中",
     "statusCancelled": "キャンセル済み",
-    "statusPaused": "一時停止"
+    "statusPaused": "一時停止",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "マイ",
@@ -136,7 +138,9 @@
     "itemCount": "{count}件",
     "emptyTitle": "ウォッチリストは空です",
     "emptyDescription": "後で見る映画やシリーズを保存しましょう",
-    "viewDetails": "{title}の詳細を見る"
+    "viewDetails": "{title}の詳細を見る",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "リストからの削除に失敗しました",

@@ -143,7 +143,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
               }
             : {
                 position: 'fixed',
-                top: 0,
+                top: 'var(--electron-titlebar-height, 0px)',
                 right: 0,
                 bottom: 0,
                 left: 0,

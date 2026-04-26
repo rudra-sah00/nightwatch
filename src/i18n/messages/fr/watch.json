@@ -127,7 +127,9 @@
     "statusDownloading": "TÉLÉCHARGEMENT",
     "statusQueued": "EN FILE D'ATTENTE",
     "statusCancelled": "ANNULÉ",
-    "statusPaused": "EN PAUSE"
+    "statusPaused": "EN PAUSE",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "MA",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {élément} other {éléments}}",
     "emptyTitle": "Votre liste est vide",
     "emptyDescription": "Sauvegardez des films et séries pour plus tard",
-    "viewDetails": "Voir les détails de {title}"
+    "viewDetails": "Voir les détails de {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Impossible de retirer de la liste",

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Loader2, Pencil, Play, Trash2, X } from 'lucide-react';
+import { Check, Loader2, Pencil, Play, Share2, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,9 +25,17 @@ interface ClipCardProps {
   clip: Clip;
   onDelete: (id: string) => void;
   onRename: (id: string, title: string) => void;
+  onPlay: (clip: Clip) => void;
+  onShare: (clip: Clip) => void;
 }
 
-export function ClipCard({ clip, onDelete, onRename }: ClipCardProps) {
+export function ClipCard({
+  clip,
+  onDelete,
+  onRename,
+  onPlay,
+  onShare,
+}: ClipCardProps) {
   const isReady = clip.status === 'ready';
   const isProcessing = clip.status === 'processing';
   const [editing, setEditing] = useState(false);
@@ -62,6 +70,7 @@ export function ClipCard({ clip, onDelete, onRename }: ClipCardProps) {
             src={clip.thumbnailUrl}
             alt={clip.title}
             fill
+            unoptimized
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter] duration-300"
           />
@@ -75,19 +84,19 @@ export function ClipCard({ clip, onDelete, onRename }: ClipCardProps) {
           </div>
         )}
 
-        {/* Duration badge — top left */}
+        {/* Duration badge */}
         {clip.duration > 0 && (
           <div className="absolute top-3 left-3 bg-black/80 border-[2px] border-border px-2 py-0.5 font-headline font-black text-xs text-white tracking-wider">
             {formatDuration(clip.duration)}
           </div>
         )}
 
-        {/* Date badge — top right */}
+        {/* Date badge */}
         <div className="absolute top-3 right-3 bg-neo-yellow border-[2px] border-border px-2 py-0.5 font-headline font-black uppercase text-xs text-foreground">
           {formatDate(clip.createdAt)}
         </div>
 
-        {/* Status badge — bottom left */}
+        {/* Status badge */}
         {isProcessing && (
           <div className="absolute bottom-3 left-3 bg-neo-orange border-[2px] border-border px-2 py-0.5 font-headline font-black uppercase text-[10px] text-foreground tracking-widest flex items-center gap-1.5">
             <Loader2 className="w-3 h-3 animate-spin" />
@@ -102,19 +111,17 @@ export function ClipCard({ clip, onDelete, onRename }: ClipCardProps) {
 
         {/* Play overlay */}
         {isReady && clip.videoUrl && (
-          <a
-            href={clip.videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => onPlay(clip)}
             className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors cursor-pointer"
           >
             <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg stroke-[3px]" />
-          </a>
+          </button>
         )}
       </div>
 
       <CardContent className="px-2 pb-2">
-        {/* Editable title */}
         {editing ? (
           <div className="flex items-center gap-1.5">
             <input
@@ -154,6 +161,16 @@ export function ClipCard({ clip, onDelete, onRename }: ClipCardProps) {
               {clip.title}
             </h3>
             <div className="flex items-center gap-0.5 shrink-0 mt-1">
+              {isReady && (
+                <button
+                  type="button"
+                  onClick={() => onShare(clip)}
+                  className={`p-1.5 rounded-lg hover:bg-muted transition-colors ${clip.isPublic ? 'text-neo-blue' : 'text-foreground/30 hover:text-foreground'}`}
+                  aria-label={clip.isPublic ? 'Copy share link' : 'Share clip'}
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={startEdit}

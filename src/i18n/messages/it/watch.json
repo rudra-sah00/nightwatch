@@ -127,7 +127,9 @@
     "statusDownloading": "IN DOWNLOAD",
     "statusQueued": "IN CODA",
     "statusCancelled": "ANNULLATO",
-    "statusPaused": "IN PAUSA"
+    "statusPaused": "IN PAUSA",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "LA MIA",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {elemento} other {elementi}}",
     "emptyTitle": "La tua lista è vuota",
     "emptyDescription": "Salva film e serie da guardare dopo",
-    "viewDetails": "Vedi dettagli per {title}"
+    "viewDetails": "Vedi dettagli per {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Impossibile rimuovere dalla lista",

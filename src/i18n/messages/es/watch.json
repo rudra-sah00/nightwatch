@@ -127,7 +127,9 @@
     "statusDownloading": "DESCARGANDO",
     "statusQueued": "EN COLA",
     "statusCancelled": "CANCELADO",
-    "statusPaused": "PAUSADO"
+    "statusPaused": "PAUSADO",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "MI",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {elemento} other {elementos}}",
     "emptyTitle": "Tu lista está vacía",
     "emptyDescription": "Guarda películas y series para ver después",
-    "viewDetails": "Ver detalles de {title}"
+    "viewDetails": "Ver detalles de {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "Error al eliminar de la lista",

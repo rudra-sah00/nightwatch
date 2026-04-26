@@ -29,7 +29,9 @@
     "emptyTitle": "Tu historial de visualización está vacío",
     "emptyDescription": "Empieza a ver algo y aparecerá aquí",
     "removeAriaLabel": "Eliminar de la lista",
-    "sectionAriaLabel": "Contenido visto recientemente"
+    "sectionAriaLabel": "Contenido visto recientemente",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Serie",

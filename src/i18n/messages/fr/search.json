@@ -29,7 +29,9 @@
     "emptyTitle": "Votre historique de visionnage est vide",
     "emptyDescription": "Commencez à regarder quelque chose et cela apparaîtra ici",
     "removeAriaLabel": "Retirer de la liste",
-    "sectionAriaLabel": "Contenu récemment visionné"
+    "sectionAriaLabel": "Contenu récemment visionné",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "Série",

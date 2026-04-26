@@ -127,7 +127,9 @@
     "statusDownloading": "جارٍ التحميل",
     "statusQueued": "في الانتظار",
     "statusCancelled": "ملغى",
-    "statusPaused": "متوقف مؤقتاً"
+    "statusPaused": "متوقف مؤقتاً",
+    "searchPlaceholder": "Search downloads...",
+    "noResults": "No results found"
   },
   "watchlist": {
     "pageTitle": "قائمة",
@@ -136,7 +138,9 @@
     "itemCount": "{count} {count, plural, one {عنصر} other {عناصر}}",
     "emptyTitle": "قائمة المشاهدة فارغة",
     "emptyDescription": "احفظ الأفلام والمسلسلات لمشاهدتها لاحقاً",
-    "viewDetails": "عرض تفاصيل {title}"
+    "viewDetails": "عرض تفاصيل {title}",
+    "searchPlaceholder": "Search watchlist...",
+    "noResults": "No results found"
   },
   "continueWatching": {
     "failedToRemove": "فشل الإزالة من القائمة",

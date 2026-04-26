@@ -29,7 +29,9 @@
     "emptyTitle": "ประวัติการดูว่างเปล่า",
     "emptyDescription": "เริ่มดูอะไรสักอย่างแล้วจะปรากฏที่นี่",
     "removeAriaLabel": "ลบออกจากรายการ",
-    "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด"
+    "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด",
+    "searchPlaceholder": "Search continue watching...",
+    "noResults": "No results found"
   },
   "contentDetail": {
     "series": "ซีรีส์",

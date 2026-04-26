@@ -102,7 +102,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
               }
             : {
                 position: 'fixed',
-                top: 0,
+                top: 'var(--electron-titlebar-height, 0px)',
                 right: 0,
                 bottom: 0,
                 left: 0,
@@ -132,6 +132,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
     matchId: metadata.movieId,
     title: `${metadata.title} - Clip`,
     streamUrl,
+    clientDownload: metadata.movieId.startsWith('live-server1:'),
   });
 
   const handleStart = () => {
