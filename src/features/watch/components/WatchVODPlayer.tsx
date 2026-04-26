@@ -44,6 +44,8 @@ interface WatchPlayerProps {
   initialAudioTrackId?: string;
   /** Called when the user selects a language dub on server 2 */
   onAudioTrackChange?: (trackId: string) => void;
+  /** Hide the back button in the player header (e.g. public clip page) */
+  hideBackButton?: boolean;
 }
 
 export const WatchVODPlayer = memo(function WatchVODPlayer(
@@ -155,13 +157,13 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         onNavigate={props.onNavigate || ((url) => router.replace(url))}
       >
         {!useInlineMobileLayout ? mobileHeader : null}
-        <VODPlayerState />
+        <VODPlayerState hideBackButton={props.hideBackButton} />
       </Player.Root>
     </>
   );
 });
 
-function VODPlayerState() {
+function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
   const t = useTranslations('watch.player');
@@ -212,7 +214,7 @@ function VODPlayerState() {
       {/* Episode panel provider wraps controls for shared context */}
       <Player.EpisodePanel>
         <Player.Controls>
-          <Player.Header />
+          <Player.Header hideBackButton={hideBackButton} />
           <Player.SeekBar />
           <Player.ControlRow>
             <Player.PlayPause />

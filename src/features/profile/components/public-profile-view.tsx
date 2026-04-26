@@ -55,7 +55,7 @@ export function PublicProfileView({
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-neo-yellow selection:text-foreground">
+    <div className="min-h-0 flex-1 overflow-y-auto bg-background text-foreground selection:bg-neo-yellow selection:text-foreground">
       {/* Background patterns / abstract shapes for premium look */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full border-[100px] border-border" />

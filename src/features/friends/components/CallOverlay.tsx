@@ -79,13 +79,20 @@ export function CallOverlay() {
     }
     if (dragRef.current.dragging) {
       const { w, h } = dragRef.current;
+      const titlebarH =
+        Number.parseInt(
+          getComputedStyle(document.documentElement)
+            .getPropertyValue('--electron-titlebar-height')
+            .trim(),
+          10,
+        ) || 0;
       setDragPos({
         x: Math.max(
           0,
           Math.min(window.innerWidth - w, dragRef.current.origX + dx),
         ),
         y: Math.max(
-          0,
+          titlebarH,
           Math.min(window.innerHeight - h, dragRef.current.origY + dy),
         ),
       });
@@ -147,7 +154,7 @@ export function CallOverlay() {
   if (expanded) {
     return (
       <div
-        className={`fixed inset-0 z-[95] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 ${
+        className={`fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10010] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 ${
           exiting
             ? 'opacity-0 scale-95'
             : 'animate-in fade-in zoom-in-95 duration-200'
@@ -339,8 +346,8 @@ export function CallOverlay() {
   return (
     <>
       <div
-        className={`fixed z-[90] transition-opacity duration-300 ease-out ${
-          !dragPos ? 'top-4 right-4' : ''
+        className={`fixed z-[10000] transition-opacity duration-300 ease-out ${
+          !dragPos ? 'right-4' : ''
         } ${
           exiting
             ? 'opacity-0 scale-95'
@@ -351,7 +358,10 @@ export function CallOverlay() {
         style={
           dragPos
             ? { left: dragPos.x, top: dragPos.y, touchAction: 'none' }
-            : { touchAction: 'none' }
+            : {
+                top: 'calc(var(--electron-titlebar-height, 0px) + 1rem)',
+                touchAction: 'none',
+              }
         }
       >
         <section

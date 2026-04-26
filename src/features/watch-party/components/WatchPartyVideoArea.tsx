@@ -1,6 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
+import { RecordButton } from '@/features/clips/components/RecordButton';
+import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { Player } from '@/features/watch/player';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
@@ -147,6 +150,31 @@ export function WatchPartyVideoArea({
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
+  const clip = useClipRecorder({
+    matchId: room.contentId || `wp-${room.id}`,
+    title: `${metadata.title} - Clip`,
+    streamUrl: streamUrlOverride || room.streamUrl || null,
+  });
+
+  const handleClipStart = () => {
+    clip.start();
+    toast.info('Recording started');
+  };
+  const handleClipStop = async () => {
+    await clip.stop();
+    toast.success('Clip saved! Processing...');
+  };
+
+  const recordButton = isHost ? (
+    <RecordButton
+      isRecording={clip.isRecording}
+      duration={clip.duration}
+      canStop={clip.canStop}
+      onStart={handleClipStart}
+      onStop={handleClipStop}
+    />
+  ) : null;
+
   return (
     <Player.Root
       streamUrl={streamUrlOverride || room.streamUrl || null}
@@ -203,6 +231,7 @@ export function WatchPartyVideoArea({
               onSidebarToggle={onSidebarToggle}
               isSidebarOpen={isSidebarOpen}
               hideBackButton
+              rightContent={recordButton}
             />
             <Player.SeekBar />
             <Player.ControlRow>

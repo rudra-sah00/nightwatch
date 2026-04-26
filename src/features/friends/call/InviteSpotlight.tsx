@@ -40,7 +40,7 @@ export function InviteSpotlight({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[18vh] bg-black/40 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-200"
+      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10020] flex items-start justify-center pt-[18vh] bg-black/40 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

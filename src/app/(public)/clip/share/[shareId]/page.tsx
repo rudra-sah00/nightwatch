@@ -50,5 +50,11 @@ export default function PublicClipPage() {
     movieId: `clip-${clip.id}`,
   };
 
-  return <WatchVODPlayer streamUrl={clip.videoUrl} metadata={metadata} />;
+  return (
+    <WatchVODPlayer
+      streamUrl={clip.videoUrl}
+      metadata={metadata}
+      hideBackButton
+    />
+  );
 }

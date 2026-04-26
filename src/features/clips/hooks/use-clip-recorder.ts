@@ -1,108 +1,90 @@
 'use client';
 
-import type HlsType from 'hls.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { finalizeClip, pushSegment, pushSegmentData, startClip } from '../api';
+import { finalizeClip, pushSegmentData, startClip } from '../api';
 
 const MAX_DURATION = 300;
 const MIN_DURATION = 5;
+const CHUNK_INTERVAL = 2000;
 
 interface UseClipRecorderOptions {
-  hlsRef: React.RefObject<HlsType | null>;
   matchId: string;
   title: string;
   streamUrl: string | null;
-  /** Server 1 streams require client-side download + binary upload */
-  clientDownload?: boolean;
 }
 
 export function useClipRecorder({
-  hlsRef,
   matchId,
   title,
   streamUrl,
-  clientDownload = false,
 }: UseClipRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [clipId, setClipId] = useState<string | null>(null);
 
   const clipIdRef = useRef<string | null>(null);
-  const seenUrls = useRef(new Set<string>());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
-  // biome-ignore lint/suspicious/noExplicitAny: hls.js event handler type varies
-  const fragHandlerRef = useRef<((...args: any[]) => void) | null>(null);
+  const pausedAtRef = useRef(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunkIndexRef = useRef(0);
 
-  /**
-   * Push a segment — either URL (Server 2) or fetch + upload binary (Server 1).
-   */
-  const pushFrag = useCallback(
-    async (
-      id: string,
-      url: string,
-      fragStart: number,
-      fragDuration: number,
-    ) => {
-      if (clientDownload) {
-        // Server 1: fetch segment locally in the browser, upload raw bytes
-        try {
-          const res = await fetch(url);
-          if (!res.ok) return;
-          const data = await res.arrayBuffer();
-          await pushSegmentData(id, data, fragStart, fragDuration);
-        } catch {
-          // silent — segment lost
-        }
-      } else {
-        // Server 2: send URL, backend downloads via CF worker
-        await pushSegment(id, {
-          url,
-          startTime: fragStart,
-          duration: fragDuration,
-        }).catch(() => {});
-      }
-    },
-    [clientDownload],
-  );
-
-  const stop = useCallback(async () => {
-    const hls = hlsRef.current;
-    if (fragHandlerRef.current && hls) {
-      const Hls = (await import('hls.js')).default;
-      hls.off(Hls.Events.FRAG_LOADED, fragHandlerRef.current);
-      fragHandlerRef.current = null;
-    }
+  const cleanup = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-
-    const id = clipIdRef.current;
+    recorderRef.current = null;
+    chunkIndexRef.current = 0;
+    pausedAtRef.current = 0;
     setIsRecording(false);
     setDuration(0);
     clipIdRef.current = null;
-    seenUrls.current.clear();
+  }, []);
 
-    if (id && (Date.now() - startTimeRef.current) / 1000 >= MIN_DURATION) {
-      try {
-        await finalizeClip(id);
-      } catch {
-        /* toast handled by caller */
-      }
+  const stop = useCallback(async () => {
+    const id = clipIdRef.current;
+    const recorder = recorderRef.current;
+
+    if (!recorder || !id) {
+      cleanup();
+      return;
     }
-    setClipId(null);
-  }, [hlsRef]);
+
+    return new Promise<void>((resolve) => {
+      recorder.onstop = async () => {
+        try {
+          await finalizeClip(id);
+        } catch {
+          /* toast handled by caller */
+        }
+        cleanup();
+        resolve();
+      };
+      recorder.stop();
+    });
+  }, [cleanup]);
 
   const start = useCallback(async () => {
-    if (!streamUrl || !hlsRef.current) return;
+    if (!streamUrl) return;
+
+    const video = document.querySelector('video');
+    if (!video) return;
+
+    const videoEl = video as HTMLVideoElement & {
+      captureStream?: () => MediaStream;
+      mozCaptureStream?: () => MediaStream;
+    };
+    const stream = videoEl.captureStream?.() || videoEl.mozCaptureStream?.();
+    if (!stream) return;
 
     try {
       const { clipId: id } = await startClip(matchId, title, streamUrl);
       clipIdRef.current = id;
       setClipId(id);
-      seenUrls.current.clear();
       startTimeRef.current = Date.now();
+      pausedAtRef.current = 0;
+      chunkIndexRef.current = 0;
       setIsRecording(true);
       setDuration(0);
 
@@ -112,54 +94,80 @@ export function useClipRecorder({
         if (elapsed >= MAX_DURATION) stop();
       }, 1000);
 
-      const hls = hlsRef.current;
-      const Hls = (await import('hls.js')).default;
+      const mimeType = MediaRecorder.isTypeSupported(
+        'video/webm;codecs=vp9,opus',
+      )
+        ? 'video/webm;codecs=vp9,opus'
+        : 'video/webm';
+      const recorder = new MediaRecorder(stream, { mimeType });
 
-      // Capture the currently playing segment
-      // biome-ignore lint/suspicious/noExplicitAny: hls.js internal types
-      const levels = hls.levels as any[];
-      const currentLevel = hls.currentLevel >= 0 ? hls.currentLevel : 0;
-      const details = levels?.[currentLevel]?.details;
-      const video = document.querySelector('video');
-      const currentTime = video?.currentTime ?? 0;
+      recorder.ondataavailable = async (e) => {
+        if (e.data.size === 0) return;
+        const currentId = clipIdRef.current;
+        if (!currentId) return;
 
-      if (details?.fragments) {
-        for (const frag of details.fragments) {
-          if (!frag?.url) continue;
-          const fragEnd = (frag.start ?? 0) + (frag.duration ?? 0);
-          if (fragEnd >= currentTime && !seenUrls.current.has(frag.url)) {
-            seenUrls.current.add(frag.url);
-            pushFrag(id, frag.url, frag.start ?? 0, frag.duration ?? 0);
-            break;
-          }
+        const chunkStart = (chunkIndexRef.current * CHUNK_INTERVAL) / 1000;
+        const chunkDuration = CHUNK_INTERVAL / 1000;
+        chunkIndexRef.current++;
+
+        try {
+          const buf = await e.data.arrayBuffer();
+          await pushSegmentData(currentId, buf, chunkStart, chunkDuration);
+        } catch {
+          /* non-fatal */
         }
-      }
-
-      // Listen for new segments during recording
-      // biome-ignore lint/suspicious/noExplicitAny: hls.js FRAG_LOADED data shape
-      const handler = (_event: any, data: any) => {
-        const frag = data?.frag;
-        if (!frag?.url || !clipIdRef.current) return;
-        if (seenUrls.current.has(frag.url)) return;
-        seenUrls.current.add(frag.url);
-        pushFrag(
-          clipIdRef.current,
-          frag.url,
-          frag.start ?? 0,
-          frag.duration ?? 0,
-        );
       };
 
-      fragHandlerRef.current = handler;
-      hls.on(Hls.Events.FRAG_LOADED, handler);
+      recorder.start(CHUNK_INTERVAL);
+      recorderRef.current = recorder;
     } catch {
-      setIsRecording(false);
+      cleanup();
     }
-  }, [hlsRef, matchId, title, streamUrl, stop, pushFrag]);
+  }, [matchId, title, streamUrl, stop, cleanup]);
+
+  // Pause/resume MediaRecorder when video pauses, buffers, or resumes
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const video = document.querySelector('video');
+    if (!video) return;
+
+    const pauseRecorder = () => {
+      const r = recorderRef.current;
+      if (r?.state === 'recording') {
+        r.pause();
+        pausedAtRef.current = Date.now();
+      }
+    };
+
+    const resumeRecorder = () => {
+      const r = recorderRef.current;
+      if (r?.state === 'paused') {
+        // Shift start time forward so duration counter stays accurate
+        if (pausedAtRef.current) {
+          startTimeRef.current += Date.now() - pausedAtRef.current;
+          pausedAtRef.current = 0;
+        }
+        r.resume();
+      }
+    };
+
+    video.addEventListener('pause', pauseRecorder);
+    video.addEventListener('waiting', pauseRecorder);
+    video.addEventListener('playing', resumeRecorder);
+
+    return () => {
+      video.removeEventListener('pause', pauseRecorder);
+      video.removeEventListener('waiting', pauseRecorder);
+      video.removeEventListener('playing', resumeRecorder);
+    };
+  }, [isRecording]);
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (recorderRef.current?.state === 'recording')
+        recorderRef.current.stop();
     };
   }, []);
 

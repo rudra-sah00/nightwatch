@@ -121,18 +121,16 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   );
 });
 function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
-  const { state, playerHandlers, metadata, hlsRef } = usePlayerContext();
+  const { state, playerHandlers, metadata } = usePlayerContext();
   const t = useTranslations('watch.player');
   const error = state.error;
   const isWaitingForStream = !streamUrl;
   const isLoading = state.isLoading || isWaitingForStream;
 
   const clip = useClipRecorder({
-    hlsRef,
     matchId: metadata.movieId,
     title: `${metadata.title} - Clip`,
     streamUrl,
-    clientDownload: metadata.movieId.startsWith('live-server1:'),
   });
 
   const handleStart = () => {
