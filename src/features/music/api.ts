@@ -246,3 +246,46 @@ export async function removeTrackFromPlaylist(
     method: 'DELETE',
   });
 }
+
+export interface SyncedLyricLine {
+  time: number;
+  text: string;
+}
+
+export async function getSyncedLyrics(
+  title: string,
+  artist: string,
+  duration: number,
+): Promise<SyncedLyricLine[] | null> {
+  try {
+    const q = encodeURIComponent(`${title} ${artist}`);
+    const res = await fetch(`https://lrclib.net/api/search?q=${q}`, {
+      headers: { 'User-Agent': 'Nightwatch/2.0' },
+    });
+    if (!res.ok) return null;
+    const results = (await res.json()) as {
+      syncedLyrics: string | null;
+      duration: number;
+    }[];
+    // Find best match by duration
+    const match =
+      results.find(
+        (r) => r.syncedLyrics && Math.abs(r.duration - duration) < 5,
+      ) ?? results.find((r) => r.syncedLyrics);
+    if (!match?.syncedLyrics) return null;
+    // Parse LRC format: [mm:ss.xx] text
+    return match.syncedLyrics
+      .split('\n')
+      .map((line) => {
+        const m = line.match(/\[(\d+):(\d+\.\d+)\]\s*(.*)/);
+        if (!m) return null;
+        return {
+          time: Number(m[1]) * 60 + Number(m[2]),
+          text: m[3],
+        };
+      })
+      .filter((l): l is SyncedLyricLine => l !== null && l.text.length > 0);
+  } catch {
+    return null;
+  }
+}
