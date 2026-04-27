@@ -4,16 +4,18 @@ import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useAuth } from '@/providers/auth-provider';
 
 export function Navbar() {
   const { user } = useAuth();
+  const { expanded: musicExpanded } = useMusicPlayerContext();
   const t = useTranslations('common.nav');
 
   return (
     <nav
       data-electron-drag-region
-      className={`sticky [-webkit-app-region:drag] top-0 z-50 w-full bg-background text-foreground overflow-hidden`}
+      className={`sticky top-0 z-50 w-full bg-background text-foreground overflow-hidden ${musicExpanded ? '[-webkit-app-region:no-drag]' : '[-webkit-app-region:drag]'}`}
     >
       <div
         className="flex justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 h-20 relative gap-4"

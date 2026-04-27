@@ -2,6 +2,11 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
+import { FloatingDisc } from '@/features/music/components/FloatingDisc';
+import { FullPlayer } from '@/features/music/components/FullPlayer';
+import { MusicAutoStop } from '@/features/music/components/MusicAutoStop';
+import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPresence';
+import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
 import { PipOverlay } from '@/features/watch/player/ui/overlays/PipOverlay';
 
 export default async function ProtectedLayout({
@@ -18,11 +23,17 @@ export default async function ProtectedLayout({
 
   return (
     <CallProvider>
-      <CallOverlay />
-      <PipOverlay />
-      <div className="h-full bg-background flex flex-col overflow-hidden">
-        <main className="flex-1 w-full min-h-0">{children}</main>
-      </div>
+      <MusicPlayerProvider>
+        <CallOverlay />
+        <PipOverlay />
+        <FullPlayer />
+        <FloatingDisc />
+        <MusicAutoStop />
+        <MusicDiscordPresence />
+        <div className="h-full bg-background flex flex-col overflow-hidden">
+          <main className="flex-1 w-full min-h-0">{children}</main>
+        </div>
+      </MusicPlayerProvider>
     </CallProvider>
   );
 }
