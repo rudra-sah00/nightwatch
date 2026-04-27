@@ -28,42 +28,28 @@ src/features/clips/
 
 ## Dual-Mode Recording (Server 1 vs Server 2)
 
-### Server 2 — URL Mode (Default)
+### Unified Recording (All Servers)
 
-Server 2 streams go through the Cloudflare Worker CDN proxy. Segment URLs are valid server-side.
-
-```
-User clicks Record
-  → hls.js FRAG_LOADED fires per segment
-  → POST /api/clips/:id/segment { url, startTime, duration }
-  → Backend stores URL in DB
-  → (On finalize) Clip processor downloads via CF worker → FFmpeg → S3
-```
-
-### Server 1 — Binary Upload Mode (Electron Only)
-
-Server 1 streams use an Electron-local HTTP proxy. URLs are only reachable from the user's machine.
+Both Server 1 and Server 2 use the same recording approach via MediaRecorder + captureStream.
 
 ```
 User clicks Record
-  → hls.js FRAG_LOADED fires per segment
-  → Browser fetches segment bytes locally (Electron can reach its own proxy)
-  → POST /api/clips/:id/segment-data (Content-Type: application/octet-stream)
-    Headers: x-segment-start, x-segment-duration
-  → Backend saves raw .ts bytes to /tmp/clips/
-  → (On finalize) Clip processor reads local files → FFmpeg → S3
+  → MediaRecorder captures decoded video/audio frames from <video> element
+  → 2-second WebM chunks sent as binary to POST /api/clips/:id/segment-data
+  → Backend uploads each chunk to MinIO (clips/{clipId}/segments/seg_NNNN.webm)
+  → (On finalize) Clip processor downloads from MinIO → concatenates WebM → FFmpeg → MP4 → MinIO
 ```
 
-The `clientDownload` flag is set automatically based on `matchId.startsWith('live-server1:')`.
+Recording pauses automatically when the video pauses or buffers, and resumes on playback.
 
 ## Recording Flow
 
 1. User clicks **Record** → `POST /api/clips/start` → returns `clipId`
-2. Current playing segment captured immediately (hls.js buffer)
-3. Each new segment streamed to backend in real-time as it loads
+2. MediaRecorder captures decoded frames from `<video>` element
+3. Every 2 seconds, a WebM chunk is uploaded to MinIO via `POST /api/clips/:id/segment-data`
 4. User clicks **Stop** (or 5 min auto-stop) → `POST /api/clips/:id/finalize`
 5. Backend enqueues BullMQ job → clip-processor container processes
-6. Worker: download (Server 2) or read local files (Server 1) → FFmpeg → S3 → DB update
+6. Worker: downloads chunks from MinIO → concatenates WebM → FFmpeg MP4 → uploads to MinIO → DB update
 7. Worker publishes `clip:ready` to Redis → backend relays via Socket.IO → frontend toast + refetch
 
 ## Constraints
@@ -99,22 +85,22 @@ services/clip-processor/
 
 ### FFmpeg Pipeline
 
-1. Locate pre-downloaded segments OR download via `host.docker.internal` (Docker → host proxy)
-2. Create FFmpeg concat file
-3. `ffmpeg -f concat → libx264 MP4` with `-movflags +faststart`
+1. Download WebM chunks from MinIO (`clips/{clipId}/segments/`)
+2. Concatenate into single `recorded.webm`
+3. `ffmpeg -i recorded.webm → libx264 MP4` with `-movflags +faststart`
 4. `ffprobe` for accurate duration
 5. `ffmpeg -ss <midpoint>` → thumbnail.jpg
-6. Upload MP4 + thumbnail to S3/MinIO
+6. Upload MP4 + thumbnail to MinIO
 7. Update DB status to `ready`
 8. Publish `clip:ready` to Redis
-9. Cleanup temp directory
+9. Cleanup: delete local temp files + MinIO segment objects
 
 ### Storage
 
 | Environment | Service | URL Format |
 |------------|---------|------------|
 | Development | MinIO (Docker) | `http://localhost:9000/nightwatch-clips/clips/{userId}/{clipId}/video.mp4` |
-| Production | AWS S3 | `https://nightwatch-clips.s3.{region}.amazonaws.com/clips/{userId}/{clipId}/video.mp4` |
+| Production | MinIO (Self-hosted) | `https://s3.nightwatch.in/nightwatch-clips/clips/{userId}/{clipId}/video.mp4` |
 
 ### Docker Setup
 

@@ -29,8 +29,9 @@ Due to the scale of the application, our detailed technical documentation is spl
 ### Feature Details
 - [Authentication](./docs/features/AUTHENTICATION.md): Dual-factor HTTP-only cookie sessions and Anti-Bot protection.
 - [Livestream Framework](./docs/features/LIVESTREAM.md): RTMP ingestion, HLS transmission, and Agora RTM Live Chat loops.
-- [Livestream Clipping](./docs/features/CLIPS.md): Record live moments, FFmpeg processing, S3 storage, and Library page.
+- [Livestream Clipping](./docs/features/CLIPS.md): Record live moments, FFmpeg processing, MinIO storage, and Library page.
 - [User Profile](./docs/features/PROFILE.md): Zod validation, S3 avatar uploads, and Security mutations.
+- [Ask AI](./docs/features/ASK_AI.md): Voice-to-voice AI assistant with Nova 2 Sonic, tool calling, and content search.
 - [Search Engine](./docs/features/SEARCH.md): Debounced URL-parameter driven queries and infinite scroll facets.
 - [Watch Content](./docs/features/WATCH.md): VOD operations, HLS bitrates, and Redis heartbeat synchronization.
 - [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.

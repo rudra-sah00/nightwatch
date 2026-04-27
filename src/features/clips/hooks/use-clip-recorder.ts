@@ -28,6 +28,7 @@ export function useClipRecorder({
   const pausedAtRef = useRef(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunkIndexRef = useRef(0);
+  const pendingUploadsRef = useRef<Promise<void>[]>([]);
 
   const cleanup = useCallback(() => {
     if (timerRef.current) {
@@ -37,6 +38,7 @@ export function useClipRecorder({
     recorderRef.current = null;
     chunkIndexRef.current = 0;
     pausedAtRef.current = 0;
+    pendingUploadsRef.current = [];
     setIsRecording(false);
     setDuration(0);
     clipIdRef.current = null;
@@ -54,6 +56,9 @@ export function useClipRecorder({
     return new Promise<void>((resolve) => {
       recorder.onstop = async () => {
         try {
+          // Wait for all chunk uploads to complete (including the final one)
+          await Promise.all(pendingUploadsRef.current);
+          pendingUploadsRef.current = [];
           await finalizeClip(id);
         } catch {
           /* toast handled by caller */
@@ -101,7 +106,7 @@ export function useClipRecorder({
         : 'video/webm';
       const recorder = new MediaRecorder(stream, { mimeType });
 
-      recorder.ondataavailable = async (e) => {
+      recorder.ondataavailable = (e) => {
         if (e.data.size === 0) return;
         const currentId = clipIdRef.current;
         if (!currentId) return;
@@ -110,12 +115,14 @@ export function useClipRecorder({
         const chunkDuration = CHUNK_INTERVAL / 1000;
         chunkIndexRef.current++;
 
-        try {
-          const buf = await e.data.arrayBuffer();
-          await pushSegmentData(currentId, buf, chunkStart, chunkDuration);
-        } catch {
-          /* non-fatal */
-        }
+        const upload = e.data.arrayBuffer().then((buf) =>
+          pushSegmentData(currentId, buf, chunkStart, chunkDuration).catch(
+            () => {
+              /* non-fatal */
+            },
+          ),
+        );
+        pendingUploadsRef.current.push(upload);
       };
 
       recorder.start(CHUNK_INTERVAL);
