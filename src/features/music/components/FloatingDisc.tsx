@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
-const VIDEO_ROUTES = ['/watch/', '/live/', '/live'];
+const VIDEO_ROUTES = ['/watch/', '/live/'];
 
 export function FloatingDisc() {
   const { currentTrack, isPlaying, setExpanded } = useMusicPlayerContext();

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeletons';
 import {
   getCharts,
   getFeaturedPlaylists,
@@ -174,60 +175,24 @@ export function MusicView() {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="flex-shrink-0 w-36 md:w-40">
-      <div className="w-36 h-36 md:w-40 md:h-40 bg-muted animate-pulse border-[3px] border-border" />
-      <div className="h-3 bg-muted animate-pulse mt-2 w-3/4" />
-      <div className="h-2 bg-muted animate-pulse mt-1 w-1/2" />
-    </div>
-  );
-}
-
-function SkeletonCircle() {
-  return (
-    <div className="flex-shrink-0 w-28 md:w-32 text-center">
-      <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-muted animate-pulse border-[3px] border-border mx-auto" />
-      <div className="h-2 bg-muted animate-pulse mt-2 w-2/3 mx-auto" />
-    </div>
-  );
-}
-
-function SkeletonRow() {
-  return (
-    <div className="flex gap-4 px-6 overflow-hidden">
-      {Array.from({ length: 5 }).map((_, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  );
-}
-
 function MusicSkeleton() {
   return (
-    <div className="space-y-8 py-4">
-      <div className="px-6">
-        <div className="h-4 w-28 bg-muted animate-pulse" />
-      </div>
-      <SkeletonRow />
-      <div className="px-6">
-        <div className="h-4 w-24 bg-muted animate-pulse" />
-      </div>
-      <SkeletonRow />
-      <div className="px-6">
-        <div className="h-4 w-28 bg-muted animate-pulse" />
-      </div>
-      <div className="flex gap-4 px-6 overflow-hidden">
-        {Array.from({ length: 5 }).map((_, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-          <SkeletonCircle key={i} />
-        ))}
-      </div>
-      <div className="px-6">
-        <div className="h-4 w-32 bg-muted animate-pulse" />
-      </div>
-      <SkeletonRow />
+    <div className="space-y-6 py-4">
+      {[1, 2, 3, 4].map((section) => (
+        <div key={section}>
+          <div className="px-6 mb-3">
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="flex gap-4 px-6 overflow-hidden">
+            {[1, 2, 3, 4, 5].map((card) => (
+              <div key={card} className="flex-shrink-0 w-36 md:w-40">
+                <Skeleton className="w-36 h-36 md:w-40 md:h-40" />
+                <Skeleton className="h-2.5 mt-2 w-3/4" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

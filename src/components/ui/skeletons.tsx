@@ -2,7 +2,17 @@
 
 /**
  * Shared skeleton components for loading states.
+ *
+ * Base primitive: <Skeleton /> — a simple animated placeholder block.
+ * Compose domain-specific skeletons using the base primitive.
  */
+
+/** Base skeleton block — use className to set width/height/shape */
+export function Skeleton({ className = '' }: { className?: string }) {
+  return (
+    <div aria-hidden="true" className={`bg-muted animate-pulse ${className}`} />
+  );
+}
 
 export function SearchSkeleton() {
   return (
