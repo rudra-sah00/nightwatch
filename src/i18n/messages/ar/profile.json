@@ -89,7 +89,6 @@
     "system": "النظام",
     "language": "اللغة",
     "languageDescription": "اختر لغة العرض المفضلة لديك.",
-    "selectLanguage": "اختر اللغة",
     "launchOnStartup": "التشغيل عند بدء التشغيل",
     "launchDescription": "تشغيل Nightwatch تلقائياً في الخلفية عند تشغيل الكمبيوتر.",
     "maxConcurrentDownloads": "الحد الأقصى للتنزيلات المتزامنة",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "تقييد سرعة التنزيل في الخلفية. مفيد إذا أصبحت شبكتك بطيئة!",
     "unlimited": "غير محدود",
     "cancel": "إلغاء",
-    "set": "تعيين",
     "customConcurrent": "مخصص (1-10)",
     "customSpeed": "مخصص ميجابايت/ث"
   },

@@ -2,19 +2,15 @@
   "nav": {
     "home": "Главная",
     "continue": "Продолжить",
-    "continueWatching": "Продолжить просмотр",
     "live": "Прямой эфир",
-    "liveMatches": "Матчи в прямом эфире",
     "watchlist": "Список просмотра",
     "downloads": "Загрузки",
-    "offlineDownloads": "Офлайн-загрузки",
     "profile": "Профиль",
     "logoAlt": "Логотип Nightwatch",
     "music": "Music"
   },
   "language": {
-    "title": "Язык",
-    "description": "Выберите предпочитаемый язык"
+    "title": "Язык"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "Настройка Параметров",
     "customizingProfile": "Настройка профиля"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "Сбалансированный",
-    "highQuality": "Высококачественный Поток"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "Ваш персональный стриминговый компаньон",
     "homeTitle": "Главная | Nightwatch",
     "homeDescription": "Ищите фильмы и сериалы, чтобы начать смотреть вместе.",
     "continueWatchingTitle": "Продолжить Просмотр | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "Доступ к загруженным фильмам и сериалам для офлайн-просмотра.",
     "watchlistTitle": "Мой Список | Nightwatch",
     "watchlistDescription": "Отслеживайте фильмы и сериалы, которые хотите посмотреть позже.",
-    "watchPartyTitle": "Совместный Просмотр | Nightwatch",
-    "watchPartyDescription": "Присоединяйтесь к друзьям и смотрите вместе в реальном времени.",
-    "messagesTitle": "Сообщения | Nightwatch",
     "userNotFoundTitle": "Пользователь не найден | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "Просмотр активности и профиля {name} на Nightwatch.",
@@ -203,18 +185,8 @@
     "showMore": "Показать Ещё ({remaining} осталось)"
   },
   "downloads": {
-    "failedToLoad": "Не удалось загрузить контент",
     "experienceStarting": "Запуск Впечатления",
-    "preparingContent": "Подготовка \"{title}\"...",
-    "episodes": "Эпизоды",
-    "noImageAvailable": "Изображение Недоступно",
-    "closePreview": "Закрыть Предпросмотр",
-    "statusCompleted": "ЗАВЕРШЕНО",
-    "statusFailed": "ОШИБКА",
-    "statusDownloading": "ЗАГРУЗКА",
-    "statusQueued": "В ОЧЕРЕДИ",
-    "statusCancelled": "ОТМЕНЕНО",
-    "statusPaused": "ПАУЗА"
+    "preparingContent": "Подготовка \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "Сессия истекла. Пожалуйста, войдите снова.",
@@ -227,49 +199,20 @@
     "csrfFailed": "Токен безопасности истёк. Обновите страницу.",
     "notFound": "Запрашиваемый ресурс не найден.",
     "forbidden": "У вас нет разрешения на это действие.",
-    "networkError": "Проблема с сетью. Проверьте подключение и попробуйте снова.",
     "requestTimeout": "Время ожидания запроса истекло. Проверьте подключение и попробуйте снова."
-  },
-  "units": {
-    "bytes": "Байт",
-    "kb": "КБ",
-    "mb": "МБ",
-    "gb": "ГБ",
-    "tb": "ТБ"
-  },
-  "fallbacks": {
-    "guest": "Гость",
-    "member": "Участник",
-    "roomHost": "Хост комнаты",
-    "user": "Пользователь"
   },
   "friends": {
     "title": "Друзья",
-    "messagesTitle": "Сообщения",
-    "conversations": "Беседы",
-    "selectConversation": "Выберите беседу",
-    "noConversations": "Нет бесед",
-    "noMessages": "Нет сообщений — поздоровайтесь!",
     "noFriends": "Нет друзей",
     "online": "В сети",
     "offline": "Не в сети",
-    "typing": "Печатает...",
-    "typeMessage": "Введите сообщение...",
-    "send": "Отправить",
-    "back": "Назад",
     "accept": "Принять",
     "reject": "Отклонить",
     "pendingRequests": "Запросы",
-    "openMessages": "Сообщения",
     "addFriend": "Добавить друга",
     "addFriendPlaceholder": "Введите имя пользователя",
     "requestSent": "Запрос отправлен!",
     "requestFailed": "Не удалось отправить запрос",
-    "unfriend": "Удалить из друзей",
-    "block": "Заблокировать",
-    "unfriended": "Друг удалён",
-    "blocked": "Пользователь заблокирован",
-    "actionFailed": "Действие не выполнено",
     "noUsersFound": "Пользователи не найдены",
     "sentRequests": "Отправленные",
     "cancelRequest": "Отменить",
@@ -292,16 +235,10 @@
       "invite": "Пригласить друга",
       "searchFriends": "Найти друзей для добавления...",
       "noFriendsFound": "Друзья не найдены",
-      "participants": "{count, plural, one {# участник} few {# участника} other {# участников}}",
+      "participants": "{count, plural, one {# участник} few {# участника} many {# участников} other {# участников}}",
       "you": "Вы",
-      "callOverlay": "Окно звонка",
-      "replying": "Ответ",
-      "reply": "Ответить",
-      "emoji": "Эмодзи",
-      "callButton": "Позвонить"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "Окно звонка"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "Свернуть",
+    "maximize": "Развернуть",
+    "close": "Закрыть",
+    "back": "Назад",
+    "forward": "Вперёд",
+    "goBack": "Назад",
+    "goForward": "Вперёд"
   }
 }

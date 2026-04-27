@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "某人",
     "guest": "访客",
-    "member": "成员",
-    "unknownParticipant": "未知参与者",
-    "anonymous": "匿名"
+    "member": "成员"
   },
   "toasts": {
     "failedApprove": "批准成员失败",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "更新内容失败",
     "contentChanged": "内容已更改为：{title}",
     "kicked": "你被踢出了：{reason}",
-    "roomEnded": "此观影派对已结束或代码无效。",
-    "networkError": "无法检查房间状态。请检查你的网络连接。",
     "failedFetchRoom": "批准后获取房间详情失败。",
     "hostDeclined": "主持人拒绝了你的加入请求。",
     "movieEndWarning": "电影结束时，此观影派对将自动结束。",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "正在重新连接语音/视频服务器...",
     "disconnectedVoice": "已断开与语音/视频服务器的连接",
     "failedConnectVoice": "连接语音/视频服务器失败",
-    "permissionDenied": "{device}权限被拒绝。请点击浏览器地址栏中的锁图标以允许访问。",
-    "deviceNotFound": "未找到{device}。请连接一个{device}。",
-    "deviceAccessFailed": "访问{device}失败。请检查浏览器设置。",
     "notConnectedVoice": "尚未连接到语音服务器。请稍候...",
     "notConnectedVideo": "尚未连接到视频服务器。请稍候...",
     "micSwitched": "麦克风已切换",

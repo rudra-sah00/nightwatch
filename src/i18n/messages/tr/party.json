@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "Birisi",
     "guest": "Misafir",
-    "member": "Üye",
-    "unknownParticipant": "Bilinmeyen Katılımcı",
-    "anonymous": "Anonim"
+    "member": "Üye"
   },
   "toasts": {
     "failedApprove": "Üye onaylanamadı",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "İçerik güncellenemedi",
     "contentChanged": "İçerik şu olarak değiştirildi: {title}",
     "kicked": "Atıldınız: {reason}",
-    "roomEnded": "Bu izleme partisi sona erdi veya kod geçersiz.",
-    "networkError": "Oda durumu kontrol edilemiyor. Lütfen bağlantınızı kontrol edin.",
     "failedFetchRoom": "Onay sonrası oda detayları alınamadı.",
     "hostDeclined": "Ev sahibi katılma isteğinizi reddetti.",
     "movieEndWarning": "Film bittiğinde bu izleme partisi otomatik olarak sona erecek.",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "Ses/video sunucusuna yeniden bağlanılıyor...",
     "disconnectedVoice": "Ses/video sunucusuyla bağlantı kesildi",
     "failedConnectVoice": "Ses/video sunucusuna bağlanılamadı",
-    "permissionDenied": "{device} izni reddedildi. Erişime izin vermek için tarayıcı adres çubuğundaki kilit simgesine tıklayın.",
-    "deviceNotFound": "{device} bulunamadı. Lütfen bir {device} bağlayın.",
-    "deviceAccessFailed": "{device} erişimi başarısız. Lütfen tarayıcı ayarlarınızı kontrol edin.",
     "notConnectedVoice": "Henüz ses sunucusuna bağlı değil. Lütfen bekleyin...",
     "notConnectedVideo": "Henüz video sunucusuna bağlı değil. Lütfen bekleyin...",
     "micSwitched": "Mikrofon değiştirildi",

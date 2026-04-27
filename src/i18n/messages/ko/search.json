@@ -53,10 +53,7 @@
     "experienceStarting": "체험 시작 중",
     "preparingContent": "\"{title}\" 준비 중...",
     "closeModal": "모달 닫기",
-    "episodesAriaLabel": "에피소드",
-    "failedToLoadDetails": "프로그램 상세 정보를 불러오지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.",
-    "failedToLoadEpisodes": "에피소드 목록을 불러오지 못했습니다. 캐시된 데이터가 있으면 사용합니다.",
-    "watchPartyError": "워치 파티를 생성하는 중 예기치 않은 오류가 발생했습니다."
+    "episodesAriaLabel": "에피소드"
   },
   "actions": {
     "watchSolo": "혼자 보기",
@@ -67,8 +64,7 @@
     "watchTogether": "함께 보기",
     "creating": "생성 중",
     "toWatchlist": "관심목록에 추가",
-    "removeFromList": "목록에서 제거",
-    "episodeFallbackTitle": "에피소드 {number}"
+    "removeFromList": "목록에서 제거"
   },
   "download": {
     "download": "다운로드",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "사용 가능한 에피소드가 없습니다",
     "saved": "저장됨",
     "securelyStarting": "안전하게 다운로드 시작 중...",
-    "episode": "에피소드 {number}",
     "untitled": "제목 없음",
-    "downloadSrOnly": "{title} 다운로드",
     "downloadingToast": "다운로드 중{epText}! 오프라인 라이브러리를 확인하세요.",
     "downloadingEpisodeText": " Ep {episode}",
-    "episodeLabel": "에피소드 {number}",
     "episodePrefix": "에피소드"
   },
   "episodeCard": {

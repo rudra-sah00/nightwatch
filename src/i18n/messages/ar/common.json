@@ -2,19 +2,15 @@
   "nav": {
     "home": "الرئيسية",
     "continue": "متابعة",
-    "continueWatching": "متابعة المشاهدة",
     "live": "مباشر",
-    "liveMatches": "المباريات المباشرة",
     "watchlist": "قائمة المشاهدة",
     "downloads": "التنزيلات",
-    "offlineDownloads": "التنزيلات بدون إنترنت",
     "profile": "الملف الشخصي",
     "logoAlt": "شعار Nightwatch",
     "music": "Music"
   },
   "language": {
-    "title": "اللغة",
-    "description": "اختر لغتك المفضلة"
+    "title": "اللغة"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "ضبط الإعدادات",
     "customizingProfile": "تخصيص الملف الشخصي"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "متوازن",
-    "highQuality": "بث عالي الجودة"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "رفيقك الشخصي للبث",
     "homeTitle": "الرئيسية | Nightwatch",
     "homeDescription": "ابحث عن الأفلام والمسلسلات لبدء المشاهدة معاً.",
     "continueWatchingTitle": "متابعة المشاهدة | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "الوصول إلى الأفلام والمسلسلات المحملة للمشاهدة بدون إنترنت.",
     "watchlistTitle": "قائمة المشاهدة | Nightwatch",
     "watchlistDescription": "تتبع الأفلام والمسلسلات التي تريد مشاهدتها لاحقاً.",
-    "watchPartyTitle": "حفلة المشاهدة | Nightwatch",
-    "watchPartyDescription": "انضم إلى أصدقائك وشاهدوا معاً في الوقت الفعلي.",
-    "messagesTitle": "الرسائل | Nightwatch",
     "userNotFoundTitle": "المستخدم غير موجود | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "عرض نشاط المشاهدة والملف الشخصي لـ {name}.",
@@ -203,18 +185,8 @@
     "showMore": "عرض المزيد ({remaining} متبقية)"
   },
   "downloads": {
-    "failedToLoad": "فشل تحميل المحتوى",
     "experienceStarting": "بدء التجربة",
-    "preparingContent": "جارٍ تحضير \"{title}\"...",
-    "episodes": "الحلقات",
-    "noImageAvailable": "لا توجد صورة",
-    "closePreview": "إغلاق المعاينة",
-    "statusCompleted": "مكتمل",
-    "statusFailed": "فشل",
-    "statusDownloading": "جارٍ التحميل",
-    "statusQueued": "في الانتظار",
-    "statusCancelled": "ملغى",
-    "statusPaused": "متوقف مؤقتاً"
+    "preparingContent": "جارٍ تحضير \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.",
@@ -227,49 +199,20 @@
     "csrfFailed": "انتهت صلاحية رمز الأمان. يرجى تحديث الصفحة.",
     "notFound": "المورد المطلوب غير موجود.",
     "forbidden": "ليس لديك إذن لتنفيذ هذا الإجراء.",
-    "networkError": "مشكلة في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
     "requestTimeout": "انتهت مهلة الطلب. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
-  },
-  "units": {
-    "bytes": "بايت",
-    "kb": "كيلوبايت",
-    "mb": "ميغابايت",
-    "gb": "غيغابايت",
-    "tb": "تيرابايت"
-  },
-  "fallbacks": {
-    "guest": "ضيف",
-    "member": "عضو",
-    "roomHost": "مضيف الغرفة",
-    "user": "مستخدم"
   },
   "friends": {
     "title": "الأصدقاء",
-    "messagesTitle": "الرسائل",
-    "conversations": "المحادثات",
-    "selectConversation": "اختر محادثة",
-    "noConversations": "لا توجد محادثات بعد",
-    "noMessages": "لا توجد رسائل بعد — قل مرحبًا!",
     "noFriends": "لا يوجد أصدقاء بعد",
     "online": "متصل",
     "offline": "غير متصل",
-    "typing": "يكتب...",
-    "typeMessage": "اكتب رسالة...",
-    "send": "إرسال",
-    "back": "رجوع",
     "accept": "قبول",
     "reject": "رفض",
     "pendingRequests": "الطلبات",
-    "openMessages": "الرسائل",
     "addFriend": "إضافة صديق",
     "addFriendPlaceholder": "أدخل اسم المستخدم",
     "requestSent": "تم إرسال طلب الصداقة!",
     "requestFailed": "تعذر إرسال الطلب",
-    "unfriend": "إلغاء الصداقة",
-    "block": "حظر المستخدم",
-    "unfriended": "تمت إزالة الصديق",
-    "blocked": "تم حظر المستخدم",
-    "actionFailed": "فشل الإجراء",
     "noUsersFound": "لم يتم العثور على مستخدمين",
     "sentRequests": "مرسلة",
     "cancelRequest": "إلغاء",
@@ -294,14 +237,8 @@
       "noFriendsFound": "لم يتم العثور على أصدقاء",
       "participants": "{count, plural, one {مشارك #} other {# مشاركين}}",
       "you": "أنت",
-      "callOverlay": "نافذة المكالمة",
-      "replying": "الرد",
-      "reply": "رد",
-      "emoji": "إيموجي",
-      "callButton": "اتصال"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "نافذة المكالمة"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "تصغير",
+    "maximize": "تكبير",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "forward": "تقدم",
+    "goBack": "رجوع",
+    "goForward": "تقدم"
   }
 }

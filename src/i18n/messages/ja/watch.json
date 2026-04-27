@@ -36,7 +36,6 @@
     "failedExitFullscreen": "フルスクリーンの解除に失敗しました",
     "fullscreenToggleFailed": "フルスクリーンの切り替えに失敗しました",
     "seekTime": "シーク時間",
-    "liveSeekBar": "ライブ配信シークバー",
     "atLiveEdge": "ライブ配信中",
     "behindLive": "ライブから{seconds}秒遅れ",
     "closeSidebar": "サイドバーを閉じる",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "このプレーヤーは横向きモードでのみ利用可能です",
     "showEpisodes": "エピソードを表示",
     "episodesTitle": "エピソード",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "最大化",
+    "captionNone": "なし"
   },
   "settings": {
     "quality": "画質",

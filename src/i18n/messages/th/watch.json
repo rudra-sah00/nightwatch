@@ -36,7 +36,6 @@
     "failedExitFullscreen": "ออกจากโหมดเต็มหน้าจอไม่สำเร็จ",
     "fullscreenToggleFailed": "สลับโหมดเต็มหน้าจอไม่สำเร็จ",
     "seekTime": "เวลาค้นหา",
-    "liveSeekBar": "แถบค้นหาสตรีมสด",
     "atLiveEdge": "ถ่ายทอดสด",
     "behindLive": "ช้ากว่าสด {seconds} วินาที",
     "closeSidebar": "ปิดแถบด้านข้าง",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "เครื่องเล่นนี้ใช้ได้เฉพาะในโหมดแนวนอนเท่านั้น",
     "showEpisodes": "แสดงตอน",
     "episodesTitle": "ตอน",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "ขยาย",
+    "captionNone": "ไม่มี"
   },
   "settings": {
     "quality": "คุณภาพ",

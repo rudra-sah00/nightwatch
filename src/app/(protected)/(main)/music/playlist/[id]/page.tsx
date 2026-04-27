@@ -2,9 +2,11 @@
 
 import { ArrowLeft, Pause, Play } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getMusicPlaylist, type MusicTrack } from '@/features/music/api';
+import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
 function formatTime(seconds: number): string {
@@ -16,6 +18,7 @@ function formatTime(seconds: number): string {
 export default function MusicPlaylistPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('music');
   const id = params.id as string;
   const player = useMusicPlayerContext();
   const [songs, setSongs] = useState<MusicTrack[]>([]);
@@ -49,7 +52,7 @@ export default function MusicPlaylistPage() {
           className="flex items-center gap-2 text-foreground/40 hover:text-foreground font-headline font-bold uppercase tracking-widest text-xs transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t('back')}
         </button>
       </div>
 
@@ -73,7 +76,7 @@ export default function MusicPlaylistPage() {
               </p>
             )}
             <p className="text-foreground/20 font-headline uppercase tracking-widest text-[10px] mt-2">
-              {songs.length} songs
+              {t('songCount', { count: songs.length })}
             </p>
           </div>
         </div>
@@ -109,11 +112,8 @@ export default function MusicPlaylistPage() {
                   ? player.togglePlay()
                   : player.play(song, songs)
               }
-              className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors ${
-                player.currentTrack?.id === song.id
-                  ? 'bg-neo-yellow/10 border-[2px] border-neo-yellow/30'
-                  : 'hover:bg-card border-[2px] border-transparent'
-              }`}
+              onContextMenu={(e) => showSongMenu(e, song)}
+              className="w-full flex items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-card"
             >
               <span className="w-6 text-foreground/20 text-xs font-mono text-right flex-shrink-0">
                 {player.currentTrack?.id === song.id && player.isPlaying ? (

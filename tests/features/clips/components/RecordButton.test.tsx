@@ -14,7 +14,7 @@ describe('RecordButton', () => {
         onStop={vi.fn()}
       />,
     );
-    expect(screen.getByText('Clip')).toBeInTheDocument();
+    expect(screen.getByText('clip')).toBeInTheDocument();
   });
 
   it('calls onStart when clicked in idle state', async () => {
@@ -28,7 +28,7 @@ describe('RecordButton', () => {
         onStop={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByText('Clip'));
+    await userEvent.click(screen.getByText('clip'));
     expect(onStart).toHaveBeenCalledOnce();
   });
 

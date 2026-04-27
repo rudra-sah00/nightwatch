@@ -1,5 +1,4 @@
 {
-  "title": "直播赛事",
   "heroTitle": "直播",
   "heroTitleStream": "流媒体",
   "heroSubtitle": "形式追随行动",
@@ -67,8 +66,6 @@
   "back": "返回",
   "liveStream": "直播",
   "vs": "VS",
-  "noImageAvailable": "无可用图片",
-  "closePreview": "关闭预览",
   "loginRequired": "您必须登录才能主持观影派对。",
   "noEpisodesOffline": "没有可离线观看的剧集。",
   "failedPlayback": "播放启动失败",
@@ -76,5 +73,10 @@
   "teamFallback2": "队伍 2",
   "twentyFourSevenChannel": "24/7 频道",
   "closeModal": "关闭",
-  "liveTVType": "直播电视"
+  "liveTVType": "直播电视",
+  "clip": "剪辑",
+  "clipSave": "保存",
+  "clipCancel": "取消",
+  "clipRename": "重命名剪辑",
+  "clipDelete": "删除剪辑"
 }

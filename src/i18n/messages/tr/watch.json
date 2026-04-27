@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Tam ekrandan çıkılamadı",
     "fullscreenToggleFailed": "Tam ekran geçişi başarısız",
     "seekTime": "Arama zamanı",
-    "liveSeekBar": "Canlı yayın arama çubuğu",
     "atLiveEdge": "Canlı",
     "behindLive": "Canlıdan {seconds}s geride",
     "closeSidebar": "Kenar çubuğunu kapat",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Bu oynatıcı yalnızca yatay modda kullanılabilir",
     "showEpisodes": "Bölümleri göster",
     "episodesTitle": "Bölümler",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Büyüt",
+    "captionNone": "Yok"
   },
   "settings": {
     "quality": "Kalite",

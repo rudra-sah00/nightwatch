@@ -1,6 +1,7 @@
 'use client';
 
 import { MiniPlayer } from '@/features/music/components/MiniPlayer';
+import { SongContextMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
 export default function MusicLayout({
@@ -14,6 +15,7 @@ export default function MusicLayout({
     <>
       {children}
       {!expanded && <MiniPlayer />}
+      <SongContextMenu />
     </>
   );
 }

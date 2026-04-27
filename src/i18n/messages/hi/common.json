@@ -2,19 +2,15 @@
   "nav": {
     "home": "होम",
     "continue": "जारी रखें",
-    "continueWatching": "देखना जारी रखें",
     "live": "लाइव",
-    "liveMatches": "लाइव मैच",
     "watchlist": "वॉचलिस्ट",
     "downloads": "डाउनलोड",
-    "offlineDownloads": "ऑफ़लाइन डाउनलोड",
     "profile": "प्रोफ़ाइल",
     "logoAlt": "Nightwatch लोगो",
     "music": "Music"
   },
   "language": {
-    "title": "भाषा",
-    "description": "अपनी पसंदीदा भाषा चुनें"
+    "title": "भाषा"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "सेटिंग्स समायोजित कर रहे हैं",
     "customizingProfile": "प्रोफ़ाइल कस्टमाइज़ कर रहे हैं"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "संतुलित",
-    "highQuality": "उच्च गुणवत्ता स्ट्रीम"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "आपका व्यक्तिगत स्ट्रीमिंग साथी",
     "homeTitle": "होम | Nightwatch",
     "homeDescription": "एक साथ देखना शुरू करने के लिए फिल्में और टीवी शो खोजें।",
     "continueWatchingTitle": "देखना जारी रखें | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "ऑफ़लाइन देखने के लिए अपनी डाउनलोड की गई फिल्मों और टीवी शो तक पहुँचें।",
     "watchlistTitle": "मेरी वॉचलिस्ट | Nightwatch",
     "watchlistDescription": "बाद में देखने के लिए फिल्मों और टीवी शो का ट्रैक रखें।",
-    "watchPartyTitle": "वॉच पार्टी | Nightwatch",
-    "watchPartyDescription": "अपने दोस्तों के साथ जुड़ें और रियल-टाइम में एक साथ देखें।",
-    "messagesTitle": "संदेश | Nightwatch",
     "userNotFoundTitle": "उपयोगकर्ता नहीं मिला | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "{name} की वॉच गतिविधि और प्रोफ़ाइल देखें।",
@@ -203,18 +185,8 @@
     "showMore": "और दिखाएँ ({remaining} शेष)"
   },
   "downloads": {
-    "failedToLoad": "सामग्री लोड करने में विफल",
     "experienceStarting": "अनुभव शुरू हो रहा है",
-    "preparingContent": "\"{title}\" तैयार कर रहे हैं...",
-    "episodes": "एपिसोड",
-    "noImageAvailable": "कोई छवि उपलब्ध नहीं",
-    "closePreview": "प्रीव्यू बंद करें",
-    "statusCompleted": "पूर्ण",
-    "statusFailed": "विफल",
-    "statusDownloading": "डाउनलोड हो रहा है",
-    "statusQueued": "कतार में",
-    "statusCancelled": "रद्द",
-    "statusPaused": "रुका हुआ"
+    "preparingContent": "\"{title}\" तैयार कर रहे हैं..."
   },
   "errors": {
     "sessionExpired": "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
@@ -227,49 +199,20 @@
     "csrfFailed": "सुरक्षा टोकन समाप्त हो गया। कृपया पेज रिफ्रेश करें।",
     "notFound": "अनुरोधित संसाधन नहीं मिला।",
     "forbidden": "आपको यह कार्य करने की अनुमति नहीं है।",
-    "networkError": "नेटवर्क समस्या। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।",
     "requestTimeout": "अनुरोध का समय समाप्त हो गया। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।"
-  },
-  "units": {
-    "bytes": "बाइट्स",
-    "kb": "KB",
-    "mb": "MB",
-    "gb": "GB",
-    "tb": "TB"
-  },
-  "fallbacks": {
-    "guest": "अतिथि",
-    "member": "सदस्य",
-    "roomHost": "रूम होस्ट",
-    "user": "उपयोगकर्ता"
   },
   "friends": {
     "title": "दोस्त",
-    "messagesTitle": "संदेश",
-    "conversations": "बातचीत",
-    "selectConversation": "बातचीत चुनें",
-    "noConversations": "अभी कोई बातचीत नहीं",
-    "noMessages": "अभी कोई संदेश नहीं — नमस्ते कहें!",
     "noFriends": "अभी कोई दोस्त नहीं",
     "online": "ऑनलाइन",
     "offline": "ऑफ़लाइन",
-    "typing": "टाइप कर रहा है...",
-    "typeMessage": "संदेश लिखें...",
-    "send": "भेजें",
-    "back": "वापस",
     "accept": "स्वीकार",
     "reject": "अस्वीकार",
     "pendingRequests": "अनुरोध",
-    "openMessages": "संदेश",
     "addFriend": "दोस्त जोड़ें",
     "addFriendPlaceholder": "यूज़रनेम दर्ज करें",
     "requestSent": "दोस्ती का अनुरोध भेजा गया!",
     "requestFailed": "अनुरोध नहीं भेजा जा सका",
-    "unfriend": "दोस्ती हटाएं",
-    "block": "ब्लॉक करें",
-    "unfriended": "दोस्त हटाया गया",
-    "blocked": "उपयोगकर्ता ब्लॉक किया गया",
-    "actionFailed": "कार्रवाई विफल",
     "noUsersFound": "कोई उपयोगकर्ता नहीं मिला",
     "sentRequests": "भेजे गए",
     "cancelRequest": "रद्द करें",
@@ -294,14 +237,8 @@
       "noFriendsFound": "कोई दोस्त नहीं मिला",
       "participants": "{count, plural, one {# प्रतिभागी} other {# प्रतिभागी}}",
       "you": "आप",
-      "callOverlay": "कॉल ओवरले",
-      "replying": "जवाब दे रहे हैं",
-      "reply": "जवाब",
-      "emoji": "इमोजी",
-      "callButton": "कॉल"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "कॉल ओवरले"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "छोटा करें",
+    "maximize": "बड़ा करें",
+    "close": "बंद करें",
+    "back": "पीछे",
+    "forward": "आगे",
+    "goBack": "पीछे जाएं",
+    "goForward": "आगे जाएं"
   }
 }

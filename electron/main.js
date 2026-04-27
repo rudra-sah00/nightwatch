@@ -9,6 +9,26 @@ const {
   nativeImage,
 } = require('electron');
 const _path = require('node:path');
+
+// --- LOAD .env FOR ELECTRON MAIN PROCESS ---
+// Next.js only loads .env for the renderer/server. The Electron main process
+// needs its own loader so variables like DISCORD_CLIENT_ID are available.
+(() => {
+  const fs = require('node:fs');
+  const envPath = _path.join(__dirname, '..', '.env');
+  try {
+    if (!fs.existsSync(envPath)) return;
+    for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const idx = trimmed.indexOf('=');
+      if (idx === -1) continue;
+      const key = trimmed.slice(0, idx).trim();
+      const val = trimmed.slice(idx + 1).trim();
+      if (!process.env[key]) process.env[key] = val;
+    }
+  } catch (_e) {}
+})();
 const Sentry = require('@sentry/electron/main');
 const Store = require('electron-store');
 const { protocol } = require('electron');
@@ -450,7 +470,16 @@ const startElectronApp = async () => {
 
   // IPC Event listener for React letting us know the user changed rooms!
   ipcMain.on('update-discord-status', (_event, presenceData) => {
+    console.log(
+      '[Main→Discord] IPC update-discord-status received:',
+      JSON.stringify(presenceData),
+    );
     discordLogic.setActivity(presenceData);
+  });
+
+  ipcMain.on('clear-discord-status', () => {
+    console.log('[Main→Discord] IPC clear-discord-status received');
+    discordLogic.clearActivity();
   });
 
   // Native Clipboard API

@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "شخص ما",
     "guest": "ضيف",
-    "member": "عضو",
-    "unknownParticipant": "مشارك غير معروف",
-    "anonymous": "مجهول"
+    "member": "عضو"
   },
   "toasts": {
     "failedApprove": "فشل في الموافقة على العضو",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "فشل في تحديث المحتوى",
     "contentChanged": "تم تغيير المحتوى إلى: {title}",
     "kicked": "تم طردك: {reason}",
-    "roomEnded": "انتهت حفلة المشاهدة هذه أو الرمز غير صالح.",
-    "networkError": "تعذر التحقق من حالة الغرفة. يرجى التحقق من اتصالك.",
     "failedFetchRoom": "فشل في جلب تفاصيل الغرفة بعد الموافقة.",
     "hostDeclined": "رفض المضيف طلب انضمامك.",
     "movieEndWarning": "ستنتهي حفلة المشاهدة تلقائياً عند انتهاء الفيلم.",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "جارٍ إعادة الاتصال بخادم الصوت/الفيديو...",
     "disconnectedVoice": "تم قطع الاتصال بخادم الصوت/الفيديو",
     "failedConnectVoice": "فشل الاتصال بخادم الصوت/الفيديو",
-    "permissionDenied": "تم رفض إذن {device}. انقر على أيقونة القفل في شريط العنوان للسماح بالوصول.",
-    "deviceNotFound": "لم يتم العثور على {device}. يرجى توصيل {device}.",
-    "deviceAccessFailed": "فشل في الوصول إلى {device}. يرجى التحقق من إعدادات المتصفح.",
     "notConnectedVoice": "لم يتم الاتصال بخادم الصوت بعد. يرجى الانتظار...",
     "notConnectedVideo": "لم يتم الاتصال بخادم الفيديو بعد. يرجى الانتظار...",
     "micSwitched": "تم تبديل الميكروفون",

@@ -1,5 +1,4 @@
 {
-  "title": "लाइव मैच",
   "heroTitle": "लाइव",
   "heroTitleStream": "स्ट्रीम",
   "heroSubtitle": "फॉर्म फॉलोज़ एक्शन",
@@ -67,8 +66,6 @@
   "back": "वापस",
   "liveStream": "लाइव स्ट्रीम",
   "vs": "बनाम",
-  "noImageAvailable": "कोई छवि उपलब्ध नहीं",
-  "closePreview": "प्रीव्यू बंद करें",
   "loginRequired": "वॉच पार्टी होस्ट करने के लिए आपको लॉग इन करना होगा।",
   "noEpisodesOffline": "ऑफ़लाइन कोई एपिसोड उपलब्ध नहीं है।",
   "failedPlayback": "प्लेबैक शुरू करने में विफल",
@@ -76,5 +73,10 @@
   "teamFallback2": "टीम 2",
   "twentyFourSevenChannel": "24/7 चैनल",
   "closeModal": "बंद करें",
-  "liveTVType": "लाइव टीवी"
+  "liveTVType": "लाइव टीवी",
+  "clip": "क्लिप",
+  "clipSave": "सहेजें",
+  "clipCancel": "रद्द करें",
+  "clipRename": "क्लिप का नाम बदलें",
+  "clipDelete": "क्लिप हटाएं"
 }

@@ -53,10 +53,7 @@
     "experienceStarting": "अनुभव शुरू हो रहा है",
     "preparingContent": "\"{title}\" तैयार हो रहा है...",
     "closeModal": "मोडल बंद करें",
-    "episodesAriaLabel": "एपिसोड",
-    "failedToLoadDetails": "शो का विवरण लोड करने में विफल। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।",
-    "failedToLoadEpisodes": "एपिसोड सूची लोड करने में विफल। उपलब्ध होने पर कैश्ड डेटा का उपयोग किया जा रहा है।",
-    "watchPartyError": "वॉच पार्टी बनाते समय एक अप्रत्याशित त्रुटि हुई।"
+    "episodesAriaLabel": "एपिसोड"
   },
   "actions": {
     "watchSolo": "अकेले देखें",
@@ -67,8 +64,7 @@
     "watchTogether": "साथ में देखें",
     "creating": "बना रहे हैं",
     "toWatchlist": "वॉचलिस्ट में जोड़ें",
-    "removeFromList": "सूची से हटाएं",
-    "episodeFallbackTitle": "एपिसोड {number}"
+    "removeFromList": "सूची से हटाएं"
   },
   "download": {
     "download": "डाउनलोड",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "कोई एपिसोड उपलब्ध नहीं",
     "saved": "सहेजा गया",
     "securelyStarting": "सुरक्षित रूप से डाउनलोड शुरू हो रहा है...",
-    "episode": "एपिसोड {number}",
     "untitled": "शीर्षकहीन",
-    "downloadSrOnly": "{title} डाउनलोड करें",
     "downloadingToast": "डाउनलोड हो रहा है{epText}! अपनी ऑफ़लाइन लाइब्रेरी देखें।",
     "downloadingEpisodeText": " एपिसोड {episode} के लिए",
-    "episodeLabel": "एपिसोड {number}",
     "episodePrefix": "एपिसोड"
   },
   "episodeCard": {

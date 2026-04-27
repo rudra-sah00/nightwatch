@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Failed to exit fullscreen",
     "fullscreenToggleFailed": "Fullscreen toggle failed",
     "seekTime": "Seek time",
-    "liveSeekBar": "Live stream seek bar",
     "atLiveEdge": "At live edge",
     "behindLive": "{seconds}s behind live",
     "closeSidebar": "Close sidebar",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "This player is only available in landscape mode",
     "showEpisodes": "Show episodes",
     "episodesTitle": "Episodes",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Maximize",
+    "captionNone": "None"
   },
   "settings": {
     "quality": "Quality",

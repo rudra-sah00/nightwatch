@@ -89,7 +89,6 @@
     "system": "Sistema",
     "language": "Lingua",
     "languageDescription": "Scegli la tua lingua di visualizzazione preferita.",
-    "selectLanguage": "Seleziona lingua",
     "launchOnStartup": "Avvia all'accensione",
     "launchDescription": "Avvia automaticamente Nightwatch in background all'avvio del computer.",
     "maxConcurrentDownloads": "Download simultanei massimi",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "Limita la velocità di download in background. Utile se la rete rallenta globalmente!",
     "unlimited": "Illimitato",
     "cancel": "Annulla",
-    "set": "Imposta",
     "customConcurrent": "Personalizzato (1-10)",
     "customSpeed": "Personalizzato MB/s"
   },

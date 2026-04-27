@@ -1,5 +1,4 @@
 {
-  "title": "ライブマッチ",
   "heroTitle": "ライブ",
   "heroTitleStream": "ストリーム",
   "heroSubtitle": "形は行動に従う",
@@ -67,8 +66,6 @@
   "back": "戻る",
   "liveStream": "ライブ配信",
   "vs": "VS",
-  "noImageAvailable": "画像がありません",
-  "closePreview": "プレビューを閉じる",
   "loginRequired": "ウォッチパーティーを主催するにはログインが必要です。",
   "noEpisodesOffline": "オフラインで利用可能なエピソードはありません。",
   "failedPlayback": "再生の開始に失敗しました",
@@ -76,5 +73,10 @@
   "teamFallback2": "チーム 2",
   "twentyFourSevenChannel": "24時間チャンネル",
   "closeModal": "閉じる",
-  "liveTVType": "ライブTV"
+  "liveTVType": "ライブTV",
+  "clip": "クリップ",
+  "clipSave": "保存",
+  "clipCancel": "キャンセル",
+  "clipRename": "クリップ名を変更",
+  "clipDelete": "クリップを削除"
 }

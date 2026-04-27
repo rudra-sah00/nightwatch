@@ -1,5 +1,4 @@
 {
-  "title": "Live-Spiele",
   "heroTitle": "LIVE",
   "heroTitleStream": "STREAM",
   "heroSubtitle": "Form folgt Aktion",
@@ -67,8 +66,6 @@
   "back": "Zurück",
   "liveStream": "LIVESTREAM",
   "vs": "VS",
-  "noImageAvailable": "Kein Bild Verfügbar",
-  "closePreview": "Vorschau Schließen",
   "loginRequired": "Sie müssen angemeldet sein, um eine Watch Party zu veranstalten.",
   "noEpisodesOffline": "Keine Episoden offline verfügbar.",
   "failedPlayback": "Wiedergabe konnte nicht gestartet werden",
@@ -76,5 +73,10 @@
   "teamFallback2": "Team 2",
   "twentyFourSevenChannel": "24/7-Kanal",
   "closeModal": "Schließen",
-  "liveTVType": "Live-TV"
+  "liveTVType": "Live-TV",
+  "clip": "Clip",
+  "clipSave": "Speichern",
+  "clipCancel": "Abbrechen",
+  "clipRename": "Clip umbenennen",
+  "clipDelete": "Clip löschen"
 }

@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "Quelqu'un",
     "guest": "Invité",
-    "member": "Membre",
-    "unknownParticipant": "Participant inconnu",
-    "anonymous": "Anonyme"
+    "member": "Membre"
   },
   "toasts": {
     "failedApprove": "Échec de l'approbation du membre",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "Échec de la mise à jour du contenu",
     "contentChanged": "Contenu changé pour : {title}",
     "kicked": "Vous avez été expulsé : {reason}",
-    "roomEnded": "Cette watch party est terminée ou le code est invalide.",
-    "networkError": "Impossible de vérifier l'état du salon. Vérifiez votre connexion.",
     "failedFetchRoom": "Échec de la récupération des détails du salon après approbation.",
     "hostDeclined": "L'hôte a refusé votre demande d'adhésion.",
     "movieEndWarning": "Cette watch party se terminera automatiquement à la fin du film.",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "Reconnexion au serveur voix/vidéo...",
     "disconnectedVoice": "Déconnecté du serveur voix/vidéo",
     "failedConnectVoice": "Échec de la connexion au serveur voix/vidéo",
-    "permissionDenied": "Permission {device} refusée. Cliquez sur l'icône de cadenas dans la barre d'adresse pour autoriser l'accès.",
-    "deviceNotFound": "Aucun {device} trouvé. Veuillez connecter un {device}.",
-    "deviceAccessFailed": "Échec de l'accès à {device}. Vérifiez les paramètres de votre navigateur.",
     "notConnectedVoice": "Pas encore connecté au serveur vocal. Veuillez patienter...",
     "notConnectedVideo": "Pas encore connecté au serveur vidéo. Veuillez patienter...",
     "micSwitched": "Microphone changé",

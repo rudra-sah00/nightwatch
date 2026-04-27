@@ -10,12 +10,12 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
-  Users,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { createMusicParty } from '@/features/music-party/api';
 import { getLyrics } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { formatTime } from '../utils';
@@ -36,6 +36,8 @@ export function FullPlayer() {
     toggleShuffle,
     cycleRepeat,
     setExpanded,
+    volume,
+    setVolume,
   } = useMusicPlayerContext();
   const t = useTranslations('music');
 
@@ -43,26 +45,6 @@ export function FullPlayer() {
   const [lyricsLoading, setLyricsLoading] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [partyCode, setPartyCode] = useState<string | null>(null);
-
-  const startParty = async () => {
-    if (partyCode) {
-      setPartyCode(null);
-      return;
-    }
-    try {
-      const { room } = await createMusicParty(
-        currentTrack?.title ?? 'Music Party',
-      );
-      setPartyCode(room.id);
-      navigator.clipboard.writeText(
-        `${window.location.origin}/music-party/${room.id}`,
-      );
-      toast.success(t('party.partyLinkCopied'));
-    } catch {
-      toast.error(t('party.failedToCreate'));
-    }
-  };
 
   const handleClose = () => {
     setClosing(true);
@@ -227,18 +209,30 @@ export function FullPlayer() {
             >
               <Mic2 className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* Volume */}
+          <div className="flex items-center gap-2 mt-4 w-full max-w-sm">
             <button
               type="button"
-              onClick={startParty}
-              className={`p-2 transition-colors ${partyCode ? 'text-neo-yellow' : 'text-foreground/30 hover:text-foreground'}`}
-              title={
-                partyCode
-                  ? `Party: ${partyCode} (click to copy)`
-                  : 'Start party'
-              }
+              onClick={() => setVolume(volume > 0 ? 0 : 1)}
+              className="p-1 text-foreground/30 hover:text-foreground transition-colors"
             >
-              <Users className="w-5 h-5" />
+              {volume === 0 ? (
+                <VolumeX className="w-4 h-4" />
+              ) : (
+                <Volume2 className="w-4 h-4" />
+              )}
             </button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="flex-1 h-1 accent-neo-yellow cursor-pointer"
+            />
           </div>
         </div>
 

@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Impossible de quitter le plein écran",
     "fullscreenToggleFailed": "Échec du basculement en plein écran",
     "seekTime": "Temps de recherche",
-    "liveSeekBar": "Barre de recherche du flux en direct",
     "atLiveEdge": "En direct",
     "behindLive": "{seconds}s de retard sur le direct",
     "closeSidebar": "Fermer la barre latérale",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Ce lecteur est uniquement disponible en mode paysage",
     "showEpisodes": "Afficher les épisodes",
     "episodesTitle": "Épisodes",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Agrandir",
+    "captionNone": "Aucun"
   },
   "settings": {
     "quality": "Qualité",

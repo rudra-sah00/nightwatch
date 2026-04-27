@@ -1,5 +1,4 @@
 {
-  "title": "Matchs en Direct",
   "heroTitle": "EN",
   "heroTitleStream": "DIRECT",
   "heroSubtitle": "La Forme Suit l'Action",
@@ -67,8 +66,6 @@
   "back": "Retour",
   "liveStream": "EN DIRECT",
   "vs": "VS",
-  "noImageAvailable": "Aucune Image Disponible",
-  "closePreview": "Fermer l'Aperçu",
   "loginRequired": "Vous devez être connecté pour organiser une watch party.",
   "noEpisodesOffline": "Aucun épisode disponible hors ligne.",
   "failedPlayback": "Échec du lancement de la lecture",
@@ -76,5 +73,10 @@
   "teamFallback2": "Équipe 2",
   "twentyFourSevenChannel": "Chaîne 24/7",
   "closeModal": "Fermer",
-  "liveTVType": "TV en Direct"
+  "liveTVType": "TV en Direct",
+  "clip": "Clip",
+  "clipSave": "Enregistrer",
+  "clipCancel": "Annuler",
+  "clipRename": "Renommer le clip",
+  "clipDelete": "Supprimer le clip"
 }

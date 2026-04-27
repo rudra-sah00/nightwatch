@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { memo } from 'react';
 import type { PlayerAction } from '../context/types';
@@ -56,6 +57,7 @@ export const VideoElement = memo(function VideoElement({
     currentTrackId,
     ref,
   });
+  const t = useTranslations('watch.player');
 
   return (
     <video
@@ -89,7 +91,12 @@ export const VideoElement = memo(function VideoElement({
           }
         />
       ))}
-      <track kind="captions" src="data:text/vtt," label="None" srcLang="en" />
+      <track
+        kind="captions"
+        src="data:text/vtt,"
+        label={t('captionNone')}
+        srcLang="en"
+      />
     </video>
   );
 });

@@ -36,8 +36,8 @@ importers:
         specifier: ^4.24.2
         version: 4.24.2(debug@4.4.3)
       agora-rtm-sdk:
-        specifier: 2.2.3-1
-        version: 2.2.3-1(agora-rtc-sdk-ng@4.24.2(debug@4.4.3))
+        specifier: 2.2.4
+        version: 2.2.4(agora-rtc-sdk-ng@4.24.2(debug@4.4.3))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -3395,8 +3395,8 @@ packages:
   agora-rte-extension@1.2.4:
     resolution: {integrity: sha512-0ovZz1lbe30QraG1cU+ji7EnQ8aUu+Hf3F+a8xPml3wPOyUQEK6CTdxV9kMecr9t+fIDrGeW7wgJTsM1DQE7Nw==}
 
-  agora-rtm-sdk@2.2.3-1:
-    resolution: {integrity: sha512-xeYhMnmieijBvL2nyeWS+bcQ3EHm83AY8HDVoxPpP4TzNoBO+HCwFpl11aYua2NIwqSGt4UpGUKYIb1Cqg7nZw==}
+  agora-rtm-sdk@2.2.4:
+    resolution: {integrity: sha512-0PVcvsjvacvuWiacI6ndgvAqyUgmOXlQtILXrEvj1EeA7cHAhnT8/mW7OwDBhcf3BzWuG4g78mKzqe5iPOygVQ==}
     peerDependencies:
       agora-rtc-sdk-ng: 4.23.0
 
@@ -11025,7 +11025,7 @@ snapshots:
 
   agora-rte-extension@1.2.4: {}
 
-  agora-rtm-sdk@2.2.3-1(agora-rtc-sdk-ng@4.24.2(debug@4.4.3)):
+  agora-rtm-sdk@2.2.4(agora-rtc-sdk-ng@4.24.2(debug@4.4.3)):
     dependencies:
       agora-rtc-sdk-ng: 4.24.2(debug@4.4.3)
 

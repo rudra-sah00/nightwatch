@@ -1,5 +1,4 @@
 {
-  "title": "المباريات المباشرة",
   "heroTitle": "بث",
   "heroTitleStream": "مباشر",
   "heroSubtitle": "الشكل يتبع الحركة",
@@ -67,8 +66,6 @@
   "back": "رجوع",
   "liveStream": "بث مباشر",
   "vs": "ضد",
-  "noImageAvailable": "لا توجد صورة متاحة",
-  "closePreview": "إغلاق المعاينة",
   "loginRequired": "يجب تسجيل الدخول لاستضافة حفلة مشاهدة.",
   "noEpisodesOffline": "لا توجد حلقات متاحة بدون اتصال.",
   "failedPlayback": "فشل في بدء التشغيل",
@@ -76,5 +73,10 @@
   "teamFallback2": "الفريق 2",
   "twentyFourSevenChannel": "قناة 24/7",
   "closeModal": "إغلاق",
-  "liveTVType": "تلفزيون مباشر"
+  "liveTVType": "تلفزيون مباشر",
+  "clip": "مقطع",
+  "clipSave": "حفظ",
+  "clipCancel": "إلغاء",
+  "clipRename": "إعادة تسمية المقطع",
+  "clipDelete": "حذف المقطع"
 }

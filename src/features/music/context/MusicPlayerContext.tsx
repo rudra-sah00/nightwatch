@@ -25,6 +25,7 @@ interface MusicPlayerContextValue {
   shuffle: boolean;
   repeat: RepeatMode;
   expanded: boolean;
+  volume: number;
   play: (track: MusicTrack, queue?: MusicTrack[]) => void;
   togglePlay: () => void;
   next: () => void;
@@ -32,6 +33,7 @@ interface MusicPlayerContextValue {
   seek: (percent: number) => void;
   toggleShuffle: () => void;
   cycleRepeat: () => void;
+  setVolume: (v: number) => void;
   stop: () => void;
   setExpanded: (v: boolean) => void;
 }
@@ -53,6 +55,7 @@ export function MusicPlayerProvider({
     duration: 0,
     shuffle: false,
     repeat: 'off',
+    volume: 1,
   });
   const [expanded, setExpanded] = useState(false);
 
@@ -79,6 +82,10 @@ export function MusicPlayerProvider({
     [],
   );
   const cycleRepeat = useCallback(() => engineRef.current?.cycleRepeat(), []);
+  const setVolume = useCallback(
+    (v: number) => engineRef.current?.setVolume(v),
+    [],
+  );
   const stop = useCallback(() => {
     engineRef.current?.stop();
     setExpanded(false);
@@ -94,6 +101,7 @@ export function MusicPlayerProvider({
       shuffle: state.shuffle,
       repeat: state.repeat,
       expanded,
+      volume: state.volume,
       play,
       togglePlay,
       next,
@@ -101,6 +109,7 @@ export function MusicPlayerProvider({
       seek,
       toggleShuffle,
       cycleRepeat,
+      setVolume,
       stop,
       setExpanded,
     }),
@@ -114,6 +123,7 @@ export function MusicPlayerProvider({
       seek,
       toggleShuffle,
       cycleRepeat,
+      setVolume,
       stop,
     ],
   );

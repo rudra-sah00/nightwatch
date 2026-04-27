@@ -1,6 +1,7 @@
 'use client';
 
 import { Maximize2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
@@ -8,6 +9,7 @@ export function PipOverlay() {
   const [isPip, setIsPip] = useState(false);
   const [title, setTitle] = useState('');
   const [visible, setVisible] = useState(false);
+  const t = useTranslations('watch.player');
 
   useEffect(() => {
     if (!checkIsDesktop() || !desktopBridge.onPipModeChanged) return;
@@ -59,7 +61,7 @@ export function PipOverlay() {
         onClick={handleMaximize}
         className="shrink-0 p-1 rounded hover:bg-white/20 transition-colors"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        aria-label="Maximize"
+        aria-label={t('maximize')}
       >
         <Maximize2 className="w-3.5 h-3.5 text-white/80" />
       </button>

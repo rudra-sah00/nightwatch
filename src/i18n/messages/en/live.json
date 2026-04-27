@@ -1,5 +1,4 @@
 {
-  "title": "Live Matches",
   "heroTitle": "LIVE",
   "heroTitleStream": "STREAM",
   "heroSubtitle": "Form Follows Action",
@@ -68,13 +67,16 @@
   "back": "Back",
   "liveStream": "LIVE STREAM",
   "vs": "VS",
-  "noImageAvailable": "No Image Available",
-  "closePreview": "Close Preview",
   "loginRequired": "You must be logged in to host a watch party.",
   "noEpisodesOffline": "No episodes available offline.",
   "failedPlayback": "Failed to start playback",
   "teamFallback1": "Team 1",
   "teamFallback2": "Team 2",
   "twentyFourSevenChannel": "24/7 Channel",
-  "closeModal": "Close"
+  "closeModal": "Close",
+  "clip": "Clip",
+  "clipSave": "Save",
+  "clipCancel": "Cancel",
+  "clipRename": "Rename clip",
+  "clipDelete": "Delete clip"
 }

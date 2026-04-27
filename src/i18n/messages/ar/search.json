@@ -53,10 +53,7 @@
     "experienceStarting": "التجربة تبدأ",
     "preparingContent": "جارٍ تحضير \"{title}\"...",
     "closeModal": "إغلاق النافذة",
-    "episodesAriaLabel": "الحلقات",
-    "failedToLoadDetails": "فشل تحميل تفاصيل العرض. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
-    "failedToLoadEpisodes": "فشل تحميل قائمة الحلقات. سيتم استخدام البيانات المخزنة مؤقتاً إن توفرت.",
-    "watchPartyError": "حدث خطأ غير متوقع أثناء إنشاء حفلة المشاهدة."
+    "episodesAriaLabel": "الحلقات"
   },
   "actions": {
     "watchSolo": "مشاهدة فردية",
@@ -67,8 +64,7 @@
     "watchTogether": "مشاهدة معاً",
     "creating": "جارٍ الإنشاء",
     "toWatchlist": "إلى القائمة",
-    "removeFromList": "إزالة من القائمة",
-    "episodeFallbackTitle": "الحلقة {number}"
+    "removeFromList": "إزالة من القائمة"
   },
   "download": {
     "download": "تنزيل",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "لا توجد حلقات متاحة",
     "saved": "تم الحفظ",
     "securelyStarting": "جارٍ بدء التنزيل الآمن...",
-    "episode": "الحلقة {number}",
     "untitled": "بدون عنوان",
-    "downloadSrOnly": "تحميل {title}",
     "downloadingToast": "جارٍ التحميل{epText}! تحقق من مكتبتك بدون اتصال.",
     "downloadingEpisodeText": " للحلقة {episode}",
-    "episodeLabel": "الحلقة {number}",
     "episodePrefix": "الحلقة"
   },
   "episodeCard": {

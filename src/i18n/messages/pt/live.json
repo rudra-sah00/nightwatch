@@ -1,5 +1,4 @@
 {
-  "title": "Jogos ao Vivo",
   "heroTitle": "AO",
   "heroTitleStream": "VIVO",
   "heroSubtitle": "A Forma Segue a Ação",
@@ -67,8 +66,6 @@
   "back": "Voltar",
   "liveStream": "AO VIVO",
   "vs": "VS",
-  "noImageAvailable": "Nenhuma Imagem Disponível",
-  "closePreview": "Fechar Pré-visualização",
   "loginRequired": "Você precisa estar logado para organizar uma watch party.",
   "noEpisodesOffline": "Nenhum episódio disponível offline.",
   "failedPlayback": "Falha ao iniciar a reprodução",
@@ -76,5 +73,10 @@
   "teamFallback2": "Time 2",
   "twentyFourSevenChannel": "Canal 24/7",
   "closeModal": "Fechar",
-  "liveTVType": "TV ao Vivo"
+  "liveTVType": "TV ao Vivo",
+  "clip": "Clip",
+  "clipSave": "Salvar",
+  "clipCancel": "Cancelar",
+  "clipRename": "Renomear clip",
+  "clipDelete": "Excluir clip"
 }

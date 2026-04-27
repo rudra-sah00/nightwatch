@@ -89,7 +89,6 @@
     "system": "सिस्टम",
     "language": "भाषा",
     "languageDescription": "अपनी पसंदीदा प्रदर्शन भाषा चुनें।",
-    "selectLanguage": "भाषा चुनें",
     "launchOnStartup": "स्टार्टअप पर लॉन्च करें",
     "launchDescription": "जब आपका कंप्यूटर बूट हो तो Nightwatch को स्वचालित रूप से पृष्ठभूमि में शुरू करें।",
     "maxConcurrentDownloads": "अधिकतम समवर्ती डाउनलोड",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "पृष्ठभूमि डाउनलोड गति को प्रतिबंधित करें। यदि आपका नेटवर्क धीमा हो जाता है तो सहायक!",
     "unlimited": "असीमित",
     "cancel": "रद्द करें",
-    "set": "सेट करें",
     "customConcurrent": "कस्टम (1-10)",
     "customSpeed": "कस्टम MB/s"
   },

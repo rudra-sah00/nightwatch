@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateDiscordPresence: (presenceData) => {
     ipcRenderer.send('update-discord-status', presenceData);
   },
+  clearDiscordPresence: () => {
+    ipcRenderer.send('clear-discord-status');
+  },
 
   // Let Next.js invoke desktop system features, like copying magic invite links via native copy
   copyToClipboard: (text) => ipcRenderer.send('copy-to-clipboard', text),

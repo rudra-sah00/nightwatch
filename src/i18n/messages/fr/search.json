@@ -53,10 +53,7 @@
     "experienceStarting": "Expérience en cours de démarrage",
     "preparingContent": "Préparation de \"{title}\"...",
     "closeModal": "Fermer la fenêtre",
-    "episodesAriaLabel": "Épisodes",
-    "failedToLoadDetails": "Impossible de charger les détails de l'émission. Veuillez vérifier votre connexion et réessayer.",
-    "failedToLoadEpisodes": "Impossible de charger la liste des épisodes. Les données en cache seront utilisées si disponibles.",
-    "watchPartyError": "Une erreur inattendue s'est produite lors de la création de la watch party."
+    "episodesAriaLabel": "Épisodes"
   },
   "actions": {
     "watchSolo": "Regarder seul",
@@ -67,8 +64,7 @@
     "watchTogether": "Regarder ensemble",
     "creating": "Création",
     "toWatchlist": "À la liste",
-    "removeFromList": "Retirer de la liste",
-    "episodeFallbackTitle": "Épisode {number}"
+    "removeFromList": "Retirer de la liste"
   },
   "download": {
     "download": "Télécharger",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "Aucun épisode disponible",
     "saved": "Enregistré",
     "securelyStarting": "Démarrage sécurisé du téléchargement...",
-    "episode": "Épisode {number}",
     "untitled": "Sans titre",
-    "downloadSrOnly": "Télécharger {title}",
     "downloadingToast": "Téléchargement{epText} en cours ! Consultez votre Bibliothèque Hors Ligne.",
     "downloadingEpisodeText": " de l'Ép {episode}",
-    "episodeLabel": "Épisode {number}",
     "episodePrefix": "Épisode"
   },
   "episodeCard": {

@@ -1,5 +1,4 @@
 {
-  "title": "Матчи в прямом эфире",
   "heroTitle": "ПРЯМОЙ",
   "heroTitleStream": "ЭФИР",
   "heroSubtitle": "Форма следует действию",
@@ -67,8 +66,6 @@
   "back": "Назад",
   "liveStream": "ПРЯМОЙ ЭФИР",
   "vs": "ПРОТИВ",
-  "noImageAvailable": "Изображение Недоступно",
-  "closePreview": "Закрыть Предпросмотр",
   "loginRequired": "Для проведения совместного просмотра необходимо войти в систему.",
   "noEpisodesOffline": "Нет эпизодов, доступных офлайн.",
   "failedPlayback": "Не удалось начать воспроизведение",
@@ -76,5 +73,10 @@
   "teamFallback2": "Команда 2",
   "twentyFourSevenChannel": "Канал 24/7",
   "closeModal": "Закрыть",
-  "liveTVType": "Прямой эфир ТВ"
+  "liveTVType": "Прямой эфир ТВ",
+  "clip": "Клип",
+  "clipSave": "Сохранить",
+  "clipCancel": "Отмена",
+  "clipRename": "Переименовать клип",
+  "clipDelete": "Удалить клип"
 }

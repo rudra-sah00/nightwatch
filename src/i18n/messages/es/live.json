@@ -1,5 +1,4 @@
 {
-  "title": "Partidos en Vivo",
   "heroTitle": "EN",
   "heroTitleStream": "VIVO",
   "heroSubtitle": "La Forma Sigue a la Acción",
@@ -67,8 +66,6 @@
   "back": "Volver",
   "liveStream": "EN VIVO",
   "vs": "VS",
-  "noImageAvailable": "Imagen No Disponible",
-  "closePreview": "Cerrar Vista Previa",
   "loginRequired": "Debes iniciar sesión para organizar una watch party.",
   "noEpisodesOffline": "No hay episodios disponibles sin conexión.",
   "failedPlayback": "Error al iniciar la reproducción",
@@ -76,5 +73,10 @@
   "teamFallback2": "Equipo 2",
   "twentyFourSevenChannel": "Canal 24/7",
   "closeModal": "Cerrar",
-  "liveTVType": "TV en Vivo"
+  "liveTVType": "TV en Vivo",
+  "clip": "Clip",
+  "clipSave": "Guardar",
+  "clipCancel": "Cancelar",
+  "clipRename": "Renombrar clip",
+  "clipDelete": "Eliminar clip"
 }

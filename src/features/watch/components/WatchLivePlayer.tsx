@@ -49,6 +49,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         largeImageKey: 'nightwatch_logo', // Safe fallback because discord-rpc drops invalid keys/urls
         startTimestamp: Date.now(),
       });
+      return () => desktopBridge.clearDiscordPresence();
     }
   }, [props.metadata]);
 

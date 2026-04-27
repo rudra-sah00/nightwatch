@@ -1,5 +1,4 @@
 {
-  "title": "라이브 경기",
   "heroTitle": "라이브",
   "heroTitleStream": "스트림",
   "heroSubtitle": "형태는 행동을 따른다",
@@ -67,8 +66,6 @@
   "back": "뒤로",
   "liveStream": "라이브 스트림",
   "vs": "VS",
-  "noImageAvailable": "이미지 없음",
-  "closePreview": "미리보기 닫기",
   "loginRequired": "워치 파티를 주최하려면 로그인해야 합니다.",
   "noEpisodesOffline": "오프라인에서 사용할 수 있는 에피소드가 없습니다.",
   "failedPlayback": "재생 시작 실패",
@@ -76,5 +73,10 @@
   "teamFallback2": "팀 2",
   "twentyFourSevenChannel": "24/7 채널",
   "closeModal": "닫기",
-  "liveTVType": "라이브 TV"
+  "liveTVType": "라이브 TV",
+  "clip": "클립",
+  "clipSave": "저장",
+  "clipCancel": "취소",
+  "clipRename": "클립 이름 변경",
+  "clipDelete": "클립 삭제"
 }

@@ -36,7 +36,6 @@
     "failedExitFullscreen": "退出全屏失败",
     "fullscreenToggleFailed": "全屏切换失败",
     "seekTime": "跳转时间",
-    "liveSeekBar": "直播进度条",
     "atLiveEdge": "直播中",
     "behindLive": "落后直播{seconds}秒",
     "closeSidebar": "关闭侧边栏",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "此播放器仅在横屏模式下可用",
     "showEpisodes": "显示剧集",
     "episodesTitle": "剧集",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "最大化",
+    "captionNone": "无"
   },
   "settings": {
     "quality": "画质",

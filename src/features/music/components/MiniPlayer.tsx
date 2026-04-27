@@ -1,58 +1,40 @@
 'use client';
 
 import {
+  ListMusic,
   Pause,
   Play,
   SkipBack,
   SkipForward,
   Square,
-  Users,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { createMusicParty } from '@/features/music-party/api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
-import { formatTime } from '../utils';
 
 export function MiniPlayer() {
+  const player = useMusicPlayerContext();
+  const t = useTranslations('music');
+
   const {
     currentTrack,
     isPlaying,
     progress,
-    duration,
+    queue,
     togglePlay,
     next,
     prev,
     seek,
     stop,
     setExpanded,
-  } = useMusicPlayerContext();
-  const t = useTranslations('music');
-  const [partyCode, setPartyCode] = useState<string | null>(null);
+    volume,
+    setVolume,
+  } = player;
+  const [showQueue, setShowQueue] = useState(false);
 
-  const startParty = async () => {
-    if (partyCode) {
-      setPartyCode(null);
-      return;
-    }
-    try {
-      const { room } = await createMusicParty(
-        currentTrack?.title ?? 'Music Party',
-      );
-      setPartyCode(room.id);
-      navigator.clipboard.writeText(
-        `${window.location.origin}/music-party/${room.id}`,
-      );
-      toast.success(t('party.partyLinkCopied'));
-    } catch {
-      toast.error(t('party.failedToCreate'));
-    }
-  };
-
-  if (!currentTrack) {
-    return null;
-  }
+  if (!currentTrack) return null;
 
   return (
     <div className="sticky bottom-0 z-10 bg-card">
@@ -72,7 +54,7 @@ export function MiniPlayer() {
       </button>
 
       <div className="flex items-center gap-3 px-4 py-2.5">
-        {/* Cover — click to expand */}
+        {/* Cover */}
         <button
           type="button"
           onClick={() => setExpanded(true)}
@@ -87,7 +69,7 @@ export function MiniPlayer() {
           </div>
         </button>
 
-        {/* Info — click to expand */}
+        {/* Info */}
         <button
           type="button"
           onClick={() => setExpanded(true)}
@@ -101,57 +83,102 @@ export function MiniPlayer() {
           </p>
         </button>
 
-        {/* Time */}
-        <span className="text-foreground/20 text-[10px] font-mono hidden sm:block">
-          {formatTime((progress / 100) * duration)} / {formatTime(duration)}
-        </span>
-
         {/* Controls */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={prev}
-            className="p-2 text-foreground/40 hover:text-foreground transition-colors"
+            className="p-1.5 text-foreground/40 hover:text-foreground transition-colors"
           >
-            <SkipBack className="w-4 h-4 fill-current" />
+            <SkipBack className="w-3.5 h-3.5 fill-current" />
           </button>
           <button
             type="button"
             onClick={togglePlay}
-            className="w-9 h-9 flex items-center justify-center bg-neo-yellow border-[2px] border-border text-foreground"
+            className="w-8 h-8 flex items-center justify-center bg-neo-yellow border-[2px] border-border text-foreground"
           >
             {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 fill-current" />
+              <Pause className="w-3 h-3 fill-current" />
             ) : (
-              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              <Play className="w-3 h-3 fill-current ml-0.5" />
             )}
           </button>
           <button
             type="button"
             onClick={next}
-            className="p-2 text-foreground/40 hover:text-foreground transition-colors"
+            className="p-1.5 text-foreground/40 hover:text-foreground transition-colors"
           >
-            <SkipForward className="w-4 h-4 fill-current" />
+            <SkipForward className="w-3.5 h-3.5 fill-current" />
           </button>
           <button
             type="button"
             onClick={stop}
-            className="p-2 text-foreground/20 hover:text-foreground transition-colors"
+            className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
           >
             <Square className="w-3 h-3 fill-current" />
           </button>
           <button
             type="button"
-            onClick={startParty}
-            className={`p-2 transition-colors ${partyCode ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
-            title={
-              partyCode ? `Party: ${partyCode} (click to copy)` : 'Start party'
-            }
+            onClick={() => setVolume(volume > 0 ? 0 : 1)}
+            className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
           >
-            <Users className="w-3.5 h-3.5" />
+            {volume === 0 ? (
+              <VolumeX className="w-3.5 h-3.5" />
+            ) : (
+              <Volume2 className="w-3.5 h-3.5" />
+            )}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="w-16 h-1 accent-neo-yellow cursor-pointer"
+          />
+          <button
+            type="button"
+            onClick={() => setShowQueue((v) => !v)}
+            className={`p-1.5 transition-colors ${showQueue ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
+            title={t('queueTitle')}
+          >
+            <ListMusic className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
+
+      {/* Queue panel */}
+      {showQueue && queue.length > 0 && (
+        <div className="border-t-[2px] border-border max-h-48 overflow-y-auto px-4 py-2">
+          <p className="font-headline font-black uppercase tracking-widest text-[10px] text-foreground/30 mb-1">
+            Queue — {queue.length}
+          </p>
+          {queue.map((track, i) => (
+            <button
+              key={track.id}
+              type="button"
+              onClick={() => player.play(track, queue)}
+              className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:bg-card ${currentTrack?.id === track.id ? 'text-neo-yellow' : ''}`}
+            >
+              <span className="w-4 text-foreground/20 text-[9px] font-mono text-right shrink-0">
+                {i + 1}
+              </span>
+              <img
+                src={track.image}
+                alt=""
+                className="w-6 h-6 border border-border object-cover shrink-0"
+              />
+              <span className="font-headline font-bold text-[10px] uppercase tracking-wider truncate flex-1">
+                {track.title}
+              </span>
+              <span className="text-foreground/20 text-[9px] font-mono shrink-0">
+                {track.artist}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

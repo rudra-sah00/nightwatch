@@ -36,7 +36,6 @@
     "failedExitFullscreen": "전체 화면 종료 실패",
     "fullscreenToggleFailed": "전체 화면 전환 실패",
     "seekTime": "탐색 시간",
-    "liveSeekBar": "라이브 스트림 탐색 바",
     "atLiveEdge": "실시간",
     "behindLive": "실시간보다 {seconds}초 뒤",
     "closeSidebar": "사이드바 닫기",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "이 플레이어는 가로 모드에서만 사용할 수 있습니다",
     "showEpisodes": "에피소드 보기",
     "episodesTitle": "에피소드",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "최대화",
+    "captionNone": "없음"
   },
   "settings": {
     "quality": "화질",

@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { desktopBridge } from '@/lib/electron-bridge';
@@ -39,16 +40,17 @@ function getRouteTitle(pathname: string): string {
 }
 
 function WindowControls() {
+  const t = useTranslations('common');
   return (
     <div className="absolute right-0 top-0 h-8 flex items-stretch [-webkit-app-region:no-drag]">
       <button
         type="button"
         onClick={() => desktopBridge.windowMinimize()}
         className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-foreground/10 transition-colors"
-        aria-label="Minimize"
+        aria-label={t('electron.minimize')}
       >
         <svg width="10" height="1" viewBox="0 0 10 1" className="fill-current">
-          <title>Minimize</title>
+          <title>{t('electron.minimize')}</title>
           <rect width="10" height="1" />
         </svg>
       </button>
@@ -56,7 +58,7 @@ function WindowControls() {
         type="button"
         onClick={() => desktopBridge.windowMaximize()}
         className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-foreground/10 transition-colors"
-        aria-label="Maximize"
+        aria-label={t('electron.maximize')}
       >
         <svg
           width="10"
@@ -65,7 +67,7 @@ function WindowControls() {
           fill="none"
           className="stroke-current"
         >
-          <title>Maximize</title>
+          <title>{t('electron.maximize')}</title>
           <rect x="0.5" y="0.5" width="9" height="9" strokeWidth="1" />
         </svg>
       </button>
@@ -73,7 +75,7 @@ function WindowControls() {
         type="button"
         onClick={() => desktopBridge.windowClose()}
         className="w-12 h-8 flex items-center justify-center text-foreground/60 hover:bg-neo-red hover:text-white transition-colors"
-        aria-label="Close"
+        aria-label={t('electron.close')}
       >
         <svg
           width="10"
@@ -82,7 +84,7 @@ function WindowControls() {
           fill="none"
           className="stroke-current"
         >
-          <title>Close</title>
+          <title>{t('electron.close')}</title>
           <path d="M1 1L9 9M9 1L1 9" strokeWidth="1.2" strokeLinecap="round" />
         </svg>
       </button>
@@ -94,6 +96,7 @@ export function ElectronDragRegion() {
   const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations('common');
   const title = useMemo(() => getRouteTitle(pathname), [pathname]);
 
   useEffect(() => {
@@ -128,7 +131,7 @@ export function ElectronDragRegion() {
           type="button"
           onClick={goBack}
           className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
-          aria-label="Go back"
+          aria-label={t('electron.back')}
         >
           <svg
             width="16"
@@ -137,7 +140,7 @@ export function ElectronDragRegion() {
             fill="none"
             className="stroke-current"
           >
-            <title>Back</title>
+            <title>{t('electron.back')}</title>
             <path
               d="M10 3L5 8L10 13"
               strokeWidth="1.5"
@@ -150,7 +153,7 @@ export function ElectronDragRegion() {
           type="button"
           onClick={goForward}
           className="w-7 h-7 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/10 transition-colors"
-          aria-label="Go forward"
+          aria-label={t('electron.forward')}
         >
           <svg
             width="16"
@@ -159,7 +162,7 @@ export function ElectronDragRegion() {
             fill="none"
             className="stroke-current"
           >
-            <title>Forward</title>
+            <title>{t('electron.forward')}</title>
             <path
               d="M6 3L11 8L6 13"
               strokeWidth="1.5"

@@ -165,9 +165,7 @@
   "fallback": {
     "someone": "Someone",
     "guest": "Guest",
-    "member": "Member",
-    "unknownParticipant": "Unknown Participant",
-    "anonymous": "Anonymous"
+    "member": "Member"
   },
   "toasts": {
     "failedApprove": "Failed to approve member",
@@ -184,8 +182,6 @@
     "failedUpdateContent": "Failed to update content",
     "contentChanged": "Content changed to: {title}",
     "kicked": "You were kicked: {reason}",
-    "roomEnded": "This watch party has ended or the code is invalid.",
-    "networkError": "Unable to check room status. Please check your connection.",
     "failedFetchRoom": "Failed to fetch room details after approval.",
     "hostDeclined": "The host declined your request to join.",
     "movieEndWarning": "This watch party will automatically end when the movie finishes.",
@@ -199,9 +195,6 @@
     "reconnectingVoice": "Reconnecting to voice/video server...",
     "disconnectedVoice": "Disconnected from voice/video server",
     "failedConnectVoice": "Failed to connect to voice/video server",
-    "permissionDenied": "{device} permission denied. Click the lock icon in your browser address bar to allow access.",
-    "deviceNotFound": "No {device} found. Please connect a {device}.",
-    "deviceAccessFailed": "Failed to access {device}. Please check your browser settings.",
     "notConnectedVoice": "Not connected to voice server yet. Please wait...",
     "notConnectedVideo": "Not connected to video server yet. Please wait...",
     "micSwitched": "Microphone switched",

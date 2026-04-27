@@ -1,5 +1,4 @@
 {
-  "title": "Partite in diretta",
   "heroTitle": "IN",
   "heroTitleStream": "DIRETTA",
   "heroSubtitle": "La forma segue l'azione",
@@ -67,8 +66,6 @@
   "back": "Indietro",
   "liveStream": "IN DIRETTA",
   "vs": "VS",
-  "noImageAvailable": "Nessuna Immagine Disponibile",
-  "closePreview": "Chiudi Anteprima",
   "loginRequired": "Devi effettuare l'accesso per organizzare una watch party.",
   "noEpisodesOffline": "Nessun episodio disponibile offline.",
   "failedPlayback": "Impossibile avviare la riproduzione",
@@ -76,5 +73,10 @@
   "teamFallback2": "Squadra 2",
   "twentyFourSevenChannel": "Canale 24/7",
   "closeModal": "Chiudi",
-  "liveTVType": "TV in Diretta"
+  "liveTVType": "TV in Diretta",
+  "clip": "Clip",
+  "clipSave": "Salva",
+  "clipCancel": "Annulla",
+  "clipRename": "Rinomina clip",
+  "clipDelete": "Elimina clip"
 }

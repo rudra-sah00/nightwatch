@@ -53,10 +53,7 @@
     "experienceStarting": "Deneyim Başlıyor",
     "preparingContent": "\"{title}\" hazırlanıyor...",
     "closeModal": "Pencereyi kapat",
-    "episodesAriaLabel": "Bölümler",
-    "failedToLoadDetails": "Program detayları yüklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
-    "failedToLoadEpisodes": "Bölüm listesi yüklenemedi. Varsa önbellek verileri kullanılacak.",
-    "watchPartyError": "İzleme partisi oluşturulurken beklenmeyen bir hata oluştu."
+    "episodesAriaLabel": "Bölümler"
   },
   "actions": {
     "watchSolo": "Tek Başına İzle",
@@ -67,8 +64,7 @@
     "watchTogether": "Birlikte İzle",
     "creating": "Oluşturuluyor",
     "toWatchlist": "Listeye Ekle",
-    "removeFromList": "Listeden Kaldır",
-    "episodeFallbackTitle": "Bölüm {number}"
+    "removeFromList": "Listeden Kaldır"
   },
   "download": {
     "download": "İndir",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "Bölüm mevcut değil",
     "saved": "Kaydedildi",
     "securelyStarting": "Güvenli İndirme Başlatılıyor...",
-    "episode": "Bölüm {number}",
     "untitled": "Başlıksız",
-    "downloadSrOnly": "{title} indir",
     "downloadingToast": "İndiriliyor{epText}! Çevrimdışı Kütüphanenizi kontrol edin.",
     "downloadingEpisodeText": " Böl {episode} için",
-    "episodeLabel": "Bölüm {number}",
     "episodePrefix": "Bölüm"
   },
   "episodeCard": {

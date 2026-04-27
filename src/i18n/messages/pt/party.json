@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "Alguém",
     "guest": "Convidado",
-    "member": "Membro",
-    "unknownParticipant": "Participante desconhecido",
-    "anonymous": "Anônimo"
+    "member": "Membro"
   },
   "toasts": {
     "failedApprove": "Falha ao aprovar membro",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "Falha ao atualizar conteúdo",
     "contentChanged": "Conteúdo alterado para: {title}",
     "kicked": "Você foi expulso: {reason}",
-    "roomEnded": "Esta watch party terminou ou o código é inválido.",
-    "networkError": "Não foi possível verificar o status da sala. Verifique sua conexão.",
     "failedFetchRoom": "Falha ao obter detalhes da sala após aprovação.",
     "hostDeclined": "O anfitrião recusou sua solicitação para entrar.",
     "movieEndWarning": "Esta watch party será encerrada automaticamente quando o filme terminar.",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "Reconectando ao servidor de voz/vídeo...",
     "disconnectedVoice": "Desconectado do servidor de voz/vídeo",
     "failedConnectVoice": "Falha ao conectar ao servidor de voz/vídeo",
-    "permissionDenied": "Permissão de {device} negada. Clique no ícone de cadeado na barra de endereço para permitir o acesso.",
-    "deviceNotFound": "Nenhum {device} encontrado. Por favor, conecte um {device}.",
-    "deviceAccessFailed": "Falha ao acessar {device}. Verifique as configurações do seu navegador.",
     "notConnectedVoice": "Ainda não conectado ao servidor de voz. Aguarde...",
     "notConnectedVideo": "Ainda não conectado ao servidor de vídeo. Aguarde...",
     "micSwitched": "Microfone alterado",

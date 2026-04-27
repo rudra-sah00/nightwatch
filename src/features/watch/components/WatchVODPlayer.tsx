@@ -89,6 +89,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         largeImageKey: 'nightwatch_logo', // Safe fallback, external URLs usually break discord-rpc
         startTimestamp: Date.now(),
       });
+      return () => desktopBridge.clearDiscordPresence();
     }
   }, [props.metadata]);
 

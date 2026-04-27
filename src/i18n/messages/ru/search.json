@@ -53,10 +53,7 @@
     "experienceStarting": "Запуск",
     "preparingContent": "Подготовка \"{title}\"...",
     "closeModal": "Закрыть окно",
-    "episodesAriaLabel": "Эпизоды",
-    "failedToLoadDetails": "Не удалось загрузить информацию о шоу. Проверьте подключение и попробуйте снова.",
-    "failedToLoadEpisodes": "Не удалось загрузить список эпизодов. Будут использованы кэшированные данные, если доступны.",
-    "watchPartyError": "Произошла непредвиденная ошибка при создании совместного просмотра."
+    "episodesAriaLabel": "Эпизоды"
   },
   "actions": {
     "watchSolo": "Смотреть одному",
@@ -67,8 +64,7 @@
     "watchTogether": "Смотреть вместе",
     "creating": "Создание",
     "toWatchlist": "В список",
-    "removeFromList": "Удалить из списка",
-    "episodeFallbackTitle": "Эпизод {number}"
+    "removeFromList": "Удалить из списка"
   },
   "download": {
     "download": "Скачать",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "Нет доступных эпизодов",
     "saved": "Сохранено",
     "securelyStarting": "Безопасная загрузка начинается...",
-    "episode": "Эпизод {number}",
     "untitled": "Без названия",
-    "downloadSrOnly": "Скачать {title}",
     "downloadingToast": "Скачивание{epText}! Проверьте вашу Офлайн Библиотеку.",
     "downloadingEpisodeText": " эп. {episode}",
-    "episodeLabel": "Эпизод {number}",
     "episodePrefix": "Эпизод"
   },
   "episodeCard": {
@@ -98,7 +91,7 @@
     "minSuffix": "{duration} МИН"
   },
   "contentInfo": {
-    "seasonCount": "{count, plural, one {# Сезон} few {# Сезона} other {# Сезонов}}",
+    "seasonCount": "{count, plural, one {# Сезон} few {# Сезона} many {# Сезонов} other {# Сезонов}}",
     "seasonEpisodePrefix": "С{season}:Э{episode}",
     "minutesSuffix": "{runtime}М"
   },

@@ -53,10 +53,7 @@
     "experienceStarting": "กำลังเริ่มประสบการณ์",
     "preparingContent": "กำลังเตรียม \"{title}\"...",
     "closeModal": "ปิดหน้าต่าง",
-    "episodesAriaLabel": "ตอน",
-    "failedToLoadDetails": "ไม่สามารถโหลดรายละเอียดรายการได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
-    "failedToLoadEpisodes": "ไม่สามารถโหลดรายการตอนได้ จะใช้ข้อมูลแคชหากมี",
-    "watchPartyError": "เกิดข้อผิดพลาดที่ไม่คาดคิดขณะสร้างวอทช์ปาร์ตี้"
+    "episodesAriaLabel": "ตอน"
   },
   "actions": {
     "watchSolo": "ดูคนเดียว",
@@ -67,8 +64,7 @@
     "watchTogether": "ดูด้วยกัน",
     "creating": "กำลังสร้าง",
     "toWatchlist": "เพิ่มในรายการ",
-    "removeFromList": "ลบออกจากรายการ",
-    "episodeFallbackTitle": "ตอนที่ {number}"
+    "removeFromList": "ลบออกจากรายการ"
   },
   "download": {
     "download": "ดาวน์โหลด",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "ไม่มีตอนที่ใช้ได้",
     "saved": "บันทึกแล้ว",
     "securelyStarting": "กำลังเริ่มดาวน์โหลดอย่างปลอดภัย...",
-    "episode": "ตอนที่ {number}",
     "untitled": "ไม่มีชื่อ",
-    "downloadSrOnly": "ดาวน์โหลด {title}",
     "downloadingToast": "กำลังดาวน์โหลด{epText}! ตรวจสอบคลังออฟไลน์ของคุณ",
     "downloadingEpisodeText": " ตอนที่ {episode}",
-    "episodeLabel": "ตอนที่ {number}",
     "episodePrefix": "ตอนที่"
   },
   "episodeCard": {

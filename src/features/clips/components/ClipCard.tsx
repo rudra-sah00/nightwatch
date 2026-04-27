@@ -2,6 +2,7 @@
 
 import { Check, Loader2, Pencil, Play, Share2, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCallback, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Clip } from '../types';
@@ -36,6 +37,7 @@ export function ClipCard({
   onPlay,
   onShare,
 }: ClipCardProps) {
+  const t = useTranslations('live');
   const isReady = clip.status === 'ready';
   const isProcessing = clip.status === 'processing';
   const [editing, setEditing] = useState(false);
@@ -139,7 +141,7 @@ export function ClipCard({
               type="button"
               onClick={saveEdit}
               className="p-1 text-neo-green hover:bg-neo-green/10 rounded"
-              aria-label="Save"
+              aria-label={t('clipSave')}
             >
               <Check className="w-4 h-4 stroke-[3px]" />
             </button>
@@ -147,7 +149,7 @@ export function ClipCard({
               type="button"
               onClick={cancelEdit}
               className="p-1 text-foreground/40 hover:bg-muted rounded"
-              aria-label="Cancel"
+              aria-label={t('clipCancel')}
             >
               <X className="w-4 h-4 stroke-[3px]" />
             </button>
@@ -175,7 +177,7 @@ export function ClipCard({
                 type="button"
                 onClick={startEdit}
                 className="p-1.5 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground transition-colors"
-                aria-label="Rename clip"
+                aria-label={t('clipRename')}
               >
                 <Pencil className="w-3.5 h-3.5" />
               </button>
@@ -183,7 +185,7 @@ export function ClipCard({
                 type="button"
                 onClick={() => onDelete(clip.id)}
                 className="p-1.5 rounded-lg hover:bg-destructive/10 text-foreground/30 hover:text-destructive transition-colors"
-                aria-label="Delete clip"
+                aria-label={t('clipDelete')}
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

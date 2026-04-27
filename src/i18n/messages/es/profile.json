@@ -89,7 +89,6 @@
     "system": "Sistema",
     "language": "Idioma",
     "languageDescription": "Elige tu idioma de visualización preferido.",
-    "selectLanguage": "Seleccionar Idioma",
     "launchOnStartup": "Iniciar al Arrancar",
     "launchDescription": "Iniciar Nightwatch automáticamente en segundo plano cuando tu computadora arranque.",
     "maxConcurrentDownloads": "Descargas Simultáneas Máximas",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "Restringe la velocidad de descarga en segundo plano. ¡Útil si tu red se ralentiza!",
     "unlimited": "Ilimitado",
     "cancel": "Cancelar",
-    "set": "Establecer",
     "customConcurrent": "Personalizado (1-10)",
     "customSpeed": "Personalizado MB/s"
   },

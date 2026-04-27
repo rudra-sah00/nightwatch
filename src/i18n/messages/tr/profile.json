@@ -89,7 +89,6 @@
     "system": "Sistem",
     "language": "Dil",
     "languageDescription": "Tercih ettiğiniz görüntüleme dilini seçin.",
-    "selectLanguage": "Dil Seçin",
     "launchOnStartup": "Başlangıçta Aç",
     "launchDescription": "Bilgisayarınız açıldığında Nightwatch'yı otomatik olarak arka planda başlatın.",
     "maxConcurrentDownloads": "Maks. Eşzamanlı İndirme",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "Arka plan indirme hızını kısıtlayın. Ağınız genel olarak yavaşlıyorsa faydalıdır!",
     "unlimited": "Sınırsız",
     "cancel": "İptal",
-    "set": "Ayarla",
     "customConcurrent": "Özel (1-10)",
     "customSpeed": "Özel MB/s"
   },

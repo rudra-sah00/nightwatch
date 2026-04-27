@@ -1,5 +1,4 @@
 {
-  "title": "แมตช์สด",
   "heroTitle": "ถ่ายทอด",
   "heroTitleStream": "สด",
   "heroSubtitle": "รูปแบบตามการกระทำ",
@@ -67,8 +66,6 @@
   "back": "กลับ",
   "liveStream": "ถ่ายทอดสด",
   "vs": "VS",
-  "noImageAvailable": "ไม่มีรูปภาพ",
-  "closePreview": "ปิดตัวอย่าง",
   "loginRequired": "คุณต้องเข้าสู่ระบบเพื่อจัดวอทช์ปาร์ตี้",
   "noEpisodesOffline": "ไม่มีตอนที่ใช้งานแบบออฟไลน์ได้",
   "failedPlayback": "ไม่สามารถเริ่มเล่นได้",
@@ -76,5 +73,10 @@
   "teamFallback2": "ทีม 2",
   "twentyFourSevenChannel": "ช่อง 24/7",
   "closeModal": "ปิด",
-  "liveTVType": "ทีวีสด"
+  "liveTVType": "ทีวีสด",
+  "clip": "คลิป",
+  "clipSave": "บันทึก",
+  "clipCancel": "ยกเลิก",
+  "clipRename": "เปลี่ยนชื่อคลิป",
+  "clipDelete": "ลบคลิป"
 }

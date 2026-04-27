@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getMusicAlbum, type MusicTrack } from '@/features/music/api';
+import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
 function formatTime(seconds: number): string {
@@ -115,11 +116,8 @@ export default function MusicAlbumPage() {
                   ? player.togglePlay()
                   : player.play(song, songs)
               }
-              className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors ${
-                player.currentTrack?.id === song.id
-                  ? 'bg-neo-yellow/10 border-[2px] border-neo-yellow/30'
-                  : 'hover:bg-card border-[2px] border-transparent'
-              }`}
+              onContextMenu={(e) => showSongMenu(e, song)}
+              className="w-full flex items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-card"
             >
               <span className="w-6 text-foreground/20 text-xs font-mono text-right flex-shrink-0">
                 {player.currentTrack?.id === song.id && player.isPlaying ? (

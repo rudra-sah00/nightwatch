@@ -61,6 +61,7 @@ function createBridge() {
   if (!isElectronEnv) {
     return {
       updateDiscordPresence: noop as (p: Record<string, unknown>) => void,
+      clearDiscordPresence: noop as () => void,
       copyToClipboard: noop as (t: string) => void,
       storeGet: async (_k: string): Promise<unknown> => undefined,
       storeSet: noop as (k: string, v: unknown) => void,
@@ -125,6 +126,7 @@ function createBridge() {
   return {
     updateDiscordPresence: (p: Record<string, unknown>) =>
       e.updateDiscordPresence(p),
+    clearDiscordPresence: () => e.clearDiscordPresence(),
     copyToClipboard: (t: string) => e.copyToClipboard(t),
     storeGet: (k: string) => e.storeGet(k) as Promise<unknown>,
     storeSet: (k: string, v: unknown) => e.storeSet(k, v),

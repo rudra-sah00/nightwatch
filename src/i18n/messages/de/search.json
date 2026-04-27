@@ -53,10 +53,7 @@
     "experienceStarting": "Erlebnis startet",
     "preparingContent": "Bereite \"{title}\" vor...",
     "closeModal": "Modal schließen",
-    "episodesAriaLabel": "Episoden",
-    "failedToLoadDetails": "Details der Sendung konnten nicht geladen werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
-    "failedToLoadEpisodes": "Episodenliste konnte nicht geladen werden. Zwischengespeicherte Daten werden verwendet, falls verfügbar.",
-    "watchPartyError": "Beim Erstellen der Watch Party ist ein unerwarteter Fehler aufgetreten."
+    "episodesAriaLabel": "Episoden"
   },
   "actions": {
     "watchSolo": "Alleine schauen",
@@ -67,8 +64,7 @@
     "watchTogether": "Zusammen schauen",
     "creating": "Erstelle",
     "toWatchlist": "Zur Merkliste",
-    "removeFromList": "Von Liste entfernen",
-    "episodeFallbackTitle": "Episode {number}"
+    "removeFromList": "Von Liste entfernen"
   },
   "download": {
     "download": "Herunterladen",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "Keine Episoden verfügbar",
     "saved": "Gespeichert",
     "securelyStarting": "Sicherer Download wird gestartet...",
-    "episode": "Episode {number}",
     "untitled": "Ohne Titel",
-    "downloadSrOnly": "{title} herunterladen",
     "downloadingToast": "Download{epText} läuft! Überprüfe deine Offline-Bibliothek.",
     "downloadingEpisodeText": " für Ep {episode}",
-    "episodeLabel": "Episode {number}",
     "episodePrefix": "Episode"
   },
   "episodeCard": {

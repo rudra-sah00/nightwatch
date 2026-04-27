@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "誰か",
     "guest": "ゲスト",
-    "member": "メンバー",
-    "unknownParticipant": "不明な参加者",
-    "anonymous": "匿名"
+    "member": "メンバー"
   },
   "toasts": {
     "failedApprove": "メンバーの承認に失敗しました",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "コンテンツの更新に失敗しました",
     "contentChanged": "コンテンツが変更されました: {title}",
     "kicked": "キックされました: {reason}",
-    "roomEnded": "このウォッチパーティーは終了したか、コードが無効です。",
-    "networkError": "ルームの状態を確認できません。接続を確認してください。",
     "failedFetchRoom": "承認後のルーム詳細の取得に失敗しました。",
     "hostDeclined": "ホストが参加リクエストを拒否しました。",
     "movieEndWarning": "映画が終了すると、このウォッチパーティーは自動的に終了します。",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "音声/ビデオサーバーに再接続中...",
     "disconnectedVoice": "音声/ビデオサーバーから切断されました",
     "failedConnectVoice": "音声/ビデオサーバーへの接続に失敗しました",
-    "permissionDenied": "{device}の許可が拒否されました。ブラウザのアドレスバーにあるロックアイコンをクリックしてアクセスを許可してください。",
-    "deviceNotFound": "{device}が見つかりません。{device}を接続してください。",
-    "deviceAccessFailed": "{device}へのアクセスに失敗しました。ブラウザの設定を確認してください。",
     "notConnectedVoice": "まだ音声サーバーに接続されていません。お待ちください...",
     "notConnectedVideo": "まだビデオサーバーに接続されていません。お待ちください...",
     "micSwitched": "マイクが切り替わりました",

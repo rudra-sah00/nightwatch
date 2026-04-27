@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Vollbildmodus konnte nicht beendet werden",
     "fullscreenToggleFailed": "Vollbild-Umschaltung fehlgeschlagen",
     "seekTime": "Suchzeit",
-    "liveSeekBar": "Live-Stream-Suchleiste",
     "atLiveEdge": "Live",
     "behindLive": "{seconds}s hinter Live",
     "closeSidebar": "Seitenleiste schließen",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Dieser Player ist nur im Querformat verfügbar",
     "showEpisodes": "Folgen anzeigen",
     "episodesTitle": "Folgen",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Maximieren",
+    "captionNone": "Keine"
   },
   "settings": {
     "quality": "Qualität",

@@ -105,7 +105,6 @@
     "system": "System",
     "language": "Language",
     "languageDescription": "Choose your preferred display language.",
-    "selectLanguage": "Select Language",
     "launchOnStartup": "Launch on Startup",
     "launchDescription": "Automatically start Nightwatch silently in the background when your computer boots up.",
     "maxConcurrentDownloads": "Max Concurrent Downloads",
@@ -114,7 +113,6 @@
     "downloadSpeedDescription": "Restrict the background download speed. Helpful if your network slows down globally!",
     "unlimited": "Unlimited",
     "cancel": "Cancel",
-    "set": "Set",
     "customConcurrent": "Custom (1-10)",
     "customSpeed": "Custom MB/s"
   },

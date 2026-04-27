@@ -2,19 +2,15 @@
   "nav": {
     "home": "Inicio",
     "continue": "Continuar",
-    "continueWatching": "Seguir viendo",
     "live": "En vivo",
-    "liveMatches": "Partidos en vivo",
     "watchlist": "Mi lista",
     "downloads": "Descargas",
-    "offlineDownloads": "Descargas sin conexión",
     "profile": "Perfil",
     "logoAlt": "Logo de Nightwatch",
     "music": "Music"
   },
   "language": {
-    "title": "Idioma",
-    "description": "Elige tu idioma preferido"
+    "title": "Idioma"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "Ajustando Configuración",
     "customizingProfile": "Personalizando perfil"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "Equilibrado",
-    "highQuality": "Transmisión de Alta Calidad"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "Tu compañero personal de streaming",
     "homeTitle": "Inicio | Nightwatch",
     "homeDescription": "Busca películas y series para empezar a ver juntos.",
     "continueWatchingTitle": "Seguir Viendo | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "Accede a tus películas y series descargadas para ver sin conexión.",
     "watchlistTitle": "Mi Lista | Nightwatch",
     "watchlistDescription": "Lleva un registro de las películas y series que quieres ver después.",
-    "watchPartyTitle": "Watch Party | Nightwatch",
-    "watchPartyDescription": "Únete a tus amigos y vean juntos en tiempo real.",
-    "messagesTitle": "Mensajes | Nightwatch",
     "userNotFoundTitle": "Usuario no encontrado | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "Ver la actividad y perfil de {name} en Nightwatch.",
@@ -203,18 +185,8 @@
     "showMore": "Mostrar Más ({remaining} restantes)"
   },
   "downloads": {
-    "failedToLoad": "Error al cargar contenido",
     "experienceStarting": "Iniciando Experiencia",
-    "preparingContent": "Preparando \"{title}\"...",
-    "episodes": "Episodios",
-    "noImageAvailable": "Sin Imagen Disponible",
-    "closePreview": "Cerrar Vista Previa",
-    "statusCompleted": "COMPLETADO",
-    "statusFailed": "FALLIDO",
-    "statusDownloading": "DESCARGANDO",
-    "statusQueued": "EN COLA",
-    "statusCancelled": "CANCELADO",
-    "statusPaused": "PAUSADO"
+    "preparingContent": "Preparando \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "Sesión expirada. Por favor inicia sesión de nuevo.",
@@ -227,49 +199,20 @@
     "csrfFailed": "Token de seguridad expirado. Actualiza la página.",
     "notFound": "El recurso solicitado no fue encontrado.",
     "forbidden": "No tienes permiso para realizar esta acción.",
-    "networkError": "Problema de red. Verifica tu conexión e inténtalo de nuevo.",
     "requestTimeout": "La solicitud ha expirado. Verifica tu conexión e inténtalo de nuevo."
-  },
-  "units": {
-    "bytes": "Bytes",
-    "kb": "KB",
-    "mb": "MB",
-    "gb": "GB",
-    "tb": "TB"
-  },
-  "fallbacks": {
-    "guest": "Invitado",
-    "member": "Miembro",
-    "roomHost": "Anfitrión",
-    "user": "Usuario"
   },
   "friends": {
     "title": "Amigos",
-    "messagesTitle": "Mensajes",
-    "conversations": "Conversaciones",
-    "selectConversation": "Selecciona una conversación",
-    "noConversations": "Sin conversaciones aún",
-    "noMessages": "Sin mensajes aún — ¡di hola!",
     "noFriends": "Sin amigos aún",
     "online": "En línea",
     "offline": "Desconectado",
-    "typing": "Escribiendo...",
-    "typeMessage": "Escribe un mensaje...",
-    "send": "Enviar",
-    "back": "Volver",
     "accept": "Aceptar",
     "reject": "Rechazar",
     "pendingRequests": "Solicitudes",
-    "openMessages": "Mensajes",
     "addFriend": "Añadir amigo",
     "addFriendPlaceholder": "Ingresa el usuario",
     "requestSent": "¡Solicitud enviada!",
     "requestFailed": "No se pudo enviar la solicitud",
-    "unfriend": "Eliminar amigo",
-    "block": "Bloquear usuario",
-    "unfriended": "Amigo eliminado",
-    "blocked": "Usuario bloqueado",
-    "actionFailed": "Acción fallida",
     "noUsersFound": "No se encontraron usuarios",
     "sentRequests": "Enviadas",
     "cancelRequest": "Cancelar",
@@ -294,14 +237,8 @@
       "noFriendsFound": "No se encontraron amigos",
       "participants": "{count, plural, one {# participante} other {# participantes}}",
       "you": "Tú",
-      "callOverlay": "Ventana de llamada",
-      "replying": "Respondiendo",
-      "reply": "Responder",
-      "emoji": "Emoji",
-      "callButton": "Llamar"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "Ventana de llamada"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "forward": "Adelante",
+    "goBack": "Ir atrás",
+    "goForward": "Ir adelante"
   }
 }

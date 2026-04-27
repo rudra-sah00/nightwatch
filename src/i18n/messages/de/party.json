@@ -149,9 +149,7 @@
   "fallback": {
     "someone": "Jemand",
     "guest": "Gast",
-    "member": "Mitglied",
-    "unknownParticipant": "Unbekannter Teilnehmer",
-    "anonymous": "Anonym"
+    "member": "Mitglied"
   },
   "toasts": {
     "failedApprove": "Mitglied konnte nicht genehmigt werden",
@@ -168,8 +166,6 @@
     "failedUpdateContent": "Inhalt konnte nicht aktualisiert werden",
     "contentChanged": "Inhalt geändert zu: {title}",
     "kicked": "Du wurdest rausgeworfen: {reason}",
-    "roomEnded": "Diese Watch Party ist beendet oder der Code ist ungültig.",
-    "networkError": "Raumstatus konnte nicht überprüft werden. Bitte überprüfe deine Verbindung.",
     "failedFetchRoom": "Raumdetails konnten nach der Genehmigung nicht abgerufen werden.",
     "hostDeclined": "Der Gastgeber hat deine Beitrittsanfrage abgelehnt.",
     "movieEndWarning": "Diese Watch Party endet automatisch, wenn der Film zu Ende ist.",
@@ -183,9 +179,6 @@
     "reconnectingVoice": "Verbindung zum Sprach-/Videoserver wird wiederhergestellt...",
     "disconnectedVoice": "Vom Sprach-/Videoserver getrennt",
     "failedConnectVoice": "Verbindung zum Sprach-/Videoserver fehlgeschlagen",
-    "permissionDenied": "{device}-Berechtigung verweigert. Klicke auf das Schloss-Symbol in der Adressleiste, um den Zugriff zu erlauben.",
-    "deviceNotFound": "Kein {device} gefunden. Bitte schließe ein {device} an.",
-    "deviceAccessFailed": "Zugriff auf {device} fehlgeschlagen. Bitte überprüfe deine Browsereinstellungen.",
     "notConnectedVoice": "Noch nicht mit dem Sprachserver verbunden. Bitte warte...",
     "notConnectedVideo": "Noch nicht mit dem Videoserver verbunden. Bitte warte...",
     "micSwitched": "Mikrofon gewechselt",

@@ -134,3 +134,115 @@ export async function getRadioStations(language?: string) {
     { id: string; title: string; image: string; language: string }[]
   >(`/api/music/radio${qs}`);
 }
+
+export async function getUserQueue(): Promise<MusicTrack[]> {
+  return apiFetch('/api/music/queue');
+}
+
+export async function addToUserQueue(track: {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  image: string;
+  duration: number;
+}): Promise<MusicTrack[]> {
+  return apiFetch('/api/music/queue', {
+    method: 'POST',
+    body: JSON.stringify(track),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export interface UserPlaylist {
+  id: string;
+  name: string;
+  coverUrl: string | null;
+  isPublic: boolean;
+  trackCount: number;
+  createdAt: string;
+}
+
+export interface UserPlaylistDetail extends UserPlaylist {
+  tracks: {
+    id: string;
+    trackId: string;
+    title: string;
+    artist: string;
+    album: string;
+    image: string;
+    duration: number;
+    position: number;
+  }[];
+}
+
+export async function getUserPlaylists(): Promise<UserPlaylist[]> {
+  return apiFetch('/api/music/playlists');
+}
+
+export async function createUserPlaylist(name: string): Promise<UserPlaylist> {
+  return apiFetch('/api/music/playlists', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function getUserPlaylistDetail(
+  id: string,
+): Promise<UserPlaylistDetail> {
+  return apiFetch(`/api/music/playlists/${id}`);
+}
+
+export async function updateUserPlaylist(
+  id: string,
+  data: { name?: string; isPublic?: boolean },
+): Promise<UserPlaylist> {
+  return apiFetch(`/api/music/playlists/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function deleteUserPlaylist(id: string): Promise<void> {
+  await apiFetch(`/api/music/playlists/${id}`, { method: 'DELETE' });
+}
+
+export async function uploadPlaylistCover(
+  id: string,
+  file: File,
+): Promise<UserPlaylist> {
+  return apiFetch(`/api/music/playlists/${id}/cover`, {
+    method: 'PUT',
+    body: file,
+    headers: { 'Content-Type': file.type },
+  });
+}
+
+export async function addTrackToPlaylist(
+  playlistId: string,
+  track: {
+    trackId: string;
+    title: string;
+    artist: string;
+    album: string;
+    image: string;
+    duration: number;
+  },
+): Promise<unknown> {
+  return apiFetch(`/api/music/playlists/${playlistId}/tracks`, {
+    method: 'POST',
+    body: JSON.stringify(track),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function removeTrackFromPlaylist(
+  playlistId: string,
+  trackEntryId: string,
+): Promise<void> {
+  await apiFetch(`/api/music/playlists/${playlistId}/tracks/${trackEntryId}`, {
+    method: 'DELETE',
+  });
+}

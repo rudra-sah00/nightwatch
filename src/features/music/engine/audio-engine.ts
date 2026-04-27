@@ -12,6 +12,7 @@ export interface AudioEngineState {
   duration: number;
   shuffle: boolean;
   repeat: RepeatMode;
+  volume: number;
 }
 
 type Listener = (state: AudioEngineState) => void;
@@ -34,6 +35,7 @@ export class AudioEngine {
       duration: 0,
       shuffle: false,
       repeat: 'off',
+      volume: 1,
     };
 
     this.audio.onended = () => this.handleEnded();
@@ -98,7 +100,20 @@ export class AudioEngine {
     this.next();
   }
 
+  private async fadeOut(duration = 500): Promise<void> {
+    if (!this.audio.src || this.audio.paused) return;
+    const steps = 20;
+    const stepTime = duration / steps;
+    for (let i = steps; i >= 0; i--) {
+      this.audio.volume = (i / steps) * this.state.volume;
+      await new Promise((r) => setTimeout(r, stepTime));
+    }
+    this.audio.pause();
+    this.audio.volume = this.state.volume;
+  }
+
   async playTrack(track: MusicTrack, queue?: MusicTrack[]) {
+    console.log('[AudioEngine] playTrack called:', track.id, track.title);
     if (queue) {
       const idx = queue.findIndex((t) => t.id === track.id);
       this.update({ queue, queueIndex: idx >= 0 ? idx : 0 });
@@ -118,11 +133,20 @@ export class AudioEngine {
     });
 
     try {
+      // Crossfade: fade out current, load new, fade in
+      await this.fadeOut(300);
       const url = await getStreamUrl(track.id);
       this.audio.src = url;
+      this.audio.volume = 0;
       await this.audio.play();
       this.update({ isPlaying: true });
       this.startProgressTimer();
+      // Fade in
+      const steps = 20;
+      for (let i = 1; i <= steps; i++) {
+        this.audio.volume = (i / steps) * this.state.volume;
+        await new Promise((r) => setTimeout(r, 15));
+      }
     } catch {
       this.update({ isPlaying: false });
     }
@@ -216,6 +240,12 @@ export class AudioEngine {
     const modes: RepeatMode[] = ['off', 'all', 'one'];
     const idx = modes.indexOf(this.state.repeat);
     this.update({ repeat: modes[(idx + 1) % modes.length] });
+  }
+
+  setVolume(v: number) {
+    const vol = Math.max(0, Math.min(1, v));
+    this.audio.volume = vol;
+    this.update({ volume: vol });
   }
 
   stop() {

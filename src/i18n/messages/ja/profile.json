@@ -89,7 +89,6 @@
     "system": "システム",
     "language": "言語",
     "languageDescription": "お好みの表示言語を選択してください。",
-    "selectLanguage": "言語を選択",
     "launchOnStartup": "起動時に開始",
     "launchDescription": "コンピューター起動時にNightwatchをバックグラウンドで自動的に開始します。",
     "maxConcurrentDownloads": "最大同時ダウンロード数",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "バックグラウンドのダウンロード速度を制限します。ネットワークが遅くなる場合に便利です！",
     "unlimited": "無制限",
     "cancel": "キャンセル",
-    "set": "設定",
     "customConcurrent": "カスタム (1-10)",
     "customSpeed": "カスタム MB/s"
   },

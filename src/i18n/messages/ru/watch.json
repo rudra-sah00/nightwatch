@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Не удалось выйти из полноэкранного режима",
     "fullscreenToggleFailed": "Не удалось переключить полноэкранный режим",
     "seekTime": "Время перемотки",
-    "liveSeekBar": "Полоса перемотки прямой трансляции",
     "atLiveEdge": "В прямом эфире",
     "behindLive": "Отставание от эфира: {seconds}с",
     "closeSidebar": "Закрыть боковую панель",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Этот плеер доступен только в альбомном режиме",
     "showEpisodes": "Показать серии",
     "episodesTitle": "Серии",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Развернуть",
+    "captionNone": "Нет"
   },
   "settings": {
     "quality": "Качество",
@@ -135,7 +136,7 @@
     "pageTitle": "МОЙ",
     "watchlist": "СПИСОК",
     "subtitle": "Ваша подборка",
-    "itemCount": "{count} {count, plural, one {элемент} few {элемента} other {элементов}}",
+    "itemCount": "{count} {count, plural, one {элемент} few {элемента} many {элементов} other {элементов}}",
     "emptyTitle": "Ваш список просмотра пуст",
     "emptyDescription": "Сохраняйте фильмы и сериалы для просмотра позже",
     "viewDetails": "Подробнее о {title}",

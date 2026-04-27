@@ -53,10 +53,7 @@
     "experienceStarting": "体験を開始しています",
     "preparingContent": "「{title}」を準備中...",
     "closeModal": "モーダルを閉じる",
-    "episodesAriaLabel": "エピソード",
-    "failedToLoadDetails": "番組の詳細を読み込めませんでした。接続を確認して再度お試しください。",
-    "failedToLoadEpisodes": "エピソードリストを読み込めませんでした。キャッシュデータがあれば使用します。",
-    "watchPartyError": "ウォッチパーティーの作成中に予期しないエラーが発生しました。"
+    "episodesAriaLabel": "エピソード"
   },
   "actions": {
     "watchSolo": "一人で見る",
@@ -67,8 +64,7 @@
     "watchTogether": "一緒に見る",
     "creating": "作成中",
     "toWatchlist": "ウォッチリストに追加",
-    "removeFromList": "リストから削除",
-    "episodeFallbackTitle": "エピソード {number}"
+    "removeFromList": "リストから削除"
   },
   "download": {
     "download": "ダウンロード",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "利用可能なエピソードがありません",
     "saved": "保存済み",
     "securelyStarting": "安全にダウンロードを開始中...",
-    "episode": "エピソード {number}",
     "untitled": "無題",
-    "downloadSrOnly": "{title}をダウンロード",
     "downloadingToast": "ダウンロード中{epText}！オフラインライブラリを確認してください。",
     "downloadingEpisodeText": " Ep {episode}の",
-    "episodeLabel": "エピソード {number}",
     "episodePrefix": "エピソード"
   },
   "episodeCard": {

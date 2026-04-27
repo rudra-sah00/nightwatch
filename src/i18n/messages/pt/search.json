@@ -53,10 +53,7 @@
     "experienceStarting": "Experiência Iniciando",
     "preparingContent": "Preparando \"{title}\"...",
     "closeModal": "Fechar modal",
-    "episodesAriaLabel": "Episódios",
-    "failedToLoadDetails": "Falha ao carregar os detalhes do programa. Verifique sua conexão e tente novamente.",
-    "failedToLoadEpisodes": "Falha ao carregar a lista de episódios. Dados em cache serão usados, se disponíveis.",
-    "watchPartyError": "Ocorreu um erro inesperado ao criar a watch party."
+    "episodesAriaLabel": "Episódios"
   },
   "actions": {
     "watchSolo": "Assistir Solo",
@@ -67,8 +64,7 @@
     "watchTogether": "Assistir Juntos",
     "creating": "Criando",
     "toWatchlist": "À Lista",
-    "removeFromList": "Remover da Lista",
-    "episodeFallbackTitle": "Episódio {number}"
+    "removeFromList": "Remover da Lista"
   },
   "download": {
     "download": "Baixar",
@@ -83,12 +79,9 @@
     "noEpisodesAvailable": "Nenhum episódio disponível",
     "saved": "Salvo",
     "securelyStarting": "Iniciando Download Seguro...",
-    "episode": "Episódio {number}",
     "untitled": "Sem título",
-    "downloadSrOnly": "Baixar {title}",
     "downloadingToast": "Baixando{epText}! Confira sua Biblioteca Offline.",
     "downloadingEpisodeText": " do Ep {episode}",
-    "episodeLabel": "Episódio {number}",
     "episodePrefix": "Episódio"
   },
   "episodeCard": {

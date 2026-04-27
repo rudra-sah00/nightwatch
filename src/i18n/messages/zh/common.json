@@ -2,19 +2,15 @@
   "nav": {
     "home": "首页",
     "continue": "继续",
-    "continueWatching": "继续观看",
     "live": "直播",
-    "liveMatches": "直播赛事",
     "watchlist": "观看列表",
     "downloads": "下载",
-    "offlineDownloads": "离线下载",
     "profile": "个人资料",
     "logoAlt": "Nightwatch 标志",
     "music": "Music"
   },
   "language": {
-    "title": "语言",
-    "description": "选择您的首选语言"
+    "title": "语言"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "调整设置",
     "customizingProfile": "自定义个人资料"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "均衡",
-    "highQuality": "高质量流媒体"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "您的个人流媒体伴侣",
     "homeTitle": "首页 | Nightwatch",
     "homeDescription": "搜索电影和电视节目，开始一起观看。",
     "continueWatchingTitle": "继续观看 | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "访问已下载的电影和电视节目以供离线观看。",
     "watchlistTitle": "我的观看列表 | Nightwatch",
     "watchlistDescription": "跟踪您想稍后观看的电影和电视节目。",
-    "watchPartyTitle": "观影派对 | Nightwatch",
-    "watchPartyDescription": "加入朋友，实时一起观看。",
-    "messagesTitle": "消息 | Nightwatch",
     "userNotFoundTitle": "未找到用户 | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "查看 {name} 的观看活动和个人资料。",
@@ -203,18 +185,8 @@
     "showMore": "显示更多（剩余{remaining}个）"
   },
   "downloads": {
-    "failedToLoad": "内容加载失败",
     "experienceStarting": "体验启动中",
-    "preparingContent": "正在准备\"{title}\"...",
-    "episodes": "剧集",
-    "noImageAvailable": "无可用图片",
-    "closePreview": "关闭预览",
-    "statusCompleted": "已完成",
-    "statusFailed": "失败",
-    "statusDownloading": "下载中",
-    "statusQueued": "排队中",
-    "statusCancelled": "已取消",
-    "statusPaused": "已暂停"
+    "preparingContent": "正在准备\"{title}\"..."
   },
   "errors": {
     "sessionExpired": "会话已过期。请重新登录。",
@@ -227,49 +199,20 @@
     "csrfFailed": "安全令牌已过期。请刷新页面。",
     "notFound": "未找到请求的资源。",
     "forbidden": "您没有执行此操作的权限。",
-    "networkError": "网络问题。请检查连接后重试。",
     "requestTimeout": "请求超时。请检查连接后重试。"
-  },
-  "units": {
-    "bytes": "字节",
-    "kb": "KB",
-    "mb": "MB",
-    "gb": "GB",
-    "tb": "TB"
-  },
-  "fallbacks": {
-    "guest": "访客",
-    "member": "成员",
-    "roomHost": "房间主持人",
-    "user": "用户"
   },
   "friends": {
     "title": "好友",
-    "messagesTitle": "消息",
-    "conversations": "对话",
-    "selectConversation": "选择对话",
-    "noConversations": "暂无对话",
-    "noMessages": "暂无消息 — 打个招呼吧！",
     "noFriends": "暂无好友",
     "online": "在线",
     "offline": "离线",
-    "typing": "正在输入...",
-    "typeMessage": "输入消息...",
-    "send": "发送",
-    "back": "返回",
     "accept": "接受",
     "reject": "拒绝",
     "pendingRequests": "请求",
-    "openMessages": "消息",
     "addFriend": "添加好友",
     "addFriendPlaceholder": "输入用户名",
     "requestSent": "好友请求已发送！",
     "requestFailed": "无法发送请求",
-    "unfriend": "删除好友",
-    "block": "屏蔽用户",
-    "unfriended": "好友已删除",
-    "blocked": "用户已屏蔽",
-    "actionFailed": "操作失败",
     "noUsersFound": "未找到用户",
     "sentRequests": "已发送",
     "cancelRequest": "取消",
@@ -294,14 +237,8 @@
       "noFriendsFound": "未找到好友",
       "participants": "{count, plural, other {#位参与者}}",
       "you": "你",
-      "callOverlay": "通话窗口",
-      "replying": "回复中",
-      "reply": "回复",
-      "emoji": "表情",
-      "callButton": "通话"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "通话窗口"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "关闭",
+    "back": "返回",
+    "forward": "前进",
+    "goBack": "返回",
+    "goForward": "前进"
   }
 }

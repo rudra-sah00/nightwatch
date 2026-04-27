@@ -36,7 +36,6 @@
     "failedExitFullscreen": "فشل الخروج من وضع ملء الشاشة",
     "fullscreenToggleFailed": "فشل تبديل ملء الشاشة",
     "seekTime": "وقت التقديم",
-    "liveSeekBar": "شريط تقديم البث المباشر",
     "atLiveEdge": "على البث المباشر",
     "behindLive": "{seconds} ثانية خلف البث المباشر",
     "closeSidebar": "إغلاق الشريط الجانبي",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "هذا المشغل متاح فقط في الوضع الأفقي",
     "showEpisodes": "عرض الحلقات",
     "episodesTitle": "الحلقات",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "تكبير",
+    "captionNone": "لا شيء"
   },
   "settings": {
     "quality": "الجودة",

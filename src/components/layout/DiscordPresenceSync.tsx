@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { musicPresenceLock } from '@/lib/music-presence-lock';
 import { useAuth } from '@/providers/auth-provider';
 
 export function DiscordPresenceSync() {
@@ -28,8 +29,15 @@ export function DiscordPresenceSync() {
     if (
       pathname.includes('/watch/') ||
       pathname.includes('/party/') ||
-      /^\/live\/[^/]+/.test(pathname)
+      /^\/live\/[^/]+/.test(pathname) ||
+      musicPresenceLock.isLocked()
     ) {
+      console.log(
+        '[DiscordPresenceSync] skipped — musicLock:',
+        musicPresenceLock.isLocked(),
+        'path:',
+        pathname,
+      );
       return;
     }
 
@@ -52,6 +60,12 @@ export function DiscordPresenceSync() {
       state = 'Nightwatch';
     }
 
+    console.log(
+      '[DiscordPresenceSync] sending browsing presence:',
+      details,
+      '|',
+      state,
+    );
     desktopBridge.updateDiscordPresence({
       details,
       state,

@@ -2,19 +2,15 @@
   "nav": {
     "home": "หน้าแรก",
     "continue": "ดูต่อ",
-    "continueWatching": "ดูต่อจากที่ค้างไว้",
     "live": "สด",
-    "liveMatches": "แมตช์สด",
     "watchlist": "รายการดู",
     "downloads": "ดาวน์โหลด",
-    "offlineDownloads": "ดาวน์โหลดออฟไลน์",
     "profile": "โปรไฟล์",
     "logoAlt": "โลโก้ Nightwatch",
     "music": "Music"
   },
   "language": {
-    "title": "ภาษา",
-    "description": "เลือกภาษาที่คุณต้องการ"
+    "title": "ภาษา"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "ปรับการตั้งค่า",
     "customizingProfile": "ปรับแต่งโปรไฟล์"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "สมดุล",
-    "highQuality": "สตรีมคุณภาพสูง"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "เพื่อนร่วมสตรีมมิ่งส่วนตัวของคุณ",
     "homeTitle": "หน้าแรก | Nightwatch",
     "homeDescription": "ค้นหาภาพยนตร์และซีรีส์เพื่อเริ่มดูด้วยกัน",
     "continueWatchingTitle": "ดูต่อ | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "เข้าถึงภาพยนตร์และซีรีส์ที่ดาวน์โหลดไว้สำหรับดูแบบออฟไลน์",
     "watchlistTitle": "รายการดูของฉัน | Nightwatch",
     "watchlistDescription": "ติดตามภาพยนตร์และซีรีส์ที่คุณต้องการดูทีหลัง",
-    "watchPartyTitle": "ปาร์ตี้ดูหนัง | Nightwatch",
-    "watchPartyDescription": "เข้าร่วมกับเพื่อนและดูด้วยกันแบบเรียลไทม์",
-    "messagesTitle": "ข้อความ | Nightwatch",
     "userNotFoundTitle": "ไม่พบผู้ใช้ | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "ดูกิจกรรมการรับชมและโปรไฟล์ของ {name}",
@@ -203,18 +185,8 @@
     "showMore": "แสดงเพิ่มเติม (เหลือ {remaining})"
   },
   "downloads": {
-    "failedToLoad": "โหลดเนื้อหาล้มเหลว",
     "experienceStarting": "กำลังเริ่มประสบการณ์",
-    "preparingContent": "กำลังเตรียม \"{title}\"...",
-    "episodes": "ตอน",
-    "noImageAvailable": "ไม่มีรูปภาพ",
-    "closePreview": "ปิดตัวอย่าง",
-    "statusCompleted": "เสร็จสิ้น",
-    "statusFailed": "ล้มเหลว",
-    "statusDownloading": "กำลังดาวน์โหลด",
-    "statusQueued": "อยู่ในคิว",
-    "statusCancelled": "ยกเลิกแล้ว",
-    "statusPaused": "หยุดชั่วคราว"
+    "preparingContent": "กำลังเตรียม \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง",
@@ -227,49 +199,20 @@
     "csrfFailed": "โทเค็นความปลอดภัยหมดอายุ กรุณารีเฟรชหน้า",
     "notFound": "ไม่พบทรัพยากรที่ร้องขอ",
     "forbidden": "คุณไม่มีสิทธิ์ดำเนินการนี้",
-    "networkError": "ปัญหาเครือข่าย กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
     "requestTimeout": "คำขอหมดเวลา กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
-  },
-  "units": {
-    "bytes": "ไบต์",
-    "kb": "KB",
-    "mb": "MB",
-    "gb": "GB",
-    "tb": "TB"
-  },
-  "fallbacks": {
-    "guest": "ผู้เยี่ยมชม",
-    "member": "สมาชิก",
-    "roomHost": "เจ้าของห้อง",
-    "user": "ผู้ใช้"
   },
   "friends": {
     "title": "เพื่อน",
-    "messagesTitle": "ข้อความ",
-    "conversations": "การสนทนา",
-    "selectConversation": "เลือกการสนทนา",
-    "noConversations": "ยังไม่มีการสนทนา",
-    "noMessages": "ยังไม่มีข้อความ — ทักทายสิ!",
     "noFriends": "ยังไม่มีเพื่อน",
     "online": "ออนไลน์",
     "offline": "ออฟไลน์",
-    "typing": "กำลังพิมพ์...",
-    "typeMessage": "พิมพ์ข้อความ...",
-    "send": "ส่ง",
-    "back": "กลับ",
     "accept": "ยอมรับ",
     "reject": "ปฏิเสธ",
     "pendingRequests": "คำขอ",
-    "openMessages": "ข้อความ",
     "addFriend": "เพิ่มเพื่อน",
     "addFriendPlaceholder": "ป้อนชื่อผู้ใช้",
     "requestSent": "ส่งคำขอเป็นเพื่อนแล้ว!",
     "requestFailed": "ไม่สามารถส่งคำขอได้",
-    "unfriend": "ลบเพื่อน",
-    "block": "บล็อก",
-    "unfriended": "ลบเพื่อนแล้ว",
-    "blocked": "บล็อกผู้ใช้แล้ว",
-    "actionFailed": "การดำเนินการล้มเหลว",
     "noUsersFound": "ไม่พบผู้ใช้",
     "sentRequests": "ส่งแล้ว",
     "cancelRequest": "ยกเลิก",
@@ -294,14 +237,8 @@
       "noFriendsFound": "ไม่พบเพื่อน",
       "participants": "{count, plural, other {ผู้เข้าร่วม # คน}}",
       "you": "คุณ",
-      "callOverlay": "หน้าต่างสาย",
-      "replying": "กำลังตอบ",
-      "reply": "ตอบ",
-      "emoji": "อิโมจิ",
-      "callButton": "โทร"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "หน้าต่างสาย"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "ย่อ",
+    "maximize": "ขยาย",
+    "close": "ปิด",
+    "back": "ย้อนกลับ",
+    "forward": "ไปข้างหน้า",
+    "goBack": "ย้อนกลับ",
+    "goForward": "ไปข้างหน้า"
   }
 }

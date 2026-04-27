@@ -48,11 +48,8 @@
     "episodeCount": "({count} EP)",
     "noEpisodesAvailable": "No episodes available for this season",
     "loadingEpisodes": "Loading episodes",
-    "failedToLoadDetails": "Failed to load show details. Please check your connection and try again.",
-    "failedToLoadEpisodes": "Failed to load episode list. Using cached data if available.",
     "watchPartyPick": "Watch Party — Pick an episode",
     "watchPartyHint": "Everyone joins once you select",
-    "watchPartyError": "An unexpected error occurred while creating the watch party.",
     "cancelWatchParty": "Cancel watch party",
     "continue": "Continue",
     "experienceStarting": "Experience Starting",
@@ -67,12 +64,10 @@
     "watchTogether": "Watch Together",
     "creating": "Creating",
     "toWatchlist": "To Watchlist",
-    "removeFromList": "Remove from List",
-    "episodeFallbackTitle": "Episode {number}"
+    "removeFromList": "Remove from List"
   },
   "download": {
     "download": "Download",
-    "downloadSrOnly": "Download {title}",
     "viewInVault": "View in Vault",
     "cancel": "Cancel",
     "language": "Language",
@@ -84,11 +79,9 @@
     "noEpisodesAvailable": "No episodes available",
     "saved": "Saved",
     "securelyStarting": "Securely Starting Download...",
-    "episode": "Episode {number}",
     "untitled": "Untitled",
     "downloadingToast": "Downloading{epText}! Check your Offline Library.",
     "downloadingEpisodeText": " for Ep {episode}",
-    "episodeLabel": "Episode {number}",
     "episodePrefix": "Episode"
   },
   "episodeCard": {

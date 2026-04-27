@@ -2,19 +2,15 @@
   "nav": {
     "home": "ホーム",
     "continue": "続きを見る",
-    "continueWatching": "視聴を続ける",
     "live": "ライブ",
-    "liveMatches": "ライブ試合",
     "watchlist": "ウォッチリスト",
     "downloads": "ダウンロード",
-    "offlineDownloads": "オフラインダウンロード",
     "profile": "プロフィール",
     "logoAlt": "Nightwatch ロゴ",
     "music": "Music"
   },
   "language": {
-    "title": "言語",
-    "description": "お好みの言語を選択してください"
+    "title": "言語"
   },
   "notFound": {
     "title": "404",
@@ -105,10 +101,6 @@
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "messages": {
-      "title": "Messages",
-      "description": "Send direct messages, make voice calls, and stay connected with friends."
-    },
     "nextBtn": "Next",
     "prevBtn": "Back",
     "doneBtn": "Let's Go!"
@@ -158,14 +150,7 @@
     "adjustingSettings": "設定を調整中",
     "customizingProfile": "プロフィールをカスタマイズ中"
   },
-  "server": {
-    "netflix": "Netflix",
-    "balanced": "バランス",
-    "highQuality": "高画質ストリーム"
-  },
   "metadata": {
-    "appTitle": "Nightwatch",
-    "appDescription": "あなたのパーソナルストリーミングコンパニオン",
     "homeTitle": "ホーム | Nightwatch",
     "homeDescription": "映画やテレビ番組を検索して一緒に視聴を始めましょう。",
     "continueWatchingTitle": "視聴を続ける | Nightwatch",
@@ -180,9 +165,6 @@
     "downloadsDescription": "オフライン視聴用にダウンロードした映画やテレビ番組にアクセス。",
     "watchlistTitle": "マイウォッチリスト | Nightwatch",
     "watchlistDescription": "後で見たい映画やテレビ番組を管理。",
-    "watchPartyTitle": "ウォッチパーティー | Nightwatch",
-    "watchPartyDescription": "友達と一緒にリアルタイムで視聴しましょう。",
-    "messagesTitle": "メッセージ | Nightwatch",
     "userNotFoundTitle": "ユーザーが見つかりません | Nightwatch",
     "userProfileTitle": "{name} (@{username}) | Nightwatch",
     "userProfileDescription": "{name}の視聴アクティビティとプロフィールを表示。",
@@ -203,18 +185,8 @@
     "showMore": "もっと見る（残り{remaining}件）"
   },
   "downloads": {
-    "failedToLoad": "コンテンツの読み込みに失敗",
     "experienceStarting": "体験を開始中",
-    "preparingContent": "「{title}」を準備中...",
-    "episodes": "エピソード",
-    "noImageAvailable": "画像なし",
-    "closePreview": "プレビューを閉じる",
-    "statusCompleted": "完了",
-    "statusFailed": "失敗",
-    "statusDownloading": "ダウンロード中",
-    "statusQueued": "待機中",
-    "statusCancelled": "キャンセル済み",
-    "statusPaused": "一時停止"
+    "preparingContent": "「{title}」を準備中..."
   },
   "errors": {
     "sessionExpired": "セッションが期限切れです。再度ログインしてください。",
@@ -227,49 +199,20 @@
     "csrfFailed": "セキュリティトークンが期限切れです。ページを更新してください。",
     "notFound": "リクエストされたリソースが見つかりません。",
     "forbidden": "この操作を実行する権限がありません。",
-    "networkError": "ネットワークの問題です。接続を確認して再試行してください。",
     "requestTimeout": "リクエストがタイムアウトしました。接続を確認して再試行してください。"
-  },
-  "units": {
-    "bytes": "バイト",
-    "kb": "KB",
-    "mb": "MB",
-    "gb": "GB",
-    "tb": "TB"
-  },
-  "fallbacks": {
-    "guest": "ゲスト",
-    "member": "メンバー",
-    "roomHost": "ルームホスト",
-    "user": "ユーザー"
   },
   "friends": {
     "title": "フレンド",
-    "messagesTitle": "メッセージ",
-    "conversations": "会話",
-    "selectConversation": "会話を選択",
-    "noConversations": "会話はまだありません",
-    "noMessages": "メッセージはまだありません",
     "noFriends": "フレンドはまだいません",
     "online": "オンライン",
     "offline": "オフライン",
-    "typing": "入力中...",
-    "typeMessage": "メッセージを入力...",
-    "send": "送信",
-    "back": "戻る",
     "accept": "承認",
     "reject": "拒否",
     "pendingRequests": "リクエスト",
-    "openMessages": "メッセージ",
     "addFriend": "フレンド追加",
     "addFriendPlaceholder": "ユーザー名を入力",
     "requestSent": "フレンドリクエスト送信!",
     "requestFailed": "リクエストを送信できませんでした",
-    "unfriend": "フレンド解除",
-    "block": "ブロック",
-    "unfriended": "フレンドを解除しました",
-    "blocked": "ユーザーをブロックしました",
-    "actionFailed": "操作に失敗しました",
     "noUsersFound": "ユーザーが見つかりません",
     "sentRequests": "送信済み",
     "cancelRequest": "キャンセル",
@@ -294,14 +237,8 @@
       "noFriendsFound": "友達が見つかりません",
       "participants": "{count, plural, other {#人の参加者}}",
       "you": "あなた",
-      "callOverlay": "通話オーバーレイ",
-      "replying": "返信中",
-      "reply": "返信",
-      "emoji": "絵文字",
-      "callButton": "通話"
-    },
-    "watching": "Watching {title}",
-    "watchingSeries": "Watching {title} S{season}E{episode}"
+      "callOverlay": "通話オーバーレイ"
+    }
   },
   "landing": {
     "brand": "Nightwatch",
@@ -370,5 +307,14 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "electron": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "閉じる",
+    "back": "戻る",
+    "forward": "進む",
+    "goBack": "戻る",
+    "goForward": "進む"
   }
 }

@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Falha ao sair da tela cheia",
     "fullscreenToggleFailed": "Falha ao alternar tela cheia",
     "seekTime": "Tempo de busca",
-    "liveSeekBar": "Barra de busca da transmissão ao vivo",
     "atLiveEdge": "Ao vivo",
     "behindLive": "{seconds}s atrás do ao vivo",
     "closeSidebar": "Fechar barra lateral",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Este player está disponível apenas no modo paisagem",
     "showEpisodes": "Mostrar episódios",
     "episodesTitle": "Episódios",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Maximizar",
+    "captionNone": "Nenhum"
   },
   "settings": {
     "quality": "Qualidade",

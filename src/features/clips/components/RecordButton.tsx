@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface RecordButtonProps {
   isRecording: boolean;
   duration: number;
@@ -21,6 +23,8 @@ export function RecordButton({
   onStart,
   onStop,
 }: RecordButtonProps) {
+  const t = useTranslations('live');
+
   if (isRecording) {
     return (
       <button
@@ -43,7 +47,7 @@ export function RecordButton({
       title="Record clip (max 5 min)"
     >
       <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-      <span>Clip</span>
+      <span>{t('clip')}</span>
     </button>
   );
 }

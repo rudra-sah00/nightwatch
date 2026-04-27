@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Error al salir de pantalla completa",
     "fullscreenToggleFailed": "Error al cambiar pantalla completa",
     "seekTime": "Tiempo de búsqueda",
-    "liveSeekBar": "Barra de búsqueda de transmisión en vivo",
     "atLiveEdge": "En directo",
     "behindLive": "{seconds}s detrás del directo",
     "closeSidebar": "Cerrar barra lateral",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Este reproductor solo está disponible en modo horizontal",
     "showEpisodes": "Mostrar episodios",
     "episodesTitle": "Episodios",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Maximizar",
+    "captionNone": "Ninguno"
   },
   "settings": {
     "quality": "Calidad",

@@ -36,7 +36,6 @@
     "failedExitFullscreen": "Impossibile uscire dallo schermo intero",
     "fullscreenToggleFailed": "Cambio schermo intero fallito",
     "seekTime": "Tempo di ricerca",
-    "liveSeekBar": "Barra di ricerca dello streaming live",
     "atLiveEdge": "In diretta",
     "behindLive": "{seconds}s in ritardo sulla diretta",
     "closeSidebar": "Chiudi barra laterale",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "Questo player è disponibile solo in modalità orizzontale",
     "showEpisodes": "Mostra episodi",
     "episodesTitle": "Episodi",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "Ingrandisci",
+    "captionNone": "Nessuno"
   },
   "settings": {
     "quality": "Qualità",

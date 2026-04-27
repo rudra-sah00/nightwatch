@@ -36,7 +36,6 @@
     "failedExitFullscreen": "फ़ुलस्क्रीन से बाहर निकलने में विफल",
     "fullscreenToggleFailed": "फ़ुलस्क्रीन टॉगल विफल",
     "seekTime": "सीक समय",
-    "liveSeekBar": "लाइव स्ट्रीम सीक बार",
     "atLiveEdge": "लाइव पर",
     "behindLive": "{seconds}s लाइव से पीछे",
     "closeSidebar": "साइडबार बंद करें",
@@ -46,7 +45,9 @@
     "landscapeOnlyMessage": "यह प्लेयर केवल लैंडस्केप मोड में उपलब्ध है",
     "showEpisodes": "एपिसोड दिखाएँ",
     "episodesTitle": "एपिसोड",
-    "liveStreamSeekBar": "Live stream seek bar"
+    "liveStreamSeekBar": "Live stream seek bar",
+    "maximize": "बड़ा करें",
+    "captionNone": "कोई नहीं"
   },
   "settings": {
     "quality": "गुणवत्ता",
@@ -135,7 +136,7 @@
     "pageTitle": "मेरी",
     "watchlist": "वॉचलिस्ट",
     "subtitle": "आपका चुना हुआ संग्रह",
-    "itemCount": "{count} आइटम",
+    "itemCount": "{count, plural, one {# आइटम} other {# आइटम}}",
     "emptyTitle": "आपकी वॉचलिस्ट खाली है",
     "emptyDescription": "बाद में देखने के लिए फ़िल्में और शो सहेजें",
     "viewDetails": "{title} के विवरण देखें",

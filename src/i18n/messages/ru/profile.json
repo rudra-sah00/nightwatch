@@ -89,7 +89,6 @@
     "system": "Системная",
     "language": "Язык",
     "languageDescription": "Выберите предпочитаемый язык отображения.",
-    "selectLanguage": "Выбрать язык",
     "launchOnStartup": "Запуск при старте",
     "launchDescription": "Автоматически запускать Nightwatch в фоновом режиме при загрузке компьютера.",
     "maxConcurrentDownloads": "Макс. одновременных загрузок",
@@ -98,7 +97,6 @@
     "downloadSpeedDescription": "Ограничьте фоновую скорость загрузки. Полезно, если сеть замедляется глобально!",
     "unlimited": "Без ограничений",
     "cancel": "Отмена",
-    "set": "Установить",
     "customConcurrent": "Пользовательский (1-10)",
     "customSpeed": "Пользовательский МБ/с"
   },
