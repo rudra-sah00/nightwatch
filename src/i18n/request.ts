@@ -17,6 +17,7 @@ const messageImports: Record<
     import('./messages/en/watch.json'),
     import('./messages/en/live.json'),
     import('./messages/en/party.json'),
+    import('./messages/en/music.json'),
   ],
   hi: () => [
     import('./messages/hi/common.json'),
@@ -26,6 +27,7 @@ const messageImports: Record<
     import('./messages/hi/watch.json'),
     import('./messages/hi/live.json'),
     import('./messages/hi/party.json'),
+    import('./messages/hi/music.json'),
   ],
   es: () => [
     import('./messages/es/common.json'),
@@ -35,6 +37,7 @@ const messageImports: Record<
     import('./messages/es/watch.json'),
     import('./messages/es/live.json'),
     import('./messages/es/party.json'),
+    import('./messages/es/music.json'),
   ],
   fr: () => [
     import('./messages/fr/common.json'),
@@ -44,6 +47,7 @@ const messageImports: Record<
     import('./messages/fr/watch.json'),
     import('./messages/fr/live.json'),
     import('./messages/fr/party.json'),
+    import('./messages/fr/music.json'),
   ],
   ja: () => [
     import('./messages/ja/common.json'),
@@ -53,6 +57,7 @@ const messageImports: Record<
     import('./messages/ja/watch.json'),
     import('./messages/ja/live.json'),
     import('./messages/ja/party.json'),
+    import('./messages/ja/music.json'),
   ],
   ko: () => [
     import('./messages/ko/common.json'),
@@ -62,6 +67,7 @@ const messageImports: Record<
     import('./messages/ko/watch.json'),
     import('./messages/ko/live.json'),
     import('./messages/ko/party.json'),
+    import('./messages/ko/music.json'),
   ],
   de: () => [
     import('./messages/de/common.json'),
@@ -71,6 +77,7 @@ const messageImports: Record<
     import('./messages/de/watch.json'),
     import('./messages/de/live.json'),
     import('./messages/de/party.json'),
+    import('./messages/de/music.json'),
   ],
   pt: () => [
     import('./messages/pt/common.json'),
@@ -80,6 +87,7 @@ const messageImports: Record<
     import('./messages/pt/watch.json'),
     import('./messages/pt/live.json'),
     import('./messages/pt/party.json'),
+    import('./messages/pt/music.json'),
   ],
   ar: () => [
     import('./messages/ar/common.json'),
@@ -89,6 +97,7 @@ const messageImports: Record<
     import('./messages/ar/watch.json'),
     import('./messages/ar/live.json'),
     import('./messages/ar/party.json'),
+    import('./messages/ar/music.json'),
   ],
   ru: () => [
     import('./messages/ru/common.json'),
@@ -98,6 +107,7 @@ const messageImports: Record<
     import('./messages/ru/watch.json'),
     import('./messages/ru/live.json'),
     import('./messages/ru/party.json'),
+    import('./messages/ru/music.json'),
   ],
   zh: () => [
     import('./messages/zh/common.json'),
@@ -107,6 +117,7 @@ const messageImports: Record<
     import('./messages/zh/watch.json'),
     import('./messages/zh/live.json'),
     import('./messages/zh/party.json'),
+    import('./messages/zh/music.json'),
   ],
   it: () => [
     import('./messages/it/common.json'),
@@ -116,6 +127,7 @@ const messageImports: Record<
     import('./messages/it/watch.json'),
     import('./messages/it/live.json'),
     import('./messages/it/party.json'),
+    import('./messages/it/music.json'),
   ],
   tr: () => [
     import('./messages/tr/common.json'),
@@ -125,6 +137,7 @@ const messageImports: Record<
     import('./messages/tr/watch.json'),
     import('./messages/tr/live.json'),
     import('./messages/tr/party.json'),
+    import('./messages/tr/music.json'),
   ],
   th: () => [
     import('./messages/th/common.json'),
@@ -134,6 +147,7 @@ const messageImports: Record<
     import('./messages/th/watch.json'),
     import('./messages/th/live.json'),
     import('./messages/th/party.json'),
+    import('./messages/th/music.json'),
   ],
 };
 
@@ -145,9 +159,8 @@ export default getRequestConfig(async () => {
     : defaultLocale;
 
   const loader = messageImports[locale] || messageImports.en;
-  const [common, auth, profile, search, watch, live, party] = await Promise.all(
-    loader(),
-  );
+  const [common, auth, profile, search, watch, live, party, music] =
+    await Promise.all(loader());
 
   return {
     locale,
@@ -159,6 +172,7 @@ export default getRequestConfig(async () => {
       watch: watch.default,
       live: live.default,
       party: party.default,
+      music: music.default,
     },
   };
 });

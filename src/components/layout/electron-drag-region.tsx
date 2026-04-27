@@ -20,11 +20,16 @@ const ROUTE_NAMES: Record<string, string> = {
   '/continue-watching': 'Continue Watching',
   '/library': 'Library',
   '/ask-ai': 'Ask AI',
+  '/music': 'Music',
   '/changelog': 'Changelog',
 };
 
 function getRouteTitle(pathname: string): string {
   if (ROUTE_NAMES[pathname]) return ROUTE_NAMES[pathname];
+  if (pathname.startsWith('/music/artist/')) return 'Music | Artist';
+  if (pathname.startsWith('/music/album/')) return 'Music | Album';
+  if (pathname.startsWith('/music/playlist/')) return 'Music | Playlist';
+  if (pathname.startsWith('/music/radio/')) return 'Music | Radio';
   if (pathname.startsWith('/watch-party/')) return 'Watch Party';
   if (pathname.startsWith('/watch/')) return 'Watch';
   if (pathname.startsWith('/clip/')) return 'Clip';

@@ -7,6 +7,7 @@ import {
   Home,
   Library,
   Monitor,
+  Music,
   Plus,
   Radio,
   Sparkles,
@@ -48,6 +49,7 @@ export function LeftSidebar() {
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
     { href: '/library', label: 'Library', icon: Library },
+    { href: '/music', label: t('music'), icon: Music },
     ...(isMounted && isDesktopApp
       ? [{ href: '/downloads', label: t('downloads'), icon: Download }]
       : []),

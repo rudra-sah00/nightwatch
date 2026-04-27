@@ -76,7 +76,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     };
   }
 
-  process(inputs, outputs) {
+  process(_inputs, outputs) {
     const output = outputs[0][0];
     this.playbackBuffer.read(output);
     return true;

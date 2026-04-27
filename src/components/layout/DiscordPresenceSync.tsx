@@ -12,54 +12,53 @@ export function DiscordPresenceSync() {
   const t = useTranslations('common');
 
   useEffect(() => {
-    // Only handle basic page routes, since Watch and Party components
-    // override this with their own detailed metadata when mounted.
-    if (typeof window !== 'undefined' && checkIsDesktop()) {
-      if (!isAuthenticated || pathname === '/login' || pathname === '/signup') {
-        desktopBridge.updateDiscordPresence({
-          details: t('discord.readyToStream'),
-          state: t('discord.atLoginScreen'),
-          largeImageKey: 'nightwatch_logo',
-          largeImageText: 'Nightwatch',
-          startTimestamp: Date.now(), // Reset timer
-        });
-        return;
-      }
+    if (typeof window === 'undefined' || !checkIsDesktop()) return;
 
-      if (
-        pathname.includes('/watch/') ||
-        pathname.includes('/party/') ||
-        /^\/live\/[^/]+/.test(pathname)
-      ) {
-        // Let the specific player component handle the rich presence details
-        return;
-      }
-
-      // Default authenticated states
-      let details = t('discord.browsingDashboard');
-      let state = t('discord.lookingForContent');
-
-      if (pathname === '/home') {
-        details = t('discord.browsingHomepage');
-      } else if (pathname === '/live') {
-        details = t('discord.browsingLiveMatches');
-        state = t('discord.findingStream');
-      } else if (pathname === '/watchlist') {
-        details = t('discord.curatingWatchlist');
-        state = t('discord.planningMarathon');
-      } else if (pathname === '/profile') {
-        details = t('discord.adjustingSettings');
-        state = t('discord.customizingProfile');
-      }
-
+    if (!isAuthenticated || pathname === '/login' || pathname === '/signup') {
       desktopBridge.updateDiscordPresence({
-        details,
-        state,
+        details: t('discord.readyToStream'),
+        state: t('discord.atLoginScreen'),
         largeImageKey: 'nightwatch_logo',
         largeImageText: 'Nightwatch',
         startTimestamp: Date.now(),
       });
+      return;
     }
+
+    if (
+      pathname.includes('/watch/') ||
+      pathname.includes('/party/') ||
+      /^\/live\/[^/]+/.test(pathname)
+    ) {
+      return;
+    }
+
+    let details = t('discord.browsingDashboard');
+    let state = t('discord.lookingForContent');
+
+    if (pathname === '/home') {
+      details = t('discord.browsingHomepage');
+    } else if (pathname === '/live') {
+      details = t('discord.browsingLiveMatches');
+      state = t('discord.findingStream');
+    } else if (pathname === '/watchlist') {
+      details = t('discord.curatingWatchlist');
+      state = t('discord.planningMarathon');
+    } else if (pathname === '/profile') {
+      details = t('discord.adjustingSettings');
+      state = t('discord.customizingProfile');
+    } else if (pathname.startsWith('/music')) {
+      details = 'Browsing Music';
+      state = 'Nightwatch';
+    }
+
+    desktopBridge.updateDiscordPresence({
+      details,
+      state,
+      largeImageKey: 'nightwatch_logo',
+      largeImageText: 'Nightwatch',
+      startTimestamp: Date.now(),
+    });
   }, [pathname, isAuthenticated, t]);
 
   return null;
