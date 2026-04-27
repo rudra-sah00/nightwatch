@@ -53,10 +53,10 @@ export function MusicView() {
         <button
           type="button"
           onClick={() => setShowSearch(true)}
-          className="p-3 bg-card border-[3px] border-border hover:border-neo-yellow transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
           aria-label={t('searchMusic')}
         >
-          <Search className="w-5 h-5 text-foreground/40" />
+          <Search className="w-4 h-4 text-foreground/50" />
         </button>
       </div>
 
