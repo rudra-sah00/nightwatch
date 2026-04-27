@@ -4,7 +4,8 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { Skeleton } from '@/components/ui/skeletons';
+import ReactSkeleton from 'react-loading-skeleton';
+import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 import {
   getCharts,
   getFeaturedPlaylists,
@@ -177,22 +178,35 @@ export function MusicView() {
 
 function MusicSkeleton() {
   return (
-    <div className="space-y-6 py-4">
-      {[1, 2, 3, 4].map((section) => (
-        <div key={section}>
-          <div className="px-6 mb-3">
-            <Skeleton className="h-3 w-24" />
+    <AppSkeletonTheme>
+      <div className="space-y-6 py-4">
+        {[1, 2, 3, 4, 5, 6].map((section) => (
+          <div key={section} className="px-6">
+            <ReactSkeleton
+              width={90}
+              height={10}
+              style={{ marginBottom: 12 }}
+            />
+            <div className="flex gap-4 overflow-hidden">
+              {[1, 2, 3, 4, 5].map((card) => (
+                <div key={card} className="flex-shrink-0 w-36 md:w-40">
+                  <ReactSkeleton className="w-36 md:w-40 aspect-square" />
+                  <ReactSkeleton
+                    width="70%"
+                    height={10}
+                    style={{ marginTop: 8 }}
+                  />
+                  <ReactSkeleton
+                    width="45%"
+                    height={8}
+                    style={{ marginTop: 4 }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-4 px-6 overflow-hidden">
-            {[1, 2, 3, 4, 5].map((card) => (
-              <div key={card} className="flex-shrink-0 w-36 md:w-40">
-                <Skeleton className="w-36 h-36 md:w-40 md:h-40" />
-                <Skeleton className="h-2.5 mt-2 w-3/4" />
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </AppSkeletonTheme>
   );
 }

@@ -4,6 +4,7 @@ import { ArrowLeft, Pause, Play } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getMusicAlbum, type MusicTrack } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
@@ -86,9 +87,21 @@ export default function MusicAlbumPage() {
       )}
 
       {loading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-6 h-6 border-[3px] border-foreground/10 border-t-foreground rounded-full animate-spin" />
-        </div>
+        <AppSkeletonTheme>
+          <div className="px-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="flex items-center gap-4 px-4 py-3">
+                <Skeleton width={20} height={12} />
+                <Skeleton width={40} height={40} />
+                <div className="flex-1 min-w-0">
+                  <Skeleton width="55%" height={12} />
+                  <Skeleton width="35%" height={9} style={{ marginTop: 4 }} />
+                </div>
+                <Skeleton width={30} height={9} />
+              </div>
+            ))}
+          </div>
+        </AppSkeletonTheme>
       )}
 
       {!loading && (
