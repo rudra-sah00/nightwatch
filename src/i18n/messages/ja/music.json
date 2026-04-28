@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "この操作は元に戻せません。このプレイリストのすべての曲が失われます。",
   "cancel": "キャンセル",
   "songCount": "{count}曲",
-  "queueTitle": "キュー"
+  "queueTitle": "キュー",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

@@ -2,18 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { io, type Socket } from 'socket.io-client';
-import { env } from '@/lib/env';
-import { useAuthStore } from '@/store/use-auth-store';
+import { useSocket } from '@/providers/socket-provider';
 
 /**
  * Ask AI hook — follows official AWS Nova Sonic sample pattern exactly.
  *
- * Key differences from previous implementation:
- * - Dedicated Socket.IO connection (no head-of-line blocking from friends/presence/calls)
- * - Mic streams continuously during AI speech (enables barge-in, eliminates dead gap)
- * - Captures at 16kHz directly on Chrome (3× fewer chunks vs 48kHz downsample)
- * - No audioReady wait — starts streaming immediately after audioStart
+ * Uses the main app socket (via SocketProvider) for auth and reconnection.
+ * Ask AI events are namespaced (ask-ai:*) so there's no conflict with
+ * friends/presence/calls on the same connection.
  */
 
 type State = 'idle' | 'listening' | 'speaking';
@@ -42,8 +38,7 @@ export function useAskAi() {
   // Playback refs
   const playCtxRef = useRef<AudioContext | null>(null);
 
-  // Dedicated socket for ask-ai (not shared with friends/presence/calls)
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<ReturnType<typeof useSocket>['socket']>(null);
 
   const roleRef = useRef('');
   const displayAssistantTextRef = useRef(false);
@@ -64,27 +59,15 @@ export function useAskAi() {
     return float32;
   }, []);
 
-  // --- Create dedicated socket on mount, tear down on unmount ---
+  // --- Use the main app socket (already authenticated via SocketProvider) ---
+  // A dedicated socket would need its own session validation and reconnection
+  // handling. The main socket already handles auth, force_logout, and reconnection.
+  // Ask AI events are namespaced (ask-ai:*) so there's no conflict.
+  const { socket: appSocket } = useSocket();
+
   useEffect(() => {
-    const user = useAuthStore.getState().user;
-    if (!user?.id || !user?.sessionId) return;
-
-    const s = io(env.WS_URL, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 10000,
-      query: { userId: user.id, sessionId: user.sessionId },
-    });
-    socketRef.current = s;
-
-    return () => {
-      s.disconnect();
-      socketRef.current = null;
-    };
-  }, []);
+    socketRef.current = appSocket;
+  }, [appSocket]);
 
   // --- Socket event handlers (matching official main.js) ---
   useEffect(() => {

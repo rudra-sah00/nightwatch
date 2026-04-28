@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Bu işlem geri alınamaz. Bu çalma listesindeki tüm şarkılar kaybolacak.",
   "cancel": "İptal",
   "songCount": "{count} şarkı",
-  "queueTitle": "Sıra"
+  "queueTitle": "Sıra",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

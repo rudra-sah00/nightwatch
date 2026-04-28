@@ -15,7 +15,14 @@ let _lastEventSender = null;
 // Per-session random token — prevents other local processes from using the proxy
 let proxyToken = crypto.randomBytes(16).toString('hex');
 
-const RACER_PATHS = ['/stream/', '/cast/'];
+const RACER_PATHS = [
+  '/stream/',
+  '/cast/',
+  '/casting/',
+  '/player/',
+  '/plus/',
+  '/watch/',
+];
 
 function getCookieString() {
   return streamCookies || '';
@@ -394,7 +401,7 @@ function setupLiveBridge() {
           );
 
           win.loadURL(racerUrl).catch(() => {});
-        }, index * 250); // Stagger by 250ms
+        }, index * 150); // Stagger by 150ms
       });
 
       // Safety timeout for the entire race

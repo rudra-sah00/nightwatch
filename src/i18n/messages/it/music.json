@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Questa azione non può essere annullata. Tutte le canzoni in questa playlist andranno perse.",
   "cancel": "Annulla",
   "songCount": "{count, plural, one {# canzone} other {# canzoni}}",
-  "queueTitle": "Coda"
+  "queueTitle": "Coda",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

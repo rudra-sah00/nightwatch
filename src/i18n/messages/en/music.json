@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "This action cannot be reversed. All songs in this playlist will be lost.",
   "cancel": "Cancel",
   "songCount": "{count, plural, one {# song} other {# songs}}",
-  "queueTitle": "Queue"
+  "queueTitle": "Queue",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

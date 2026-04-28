@@ -98,7 +98,9 @@
     "unlimited": "غير محدود",
     "cancel": "إلغاء",
     "customConcurrent": "مخصص (1-10)",
-    "customSpeed": "مخصص ميجابايت/ث"
+    "customSpeed": "مخصص ميجابايت/ث",
+    "shortcuts": "Keyboard Shortcuts",
+    "shortcutsDescription": "View all available keyboard shortcuts."
   },
   "publicProfile": {
     "returnBase": "العودة للقاعدة",
@@ -135,5 +137,40 @@
     "passwordUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
     "passwordSpecialChar": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل",
     "newPasswordsMismatch": "كلمتا المرور الجديدتان غير متطابقتين"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "groups": {
+      "video": "Video Player",
+      "music": "Music",
+      "party": "Watch Party",
+      "search": "Search",
+      "desktop": "Desktop Keys"
+    },
+    "actions": {
+      "playPause": "Play / Pause",
+      "seekBack": "Seek Backward 10s",
+      "seekForward": "Seek Forward 10s",
+      "volumeUp": "Volume Up",
+      "volumeDown": "Volume Down",
+      "mute": "Toggle Mute",
+      "fullscreen": "Toggle Fullscreen",
+      "captions": "Toggle Captions",
+      "nextEpisode": "Next Episode",
+      "exitFullscreen": "Exit Fullscreen",
+      "prevTrack": "Previous Track",
+      "nextTrack": "Next Track",
+      "shuffle": "Toggle Shuffle",
+      "repeat": "Cycle Repeat",
+      "sendMessage": "Send Message",
+      "cancelAnnotation": "Cancel Annotation",
+      "autocomplete": "Autocomplete Suggestion",
+      "search": "Execute Search",
+      "close": "Close",
+      "mediaPlay": "Play / Pause",
+      "mediaNext": "Next Track",
+      "mediaPrev": "Seek Backward"
+    },
+    "note": "Shortcuts are disabled when typing in text fields."
   }
 }

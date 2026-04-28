@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "此操作无法撤销。此播放列表中的所有歌曲将丢失。",
   "cancel": "取消",
   "songCount": "{count} 首歌曲",
-  "queueTitle": "队列"
+  "queueTitle": "队列",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

@@ -98,7 +98,9 @@
     "unlimited": "无限制",
     "cancel": "取消",
     "customConcurrent": "自定义 (1-10)",
-    "customSpeed": "自定义 MB/s"
+    "customSpeed": "自定义 MB/s",
+    "shortcuts": "Keyboard Shortcuts",
+    "shortcutsDescription": "View all available keyboard shortcuts."
   },
   "publicProfile": {
     "returnBase": "返回基地",
@@ -135,5 +137,40 @@
     "passwordUppercase": "密码必须包含至少一个大写字母",
     "passwordSpecialChar": "密码必须包含至少一个特殊字符",
     "newPasswordsMismatch": "两次输入的新密码不一致"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "groups": {
+      "video": "Video Player",
+      "music": "Music",
+      "party": "Watch Party",
+      "search": "Search",
+      "desktop": "Desktop Keys"
+    },
+    "actions": {
+      "playPause": "Play / Pause",
+      "seekBack": "Seek Backward 10s",
+      "seekForward": "Seek Forward 10s",
+      "volumeUp": "Volume Up",
+      "volumeDown": "Volume Down",
+      "mute": "Toggle Mute",
+      "fullscreen": "Toggle Fullscreen",
+      "captions": "Toggle Captions",
+      "nextEpisode": "Next Episode",
+      "exitFullscreen": "Exit Fullscreen",
+      "prevTrack": "Previous Track",
+      "nextTrack": "Next Track",
+      "shuffle": "Toggle Shuffle",
+      "repeat": "Cycle Repeat",
+      "sendMessage": "Send Message",
+      "cancelAnnotation": "Cancel Annotation",
+      "autocomplete": "Autocomplete Suggestion",
+      "search": "Execute Search",
+      "close": "Close",
+      "mediaPlay": "Play / Pause",
+      "mediaNext": "Next Track",
+      "mediaPrev": "Seek Backward"
+    },
+    "note": "Shortcuts are disabled when typing in text fields."
   }
 }

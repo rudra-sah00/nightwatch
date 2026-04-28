@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Cette action est irréversible. Toutes les chansons de cette playlist seront perdues.",
   "cancel": "Annuler",
   "songCount": "{count, plural, one {# chanson} other {# chansons}}",
-  "queueTitle": "File d'attente"
+  "queueTitle": "File d'attente",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

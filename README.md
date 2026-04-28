@@ -37,6 +37,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.
 - [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
 - [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, and online presence.
+- [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, and Redis queue.
 
 ## Technology Stack
 

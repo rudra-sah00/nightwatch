@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "لا يمكن التراجع عن هذا الإجراء. ستفقد جميع الأغاني في قائمة التشغيل هذه.",
   "cancel": "إلغاء",
   "songCount": "{count, plural, zero {لا أغاني} one {أغنية واحدة} two {أغنيتان} few {# أغانٍ} many {# أغنية} other {# أغنية}}",
-  "queueTitle": "قائمة الانتظار"
+  "queueTitle": "قائمة الانتظار",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

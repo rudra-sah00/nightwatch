@@ -36,6 +36,7 @@ interface MusicPlayerContextValue {
   setVolume: (v: number) => void;
   stop: () => void;
   setExpanded: (v: boolean) => void;
+  addToQueue: (track: MusicTrack) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -63,6 +64,7 @@ export function MusicPlayerProvider({
     const engine = new AudioEngine();
     engineRef.current = engine;
     const unsub = engine.subscribe(setState);
+    engine.loadQueue();
     return () => {
       unsub();
       engine.destroy();
@@ -84,6 +86,10 @@ export function MusicPlayerProvider({
   const cycleRepeat = useCallback(() => engineRef.current?.cycleRepeat(), []);
   const setVolume = useCallback(
     (v: number) => engineRef.current?.setVolume(v),
+    [],
+  );
+  const addToQueue = useCallback(
+    (track: MusicTrack) => engineRef.current?.addToQueue(track),
     [],
   );
   const stop = useCallback(() => {
@@ -112,6 +118,7 @@ export function MusicPlayerProvider({
       setVolume,
       stop,
       setExpanded,
+      addToQueue,
     }),
     [
       state,
@@ -125,6 +132,7 @@ export function MusicPlayerProvider({
       cycleRepeat,
       setVolume,
       stop,
+      addToQueue,
     ],
   );
 

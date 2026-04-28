@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Pause, Play } from 'lucide-react';
+import { ArrowLeft, Loader2, Pause, Play, Radio } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import {
   getArtistAlbums,
+  getArtistStation,
   getMusicArtist,
   type MusicArtistAlbum,
   type MusicTrack,
@@ -40,6 +41,20 @@ export default function MusicArtistPage() {
   const [albumPage, setAlbumPage] = useState(1);
   const [albumsHasMore, setAlbumsHasMore] = useState(true);
   const [albumsLoading, setAlbumsLoading] = useState(false);
+  const [radioLoading, setRadioLoading] = useState(false);
+
+  const playArtistRadio = () => {
+    if (!meta || radioLoading) return;
+    setRadioLoading(true);
+    getArtistStation(meta.name)
+      .then((radioSongs) => {
+        if (radioSongs.length > 0) {
+          player.play(radioSongs[0], radioSongs);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setRadioLoading(false));
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -113,6 +128,19 @@ export default function MusicArtistPage() {
               {songs.length} songs
               {albums.length > 0 && ` · ${albums.length} albums`}
             </p>
+            <button
+              type="button"
+              onClick={playArtistRadio}
+              disabled={radioLoading}
+              className="mt-3 flex items-center gap-2 px-4 py-2 bg-neo-yellow text-black font-headline font-bold uppercase text-xs tracking-widest border-[2px] border-border hover:brightness-110 transition-all disabled:opacity-50"
+            >
+              {radioLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Radio className="w-3.5 h-3.5" />
+              )}
+              {t('artistRadio')}
+            </button>
           </div>
         </div>
       )}

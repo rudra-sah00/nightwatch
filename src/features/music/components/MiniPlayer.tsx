@@ -13,10 +13,12 @@ import {
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
   const t = useTranslations('music');
+  useMusicShortcuts();
 
   const {
     currentTrack,

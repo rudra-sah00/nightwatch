@@ -46,6 +46,10 @@ export async function getMusicAlbum(id: string): Promise<MusicAlbum> {
   return apiFetch<MusicAlbum>(`/api/music/album/${id}`);
 }
 
+export async function getSong(id: string): Promise<MusicTrack> {
+  return apiFetch<MusicTrack>(`/api/music/song/${id}`);
+}
+
 export async function getMusicPlaylist(id: string): Promise<{
   id: string;
   title: string;
@@ -111,8 +115,16 @@ export async function getNewReleases() {
 
 export async function getLyrics(
   songId: string,
+  title?: string,
+  artist?: string,
+  duration?: number,
 ): Promise<{ lyrics: string; synced: boolean; copyright: string }> {
-  return apiFetch(`/api/music/lyrics/${songId}`);
+  const params = new URLSearchParams();
+  if (title) params.set('title', title);
+  if (artist) params.set('artist', artist);
+  if (duration) params.set('duration', String(Math.round(duration)));
+  const qs = params.toString();
+  return apiFetch(`/api/music/lyrics/${songId}${qs ? `?${qs}` : ''}`);
 }
 
 export interface MusicArtistAlbum {
@@ -165,6 +177,84 @@ export async function getRadioSongs(
 
 export async function getUserQueue(): Promise<MusicTrack[]> {
   return apiFetch('/api/music/queue');
+}
+
+export async function getTrending(
+  type: 'song' | 'album' | 'playlist' = 'song',
+  language = 'hindi',
+) {
+  return apiFetch<
+    {
+      id: string;
+      title: string;
+      type: string;
+      image: string;
+      subtitle: string;
+    }[]
+  >(
+    `/api/music/trending?type=${type}&language=${encodeURIComponent(language)}`,
+  );
+}
+
+export async function getTopSearches() {
+  return apiFetch<{ id: string; title: string; type: string; image: string }[]>(
+    '/api/music/top-searches',
+  );
+}
+
+export async function searchSongs(query: string, page = 1, limit = 20) {
+  return apiFetch<{ total: number; start: number; results: MusicTrack[] }>(
+    `/api/music/search/songs?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+  );
+}
+
+export async function searchAlbums(query: string, page = 1, limit = 20) {
+  return apiFetch<{
+    total: number;
+    start: number;
+    results: {
+      id: string;
+      title: string;
+      artist: string;
+      image: string;
+      year: number;
+    }[];
+  }>(
+    `/api/music/search/albums?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+  );
+}
+
+export async function searchArtists(query: string, page = 1, limit = 20) {
+  return apiFetch<{
+    total: number;
+    start: number;
+    results: { id: string; name: string; image: string; role: string }[];
+  }>(
+    `/api/music/search/artists?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+  );
+}
+
+export async function searchPlaylists(query: string, page = 1, limit = 20) {
+  return apiFetch<{
+    total: number;
+    start: number;
+    results: { id: string; title: string; image: string; songCount: number }[];
+  }>(
+    `/api/music/search/playlists?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+  );
+}
+
+export async function getArtistStation(name: string): Promise<MusicTrack[]> {
+  const data = await apiFetch<{ songs: MusicTrack[] }>(
+    `/api/music/artist-station?name=${encodeURIComponent(name)}`,
+  );
+  return data.songs;
+}
+
+export async function getBrowseModules() {
+  return apiFetch<{
+    genres: { id: string; title: string; image: string; type: string }[];
+  }>('/api/music/browse');
 }
 
 export async function addToUserQueue(track: {
@@ -281,28 +371,16 @@ export interface SyncedLyricLine {
 }
 
 export async function getSyncedLyrics(
+  songId: string,
   title: string,
   artist: string,
   duration: number,
 ): Promise<SyncedLyricLine[] | null> {
   try {
-    const q = encodeURIComponent(`${title} ${artist}`);
-    const res = await fetch(`https://lrclib.net/api/search?q=${q}`, {
-      headers: { 'User-Agent': 'Nightwatch/2.0' },
-    });
-    if (!res.ok) return null;
-    const results = (await res.json()) as {
-      syncedLyrics: string | null;
-      duration: number;
-    }[];
-    // Find best match by duration
-    const match =
-      results.find(
-        (r) => r.syncedLyrics && Math.abs(r.duration - duration) < 5,
-      ) ?? results.find((r) => r.syncedLyrics);
-    if (!match?.syncedLyrics) return null;
+    const data = await getLyrics(songId, title, artist, duration);
+    if (!data.synced || !data.lyrics) return null;
     // Parse LRC format: [mm:ss.xx] text
-    return match.syncedLyrics
+    return data.lyrics
       .split('\n')
       .map((line) => {
         const m = line.match(/\[(\d+):(\d+\.\d+)\]\s*(.*)/);
@@ -316,4 +394,43 @@ export async function getSyncedLyrics(
   } catch {
     return null;
   }
+}
+
+export async function getSongRecommendations(
+  songId: string,
+  limit = 10,
+): Promise<MusicTrack[]> {
+  return apiFetch(`/api/music/song/${songId}/recommendations?limit=${limit}`);
+}
+
+export async function createSongRadio(songId: string): Promise<MusicTrack[]> {
+  const data = await apiFetch<{ songs: MusicTrack[] }>(
+    `/api/music/song/${songId}/radio`,
+  );
+  return data.songs;
+}
+
+export async function getMixDetails(id: string): Promise<{
+  id: string;
+  title: string;
+  image: string;
+  songs: MusicTrack[];
+}> {
+  return apiFetch(`/api/music/mix/${id}`);
+}
+
+export async function searchMore(
+  query: string,
+  page = 1,
+  limit = 20,
+): Promise<{ total: number; start: number; results: MusicTrack[] }> {
+  return apiFetch(
+    `/api/music/search/more?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+  );
+}
+
+export async function getAlbumRecommendations(albumId: string) {
+  return apiFetch<
+    { id: string; title: string; artist: string; image: string; year: number }[]
+  >(`/api/music/album/${albumId}/recommendations`);
 }

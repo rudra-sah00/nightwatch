@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Esta ação não pode ser desfeita. Todas as músicas desta playlist serão perdidas.",
   "cancel": "Cancelar",
   "songCount": "{count, plural, one {# música} other {# músicas}}",
-  "queueTitle": "Fila"
+  "queueTitle": "Fila",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

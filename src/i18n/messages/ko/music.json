@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "이 작업은 되돌릴 수 없습니다. 이 플레이리스트의 모든 곡이 삭제됩니다.",
   "cancel": "취소",
   "songCount": "{count}곡",
-  "queueTitle": "대기열"
+  "queueTitle": "대기열",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

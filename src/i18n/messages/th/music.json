@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "การดำเนินการนี้ไม่สามารถย้อนกลับได้ เพลงทั้งหมดในเพลย์ลิสต์นี้จะหายไป",
   "cancel": "ยกเลิก",
   "songCount": "{count} เพลง",
-  "queueTitle": "คิว"
+  "queueTitle": "คิว",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

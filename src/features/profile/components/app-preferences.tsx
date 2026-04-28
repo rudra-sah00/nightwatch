@@ -4,6 +4,7 @@ import {
   Activity,
   Check,
   Globe,
+  Keyboard,
   Monitor,
   Moon,
   Palette,
@@ -24,6 +25,7 @@ import {
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
+import { KeyboardShortcuts } from './keyboard-shortcuts';
 
 const THEME_META = [
   { id: 'light' as const, label: 'Light', Icon: Sun },
@@ -208,6 +210,23 @@ export function AppPreferences() {
               </button>
             }
           />
+        </div>
+
+        <div className="h-px bg-border w-full" />
+
+        {/* Keyboard Shortcuts */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+              <Keyboard className="w-4 h-4 text-neo-green" />
+              {t('preferences.shortcuts')}
+            </span>
+            <p className="text-muted-foreground font-body text-sm max-w-sm">
+              {t('preferences.shortcutsDescription')}
+            </p>
+          </div>
+
+          <KeyboardShortcuts />
         </div>
 
         {/* Desktop Only Settings */}

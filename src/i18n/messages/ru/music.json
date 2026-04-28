@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Это действие нельзя отменить. Все песни в этом плейлисте будут потеряны.",
   "cancel": "Отмена",
   "songCount": "{count, plural, one {# песня} few {# песни} many {# песен} other {# песен}}",
-  "queueTitle": "Очередь"
+  "queueTitle": "Очередь",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

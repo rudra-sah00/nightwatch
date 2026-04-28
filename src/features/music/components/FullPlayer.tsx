@@ -13,7 +13,12 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getSyncedLyrics, type SyncedLyricLine } from '../api';
+import {
+  getSongRecommendations,
+  getSyncedLyrics,
+  type MusicTrack,
+  type SyncedLyricLine,
+} from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { formatTime } from '../utils';
 
@@ -35,10 +40,12 @@ export function FullPlayer() {
     setExpanded,
     volume,
     setVolume,
+    play,
   } = useMusicPlayerContext();
 
   const [closing, setClosing] = useState(false);
   const [lyrics, setLyrics] = useState<SyncedLyricLine[] | null>(null);
+  const [recommendations, setRecommendations] = useState<MusicTrack[]>([]);
   const lyricsRef = useRef<HTMLDivElement>(null);
 
   const handleClose = useCallback(() => {
@@ -49,15 +56,22 @@ export function FullPlayer() {
     }, 300);
   }, [setExpanded]);
 
-  // Fetch synced lyrics from LRCLIB when track changes
+  // Fetch synced lyrics and recommendations when track changes
   const trackId = currentTrack?.id;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
   useEffect(() => {
     setLyrics(null);
+    setRecommendations([]);
     if (!currentTrack) return;
-    getSyncedLyrics(currentTrack.title, currentTrack.artist, duration).then(
-      setLyrics,
-    );
+    getSyncedLyrics(
+      currentTrack.id,
+      currentTrack.title,
+      currentTrack.artist,
+      duration,
+    ).then(setLyrics);
+    getSongRecommendations(currentTrack.id)
+      .then(setRecommendations)
+      .catch(() => {});
   }, [trackId]);
 
   // Current lyric line index based on playback time
@@ -324,6 +338,37 @@ export function FullPlayer() {
                 })}
                 <div className="h-[30vh]" />
               </div>
+            </div>
+          )}
+
+          {/* Similar Songs — shown when no lyrics or on the right side */}
+          {!hasLyrics && recommendations.length > 0 && (
+            <div className="hidden md:flex flex-1 flex-col min-h-0 py-8 px-4 overflow-y-auto no-scrollbar">
+              <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] mb-4">
+                Similar Songs
+              </p>
+              {recommendations.map((song) => (
+                <button
+                  key={song.id}
+                  type="button"
+                  onClick={() => play(song, recommendations)}
+                  className="w-full flex items-center gap-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                >
+                  <img
+                    src={song.image}
+                    alt=""
+                    className="w-10 h-10 rounded object-cover shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">
+                      {song.title}
+                    </p>
+                    <p className="text-white/40 text-xs truncate">
+                      {song.artist}
+                    </p>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
         </div>

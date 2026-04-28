@@ -98,7 +98,9 @@
     "unlimited": "무제한",
     "cancel": "취소",
     "customConcurrent": "사용자 지정 (1-10)",
-    "customSpeed": "사용자 지정 MB/s"
+    "customSpeed": "사용자 지정 MB/s",
+    "shortcuts": "Keyboard Shortcuts",
+    "shortcutsDescription": "View all available keyboard shortcuts."
   },
   "publicProfile": {
     "returnBase": "돌아가기",
@@ -135,5 +137,40 @@
     "passwordUppercase": "비밀번호에 대문자가 하나 이상 포함되어야 합니다",
     "passwordSpecialChar": "비밀번호에 특수 문자가 하나 이상 포함되어야 합니다",
     "newPasswordsMismatch": "새 비밀번호가 일치하지 않습니다"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "groups": {
+      "video": "Video Player",
+      "music": "Music",
+      "party": "Watch Party",
+      "search": "Search",
+      "desktop": "Desktop Keys"
+    },
+    "actions": {
+      "playPause": "Play / Pause",
+      "seekBack": "Seek Backward 10s",
+      "seekForward": "Seek Forward 10s",
+      "volumeUp": "Volume Up",
+      "volumeDown": "Volume Down",
+      "mute": "Toggle Mute",
+      "fullscreen": "Toggle Fullscreen",
+      "captions": "Toggle Captions",
+      "nextEpisode": "Next Episode",
+      "exitFullscreen": "Exit Fullscreen",
+      "prevTrack": "Previous Track",
+      "nextTrack": "Next Track",
+      "shuffle": "Toggle Shuffle",
+      "repeat": "Cycle Repeat",
+      "sendMessage": "Send Message",
+      "cancelAnnotation": "Cancel Annotation",
+      "autocomplete": "Autocomplete Suggestion",
+      "search": "Execute Search",
+      "close": "Close",
+      "mediaPlay": "Play / Pause",
+      "mediaNext": "Next Track",
+      "mediaPrev": "Seek Backward"
+    },
+    "note": "Shortcuts are disabled when typing in text fields."
   }
 }

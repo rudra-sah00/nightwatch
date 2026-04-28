@@ -1,14 +1,15 @@
 'use client';
 
-import { ListMusic, ListPlus, Plus, Trash2 } from 'lucide-react';
+import { ListMusic, ListPlus, Plus, Radio, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
-  addToUserQueue,
   addTrackToPlaylist,
+  createSongRadio,
   createUserPlaylist,
   getUserPlaylists,
+  type MusicTrack,
   type UserPlaylist,
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
@@ -38,7 +39,7 @@ export function showSongMenu(
 
 export function SongContextMenu() {
   const t = useTranslations('music');
-  const { currentTrack } = useMusicPlayerContext();
+  const { currentTrack, addToQueue, play } = useMusicPlayerContext();
   const [menu, setMenu] = useState<MenuEvent | null>(null);
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
   const [showPlaylists, setShowPlaylists] = useState(false);
@@ -80,12 +81,24 @@ export function SongContextMenu() {
     const { song } = menu;
     setMenu(null);
     try {
-      await addToUserQueue(song);
+      await addToQueue(song as MusicTrack);
       toast.success(t('addedToQueue'));
     } catch {
       toast.error(t('failedToAdd'));
     }
-  }, [menu, t]);
+  }, [menu, t, addToQueue]);
+
+  const handleStartRadio = useCallback(async () => {
+    if (!menu) return;
+    const { song } = menu;
+    setMenu(null);
+    try {
+      const songs = await createSongRadio(song.id);
+      if (songs.length > 0) play(songs[0], songs);
+    } catch {
+      toast.error(t('failedToAdd'));
+    }
+  }, [menu, t, play]);
 
   const handleShowPlaylists = useCallback(async () => {
     setShowPlaylists(true);
@@ -186,6 +199,17 @@ export function SongContextMenu() {
           <li className="h-[2px] bg-border mx-2 my-1" />
         </>
       )}
+      <li>
+        <button
+          type="button"
+          onClick={handleStartRadio}
+          className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
+        >
+          <Radio className="w-4 h-4 text-foreground/40" />
+          Start Song Radio
+        </button>
+      </li>
+      <li className="h-[2px] bg-border mx-2 my-1" />
       <li>
         <button
           type="button"

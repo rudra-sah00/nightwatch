@@ -10,8 +10,11 @@ import { toast } from 'sonner';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 import {
   createUserPlaylist,
+  getBrowseModules,
+  getMixDetails,
   getMusicHome,
-  searchMusic,
+  getSong,
+  getTrending,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { Card, ScrollRow, Section } from './MusicPrimitives';
@@ -23,6 +26,15 @@ type ArtistItem = { id: string; name: string; image: string };
 type ReleaseItem = { id: string; title: string; artist: string; image: string };
 type RadioItem = { id: string; title: string; image: string; language: string };
 
+type TrendingItem = {
+  id: string;
+  title: string;
+  type: string;
+  image: string;
+  subtitle: string;
+};
+type GenreItem = { id: string; title: string; image: string; type: string };
+
 export function MusicView() {
   const t = useTranslations('music');
   const searchParams = useSearchParams();
@@ -32,6 +44,8 @@ export function MusicView() {
   const [artists, setArtists] = useState<ArtistItem[]>([]);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
   const [radio, setRadio] = useState<RadioItem[]>([]);
+  const [trendingSongs, setTrendingSongs] = useState<TrendingItem[]>([]);
+  const [genres, setGenres] = useState<GenreItem[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
@@ -39,13 +53,19 @@ export function MusicView() {
   const [playlistKey, setPlaylistKey] = useState(0);
 
   useEffect(() => {
-    getMusicHome()
-      .then((data) => {
-        setCharts(data.charts);
-        setFeatured(data.featured);
-        setArtists(data.artists);
-        setReleases(data.releases);
-        setRadio(data.radio);
+    Promise.all([
+      getMusicHome(),
+      getTrending('song', 'hindi').catch(() => []),
+      getBrowseModules().catch(() => ({ genres: [] })),
+    ])
+      .then(([home, trending, browse]) => {
+        setCharts(home.charts);
+        setFeatured(home.featured);
+        setArtists(home.artists);
+        setReleases(home.releases);
+        setRadio(home.radio);
+        setTrendingSongs(trending);
+        setGenres(browse.genres);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -55,11 +75,9 @@ export function MusicView() {
   useEffect(() => {
     const playSongId = searchParams.get('play');
     if (!playSongId) return;
-    searchMusic(playSongId)
-      .then((results) => {
-        const song =
-          results.songs.find((s) => s.id === playSongId) ?? results.songs[0];
-        if (song) player.play(song, results.songs);
+    getSong(playSongId)
+      .then((song) => {
+        if (song) player.play(song, [song]);
       })
       .catch(() => {});
   }, [searchParams, player]);
@@ -211,7 +229,54 @@ export function MusicView() {
                 image={r.image}
                 title={r.title}
                 subtitle={r.artist}
+                href={`/music/album/${r.id}`}
               />
+            ))}
+          </ScrollRow>
+        </Section>
+      )}
+
+      {/* Trending Songs */}
+      {!loading && trendingSongs.length > 0 && (
+        <Section title={t('trending')}>
+          <ScrollRow>
+            {trendingSongs.map((item) => (
+              <Card
+                key={item.id}
+                image={item.image}
+                title={item.title}
+                subtitle={item.subtitle}
+                href={
+                  item.type === 'album'
+                    ? `/music/album/${item.id}`
+                    : item.type === 'playlist'
+                      ? `/music/playlist/${item.id}`
+                      : undefined
+                }
+                onClick={
+                  item.type === 'mix'
+                    ? () => {
+                        getMixDetails(item.id)
+                          .then((mix) => {
+                            if (mix.songs.length > 0)
+                              player.play(mix.songs[0], mix.songs);
+                          })
+                          .catch(() => {});
+                      }
+                    : undefined
+                }
+              />
+            ))}
+          </ScrollRow>
+        </Section>
+      )}
+
+      {/* Browse by Genre/Mood */}
+      {!loading && genres.length > 0 && (
+        <Section title={t('browseGenres')}>
+          <ScrollRow>
+            {genres.slice(0, 20).map((g) => (
+              <Card key={g.id} image={g.image} title={g.title} />
             ))}
           </ScrollRow>
         </Section>

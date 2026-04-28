@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Esta acción no se puede deshacer. Todas las canciones de esta lista se perderán.",
   "cancel": "Cancelar",
   "songCount": "{count, plural, one {# canción} other {# canciones}}",
-  "queueTitle": "Cola"
+  "queueTitle": "Cola",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

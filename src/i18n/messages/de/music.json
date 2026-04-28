@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Songs in dieser Playlist gehen verloren.",
   "cancel": "Abbrechen",
   "songCount": "{count, plural, one {# Song} other {# Songs}}",
-  "queueTitle": "Warteschlange"
+  "queueTitle": "Warteschlange",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

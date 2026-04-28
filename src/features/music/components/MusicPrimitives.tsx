@@ -30,11 +30,13 @@ export function Card({
   title,
   subtitle,
   href,
+  onClick,
 }: {
   image: string;
   title: string;
   subtitle?: string;
   href?: string;
+  onClick?: () => void;
 }) {
   const inner = (
     <div className="flex-shrink-0 w-36 md:w-40 cursor-pointer">
@@ -57,6 +59,13 @@ export function Card({
   );
   if (href) {
     return <Link href={href}>{inner}</Link>;
+  }
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick}>
+        {inner}
+      </button>
+    );
   }
   return inner;
 }

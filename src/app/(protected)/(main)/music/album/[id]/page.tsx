@@ -5,7 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
-import { getMusicAlbum, type MusicTrack } from '@/features/music/api';
+import {
+  getAlbumRecommendations,
+  getMusicAlbum,
+  type MusicTrack,
+} from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
@@ -29,6 +33,9 @@ export default function MusicAlbumPage() {
     year: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recoAlbums, setRecoAlbums] = useState<
+    { id: string; title: string; artist: string; image: string; year: number }[]
+  >([]);
 
   useEffect(() => {
     if (!id) return;
@@ -46,6 +53,9 @@ export default function MusicAlbumPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+    getAlbumRecommendations(id)
+      .then(setRecoAlbums)
+      .catch(() => {});
   }, [id]);
 
   return (
@@ -148,6 +158,38 @@ export default function MusicAlbumPage() {
               </span>
             </button>
           ))}
+        </div>
+      )}
+
+      {recoAlbums.length > 0 && (
+        <div className="px-6 mt-8 mb-4">
+          <p className="font-headline font-black uppercase tracking-widest text-[10px] text-foreground/30 mb-3">
+            Similar Albums
+          </p>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {recoAlbums.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => router.push(`/music/album/${a.id}`)}
+                className="flex-shrink-0 w-32 text-left"
+              >
+                <div className="w-32 h-32 border-[3px] border-border overflow-hidden hover:border-neo-yellow transition-colors">
+                  <img
+                    src={a.image}
+                    alt={a.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
+                  {a.title}
+                </p>
+                <p className="text-foreground/30 text-[10px] font-headline uppercase tracking-wider truncate">
+                  {a.artist}
+                </p>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

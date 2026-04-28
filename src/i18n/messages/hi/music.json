@@ -37,5 +37,9 @@
   "deletePlaylistDescription": "यह क्रिया पूर्ववत नहीं की जा सकती। इस प्लेलिस्ट के सभी गाने खो जाएंगे।",
   "cancel": "रद्द करें",
   "songCount": "{count, plural, one {# गाना} other {# गाने}}",
-  "queueTitle": "कतार"
+  "queueTitle": "कतार",
+  "trending": "Trending",
+  "trendingSearches": "Trending Searches",
+  "browseGenres": "Browse by Genre & Mood",
+  "artistRadio": "Artist Radio"
 }

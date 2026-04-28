@@ -98,7 +98,9 @@
     "unlimited": "Unbegrenzt",
     "cancel": "Abbrechen",
     "customConcurrent": "Benutzerdefiniert (1-10)",
-    "customSpeed": "Benutzerdefiniert MB/s"
+    "customSpeed": "Benutzerdefiniert MB/s",
+    "shortcuts": "Keyboard Shortcuts",
+    "shortcutsDescription": "View all available keyboard shortcuts."
   },
   "publicProfile": {
     "returnBase": "Zurück zur Basis",
@@ -135,5 +137,40 @@
     "passwordUppercase": "Das Passwort muss mindestens einen Großbuchstaben enthalten",
     "passwordSpecialChar": "Das Passwort muss mindestens ein Sonderzeichen enthalten",
     "newPasswordsMismatch": "Die neuen Passwörter stimmen nicht überein"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "groups": {
+      "video": "Video Player",
+      "music": "Music",
+      "party": "Watch Party",
+      "search": "Search",
+      "desktop": "Desktop Keys"
+    },
+    "actions": {
+      "playPause": "Play / Pause",
+      "seekBack": "Seek Backward 10s",
+      "seekForward": "Seek Forward 10s",
+      "volumeUp": "Volume Up",
+      "volumeDown": "Volume Down",
+      "mute": "Toggle Mute",
+      "fullscreen": "Toggle Fullscreen",
+      "captions": "Toggle Captions",
+      "nextEpisode": "Next Episode",
+      "exitFullscreen": "Exit Fullscreen",
+      "prevTrack": "Previous Track",
+      "nextTrack": "Next Track",
+      "shuffle": "Toggle Shuffle",
+      "repeat": "Cycle Repeat",
+      "sendMessage": "Send Message",
+      "cancelAnnotation": "Cancel Annotation",
+      "autocomplete": "Autocomplete Suggestion",
+      "search": "Execute Search",
+      "close": "Close",
+      "mediaPlay": "Play / Pause",
+      "mediaNext": "Next Track",
+      "mediaPrev": "Seek Backward"
+    },
+    "note": "Shortcuts are disabled when typing in text fields."
   }
 }

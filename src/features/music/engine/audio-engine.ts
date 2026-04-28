@@ -1,5 +1,10 @@
 import type { MusicTrack } from '../api';
-import { getStreamUrl } from '../api';
+import {
+  addToUserQueue,
+  getSongRecommendations,
+  getStreamUrl,
+  getUserQueue,
+} from '../api';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 
@@ -187,7 +192,7 @@ export class AudioEngine {
           );
           nextIdx = this.shuffledOrder[0];
         } else {
-          this.stop();
+          await this.autoContinue();
           return;
         }
       } else {
@@ -199,7 +204,7 @@ export class AudioEngine {
         if (repeat === 'all') {
           nextIdx = 0;
         } else {
-          this.stop();
+          await this.autoContinue();
           return;
         }
       }
@@ -261,8 +266,51 @@ export class AudioEngine {
     });
   }
 
+  /** Auto-continue with recommendations when queue ends */
+  private async autoContinue() {
+    const track = this.state.currentTrack;
+    if (!track) {
+      this.stop();
+      return;
+    }
+    try {
+      const recs = await getSongRecommendations(track.id);
+      if (recs.length > 0) {
+        this.update({ queue: recs, queueIndex: 0 });
+        await this.playTrack(recs[0]);
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
+    this.stop();
+  }
+
   destroy() {
     this.stop();
     this.listeners.clear();
+  }
+
+  /** Load persisted queue from backend Redis */
+  async loadQueue() {
+    try {
+      const tracks = await getUserQueue();
+      if (tracks.length > 0) {
+        this.update({ queue: tracks });
+      }
+    } catch {
+      /* ignore — offline or no queue */
+    }
+  }
+
+  /** Add a track to the queue and persist to backend */
+  async addToQueue(track: MusicTrack) {
+    const queue = [...this.state.queue, track];
+    this.update({ queue });
+    try {
+      await addToUserQueue(track);
+    } catch {
+      /* best-effort persist */
+    }
   }
 }
