@@ -123,7 +123,7 @@ export function ElectronDragRegion() {
   if (!isMounted || !isDesktopApp) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-background [-webkit-app-region:drag] flex items-center">
+    <div className="fixed top-0 left-0 right-0 h-8 z-[9999] bg-background [-webkit-app-region:drag] flex items-center will-change-transform">
       <div
         className={`flex items-center gap-0.5 [-webkit-app-region:no-drag] ${isMacOS ? 'ml-[80px]' : 'ml-2'}`}
       >

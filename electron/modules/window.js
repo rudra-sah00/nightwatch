@@ -362,7 +362,13 @@ class AppWindow {
         clearTimeout(pipDebounceTimer);
         pipDebounceTimer = null;
       }
-      this.mainWindow.webContents.send('window-focus');
+      // Delay focus event slightly so the PiP→fullsize resize animation
+      // completes before the renderer repaints — prevents macOS traffic
+      // light blinking caused by layout thrash during the animation.
+      pipDebounceTimer = setTimeout(() => {
+        this.mainWindow.webContents.send('window-focus');
+        pipDebounceTimer = null;
+      }, 100);
     });
 
     // Minimize to tray on close for all platforms (standard behavior)
