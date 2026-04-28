@@ -750,3 +750,9 @@
     animation: indeterminate-progress 1.5s infinite linear;
   }
 }
+
+img,
+a,
+button {
+  -webkit-user-drag: none;
+}

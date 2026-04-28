@@ -10,7 +10,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
@@ -71,11 +70,20 @@ export default function UserPlaylistDetailPage() {
     setEditing(false);
   };
 
+  const [uploading, setUploading] = useState(false);
+
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const updated = await uploadPlaylistCover(id, file);
-    setPlaylist((p) => (p ? { ...p, coverUrl: updated.coverUrl } : p));
+    setUploading(true);
+    try {
+      const updated = await uploadPlaylistCover(id, file);
+      setPlaylist((p) =>
+        p ? { ...p, coverUrl: `${updated.coverUrl}?t=${Date.now()}` } : p,
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemoveTrack = async (trackEntryId: string) => {
@@ -172,6 +180,11 @@ export default function UserPlaylistDetailPage() {
               ) : (
                 <div className="w-full h-full bg-card flex items-center justify-center">
                   <Music className="w-16 h-16 text-foreground/20" />
+                </div>
+              )}
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="w-6 h-6 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
                 </div>
               )}
               <button
@@ -288,18 +301,21 @@ export default function UserPlaylistDetailPage() {
               {tm('deletePlaylistDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tm('cancel')}</AlertDialogCancel>
+          <div className="flex justify-end gap-6 mt-6">
+            <AlertDialogCancel className="bg-transparent border-none p-0 font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 hover:text-foreground">
+              {tm('cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
+              className="bg-transparent border-none p-0 font-headline font-bold uppercase tracking-widest text-xs text-neo-red hover:text-neo-red/80"
               onClick={async () => {
                 if (!playlist) return;
                 await deleteUserPlaylist(playlist.id);
-                router.push('/music');
+                router.back();
               }}
             >
               {tm('deletePlaylist')}
             </AlertDialogAction>
-          </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

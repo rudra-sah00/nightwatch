@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { getRadioStations } from '@/features/music/api';
+import { toast } from 'sonner';
+import { getRadioSongs, getRadioStations } from '@/features/music/api';
+import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 
 const LANGUAGES = [
   'hindi',
@@ -25,6 +27,24 @@ export default function MusicRadioLangPage() {
   const lang = (params.lang as string) || 'hindi';
   const [stations, setStations] = useState<RadioItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playingStation, setPlayingStation] = useState<string | null>(null);
+  const player = useMusicPlayerContext();
+
+  const handlePlayStation = async (station: RadioItem) => {
+    setPlayingStation(station.id);
+    try {
+      const songs = await getRadioSongs(station.title);
+      if (songs.length > 0) {
+        player.play(songs[0], songs);
+      } else {
+        toast.error('No songs available');
+      }
+    } catch {
+      toast.error('Failed to load station');
+    } finally {
+      setPlayingStation(null);
+    }
+  };
 
   useEffect(() => {
     document.title = `${lang.charAt(0).toUpperCase() + lang.slice(1)} Radio — Nightwatch`;
@@ -81,7 +101,13 @@ export default function MusicRadioLangPage() {
         <div className="px-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {stations.map((r) => (
-              <div key={r.id} className="text-center">
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => handlePlayStation(r)}
+                disabled={playingStation === r.id}
+                className="text-center cursor-pointer"
+              >
                 <div className="relative">
                   <div className="absolute inset-0 bg-neo-yellow translate-x-1 translate-y-1 border-[3px] border-border" />
                   <div className="relative border-[3px] border-border overflow-hidden bg-card">
@@ -90,12 +116,17 @@ export default function MusicRadioLangPage() {
                       alt={r.title}
                       className="w-full aspect-square object-cover"
                     />
+                    {playingStation === r.id && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <div className="w-5 h-5 border-[2px] border-white/20 border-t-white rounded-full animate-spin" />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
                   {r.title}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>

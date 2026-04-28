@@ -66,6 +66,25 @@ export async function getStreamUrl(
   return data.url;
 }
 
+export interface MusicHomeData {
+  charts: { id: string; title: string; image: string }[];
+  featured: { id: string; title: string; image: string }[];
+  artists: { id: string; name: string; image: string }[];
+  releases: { id: string; title: string; artist: string; image: string }[];
+  trending: {
+    id: string;
+    title: string;
+    type: string;
+    image: string;
+    subtitle: string;
+  }[];
+  radio: { id: string; title: string; image: string; language: string }[];
+}
+
+export async function getMusicHome(): Promise<MusicHomeData> {
+  return apiFetch('/api/music/home');
+}
+
 export async function getCharts() {
   return apiFetch<{ id: string; title: string; image: string }[]>(
     '/api/music/charts',
@@ -133,6 +152,15 @@ export async function getRadioStations(language?: string) {
   return apiFetch<
     { id: string; title: string; image: string; language: string }[]
   >(`/api/music/radio${qs}`);
+}
+
+export async function getRadioSongs(
+  stationName: string,
+): Promise<MusicTrack[]> {
+  const data = await apiFetch<{ songs: MusicTrack[] }>(
+    `/api/music/radio/${encodeURIComponent(stationName)}/songs`,
+  );
+  return data.songs;
 }
 
 export async function getUserQueue(): Promise<MusicTrack[]> {

@@ -10,12 +10,7 @@ import { toast } from 'sonner';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 import {
   createUserPlaylist,
-  getCharts,
-  getFeaturedPlaylists,
-  getNewReleases,
-  getRadioStations,
-  getTopArtists,
-  getTopPodcasts,
+  getMusicHome,
   searchMusic,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
@@ -36,22 +31,24 @@ export function MusicView() {
   const [featured, setFeatured] = useState<ChartItem[]>([]);
   const [artists, setArtists] = useState<ArtistItem[]>([]);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
-  const [podcasts, setPodcasts] = useState<ChartItem[]>([]);
   const [radio, setRadio] = useState<RadioItem[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [playlistKey, setPlaylistKey] = useState(0);
 
   useEffect(() => {
-    Promise.allSettled([
-      getCharts().then(setCharts),
-      getFeaturedPlaylists().then(setFeatured),
-      getTopArtists().then(setArtists),
-      getNewReleases().then(setReleases),
-      getTopPodcasts().then(setPodcasts),
-      getRadioStations('hindi').then(setRadio),
-    ]).finally(() => setLoading(false));
+    getMusicHome()
+      .then((data) => {
+        setCharts(data.charts);
+        setFeatured(data.featured);
+        setArtists(data.artists);
+        setReleases(data.releases);
+        setRadio(data.radio);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   // Auto-play from AI navigation: /music?play=songId
@@ -129,7 +126,7 @@ export function MusicView() {
                   setNewPlaylistName('');
                   setShowCreatePlaylist(false);
                   toast.success(t('createPlaylist'));
-                  window.location.reload();
+                  setPlaylistKey((k) => k + 1);
                 }
                 if (e.key === 'Escape') {
                   setShowCreatePlaylist(false);
@@ -144,7 +141,7 @@ export function MusicView() {
       {loading && <MusicSkeleton />}
 
       {/* User Playlists */}
-      {!loading && <UserPlaylists />}
+      {!loading && <UserPlaylists key={playlistKey} />}
 
       {/* Charts */}
       {!loading && charts.length > 0 && (
@@ -214,7 +211,6 @@ export function MusicView() {
                 image={r.image}
                 title={r.title}
                 subtitle={r.artist}
-                href={r.id ? `/music/playlist/${r.id}` : undefined}
               />
             ))}
           </ScrollRow>
@@ -222,16 +218,6 @@ export function MusicView() {
       )}
 
       {/* Podcasts */}
-      {!loading && podcasts.length > 0 && (
-        <Section title={t('podcasts')}>
-          <ScrollRow>
-            {podcasts.map((p) => (
-              <Card key={p.id} image={p.image} title={p.title} />
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
       {/* Radio */}
       {!loading && radio.length > 0 && (
         <Section title={t('radioStations')}>

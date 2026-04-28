@@ -1,3 +1,6 @@
+// Suppress EPIPE errors from electron-log when stdout pipe is closed
+process.stdout?.on?.('error', () => {});
+process.stderr?.on?.('error', () => {});
 const {
   app,
   globalShortcut,
