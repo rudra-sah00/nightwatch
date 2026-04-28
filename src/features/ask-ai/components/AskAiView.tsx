@@ -9,19 +9,37 @@ export function AskAiView() {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4 py-12">
-      {/* Orb button — start or stop */}
-      <button
-        type="button"
-        onClick={isActive ? stop : start}
-        className="group relative w-40 h-40 md:w-52 md:h-52 rounded-full bg-primary/10 border-[3px] border-border flex items-center justify-center hover:bg-primary/20 transition-colors duration-300 focus:outline-none"
-        aria-label={isActive ? 'Stop conversation' : 'Start conversation'}
-      >
-        {isActive ? (
-          <Square className="w-10 h-10 md:w-14 md:h-14 text-red-400 fill-current transition-colors" />
-        ) : (
-          <Play className="w-14 h-14 md:w-20 md:h-20 text-foreground/40 group-hover:text-foreground/60 fill-current transition-colors ml-2" />
+      {/* Orb button */}
+      <div className="relative">
+        {/* Pulse rings when listening */}
+        {state === 'listening' && (
+          <>
+            <div className="absolute inset-0 rounded-full bg-neo-yellow/20 animate-ping" />
+            <div className="absolute -inset-4 rounded-full border-2 border-neo-yellow/30 animate-pulse" />
+          </>
         )}
-      </button>
+        {state === 'speaking' && (
+          <div className="absolute -inset-3 rounded-full border-2 border-neo-blue/30 animate-pulse" />
+        )}
+        <button
+          type="button"
+          onClick={isActive ? stop : start}
+          className={`relative w-40 h-40 md:w-52 md:h-52 rounded-full border-[3px] flex items-center justify-center transition-all duration-300 focus:outline-none ${
+            state === 'listening'
+              ? 'bg-neo-yellow/10 border-neo-yellow/40'
+              : state === 'speaking'
+                ? 'bg-neo-blue/10 border-neo-blue/40'
+                : 'bg-primary/10 border-border hover:bg-primary/20'
+          }`}
+          aria-label={isActive ? 'Stop conversation' : 'Start conversation'}
+        >
+          {isActive ? (
+            <Square className="w-10 h-10 md:w-14 md:h-14 text-red-400 fill-current" />
+          ) : (
+            <Play className="w-14 h-14 md:w-20 md:h-20 text-foreground/40 fill-current ml-2" />
+          )}
+        </button>
+      </div>
 
       {/* Status */}
       <p className="font-headline font-black uppercase tracking-[0.2em] text-xs text-foreground/40">

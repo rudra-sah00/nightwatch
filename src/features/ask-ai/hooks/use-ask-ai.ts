@@ -2,19 +2,28 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSocket } from '@/providers/socket-provider';
+import { io, type Socket } from 'socket.io-client';
+import { env } from '@/lib/env';
+import { useAuthStore } from '@/store/use-auth-store';
 
 /**
  * Ask AI hook — follows official AWS Nova Sonic sample pattern exactly.
  *
- * Protocol: init → promptStart → systemPrompt → audioStart → audioInput... → stop
- * Playback: AudioWorklet with 1-second initial buffer (from official sample)
+ * Key differences from previous implementation:
+ * - Dedicated Socket.IO connection (no head-of-line blocking from friends/presence/calls)
+ * - Mic streams continuously during AI speech (enables barge-in, eliminates dead gap)
+ * - Captures at 16kHz directly on Chrome (3× fewer chunks vs 48kHz downsample)
+ * - No audioReady wait — starts streaming immediately after audioStart
  */
 
 type State = 'idle' | 'listening' | 'speaking';
 
+const TARGET_SAMPLE_RATE = 16000;
+const isFirefox =
+  typeof navigator !== 'undefined' &&
+  navigator.userAgent.toLowerCase().includes('firefox');
+
 export function useAskAi() {
-  const { socket } = useSocket();
   const router = useRouter();
   const [state, setState] = useState<State>('idle');
   const [transcript, setTranscript] = useState('');
@@ -32,6 +41,9 @@ export function useAskAi() {
 
   // Playback refs
   const playCtxRef = useRef<AudioContext | null>(null);
+
+  // Dedicated socket for ask-ai (not shared with friends/presence/calls)
+  const socketRef = useRef<Socket | null>(null);
 
   const roleRef = useRef('');
   const displayAssistantTextRef = useRef(false);
@@ -52,8 +64,31 @@ export function useAskAi() {
     return float32;
   }, []);
 
+  // --- Create dedicated socket on mount, tear down on unmount ---
+  useEffect(() => {
+    const user = useAuthStore.getState().user;
+    if (!user?.id || !user?.sessionId) return;
+
+    const s = io(env.WS_URL, {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
+      query: { userId: user.id, sessionId: user.sessionId },
+    });
+    socketRef.current = s;
+
+    return () => {
+      s.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
   // --- Socket event handlers (matching official main.js) ---
   useEffect(() => {
+    const socket = socketRef.current;
     if (!socket) return;
 
     const onContentStart = (data: {
@@ -138,7 +173,6 @@ export function useAskAi() {
     };
 
     const onNavigate = (url: string) => {
-      // Full cleanup: stop mic, close audio, end session, then navigate
       activeRef.current = false;
       playQueueRef.current = [];
       nextPlayTimeRef.current = 0;
@@ -149,7 +183,7 @@ export function useAskAi() {
       streamRef.current?.getTracks().forEach((t) => {
         t.stop();
       });
-      socket?.emit('ask-ai:stop');
+      socket.emit('ask-ai:stop');
       router.push(url);
     };
 
@@ -172,10 +206,11 @@ export function useAskAi() {
       socket.off('ask-ai:sessionClosed', onSessionClosed);
       socket.off('ask-ai:navigate', onNavigate);
     };
-  }, [socket, base64ToFloat32, router]);
+  }, [base64ToFloat32, router]);
 
   // --- Start (matching official startStreaming + initializeSession) ---
   const start = useCallback(async () => {
+    const socket = socketRef.current;
     if (!socket?.connected || activeRef.current) return;
     setError(null);
     setTranscript('');
@@ -188,13 +223,18 @@ export function useAskAi() {
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true,
+          autoGainControl: true,
         },
       });
       streamRef.current = stream;
 
-      // 2. Set up audio capture context (use native sample rate, resample to 16kHz when sending)
-      const audioCtx = new AudioContext();
+      // 2. Set up audio capture context — capture at 16kHz directly (matching official sample)
+      //    Firefox doesn't allow AudioContext sampleRate different from device, so use native + downsample
+      const audioCtx = isFirefox
+        ? new AudioContext()
+        : new AudioContext({ sampleRate: TARGET_SAMPLE_RATE });
       audioCtxRef.current = audioCtx;
+      const samplingRatio = audioCtx.sampleRate / TARGET_SAMPLE_RATE;
 
       // 3. Set up playback context
       const playCtx = new AudioContext({ sampleRate: 24000 });
@@ -205,11 +245,8 @@ export function useAskAi() {
         socket.emit(
           'ask-ai:init',
           (res: { success: boolean; error?: string }) => {
-            if (res?.success) {
-              resolve();
-            } else {
-              reject(new Error(res?.error || 'Init failed'));
-            }
+            if (res?.success) resolve();
+            else reject(new Error(res?.error || 'Init failed'));
           },
         );
       });
@@ -218,13 +255,7 @@ export function useAskAi() {
       socket.emit('ask-ai:systemPrompt');
       socket.emit('ask-ai:audioStart');
 
-      // 5. Wait for audioReady
-      await new Promise<void>((resolve) => {
-        socket.once('ask-ai:audioReady', resolve);
-        // Timeout fallback
-        setTimeout(resolve, 2000);
-      });
-
+      // 5. Start streaming immediately — no audioReady wait (matching official sample)
       activeRef.current = true;
       setState('listening');
 
@@ -235,16 +266,24 @@ export function useAskAi() {
       processorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
-        if (!activeRef.current || speakingRef.current) return;
+        if (!activeRef.current) return;
         const input = e.inputBuffer.getChannelData(0);
-        // Downsample to 16kHz if needed
-        const ratio = audioCtx.sampleRate / 16000;
-        const numSamples = Math.round(input.length / ratio);
+
+        // On Chrome: already at 16kHz, no downsample needed. On Firefox: downsample.
+        const numSamples = Math.round(input.length / samplingRatio);
         const pcm = new Int16Array(numSamples);
-        for (let i = 0; i < numSamples; i++) {
-          pcm[i] =
-            Math.max(-1, Math.min(1, input[Math.round(i * ratio)])) * 0x7fff;
+        if (isFirefox) {
+          for (let i = 0; i < numSamples; i++) {
+            pcm[i] =
+              Math.max(-1, Math.min(1, input[Math.round(i * samplingRatio)])) *
+              0x7fff;
+          }
+        } else {
+          for (let i = 0; i < input.length; i++) {
+            pcm[i] = Math.max(-1, Math.min(1, input[i])) * 0x7fff;
+          }
         }
+
         // Convert to base64
         const bytes = new Uint8Array(pcm.buffer);
         let binary = '';
@@ -261,7 +300,7 @@ export function useAskAi() {
       setState('idle');
       activeRef.current = false;
     }
-  }, [socket]);
+  }, []);
 
   // --- Stop (matching official stopStreaming) ---
   const stop = useCallback(() => {
@@ -290,9 +329,9 @@ export function useAskAi() {
     streamRef.current = null;
 
     // Tell server to stop
-    socket?.emit('ask-ai:stop');
+    socketRef.current?.emit('ask-ai:stop');
     setState('idle');
-  }, [socket]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
