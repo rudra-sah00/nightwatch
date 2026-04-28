@@ -50,7 +50,11 @@ export default function MusicRadioLangPage() {
     document.title = `${lang.charAt(0).toUpperCase() + lang.slice(1)} Radio — Nightwatch`;
     setLoading(true);
     getRadioStations(lang)
-      .then((data) => setStations(data.filter((s) => s.language === lang)))
+      .then((data) =>
+        setStations(
+          data.filter((s) => s.language.toLowerCase() === lang.toLowerCase()),
+        ),
+      )
       .catch(() => setStations([]))
       .finally(() => setLoading(false));
   }, [lang]);

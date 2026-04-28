@@ -13,6 +13,7 @@ import {
   getBrowseModules,
   getMixDetails,
   getMusicHome,
+  getRadioSongs,
   getSong,
   getTrending,
 } from '@/features/music/api';
@@ -276,7 +277,25 @@ export function MusicView() {
         <Section title={t('browseGenres')}>
           <ScrollRow>
             {genres.slice(0, 20).map((g) => (
-              <Card key={g.id} image={g.image} title={g.title} />
+              <Card
+                key={g.id}
+                image={g.image}
+                title={g.title}
+                href={
+                  g.type === 'playlist' ? `/music/playlist/${g.id}` : undefined
+                }
+                onClick={
+                  g.type !== 'playlist'
+                    ? () => {
+                        getRadioSongs(g.title)
+                          .then((songs) => {
+                            if (songs.length > 0) player.play(songs[0], songs);
+                          })
+                          .catch(() => {});
+                      }
+                    : undefined
+                }
+              />
             ))}
           </ScrollRow>
         </Section>
@@ -288,7 +307,18 @@ export function MusicView() {
         <Section title={t('radioStations')}>
           <ScrollRow>
             {radio.slice(0, 10).map((r) => (
-              <Card key={r.id} image={r.image} title={r.title} />
+              <Card
+                key={r.id}
+                image={r.image}
+                title={r.title}
+                onClick={() => {
+                  getRadioSongs(r.title)
+                    .then((songs) => {
+                      if (songs.length > 0) player.play(songs[0], songs);
+                    })
+                    .catch(() => {});
+                }}
+              />
             ))}
             <Link
               href="/music/radio/hindi"
