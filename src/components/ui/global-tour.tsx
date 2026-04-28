@@ -97,6 +97,15 @@ export function GlobalTour() {
             align: 'center',
           },
         },
+        {
+          element: 'a[href="/library"]',
+          popover: {
+            title: title(t('library.title')),
+            description: desc(t('library.description')),
+            side: 'right',
+            align: 'center',
+          },
+        },
         ...(isDesktopApp
           ? [
               {
@@ -110,6 +119,24 @@ export function GlobalTour() {
               },
             ]
           : []),
+        {
+          element: 'a[href="/music"]',
+          popover: {
+            title: title(t('music.title')),
+            description: desc(t('music.description')),
+            side: 'right',
+            align: 'center',
+          },
+        },
+        {
+          element: 'a[href="/ask-ai"]',
+          popover: {
+            title: title(t('askAi.title')),
+            description: desc(t('askAi.description')),
+            side: 'right',
+            align: 'center',
+          },
+        },
         // Close left, open right sidebar for friends
         {
           element: 'aside:last-of-type',

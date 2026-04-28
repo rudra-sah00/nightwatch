@@ -81,6 +81,18 @@
       "title": "Bóveda offline",
       "description": "Ve películas en cualquier lugar, en cualquier momento. Accede a tus descargas offline aquí."
     },
+    "library": {
+      "title": "Tu Biblioteca",
+      "description": "Explora tus clips guardados, grabaciones y contenido recopilado en un solo lugar."
+    },
+    "music": {
+      "title": "Música",
+      "description": "Escucha estaciones de radio y música seleccionada mientras navegas."
+    },
+    "askAi": {
+      "title": "Pregunta a la IA",
+      "description": "Habla con tu asistente de IA. Pide recomendaciones, busca contenido o controla la reproducción con tu voz."
+    },
     "profile": {
       "title": "Configuración del perfil",
       "description": "Administra tu cuenta, preferencias y ve tu actividad aquí."

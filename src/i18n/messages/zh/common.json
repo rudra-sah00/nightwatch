@@ -81,6 +81,18 @@
       "title": "离线保险库",
       "description": "随时随地观看电影。在这里访问您的离线下载。"
     },
+    "library": {
+      "title": "你的资料库",
+      "description": "在一个地方浏览你保存的剪辑、录制和收集的内容。"
+    },
+    "music": {
+      "title": "音乐",
+      "description": "浏览时收听精选电台和音乐。"
+    },
+    "askAi": {
+      "title": "问AI",
+      "description": "与AI助手对话。请求推荐、搜索内容或用语音控制播放。"
+    },
     "profile": {
       "title": "个人资料设置",
       "description": "管理您的账户、偏好设置并查看您的活动。"

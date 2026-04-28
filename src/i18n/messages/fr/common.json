@@ -81,6 +81,18 @@
       "title": "Coffre hors ligne",
       "description": "Regardez des films n'importe où, n'importe quand. Accédez à vos téléchargements hors ligne ici."
     },
+    "library": {
+      "title": "Votre Bibliothèque",
+      "description": "Parcourez vos clips sauvegardés, enregistrements et contenus collectés en un seul endroit."
+    },
+    "music": {
+      "title": "Musique",
+      "description": "Écoutez des stations de radio et de la musique sélectionnée pendant que vous naviguez."
+    },
+    "askAi": {
+      "title": "Demander à l'IA",
+      "description": "Parlez à votre assistant IA. Demandez des recommandations, recherchez du contenu ou contrôlez la lecture avec votre voix."
+    },
     "profile": {
       "title": "Paramètres du profil",
       "description": "Gérez votre compte, vos préférences et consultez votre activité ici."

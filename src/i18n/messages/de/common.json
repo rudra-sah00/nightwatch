@@ -81,6 +81,18 @@
       "title": "Offline-Tresor",
       "description": "Schau Filme überall und jederzeit. Greife hier auf deine Offline-Downloads zu."
     },
+    "library": {
+      "title": "Deine Bibliothek",
+      "description": "Durchsuche deine gespeicherten Clips, Aufnahmen und gesammelten Inhalte an einem Ort."
+    },
+    "music": {
+      "title": "Musik",
+      "description": "Höre kuratierte Radiosender und Musik, während du stöberst."
+    },
+    "askAi": {
+      "title": "KI fragen",
+      "description": "Sprich mit deinem KI-Assistenten. Frage nach Empfehlungen, suche Inhalte oder steuere die Wiedergabe mit deiner Stimme."
+    },
     "profile": {
       "title": "Profileinstellungen",
       "description": "Verwalte dein Konto, Einstellungen und sieh dir deine Aktivität an."

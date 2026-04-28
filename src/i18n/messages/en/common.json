@@ -81,6 +81,18 @@
       "title": "Offline Vault",
       "description": "Watch movies anywhere, anytime. Access your offline downloads here."
     },
+    "library": {
+      "title": "Your Library",
+      "description": "Browse your saved clips, recordings, and collected content all in one place."
+    },
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    },
+    "askAi": {
+      "title": "Ask AI",
+      "description": "Talk to your AI assistant. Ask for recommendations, search content, or control playback with your voice."
+    },
     "profile": {
       "title": "Profile Settings",
       "description": "Manage your account, preferences, and view your activity here."

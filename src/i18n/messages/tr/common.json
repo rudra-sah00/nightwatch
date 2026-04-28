@@ -81,6 +81,18 @@
       "title": "Çevrimdışı Kasa",
       "description": "Her yerde, her zaman film izleyin. Çevrimdışı indirmelerinize buradan erişin."
     },
+    "library": {
+      "title": "Kütüphanen",
+      "description": "Kayıtlı kliplerini, kayıtlarını ve topladığın içerikleri tek bir yerde gözat."
+    },
+    "music": {
+      "title": "Müzik",
+      "description": "Gezinirken seçilmiş radyo istasyonlarını ve müzikleri dinle."
+    },
+    "askAi": {
+      "title": "Yapay Zekaya Sor",
+      "description": "Yapay zeka asistanınla konuş. Öneriler iste, içerik ara veya sesinle oynatmayı kontrol et."
+    },
     "profile": {
       "title": "Profil Ayarları",
       "description": "Hesabınızı, tercihlerinizi yönetin ve etkinliğinizi buradan görüntüleyin."

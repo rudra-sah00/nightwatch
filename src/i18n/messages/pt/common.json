@@ -81,6 +81,18 @@
       "title": "Cofre offline",
       "description": "Assista filmes em qualquer lugar, a qualquer hora. Acesse seus downloads offline aqui."
     },
+    "library": {
+      "title": "Sua Biblioteca",
+      "description": "Navegue por seus clipes salvos, gravações e conteúdo coletado em um só lugar."
+    },
+    "music": {
+      "title": "Música",
+      "description": "Ouça estações de rádio e músicas selecionadas enquanto navega."
+    },
+    "askAi": {
+      "title": "Pergunte à IA",
+      "description": "Fale com seu assistente de IA. Peça recomendações, pesquise conteúdo ou controle a reprodução com sua voz."
+    },
     "profile": {
       "title": "Configurações do perfil",
       "description": "Gerencie sua conta, preferências e veja sua atividade aqui."

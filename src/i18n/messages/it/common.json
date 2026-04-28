@@ -81,6 +81,18 @@
       "title": "Cassaforte offline",
       "description": "Guarda film ovunque, in qualsiasi momento. Accedi ai tuoi download offline qui."
     },
+    "library": {
+      "title": "La Tua Libreria",
+      "description": "Sfoglia i tuoi clip salvati, registrazioni e contenuti raccolti in un unico posto."
+    },
+    "music": {
+      "title": "Musica",
+      "description": "Ascolta stazioni radio e musica selezionata mentre navighi."
+    },
+    "askAi": {
+      "title": "Chiedi all'IA",
+      "description": "Parla con il tuo assistente IA. Chiedi consigli, cerca contenuti o controlla la riproduzione con la tua voce."
+    },
     "profile": {
       "title": "Impostazioni profilo",
       "description": "Gestisci il tuo account, le preferenze e visualizza la tua attività qui."
