@@ -365,6 +365,23 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   );
 
   // ── Socket event listeners ────────────────────────────────────────
+  // Use refs to avoid re-registering listeners when callbacks change.
+  // Re-registration creates a brief window where events can be missed,
+  // which is the root cause of the initiator not seeing the call overlay
+  // after the receiver accepts.
+  const joinAgoraChannelRef = useRef(joinAgoraChannel);
+  const cleanupRef = useRef(cleanup);
+  const updateCallStateRef = useRef(updateCallState);
+  useEffect(() => {
+    joinAgoraChannelRef.current = joinAgoraChannel;
+  }, [joinAgoraChannel]);
+  useEffect(() => {
+    cleanupRef.current = cleanup;
+  }, [cleanup]);
+  useEffect(() => {
+    updateCallStateRef.current = updateCallState;
+  }, [updateCallState]);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -379,20 +396,20 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         name: data.callerName,
         photo: data.callerPhoto,
       });
-      updateCallState('incoming');
+      updateCallStateRef.current('incoming');
     };
 
     const onAccepted = (data: { channelName: string }) => {
       if (callStateRef.current === 'outgoing') {
-        joinAgoraChannel(data.channelName);
+        joinAgoraChannelRef.current(data.channelName);
       }
     };
 
     const onRejected = () => {
-      if (callStateRef.current === 'outgoing') cleanup();
+      if (callStateRef.current === 'outgoing') cleanupRef.current();
     };
 
-    const onEnded = () => cleanup();
+    const onEnded = () => cleanupRef.current();
 
     const onParticipantLeft = (data: { userId: string }) => {
       setParticipants((prev) => prev.filter((p) => p.id !== data.userId));
@@ -411,7 +428,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       socket.off('call:ended', onEnded);
       socket.off('call:participant_left', onParticipantLeft);
     };
-  }, [socket, joinAgoraChannel, cleanup, updateCallState]);
+  }, [socket]);
 
   return (
     <CallContext.Provider

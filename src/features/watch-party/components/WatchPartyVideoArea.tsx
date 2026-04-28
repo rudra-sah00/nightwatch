@@ -170,6 +170,8 @@ export function WatchPartyVideoArea({
       isRecording={clip.isRecording}
       duration={clip.duration}
       canStop={clip.canStop}
+      isStarting={clip.isStarting}
+      isStopping={clip.isStopping}
       onStart={handleClipStart}
       onStop={handleClipStop}
     />

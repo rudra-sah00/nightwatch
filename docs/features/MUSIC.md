@@ -43,12 +43,14 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 
 ```
 src/features/music/
-├── api.ts                          # All backend API functions (34 endpoints)
+├── api.ts                          # All backend API functions (40 endpoints)
 ├── utils.ts                        # formatTime helper
 ├── engine/
 │   └── audio-engine.ts             # AudioEngine class (playback, queue, shuffle, repeat)
 ├── context/
 │   └── MusicPlayerContext.tsx       # React Context wrapping AudioEngine
+├── hooks/
+│   └── use-music-shortcuts.ts       # Global keyboard shortcuts (Space, ←→, ↑↓, M, S, R)
 └── components/
     ├── MusicView.tsx               # Main music home page
     ├── FullPlayer.tsx              # Expanded player with synced lyrics
@@ -135,7 +137,7 @@ All routes are under `/api/music/`. Authenticated routes require a valid session
 | GET | `/artist/:id` | Artist bio + top songs + albums |
 | GET | `/artist/:id/albums?page=` | Paginated artist albums |
 | GET | `/lyrics/:id?title=&artist=&duration=` | Synced lyrics (LRCLIB → JioSaavn fallback) |
-| GET | `/stream/:id?bitrate=` | Proxied stream URL (public, optional auth) |
+| GET | `/stream/:id?bitrate=` | Proxied stream URL |
 
 ### Search
 
@@ -172,6 +174,65 @@ All routes are under `/api/music/`. Authenticated routes require a valid session
 
 Audio streams are proxied through a Cloudflare Worker to inject the required `Referer: https://www.jiosaavn.com/` header. The CDN blocks direct browser requests without this header.
 
+## JioSaavn API Reference
+
+All music data is sourced from JioSaavn's internal web API (`https://www.jiosaavn.com/api.php`). The backend provider wraps 29 `__call` endpoints:
+
+### Discovery & Browse
+
+| `__call` Endpoint | Backend Method | Description |
+|-------------------|---------------|-------------|
+| `webapi.getLaunchData` | `getLaunchData()` | Home page super-endpoint (charts, featured, artists, releases, trending, radio) |
+| `content.getCharts` | `getCharts()` | Top chart playlists |
+| `content.getFeaturedPlaylists` | `getFeaturedPlaylists()` | Curated featured playlists |
+| `social.getTopArtists` | `getTopArtists()` | Popular artists |
+| `content.getAlbums` | `getNewReleases()` | New album releases |
+| `content.getTrending` | `getTrending()` | Trending songs/albums/playlists by language |
+| `content.getTopSearches` | `getTopSearches()` | Trending search terms |
+| `content.getBrowseModules` | `getBrowseModules()` | Genre/mood browse categories |
+| `content.getTopShows` | `getTopPodcasts()` | Top podcast shows |
+
+### Content Details
+
+| `__call` Endpoint | Backend Method | Description |
+|-------------------|---------------|-------------|
+| `song.getDetails` | `getSongDetails()` | Single song metadata + encrypted media URL |
+| `content.getAlbumDetails` | `getAlbum()` | Album metadata + track list |
+| `playlist.getDetails` | `getPlaylist()` | Playlist metadata + track list (up to 50) |
+| `content.getMixDetails` | `getMixDetails()` | Algorithmic mix playlist + tracks |
+| `artist.getArtistPageDetails` | `getArtist()` / `getArtistAlbums()` | Artist bio, top songs, albums (paginated) |
+| `lyrics.getLyrics` | `getLyrics()` | Plain-text lyrics for a song |
+
+### Streaming
+
+| `__call` Endpoint | Backend Method | Description |
+|-------------------|---------------|-------------|
+| `song.getDetails` | `getStreamUrl()` | Fetches encrypted media URL from song details |
+| `song.generateAuthToken` | `getStreamUrl()` | Generates signed streaming URL from encrypted URL |
+
+### Search
+
+| `__call` Endpoint | Backend Method | Description |
+|-------------------|---------------|-------------|
+| `search.getResults` | `search()` / `searchSongs()` | Song search results |
+| `autocomplete.get` | `search()` | Supplementary album/playlist results for combined search |
+| `search.getMoreResults` | `searchMore()` | Paginated load-more for song results |
+| `search.getAlbumResults` | `searchAlbums()` | Album-specific search |
+| `search.getArtistResults` | `searchArtists()` | Artist-specific search |
+| `search.getPlaylistResults` | `searchPlaylists()` | Playlist-specific search |
+
+### Radio & Recommendations
+
+| `__call` Endpoint | Backend Method | Description |
+|-------------------|---------------|-------------|
+| `webradio.getFeaturedStations` | `getRadioStations()` | Featured radio stations by language |
+| `webradio.createFeaturedStation` | `getRadioSongs()` | Create station from featured station name |
+| `webradio.createArtistStation` | `createArtistStation()` | Create station from artist name |
+| `webradio.createEntityStation` | `createSongRadio()` | Create station from a specific song |
+| `webradio.getSong` | (used internally) | Fetch tracks from a created station (up to 20) |
+| `reco.getreco` | `getSongRecommendations()` | Similar songs for a given song ID |
+| `reco.getAlbumReco` | `getAlbumRecommendations()` | Similar albums for a given album ID |
+
 ## Internationalization
 
 Music UI strings are translated across 14 languages via `next-intl`. Translation files are at `src/i18n/messages/{locale}/music.json`.
@@ -193,4 +254,9 @@ Music UI strings are translated across 14 languages via `next-intl`. Translation
 | Redis | `music:releases` | 1h | New releases |
 | Redis | `music:trending:{type}:{lang}` | 1h | Trending content |
 | Redis | `music:artist:{id}` | 1h | Artist details |
+| Redis | `music:reco:{songId}` | 1h | Song recommendations |
+| Redis | `music:album-reco:{albumId}` | 1h | Album recommendations |
+| Redis | `music:mix:{id}` | 1h | Mix details |
+| Redis | `music:artist-station:{name}` | 30m | Artist radio station |
+| Redis | `music:radio:songs:{name}` | 30m | Radio station songs |
 | Redis | `music:queue:{userId}` | 24h | User queue |

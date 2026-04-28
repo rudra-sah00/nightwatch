@@ -75,6 +75,8 @@
   "closeModal": "Schließen",
   "liveTVType": "Live-TV",
   "clip": "Clip",
+  "clipStarting": "Starting...",
+  "clipSaving": "Saving...",
   "clipSave": "Speichern",
   "clipCancel": "Abbrechen",
   "clipRename": "Clip umbenennen",

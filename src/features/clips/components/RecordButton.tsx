@@ -1,11 +1,14 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface RecordButtonProps {
   isRecording: boolean;
   duration: number;
   canStop: boolean;
+  isStarting?: boolean;
+  isStopping?: boolean;
   onStart: () => void;
   onStop: () => void;
 }
@@ -20,10 +23,38 @@ export function RecordButton({
   isRecording,
   duration,
   canStop,
+  isStarting,
+  isStopping,
   onStart,
   onStop,
 }: RecordButtonProps) {
   const t = useTranslations('live');
+
+  if (isStarting) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600/60 text-white text-xs font-headline font-bold uppercase tracking-widest"
+      >
+        <Loader2 className="w-3 h-3 animate-spin" />
+        <span>{t('clipStarting')}</span>
+      </button>
+    );
+  }
+
+  if (isStopping) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600/60 text-white text-xs font-headline font-bold uppercase tracking-widest"
+      >
+        <Loader2 className="w-3 h-3 animate-spin" />
+        <span>{t('clipSaving')}</span>
+      </button>
+    );
+  }
 
   if (isRecording) {
     return (

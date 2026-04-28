@@ -149,6 +149,8 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
       isRecording={clip.isRecording}
       duration={clip.duration}
       canStop={clip.canStop}
+      isStarting={clip.isStarting}
+      isStopping={clip.isStopping}
       onStart={handleStart}
       onStop={handleStop}
     />

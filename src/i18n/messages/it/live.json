@@ -75,6 +75,8 @@
   "closeModal": "Chiudi",
   "liveTVType": "TV in Diretta",
   "clip": "Clip",
+  "clipStarting": "Starting...",
+  "clipSaving": "Saving...",
   "clipSave": "Salva",
   "clipCancel": "Annulla",
   "clipRename": "Rinomina clip",

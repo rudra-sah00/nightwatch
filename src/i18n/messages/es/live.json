@@ -75,6 +75,8 @@
   "closeModal": "Cerrar",
   "liveTVType": "TV en Vivo",
   "clip": "Clip",
+  "clipStarting": "Starting...",
+  "clipSaving": "Saving...",
   "clipSave": "Guardar",
   "clipCancel": "Cancelar",
   "clipRename": "Renombrar clip",

@@ -21,6 +21,8 @@ export function useClipRecorder({
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [clipId, setClipId] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
 
   const clipIdRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -41,6 +43,8 @@ export function useClipRecorder({
     pendingUploadsRef.current = [];
     setIsRecording(false);
     setDuration(0);
+    setIsStarting(false);
+    setIsStopping(false);
     clipIdRef.current = null;
   }, []);
 
@@ -52,6 +56,8 @@ export function useClipRecorder({
       cleanup();
       return;
     }
+
+    setIsStopping(true);
 
     return new Promise<void>((resolve) => {
       recorder.onstop = async () => {
@@ -76,6 +82,8 @@ export function useClipRecorder({
     const video = document.querySelector('video');
     if (!video) return;
 
+    setIsStarting(true);
+
     const videoEl = video as HTMLVideoElement & {
       captureStream?: () => MediaStream;
       mozCaptureStream?: () => MediaStream;
@@ -92,6 +100,7 @@ export function useClipRecorder({
       chunkIndexRef.current = 0;
       setIsRecording(true);
       setDuration(0);
+      setIsStarting(false);
 
       timerRef.current = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -183,6 +192,8 @@ export function useClipRecorder({
     duration,
     clipId,
     canStop: duration >= MIN_DURATION,
+    isStarting,
+    isStopping,
     start,
     stop,
   };

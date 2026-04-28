@@ -75,6 +75,8 @@
   "twentyFourSevenChannel": "24/7 Channel",
   "closeModal": "Close",
   "clip": "Clip",
+  "clipStarting": "Starting...",
+  "clipSaving": "Saving...",
   "clipSave": "Save",
   "clipCancel": "Cancel",
   "clipRename": "Rename clip",
