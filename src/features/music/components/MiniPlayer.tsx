@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
+import { showSongMenu } from './SongContextMenu';
 
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
@@ -33,6 +34,7 @@ export function MiniPlayer() {
     setExpanded,
     volume,
     setVolume,
+    removeFromQueue,
   } = player;
   const [showQueue, setShowQueue] = useState(false);
 
@@ -161,6 +163,15 @@ export function MiniPlayer() {
               key={track.id}
               type="button"
               onClick={() => player.play(track, queue)}
+              onContextMenu={(e) =>
+                showSongMenu(
+                  e,
+                  track,
+                  currentTrack?.id !== track.id
+                    ? () => removeFromQueue(i)
+                    : undefined,
+                )
+              }
               className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:bg-card ${currentTrack?.id === track.id ? 'text-neo-yellow' : ''}`}
             >
               <span className="w-4 text-foreground/20 text-[9px] font-mono text-right shrink-0">

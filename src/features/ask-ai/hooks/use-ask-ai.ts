@@ -93,6 +93,9 @@ export function useAskAi() {
       } else if (data.type === 'AUDIO' && data.role === 'ASSISTANT') {
         speakingRef.current = true;
         setState('speaking');
+        window.dispatchEvent(
+          new CustomEvent('ask-ai:duck', { detail: { duck: true } }),
+        );
       }
     };
 
@@ -134,6 +137,9 @@ export function useAskAi() {
     const onContentEnd = () => {
       if (speakingRef.current) {
         speakingRef.current = false;
+        window.dispatchEvent(
+          new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
+        );
         if (activeRef.current) {
           setState('listening');
         }
@@ -170,6 +176,51 @@ export function useAskAi() {
       router.push(url);
     };
 
+    const onPlayMusic = (data: { track?: unknown; songId?: string }) => {
+      if (data.track) {
+        // Full track data from backend — play directly, no API call needed
+        window.dispatchEvent(
+          new CustomEvent('ask-ai:play-music', {
+            detail: { track: data.track },
+          }),
+        );
+      } else if (data.songId) {
+        // Fallback: fetch song data
+        window.dispatchEvent(
+          new CustomEvent('ask-ai:play-music', {
+            detail: { songId: data.songId },
+          }),
+        );
+      }
+    };
+
+    const onPlayPlaylist = (data: { tracks: unknown[]; name: string }) => {
+      window.dispatchEvent(
+        new CustomEvent('ask-ai:play-playlist', { detail: data }),
+      );
+    };
+
+    const onEndSession = () => {
+      activeRef.current = false;
+      playQueueRef.current = [];
+      nextPlayTimeRef.current = 0;
+      processorRef.current?.disconnect();
+      sourceRef.current?.disconnect();
+      audioCtxRef.current?.close();
+      playCtxRef.current?.close();
+      streamRef.current?.getTracks().forEach((t) => {
+        t.stop();
+      });
+      socket.emit('ask-ai:stop');
+      setState('idle');
+    };
+
+    const onMusicControl = (data: { action: string }) => {
+      window.dispatchEvent(
+        new CustomEvent('ask-ai:music-control', { detail: data }),
+      );
+    };
+
     socket.on('ask-ai:contentStart', onContentStart);
     socket.on('ask-ai:textOutput', onTextOutput);
     socket.on('ask-ai:audioOutput', onAudioOutput);
@@ -178,6 +229,10 @@ export function useAskAi() {
     socket.on('ask-ai:streamComplete', onStreamComplete);
     socket.on('ask-ai:sessionClosed', onSessionClosed);
     socket.on('ask-ai:navigate', onNavigate);
+    socket.on('ask-ai:playMusic', onPlayMusic);
+    socket.on('ask-ai:playPlaylist', onPlayPlaylist);
+    socket.on('ask-ai:endSession', onEndSession);
+    socket.on('ask-ai:musicControl', onMusicControl);
 
     return () => {
       socket.off('ask-ai:contentStart', onContentStart);
@@ -188,6 +243,10 @@ export function useAskAi() {
       socket.off('ask-ai:streamComplete', onStreamComplete);
       socket.off('ask-ai:sessionClosed', onSessionClosed);
       socket.off('ask-ai:navigate', onNavigate);
+      socket.off('ask-ai:playMusic', onPlayMusic);
+      socket.off('ask-ai:playPlaylist', onPlayPlaylist);
+      socket.off('ask-ai:endSession', onEndSession);
+      socket.off('ask-ai:musicControl', onMusicControl);
     };
   }, [base64ToFloat32, router]);
 

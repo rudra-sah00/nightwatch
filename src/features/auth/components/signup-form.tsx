@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import { PasswordInfo } from '@/components/ui/password-info';
 import type { useSignupForm } from '../hooks/use-signup-form';
-import { getPasswordStrength } from '../schema';
 import { AuthCard } from './auth-card';
 
 export function SignupForm(props: ReturnType<typeof useSignupForm>) {
@@ -306,28 +305,6 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {formData.password && (
-                <div className="mt-1.5 flex items-center gap-2">
-                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full transition-all duration-300"
-                      style={{
-                        width: `${getPasswordStrength(formData.password).score}%`,
-                        backgroundColor: getPasswordStrength(formData.password)
-                          .color,
-                      }}
-                    />
-                  </div>
-                  <span
-                    className="text-[9px] font-headline font-bold uppercase tracking-widest"
-                    style={{
-                      color: getPasswordStrength(formData.password).color,
-                    }}
-                  >
-                    {t(getPasswordStrength(formData.password).label)}
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className="w-full shrink-0">

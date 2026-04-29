@@ -1,10 +1,10 @@
 'use client';
 
-import { Plus, Search } from 'lucide-react';
+import { Globe, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ReactSkeleton from 'react-loading-skeleton';
 import { toast } from 'sonner';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
@@ -13,9 +13,11 @@ import {
   getBrowseModules,
   getMixDetails,
   getMusicHome,
+  getMusicLanguages,
   getRadioSongs,
   getSong,
   getTrending,
+  setMusicLanguages,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { Card, ScrollRow, Section } from './MusicPrimitives';
@@ -24,7 +26,14 @@ import { UserPlaylists } from './UserPlaylists';
 
 type ChartItem = { id: string; title: string; image: string };
 type ArtistItem = { id: string; name: string; image: string };
-type ReleaseItem = { id: string; title: string; artist: string; image: string };
+type ReleaseItem = {
+  id: string;
+  title: string;
+  artist: string;
+  image: string;
+  type: string;
+  albumId: string;
+};
 type RadioItem = { id: string; title: string; image: string; language: string };
 
 type TrendingItem = {
@@ -52,8 +61,22 @@ export function MusicView() {
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
+  const [showLangPicker, setShowLangPicker] = useState(false);
+  const [selectedLangs, setSelectedLangs] = useState<Set<string>>(
+    new Set(['hindi', 'english']),
+  );
 
+  // Load saved language preference
   useEffect(() => {
+    getMusicLanguages()
+      .then((langs) => {
+        if (langs) setSelectedLangs(new Set(langs.split(',')));
+      })
+      .catch(() => {});
+  }, []);
+
+  const loadData = useCallback(() => {
+    setLoading(true);
     Promise.all([
       getMusicHome(),
       getTrending('song', 'hindi').catch(() => []),
@@ -71,6 +94,10 @@ export function MusicView() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Auto-play from AI navigation: /music?play=songId
   useEffect(() => {
@@ -91,6 +118,20 @@ export function MusicView() {
           {t('title')}
         </h1>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowLangPicker(true)}
+            className="h-8 px-3 flex items-center gap-1.5 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
+          >
+            <Globe className="w-3.5 h-3.5 text-foreground/50" />
+            <span className="font-headline font-bold text-[9px] uppercase tracking-wider text-foreground/50">
+              {[...selectedLangs]
+                .slice(0, 2)
+                .map((l) => l.slice(0, 2).toUpperCase())
+                .join(', ')}
+              {selectedLangs.size > 2 && ` +${selectedLangs.size - 2}`}
+            </span>
+          </button>
           <button
             type="button"
             onClick={() => setShowCreatePlaylist((v) => !v)}
@@ -153,6 +194,84 @@ export function MusicView() {
                 }
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Language Picker */}
+      {showLangPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => setShowLangPicker(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowLangPicker(false);
+          }}
+          role="dialog"
+        >
+          <div
+            className="bg-background border-[3px] border-border p-6 w-80 max-h-[70vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={() => {}}
+            role="dialog"
+          >
+            <h3 className="font-headline font-black uppercase tracking-tighter text-lg mb-4">
+              Music Languages
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                'hindi',
+                'english',
+                'punjabi',
+                'tamil',
+                'telugu',
+                'marathi',
+                'gujarati',
+                'bengali',
+                'kannada',
+                'malayalam',
+                'urdu',
+                'bhojpuri',
+                'rajasthani',
+                'odia',
+                'assamese',
+                'haryanvi',
+                'sanskrit',
+              ].map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => {
+                    setSelectedLangs((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(lang)) {
+                        if (next.size > 1) next.delete(lang);
+                      } else next.add(lang);
+                      return next;
+                    });
+                  }}
+                  className={`px-3 py-2 border-[2px] font-headline font-bold text-[10px] uppercase tracking-wider transition-colors ${
+                    selectedLangs.has(lang)
+                      ? 'border-neo-yellow bg-neo-yellow/10 text-foreground'
+                      : 'border-border text-foreground/40 hover:border-foreground/20'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const langs = [...selectedLangs].join(',');
+                setShowLangPicker(false);
+                await setMusicLanguages(langs).catch(() => {});
+                loadData();
+                toast.success('Languages updated');
+              }}
+              className="w-full mt-4 py-2 bg-neo-yellow border-[2px] border-border font-headline font-black uppercase text-xs tracking-wider hover:brightness-110 transition-all"
+            >
+              Apply
+            </button>
           </div>
         </div>
       )}
@@ -230,7 +349,18 @@ export function MusicView() {
                 image={r.image}
                 title={r.title}
                 subtitle={r.artist}
-                href={`/music/album/${r.id}`}
+                href={r.albumId ? `/music/album/${r.albumId}` : undefined}
+                onClick={
+                  r.type === 'song' && !r.albumId
+                    ? () => {
+                        getSong(r.id)
+                          .then((song) => {
+                            if (song) player.play(song, [song]);
+                          })
+                          .catch(() => {});
+                      }
+                    : undefined
+                }
               />
             ))}
           </ScrollRow>
@@ -255,16 +385,24 @@ export function MusicView() {
                       : undefined
                 }
                 onClick={
-                  item.type === 'mix'
+                  item.type === 'song'
                     ? () => {
-                        getMixDetails(item.id)
-                          .then((mix) => {
-                            if (mix.songs.length > 0)
-                              player.play(mix.songs[0], mix.songs);
+                        getSong(item.id)
+                          .then((song) => {
+                            if (song) player.play(song, [song]);
                           })
                           .catch(() => {});
                       }
-                    : undefined
+                    : item.type === 'mix'
+                      ? () => {
+                          getMixDetails(item.id)
+                            .then((mix) => {
+                              if (mix.songs.length > 0)
+                                player.play(mix.songs[0], mix.songs);
+                            })
+                            .catch(() => {});
+                        }
+                      : undefined
                 }
               />
             ))}
@@ -312,11 +450,22 @@ export function MusicView() {
                 image={r.image}
                 title={r.title}
                 onClick={() => {
-                  getRadioSongs(r.title)
-                    .then((songs) => {
-                      if (songs.length > 0) player.play(songs[0], songs);
-                    })
-                    .catch(() => {});
+                  toast.promise(
+                    getRadioSongs(r.title, r.language || 'hindi').then(
+                      (songs) => {
+                        if (songs.length > 0) {
+                          player.play(songs[0], songs);
+                        } else {
+                          throw new Error('No songs available');
+                        }
+                      },
+                    ),
+                    {
+                      loading: r.title,
+                      success: r.title,
+                      error: 'Failed to load station',
+                    },
+                  );
                 }}
               />
             ))}

@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import type { MusicTrack } from '../api';
+import { getSong } from '../api';
 import {
   AudioEngine,
   type AudioEngineState,
@@ -37,6 +38,8 @@ interface MusicPlayerContextValue {
   stop: () => void;
   setExpanded: (v: boolean) => void;
   addToQueue: (track: MusicTrack) => void;
+  playNext: (track: MusicTrack) => void;
+  removeFromQueue: (index: number) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -71,6 +74,73 @@ export function MusicPlayerProvider({
     };
   }, []);
 
+  // Listen for Ask AI music play requests (no navigation needed)
+  useEffect(() => {
+    const handleSong = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.track) {
+        engineRef.current?.playTrack(detail.track, [detail.track]);
+      } else if (detail.songId) {
+        getSong(detail.songId)
+          .then((song) => {
+            if (song) engineRef.current?.playTrack(song, [song]);
+          })
+          .catch(() => {});
+      }
+    };
+    const handlePlaylist = (e: Event) => {
+      const { tracks } = (e as CustomEvent).detail as { tracks: MusicTrack[] };
+      if (tracks?.length) {
+        engineRef.current?.playTrack(tracks[0], tracks);
+      }
+    };
+    const handleControl = (e: Event) => {
+      const { action } = (e as CustomEvent).detail as { action: string };
+      const engine = engineRef.current;
+      if (!engine) return;
+      switch (action) {
+        case 'pause':
+          engine.togglePlay();
+          break;
+        case 'resume':
+          engine.togglePlay();
+          break;
+        case 'next':
+          engine.next();
+          break;
+        case 'previous':
+          engine.prev();
+          break;
+        case 'stop':
+          engine.stop();
+          break;
+      }
+    };
+    const savedVolRef = { current: -1 };
+    const handleDuck = (e: Event) => {
+      const { duck } = (e as CustomEvent).detail as { duck: boolean };
+      const engine = engineRef.current;
+      if (!engine) return;
+      if (duck) {
+        savedVolRef.current = state.volume;
+        engine.setVolume(Math.min(state.volume * 0.15, 0.1));
+      } else if (savedVolRef.current >= 0) {
+        engine.setVolume(savedVolRef.current);
+        savedVolRef.current = -1;
+      }
+    };
+    window.addEventListener('ask-ai:play-music', handleSong);
+    window.addEventListener('ask-ai:play-playlist', handlePlaylist);
+    window.addEventListener('ask-ai:music-control', handleControl);
+    window.addEventListener('ask-ai:duck', handleDuck);
+    return () => {
+      window.removeEventListener('ask-ai:play-music', handleSong);
+      window.removeEventListener('ask-ai:play-playlist', handlePlaylist);
+      window.removeEventListener('ask-ai:music-control', handleControl);
+      window.removeEventListener('ask-ai:duck', handleDuck);
+    };
+  }, [state.volume]);
+
   const play = useCallback((track: MusicTrack, queue?: MusicTrack[]) => {
     engineRef.current?.playTrack(track, queue);
   }, []);
@@ -90,6 +160,14 @@ export function MusicPlayerProvider({
   );
   const addToQueue = useCallback(
     (track: MusicTrack) => engineRef.current?.addToQueue(track),
+    [],
+  );
+  const playNext = useCallback(
+    (track: MusicTrack) => engineRef.current?.playNext(track),
+    [],
+  );
+  const removeFromQueue = useCallback(
+    (index: number) => engineRef.current?.removeFromQueue(index),
     [],
   );
   const stop = useCallback(() => {
@@ -119,6 +197,8 @@ export function MusicPlayerProvider({
       stop,
       setExpanded,
       addToQueue,
+      playNext,
+      removeFromQueue,
     }),
     [
       state,
@@ -133,6 +213,8 @@ export function MusicPlayerProvider({
       setVolume,
       stop,
       addToQueue,
+      playNext,
+      removeFromQueue,
     ],
   );
 

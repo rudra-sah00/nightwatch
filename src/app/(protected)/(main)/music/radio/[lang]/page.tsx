@@ -33,7 +33,7 @@ export default function MusicRadioLangPage() {
   const handlePlayStation = async (station: RadioItem) => {
     setPlayingStation(station.id);
     try {
-      const songs = await getRadioSongs(station.title);
+      const songs = await getRadioSongs(station.title, lang);
       if (songs.length > 0) {
         player.play(songs[0], songs);
       } else {

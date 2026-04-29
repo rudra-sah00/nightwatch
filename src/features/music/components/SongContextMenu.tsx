@@ -1,6 +1,13 @@
 'use client';
 
-import { ListMusic, ListPlus, Plus, Radio, Trash2 } from 'lucide-react';
+import {
+  ListMusic,
+  ListPlus,
+  Plus,
+  Radio,
+  SkipForward,
+  Trash2,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -39,7 +46,7 @@ export function showSongMenu(
 
 export function SongContextMenu() {
   const t = useTranslations('music');
-  const { currentTrack, addToQueue, play } = useMusicPlayerContext();
+  const { currentTrack, addToQueue, playNext, play } = useMusicPlayerContext();
   const [menu, setMenu] = useState<MenuEvent | null>(null);
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
   const [showPlaylists, setShowPlaylists] = useState(false);
@@ -87,6 +94,14 @@ export function SongContextMenu() {
       toast.error(t('failedToAdd'));
     }
   }, [menu, t, addToQueue]);
+
+  const handlePlayNext = useCallback(() => {
+    if (!menu) return;
+    const { song } = menu;
+    setMenu(null);
+    playNext(song as MusicTrack);
+    toast.success('Playing next');
+  }, [menu, playNext]);
 
   const handleStartRadio = useCallback(async () => {
     if (!menu) return;
@@ -186,6 +201,16 @@ export function SongContextMenu() {
       )}
       {menu.song.id !== currentTrack?.id && (
         <>
+          <li>
+            <button
+              type="button"
+              onClick={handlePlayNext}
+              className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
+            >
+              <SkipForward className="w-4 h-4 text-foreground/40" />
+              Play Next
+            </button>
+          </li>
           <li>
             <button
               type="button"

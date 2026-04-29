@@ -313,4 +313,21 @@ export class AudioEngine {
       /* best-effort persist */
     }
   }
+
+  /** Insert a track right after the currently playing track */
+  playNext(track: MusicTrack) {
+    const { queue, queueIndex } = this.state;
+    const newQueue = [...queue];
+    newQueue.splice(queueIndex + 1, 0, track);
+    this.update({ queue: newQueue });
+  }
+
+  /** Remove a track from the queue by index */
+  removeFromQueue(index: number) {
+    const { queue, queueIndex } = this.state;
+    if (index < 0 || index >= queue.length || index === queueIndex) return;
+    const newQueue = queue.filter((_, i) => i !== index);
+    const newIndex = index < queueIndex ? queueIndex - 1 : queueIndex;
+    this.update({ queue: newQueue, queueIndex: newIndex });
+  }
 }

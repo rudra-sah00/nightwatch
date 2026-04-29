@@ -74,7 +74,14 @@ export interface MusicHomeData {
   charts: { id: string; title: string; image: string }[];
   featured: { id: string; title: string; image: string }[];
   artists: { id: string; name: string; image: string }[];
-  releases: { id: string; title: string; artist: string; image: string }[];
+  releases: {
+    id: string;
+    title: string;
+    artist: string;
+    image: string;
+    type: string;
+    albumId: string;
+  }[];
   trending: {
     id: string;
     title: string;
@@ -168,15 +175,29 @@ export async function getRadioStations(language?: string) {
 
 export async function getRadioSongs(
   stationName: string,
+  language = 'hindi',
 ): Promise<MusicTrack[]> {
   const data = await apiFetch<{ songs: MusicTrack[] }>(
-    `/api/music/radio/${encodeURIComponent(stationName)}/songs`,
+    `/api/music/radio/${encodeURIComponent(stationName)}/songs?language=${encodeURIComponent(language)}`,
   );
   return data.songs;
 }
 
 export async function getUserQueue(): Promise<MusicTrack[]> {
   return apiFetch('/api/music/queue');
+}
+
+export async function getMusicLanguages(): Promise<string> {
+  const data = await apiFetch<{ languages: string }>('/api/music/languages');
+  return data.languages;
+}
+
+export async function setMusicLanguages(languages: string): Promise<void> {
+  await apiFetch('/api/music/languages', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ languages }),
+  });
 }
 
 export async function getTrending(
