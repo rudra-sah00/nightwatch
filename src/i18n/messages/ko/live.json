@@ -59,7 +59,6 @@
   "desktopAppRequired": "데스크톱 앱 필요",
   "accessDenied": "접근 거부",
   "premiumDesktopOnly": "프리미엄 채널은 데스크톱 앱이 필요합니다.",
-  "failedLiveBridge": "LiveBridge를 통한 스트림 URL 추출에 실패했습니다.",
   "failedStreamSession": "보안 스트림 세션 초기화에 실패했습니다.",
   "errorStreamServer": "스트림 서버 연결 오류.",
   "downloadApp": "앱 다운로드",

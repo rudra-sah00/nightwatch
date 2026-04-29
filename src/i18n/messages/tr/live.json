@@ -59,7 +59,6 @@
   "desktopAppRequired": "Masaüstü Uygulaması Gerekli",
   "accessDenied": "Erişim Reddedildi",
   "premiumDesktopOnly": "Premium kanallar Masaüstü Uygulaması gerektirir.",
-  "failedLiveBridge": "LiveBridge üzerinden yayın URL'si çıkarılamadı.",
   "failedStreamSession": "Güvenli yayın oturumu başlatılamadı.",
   "errorStreamServer": "Yayın sunucusuna bağlanırken hata oluştu.",
   "downloadApp": "Uygulamayı İndir",

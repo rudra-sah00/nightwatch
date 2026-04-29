@@ -59,7 +59,6 @@
   "desktopAppRequired": "需要桌面应用",
   "accessDenied": "访问被拒绝",
   "premiumDesktopOnly": "高级频道需要桌面应用。",
-  "failedLiveBridge": "通过LiveBridge提取直播URL失败。",
   "failedStreamSession": "初始化安全直播会话失败。",
   "errorStreamServer": "连接直播服务器时出错。",
   "downloadApp": "下载应用",

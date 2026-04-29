@@ -59,7 +59,6 @@
   "desktopAppRequired": "ต้องใช้แอปเดสก์ท็อป",
   "accessDenied": "การเข้าถึงถูกปฏิเสธ",
   "premiumDesktopOnly": "ช่องพรีเมียมต้องใช้แอปเดสก์ท็อป",
-  "failedLiveBridge": "ไม่สามารถดึง URL สตรีมผ่าน LiveBridge ได้",
   "failedStreamSession": "ไม่สามารถเริ่มเซสชันสตรีมที่ปลอดภัยได้",
   "errorStreamServer": "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์สตรีม",
   "downloadApp": "ดาวน์โหลดแอป",

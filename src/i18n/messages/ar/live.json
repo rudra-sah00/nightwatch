@@ -59,7 +59,6 @@
   "desktopAppRequired": "تطبيق سطح المكتب مطلوب",
   "accessDenied": "تم رفض الوصول",
   "premiumDesktopOnly": "القنوات المميزة تتطلب تطبيق سطح المكتب.",
-  "failedLiveBridge": "فشل في استخراج رابط البث عبر LiveBridge.",
   "failedStreamSession": "فشل في تهيئة جلسة البث الآمنة.",
   "errorStreamServer": "خطأ في الاتصال بخادم البث.",
   "downloadApp": "تحميل التطبيق",

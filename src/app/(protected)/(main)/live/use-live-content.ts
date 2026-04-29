@@ -2,13 +2,11 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
-import { checkIsDesktop } from '@/lib/electron-bridge';
 
 export function useLiveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const isDesktop = checkIsDesktop();
-  const defaultServer = isDesktop ? 'server1' : 'server2';
+  const defaultServer = 'server1';
   const activeServer =
     (searchParams.get('server') as 'server1' | 'server2') || defaultServer;
   const activeTab = searchParams.get('sportType') || 'all_channels';

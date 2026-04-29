@@ -12,11 +12,6 @@ import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-
-interface LiveBridgeResult {
-  hlsUrl?: string;
-}
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();
@@ -35,46 +30,10 @@ export default function LiveMatchPlayerPage() {
     if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
       return;
 
-    const _isServer1 = match.id.startsWith('live-server1:');
-    const _isDesktopApp = checkIsDesktop();
-
-    let _bridgeUnsubscribe: (() => void) | undefined;
-
     const initSession = async () => {
       // PREVENT DOUBLE FIRE
       if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
         return;
-
-      const isServer1 = match.id.startsWith('live-server1:');
-      const isDesktopApp = checkIsDesktop();
-
-      if (isServer1) {
-        if (!isDesktopApp) {
-          setSessionError('premium_desktop_only');
-          return;
-        }
-
-        const sourceUrl = match.playPath!.replace('live-server1://', '');
-        setSessionLoading(true);
-
-        _bridgeUnsubscribe = desktopBridge.onLiveBridgeResolved((raw) => {
-          const result = raw as LiveBridgeResult;
-          if (result?.hlsUrl) {
-            setSessionUrl(result.hlsUrl);
-            setSessionLoading(false);
-            // if (bridgeUnsubscribe) bridgeUnsubscribe(); <--- DO NOT UNSUBSCRIBE IMMEDIATELY, LET IT BE!
-          } else {
-            setSessionError('failed_live_bridge');
-            setSessionLoading(false);
-          }
-        });
-
-        desktopBridge.startLiveBridge({
-          url: sourceUrl,
-          channelId: match.id,
-        });
-        return;
-      }
 
       setSessionLoading(true);
       try {
@@ -92,27 +51,12 @@ export default function LiveMatchPlayerPage() {
       } catch (_err) {
         setSessionError('error_stream_server');
       } finally {
-        if (!isServer1) setSessionLoading(false);
+        setSessionLoading(false);
       }
     };
 
     initSession();
-
-    return () => {
-      // We must not unsubscribe from the IPC listener here because setSessionLoading(true)
-      // immediately triggers this cleanup block, severing the listener string!
-      // if (bridgeUnsubscribe) bridgeUnsubscribe();
-    };
   }, [match, sessionUrl, sessionLoading, sessionError]);
-
-  // Clean up LiveBridge ONLY when the user physically leaves this page
-  useEffect(() => {
-    return () => {
-      if (checkIsDesktop()) {
-        desktopBridge.stopLiveBridge();
-      }
-    };
-  }, []);
 
   if (isLoading) {
     return <PlayerLoadingSkeleton />;
@@ -213,11 +157,7 @@ export default function LiveMatchPlayerPage() {
   }
 
   if (!sessionLoading && sessionError) {
-    const isDesktopError = sessionError === 'premium_desktop_only';
-
     const sessionErrorMessages: Record<string, string> = {
-      premium_desktop_only: t('premiumDesktopOnly'),
-      failed_live_bridge: t('failedLiveBridge'),
       failed_stream_session: t('failedStreamSession'),
       error_stream_server: t('errorStreamServer'),
     };
@@ -225,45 +165,20 @@ export default function LiveMatchPlayerPage() {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-          {isDesktopError ? t('desktopAppRequired') : t('accessDenied')}
+          {t('accessDenied')}
         </h2>
         <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
           {sessionErrorMessages[sessionError] || sessionError}
         </p>
-
-        {isDesktopError ? (
-          <div className="flex gap-4">
-            <Link
-              href="https://github.com/rudra-sah00/nightwatch/releases"
-              target="_blank"
-            >
-              <Button
-                variant="default"
-                className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {t('downloadApp')}
-              </Button>
-            </Link>
-            <Link href="/live">
-              <Button
-                variant="default"
-                className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
-              >
-                {t('back')}
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <Link href="/live">
-            <Button
-              variant="default"
-              className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
-            >
-              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
-              {t('backToSchedule')}
-            </Button>
-          </Link>
-        )}
+        <Link href="/live">
+          <Button
+            variant="default"
+            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+          >
+            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+            {t('backToSchedule')}
+          </Button>
+        </Link>
       </div>
     );
   }

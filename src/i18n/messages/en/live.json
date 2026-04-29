@@ -60,7 +60,6 @@
   "desktopAppRequired": "Desktop App Required",
   "accessDenied": "Access Denied",
   "premiumDesktopOnly": "Premium channels require the Desktop App.",
-  "failedLiveBridge": "Failed to extract stream URL via LiveBridge.",
   "failedStreamSession": "Failed to initialize secure stream session.",
   "errorStreamServer": "Error connecting to stream server.",
   "downloadApp": "Download App",

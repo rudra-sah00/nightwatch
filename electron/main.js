@@ -75,7 +75,6 @@ const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
 const { getAppVersion } = require('./modules/version.js');
-const { setupLiveBridge } = require('./modules/live-bridge.js');
 const {
   setupOfflineMediaProtocol,
   setupDownloadManager,
@@ -354,9 +353,6 @@ const startElectronApp = async () => {
     setupTray(AppWindow.getInstance(), (quitState) =>
       AppWindow.setQuitting(quitState),
     );
-
-    // Setup Live Bridge for Headless Premium Channels
-    setupLiveBridge();
 
     // Setup Offline Download Manager for HLS segments
     setupDownloadManager();

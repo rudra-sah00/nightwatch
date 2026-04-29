@@ -106,17 +106,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('window-fullscreen-changed', subscription);
   },
 
-  // --- LIVE HLS EXTRACTOR BRIDGE (DaddyLive) ---
-  startLiveBridge: (config) => ipcRenderer.send('start-live-bridge', config),
-  stopLiveBridge: () => ipcRenderer.send('stop-live-bridge'),
-  onLiveBridgeResolved: (callback) => {
-    ipcRenderer.removeAllListeners('live-bridge-resolved');
-    const subscription = (_event, result) => callback(result);
-    ipcRenderer.on('live-bridge-resolved', subscription);
-    return () =>
-      ipcRenderer.removeListener('live-bridge-resolved', subscription);
-  },
-
   // --- OFFLINE HLS DOWNLOADER ---
   startDownload: (config) => ipcRenderer.send('start-download', config),
   cancelDownload: (contentId) => ipcRenderer.send('cancel-download', contentId),

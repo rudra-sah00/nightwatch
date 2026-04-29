@@ -59,7 +59,6 @@
   "desktopAppRequired": "App de Desktop Necessário",
   "accessDenied": "Acesso Negado",
   "premiumDesktopOnly": "Canais premium requerem o App de Desktop.",
-  "failedLiveBridge": "Falha ao extrair a URL da transmissão via LiveBridge.",
   "failedStreamSession": "Falha ao inicializar a sessão de transmissão segura.",
   "errorStreamServer": "Erro ao conectar ao servidor de transmissão.",
   "downloadApp": "Baixar App",

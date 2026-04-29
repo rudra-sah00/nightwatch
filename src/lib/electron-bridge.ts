@@ -109,11 +109,6 @@ function createBridge() {
       onDownloadProgress: noopListen as (
         cb: (item: DownloadItem) => void,
       ) => UnlistenFn,
-      startLiveBridge: noop as (c: { url: string; channelId: string }) => void,
-      stopLiveBridge: noop,
-      onLiveBridgeResolved: noopListen as (
-        cb: (r: unknown) => void,
-      ) => UnlistenFn,
       readOfflineFile: async (_path: string): Promise<Uint8Array> =>
         new Uint8Array(),
       getOfflineMediaBase: async (): Promise<string> => '',
@@ -170,11 +165,6 @@ function createBridge() {
     getDownloads: () => e.getDownloads() as Promise<DownloadItem[]>,
     onDownloadProgress: (cb: (item: DownloadItem) => void) =>
       e.onDownloadProgress(cb) as UnlistenFn,
-    startLiveBridge: (c: { url: string; channelId: string }) =>
-      e.startLiveBridge(c),
-    stopLiveBridge: () => e.stopLiveBridge(),
-    onLiveBridgeResolved: (cb: (r: unknown) => void) =>
-      e.onLiveBridgeResolved(cb) as UnlistenFn,
     readOfflineFile: async (_path: string): Promise<Uint8Array> =>
       new Uint8Array(),
     getOfflineMediaBase: async (): Promise<string> => '',

@@ -59,7 +59,6 @@
   "desktopAppRequired": "Application de Bureau Requise",
   "accessDenied": "Accès Refusé",
   "premiumDesktopOnly": "Les chaînes premium nécessitent l'Application de Bureau.",
-  "failedLiveBridge": "Échec de l'extraction de l'URL du flux via LiveBridge.",
   "failedStreamSession": "Échec de l'initialisation de la session de flux sécurisée.",
   "errorStreamServer": "Erreur de connexion au serveur de flux.",
   "downloadApp": "Télécharger l'App",

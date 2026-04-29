@@ -16,7 +16,6 @@ import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
 import { Server1Channels } from '@/features/livestream/components/Server1Channels';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useSports } from '@/features/livestream/hooks/use-sports';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useLiveContent } from './use-live-content';
 
 const _SERVER_2_SPORTS_FALLBACK = [
@@ -28,7 +27,6 @@ function LiveContent() {
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const t = useTranslations('live');
   const format = useFormatter();
-  const { isDesktopApp } = useDesktopApp();
 
   const ALL_SERVERS = [
     {
@@ -45,10 +43,8 @@ function LiveContent() {
     },
   ];
 
-  // Desktop: only server1, Web: only server2
-  const SERVERS = isDesktopApp
-    ? ALL_SERVERS.filter((s) => s.id === 'server1')
-    : ALL_SERVERS.filter((s) => s.id === 'server2');
+  // Both servers available to all users (web + desktop)
+  const SERVERS = ALL_SERVERS;
 
   const SERVER_1_SPORTS = [{ id: 'all_channels', label: t('allChannels') }];
 
@@ -275,7 +271,7 @@ function LiveContent() {
 
       {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
-        {isDesktopApp && activeServer === 'server1' ? (
+        {activeServer === 'server1' ? (
           <Server1Channels />
         ) : isLoading || isPending ? (
           <div className="space-y-16">

@@ -361,18 +361,18 @@ function LiveMatchModalContent({
               </button>
 
               {/* Watch Party */}
-              {!isMobile && !isServer1 && (
+              {!isMobile && (
                 <button
                   type="button"
                   className={cn(
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
                     'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
-                    isCreatingParty || !canWatch || isServer1
+                    isCreatingParty || !canWatch
                       ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
                       : 'bg-primary text-primary-foreground hover:bg-neo-blue',
                   )}
                   onClick={onWatchParty}
-                  disabled={isCreatingParty || !canWatch || isServer1}
+                  disabled={isCreatingParty || !canWatch}
                 >
                   {isCreatingParty ? (
                     <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
@@ -380,11 +380,7 @@ function LiveMatchModalContent({
                     <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
                   )}
                   <span className="truncate">
-                    {isServer1
-                      ? t('comingSoon')
-                      : isCreatingParty
-                        ? t('creating')
-                        : t('watchTogether')}
+                    {isCreatingParty ? t('creating') : t('watchTogether')}
                   </span>
                 </button>
               )}

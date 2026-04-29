@@ -16,9 +16,24 @@ declare const self: WorkerGlobalScope;
 // cache entire streaming video files — causing blank screens on S2 (MP4) streams.
 // We intercept all video/HLS streaming requests and pass them straight to the network.
 const streamingPassthrough = [
+  // Local Electron proxy — must bypass SW entirely
+  {
+    matcher({ url }: { url: URL }) {
+      return (
+        url.hostname === '127.0.0.1' ||
+        (url.hostname === 'localhost' && url.port !== '3000')
+      );
+    },
+    handler: new NetworkOnly(),
+  },
   // S2 MP4 streams served via the backend proxy
   {
     matcher: /\/api\/stream\//i,
+    handler: new NetworkOnly(),
+  },
+  // Livestream API endpoints
+  {
+    matcher: /\/api\/livestream\//i,
     handler: new NetworkOnly(),
   },
   // HLS manifests and segments (any origin)

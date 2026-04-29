@@ -59,7 +59,6 @@
   "desktopAppRequired": "デスクトップアプリが必要です",
   "accessDenied": "アクセス拒否",
   "premiumDesktopOnly": "プレミアムチャンネルにはデスクトップアプリが必要です。",
-  "failedLiveBridge": "LiveBridge経由でストリームURLの抽出に失敗しました。",
   "failedStreamSession": "安全なストリームセッションの初期化に失敗しました。",
   "errorStreamServer": "ストリームサーバーへの接続エラー。",
   "downloadApp": "アプリをダウンロード",

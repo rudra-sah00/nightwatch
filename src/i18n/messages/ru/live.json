@@ -59,7 +59,6 @@
   "desktopAppRequired": "Требуется Настольное Приложение",
   "accessDenied": "Доступ Запрещён",
   "premiumDesktopOnly": "Премиум-каналы требуют настольное приложение.",
-  "failedLiveBridge": "Не удалось извлечь URL трансляции через LiveBridge.",
   "failedStreamSession": "Не удалось инициализировать безопасную сессию трансляции.",
   "errorStreamServer": "Ошибка подключения к серверу трансляции.",
   "downloadApp": "Скачать Приложение",

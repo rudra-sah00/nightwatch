@@ -59,7 +59,6 @@
   "desktopAppRequired": "Se Requiere la App de Escritorio",
   "accessDenied": "Acceso Denegado",
   "premiumDesktopOnly": "Los canales premium requieren la App de Escritorio.",
-  "failedLiveBridge": "Error al extraer la URL de transmisión a través de LiveBridge.",
   "failedStreamSession": "Error al inicializar la sesión de transmisión segura.",
   "errorStreamServer": "Error al conectar con el servidor de transmisión.",
   "downloadApp": "Descargar App",

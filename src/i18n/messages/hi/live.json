@@ -59,7 +59,6 @@
   "desktopAppRequired": "डेस्कटॉप ऐप आवश्यक है",
   "accessDenied": "पहुँच अस्वीकृत",
   "premiumDesktopOnly": "प्रीमियम चैनलों के लिए डेस्कटॉप ऐप आवश्यक है।",
-  "failedLiveBridge": "LiveBridge के माध्यम से स्ट्रीम URL निकालने में विफल।",
   "failedStreamSession": "सुरक्षित स्ट्रीम सत्र शुरू करने में विफल।",
   "errorStreamServer": "स्ट्रीम सर्वर से कनेक्ट करने में त्रुटि।",
   "downloadApp": "ऐप डाउनलोड करें",
