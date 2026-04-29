@@ -153,7 +153,7 @@ async function startMp4Download(
           }
         },
         item,
-        getStore,
+        getStore(),
         startOffset,
         // onTotalBytes: called once when Content-Length header arrives
         (totalBytes) => {

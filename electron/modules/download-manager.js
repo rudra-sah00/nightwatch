@@ -167,9 +167,10 @@ function setupDownloadManager() {
   }
   if (needsSave) saveDatabase(initialDb);
 
-  // Only auto-restart QUEUED and ERROR items — not PAUSED
+  // Only auto-restart QUEUED, ERROR, and FAILED items — not PAUSED
   const autoStartItems = initialDb.items.filter(
-    (i) => i.status === 'QUEUED' || i.status === 'ERROR',
+    (i) =>
+      i.status === 'QUEUED' || i.status === 'ERROR' || i.status === 'FAILED',
   );
   for (const item of autoStartItems) {
     downloadQueue.push({

@@ -85,7 +85,7 @@ async function startHlsDownload(
     m3u8Url === 'undefined'
   ) {
     if (item.status !== 'CANCELLED') {
-      item.status = 'FAILED';
+      item.status = 'ERROR';
       item.error = 'Invalid M3U8 URL provided';
       syncDbState(item);
       sendSafeProgress(eventSender, item);
@@ -181,6 +181,20 @@ async function startHlsDownload(
             isKey: true,
           });
         }
+      } else if (line.startsWith('#EXT-X-MAP')) {
+        // Handle fMP4 init segments (required for S3 HLS streams)
+        // Format: #EXT-X-MAP:URI="https://...init.mp4"
+        const uriMatch = line.match(/URI=["']([^"']+)["']/);
+        if (uriMatch) {
+          const initUrl = resolveUrl(targetPlaylistUrl, uriMatch[1]);
+          const initName = `init_${i}.mp4`;
+          segments.push({
+            originalUrl: initUrl,
+            localName: initName,
+            lineIndex: i,
+            isInit: true,
+          });
+        }
       }
     }
 
@@ -196,7 +210,7 @@ async function startHlsDownload(
       const restoredSet = [];
 
       for (const seg of segments) {
-        if (seg.isKey) continue; // Keys don't count towards segment progress bar
+        if (seg.isKey || seg.isInit) continue; // Keys and init segments don't count towards progress
         const destPath = path.join(contentFolder, seg.localName);
         if (fs.existsSync(destPath)) {
           const stat = fs.statSync(destPath);
@@ -225,7 +239,7 @@ async function startHlsDownload(
     const downloadSegment = async (segment) => {
       if (item.status === 'CANCELLED') return;
       const destPath = path.join(contentFolder, segment.localName);
-      if (segment.isKey) {
+      if (segment.isKey || segment.isInit) {
         rewritenLines[segment.lineIndex] = rewritenLines[
           segment.lineIndex
         ].replace(/URI=["'][^"']+["']/, `URI="${segment.localName}"`);
@@ -246,10 +260,10 @@ async function startHlsDownload(
           bytesSinceLastTick += bytes;
         },
         item,
-        getStore,
+        getStore(),
       );
 
-      if (!segment.isKey) {
+      if (!segment.isKey && !segment.isInit) {
         item.segmentsDownloaded++;
         if (!item.segmentsDownloadedSet) item.segmentsDownloadedSet = [];
         item.segmentsDownloadedSet.push(segment.localName);
@@ -304,7 +318,7 @@ async function startHlsDownload(
     // If we missed segments due to network errors, mark as ERROR instead.
     const finalRestoredSet = [];
     for (const seg of segments) {
-      if (seg.isKey) continue;
+      if (seg.isKey || seg.isInit) continue;
       if (fs.existsSync(path.join(contentFolder, seg.localName))) {
         finalRestoredSet.push(seg.localName);
       }
@@ -347,7 +361,7 @@ async function startHlsDownload(
       sendSafeProgress(eventSender, item);
       return;
     }
-    item.status = 'FAILED';
+    item.status = 'ERROR';
     item.error = error.message;
     console.error('[startHlsDownload ERROR]', error);
     item.speed = '';

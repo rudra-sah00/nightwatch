@@ -215,6 +215,11 @@ const startElectronApp = async () => {
       details.url.includes('/api/stream/') ||
       details.url.includes('/api/');
 
+    // CSP for our own app pages (nightwatch.in or localhost)
+    const isAppPage =
+      details.url.startsWith('https://nightwatch.in') ||
+      details.url.startsWith('http://localhost');
+
     // Strip out any existing CORS headers to prevent duplicate header conflicts
     const cleanedHeaders = { ...details.responseHeaders };
     const corsKeys = [
@@ -227,6 +232,23 @@ const startElectronApp = async () => {
       if (corsKeys.includes(key.toLowerCase())) {
         delete cleanedHeaders[key];
       }
+    }
+
+    // Inject Content-Security-Policy on our own HTML pages
+    if (isAppPage && details.resourceType === 'mainFrame') {
+      cleanedHeaders['Content-Security-Policy'] = [
+        [
+          "default-src 'self' https://nightwatch.in https://*.nightwatch.in",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://nightwatch.in https://*.nightwatch.in https://challenges.cloudflare.com",
+          "style-src 'self' 'unsafe-inline' https://nightwatch.in https://*.nightwatch.in https://fonts.googleapis.com",
+          "font-src 'self' https://fonts.gstatic.com",
+          "img-src 'self' data: blob: https: offline-media:",
+          "media-src 'self' blob: https: offline-media:",
+          "connect-src 'self' https: wss: ws: http://localhost:* offline-media:",
+          "frame-src 'self' https://challenges.cloudflare.com",
+          "worker-src 'self' blob:",
+        ].join('; '),
+      ];
     }
 
     if (isBackendRequest) {
