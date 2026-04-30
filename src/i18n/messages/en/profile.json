@@ -79,7 +79,7 @@
   "serverSelection": {
     "title": "Server Selection",
     "ariaLabel": "Server selection",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "Standard",
     "balanced": "Balanced",
     "performance": "Performance",

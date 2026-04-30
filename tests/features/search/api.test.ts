@@ -23,26 +23,54 @@ describe('Search API', () => {
         { id: '2', title: 'Movie 2', type: 'movie' },
       ];
 
-      vi.mocked(apiFetch).mockResolvedValueOnce({ results: mockResults });
+      // S1 path fires two parallel calls (s1 + pv)
+      vi.mocked(apiFetch)
+        .mockResolvedValueOnce({ results: mockResults })
+        .mockResolvedValueOnce({ results: [] });
 
       const result = await searchContent('test query');
 
+      expect(apiFetch).toHaveBeenCalledTimes(2);
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test%20query',
+        '/api/video/search?q=test%20query&server=s1',
         undefined,
       );
-      expect(result).toEqual(mockResults);
+      expect(apiFetch).toHaveBeenCalledWith(
+        '/api/video/search?q=test%20query&server=pv',
+        undefined,
+      );
+      expect(result).toEqual(
+        mockResults.map((r) => ({ ...r, provider: 's1' })),
+      );
     });
 
     it('should pass options', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({ results: [] });
+      vi.mocked(apiFetch)
+        .mockResolvedValueOnce({ results: [] })
+        .mockResolvedValueOnce({ results: [] });
 
       const options = { signal: new AbortController().signal };
       await searchContent('test', undefined, options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test',
+        '/api/video/search?q=test&server=s1',
         options,
+      );
+      expect(apiFetch).toHaveBeenCalledWith(
+        '/api/video/search?q=test&server=pv',
+        options,
+      );
+    });
+
+    it('should use single call for non-s1 servers', async () => {
+      vi.mocked(apiFetch).mockResolvedValueOnce({ results: [] });
+
+      await searchContent('test', 's2');
+
+      expect(apiFetch).toHaveBeenCalledTimes(1);
+      expect(apiFetch).toHaveBeenCalledWith(
+        '/api/video/search?q=test&server=s2',
+        undefined,
       );
     });
   });
@@ -179,7 +207,8 @@ describe('Search API', () => {
       }
 
       // searchContent should have been called 110 times (no caching across different keys)
-      expect(apiFetch).toHaveBeenCalledTimes(110);
+      // Each S1 call fires 2 apiFetch calls (s1 + pv in parallel)
+      expect(apiFetch).toHaveBeenCalledTimes(220);
     });
   });
 });

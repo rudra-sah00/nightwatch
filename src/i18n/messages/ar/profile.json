@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "اختيار الخادم",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "قياسي",
     "balanced": "متوازن",
     "performance": "أداء",

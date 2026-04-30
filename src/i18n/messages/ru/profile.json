@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "Выбор сервера",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "Стандарт",
     "balanced": "Сбалансированный",
     "performance": "Производительность",

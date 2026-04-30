@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "Serverauswahl",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "Standard",
     "balanced": "Ausgewogen",
     "performance": "Leistung",

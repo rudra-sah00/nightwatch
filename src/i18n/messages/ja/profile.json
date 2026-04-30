@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "サーバー選択",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "スタンダード",
     "balanced": "バランス",
     "performance": "パフォーマンス",

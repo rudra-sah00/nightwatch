@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "Sunucu Seçimi",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "Standart",
     "balanced": "Dengeli",
     "performance": "Performans",

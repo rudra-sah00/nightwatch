@@ -17,7 +17,35 @@ export async function searchContent(
   const cached = searchResultsCache.get(cacheKey);
   if (cached) return cached;
 
-  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
+  // When S1 (Netflix) is selected, search both S1 and PV (Prime Video) in parallel
+  if (!server || server === 's1') {
+    const [s1Results, pvResults] = await Promise.all([
+      apiFetch<{ results: SearchResult[] }>(
+        `/api/video/search?q=${encodeURIComponent(query)}&server=s1`,
+        options,
+      )
+        .then(({ results }) =>
+          results.map((r) => ({ ...r, provider: 's1' as const })),
+        )
+        .catch(() => [] as SearchResult[]),
+      apiFetch<{ results: SearchResult[] }>(
+        `/api/video/search?q=${encodeURIComponent(query)}&server=pv`,
+        options,
+      )
+        .then(({ results }) =>
+          results.map((r) => ({ ...r, provider: 'pv' as const })),
+        )
+        .catch(() => [] as SearchResult[]),
+    ]);
+    // Interleave: S1 first, then PV results that aren't duplicates by title
+    const seen = new Set(s1Results.map((r) => r.title.toLowerCase()));
+    const uniquePv = pvResults.filter((r) => !seen.has(r.title.toLowerCase()));
+    const merged = [...s1Results, ...uniquePv];
+    searchResultsCache.set(cacheKey, merged);
+    return merged;
+  }
+
+  const serverParam = `&server=${encodeURIComponent(server)}`;
   const { results } = await apiFetch<{ results: SearchResult[] }>(
     `/api/video/search?q=${encodeURIComponent(query)}${serverParam}`,
     options,

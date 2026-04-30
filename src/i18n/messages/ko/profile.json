@@ -62,7 +62,7 @@
   },
   "serverSelection": {
     "title": "서버 선택",
-    "netflix": "Netflix",
+    "netflix": "Server 1",
     "standard": "표준",
     "balanced": "균형",
     "performance": "성능",
