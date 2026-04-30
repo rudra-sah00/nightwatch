@@ -8,19 +8,21 @@ const THRESHOLD = 80;
 const MAX_PULL = 120;
 
 /**
- * Pull-to-refresh for mobile. Attach `ref` to the scrollable container.
- * Only triggers when the container is fully at rest at the top (scrollTop === 0)
- * and the user pulls down deliberately.
+ * Pull-to-refresh for mobile.
+ * Only activates when:
+ * 1. The container scrollTop is 0
+ * 2. The user is pulling DOWN (not scrolling up to reach top)
+ * 3. No scroll happened in the last 200ms (no momentum)
  */
 export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
   const ref = useRef<HTMLDivElement>(null);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const startY = useRef(0);
+
   const pulling = useRef(false);
-  const scrollWasZero = useRef(false);
-  const lastScrollTop = useRef(0);
-  const scrollSettled = useRef(false);
+  const startY = useRef(0);
+  const startScrollTop = useRef(0);
+  const lastScrollTime = useRef(0);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -38,46 +40,51 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
     const el = ref.current;
     if (!el) return;
 
-    // Track scroll to know if we're settled at top (not mid-momentum)
-    let scrollTimer: ReturnType<typeof setTimeout>;
     const onScroll = () => {
-      lastScrollTop.current = el.scrollTop;
-      scrollSettled.current = false;
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => {
-        scrollSettled.current = true;
-      }, 100);
+      lastScrollTime.current = Date.now();
     };
 
     const onTouchStart = (e: TouchEvent) => {
-      // Must be at scrollTop 0 AND scroll must have settled (no momentum)
-      const atTop = el.scrollTop <= 0;
-      scrollWasZero.current =
-        atTop && (scrollSettled.current || lastScrollTop.current <= 0);
-      if (scrollWasZero.current && !isRefreshing) {
-        startY.current = e.touches[0].clientY;
-        pulling.current = false;
-      }
+      if (isRefreshing) return;
+      startY.current = e.touches[0].clientY;
+      startScrollTop.current = el.scrollTop;
+      pulling.current = false;
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!scrollWasZero.current || isRefreshing) return;
-      // If scroll has moved away from top, cancel
-      if (el.scrollTop > 0) {
-        pulling.current = false;
-        setPullDistance(0);
-        scrollWasZero.current = false;
+      if (isRefreshing) return;
+
+      const currentScrollTop = el.scrollTop;
+      const dy = e.touches[0].clientY - startY.current;
+
+      // If the container is not at the top, let normal scroll happen
+      if (currentScrollTop > 0) {
+        if (pulling.current) {
+          pulling.current = false;
+          setPullDistance(0);
+        }
         return;
       }
-      const dy = e.touches[0].clientY - startY.current;
-      if (dy > 8) {
+
+      // Container is at top. But did we ARRIVE here by scrolling up?
+      // If touch started when scrollTop > 0, user was scrolling up — don't pull
+      if (startScrollTop.current > 5) {
+        return;
+      }
+
+      // If there was a scroll event in the last 200ms, momentum is still going
+      if (
+        Date.now() - lastScrollTime.current < 200 &&
+        startScrollTop.current > 0
+      ) {
+        return;
+      }
+
+      // Only pull if finger is moving DOWN
+      if (dy > 10) {
         pulling.current = true;
-        setPullDistance(Math.min(dy * 0.4, MAX_PULL));
+        setPullDistance(Math.min((dy - 10) * 0.4, MAX_PULL));
         e.preventDefault();
-      } else if (dy < -5) {
-        pulling.current = false;
-        scrollWasZero.current = false;
-        setPullDistance(0);
       }
     };
 
@@ -87,7 +94,6 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
         return;
       }
       pulling.current = false;
-      scrollWasZero.current = false;
       if (pullDistance >= THRESHOLD) {
         handleRefresh();
       } else {
@@ -95,15 +101,11 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
       }
     };
 
-    // Mark as settled initially
-    scrollSettled.current = el.scrollTop <= 0;
-
     el.addEventListener('scroll', onScroll, { passive: true });
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
     return () => {
-      clearTimeout(scrollTimer);
       el.removeEventListener('scroll', onScroll);
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
