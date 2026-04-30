@@ -29,9 +29,7 @@
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 1 | Fix `innerHTML` XSS in Server1Channels | `src/features/livestream/components/Server1Channels.tsx` | `onError` handler uses `innerHTML` injection — bypasses React reconciliation and is an XSS vector if channel data is untrusted. Replace with React state-based fallback. |
-| 2 | Remove `window.debounceTimer` global | `src/features/livestream/components/Server1Channels.tsx` | Uses `declare global { interface Window { debounceTimer } }` — pollutes global namespace, not cleaned up on unmount. Replace with `useRef` or the shared `useDebounce` hook. |
-| 3 | Stop importing `package.json` in client bundle | `src/components/ui/creator-footer.tsx` | Imports entire `package.json` into the client bundle for the version number. Replace with a build-time constant or `process.env.npm_package_version`. |
+| 1 | Stop importing `package.json` in client bundle | `src/components/ui/creator-footer.tsx` | Imports entire `package.json` into the client bundle for the version number. Replace with a build-time constant or `process.env.npm_package_version`. |
 
 ### A.2 Remove Artificial Page Delays
 
@@ -183,8 +181,6 @@
 | 2 | Add focus trap to content-detail-modal | `src/features/search/components/content-detail-modal.tsx` | Same issue — has dialog role but no focus trap. |
 | 3 | Optimize LiveMatchCard modal rendering | `src/features/livestream/components/LiveMatchCard.tsx` | Each card renders its own hidden modal instance. Use a single shared modal at the list level. |
 | 4 | Add `aria-live` for live score updates | `src/features/livestream/components/LiveMatchCard.tsx` | Scores update in real-time but changes aren't announced. |
-| 5 | Add channel favorites/recently watched | `src/features/livestream/components/Server1Channels.tsx` | No way to bookmark frequently watched channels. |
-| 6 | Add category filtering for channels | `src/features/livestream/components/Server1Channels.tsx` | Only text search — add genre/category tabs. |
 
 ---
 
