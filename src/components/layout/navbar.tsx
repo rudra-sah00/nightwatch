@@ -31,13 +31,13 @@ export function Navbar() {
             className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
             title={t('home')}
           >
-            <div className="md:hidden w-10 h-10 border border-border bg-neo-yellow flex items-center justify-center rounded-md hover:bg-neo-yellow/80 transition-colors shrink-0">
+            <div className="md:hidden w-10 h-10 flex items-center justify-center shrink-0">
               <img
                 src="/logo-ico.png"
                 alt={t('logoAlt')}
-                width={24}
-                height={24}
-                className="w-6 h-6 object-contain"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain"
               />
             </div>
             <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
