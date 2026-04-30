@@ -23,7 +23,11 @@
     "test:e2e": "for key in $(redis-cli --scan --pattern 'security:*' 2>/dev/null); do redis-cli del $key; done; for key in $(redis-cli --scan --pattern 'auth:otp_limit*' 2>/dev/null); do redis-cli del $key; done; npx playwright test",
     "version": "node -p \"require('./package.json').version\"",
     "desktop:start": "electron .",
-    "desktop:build": "electron-builder --mac --win --linux && bash scripts/resign-mac.sh desktop-build/mac-arm64/Nightwatch.app"
+    "desktop:build": "electron-builder --mac --win --linux && bash scripts/resign-mac.sh desktop-build/mac-arm64/Nightwatch.app",
+    "mobile:build": "npx cap sync",
+    "mobile:sync": "npx cap sync",
+    "mobile:ios": "npx cap open ios",
+    "mobile:android": "npx cap open android"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}": [
@@ -31,6 +35,21 @@
     ]
   },
   "dependencies": {
+    "@capacitor-community/keep-awake": "^8.0.1",
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/clipboard": "^8.0.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.3.1",
+    "@capacitor/keyboard": "^8.0.3",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/screen-orientation": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
+    "@capawesome/capacitor-badge": "^8.0.2",
     "@marsidev/react-turnstile": "^1.4.1",
     "@mediapipe/tasks-vision": "^0.10.32",
     "@radix-ui/react-label": "^2.1.2",
@@ -83,6 +102,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@capacitor/cli": "^8.3.1",
     "@electron/asar": "^4.2.0",
     "@electron/fuses": "^2.1.1",
     "@electron/rebuild": "^4.0.3",

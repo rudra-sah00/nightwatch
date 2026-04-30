@@ -5,6 +5,7 @@ import './globals.css';
 import { Suspense } from 'react';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
+import { MobileShell } from '@/components/layout/MobileShell';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
@@ -85,6 +86,7 @@ export default async function RootLayout({
                     >
                       <ProgressBar />
                       <DiscordPresenceSync />
+                      <MobileShell />
                       <OfflineIndicator />
                       <SwUpdatePrompt />
                       <SplashScreen />

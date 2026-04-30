@@ -11,6 +11,8 @@ import { ClipCard } from '@/features/clips/components/ClipCard';
 import { useClips } from '@/features/clips/hooks/use-clips';
 import type { Clip } from '@/features/clips/types';
 import { WS_EVENTS } from '@/lib/constants';
+import { checkIsMobile } from '@/lib/electron-bridge';
+import { mobileBridge } from '@/lib/mobile-bridge';
 import { useSocket } from '@/providers/socket-provider';
 
 const SORT_OPTIONS = [
@@ -82,20 +84,26 @@ export function ClipsGrid() {
     [router],
   );
 
+  const shareOrCopy = useCallback(async (url: string, title: string) => {
+    if (checkIsMobile()) {
+      await mobileBridge.share({ title, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  }, []);
+
   const handleShare = useCallback(
     async (clip: Clip) => {
       if (clip.isPublic && clip.shareId) {
-        // Already public — copy link
         const url = `${window.location.origin}/clip/share/${clip.shareId}`;
-        await navigator.clipboard.writeText(url);
+        await shareOrCopy(url, clip.title);
         toast.success('Link copied!');
       } else {
-        // Make public and copy link
         try {
           const result = await toggleClipPublic(clip.id);
           if (result.isPublic && result.shareId) {
             const url = `${window.location.origin}/clip/share/${result.shareId}`;
-            await navigator.clipboard.writeText(url);
+            await shareOrCopy(url, clip.title);
             toast.success('Clip shared! Link copied.');
             refetch();
           }
@@ -104,7 +112,7 @@ export function ClipsGrid() {
         }
       }
     },
-    [refetch],
+    [refetch, shareOrCopy],
   );
 
   return (

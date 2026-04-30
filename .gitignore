@@ -72,3 +72,8 @@ src-tauri/target/
 src-tauri/gen/
 src-tauri/Cargo.lock
 logs/
+
+# Capacitor native projects
+ios/
+android/
+out/

@@ -131,3 +131,10 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     uses: ./.github/workflows/build-desktop.yml
     secrets: inherit
+
+  build-android:
+    name: Build Android APK (Release)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/build-android.yml
+    secrets: inherit

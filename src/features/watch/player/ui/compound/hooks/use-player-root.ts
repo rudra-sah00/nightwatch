@@ -1,6 +1,11 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import {
+  checkIsDesktop,
+  checkIsMobile,
+  desktopBridge,
+} from '@/lib/electron-bridge';
+import { mobileBridge } from '@/lib/mobile-bridge';
 import {
   initialPlayerState,
   playerReducer,
@@ -387,17 +392,19 @@ export function usePlayerRoot({
 
   // --- NATIVE OS: KEEP AWAKE DURING PLAYBACK ---
   useEffect(() => {
+    const playing = state.isPlaying && !state.isPaused;
     if (checkIsDesktop() && desktopBridge.setKeepAwake) {
-      if (state.isPlaying && !state.isPaused) {
-        desktopBridge.setKeepAwake(true);
-      } else {
-        desktopBridge.setKeepAwake(false);
-      }
+      desktopBridge.setKeepAwake(playing);
     }
-    // Cleanup on unmount or URL change
+    if (checkIsMobile()) {
+      mobileBridge.setKeepAwake(playing);
+    }
     return () => {
       if (checkIsDesktop() && desktopBridge.setKeepAwake) {
         desktopBridge.setKeepAwake(false);
+      }
+      if (checkIsMobile()) {
+        mobileBridge.setKeepAwake(false);
       }
     };
   }, [state.isPlaying, state.isPaused]);

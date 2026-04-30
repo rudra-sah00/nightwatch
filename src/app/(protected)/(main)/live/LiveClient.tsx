@@ -55,7 +55,7 @@ function LiveContent() {
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
       {/* Hero Header */}
-      <div className="mb-12 bg-neo-yellow relative z-40 rounded-2xl overflow-visible">
+      <div className="mb-12 bg-neo-yellow relative rounded-2xl overflow-visible">
         {/* Abstract background shapes */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
           <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
@@ -81,7 +81,7 @@ function LiveContent() {
             </div>
 
             {/* Sport Selector Dropdown */}
-            <div className="relative w-full md:w-auto flex-grow min-w-0 z-40">
+            <div className="relative w-full md:w-auto flex-grow min-w-0 overflow-visible">
               <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
                 {t('selectCoverage')}
               </p>

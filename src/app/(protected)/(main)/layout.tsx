@@ -18,6 +18,8 @@ import { RightSidebar } from '@/components/layout/right-sidebar';
 import { GlobalTour } from '@/components/ui/global-tour';
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
 import { useNetworkStatus } from '@/hooks/use-network-status';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { ServerProvider } from '@/providers/server-provider';
 
@@ -57,7 +59,18 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const [sidebarsDisabled, _setSidebarsDisabled] = useState(false);
   const disabledRef = useRef(false);
   const cooldownRef = useRef(false);
+  const recentTouchRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    ref: pullRef,
+    isRefreshing,
+    pullDistance,
+  } = usePullToRefresh(
+    useCallback(() => {
+      window.location.reload();
+    }, []),
+  );
 
   const setSidebarsDisabled = useCallback((disabled: boolean) => {
     disabledRef.current = disabled;
@@ -76,6 +89,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      if (recentTouchRef.current) return;
       if (disabledRef.current || cooldownRef.current) return;
       const container = containerRef.current;
       if (!container) return;
@@ -106,15 +120,69 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Mobile native app uses swipe gestures instead of mouse hover
+    if (checkIsMobile()) return;
     const container = containerRef.current;
     if (!container) return;
+
+    // Suppress mouse events that originate from touch
+    const onTouch = () => {
+      recentTouchRef.current = true;
+      setTimeout(() => {
+        recentTouchRef.current = false;
+      }, 500);
+    };
+
+    container.addEventListener('touchstart', onTouch, { passive: true });
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('mouseleave', handleMouseLeave);
     return () => {
+      container.removeEventListener('touchstart', onTouch);
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [handleMouseMove, handleMouseLeave]);
+
+  // --- MOBILE: Swipe gestures to open sidebars ---
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let startX = 0;
+    let startY = 0;
+    let swiping = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (disabledRef.current) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      swiping = true;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!swiping) return;
+      swiping = false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      // Only count horizontal swipes (dx > dy)
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+
+      if (dx > 0) {
+        // Swipe right → open left sidebar (only from left edge)
+        if (startX < 40) setLeftOpen(true);
+      } else {
+        // Swipe left → open right sidebar (only from right edge)
+        const w = container.getBoundingClientRect().width;
+        if (startX > w - 40) setRightOpen(true);
+      }
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
 
   const bypassOfflineState =
     pathname.startsWith('/watch/') ||
@@ -150,10 +218,28 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           <div
             ref={containerRef}
             id="main-content"
-            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden"
+            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
           >
             <LeftSidebar />
-            <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full">
+            <div
+              ref={pullRef}
+              className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative"
+            >
+              {/* Pull-to-refresh indicator */}
+              {pullDistance > 0 && (
+                <div
+                  className="flex items-center justify-center shrink-0 overflow-hidden"
+                  style={{ height: pullDistance }}
+                >
+                  <div
+                    className={`w-6 h-6 border-[3px] border-border border-t-transparent rounded-full ${isRefreshing ? 'animate-spin' : ''}`}
+                    style={{
+                      opacity: Math.min(pullDistance / 80, 1),
+                      transform: `rotate(${pullDistance * 3}deg)`,
+                    }}
+                  />
+                </div>
+              )}
               {showOfflineBlocker ? <OfflineState /> : children}
             </div>
             <RightSidebar />

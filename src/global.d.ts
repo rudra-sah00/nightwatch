@@ -18,4 +18,7 @@ type Messages = {
 
 declare global {
   interface IntlMessages extends Messages {}
+  interface Window {
+    Capacitor?: { isNativePlatform?: () => boolean };
+  }
 }

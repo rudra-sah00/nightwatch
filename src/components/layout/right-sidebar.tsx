@@ -15,9 +15,11 @@ import { formatActivity } from '@/features/friends/format-activity';
 import { useCall } from '@/features/friends/hooks/use-call';
 import { useFriends } from '@/features/friends/hooks/use-friends';
 import type { FriendActivity } from '@/features/friends/types';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 export function RightSidebar() {
-  const { rightOpen: open } = useSidebar();
+  const { rightOpen: open, setRightOpen } = useSidebar();
+  const mobile = useIsMobile();
   const {
     onlineFriends,
     offlineFriends,
@@ -248,9 +250,15 @@ export function RightSidebar() {
       )}
 
       <aside
-        className={`shrink-0 h-full bg-card flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
-          open ? 'w-80 rounded-2xl' : 'w-11 hover:w-14 rounded-l-2xl -mr-2'
-        }`}
+        className={
+          mobile
+            ? `${open ? 'absolute inset-0 z-40 bg-card flex flex-col overflow-hidden animate-in slide-in-from-right duration-200' : 'hidden'}`
+            : `shrink-0 h-full bg-card flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+                open
+                  ? 'w-80 rounded-2xl'
+                  : 'w-11 hover:w-14 rounded-l-2xl -mr-2'
+              }`
+        }
       >
         {open ? (
           <>
@@ -259,14 +267,26 @@ export function RightSidebar() {
               <span className="text-sm font-black uppercase tracking-widest font-headline text-foreground">
                 {t('title')}
               </span>
-              <button
-                type="button"
-                onClick={openSpotlight}
-                className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-                aria-label={t('addFriend')}
-              >
-                <UserPlus className="w-4 h-4 text-foreground/60" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={openSpotlight}
+                  className="px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-xs font-headline font-black uppercase tracking-widest text-foreground/60"
+                  aria-label={t('addFriend')}
+                >
+                  + {t('addFriend')}
+                </button>
+                {mobile && (
+                  <button
+                    type="button"
+                    onClick={() => setRightOpen(false)}
+                    className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Search filter */}

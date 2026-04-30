@@ -35,15 +35,23 @@ type UnlistenFn = () => void;
 
 const isElectronEnv = typeof window !== 'undefined' && 'electronAPI' in window;
 
+// Capacitor detection — true when running inside the native iOS/Android shell
+const isCapacitorEnv =
+  typeof window !== 'undefined' &&
+  window.Capacitor?.isNativePlatform?.() === true;
+
 export const isDesktop = isElectronEnv;
-export const isMobile = false;
+export const isMobile = isCapacitorEnv;
 
 export function checkIsDesktop(): boolean {
   return typeof window !== 'undefined' && 'electronAPI' in window;
 }
 
 export function checkIsMobile(): boolean {
-  return false;
+  return (
+    typeof window !== 'undefined' &&
+    window.Capacitor?.isNativePlatform?.() === true
+  );
 }
 
 const api = () =>

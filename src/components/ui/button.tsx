@@ -1,6 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
+import { hapticLight } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
@@ -58,9 +59,15 @@ function Button({
   isLoading,
   children,
   ref,
+  onClick,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    hapticLight();
+    onClick?.(e);
+  };
 
   // When using asChild, don't render loading state to avoid multiple children
   // The Slot component expects exactly one child
@@ -69,6 +76,7 @@ function Button({
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={handleClick}
         {...props}
       >
         {children}
@@ -83,6 +91,7 @@ function Button({
       disabled={isLoading || props.disabled}
       aria-busy={isLoading}
       aria-live={isLoading ? 'polite' : 'off'}
+      onClick={handleClick}
       {...props}
     >
       {isLoading ? (
