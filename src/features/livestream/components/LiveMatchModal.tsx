@@ -132,18 +132,12 @@ function LiveMatchModalContent({
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
-  const isServer2 = match.id.startsWith('live-server2');
-  const isServer1 = match.id.startsWith('live-server1:');
-  const providerName = isServer1
-    ? t('liveTV')
-    : isServer2
-      ? t('privateServer')
-      : t('sportsToday');
+  const isLivestream = match.id.startsWith('live-server1');
+  const providerName = isLivestream ? t('liveTV') : t('sportsToday');
   const canWatch =
-    (isLive || isServer2 || isServer1) &&
+    (isLive || isLivestream) &&
     (match.playType === 'PlayTypeVideo' ||
-      isServer2 ||
-      isServer1 ||
+      isLivestream ||
       match.playType === 'hls');
   const team1Name = asText(match.team1?.name, t('teamFallback1'));
   const team2Name = asText(match.team2?.name, t('teamFallback2'));
@@ -151,7 +145,9 @@ function LiveMatchModalContent({
   const typeName = asText(match.type);
   const timeDesc = asText(match.timeDesc);
   const isChannelCard =
-    isServer1 || match.contentKind === 'channel' || typeName === 'all_channels';
+    isLivestream ||
+    match.contentKind === 'channel' ||
+    typeName === 'all_channels';
   const channelTitle = asText(match.channelName) || team1Name;
 
   const safeTeam1 = {
@@ -197,7 +193,7 @@ function LiveMatchModalContent({
             </span>
             <div
               className={`px-3 py-1 border border-gray-200 text-[10px] font-black font-headline uppercase tracking-[0.2em] rounded-md hidden sm:block ${
-                isServer2
+                isLivestream
                   ? 'bg-neo-blue text-primary-foreground'
                   : 'bg-neo-yellow text-foreground'
               }`}

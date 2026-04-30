@@ -6,9 +6,6 @@ import { useTransition } from 'react';
 export function useLiveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const defaultServer = 'server1';
-  const activeServer =
-    (searchParams.get('server') as 'server1' | 'server2') || defaultServer;
   const activeTab = searchParams.get('sportType') || 'all_channels';
 
   const [isPending, startTransition] = useTransition();
@@ -17,28 +14,13 @@ export function useLiveContent() {
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.set('sportType', val);
-      params.set('server', activeServer);
-      router.push(`/live?${params.toString()}`);
-    });
-  };
-
-  const handleServerChange = (
-    serverId: 'server1' | 'server2',
-    defaultSport: string,
-  ) => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('server', serverId);
-      params.set('sportType', defaultSport);
       router.push(`/live?${params.toString()}`);
     });
   };
 
   return {
-    activeServer,
     activeTab,
     isPending,
     handleTabChange,
-    handleServerChange,
   };
 }

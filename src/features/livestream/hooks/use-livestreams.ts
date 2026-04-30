@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
 import type { LiveMatch } from '../types';
 
-export function useLivestreams(sportType = 'basketball', server = 'server1') {
+export function useLivestreams(sportType = 'basketball') {
   const [schedule, setSchedule] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -22,7 +22,6 @@ export function useLivestreams(sportType = 'basketball', server = 'server1') {
         sportType,
         0,
         3,
-        server,
         controller.signal,
       );
 
@@ -42,7 +41,7 @@ export function useLivestreams(sportType = 'basketball', server = 'server1') {
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, [sportType, server]);
+  }, [sportType]);
 
   useEffect(() => {
     loadSchedule();

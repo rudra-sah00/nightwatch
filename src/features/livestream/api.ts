@@ -14,14 +14,10 @@ export const fetchLivestreamSchedule = async (
   sportType = 'basketball',
   daysBackward = 0,
   daysForward = 3,
-  server = 'server1',
   signal?: AbortSignal,
 ): Promise<LiveMatch[]> => {
-  // Intentionally NOT catching here — let the error propagate to useLivestreams
-  // so it sets error state and shows the retry UI instead of silently rendering
-  // "No Matches Found" when the backend session isn't warm yet.
   const data = await apiFetch<LivestreamScheduleResponse>(
-    `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=${server}`,
+    `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=server1`,
     { signal },
   );
   return data?.items || [];

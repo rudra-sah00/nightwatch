@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
-  Globe2,
   Radio,
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -13,61 +12,21 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
-import { Server1Channels } from '@/features/livestream/components/Server1Channels';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useSports } from '@/features/livestream/hooks/use-sports';
 import { useLiveContent } from './use-live-content';
 
-const _SERVER_2_SPORTS_FALLBACK = [
-  { id: 'all_channels', label: 'All Channels' },
-];
-
 function LiveContent() {
-  const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const t = useTranslations('live');
   const format = useFormatter();
 
-  const ALL_SERVERS = [
-    {
-      id: 'server1' as const,
-      label: t('server1'),
-      short: 'S1',
-      desc: t('server1Desc'),
-    },
-    {
-      id: 'server2' as const,
-      label: t('server2'),
-      short: 'S2',
-      desc: t('server2Desc'),
-    },
-  ];
+  const { activeTab, isPending, handleTabChange } = useLiveContent();
 
-  // Both servers available to all users (web + desktop)
-  const SERVERS = ALL_SERVERS;
+  const { sports } = useSports();
+  const { schedule, isLoading, error, refresh } = useLivestreams(activeTab);
 
-  const SERVER_1_SPORTS = [{ id: 'all_channels', label: t('allChannels') }];
-
-  const {
-    activeServer,
-    activeTab,
-    isPending,
-    handleTabChange,
-    handleServerChange,
-  } = useLiveContent();
-
-  const { sports: dynamicServer2Sports } = useSports();
-  const currentSports =
-    activeServer === 'server1' ? SERVER_1_SPORTS : dynamicServer2Sports;
-
-  const { schedule, isLoading, error, refresh } = useLivestreams(
-    activeTab,
-    activeServer,
-  );
-
-  const isAllChannelsView =
-    (activeServer === 'server1' || activeServer === 'server2') &&
-    activeTab === 'all_channels';
+  const isAllChannelsView = activeTab === 'all_channels';
 
   // Separate live, upcoming, and ended matches
   const endedMatches = schedule.filter((m) => m.status === 'MatchEnded');
@@ -91,9 +50,7 @@ function LiveContent() {
     {} as Record<string, typeof activeMatches>,
   );
 
-  const activeSport = [...SERVER_1_SPORTS, ...dynamicServer2Sports].find(
-    (s) => s.id === activeTab,
-  );
+  const activeSport = sports.find((s) => s.id === activeTab);
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
@@ -123,147 +80,61 @@ function LiveContent() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-start md:items-end gap-6 w-full min-w-0 relative">
-              {/* Server Selector Dropdown */}
-              <div className="relative w-full md:w-auto shrink-0 md:shrink min-w-0 z-50">
-                <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
-                  1. {t('regionProvider')}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsServerMenuOpen(!isServerMenuOpen);
-                    setIsSportMenuOpen(false);
-                  }}
-                  aria-haspopup="menu"
-                  aria-expanded={isServerMenuOpen}
-                  aria-controls="live-server-menu"
-                  className={`flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full min-w-0 hover:bg-muted hover:text-foreground cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 ${
-                    isServerMenuOpen || activeServer
-                      ? 'bg-muted text-foreground'
-                      : 'bg-background'
+            {/* Sport Selector Dropdown */}
+            <div className="relative w-full md:w-auto flex-grow min-w-0 z-40">
+              <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
+                {t('selectCoverage')}
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsSportMenuOpen(!isSportMenuOpen)}
+                aria-haspopup="menu"
+                aria-expanded={isSportMenuOpen}
+                aria-controls="live-sport-menu"
+                className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 min-w-0"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-3 h-3 bg-neo-red border-[2px] border-border rounded-full animate-pulse shrink-0" />
+                  <span className="truncate">{activeSport?.label}</span>
+                </div>
+                <ChevronDown
+                  className={`w-6 h-6 shrink-0 transition-transform duration-300 ${
+                    isSportMenuOpen ? 'rotate-180' : ''
                   }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {activeServer === 'server1' ? (
-                      <Radio className="w-6 h-6 shrink-0" />
-                    ) : (
-                      <Globe2 className="w-6 h-6 shrink-0" />
-                    )}
-                    <span className="truncate hidden lg:inline">
-                      {SERVERS.find((s) => s.id === activeServer)?.label}
-                    </span>
-                    <span className="truncate lg:hidden">
-                      {SERVERS.find((s) => s.id === activeServer)?.short}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`w-6 h-6 shrink-0 transition-transform duration-300 ${
-                      isServerMenuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
+                />
+              </button>
 
-                {isServerMenuOpen && (
-                  <div
-                    id="live-server-menu"
-                    role="menu"
-                    className="absolute top-full left-0 right-0 mt-3 bg-background border-[3px] border-border z-50 overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none rounded-md shadow-md"
-                  >
-                    {SERVERS.map((server) => (
+              {isSportMenuOpen && (
+                <div
+                  id="live-sport-menu"
+                  role="menu"
+                  className="absolute top-full left-0 right-0 mt-3 bg-background border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
+                >
+                  <div className="flex flex-col gap-2">
+                    {sports.map((sport) => (
                       <button
                         type="button"
-                        key={server.id}
+                        key={sport.id}
                         role="menuitem"
                         onClick={() => {
-                          handleServerChange(
-                            server.id,
-                            server.id === 'server1'
-                              ? SERVER_1_SPORTS[0].id
-                              : dynamicServer2Sports[0]?.id || 'all_channels',
-                          );
-                          setIsServerMenuOpen(false);
+                          handleTabChange(sport.id);
+                          setIsSportMenuOpen(false);
                         }}
-                        className={`w-full text-left px-6 py-4 font-headline font-bold text-lg uppercase tracking-widest border-b-[3px] last:border-b-0 border-border transition-colors flex items-center justify-between cursor-pointer focus-visible:outline-none focus-visible:bg-muted ${
-                          activeServer === server.id
+                        className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-muted ${
+                          activeTab === sport.id
                             ? 'bg-muted text-foreground'
                             : 'bg-background hover:bg-muted/80'
                         }`}
                       >
-                        <div className="flex flex-col">
-                          <span>{server.label}</span>
-                          <span className="text-[10px] opacity-60 tracking-normal font-bold">
-                            {server.desc}
-                          </span>
-                        </div>
-                        {activeServer === server.id && (
+                        {sport.label}
+                        {activeTab === sport.id && (
                           <div className="w-3 h-3 bg-primary rounded-full" />
                         )}
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-
-              {/* Sport Selector Dropdown */}
-              <div className="relative w-full md:w-auto flex-grow min-w-0 z-40">
-                <p className="font-headline font-black text-xs uppercase tracking-[0.2em] text-foreground/40 mb-2 ml-1">
-                  2. {t('selectCoverage')}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSportMenuOpen(!isSportMenuOpen);
-                    setIsServerMenuOpen(false);
-                  }}
-                  aria-haspopup="menu"
-                  aria-expanded={isSportMenuOpen}
-                  aria-controls="live-sport-menu"
-                  className="flex items-center justify-between gap-4 px-5 md:px-6 py-3 md:py-4 font-headline font-black text-base md:text-xl uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 min-w-0"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="w-3 h-3 bg-neo-red border-[2px] border-border rounded-full animate-pulse shrink-0" />
-                    <span className="truncate">{activeSport?.label}</span>
-                  </div>
-                  <ChevronDown
-                    className={`w-6 h-6 shrink-0 transition-transform duration-300 ${
-                      isSportMenuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                {isSportMenuOpen && (
-                  <div
-                    id="live-sport-menu"
-                    role="menu"
-                    className="absolute top-full left-0 right-0 mt-3 bg-background border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
-                  >
-                    <div className="flex flex-col gap-2">
-                      {currentSports.map((sport) => (
-                        <button
-                          type="button"
-                          key={sport.id}
-                          role="menuitem"
-                          onClick={() => {
-                            handleTabChange(sport.id);
-                            setIsSportMenuOpen(false);
-                          }}
-                          className={`w-full px-6 py-4 font-headline font-bold text-base uppercase tracking-widest border-[3px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-muted ${
-                            activeTab === sport.id
-                              ? 'bg-muted text-foreground'
-                              : 'bg-background hover:bg-muted/80'
-                          }`}
-                        >
-                          {sport.label}
-                          {activeTab === sport.id && (
-                            <div className="w-3 h-3 bg-primary rounded-full" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -271,9 +142,7 @@ function LiveContent() {
 
       {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
-        {activeServer === 'server1' ? (
-          <Server1Channels />
-        ) : isLoading || isPending ? (
+        {isLoading || isPending ? (
           <div className="space-y-16">
             <section>
               <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
@@ -344,7 +213,6 @@ function LiveContent() {
 
             {!isAllChannelsView && (
               <>
-                {/* SCHEDULE Section (Combines Live and Upcoming) */}{' '}
                 {Object.keys(upcomingByDate).length > 0 && (
                   <section>
                     <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
@@ -388,7 +256,6 @@ function LiveContent() {
                     </div>
                   </section>
                 )}
-                {/* ENDED Section */}
                 {endedMatches.length > 0 && (
                   <section>
                     <div className="flex items-center gap-4 mb-8 bg-primary border-[4px] border-border px-5 py-3 inline-flex ">
