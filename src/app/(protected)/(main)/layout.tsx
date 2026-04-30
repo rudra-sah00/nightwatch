@@ -60,6 +60,8 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const disabledRef = useRef(false);
   const cooldownRef = useRef(false);
   const recentTouchRef = useRef(false);
+  const leftOpenRef = useRef(false);
+  const rightOpenRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -71,6 +73,9 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
       window.location.reload();
     }, []),
   );
+
+  leftOpenRef.current = leftOpen;
+  rightOpenRef.current = rightOpen;
 
   const setSidebarsDisabled = useCallback((disabled: boolean) => {
     disabledRef.current = disabled;
@@ -167,12 +172,18 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
 
       if (dx > 0) {
-        // Swipe right → open left sidebar (only from left edge)
-        if (startX < 40) setLeftOpen(true);
+        if (rightOpenRef.current) {
+          setRightOpen(false);
+        } else if (startX < 40) {
+          setLeftOpen(true);
+        }
       } else {
-        // Swipe left → open right sidebar (only from right edge)
-        const w = container.getBoundingClientRect().width;
-        if (startX > w - 40) setRightOpen(true);
+        if (leftOpenRef.current) {
+          setLeftOpen(false);
+        } else {
+          const w = container.getBoundingClientRect().width;
+          if (startX > w - 40) setRightOpen(true);
+        }
       }
     };
 

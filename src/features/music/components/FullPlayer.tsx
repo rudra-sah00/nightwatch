@@ -1,7 +1,10 @@
 'use client';
 
 import {
+  Airplay,
   ChevronDown,
+  ListMusic,
+  Mic2,
   Pause,
   Play,
   Repeat,
@@ -9,10 +12,12 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  Volume1,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import {
   getSongRecommendations,
   getSyncedLyrics,
@@ -43,25 +48,30 @@ export function FullPlayer() {
     play,
   } = useMusicPlayerContext();
 
+  const mobile = useIsMobile();
   const [closing, setClosing] = useState(false);
   const [lyrics, setLyrics] = useState<SyncedLyricLine[] | null>(null);
   const [recommendations, setRecommendations] = useState<MusicTrack[]>([]);
+  const [showLyrics, setShowLyrics] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
+  const swipeStartY = useRef(0);
+  const [swipeOffset, setSwipeOffset] = useState(0);
 
   const handleClose = useCallback(() => {
     setClosing(true);
     setTimeout(() => {
       setClosing(false);
       setExpanded(false);
+      setShowLyrics(false);
     }, 300);
   }, [setExpanded]);
 
-  // Fetch synced lyrics and recommendations when track changes
   const trackId = currentTrack?.id;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
   useEffect(() => {
     setLyrics(null);
     setRecommendations([]);
+    setShowLyrics(false);
     if (!currentTrack) return;
     getSyncedLyrics(
       currentTrack.id,
@@ -74,7 +84,6 @@ export function FullPlayer() {
       .catch(() => {});
   }, [trackId]);
 
-  // Current lyric line index based on playback time
   const currentTime = (progress / 100) * duration;
   const currentLineIndex = useMemo(() => {
     if (!lyrics) return -1;
@@ -86,11 +95,10 @@ export function FullPlayer() {
     return idx;
   }, [lyrics, currentTime]);
 
-  // Smooth animated scroll to current line
   const scrollTargetRef = useRef(0);
   const rafRef = useRef<number>(0);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on expand too
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on expand/lyrics toggle
   useEffect(() => {
     if (currentLineIndex < 0 || !lyricsRef.current) return;
     const container = lyricsRef.current;
@@ -111,17 +119,248 @@ export function FullPlayer() {
     };
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [currentLineIndex, expanded]);
+  }, [currentLineIndex, expanded, showLyrics]);
 
   if (!expanded || !currentTrack) return null;
 
   const hasLyrics = lyrics && lyrics.length > 0;
 
+  // --- MOBILE LAYOUT (Apple Music style) ---
+  if (mobile) {
+    return (
+      <div
+        className={`fixed inset-0 z-[10100] overflow-hidden duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
+        style={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          transform:
+            swipeOffset > 0 ? `translateY(${swipeOffset}px)` : undefined,
+          transition: swipeOffset > 0 ? 'none' : undefined,
+        }}
+        onTouchStart={(e) => {
+          swipeStartY.current = e.touches[0].clientY;
+        }}
+        onTouchMove={(e) => {
+          const dy = e.touches[0].clientY - swipeStartY.current;
+          if (dy > 0) setSwipeOffset(dy * 0.6);
+        }}
+        onTouchEnd={() => {
+          if (swipeOffset > 120) {
+            handleClose();
+          }
+          setSwipeOffset(0);
+        }}
+      >
+        {/* Blurred background */}
+        <div className="absolute inset-0">
+          <img
+            src={currentTrack.image}
+            alt=""
+            className="w-full h-full object-cover scale-110"
+          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
+        </div>
+
+        <div className="relative z-10 flex flex-col h-full px-6">
+          {/* Drag handle + close */}
+          <button
+            type="button"
+            onClick={handleClose}
+            className="shrink-0 flex justify-center pt-3 pb-2"
+          >
+            <div className="w-10 h-1 rounded-full bg-white/30" />
+          </button>
+
+          {showLyrics && hasLyrics ? (
+            /* ===== LYRICS MODE ===== */
+            <>
+              {/* Compact header: small art + title */}
+              <div className="shrink-0 flex items-center gap-3 pb-4">
+                <img
+                  src={currentTrack.image}
+                  alt=""
+                  className="w-14 h-14 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold text-sm truncate">
+                    {currentTrack.title}
+                  </p>
+                  <p className="text-white/50 text-xs truncate">
+                    {currentTrack.artist}
+                  </p>
+                </div>
+              </div>
+
+              {/* Lyrics area */}
+              <div className="flex-1 min-h-0 relative">
+                <div
+                  ref={lyricsRef}
+                  className="h-full overflow-y-auto no-scrollbar px-1 space-y-5"
+                  style={{
+                    maskImage:
+                      'linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%)',
+                  }}
+                >
+                  <div className="h-[20vh]" />
+                  {lyrics.map((line, i) => {
+                    const isCurrent = i === currentLineIndex;
+                    const isPast = i < currentLineIndex;
+                    const dist = Math.abs(i - currentLineIndex);
+                    return (
+                      <p
+                        key={line.time}
+                        className="font-headline uppercase tracking-tight leading-snug cursor-pointer"
+                        style={{
+                          fontSize: isCurrent ? '1.75rem' : '1.25rem',
+                          fontWeight: isCurrent ? 900 : 700,
+                          color: isCurrent
+                            ? '#fff'
+                            : isPast
+                              ? 'rgba(255,255,255,0.15)'
+                              : 'rgba(255,255,255,0.3)',
+                          filter: isCurrent
+                            ? 'none'
+                            : `blur(${Math.min(dist * 0.5, 2)}px)`,
+                          transition: 'all 0.4s ease',
+                        }}
+                        onClick={() => {
+                          if (duration > 0) seek((line.time / duration) * 100);
+                        }}
+                        onKeyDown={() => {}}
+                      >
+                        {line.text}
+                      </p>
+                    );
+                  })}
+                  <div className="h-[30vh]" />
+                </div>
+                {/* Karaoke toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowLyrics(false)}
+                  className="absolute bottom-2 right-2 p-2.5 rounded-full bg-white/10 text-white/60"
+                >
+                  <Mic2 className="w-5 h-5" />
+                </button>
+              </div>
+            </>
+          ) : (
+            /* ===== ALBUM ART MODE ===== */
+            <div className="flex-1 flex flex-col items-center justify-center min-h-0">
+              {/* Album art */}
+              <div className="w-[70vw] max-w-[320px] aspect-square mb-8">
+                <img
+                  src={currentTrack.image}
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                />
+              </div>
+
+              {/* Title + artist */}
+              <div className="w-full text-left mb-1">
+                <h2 className="text-white font-bold text-xl truncate">
+                  {currentTrack.title}
+                </h2>
+                <p className="text-white/50 text-sm truncate">
+                  {currentTrack.artist}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ===== BOTTOM CONTROLS (always visible) ===== */}
+          <div className="shrink-0 pb-2">
+            {/* Seek bar */}
+            <div className="w-full mb-1">
+              <button
+                type="button"
+                className="w-full h-1.5 bg-white/15 cursor-pointer relative rounded-full"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  seek(((e.clientX - rect.left) / rect.width) * 100);
+                }}
+              >
+                <div
+                  className="h-full bg-white/80 rounded-full"
+                  style={{ width: `${progress}%` }}
+                />
+              </button>
+              <div className="flex justify-between mt-1">
+                <span className="text-white/40 text-[10px] font-mono">
+                  {formatTime(currentTime)}
+                </span>
+                <span className="text-white/40 text-[10px] font-mono">
+                  -{formatTime(Math.max(0, duration - currentTime))}
+                </span>
+              </div>
+            </div>
+
+            {/* Play controls */}
+            <div className="flex items-center justify-center gap-10 my-4">
+              <button type="button" onClick={prev} className="text-white">
+                <SkipBack className="w-8 h-8 fill-current" />
+              </button>
+              <button type="button" onClick={togglePlay} className="text-white">
+                {isPlaying ? (
+                  <Pause className="w-12 h-12 fill-current" />
+                ) : (
+                  <Play className="w-12 h-12 fill-current ml-1" />
+                )}
+              </button>
+              <button type="button" onClick={next} className="text-white">
+                <SkipForward className="w-8 h-8 fill-current" />
+              </button>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-3 mb-4">
+              <Volume1 className="w-3.5 h-3.5 text-white/30" />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="flex-1 h-1 accent-white cursor-pointer"
+              />
+              <Volume2 className="w-3.5 h-3.5 text-white/30" />
+            </div>
+
+            {/* Bottom bar: lyrics / airplay / queue */}
+            <div className="flex items-center justify-around pb-2">
+              <button
+                type="button"
+                onClick={() => hasLyrics && setShowLyrics(!showLyrics)}
+                className={`p-2.5 rounded-full transition-colors ${showLyrics ? 'bg-white/20 text-white' : hasLyrics ? 'text-white/50' : 'text-white/15'}`}
+                disabled={!hasLyrics}
+              >
+                <Mic2 className="w-5 h-5" />
+              </button>
+              <button type="button" className="p-2.5 text-white/50">
+                <Airplay className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="p-2.5 text-white/50"
+              >
+                <ListMusic className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- DESKTOP LAYOUT (unchanged) ---
   return (
     <div
       className={`fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10100] overflow-hidden [-webkit-app-region:no-drag] duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
     >
-      {/* Blurred album art background */}
       <div className="absolute inset-0">
         <img
           src={currentTrack.image}
@@ -131,9 +370,7 @@ export function FullPlayer() {
         <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
-        {/* Close */}
         <button
           type="button"
           onClick={handleClose}
@@ -142,13 +379,10 @@ export function FullPlayer() {
           <ChevronDown className="w-6 h-6 text-white/40 hover:text-white transition-colors" />
         </button>
 
-        {/* Main area */}
         <div className="flex-1 flex min-h-0 px-6 pb-6 gap-8">
-          {/* Left: Disc + Info + Controls */}
           <div
             className={`flex flex-col items-center justify-center ${hasLyrics ? 'w-[45%]' : 'flex-1'}`}
           >
-            {/* Disc */}
             <div className="relative mb-6 w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72">
               <div
                 className="w-full h-full border-[5px] overflow-hidden shadow-2xl"
@@ -183,7 +417,6 @@ export function FullPlayer() {
               <style>{`@keyframes disc-spin { to { transform: rotate(360deg) } }`}</style>
             </div>
 
-            {/* Track info */}
             <div className="text-center px-4 mb-5 max-w-md w-full">
               <h2 className="font-headline font-black uppercase tracking-tighter text-lg md:text-xl text-white truncate">
                 {currentTrack.title}
@@ -193,7 +426,6 @@ export function FullPlayer() {
               </p>
             </div>
 
-            {/* Seek bar */}
             <div className="w-full max-w-xs mb-3">
               <button
                 type="button"
@@ -218,7 +450,6 @@ export function FullPlayer() {
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center gap-5">
               <button
                 type="button"
@@ -265,7 +496,6 @@ export function FullPlayer() {
               </button>
             </div>
 
-            {/* Volume */}
             <div className="flex items-center gap-2 mt-3 w-full max-w-xs">
               <button
                 type="button"
@@ -290,7 +520,6 @@ export function FullPlayer() {
             </div>
           </div>
 
-          {/* Right: Synced Lyrics */}
           {hasLyrics && (
             <div className="hidden md:flex flex-1 flex-col min-h-0 justify-center py-8">
               <div
@@ -341,7 +570,6 @@ export function FullPlayer() {
             </div>
           )}
 
-          {/* Similar Songs — shown when no lyrics or on the right side */}
           {!hasLyrics && recommendations.length > 0 && (
             <div className="hidden md:flex flex-1 flex-col min-h-0 py-8 px-4 overflow-y-auto no-scrollbar">
               <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] mb-4">

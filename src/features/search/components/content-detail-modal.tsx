@@ -282,7 +282,7 @@ export function ContentDetailModal({
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
-                isDesktopApp ? (
+                isDesktopApp || isMobile ? (
                   <DownloadMenu
                     show={show}
                     selectedSeason={selectedSeason}

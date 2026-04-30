@@ -53,7 +53,7 @@ export function LeftSidebar() {
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
     { href: '/library', label: 'Library', icon: Library },
-    ...(isMounted && isDesktopApp
+    ...(isMounted && (isDesktopApp || mobile)
       ? [{ href: '/downloads', label: t('downloads'), icon: Download }]
       : []),
     { href: '/music', label: t('music'), icon: Music },

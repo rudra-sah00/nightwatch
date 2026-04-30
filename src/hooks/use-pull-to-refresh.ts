@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { hapticMedium } from '@/lib/haptics';
 
-const THRESHOLD = 80; // px to pull before triggering refresh
+const THRESHOLD = 80;
 const MAX_PULL = 120;
 
 /**
  * Pull-to-refresh for mobile. Attach `ref` to the scrollable container.
- * Returns `{ ref, isRefreshing, pullDistance }`.
+ * Only triggers when the container is scrolled to the very top.
  */
 export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -17,6 +17,7 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
+  const wasAtTop = useRef(false);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -35,27 +36,43 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
     if (!el) return;
 
     const onTouchStart = (e: TouchEvent) => {
-      if (el.scrollTop <= 0 && !isRefreshing) {
+      // Only allow pull if already at the very top when touch begins
+      wasAtTop.current = el.scrollTop <= 0;
+      if (wasAtTop.current && !isRefreshing) {
         startY.current = e.touches[0].clientY;
-        pulling.current = true;
+        pulling.current = false; // Don't start pulling yet
       }
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!pulling.current || isRefreshing) return;
-      const dy = e.touches[0].clientY - startY.current;
-      if (dy > 0) {
-        setPullDistance(Math.min(dy * 0.5, MAX_PULL));
-        if (dy > 10) e.preventDefault();
-      } else {
+      if (!wasAtTop.current || isRefreshing) return;
+      // Re-check scrollTop — if user scrolled down since touchstart, abort
+      if (el.scrollTop > 0) {
         pulling.current = false;
+        setPullDistance(0);
+        return;
+      }
+      const dy = e.touches[0].clientY - startY.current;
+      if (dy > 5) {
+        // Only start pulling after a clear downward gesture from the top
+        pulling.current = true;
+        setPullDistance(Math.min(dy * 0.4, MAX_PULL));
+        e.preventDefault();
+      } else if (dy < -5) {
+        // Scrolling up — cancel
+        pulling.current = false;
+        wasAtTop.current = false;
         setPullDistance(0);
       }
     };
 
     const onTouchEnd = () => {
-      if (!pulling.current) return;
+      if (!pulling.current) {
+        setPullDistance(0);
+        return;
+      }
       pulling.current = false;
+      wasAtTop.current = false;
       if (pullDistance >= THRESHOLD) {
         handleRefresh();
       } else {
