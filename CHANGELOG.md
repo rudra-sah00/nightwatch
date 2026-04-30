@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.8.0](https://github.com/rudra-sah00/nightwatch/compare/v2.7.0...v2.8.0) (2026-04-30)
+
+
+### Features
+
+* add Library, Music, and Ask AI steps to global tour ([edbc496](https://github.com/rudra-sah00/nightwatch/commit/edbc4965718da42b81d8c2c549a95e6a48341577))
+* music features, ask-ai socket fix, live-bridge 6 racers ([4d8d28b](https://github.com/rudra-sah00/nightwatch/commit/4d8d28b9b9abef84825cefb9f7f61b41d9e43b5c))
+* music page overhaul, Ask AI enhancements, skeleton theme fix ([6b7013d](https://github.com/rudra-sah00/nightwatch/commit/6b7013df8ea2af2515b217512134e0c2415a8290))
+* parallel S1+PV search with provider badges ([fc0c7f4](https://github.com/rudra-sah00/nightwatch/commit/fc0c7f4b4e423454cbea2ed353c8e0652eba4d5f))
+* Redis caching for music APIs, radio playback, UI fixes ([7a16175](https://github.com/rudra-sah00/nightwatch/commit/7a16175f0a64b6f1f8cef24f3f6f023cc006ebb2))
+* Server 1 livestreams via backend proxy, remove Electron bridge ([6479237](https://github.com/rudra-sah00/nightwatch/commit/6479237a1c4fc215c09f1be2212c2a1bb4bf602e))
+
+
+### Bug Fixes
+
+* clip recording loading states, call overlay race condition, music docs ([f4d6045](https://github.com/rudra-sah00/nightwatch/commit/f4d6045048b58b6a4222ef757ef3ec3e94c61d2b))
+* electron download manager bugs + security hardening ([c9123c2](https://github.com/rudra-sah00/nightwatch/commit/c9123c25f7bbf0c6a6a1c43d3eb9f022b12c68bf))
+* macOS traffic light blinking on PiP exit ([a9a452c](https://github.com/rudra-sah00/nightwatch/commit/a9a452ce81de04b8bdeb00c0e10f0424c2d51669))
+* make radio & genre cards clickable, fix case-sensitive language filter ([281ca22](https://github.com/rudra-sah00/nightwatch/commit/281ca2284f03a349b6788790c65e6db111d5c620))
+* reduce Ask AI response delay ([e2e18d9](https://github.com/rudra-sah00/nightwatch/commit/e2e18d9ec7d1d171381ccf281bdf479eefe04c50))
+
 ## [2.7.0](https://github.com/rudra-sah00/nightwatch/compare/v2.6.0...v2.7.0) (2026-04-25)
 
 
