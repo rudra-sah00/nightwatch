@@ -85,11 +85,18 @@ export function LanguageSwitcher({
           type="button"
           onClick={() => setOpen(false)}
           className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+          style={{
+            top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+            right: 'calc(2rem + env(safe-area-inset-right, 0px))',
+          }}
         >
           {tCancel('cancel')}
         </button>
 
-        <div className="flex flex-col items-center w-full max-w-md px-6 h-full pt-16">
+        <div
+          className="flex flex-col items-center w-full max-w-md px-6 h-full"
+          style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
+        >
           <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
             {t('title')}
           </h2>

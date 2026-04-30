@@ -44,9 +44,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: '#000000',
   colorScheme: 'dark light',
-  // Extend layout into the notch/Dynamic Island so safe-area-inset-* values
-  // are non-zero on iOS — required for the player's bottom controls and mobile
-  // header to correctly clear the home indicator and the notch.
+  maximumScale: 1, // Prevent iOS auto-zoom on input focus (inputs < 16px trigger zoom)
   viewportFit: 'cover',
 };
 
@@ -81,7 +79,11 @@ export default async function RootLayout({
                     <div
                       className="flex flex-col overflow-hidden h-[100dvh] box-border"
                       style={{
-                        paddingTop: 'var(--electron-titlebar-height, 0px)',
+                        paddingTop:
+                          'max(var(--electron-titlebar-height, 0px), env(safe-area-inset-top, 0px))',
+                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                        paddingLeft: 'env(safe-area-inset-left, 0px)',
+                        paddingRight: 'env(safe-area-inset-right, 0px)',
                       }}
                     >
                       <ProgressBar />

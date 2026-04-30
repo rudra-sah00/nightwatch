@@ -54,19 +54,35 @@ export function MobileShell() {
       }
     });
 
-    // --- KEYBOARD: push content up ---
+    // --- KEYBOARD: track open state ---
     const unlistenKbShow = mobileBridge.onKeyboardShow(({ keyboardHeight }) => {
       document.documentElement.style.setProperty(
         '--keyboard-height',
         `${keyboardHeight}px`,
       );
+      document.documentElement.classList.add('keyboard-open');
     });
     const unlistenKbHide = mobileBridge.onKeyboardHide(() => {
       document.documentElement.style.setProperty('--keyboard-height', '0px');
+      document.documentElement.classList.remove('keyboard-open');
     });
 
-    // --- SPLASH SCREEN: hide after app loads ---
-    mobileBridge.hideSplash();
+    // --- KEYBOARD: tap outside input to dismiss ---
+    const handleTapDismiss = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const tag = target.tagName;
+      if (
+        tag !== 'INPUT' &&
+        tag !== 'TEXTAREA' &&
+        !target.isContentEditable &&
+        document.documentElement.classList.contains('keyboard-open')
+      ) {
+        mobileBridge.hideKeyboard();
+      }
+    };
+    document.addEventListener('touchstart', handleTapDismiss, {
+      passive: true,
+    });
 
     return () => {
       observer.disconnect();
@@ -74,6 +90,7 @@ export function MobileShell() {
       unlistenNetwork();
       unlistenKbShow();
       unlistenKbHide();
+      document.removeEventListener('touchstart', handleTapDismiss);
     };
   }, [router]);
 

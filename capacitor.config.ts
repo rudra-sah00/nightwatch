@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize } from '@capacitor/keyboard';
 
 const isDev = process.env.CAPACITOR_DEV === 'true';
 
@@ -7,12 +8,20 @@ const config: CapacitorConfig = {
   appName: 'Nightwatch',
   webDir: 'public',
   server: {
-    // Production: load the deployed app (same as Electron)
-    // Local dev: set CAPACITOR_DEV=true to use localhost
     url: isDev
       ? process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000'
       : 'https://nightwatch.in',
-    cleartext: isDev, // Only allow HTTP in dev
+    cleartext: isDev,
+    allowNavigation: ['nightwatch.in', '*.nightwatch.in', 'localhost:*'],
+  },
+  plugins: {
+    Keyboard: {
+      resize: KeyboardResize.None,
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 0,
+    },
   },
 };
 

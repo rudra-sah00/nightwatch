@@ -52,7 +52,7 @@ export function ProgressBar() {
         background: var(--neo-yellow);
         position: fixed;
         z-index: 99999;
-        top: calc(77px + var(--electron-titlebar-height, 0px));
+        top: calc(77px + var(--electron-titlebar-height, 0px) + env(safe-area-inset-top, 0px));
         left: 0;
         width: 100%;
         height: 3px;

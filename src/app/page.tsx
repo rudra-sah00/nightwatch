@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useDownloadLinks } from '@/hooks/use-download-links';
-import { checkIsDesktop } from '@/lib/electron-bridge';
+import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 const FEATURE_ICONS = [
@@ -139,11 +139,11 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) router.replace('/home');
-    if (!isLoading && !isAuthenticated && checkIsDesktop())
+    if (!isLoading && !isAuthenticated && (checkIsDesktop() || checkIsMobile()))
       router.replace('/login');
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || isAuthenticated || checkIsDesktop()) {
+  if (isLoading || isAuthenticated || checkIsDesktop() || checkIsMobile()) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />

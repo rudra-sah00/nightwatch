@@ -3,14 +3,19 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { LoginForm } from '@/features/auth/components/login-form';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import {
+  checkIsDesktop,
+  checkIsMobile,
+  desktopBridge,
+} from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LoginClient() {
@@ -25,6 +30,12 @@ export default function LoginClient() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
 
+  const { ref: pullRef, pullDistance } = usePullToRefresh(
+    useCallback(() => {
+      window.location.reload();
+    }, []),
+  );
+
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)
     const flash = sessionStorage.getItem('auth_flash');
@@ -35,7 +46,11 @@ export default function LoginClient() {
 
     // Direct redirect if already authenticated
     if (isAuthenticated) {
-      router.replace('/home');
+      if (checkIsMobile()) {
+        window.location.href = '/home';
+      } else {
+        router.replace('/home');
+      }
     }
   }, [isAuthenticated, router]);
 
@@ -43,7 +58,11 @@ export default function LoginClient() {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
-        router.push('/home');
+        if (checkIsMobile()) {
+          window.location.href = '/home';
+        } else {
+          router.push('/home');
+        }
       }, 700);
       return () => clearTimeout(timer);
     }
@@ -73,9 +92,24 @@ export default function LoginClient() {
 
   return (
     <div
-      className={`bg-background text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
+      ref={pullRef}
+      className={`bg-background text-foreground h-screen h-[100dvh] flex flex-col font-body overflow-y-auto md:overflow-hidden transition-[transform,opacity] duration-700 ease-out origin-top motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:zoom-in-[0.99] motion-reduce:animate-none ${isTransitioning ? 'scale-[0.98] -translate-y-4 opacity-0 pointer-events-none' : 'scale-100 translate-y-0 opacity-100'}`}
     >
-      <LanguageSwitcher className="absolute top-[calc(1rem)] right-[calc(1rem+var(--electron-inset-right,0px))] z-50" />
+      {pullDistance > 0 && (
+        <div
+          className="flex items-center justify-center shrink-0"
+          style={{ height: pullDistance }}
+        >
+          <div
+            className="w-6 h-6 border-[3px] border-border border-t-transparent rounded-full"
+            style={{
+              opacity: Math.min(pullDistance / 80, 1),
+              transform: `rotate(${pullDistance * 3}deg)`,
+            }}
+          />
+        </div>
+      )}
+      <LanguageSwitcher className="self-end mr-4 mt-2 md:absolute md:top-[calc(1rem+env(safe-area-inset-top,0px))] md:right-[calc(1rem+var(--electron-inset-right,0px)+env(safe-area-inset-right,0px))] z-50 shrink-0" />
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
           {/* Features Bento Box - Identical to Signup for Parity */}
