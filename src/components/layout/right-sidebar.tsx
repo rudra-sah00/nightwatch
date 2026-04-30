@@ -120,7 +120,7 @@ export function RightSidebar() {
       {/* Spotlight Search Overlay */}
       {showSpotlight && (
         <div
-          className={`fixed inset-0 z-[100] flex items-start justify-center pt-[18vh] bg-black/40 backdrop-blur-sm transition-all duration-200 ${
+          className={`fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] bg-black/40 backdrop-blur-sm transition-all duration-200 ${
             spotlightClosing
               ? 'opacity-0 scale-95'
               : 'animate-in fade-in zoom-in-95 duration-200'
@@ -134,7 +134,7 @@ export function RightSidebar() {
           role="dialog"
           tabIndex={-1}
         >
-          <div className="w-full max-w-lg mx-4">
+          <div className="w-full max-w-xl mx-4">
             {/* Search Input */}
             <div className="flex items-center bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl px-5 py-3.5 gap-3">
               <Search className="w-5 h-5 text-white/40 shrink-0" />

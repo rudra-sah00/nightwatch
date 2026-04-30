@@ -103,6 +103,14 @@ export function ContentDetailModal({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Lock body scroll when modal is open (prevents iOS scroll-through)
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // Loading state
   if (isLoading) {
     return (
@@ -162,7 +170,7 @@ export function ContentDetailModal({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10000] bg-black/80 backdrop-blur-sm"
+      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10000] bg-black/80 backdrop-blur-sm overscroll-contain"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
