@@ -5,6 +5,7 @@ export * from './ui/compound/PlayerEpisodePanel';
 export * from './ui/compound/PlayerFullscreen';
 export * from './ui/compound/PlayerHeader';
 export * from './ui/compound/PlayerLiveBadge';
+export * from './ui/compound/PlayerMobileSeekBar';
 export * from './ui/compound/PlayerPlayPause';
 export * from './ui/compound/PlayerRoot';
 export * from './ui/compound/PlayerSeekBar';
@@ -18,6 +19,8 @@ import { PlayerAudioSubtitleSelectors } from './ui/compound/PlayerAudioSubtitleS
 import {
   PlayerControlRow,
   PlayerControls,
+  PlayerMobileCenterControls,
+  PlayerMobileTopBar,
   PlayerSpacer,
 } from './ui/compound/PlayerControls';
 import {
@@ -28,6 +31,7 @@ import {
 import { PlayerFullscreen } from './ui/compound/PlayerFullscreen';
 import { PlayerHeader } from './ui/compound/PlayerHeader';
 import { PlayerLiveBadge } from './ui/compound/PlayerLiveBadge';
+import { PlayerMobileSeekBar } from './ui/compound/PlayerMobileSeekBar';
 import { PlayerPlayPause } from './ui/compound/PlayerPlayPause';
 import { PlayerRoot } from './ui/compound/PlayerRoot';
 import { PlayerSeekBar } from './ui/compound/PlayerSeekBar';
@@ -43,9 +47,12 @@ export const Player = {
   Video: PlayerVideo,
   Controls: PlayerControls,
   ControlRow: PlayerControlRow,
+  MobileTopBar: PlayerMobileTopBar,
+  MobileCenterControls: PlayerMobileCenterControls,
   Spacer: PlayerSpacer,
   PlayPause: PlayerPlayPause,
   SeekBar: PlayerSeekBar,
+  MobileSeekBar: PlayerMobileSeekBar,
   Volume: PlayerVolume,
   TimeDisplay: PlayerTimeDisplay,
   Fullscreen: PlayerFullscreen,

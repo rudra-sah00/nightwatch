@@ -337,7 +337,6 @@ export function usePlayerRoot({
 
   const { toggleFullscreen: nativeToggleFullscreen } = useFullscreen({
     containerRef,
-    videoRef,
     dispatch,
     playerIsFullscreen: state.isFullscreen,
   });

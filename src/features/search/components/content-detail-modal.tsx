@@ -170,7 +170,7 @@ export function ContentDetailModal({
 
   return (
     <div
-      className="absolute inset-0 z-[100] bg-card overscroll-contain"
+      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm overscroll-contain"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

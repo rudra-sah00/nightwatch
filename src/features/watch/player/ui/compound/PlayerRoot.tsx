@@ -160,6 +160,21 @@ export function PlayerRoot({
 
   const isMobile = useMobileDetection();
   const isPortrait = useMobileOrientation();
+
+  // YouTube-style mobile fullscreen: override container to fill viewport
+  const mobileFullscreen = isMobile && state.isFullscreen;
+  const effectiveContainerStyle = mobileFullscreen
+    ? ({
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100dvh',
+        zIndex: 9999,
+      } as React.CSSProperties)
+    : (containerStyle ?? CONTAINER_STYLE);
   // Android: orientation lock + real fullscreen kick in automatically so this
   // only triggers on iOS Safari where the OS won't rotate programmatically.
   // Also suppress the wall when the player is already in fullscreen (either
@@ -184,7 +199,7 @@ export function PlayerRoot({
           state.showControls && !resolvedHideControls && 'cursor-auto',
           className,
         )}
-        style={containerStyle ?? CONTAINER_STYLE}
+        style={effectiveContainerStyle}
         onMouseMove={showControls}
         onMouseEnter={showControls}
         aria-label={tAria('videoPlayer')}

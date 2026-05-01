@@ -232,13 +232,34 @@ export function SettingsMenu({
         />
       </button>
 
-      {/* Menu dropdown */}
+      {/* Menu dropdown — bottom sheet on mobile, dropdown on desktop */}
       {isOpen ? (
-        <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-background border-[4px] border-border  flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
-          {currentScreen === 'main' && renderMainMenu()}
-          {currentScreen === 'quality' && renderQualityMenu()}
-          {currentScreen === 'speed' && renderSpeedMenu()}
-        </div>
+        compact ? (
+          <>
+            {/* Backdrop */}
+            <button
+              type="button"
+              className="fixed inset-0 z-[99] bg-black/60"
+              onClick={() => {
+                setIsOpen(false);
+                setCurrentScreen('main');
+              }}
+              aria-label="Close settings"
+            />
+            {/* Bottom sheet */}
+            <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background border-t-[4px] border-border max-h-[60vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom motion-safe:duration-200 motion-reduce:animate-none">
+              {currentScreen === 'main' && renderMainMenu()}
+              {currentScreen === 'quality' && renderQualityMenu()}
+              {currentScreen === 'speed' && renderSpeedMenu()}
+            </div>
+          </>
+        ) : (
+          <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-background border-[4px] border-border  flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
+            {currentScreen === 'main' && renderMainMenu()}
+            {currentScreen === 'quality' && renderQualityMenu()}
+            {currentScreen === 'speed' && renderSpeedMenu()}
+          </div>
+        )
       ) : null}
     </div>
   );

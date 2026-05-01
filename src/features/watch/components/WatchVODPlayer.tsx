@@ -1,11 +1,12 @@
-import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { SkipBack, SkipForward } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { memo, useEffect } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
-import { Player } from '../player';
+import { Player, usePlayerContext } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
@@ -52,19 +53,9 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   props: WatchPlayerProps,
 ) {
   const router = useRouter();
-  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const useInlineMobileLayout =
     isMobile && (props.mobileLayout ?? 'inline') === 'inline';
-
-  const mobileMetaText =
-    props.metadata.type === 'series' &&
-    props.metadata.season != null &&
-    props.metadata.episode != null
-      ? `S${props.metadata.season}:E${props.metadata.episode}${props.metadata.episodeTitle ? ` • ${props.metadata.episodeTitle}` : ''}`
-      : props.metadata.year
-        ? `${t('movie')} • ${props.metadata.year}`
-        : t('movie');
 
   // Handle going back
   const handleBack = () => {
@@ -110,40 +101,64 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     };
   }, [socket, props.metadata]);
 
-  const mobileHeader = (
-    <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
-      <button
-        type="button"
-        onClick={handleBack}
-        aria-label={t('goBackAriaLabel')}
-        className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5 text-white" />
-      </button>
-      <div className="flex-1 min-w-0">
-        <h1 className="text-base font-semibold text-white truncate">
-          {props.metadata.title}
-        </h1>
-        <p className="text-xs text-white/70 truncate">{mobileMetaText}</p>
-      </div>
-      {props.mobileHeaderContent}
-    </div>
-  );
+  // Ref for IntersectionObserver-based in-app PiP on mobile
+  const playerSentinelRef = useRef<HTMLDivElement>(null);
+  const [isPip, setIsPip] = useState(false);
+
+  useEffect(() => {
+    if (!useInlineMobileLayout) return;
+    const sentinel = playerSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsPip(!entry.isIntersecting),
+      { threshold: 0.5 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [useInlineMobileLayout]);
+
+  const dismissPip = useCallback(() => {
+    setIsPip(false);
+    playerSentinelRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const inlineStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '100%',
+    height: 'auto',
+    aspectRatio: '16 / 9',
+    maxHeight: '56.25vw',
+  };
+
+  const pipStyle: React.CSSProperties = {
+    position: 'fixed',
+    bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+    right: '0.75rem',
+    width: '45vw',
+    height: 'auto',
+    aspectRatio: '16 / 9',
+    zIndex: 9998,
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+  };
 
   return (
     <>
-      {useInlineMobileLayout ? mobileHeader : null}
+      {/* Sentinel: tracks when the player area scrolls out of view */}
+      {useInlineMobileLayout ? (
+        <div
+          ref={playerSentinelRef}
+          style={isPip ? { height: 'calc(56.25vw)' } : undefined}
+        />
+      ) : null}
       <Player.Root
         {...props}
         containerStyle={
           useInlineMobileLayout
-            ? {
-                position: 'relative',
-                width: '100%',
-                height: 'auto',
-                aspectRatio: '16 / 9',
-                maxHeight: '56.25vw',
-              }
+            ? isPip
+              ? pipStyle
+              : inlineStyle
             : {
                 position: 'fixed',
                 top: 'var(--electron-titlebar-height, 0px)',
@@ -157,21 +172,36 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         onBack={handleBack}
         onNavigate={props.onNavigate || ((url) => router.replace(url))}
       >
-        {!useInlineMobileLayout ? mobileHeader : null}
-        <VODPlayerState hideBackButton={props.hideBackButton} />
+        {/* Tap PiP to scroll back to player */}
+        {isPip ? (
+          <button
+            type="button"
+            onClick={dismissPip}
+            className="absolute inset-0 z-[60]"
+            aria-label="Back to player"
+          />
+        ) : null}
+        <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
+        <VODPlayerState hideBackButton={props.hideBackButton} isPip={isPip} />
       </Player.Root>
     </>
   );
 });
 
-function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
+function VODPlayerState({
+  hideBackButton,
+  isPip,
+}: {
+  hideBackButton?: boolean;
+  isPip?: boolean;
+}) {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
   const t = useTranslations('watch.player');
 
   return (
     <>
-      {state.isLoading ? (
+      {!isPip && state.isLoading ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
           {metadata.posterUrl ? (
             <div className="absolute inset-0 z-0">
@@ -193,60 +223,136 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
 
       <Player.Video />
 
-      <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+      {isPip ? null : (
+        <>
+          <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
 
-      <ErrorOverlay
-        isVisible={!!state.error && !state.isLoading && !state.isBuffering}
-        message={state.error || t('errorDefault')}
-        onRetry={() => {
-          window.location.reload();
-        }}
-        onBack={playerHandlers.goBack}
-      />
+          <ErrorOverlay
+            isVisible={!!state.error && !state.isLoading && !state.isBuffering}
+            message={state.error || t('errorDefault')}
+            onRetry={() => {
+              window.location.reload();
+            }}
+            onBack={playerHandlers.goBack}
+          />
 
-      <CenterPlayButton
-        isPlaying={state.isPlaying}
-        onToggle={playerHandlers.togglePlay}
-        metadata={pauseOverlayMetadata}
-        disabled={false}
-        isLoading={state.isLoading}
-      />
+          <CenterPlayButton
+            isPlaying={state.isPlaying}
+            onToggle={playerHandlers.togglePlay}
+            metadata={pauseOverlayMetadata}
+            disabled={false}
+            isLoading={state.isLoading}
+          />
+        </>
+      )}
 
-      {/* Episode panel provider wraps controls for shared context */}
-      <Player.EpisodePanel>
-        <Player.Controls>
-          <Player.Header hideBackButton={hideBackButton} />
-          <Player.SeekBar />
-          <Player.ControlRow>
-            <Player.PlayPause />
-            <Player.SkipButtons />
-            <Player.Volume />
+      {isPip ? null : (
+        <Player.EpisodePanel>
+          <Player.Controls>
+            <Player.Header hideBackButton={hideBackButton} />
+            {/* Mobile top-right: settings + fullscreen (YouTube-style) */}
+            <Player.MobileTopBar>
+              <Player.SettingsMenu />
+              <Player.Fullscreen />
+            </Player.MobileTopBar>
+            {/* Mobile center: skip back / play / skip forward (YouTube-style) */}
+            <Player.MobileCenterControls>
+              <MobileSkipBack />
+              <Player.PlayPause size="lg" />
+              <MobileSkipForward />
+            </Player.MobileCenterControls>
+            {/* Desktop layout: seekbar then control row */}
             <div className="hidden md:contents">
-              <Player.TimeDisplay />
+              <Player.SeekBar />
             </div>
-            <Player.Spacer />
-            <div className="hidden md:contents">
-              <Player.EpisodePanelTrigger />
+            <Player.ControlRow>
+              <Player.PlayPause />
+              <Player.SkipButtons />
+              <Player.Volume />
+              <div className="hidden md:contents">
+                <Player.TimeDisplay />
+              </div>
+              <Player.Spacer />
+              <div className="hidden md:contents">
+                <Player.EpisodePanelTrigger />
+              </div>
+              <div className="hidden md:contents">
+                <Player.AudioSubtitleSelectors />
+              </div>
+              <Player.SettingsMenu />
+              <Player.Fullscreen />
+            </Player.ControlRow>
+            {/* Mobile layout: thin seekbar pinned to very bottom (YouTube-style) */}
+            <div className="md:hidden">
+              <Player.MobileSeekBar />
             </div>
-            <div className="hidden md:contents">
-              <Player.AudioSubtitleSelectors />
-            </div>
-            <Player.SettingsMenu />
-            <Player.Fullscreen />
-          </Player.ControlRow>
-        </Player.Controls>
+          </Player.Controls>
 
-        {/* Episode overlay — renders OUTSIDE controls, covers entire player */}
-        <Player.EpisodePanelOverlay />
-      </Player.EpisodePanel>
+          {/* Episode overlay — renders OUTSIDE controls, covers entire player */}
+          <Player.EpisodePanelOverlay />
+        </Player.EpisodePanel>
+      )}
 
-      <NextEpisodeOverlay
-        isVisible={nextEpisode.show}
-        nextEpisode={nextEpisode.info}
-        onPlayNext={nextEpisode.play}
-        onCancel={nextEpisode.cancel}
-        isLoading={nextEpisode.isLoading}
-      />
+      {isPip ? null : (
+        <NextEpisodeOverlay
+          isVisible={nextEpisode.show}
+          nextEpisode={nextEpisode.info}
+          onPlayNext={nextEpisode.play}
+          onCancel={nextEpisode.cancel}
+          isLoading={nextEpisode.isLoading}
+        />
+      )}
     </>
   );
+}
+
+function MobileSkipBack() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={() => playerHandlers.skip(-10)}
+      className="p-3 transition-transform active:scale-90"
+    >
+      <SkipBack className="w-7 h-7 text-white fill-white" />
+    </button>
+  );
+}
+
+function MobileSkipForward() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={() => playerHandlers.skip(10)}
+      className="p-3 transition-transform active:scale-90"
+    >
+      <SkipForward className="w-7 h-7 text-white fill-white" />
+    </button>
+  );
+}
+
+/** Registers the current video element with the global PiP provider so it can
+ *  be captured when the user navigates away from the watch route. */
+function PipRegistrar({
+  streamUrl,
+  metadata,
+}: {
+  streamUrl: string | null;
+  metadata: VideoMetadata;
+}) {
+  const { videoRef } = usePlayerContext();
+  const pip = usePipContext();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!pip || !streamUrl || !videoRef.current) return;
+    pip.register(
+      { streamUrl, watchUrl: pathname, title: metadata.title },
+      videoRef.current,
+    );
+    return () => pip.unregister();
+  }, [pip, streamUrl, pathname, metadata.title, videoRef]);
+
+  return null;
 }

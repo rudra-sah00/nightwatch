@@ -8,6 +8,7 @@ import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPr
 import { MusicMediaSession } from '@/features/music/components/MusicMediaSession';
 import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
 import { PipOverlay } from '@/features/watch/player/ui/overlays/PipOverlay';
+import { PipProvider } from '@/providers/pip-provider';
 
 export default function ProtectedLayout({
   children,
@@ -17,17 +18,19 @@ export default function ProtectedLayout({
   return (
     <CallProvider>
       <MusicPlayerProvider>
-        <CallOverlay />
-        <PipOverlay />
-        <FullPlayer />
-        <FloatingDisc />
-        <MusicAutoStop />
-        <MusicDiscordPresence />
-        <MusicMediaSession />
-        <MobileAppLifecycle />
-        <div className="h-full bg-background flex flex-col overflow-hidden">
-          <main className="flex-1 w-full min-h-0">{children}</main>
-        </div>
+        <PipProvider>
+          <CallOverlay />
+          <PipOverlay />
+          <FullPlayer />
+          <FloatingDisc />
+          <MusicAutoStop />
+          <MusicDiscordPresence />
+          <MusicMediaSession />
+          <MobileAppLifecycle />
+          <div className="h-full bg-background flex flex-col overflow-hidden">
+            <main className="flex-1 w-full min-h-0">{children}</main>
+          </div>
+        </PipProvider>
       </MusicPlayerProvider>
     </CallProvider>
   );
