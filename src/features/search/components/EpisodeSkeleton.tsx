@@ -2,6 +2,12 @@
 
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 
+/**
+ * Skeleton placeholder that mirrors the layout of {@link EpisodeCard}.
+ * Displayed while episode data is being fetched.
+ *
+ * @returns A shimmer skeleton element matching the episode card dimensions.
+ */
 export function EpisodeSkeleton() {
   return (
     <AppSkeletonTheme>

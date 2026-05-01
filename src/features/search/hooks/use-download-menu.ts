@@ -11,6 +11,7 @@ import {
   startDesktopDownload,
 } from '../utils/download';
 
+/** Options for the {@link useDownloadMenu} hook. */
 interface UseDownloadOptions {
   contentId: string;
   showTitle: string;
@@ -22,6 +23,16 @@ interface UseDownloadOptions {
   show?: ShowDetails;
 }
 
+/**
+ * Hook that powers the download-quality picker menu.
+ *
+ * Lazily fetches available download qualities for Server 2 (s2) content,
+ * tracks existing offline downloads, and initiates desktop/mobile
+ * downloads via the Electron bridge or Capacitor plugin.
+ *
+ * @param options - {@link UseDownloadOptions}
+ * @returns Quality list, loading flags, existing download state, and action handlers.
+ */
 export function useDownloadMenu({
   contentId,
   showTitle,

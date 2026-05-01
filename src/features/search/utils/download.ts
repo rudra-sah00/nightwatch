@@ -8,13 +8,22 @@ import { apiFetch } from '@/lib/fetch';
 
 import type { ShowDetails } from '@/types/content';
 
+/** A single download quality option with its label and direct URL. */
 export interface DownloadQuality {
   quality: string;
   url: string;
 }
 
+/** Preferred quality sort order from highest to lowest resolution. */
 export const QUALITY_ORDER = ['1080p', '720p', '480p', '360p'];
 
+/**
+ * Sorts download qualities according to {@link QUALITY_ORDER} (highest
+ * resolution first). Unknown qualities are appended alphabetically.
+ *
+ * @param qualities - Unsorted quality options.
+ * @returns A new sorted array.
+ */
 export function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
   return [...qualities].sort((a, b) => {
     const ai = QUALITY_ORDER.indexOf(a.quality);
@@ -26,7 +35,16 @@ export function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
   });
 }
 
-// Server 2 direct mp4 fallback
+/**
+ * Builds a deterministic offline-storage key for a downloadable item.
+ *
+ * For Server 2 direct URLs the key is `{contentId}-ep{episode}` (series)
+ * or just `contentId` (movie). For HLS-based downloads it appends
+ * `_S{season}E{episode}` when applicable.
+ *
+ * @param params - Content identifiers and type metadata.
+ * @returns A unique string identifier for offline storage.
+ */
 export function getOfflineIdentifier({
   contentId,
   type,
@@ -48,6 +66,15 @@ export function getOfflineIdentifier({
   return `${contentId}${season ? `_S${season}E${episode}` : ''}`;
 }
 
+/**
+ * Fetches available download quality links from the backend API.
+ *
+ * @param id - The content identifier.
+ * @param type - Whether the content is a `movie` or `series`.
+ * @param season - Season number (series only).
+ * @param episode - Episode number (series only).
+ * @returns An array of {@link DownloadQuality} options, or an empty array on failure.
+ */
 export async function fetchDownloadLinks(
   id: string,
   type: 'movie' | 'series',
@@ -66,6 +93,20 @@ export async function fetchDownloadLinks(
   return res.success && res.qualities ? res.qualities : [];
 }
 
+/**
+ * Initiates a content download on the current platform.
+ *
+ * On Electron (desktop) it delegates to the desktop bridge; on Capacitor
+ * (mobile) it lazy-loads the mobile download manager. For non-direct URLs
+ * it first resolves the HLS master playlist via `playVideo`, then hands
+ * the URL to the appropriate native downloader.
+ *
+ * @param params - Download metadata including content ID, title, quality,
+ *                 and optional direct URL.
+ * @returns `true` if a non-direct download was successfully started via
+ *          HLS resolution, `false` if the playlist was unavailable, or
+ *          `undefined` for direct-URL paths (fire-and-forget).
+ */
 export async function startDesktopDownload({
   contentId,
   showTitle,

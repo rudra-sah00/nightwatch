@@ -5,6 +5,7 @@ import { fetchContentProgress, getCachedProgress } from '@/features/watch/api';
 import type { ContentProgress } from '@/types/content';
 import { ContentType, type Season, type ShowDetails } from '../types';
 
+/** Return value of the {@link useContentProgress} hook. */
 interface UseContentProgressReturn {
   watchProgress: ContentProgress | null;
   hasWatchProgress: boolean;
@@ -12,6 +13,7 @@ interface UseContentProgressReturn {
   progressCheckedRef: React.MutableRefObject<boolean>;
 }
 
+/** Props for the {@link useContentProgress} hook. */
 interface UseContentProgressProps {
   contentId: string;
   show: ShowDetails | null;
@@ -25,6 +27,16 @@ interface UseContentProgressProps {
   autoPlaySeasonSelectedRef: React.MutableRefObject<boolean>;
 }
 
+/**
+ * Hook that fetches and manages the user's watch progress for a piece of
+ * content. Checks the in-memory cache first, then falls back to an HTTP
+ * request with a 5-second timeout guard. Once progress is available, it
+ * auto-selects the matching season (or the latest season) for series
+ * content, unless auto-play has already made a selection.
+ *
+ * @param props - {@link UseContentProgressProps}
+ * @returns {@link UseContentProgressReturn}
+ */
 export function useContentProgress({
   contentId,
   show,

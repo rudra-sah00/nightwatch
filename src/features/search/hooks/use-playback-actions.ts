@@ -8,6 +8,7 @@ import { cacheSeriesData } from '@/features/watch/player/hooks/useNextEpisode';
 import type { ContentProgress } from '@/types/content';
 import { ContentType, type Episode, type ShowDetails } from '../types';
 
+/** Props for the {@link usePlaybackActions} hook. */
 interface UsePlaybackActionsProps {
   show: ShowDetails | null;
   episodes: Episode[];
@@ -15,6 +16,7 @@ interface UsePlaybackActionsProps {
   fromContinueWatching: boolean;
 }
 
+/** Return value of the {@link usePlaybackActions} hook. */
 interface UsePlaybackActionsReturn {
   isPlaying: boolean;
   playingEpisodeId: string | number | null;
@@ -22,6 +24,19 @@ interface UsePlaybackActionsReturn {
   handleResume: () => Promise<void>;
 }
 
+/**
+ * Hook that builds the play and resume navigation URLs and handles
+ * router transitions to the `/watch` page.
+ *
+ * For movies it constructs a single URL; for series it resolves the
+ * target episode (explicit, first-of-season, or from watch-progress),
+ * caches series metadata for the next-episode feature, and navigates.
+ * Includes an 8-second timeout guard that resets loading state if
+ * navigation stalls.
+ *
+ * @param props - {@link UsePlaybackActionsProps}
+ * @returns {@link UsePlaybackActionsReturn}
+ */
 export function usePlaybackActions({
   show,
   episodes,

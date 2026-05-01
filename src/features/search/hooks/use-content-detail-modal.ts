@@ -8,6 +8,7 @@ import { generateRoomId } from '@/features/watch-party/room/utils';
 import { ContentType, type Episode } from '../types';
 import { useContentDetail } from './use-content-detail';
 
+/** Options for the {@link useContentDetailModal} hook. */
 interface ContentDetailModalOptions {
   contentId: string;
   initialContext?: {
@@ -21,6 +22,17 @@ interface ContentDetailModalOptions {
   onClose: () => void;
 }
 
+/**
+ * Hook that orchestrates the content-detail modal lifecycle.
+ *
+ * Composes {@link useContentDetail} with watch-party creation, watchlist
+ * toggling, trailer auto-play, countdown overlays, body-scroll locking,
+ * and Escape-key dismissal. Disables layout sidebars while the modal is
+ * open.
+ *
+ * @param options - {@link ContentDetailModalOptions}
+ * @returns All state and action handlers needed by the content-detail modal UI.
+ */
 export function useContentDetailModal({
   contentId,
   initialContext,

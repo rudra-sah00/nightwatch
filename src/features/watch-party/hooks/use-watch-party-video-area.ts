@@ -5,6 +5,17 @@ import type { VideoMetadata } from '@/features/watch/player/context/types';
 import type { S2AudioTrack } from '@/features/watch/player/hooks/useS2AudioTracks';
 import type { WatchPartyRoom } from '../room/types';
 
+/**
+ * Hook managing the video area state for a watch party room.
+ *
+ * Derives video metadata from the room state, handles local stream URL overrides
+ * for audio dub switching, resets overrides on content changes, and provides
+ * audio track selection logic. Avoids calling `playVideo()` to prevent session
+ * token conflicts that would revoke the party stream for all members.
+ *
+ * @param room - The current watch party room state.
+ * @returns Video metadata, stream URL override, audio tracks, and track change handler.
+ */
 export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   // Local stream URL override — when the host switches to a direct-URL audio
   // dub, we update this so the player reloads the stream without touching the

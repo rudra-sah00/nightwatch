@@ -6,6 +6,18 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { getSearchSuggestions } from '@/features/search/api';
 import { useServer } from '@/providers/server-provider';
 
+/**
+ * Hook that manages the global search input, inline typeahead suggestions,
+ * recent-search history (localStorage), and URL-driven navigation.
+ *
+ * Suggestions are fetched from the Server 2 API with a 200 ms debounce
+ * and are disabled on the `/search` results page. The user must press
+ * Enter or select a suggestion to trigger navigation; auto-search on
+ * keystroke is intentionally disabled.
+ *
+ * @returns Refs, query state, suggestion data, keyboard/focus handlers,
+ *          and derived display flags.
+ */
 export function useSearchInput() {
   const router = useRouter();
   const pathname = usePathname();

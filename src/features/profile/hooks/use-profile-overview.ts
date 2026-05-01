@@ -6,6 +6,16 @@ import { useAuth } from '@/providers/auth-provider';
 import { getWatchActivity, uploadProfileImage } from '../api';
 import type { WatchActivity } from '../types';
 
+/**
+ * Hook that powers the profile overview page.
+ *
+ * Fetches watch-activity data on mount (and on window re-focus), handles
+ * profile-image uploads with an optimistic local preview, and derives
+ * display values such as the formatted join date.
+ *
+ * @returns User data, activity list, upload helpers, display image URL,
+ *          file-input ref, formatted join date, and the `logout` action.
+ */
 export function useProfileOverview() {
   const { user, logout, updateUser } = useAuth();
   const t = useTranslations('profile.messages');

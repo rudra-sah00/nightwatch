@@ -6,13 +6,32 @@ import type {
 } from '@/features/watch-party/room/types';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
+/**
+ * Props for the {@link useDesktopNotifications} hook.
+ */
 interface UseDesktopNotificationsProps {
+  /** The current watch party room, or `null` if not yet joined. */
   room: WatchPartyRoom | null;
+  /** Whether the user is currently connected to the room. */
   isConnected: boolean;
+  /** The current list of chat messages in the room. */
   messages: ChatMessage[];
+  /** The current user's unique identifier, used to suppress self-notifications. */
   currentUserId?: string;
 }
 
+/**
+ * Hook managing desktop-specific notifications for a watch party.
+ *
+ * When running inside the Electron desktop wrapper, this hook:
+ * - Updates Discord Rich Presence with the current room details.
+ * - Tracks window focus state and increments the taskbar unread badge
+ *   when new messages arrive while the window is blurred.
+ * - Triggers native OS toast notifications for incoming human messages
+ *   when the window is not focused.
+ *
+ * @param props - Room state, connection status, messages, and current user ID.
+ */
 export function useDesktopNotifications({
   room,
   isConnected,

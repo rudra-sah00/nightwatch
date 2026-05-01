@@ -21,6 +21,7 @@ import { usePlaybackActions } from './use-playback-actions';
 import { useSeasonEpisodes } from './use-season-episodes';
 import { useShowDetails } from './use-show-details';
 
+/** Options for the {@link useContentDetail} hook. */
 interface UseContentDetailOptions {
   contentId: string;
   initialContext?: {
@@ -31,6 +32,7 @@ interface UseContentDetailOptions {
   fromContinueWatching?: boolean;
 }
 
+/** Return value of the {@link useContentDetail} hook. */
 interface UseContentDetailReturn {
   // State
   show: ShowDetails | null;
@@ -53,6 +55,19 @@ interface UseContentDetailReturn {
   toggleWatchlist: () => Promise<void>;
 }
 
+/**
+ * Core composition hook for the content-detail view.
+ *
+ * Orchestrates show-detail fetching, season/episode management, watch
+ * progress restoration, playback actions, auto-play from initial context,
+ * and optimistic watchlist toggling. Delegates to specialised sub-hooks:
+ * {@link useShowDetails}, {@link useSeasonEpisodes},
+ * {@link useContentProgress}, {@link usePlaybackActions}, and
+ * {@link useAutoPlay}.
+ *
+ * @param options - {@link UseContentDetailOptions}
+ * @returns {@link UseContentDetailReturn}
+ */
 export function useContentDetail({
   contentId,
   initialContext,

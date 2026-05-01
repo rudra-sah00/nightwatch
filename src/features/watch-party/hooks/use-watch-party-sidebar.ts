@@ -9,16 +9,36 @@ import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { useAgoraToken } from '../media/hooks/useAgoraToken';
 import type { WatchPartyRoom } from '../room/types';
 
+/** Sidebar tab identifier type. */
 type SidebarTab = 'chat' | 'participants' | 'soundboard' | 'sketch';
 
+/**
+ * Props for the {@link useWatchPartySidebar} hook.
+ */
 interface UseWatchPartySidebarProps {
+  /** The current watch party room state. */
   room: WatchPartyRoom;
+  /** The current user's unique identifier. */
   currentUserId?: string;
+  /** Optional callback invoked when the active sidebar tab changes. */
   onTabChange?: (tab: SidebarTab) => void;
+  /** Optional callback invoked when Agora participants are ready. */
   onAgoraReady?: (data: { participants: AgoraParticipant[] }) => void;
+  /** Optional function to broadcast an RTM message to all room participants. */
   rtmSendMessage?: (msg: RTMMessage) => void;
 }
 
+/**
+ * Hook managing the watch party sidebar state and Agora voice/video integration.
+ *
+ * Handles sidebar tab selection, resolves the current user's display name and
+ * permissions (draw, sound, chat), initializes Agora RTC with token authentication,
+ * manages audio/video device selection and toggling, runs gesture detection on the
+ * local video track, and listens for desktop push-to-talk shortcuts.
+ *
+ * @param props - Room state, user ID, and optional callbacks.
+ * @returns Sidebar tab state, user permissions, Agora media controls, and device lists.
+ */
 export function useWatchPartySidebar({
   room,
   currentUserId,

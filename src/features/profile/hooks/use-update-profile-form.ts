@@ -7,6 +7,18 @@ import type { ApiError } from '@/types';
 import { checkUsername, deleteAccount, updateProfile } from '../api';
 import { updateProfileSchema } from '../schema';
 
+/**
+ * Hook that manages the update-profile form (name, username, preferred server)
+ * and the account-deletion flow.
+ *
+ * Performs debounced username-availability checks, validates input via
+ * {@link updateProfileSchema}, submits changes through the `updateProfile`
+ * API, and shows contextual toasts. Also exposes a `handleDeleteAccount`
+ * callback that deletes the account and logs the user out.
+ *
+ * @returns Form field values, setters, availability status, form `action`,
+ *          pending/deleting flags, delete-dialog state, and action handlers.
+ */
 export function useUpdateProfileForm() {
   const t = useTranslations('profile');
   const { user, updateUser, logout } = useAuth();

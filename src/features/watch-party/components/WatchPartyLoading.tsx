@@ -3,11 +3,25 @@
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
+/**
+ * Props for the {@link WatchPartyLoading} component.
+ */
 interface WatchPartyLoadingProps {
+  /** Optional loading message to display. Defaults to the "connecting" translation. */
   message?: string;
+  /** Optional additional CSS class names for the container. */
   className?: string;
 }
 
+/**
+ * Full-screen loading indicator for watch party transitions.
+ *
+ * Renders a neo-brutalist animated spinner with a status message.
+ * Used during socket connection, room setup, and other async transitions.
+ *
+ * @param props - Optional message and className overrides.
+ * @returns An accessible loading screen with `role="status"` and `aria-live="polite"`.
+ */
 export function WatchPartyLoading({
   message,
   className,

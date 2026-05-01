@@ -6,12 +6,21 @@ import { useWatchPartyFullscreen } from '../room/hooks/useWatchPartyFullscreen';
 import { useWatchPartyHostSync } from '../room/hooks/useWatchPartyHostSync';
 import type { PartyEvent, WatchPartyRoom } from '../room/types';
 
+/**
+ * Configuration options for the {@link useActiveWatchParty} hook.
+ */
 interface UseActiveWatchPartyOptions {
+  /** The current watch party room state. */
   room: WatchPartyRoom;
+  /** Whether the current user is the party host. */
   isHost: boolean;
+  /** The current user's unique identifier. */
   currentUserId?: string;
+  /** Ref to the HTML video element used for playback. */
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  /** Callback to emit a party synchronization event (play, pause, seek). */
   onPartyEvent: (event: PartyEvent) => void;
+  /** Callback to update the room's content (e.g. switch episode or movie). */
   onUpdateContent: (content: {
     title: string;
     type: 'movie' | 'series';
@@ -20,6 +29,16 @@ interface UseActiveWatchPartyOptions {
   }) => void;
 }
 
+/**
+ * Hook managing the active watch party experience after joining.
+ *
+ * Coordinates fullscreen toggling, host sync broadcasting, sketch mode permissions,
+ * orientation detection, Agora participant tracking, audio ducking when participants
+ * speak, video element binding, and host-only content navigation.
+ *
+ * @param options - Room state, host flag, video ref, and event callbacks.
+ * @returns UI state and handlers for the active watch party view.
+ */
 export function useActiveWatchParty({
   room,
   isHost,

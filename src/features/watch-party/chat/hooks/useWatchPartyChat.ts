@@ -7,13 +7,30 @@ import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { sendPartyMessage } from '../../room/services/watch-party.api';
 import type { ChatMessage, WatchPartyRoom } from '../../room/types';
 
+/**
+ * Configuration options for the {@link useWatchPartyChat} hook.
+ */
 interface UseWatchPartyChatOptions {
+  /** The current watch party room, if available. */
   room?: WatchPartyRoom | null;
+  /** Function to broadcast an RTM message to all room participants. */
   rtmSendMessage?: (msg: RTMMessage) => void;
+  /** The current user's unique identifier. */
   userId?: string;
+  /** The current user's display name. */
   currentUserName?: string;
 }
 
+/**
+ * Hook managing the full chat lifecycle for a watch party room.
+ *
+ * Provides optimistic message sending with backend persistence and RTM broadcast,
+ * typing indicator signalling, and incoming RTM message handling (chat messages,
+ * typing start/stop events) with duplicate detection and notification sounds.
+ *
+ * @param options - Chat configuration including room, user info, and RTM sender.
+ * @returns Chat state (messages, typing users) and handlers for sending, typing, and incoming RTM messages.
+ */
 export function useWatchPartyChat({
   room,
   rtmSendMessage,

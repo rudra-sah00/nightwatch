@@ -8,6 +8,7 @@ import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useEpisodeCard } from '../hooks/use-episode-card';
 import type { Episode } from '../types';
 
+/** Props for {@link EpisodeCard}. */
 interface EpisodeCardProps {
   episode: Episode;
   onPlay: () => void;
@@ -15,6 +16,14 @@ interface EpisodeCardProps {
   isAnyLoading?: boolean;
 }
 
+/**
+ * Renders a single episode row with thumbnail, title, description, and
+ * duration. Shows a loading spinner when the episode is actively being
+ * played and a play overlay on hover.
+ *
+ * @param props - {@link EpisodeCardProps}
+ * @returns The episode card button element.
+ */
 export function EpisodeCard({
   episode,
   onPlay,

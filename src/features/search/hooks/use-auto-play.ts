@@ -8,6 +8,7 @@ import {
   type ShowDetails,
 } from '../types';
 
+/** Configuration for the {@link useAutoPlay} hook. */
 interface UseAutoPlayProps {
   initialContext?: {
     season?: number;
@@ -28,6 +29,17 @@ interface UseAutoPlayProps {
   autoPlayEpisodeStartedRef: React.MutableRefObject<boolean>;
 }
 
+/**
+ * Side-effect hook that auto-selects a season and auto-plays an episode
+ * when the content-detail modal is opened with an `initialContext`
+ * (e.g. from a deep-link or continue-watching card).
+ *
+ * Runs two sequential effects:
+ * 1. Selects the target season and fetches its episodes.
+ * 2. Once episodes are loaded, starts playback of the target episode.
+ *
+ * @param props - {@link UseAutoPlayProps}
+ */
 export function useAutoPlay({
   initialContext,
   show,

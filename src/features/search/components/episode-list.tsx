@@ -5,6 +5,7 @@ import type { Episode } from '../types';
 import { EpisodeSkeleton } from './EpisodeSkeleton';
 import { EpisodeCard } from './episode-card';
 
+/** Props for {@link EpisodeList}. */
 interface EpisodeListProps {
   episodes: Episode[];
   isLoading: boolean;
@@ -12,6 +13,15 @@ interface EpisodeListProps {
   onPlayEpisode: (episode: Episode) => void;
 }
 
+/**
+ * Renders a vertical list of {@link EpisodeCard} components for a given
+ * season. Displays skeleton placeholders while loading and an empty-state
+ * message when no episodes are available. Uses `contentVisibility: auto`
+ * for virtualised rendering performance.
+ *
+ * @param props - {@link EpisodeListProps}
+ * @returns The episode list element.
+ */
 export function EpisodeList({
   episodes,
   isLoading,

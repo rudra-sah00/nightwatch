@@ -12,13 +12,36 @@ import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 
+/**
+ * Configuration options for the {@link useWatchPartyClient} hook.
+ */
 interface UseWatchPartyClientOptions {
+  /** Unique identifier of the watch party room. */
   roomId: string;
+  /** Whether this is a freshly created party. */
   isNewParty: boolean;
+  /** Server-fetched room preview data, or `null` if unavailable. */
   initialRoomPreview: RoomPreview | null;
+  /** Whether the room was not found during server-side lookup. */
   initialRoomNotFound: boolean;
 }
 
+/**
+ * Central orchestration hook for the watch party client page.
+ *
+ * Manages the complete watch party lifecycle including:
+ * - Authentication and guest socket connection
+ * - Room join/leave/cancel request flows
+ * - Host detection and creator identification
+ * - Predictive video sync for non-host members
+ * - Party duration limits and movie end warnings
+ * - Auto-join logic for authenticated users and creators
+ * - Clipboard invite link copying
+ * - Chat message and typing indicator delegation
+ *
+ * @param options - Room ID, creation flag, and server-fetched initial data.
+ * @returns All state, refs, and handlers needed by the `WatchPartyClient` component.
+ */
 export function useWatchPartyClient({
   roomId,
   isNewParty,

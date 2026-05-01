@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { getSeriesEpisodes } from '../api';
 import type { Episode, Season, ShowDetails } from '../types';
 
+/** Return value of the {@link useSeasonEpisodes} hook. */
 interface UseSeasonEpisodesReturn {
   episodes: Episode[];
   isLoadingEpisodes: boolean;
@@ -17,6 +18,15 @@ interface UseSeasonEpisodesReturn {
   handleSeasonSelect: (showData: ShowDetails, season: Season) => void;
 }
 
+/**
+ * Hook that manages the currently selected season and its episode list.
+ *
+ * Uses locally embedded episode data when the full set is available;
+ * otherwise fetches episodes from the API via `getSeriesEpisodes`.
+ * Falls back to cached show data on network errors.
+ *
+ * @returns {@link UseSeasonEpisodesReturn}
+ */
 export function useSeasonEpisodes(): UseSeasonEpisodesReturn {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);

@@ -1,12 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/**
+ * Configuration options for the {@link useWatchPartyChat} hook.
+ */
 interface UseWatchPartyChatOptions {
+  /** Current total number of chat messages, used to trigger auto-scroll. */
   messageCount: number;
+  /** Callback invoked when the user sends a message. */
   onSendMessage: (content: string) => void;
+  /** Optional callback fired when the user begins typing. */
   onTypingStart?: () => void;
+  /** Optional callback fired when the user stops typing. */
   onTypingStop?: () => void;
 }
 
+/**
+ * Hook managing local chat UI state for a watch party chat panel.
+ *
+ * Handles input state, emoji picker visibility, auto-scrolling on new messages,
+ * typing indicator signalling, and keyboard shortcuts (Enter to send).
+ *
+ * @param options - Chat configuration including message count and event callbacks.
+ * @returns Chat UI state and handlers for input, emoji picker, send, and keyboard events.
+ */
 export function useWatchPartyChat({
   messageCount,
   onSendMessage,

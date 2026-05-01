@@ -13,12 +13,21 @@ import {
 } from '../hooks/use-search-results';
 import type { SearchResult } from '../types';
 
+/** Props for {@link SearchResults}. */
 interface SearchResultsProps {
   results: SearchResult[];
   isLoading: boolean;
   onSelect: (result: SearchResult) => void;
 }
 
+/**
+ * Displays a responsive grid of search-result cards. Deduplicates results
+ * by ID, shows skeleton placeholders while loading, and renders an
+ * empty-state illustration when no results match.
+ *
+ * @param props - {@link SearchResultsProps}
+ * @returns The search results grid element.
+ */
 export const SearchResults = React.memo(function SearchResults({
   results,
   isLoading,
@@ -73,6 +82,7 @@ export const SearchResults = React.memo(function SearchResults({
   );
 });
 
+/** Props for the internal {@link SearchResultItem} card. */
 interface SearchResultItemProps {
   result: SearchResult;
   onSelect: (result: SearchResult) => void;

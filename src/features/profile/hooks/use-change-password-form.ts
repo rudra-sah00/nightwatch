@@ -6,6 +6,16 @@ import { toast } from 'sonner';
 import { changePassword } from '../api';
 import { changePasswordSchema } from '../schema';
 
+/**
+ * Hook that manages the change-password form state and submission logic.
+ *
+ * Validates input against {@link changePasswordSchema}, calls the
+ * `changePassword` API, and displays success/error toasts. Form fields
+ * are reset on a successful password change.
+ *
+ * @returns Form field values, their setters, the form `action` for
+ *          `useActionState`, and an `isPending` flag.
+ */
 export function useChangePasswordForm() {
   const t = useTranslations('profile');
   const [currentPassword, setCurrentPassword] = useState('');

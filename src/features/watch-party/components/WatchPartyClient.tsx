@@ -11,6 +11,9 @@ import { useDesktopNotifications } from '../hooks/use-desktop-notifications';
 import { useWatchPartyClient } from '../hooks/use-watch-party-client';
 
 // Dynamic imports for heavy watch party components
+/**
+ * Dynamically imported `ActiveWatchParty` component (client-only, no SSR).
+ */
 const ActiveWatchParty = dynamic(
   () =>
     import('@/features/watch-party/components/ActiveWatchParty').then((m) => ({
@@ -19,6 +22,9 @@ const ActiveWatchParty = dynamic(
   { ssr: false },
 );
 
+/**
+ * Dynamically imported `WatchPartyLobby` component (client-only, no SSR).
+ */
 const WatchPartyLobby = dynamic(
   () =>
     import('@/features/watch-party/components/WatchPartyLobby').then((m) => ({
@@ -27,13 +33,30 @@ const WatchPartyLobby = dynamic(
   { ssr: false },
 );
 
+/**
+ * Props for the {@link WatchPartyClient} component.
+ */
 interface WatchPartyClientProps {
+  /** Unique identifier of the watch party room. */
   roomId: string;
+  /** Whether this is a freshly created party (triggers auto-join and toast). */
   isNewParty: boolean;
+  /** Server-fetched room preview data for the lobby, or `null` if unavailable. */
   initialRoomPreview: RoomPreview | null;
+  /** Whether the room was not found during server-side lookup. */
   initialRoomNotFound: boolean;
 }
 
+/**
+ * Top-level client component orchestrating the entire watch party experience.
+ *
+ * Manages the lifecycle from socket connection through lobby, pending request,
+ * and active party states. Dynamically imports heavy sub-components, handles
+ * desktop notifications, and delegates all room logic to {@link useWatchPartyClient}.
+ *
+ * @param props - Room ID, creation flag, and server-fetched initial data.
+ * @returns The appropriate watch party view based on connection and room state.
+ */
 export function WatchPartyClient({
   roomId,
   isNewParty,

@@ -10,12 +10,26 @@ import type { SearchResult } from '@/features/search/types';
 import { useAuth } from '@/providers/auth-provider';
 import { useServer } from '@/providers/server-provider';
 
+/** Options for the {@link useHomeClient} hook. */
 interface UseHomeClientOptions {
   initialResults: SearchResult[];
   initialQuery: string;
   initialServer?: string;
 }
 
+/**
+ * Client-side hook for the home/search page.
+ *
+ * Reacts to the `q` URL search-param, validates it against
+ * {@link searchQuerySchema}, fetches results via `searchContent`, and
+ * manages content-detail modal selection (including continue-watching
+ * entries). Lazily preloads the content-detail modal chunk when results
+ * or continue-watching items are present.
+ *
+ * @param options - {@link UseHomeClientOptions}
+ * @returns Query string, results, loading/transition flags, modal state,
+ *          and selection handlers.
+ */
 export function useHomeClient({
   initialResults,
   initialQuery,
