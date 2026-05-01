@@ -43,21 +43,26 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   };
 
   return (
-    <AuthCard title={getHeader()} className="h-[440px]">
+    <AuthCard
+      title={getHeader()}
+      className="h-[440px]"
+      action={
+        step === 'otp' ? (
+          <button
+            type="button"
+            onClick={() => setStep('initial')}
+            className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40 hover:text-foreground transition-colors"
+          >
+            {t('otp.back')}
+          </button>
+        ) : undefined
+      }
+    >
       {step === 'otp' && (
         <form
           onSubmit={handleOtpSubmit}
           className="h-full flex flex-col pt-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-300 motion-reduce:animate-none"
         >
-          <div className="flex justify-end mb-1">
-            <button
-              type="button"
-              onClick={() => setStep('initial')}
-              className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40 hover:text-foreground transition-colors"
-            >
-              {t('otp.back')}
-            </button>
-          </div>
           <div className="flex flex-col justify-start">
             <p className="text-[10px] font-body font-black text-foreground uppercase tracking-[0.18em] opacity-80 text-center mb-2">
               {t('otp.sentTo')}

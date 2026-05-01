@@ -2,6 +2,7 @@ import type React from 'react';
 
 interface AuthCardProps {
   title: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
   height?: string;
   className?: string;
@@ -9,6 +10,7 @@ interface AuthCardProps {
 
 export function AuthCard({
   title,
+  action,
   children,
   height,
   className = '',
@@ -26,10 +28,11 @@ export function AuthCard({
       </div>
 
       {/* ── TITLE ROW — 52px ── */}
-      <div className="shrink-0 h-[52px] border-b-[5px] border-border flex items-center mt-0">
+      <div className="shrink-0 h-[52px] border-b-[5px] border-border flex items-center justify-between mt-0">
         <h2 className="text-[34px] md:text-[38px] font-black uppercase tracking-[-0.04em] font-headline text-foreground leading-none whitespace-nowrap">
           {title}
         </h2>
+        {action}
       </div>
 
       {/* ── GAP — 8px ── */}
