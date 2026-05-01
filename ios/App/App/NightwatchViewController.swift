@@ -7,4 +7,9 @@ class NightwatchViewController: CAPBridgeViewController {
         config.allowsPictureInPictureMediaPlayback = true
         return config
     }
+
+    // Register local plugins with the Capacitor bridge
+    override open func capacitorDidLoad() {
+        bridge?.registerPluginInstance(NWVolumePlugin())
+    }
 }
