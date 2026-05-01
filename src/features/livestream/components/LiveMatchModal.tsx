@@ -187,7 +187,10 @@ function LiveMatchModalContent({
     >
       <div className="relative w-full h-full overflow-y-auto bg-background flex flex-col no-scrollbar">
         {/* Header / Close button */}
-        <div className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20 [-webkit-app-region:drag]">
+        <div
+          className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20 [-webkit-app-region:drag]"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))' }}
+        >
           <div className="flex items-center gap-4">
             <span
               id="live-match-modal-title"
@@ -218,8 +221,8 @@ function LiveMatchModalContent({
         {/* Hero — team panels */}
         <div className="relative w-full bg-background border-b-[4px] border-border">
           {isChannelCard ? (
-            <div className="relative py-8 md:py-16">
-              <div className="max-w-2xl mx-auto flex flex-col items-center gap-5 px-4">
+            <div className="relative py-4 md:py-16">
+              <div className="max-w-2xl mx-auto flex flex-col items-center gap-3 md:gap-5 px-4">
                 <TeamPanel
                   team={safeTeam1}
                   score={safeTeam1.score}
@@ -305,7 +308,7 @@ function LiveMatchModalContent({
         <div className="px-4 md:px-10 py-6 md:py-10 bg-background">
           <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
             {/* Title row */}
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-3 md:space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
                 {isChannelCard ? (
                   channelTitle

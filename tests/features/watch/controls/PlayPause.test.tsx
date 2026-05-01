@@ -34,19 +34,19 @@ describe('PlayPause', () => {
     it('should render with small size', () => {
       const { container } = render(<PlayPause {...defaultProps} size="sm" />);
 
-      expect(container.querySelector('.w-10')).toBeInTheDocument();
+      expect(container.querySelector('.w-8')).toBeInTheDocument();
     });
 
     it('should render with medium size by default', () => {
       const { container } = render(<PlayPause {...defaultProps} />);
 
-      expect(container.querySelector('.w-12')).toBeInTheDocument();
+      expect(container.querySelector('.w-9')).toBeInTheDocument();
     });
 
     it('should render with large size', () => {
       const { container } = render(<PlayPause {...defaultProps} size="lg" />);
 
-      expect(container.querySelector('.w-14')).toBeInTheDocument();
+      expect(container.querySelector('.w-10')).toBeInTheDocument();
     });
   });
 

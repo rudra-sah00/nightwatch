@@ -54,16 +54,6 @@ export function RightSidebar() {
           >
             + {t('addFriend')}
           </button>
-          {mobile && (
-            <button
-              type="button"
-              onClick={() => setRightOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
         </div>
       </div>
 

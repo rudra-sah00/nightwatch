@@ -12,7 +12,7 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
   return (
     <div
       className={cn(
-        'absolute inset-0 z-20 flex items-center justify-center bg-black/40 pointer-events-none transition-opacity duration-300',
+        'absolute inset-0 z-10 flex items-center justify-center bg-black/40 pointer-events-none transition-opacity duration-300',
         isVisible ? 'opacity-100' : 'opacity-0',
       )}
       role="status"
@@ -21,7 +21,7 @@ export function BufferingOverlay({ isVisible }: BufferingOverlayProps) {
       aria-hidden={!isVisible}
     >
       <div className="relative flex items-center justify-center drop-shadow-md">
-        <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-white animate-spin" />
+        <Loader2 className="w-8 h-8 md:w-16 md:h-16 text-white animate-spin" />
       </div>
     </div>
   );

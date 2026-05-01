@@ -48,13 +48,13 @@ export function Volume({
         onMouseDown={(e) => e.preventDefault()}
         aria-label={isMuted || volume === 0 ? t('unmute') : t('mute')}
         className={cn(
-          'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-          'bg-background border-[3px] border-border text-foreground ',
+          'p-1.5 md:p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
+          'bg-background border-[2px] md:border-[3px] border-border text-foreground ',
           'hover:bg-neo-yellow/80',
           'active:bg-neo-yellow',
         )}
       >
-        <VolumeIcon className="w-5 h-5 stroke-[3px]" />
+        <VolumeIcon className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
       </button>
 
       <div

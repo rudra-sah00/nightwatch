@@ -31,8 +31,8 @@ export function Fullscreen({
       className={cn(
         compact
           ? 'p-1.5 transition-[background-color,color,border-color,opacity,transform] duration-200'
-          : 'p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'bg-background border-[3px] border-border text-foreground ',
+          : 'p-1.5 md:p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
+        'bg-background border-[2px] md:border-[3px] border-border text-foreground ',
         'hover:bg-neo-yellow/80',
         'active:bg-neo-yellow',
       )}

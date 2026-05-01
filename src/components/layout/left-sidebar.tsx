@@ -62,7 +62,7 @@ export function LeftSidebar() {
   ];
 
   const whatsNewHref = isMounted && isDesktopApp ? '/changelog' : '/whats-new';
-  const showDownloadApp = isMounted && !isDesktopApp && osName;
+  const showDownloadApp = isMounted && !isDesktopApp && !mobile && osName;
   const closeSidebar = () => setLeftOpen(false);
 
   const navContent = (onClick?: () => void) => (

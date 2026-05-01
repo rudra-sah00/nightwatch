@@ -31,7 +31,7 @@ export function LoadingOverlay({
     >
       <div className="flex flex-col items-center gap-6 saturate-[1.2] max-w-[calc(100vw-2rem)] md:max-w-none">
         {/* Simple Circular Spinner */}
-        <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-primary animate-spin" />
+        <Loader2 className="w-8 h-8 md:w-16 md:h-16 text-primary animate-spin" />
 
         {/* Steady Loading Text */}
         <div className="flex flex-col items-center gap-2">

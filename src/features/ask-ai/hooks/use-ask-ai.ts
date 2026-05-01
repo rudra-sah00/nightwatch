@@ -276,6 +276,13 @@ export function useAskAi() {
       }
 
       // 2. Get mic
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setError(
+          'Microphone is not available. This requires a secure (HTTPS) connection.',
+        );
+        setState('idle');
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,

@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { cn, formatBytes } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
@@ -29,6 +30,7 @@ export function OfflineLibrary() {
     resumeDownload,
   } = useDownloads();
   const t = useTranslations('watch.offline');
+  const mobile = useIsMobile();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -87,7 +89,7 @@ export function OfflineLibrary() {
     );
   }
 
-  if (!isDesktopApp) {
+  if (!isDesktopApp && !mobile) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center border-[4px] border-border bg-card">
         <MonitorDown className="w-16 h-16 stroke-[2px] text-foreground/30 mb-6" />

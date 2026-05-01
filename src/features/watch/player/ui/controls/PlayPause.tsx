@@ -8,15 +8,15 @@ import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 
 // Static size configurations to avoid recreation
 const SIZE_CLASSES = {
-  sm: 'w-10 h-10',
-  md: 'w-12 h-12',
-  lg: 'w-14 h-14',
+  sm: 'w-8 h-8 md:w-10 md:h-10',
+  md: 'w-9 h-9 md:w-12 md:h-12',
+  lg: 'w-10 h-10 md:w-14 md:h-14',
 } as const;
 
 const ICON_SIZES = {
-  sm: 'w-5 h-5',
-  md: 'w-6 h-6',
-  lg: 'w-7 h-7',
+  sm: 'w-3.5 h-3.5 md:w-5 md:h-5',
+  md: 'w-4 h-4 md:w-6 md:h-6',
+  lg: 'w-5 h-5 md:w-7 md:h-7',
 } as const;
 
 interface PlayPauseProps {
@@ -39,7 +39,7 @@ export function PlayPause({
       aria-label={isPlaying ? t('pause') : t('play')}
       className={cn(
         'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'border-[3px] border-border bg-neo-yellow text-foreground ',
+        'border-[2px] md:border-[3px] border-border bg-neo-yellow text-foreground ',
         'hover:bg-neo-yellow/80',
         'active:bg-neo-yellow/80',
         SIZE_CLASSES[size],

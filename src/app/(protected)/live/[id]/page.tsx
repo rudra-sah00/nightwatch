@@ -314,7 +314,10 @@ export default function LiveMatchPlayerPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}
+    >
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}

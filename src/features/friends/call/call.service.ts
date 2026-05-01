@@ -33,6 +33,11 @@ export async function connectToAgoraCall(
   audioTrack: IMicrophoneAudioTrack;
 }> {
   // Pre-check mic permission (required for iOS Capacitor WebView)
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error(
+      'Microphone is not available. This requires a secure (HTTPS) connection.',
+    );
+  }
   try {
     const testStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
