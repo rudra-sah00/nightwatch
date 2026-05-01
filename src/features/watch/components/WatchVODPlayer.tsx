@@ -269,8 +269,15 @@ function VODPlayerState({
             <Player.Header hideBackButton={hideBackButton} />
             {/* Mobile top-right: settings + fullscreen (YouTube-style) */}
             <Player.MobileTopBar>
+              <Player.PipButton
+                onPip={() => {
+                  window.scrollTo({
+                    top: window.innerHeight,
+                    behavior: 'smooth',
+                  });
+                }}
+              />
               <Player.SettingsMenu />
-              <Player.Fullscreen />
             </Player.MobileTopBar>
             {/* Mobile center: skip back / play / skip forward (YouTube-style) */}
             <Player.MobileCenterControls>
@@ -299,7 +306,10 @@ function VODPlayerState({
               <Player.SettingsMenu />
               <Player.Fullscreen />
             </Player.ControlRow>
-            {/* Mobile layout: thin seekbar pinned to very bottom (YouTube-style) */}
+            {/* Mobile layout: fullscreen bottom-right, then seekbar pinned to bottom */}
+            <Player.MobileBottomRight>
+              <Player.Fullscreen />
+            </Player.MobileBottomRight>
             <div className="md:hidden">
               <Player.MobileSeekBar />
             </div>

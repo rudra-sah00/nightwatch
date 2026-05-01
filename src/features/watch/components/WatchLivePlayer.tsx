@@ -245,10 +245,17 @@ function LivePlayerState({
       {isPip ? null : (
         <Player.Controls>
           <Player.Header rightContent={recordButton} />
-          {/* Mobile top-right: settings + fullscreen */}
+          {/* Mobile top: PiP left, settings right */}
           <Player.MobileTopBar>
+            <Player.PipButton
+              onPip={() => {
+                window.scrollTo({
+                  top: window.innerHeight,
+                  behavior: 'smooth',
+                });
+              }}
+            />
             <Player.SettingsMenu />
-            <Player.Fullscreen />
           </Player.MobileTopBar>
           {/* Mobile center: skip back / play / skip forward */}
           <Player.MobileCenterControls>
@@ -270,7 +277,10 @@ function LivePlayerState({
             </div>
             <Player.Fullscreen />
           </Player.ControlRow>
-          {/* Mobile: thin seekbar */}
+          {/* Mobile: fullscreen bottom-right, then seekbar */}
+          <Player.MobileBottomRight>
+            <Player.Fullscreen />
+          </Player.MobileBottomRight>
           <div className="md:hidden">
             <Player.MobileSeekBar />
           </div>

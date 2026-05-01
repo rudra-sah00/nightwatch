@@ -38,14 +38,14 @@ export function PlayerControlRow({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** YouTube-style mobile top bar: settings gear + fullscreen top-right */
+/** YouTube-style mobile top bar: PiP arrow top-left, settings top-right */
 export function PlayerMobileTopBar({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden flex items-center justify-end gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pointer-events-auto">
+    <div className="md:hidden flex items-center justify-between gap-2 px-3 pt-2 pointer-events-auto">
       {children}
     </div>
   );
@@ -69,4 +69,17 @@ export function PlayerMobileCenterControls({
 
 export function PlayerSpacer() {
   return <div className="flex-1 min-w-4" />;
+}
+
+/** Fullscreen button pinned to bottom-right on mobile (above seekbar) */
+export function PlayerMobileBottomRight({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="md:hidden flex items-center justify-end px-3 pb-1 pointer-events-auto">
+      {children}
+    </div>
+  );
 }

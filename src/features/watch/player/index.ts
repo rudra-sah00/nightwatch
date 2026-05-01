@@ -14,11 +14,13 @@ export * from './ui/compound/PlayerSkipButtons';
 export * from './ui/compound/PlayerTimeDisplay';
 export * from './ui/compound/PlayerVideo';
 export * from './ui/compound/PlayerVolume';
+export * from './ui/controls/PipButton';
 
 import { PlayerAudioSubtitleSelectors } from './ui/compound/PlayerAudioSubtitleSelectors';
 import {
   PlayerControlRow,
   PlayerControls,
+  PlayerMobileBottomRight,
   PlayerMobileCenterControls,
   PlayerMobileTopBar,
   PlayerSpacer,
@@ -40,6 +42,7 @@ import { PlayerSkipButtons } from './ui/compound/PlayerSkipButtons';
 import { PlayerTimeDisplay } from './ui/compound/PlayerTimeDisplay';
 import { PlayerVideo } from './ui/compound/PlayerVideo';
 import { PlayerVolume } from './ui/compound/PlayerVolume';
+import { PlayerPipButton } from './ui/controls/PipButton';
 
 // Namespace for clean importing in components
 export const Player = {
@@ -49,7 +52,9 @@ export const Player = {
   ControlRow: PlayerControlRow,
   MobileTopBar: PlayerMobileTopBar,
   MobileCenterControls: PlayerMobileCenterControls,
+  MobileBottomRight: PlayerMobileBottomRight,
   Spacer: PlayerSpacer,
+  PipButton: PlayerPipButton,
   PlayPause: PlayerPlayPause,
   SeekBar: PlayerSeekBar,
   MobileSeekBar: PlayerMobileSeekBar,
