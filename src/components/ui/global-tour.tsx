@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useTheme } from '@/providers/theme-provider';
 
 function isDark(theme: string) {
@@ -22,6 +23,7 @@ export function GlobalTour() {
   const pathname = usePathname();
   const tourStarted = useRef(false);
   const { isDesktopApp } = useDesktopApp();
+  const mobile = useIsMobile();
   const { theme } = useTheme();
   const { setLeftOpen, setRightOpen } = useSidebar();
   const t = useTranslations('common.tour');
@@ -43,152 +45,28 @@ export function GlobalTour() {
       `<span class="font-body text-sm font-medium" style="color:${fg};opacity:0.7">${text}</span>`;
 
     const timer = setTimeout(() => {
-      const steps: DriveStep[] = [
-        {
-          popover: {
-            title: title(t('welcome.title')),
-            description: desc(t('welcome.description')),
-          },
-        },
-        {
-          element: 'input[name="q"]',
-          popover: {
-            title: title(t('search.title')),
-            description: desc(t('search.description')),
-            side: 'bottom',
-            align: 'start',
-          },
-        },
-        // Open left sidebar and highlight it
-        {
-          element: 'aside',
-          popover: {
-            title: title(t('sidebar.title')),
-            description: desc(t('sidebar.description')),
-            side: 'right',
-            align: 'start',
-          },
-          onHighlightStarted: () => setLeftOpen(true),
-        },
-        {
-          element: 'a[href="/continue-watching"]',
-          popover: {
-            title: title(t('resume.title')),
-            description: desc(t('resume.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        {
-          element: 'a[href="/live"]',
-          popover: {
-            title: title(t('live.title')),
-            description: desc(t('live.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        {
-          element: 'a[href="/watchlist"]',
-          popover: {
-            title: title(t('watchlist.title')),
-            description: desc(t('watchlist.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        {
-          element: 'a[href="/library"]',
-          popover: {
-            title: title(t('library.title')),
-            description: desc(t('library.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        ...(isDesktopApp
-          ? [
-              {
-                element: 'a[href="/downloads"]',
-                popover: {
-                  title: title(t('downloads.title')),
-                  description: desc(t('downloads.description')),
-                  side: 'right' as const,
-                  align: 'center' as const,
-                },
-              },
-            ]
-          : []),
-        {
-          element: 'a[href="/music"]',
-          popover: {
-            title: title(t('music.title')),
-            description: desc(t('music.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        {
-          element: 'a[href="/ask-ai"]',
-          popover: {
-            title: title(t('askAi.title')),
-            description: desc(t('askAi.description')),
-            side: 'right',
-            align: 'center',
-          },
-        },
-        // Close left, open right sidebar for friends
-        {
-          element: 'aside:last-of-type',
-          popover: {
-            title: title(t('friends.title')),
-            description: desc(t('friends.description')),
-            side: 'left',
-            align: 'start',
-          },
-          onHighlightStarted: () => {
-            setLeftOpen(false);
-            setRightOpen(true);
-          },
-        },
-        // Close right sidebar, show profile
-        {
-          element: 'a[href="/profile"]',
-          popover: {
-            title: title(t('profile.title')),
-            description: desc(t('profile.description')),
-            side: 'bottom',
-            align: 'end',
-          },
-          onHighlightStarted: () => setRightOpen(false),
-        },
-        {
-          element: 'a[href="/profile"]',
-          popover: {
-            title: title(t('serverTip.title'), dark ? '#fb7185' : '#e63b2e'),
-            description: desc(t('serverTip.description')),
-            side: 'bottom',
-            align: 'end',
-          },
-        },
-        {
-          popover: {
-            title: title(t('ready.title')),
-            description: desc(t('ready.description')),
-          },
-        },
-      ];
+      const steps: DriveStep[] = mobile
+        ? buildMobileSteps(title, desc, t, setLeftOpen, setRightOpen)
+        : buildDesktopSteps(
+            title,
+            desc,
+            t,
+            dark,
+            isDesktopApp,
+            setLeftOpen,
+            setRightOpen,
+          );
 
       const driverObj = driver({
         showProgress: true,
         animate: true,
         allowClose: true,
         overlayColor: overlay,
-        popoverClass: `rounded-xl border-2 shadow-xl !font-body`,
+        popoverClass: 'rounded-xl border-2 shadow-xl !font-body',
         stagePadding: 8,
         stageRadius: 12,
         popoverOffset: 12,
-        progressText: `{{current}} / {{total}}`,
+        progressText: '{{current}} / {{total}}',
         nextBtnText: t('nextBtn'),
         prevBtnText: t('prevBtn'),
         doneBtnText: t('doneBtn'),
@@ -219,6 +97,7 @@ export function GlobalTour() {
     pathname,
     router,
     isDesktopApp,
+    mobile,
     t,
     theme,
     setLeftOpen,
@@ -226,4 +105,212 @@ export function GlobalTour() {
   ]);
 
   return null;
+}
+
+// ── Mobile tour steps (swipe-based navigation) ──────────────────────
+function buildMobileSteps(
+  title: (t: string, c?: string) => string,
+  desc: (t: string) => string,
+  t: (key: string) => string,
+  setLeftOpen: (v: boolean) => void,
+  setRightOpen: (v: boolean) => void,
+): DriveStep[] {
+  return [
+    {
+      popover: {
+        title: title(t('welcome.title')),
+        description: desc(t('welcome.description')),
+      },
+    },
+    {
+      element: 'input[name="q"]',
+      popover: {
+        title: title(t('search.title')),
+        description: desc(t('search.description')),
+        side: 'bottom',
+        align: 'start',
+      },
+    },
+    {
+      popover: {
+        title: title('← Swipe Right'),
+        description: desc(
+          'Swipe from the left edge to open the navigation menu. It has Home, Live, Music, Downloads, and more.',
+        ),
+      },
+      onHighlightStarted: () => setLeftOpen(true),
+    },
+    {
+      popover: {
+        title: title('Swipe Left →'),
+        description: desc(
+          'Swipe from the right edge to see your friends, online status, and start voice calls.',
+        ),
+      },
+      onHighlightStarted: () => {
+        setLeftOpen(false);
+        setRightOpen(true);
+      },
+    },
+    {
+      element: 'a[href="/profile"]',
+      popover: {
+        title: title(t('profile.title')),
+        description: desc(t('profile.description')),
+        side: 'bottom',
+        align: 'end',
+      },
+      onHighlightStarted: () => setRightOpen(false),
+    },
+    {
+      popover: {
+        title: title(t('ready.title')),
+        description: desc(t('ready.description')),
+      },
+    },
+  ];
+}
+
+// ── Desktop tour steps (hover-based sidebars) ───────────────────────
+function buildDesktopSteps(
+  title: (t: string, c?: string) => string,
+  desc: (t: string) => string,
+  t: (key: string) => string,
+  dark: boolean,
+  isDesktopApp: boolean,
+  setLeftOpen: (v: boolean) => void,
+  setRightOpen: (v: boolean) => void,
+): DriveStep[] {
+  return [
+    {
+      popover: {
+        title: title(t('welcome.title')),
+        description: desc(t('welcome.description')),
+      },
+    },
+    {
+      element: 'input[name="q"]',
+      popover: {
+        title: title(t('search.title')),
+        description: desc(t('search.description')),
+        side: 'bottom',
+        align: 'start',
+      },
+    },
+    {
+      element: 'aside',
+      popover: {
+        title: title(t('sidebar.title')),
+        description: desc(t('sidebar.description')),
+        side: 'right',
+        align: 'start',
+      },
+      onHighlightStarted: () => setLeftOpen(true),
+    },
+    {
+      element: 'a[href="/continue-watching"]',
+      popover: {
+        title: title(t('resume.title')),
+        description: desc(t('resume.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/live"]',
+      popover: {
+        title: title(t('live.title')),
+        description: desc(t('live.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/watchlist"]',
+      popover: {
+        title: title(t('watchlist.title')),
+        description: desc(t('watchlist.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/library"]',
+      popover: {
+        title: title(t('library.title')),
+        description: desc(t('library.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    ...(isDesktopApp
+      ? [
+          {
+            element: 'a[href="/downloads"]',
+            popover: {
+              title: title(t('downloads.title')),
+              description: desc(t('downloads.description')),
+              side: 'right' as const,
+              align: 'center' as const,
+            },
+          },
+        ]
+      : []),
+    {
+      element: 'a[href="/music"]',
+      popover: {
+        title: title(t('music.title')),
+        description: desc(t('music.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/ask-ai"]',
+      popover: {
+        title: title(t('askAi.title')),
+        description: desc(t('askAi.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'aside:last-of-type',
+      popover: {
+        title: title(t('friends.title')),
+        description: desc(t('friends.description')),
+        side: 'left',
+        align: 'start',
+      },
+      onHighlightStarted: () => {
+        setLeftOpen(false);
+        setRightOpen(true);
+      },
+    },
+    {
+      element: 'a[href="/profile"]',
+      popover: {
+        title: title(t('profile.title')),
+        description: desc(t('profile.description')),
+        side: 'bottom',
+        align: 'end',
+      },
+      onHighlightStarted: () => setRightOpen(false),
+    },
+    {
+      element: 'a[href="/profile"]',
+      popover: {
+        title: title(t('serverTip.title'), dark ? '#fb7185' : '#e63b2e'),
+        description: desc(t('serverTip.description')),
+        side: 'bottom',
+        align: 'end',
+      },
+    },
+    {
+      popover: {
+        title: title(t('ready.title')),
+        description: desc(t('ready.description')),
+      },
+    },
+  ];
 }

@@ -45,9 +45,9 @@ function TeamPanel({
   const showScore = isLive || isEnded;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8 px-4">
+    <div className="flex-1 flex flex-col items-center justify-center gap-3 md:gap-6 py-4 md:py-8 px-4">
       {/* Avatar */}
-      <div className="relative w-20 h-20 md:w-32 md:h-32 bg-white border-[4px] border-border  flex items-center justify-center overflow-hidden">
+      <div className="relative w-14 h-14 md:w-32 md:h-32 bg-white border-[4px] border-border  flex items-center justify-center overflow-hidden">
         {team.avatar ? (
           <img
             src={team.avatar}
@@ -68,7 +68,7 @@ function TeamPanel({
 
       {/* Score */}
       {showScore && (
-        <span className="text-4xl md:text-7xl font-black font-headline tracking-tighter text-foreground tabular-nums">
+        <span className="text-2xl md:text-7xl font-black font-headline tracking-tighter text-foreground tabular-nums">
           {score || '0'}
         </span>
       )}
@@ -116,7 +116,11 @@ function LiveMatchModalContent({
   // Disable sidebars while modal is open
   useEffect(() => {
     setSidebarsDisabled(true);
-    return () => setSidebarsDisabled(false);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      setSidebarsDisabled(false);
+      document.body.style.overflow = '';
+    };
   }, [setSidebarsDisabled]);
 
   // Escape key to close + auto-focus on open
@@ -241,7 +245,7 @@ function LiveMatchModalContent({
               </div>
             </div>
           ) : (
-            <div className="relative flex items-stretch py-8 md:py-16">
+            <div className="relative flex items-stretch py-4 md:py-16">
               <TeamPanel
                 team={safeTeam1}
                 score={safeTeam1.score}
@@ -275,7 +279,7 @@ function LiveMatchModalContent({
                 )}
 
                 {/* VS */}
-                <span className="text-3xl md:text-6xl font-black font-headline text-foreground tracking-widest">
+                <span className="text-xl md:text-6xl font-black font-headline text-foreground tracking-widest">
                   VS
                 </span>
 
@@ -298,8 +302,8 @@ function LiveMatchModalContent({
         </div>
 
         {/* Details section */}
-        <div className="px-6 md:px-10 py-10 bg-background">
-          <div className="max-w-3xl mx-auto space-y-10">
+        <div className="px-4 md:px-10 py-6 md:py-10 bg-background">
+          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
             {/* Title row */}
             <div className="text-center space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">

@@ -40,7 +40,7 @@ export default function LoginClient() {
     // Direct redirect if already authenticated
     if (isAuthenticated) {
       if (checkIsMobile()) {
-        window.location.href = '/home';
+        window.location.href = '/home?tour=true';
       } else {
         router.replace('/home');
       }
@@ -52,7 +52,7 @@ export default function LoginClient() {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
         if (checkIsMobile()) {
-          window.location.href = '/home';
+          window.location.href = '/home?tour=true';
         } else {
           router.push('/home');
         }

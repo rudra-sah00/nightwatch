@@ -259,7 +259,23 @@ export function useAskAi() {
     setUserTranscript('');
 
     try {
-      // 1. Get mic
+      // 1. Check mic permission first (required for iOS Capacitor WebView)
+      if (navigator.permissions?.query) {
+        try {
+          const perm = await navigator.permissions.query({
+            name: 'microphone' as PermissionName,
+          });
+          if (perm.state === 'denied') {
+            setError('Microphone access denied. Please enable it in Settings.');
+            setState('idle');
+            return;
+          }
+        } catch {
+          // permissions.query not supported for microphone in some browsers — continue
+        }
+      }
+
+      // 2. Get mic
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -338,7 +354,13 @@ export function useAskAi() {
       source.connect(processor);
       processor.connect(audioCtx.destination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start');
+      const msg =
+        err instanceof DOMException && err.name === 'NotAllowedError'
+          ? 'Microphone access denied. Please allow microphone in your device Settings.'
+          : err instanceof Error
+            ? err.message
+            : 'Failed to start';
+      setError(msg);
       setState('idle');
       activeRef.current = false;
     }

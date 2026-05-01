@@ -32,6 +32,21 @@ export async function connectToAgoraCall(
   client: IAgoraRTCClient;
   audioTrack: IMicrophoneAudioTrack;
 }> {
+  // Pre-check mic permission (required for iOS Capacitor WebView)
+  try {
+    const testStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+    for (const track of testStream.getTracks()) track.stop();
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'NotAllowedError') {
+      throw new Error(
+        'Microphone access denied. Please allow microphone in Settings.',
+      );
+    }
+    throw err;
+  }
+
   const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
   AgoraRTC.setLogLevel(process.env.NODE_ENV === 'production' ? 4 : 2);
   const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });

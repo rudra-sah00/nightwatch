@@ -14,7 +14,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import { desktopBridge } from '@/lib/electron-bridge';
+import { toast } from 'sonner';
+import { checkIsMobile, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import {
   connectToAgoraCall,
@@ -82,9 +83,28 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [callDuration, setCallDuration] = useState(0);
 
   const callStateRef = useRef<CallState>('idle');
-  const updateCallState = useCallback((state: CallState) => {
+  const peerRef = useRef<CallPeer | null>(null);
+  const updateCallState = useCallback((state: CallState, peerName?: string) => {
     callStateRef.current = state;
     setCallState(state);
+
+    // Native call notification for mobile
+    if (checkIsMobile()) {
+      import('@anuradev/capacitor-phone-call-notification').then(
+        ({ PhoneCallNotification }) => {
+          if (state === 'active') {
+            PhoneCallNotification.showCallInProgressNotification({
+              channelName: peerName || 'Nightwatch',
+              channelDescription: 'Voice call in progress',
+            }).catch(() => {});
+          } else if (state === 'idle') {
+            PhoneCallNotification.hideCallInProgressNotification().catch(
+              () => {},
+            );
+          }
+        },
+      );
+    }
   }, []);
 
   const agoraClientRef = useRef<IAgoraRTCClient | null>(null);
@@ -207,6 +227,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new CustomEvent('dm-call:end'));
     updateCallState('idle');
     setPeer(null);
+    peerRef.current = null;
     setParticipants([]);
     setIsVideoOn(false);
     setIsRemoteVideoOn(false);
@@ -237,7 +258,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       );
       localTrackRef.current = audioTrack;
       agoraClientRef.current = client;
-      updateCallState('active');
+      updateCallState('active', peerRef.current?.name);
       new Audio('/room-join.mp3').play().catch(() => {});
     },
     [updateCallState],
@@ -247,7 +268,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     async (channel: string, token: string, appId: string, uid: number) => {
       try {
         await connectAgora(channel, token, appId, uid);
-      } catch {
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
         cleanup();
       }
     },
@@ -259,7 +281,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       try {
         const data = await fetchCallToken(channel);
         await connectAgora(channel, data.token, data.appId, data.uid);
-      } catch {
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
         cleanup();
       }
     },
@@ -271,6 +294,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     (callPeer: CallPeer) => {
       if (!socket || callStateRef.current !== 'idle') return;
       setPeer(callPeer);
+      peerRef.current = callPeer;
       updateCallState('outgoing');
       socket.emit(
         'call:initiate',
@@ -391,11 +415,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callerPhoto: string | null;
     }) => {
       if (callStateRef.current !== 'idle') return;
-      setPeer({
+      const incomingPeer = {
         id: data.callerId,
         name: data.callerName,
         photo: data.callerPhoto,
-      });
+      };
+      setPeer(incomingPeer);
+      peerRef.current = incomingPeer;
       updateCallStateRef.current('incoming');
     };
 
