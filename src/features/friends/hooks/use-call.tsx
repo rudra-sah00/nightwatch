@@ -186,7 +186,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   // ── Media ducking ─────────────────────────────────────────────────
   useEffect(() => {
-    if (callState === 'active') {
+    if (callState === 'active' || callState === 'incoming') {
       restoreVolumeRef.current = duckMediaElements(0.2);
       window.dispatchEvent(new CustomEvent('dm-call:start'));
       desktopBridge.setCallActive(true);

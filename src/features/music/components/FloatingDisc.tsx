@@ -21,7 +21,7 @@ export function FloatingDisc() {
     <button
       type="button"
       onClick={() => setExpanded(true)}
-      className="fixed bottom-6 right-4 md:right-20 z-50 w-16 h-16 md:w-20 md:h-20 rounded-full border-[3px] border-border overflow-hidden shadow-lg hover:scale-110 transition-transform [-webkit-app-region:no-drag]"
+      className="fixed bottom-6 right-4 md:right-20 z-[101] w-16 h-16 md:w-20 md:h-20 rounded-full border-[3px] border-border overflow-hidden shadow-lg hover:scale-110 transition-transform [-webkit-app-region:no-drag]"
       aria-label={`Now playing: ${currentTrack.title}`}
     >
       <img

@@ -143,6 +143,32 @@ export function MusicPlayerProvider({
     };
   }, [state.volume]);
 
+  // Pause music when a DM voice call arrives, resume when it ends
+  const wasPlayingBeforeCallRef = useRef(false);
+  useEffect(() => {
+    const handleCallStart = () => {
+      const engine = engineRef.current;
+      if (!engine) return;
+      const s = engine.getState();
+      wasPlayingBeforeCallRef.current = s.isPlaying;
+      if (s.isPlaying) engine.togglePlay();
+    };
+    const handleCallEnd = () => {
+      const engine = engineRef.current;
+      if (!engine) return;
+      if (wasPlayingBeforeCallRef.current && !engine.getState().isPlaying) {
+        engine.togglePlay();
+      }
+      wasPlayingBeforeCallRef.current = false;
+    };
+    window.addEventListener('dm-call:start', handleCallStart);
+    window.addEventListener('dm-call:end', handleCallEnd);
+    return () => {
+      window.removeEventListener('dm-call:start', handleCallStart);
+      window.removeEventListener('dm-call:end', handleCallEnd);
+    };
+  }, []);
+
   const play = useCallback((track: MusicTrack, queue?: MusicTrack[]) => {
     engineRef.current?.playTrack(track, queue);
   }, []);
