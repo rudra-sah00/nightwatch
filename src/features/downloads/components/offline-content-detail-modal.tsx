@@ -136,7 +136,7 @@ export function OfflineContentDetailModal({
 
   return (
     <div
-      className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm"
+      className="absolute inset-0 z-[100] bg-card"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

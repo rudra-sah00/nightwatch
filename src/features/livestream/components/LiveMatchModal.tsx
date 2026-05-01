@@ -180,7 +180,7 @@ function LiveMatchModalContent({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm outline-none"
+      className="absolute inset-0 z-[100] bg-card outline-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-match-modal-title"
