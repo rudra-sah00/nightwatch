@@ -20,6 +20,9 @@ export function MobileShell() {
   useEffect(() => {
     if (!checkIsMobile()) return;
 
+    // Pre-load plugins that are dynamically imported elsewhere
+    import('@anuradev/capacitor-phone-call-notification').catch(() => {});
+
     // --- STATUS BAR: match dark theme ---
     const applyStatusBar = () => {
       const isDark = document.documentElement.classList.contains('dark');

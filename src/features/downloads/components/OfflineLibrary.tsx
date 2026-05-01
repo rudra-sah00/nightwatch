@@ -125,20 +125,6 @@ export function OfflineLibrary() {
                 {t('yourDownloads')}
               </p>
             </div>
-
-            <div className="bg-background text-foreground border-[4px] border-border px-6 py-4">
-              <div className="flex items-center gap-4">
-                <Download className="w-10 h-10 stroke-[3px] text-neo-blue" />
-                <div className="space-y-1">
-                  <h3 className="font-headline font-black uppercase text-xl md:text-2xl leading-none">
-                    {t('downloadsCount', { count: downloads.length })}
-                  </h3>
-                  <p className="font-body text-sm font-bold text-muted-foreground">
-                    {t('availableOffline')}
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

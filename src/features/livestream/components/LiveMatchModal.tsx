@@ -180,7 +180,7 @@ function LiveMatchModalContent({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10000] bg-black/80 backdrop-blur-sm outline-none"
+      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm outline-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-match-modal-title"
@@ -305,8 +305,8 @@ function LiveMatchModalContent({
         </div>
 
         {/* Details section */}
-        <div className="px-4 md:px-10 py-6 md:py-10 bg-background">
-          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
+        <div className="px-4 md:px-10 py-6 md:py-10 bg-background flex-1 flex flex-col">
+          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10 flex-1 flex flex-col justify-between">
             {/* Title row */}
             <div className="text-center space-y-3 md:space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
@@ -363,7 +363,7 @@ function LiveMatchModalContent({
                 </span>
               </button>
 
-              {/* Watch Party */}
+              {/* Watch Party — desktop only */}
               {!isMobile && (
                 <button
                   type="button"
@@ -388,13 +388,6 @@ function LiveMatchModalContent({
                 </button>
               )}
             </div>
-
-            {/* Mobile-only note */}
-            {isMobile && (
-              <p className="text-center text-sm font-black uppercase tracking-widest text-neo-red font-headline">
-                {t('watchPartyDesktopOnly')}
-              </p>
-            )}
           </div>
         </div>
       </div>

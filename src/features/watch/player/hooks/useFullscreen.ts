@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { checkIsMobile } from '@/lib/electron-bridge';
+import { mobileBridge } from '@/lib/mobile-bridge';
 import type { PlayerAction } from '../context/types';
 import { useMobileDetection } from './useMobileDetection';
 
@@ -476,13 +477,11 @@ export function useFullscreen({
   // Hide status bar on mobile when entering fullscreen, show on exit
   useEffect(() => {
     if (!checkIsMobile()) return;
-    import('@/lib/mobile-bridge').then(({ mobileBridge }) => {
-      if (playerIsFullscreen) {
-        mobileBridge.hideStatusBar();
-      } else {
-        mobileBridge.showStatusBar();
-      }
-    });
+    if (playerIsFullscreen) {
+      mobileBridge.hideStatusBar();
+    } else {
+      mobileBridge.showStatusBar();
+    }
   }, [playerIsFullscreen]);
 
   return { enterFullscreen, exitFullscreen, toggleFullscreen, isMobile };

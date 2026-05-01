@@ -1,30 +1,23 @@
-// Lightweight haptic helper for UI components.
-// Lazy-loads @capacitor/haptics only on native mobile — zero cost on web/desktop.
+// Haptic helper for UI components.
+// Uses static imports — pre-loaded on native, no-op on web/desktop.
 
-let _haptics: typeof import('@capacitor/haptics') | null = null;
+import { Capacitor } from '@capacitor/core';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
-const isNative =
-  typeof window !== 'undefined' &&
-  window.Capacitor?.isNativePlatform?.() === true;
-
-if (isNative) {
-  import('@capacitor/haptics').then((m) => {
-    _haptics = m;
-  });
-}
+const isNative = Capacitor.isNativePlatform();
 
 export function hapticLight() {
-  _haptics?.Haptics.impact({ style: _haptics.ImpactStyle.Light });
+  if (isNative) Haptics.impact({ style: ImpactStyle.Light });
 }
 
 export function hapticMedium() {
-  _haptics?.Haptics.impact({ style: _haptics.ImpactStyle.Medium });
+  if (isNative) Haptics.impact({ style: ImpactStyle.Medium });
 }
 
 export function hapticSuccess() {
-  _haptics?.Haptics.notification({ type: _haptics.NotificationType.Success });
+  if (isNative) Haptics.notification({ type: NotificationType.Success });
 }
 
 export function hapticError() {
-  _haptics?.Haptics.notification({ type: _haptics.NotificationType.Error });
+  if (isNative) Haptics.notification({ type: NotificationType.Error });
 }

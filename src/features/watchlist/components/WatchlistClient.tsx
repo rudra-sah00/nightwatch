@@ -60,15 +60,6 @@ export function WatchlistClient() {
                   {t('subtitle')}
                 </p>
               </div>
-
-              {/* Item Counter */}
-              {!loading && (
-                <div className="flex flex-wrap gap-3 pb-3 xl:pb-6 h-fit">
-                  <span className="text-lg md:text-2xl font-black font-headline uppercase tracking-widest text-foreground bg-neo-surface border-[4px] border-border px-6 py-3 ">
-                    {t('itemCount', { count: watchlist.length })}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>

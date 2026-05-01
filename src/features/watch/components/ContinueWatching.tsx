@@ -167,13 +167,13 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
       className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       {/* Poster */}
-      <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
+      <div className="w-20 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border">
         {item.posterUrl ? (
           <Image
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            sizes="112px"
+            sizes="(max-width: 640px) 80px, 112px"
             className="object-cover"
             unoptimized={item.posterUrl.includes('/api/stream/')}
             loading={index < 4 ? 'eager' : 'lazy'}
@@ -182,9 +182,9 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
         ) : (
           <div className="w-full h-full flex items-center justify-center text-foreground/20">
             {item.contentType === 'Series' ? (
-              <Tv className="w-8 h-8 stroke-[2px]" />
+              <Tv className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2px]" />
             ) : (
-              <Film className="w-8 h-8 stroke-[2px]" />
+              <Film className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2px]" />
             )}
           </div>
         )}

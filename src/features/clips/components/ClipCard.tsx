@@ -162,32 +162,32 @@ export function ClipCard({
             >
               {clip.title}
             </h3>
-            <div className="flex items-center gap-0.5 shrink-0 mt-1">
+            <div className="flex items-center gap-1 md:gap-0.5 shrink-0 mt-1">
               {isReady && (
                 <button
                   type="button"
                   onClick={() => onShare(clip)}
-                  className={`p-1.5 rounded-lg hover:bg-muted transition-colors ${clip.isPublic ? 'text-neo-blue' : 'text-foreground/30 hover:text-foreground'}`}
+                  className={`p-2.5 md:p-1.5 rounded-lg hover:bg-muted transition-colors ${clip.isPublic ? 'text-neo-blue' : 'text-foreground/30 hover:text-foreground'}`}
                   aria-label={clip.isPublic ? 'Copy share link' : 'Share clip'}
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-5 h-5 md:w-3.5 md:h-3.5" />
                 </button>
               )}
               <button
                 type="button"
                 onClick={startEdit}
-                className="p-1.5 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground transition-colors"
+                className="p-2.5 md:p-1.5 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground transition-colors"
                 aria-label={t('clipRename')}
               >
-                <Pencil className="w-3.5 h-3.5" />
+                <Pencil className="w-5 h-5 md:w-3.5 md:h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => onDelete(clip.id)}
-                className="p-1.5 rounded-lg hover:bg-destructive/10 text-foreground/30 hover:text-destructive transition-colors"
+                className="p-2.5 md:p-1.5 rounded-lg hover:bg-destructive/10 text-foreground/30 hover:text-destructive transition-colors"
                 aria-label={t('clipDelete')}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-5 h-5 md:w-3.5 md:h-3.5" />
               </button>
             </div>
           </div>

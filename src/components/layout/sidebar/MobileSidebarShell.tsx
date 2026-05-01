@@ -23,7 +23,7 @@ export function MobileSidebarShell({
     : `animate-in ${direction === 'left' ? 'slide-in-from-left' : 'slide-in-from-right'}`;
 
   return (
-    <div className="absolute inset-0 z-40">
+    <div className="absolute inset-0 z-[200]">
       <button
         type="button"
         className={`absolute inset-0 bg-black/40 backdrop-blur-sm duration-200 ${closing ? 'animate-out fade-out' : 'animate-in fade-in'}`}
