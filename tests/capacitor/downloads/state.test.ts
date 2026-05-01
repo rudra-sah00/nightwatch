@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { DownloadItem } from '@/lib/electron-bridge';
 
 // Mock Capacitor Preferences
 vi.mock('@capacitor/preferences', () => ({
@@ -45,7 +46,7 @@ describe('Mobile Download State', () => {
         progress: 0,
         downloadedBytes: 0,
         createdAt: 0,
-      } as any,
+      } as DownloadItem,
     ]);
 
     expect(Preferences.set).toHaveBeenCalledWith({
@@ -68,7 +69,7 @@ describe('Mobile Download State', () => {
       progress: 50,
       downloadedBytes: 100,
       createdAt: 0,
-    } as any);
+    } as DownloadItem);
 
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb).toHaveBeenCalledWith(
@@ -83,7 +84,7 @@ describe('Mobile Download State', () => {
       progress: 100,
       downloadedBytes: 200,
       createdAt: 0,
-    } as any);
+    } as DownloadItem);
     expect(cb).toHaveBeenCalledTimes(1); // Not called again after unsub
   });
 
