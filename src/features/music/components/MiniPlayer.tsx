@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { showSongMenu } from './SongContextMenu';
@@ -19,6 +20,7 @@ import { showSongMenu } from './SongContextMenu';
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
   const t = useTranslations('music');
+  const mobile = useIsMobile();
   useMusicShortcuts();
 
   const {
@@ -121,26 +123,30 @@ export function MiniPlayer() {
           >
             <Square className="w-3 h-3 fill-current" />
           </button>
-          <button
-            type="button"
-            onClick={() => setVolume(volume > 0 ? 0 : 1)}
-            className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
-          >
-            {volume === 0 ? (
-              <VolumeX className="w-3.5 h-3.5" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5" />
-            )}
-          </button>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-16 h-1 accent-neo-yellow cursor-pointer"
-          />
+          {!mobile && (
+            <>
+              <button
+                type="button"
+                onClick={() => setVolume(volume > 0 ? 0 : 1)}
+                className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
+              >
+                {volume === 0 ? (
+                  <VolumeX className="w-3.5 h-3.5" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5" />
+                )}
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-16 h-1 accent-neo-yellow cursor-pointer"
+              />
+            </>
+          )}
           <button
             type="button"
             onClick={() => setShowQueue((v) => !v)}

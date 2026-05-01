@@ -46,6 +46,8 @@ export function FullPlayer() {
     volume,
     setVolume,
     play,
+    showAirPlay,
+    queue,
   } = useMusicPlayerContext();
 
   const mobile = useIsMobile();
@@ -53,6 +55,7 @@ export function FullPlayer() {
   const [lyrics, setLyrics] = useState<SyncedLyricLine[] | null>(null);
   const [recommendations, setRecommendations] = useState<MusicTrack[]>([]);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [showQueue, setShowQueue] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
   const swipeStartY = useRef(0);
   const [swipeOffset, setSwipeOffset] = useState(0);
@@ -63,6 +66,7 @@ export function FullPlayer() {
       setClosing(false);
       setExpanded(false);
       setShowLyrics(false);
+      setShowQueue(false);
     }, 300);
   }, [setExpanded]);
 
@@ -72,6 +76,7 @@ export function FullPlayer() {
     setLyrics(null);
     setRecommendations([]);
     setShowLyrics(false);
+    setShowQueue(false);
     if (!currentTrack) return;
     getSyncedLyrics(
       currentTrack.id,
@@ -171,7 +176,41 @@ export function FullPlayer() {
             <div className="w-10 h-1 rounded-full bg-white/30" />
           </button>
 
-          {showLyrics && hasLyrics ? (
+          {showQueue ? (
+            /* ===== QUEUE MODE ===== */
+            <div className="flex-1 min-h-0 flex flex-col">
+              <p className="shrink-0 text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] pb-2">
+                Queue — {queue.length}
+              </p>
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                {queue.map((track, i) => (
+                  <button
+                    key={track.id}
+                    type="button"
+                    onClick={() => play(track, queue)}
+                    className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white' : 'text-white/60'}`}
+                  >
+                    <span className="w-5 text-white/20 text-[10px] font-mono text-right shrink-0">
+                      {i + 1}
+                    </span>
+                    <img
+                      src={track.image}
+                      alt=""
+                      className="w-10 h-10 rounded object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {track.title}
+                      </p>
+                      <p className="text-white/30 text-xs truncate">
+                        {track.artist}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : showLyrics && hasLyrics ? (
             /* ===== LYRICS MODE ===== */
             <>
               {/* Compact header: small art + title */}
@@ -276,16 +315,33 @@ export function FullPlayer() {
             <div className="w-full mb-1">
               <button
                 type="button"
-                className="w-full h-1.5 bg-white/15 cursor-pointer relative rounded-full"
+                className="w-full py-2 cursor-pointer relative"
                 onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  seek(((e.clientX - rect.left) / rect.width) * 100);
+                  const bar = e.currentTarget.querySelector(
+                    '[data-seekbar]',
+                  ) as HTMLElement;
+                  if (!bar) return;
+                  const rect = bar.getBoundingClientRect();
+                  seek(
+                    Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        ((e.clientX - rect.left) / rect.width) * 100,
+                      ),
+                    ),
+                  );
                 }}
               >
                 <div
-                  className="h-full bg-white/80 rounded-full"
-                  style={{ width: `${progress}%` }}
-                />
+                  data-seekbar
+                  className="w-full h-1.5 bg-white/15 rounded-full relative"
+                >
+                  <div
+                    className="h-full bg-white/80 rounded-full"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               </button>
               <div className="flex justify-between mt-1">
                 <span className="text-white/40 text-[10px] font-mono">
@@ -333,19 +389,30 @@ export function FullPlayer() {
             <div className="flex items-center justify-around pb-2">
               <button
                 type="button"
-                onClick={() => hasLyrics && setShowLyrics(!showLyrics)}
+                onClick={() => {
+                  if (!hasLyrics) return;
+                  setShowLyrics(!showLyrics);
+                  if (!showLyrics) setShowQueue(false);
+                }}
                 className={`p-2.5 rounded-full transition-colors ${showLyrics ? 'bg-white/20 text-white' : hasLyrics ? 'text-white/50' : 'text-white/15'}`}
                 disabled={!hasLyrics}
               >
                 <Mic2 className="w-5 h-5" />
               </button>
-              <button type="button" className="p-2.5 text-white/50">
+              <button
+                type="button"
+                onClick={showAirPlay}
+                className="p-2.5 text-white/50"
+              >
                 <Airplay className="w-5 h-5" />
               </button>
               <button
                 type="button"
-                onClick={handleClose}
-                className="p-2.5 text-white/50"
+                onClick={() => {
+                  setShowQueue((v) => !v);
+                  if (!showQueue) setShowLyrics(false);
+                }}
+                className={`p-2.5 rounded-full transition-colors ${showQueue ? 'bg-white/20 text-white' : 'text-white/50'}`}
               >
                 <ListMusic className="w-5 h-5" />
               </button>

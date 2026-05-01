@@ -58,6 +58,10 @@ export class AudioEngine {
     return this.state;
   }
 
+  getAudioElement() {
+    return this.audio;
+  }
+
   private update(partial: Partial<AudioEngineState>) {
     this.state = { ...this.state, ...partial };
     for (const fn of this.listeners) {

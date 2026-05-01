@@ -49,7 +49,10 @@ export function RightSidebar() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setShowSpotlight(true)}
+            onClick={() => {
+              setRightOpen(false);
+              setShowSpotlight(true);
+            }}
             className="px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-xs font-headline font-black uppercase tracking-widest text-foreground/60"
           >
             + {t('addFriend')}

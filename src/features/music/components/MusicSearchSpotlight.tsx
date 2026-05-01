@@ -115,7 +115,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
       role="dialog"
       tabIndex={-1}
     >
-      <div className="w-full max-w-xl mx-4 max-h-[80vh] flex flex-col">
+      <div className="w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden">
         {/* Input */}
         <div className="flex items-center bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl px-5 py-3.5 gap-3 shrink-0">
           <Search className="w-5 h-5 text-white/40 shrink-0" />
@@ -152,7 +152,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
 
         {/* Top Searches (shown when no query) */}
         {!query && topSearches.length > 0 && (
-          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3">
+          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
             <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] px-2 mb-2">
               {t('trendingSearches')}
             </p>
@@ -186,7 +186,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
           (results.songs.length > 0 ||
             results.albums.length > 0 ||
             results.playlists.length > 0) && (
-            <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto">
+            <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto min-h-0">
               {results.songs.length > 0 && (
                 <div className="p-3">
                   <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] px-2 mb-2">

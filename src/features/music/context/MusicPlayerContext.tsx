@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { toast } from 'sonner';
 import type { MusicTrack } from '../api';
 import { getSong } from '../api';
 import {
@@ -40,6 +41,7 @@ interface MusicPlayerContextValue {
   addToQueue: (track: MusicTrack) => void;
   playNext: (track: MusicTrack) => void;
   removeFromQueue: (index: number) => void;
+  showAirPlay: () => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -170,6 +172,42 @@ export function MusicPlayerProvider({
     (index: number) => engineRef.current?.removeFromQueue(index),
     [],
   );
+  const showAirPlay = useCallback(async () => {
+    const audio = engineRef.current?.getAudioElement() as
+      | (HTMLAudioElement & { webkitShowPlaybackTargetPicker?: () => void })
+      | undefined;
+
+    // iOS / macOS Safari — native AirPlay picker
+    if (audio?.webkitShowPlaybackTargetPicker) {
+      audio.webkitShowPlaybackTargetPicker();
+      return;
+    }
+
+    // Chrome / Edge — Web Audio Output Devices API
+    const md = navigator.mediaDevices as typeof navigator.mediaDevices & {
+      selectAudioOutput?: () => Promise<MediaDeviceInfo>;
+    };
+    if (md?.selectAudioOutput) {
+      try {
+        const device = await md.selectAudioOutput();
+        if (audio && 'setSinkId' in audio) {
+          await (
+            audio as HTMLAudioElement & {
+              setSinkId: (id: string) => Promise<void>;
+            }
+          ).setSinkId(device.deviceId);
+        }
+        return;
+      } catch {
+        /* user cancelled or not supported */
+      }
+    }
+
+    // Android / fallback — guide user to system audio settings
+    toast.info(
+      "Use your device's Bluetooth or audio settings to switch output devices.",
+    );
+  }, []);
   const stop = useCallback(() => {
     engineRef.current?.stop();
     setExpanded(false);
@@ -199,6 +237,7 @@ export function MusicPlayerProvider({
       addToQueue,
       playNext,
       removeFromQueue,
+      showAirPlay,
     }),
     [
       state,
@@ -215,6 +254,7 @@ export function MusicPlayerProvider({
       addToQueue,
       playNext,
       removeFromQueue,
+      showAirPlay,
     ],
   );
 
