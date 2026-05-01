@@ -260,12 +260,21 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
   }, [callState]);
 
-  // ── Media ducking ─────────────────────────────────────────────────
+  // ── Media ducking + iOS audio session ──────────────────────────────
   useEffect(() => {
     if (callState === 'active' || callState === 'incoming') {
       restoreVolumeRef.current = duckMediaElements(0.2);
       window.dispatchEvent(new CustomEvent('dm-call:start'));
       desktopBridge.setCallActive(true);
+      // iOS: switch to voice call audio session (earpiece, echo cancellation)
+      if (checkIsMobile()) {
+        import('@capacitor/core').then(({ registerPlugin }) => {
+          const NWAudioSession = registerPlugin<{
+            setVoiceCallMode: () => Promise<void>;
+          }>('NWAudioSession');
+          NWAudioSession.setVoiceCallMode().catch(() => {});
+        });
+      }
     }
     return () => {
       if (restoreVolumeRef.current) {
@@ -273,6 +282,15 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         restoreVolumeRef.current = null;
       }
       desktopBridge.setCallActive(false);
+      // iOS: restore media playback audio session
+      if (checkIsMobile()) {
+        import('@capacitor/core').then(({ registerPlugin }) => {
+          const NWAudioSession = registerPlugin<{
+            setMediaMode: () => Promise<void>;
+          }>('NWAudioSession');
+          NWAudioSession.setMediaMode().catch(() => {});
+        });
+      }
     };
   }, [callState]);
 

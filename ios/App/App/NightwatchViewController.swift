@@ -8,8 +8,8 @@ class NightwatchViewController: CAPBridgeViewController {
         return config
     }
 
-    // Register local plugins with the Capacitor bridge
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NWVolumePlugin())
+        bridge?.registerPluginInstance(NWAudioSessionPlugin())
     }
 }
