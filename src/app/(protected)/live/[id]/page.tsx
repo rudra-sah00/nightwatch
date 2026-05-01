@@ -250,62 +250,6 @@ export default function LiveMatchPlayerPage() {
     providerId: 's1', // Force HLS engine
   };
 
-  const mobileHeader = (
-    <div className="flex items-center gap-3 ml-auto">
-      {isEffectivelyLive && (
-        <Badge variant="red" className="animate-pulse">
-          {t('liveStream')}
-        </Badge>
-      )}
-      {isChannelCard ? (
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90 max-w-[180px]">
-          {activeMatch.team1.avatar ? (
-            <img
-              src={activeMatch.team1.avatar}
-              alt={channelDisplayName}
-              className="w-5 h-5 rounded-none border border-border"
-            />
-          ) : (
-            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
-              {channelDisplayName.charAt(0)}
-            </span>
-          )}
-          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-            {channelDisplayName}
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1 text-foreground scale-90">
-          {activeMatch.team1.avatar ? (
-            <img
-              src={activeMatch.team1.avatar}
-              alt={activeMatch.team1.name}
-              className="w-5 h-5 rounded-none border border-border"
-            />
-          ) : (
-            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
-              {activeMatch.team1.name.charAt(0)}
-            </span>
-          )}
-          <span className="font-black font-headline uppercase text-[10px] max-w-[120px] truncate tracking-tight">
-            {t('vs')}
-          </span>
-          {activeMatch.team2.avatar ? (
-            <img
-              src={activeMatch.team2.avatar}
-              alt={activeMatch.team2.name}
-              className="w-5 h-5 rounded-none border border-border"
-            />
-          ) : (
-            <span className="w-5 h-5 flex items-center justify-center font-black text-[10px] bg-background border border-border">
-              {activeMatch.team2.name.charAt(0)}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
   const startLabel = format.dateTime(new Date(activeMatch.startTime), {
     month: 'short',
     day: 'numeric',
@@ -321,7 +265,6 @@ export default function LiveMatchPlayerPage() {
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}
-        mobileHeaderContent={mobileHeader}
         mobileLayout="inline"
       />
 

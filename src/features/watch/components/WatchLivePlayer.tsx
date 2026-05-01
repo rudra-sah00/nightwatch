@@ -1,15 +1,15 @@
 'use client';
-import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { SkipBack, SkipForward } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
-import { Player } from '../player';
-import { usePlayerContext } from '../player/context/PlayerContext';
+import { Player, usePlayerContext } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { useMobileDetection } from '../player/hooks/useMobileDetection';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
@@ -28,7 +28,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
   const router = useRouter();
-  const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const useInlineMobileLayout = isMobile && props.mobileLayout === 'inline';
 
@@ -46,14 +45,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         details: `Watching Live: ${props.metadata.title}`,
         state: 'Live Stream',
         largeImageText: props.metadata.title,
-        largeImageKey: 'nightwatch_logo', // Safe fallback because discord-rpc drops invalid keys/urls
+        largeImageKey: 'nightwatch_logo',
         startTimestamp: Date.now(),
       });
       return () => desktopBridge.clearDiscordPresence();
     }
   }, [props.metadata]);
 
-  // Broadcast live activity to friends (set once, clear on unmount)
   const { socket } = useSocket();
   useEffect(() => {
     if (!socket?.connected) return;
@@ -67,40 +65,64 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     };
   }, [socket, props.metadata.title, props.metadata.posterUrl]);
 
-  const mobileHeader = (
-    <div className="relative z-50 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex md:hidden items-center gap-4 bg-black pointer-events-auto border-b border-white/5">
-      <button
-        type="button"
-        onClick={handleBack}
-        aria-label={t('goBackAriaLabel')}
-        className="p-2 rounded-full bg-neo-surface/10/20 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5 text-white" />
-      </button>
-      <div className="flex-1 min-w-0">
-        <h1 className="text-base font-semibold text-white truncate">
-          {props.metadata.title}
-        </h1>
-      </div>
-      {props.mobileHeaderContent}
-    </div>
-  );
+  // Local scroll-based PiP
+  const playerSentinelRef = useRef<HTMLDivElement>(null);
+  const [isPip, setIsPip] = useState(false);
+
+  useEffect(() => {
+    if (!useInlineMobileLayout) return;
+    const sentinel = playerSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsPip(!entry.isIntersecting),
+      { threshold: 0.5 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [useInlineMobileLayout]);
+
+  const dismissPip = useCallback(() => {
+    setIsPip(false);
+    playerSentinelRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const inlineStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '100%',
+    height: 'auto',
+    aspectRatio: '16 / 9',
+    maxHeight: '56.25vw',
+  };
+
+  const pipStyle: React.CSSProperties = {
+    position: 'fixed',
+    bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+    right: '0.75rem',
+    width: '45vw',
+    height: 'auto',
+    aspectRatio: '16 / 9',
+    zIndex: 9998,
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+  };
 
   return (
     <>
-      {useInlineMobileLayout ? mobileHeader : null}
+      {useInlineMobileLayout ? (
+        <div
+          ref={playerSentinelRef}
+          style={isPip ? { height: 'calc(56.25vw)' } : undefined}
+        />
+      ) : null}
       <Player.Root
         {...props}
         skipProgressHistory={true}
         containerStyle={
           useInlineMobileLayout
-            ? {
-                position: 'relative',
-                width: '100%',
-                height: 'auto',
-                aspectRatio: '16 / 9',
-                maxHeight: '56.25vw',
-              }
+            ? isPip
+              ? pipStyle
+              : inlineStyle
             : {
                 position: 'fixed',
                 top: 'var(--electron-titlebar-height, 0px)',
@@ -114,14 +136,28 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         onBack={handleBack}
         onNavigate={(url) => router.push(url)}
       >
-        {!useInlineMobileLayout ? mobileHeader : null}
-
-        <LivePlayerState streamUrl={props.streamUrl} />
+        {isPip ? (
+          <button
+            type="button"
+            onClick={dismissPip}
+            className="absolute inset-0 z-[60]"
+            aria-label="Back to player"
+          />
+        ) : null}
+        <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
+        <LivePlayerState streamUrl={props.streamUrl} isPip={isPip} />
       </Player.Root>
     </>
   );
 });
-function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
+
+function LivePlayerState({
+  streamUrl,
+  isPip,
+}: {
+  streamUrl: string | null;
+  isPip?: boolean;
+}) {
   const { state, playerHandlers, metadata } = usePlayerContext();
   const t = useTranslations('watch.player');
   const error = state.error;
@@ -158,7 +194,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
 
   return (
     <>
-      {isLoading ? (
+      {!isPip && isLoading ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-1000">
           <LoadingOverlay isVisible={true} />
         </div>
@@ -166,46 +202,116 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
 
       <Player.Video />
 
-      <CenterPlayButton
-        isPlaying={state.isPlaying}
-        onToggle={playerHandlers.togglePlay}
-        metadata={metadata}
-        disabled={false}
-        isLoading={isLoading}
-      />
+      {isPip ? null : (
+        <>
+          <CenterPlayButton
+            isPlaying={state.isPlaying}
+            onToggle={playerHandlers.togglePlay}
+            metadata={metadata}
+            disabled={false}
+            isLoading={isLoading}
+          />
 
-      <LiveBufferingOverlay isVisible={state.isBuffering && !isLoading} />
+          <LiveBufferingOverlay isVisible={state.isBuffering && !isLoading} />
 
-      <ErrorOverlay
-        isVisible={!!error && !isLoading && !state.isBuffering}
-        message={error || t('liveUnavailable')}
-        onRetry={() => {
-          window.location.reload();
-        }}
-        onBack={playerHandlers.goBack}
-      />
+          <ErrorOverlay
+            isVisible={!!error && !isLoading && !state.isBuffering}
+            message={error || t('liveUnavailable')}
+            onRetry={() => {
+              window.location.reload();
+            }}
+            onBack={playerHandlers.goBack}
+          />
+        </>
+      )}
 
-      <Player.Controls>
-        <Player.Header rightContent={recordButton} />
-
-        {/* DVR seek bar — scrub within the live buffer window */}
-        <Player.SeekBar />
-
-        {/* Bottom control row */}
-        <Player.ControlRow>
-          <Player.PlayPause />
-          <Player.Volume />
-          <Player.LiveBadge />
-          <Player.Spacer />
-          <div className="hidden min-[380px]:contents md:contents">
+      {isPip ? null : (
+        <Player.Controls>
+          <Player.Header rightContent={recordButton} />
+          {/* Mobile top-right: settings + fullscreen */}
+          <Player.MobileTopBar>
             <Player.SettingsMenu />
+            <Player.Fullscreen />
+          </Player.MobileTopBar>
+          {/* Mobile center: skip back / play / skip forward */}
+          <Player.MobileCenterControls>
+            <MobileSkipBack />
+            <Player.PlayPause size="lg" />
+            <MobileSkipForward />
+          </Player.MobileCenterControls>
+          {/* Desktop: DVR seek bar */}
+          <div className="hidden md:contents">
+            <Player.SeekBar />
           </div>
-          <Player.Fullscreen />
-        </Player.ControlRow>
-      </Player.Controls>
+          <Player.ControlRow>
+            <Player.PlayPause />
+            <Player.Volume />
+            <Player.LiveBadge />
+            <Player.Spacer />
+            <div className="hidden min-[380px]:contents md:contents">
+              <Player.SettingsMenu />
+            </div>
+            <Player.Fullscreen />
+          </Player.ControlRow>
+          {/* Mobile: thin seekbar */}
+          <div className="md:hidden">
+            <Player.MobileSeekBar />
+          </div>
+        </Player.Controls>
+      )}
     </>
   );
 }
+
+function MobileSkipBack() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={() => playerHandlers.skip(-10)}
+      className="p-3 transition-transform active:scale-90"
+    >
+      <SkipBack className="w-7 h-7 text-white fill-white" />
+    </button>
+  );
+}
+
+function MobileSkipForward() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={() => playerHandlers.skip(10)}
+      className="p-3 transition-transform active:scale-90"
+    >
+      <SkipForward className="w-7 h-7 text-white fill-white" />
+    </button>
+  );
+}
+
+function PipRegistrar({
+  streamUrl,
+  metadata,
+}: {
+  streamUrl: string | null;
+  metadata: VideoMetadata;
+}) {
+  const { videoRef } = usePlayerContext();
+  const pip = usePipContext();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!pip || !streamUrl || !videoRef.current) return;
+    pip.register(
+      { streamUrl, watchUrl: pathname, title: metadata.title },
+      videoRef.current,
+    );
+    return () => pip.unregister();
+  }, [pip, streamUrl, pathname, metadata.title, videoRef]);
+
+  return null;
+}
+
 function LiveBufferingOverlay({ isVisible }: { isVisible: boolean }) {
   const [debouncedVisible, setDebouncedVisible] = useState(false);
 
@@ -214,9 +320,6 @@ function LiveBufferingOverlay({ isVisible }: { isVisible: boolean }) {
       setDebouncedVisible(false);
       return;
     }
-
-    // Only show the spinner if we've been stalled for > 500ms.
-    // This avoids 'flicker' for micro-buffering events that recover instantly.
     const timer = setTimeout(() => setDebouncedVisible(true), 500);
     return () => clearTimeout(timer);
   }, [isVisible]);
