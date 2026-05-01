@@ -276,13 +276,6 @@ export function useAskAi() {
       }
 
       // 2. Get mic
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setError(
-          'Microphone is not available. This requires a secure (HTTPS) connection.',
-        );
-        setState('idle');
-        return;
-      }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -361,12 +354,19 @@ export function useAskAi() {
       source.connect(processor);
       processor.connect(audioCtx.destination);
     } catch (err) {
-      const msg =
-        err instanceof DOMException && err.name === 'NotAllowedError'
-          ? 'Microphone access denied. Please allow microphone in your device Settings.'
-          : err instanceof Error
-            ? err.message
-            : 'Failed to start';
+      let msg: string;
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        msg =
+          'Microphone access denied. Please allow microphone in your device Settings.';
+      } else if (
+        err instanceof TypeError ||
+        (err instanceof Error && err.message.includes('undefined'))
+      ) {
+        msg =
+          'Microphone is not available on this device. Try using the app from a browser or check your permissions in Settings.';
+      } else {
+        msg = err instanceof Error ? err.message : 'Failed to start';
+      }
       setError(msg);
       setState('idle');
       activeRef.current = false;

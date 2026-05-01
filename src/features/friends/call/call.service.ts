@@ -33,11 +33,6 @@ export async function connectToAgoraCall(
   audioTrack: IMicrophoneAudioTrack;
 }> {
   // Pre-check mic permission (required for iOS Capacitor WebView)
-  if (!navigator.mediaDevices?.getUserMedia) {
-    throw new Error(
-      'Microphone is not available. This requires a secure (HTTPS) connection.',
-    );
-  }
   try {
     const testStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -47,6 +42,14 @@ export async function connectToAgoraCall(
     if (err instanceof DOMException && err.name === 'NotAllowedError') {
       throw new Error(
         'Microphone access denied. Please allow microphone in Settings.',
+      );
+    }
+    if (
+      err instanceof TypeError ||
+      (err instanceof Error && err.message.includes('undefined'))
+    ) {
+      throw new Error(
+        'Microphone is not available. Try checking your permissions in Settings.',
       );
     }
     throw err;
