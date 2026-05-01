@@ -14,6 +14,9 @@ importers:
       '@capacitor-community/keep-awake':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.3.1)
+      '@capacitor-community/volume-buttons':
+        specifier: 8.0.0
+        version: 8.0.0(@capacitor/core@8.3.1)
       '@capacitor/android':
         specifier: ^8.3.1
         version: 8.3.1(@capacitor/core@8.3.1)
@@ -68,6 +71,9 @@ importers:
       '@mediapipe/tasks-vision':
         specifier: ^0.10.32
         version: 0.10.32
+      '@ottimis/capacitor-volumes':
+        specifier: 7.0.0
+        version: 7.0.0(@capacitor/core@8.3.1)
       '@radix-ui/react-label':
         specifier: ^2.1.2
         version: 2.1.8(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -558,6 +564,12 @@ packages:
 
   '@capacitor-community/keep-awake@8.0.1':
     resolution: {integrity: sha512-wTI5A6FWl5gWoMduzJ5euuJ1P73SO+rea0jV6vNdmz5TLbwIDhufelFe/GowNvU9gog6kDYbFhJ2pOp9ua1f3w==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@capacitor-community/volume-buttons@8.0.0':
+    resolution: {integrity: sha512-tpimxcdOhuTzgmiwU9IjbM3tHJWmKDHB0c/7dC27f0xeHgJEVQDg5Iz9mdYyc6p7/F6EwaWnw2g7K/KLzkEw0g==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -1706,6 +1718,11 @@ packages:
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
+
+  '@ottimis/capacitor-volumes@7.0.0':
+    resolution: {integrity: sha512-yvWYCi6pSFaRs5Eo5dDOPhCW+lQ13rxW/T1CfeqBgFpPJs1aPZDrsU06AnHdJMvWNnZyK/A/xOUrcY5XZOIehA==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@parcel/watcher-android-arm64@2.5.6':
     resolution: {integrity: sha512-YQxSS34tPF/6ZG7r/Ih9xy+kP/WwediEUsqmtf0cuCV5TPPKw/PQHRhueUo6JdeFJaqV3pyjm0GdYjZotbRt/A==}
@@ -8339,6 +8356,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.3.1
 
+  '@capacitor-community/volume-buttons@8.0.0(@capacitor/core@8.3.1)':
+    dependencies:
+      '@capacitor/core': 8.3.1
+
   '@capacitor/android@8.3.1(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
@@ -9507,6 +9528,10 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.6.1(@opentelemetry/api@1.9.1)
+
+  '@ottimis/capacitor-volumes@7.0.0(@capacitor/core@8.3.1)':
+    dependencies:
+      '@capacitor/core': 8.3.1
 
   '@parcel/watcher-android-arm64@2.5.6':
     optional: true

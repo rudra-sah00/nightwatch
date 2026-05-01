@@ -4,7 +4,6 @@ import { Lock, Pause, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
-import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 
 // Static size configurations to avoid recreation
 const SIZE_CLASSES = {
@@ -83,8 +82,9 @@ export function CenterPlayButton({
 }: CenterPlayButtonProps & { isLoading?: boolean }) {
   const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
-  const isPortrait = useMobileOrientation();
-  const useCompactOverlay = isMobile && isPortrait;
+
+  // On mobile, don't show the pause overlay — controls handle play/pause
+  if (isMobile) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     // Don't propagate clicks to video element
@@ -122,37 +122,12 @@ export function CenterPlayButton({
           !isPlaying ? 'opacity-100' : 'opacity-0',
         )}
       >
-        <div
-          className={cn(
-            'absolute inset-0',
-            useCompactOverlay ? 'bg-black/40' : 'bg-black/70',
-          )}
-        />
+        <div className={cn('absolute inset-0', 'bg-black/70')} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
       </div>
 
-      {useCompactOverlay ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none px-4">
-          <div className="w-16 h-16 rounded-full bg-background/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
-            <Play className="w-7 h-7 text-primary-foreground fill-white ml-0.5" />
-          </div>
-          {disabled ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/20 rounded-full">
-              <Lock className="w-3.5 h-3.5 text-primary-foreground" />
-              <span className="text-[10px] text-primary-foreground font-black font-headline uppercase tracking-widest">
-                {t('hostControlsPlayback')}
-              </span>
-            </div>
-          ) : (
-            <span className="text-[11px] text-primary-foreground font-black font-headline uppercase tracking-widest">
-              {t('tapToResume')}
-            </span>
-          )}
-        </div>
-      ) : null}
-
-      {/* Movie Info - CENTERED in the middle with mobile-optimized layout */}
-      {!useCompactOverlay && metadata ? (
+      {/* Movie Info - CENTERED in the middle */}
+      {metadata ? (
         <div
           className={cn(
             'absolute inset-0 flex flex-col items-center justify-center pointer-events-none',
@@ -241,8 +216,8 @@ export function CenterPlayButton({
         </div>
       ) : null}
 
-      {/* Fallback for no metadata - enhanced for guests */}
-      {!useCompactOverlay && !metadata ? (
+      {/* Fallback for no metadata */}
+      {!metadata ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none">
           {disabled ? (
             /* Guest locked view */

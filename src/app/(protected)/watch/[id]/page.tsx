@@ -85,10 +85,7 @@ function WatchContent() {
       : t('player.movie');
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}
-    >
+    <div className="min-h-screen bg-background" style={{ marginTop: 0 }}>
       <WatchVODPlayer
         key={watchKey}
         streamUrl={streamUrl}

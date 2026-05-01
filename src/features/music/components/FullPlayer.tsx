@@ -1,21 +1,5 @@
 'use client';
 
-import {
-  Airplay,
-  ChevronDown,
-  ListMusic,
-  Mic2,
-  Pause,
-  Play,
-  Repeat,
-  Repeat1,
-  Shuffle,
-  SkipBack,
-  SkipForward,
-  Volume1,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import {
@@ -25,7 +9,9 @@ import {
   type SyncedLyricLine,
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
-import { formatTime } from '../utils';
+import { useSystemVolume } from '../hooks/use-system-volume';
+import { DesktopFullPlayer } from './DesktopFullPlayer';
+import { MobileFullPlayer } from './MobileFullPlayer';
 
 export function FullPlayer() {
   const {
@@ -57,8 +43,7 @@ export function FullPlayer() {
   const [showLyrics, setShowLyrics] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
-  const swipeStartY = useRef(0);
-  const [swipeOffset, setSwipeOffset] = useState(0);
+  const systemVol = useSystemVolume();
 
   const handleClose = useCallback(() => {
     setClosing(true);
@@ -128,546 +113,70 @@ export function FullPlayer() {
 
   if (!expanded || !currentTrack) return null;
 
-  const hasLyrics = lyrics && lyrics.length > 0;
+  const handleToggleLyrics = () => {
+    if (!lyrics?.length) return;
+    setShowLyrics(!showLyrics);
+    if (!showLyrics) setShowQueue(false);
+  };
 
-  // --- MOBILE LAYOUT (Apple Music style) ---
+  const handleToggleQueue = () => {
+    setShowQueue((v) => !v);
+    if (!showQueue) setShowLyrics(false);
+  };
+
   if (mobile) {
     return (
-      <div
-        className={`fixed inset-0 z-[10100] overflow-hidden duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
-        style={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          transform:
-            swipeOffset > 0 ? `translateY(${swipeOffset}px)` : undefined,
-          transition: swipeOffset > 0 ? 'none' : undefined,
-        }}
-        onTouchStart={(e) => {
-          swipeStartY.current = e.touches[0].clientY;
-        }}
-        onTouchMove={(e) => {
-          const dy = e.touches[0].clientY - swipeStartY.current;
-          if (dy > 0) setSwipeOffset(dy * 0.6);
-        }}
-        onTouchEnd={() => {
-          if (swipeOffset > 120) {
-            handleClose();
-          }
-          setSwipeOffset(0);
-        }}
-      >
-        {/* Blurred background */}
-        <div className="absolute inset-0">
-          <img
-            src={currentTrack.image}
-            alt=""
-            className="w-full h-full object-cover scale-110"
-          />
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
-        </div>
-
-        <div className="relative z-10 flex flex-col h-full px-6">
-          {/* Drag handle + close */}
-          <button
-            type="button"
-            onClick={handleClose}
-            className="shrink-0 flex justify-center pt-3 pb-2"
-          >
-            <div className="w-10 h-1 rounded-full bg-white/30" />
-          </button>
-
-          {showQueue ? (
-            /* ===== QUEUE MODE ===== */
-            <div className="flex-1 min-h-0 flex flex-col">
-              <p className="shrink-0 text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] pb-2">
-                Queue — {queue.length}
-              </p>
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                {queue.map((track, i) => (
-                  <button
-                    key={track.id}
-                    type="button"
-                    onClick={() => play(track, queue)}
-                    className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white' : 'text-white/60'}`}
-                  >
-                    <span className="w-5 text-white/20 text-[10px] font-mono text-right shrink-0">
-                      {i + 1}
-                    </span>
-                    <img
-                      src={track.image}
-                      alt=""
-                      className="w-10 h-10 rounded object-cover shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {track.title}
-                      </p>
-                      <p className="text-white/30 text-xs truncate">
-                        {track.artist}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : showLyrics && hasLyrics ? (
-            /* ===== LYRICS MODE ===== */
-            <>
-              {/* Compact header: small art + title */}
-              <div className="shrink-0 flex items-center gap-3 pb-4">
-                <img
-                  src={currentTrack.image}
-                  alt=""
-                  className="w-14 h-14 rounded-lg object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-bold text-sm truncate">
-                    {currentTrack.title}
-                  </p>
-                  <p className="text-white/50 text-xs truncate">
-                    {currentTrack.artist}
-                  </p>
-                </div>
-              </div>
-
-              {/* Lyrics area */}
-              <div className="flex-1 min-h-0 relative">
-                <div
-                  ref={lyricsRef}
-                  className="h-full overflow-y-auto no-scrollbar px-1 space-y-5"
-                  style={{
-                    maskImage:
-                      'linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%)',
-                    WebkitMaskImage:
-                      'linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%)',
-                  }}
-                >
-                  <div className="h-[20vh]" />
-                  {lyrics.map((line, i) => {
-                    const isCurrent = i === currentLineIndex;
-                    const isPast = i < currentLineIndex;
-                    const dist = Math.abs(i - currentLineIndex);
-                    return (
-                      <p
-                        key={line.time}
-                        className="font-headline uppercase tracking-tight leading-snug cursor-pointer"
-                        style={{
-                          fontSize: isCurrent ? '1.75rem' : '1.25rem',
-                          fontWeight: isCurrent ? 900 : 700,
-                          color: isCurrent
-                            ? '#fff'
-                            : isPast
-                              ? 'rgba(255,255,255,0.15)'
-                              : 'rgba(255,255,255,0.3)',
-                          filter: isCurrent
-                            ? 'none'
-                            : `blur(${Math.min(dist * 0.5, 2)}px)`,
-                          transition: 'all 0.4s ease',
-                        }}
-                        onClick={() => {
-                          if (duration > 0) seek((line.time / duration) * 100);
-                        }}
-                        onKeyDown={() => {}}
-                      >
-                        {line.text}
-                      </p>
-                    );
-                  })}
-                  <div className="h-[30vh]" />
-                </div>
-                {/* Karaoke toggle */}
-                <button
-                  type="button"
-                  onClick={() => setShowLyrics(false)}
-                  className="absolute bottom-2 right-2 p-2.5 rounded-full bg-white/10 text-white/60"
-                >
-                  <Mic2 className="w-5 h-5" />
-                </button>
-              </div>
-            </>
-          ) : (
-            /* ===== ALBUM ART MODE ===== */
-            <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-              {/* Album art */}
-              <div className="w-[70vw] max-w-[320px] aspect-square mb-8">
-                <img
-                  src={currentTrack.image}
-                  alt={currentTrack.title}
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
-                />
-              </div>
-
-              {/* Title + artist */}
-              <div className="w-full text-left mb-1">
-                <h2 className="text-white font-bold text-xl truncate">
-                  {currentTrack.title}
-                </h2>
-                <p className="text-white/50 text-sm truncate">
-                  {currentTrack.artist}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* ===== BOTTOM CONTROLS (always visible) ===== */}
-          <div className="shrink-0 pb-2">
-            {/* Seek bar */}
-            <div className="w-full mb-1">
-              <button
-                type="button"
-                className="w-full py-2 cursor-pointer relative"
-                onClick={(e) => {
-                  const bar = e.currentTarget.querySelector(
-                    '[data-seekbar]',
-                  ) as HTMLElement;
-                  if (!bar) return;
-                  const rect = bar.getBoundingClientRect();
-                  seek(
-                    Math.max(
-                      0,
-                      Math.min(
-                        100,
-                        ((e.clientX - rect.left) / rect.width) * 100,
-                      ),
-                    ),
-                  );
-                }}
-              >
-                <div
-                  data-seekbar
-                  className="w-full h-1.5 bg-white/15 rounded-full relative"
-                >
-                  <div
-                    className="h-full bg-white/80 rounded-full"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </button>
-              <div className="flex justify-between mt-1">
-                <span className="text-white/40 text-[10px] font-mono">
-                  {formatTime(currentTime)}
-                </span>
-                <span className="text-white/40 text-[10px] font-mono">
-                  -{formatTime(Math.max(0, duration - currentTime))}
-                </span>
-              </div>
-            </div>
-
-            {/* Play controls */}
-            <div className="flex items-center justify-center gap-10 my-4">
-              <button type="button" onClick={prev} className="text-white">
-                <SkipBack className="w-8 h-8 fill-current" />
-              </button>
-              <button type="button" onClick={togglePlay} className="text-white">
-                {isPlaying ? (
-                  <Pause className="w-12 h-12 fill-current" />
-                ) : (
-                  <Play className="w-12 h-12 fill-current ml-1" />
-                )}
-              </button>
-              <button type="button" onClick={next} className="text-white">
-                <SkipForward className="w-8 h-8 fill-current" />
-              </button>
-            </div>
-
-            {/* Volume */}
-            <div className="flex items-center gap-3 mb-4">
-              <Volume1 className="w-3.5 h-3.5 text-white/30" />
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="flex-1 h-1 accent-white cursor-pointer"
-              />
-              <Volume2 className="w-3.5 h-3.5 text-white/30" />
-            </div>
-
-            {/* Bottom bar: lyrics / airplay / queue */}
-            <div className="flex items-center justify-around pb-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!hasLyrics) return;
-                  setShowLyrics(!showLyrics);
-                  if (!showLyrics) setShowQueue(false);
-                }}
-                className={`p-2.5 rounded-full transition-colors ${showLyrics ? 'bg-white/20 text-white' : hasLyrics ? 'text-white/50' : 'text-white/15'}`}
-                disabled={!hasLyrics}
-              >
-                <Mic2 className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={showAirPlay}
-                className="p-2.5 text-white/50"
-              >
-                <Airplay className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowQueue((v) => !v);
-                  if (!showQueue) setShowLyrics(false);
-                }}
-                className={`p-2.5 rounded-full transition-colors ${showQueue ? 'bg-white/20 text-white' : 'text-white/50'}`}
-              >
-                <ListMusic className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MobileFullPlayer
+        currentTrack={currentTrack}
+        isPlaying={isPlaying}
+        progress={progress}
+        duration={duration}
+        volume={volume}
+        queue={queue}
+        lyrics={lyrics}
+        currentLineIndex={currentLineIndex}
+        closing={closing}
+        showLyrics={showLyrics}
+        showQueue={showQueue}
+        lyricsRef={lyricsRef}
+        systemVol={systemVol}
+        onClose={handleClose}
+        onTogglePlay={togglePlay}
+        onNext={next}
+        onPrev={prev}
+        onSeek={seek}
+        onSetVolume={setVolume}
+        onPlay={play}
+        onShowAirPlay={showAirPlay}
+        onToggleLyrics={handleToggleLyrics}
+        onToggleQueue={handleToggleQueue}
+      />
     );
   }
 
-  // --- DESKTOP LAYOUT (unchanged) ---
   return (
-    <div
-      className={`fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[10100] overflow-hidden [-webkit-app-region:no-drag] duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
-    >
-      <div className="absolute inset-0">
-        <img
-          src={currentTrack.image}
-          alt=""
-          className="w-full h-full object-cover scale-110"
-        />
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
-      </div>
-
-      <div className="relative z-10 flex flex-col h-full">
-        <button
-          type="button"
-          onClick={handleClose}
-          className="shrink-0 h-14 flex items-center px-6 cursor-pointer"
-        >
-          <ChevronDown className="w-6 h-6 text-white/40 hover:text-white transition-colors" />
-        </button>
-
-        <div className="flex-1 flex min-h-0 px-6 pb-6 gap-8">
-          <div
-            className={`flex flex-col items-center justify-center ${hasLyrics ? 'w-[45%]' : 'flex-1'}`}
-          >
-            <div className="relative mb-6 w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72">
-              <div
-                className="w-full h-full border-[5px] overflow-hidden shadow-2xl"
-                style={{
-                  borderRadius: isPlaying ? '9999px' : '12px',
-                  borderColor: isPlaying
-                    ? 'rgba(255,255,255,0.15)'
-                    : 'rgba(255,255,255,0.1)',
-                  animation: isPlaying
-                    ? 'disc-spin 25s linear infinite'
-                    : 'none',
-                  transform: isPlaying ? undefined : 'rotate(0deg)',
-                  transition:
-                    'border-radius 0.7s ease, border-color 0.7s ease, transform 0.7s ease',
-                }}
-              >
-                <img
-                  src={currentTrack.image}
-                  alt={currentTrack.title}
-                  className="w-full h-full object-cover"
-                />
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background:
-                      'repeating-radial-gradient(circle at center, transparent 0px, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px)',
-                    opacity: isPlaying ? 1 : 0,
-                    transition: 'opacity 0.7s ease',
-                  }}
-                />
-              </div>
-              <style>{`@keyframes disc-spin { to { transform: rotate(360deg) } }`}</style>
-            </div>
-
-            <div className="text-center px-4 mb-5 max-w-md w-full">
-              <h2 className="font-headline font-black uppercase tracking-tighter text-lg md:text-xl text-white truncate">
-                {currentTrack.title}
-              </h2>
-              <p className="text-white/40 font-headline font-bold uppercase tracking-widest text-[10px] mt-1 truncate">
-                {currentTrack.artist}
-              </p>
-            </div>
-
-            <div className="w-full max-w-xs mb-3">
-              <button
-                type="button"
-                className="w-full h-1.5 bg-white/10 cursor-pointer relative rounded-full"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  seek(((e.clientX - rect.left) / rect.width) * 100);
-                }}
-              >
-                <div
-                  className="h-full bg-white/80 rounded-full transition-all duration-200"
-                  style={{ width: `${progress}%` }}
-                />
-              </button>
-              <div className="flex justify-between mt-1">
-                <span className="text-white/30 text-[9px] font-mono">
-                  {formatTime((progress / 100) * duration)}
-                </span>
-                <span className="text-white/30 text-[9px] font-mono">
-                  {formatTime(duration)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-5">
-              <button
-                type="button"
-                onClick={toggleShuffle}
-                className={`p-2 transition-colors ${shuffle ? 'text-white' : 'text-white/30 hover:text-white'}`}
-              >
-                <Shuffle className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={prev}
-                className="p-2 text-white/60 hover:text-white transition-colors"
-              >
-                <SkipBack className="w-5 h-5 fill-current" />
-              </button>
-              <button
-                type="button"
-                onClick={togglePlay}
-                className="w-12 h-12 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors"
-              >
-                {isPlaying ? (
-                  <Pause className="w-5 h-5 fill-current" />
-                ) : (
-                  <Play className="w-5 h-5 fill-current ml-0.5" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                className="p-2 text-white/60 hover:text-white transition-colors"
-              >
-                <SkipForward className="w-5 h-5 fill-current" />
-              </button>
-              <button
-                type="button"
-                onClick={cycleRepeat}
-                className={`p-2 transition-colors ${repeat !== 'off' ? 'text-white' : 'text-white/30 hover:text-white'}`}
-              >
-                {repeat === 'one' ? (
-                  <Repeat1 className="w-4 h-4" />
-                ) : (
-                  <Repeat className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 mt-3 w-full max-w-xs">
-              <button
-                type="button"
-                onClick={() => setVolume(volume > 0 ? 0 : 1)}
-                className="p-1 text-white/30 hover:text-white transition-colors"
-              >
-                {volume === 0 ? (
-                  <VolumeX className="w-3.5 h-3.5" />
-                ) : (
-                  <Volume2 className="w-3.5 h-3.5" />
-                )}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="flex-1 h-1 accent-white cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {hasLyrics && (
-            <div className="hidden md:flex flex-1 flex-col min-h-0 justify-center py-8">
-              <div
-                ref={lyricsRef}
-                className="overflow-y-auto no-scrollbar max-h-full px-4 space-y-6"
-                style={{
-                  maskImage:
-                    'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
-                  WebkitMaskImage:
-                    'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
-                }}
-              >
-                <div className="h-[30vh]" />
-                {lyrics.map((line, i) => {
-                  const dist = Math.abs(i - currentLineIndex);
-                  const isCurrent = i === currentLineIndex;
-                  const isPast = i < currentLineIndex;
-                  return (
-                    <p
-                      key={line.time}
-                      className="cursor-pointer font-headline uppercase tracking-tight leading-snug"
-                      style={{
-                        fontSize: isCurrent ? '2rem' : '1.5rem',
-                        fontWeight: isCurrent ? 900 : 700,
-                        color: isCurrent
-                          ? '#fff'
-                          : isPast
-                            ? 'rgba(255,255,255,0.15)'
-                            : 'rgba(255,255,255,0.3)',
-                        filter: isCurrent
-                          ? 'none'
-                          : `blur(${Math.min(dist * 0.5, 2.5)}px)`,
-                        transform: isCurrent ? 'scale(1)' : 'scale(0.92)',
-                        transition:
-                          'font-size 0.4s ease, color 0.4s ease, filter 0.5s ease, transform 0.4s ease',
-                      }}
-                      onClick={() => {
-                        if (duration > 0) seek((line.time / duration) * 100);
-                      }}
-                      onKeyDown={() => {}}
-                    >
-                      {line.text}
-                    </p>
-                  );
-                })}
-                <div className="h-[30vh]" />
-              </div>
-            </div>
-          )}
-
-          {!hasLyrics && recommendations.length > 0 && (
-            <div className="hidden md:flex flex-1 flex-col min-h-0 py-8 px-4 overflow-y-auto no-scrollbar">
-              <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] mb-4">
-                Similar Songs
-              </p>
-              {recommendations.map((song) => (
-                <button
-                  key={song.id}
-                  type="button"
-                  onClick={() => play(song, recommendations)}
-                  className="w-full flex items-center gap-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
-                >
-                  <img
-                    src={song.image}
-                    alt=""
-                    className="w-10 h-10 rounded object-cover shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">
-                      {song.title}
-                    </p>
-                    <p className="text-white/40 text-xs truncate">
-                      {song.artist}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <DesktopFullPlayer
+      currentTrack={currentTrack}
+      isPlaying={isPlaying}
+      progress={progress}
+      duration={duration}
+      shuffle={shuffle}
+      repeat={repeat}
+      volume={volume}
+      lyrics={lyrics}
+      currentLineIndex={currentLineIndex}
+      recommendations={recommendations}
+      closing={closing}
+      lyricsRef={lyricsRef}
+      onClose={handleClose}
+      onTogglePlay={togglePlay}
+      onNext={next}
+      onPrev={prev}
+      onSeek={seek}
+      onToggleShuffle={toggleShuffle}
+      onCycleRepeat={cycleRepeat}
+      onSetVolume={setVolume}
+      onPlay={play}
+    />
   );
 }
