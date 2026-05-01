@@ -11,5 +11,6 @@ class NightwatchViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NWVolumePlugin())
         bridge?.registerPluginInstance(NWAudioSessionPlugin())
+        bridge?.registerPluginInstance(NWPipPlugin())
     }
 }

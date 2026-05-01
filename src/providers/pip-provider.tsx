@@ -147,17 +147,27 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!checkIsMobile()) return;
 
+    let NWPip: {
+      start: () => Promise<void>;
+      stop: () => Promise<void>;
+    } | null = null;
+
+    import('@capacitor/core').then(({ registerPlugin }) => {
+      NWPip = registerPlugin<{
+        start: () => Promise<void>;
+        stop: () => Promise<void>;
+      }>('NWPip');
+    });
+
     const unlisten = mobileBridge.onAppStateChange(({ isActive }) => {
+      if (!NWPip) return;
       if (isActive) {
-        // Foreground — exit native PiP
-        if (document.pictureInPictureElement) {
-          document.exitPictureInPicture().catch(() => {});
-        }
+        NWPip.stop().catch(() => {});
       } else {
-        // Background — enter native PiP if a video is registered and playing
+        // Background — enter native PiP if a video is playing
         const el = videoElRef.current ?? pipVideoRef.current;
         if (el && !el.paused && el.currentTime > 0) {
-          el.requestPictureInPicture?.().catch(() => {});
+          NWPip.start().catch(() => {});
         }
       }
     });
@@ -258,7 +268,7 @@ function PipPlayer({
       style={{
         bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
         right: '0.75rem',
-        width: '45vw',
+        width: '60vw',
         aspectRatio: '16 / 9',
         borderRadius: '8px',
         transform: swipeX ? `translateX(${swipeX}px)` : undefined,
@@ -300,7 +310,7 @@ function PipPlayer({
       />
       {/* Title */}
       <div className="absolute bottom-0 left-0 right-0 z-10 px-2 py-1 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-        <p className="text-[10px] text-white font-semibold truncate">
+        <p className="text-[11px] text-white font-semibold truncate">
           {pip.title}
         </p>
       </div>
