@@ -305,8 +305,8 @@ function LiveMatchModalContent({
         </div>
 
         {/* Details section */}
-        <div className="px-4 md:px-10 py-6 md:py-10 bg-background flex-1 flex flex-col">
-          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10 flex-1 flex flex-col justify-between">
+        <div className="px-6 md:px-10 lg:px-16 py-6 md:py-10 bg-background flex-1 flex flex-col">
+          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10 flex-1">
             {/* Title row */}
             <div className="text-center space-y-3 md:space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
@@ -339,7 +339,7 @@ function LiveMatchModalContent({
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 mt-6">
               {/* Watch Solo */}
               <button
                 type="button"
@@ -347,7 +347,7 @@ function LiveMatchModalContent({
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
                   'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
                   !canWatch
-                    ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
+                    ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
                     : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
                 )}
                 onClick={onWatchSolo}
@@ -371,7 +371,7 @@ function LiveMatchModalContent({
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
                     'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
                     isCreatingParty || !canWatch
-                      ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
+                      ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
                       : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
                   )}
                   onClick={onWatchParty}

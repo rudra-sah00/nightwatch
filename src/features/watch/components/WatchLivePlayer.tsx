@@ -86,14 +86,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     playerSentinelRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  const inlineStyle: React.CSSProperties = {
-    position: 'relative',
-    width: '100%',
-    height: 'auto',
-    aspectRatio: '16 / 9',
-    maxHeight: '56.25vw',
-  };
-
   const pipStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
@@ -112,41 +104,66 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
       {useInlineMobileLayout ? (
         <div
           ref={playerSentinelRef}
-          style={isPip ? { height: 'calc(56.25vw)' } : undefined}
-        />
-      ) : null}
-      <Player.Root
-        {...props}
-        skipProgressHistory={true}
-        containerStyle={
-          useInlineMobileLayout
-            ? isPip
-              ? pipStyle
-              : inlineStyle
-            : {
-                position: 'fixed',
-                top: 'var(--electron-titlebar-height, 0px)',
-                right: 0,
-                bottom: 0,
-                left: 0,
-              }
-        }
-        streamMode="live"
-        allowPortraitPlayback={useInlineMobileLayout}
-        onBack={handleBack}
-        onNavigate={(url) => router.push(url)}
-      >
-        {isPip ? (
-          <button
-            type="button"
-            onClick={dismissPip}
-            className="absolute inset-0 z-[60]"
-            aria-label="Back to player"
-          />
-        ) : null}
-        <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
-        <LivePlayerState streamUrl={props.streamUrl} isPip={isPip} />
-      </Player.Root>
+          style={{
+            width: '100%',
+            aspectRatio: '16 / 9',
+            maxHeight: '56.25vw',
+            position: 'relative',
+          }}
+        >
+          <Player.Root
+            {...props}
+            skipProgressHistory={true}
+            containerStyle={
+              isPip
+                ? pipStyle
+                : {
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                  }
+            }
+            streamMode="live"
+            allowPortraitPlayback={useInlineMobileLayout}
+            onBack={handleBack}
+            onNavigate={(url) => router.push(url)}
+          >
+            {isPip ? (
+              <button
+                type="button"
+                onClick={dismissPip}
+                className="absolute inset-0 z-[60]"
+                aria-label="Back to player"
+              />
+            ) : null}
+            <PipRegistrar
+              streamUrl={props.streamUrl}
+              metadata={props.metadata}
+            />
+            <LivePlayerState streamUrl={props.streamUrl} isPip={isPip} />
+          </Player.Root>
+        </div>
+      ) : (
+        <Player.Root
+          {...props}
+          skipProgressHistory={true}
+          containerStyle={{
+            position: 'fixed',
+            top: 'var(--electron-titlebar-height, 0px)',
+            right: 0,
+            bottom: 0,
+            left: 0,
+          }}
+          streamMode="live"
+          allowPortraitPlayback={false}
+          onBack={handleBack}
+          onNavigate={(url) => router.push(url)}
+        >
+          <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
+          <LivePlayerState streamUrl={props.streamUrl} isPip={false} />
+        </Player.Root>
+      )}
     </>
   );
 });

@@ -122,14 +122,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     playerSentinelRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  const inlineStyle: React.CSSProperties = {
-    position: 'relative',
-    width: '100%',
-    height: 'auto',
-    aspectRatio: '16 / 9',
-    maxHeight: '56.25vw',
-  };
-
   const pipStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
@@ -145,45 +137,70 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 
   return (
     <>
-      {/* Sentinel: tracks when the player area scrolls out of view */}
       {useInlineMobileLayout ? (
         <div
           ref={playerSentinelRef}
-          style={isPip ? { height: 'calc(56.25vw)' } : undefined}
-        />
-      ) : null}
-      <Player.Root
-        {...props}
-        containerStyle={
-          useInlineMobileLayout
-            ? isPip
-              ? pipStyle
-              : inlineStyle
-            : {
-                position: 'fixed',
-                top: 'var(--electron-titlebar-height, 0px)',
-                right: 0,
-                bottom: 0,
-                left: 0,
-              }
-        }
-        streamMode="vod"
-        allowPortraitPlayback={useInlineMobileLayout}
-        onBack={handleBack}
-        onNavigate={props.onNavigate || ((url) => router.replace(url))}
-      >
-        {/* Tap PiP to scroll back to player */}
-        {isPip ? (
-          <button
-            type="button"
-            onClick={dismissPip}
-            className="absolute inset-0 z-[60]"
-            aria-label="Back to player"
-          />
-        ) : null}
-        <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
-        <VODPlayerState hideBackButton={props.hideBackButton} isPip={isPip} />
-      </Player.Root>
+          style={{
+            width: '100%',
+            aspectRatio: '16 / 9',
+            maxHeight: '56.25vw',
+            position: 'relative',
+          }}
+        >
+          <Player.Root
+            {...props}
+            containerStyle={
+              isPip
+                ? pipStyle
+                : {
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                  }
+            }
+            streamMode="vod"
+            allowPortraitPlayback={useInlineMobileLayout}
+            onBack={handleBack}
+            onNavigate={props.onNavigate || ((url) => router.replace(url))}
+          >
+            {isPip ? (
+              <button
+                type="button"
+                onClick={dismissPip}
+                className="absolute inset-0 z-[60]"
+                aria-label="Back to player"
+              />
+            ) : null}
+            <PipRegistrar
+              streamUrl={props.streamUrl}
+              metadata={props.metadata}
+            />
+            <VODPlayerState
+              hideBackButton={props.hideBackButton}
+              isPip={isPip}
+            />
+          </Player.Root>
+        </div>
+      ) : (
+        <Player.Root
+          {...props}
+          containerStyle={{
+            position: 'fixed',
+            top: 'var(--electron-titlebar-height, 0px)',
+            right: 0,
+            bottom: 0,
+            left: 0,
+          }}
+          streamMode="vod"
+          allowPortraitPlayback={false}
+          onBack={handleBack}
+          onNavigate={props.onNavigate || ((url) => router.replace(url))}
+        >
+          <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
+          <VODPlayerState hideBackButton={props.hideBackButton} isPip={false} />
+        </Player.Root>
+      )}
     </>
   );
 });
