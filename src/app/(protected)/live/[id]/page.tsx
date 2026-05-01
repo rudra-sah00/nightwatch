@@ -258,17 +258,14 @@ export default function LiveMatchPlayerPage() {
   });
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-    >
+    <div className="min-h-screen bg-background">
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}
         mobileLayout="inline"
       />
 
-      <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60">
+      <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">

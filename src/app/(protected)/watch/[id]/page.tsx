@@ -85,10 +85,7 @@ function WatchContent() {
       : t('player.movie');
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-    >
+    <div className="min-h-screen bg-background">
       <WatchVODPlayer
         key={watchKey}
         streamUrl={streamUrl}
@@ -108,7 +105,7 @@ function WatchContent() {
         }
       />
 
-      <section className="md:hidden px-4 py-4 space-y-3 bg-background text-foreground border-t border-border/60">
+      <section className="md:hidden px-4 py-4 space-y-3 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
         <div className="min-w-0">
           <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
             {metadata.title}
