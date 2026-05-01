@@ -181,7 +181,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
             <LivePlayerState
               streamUrl={props.streamUrl}
               isPip={isPip}
-              onPip={() => setIsPip(true)}
+              onPip={handleBack}
             />
           </Player.Root>
         </div>

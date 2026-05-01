@@ -216,7 +216,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
             <VODPlayerState
               hideBackButton={props.hideBackButton}
               isPip={isPip}
-              onPip={() => setIsPip(true)}
+              onPip={handleBack}
             />
           </Player.Root>
         </div>
