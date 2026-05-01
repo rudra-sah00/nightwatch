@@ -31,6 +31,7 @@ export class AudioEngine {
 
   constructor() {
     this.audio = new Audio();
+    this.audio.disableRemotePlayback = true;
     this.state = {
       currentTrack: null,
       queue: [],
