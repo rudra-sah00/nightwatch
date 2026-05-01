@@ -199,6 +199,72 @@ active → idle (ended by either party)
 | `call:reject` | `{ callerId }` | — | Reject call |
 | `call:end` | `{ peerId }` | — | End call |
 
+## Media Ducking & Music Pause on Calls
+
+### `dm-call:start` / `dm-call:end` Custom Events
+
+When a voice call transitions to `incoming` or `active` state, the `CallProvider` dispatches a `dm-call:start` custom event on `window`. When the call ends (cleanup), it dispatches `dm-call:end`. These events allow the music player to react without direct coupling.
+
+```ts
+// CallProvider (use-call.tsx) — on incoming or active:
+window.dispatchEvent(new CustomEvent('dm-call:start'));
+
+// CallProvider — on cleanup:
+window.dispatchEvent(new CustomEvent('dm-call:end'));
+```
+
+### Music Player Integration
+
+`MusicPlayerContext.tsx` listens for these events:
+
+```ts
+window.addEventListener('dm-call:start', handleCallStart);
+window.addEventListener('dm-call:end', handleCallEnd);
+```
+
+- `dm-call:start` → pauses music playback
+- `dm-call:end` → allows music to resume
+
+### Media Ducking (All Audio/Video Elements)
+
+In addition to pausing music, the `CallProvider` ducks **all** `<audio>` and `<video>` elements on the page to 20% volume via `duckMediaElements(0.2)` from `call.utils.ts`. This affects:
+
+- Background video players
+- Trailer previews
+- Any other media elements
+
+Volume is restored when the call ends via the returned cleanup function.
+
+### Ducking Triggers on Incoming Calls (Not Just Active)
+
+Media ducking activates on **both** `incoming` and `active` call states:
+
+```ts
+useEffect(() => {
+  if (callState === 'active' || callState === 'incoming') {
+    restoreVolumeRef.current = duckMediaElements(0.2);
+    window.dispatchEvent(new CustomEvent('dm-call:start'));
+    desktopBridge.setCallActive(true);
+  }
+  return () => {
+    if (restoreVolumeRef.current) {
+      restoreVolumeRef.current();
+      restoreVolumeRef.current = null;
+    }
+    desktopBridge.setCallActive(false);
+  };
+}, [callState]);
+```
+
+This means:
+- When a call **rings** (incoming), media is immediately ducked so the ringtone is audible
+- When a call is **active**, ducking continues so the voice call audio is clear
+- When the call **ends** or is **rejected**, volume is restored and `dm-call:end` fires
+
+### Desktop Integration
+
+`desktopBridge.setCallActive(true/false)` notifies the Electron main process of call state, enabling OS-level audio ducking and preventing the app from being suspended.
+
 ## Security
 
 - Message content sanitized via `sanitizeChatMessage()` before storage (stored XSS prevention)

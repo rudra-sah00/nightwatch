@@ -65,3 +65,264 @@ Inside Next.js `src/proxy.ts` (mapped in Edge infrastructure), our frontend inte
 
 Instead of rendering a normal web app in a system webview, the Nightwatch standard browser experience contains fallback abstractions checking for custom protocol handlers (`nightwatch://`).
 If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/lib/electron-bridge.ts`.
+
+---
+
+## 6. Desktop Platform Layer (Electron)
+
+The desktop app wraps the Next.js frontend in an Electron shell with a preload script that exposes `window.electronAPI`. The frontend communicates with the main process exclusively through `src/lib/electron-bridge.ts`, which provides a safe no-op fallback when running outside Electron.
+
+### Bridge Pattern
+
+```ts
+import { desktopBridge, checkIsDesktop } from '@/lib/electron-bridge';
+
+if (checkIsDesktop()) {
+  desktopBridge.setPictureInPicture(true);
+}
+```
+
+### Desktop-Exclusive Features
+
+| Feature | Bridge Method | Description |
+|---------|--------------|-------------|
+| Discord Rich Presence | `updateDiscordPresence()` / `clearDiscordPresence()` | Shows current activity in Discord |
+| Picture-in-Picture | `setPictureInPicture(enabled, opacity)` | OS-level always-on-top mini player |
+| System Tray | (main process) | Background presence with unread badge |
+| Media Keys | `onMediaCommand(cb)` | Play/pause/next/prev from keyboard |
+| Window Controls | `windowMinimize()` / `windowMaximize()` / `windowClose()` | Frameless window management |
+| Native Theme | `setNativeTheme(theme)` | Sync OS dark/light mode |
+| Notifications | `showNotification({ title, body })` | OS-native notifications |
+| Fullscreen | `toggleFullscreen()` / `onFullscreenChanged(cb)` | Native fullscreen toggle |
+| Keep Awake | `setKeepAwake(keep)` | Prevent sleep during playback |
+| Unread Badge | `setUnreadBadge(count)` | macOS Dock badge |
+| Run on Boot | `setRunOnBoot(enabled)` | Auto-start on login |
+| Offline Downloads | `startDownload()` / `getDownloads()` / `onDownloadProgress()` | Full HLS/MP4 download manager |
+| Key-Value Store | `storeGet()` / `storeSet()` / `storeDelete()` | Persistent preferences |
+| Call State | `setCallActive(active)` | OS-level audio ducking during calls |
+
+### Detection
+
+```ts
+// Module-level constant (evaluated once)
+export const isDesktop = typeof window !== 'undefined' && 'electronAPI' in window;
+
+// Runtime check (re-evaluates each call)
+export function checkIsDesktop(): boolean { ... }
+```
+
+---
+
+## 7. Mobile Platform Layer (Capacitor)
+
+The mobile app wraps the deployed Next.js app in a native WebView via Capacitor, with 16 native plugins providing device API access. The frontend communicates through `src/lib/mobile-bridge.ts`, which mirrors the `desktopBridge` pattern.
+
+### Bridge Pattern
+
+```ts
+import { mobileBridge, isMobileNative } from '@/lib/mobile-bridge';
+
+if (isMobileNative) {
+  mobileBridge.hapticImpact('medium');
+}
+```
+
+### Mobile-Exclusive Features
+
+| Feature | Plugin | Description |
+|---------|--------|-------------|
+| Haptic Feedback | `@capacitor/haptics` | Impact, notification, vibration |
+| Status Bar | `@capacitor/status-bar` | Theme-synced dark/light style |
+| CallKit (iOS) | `@capgo/capacitor-incoming-call-kit` | Native incoming call UI |
+| Phone Notification (Android) | `@anuradev/capacitor-phone-call-notification` | Call-in-progress notification |
+| Offline Downloads | `@capacitor/filesystem` + `@capacitor/preferences` | HLS/MP4 download to device |
+| Native Share | `@capacitor/share` | OS share sheet |
+| Screen Orientation | `@capacitor/screen-orientation` | Lock landscape for video |
+| Keep Awake | `@capacitor-community/keep-awake` | Prevent sleep during playback |
+| Network Detection | `@capacitor/network` | Online/offline toast notifications |
+| App Badge | `@capawesome/capacitor-badge` | Unread count on app icon |
+
+### Global Lifecycle
+
+`MobileShell` (mounted once in root layout) handles status bar theming, Android back button, network detection, and keyboard management. See [MOBILE.md](./features/MOBILE.md) for full details.
+
+### Detection
+
+```ts
+// Module-level constant
+export const isMobile = window.Capacitor?.isNativePlatform?.() === true;
+
+// Runtime check
+export function checkIsMobile(): boolean { ... }
+
+// React hook (viewport OR native)
+const isMobile = useIsMobile(); // true if <768px OR Capacitor native
+```
+
+---
+
+## 8. Picture-in-Picture System
+
+Nightwatch implements a multi-layer PiP system that works across routes and platforms.
+
+### Global PipProvider (`src/providers/pip-provider.tsx`)
+
+The `PipProvider` wraps the entire protected layout and manages cross-route video continuity on mobile:
+
+```
+PlayerRoot (watch page)
+  → register(streamUrl, title, watchUrl, videoEl)
+  → user navigates away from /watch/, /live/, /clip/
+  → PipProvider captures currentTime + streamUrl
+  → renders floating PipPlayer mini-player (bottom-right, 45vw)
+  → user taps mini-player → navigates back to watchUrl
+  → user navigates to another video route → PiP closes
+```
+
+### Route-Change Detection
+
+The provider watches `pathname` via `usePathname()`:
+
+- **Navigating AWAY from a video route** with a registered, playing video → activate PiP
+- **Navigating TO a video route** → close any existing PiP (avoid conflicts)
+
+Video routes: `/watch/`, `/live/`, `/clip/`
+
+### Music Conflict Resolution
+
+If music starts playing while PiP is active, PiP is automatically closed so audio streams don't overlap:
+
+```ts
+const { isPlaying: musicPlaying } = useMusicPlayerContext();
+useEffect(() => {
+  if (musicPlaying && pip) close();
+}, [musicPlaying, pip, close]);
+```
+
+### Native Background PiP (Capacitor)
+
+When the app goes to background on mobile, the provider uses the native `requestPictureInPicture()` API:
+
+```ts
+mobileBridge.onAppStateChange(({ isActive }) => {
+  if (!isActive) {
+    videoEl.requestPictureInPicture?.();  // Enter native PiP
+  } else {
+    document.exitPictureInPicture();      // Return to app
+  }
+});
+```
+
+### Desktop PiP (Electron)
+
+On desktop, PiP uses the Electron main process for an always-on-top mini window:
+
+```ts
+desktopBridge.setPictureInPicture(enabled, opacity);
+desktopBridge.onPipModeChanged((isPip) => { ... });
+```
+
+### PipPlayer Component
+
+The floating mini-player renders when PiP is active on mobile:
+
+- Fixed position: `bottom: calc(1rem + env(safe-area-inset-bottom))`, `right: 0.75rem`
+- Size: `45vw` with `16:9` aspect ratio
+- Seeks to saved `currentTime` on `loadedmetadata`
+- Tap overlay → navigate back to original watch route
+- Close button (X) → dismiss PiP
+- Title bar with gradient overlay
+
+### Local IntersectionObserver PiP
+
+Individual player components (e.g., `PipOverlay`) use `IntersectionObserver` to detect when the video element scrolls out of view within a page, triggering an in-page mini-player overlay without the global PiP system.
+
+---
+
+## 9. Player Compound Component Pattern
+
+The video player uses a **compound component** architecture where a root provider exposes shared state to composable child components via React Context.
+
+### Structure
+
+```
+src/features/watch/player/ui/compound/
+├── PlayerRoot.tsx                  # Provider + HLS engine + state management
+├── PlayerVideo.tsx                 # <video> element with event bindings
+├── PlayerControls.tsx              # Bottom control bar container
+├── PlayerHeader.tsx                # Top bar (title, back button, right slot)
+├── PlayerPlayPause.tsx             # Central play/pause button
+├── PlayerSeekBar.tsx               # Desktop seek bar with sprite thumbnails
+├── PlayerMobileSeekBar.tsx         # Mobile-optimized seek bar
+├── PlayerVolume.tsx                # Volume slider (desktop)
+├── PlayerTimeDisplay.tsx           # Current time / duration
+├── PlayerSkipButtons.tsx           # ±10s skip buttons
+├── PlayerFullscreen.tsx            # Fullscreen toggle
+├── PlayerLiveBadge.tsx             # "LIVE" indicator with edge-to-live seek
+├── PlayerSettingsMenu.tsx          # Quality, speed, subtitle settings
+├── PlayerAudioSubtitleSelectors.tsx # Audio track + subtitle track pickers
+├── PlayerEpisodePanel.tsx          # Series episode list panel
+├── SubtitleOverlay.tsx             # WebVTT subtitle renderer
+└── hooks/
+    ├── use-player-root.ts          # Core hook: HLS init, state machine, progress
+    ├── use-subtitle-overlay.ts     # WebVTT parsing + cue timing
+    ├── use-player-audio-subtitle-selectors.ts # Track enumeration
+    └── use-player-live-badge.ts    # Live edge detection
+```
+
+### Composition Pattern
+
+```tsx
+<PlayerRoot streamUrl={url} metadata={metadata} subtitleTracks={tracks}>
+  <PlayerVideo />
+  <SubtitleOverlay />
+  <PlayerHeader title={title}>
+    <RecordButton />  {/* Right slot — clips integration */}
+  </PlayerHeader>
+  <PlayerControls>
+    <PlayerPlayPause />
+    <PlayerSkipButtons />
+    <PlayerSeekBar />
+    <PlayerVolume />
+    <PlayerTimeDisplay />
+    <PlayerFullscreen />
+  </PlayerControls>
+  <PlayerEpisodePanel episodes={episodes} />
+</PlayerRoot>
+```
+
+### PlayerRoot Responsibilities
+
+`PlayerRoot` is the compound root that:
+
+1. Initializes the HLS.js engine and attaches it to the `<video>` element
+2. Manages the player state machine (loading, playing, paused, buffering, error)
+3. Tracks playback progress and reports to the backend history API
+4. Handles quality switching, subtitle track selection, and audio track selection
+5. Provides mobile detection and orientation locking
+6. Exposes all state and controls via `PlayerContext`
+
+### Key Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `streamUrl` | `string \| null` | HLS or MP4 URL (`null` while resolving) |
+| `metadata` | `VideoMetadata` | Title, type, IDs for progress tracking |
+| `subtitleTracks` | `SubtitleTrack[]` | Selectable subtitle tracks |
+| `qualities` | `Quality[]` | Manual quality selection options |
+| `spriteVtt` / `spriteSheet` | `string` / `object` | Seekbar thumbnail previews |
+| `interactionMode` | `'interactive' \| 'read-only'` | Controls visibility |
+| `streamMode` | `'vod' \| 'live'` | Playback mode |
+| `skipProgressHistory` | `boolean` | Skip backend progress writes |
+
+### Consumer Components
+
+Each child component consumes `PlayerContext` and renders a single concern:
+
+- `PlayerVideo` — renders `<video>` with event bindings, registers with PipProvider
+- `PlayerControls` — auto-hiding control bar with idle detection
+- `PlayerSeekBar` — draggable seek with sprite thumbnail preview on hover
+- `PlayerMobileSeekBar` — swipe-based seek optimized for touch
+- `SubtitleOverlay` — parses WebVTT and renders cues positioned over the video
+
+This pattern allows `WatchVODPlayer` and `WatchLivePlayer` to compose different control layouts from the same building blocks while sharing all core player logic.

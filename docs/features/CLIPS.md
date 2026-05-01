@@ -162,6 +162,102 @@ The `/library` route displays clips with:
 - Delete button
 - Play overlay → opens `/clip/{id}` with core VOD player
 
+## Public Clip Sharing
+
+Clips can be shared publicly via a unique share link. The sharing system uses a toggle-based visibility model with a dedicated public route.
+
+### Toggle Public Visibility
+
+```ts
+// api.ts
+export async function toggleClipPublic(clipId: string): Promise<{ isPublic: boolean; shareId: string | null }>;
+export async function getPublicClip(shareId: string): Promise<Clip>;
+```
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/clips/:id/toggle-public` | Toggle public visibility → `{ isPublic, shareId }` |
+| `GET` | `/api/clips/public/:shareId` | Fetch public clip by share ID (no auth required) |
+
+### Clip Data Model (Sharing Fields)
+
+```ts
+interface Clip {
+  // ... existing fields ...
+  isPublic: boolean;        // Whether the clip is publicly accessible
+  shareId: string | null;   // Unique share identifier (null if not shared)
+}
+```
+
+### Public Share Route
+
+**Route**: `/clip/share/[shareId]` — `src/app/(public)/clip/share/[shareId]/page.tsx`
+
+This is a **public** route (under the `(public)` route group — no authentication required). It:
+
+1. Extracts `shareId` from the URL params
+2. Fetches the clip via `getPublicClip(shareId)`
+3. Renders the clip in the standard `WatchVODPlayer` with `hideBackButton` enabled
+4. Shows a "Clip not found" error state if the clip doesn't exist, was removed, or is no longer public
+
+```tsx
+const metadata: VideoMetadata = {
+  title: clip.title,
+  type: 'movie',
+  movieId: `clip-${clip.id}`,
+};
+
+return <WatchVODPlayer streamUrl={clip.videoUrl} metadata={metadata} hideBackButton />;
+```
+
+### ClipCard Share Button
+
+The `ClipCard` component includes a share button (Share2 icon) that:
+- Shows `text-neo-blue` when the clip is already public
+- Shows `text-foreground/30` when private
+- Only appears when the clip status is `ready`
+- Calls the parent `onShare(clip)` callback which typically toggles public visibility and copies the share URL
+
+### Share Flow
+
+1. User clicks share icon on a `ClipCard`
+2. `toggleClipPublic(clipId)` is called → backend generates a `shareId` (or removes it)
+3. If now public: share URL `https://nightwatch.in/clip/share/{shareId}` is copied to clipboard
+4. If now private: `shareId` is set to `null`, existing share links stop working
+
+## RecordButton Integration with Livestreams
+
+The `RecordButton` component (`src/features/clips/components/RecordButton.tsx`) is integrated into the live player's header bar.
+
+### Integration Point
+
+- **Live Player** (`WatchLivePlayer.tsx`): `RecordButton` is placed in the `PlayerHeader` right slot
+- **Player Context** (`PlayerContext.tsx`): Exposes `hlsRef` for the recorder to access the video element
+
+### RecordButton States
+
+| State | Visual | Interaction |
+|-------|--------|-------------|
+| **Idle** | White pill with red dot + "CLIP" label | Click → `onStart()` |
+| **Starting** | Red pill with spinner + "Starting..." | Disabled |
+| **Recording** | Red pill with pulsing dot + "REC 0:00" timer | Click → `onStop()` (disabled until 5s minimum) |
+| **Stopping** | Red pill with spinner + "Saving..." | Disabled |
+
+### useClipRecorder Hook
+
+`src/features/clips/hooks/use-clip-recorder.ts` manages the full recording lifecycle:
+
+1. Captures the `<video>` element's MediaStream via `captureStream()`
+2. Creates a `MediaRecorder` with WebM codec (`vp9,opus` preferred, `webm` fallback)
+3. Records 2-second chunks uploaded to the backend in real-time
+4. Automatically pauses/resumes when the video element pauses or buffers
+5. Enforces 5-second minimum and 300-second (5 min) maximum duration
+
+```ts
+const { isRecording, duration, clipId, canStop, isStarting, isStopping, start, stop } =
+  useClipRecorder({ matchId, title, streamUrl });
+```
+
 ## Testing
 
 | Test File | Tests | Coverage |
