@@ -377,6 +377,14 @@ export function useAskAi() {
   const stop = useCallback(() => {
     activeRef.current = false;
 
+    // Release audio ducking if AI was speaking
+    if (speakingRef.current) {
+      speakingRef.current = false;
+      window.dispatchEvent(
+        new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
+      );
+    }
+
     // Barge-in: clear playback buffer
     playQueueRef.current = [];
     nextPlayTimeRef.current = 0;
