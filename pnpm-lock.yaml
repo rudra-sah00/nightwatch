@@ -59,6 +59,9 @@ importers:
       '@capawesome/capacitor-badge':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.3.1)
+      '@capgo/capacitor-incoming-call-kit':
+        specifier: ^8.1.1
+        version: 8.1.1(@capacitor/core@8.3.1)
       '@marsidev/react-turnstile':
         specifier: ^1.4.1
         version: 1.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -636,6 +639,11 @@ packages:
 
   '@capawesome/capacitor-badge@8.0.2':
     resolution: {integrity: sha512-4ZnRyFvViaokupdrOi3OkoBurH+23hnxni+PYq5C1ObNLYbhty/WK8BzMtndCv0S47XjGBLjQ9DJsYj3JDVxGQ==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@capgo/capacitor-incoming-call-kit@8.1.1':
+    resolution: {integrity: sha512-yBqkcboSJ8D3jcSscAMZQ++1qknljoGwtsOxCGoOHFSxSnVaBWfHoiI9NTBVL5HoLz+DSEZmaDDxeSUZO8Ixug==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -8413,6 +8421,10 @@ snapshots:
   '@capacitor/synapse@1.0.4': {}
 
   '@capawesome/capacitor-badge@8.0.2(@capacitor/core@8.3.1)':
+    dependencies:
+      '@capacitor/core': 8.3.1
+
+  '@capgo/capacitor-incoming-call-kit@8.1.1(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 

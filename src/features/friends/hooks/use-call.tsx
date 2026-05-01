@@ -84,26 +84,48 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const callStateRef = useRef<CallState>('idle');
   const peerRef = useRef<CallPeer | null>(null);
+  const callIdRef = useRef<string>(`nw-call-${Date.now()}`);
+
   const updateCallState = useCallback((state: CallState, peerName?: string) => {
     callStateRef.current = state;
     setCallState(state);
 
-    // Native call notification for mobile
+    // Native call UI for mobile (CallKit on iOS, notification on Android)
     if (checkIsMobile()) {
-      import('@anuradev/capacitor-phone-call-notification').then(
-        ({ PhoneCallNotification }) => {
-          if (state === 'active') {
+      if (state === 'active') {
+        callIdRef.current = `nw-call-${Date.now()}`;
+        // CallKit: show native call UI (green pill, lock screen controls)
+        import('@capgo/capacitor-incoming-call-kit')
+          .then(({ IncomingCallKit }) =>
+            IncomingCallKit.showIncomingCall({
+              callId: callIdRef.current,
+              callerName: peerName || 'Nightwatch Call',
+              handle: peerName || 'Voice Call',
+              ios: { handleType: 'generic', supportsHolding: false },
+            }),
+          )
+          .catch(() => {});
+        // Also show Android notification
+        import('@anuradev/capacitor-phone-call-notification')
+          .then(({ PhoneCallNotification }) =>
             PhoneCallNotification.showCallInProgressNotification({
               channelName: peerName || 'Nightwatch',
               channelDescription: 'Voice call in progress',
-            }).catch(() => {});
-          } else if (state === 'idle') {
-            PhoneCallNotification.hideCallInProgressNotification().catch(
-              () => {},
-            );
-          }
-        },
-      );
+            }),
+          )
+          .catch(() => {});
+      } else if (state === 'idle') {
+        // End CallKit call
+        import('@capgo/capacitor-incoming-call-kit')
+          .then(({ IncomingCallKit }) => IncomingCallKit.endAllCalls())
+          .catch(() => {});
+        // Hide Android notification
+        import('@anuradev/capacitor-phone-call-notification')
+          .then(({ PhoneCallNotification }) =>
+            PhoneCallNotification.hideCallInProgressNotification(),
+          )
+          .catch(() => {});
+      }
     }
   }, []);
 
