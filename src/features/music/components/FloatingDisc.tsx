@@ -3,8 +3,21 @@
 import { usePathname } from 'next/navigation';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
+/** Routes where the floating disc should be hidden (video playback stops music). */
 const VIDEO_ROUTES = ['/watch/', '/live/'];
 
+/**
+ * Floating album-art disc (FAB) displayed on non-music, non-video pages
+ * when a track is currently loaded.
+ *
+ * Renders a circular button fixed to the bottom-right corner showing the
+ * current track's album art. When audio is playing the image spins continuously
+ * (4 s per revolution). Clicking the disc expands the full-screen player.
+ *
+ * Hidden on `/music` routes (where {@link MiniPlayer} is shown instead) and
+ * on `/watch/` or `/live/` routes (where music playback is auto-stopped).
+ * Renders `null` when no track is loaded or on excluded routes.
+ */
 export function FloatingDisc() {
   const { currentTrack, isPlaying, setExpanded } = useMusicPlayerContext();
   const pathname = usePathname();

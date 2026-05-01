@@ -14,6 +14,28 @@ import { PasswordInfo } from '@/components/ui/password-info';
 import type { useSignupForm } from '../hooks/use-signup-form';
 import { AuthCard } from './auth-card';
 
+/**
+ * Multi-step signup form rendered inside an {@link AuthCard}.
+ *
+ * **Step `'name'`** (Discovery) — collects display name, username (with live
+ * availability check showing ✓/✗/spinner), and email. The "Continue" button
+ * is disabled while the username is being checked, is taken, or is locally
+ * invalid (must match `/^[a-z0-9_]{3,}$/i`).
+ *
+ * **Step `'details'`** (Security) — password + confirm-password fields with a
+ * show/hide toggle, a {@link PasswordInfo} tooltip, a Turnstile captcha, and
+ * a submit button. Hidden inputs preserve name/username/email/inviteCode from
+ * the previous step. A "Back" button returns to the name step.
+ *
+ * **Step `'otp'`** (Verify) — 6-digit OTP input sent to the provided email,
+ * with verify and resend (countdown timer) buttons. Identical layout to the
+ * login OTP step.
+ *
+ * All form state and handlers are provided by the {@link useSignupForm} hook.
+ *
+ * @param props - Return value of {@link useSignupForm}.
+ * @returns The signup form element.
+ */
 export function SignupForm(props: ReturnType<typeof useSignupForm>) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations('auth');

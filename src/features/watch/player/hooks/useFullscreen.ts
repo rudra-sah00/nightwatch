@@ -8,25 +8,64 @@ import { mobileBridge } from '@/lib/mobile-bridge';
 import type { PlayerAction } from '../context/types';
 import { useMobileDetection } from './useMobileDetection';
 
+/**
+ * Options for the {@link useFullscreen} hook.
+ */
 interface UseFullscreenOptions {
+  /** Ref to the player container element used as the fullscreen target on desktop browsers. */
   containerRef: RefObject<HTMLDivElement | null>;
+  /** Player state dispatcher for `SET_FULLSCREEN` actions. */
   dispatch: React.Dispatch<PlayerAction>;
-  /** Current isFullscreen value from player state — used on mobile where
-   *  document.fullscreenElement may be null (YouTube-style custom fullscreen). */
+  /**
+   * Current `isFullscreen` value from player state.
+   *
+   * Required on mobile where `document.fullscreenElement` is always `null`
+   * (YouTube-style custom fullscreen uses fixed positioning, not the native API).
+   */
   playerIsFullscreen?: boolean;
 }
 
+/** Vendor-prefixed fullscreen properties on `Document` (Safari/older WebKit). */
 interface DocumentWithWebkit extends Document {
   webkitFullscreenElement?: Element;
   webkitExitFullscreen?: () => Promise<void>;
   webkitCancelFullScreen?: () => void;
 }
 
+/** Vendor-prefixed fullscreen request methods on `HTMLElement` (Safari/older WebKit). */
 interface HTMLElementWithWebkit extends HTMLElement {
   webkitRequestFullscreen?: () => Promise<void>;
   webkitRequestFullScreen?: () => void;
 }
 
+/**
+ * Hook managing fullscreen enter/exit across all supported platforms.
+ *
+ * **Mobile (YouTube-style):** Does NOT use the native Fullscreen API. Instead it
+ * locks the screen orientation to landscape (via `screen.orientation.lock` or the
+ * Capacitor ScreenOrientation plugin), switches the player container to a fixed
+ * viewport overlay, and locks document scroll. This keeps custom controls visible
+ * on both iOS Safari and Android Chrome.
+ *
+ * **Desktop browser:** Requests container-level fullscreen via the standard
+ * `requestFullscreen` API with vendor-prefixed fallbacks for older WebKit.
+ *
+ * **Electron:** Delegates to `window.electronAPI.toggleFullscreen()` which toggles
+ * the native `BrowserWindow` fullscreen state.
+ *
+ * **Capacitor (iOS/Android):** Uses the `@capacitor/screen-orientation` plugin for
+ * reliable orientation locking on native platforms.
+ *
+ * **Delayed unlock fix:** When exiting mobile fullscreen, the hook first locks to
+ * portrait, then unlocks after a 500ms delay. This prevents a "rotate wall flash"
+ * where the device briefly reports landscape orientation before settling into portrait.
+ *
+ * Also manages the mobile status bar visibility via `mobileBridge` — hidden in
+ * fullscreen, shown when exiting.
+ *
+ * @param options - See {@link UseFullscreenOptions}.
+ * @returns Object with `enterFullscreen`, `exitFullscreen`, `toggleFullscreen` callbacks and `isMobile` flag.
+ */
 export function useFullscreen({
   containerRef,
   dispatch,

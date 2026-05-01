@@ -16,35 +16,78 @@ import type { MusicTrack, SyncedLyricLine } from '../api';
 import { formatTime } from '../utils';
 import { FullPlayerLyrics } from './FullPlayerLyrics';
 
+/**
+ * Props for the {@link MobileFullPlayer} component.
+ *
+ * All playback state and callbacks are passed down from the {@link FullPlayer}
+ * orchestrator so this component remains a pure presentational layer.
+ */
 interface MobileFullPlayerProps {
+  /** The currently playing track metadata. */
   currentTrack: MusicTrack;
+  /** Whether audio is currently playing. */
   isPlaying: boolean;
+  /** Playback progress as a percentage (0–100). */
   progress: number;
+  /** Total track duration in seconds. */
   duration: number;
+  /** Application-level volume (0–1). */
   volume: number;
+  /** The current playback queue. */
   queue: MusicTrack[];
+  /** Synced lyric lines, or `null` if unavailable / still loading. */
   lyrics: SyncedLyricLine[] | null;
+  /** Index of the lyric line matching the current playback position (-1 if none). */
   currentLineIndex: number;
+  /** Whether the close-out animation is in progress. */
   closing: boolean;
+  /** Whether the lyrics panel is currently visible. */
   showLyrics: boolean;
+  /** Whether the queue panel is currently visible. */
   showQueue: boolean;
+  /** Ref attached to the lyrics scroll container for programmatic scrolling. */
   lyricsRef: React.RefObject<HTMLDivElement | null>;
+  /** Native system volume control (Capacitor), `null` on web. */
   systemVol: {
     volume: number | null;
     setSystemVolume: (v: number) => Promise<void>;
   } | null;
+  /** Triggers the close animation and collapses the full player. */
   onClose: () => void;
+  /** Toggles play / pause. */
   onTogglePlay: () => void;
+  /** Skips to the next track. */
   onNext: () => void;
+  /** Skips to the previous track. */
   onPrev: () => void;
+  /** Seeks to a position expressed as a percentage (0–100). */
   onSeek: (percent: number) => void;
+  /** Sets the application-level volume (0–1). */
   onSetVolume: (v: number) => void;
+  /** Plays a specific track, optionally replacing the queue. */
   onPlay: (track: MusicTrack, queue?: MusicTrack[]) => void;
+  /** Opens the native AirPlay picker (Capacitor / WebKit). */
   onShowAirPlay: () => void;
+  /** Toggles the synced lyrics overlay. */
   onToggleLyrics: () => void;
+  /** Toggles the queue list overlay. */
   onToggleQueue: () => void;
 }
 
+/**
+ * Full-screen music player for mobile viewports.
+ *
+ * Renders a slide-up overlay with three mutually exclusive content modes:
+ * 1. **Album Art mode** (default) — large album artwork with track title and artist.
+ * 2. **Lyrics mode** — compact header + scrollable synced lyrics via {@link FullPlayerLyrics}.
+ * 3. **Queue mode** — scrollable list of upcoming tracks in the playback queue.
+ *
+ * The bottom control strip (seek bar, play/pause/skip, volume slider, and
+ * lyrics/AirPlay/queue toggles) is always visible regardless of the active mode.
+ *
+ * Supports swipe-down-to-dismiss via touch event tracking with a 120 px threshold.
+ * Respects iOS safe-area insets for notch and home-indicator spacing.
+ */
 export function MobileFullPlayer({
   currentTrack,
   isPlaying,

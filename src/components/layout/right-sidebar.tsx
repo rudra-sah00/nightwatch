@@ -12,6 +12,31 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MobileSidebarShell } from './sidebar/MobileSidebarShell';
 import { useSidebarAnimation } from './sidebar/use-sidebar-animation';
 
+/**
+ * Right sidebar displaying the user's friend list, pending/sent friend
+ * requests, blocked users, and an inline search filter.
+ *
+ * **Sections** (rendered in order when non-empty):
+ * 1. Pending incoming requests — with accept/reject buttons.
+ * 2. Sent outgoing requests — with a cancel button.
+ * 3. Online friends — each rendered as a {@link FriendRow} with activity info.
+ * 4. Offline friends — same row, greyed out.
+ * 5. Blocked users — with an unblock button.
+ *
+ * **Filter** — a text input at the top filters online, offline, and blocked
+ * lists by name (case-insensitive substring match). Pending/sent requests are
+ * always shown unfiltered.
+ *
+ * **Spotlight integration** — the "+ Add Friend" button closes the sidebar and
+ * opens a {@link FriendSearchSpotlight} modal for searching and sending friend
+ * requests.
+ *
+ * **Responsive** — on mobile, renders inside a {@link MobileSidebarShell}
+ * (slide-in drawer from the right). On desktop, renders as a collapsible
+ * `<aside>` that shrinks to a 44 px icon strip when closed.
+ *
+ * @returns The right sidebar element.
+ */
 export function RightSidebar() {
   const { rightOpen: open, setRightOpen } = useSidebar();
   const mobile = useIsMobile();

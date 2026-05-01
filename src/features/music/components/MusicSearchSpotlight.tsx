@@ -13,6 +13,24 @@ import {
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { formatTime } from '../utils';
 
+/**
+ * Cmd+K style search spotlight overlay for discovering music.
+ *
+ * Renders a full-screen backdrop with a floating search input and results panel:
+ * - **Idle state** (no query): shows trending/top searches fetched from `getTopSearches`.
+ * - **Searching**: debounces input by 400 ms, then calls `searchMusic` for songs, albums,
+ *   and playlists. Songs are displayed as a clickable list (plays on click), albums and
+ *   playlists as horizontal thumbnail rows linking to their detail pages.
+ * - **Load More**: paginated song results (20 per page) with an inline "Load More" button.
+ * - **No results**: a centered empty-state message.
+ *
+ * Closes on Escape, backdrop click, or after selecting a result. The close triggers a
+ * 200 ms fade-out + scale animation before invoking `onClose`.
+ *
+ * On native mobile (Capacitor), auto-focus is skipped to prevent iOS zoom/scroll issues.
+ *
+ * @param props.onClose - Callback invoked after the closing animation completes.
+ */
 export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const t = useTranslations('music');
   const player = useMusicPlayerContext();

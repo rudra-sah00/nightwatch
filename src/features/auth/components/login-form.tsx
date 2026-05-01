@@ -12,6 +12,25 @@ import { OtpInput } from '@/components/ui/otp-input';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
+/**
+ * Login form with a two-step flow rendered inside an {@link AuthCard}.
+ *
+ * **Step `'initial'`** — email + password fields, a Turnstile captcha widget,
+ * and a "Forgot password?" link that switches to the forgot-password step.
+ * The password field has a show/hide toggle. Submission is blocked until the
+ * captcha is verified and both fields are non-empty.
+ *
+ * **Step `'otp'`** — shown after the server requires email verification.
+ * Displays the target email, a 6-digit OTP input, a verify button, and a
+ * resend button with a countdown timer. A back button in the {@link AuthCard}
+ * title row returns to the initial step.
+ *
+ * All form state and handlers are provided by the {@link useLoginForm} hook
+ * and passed in as props (render-props pattern).
+ *
+ * @param props - Return value of {@link useLoginForm}.
+ * @returns The login form element.
+ */
 export function LoginForm(props: ReturnType<typeof useLoginForm>) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations('auth');

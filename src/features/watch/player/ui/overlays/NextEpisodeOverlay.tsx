@@ -8,24 +8,59 @@ import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { useNextEpisodeOverlay } from './use-next-episode-overlay';
 
+/**
+ * Metadata describing the next episode to be played.
+ */
 export interface NextEpisodeInfo {
+  /** Episode title (falls back to "Episode N" if empty). */
   title: string;
+  /** Parent series title. */
   seriesTitle: string;
+  /** Season number of the next episode. */
   seasonNumber: number;
+  /** Episode number within the season. `1` triggers a "Next Season" label. */
   episodeNumber: number;
+  /** Thumbnail URL for the episode card preview. */
   thumbnailUrl?: string;
+  /** Episode duration in minutes (displayed in the desktop card). */
   duration?: number;
 }
 
+/**
+ * Props for the {@link NextEpisodeOverlay} component.
+ */
 interface NextEpisodeOverlayProps {
+  /** Whether the overlay should be rendered. */
   isVisible: boolean;
+  /** Metadata for the upcoming episode. `null` hides the overlay. */
   nextEpisode: NextEpisodeInfo | null;
+  /** Callback to immediately start the next episode. */
   onPlayNext: () => void;
+  /** Callback to dismiss the overlay and cancel auto-play. */
   onCancel: () => void;
+  /** Seconds before auto-playing the next episode. `0` disables auto-play. */
   autoPlayDelay?: number;
+  /** Shows a loading spinner on the play button while the next episode loads. */
   isLoading?: boolean;
 }
 
+/**
+ * "Up Next" overlay shown near the end of an episode.
+ *
+ * Renders two distinct layouts based on device and orientation:
+ *
+ * **Mobile portrait (compact):** A minimal button bar at the bottom-center with
+ * the episode label (e.g. "S2 E1"), a countdown timer, and a dismiss "✕" button.
+ * Animates in from the bottom.
+ *
+ * **Desktop / landscape (full card):** A 320px card anchored to the bottom-right
+ * with a thumbnail, episode metadata, Play/Cancel buttons, and an animated
+ * countdown progress bar. Animates in from the right.
+ *
+ * Uses {@link useNextEpisodeOverlay} for countdown logic and cancellation state.
+ *
+ * @param props - See {@link NextEpisodeOverlayProps}.
+ */
 export function NextEpisodeOverlay({
   isVisible,
   nextEpisode,

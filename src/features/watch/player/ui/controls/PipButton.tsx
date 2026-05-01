@@ -6,11 +6,25 @@ import { cn } from '@/lib/utils';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 
+/**
+ * Props for the {@link PlayerPipButton} component.
+ */
 interface PlayerPipButtonProps {
+  /** Callback invoked when the user taps the PiP minimize button. */
   onPip: () => void;
+  /** Force compact sizing. When omitted, auto-resolves to compact on mobile portrait. */
   compact?: boolean;
 }
 
+/**
+ * Mobile-only Picture-in-Picture minimize button.
+ *
+ * Renders a downward chevron icon that triggers the PiP transition when tapped.
+ * Returns `null` on desktop — PiP is only available on mobile devices.
+ * Automatically switches to compact sizing when the device is in portrait orientation.
+ *
+ * @param props - See {@link PlayerPipButtonProps}.
+ */
 export function PlayerPipButton({ onPip, compact }: PlayerPipButtonProps) {
   const isMobile = useMobileDetection();
   const isPortrait = useMobileOrientation();

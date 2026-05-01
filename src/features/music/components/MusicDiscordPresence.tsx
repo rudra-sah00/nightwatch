@@ -5,6 +5,22 @@ import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { musicPresenceLock } from '@/lib/music-presence-lock';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
+/**
+ * Headless component that syncs the current music track to Discord Rich Presence
+ * via the Electron desktop bridge.
+ *
+ * When a track is playing:
+ * - Acquires the shared `musicPresenceLock` to prevent other features (e.g. watch party)
+ *   from overwriting the presence.
+ * - Sends track metadata (title, artist, album art, timestamps) to the Electron main
+ *   process via `desktopBridge.updateDiscordPresence`.
+ *
+ * When playback stops or the component unmounts:
+ * - Releases the presence lock and clears the Discord activity.
+ *
+ * Only active in the Electron desktop environment (`checkIsDesktop()`).
+ * Renders `null` — this is a side-effect-only component.
+ */
 export function MusicDiscordPresence() {
   const { currentTrack, isPlaying } = useMusicPlayerContext();
 

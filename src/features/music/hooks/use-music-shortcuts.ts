@@ -4,16 +4,28 @@ import { useEffect } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
 /**
- * Global keyboard shortcuts for music playback.
+ * Registers global keyboard shortcuts for music playback controls.
  *
- * Space — play/pause (only when no input/textarea focused)
- * ArrowLeft — previous track
- * ArrowRight — next track
- * ArrowUp — volume up 10%
- * ArrowDown — volume down 10%
- * M — mute/unmute
- * S — toggle shuffle
- * R — cycle repeat mode
+ * Shortcuts are only active when a track is loaded. All shortcuts are
+ * suppressed when an `<input>`, `<textarea>`, or `contentEditable` element
+ * is focused to avoid interfering with text entry.
+ *
+ * | Key          | Action                        |
+ * |--------------|-------------------------------|
+ * | `Space`      | Toggle play / pause           |
+ * | `ArrowLeft`  | Previous track                |
+ * | `ArrowRight` | Next track                    |
+ * | `ArrowUp`    | Volume up 10 %                |
+ * | `ArrowDown`  | Volume down 10 %              |
+ * | `M`          | Mute / unmute (toggle 0 ↔ 1)  |
+ * | `S`          | Toggle shuffle                |
+ * | `R`          | Cycle repeat mode             |
+ *
+ * @example
+ * ```tsx
+ * // Call once at the top of the music player layout
+ * useMusicShortcuts();
+ * ```
  */
 export function useMusicShortcuts() {
   const {

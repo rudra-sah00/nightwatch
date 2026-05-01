@@ -24,30 +24,66 @@ import {
 } from '../call/call.service';
 import { duckMediaElements } from '../call/call.utils';
 
+/**
+ * Finite state machine for a voice/video call lifecycle.
+ *
+ * - `'idle'` — no call in progress.
+ * - `'outgoing'` — local user initiated a call; waiting for the remote peer to accept.
+ * - `'incoming'` — a remote peer is calling; ringtone is playing.
+ * - `'active'` — call connected via Agora RTC; audio/video tracks are live.
+ */
 export type CallState = 'idle' | 'outgoing' | 'incoming' | 'active';
 
+/**
+ * Minimal representation of a call participant (the remote peer or an invitee).
+ */
 export interface CallPeer {
+  /** Unique user ID. */
   id: string;
+  /** Display name shown in the call overlay. */
   name: string;
+  /** Profile photo URL, or `null` for the default avatar. */
   photo: string | null;
 }
 
+/**
+ * Shape of the call context exposed by {@link CallProvider}.
+ *
+ * Provides the current call state, peer info, media toggles, Agora video refs,
+ * and action callbacks for initiating, accepting, rejecting, and ending calls.
+ */
 interface CallContextType {
+  /** Current call lifecycle state. */
   callState: CallState;
+  /** The primary remote peer (caller or callee). */
   peer: CallPeer | null;
+  /** Additional participants in a group call. */
   participants: CallPeer[];
+  /** Whether the local microphone is muted. */
   isMuted: boolean;
+  /** Whether the local camera is publishing video. */
   isVideoOn: boolean;
+  /** Whether the remote peer is sending video. */
   isRemoteVideoOn: boolean;
+  /** Ref to the DOM element where the remote video track is rendered. */
   remoteVideoRef: React.RefObject<HTMLDivElement | null>;
+  /** Ref to the DOM element where the local video track is rendered. */
   localVideoRef: React.RefObject<HTMLDivElement | null>;
+  /** Elapsed call duration in seconds (resets on each new call). */
   callDuration: number;
+  /** Start an outgoing call to the given peer. */
   initiateCall: (peer: CallPeer) => void;
+  /** Accept an incoming call. */
   acceptCall: () => void;
+  /** Reject an incoming call. */
   rejectCall: () => void;
+  /** End the current active/outgoing call. */
   endCall: () => void;
+  /** Toggle the local microphone mute state. */
   toggleMute: () => void;
+  /** Toggle the local camera on/off (publishes/unpublishes the video track). */
   toggleVideo: () => void;
+  /** Invite an additional friend into the active call. */
   inviteFriend: (peer: CallPeer) => void;
 }
 
@@ -70,8 +106,48 @@ const CallContext = createContext<CallContextType>({
   inviteFriend: () => {},
 });
 
+/**
+ * Convenience hook to consume the {@link CallContextType} from the nearest
+ * {@link CallProvider}.
+ *
+ * @returns The call context with state, peer info, and action callbacks.
+ */
 export const useCall = () => useContext(CallContext);
 
+/**
+ * Global call provider that manages the full voice/video call lifecycle.
+ *
+ * **Agora RTC connection** — on call acceptance, fetches a channel token from
+ * the backend and joins an Agora RTC channel. Publishes a local microphone
+ * track immediately; camera track is toggled on demand via `toggleVideo`.
+ *
+ * **Ringtone** — preloads `incoming-call.mp3` (looped, 50 % volume) and
+ * `outgoing-call.mp3` (looped, 40 % volume). Playback starts/stops
+ * automatically based on `callState`.
+ *
+ * **Media ducking** — when a call is incoming or active, all other `<audio>`
+ * and `<video>` elements on the page are ducked to 20 % volume via
+ * {@link duckMediaElements}. Volume is restored on cleanup. A `dm-call:start`
+ * / `dm-call:end` custom event is dispatched for the music player to react.
+ *
+ * **Native mobile integration** —
+ * - iOS: shows a CallKit incoming-call UI (green pill, lock-screen controls)
+ *   via `@capgo/capacitor-incoming-call-kit`.
+ * - Android: shows a persistent "call in progress" notification via
+ *   `@anuradev/capacitor-phone-call-notification`.
+ * - Both are dismissed when the call ends.
+ *
+ * **Socket events** — listens on:
+ * - `call:incoming` — sets state to `'incoming'` with caller info.
+ * - `call:accepted` — initiator joins the Agora channel.
+ * - `call:rejected` / `call:ended` — cleans up all tracks and state.
+ * - `call:participant_left` — removes a participant from the group list.
+ *
+ * Socket listeners are registered once (stable refs via `useRef`) to avoid
+ * re-registration gaps that could cause missed events.
+ *
+ * @param props.children - Application tree that can access the call context.
+ */
 export function CallProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocket();
   const [callState, setCallState] = useState<CallState>('idle');

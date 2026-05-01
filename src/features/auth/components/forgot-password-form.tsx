@@ -9,6 +9,22 @@ import { Label } from '@/components/ui/label';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
+/**
+ * Forgot-password form with two visual states rendered inside an {@link AuthCard}.
+ *
+ * **Request step** (`step !== 'forgot_success'`) — an identifier field
+ * (email or username), a Turnstile captcha, a submit button ("Dispatch"), and
+ * a "Back to Login" button that returns to the initial login step.
+ *
+ * **Success step** (`step === 'forgot_success'`) — a confirmation message with
+ * a checkmark icon instructing the user to check their email, and a "Return to
+ * Entrance" button.
+ *
+ * Form state and handlers are provided by the {@link useLoginForm} hook.
+ *
+ * @param props - Return value of {@link useLoginForm}.
+ * @returns The forgot-password form element.
+ */
 export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
   const t = useTranslations('auth');
   const {

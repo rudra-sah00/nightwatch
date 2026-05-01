@@ -18,12 +18,26 @@ const ICON_SIZES = {
   lg: 'w-5 h-5 md:w-7 md:h-7',
 } as const;
 
+/**
+ * Props for the {@link PlayPause} button.
+ */
 interface PlayPauseProps {
+  /** Whether the video is currently playing. */
   isPlaying: boolean;
+  /** Callback to toggle play/pause state. */
   onToggle: () => void;
+  /** Button size variant. Affects both the outer button and inner icon dimensions. */
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * Play/pause toggle button used in both desktop and mobile control rows.
+ *
+ * Renders a filled Play or Pause icon inside a neo-brutalist styled button.
+ * On mobile the border is removed; on desktop a 3px border is applied.
+ *
+ * @param props - See {@link PlayPauseProps}.
+ */
 export function PlayPause({
   isPlaying,
   onToggle,
@@ -57,10 +71,15 @@ export function PlayPause({
   );
 }
 
-// Netflix-style pause overlay with movie info in CENTER
+/**
+ * Props for the {@link CenterPlayButton} Netflix-style pause overlay.
+ */
 interface CenterPlayButtonProps {
+  /** Whether the video is currently playing. The overlay is only visible when paused. */
   isPlaying: boolean;
+  /** Callback to resume playback. */
   onToggle: () => void;
+  /** Video metadata displayed in the overlay (title, type badge, episode info, description). */
   metadata?: {
     title: string;
     type: 'movie' | 'series' | 'livestream';
@@ -70,9 +89,22 @@ interface CenterPlayButtonProps {
     year?: string;
     posterUrl?: string;
   };
+  /** When `true`, shows a "Host controls playback" lock badge instead of the resume prompt (watch-party guest). */
   disabled?: boolean;
 }
 
+/**
+ * Netflix-style full-screen pause overlay displayed in the center of the player.
+ *
+ * When the video is paused, this overlay fades in with a dark gradient background
+ * and shows the video's metadata (title, type badge, season/episode, year, description)
+ * along with a "Tap to resume" or "Host controls playback" indicator.
+ *
+ * **Mobile:** Returns `null` — mobile uses the dedicated center controls instead.
+ * **Desktop:** Covers the entire player area as a clickable button to resume playback.
+ *
+ * @param props - See {@link CenterPlayButtonProps}.
+ */
 export function CenterPlayButton({
   isPlaying,
   onToggle,
@@ -246,13 +278,26 @@ export function CenterPlayButton({
   );
 }
 
-// Ripple effect on tap (mobile)
+/**
+ * Props for the {@link TapIndicator} seek ripple overlay.
+ */
 interface TapIndicatorProps {
+  /** Which side of the player the ripple appears on. */
   direction: 'left' | 'right';
+  /** Number of seconds being skipped (displayed inside the ripple circle). */
   seconds: number;
+  /** Controls visibility — when `false`, the component returns `null`. */
   isVisible: boolean;
 }
 
+/**
+ * Animated ripple indicator shown on mobile when the user double-taps to seek.
+ *
+ * Appears at 25% from the left or right edge of the player, displaying the
+ * number of seconds skipped inside a translucent circle with a zoom-in animation.
+ *
+ * @param props - See {@link TapIndicatorProps}.
+ */
 export function TapIndicator({
   direction,
   seconds,

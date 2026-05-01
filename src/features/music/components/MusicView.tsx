@@ -17,6 +17,20 @@ import { MusicSearchSpotlight } from './MusicSearchSpotlight';
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
 
+/**
+ * Top-level orchestrator for the `/music` home page.
+ *
+ * Coordinates data fetching, dialog state, and child component composition:
+ * - Loads the music home feed (charts, featured playlists, artists, releases, radio),
+ *   trending songs, and browse genres on mount via parallel API calls.
+ * - Persists and restores the user's preferred music languages (cookie-backed).
+ * - Supports deep-link auto-play via the `?play=<songId>` search parameter
+ *   (used by the Ask AI feature to navigate users directly to a song).
+ * - Manages open/close state for {@link MusicSearchSpotlight}, {@link CreatePlaylistDialog},
+ *   and {@link LanguagePickerDialog}.
+ * - Renders {@link MusicHeader} at the top, {@link MusicSkeleton} while loading,
+ *   and {@link MusicSections} once data is ready.
+ */
 export function MusicView() {
   const searchParams = useSearchParams();
   const player = useMusicPlayerContext();

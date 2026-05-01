@@ -1,13 +1,37 @@
 import type React from 'react';
 
+/**
+ * Props for the {@link AuthCard} layout wrapper.
+ */
 interface AuthCardProps {
+  /** Heading text rendered in the title row (34–38 px, uppercase, bold). */
   title: string;
+  /**
+   * Optional action element rendered on the right side of the title row.
+   * Typically a "Back" button in the OTP verification step.
+   */
   action?: React.ReactNode;
+  /** Form content rendered in the flexible body area. */
   children: React.ReactNode;
+  /** Explicit CSS height (overrides className-based height). */
   height?: string;
+  /** Additional CSS classes merged onto the root container. */
   className?: string;
 }
 
+/**
+ * Shared layout card for all authentication forms (login, signup, forgot password).
+ *
+ * Renders a fixed-height column with four zones:
+ * 1. **Brand row** (32 px) — "NIGHTWATCH" wordmark.
+ * 2. **Title row** (52 px) — large uppercase heading with an optional right-aligned
+ *    action slot (e.g. a back button).
+ * 3. **Gap** (8 px) — visual breathing room.
+ * 4. **Body** (flex-1) — scrollable area for the form content passed as `children`.
+ *
+ * @param props - {@link AuthCardProps}
+ * @returns The auth card wrapper element.
+ */
 export function AuthCard({
   title,
   action,

@@ -18,29 +18,59 @@ import {
   type RepeatMode,
 } from '../engine/audio-engine';
 
+/**
+ * Shape of the value exposed by {@link MusicPlayerProvider} via React Context.
+ *
+ * This is the **React-facing API** for music playback. It mirrors the
+ * {@link AudioEngineState} fields and adds UI-specific state (`expanded`)
+ * plus stable callback wrappers around the underlying {@link AudioEngine} methods.
+ */
 interface MusicPlayerContextValue {
+  /** Currently loaded track, or `null` when idle. */
   currentTrack: MusicTrack | null;
+  /** Ordered playback queue. */
   queue: MusicTrack[];
+  /** Whether audio is actively playing. */
   isPlaying: boolean;
+  /** Playback progress as a percentage (0–100). */
   progress: number;
+  /** Duration of the current track in seconds. */
   duration: number;
+  /** Whether shuffle mode is active. */
   shuffle: boolean;
+  /** Current repeat mode (`'off'` | `'all'` | `'one'`). */
   repeat: RepeatMode;
+  /** Whether the full-screen / expanded player UI is open. */
   expanded: boolean;
+  /** Volume level from 0 (muted) to 1 (max). */
   volume: number;
+  /** Start playing a track, optionally replacing the queue. */
   play: (track: MusicTrack, queue?: MusicTrack[]) => void;
+  /** Toggle play / pause. */
   togglePlay: () => void;
+  /** Skip to the next track. */
   next: () => void;
+  /** Go to the previous track (or restart if >3 s elapsed). */
   prev: () => void;
+  /** Seek to a percentage position (0–100). */
   seek: (percent: number) => void;
+  /** Toggle shuffle on/off. */
   toggleShuffle: () => void;
+  /** Cycle repeat mode: off → all → one → off. */
   cycleRepeat: () => void;
+  /** Set volume (0–1). */
   setVolume: (v: number) => void;
+  /** Stop playback and collapse the player. */
   stop: () => void;
+  /** Open or close the expanded player UI. */
   setExpanded: (v: boolean) => void;
+  /** Append a track to the end of the queue. */
   addToQueue: (track: MusicTrack) => void;
+  /** Insert a track right after the current one. */
   playNext: (track: MusicTrack) => void;
+  /** Remove a track from the queue by index. */
   removeFromQueue: (index: number) => void;
+  /** Show the native AirPlay / audio-output picker (Safari, Chrome, or fallback toast). */
   showAirPlay: () => void;
 }
 
@@ -291,6 +321,19 @@ export function MusicPlayerProvider({
   );
 }
 
+/**
+ * Consume the music player context.
+ *
+ * Must be called within a {@link MusicPlayerProvider}. Returns the full
+ * {@link MusicPlayerContextValue} including playback state and control callbacks.
+ *
+ * @throws {Error} If called outside of a `MusicPlayerProvider`.
+ *
+ * @example
+ * ```tsx
+ * const { currentTrack, togglePlay, isPlaying } = useMusicPlayerContext();
+ * ```
+ */
 export function useMusicPlayerContext() {
   const ctx = useContext(MusicPlayerContext);
   if (!ctx) {

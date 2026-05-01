@@ -17,13 +17,43 @@ import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 
+/**
+ * Props for the {@link WatchLivePlayer} component.
+ */
 interface WatchLivePlayerProps {
+  /** HLS live manifest URL, or `null` while the stream is not yet available. */
   streamUrl: string | null;
+  /** Metadata (title, poster) used by overlays and Discord Rich Presence. */
   metadata: VideoMetadata;
+  /** Custom header content rendered above the player on mobile. */
   mobileHeaderContent?: React.ReactNode;
+  /**
+   * Mobile layout mode.
+   * - `'inline'`: player sits in the page flow with scroll-based PiP.
+   * - `'immersive'` (default): player fills the viewport.
+   */
   mobileLayout?: 'immersive' | 'inline';
 }
 
+/**
+ * Live-stream player component with clip recording and the same dual-layout
+ * PiP system as {@link WatchVODPlayer}.
+ *
+ * **Inline mobile PiP** — uses an `IntersectionObserver` on a sentinel div;
+ * when the sentinel scrolls out of view the player transitions to a fixed
+ * mini-player with swipe-to-dismiss (same 80 px threshold and slide-out
+ * animation as the VOD player).
+ *
+ * **Clip recording** — the header renders a {@link RecordButton} powered by
+ * {@link useClipRecorder}. Starting/stopping a recording shows toast
+ * notifications; clips are processed server-side via FFmpeg.
+ *
+ * Also updates Discord Rich Presence and broadcasts `watch:set_activity`
+ * (type `'live'`) over the socket for friend activity feeds.
+ *
+ * @param props - {@link WatchLivePlayerProps}
+ * @returns The memoised live player element.
+ */
 export const WatchLivePlayer = memo(function WatchLivePlayer(
   props: WatchLivePlayerProps,
 ) {
@@ -209,6 +239,20 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
   );
 });
 
+/**
+ * Internal state renderer for the live player.
+ *
+ * Renders loading/buffering/error overlays, the center play button, the clip
+ * {@link RecordButton} in the header, and the control bar with a live badge
+ * and DVR seek bar. All overlays are suppressed in PiP mode.
+ *
+ * Uses {@link LiveBufferingOverlay} which debounces the buffering indicator
+ * by 500 ms to avoid flicker on brief stalls.
+ *
+ * @param props.streamUrl - Current HLS URL (used by the clip recorder).
+ * @param props.isPip - Whether the player is in inline mobile PiP mode.
+ * @param props.onPip - Callback when the user taps the PiP exit button.
+ */
 function LivePlayerState({
   streamUrl,
   isPip,
@@ -326,6 +370,7 @@ function LivePlayerState({
   );
 }
 
+/** Mobile-only skip-back button that seeks the live DVR buffer 10 seconds backwards. */
 function MobileSkipBack() {
   const { playerHandlers } = usePlayerContext();
   return (
@@ -339,6 +384,7 @@ function MobileSkipBack() {
   );
 }
 
+/** Mobile-only skip-forward button that seeks the live DVR buffer 10 seconds forwards. */
 function MobileSkipForward() {
   const { playerHandlers } = usePlayerContext();
   return (
@@ -352,6 +398,13 @@ function MobileSkipForward() {
   );
 }
 
+/**
+ * Registers the current live video element with the global {@link PipProvider}
+ * so cross-route PiP can activate when the user navigates away.
+ *
+ * @param props.streamUrl - Current HLS live manifest URL.
+ * @param props.metadata - Video metadata (title used in the PiP overlay).
+ */
 function PipRegistrar({
   streamUrl,
   metadata,
@@ -375,6 +428,14 @@ function PipRegistrar({
   return null;
 }
 
+/**
+ * Debounced buffering overlay for live streams.
+ *
+ * Delays showing the buffering spinner by 500 ms to prevent flicker during
+ * brief network stalls that are common with live HLS segments.
+ *
+ * @param props.isVisible - Raw buffering state from the player.
+ */
 function LiveBufferingOverlay({ isVisible }: { isVisible: boolean }) {
   const [debouncedVisible, setDebouncedVisible] = useState(false);
 

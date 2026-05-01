@@ -2,7 +2,21 @@ import { useCallback, useRef } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 
-/** YouTube-style thin seekbar for mobile — progress-only in portrait, interactive in landscape. */
+/**
+ * YouTube-style thin seekbar for mobile with dual behavior based on device orientation.
+ *
+ * **Portrait mode (non-interactive):** Renders a 3px progress-only bar at the bottom
+ * of the player. Touch events are disabled (`pointer-events-none`) so the user cannot
+ * seek — this matches YouTube's mobile portrait UX where the seekbar is purely visual.
+ *
+ * **Landscape mode (interactive):** Renders a taller touch target (40px) with the same
+ * 3px visible bar at the bottom. Supports touch-drag seeking, tap-to-seek, and
+ * keyboard arrow-key seeking (±10s). The bar shows both buffered (white/40%) and
+ * played (red) progress.
+ *
+ * Read-only players (e.g. watch-party guests) disable all seek interactions regardless
+ * of orientation.
+ */
 export function PlayerMobileSeekBar() {
   const { state, playerHandlers, readOnly } = usePlayerContext();
   const isPortrait = useMobileOrientation();

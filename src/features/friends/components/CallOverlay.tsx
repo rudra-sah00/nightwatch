@@ -17,6 +17,29 @@ import { InviteSpotlight } from '@/features/friends/call/InviteSpotlight';
 import { PeerAvatar } from '@/features/friends/call/PeerAvatar';
 import { useCall } from '@/features/friends/hooks/use-call';
 
+/**
+ * Floating call overlay that renders in three visual states:
+ *
+ * 1. **Incoming** — compact card (top-right) showing the caller's avatar/name
+ *    with accept (green) and reject (red) buttons.
+ * 2. **Outgoing** — same compact card with mute toggle and end-call button;
+ *    displays "Calling…" status text.
+ * 3. **Active** — compact card showing call duration, mute/video/invite/end
+ *    controls. When remote video is active the card expands to 320×224 px and
+ *    auto-hides controls after 3 s (re-shown on hover).
+ *
+ * **Expanded mode** — tapping the compact card (not a button) opens a
+ * full-screen 80 vw × 80 vh popup with a participant grid, local/remote video
+ * swap, and an {@link InviteSpotlight} dialog for adding friends to the call.
+ *
+ * **Draggable** — the compact card supports pointer-based dragging (clamped to
+ * viewport bounds, respecting `--electron-titlebar-height`). A 4 px dead-zone
+ * distinguishes drags from taps.
+ *
+ * Entry/exit uses CSS `animate-in` / opacity+scale transitions (300 ms).
+ *
+ * @returns The call overlay element, or `null` when no call is active.
+ */
 export function CallOverlay() {
   const {
     callState,

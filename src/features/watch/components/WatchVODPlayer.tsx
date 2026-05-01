@@ -15,24 +15,48 @@ import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 import { NextEpisodeOverlay } from '../player/ui/overlays/NextEpisodeOverlay';
 
+/**
+ * Props for the {@link WatchVODPlayer} component.
+ *
+ * Configures the HLS stream source, video metadata, subtitle/audio tracks,
+ * quality variants, and mobile layout behaviour (inline vs immersive).
+ */
 interface WatchPlayerProps {
+  /** HLS manifest URL for the VOD stream, or `null` while loading. */
   streamUrl: string | null;
+  /** Title, poster, season/episode info used by overlays and Discord Rich Presence. */
   metadata: VideoMetadata;
+  /** Single-file caption/subtitle URL (legacy path). */
   captionUrl?: string | null;
+  /** Multi-track subtitle list rendered in the player's subtitle selector. */
   subtitleTracks?: {
     id: string;
     label: string;
     language: string;
     src: string;
   }[];
+  /** Available quality variants for manual bitrate switching. */
   qualities?: { quality: string; url: string }[];
+  /** WebVTT sprite sheet URL for seek-bar thumbnail previews. */
   spriteVtt?: string;
+  /** Content description shown in the pause overlay. */
   description?: string;
+  /** Callback to expose the underlying `<video>` element to the parent. */
   onVideoRef?: (ref: HTMLVideoElement | null) => void;
+  /** Custom header content rendered above the player on mobile inline layout. */
   mobileHeaderContent?: React.ReactNode;
+  /**
+   * Mobile layout mode.
+   * - `'inline'` (default): player sits in the page flow and enters a floating
+   *   PiP mini-player when scrolled out of view via IntersectionObserver.
+   * - `'immersive'`: player fills the viewport (no scroll-based PiP).
+   */
   mobileLayout?: 'immersive' | 'inline';
+  /** Whether the current user is authenticated (gates certain controls). */
   isAuthenticated?: boolean;
+  /** Custom navigation handler; defaults to `router.replace`. */
   onNavigate?: (url: string) => void;
+  /** Fired when the stream token expires so the parent can refresh it. */
   onStreamExpired?: () => void;
   /** Server 2 language dubs: seeded into the player so AudioSelector shows them */
   initialAudioTracks?: {
@@ -49,6 +73,30 @@ interface WatchPlayerProps {
   hideBackButton?: boolean;
 }
 
+/**
+ * VOD (Video-On-Demand) player component with two layout strategies:
+ *
+ * **Desktop / immersive mobile** — the player is fixed full-viewport.
+ *
+ * **Inline mobile** — the player sits in the normal document flow inside a
+ * 16:9 sentinel `<div>`. An `IntersectionObserver` watches the sentinel; when
+ * it scrolls out of view (< 50 % visible) the player transitions to a fixed
+ * mini-player (PiP) in the bottom-right corner with a smooth
+ * `cubic-bezier(0.4, 0, 0.2, 1)` CSS transition. The mini-player supports:
+ *
+ * - **Tap to dismiss** — scrolls back to the top and restores inline mode.
+ * - **Swipe-to-dismiss** — horizontal touch gestures beyond 80 px trigger a
+ *   slide-out animation (opacity fade + translateX) then navigate back.
+ *
+ * The component also:
+ * - Updates Discord Rich Presence on Electron via `desktopBridge`.
+ * - Broadcasts a `watch:set_activity` socket event so friends can see what
+ *   the user is watching, cleared on unmount.
+ * - Registers with the global {@link PipProvider} so cross-route PiP works.
+ *
+ * @param props - {@link WatchPlayerProps}
+ * @returns The memoised VOD player element.
+ */
 export const WatchVODPlayer = memo(function WatchVODPlayer(
   props: WatchPlayerProps,
 ) {
@@ -243,6 +291,19 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   );
 });
 
+/**
+ * Internal state renderer for the VOD player.
+ *
+ * Consumes {@link useVODPlayerState} and renders the loading poster overlay,
+ * buffering spinner, error overlay, center play button, control bar (with
+ * desktop/mobile variants), episode panel, and next-episode auto-play overlay.
+ * All overlays are hidden when the player is in PiP mode to keep the
+ * mini-player uncluttered.
+ *
+ * @param props.hideBackButton - Hides the header back arrow (e.g. on public clip pages).
+ * @param props.isPip - Whether the player is currently in the inline mobile PiP state.
+ * @param props.onPip - Callback invoked when the user taps the PiP exit button.
+ */
 function VODPlayerState({
   hideBackButton,
   isPip,
@@ -370,6 +431,7 @@ function VODPlayerState({
   );
 }
 
+/** Mobile-only skip-back button that seeks the video 10 seconds backwards. */
 function MobileSkipBack() {
   const { playerHandlers } = usePlayerContext();
   return (
@@ -383,6 +445,7 @@ function MobileSkipBack() {
   );
 }
 
+/** Mobile-only skip-forward button that seeks the video 10 seconds forwards. */
 function MobileSkipForward() {
   const { playerHandlers } = usePlayerContext();
   return (

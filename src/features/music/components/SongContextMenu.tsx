@@ -21,6 +21,7 @@ import {
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
+/** Minimal track shape required by the context menu (avoids coupling to full MusicTrack). */
 interface Track {
   id: string;
   title: string;
@@ -30,11 +31,30 @@ interface Track {
   duration: number;
 }
 
+/** Payload emitted through the event bus when a context menu is requested. */
 type MenuEvent = { x: number; y: number; song: Track; onRemove?: () => void };
+/** Subscriber callback type for the event bus. */
 type Listener = (e: MenuEvent) => void;
 
+/**
+ * Simple in-memory pub/sub event bus (a `Set` of listeners).
+ *
+ * Producers call {@link showSongMenu} which broadcasts a `MenuEvent` to all
+ * registered listeners. The singleton {@link SongContextMenu} component
+ * subscribes on mount and renders the menu at the event coordinates.
+ */
 const bus = new Set<Listener>();
 
+/**
+ * Fires a context-menu event for a song at the pointer position.
+ *
+ * Call this from any component's `onContextMenu` handler to open the
+ * global {@link SongContextMenu} without prop-drilling.
+ *
+ * @param e - The React mouse event (used for coordinates and `preventDefault`).
+ * @param song - The track to show actions for.
+ * @param onRemove - Optional callback for a "Remove from Playlist" action.
+ */
 export function showSongMenu(
   e: React.MouseEvent,
   song: Track,
@@ -44,6 +64,22 @@ export function showSongMenu(
   for (const l of bus) l({ x: e.clientX, y: e.clientY, song, onRemove });
 }
 
+/**
+ * Global right-click context menu for song actions.
+ *
+ * Subscribes to the {@link bus} event bus on mount and renders a positioned
+ * `<menu>` element at the pointer coordinates when a {@link showSongMenu} event
+ * is received. Available actions (shown conditionally):
+ *
+ * - **Remove from Playlist** — only if `onRemove` was provided by the caller.
+ * - **Play Next** / **Add to Queue** — only if the song is not the currently playing track.
+ * - **Start Song Radio** — creates an auto-generated radio queue from the song.
+ * - **Add to Playlist** — expands an inline sub-menu listing the user's playlists
+ *   (fetched on demand) with an option to create a new playlist inline.
+ *
+ * The menu auto-closes on outside click or scroll. This is a singleton component —
+ * mount it once near the app root.
+ */
 export function SongContextMenu() {
   const t = useTranslations('music');
   const { currentTrack, addToQueue, playNext, play } = useMusicPlayerContext();

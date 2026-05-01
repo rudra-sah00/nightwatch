@@ -7,6 +7,18 @@ import { useEffect, useState } from 'react';
 import { getUserPlaylists, type UserPlaylist } from '@/features/music/api';
 import { ScrollRow, Section } from './MusicPrimitives';
 
+/**
+ * Horizontal scroll section displaying the authenticated user's custom playlists.
+ *
+ * Fetches playlists from `getUserPlaylists` on mount and renders them as
+ * {@link Card}-style tiles inside a {@link Section} / {@link ScrollRow} layout.
+ * Each tile links to the playlist detail page (`/music/playlist-user/:id`).
+ * Playlists without a cover image show a fallback music icon.
+ *
+ * Renders `null` when the user has no playlists, keeping the home page clean.
+ * The parent ({@link MusicSections}) uses a React `key` prop to force-remount
+ * this component after a new playlist is created.
+ */
 export function UserPlaylists() {
   const t = useTranslations('music');
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);

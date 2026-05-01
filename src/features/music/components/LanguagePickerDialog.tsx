@@ -3,6 +3,10 @@
 import { toast } from 'sonner';
 import { setMusicLanguages } from '@/features/music/api';
 
+/**
+ * The 17 Indian languages supported by the JioSaavn music API.
+ * Used as the option set in {@link LanguagePickerDialog}.
+ */
 const LANGUAGES = [
   'hindi',
   'english',
@@ -23,13 +27,28 @@ const LANGUAGES = [
   'sanskrit',
 ] as const;
 
+/**
+ * Props for the {@link LanguagePickerDialog} component.
+ */
 interface LanguagePickerDialogProps {
+  /** The currently selected language set (at least one must remain selected). */
   selectedLangs: Set<string>;
+  /** Callback to update the selected languages in the parent's state. */
   onChangeLangs: (langs: Set<string>) => void;
+  /** Closes the dialog overlay. */
   onClose: () => void;
+  /** Called after the "Apply" button persists the selection — triggers a data reload. */
   onApply: () => void;
 }
 
+/**
+ * Modal dialog for selecting preferred music languages.
+ *
+ * Displays a 2-column grid of 17 Indian language toggle buttons. At least one
+ * language must remain selected (deselecting the last one is a no-op). Clicking
+ * "Apply" persists the selection to the server via `setMusicLanguages`, closes
+ * the dialog, and triggers a home-page data reload through `onApply`.
+ */
 export function LanguagePickerDialog({
   selectedLangs,
   onChangeLangs,

@@ -7,19 +7,53 @@ import { cn } from '@/lib/utils';
 import type { Quality } from '../../context/types';
 import { useSettingsMenu } from './hooks/use-settings-menu';
 
+/**
+ * Props for the {@link SettingsMenu} component.
+ */
 interface SettingsMenuProps {
+  /** Available quality levels (e.g. 1080p, 720p). Empty array hides the quality sub-menu. */
   qualities: Quality[];
+  /** Currently active quality label (or `"auto"`). */
   currentQuality: string;
+  /** Current playback speed multiplier (1 = normal). */
   playbackRate: number;
+  /** Callback when the user selects a quality level. */
   onQualityChange: (quality: string) => void;
+  /** Callback when the user selects a playback speed. */
   onPlaybackRateChange: (rate: number) => void;
+  /** Disables the speed sub-menu (e.g. for watch-party guests). Shows a lock icon. */
   disabled?: boolean;
+  /** Notifies the parent when the menu is opened/closed so controls auto-hide can pause. */
   onInteraction?: (isActive: boolean) => void;
+  /**
+   * When `true`, renders the open menu as a **bottom sheet portal** (`createPortal` to `document.body`)
+   * with a backdrop overlay — used on mobile. When `false`, renders an absolutely-positioned
+   * dropdown anchored above the settings button — used on desktop.
+   */
   compact?: boolean;
 }
 
+/** Available playback speed options shown in the speed sub-menu. */
 const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
+/**
+ * Player settings menu with quality and playback speed sub-menus.
+ *
+ * Renders a gear icon toggle button. When opened:
+ * - **Mobile (`compact=true`):** A full-width bottom sheet is portalled to `document.body`
+ *   with a dark backdrop. Animates in from the bottom.
+ * - **Desktop (`compact=false`):** An absolutely-positioned dropdown appears above the button
+ *   with a max height of 70vh and scroll overflow.
+ *
+ * The menu has three screens navigated via internal state:
+ * 1. **Main menu** — lists Quality and Speed rows with current values.
+ * 2. **Quality sub-menu** — lists all available quality levels plus "Auto", with a checkmark
+ *    on the active selection. Selecting a quality closes the menu.
+ * 3. **Speed sub-menu** — lists predefined speeds (0.25×–2×) with a checkmark on the active
+ *    selection. Disabled when `disabled` is `true` (shows a lock icon).
+ *
+ * @param props - See {@link SettingsMenuProps}.
+ */
 export function SettingsMenu({
   qualities,
   currentQuality,

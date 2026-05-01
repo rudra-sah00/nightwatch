@@ -3,6 +3,14 @@
 import ReactSkeleton from 'react-loading-skeleton';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 
+/**
+ * Loading skeleton placeholder for the `/music` home page.
+ *
+ * Renders six placeholder sections, each containing a title bone and five
+ * card bones (square image + two text lines), matching the layout of
+ * {@link MusicSections}. Uses `react-loading-skeleton` wrapped in the
+ * app's shared {@link AppSkeletonTheme} for consistent theming.
+ */
 export function MusicSkeleton() {
   return (
     <AppSkeletonTheme>

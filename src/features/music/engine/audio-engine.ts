@@ -49,15 +49,32 @@ export class AudioEngine {
     };
   }
 
+  /**
+   * Register a listener that is called on every state change.
+   *
+   * @param fn - Callback receiving the latest {@link AudioEngineState}.
+   * @returns An unsubscribe function — call it to remove the listener.
+   */
   subscribe(fn: Listener) {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
   }
 
+  /**
+   * Returns the current immutable state snapshot.
+   *
+   * @returns The latest {@link AudioEngineState}.
+   */
   getState() {
     return this.state;
   }
 
+  /**
+   * Returns the underlying `HTMLAudioElement` for direct access
+   * (e.g. AirPlay picker, Web Audio API integration).
+   *
+   * @returns The internal audio element.
+   */
   getAudioElement() {
     return this.audio;
   }
@@ -326,7 +343,13 @@ export class AudioEngine {
     this.update({ queue: newQueue });
   }
 
-  /** Remove a track from the queue by index */
+  /**
+   * Remove a track from the queue by its index.
+   * Cannot remove the currently playing track. Adjusts `queueIndex` if the
+   * removed track was before the current one.
+   *
+   * @param index - Zero-based index of the track to remove.
+   */
   removeFromQueue(index: number) {
     const { queue, queueIndex } = this.state;
     if (index < 0 || index >= queue.length || index === queueIndex) return;

@@ -5,11 +5,24 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { createUserPlaylist } from '@/features/music/api';
 
+/**
+ * Props for the {@link CreatePlaylistDialog} component.
+ */
 interface CreatePlaylistDialogProps {
+  /** Closes the dialog and resets the input. */
   onClose: () => void;
+  /** Called after a playlist is successfully created (triggers playlist list refresh). */
   onCreated: () => void;
 }
 
+/**
+ * Modal dialog for creating a new user playlist.
+ *
+ * Renders a centered overlay with a single text input. The user types a playlist
+ * name and presses Enter to create it via the `createUserPlaylist` API. On success
+ * a toast notification is shown and `onCreated` is invoked so the parent can
+ * refresh the playlist list. Pressing Escape or clicking the backdrop closes the dialog.
+ */
 export function CreatePlaylistDialog({
   onClose,
   onCreated,

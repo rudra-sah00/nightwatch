@@ -3,11 +3,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * On Capacitor mobile: reads/writes system media volume and listens
- * for hardware volume-button presses.
+ * Hook that reads and writes the device's system media volume on Capacitor
+ * native platforms (iOS / Android) and listens for hardware volume-button presses.
  *
- * Returns `null` when not running inside a native shell (web / Electron)
- * so the caller can fall back to in-app HTMLAudioElement volume.
+ * **Platform behavior:**
+ * - **iOS** — Volume is read-only; `setSystemVolume` updates local state but
+ *   the OS ignores programmatic `setVolumeLevel` calls.
+ * - **Android** — Full read/write support. The plugin maps the 0–1 float to
+ *   a 0–10 integer scale internally.
+ * - **Web / Electron** — Returns `null` so the caller can fall back to the
+ *   in-app `HTMLAudioElement.volume` slider.
+ *
+ * @returns `null` on non-native platforms, or an object with:
+ *   - `volume` — current system volume (0–1), or `null` before the first read.
+ *   - `setSystemVolume` — async setter to update the system volume.
+ *
+ * @example
+ * ```tsx
+ * const sys = useSystemVolume();
+ * // sys is null on web — use engine volume instead
+ * const vol = sys?.volume ?? engineVolume;
+ * ```
  */
 export function useSystemVolume() {
   const [volume, setVolume] = useState<number | null>(null);

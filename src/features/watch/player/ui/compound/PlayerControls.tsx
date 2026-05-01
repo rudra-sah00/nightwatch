@@ -3,6 +3,16 @@ import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { EpisodePanelContext } from './PlayerEpisodePanel';
 
+/**
+ * Wrapper for the player's control bar overlay.
+ *
+ * Positioned absolutely over the video, it fades in/out based on
+ * `state.showControls` and hides entirely when the episode panel is open.
+ * On mobile the children are laid out with `justify-between` (top-to-bottom),
+ * while on desktop they stack at the bottom with `justify-end`.
+ *
+ * @param props.children - Control rows, seekbar, and mobile bars to render inside the overlay.
+ */
 export function PlayerControls({ children }: { children: React.ReactNode }) {
   const { state } = usePlayerContext();
   const episodeCtx = use(EpisodePanelContext);
@@ -26,6 +36,14 @@ export function PlayerControls({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Desktop-only control row containing play/pause, volume, seekbar, settings, and fullscreen buttons.
+ *
+ * Hidden on mobile (`hidden md:block`). Applies safe-area padding at the bottom
+ * for notched devices and scales spacing across breakpoints.
+ *
+ * @param props.children - Individual control buttons laid out in a horizontal flex row.
+ */
 export function PlayerControlRow({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative hidden md:block px-2 py-3 min-[380px]:p-3 md:p-6 lg:p-8 2xl:p-10 space-y-1 min-[380px]:space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[380px]:pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -38,7 +56,13 @@ export function PlayerControlRow({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** YouTube-style mobile top bar: PiP arrow top-left, settings top-right */
+/**
+ * YouTube-style mobile top bar: PiP minimize button top-left, settings gear top-right.
+ *
+ * Only visible on mobile (`md:hidden`). Receives pointer events so buttons remain tappable.
+ *
+ * @param props.children - Typically {@link PlayerPipButton} and {@link SettingsMenu}.
+ */
 export function PlayerMobileTopBar({
   children,
 }: {
@@ -51,8 +75,13 @@ export function PlayerMobileTopBar({
   );
 }
 
-/** YouTube-style mobile center: prev / play / next centered in player.
- *  Hidden during loading/buffering so only the spinner is visible. */
+/**
+ * YouTube-style mobile center controls: previous / play-pause / next buttons centered in the player.
+ *
+ * Automatically hidden during loading or buffering states so only the spinner overlay is visible.
+ *
+ * @param props.children - Typically skip-back, {@link PlayPause}, and skip-forward buttons.
+ */
 export function PlayerMobileCenterControls({
   children,
 }: {
@@ -67,11 +96,22 @@ export function PlayerMobileCenterControls({
   );
 }
 
+/**
+ * Flexible spacer element used inside control rows to push siblings apart.
+ *
+ * Renders a `flex-1` div with a minimum width to guarantee visual separation.
+ */
 export function PlayerSpacer() {
   return <div className="flex-1 min-w-4" />;
 }
 
-/** Fullscreen button pinned to bottom-right on mobile (above seekbar) */
+/**
+ * Absolutely-positioned container pinned to the bottom-right corner on mobile.
+ *
+ * Typically holds the fullscreen toggle button, placed just above the mobile seekbar.
+ *
+ * @param props.children - Usually {@link PlayerFullscreen}.
+ */
 export function PlayerMobileBottomRight({
   children,
 }: {

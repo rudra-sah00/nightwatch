@@ -17,30 +17,71 @@ import type { RepeatMode } from '../engine/audio-engine';
 import { formatTime } from '../utils';
 import { FullPlayerLyrics } from './FullPlayerLyrics';
 
+/**
+ * Props for the {@link DesktopFullPlayer} component.
+ *
+ * All playback state and callbacks are passed down from the {@link FullPlayer}
+ * orchestrator so this component remains a pure presentational layer.
+ */
 interface DesktopFullPlayerProps {
+  /** The currently playing track metadata. */
   currentTrack: MusicTrack;
+  /** Whether audio is currently playing. */
   isPlaying: boolean;
+  /** Playback progress as a percentage (0–100). */
   progress: number;
+  /** Total track duration in seconds. */
   duration: number;
+  /** Whether shuffle mode is active. */
   shuffle: boolean;
+  /** Current repeat mode (`'off'`, `'all'`, or `'one'`). */
   repeat: RepeatMode;
+  /** Application-level volume (0–1). */
   volume: number;
+  /** Synced lyric lines, or `null` if unavailable / still loading. */
   lyrics: SyncedLyricLine[] | null;
+  /** Index of the lyric line matching the current playback position (-1 if none). */
   currentLineIndex: number;
+  /** List of recommended tracks based on the current song. */
   recommendations: MusicTrack[];
+  /** Whether the close-out animation is in progress. */
   closing: boolean;
+  /** Ref attached to the lyrics scroll container for programmatic scrolling. */
   lyricsRef: React.RefObject<HTMLDivElement | null>;
+  /** Triggers the close animation and collapses the full player. */
   onClose: () => void;
+  /** Toggles play / pause. */
   onTogglePlay: () => void;
+  /** Skips to the next track. */
   onNext: () => void;
+  /** Skips to the previous track. */
   onPrev: () => void;
+  /** Seeks to a position expressed as a percentage (0–100). */
   onSeek: (percent: number) => void;
+  /** Toggles shuffle mode on/off. */
   onToggleShuffle: () => void;
+  /** Cycles through repeat modes: off → all → one → off. */
   onCycleRepeat: () => void;
+  /** Sets the application-level volume (0–1). */
   onSetVolume: (v: number) => void;
+  /** Plays a specific track, optionally replacing the queue. */
   onPlay: (track: MusicTrack, queue?: MusicTrack[]) => void;
 }
 
+/**
+ * Full-screen music player for desktop / wide viewports.
+ *
+ * Renders a slide-up overlay with a two-column layout:
+ * - **Left column**: Spinning vinyl-disc album art (morphs between rounded-square when
+ *   paused and a circular spinning disc at 25 s/revolution when playing), track metadata,
+ *   seek bar, playback controls (shuffle, prev, play/pause, next, repeat), and a volume slider.
+ * - **Right column** (visible on `md+` breakpoints): Either a synced lyrics panel
+ *   (via {@link FullPlayerLyrics}) when lyrics are available, or a "Similar Songs"
+ *   recommendation list when they are not.
+ *
+ * The overlay respects the Electron title-bar height via `--electron-titlebar-height`
+ * and disables `-webkit-app-region` drag so controls remain interactive.
+ */
 export function DesktopFullPlayer({
   currentTrack,
   isPlaying,

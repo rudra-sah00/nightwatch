@@ -13,13 +13,28 @@ import {
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
 
+/**
+ * Serialised snapshot of a playing video captured when the user navigates
+ * away from a watch route. Used to resume playback in the floating PiP player.
+ */
 interface PipState {
+  /** HLS manifest URL of the stream being played. */
   streamUrl: string;
+  /** Playback position (seconds) at the moment PiP was activated. */
   currentTime: number;
+  /** Original watch route (e.g. `/watch/abc123`) for tap-to-return navigation. */
   watchUrl: string; // e.g. /watch/abc123
+  /** Content title displayed in the PiP overlay. */
   title: string;
 }
 
+/**
+ * Context value exposed by {@link PipProvider} to child components.
+ *
+ * Watch-page players call {@link register} on mount and {@link unregister} on
+ * unmount. The provider automatically activates PiP when the user navigates
+ * away from a video route on mobile.
+ */
 interface PipContextValue {
   /** Register the current watch page so PiP can activate on navigation away */
   register: (
@@ -36,12 +51,35 @@ interface PipContextValue {
 
 const PipContext = createContext<PipContextValue | null>(null);
 
+/**
+ * Returns the current {@link PipContextValue}, or `null` if used outside a
+ * {@link PipProvider}. Watch-page players use this to register/unregister
+ * themselves for cross-route PiP.
+ *
+ * @returns The PiP context value or `null`.
+ */
 export function usePipContext() {
   return useContext(PipContext);
 }
 
 const VIDEO_ROUTES = ['/watch/', '/live/', '/clip/'];
 
+/**
+ * Global Picture-in-Picture provider for cross-route video continuity on mobile.
+ *
+ * **Route-change detection** — watches `pathname` via `usePathname()`. When the
+ * user navigates *away* from a video route (`/watch/`, `/live/`, `/clip/`) and
+ * a player was registered (playing, `currentTime > 0`), PiP activates. When
+ * navigating *to* a video route, any existing PiP is closed to avoid conflicts.
+ *
+ * **Music conflict resolution** — listens to `isPlaying` from
+ * {@link useMusicPlayerContext}. If music starts while PiP is active, PiP is
+ * automatically closed so audio streams don't overlap.
+ *
+ * Renders a {@link PipPlayer} floating mini-player when PiP is active on mobile.
+ *
+ * @param props.children - Application tree that can access the PiP context.
+ */
 export function PipProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useMobileDetection();
   const pathname = usePathname();
@@ -128,6 +166,18 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Floating mini-player rendered when cross-route PiP is active.
+ *
+ * Positioned fixed in the bottom-right corner (respecting safe-area insets),
+ * it plays the captured stream URL and seeks to the saved `currentTime` on
+ * `loadedmetadata`. Provides a tap-to-return overlay and a close button.
+ *
+ * @param props.pip - Serialised {@link PipState} with stream URL, time, and title.
+ * @param props.onClose - Closes the PiP player.
+ * @param props.onTap - Navigates back to the original watch route.
+ * @param props.pipVideoRef - Ref attached to the `<video>` element for external control.
+ */
 function PipPlayer({
   pip,
   onClose,

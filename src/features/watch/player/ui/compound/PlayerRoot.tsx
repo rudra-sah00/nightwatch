@@ -10,20 +10,35 @@ import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { usePlayerRoot } from './hooks/use-player-root';
 
+/**
+ * Props for the {@link PlayerRoot} component.
+ *
+ * Configures the video player's stream source, metadata, interaction mode,
+ * subtitle/quality options, and various legacy-compatibility flags.
+ */
 interface PlayerRootProps {
+  /** Child elements rendered inside the player container (controls, overlays, video element). */
   children: ReactNode;
+  /** HLS or MP4 stream URL. `null` while the URL is still resolving. */
   streamUrl: string | null;
+  /** Video metadata used for the pause overlay, progress history, and analytics. */
   metadata: VideoMetadata;
+  /** When `true`, skips writing playback progress to the backend history API. */
   skipProgressHistory?: boolean;
+  /** URL to a single WebVTT caption file (legacy single-track path). */
   captionUrl?: string | null;
+  /** Multiple selectable subtitle tracks displayed in the settings menu. */
   subtitleTracks?: {
     id: string;
     label: string;
     language: string;
     src: string;
   }[];
+  /** Available quality levels for manual quality selection. */
   qualities?: { quality: string; url: string }[];
+  /** WebVTT file describing sprite thumbnail positions for the seekbar preview. */
   spriteVtt?: string;
+  /** Sprite sheet metadata for seekbar thumbnail previews. */
   spriteSheet?: {
     imageUrl: string;
     width: number;
@@ -44,13 +59,19 @@ interface PlayerRootProps {
   isHost?: boolean;
   /** Legacy compatibility: pass auth state from parent. */
   isAuthenticated?: boolean;
+  /** Navigation callback used by internal links (e.g. "back" button). */
   onNavigate?: (url: string) => void;
+  /** Override the default fullscreen toggle (used by watch-party host controls). */
   fullscreenToggleOverride?: () => void;
+  /** External fullscreen state override (e.g. when the parent manages fullscreen). */
   isFullscreenOverride?: boolean;
+  /** Callback fired when the stream token expires and needs re-fetching. */
   onStreamExpired?: () => void;
+  /** Additional CSS classes merged onto the root container `div`. */
   className?: string;
   /** Legacy compatibility: replaced by controlsVisibility. */
   hideControls?: boolean;
+  /** Exposes the underlying `<video>` element ref to the parent. */
   onVideoRef?: (ref: HTMLVideoElement | null) => void;
   /** Server 2 language dubs pre-populated from the /play response */
   initialAudioTracks?: {
@@ -73,14 +94,32 @@ interface PlayerRootProps {
   allowPortraitPlayback?: boolean;
   /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
   providerId?: 's1' | 's2' | 's3';
+  /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
 }
 
+/** Default container dimensions — fills the viewport minus the Electron title bar. */
 const CONTAINER_STYLE = {
   width: '100%',
   height: 'calc(100dvh - var(--electron-titlebar-height, 0px))',
 } as const;
 
+/**
+ * Root container for the video player.
+ *
+ * Responsibilities:
+ * - Provides {@link PlayerContext} to all descendant player components.
+ * - Manages YouTube-style **mobile fullscreen** by switching to a fixed-position
+ *   viewport overlay (no native Fullscreen API on iOS Safari).
+ * - Renders a **rotate wall** on iOS portrait when playback is active, prompting
+ *   the user to physically rotate the device to landscape.
+ * - Implements **tap-to-toggle controls** on mobile — tapping the container
+ *   shows/hides the control bar (ignores taps on interactive children).
+ * - Registers **keyboard shortcuts** on the container (`Space`/`K` play/pause,
+ *   `J`/`L`/arrows seek, arrows volume, `M` mute, `F` fullscreen).
+ *
+ * @param props - See {@link PlayerRootProps}.
+ */
 export function PlayerRoot({
   children,
   streamUrl,

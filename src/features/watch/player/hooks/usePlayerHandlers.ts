@@ -2,26 +2,65 @@ import type { Dispatch } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import type { PlayerAction } from '../context/types';
 
+/**
+ * Props for the {@link usePlayerHandlers} hook.
+ */
 interface UsePlayerHandlersProps {
+  /** Ref to the underlying `<video>` element for direct DOM mutations (volume, currentTime, playbackRate). */
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  /** Player state dispatcher. */
   dispatch: Dispatch<PlayerAction>;
+  /** Whether the video is currently playing. */
   isPlaying: boolean;
+  /** Whether the video is currently paused. */
   isPaused: boolean;
+  /** When `true`, all mutating handlers (seek, play, volume, speed) become no-ops. */
   readOnly?: boolean;
+  /** When `true`, click-to-play is suppressed (e.g. during initial buffering). */
   isLoading?: boolean;
+  /** Low-level play/pause toggle from the HLS/MP4 engine. */
   togglePlay: () => void;
+  /** Low-level mute toggle from the engine. */
   toggleMute: () => void;
+  /** Low-level seek to an absolute time (seconds). */
   seek: (seconds: number) => void;
+  /** Low-level HLS quality level setter (-1 = auto). */
   setQuality: (level: number) => void;
+  /** Low-level audio track setter (HLS multi-audio). */
   setAudioTrack: (trackId: string) => void;
+  /** Available HLS quality levels for label-to-index resolution. */
   qualities: { label: string; height: number }[];
   /** For server 2: called after local state update so the parent can swap the MP4 URL */
   onExternalAudioChange?: (trackId: string) => void;
 }
 
 /**
- * Custom hook to manage all player control handlers
- * Extracted from WatchPage to reduce complexity
+ * Hook that centralizes all player control handlers.
+ *
+ * Manages the controls auto-hide timer (3s inactivity) and exposes
+ * handler functions consumed by the player UI components:
+ *
+ * - **`showControls`** — Dispatches `SHOW_CONTROLS` and resets the 3s auto-hide
+ *   timer. If the user is actively interacting (menu open), the timer is paused.
+ * - **`handleInteraction(isInteracting)`** — Called when menus/sliders open/close.
+ *   While `true`, the auto-hide timer is suspended and controls stay visible.
+ * - **`handleVideoClick`** — Click handler for the video area. No-op when
+ *   `readOnly` or `isLoading`; otherwise toggles play/pause.
+ * - **`handleSeek(time)`** — Seeks to an absolute time in seconds via `videoRef.currentTime`.
+ * - **`handleSkip(seconds)`** — Relative seek (delegates to the engine's `seek`).
+ * - **`handleVolumeChange(volume)`** — Sets volume on the `<video>` element and dispatches state.
+ * - **`handleMuteToggle`** — Toggles mute on the `<video>` element.
+ * - **`handleTogglePlay`** — Guarded play/pause toggle (respects `readOnly`).
+ * - **`handleQualityChange(quality)`** — Resolves a quality label to an HLS level index
+ *   (`"auto"` → `-1`) and dispatches `SET_CURRENT_QUALITY`.
+ * - **`handlePlaybackRateChange(rate)`** — Sets `videoRef.playbackRate` and dispatches state.
+ * - **`handleAudioChange(trackId)`** — Switches audio track and optionally notifies the parent
+ *   via `onExternalAudioChange` for server-2 MP4 URL swaps.
+ * - **`handleSubtitleChange(trackId)`** — Dispatches `SET_CURRENT_SUBTITLE_TRACK`.
+ * - **`handleRetry`** — Clears the error state and re-triggers loading.
+ *
+ * @param props - See {@link UsePlayerHandlersProps}.
+ * @returns Object containing all handler functions listed above.
  */
 export function usePlayerHandlers({
   videoRef,

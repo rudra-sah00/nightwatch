@@ -3,13 +3,32 @@
 import { Globe, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+/**
+ * Props for the {@link MusicHeader} component.
+ */
 interface MusicHeaderProps {
+  /** Currently selected music languages (e.g. `Set(['hindi', 'english'])`). */
   selectedLangs: Set<string>;
+  /** Opens the {@link LanguagePickerDialog}. */
   onOpenLangPicker: () => void;
+  /** Toggles the {@link CreatePlaylistDialog}. */
   onToggleCreatePlaylist: () => void;
+  /** Opens the {@link MusicSearchSpotlight} overlay. */
   onOpenSearch: () => void;
 }
 
+/**
+ * Header bar for the `/music` home page.
+ *
+ * Displays the localised "Music" title on the left and a row of action buttons
+ * on the right:
+ * - **Language pill** — shows the first two selected language codes (e.g. "HI, EN +1")
+ *   and opens the language picker dialog on click.
+ * - **Create playlist** button (plus icon).
+ * - **Search** button (magnifying glass icon) that opens the Cmd+K spotlight overlay.
+ *
+ * All buttons use the neo-brutalist border/hover style from the design system.
+ */
 export function MusicHeader({
   selectedLangs,
   onOpenLangPicker,

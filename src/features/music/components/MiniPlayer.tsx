@@ -17,6 +17,22 @@ import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { showSongMenu } from './SongContextMenu';
 
+/**
+ * Sticky bottom-bar mini player shown on `/music` pages when a track is loaded.
+ *
+ * Renders a compact control strip with:
+ * - A thin progress bar along the top edge (clickable to seek).
+ * - Album art thumbnail and track info (clickable to expand the full player).
+ * - Playback controls: previous, play/pause, next, stop.
+ * - Volume mute toggle and slider (desktop only).
+ * - A queue toggle button that reveals a collapsible queue panel below the bar.
+ *
+ * The queue panel lists all tracks with right-click support via the
+ * {@link showSongMenu} event bus for context-menu actions (add to playlist, etc.).
+ *
+ * Keyboard shortcuts are registered via the `useMusicShortcuts` hook.
+ * Renders `null` when no track is loaded.
+ */
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
   const t = useTranslations('music');

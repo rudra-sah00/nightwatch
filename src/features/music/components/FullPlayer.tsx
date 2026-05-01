@@ -13,6 +13,22 @@ import { useSystemVolume } from '../hooks/use-system-volume';
 import { DesktopFullPlayer } from './DesktopFullPlayer';
 import { MobileFullPlayer } from './MobileFullPlayer';
 
+/**
+ * Orchestrator component for the full-screen music player experience.
+ *
+ * Manages all shared state and side-effects consumed by both the mobile and desktop
+ * full-player variants, including:
+ * - Fetching synced lyrics and song recommendations on track change.
+ * - Computing the active lyric line index from playback progress.
+ * - Smooth-scrolling the lyrics container to the current line via `requestAnimationFrame`.
+ * - Coordinating the close animation (300 ms slide-out) before unmounting.
+ *
+ * Delegates rendering to {@link MobileFullPlayer} or {@link DesktopFullPlayer} based on
+ * the viewport width detected by `useIsMobile`. Both receive identical playback state
+ * and callback props so the orchestrator remains the single source of truth.
+ *
+ * Renders `null` when the player is not expanded or no track is loaded.
+ */
 export function FullPlayer() {
   const {
     currentTrack,
