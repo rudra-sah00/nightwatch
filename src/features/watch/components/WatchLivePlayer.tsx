@@ -108,6 +108,24 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
   };
 
+  const pipSwipeRef = useRef(0);
+  const [pipSwipeX, setPipSwipeX] = useState(0);
+  const [pipDismissing, setPipDismissing] = useState(false);
+  const handleBackRef = useRef(handleBack);
+  handleBackRef.current = handleBack;
+
+  const handlePipSwipeEnd = useCallback(() => {
+    if (Math.abs(pipSwipeX) > 80) {
+      setPipDismissing(true);
+      setPipSwipeX(pipSwipeX > 0 ? 300 : -300);
+      setTimeout(() => {
+        handleBackRef.current();
+      }, 250);
+    } else {
+      setPipSwipeX(0);
+    }
+  }, [pipSwipeX]);
+
   return (
     <>
       {useInlineMobileLayout ? (
@@ -124,7 +142,18 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
           <Player.Root
             {...props}
             skipProgressHistory={true}
-            containerStyle={isPip ? pipStyle : inlineStyle}
+            containerStyle={{
+              ...(isPip ? pipStyle : inlineStyle),
+              ...(isPip && pipSwipeX !== 0
+                ? {
+                    transform: `translateX(${pipSwipeX}px)`,
+                    opacity: pipDismissing ? 0 : 1 - Math.abs(pipSwipeX) / 400,
+                    transition: pipDismissing
+                      ? 'transform 0.25s ease-out, opacity 0.25s ease-out'
+                      : 'none',
+                  }
+                : {}),
+            }}
             streamMode="live"
             allowPortraitPlayback={useInlineMobileLayout}
             onBack={handleBack}
@@ -134,6 +163,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
               <button
                 type="button"
                 onClick={dismissPip}
+                onTouchStart={(e) => {
+                  pipSwipeRef.current = e.touches[0].clientX;
+                }}
+                onTouchMove={(e) => {
+                  setPipSwipeX(e.touches[0].clientX - pipSwipeRef.current);
+                }}
+                onTouchEnd={handlePipSwipeEnd}
                 className="absolute inset-0 z-[60]"
                 aria-label="Back to player"
               />
