@@ -158,19 +158,19 @@ export default function LoginClient() {
         </div>
       </main>
       {/* Footer - Aligned with Signup for Parity */}
-      <footer className="bg-primary dark:bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
-        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-primary-foreground/80 dark:text-muted-foreground opacity-80 text-left">
+      <footer className="bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
+        <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-muted-foreground opacity-80 text-left">
           {t('footer.copyright')}
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
           <Link
             href="/whats-new"
-            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary dark:ring-offset-background"
+            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-primary-foreground/80 dark:text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               {t('footer.stayUpdated')}
             </span>
-            <span className="font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest text-neo-yellow group-hover:text-white underline decoration-neo-yellow/30 underline-offset-4 transition-colors whitespace-nowrap">
+            <span className="font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4 transition-colors whitespace-nowrap">
               {t('footer.whatsNew')}
             </span>
           </Link>
@@ -178,13 +178,13 @@ export default function LoginClient() {
           <button
             type="button"
             onClick={handleCopyEmail}
-            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary dark:ring-offset-background"
+            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-primary-foreground/80 dark:text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               {t('footer.wantAccount')}
             </span>
             <span
-              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-colors ${copied ? 'text-success' : 'text-neo-yellow group-hover:text-white underline decoration-neo-yellow/30 underline-offset-4'}`}
+              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-colors ${copied ? 'text-success' : 'text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4'}`}
             >
               {copied ? t('footer.emailCopied') : t('footer.requestEmail')}
             </span>
