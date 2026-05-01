@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import type React from 'react';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import type { PlayerAction } from '../context/types';
 import { useVideoElement } from './use-video-element';
 
@@ -59,6 +59,17 @@ export const VideoElement = memo(function VideoElement({
   });
   const t = useTranslations('watch.player');
 
+  // WKWebView enforces CORS strictly on media fetches — crossOrigin="anonymous"
+  // causes HLS segments to silently fail. Only set it on non-Capacitor platforms
+  // where it's needed for subtitle <track> elements.
+  const crossOrigin = useMemo(
+    () =>
+      typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+        ? undefined
+        : 'anonymous',
+    [],
+  );
+
   return (
     <video
       ref={mergedRef}
@@ -66,7 +77,7 @@ export const VideoElement = memo(function VideoElement({
       style={VIDEO_STYLE}
       autoPlay
       playsInline
-      crossOrigin="anonymous"
+      crossOrigin={crossOrigin}
       onClick={onClick}
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
