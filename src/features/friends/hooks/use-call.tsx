@@ -168,33 +168,21 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
     // Native call UI for mobile (CallKit on iOS, notification on Android)
     if (checkIsMobile()) {
-      if (state === 'active') {
+      if (state === 'active' || state === 'incoming') {
         callIdRef.current = `nw-call-${Date.now()}`;
-        // CallKit: show native call UI (green pill, lock screen controls)
-        import('@capgo/capacitor-incoming-call-kit')
-          .then(({ IncomingCallKit }) =>
-            IncomingCallKit.showIncomingCall({
-              callId: callIdRef.current,
-              callerName: peerName || 'Nightwatch Call',
-              handle: peerName || 'Voice Call',
-              ios: { handleType: 'generic', supportsHolding: false },
-            }),
-          )
-          .catch(() => {});
-        // Also show Android notification
+        // Show Android notification with caller name
         import('@anuradev/capacitor-phone-call-notification')
           .then(({ PhoneCallNotification }) =>
             PhoneCallNotification.showCallInProgressNotification({
               channelName: peerName || 'Nightwatch',
-              channelDescription: 'Voice call in progress',
+              channelDescription:
+                state === 'incoming'
+                  ? `Incoming call from ${peerName || 'Unknown'}`
+                  : 'Voice call in progress',
             }),
           )
           .catch(() => {});
       } else if (state === 'idle') {
-        // End CallKit call
-        import('@capgo/capacitor-incoming-call-kit')
-          .then(({ IncomingCallKit }) => IncomingCallKit.endAllCalls())
-          .catch(() => {});
         // Hide Android notification
         import('@anuradev/capacitor-phone-call-notification')
           .then(({ PhoneCallNotification }) =>
@@ -538,7 +526,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       };
       setPeer(incomingPeer);
       peerRef.current = incomingPeer;
-      updateCallStateRef.current('incoming');
+      updateCallStateRef.current('incoming', incomingPeer.name);
     };
 
     const onAccepted = (data: { channelName: string }) => {
