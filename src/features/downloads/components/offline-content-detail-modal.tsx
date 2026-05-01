@@ -136,7 +136,7 @@ export function OfflineContentDetailModal({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm"
+      className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
