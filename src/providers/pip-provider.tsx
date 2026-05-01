@@ -134,12 +134,10 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
       isMobile
     ) {
       const el = videoElRef.current;
-      if (!el.paused && el.currentTime > 0) {
-        setPip({
-          ...registeredRef.current,
-          currentTime: el.currentTime,
-        });
-      }
+      setPip({
+        ...registeredRef.current,
+        currentTime: el.currentTime || 0,
+      });
       registeredRef.current = null;
       videoElRef.current = null;
     }
