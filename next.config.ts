@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
         pathname: '/api/stream/image/**',
       },
       {
-        pathname: '/**', // Allow local public files like /logo-ico.png
+        pathname: '/**', // Allow local public files like /logo.png
       },
     ],
     unoptimized: false,

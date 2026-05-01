@@ -41,7 +41,40 @@ function getPreferredLocale(acceptLanguage: string | null): string {
   return DEFAULT_LOCALE;
 }
 
-export default function proxy(req: NextRequest) {
+const PROTECTED_PREFIXES = [
+  '/home',
+  '/search',
+  '/music',
+  '/watchlist',
+  '/downloads',
+  '/profile',
+  '/continue-watching',
+  '/library',
+  '/ask-ai',
+  '/changelog',
+  '/watch/',
+  '/live/',
+  '/clip/',
+];
+
+function isProtectedRoute(pathname: string): boolean {
+  // /clip/share is public
+  if (pathname.startsWith('/clip/share')) return false;
+  return PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+export function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Redirect unauthenticated users away from protected routes at the edge
+  // so the RSC payload is never generated, avoiding "Failed to fetch RSC" errors
+  if (isProtectedRoute(pathname)) {
+    const rawCookie = req.headers.get('cookie') || '';
+    if (!rawCookie.includes('refreshToken=')) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+  }
+
   // Check raw Cookie header to avoid triggering dynamic route behavior
   const rawCookie = req.headers.get('cookie') || '';
   const hasLocale = rawCookie.includes(`${COOKIE_NAME}=`);
@@ -61,6 +94,6 @@ export default function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api/|_next/static|_next/image|logo-ico.png|openwakeword|images).*)',
+    '/((?!api/|_next/static|_next/image|logo.png|openwakeword|images).*)',
   ],
 };

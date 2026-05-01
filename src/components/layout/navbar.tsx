@@ -33,7 +33,7 @@ export function Navbar() {
           >
             <div className="md:hidden w-10 h-10 flex items-center justify-center shrink-0">
               <img
-                src="/logo-ico.png"
+                src="/logo.png"
                 alt={t('logoAlt')}
                 width={32}
                 height={32}

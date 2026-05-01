@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { MobileAppLifecycle } from '@/components/layout/MobileAppLifecycle';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
@@ -11,18 +9,11 @@ import { MusicMediaSession } from '@/features/music/components/MusicMediaSession
 import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
 import { PipOverlay } from '@/features/watch/player/ui/overlays/PipOverlay';
 
-export default async function ProtectedLayout({
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get('refreshToken');
-
-  if (!refreshToken) {
-    redirect('/login');
-  }
-
   return (
     <CallProvider>
       <MusicPlayerProvider>
