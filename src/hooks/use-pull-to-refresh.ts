@@ -6,13 +6,16 @@ import { hapticMedium } from '@/lib/haptics';
 
 const THRESHOLD = 80;
 const MAX_PULL = 120;
+// How long after a scroll event before we consider the scroll "settled"
+const SCROLL_SETTLE_MS = 300;
 
 /**
  * Pull-to-refresh for mobile.
- * Only activates when:
- * 1. The container scrollTop is 0
- * 2. The user is pulling DOWN (not scrolling up to reach top)
- * 3. No scroll happened in the last 200ms (no momentum)
+ *
+ * Key insight: only allow refresh when the user places their finger on a
+ * container that is ALREADY at rest at scrollTop 0. If any scroll event
+ * fired in the last 300ms, the container has momentum and we block refresh
+ * for the entire touch gesture.
  */
 export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -20,8 +23,8 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const pulling = useRef(false);
+  const blocked = useRef(false);
   const startY = useRef(0);
-  const startScrollTop = useRef(0);
   const lastScrollTime = useRef(0);
 
   const handleRefresh = useCallback(async () => {
@@ -42,45 +45,37 @@ export function usePullToRefresh(onRefresh: () => Promise<void> | void) {
 
     const onScroll = () => {
       lastScrollTime.current = Date.now();
+      // If scrolling happened while pulling, cancel the pull
+      if (pulling.current) {
+        pulling.current = false;
+        blocked.current = true;
+        setPullDistance(0);
+      }
     };
 
     const onTouchStart = (e: TouchEvent) => {
       if (isRefreshing) return;
       startY.current = e.touches[0].clientY;
-      startScrollTop.current = el.scrollTop;
       pulling.current = false;
+
+      // Block if: not at top, or scroll momentum is still active
+      const hasRecentScroll =
+        Date.now() - lastScrollTime.current < SCROLL_SETTLE_MS;
+      blocked.current = el.scrollTop > 0 || hasRecentScroll;
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (isRefreshing) return;
+      if (blocked.current || isRefreshing) return;
 
-      const currentScrollTop = el.scrollTop;
+      // Double-check: if container scrolled away from top, block
+      if (el.scrollTop > 0) {
+        blocked.current = true;
+        pulling.current = false;
+        setPullDistance(0);
+        return;
+      }
+
       const dy = e.touches[0].clientY - startY.current;
-
-      // If the container is not at the top, let normal scroll happen
-      if (currentScrollTop > 0) {
-        if (pulling.current) {
-          pulling.current = false;
-          setPullDistance(0);
-        }
-        return;
-      }
-
-      // Container is at top. But did we ARRIVE here by scrolling up?
-      // If touch started when scrollTop > 0, user was scrolling up — don't pull
-      if (startScrollTop.current > 5) {
-        return;
-      }
-
-      // If there was a scroll event in the last 200ms, momentum is still going
-      if (
-        Date.now() - lastScrollTime.current < 200 &&
-        startScrollTop.current > 0
-      ) {
-        return;
-      }
-
-      // Only pull if finger is moving DOWN
       if (dy > 10) {
         pulling.current = true;
         setPullDistance(Math.min((dy - 10) * 0.4, MAX_PULL));
