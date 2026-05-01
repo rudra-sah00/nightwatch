@@ -5,6 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
+/**
+ * Electron-only Picture-in-Picture header overlay.
+ *
+ * Shows the current content title and a maximize button when the desktop
+ * app enters PiP mode. Auto-hides after 2.5 s of mouse inactivity.
+ */
 export function PipOverlay() {
   const [isPip, setIsPip] = useState(false);
   const [title, setTitle] = useState('');

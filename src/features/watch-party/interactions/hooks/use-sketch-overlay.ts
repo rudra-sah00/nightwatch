@@ -22,6 +22,7 @@ interface PendingTextInput {
   videoTimestamp: number;
 }
 
+/** Options for {@link useSketchOverlay}. */
 interface UseSketchOverlayOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
@@ -29,6 +30,16 @@ interface UseSketchOverlayOptions {
   userName?: string;
 }
 
+/**
+ * Core logic hook for the Konva sketch overlay.
+ *
+ * Handles mouse/touch drawing, shape creation, text input, transform/drag,
+ * undo, clear, z-order, cursor broadcasting, and RTM synchronisation of
+ * all sketch actions across party members.
+ *
+ * @param options - RTM functions, user identity, and optional overrides.
+ * @returns Stage event handlers, pending text state, action list, and helpers.
+ */
 export function useSketchOverlay({
   rtmSendMessage,
   rtmSendMessageToPeer,

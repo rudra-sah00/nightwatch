@@ -2,13 +2,25 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+/** GitHub Releases API endpoint for the latest desktop build. */
 const RELEASES_API =
   'https://api.github.com/repos/rudra-sah00/nightwatch/releases/latest';
+
+/** Fallback URL when the API call fails or an asset is missing. */
 const RELEASES_FALLBACK =
   'https://github.com/rudra-sah00/nightwatch/releases/latest';
 
+/** Per-platform download URLs resolved from the latest GitHub release. */
 type DownloadLinks = { windows: string; mac: string; linux: string };
 
+/**
+ * Fetches the latest GitHub release and resolves per-platform download URLs.
+ *
+ * Looks for `.exe` (Windows), `.dmg` (macOS), and `.AppImage` (Linux) assets.
+ * Falls back to the generic releases page on error or missing assets.
+ *
+ * @returns `DownloadLinks` once resolved, or `null` while loading.
+ */
 export function useDownloadLinks() {
   const [links, setLinks] = useState<DownloadLinks | null>(null);
   useEffect(() => {
@@ -37,6 +49,15 @@ export function useDownloadLinks() {
   return links;
 }
 
+/**
+ * Convenience wrapper around {@link useDownloadLinks} that returns only the
+ * download URL matching the user's current operating system.
+ *
+ * Detects macOS, Windows, and Linux via `navigator.userAgent`.
+ *
+ * @returns The platform-specific download URL, or `null` if not yet resolved
+ *          or the OS cannot be detected.
+ */
 export function useCurrentOSDownload() {
   const links = useDownloadLinks();
   const osKey = useMemo(() => {

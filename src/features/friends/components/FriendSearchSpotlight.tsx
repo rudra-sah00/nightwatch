@@ -12,10 +12,21 @@ import {
 import { useFriends } from '@/features/friends/hooks/use-friends';
 import { Avatar } from './Avatar';
 
+/** Props for the {@link FriendSearchSpotlight} component. */
 interface FriendSearchSpotlightProps {
+  /** Callback invoked when the spotlight should close. */
   onClose: () => void;
 }
 
+/**
+ * Full-screen spotlight overlay for searching and adding friends.
+ *
+ * Debounces the search query (300 ms), displays results with relationship
+ * status badges ("Already Friends", "Request Sent", etc.), and allows sending
+ * friend requests inline.
+ *
+ * @param props - {@link FriendSearchSpotlightProps}
+ */
 export function FriendSearchSpotlight({ onClose }: FriendSearchSpotlightProps) {
   const {
     onlineFriends,

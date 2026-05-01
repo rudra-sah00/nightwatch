@@ -4,6 +4,12 @@ import { HardDriveDownload, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+/**
+ * Full-page offline fallback screen shown when the device has no network connection.
+ *
+ * Displays a "You're Offline" message with a link to the downloads vault so users
+ * can access previously downloaded content.
+ */
 export function OfflineState() {
   const t = useTranslations('common.offline');
 

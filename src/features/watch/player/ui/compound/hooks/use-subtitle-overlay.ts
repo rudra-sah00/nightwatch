@@ -1,11 +1,19 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+/** Options for {@link useSubtitleOverlay}. */
 interface UseSubtitleOverlayOptions {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   currentTrackId: string | null;
 }
 
+/**
+ * Extracts active VTT cue text from the video's text tracks and suppresses
+ * native browser cue rendering (except during native fullscreen).
+ *
+ * @param options - Video ref and current subtitle track ID.
+ * @returns `cueText` — the currently active subtitle string.
+ */
 export function useSubtitleOverlay({
   videoRef,
   currentTrackId,

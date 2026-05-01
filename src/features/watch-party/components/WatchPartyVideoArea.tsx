@@ -39,8 +39,10 @@ const EmojiReactions = dynamic(
 );
 
 /**
- * Inner component that reads player state from context.
- * Must be rendered inside <Player.Root>.
+ * Inner overlay component that reads player state from context.
+ *
+ * Renders buffering spinner, error message, center play button, and
+ * the next-episode auto-play overlay. Must be rendered inside `<Player.Root>`.
  */
 function PlayerOverlays({
   isHost,
@@ -101,6 +103,7 @@ function PlayerOverlays({
   );
 }
 
+/** Props for the {@link WatchPartyVideoArea} component. */
 interface WatchPartyVideoAreaProps {
   room: WatchPartyRoom;
   isHost: boolean;
@@ -120,9 +123,11 @@ interface WatchPartyVideoAreaProps {
 }
 
 /**
- * The video column of the Watch Party layout.
- * Composes Player.Root, overlays, sketch canvas, floating emojis,
- * and the player controls. Isolated from sidebar and dialog logic.
+ * The main video column of the Watch Party layout.
+ *
+ * Composes {@link Player.Root}, state-driven overlays, the sketch canvas,
+ * floating emoji reactions, clip recording, and the player controls bar.
+ * Isolated from sidebar and dialog logic.
  */
 export function WatchPartyVideoArea({
   room,

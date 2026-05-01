@@ -1,6 +1,10 @@
 import { usePlayerContext } from '../../context/PlayerContext';
 import { formatTime } from '../../utils/format-time';
 
+/**
+ * Displays the current playback time and total duration in the player
+ * controls bar. Hidden for livestream content.
+ */
 export function PlayerTimeDisplay() {
   const { state, metadata } = usePlayerContext();
 

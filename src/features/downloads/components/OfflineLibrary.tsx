@@ -19,6 +19,14 @@ import { cn, formatBytes } from '@/lib/utils';
 import { useDownloads } from '../hooks/use-downloads';
 import { OfflineContentDetailModal } from './offline-content-detail-modal';
 
+/**
+ * Page-level component that renders the user's offline download library.
+ *
+ * Lists all downloaded content with search filtering, progress bars for
+ * active downloads, and pause/resume/cancel controls. Selecting a completed
+ * item opens the {@link OfflineContentDetailModal}. Shows a desktop-required
+ * notice on non-desktop, non-mobile platforms.
+ */
 export function OfflineLibrary() {
   const {
     downloads,

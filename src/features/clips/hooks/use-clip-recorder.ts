@@ -7,12 +7,28 @@ const MAX_DURATION = 300;
 const MIN_DURATION = 5;
 const CHUNK_INTERVAL = 2000;
 
+/** Options for the {@link useClipRecorder} hook. */
 interface UseClipRecorderOptions {
+  /** ID of the livestream match being recorded. */
   matchId: string;
+  /** Default title for the new clip. */
   title: string;
+  /** HLS stream URL of the active livestream, or `null` if unavailable. */
   streamUrl: string | null;
 }
 
+/**
+ * Manages the full lifecycle of recording a livestream clip.
+ *
+ * Captures the `<video>` element's MediaStream via `captureStream()`, records
+ * chunks at a fixed interval, uploads each chunk to the backend, and finalizes
+ * the clip on stop. Automatically pauses/resumes recording when the video
+ * element pauses or buffers. Enforces a maximum duration of 300 seconds and a
+ * minimum of 5 seconds before allowing stop.
+ *
+ * @param options - Recording configuration (match ID, title, stream URL).
+ * @returns Recording state and control functions (`start`, `stop`, `isRecording`, etc.).
+ */
 export function useClipRecorder({
   matchId,
   title,

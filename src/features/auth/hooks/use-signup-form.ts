@@ -8,14 +8,27 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
+/** Possible steps in the multi-step signup wizard. */
 type Step = 'name' | 'details' | 'otp';
 
+/** Server action return shape for form submissions. */
 interface FormState {
   error?: string;
   fieldErrors?: Record<string, string>;
   success?: boolean;
 }
 
+/**
+ * Manages the multi-step registration flow: name entry, account details with
+ * real-time username availability checking, CAPTCHA, invite code validation,
+ * and OTP email verification with resend countdown.
+ *
+ * Pre-fills the invite code from the `?invite=` URL parameter and validates it
+ * on mount. Integrates with `React.useActionState` for form handling.
+ *
+ * @returns An object containing form state, step controls, validation status,
+ *          action handlers, and derived booleans (`isOtpStep`, `isInviteValid`).
+ */
 export function useSignupForm() {
   const { register, verifyOtp, resendOtp } = useAuth();
   const tErr = useTranslations('auth.errors');

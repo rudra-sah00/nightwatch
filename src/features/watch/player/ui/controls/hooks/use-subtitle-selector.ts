@@ -15,6 +15,7 @@ interface SubtitleTrack {
 
 type SubtitleMenuScreen = 'tracks' | 'style';
 
+/** Options for {@link useSubtitleSelector}. */
 interface UseSubtitleSelectorOptions {
   tracks: SubtitleTrack[];
   currentTrack?: string | null;
@@ -23,6 +24,13 @@ interface UseSubtitleSelectorOptions {
   onSubtitleSettingsChange?: (settings: SubtitleSettings) => void;
 }
 
+/**
+ * Manages the subtitle selector dropdown: open/close state, sub-screen
+ * navigation (tracks ↔ style), track selection, and style setting changes
+ * (font size, family, background, text colour, text shadow).
+ *
+ * @returns Menu state, handlers for each style property, and track change handler.
+ */
 export function useSubtitleSelector({
   tracks,
   currentTrack,

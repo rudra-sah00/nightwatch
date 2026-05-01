@@ -1,3 +1,4 @@
+/** Describes what a friend is currently watching. */
 export interface FriendActivity {
   type: string;
   title: string;
@@ -7,6 +8,7 @@ export interface FriendActivity {
   posterUrl: string | null;
 }
 
+/** A friend's profile including online status and current activity. */
 export interface FriendProfile {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ export interface FriendProfile {
   activity: FriendActivity | null;
 }
 
+/** An incoming friend request awaiting the user's response. */
 export interface FriendRequest {
   id: string;
   senderId: string;
@@ -25,6 +28,7 @@ export interface FriendRequest {
   profilePhoto: string | null;
 }
 
+/** An outgoing friend request the user has sent. */
 export interface SentRequest {
   id: string;
   receiverId: string;

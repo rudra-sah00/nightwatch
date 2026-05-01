@@ -7,6 +7,15 @@ import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { musicPresenceLock } from '@/lib/music-presence-lock';
 import { useAuth } from '@/providers/auth-provider';
 
+/**
+ * Headless component that synchronizes Discord Rich Presence with the current route.
+ *
+ * Sends browsing-state presence updates (e.g. "Browsing Homepage") via the Electron
+ * desktop bridge. Skips updates when the user is on a watch/party/live route or when
+ * the music presence lock is active, since those features manage their own presence.
+ *
+ * @returns `null` — this component renders no visible UI.
+ */
 export function DiscordPresenceSync() {
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();

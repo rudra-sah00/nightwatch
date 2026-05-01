@@ -15,6 +15,7 @@ import {
 } from '../services/watch-party.api';
 import type { ChatMessage, PartyCreatePayload, WatchPartyRoom } from '../types';
 
+/** Props for {@link useWatchPartyLifecycle}. */
 interface UseWatchPartyLifecycleProps {
   setRoom: React.Dispatch<React.SetStateAction<WatchPartyRoom | null>>;
   setIsConnected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,6 +40,12 @@ interface UseWatchPartyLifecycleProps {
   roomId?: string;
   rtmSendMessage?: (msg: RTMMessage) => void;
 }
+/**
+ * Manages the watch party room lifecycle: creation, join requests,
+ * approval/rejection polling via Socket.IO, and leaving/cancelling.
+ *
+ * @returns `createRoom`, `requestJoin`, `leaveRoom`, and `cancelRequest` callbacks.
+ */
 export function useWatchPartyLifecycle({
   setRoom,
   setIsConnected,

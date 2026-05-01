@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { env } from '@/lib/env';
 import { getAgoraToken } from '../services/agora.api';
 
+/** Options for {@link useAgoraToken}. */
 interface UseAgoraTokenOptions {
   roomId: string | undefined;
   userId: string | undefined;
   userName?: string;
 }
 
+/** Return value of {@link useAgoraToken}. */
 interface UseAgoraTokenReturn {
   token: string | null;
   appId: string;
@@ -19,6 +21,15 @@ interface UseAgoraTokenReturn {
   error: string | null;
 }
 
+/**
+ * Fetches an Agora RTC token for the given room and user.
+ *
+ * Handles both authenticated users and approved guests (via session-stored
+ * guest token). Skips the fetch when required identifiers are missing.
+ *
+ * @param options - Room ID, user ID, and optional display name.
+ * @returns Token, app ID, channel, UID, loading, and error state.
+ */
 export function useAgoraToken(
   options: UseAgoraTokenOptions,
 ): UseAgoraTokenReturn {

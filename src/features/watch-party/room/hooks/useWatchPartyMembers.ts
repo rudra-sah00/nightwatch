@@ -13,6 +13,7 @@ import {
 } from '../services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../types';
 
+/** Props for {@link useWatchPartyMembers}. */
 interface UseWatchPartyMembersProps {
   room: WatchPartyRoom | null;
   setRoom: React.Dispatch<React.SetStateAction<WatchPartyRoom | null>>;
@@ -25,6 +26,15 @@ interface UseWatchPartyMembersProps {
   videoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
+/**
+ * Manages watch party membership: approve/reject join requests, kick members,
+ * handle RTM member events, and auto-kick disconnected guests after a grace period.
+ *
+ * Also listens for Socket.IO `PENDING_MEMBERS_UPDATED` events (host only)
+ * and local `CustomEvent` permission updates from the settings panel.
+ *
+ * @returns Approve, reject, kick callbacks, and RTM/presence event handlers.
+ */
 export function useWatchPartyMembers({
   room,
   setRoom,

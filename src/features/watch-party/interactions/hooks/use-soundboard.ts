@@ -12,12 +12,20 @@ import {
   searchSounds,
 } from '../../room/services/watch-party.api';
 
+/** Options for {@link useSoundboard}. */
 interface UseSoundboardOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   userId?: string;
   userName?: string;
 }
 
+/**
+ * Manages soundboard state: fetching trending/searched sounds, infinite
+ * scroll pagination, local audio playback, and RTM broadcasting.
+ *
+ * @param options - RTM send function, user identity.
+ * @returns Sound list, search state, loading flags, and trigger handler.
+ */
 export function useSoundboard({
   rtmSendMessage,
   userId,

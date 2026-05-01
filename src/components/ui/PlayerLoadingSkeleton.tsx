@@ -2,6 +2,12 @@
 
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 
+/**
+ * Full-screen skeleton placeholder displayed while the video player is loading.
+ *
+ * Mimics the player UI layout with gradient overlays, a progress bar area,
+ * and circular skeleton placeholders for control buttons.
+ */
 export function PlayerLoadingSkeleton() {
   return (
     <AppSkeletonTheme>

@@ -4,6 +4,10 @@ import { AudioSelector } from '../controls/AudioSelector';
 import { SubtitleSelector } from '../controls/SubtitleSelector';
 import { usePlayerAudioSubtitleSelectors } from './hooks/use-player-audio-subtitle-selectors';
 
+/**
+ * Compound player component that renders the subtitle and audio track
+ * selector dropdowns side by side in the player controls bar.
+ */
 export function PlayerAudioSubtitleSelectors() {
   const {
     subtitleSettings,

@@ -33,6 +33,14 @@ const THEME_META = [
   { id: 'system' as const, label: 'System', Icon: Monitor },
 ];
 
+/**
+ * Application preferences panel for the profile page.
+ *
+ * Provides theme selection (light/dark/system), language switching, keyboard
+ * shortcuts reference, and desktop-only settings (launch on startup, concurrent
+ * downloads limit, download speed limit). Desktop settings are persisted via
+ * the Electron bridge store.
+ */
 export function AppPreferences() {
   const t = useTranslations('profile');
   const { theme, setTheme } = useTheme();

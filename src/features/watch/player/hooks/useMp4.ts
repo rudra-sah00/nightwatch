@@ -3,6 +3,7 @@
 import { type RefObject, useCallback, useEffect } from 'react';
 import type { PlayerAction } from '../context/types';
 
+/** Options for {@link useMp4}. */
 interface UseMp4Options {
   videoRef: RefObject<HTMLVideoElement | null>;
   streamUrl: string | null;
@@ -11,6 +12,15 @@ interface UseMp4Options {
   onStreamExpired?: () => void;
 }
 
+/**
+ * Manages direct MP4 source playback (non-HLS).
+ *
+ * Sets the video `src`, handles `loadedmetadata` and error events,
+ * syncs manual quality options to the player state, and provides a
+ * `setQuality` callback for switching between quality levels.
+ *
+ * @returns `setQuality` callback.
+ */
 export function useMp4({
   videoRef,
   streamUrl,

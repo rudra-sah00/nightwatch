@@ -8,19 +8,39 @@ import { env } from '@/lib/env';
 // Hoisted to module level to prevent recreation on each render (rule 5.4)
 const TURNSTILE_OPTIONS = { theme: 'dark', size: 'flexible' } as const;
 
+/**
+ * Imperative handle exposed by {@link Captcha} via `ref`.
+ */
 export interface CaptchaHandle {
+  /** Reset the Turnstile widget so the user can re-verify. */
   reset: () => void;
 }
 
+/** Props for the {@link Captcha} component. */
 interface CaptchaProps {
+  /** Called with the verification token on successful challenge completion. */
   onVerify: (token: string) => void;
+  /** Called when the challenge encounters an error. */
   onError?: () => void;
+  /** Called when a previously valid token expires. Defaults to `onError`. */
   onExpire?: () => void;
   ref?: React.Ref<CaptchaHandle>;
   className?: string;
+  /**
+   * Layout variant.
+   * - `'full'` (default) — standalone bordered box.
+   * - `'bottom'` — flush bottom-border style for inline placement.
+   */
   variant?: 'full' | 'bottom';
 }
 
+/**
+ * Cloudflare Turnstile CAPTCHA widget with development/test bypass.
+ *
+ * In development mode the challenge is auto-verified with a `'dev-bypass-token'`.
+ * In test mode a static placeholder is rendered. In production the real
+ * Turnstile widget is displayed using the site key from {@link env}.
+ */
 export function Captcha({
   onVerify,
   onError,

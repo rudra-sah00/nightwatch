@@ -2,10 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 
 type MenuScreen = 'main' | 'quality' | 'speed';
 
+/** Options for {@link useSettingsMenu}. */
 interface UseSettingsMenuOptions {
   onInteraction?: (isActive: boolean) => void;
 }
 
+/**
+ * Manages the settings menu open/close state, sub-screen navigation
+ * (main → quality / speed), and outside-click dismissal.
+ *
+ * @returns Menu state, screen navigation, ref, and toggle/back handlers.
+ */
 export function useSettingsMenu({
   onInteraction,
 }: UseSettingsMenuOptions = {}) {

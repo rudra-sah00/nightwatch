@@ -8,6 +8,20 @@ interface PartyPlaybackState {
   playbackRate: number;
 }
 
+/**
+ * Predictive synchronisation hook for watch party video playback.
+ *
+ * Uses NTP-style clock offset to calculate the expected video position
+ * based on the host's authoritative state, then applies graduated drift
+ * correction (hard seek > ±15% rate > ±5% rate > normal) to keep all
+ * participants in sync. Enforces play/pause state every 2 s.
+ *
+ * @param videoRef - Ref to the `<video>` element.
+ * @param clockOffset - Millisecond offset between local clock and server.
+ * @param isCalibrated - Whether the clock offset has been calibrated.
+ * @param isLive - When `true`, skips time-based seeking (HLS live).
+ * @returns `applyState` to process incoming state updates and `getExpectedTime`.
+ */
 export function usePredictiveSync(
   videoRef: RefObject<HTMLVideoElement | null>,
   clockOffset: number,

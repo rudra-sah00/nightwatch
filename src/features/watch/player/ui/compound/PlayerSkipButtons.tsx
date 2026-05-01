@@ -2,6 +2,11 @@ import { SkipBack, SkipForward } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePlayerContext } from '../../context/PlayerContext';
 
+/**
+ * Compound skip-back / skip-forward buttons for the player controls bar.
+ *
+ * Hidden on mobile, during livestreams, and in read-only (guest) mode.
+ */
 export function PlayerSkipButtons() {
   const { playerHandlers, metadata, readOnly } = usePlayerContext();
   const t = useTranslations('watch');

@@ -8,15 +8,30 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import type { LiveMatch } from '../types';
 
+/** Props for the {@link LiveMatchModal} component. */
 interface LiveMatchModalProps {
+  /** The live match to display details for. */
   match: LiveMatch;
+  /** Whether the modal is currently visible. */
   isOpen: boolean;
+  /** Whether a watch party room is being created. */
   isCreatingParty: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
+  /** Callback to start watching the match solo. */
   onWatchSolo: () => void;
+  /** Callback to create a watch party for this match. */
   onWatchParty: () => void;
 }
 
+/**
+ * Safely coerces an unknown value to a display string.
+ * Handles strings, numbers, and objects with `name`, `title`, or `id` properties.
+ *
+ * @param value - The value to coerce.
+ * @param fallback - Fallback string if coercion fails (default `""`).
+ * @returns A string representation of the value.
+ */
 function asText(value: unknown, fallback = ''): string {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
@@ -31,6 +46,9 @@ function asText(value: unknown, fallback = ''): string {
   return fallback;
 }
 
+/**
+ * Renders a single team's avatar, name, and score within the match modal hero section.
+ */
 function TeamPanel({
   team,
   score,
@@ -76,6 +94,11 @@ function TeamPanel({
   );
 }
 
+/**
+ * Full-screen modal displaying live match or channel details with team panels,
+ * score display, and watch solo / watch party action buttons.
+ * Renders nothing when `isOpen` is `false`.
+ */
 export function LiveMatchModal({
   match,
   isOpen,

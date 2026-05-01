@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { SketchAction } from '../../room/types';
 
+/** Available drawing tool identifiers for the sketch overlay. */
 export type ToolType =
   | 'select'
   | 'freehand'
@@ -27,6 +28,7 @@ export type ToolType =
   | 'eraser'
   | 'reaction';
 
+/** Shape of the sketch context value shared across sketch components. */
 export interface SketchContextType {
   currentTool: ToolType;
   setCurrentTool: (tool: ToolType) => void;
@@ -109,6 +111,10 @@ export interface SketchContextType {
 
 const SketchContext = createContext<SketchContextType | null>(null);
 
+/**
+ * Provider that holds all shared sketch state (tool, colour, actions, cursors, etc.)
+ * and exposes it via {@link useSketch}.
+ */
 export function SketchProvider({ children }: { children: ReactNode }) {
   const [currentTool, setCurrentTool] = useState<ToolType>('freehand');
   const [color, setColor] = useState<string>('#ef4444'); // Default red
@@ -212,6 +218,12 @@ export function SketchProvider({ children }: { children: ReactNode }) {
   return <SketchContext value={value}>{children}</SketchContext>;
 }
 
+/**
+ * Consumes the {@link SketchContext}.
+ *
+ * @throws If called outside a {@link SketchProvider}.
+ * @returns The current sketch context value.
+ */
 export function useSketch() {
   const context = use(SketchContext);
   if (!context) {

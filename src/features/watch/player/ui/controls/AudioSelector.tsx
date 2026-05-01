@@ -11,6 +11,7 @@ interface AudioTrack {
   language: string;
 }
 
+/** Props for the {@link AudioSelector} component. */
 interface AudioSelectorProps {
   tracks: AudioTrack[];
   currentTrack?: string;
@@ -18,6 +19,11 @@ interface AudioSelectorProps {
   disabled?: boolean;
 }
 
+/**
+ * Dropdown selector for switching between available audio language tracks.
+ *
+ * Hidden when there is only one track or the player is disabled.
+ */
 export function AudioSelector({
   tracks,
   currentTrack,

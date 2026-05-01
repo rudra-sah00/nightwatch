@@ -5,7 +5,10 @@ import { useTheme } from '@/providers/theme-provider';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-// Hoisted to module level to prevent recreation on each render (rule 5.4)
+/**
+ * Pre-configured toast class names matching the neo-brutalist design system.
+ * Hoisted to module level to prevent recreation on each render.
+ */
 const TOAST_OPTIONS = {
   classNames: {
     toast:
@@ -25,6 +28,13 @@ const TOAST_OPTIONS = {
   },
 } as const;
 
+/**
+ * Theme-aware toast notification container powered by `sonner`.
+ *
+ * Reads the current theme from {@link useTheme} and passes it to the
+ * underlying `Sonner` component. All toast variants (success, error, warning,
+ * info) are styled with neo-brutalist borders and typography.
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'light' } = useTheme();
 

@@ -6,23 +6,16 @@ import { mobileBridge } from '@/lib/mobile-bridge';
 
 /**
  * Handles app background/foreground lifecycle on mobile.
- * - Video: does NOT pause on background — allows iOS PiP to activate automatically.
- *   iOS enters PiP when a playing video's app is backgrounded.
+ * - Video PiP is handled by PipProvider (requestPictureInPicture on background).
  * - Music (HTMLAudioElement): keeps playing in background (unchanged).
  */
 export function MobileAppLifecycle() {
   useEffect(() => {
     if (!checkIsMobile()) return;
 
-    const unlisten = mobileBridge.onAppStateChange(({ isActive }) => {
-      if (isActive) {
-        // App came to foreground — exit PiP if active
-        if (document.pictureInPictureElement) {
-          document.exitPictureInPicture().catch(() => {});
-        }
-      }
-      // Don't pause video on background — let iOS PiP handle it
-    });
+    // Keep listener alive so Capacitor doesn't suspend the WebView.
+    // PiP enter/exit is handled by PipProvider which has access to the video element.
+    const unlisten = mobileBridge.onAppStateChange(() => {});
 
     return unlisten;
   }, []);

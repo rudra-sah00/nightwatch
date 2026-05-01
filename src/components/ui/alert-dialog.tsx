@@ -4,12 +4,21 @@ import { AlertDialog as RadixAlertDialog } from 'radix-ui';
 import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
+/** Props for the {@link AlertDialog} root component. */
 interface AlertDialogProps {
+  /** Whether the dialog is open. */
   open: boolean;
+  /** Callback fired when the open state changes. */
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
 }
 
+/**
+ * Controlled alert dialog root. Wraps Radix `AlertDialog.Root`.
+ *
+ * Unlike {@link Dialog}, an alert dialog requires an explicit user action
+ * (confirm or cancel) and cannot be dismissed by clicking the overlay.
+ */
 export function AlertDialog({
   open,
   onOpenChange,
@@ -22,6 +31,10 @@ export function AlertDialog({
   );
 }
 
+/**
+ * Centered alert dialog panel rendered in a portal with a blurred overlay.
+ * Styled with neo-brutalist 4px borders.
+ */
 export function AlertDialogContent({
   children,
   className,
@@ -47,6 +60,7 @@ export function AlertDialogContent({
   );
 }
 
+/** Header section for alert dialog title and description. */
 export function AlertDialogHeader({
   children,
   className,
@@ -57,6 +71,7 @@ export function AlertDialogHeader({
   return <div className={cn('space-y-4 mb-6', className)}>{children}</div>;
 }
 
+/** Footer area for alert dialog action and cancel buttons. */
 export function AlertDialogFooter({
   children,
   className,
@@ -76,6 +91,7 @@ export function AlertDialogFooter({
   );
 }
 
+/** Bold, uppercase alert dialog title. Wraps Radix `AlertDialog.Title`. */
 export function AlertDialogTitle({
   children,
   className,
@@ -95,6 +111,7 @@ export function AlertDialogTitle({
   );
 }
 
+/** Muted description text for the alert dialog. */
 export function AlertDialogDescription({
   children,
   className,
@@ -114,6 +131,10 @@ export function AlertDialogDescription({
   );
 }
 
+/**
+ * Destructive/confirm action button. Closes the dialog on click.
+ * Styled with `neo-red` background by default.
+ */
 export function AlertDialogAction({
   children,
   className,
@@ -134,6 +155,7 @@ export function AlertDialogAction({
   );
 }
 
+/** Cancel button that dismisses the alert dialog without taking action. */
 export function AlertDialogCancel({
   children,
   className,

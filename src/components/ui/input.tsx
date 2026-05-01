@@ -2,6 +2,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
+/**
+ * CVA variant definitions for the {@link Input} component.
+ *
+ * Variants:
+ * - `variant` — visual style (`default`, `neo`). Both use a bottom-border
+ *   underline aesthetic.
+ */
 const inputVariants = cva(
   'flex w-full ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
   {
@@ -18,13 +25,22 @@ const inputVariants = cva(
   },
 );
 
+/** Props for the {@link Input} component. */
 interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
+  /** Validation error message displayed below the input. */
   error?: string;
   ref?: React.Ref<HTMLInputElement>;
 }
 
+/**
+ * Neo-brutalist text input with CVA variants and inline error display.
+ *
+ * When an `error` string is provided the input border turns destructive-red
+ * and an animated error message appears below. Automatically wires
+ * `aria-invalid` and `aria-describedby` for accessibility.
+ */
 function Input({ className, variant, type, error, ref, ...props }: InputProps) {
   const errorId = error && props.id ? `${props.id}-error` : undefined;
   return (

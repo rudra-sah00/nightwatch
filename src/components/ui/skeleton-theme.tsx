@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
+/**
+ * Theme-aware wrapper around `react-loading-skeleton`'s `SkeletonTheme`.
+ *
+ * Observes the `dark` class on `<html>` via a `MutationObserver` and
+ * switches skeleton base/highlight colors between light and dark palettes.
+ * Uses `borderRadius: 0` to match the neo-brutalist design system.
+ */
 export function AppSkeletonTheme({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
 
@@ -30,4 +37,5 @@ export function AppSkeletonTheme({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Re-export of `react-loading-skeleton`'s `Skeleton` component for convenience. */
 export { Skeleton };

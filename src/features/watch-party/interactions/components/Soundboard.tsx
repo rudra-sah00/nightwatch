@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useSoundboard } from '../hooks/use-soundboard';
 
+/**
+ * Placeholder shown when the current user lacks soundboard permissions.
+ */
 export function SoundboardDisabled() {
   const t = useTranslations('party');
   return (
@@ -24,12 +27,20 @@ export function SoundboardDisabled() {
   );
 }
 
+/** Props for the {@link Soundboard} component. */
 interface SoundboardProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   userId?: string;
   userName?: string;
 }
 
+/**
+ * Searchable soundboard panel for the watch party sidebar.
+ *
+ * Fetches trending sounds on mount, supports debounced search, infinite
+ * scroll pagination, and broadcasts played sounds to all party members
+ * via RTM.
+ */
 export function Soundboard({
   rtmSendMessage,
   userId,

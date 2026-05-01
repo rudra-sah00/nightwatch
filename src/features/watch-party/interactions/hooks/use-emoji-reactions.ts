@@ -3,12 +3,20 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
+/** Options for {@link useEmojiReactions}. */
 interface UseEmojiReactionsOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   userId?: string;
   userName?: string;
 }
 
+/**
+ * Manages the emoji reaction picker state and broadcasts selected emojis
+ * to all party members via RTM.
+ *
+ * @param options - RTM send function, current user ID and name.
+ * @returns Picker visibility state, ref, and trigger handler.
+ */
 export function useEmojiReactions({
   rtmSendMessage,
   userId,

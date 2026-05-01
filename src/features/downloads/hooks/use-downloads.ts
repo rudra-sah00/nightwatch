@@ -6,6 +6,15 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
+/**
+ * Manages the list of downloaded content across Electron (desktop) and Capacitor (mobile).
+ *
+ * Subscribes to real-time download progress events and provides callbacks to
+ * cancel, pause, and resume individual downloads. Automatically detects the
+ * current platform and uses the appropriate bridge API.
+ *
+ * @returns Download items, platform flags, and download control functions.
+ */
 export function useDownloads() {
   const { isDesktopApp, isMounted } = useDesktopApp();
   const mobile = useIsMobile();

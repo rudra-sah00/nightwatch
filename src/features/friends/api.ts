@@ -4,6 +4,12 @@ import type { FriendProfile, FriendRequest, SentRequest } from './types';
 
 const friendsCache = createTTLCache<FriendProfile[]>(30_000, 1);
 
+/**
+ * Fetches the authenticated user's friend list with a 30-second TTL cache.
+ *
+ * @param options - Optional `RequestInit` overrides forwarded to `apiFetch`.
+ * @returns The list of {@link FriendProfile} objects.
+ */
 export async function getFriends(
   options?: RequestInit,
 ): Promise<FriendProfile[]> {
@@ -18,6 +24,12 @@ export async function getFriends(
   return data;
 }
 
+/**
+ * Fetches incoming friend requests awaiting the user's response.
+ *
+ * @param options - Optional `RequestInit` overrides.
+ * @returns An array of {@link FriendRequest} objects.
+ */
 export async function getPendingRequests(
   options?: RequestInit,
 ): Promise<FriendRequest[]> {
@@ -28,6 +40,12 @@ export async function getPendingRequests(
   return data;
 }
 
+/**
+ * Fetches outgoing friend requests the user has sent.
+ *
+ * @param options - Optional `RequestInit` overrides.
+ * @returns An array of {@link SentRequest} objects.
+ */
 export async function getSentRequests(
   options?: RequestInit,
 ): Promise<SentRequest[]> {
@@ -38,6 +56,11 @@ export async function getSentRequests(
   return data;
 }
 
+/**
+ * Sends a friend request to the user with the given username.
+ *
+ * @param username - The target user's username.
+ */
 export async function sendFriendRequest(username: string): Promise<void> {
   await apiFetch('/api/friends/request', {
     method: 'POST',
@@ -46,6 +69,11 @@ export async function sendFriendRequest(username: string): Promise<void> {
   friendsCache.clear();
 }
 
+/**
+ * Accepts an incoming friend request.
+ *
+ * @param friendshipId - The friendship record ID to accept.
+ */
 export async function acceptFriendRequest(friendshipId: string): Promise<void> {
   await apiFetch('/api/friends/accept', {
     method: 'POST',
@@ -54,6 +82,11 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
   friendsCache.clear();
 }
 
+/**
+ * Rejects an incoming friend request.
+ *
+ * @param friendshipId - The friendship record ID to reject.
+ */
 export async function rejectFriendRequest(friendshipId: string): Promise<void> {
   await apiFetch('/api/friends/reject', {
     method: 'POST',
@@ -61,6 +94,11 @@ export async function rejectFriendRequest(friendshipId: string): Promise<void> {
   });
 }
 
+/**
+ * Cancels a previously sent outgoing friend request.
+ *
+ * @param friendshipId - The friendship record ID to cancel.
+ */
 export async function cancelFriendRequest(friendshipId: string): Promise<void> {
   await apiFetch('/api/friends/cancel', {
     method: 'POST',
@@ -69,6 +107,11 @@ export async function cancelFriendRequest(friendshipId: string): Promise<void> {
   friendsCache.clear();
 }
 
+/**
+ * Removes an existing friend from the user's friend list.
+ *
+ * @param friendUserId - The user ID of the friend to remove.
+ */
 export async function removeFriend(friendUserId: string): Promise<void> {
   await apiFetch('/api/friends/remove', {
     method: 'DELETE',
@@ -77,6 +120,11 @@ export async function removeFriend(friendUserId: string): Promise<void> {
   friendsCache.clear();
 }
 
+/**
+ * Blocks a user, preventing further friend requests and interactions.
+ *
+ * @param userId - The user ID to block.
+ */
 export async function blockUser(userId: string): Promise<void> {
   await apiFetch('/api/friends/block', {
     method: 'POST',
@@ -85,6 +133,11 @@ export async function blockUser(userId: string): Promise<void> {
   friendsCache.clear();
 }
 
+/**
+ * Unblocks a previously blocked user.
+ *
+ * @param userId - The user ID to unblock.
+ */
 export async function unblockUser(userId: string): Promise<void> {
   await apiFetch('/api/friends/unblock', {
     method: 'POST',
@@ -93,6 +146,7 @@ export async function unblockUser(userId: string): Promise<void> {
   friendsCache.clear();
 }
 
+/** A user that has been blocked by the authenticated user. */
 export interface BlockedUser {
   id: string;
   userId: string;
@@ -101,6 +155,12 @@ export interface BlockedUser {
   profilePhoto: string | null;
 }
 
+/**
+ * Fetches the list of users blocked by the authenticated user.
+ *
+ * @param options - Optional `RequestInit` overrides.
+ * @returns An array of {@link BlockedUser} objects.
+ */
 export async function getBlockedUsers(
   options?: RequestInit,
 ): Promise<BlockedUser[]> {
@@ -111,10 +171,12 @@ export async function getBlockedUsers(
   return data;
 }
 
+/** Clears the in-memory friends TTL cache, forcing the next fetch to hit the API. */
 export function invalidateFriendsCache() {
   friendsCache.clear();
 }
 
+/** A user returned from the friend search endpoint. */
 export interface SearchUserResult {
   id: string;
   name: string;
@@ -122,6 +184,13 @@ export interface SearchUserResult {
   profilePhoto: string | null;
 }
 
+/**
+ * Searches for users by name or username (minimum 2 characters).
+ *
+ * @param query - The search string.
+ * @param options - Optional `RequestInit` overrides.
+ * @returns Matching {@link SearchUserResult} entries, or an empty array if the query is too short.
+ */
 export async function searchUsers(
   query: string,
   options?: RequestInit,

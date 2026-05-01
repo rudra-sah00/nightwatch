@@ -22,6 +22,7 @@ import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 
+/** Props for the {@link SketchOverlay} component. */
 interface SketchOverlayProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
@@ -29,6 +30,14 @@ interface SketchOverlayProps {
   userName?: string;
 }
 
+/**
+ * Konva-based sketch canvas overlay rendered on top of the video player.
+ *
+ * Supports freehand drawing, shapes (rectangle, circle, triangle, star),
+ * arrows, lines, text/bubble annotations, stickers, laser pointer, eraser,
+ * and particle reactions. Synchronises all actions across party members via
+ * RTM and renders remote user cursors in real time.
+ */
 export function SketchOverlay({
   rtmSendMessage,
   rtmSendMessageToPeer,

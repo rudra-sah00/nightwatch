@@ -2,6 +2,14 @@ import { useTranslations } from 'next-intl';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { PlayPause } from '../controls/PlayPause';
 
+/**
+ * Compound play/pause button for the player controls bar.
+ *
+ * In read-only mode (watch party guest), renders a locked icon with a
+ * tooltip indicating the host controls playback.
+ *
+ * @param props.size - Button size variant (`'md'` or `'lg'`).
+ */
 export function PlayerPlayPause({ size = 'lg' }: { size?: 'md' | 'lg' }) {
   const { state, playerHandlers, readOnly } = usePlayerContext();
   const t = useTranslations('watch.player');

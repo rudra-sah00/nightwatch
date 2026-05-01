@@ -4,6 +4,12 @@ import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { SettingsMenu } from '../controls/SettingsMenu';
 
+/**
+ * Compound settings menu for the player controls bar.
+ *
+ * Exposes quality selection and playback rate controls via a popover menu.
+ * Disabled in read-only (guest) mode.
+ */
 export function PlayerSettingsMenu() {
   const { state, playerHandlers, readOnly } = usePlayerContext();
   const t = useTranslations('watch');

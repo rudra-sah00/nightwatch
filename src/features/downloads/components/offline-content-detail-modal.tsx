@@ -15,21 +15,36 @@ import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useOfflineContentDetailModal } from '../hooks/use-offline-content-detail-modal';
 
+/** Props for the {@link OfflineContentDetailModal} component. */
 interface ContentDetailModalProps {
+  /** Unique content identifier to display details for. */
   contentId: string;
+  /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: {
     season?: number;
     episode?: number;
     episodeId?: string;
     [key: string]: unknown;
   };
+  /** Whether the modal was opened from the "Continue Watching" section. */
   fromContinueWatching?: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
+  /** Callback when the watchlist state changes for this content. */
   onWatchlistChange?: (contentId: string, inWatchlist: boolean) => void;
+  /** When `true`, automatically starts playback with a countdown. */
   autoPlay?: boolean;
+  /** Whether the app is in offline mode (disables online-only features). */
   isOfflineMode?: boolean;
 }
 
+/**
+ * Full-screen modal for viewing and playing offline-downloaded content.
+ *
+ * Displays hero media, content metadata, action bar, and episode listing
+ * (for series). Supports auto-play with a countdown overlay and trailer
+ * preview. Designed for use in Electron desktop and Capacitor mobile apps.
+ */
 export function OfflineContentDetailModal({
   contentId,
   initialContext,

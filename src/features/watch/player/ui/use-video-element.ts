@@ -9,6 +9,7 @@ interface SubtitleTrackDef {
   src: string;
 }
 
+/** Options for {@link useVideoElement}. */
 interface UseVideoElementOptions {
   dispatch: React.Dispatch<PlayerAction>;
   onTimeUpdate?: (time: number) => void;
@@ -22,6 +23,15 @@ interface UseVideoElementOptions {
 // Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_SUBTITLE_TRACKS: SubtitleTrackDef[] = [];
 
+/**
+ * Binds all native `<video>` element events to the player state dispatcher
+ * and manages subtitle text track activation.
+ *
+ * Handles play, pause, timeupdate, duration, buffering, volume, errors
+ * (with a debounced decode-error timer), and subtitle track mode toggling.
+ *
+ * @returns A merged ref callback for the video element and the computed subtitle tracks array.
+ */
 export function useVideoElement({
   dispatch,
   onTimeUpdate,

@@ -5,6 +5,12 @@ import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { LiveSeekBar } from '../controls/LiveSeekBar';
 import { SeekBar } from '../controls/SeekBar';
 
+/**
+ * Compound seek bar for the player controls.
+ *
+ * Renders a {@link LiveSeekBar} for livestreams or a standard {@link SeekBar}
+ * for VOD content, with sprite thumbnail previews and mobile-aware compact mode.
+ */
 export function PlayerSeekBar() {
   const { state, spriteSheet, spriteVtt, readOnly, playerHandlers, metadata } =
     usePlayerContext();

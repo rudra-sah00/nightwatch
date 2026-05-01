@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useParticipantView } from '../hooks/use-participant-view';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 
+/** Props for the {@link ParticipantView} component. */
 interface ParticipantViewProps {
   participant: AgoraParticipant;
   canKick?: boolean;
@@ -15,8 +16,10 @@ interface ParticipantViewProps {
 }
 
 /**
- * Renders a single participant's video/audio stream with avatar fallback.
- * Uses Agora remote user tracks for video rendering.
+ * Renders a single participant's video/audio tile with avatar fallback.
+ *
+ * Uses Agora remote user tracks for live video rendering and displays
+ * a speaking indicator, name tag, mic status, and host kick controls.
  */
 export function ParticipantView({
   participant,

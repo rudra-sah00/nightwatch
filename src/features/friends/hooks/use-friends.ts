@@ -21,6 +21,17 @@ import type {
 } from '@/features/friends/types';
 import { useSocket } from '@/providers/socket-provider';
 
+/**
+ * Central hook for the friends feature — fetches friends, pending/sent requests,
+ * and blocked users on mount, then keeps the list live via Socket.IO events
+ * (`friend:status`, `friend:activity`, `friend:request_received`, `friend:request_accepted`).
+ *
+ * Exposes action callbacks (`accept`, `reject`, `cancel`, `unblock`) that
+ * optimistically invalidate the cache and re-fetch after each mutation.
+ *
+ * @returns Friends lists (online/offline), request arrays, blocked users,
+ *          loading state, mutation callbacks, and a manual `refetch` function.
+ */
 export function useFriends() {
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);

@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type ChannelsResponse, fetchChannels } from '../api';
 
+/**
+ * Fetches and manages a paginated list of live TV channels.
+ *
+ * Aborts in-flight requests when parameters change and avoids flashing a
+ * loading skeleton on subsequent fetches after initial data is loaded.
+ *
+ * @param page - Page number (default `1`).
+ * @param limit - Items per page (default `30`).
+ * @param search - Optional search query to filter channels.
+ * @returns Channel list, pagination metadata, loading/error states, and a `refresh` function.
+ */
 export function useChannels(page = 1, limit = 30, search = '') {
   const [data, setData] = useState<ChannelsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);

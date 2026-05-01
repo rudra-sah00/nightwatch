@@ -10,6 +10,11 @@ import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useTheme } from '@/providers/theme-provider';
 
+/**
+ * Resolve whether the current theme is dark.
+ * @param theme - The active theme value.
+ * @returns `true` if the resolved theme is dark.
+ */
 function isDark(theme: string) {
   if (theme === 'dark') return true;
   if (theme === 'system' && typeof window !== 'undefined')
@@ -17,6 +22,16 @@ function isDark(theme: string) {
   return false;
 }
 
+/**
+ * Headless component that launches an interactive product tour using `driver.js`.
+ *
+ * Activates when the URL contains `?tour=true` and the user is on `/home`.
+ * Builds platform-specific step sequences (mobile vs desktop) that highlight
+ * key UI elements like the search bar, sidebar navigation, friends panel, and
+ * profile link. Automatically cleans up the `tour` query param on completion.
+ *
+ * Renders nothing to the DOM.
+ */
 export function GlobalTour() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -107,7 +122,10 @@ export function GlobalTour() {
   return null;
 }
 
-// ── Mobile tour steps (swipe-based navigation) ──────────────────────
+/**
+ * Build tour steps optimized for mobile (swipe-based navigation).
+ * @returns An array of `DriveStep` objects for the mobile tour.
+ */
 function buildMobileSteps(
   title: (t: string, c?: string) => string,
   desc: (t: string) => string,
@@ -171,7 +189,10 @@ function buildMobileSteps(
   ];
 }
 
-// ── Desktop tour steps (hover-based sidebars) ───────────────────────
+/**
+ * Build tour steps optimized for desktop (hover-based sidebars).
+ * @returns An array of `DriveStep` objects for the desktop tour.
+ */
 function buildDesktopSteps(
   title: (t: string, c?: string) => string,
   desc: (t: string) => string,

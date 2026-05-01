@@ -2,12 +2,17 @@ import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
+/** Props for the {@link LoadingOverlay} component. */
 interface LoadingOverlayProps {
   text?: string;
   bgOpacity?: string;
   isVisible: boolean;
 }
 
+/**
+ * Full-screen loading overlay with a spinner and customisable status text.
+ * Fades in/out based on `isVisible` and remains `pointer-events: none`.
+ */
 export function LoadingOverlay({
   isVisible,
   text,

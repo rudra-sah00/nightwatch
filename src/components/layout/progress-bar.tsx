@@ -5,6 +5,13 @@ import { useEffect } from 'react';
 
 NProgress.configure({ showSpinner: false, minimum: 0.1, speed: 300 });
 
+/**
+ * Global page-transition progress bar powered by NProgress.
+ *
+ * Monkey-patches `history.pushState` and `history.replaceState` and listens for
+ * anchor clicks to start/stop the progress indicator on client-side navigations.
+ * Injects a `<style>` tag to position the bar below the navbar and Electron title bar.
+ */
 export function ProgressBar() {
   useEffect(() => {
     const originalPushState = history.pushState.bind(history);

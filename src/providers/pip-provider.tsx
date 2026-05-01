@@ -12,6 +12,8 @@ import {
 } from 'react';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
+import { checkIsMobile } from '@/lib/electron-bridge';
+import { mobileBridge } from '@/lib/mobile-bridge';
 
 /**
  * Serialised snapshot of a playing video captured when the user navigates
@@ -148,6 +150,28 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (musicPlaying && pip) close();
   }, [musicPlaying, pip, close]);
+
+  // Native PiP on app background (Capacitor only)
+  useEffect(() => {
+    if (!checkIsMobile()) return;
+
+    const unlisten = mobileBridge.onAppStateChange(({ isActive }) => {
+      if (isActive) {
+        // Foreground — exit native PiP
+        if (document.pictureInPictureElement) {
+          document.exitPictureInPicture().catch(() => {});
+        }
+      } else {
+        // Background — enter native PiP if a video is registered and playing
+        const el = videoElRef.current ?? pipVideoRef.current;
+        if (el && !el.paused && el.currentTime > 0) {
+          el.requestPictureInPicture?.().catch(() => {});
+        }
+      }
+    });
+
+    return unlisten;
+  }, []);
 
   const ctx: PipContextValue = { register, unregister, close, isActive: !!pip };
 

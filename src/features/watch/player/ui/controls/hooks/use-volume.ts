@@ -1,10 +1,17 @@
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/** Options for {@link useVolume}. */
 interface UseVolumeOptions {
   onVolumeChange: (volume: number) => void;
 }
 
+/**
+ * Manages volume slider interaction: hover expansion, click-to-set,
+ * and mouse-drag tracking with global `mousemove`/`mouseup` listeners.
+ *
+ * @returns Hover/drag state, slider ref, and mousedown handler.
+ */
 export function useVolume({ onVolumeChange }: UseVolumeOptions) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);

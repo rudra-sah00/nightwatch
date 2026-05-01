@@ -12,11 +12,20 @@ import {
 } from '../api';
 import type { WatchProgress } from '../types';
 
+/** Options for {@link useContinueWatching}. */
 interface UseContinueWatchingOptions {
   onSelectContent?: (contentId: string) => void;
   onLoadComplete?: (itemCount: number) => void;
 }
 
+/**
+ * Fetches and manages the user's "continue watching" progress list.
+ *
+ * Handles server-aware caching, optimistic removal via `useOptimistic`,
+ * window-focus refetching, and cache invalidation on unmount.
+ *
+ * @returns Items, optimistic items, loading state, select and remove handlers.
+ */
 export function useContinueWatching({
   onSelectContent,
   onLoadComplete,

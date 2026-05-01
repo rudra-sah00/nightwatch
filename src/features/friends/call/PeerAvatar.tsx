@@ -1,6 +1,14 @@
 import Image from 'next/image';
 import type { CallPeer } from '@/features/friends/hooks/use-call';
 
+/**
+ * Circular avatar for a voice-call peer, using a light-on-dark color scheme.
+ *
+ * Renders the peer's profile photo or a single-letter initial fallback.
+ *
+ * @param props.peer - The {@link CallPeer} to display.
+ * @param props.size - Pixel size for width and height. @defaultValue 40
+ */
 export function PeerAvatar({
   peer,
   size = 40,

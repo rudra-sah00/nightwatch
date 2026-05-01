@@ -3,6 +3,11 @@
 import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Neo-brutalist card container with a 4px border.
+ *
+ * Renders as a flex column so content and footer stack naturally.
+ */
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -58,6 +63,7 @@ function _CardDescription({
   );
 }
 
+/** Padded content area inside a {@link Card}. Grows to fill available space. */
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div

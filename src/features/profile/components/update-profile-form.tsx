@@ -20,6 +20,11 @@ import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
 
+/**
+ * Profile editing form with avatar upload, inline-editable display name and
+ * username, server selection radio group, public profile link sharing, and
+ * account deletion danger zone. Auto-saves on blur/Enter via hidden submit.
+ */
 export function UpdateProfileForm() {
   const t = useTranslations('profile');
   const {

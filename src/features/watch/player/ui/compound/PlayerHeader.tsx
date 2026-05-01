@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
 
+/** Props for the {@link PlayerHeader} component. */
 interface PlayerHeaderProps {
   onSidebarToggle?: () => void;
   isSidebarOpen?: boolean;
@@ -11,6 +12,11 @@ interface PlayerHeaderProps {
   rightContent?: React.ReactNode;
 }
 
+/**
+ * Top header bar of the player overlay showing the content title,
+ * season/episode label, back button, optional sidebar toggle, and
+ * custom right-side content (e.g. clip record button).
+ */
 export function PlayerHeader({
   onSidebarToggle,
   isSidebarOpen,

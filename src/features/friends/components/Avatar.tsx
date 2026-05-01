@@ -1,12 +1,22 @@
 import Image from 'next/image';
 
+/** Props for the {@link Avatar} component. */
 interface AvatarProps {
+  /** Display name used for the alt text and initial fallback. */
   name: string;
+  /** URL of the profile photo, or `null` to show the initial fallback. */
   photo: string | null;
+  /** Pixel size for width and height. @defaultValue 32 */
   size?: number;
+  /** When `true`, uses light-on-dark styling for overlay contexts. */
   light?: boolean;
 }
 
+/**
+ * Circular avatar that renders a profile photo or a single-letter initial fallback.
+ *
+ * @param props - {@link AvatarProps}
+ */
 export function Avatar({ name, photo, size = 32, light }: AvatarProps) {
   if (photo) {
     return (

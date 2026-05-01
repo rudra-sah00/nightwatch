@@ -16,21 +16,37 @@ import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
 
+/** Props for the {@link ContentDetailModal} component. */
 interface ContentDetailModalProps {
+  /** Unique content identifier to display details for. */
   contentId: string;
+  /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: {
     season?: number;
     episode?: number;
     episodeId?: string;
     [key: string]: unknown;
   };
+  /** Whether the modal was opened from the "Continue Watching" section. */
   fromContinueWatching?: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
+  /** Callback when the watchlist state changes for this content. */
   onWatchlistChange?: (contentId: string, inWatchlist: boolean) => void;
+  /** When `true`, automatically starts playback with a countdown. */
   autoPlay?: boolean;
+  /** Whether the app is in offline mode (disables online-only features). */
   isOfflineMode?: boolean;
 }
 
+/**
+ * Full-screen modal for viewing content details and initiating playback.
+ *
+ * Displays hero media (trailer video or poster), content metadata, action bar
+ * (play, resume, watch party, watchlist, download), and episode listing for
+ * series. Supports auto-play with countdown, watch party episode picker mode,
+ * and escape-key dismissal.
+ */
 export function ContentDetailModal({
   contentId,
   initialContext,

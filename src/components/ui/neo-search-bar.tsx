@@ -3,13 +3,23 @@
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
+/** Props for the {@link NeoSearchBar} component. */
 interface NeoSearchBarProps {
+  /** Current search query value. */
   value: string;
+  /** Change handler for the search input. */
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Placeholder text. Defaults to `'Search...'`. */
   placeholder?: string;
   className?: string;
 }
 
+/**
+ * Neo-brutalist search input with a leading magnifying-glass icon.
+ *
+ * Renders a tall (56px) {@link Input} with bold uppercase styling, a focus
+ * ring, and a search icon positioned inside the left padding.
+ */
 export function NeoSearchBar({
   value,
   onChange,

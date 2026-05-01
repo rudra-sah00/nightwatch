@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+/** Options for {@link useNextEpisodeOverlay}. */
 interface UseNextEpisodeOverlayOptions {
   isVisible: boolean;
   nextEpisode: object | null;
@@ -9,6 +10,14 @@ interface UseNextEpisodeOverlayOptions {
   onCancel: () => void;
 }
 
+/**
+ * Manages the auto-play countdown for the next episode overlay.
+ *
+ * Counts down from `autoPlayDelay` seconds and triggers `onPlayNext`
+ * when it reaches zero (unless cancelled or loading).
+ *
+ * @returns `countdown`, `cancelled` flag, and `handleCancel` callback.
+ */
 export function useNextEpisodeOverlay({
   isVisible,
   nextEpisode,

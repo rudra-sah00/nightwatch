@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Episode, Season } from '@/features/search/types';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 
+/** Props for the {@link EpisodePanel} component. */
 interface EpisodePanelProps {
   isOpen: boolean;
   episodes: Episode[];
@@ -25,6 +26,13 @@ interface EpisodePanelProps {
 // Height of each thumbnail slot (px)
 const ITEM_H = 115;
 
+/**
+ * Full-screen episode selection panel with a vertical scroll wheel.
+ *
+ * Displays episode thumbnails in a snap-scroll column on the right side
+ * of the player, with a season dropdown and a hover info panel showing
+ * episode details. Supports animated enter/exit transitions.
+ */
 export function EpisodePanel({
   isOpen,
   episodes,

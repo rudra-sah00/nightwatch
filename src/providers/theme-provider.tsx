@@ -12,10 +12,13 @@ import {
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { initStorageCache } from '@/lib/storage-cache';
 
+/** Supported theme values. `'system'` follows the OS preference. */
 type Theme = 'light' | 'dark' | 'system';
 
+/** Props accepted by {@link ThemeProvider}. */
 interface ThemeProviderProps {
   children: React.ReactNode;
+  /** Initial theme used before localStorage is read. Defaults to `'light'`. */
   defaultTheme?: Theme;
 }
 
@@ -27,6 +30,15 @@ const ThemeContext = createContext<{
   setTheme: () => null,
 });
 
+/**
+ * Provides application-wide light/dark/system theme state.
+ *
+ * On mount it reads the persisted theme from `localStorage('neo-theme')`,
+ * applies the corresponding `dark` class to `<html>`, and syncs the Electron
+ * native title-bar theme when running on desktop.
+ *
+ * Listens to OS `prefers-color-scheme` changes when in `'system'` mode.
+ */
 export function ThemeProvider({
   children,
   defaultTheme = 'light',
@@ -103,4 +115,9 @@ export function ThemeProvider({
   );
 }
 
+/**
+ * Consume the current theme and its setter from the nearest {@link ThemeProvider}.
+ *
+ * @returns `{ theme, setTheme }` — the active theme value and a function to change it.
+ */
 export const useTheme = () => useContext(ThemeContext);

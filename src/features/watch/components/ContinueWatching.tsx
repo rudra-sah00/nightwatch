@@ -20,6 +20,7 @@ function formatRemainingTime(
     : t('continueWatching.hoursLeft', { hours });
 }
 
+/** Props for the {@link ContinueWatching} component. */
 interface ContinueWatchingProps {
   className?: string;
   hideTitle?: boolean;
@@ -28,6 +29,12 @@ interface ContinueWatchingProps {
   onLoadComplete?: (itemCount: number) => void;
 }
 
+/**
+ * Displays a list of in-progress content the user can resume watching.
+ *
+ * Supports optional search filtering, loading skeletons, empty state,
+ * and optimistic removal of items.
+ */
 export function ContinueWatching({
   className,
   hideTitle = false,

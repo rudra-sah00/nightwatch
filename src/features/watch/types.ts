@@ -3,6 +3,7 @@
 export * from '@/types/content';
 export * from './player/context/types';
 
+/** Parameters required to initiate VOD or livestream playback. */
 export interface PlayParams {
   type: 'movie' | 'series' | 'livestream';
   title: string;

@@ -3,22 +3,39 @@
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+/** Props for the {@link RecordButton} component. */
 interface RecordButtonProps {
+  /** Whether a recording is currently in progress. */
   isRecording: boolean;
+  /** Current recording duration in seconds. */
   duration: number;
+  /** Whether the minimum duration has been reached and recording can be stopped. */
   canStop: boolean;
+  /** Whether the recorder is initializing. */
   isStarting?: boolean;
+  /** Whether the recorder is finalizing and uploading remaining segments. */
   isStopping?: boolean;
+  /** Callback to start a new recording. */
   onStart: () => void;
+  /** Callback to stop the current recording. */
   onStop: () => void;
 }
 
+/**
+ * Formats seconds into `m:ss` display string.
+ * @param seconds - Total seconds.
+ * @returns Formatted time string.
+ */
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+/**
+ * Pill-shaped recording control button that cycles through idle, starting,
+ * recording (with live timer), and stopping states.
+ */
 export function RecordButton({
   isRecording,
   duration,

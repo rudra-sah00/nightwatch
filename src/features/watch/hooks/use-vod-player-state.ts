@@ -3,6 +3,12 @@
 import { useMemo } from 'react';
 import { usePlayerContext } from '../player/context/PlayerContext';
 
+/**
+ * Convenience hook that extracts commonly-needed VOD player values from
+ * the player context, including a memoised `pauseOverlayMetadata` object.
+ *
+ * @returns Player state, metadata, handlers, next episode info, and pause overlay metadata.
+ */
 export function useVODPlayerState() {
   const { state, metadata, playerHandlers, nextEpisode } = usePlayerContext();
 

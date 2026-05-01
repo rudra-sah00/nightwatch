@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { onPartyInteraction } from '../../room/services/watch-party.api';
 
+/** Describes a single floating emoji animation instance. */
 export interface FloatingEmoji {
   id: string;
   emoji: string;
@@ -12,6 +13,15 @@ export interface FloatingEmoji {
   wiggleOffsets: number[];
 }
 
+/**
+ * Manages the list of active floating emoji animations.
+ *
+ * Listens for incoming `INTERACTION` events via {@link onPartyInteraction}
+ * and spawns animated emoji instances that auto-remove after their animation
+ * completes (~4.5 s).
+ *
+ * @returns The active emoji list and a manual `spawnEmoji` helper.
+ */
 export function useFloatingEmojis() {
   const [activeEmojis, setActiveEmojis] = useState<FloatingEmoji[]>([]);
   const t = useTranslations('party.fallback');

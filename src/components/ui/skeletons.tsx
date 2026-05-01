@@ -2,6 +2,12 @@
 
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 
+/**
+ * Skeleton placeholder for a search result card.
+ *
+ * Renders a 2:3 aspect-ratio poster area and two title lines inside a
+ * neo-brutalist bordered container. Hidden from assistive technology.
+ */
 export function SearchSkeleton() {
   return (
     <AppSkeletonTheme>
@@ -22,6 +28,12 @@ export function SearchSkeleton() {
   );
 }
 
+/**
+ * Skeleton placeholder for a "continue watching" card.
+ *
+ * Similar to {@link SearchSkeleton} but includes a progress bar indicator
+ * and an extra metadata line.
+ */
 export function WatchProgressSkeleton() {
   return (
     <AppSkeletonTheme>
@@ -43,6 +55,12 @@ export function WatchProgressSkeleton() {
   );
 }
 
+/**
+ * Skeleton placeholder for a live match/event row.
+ *
+ * Mimics the two-team layout with score placeholders, team name lines,
+ * and a CTA button area.
+ */
 export function LiveMatchSkeleton() {
   return (
     <AppSkeletonTheme>

@@ -19,11 +19,17 @@ import {
 import { checkIsDesktop } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 
+/** Definition of a keyboard shortcut group (e.g. video, music, party). */
 interface ShortcutGroup {
+  /** Unique group identifier used for tab selection and i18n keys. */
   id: string;
+  /** Lucide icon component for the group tab. */
   icon: React.ElementType;
+  /** Tailwind color class for the active tab icon. */
   color: string;
+  /** Array of keyboard shortcuts in this group. */
   shortcuts: { keys: string[]; label: string }[];
+  /** When `true`, this group is only shown in the Electron desktop app. */
   desktopOnly?: boolean;
 }
 
@@ -92,6 +98,10 @@ const GROUPS: ShortcutGroup[] = [
   },
 ];
 
+/**
+ * Full-screen dialog listing all keyboard shortcuts grouped by feature area
+ * (video, music, party, search, desktop). Includes tabbed navigation between groups.
+ */
 export function KeyboardShortcuts() {
   const t = useTranslations('profile.shortcuts');
   const tCancel = useTranslations('profile.preferences');

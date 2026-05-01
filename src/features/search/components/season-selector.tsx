@@ -6,14 +6,27 @@ import { cn } from '@/lib/utils';
 import { useSeasonSelector } from '../hooks/use-season-selector';
 import type { Season } from '../types';
 
+/** Props for the {@link SeasonSelector} component. */
 interface SeasonSelectorProps {
+  /** Available seasons for the series. */
   seasons: Season[];
+  /** Currently selected season, or `null` if none selected. */
   selectedSeason: Season | null;
+  /** Whether the dropdown is currently open. */
   isOpen: boolean;
+  /** Callback to toggle the dropdown open/closed state. */
   onToggle: () => void;
+  /** Callback when a season is selected from the dropdown. */
   onSelect: (season: Season) => void;
 }
 
+/**
+ * Dropdown button for selecting a season from a series.
+ *
+ * Renders a styled trigger button showing the current season and a dropdown
+ * menu with all available seasons and their episode counts. Uses an outside-click
+ * handler via {@link useSeasonSelector} to auto-close.
+ */
 export function SeasonSelector({
   seasons,
   selectedSeason,

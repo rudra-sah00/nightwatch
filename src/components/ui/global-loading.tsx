@@ -3,12 +3,21 @@
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
+/** Props for the {@link GlobalLoading} component. */
 interface GlobalLoadingProps {
   className?: string;
+  /** Override the default "Loading" message. */
   message?: string;
+  /** When `true` (default), covers the entire viewport with a fixed overlay. */
   fullScreen?: boolean;
 }
 
+/**
+ * Full-screen or inline loading indicator with a neo-brutalist dual-ring spinner.
+ *
+ * Uses `role="status"` and `aria-live="polite"` for screen-reader announcements.
+ * The displayed message defaults to the `common.loading` translation key.
+ */
 export function GlobalLoading({
   className,
   message,

@@ -6,8 +6,10 @@ import { loginSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
+/** Possible steps in the login flow. */
 type Step = 'initial' | 'otp' | 'forgot' | 'forgot_success';
 
+/** Server action return shape for form submissions. */
 interface FormState {
   error?: string;
   fieldErrors?: Record<string, string>;
@@ -16,6 +18,16 @@ interface FormState {
 
 const MOBILE_LOGIN_STATE_KEY = 'mobile_login_state';
 
+/**
+ * Manages the entire login flow: credential submission, CAPTCHA verification,
+ * OTP two-factor authentication, OTP resend with countdown, and forgot-password.
+ *
+ * Integrates with `React.useActionState` for progressive-enhancement-friendly
+ * form handling and supports Capacitor mobile deep-link login via URL state params.
+ *
+ * @returns An object containing form state, step indicators, action handlers,
+ *          and derived booleans (`isOtpStep`, `isForgotStep`, etc.).
+ */
 export function useLoginForm() {
   const t = useTranslations('common.toasts');
   const tErr = useTranslations('auth.errors');

@@ -6,6 +6,15 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+/**
+ * Monitors the browser's online/offline status and shows toast notifications
+ * when connectivity changes.
+ *
+ * Suppresses the visual overlay on player routes (`/watch/`, `/watch-party/`, `/live/`).
+ * Currently renders no persistent UI beyond the toasts.
+ *
+ * @returns `null` — all feedback is delivered via `sonner` toasts.
+ */
 export function OfflineIndicator() {
   const t = useTranslations('common.offline');
   const [isOffline, setIsOffline] = useState(false);

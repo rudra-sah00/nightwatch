@@ -4,6 +4,15 @@ import type * as React from 'react';
 import { hapticLight } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
+/**
+ * CVA variant definitions for the {@link Button} component.
+ *
+ * Variants:
+ * - `variant` — visual style (`default`, `neo`, `neo-yellow`, `neo-red`,
+ *   `neo-outline`, `neo-ghost`, `neo-base`, `none`).
+ * - `size` — dimensions (`default`, `sm`, `lg`, `xl`, `2xl`, `icon`, `neo`,
+ *   `neo-lg`, `none`).
+ */
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-[background-color,color,border-color,opacity,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-headline font-medium tracking-normal',
   {
@@ -43,14 +52,25 @@ const buttonVariants = cva(
   },
 );
 
+/** Props for the {@link Button} component. */
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /** Render as the child element via Radix `Slot` (composition pattern). */
   asChild?: boolean;
+  /** Show a spinner and disable the button while an async action is in flight. */
   isLoading?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
 }
 
+/**
+ * Neo-brutalist button primitive with CVA variants.
+ *
+ * Triggers a light haptic on every click (native only). When `isLoading` is
+ * `true` the button is disabled and an animated spinner is prepended.
+ *
+ * Supports the Radix `asChild` composition pattern via `@radix-ui/react-slot`.
+ */
 function Button({
   className,
   variant,

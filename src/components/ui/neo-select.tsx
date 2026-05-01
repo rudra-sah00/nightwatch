@@ -3,18 +3,31 @@
 import { ChevronDown } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/** A single option in the {@link NeoSelect} dropdown. */
 interface NeoSelectOption {
+  /** Value submitted/tracked by the select. */
   value: string;
+  /** Human-readable label displayed in the dropdown. */
   label: string;
 }
 
+/** Props for the {@link NeoSelect} component. */
 interface NeoSelectProps {
+  /** Currently selected value. */
   value: string;
+  /** Available options. */
   options: NeoSelectOption[];
+  /** Called with the new value when the user picks an option. */
   onChange: (value: string) => void;
   className?: string;
 }
 
+/**
+ * Custom dropdown select with neo-brutalist styling.
+ *
+ * Renders a button that toggles a positioned option list. Closes on outside
+ * click. The selected option is highlighted with the primary color.
+ */
 export function NeoSelect({
   value,
   options,

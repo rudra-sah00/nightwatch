@@ -3,19 +3,33 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useOfflineContentDetail } from './use-offline-content-detail';
 
+/** Options for the {@link useOfflineContentDetailModal} hook. */
 interface ContentDetailModalOptions {
+  /** Unique content identifier. */
   contentId: string;
+  /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: {
     season?: number;
     episode?: number;
     episodeId?: string;
     [key: string]: unknown;
   };
+  /** Whether the modal was opened from the "Continue Watching" section. */
   fromContinueWatching?: boolean;
+  /** When `true`, automatically starts playback with a countdown. */
   autoPlay?: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
 }
 
+/**
+ * Orchestrates the offline content detail modal's state and side effects.
+ *
+ * Composes {@link useOfflineContentDetail} with UI-specific concerns: sidebar
+ * disabling, body scroll locking, escape-key handling, auto-play countdown
+ * logic, and trailer auto-start. Returns all state and handlers needed by
+ * the {@link OfflineContentDetailModal} component.
+ */
 export function useOfflineContentDetailModal({
   contentId,
   initialContext,

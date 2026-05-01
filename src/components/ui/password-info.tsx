@@ -5,10 +5,18 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
+/** Props for the {@link PasswordInfo} component. */
 interface PasswordInfoProps {
   className?: string;
 }
 
+/**
+ * Inline info button that opens a modal listing password requirements.
+ *
+ * Displays minimum character count, uppercase requirement, and special
+ * character rules. Includes a note about known-breach checking via
+ * Have I Been Pwned. Closes on Escape key or backdrop click.
+ */
 export function PasswordInfo({ className }: PasswordInfoProps) {
   const t = useTranslations('common');
   const [isOpen, setIsOpen] = useState(false);

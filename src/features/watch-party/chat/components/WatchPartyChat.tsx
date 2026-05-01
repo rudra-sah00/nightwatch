@@ -24,6 +24,7 @@ interface TypingUser {
   userName: string;
 }
 
+/** Props for the {@link WatchPartyChat} and {@link WatchPartyChatDisabled} components. */
 interface WatchPartyChatProps {
   messages: ChatMessage[];
   onSendMessage: (content: string) => void;
@@ -34,7 +35,10 @@ interface WatchPartyChatProps {
   onTypingStop?: () => void;
 }
 
-// Read-only variant for when chat is disabled
+/**
+ * Read-only variant of the watch party chat shown when the current user
+ * does not have chat permissions. Displays messages but hides the input.
+ */
 export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
   messages,
   currentUserId,
@@ -76,6 +80,12 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
 // Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_TYPING_USERS: TypingUser[] = [];
 
+/**
+ * Full interactive chat panel for the watch party sidebar.
+ *
+ * Renders the message list with auto-scroll, an emoji picker popover,
+ * typing indicators, and a text input with send button.
+ */
 export const WatchPartyChat = memo(function WatchPartyChat({
   messages,
   onSendMessage,

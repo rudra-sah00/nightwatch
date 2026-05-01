@@ -4,6 +4,13 @@ import type * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * CVA variant definitions for the {@link Label} component.
+ *
+ * Variants:
+ * - `variant` — visual style (`default`, `neo`). Both render as bold,
+ *   uppercase, wide-tracked text.
+ */
 const labelVariants = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 transition-colors',
   {
@@ -20,6 +27,11 @@ const labelVariants = cva(
   },
 );
 
+/**
+ * Accessible form label built on `@radix-ui/react-label` with CVA variants.
+ *
+ * Automatically dims when its associated peer input is disabled.
+ */
 const Label = ({
   className,
   variant,

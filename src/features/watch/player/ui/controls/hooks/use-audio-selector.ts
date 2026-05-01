@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
+/**
+ * Manages open/close state and outside-click dismissal for the audio
+ * language selector dropdown.
+ *
+ * @returns `isOpen`, `setIsOpen`, and `menuRef`.
+ */
 export function useAudioSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

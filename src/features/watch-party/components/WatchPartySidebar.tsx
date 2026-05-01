@@ -26,9 +26,8 @@ import { SidebarTabs } from './SidebarTabs';
 import { VideoGrid } from './VideoGrid';
 
 /**
- * Represents a user currently typing in the chat.
+ * Represents a user currently typing in the watch party chat.
  */
-
 interface TypingUser {
   userId: string;
   userName: string;
@@ -37,6 +36,7 @@ interface TypingUser {
 // Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_TYPING_USERS: TypingUser[] = [];
 
+/** Props for the {@link WatchPartySidebar} component. */
 interface WatchPartySidebarProps {
   room: WatchPartyRoom;
   messages: ChatMessage[];
@@ -69,9 +69,13 @@ interface WatchPartySidebarProps {
 
 /**
  * Main sidebar component for the Watch Party feature.
- * Handles tab navigation between chat and participants, as well as Agora media integration.
+ *
+ * Renders tab navigation (chat, participants, soundboard, sketch), the video
+ * grid, and the media controls footer. Integrates with Agora for real-time
+ * audio/video and RTM for theme sync.
+ *
+ * @remarks Wrapped in {@link React.memo} to avoid re-renders from parent state changes.
  */
-
 export const WatchPartySidebar = memo(function WatchPartySidebar({
   room,
   messages,

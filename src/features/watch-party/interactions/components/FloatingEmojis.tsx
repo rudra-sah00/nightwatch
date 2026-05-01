@@ -40,6 +40,13 @@ const FloatingEmojiItem = memo(
 
 FloatingEmojiItem.displayName = 'FloatingEmojiItem';
 
+/**
+ * Full-screen overlay that renders animated floating emoji reactions.
+ *
+ * Listens to the {@link useFloatingEmojis} hook for incoming emoji events
+ * and animates each one upward with randomised wiggle, rotation, and fade.
+ * The overlay is `pointer-events: none` so it never blocks video interaction.
+ */
 export function FloatingEmojis() {
   const { activeEmojis } = useFloatingEmojis();
 

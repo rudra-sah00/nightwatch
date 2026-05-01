@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '../../room/types';
 
+/** Props for the {@link FloatingChat} component. */
 interface FloatingChatProps {
   messages: ChatMessage[];
   currentUserId?: string;
@@ -16,13 +17,14 @@ interface FloatingChatProps {
 }
 
 /**
- * Invisible floating chat overlay — shown over the video when the sidebar
- * is collapsed and the "Floating chat" toggle is enabled.
+ * Transparent floating chat overlay rendered over the video area when the
+ * sidebar is collapsed and the "Floating chat" toggle is enabled.
  *
- * - No background on the message list — text only, readable via text-shadow.
- * - Max height 60 % of screen; older messages scroll up.
+ * @remarks
+ * - No background on the message list — text is readable via `text-shadow`.
+ * - Max height 60% of screen; older messages scroll up.
  * - A minimal glass-effect input at the bottom lets users send messages.
- * - Pointer-events allow scrolling the message list without blocking the entire screen.
+ * - `pointer-events` allow scrolling without blocking the video.
  */
 export function FloatingChat({
   messages,

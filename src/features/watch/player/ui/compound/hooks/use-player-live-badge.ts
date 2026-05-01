@@ -3,6 +3,12 @@ import { usePlayerContext } from '../../../context/PlayerContext';
 
 const LIVE_EDGE_THRESHOLD_S = 15;
 
+/**
+ * Tracks whether the livestream video is at the live edge and provides
+ * a "Go Live" handler to jump back to it.
+ *
+ * @returns Metadata, `isAtLiveEdge` flag, and `handleGoLive` callback.
+ */
 export function usePlayerLiveBadge() {
   const { metadata, videoRef } = usePlayerContext();
   const [isAtLiveEdge, setIsAtLiveEdge] = useState(true);

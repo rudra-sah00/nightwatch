@@ -11,6 +11,7 @@ import {
 } from '../services/watch-party.api';
 import type { PartyEvent, PartyStateUpdate, WatchPartyRoom } from '../types';
 
+/** Props for {@link useWatchPartySync}. */
 interface UseWatchPartySyncProps {
   room: WatchPartyRoom | null;
   setRoom: React.Dispatch<React.SetStateAction<WatchPartyRoom | null>>;
@@ -27,6 +28,16 @@ interface UseWatchPartySyncProps {
   videoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
+/**
+ * Handles playback state synchronisation between the host and guests.
+ *
+ * - Host: emits play/pause/seek/rate events via RTM and persists to backend.
+ * - Guest: processes incoming RTM events, applies state updates, and handles
+ *   host disconnect/reconnect with a configurable grace period.
+ * - Both: handles content updates, stream token refreshes, and sync requests.
+ *
+ * @returns `emitEvent`, `updateContent`, RTM message handler, and presence handler.
+ */
 export function useWatchPartySync({
   room,
   setRoom,

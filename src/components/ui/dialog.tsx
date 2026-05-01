@@ -7,30 +7,46 @@ import type * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+/**
+ * Root dialog container. Wraps Radix `Dialog.Root`.
+ */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/**
+ * Button or element that opens the dialog. Wraps Radix `Dialog.Trigger`.
+ */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
+/**
+ * Portal that renders dialog content outside the DOM hierarchy.
+ */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+/**
+ * Button that closes the dialog. Wraps Radix `Dialog.Close`.
+ */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/**
+ * Semi-transparent backdrop overlay rendered behind the dialog content.
+ * Includes blur and fade-in/out animations.
+ */
 function DialogOverlay({
   className,
   ...props
@@ -47,6 +63,14 @@ function DialogOverlay({
   );
 }
 
+/**
+ * Centered dialog panel with neo-brutalist border styling.
+ *
+ * Renders inside a portal with an overlay backdrop. Includes an optional
+ * close button (top-right X icon) controlled by `showCloseButton`.
+ *
+ * @param props.showCloseButton - Whether to render the X close button. Defaults to `true`.
+ */
 function DialogContent({
   className,
   children,
@@ -83,6 +107,7 @@ function DialogContent({
   );
 }
 
+/** Semantic header area for dialog title and description. */
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -96,6 +121,11 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+/**
+ * Footer area for dialog action buttons.
+ *
+ * @param props.showCloseButton - Append an auto-closing "Close" button. Defaults to `false`.
+ */
 function DialogFooter({
   className,
   showCloseButton = false,
@@ -125,6 +155,7 @@ function DialogFooter({
   );
 }
 
+/** Large, bold dialog title. Wraps Radix `Dialog.Title`. */
 function DialogTitle({
   className,
   ...props
@@ -141,6 +172,7 @@ function DialogTitle({
   );
 }
 
+/** Muted description text below the dialog title. Wraps Radix `Dialog.Description`. */
 function DialogDescription({
   className,
   ...props

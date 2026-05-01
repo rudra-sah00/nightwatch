@@ -7,6 +7,12 @@ import { useTranslations } from 'next-intl';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useAuth } from '@/providers/auth-provider';
 
+/**
+ * Top navigation bar displaying the brand logo and user profile link.
+ *
+ * Adapts its drag region behavior based on whether the music player is expanded,
+ * and applies Electron-safe insets for desktop app compatibility.
+ */
 export function Navbar() {
   const { user } = useAuth();
   const { expanded: musicExpanded } = useMusicPlayerContext();

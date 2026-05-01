@@ -4,6 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { type ClipFilters, deleteClip, getClips, renameClip } from '../api';
 import type { Clip } from '../types';
 
+/**
+ * Manages fetching, pagination, filtering, deletion, and renaming of user clips.
+ *
+ * Automatically refetches when filter values change. Supports infinite-scroll
+ * pagination via `loadMore()`.
+ *
+ * @param filters - Optional search, sort, and date range filters.
+ * @returns Clip list, loading states, and mutation helpers (`remove`, `rename`, `loadMore`, `refetch`).
+ */
 export function useClips(filters?: ClipFilters) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [isLoading, setIsLoading] = useState(true);

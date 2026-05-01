@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useVolume } from './hooks/use-volume';
 
+/** Props for the {@link Volume} component. */
 interface VolumeProps {
   volume: number;
   isMuted: boolean;
@@ -12,6 +13,10 @@ interface VolumeProps {
   onMuteToggle: () => void;
 }
 
+/**
+ * Neo-brutalist volume control with a mute toggle button and an
+ * expandable horizontal slider that appears on hover.
+ */
 export function Volume({
   volume,
   isMuted,

@@ -44,7 +44,10 @@ import { PlayerVideo } from './ui/compound/PlayerVideo';
 import { PlayerVolume } from './ui/compound/PlayerVolume';
 import { PlayerPipButton } from './ui/controls/PipButton';
 
-// Namespace for clean importing in components
+/**
+ * Namespace object that groups all compound player components for clean
+ * `<Player.Root>`, `<Player.Controls>`, etc. usage in consuming components.
+ */
 export const Player = {
   Root: PlayerRoot,
   Video: PlayerVideo,

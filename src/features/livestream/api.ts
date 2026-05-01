@@ -10,6 +10,15 @@ export type {
   LiveMatch,
 } from './types';
 
+/**
+ * Fetches the livestream schedule for a given sport type.
+ *
+ * @param sportType - Sport category to filter by (default `"basketball"`).
+ * @param daysBackward - Number of past days to include (default `0`).
+ * @param daysForward - Number of future days to include (default `3`).
+ * @param signal - Optional `AbortSignal` for request cancellation.
+ * @returns Array of live matches within the date range.
+ */
 export const fetchLivestreamSchedule = async (
   sportType = 'basketball',
   daysBackward = 0,
@@ -23,6 +32,12 @@ export const fetchLivestreamSchedule = async (
   return data?.items || [];
 };
 
+/**
+ * Fetches detailed information for a single live match.
+ *
+ * @param id - Unique match identifier.
+ * @returns The match details, or `null` if not found or on error.
+ */
 export const fetchLiveMatchDetail = async (
   id: string,
 ): Promise<LiveMatch | null> => {
@@ -36,22 +51,43 @@ export const fetchLiveMatchDetail = async (
   }
 };
 
+/** A live TV channel entry. */
 export interface Channel {
+  /** Unique channel identifier. */
   id: string;
+  /** Provider-specific identifier. */
   providerId: string;
+  /** Display name of the channel. */
   name: string;
+  /** Channel category (e.g. sports, news), or `null`. */
   category: string | null;
+  /** URL of the channel icon, or `null`. */
   icon: string | null;
 }
 
+/** Paginated response from the channels API. */
 export interface ChannelsResponse {
+  /** Array of channels for the current page. */
   channels: Channel[];
+  /** Total number of channels matching the query. */
   total: number;
+  /** Current page number. */
   page: number;
+  /** Number of items per page. */
   limit: number;
+  /** Total number of available pages. */
   totalPages: number;
 }
 
+/**
+ * Fetches a paginated list of live TV channels.
+ *
+ * @param page - Page number (default `1`).
+ * @param limit - Items per page (default `30`).
+ * @param search - Optional search query to filter channels by name.
+ * @param signal - Optional `AbortSignal` for request cancellation.
+ * @returns Paginated channels response.
+ */
 export const fetchChannels = async (
   page = 1,
   limit = 30,
@@ -71,6 +107,12 @@ export const fetchChannels = async (
   return data || { channels: [], total: 0, page: 1, limit, totalPages: 0 };
 };
 
+/**
+ * Fetches the list of available sport categories for the livestream schedule.
+ *
+ * @param signal - Optional `AbortSignal` for request cancellation.
+ * @returns Array of sport objects with `id` and `label`.
+ */
 export const fetchSports = async (signal?: AbortSignal) => {
   const data = await apiFetch<{ data: { id: string; label: string }[] }>(
     `/api/livestream/sports`,

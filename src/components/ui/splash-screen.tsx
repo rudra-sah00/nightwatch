@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
+/**
+ * Animated splash screen overlay displayed on initial app load.
+ *
+ * Shows the "NIGHTWATCH" wordmark with a shimmer animation for 2 seconds,
+ * then fades out over 500ms and unmounts. Covers the entire viewport at
+ * `z-index: 200` to mask content loading beneath.
+ */
 export function SplashScreen() {
   const [show, setShow] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);

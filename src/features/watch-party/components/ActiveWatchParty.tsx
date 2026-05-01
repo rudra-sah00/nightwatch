@@ -36,6 +36,7 @@ interface TypingUser {
 // Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_TYPING_USERS: TypingUser[] = [];
 
+/** Props for the {@link ActiveWatchParty} component. */
 interface ActiveWatchPartyProps {
   room: WatchPartyRoom;
   currentUserId: string | undefined;
@@ -67,6 +68,14 @@ interface ActiveWatchPartyProps {
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => Promise<void>;
 }
 
+/**
+ * Top-level layout component for an active watch party session.
+ *
+ * Composes the sidebar (chat, participants, soundboard, sketch), the video
+ * area, floating chat overlay, and the leave-confirmation dialog into a
+ * full-screen split layout. Manages fullscreen toggling, floating chat
+ * persistence, and sketch-mode state.
+ */
 export function ActiveWatchParty({
   room,
   currentUserId,

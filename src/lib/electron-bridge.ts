@@ -1,17 +1,36 @@
-// Electron Bridge — unified API for desktop native features.
-// Every component imports { desktopBridge, isDesktop } from here.
-// The actual implementation is in electron/preload.js which exposes window.electronAPI.
+/**
+ * Electron Bridge — unified API for desktop native features.
+ *
+ * Every component imports `{ desktopBridge, isDesktop }` from here.
+ * The actual implementation lives in `electron/preload.js` which exposes `window.electronAPI`.
+ * When running outside Electron, all bridge methods are safe no-ops.
+ *
+ * @module electron-bridge
+ */
 
+/**
+ * Represents a single offline download managed by the Electron main process.
+ */
 export interface DownloadItem {
+  /** Unique identifier for the content being downloaded. */
   contentId: string;
+  /** Human-readable title of the download. */
   title: string;
+  /** Optional poster/thumbnail URL for display. */
   posterUrl?: string;
+  /** Total file size in bytes, if known. */
   filesize?: number;
+  /** Number of bytes downloaded so far. */
   downloadedBytes: number;
+  /** Download progress as a 0–1 fraction. */
   progress: number;
+  /** Selected quality label (e.g. "1080p"). */
   quality?: string;
+  /** Current download speed as a human-readable string. */
   speed?: string;
+  /** Whether the download is a single MP4 file rather than HLS segments. */
   isMp4?: boolean;
+  /** Current lifecycle status of the download. */
   status:
     | 'QUEUED'
     | 'DOWNLOADING'
@@ -19,18 +38,24 @@ export interface DownloadItem {
     | 'PAUSED'
     | 'FAILED'
     | 'CANCELLED';
+  /** Error message when status is `FAILED`. */
   error?: string;
+  /** Arbitrary show/series metadata attached to the download. */
   showData?: unknown;
+  /** Local filesystem path to the downloaded HLS playlist. */
   localPlaylistPath?: string;
+  /** Subtitle tracks associated with this download. */
   subtitleTracks?: {
     label: string;
     language: string;
     url: string;
     localPath?: string;
   }[];
+  /** Unix timestamp (ms) when the download was created. */
   createdAt: number;
 }
 
+/** Callback returned by event listeners to unsubscribe. */
 type UnlistenFn = () => void;
 
 const isElectronEnv = typeof window !== 'undefined' && 'electronAPI' in window;
@@ -40,13 +65,35 @@ const isCapacitorEnv =
   typeof window !== 'undefined' &&
   window.Capacitor?.isNativePlatform?.() === true;
 
+/**
+ * `true` when the app is running inside the Electron desktop shell.
+ * Evaluated once at module load time — safe for top-level guards.
+ */
 export const isDesktop = isElectronEnv;
+
+/**
+ * `true` when the app is running inside the Capacitor native mobile shell.
+ * Evaluated once at module load time.
+ */
 export const isMobile = isCapacitorEnv;
 
+/**
+ * Runtime check for the Electron environment.
+ * Unlike {@link isDesktop}, this re-evaluates on every call — useful inside
+ * effects that may run before the module-level constant is set.
+ *
+ * @returns `true` if `window.electronAPI` exists.
+ */
 export function checkIsDesktop(): boolean {
   return typeof window !== 'undefined' && 'electronAPI' in window;
 }
 
+/**
+ * Runtime check for the Capacitor native environment.
+ * Unlike {@link isMobile}, this re-evaluates on every call.
+ *
+ * @returns `true` if Capacitor reports a native platform.
+ */
 export function checkIsMobile(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -180,4 +227,15 @@ function createBridge() {
   };
 }
 
+/**
+ * Singleton bridge to Electron desktop native APIs.
+ *
+ * When running outside Electron every method is a safe no-op (or returns a
+ * sensible default like an empty array / empty string). This lets UI code call
+ * bridge methods unconditionally without platform guards.
+ *
+ * Methods cover: Discord Rich Presence, clipboard, persistent key-value store,
+ * native theme, Picture-in-Picture, window controls, notifications, media keys,
+ * fullscreen, offline downloads, and more.
+ */
 export const desktopBridge = createBridge();

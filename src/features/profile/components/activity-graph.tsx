@@ -13,8 +13,11 @@ const toIso = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+/** Props for the {@link ActivityGraph} component. */
 interface ActivityGraphProps {
+  /** Array of daily watch activity records. */
   activity: WatchActivity[];
+  /** Whether the activity data is still loading. */
   isLoading?: boolean;
 }
 
@@ -82,6 +85,7 @@ function getMonthLabelsForSkeleton(t: (key: string) => string) {
   return labels;
 }
 
+/** Placeholder skeleton rendered while activity data is loading. */
 function ActivityGraphSkeleton() {
   const t = useTranslations('profile');
   const skeletonIds = useMemo(
@@ -109,6 +113,17 @@ function ActivityGraphSkeleton() {
   );
 }
 
+/**
+ * Computes the 53-week grid data for the activity heatmap.
+ *
+ * Maps raw activity records onto a calendar grid spanning the last 52 weeks
+ * plus the current partial week, assigning intensity levels (0–4) based on
+ * watch minutes per day.
+ *
+ * @param activity - Array of daily watch activity records.
+ * @param createdAt - Optional account creation date to grey out pre-creation days.
+ * @returns Object containing the `weeks` 2D array for rendering.
+ */
 function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
   return useMemo(() => {
     // Strip time to ensure consistent comparisons
@@ -183,6 +198,14 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
   }, [activity, createdAt]);
 }
 
+/**
+ * GitHub-style activity heatmap showing daily watch activity over the past year.
+ *
+ * Renders a 53×7 grid of colored cells with hover tooltips displaying watch
+ * minutes and date. Shows a skeleton placeholder while loading.
+ *
+ * @param props - Activity data, optional account creation date, and loading flag.
+ */
 export function ActivityGraph({
   activity,
   createdAt,

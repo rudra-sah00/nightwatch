@@ -29,6 +29,7 @@ const PREVIEW_SCALES = {
   '3xl': 2.2,
 };
 
+/** Options for {@link useSeekBar}. */
 interface UseSeekBarOptions {
   currentTime: number;
   duration: number;
@@ -40,6 +41,13 @@ interface UseSeekBarOptions {
   allowPreview?: boolean;
 }
 
+/**
+ * Manages seek bar interaction: progress/buffer percentages, hover preview
+ * position, sprite thumbnail lookup (VTT or sprite-sheet), click/drag
+ * seeking, and responsive preview scaling.
+ *
+ * @returns Progress values, hover state, sprite data, and mouse event handlers.
+ */
 export function useSeekBar({
   currentTime,
   duration,

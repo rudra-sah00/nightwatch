@@ -7,7 +7,9 @@ import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { WatchActivity } from '../types';
 import { ActivityGraph } from './activity-graph';
 
+/** Props for the {@link PublicProfileView} component. */
 interface PublicProfileViewProps {
+  /** Public profile data including user info and watch activity. */
   profile: {
     id: string;
     name: string;
@@ -16,10 +18,15 @@ interface PublicProfileViewProps {
     createdAt: string;
     activity: { date: string; watchSeconds: number }[];
   };
-  /** Pre-computed today's date (ISO string) from server to prevent hydration mismatch */
+  /** Pre-computed today's date (ISO string) from server to prevent hydration mismatch. */
   todayIso: string;
 }
 
+/**
+ * Read-only public profile page displaying a user's avatar, stats (streak and
+ * total watch hours), and a GitHub-style activity heatmap. Includes a link
+ * back to the home page and a "What's New" section.
+ */
 export function PublicProfileView({
   profile,
   todayIso,
@@ -192,6 +199,13 @@ export function PublicProfileView({
   );
 }
 
+/**
+ * Computes the consecutive-day watch streak ending at today (or yesterday).
+ *
+ * @param activity - Array of daily activity records with `date` and `watchSeconds`.
+ * @param todayIso - Today's date as an ISO string (`YYYY-MM-DD`).
+ * @returns Number of consecutive active days (capped at 365).
+ */
 function computeStreak(
   activity: { date: string; watchSeconds: number }[],
   todayIso: string,

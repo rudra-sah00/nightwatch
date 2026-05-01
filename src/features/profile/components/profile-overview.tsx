@@ -11,6 +11,10 @@ import { ActivityGraph } from './activity-graph';
 import { AppPreferences } from './app-preferences';
 import { UpdateProfileForm } from './update-profile-form';
 
+/**
+ * Main profile page layout composing the update form, app preferences,
+ * password change form, and watch activity heatmap sections.
+ */
 export function ProfileOverview() {
   const t = useTranslations('profile');
   const { user, activity, loadingActivity } = useProfileOverview();

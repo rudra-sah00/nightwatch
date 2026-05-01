@@ -8,6 +8,16 @@ import type { CallPeer } from '@/features/friends/hooks/use-call';
 import type { FriendProfile } from '@/features/friends/types';
 import { PeerAvatar } from './PeerAvatar';
 
+/**
+ * Spotlight overlay for inviting online friends to an active voice call.
+ *
+ * Fetches the friend list on mount, filters out peers already in the call,
+ * and allows searching by name. Selecting a friend triggers the `onInvite` callback.
+ *
+ * @param props.onClose - Callback to close the spotlight.
+ * @param props.onInvite - Callback invoked with the selected {@link CallPeer}.
+ * @param props.existing - Peers already participating in the call (excluded from results).
+ */
 export function InviteSpotlight({
   onClose,
   onInvite,

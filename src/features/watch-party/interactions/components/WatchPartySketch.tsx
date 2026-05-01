@@ -68,6 +68,9 @@ const TOOLS: { id: ToolType; labelKey: string; icon: React.ElementType }[] = [
   { id: 'reaction', labelKey: 'sketch.toolReaction', icon: Sparkles },
 ];
 
+/**
+ * Placeholder shown when the current user lacks sketch/draw permissions.
+ */
 export function WatchPartySketchDisabled() {
   const t = useTranslations('party');
 
@@ -84,6 +87,14 @@ export function WatchPartySketchDisabled() {
   );
 }
 
+/**
+ * Sketch tool panel rendered in the watch party sidebar.
+ *
+ * Provides tool selection (freehand, pencil, shapes, text, laser, eraser,
+ * sticker, reaction), colour picker, stroke width / font size slider,
+ * opacity slider, fill toggle, undo/clear actions, z-order controls,
+ * and a "Capture Scene" button that exports the Konva stage as a PNG.
+ */
 export function WatchPartySketch() {
   const {
     currentTool,

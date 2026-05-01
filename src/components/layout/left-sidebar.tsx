@@ -23,6 +23,11 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MobileSidebarShell } from './sidebar/MobileSidebarShell';
 import { useSidebarAnimation } from './sidebar/use-sidebar-animation';
 
+/**
+ * Detects the user's operating system from the navigator user agent string.
+ *
+ * @returns The OS name (`"macOS"`, `"Windows"`, or `"Linux"`), or `null` if undetectable.
+ */
 function useOSName() {
   return useMemo(() => {
     if (typeof navigator === 'undefined') return null;
@@ -34,6 +39,13 @@ function useOSName() {
   }, []);
 }
 
+/**
+ * Primary left navigation sidebar with links to all major app sections.
+ *
+ * Renders as a full-width overlay on mobile (via {@link MobileSidebarShell}) and
+ * a collapsible fixed-width panel on desktop. Conditionally shows download and
+ * desktop-app-specific links based on the current platform.
+ */
 export function LeftSidebar() {
   const { leftOpen: open, setLeftOpen } = useSidebar();
   const pathname = usePathname();

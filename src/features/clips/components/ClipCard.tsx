@@ -7,12 +7,22 @@ import { useCallback, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Clip } from '../types';
 
+/**
+ * Formats a duration in seconds to `m:ss` display string.
+ * @param seconds - Total seconds to format.
+ * @returns Formatted duration string (e.g. `"2:05"`).
+ */
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+/**
+ * Formats an ISO date string to a short locale display (e.g. `"May 1, 2026"`).
+ * @param dateStr - ISO 8601 date string.
+ * @returns Formatted date string.
+ */
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', {
@@ -22,14 +32,24 @@ function formatDate(dateStr: string): string {
   });
 }
 
+/** Props for the {@link ClipCard} component. */
 interface ClipCardProps {
+  /** The clip data to display. */
   clip: Clip;
+  /** Callback invoked when the user deletes a clip. */
   onDelete: (id: string) => void;
+  /** Callback invoked when the user renames a clip. */
   onRename: (id: string, title: string) => void;
+  /** Callback invoked when the user plays a clip. */
   onPlay: (clip: Clip) => void;
+  /** Callback invoked when the user shares a clip. */
   onShare: (clip: Clip) => void;
 }
 
+/**
+ * Displays a single clip as a card with thumbnail, duration badge, status indicators,
+ * and inline-editable title. Provides play, share, rename, and delete actions.
+ */
 export function ClipCard({
   clip,
   onDelete,

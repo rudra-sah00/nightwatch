@@ -6,14 +6,26 @@ import { useCall } from '@/features/friends/hooks/use-call';
 import type { FriendActivity } from '@/features/friends/types';
 import { Avatar } from './Avatar';
 
+/** Props for the {@link FriendRow} component. */
 interface FriendRowProps {
+  /** The friend's user ID. */
   id: string;
+  /** Display name. */
   name: string;
+  /** Profile photo URL, or `null`. */
   photo: string | null;
+  /** Whether the friend is currently online. */
   isOnline: boolean;
+  /** The friend's current watching activity, or `null`. */
   activity: FriendActivity | null;
 }
 
+/**
+ * A single row in the friends list showing avatar, online indicator, activity
+ * tooltip on hover, and a call button.
+ *
+ * @param props - {@link FriendRowProps}
+ */
 export function FriendRow({
   id,
   name,

@@ -3,6 +3,13 @@
 import { Play, Square } from 'lucide-react';
 import { useAskAi } from '@/features/ask-ai/hooks/use-ask-ai';
 
+/**
+ * Voice-to-voice AI assistant interface.
+ *
+ * Renders a large orb button that toggles between idle, listening, and speaking
+ * states. Displays animated pulse rings during active states, real-time
+ * transcripts for both user and AI, and any error messages.
+ */
 export function AskAiView() {
   const { state, transcript, userTranscript, error, start, stop } = useAskAi();
   const isActive = state !== 'idle';

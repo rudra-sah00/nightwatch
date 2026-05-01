@@ -19,12 +19,19 @@ const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
 
 const QUICK_EMOJIS = ['❤️', '😂', '😠', '🔥', '👏', '😮'];
 
+/** Props for the {@link EmojiReactions} component. */
 interface EmojiReactionsProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   userId?: string;
   userName?: string;
 }
 
+/**
+ * Quick-access emoji reaction bar displayed in the player controls.
+ *
+ * Shows a row of frequently-used emojis and a "+" button that opens a
+ * full emoji picker popover. Sends reactions via RTM to all party members.
+ */
 export function EmojiReactions({
   rtmSendMessage,
   userId,

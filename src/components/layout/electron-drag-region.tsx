@@ -25,6 +25,12 @@ const ROUTE_NAMES: Record<string, string> = {
   '/changelog': 'Changelog',
 };
 
+/**
+ * Resolves a human-readable page title from the current pathname.
+ *
+ * @param pathname - The Next.js router pathname (e.g. `"/home"`, `"/watch/abc"`).
+ * @returns A display title such as `"Home"` or `"Watch Party"`.
+ */
 function getRouteTitle(pathname: string): string {
   if (ROUTE_NAMES[pathname]) return ROUTE_NAMES[pathname];
   if (pathname.startsWith('/music/artist/')) return 'Music | Artist';
@@ -39,6 +45,7 @@ function getRouteTitle(pathname: string): string {
   return 'Nightwatch';
 }
 
+/** Windows-only minimize / maximize / close buttons for the custom title bar. */
 function WindowControls() {
   const t = useTranslations('common');
   return (
@@ -92,6 +99,16 @@ function WindowControls() {
   );
 }
 
+/**
+ * Custom Electron title bar with a draggable region, back/forward navigation,
+ * a centered route title, and platform-specific window controls (Windows only).
+ *
+ * Sets CSS custom properties (`--electron-titlebar-height`, `--electron-inset-left`,
+ * `--electron-inset-right`) on `<html>` so the rest of the layout can account for
+ * the title bar height and traffic-light / window-control insets.
+ *
+ * Renders nothing when not running inside the Electron desktop app.
+ */
 export function ElectronDragRegion() {
   const { isDesktopApp, isMounted, isMacOS, isWindows } = useDesktopApp();
   const router = useRouter();

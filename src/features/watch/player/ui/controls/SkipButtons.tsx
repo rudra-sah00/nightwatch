@@ -11,12 +11,17 @@ const skipForwardIcon = (
   <SkipForward className="w-8 h-8 text-foreground stroke-[3px]" />
 );
 
+/** Props for the {@link SkipButton} component. */
 interface SkipButtonProps {
   direction: 'back' | 'forward';
   seconds?: number;
   onSkip: () => void;
 }
 
+/**
+ * Neo-brutalist skip button that jumps playback forward or backward
+ * by a configurable number of seconds.
+ */
 export function SkipButton({
   direction,
   seconds = 10,
@@ -44,13 +49,17 @@ export function SkipButton({
   );
 }
 
-// Animated skip indicator that shows on seek
+/** Props for the {@link SeekIndicator} component. */
 interface SeekIndicatorProps {
   seconds: number;
   direction: 'back' | 'forward';
   isVisible: boolean;
 }
 
+/**
+ * Animated seek indicator overlay shown briefly when the user skips
+ * forward or backward in the video.
+ */
 export function SeekIndicator({
   seconds,
   direction,

@@ -2,6 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
 import type { LiveMatch } from '../types';
 
+/**
+ * Fetches and manages the livestream schedule for a given sport type.
+ *
+ * Deduplicates matches by ID, sorts by start time, and cancels in-flight
+ * requests when the sport type changes or the component unmounts.
+ *
+ * @param sportType - Sport category to filter by (default `"basketball"`).
+ * @returns Schedule array, loading/error states, and a `refresh` function.
+ */
 export function useLivestreams(sportType = 'basketball') {
   const [schedule, setSchedule] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +67,17 @@ export function useLivestreams(sportType = 'basketball') {
   };
 }
 
+/**
+ * Fetches and polls a single live match by ID.
+ *
+ * Performs an initial fetch, then polls every 15 seconds while the match is
+ * live or upcoming and no stream URL (`playPath`) is available yet. Uses
+ * shallow equality checks during polls to avoid unnecessary re-renders that
+ * would cause the video player to reinitialize.
+ *
+ * @param id - Match identifier, or `null` to skip fetching.
+ * @returns The match data, loading state, and any error.
+ */
 export function useLiveMatch(id: string | null) {
   const [match, setMatch] = useState<LiveMatch | null>(null);
   const [isLoading, setIsLoading] = useState(false);

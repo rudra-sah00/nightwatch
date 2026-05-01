@@ -20,6 +20,7 @@ import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
 import { WatchPartySettings } from './WatchPartySettings';
 
+/** Props for the {@link MediaControls} component. */
 interface MediaControlsProps {
   // User info
   userName: string;
@@ -57,8 +58,11 @@ interface MediaControlsProps {
 }
 
 /**
- * Media controls footer for the sidebar
- * Handles mic/camera toggle, device selection, and party actions
+ * Media controls footer for the watch party sidebar.
+ *
+ * Renders mic/camera toggle buttons with device selection dropdowns,
+ * a deafen toggle, copy-invite-link, leave/end-party actions, and
+ * the watch party settings panel.
  */
 export function MediaControls({
   userName,
@@ -323,7 +327,7 @@ export function MediaControls({
   );
 }
 
-// Subcomponent for device selection dropdown
+/** Props for the {@link DeviceDropdown} sub-component. */
 interface DeviceDropdownProps {
   title: string;
   devices: MediaDevice[];

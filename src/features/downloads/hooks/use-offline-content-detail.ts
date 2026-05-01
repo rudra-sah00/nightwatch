@@ -13,12 +13,17 @@ import {
 import type { ContentProgress } from '@/types/content';
 import { useDownloads } from './use-downloads';
 
+/** Options for the {@link useOfflineContentDetail} hook. */
 interface UseOfflineContentDetailOptions {
+  /** Unique content identifier (may include provider prefix like `s1:`, `s2:`, `s3:`). */
   contentId: string;
+  /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: { season?: number; episode?: number; episodeId?: string };
+  /** Whether the modal was opened from the "Continue Watching" section. */
   fromContinueWatching?: boolean;
 }
 
+/** Return type of the {@link useOfflineContentDetail} hook. */
 interface UseOfflineContentDetailReturn {
   show: ShowDetails | null;
   episodes: Episode[];
@@ -39,6 +44,16 @@ interface UseOfflineContentDetailReturn {
   toggleWatchlist: () => Promise<void>;
 }
 
+/**
+ * Resolves show details and episodes from the local download store for offline playback.
+ *
+ * Matches the given `contentId` against downloaded items (with or without provider
+ * prefixes), extracts embedded `showData` metadata, and provides navigation-based
+ * playback for both movies and series episodes.
+ *
+ * @param options - Content ID, initial context, and continue-watching flag.
+ * @returns Show details, episode list, playback handlers, and loading states.
+ */
 export function useOfflineContentDetail({
   contentId,
   initialContext,

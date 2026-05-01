@@ -35,6 +35,15 @@ function setCookie(name: string, value: string) {
   document.cookie = `${name}=${value};path=/;max-age=31536000;samesite=lax`;
 }
 
+/**
+ * Full-screen language picker dialog supporting 14 locales.
+ *
+ * Persists the selected locale to a cookie and `localStorage`, then triggers
+ * a router refresh so the next-intl middleware serves the new language.
+ *
+ * @param props.className - Optional CSS class applied to the default trigger button.
+ * @param props.trigger - Optional custom trigger element; defaults to a globe button showing the current locale.
+ */
 export function LanguageSwitcher({
   className,
   trigger,

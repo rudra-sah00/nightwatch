@@ -3,6 +3,7 @@
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+/** Props for the {@link ErrorOverlay} component. */
 interface ErrorOverlayProps {
   isVisible: boolean;
   message: string;
@@ -10,6 +11,10 @@ interface ErrorOverlayProps {
   onBack?: () => void;
 }
 
+/**
+ * Full-screen error overlay with an alert icon, error message, and
+ * optional retry / go-back action buttons.
+ */
 export function ErrorOverlay({
   isVisible,
   message,

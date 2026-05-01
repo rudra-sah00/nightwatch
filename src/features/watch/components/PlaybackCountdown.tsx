@@ -5,12 +5,19 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { usePlaybackCountdown } from '../hooks/use-playback-countdown';
 
+/** Props for the {@link PlaybackCountdown} component. */
 interface PlaybackCountdownProps {
   onComplete: () => void;
   title?: string;
   subtitle?: string;
 }
 
+/**
+ * Full-screen 3-2-1 countdown overlay shown before playback begins.
+ *
+ * Renders an animated circular progress ring, a large digit, and step
+ * indicators. Calls `onComplete` after the countdown reaches zero.
+ */
 export function PlaybackCountdown({
   onComplete,
   title,

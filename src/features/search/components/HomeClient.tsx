@@ -3,6 +3,13 @@
 import { useTranslations } from 'next-intl';
 import { useSearchInput } from '@/features/search/hooks/use-search-input';
 
+/**
+ * Landing page search interface with a large hero search bar.
+ *
+ * Features a Bauhaus-inspired layout with autocomplete ghost text suggestions,
+ * Tab-to-complete, and a decorative marquee strip. Navigates to the search
+ * results page on Enter or button click.
+ */
 export function HomeClient() {
   const t = useTranslations('search');
   const {

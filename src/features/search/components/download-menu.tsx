@@ -326,12 +326,24 @@ function TransparentEpisodeItem({
   );
 }
 
+/** Props for the {@link DownloadMenu} component. */
 interface DownloadMenuProps {
+  /** Full show details including dubs and content type. */
   show: ShowDetails;
+  /** Currently selected season (for series), or `null` for movies. */
   selectedSeason?: Season | null;
+  /** Episodes for the selected season. */
   episodes?: Episode[];
 }
 
+/**
+ * Download action button and full-screen dialog for downloading content.
+ *
+ * For movies, presents quality selection (480p/720p/1080p+). For series,
+ * lists episodes with per-episode quality pickers. Supports multiple language
+ * dubs when available. Shows a "View in Vault" button when content is already
+ * fully downloaded.
+ */
 export function DownloadMenu({
   show,
   selectedSeason,

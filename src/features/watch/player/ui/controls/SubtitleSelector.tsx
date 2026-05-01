@@ -23,6 +23,7 @@ interface SubtitleTrack {
   language: string;
 }
 
+/** Props for the {@link SubtitleSelector} component. */
 interface SubtitleSelectorProps {
   tracks: SubtitleTrack[];
   currentTrack?: string | null;
@@ -31,6 +32,13 @@ interface SubtitleSelectorProps {
   onSubtitleSettingsChange?: (settings: SubtitleSettings) => void;
 }
 
+/**
+ * Dropdown selector for subtitle tracks with a nested style-settings screen.
+ *
+ * Allows the user to pick a subtitle language (or turn subtitles off) and
+ * customise font size, font family, background colour, text colour, and
+ * text shadow. Hidden when no tracks are available.
+ */
 export function SubtitleSelector({
   tracks,
   currentTrack,

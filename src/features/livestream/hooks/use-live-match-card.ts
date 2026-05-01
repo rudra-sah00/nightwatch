@@ -9,6 +9,16 @@ import { generateRoomId } from '@/features/watch-party/room/utils';
 import { useAuth } from '@/providers/auth-provider';
 import type { LiveMatch } from '../types';
 
+/**
+ * Provides interaction logic for a single live match card.
+ *
+ * Derives display state (live/ended/upcoming, formatted times), manages the
+ * watch prompt modal, and handles solo watch navigation and watch party
+ * creation via the backend API.
+ *
+ * @param match - The live match data to derive state from.
+ * @returns Computed display flags, formatted strings, modal state, and action handlers.
+ */
 export function useLiveMatchCard(match: LiveMatch) {
   const router = useRouter();
   const { user } = useAuth();

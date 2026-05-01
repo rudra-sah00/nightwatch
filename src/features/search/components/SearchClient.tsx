@@ -18,12 +18,23 @@ const ContentDetailModal = dynamic(
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { useAuth } from '@/providers/auth-provider';
 
+/** Props for the {@link SearchClient} component. */
 interface SearchClientProps {
+  /** Server-rendered initial search results. */
   initialResults: SearchResult[];
+  /** The initial search query from URL parameters. */
   initialQuery: string;
+  /** Whether the server-side search request failed. */
   serverError?: boolean;
 }
 
+/**
+ * Client-side search results page with an inline-editable query input.
+ *
+ * Renders search results in a grid, handles loading/error/empty states, and
+ * opens a {@link ContentDetailModal} when a result is selected. The search
+ * input triggers a router transition on Enter for URL-driven search.
+ */
 export function SearchClient({
   initialResults,
   initialQuery,

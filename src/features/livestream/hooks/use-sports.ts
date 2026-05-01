@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { fetchSports } from '../api';
 
+/** A sport category available for livestream filtering. */
 export interface Sport {
+  /** Unique sport identifier (e.g. `"basketball"`, `"all_channels"`). */
   id: string;
+  /** Human-readable display label. */
   label: string;
 }
 
+/**
+ * Fetches the list of available sport categories from the API.
+ *
+ * Always includes a hardcoded "All Channels" entry as the first item.
+ * Aborts the request on unmount.
+ *
+ * @returns Array of sports and a loading flag.
+ */
 export function useSports() {
   const [sports, setSports] = useState<Sport[]>([
     { id: 'all_channels', label: 'All Channels' },

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import type { PlayerAction } from '../context/types';
 
+/** Options for {@link useKeyboard}. */
 interface UseKeyboardOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   containerRef: RefObject<HTMLDivElement | null>;
@@ -24,6 +25,19 @@ interface UseKeyboardOptions {
   onToggleFullscreen?: () => void;
 }
 
+/**
+ * Registers global keyboard shortcuts for the video player.
+ *
+ * Supports Space/K (play/pause), J/L and arrows (seek), arrows up/down
+ * (volume), M (mute), F (fullscreen), C (captions), N (next episode),
+ * and Escape (exit fullscreen). Also listens for Electron desktop media
+ * key commands when running as a native app.
+ *
+ * Uses a `useLatest` ref pattern so the keydown listener is registered
+ * only once and always reads current handler values.
+ *
+ * @returns `togglePlay`, `toggleMute`, `toggleFullscreen`, `seek`, and `adjustVolume`.
+ */
 export function useKeyboard({
   videoRef,
   containerRef,
