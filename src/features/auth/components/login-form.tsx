@@ -212,7 +212,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
               }
               className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
             >
-              {isPending ? t('syncing') : t('submit')}
+              {t('submit')}
             </Button>
             {/* The Login form has no second 'Back' button, returning to uniform styling */}
           </div>
