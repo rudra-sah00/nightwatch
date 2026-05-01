@@ -16,78 +16,35 @@ import type { MusicTrack, SyncedLyricLine } from '../api';
 import { formatTime } from '../utils';
 import { FullPlayerLyrics } from './FullPlayerLyrics';
 
-/**
- * Props for the {@link MobileFullPlayer} component.
- *
- * All playback state and callbacks are passed down from the {@link FullPlayer}
- * orchestrator so this component remains a pure presentational layer.
- */
 interface MobileFullPlayerProps {
-  /** The currently playing track metadata. */
   currentTrack: MusicTrack;
-  /** Whether audio is currently playing. */
   isPlaying: boolean;
-  /** Playback progress as a percentage (0–100). */
   progress: number;
-  /** Total track duration in seconds. */
   duration: number;
-  /** Application-level volume (0–1). */
   volume: number;
-  /** The current playback queue. */
   queue: MusicTrack[];
-  /** Synced lyric lines, or `null` if unavailable / still loading. */
   lyrics: SyncedLyricLine[] | null;
-  /** Index of the lyric line matching the current playback position (-1 if none). */
   currentLineIndex: number;
-  /** Whether the close-out animation is in progress. */
   closing: boolean;
-  /** Whether the lyrics panel is currently visible. */
   showLyrics: boolean;
-  /** Whether the queue panel is currently visible. */
   showQueue: boolean;
-  /** Ref attached to the lyrics scroll container for programmatic scrolling. */
   lyricsRef: React.RefObject<HTMLDivElement | null>;
-  /** Native system volume control (Capacitor), `null` on web. */
   systemVol: {
     volume: number | null;
     setSystemVolume: (v: number) => Promise<void>;
   } | null;
-  /** Triggers the close animation and collapses the full player. */
   onClose: () => void;
-  /** Toggles play / pause. */
   onTogglePlay: () => void;
-  /** Skips to the next track. */
   onNext: () => void;
-  /** Skips to the previous track. */
   onPrev: () => void;
-  /** Seeks to a position expressed as a percentage (0–100). */
   onSeek: (percent: number) => void;
-  /** Sets the application-level volume (0–1). */
   onSetVolume: (v: number) => void;
-  /** Plays a specific track, optionally replacing the queue. */
   onPlay: (track: MusicTrack, queue?: MusicTrack[]) => void;
-  /** Opens the native AirPlay picker (Capacitor / WebKit). */
   onShowAirPlay: () => void;
-  /** Toggles the synced lyrics overlay. */
   onToggleLyrics: () => void;
-  /** Toggles the queue list overlay. */
   onToggleQueue: () => void;
 }
 
-/**
- * Full-screen music player for mobile viewports.
- *
- * Renders a slide-up overlay with three mutually exclusive content modes:
- * 1. **Album Art mode** (default) — large album artwork with track title and artist.
- * 2. **Lyrics mode** — compact header + scrollable synced lyrics via {@link FullPlayerLyrics}.
- * 3. **Queue mode** — scrollable list of upcoming tracks in the playback queue.
- *
- * The bottom control strip (seek bar, play/pause/skip, volume slider, and
- * lyrics/AirPlay/queue toggles) is always visible regardless of the active mode.
- *
- * Supports swipe-down-to-dismiss via touch event tracking with a 120 px threshold.
- * Respects iOS safe-area insets for notch and home-indicator spacing.
- */
 export function MobileFullPlayer({
   currentTrack,
   isPlaying,
@@ -194,71 +151,91 @@ export function MobileFullPlayer({
               ))}
             </div>
           </div>
-        ) : showLyrics && hasLyrics ? (
-          /* ===== LYRICS MODE ===== */
-          <>
-            {/* Compact header: small art + title */}
-            <div className="shrink-0 flex items-center gap-3 pb-4">
-              <img
-                src={currentTrack.image}
-                alt=""
-                className="w-14 h-14 rounded-lg object-cover"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-bold text-sm truncate">
-                  {currentTrack.title}
-                </p>
-                <p className="text-white/50 text-xs truncate">
-                  {currentTrack.artist}
-                </p>
-              </div>
+        ) : (
+          /* ===== ALBUM ART / LYRICS with smooth crossfade ===== */
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Album art — shrinks and fades when lyrics are shown */}
+            <div
+              className="shrink-0 flex flex-col items-center transition-all duration-500 ease-out overflow-hidden"
+              style={{
+                maxHeight: showLyrics && hasLyrics ? '72px' : '60vh',
+                opacity: 1,
+              }}
+            >
+              {showLyrics && hasLyrics ? (
+                /* Compact header when lyrics visible */
+                <div className="w-full flex items-center gap-3 py-1">
+                  <img
+                    src={currentTrack.image}
+                    alt=""
+                    className="w-14 h-14 rounded-lg object-cover shrink-0 transition-all duration-500"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-sm truncate">
+                      {currentTrack.title}
+                    </p>
+                    <p className="text-white/50 text-xs truncate">
+                      {currentTrack.artist}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Full album art */
+                <>
+                  <div className="w-[70vw] max-w-[320px] aspect-square mb-6 mt-2">
+                    <img
+                      src={currentTrack.image}
+                      alt={currentTrack.title}
+                      className="w-full h-full object-cover rounded-2xl shadow-2xl transition-all duration-500"
+                    />
+                  </div>
+                  <div className="w-full text-left mb-1">
+                    <h2 className="text-white font-bold text-xl truncate">
+                      {currentTrack.title}
+                    </h2>
+                    <p className="text-white/50 text-sm truncate">
+                      {currentTrack.artist}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Lyrics area */}
-            <div className="flex-1 min-h-0 relative">
-              <FullPlayerLyrics
-                lyrics={lyrics}
-                currentLineIndex={currentLineIndex}
-                duration={duration}
-                seek={onSeek}
-                lyricsRef={lyricsRef}
-                variant="mobile"
-              />
-              {/* Karaoke toggle */}
-              <button
-                type="button"
-                onClick={onToggleLyrics}
-                className="absolute bottom-2 right-2 p-2.5 rounded-full bg-white/10 text-white/60"
-              >
-                <Mic2 className="w-5 h-5" />
-              </button>
-            </div>
-          </>
-        ) : (
-          /* ===== ALBUM ART MODE ===== */
-          <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-            <div className="w-[70vw] max-w-[320px] aspect-square mb-8">
-              <img
-                src={currentTrack.image}
-                alt={currentTrack.title}
-                className="w-full h-full object-cover rounded-2xl shadow-2xl"
-              />
-            </div>
-            <div className="w-full text-left mb-1">
-              <h2 className="text-white font-bold text-xl truncate">
-                {currentTrack.title}
-              </h2>
-              <p className="text-white/50 text-sm truncate">
-                {currentTrack.artist}
-              </p>
+            {/* Lyrics area — expands smoothly */}
+            <div
+              className="relative transition-all duration-500 ease-out overflow-hidden"
+              style={{
+                flex: showLyrics && hasLyrics ? 1 : 0,
+                opacity: showLyrics && hasLyrics ? 1 : 0,
+              }}
+            >
+              {hasLyrics && (
+                <FullPlayerLyrics
+                  lyrics={lyrics}
+                  currentLineIndex={currentLineIndex}
+                  duration={duration}
+                  seek={onSeek}
+                  lyricsRef={lyricsRef}
+                  variant="mobile"
+                />
+              )}
+              {showLyrics && hasLyrics && (
+                <button
+                  type="button"
+                  onClick={onToggleLyrics}
+                  className="absolute bottom-2 right-2 p-2.5 rounded-full bg-white/10 text-white/60"
+                >
+                  <Mic2 className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* ===== BOTTOM CONTROLS (always visible) ===== */}
-        <div className="shrink-0 pb-2">
+        {/* ===== BOTTOM CONTROLS ===== */}
+        <div className="shrink-0 pb-1">
           {/* Seek bar */}
-          <div className="w-full mb-1">
+          <div className="w-full">
             <button
               type="button"
               className="w-full py-2 cursor-pointer relative"
@@ -286,7 +263,7 @@ export function MobileFullPlayer({
                 />
               </div>
             </button>
-            <div className="flex justify-between mt-1">
+            <div className="flex justify-between mt-0.5">
               <span className="text-white/40 text-[10px] font-mono">
                 {formatTime(currentTime)}
               </span>
@@ -297,7 +274,7 @@ export function MobileFullPlayer({
           </div>
 
           {/* Play controls */}
-          <div className="flex items-center justify-center gap-10 my-4">
+          <div className="flex items-center justify-center gap-10 my-2">
             <button type="button" onClick={onPrev} className="text-white">
               <SkipBack className="w-8 h-8 fill-current" />
             </button>
@@ -314,7 +291,7 @@ export function MobileFullPlayer({
           </div>
 
           {/* Volume */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-2">
             <Volume1 className="w-3.5 h-3.5 text-white/30" />
             <input
               type="range"
@@ -336,7 +313,7 @@ export function MobileFullPlayer({
           </div>
 
           {/* Bottom bar: lyrics / airplay / queue */}
-          <div className="flex items-center justify-around pb-2">
+          <div className="flex items-center justify-around pb-1">
             <button
               type="button"
               onClick={onToggleLyrics}
