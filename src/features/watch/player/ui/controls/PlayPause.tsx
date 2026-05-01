@@ -38,7 +38,7 @@ export function PlayPause({
       aria-label={isPlaying ? t('pause') : t('play')}
       className={cn(
         'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'border-[2px] md:border-[3px] border-border bg-neo-yellow text-foreground ',
+        'border-none md:border-[3px] md:border-border bg-neo-yellow text-foreground ',
         'hover:bg-neo-yellow/80',
         'active:bg-neo-yellow/80',
         SIZE_CLASSES[size],

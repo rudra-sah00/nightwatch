@@ -61,7 +61,7 @@ export function PlayerMobileCenterControls({
   const { state } = usePlayerContext();
   if (state.isLoading || state.isBuffering) return null;
   return (
-    <div className="md:hidden flex items-center justify-center gap-8 pointer-events-auto">
+    <div className="md:hidden flex flex-1 items-center justify-center gap-8 pointer-events-auto">
       {children}
     </div>
   );
