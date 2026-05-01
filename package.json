@@ -26,7 +26,7 @@
     "desktop:build": "electron-builder --mac --win --linux && bash scripts/resign-mac.sh desktop-build/mac-arm64/Nightwatch.app",
     "mobile:build": "npx cap sync",
     "mobile:sync": "npx cap sync",
-    "mobile:ios": "CAPACITOR_DEV=true npx cap sync ios && npx cap open ios",
+    "mobile:ios": "CAPACITOR_DEV=true npx cap sync ios && ./scripts/fix-ios-viewcontroller.sh && npx cap open ios",
     "mobile:android": "CAPACITOR_DEV=true npx cap sync android && npx cap open android"
   },
   "lint-staged": {
