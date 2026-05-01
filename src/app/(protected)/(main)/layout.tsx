@@ -18,7 +18,6 @@ import { RightSidebar } from '@/components/layout/right-sidebar';
 import { GlobalTour } from '@/components/ui/global-tour';
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
 import { useNetworkStatus } from '@/hooks/use-network-status';
-import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { ServerProvider } from '@/providers/server-provider';
@@ -63,16 +62,6 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const leftOpenRef = useRef(false);
   const rightOpenRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const {
-    ref: pullRef,
-    isRefreshing,
-    pullDistance,
-  } = usePullToRefresh(
-    useCallback(() => {
-      window.location.reload();
-    }, []),
-  );
 
   leftOpenRef.current = leftOpen;
   rightOpenRef.current = rightOpen;
@@ -232,25 +221,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
             className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
           >
             <LeftSidebar />
-            <div
-              ref={pullRef}
-              className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative"
-            >
-              {/* Pull-to-refresh indicator */}
-              {pullDistance > 0 && (
-                <div
-                  className="flex items-center justify-center shrink-0 overflow-hidden"
-                  style={{ height: pullDistance }}
-                >
-                  <div
-                    className={`w-6 h-6 border-[3px] border-border border-t-transparent rounded-full ${isRefreshing ? 'animate-spin' : ''}`}
-                    style={{
-                      opacity: Math.min(pullDistance / 80, 1),
-                      transform: `rotate(${pullDistance * 3}deg)`,
-                    }}
-                  />
-                </div>
-              )}
+            <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
               {showOfflineBlocker ? <OfflineState /> : children}
             </div>
             <RightSidebar />

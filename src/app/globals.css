@@ -4,11 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Hide floating UI elements when mobile keyboard is open */
-:root.keyboard-open .mobile-keyboard-hide {
-  display: none;
-}
-
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 
