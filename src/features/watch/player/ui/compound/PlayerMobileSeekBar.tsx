@@ -1,9 +1,11 @@
 import { useCallback, useRef } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
+import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 
-/** YouTube-style thin seekbar for mobile — 3px visible bar with a 40px touch target. */
+/** YouTube-style thin seekbar for mobile — progress-only in portrait, interactive in landscape. */
 export function PlayerMobileSeekBar() {
   const { state, playerHandlers, readOnly } = usePlayerContext();
+  const isPortrait = useMobileOrientation();
   const barRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const progress = state.duration
@@ -13,20 +15,21 @@ export function PlayerMobileSeekBar() {
 
   const seekFromTouch = useCallback(
     (clientX: number) => {
-      if (readOnly || !barRef.current || !state.duration) return;
+      if (readOnly || isPortrait || !barRef.current || !state.duration) return;
       const rect = barRef.current.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
       playerHandlers.seek(pct * state.duration);
     },
-    [readOnly, state.duration, playerHandlers],
+    [readOnly, isPortrait, state.duration, playerHandlers],
   );
 
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      if (isPortrait) return;
       dragging.current = true;
       seekFromTouch(e.touches[0].clientX);
     },
-    [seekFromTouch],
+    [isPortrait, seekFromTouch],
   );
 
   const onTouchMove = useCallback(
@@ -41,6 +44,24 @@ export function PlayerMobileSeekBar() {
   const onTouchEnd = useCallback(() => {
     dragging.current = false;
   }, []);
+
+  // Portrait: thin non-interactive progress bar at the very bottom
+  if (isPortrait) {
+    return (
+      <div className="w-full pointer-events-none">
+        <div className="w-full h-[3px] bg-white/20 relative">
+          <div
+            className="absolute inset-y-0 left-0 bg-white/40"
+            style={{ width: `${buffered}%` }}
+          />
+          <div
+            className="absolute inset-y-0 left-0 bg-red-600"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
