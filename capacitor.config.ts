@@ -12,7 +12,8 @@ const config: CapacitorConfig = {
       ? process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000'
       : 'https://nightwatch.in',
     cleartext: isDev,
-    allowNavigation: ['nightwatch.in', '*.nightwatch.in', 'localhost:*'],
+    // Allow navigation and XHR/fetch to these origins (CDNs for HLS streams)
+    allowNavigation: ['nightwatch.in', '*.nightwatch.in', 'localhost:*', '*'],
   },
   plugins: {
     Keyboard: {
@@ -25,6 +26,8 @@ const config: CapacitorConfig = {
   },
   ios: {
     preferredContentMode: 'mobile',
+    // Allow inline video playback (no forced fullscreen)
+    allowsLinkPreview: false,
   },
 };
 

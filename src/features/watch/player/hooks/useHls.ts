@@ -157,14 +157,19 @@ export function useHls({
         const finalConfig = {
           ...hlsConfig,
           xhrSetup: (xhr: XMLHttpRequest, url: string) => {
-            // We fixed the `Access-Control-Allow-Origin: *` wildcard issue in the Electron backend.
-            // It is now safe to use withCredentials in both Desktop and Browser versions.
-            // Do NOT set withCredentials for offline-media:// — it's a custom Electron protocol.
             if (
               url.includes('/api/stream/') &&
               !url.startsWith('offline-media://')
             ) {
-              xhr.withCredentials = true;
+              // Don't send credentials on Capacitor for CDN URLs
+              if (
+                !(
+                  typeof window !== 'undefined' &&
+                  window.Capacitor?.isNativePlatform?.()
+                )
+              ) {
+                xhr.withCredentials = true;
+              }
             }
           },
           // HLS.js switches to FetchLoader (progressive streaming) when fetch is available.
@@ -176,6 +181,18 @@ export function useHls({
               return new Request(context.url, {
                 ...initParams,
                 mode: 'cors',
+                credentials: 'omit',
+              });
+            }
+            // Capacitor WebView: don't send credentials to CDN URLs
+            // (avoids CORS preflight failures on third-party CDNs)
+            if (
+              typeof window !== 'undefined' &&
+              window.Capacitor?.isNativePlatform?.() &&
+              !context.url.includes('/api/')
+            ) {
+              return new Request(context.url, {
+                ...initParams,
                 credentials: 'omit',
               });
             }
