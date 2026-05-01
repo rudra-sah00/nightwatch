@@ -35,7 +35,7 @@ export function AlertDialogContent({
       <RadixAlertDialog.Content
         className={cn(
           'fixed left-1/2 top-1/2 z-[61] -translate-x-1/2 -translate-y-1/2',
-          'bg-background border-[4px] border-border rounded-none max-w-md w-full mx-4 p-8',
+          'bg-background border-[4px] border-border rounded-none w-[calc(100%-2rem)] max-w-md p-6 md:p-8',
           'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none',
           'focus:outline-none',
           className,
@@ -86,7 +86,7 @@ export function AlertDialogTitle({
   return (
     <RadixAlertDialog.Title
       className={cn(
-        'text-3xl font-black font-headline uppercase tracking-tighter text-foreground leading-none',
+        'text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-foreground leading-none',
         className,
       )}
     >
@@ -123,7 +123,7 @@ export function AlertDialogAction({
     <RadixAlertDialog.Action asChild>
       <button
         className={cn(
-          'px-6 py-3 bg-neo-red text-primary-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+          'w-full sm:w-auto px-6 py-3 bg-neo-red text-primary-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
           className,
         )}
         {...props}
@@ -143,7 +143,7 @@ export function AlertDialogCancel({
     <RadixAlertDialog.Cancel asChild>
       <button
         className={cn(
-          'px-6 py-3 bg-background text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
+          'w-full sm:w-auto px-6 py-3 bg-background text-foreground border-[3px] border-border font-headline font-black uppercase tracking-widest transition-[background-color,color,border-color,opacity,transform] duration-200',
           className,
         )}
         {...props}
