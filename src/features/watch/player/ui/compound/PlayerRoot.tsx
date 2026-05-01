@@ -2,6 +2,7 @@
 import { RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
+import { useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerContext } from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
@@ -188,6 +189,26 @@ export function PlayerRoot({
     !isFullscreenOverride &&
     !state.isFullscreen;
 
+  // Mobile: tap to toggle controls (show/hide). Ignore taps on interactive
+  // children (buttons, inputs) so controls buttons still work normally.
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const handleContainerClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isMobile) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, input, [data-seekbar], [role="slider"]'))
+        return;
+      if (state.showControls) {
+        contextValue.dispatch({ type: 'HIDE_CONTROLS' });
+        if (controlsTimeoutRef.current)
+          clearTimeout(controlsTimeoutRef.current);
+      } else {
+        showControls();
+      }
+    },
+    [isMobile, state.showControls, contextValue, showControls],
+  );
+
   return (
     <PlayerContext value={contextValue}>
       <div
@@ -202,6 +223,7 @@ export function PlayerRoot({
         style={effectiveContainerStyle}
         onMouseMove={showControls}
         onMouseEnter={showControls}
+        onClick={handleContainerClick}
         aria-label={tAria('videoPlayer')}
         tabIndex={0}
         onKeyDown={(e) => {
