@@ -127,16 +127,11 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
 
     // Navigating AWAY from a video route with a registered player → activate PiP
     const wasVideoRoute = VIDEO_ROUTES.some((r) => prev.startsWith(r));
-    if (
-      wasVideoRoute &&
-      registeredRef.current &&
-      videoElRef.current &&
-      isMobile
-    ) {
+    if (wasVideoRoute && registeredRef.current && isMobile) {
       const el = videoElRef.current;
       setPip({
         ...registeredRef.current,
-        currentTime: el.currentTime || 0,
+        currentTime: el?.currentTime || 0,
       });
       registeredRef.current = null;
       videoElRef.current = null;

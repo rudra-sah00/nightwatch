@@ -473,10 +473,10 @@ function PipRegistrar({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!pip || !streamUrl || !videoRef.current) return;
+    if (!pip || !streamUrl) return;
     pip.register(
       { streamUrl, watchUrl: pathname, title: metadata.title },
-      videoRef.current,
+      videoRef.current!,
     );
     return () => pip.unregister();
   }, [pip, streamUrl, pathname, metadata.title, videoRef]);
