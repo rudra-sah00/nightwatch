@@ -339,13 +339,13 @@ function LiveMatchModalContent({
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 justify-center">
               {/* Watch Solo */}
               <button
                 type="button"
                 className={cn(
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
+                  'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
                   !canWatch
                     ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
                     : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
@@ -369,10 +369,10 @@ function LiveMatchModalContent({
                   type="button"
                   className={cn(
                     'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2',
+                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
                     isCreatingParty || !canWatch
                       ? 'bg-background text-muted-foreground cursor-not-allowed opacity-70'
-                      : 'bg-primary text-primary-foreground hover:bg-neo-blue',
+                      : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
                   )}
                   onClick={onWatchParty}
                   disabled={isCreatingParty || !canWatch}
