@@ -51,7 +51,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
           <button
             type="button"
             onClick={() => setStep('initial')}
-            className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40 hover:text-foreground transition-colors"
+            className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 hover:text-foreground transition-colors"
           >
             {t('otp.back')}
           </button>
