@@ -1,64 +1,37 @@
 'use client';
 
-import { Globe, Plus, Search } from 'lucide-react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
-import ReactSkeleton from 'react-loading-skeleton';
-import { toast } from 'sonner';
-import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 import {
-  createUserPlaylist,
   getBrowseModules,
-  getMixDetails,
   getMusicHome,
   getMusicLanguages,
-  getRadioSongs,
   getSong,
   getTrending,
-  setMusicLanguages,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
-import { Card, ScrollRow, Section } from './MusicPrimitives';
+import { CreatePlaylistDialog } from './CreatePlaylistDialog';
+import { LanguagePickerDialog } from './LanguagePickerDialog';
+import { MusicHeader } from './MusicHeader';
 import { MusicSearchSpotlight } from './MusicSearchSpotlight';
-import { UserPlaylists } from './UserPlaylists';
-
-type ChartItem = { id: string; title: string; image: string };
-type ArtistItem = { id: string; name: string; image: string };
-type ReleaseItem = {
-  id: string;
-  title: string;
-  artist: string;
-  image: string;
-  type: string;
-  albumId: string;
-};
-type RadioItem = { id: string; title: string; image: string; language: string };
-
-type TrendingItem = {
-  id: string;
-  title: string;
-  type: string;
-  image: string;
-  subtitle: string;
-};
-type GenreItem = { id: string; title: string; image: string; type: string };
+import { MusicSections, type MusicSectionsData } from './MusicSections';
+import { MusicSkeleton } from './MusicSkeleton';
 
 export function MusicView() {
-  const t = useTranslations('music');
   const searchParams = useSearchParams();
   const player = useMusicPlayerContext();
-  const [charts, setCharts] = useState<ChartItem[]>([]);
-  const [featured, setFeatured] = useState<ChartItem[]>([]);
-  const [artists, setArtists] = useState<ArtistItem[]>([]);
-  const [releases, setReleases] = useState<ReleaseItem[]>([]);
-  const [radio, setRadio] = useState<RadioItem[]>([]);
-  const [trendingSongs, setTrendingSongs] = useState<TrendingItem[]>([]);
-  const [genres, setGenres] = useState<GenreItem[]>([]);
+
+  const [data, setData] = useState<MusicSectionsData>({
+    charts: [],
+    featured: [],
+    artists: [],
+    releases: [],
+    radio: [],
+    trendingSongs: [],
+    genres: [],
+  });
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
   const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
   const [showLangPicker, setShowLangPicker] = useState(false);
@@ -83,13 +56,15 @@ export function MusicView() {
       getBrowseModules().catch(() => ({ genres: [] })),
     ])
       .then(([home, trending, browse]) => {
-        setCharts(home.charts);
-        setFeatured(home.featured);
-        setArtists(home.artists);
-        setReleases(home.releases);
-        setRadio(home.radio);
-        setTrendingSongs(trending);
-        setGenres(browse.genres);
+        setData({
+          charts: home.charts,
+          featured: home.featured,
+          artists: home.artists,
+          releases: home.releases,
+          radio: home.radio,
+          trendingSongs: trending,
+          genres: browse.genres,
+        });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -112,414 +87,42 @@ export function MusicView() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-2">
-        <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter">
-          {t('title')}
-        </h1>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowLangPicker(true)}
-            className="h-8 px-3 flex items-center gap-1.5 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
-          >
-            <Globe className="w-3.5 h-3.5 text-foreground/50" />
-            <span className="font-headline font-bold text-[9px] uppercase tracking-wider text-foreground/50">
-              {[...selectedLangs]
-                .slice(0, 2)
-                .map((l) => l.slice(0, 2).toUpperCase())
-                .join(', ')}
-              {selectedLangs.size > 2 && ` +${selectedLangs.size - 2}`}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowCreatePlaylist((v) => !v)}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
-            aria-label={t('createPlaylist')}
-          >
-            <Plus className="w-4 h-4 text-foreground/50" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowSearch(true)}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
-            aria-label={t('searchMusic')}
-          >
-            <Search className="w-4 h-4 text-foreground/50" />
-          </button>
-        </div>
-      </div>
+      <MusicHeader
+        selectedLangs={selectedLangs}
+        onOpenLangPicker={() => setShowLangPicker(true)}
+        onToggleCreatePlaylist={() => setShowCreatePlaylist((v) => !v)}
+        onOpenSearch={() => setShowSearch(true)}
+      />
 
       {showCreatePlaylist && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-          onClick={() => {
-            setShowCreatePlaylist(false);
-            setNewPlaylistName('');
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              setShowCreatePlaylist(false);
-              setNewPlaylistName('');
-            }
-          }}
-          role="dialog"
-        >
-          <div
-            className="bg-background border-[3px] border-border p-6 w-80"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={() => {}}
-            role="dialog"
-          >
-            <h3 className="font-headline font-black uppercase tracking-tighter text-lg mb-4">
-              {t('createPlaylist')}
-            </h3>
-            <input
-              value={newPlaylistName}
-              onChange={(e) => setNewPlaylistName(e.target.value)}
-              placeholder={t('playlistName')}
-              className="w-full bg-transparent border-none outline-none text-xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 border-border focus:border-neo-yellow py-2"
-              onKeyDown={async (e) => {
-                if (e.key === 'Enter' && newPlaylistName.trim()) {
-                  await createUserPlaylist(newPlaylistName.trim());
-                  setNewPlaylistName('');
-                  setShowCreatePlaylist(false);
-                  toast.success(t('createPlaylist'));
-                  setPlaylistKey((k) => k + 1);
-                }
-                if (e.key === 'Escape') {
-                  setShowCreatePlaylist(false);
-                  setNewPlaylistName('');
-                }
-              }}
-            />
-          </div>
-        </div>
+        <CreatePlaylistDialog
+          onClose={() => setShowCreatePlaylist(false)}
+          onCreated={() => setPlaylistKey((k) => k + 1)}
+        />
       )}
 
-      {/* Language Picker */}
       {showLangPicker && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-          onClick={() => setShowLangPicker(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setShowLangPicker(false);
-          }}
-          role="dialog"
-        >
-          <div
-            className="bg-background border-[3px] border-border p-6 w-80 max-h-[70vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={() => {}}
-            role="dialog"
-          >
-            <h3 className="font-headline font-black uppercase tracking-tighter text-lg mb-4">
-              Music Languages
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                'hindi',
-                'english',
-                'punjabi',
-                'tamil',
-                'telugu',
-                'marathi',
-                'gujarati',
-                'bengali',
-                'kannada',
-                'malayalam',
-                'urdu',
-                'bhojpuri',
-                'rajasthani',
-                'odia',
-                'assamese',
-                'haryanvi',
-                'sanskrit',
-              ].map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => {
-                    setSelectedLangs((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(lang)) {
-                        if (next.size > 1) next.delete(lang);
-                      } else next.add(lang);
-                      return next;
-                    });
-                  }}
-                  className={`px-3 py-2 border-[2px] font-headline font-bold text-[10px] uppercase tracking-wider transition-colors ${
-                    selectedLangs.has(lang)
-                      ? 'border-neo-yellow bg-neo-yellow/10 text-foreground'
-                      : 'border-border text-foreground/40 hover:border-foreground/20'
-                  }`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                const langs = [...selectedLangs].join(',');
-                setShowLangPicker(false);
-                await setMusicLanguages(langs).catch(() => {});
-                loadData();
-                toast.success('Languages updated');
-              }}
-              className="w-full mt-4 py-2 bg-neo-yellow border-[2px] border-border font-headline font-black uppercase text-xs tracking-wider hover:brightness-110 transition-all"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
+        <LanguagePickerDialog
+          selectedLangs={selectedLangs}
+          onChangeLangs={setSelectedLangs}
+          onClose={() => setShowLangPicker(false)}
+          onApply={loadData}
+        />
       )}
 
       {loading && <MusicSkeleton />}
 
-      {/* User Playlists */}
-      {!loading && <UserPlaylists key={playlistKey} />}
-
-      {/* Charts */}
-      {!loading && charts.length > 0 && (
-        <Section title={t('topCharts')}>
-          <ScrollRow>
-            {charts.map((c) => (
-              <Card
-                key={c.id}
-                image={c.image}
-                title={c.title}
-                href={`/music/playlist/${c.id}`}
-              />
-            ))}
-          </ScrollRow>
-        </Section>
+      {!loading && (
+        <MusicSections
+          data={data}
+          playlistKey={playlistKey}
+          onPlay={player.play}
+        />
       )}
 
-      {/* Featured */}
-      {!loading && featured.length > 0 && (
-        <Section title={t('playlists')}>
-          <ScrollRow>
-            {featured.map((p) => (
-              <Card
-                key={p.id}
-                image={p.image}
-                title={p.title}
-                href={`/music/playlist/${p.id}`}
-              />
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* Artists */}
-      {!loading && artists.length > 0 && (
-        <Section title={t('topArtists')}>
-          <ScrollRow>
-            {artists.map((a) => (
-              <Link
-                key={a.id}
-                href={`/music/artist/${a.id}`}
-                className="flex-shrink-0 w-28 md:w-32 text-center"
-              >
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-[3px] border-border overflow-hidden mx-auto hover:border-neo-yellow transition-colors">
-                  <img
-                    src={a.image}
-                    alt={a.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
-                  {a.name}
-                </p>
-              </Link>
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* New Releases */}
-      {!loading && releases.length > 0 && (
-        <Section title={t('newReleases')}>
-          <ScrollRow>
-            {releases.map((r) => (
-              <Card
-                key={r.id}
-                image={r.image}
-                title={r.title}
-                subtitle={r.artist}
-                href={r.albumId ? `/music/album/${r.albumId}` : undefined}
-                onClick={
-                  r.type === 'song' && !r.albumId
-                    ? () => {
-                        getSong(r.id)
-                          .then((song) => {
-                            if (song) player.play(song, [song]);
-                          })
-                          .catch(() => {});
-                      }
-                    : undefined
-                }
-              />
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* Trending Songs */}
-      {!loading && trendingSongs.length > 0 && (
-        <Section title={t('trending')}>
-          <ScrollRow>
-            {trendingSongs.map((item) => (
-              <Card
-                key={item.id}
-                image={item.image}
-                title={item.title}
-                subtitle={item.subtitle}
-                href={
-                  item.type === 'album'
-                    ? `/music/album/${item.id}`
-                    : item.type === 'playlist'
-                      ? `/music/playlist/${item.id}`
-                      : undefined
-                }
-                onClick={
-                  item.type === 'song'
-                    ? () => {
-                        getSong(item.id)
-                          .then((song) => {
-                            if (song) player.play(song, [song]);
-                          })
-                          .catch(() => {});
-                      }
-                    : item.type === 'mix'
-                      ? () => {
-                          getMixDetails(item.id)
-                            .then((mix) => {
-                              if (mix.songs.length > 0)
-                                player.play(mix.songs[0], mix.songs);
-                            })
-                            .catch(() => {});
-                        }
-                      : undefined
-                }
-              />
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* Browse by Genre/Mood */}
-      {!loading && genres.length > 0 && (
-        <Section title={t('browseGenres')}>
-          <ScrollRow>
-            {genres.slice(0, 20).map((g) => (
-              <Card
-                key={g.id}
-                image={g.image}
-                title={g.title}
-                href={
-                  g.type === 'playlist' ? `/music/playlist/${g.id}` : undefined
-                }
-                onClick={
-                  g.type !== 'playlist'
-                    ? () => {
-                        getRadioSongs(g.title)
-                          .then((songs) => {
-                            if (songs.length > 0) player.play(songs[0], songs);
-                          })
-                          .catch(() => {});
-                      }
-                    : undefined
-                }
-              />
-            ))}
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* Podcasts */}
-      {/* Radio */}
-      {!loading && radio.length > 0 && (
-        <Section title={t('radioStations')}>
-          <ScrollRow>
-            {radio.slice(0, 10).map((r) => (
-              <Card
-                key={r.id}
-                image={r.image}
-                title={r.title}
-                onClick={() => {
-                  toast.promise(
-                    getRadioSongs(r.title, r.language || 'hindi').then(
-                      (songs) => {
-                        if (songs.length > 0) {
-                          player.play(songs[0], songs);
-                        } else {
-                          throw new Error('No songs available');
-                        }
-                      },
-                    ),
-                    {
-                      loading: r.title,
-                      success: r.title,
-                      error: 'Failed to load station',
-                    },
-                  );
-                }}
-              />
-            ))}
-            <Link
-              href="/music/radio/hindi"
-              className="flex-shrink-0 w-36 md:w-40 flex items-center justify-center"
-            >
-              <span className="text-foreground/40 hover:text-foreground font-headline font-bold uppercase text-xs tracking-widest transition-colors">
-                {t('viewAll')}
-              </span>
-            </Link>
-          </ScrollRow>
-        </Section>
-      )}
-
-      {/* Search Spotlight */}
       {showSearch && (
         <MusicSearchSpotlight onClose={() => setShowSearch(false)} />
       )}
     </div>
-  );
-}
-
-function MusicSkeleton() {
-  return (
-    <AppSkeletonTheme>
-      <div className="space-y-6 py-4">
-        {[1, 2, 3, 4, 5, 6].map((section) => (
-          <div key={section} className="px-6">
-            <ReactSkeleton
-              width={90}
-              height={10}
-              style={{ marginBottom: 12 }}
-            />
-            <div className="flex gap-4 overflow-hidden">
-              {[1, 2, 3, 4, 5].map((card) => (
-                <div key={card} className="flex-shrink-0 w-36 md:w-40">
-                  <ReactSkeleton className="w-36 md:w-40 aspect-square" />
-                  <ReactSkeleton
-                    width="70%"
-                    height={10}
-                    style={{ marginTop: 8 }}
-                  />
-                  <ReactSkeleton
-                    width="45%"
-                    height={8}
-                    style={{ marginTop: 4 }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </AppSkeletonTheme>
   );
 }

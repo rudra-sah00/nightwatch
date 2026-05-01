@@ -256,10 +256,3 @@ export function MusicSections({
     </>
   );
 }
-
-/** Thin wrapper to avoid circular import with MusicView → UserPlaylists */
-function UserPlaylistsSection() {
-  // Dynamic import not needed — UserPlaylists is a sibling component
-  const { UserPlaylists } = require('./UserPlaylists');
-  return <UserPlaylists />;
-}
