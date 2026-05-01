@@ -30,7 +30,10 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
+    // Don't auto-focus on mobile — causes iOS to zoom/scroll
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
     getTopSearches()
       .then(setTopSearches)
       .catch(() => {});

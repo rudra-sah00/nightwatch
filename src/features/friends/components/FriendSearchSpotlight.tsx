@@ -35,7 +35,9 @@ export function FriendSearchSpotlight({ onClose }: FriendSearchSpotlightProps) {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 50);
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
