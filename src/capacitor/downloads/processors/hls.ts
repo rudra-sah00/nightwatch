@@ -33,7 +33,7 @@ function parseM3u8(
   return { segments, isVariant };
 }
 
-function buildLocalPlaylist(original: string, segCount: number): string {
+function buildLocalPlaylist(original: string): string {
   const lines = original.split('\n');
   const result: string[] = [];
   let idx = 0;
@@ -127,7 +127,7 @@ export async function startHlsDownload(
     }
 
     // Build local playlist with relative segment paths
-    const localPlaylist = buildLocalPlaylist(mediaContent, segments.length);
+    const localPlaylist = buildLocalPlaylist(mediaContent);
     await Filesystem.writeFile({
       path: `${VAULT_DIR}/${contentId}/local.m3u8`,
       data: btoa(localPlaylist),

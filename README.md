@@ -43,6 +43,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 
 - **Framework:** Next.js (React 18+, App Router)
 - **Desktop Wrapper:** Electron (Node.js)
+- **Mobile Wrapper:** Capacitor (iOS, Android)
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
 - **Internationalization:** next-intl (14 languages, cookie-based)
@@ -58,6 +59,7 @@ The `src` directory governs all application code, rigidly separated by domain lo
 ```bash
 src/
 ├── app/               # Next.js App Router (Pages, Layouts, Server forms)
+├── capacitor/         # Capacitor mobile-specific modules (downloads, providers)
 ├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
 ├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, friends)
 ├── hooks/             # Global generic hooks
@@ -106,6 +108,50 @@ gh release create v1.32.0 --title "v1.32.0 - Major Update" --notes "Release note
 ```
 
 As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Rust + Next.js binaries, and attach the installer links automatically to the GitHub Releases page.
+
+## Mobile Application (iOS, Android)
+
+The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, offline downloads, and swipe-based navigation.
+
+### Native Plugins (15)
+
+Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Filesystem, Phone Call Notification, CallKit.
+
+### Local Development
+
+```bash
+# Start Next.js dev server
+pnpm dev
+
+# Sync Capacitor and open in Xcode (iOS)
+pnpm mobile:ios
+
+# Sync Capacitor and open in Android Studio
+pnpm mobile:android
+```
+
+For physical device testing, the WebView points to your Mac's LAN IP:
+```bash
+CAPACITOR_DEV=true CAPACITOR_SERVER_URL=http://192.168.x.x:3000 npx cap sync ios
+```
+
+### Production Build
+
+```bash
+# Sync with production URL (https://nightwatch.in)
+npx cap sync ios
+
+# Build from Xcode: Product → Scheme → Release → ⌘R
+```
+
+### Automated Cloud Builds (Android APK)
+
+The `build-android.yml` GitHub Action builds a debug APK and attaches it to GitHub Releases alongside the desktop binaries.
+
+```bash
+# Trigger manually
+gh workflow run build-android.yml
+```
 
 ---
 *For issues regarding the backend services or database administration, see the respective `nightwatch-backend` or `admin-nightwatch` repositories.*
