@@ -50,34 +50,30 @@ export function useDownloads() {
 
     let unsubscribe: (() => void) | undefined;
 
-    import('@/lib/mobile-download-manager').then(
-      ({ mobileDownloadManager }) => {
-        mobileDownloadManager
-          .getDownloads()
-          .then((items) => setDownloads(items || []));
+    import('@/capacitor/downloads').then(({ mobileDownloadManager }) => {
+      mobileDownloadManager
+        .getDownloads()
+        .then((items) => setDownloads(items || []));
 
-        unsubscribe = mobileDownloadManager.onProgress(
-          (updatedItem: DownloadItem) => {
-            setDownloads((prev) => {
-              if (updatedItem.status === 'CANCELLED') {
-                return prev.filter(
-                  (i) => i.contentId !== updatedItem.contentId,
-                );
-              }
-              const exists = prev.find(
-                (i) => i.contentId === updatedItem.contentId,
+      unsubscribe = mobileDownloadManager.onProgress(
+        (updatedItem: DownloadItem) => {
+          setDownloads((prev) => {
+            if (updatedItem.status === 'CANCELLED') {
+              return prev.filter((i) => i.contentId !== updatedItem.contentId);
+            }
+            const exists = prev.find(
+              (i) => i.contentId === updatedItem.contentId,
+            );
+            if (exists) {
+              return prev.map((i) =>
+                i.contentId === updatedItem.contentId ? updatedItem : i,
               );
-              if (exists) {
-                return prev.map((i) =>
-                  i.contentId === updatedItem.contentId ? updatedItem : i,
-                );
-              }
-              return [...prev, updatedItem];
-            });
-          },
-        );
-      },
-    );
+            }
+            return [...prev, updatedItem];
+          });
+        },
+      );
+    });
 
     return () => unsubscribe?.();
   }, [mobile]);
@@ -87,9 +83,8 @@ export function useDownloads() {
       if (checkIsDesktop()) {
         desktopBridge.cancelDownload(contentId);
       } else if (mobile) {
-        import('@/lib/mobile-download-manager').then(
-          ({ mobileDownloadManager }) =>
-            mobileDownloadManager.cancelDownload(contentId),
+        import('@/capacitor/downloads').then(({ mobileDownloadManager }) =>
+          mobileDownloadManager.cancelDownload(contentId),
         );
       }
       setDownloads((prev) => prev.filter((i) => i.contentId !== contentId));
@@ -102,9 +97,8 @@ export function useDownloads() {
       if (checkIsDesktop()) {
         desktopBridge.pauseDownload(contentId);
       } else if (mobile) {
-        import('@/lib/mobile-download-manager').then(
-          ({ mobileDownloadManager }) =>
-            mobileDownloadManager.pauseDownload(contentId),
+        import('@/capacitor/downloads').then(({ mobileDownloadManager }) =>
+          mobileDownloadManager.pauseDownload(contentId),
         );
       }
       setDownloads((prev) =>
@@ -121,9 +115,8 @@ export function useDownloads() {
       if (checkIsDesktop()) {
         desktopBridge.resumeDownload(contentId);
       } else if (mobile) {
-        import('@/lib/mobile-download-manager').then(
-          ({ mobileDownloadManager }) =>
-            mobileDownloadManager.resumeDownload(contentId),
+        import('@/capacitor/downloads').then(({ mobileDownloadManager }) =>
+          mobileDownloadManager.resumeDownload(contentId),
         );
       }
       setDownloads((prev) =>

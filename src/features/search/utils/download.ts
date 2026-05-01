@@ -109,9 +109,7 @@ export async function startDesktopDownload({
   }
 
   if (directUrl && checkIsMobile()) {
-    const { mobileDownloadManager } = await import(
-      '@/lib/mobile-download-manager'
-    );
+    const { mobileDownloadManager } = await import('@/capacitor/downloads');
     await mobileDownloadManager.startDownload({
       contentId: getOfflineIdentifier({
         contentId,
@@ -165,9 +163,7 @@ export async function startDesktopDownload({
     }
 
     if (checkIsMobile()) {
-      const { mobileDownloadManager } = await import(
-        '@/lib/mobile-download-manager'
-      );
+      const { mobileDownloadManager } = await import('@/capacitor/downloads');
       await mobileDownloadManager.startDownload({
         contentId: getOfflineIdentifier({
           contentId,
