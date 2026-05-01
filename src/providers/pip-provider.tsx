@@ -1,6 +1,5 @@
 'use client';
 
-import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   createContext,
@@ -206,48 +205,99 @@ function PipPlayer({
   onTap: () => void;
   pipVideoRef: React.RefObject<HTMLVideoElement | null>;
 }) {
+  const swipeStartRef = useRef(0);
+  const [swipeX, setSwipeX] = useState(0);
+  const [dismissing, setDismissing] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const hlsRef = useRef<{ destroy: () => void } | null>(null);
+
+  // Attach HLS.js for .m3u8 streams
+  useEffect(() => {
+    const video = pipVideoRef.current;
+    if (!video || !pip.streamUrl) return;
+
+    if (
+      pip.streamUrl.includes('.m3u8') &&
+      !video.canPlayType('application/vnd.apple.mpegurl')
+    ) {
+      import('hls.js').then(({ default: Hls }) => {
+        if (!Hls.isSupported()) return;
+        const hls = new Hls({ startPosition: pip.currentTime || -1 });
+        hls.loadSource(pip.streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        hlsRef.current = hls;
+      });
+    } else {
+      video.src = pip.streamUrl;
+      video.currentTime = pip.currentTime || 0;
+      video.play().catch(() => {});
+    }
+
+    return () => {
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, [pip.streamUrl, pip.currentTime, pipVideoRef]);
+
+  const handleSwipeEnd = () => {
+    if (Math.abs(swipeX) > 80) {
+      setDismissing(true);
+      setSwipeX(swipeX > 0 ? 300 : -300);
+      setTimeout(onClose, 250);
+    } else {
+      setSwipeX(0);
+    }
+  };
+
   return (
     <div
-      className="fixed z-[9998] shadow-2xl overflow-hidden"
+      className="fixed z-[9998] shadow-2xl overflow-hidden bg-black"
       style={{
         bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
         right: '0.75rem',
         width: '45vw',
         aspectRatio: '16 / 9',
         borderRadius: '8px',
+        transform: swipeX ? `translateX(${swipeX}px)` : undefined,
+        opacity: dismissing ? 0 : swipeX ? 1 - Math.abs(swipeX) / 400 : 1,
+        transition: dismissing
+          ? 'transform 0.25s ease-out, opacity 0.25s ease-out'
+          : swipeX
+            ? 'none'
+            : 'transform 0.3s ease, opacity 0.3s ease',
       }}
     >
+      {/* Loading indicator */}
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        </div>
+      )}
       <video
         ref={pipVideoRef}
-        src={pip.streamUrl}
         autoPlay
         playsInline
         muted={false}
         className="w-full h-full object-cover"
-        onLoadedMetadata={(e) => {
-          const v = e.currentTarget;
-          v.currentTime = pip.currentTime;
-        }}
+        onPlaying={() => setLoaded(true)}
       />
-      {/* Tap to navigate back */}
+      {/* Tap to navigate back + swipe to dismiss */}
       <button
         type="button"
         onClick={onTap}
-        className="absolute inset-0 z-10"
+        onTouchStart={(e) => {
+          swipeStartRef.current = e.touches[0].clientX;
+        }}
+        onTouchMove={(e) => {
+          setSwipeX(e.touches[0].clientX - swipeStartRef.current);
+        }}
+        onTouchEnd={handleSwipeEnd}
+        className="absolute inset-0 z-20"
         aria-label="Back to player"
       />
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-        className="absolute top-1 right-1 z-20 p-1 bg-black/60 rounded-full"
-        aria-label="Close"
-      >
-        <X className="w-3.5 h-3.5 text-white" />
-      </button>
       {/* Title */}
       <div className="absolute bottom-0 left-0 right-0 z-10 px-2 py-1 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
         <p className="text-[10px] text-white font-semibold truncate">
