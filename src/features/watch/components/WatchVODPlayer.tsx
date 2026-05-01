@@ -119,7 +119,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 
   const dismissPip = useCallback(() => {
     setIsPip(false);
-    playerSentinelRef.current?.scrollIntoView({ behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const pipStyle: React.CSSProperties = {
@@ -133,6 +133,15 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     borderRadius: '8px',
     overflow: 'hidden',
     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+    transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+  };
+
+  const inlineStyle: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
   };
 
   return (
@@ -145,20 +154,12 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
             aspectRatio: '16 / 9',
             maxHeight: '56.25vw',
             position: 'relative',
+            background: '#000',
           }}
         >
           <Player.Root
             {...props}
-            containerStyle={
-              isPip
-                ? pipStyle
-                : {
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                  }
-            }
+            containerStyle={isPip ? pipStyle : inlineStyle}
             streamMode="vod"
             allowPortraitPlayback={useInlineMobileLayout}
             onBack={handleBack}
