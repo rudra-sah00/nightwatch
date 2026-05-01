@@ -51,6 +51,15 @@ function clearCookiesAndRedirect(message?: string) {
     } catch {}
   }
   clearAllCaches();
+  // Synchronously clear persisted auth state BEFORE the hard redirect.
+  // The Zustand persist middleware writes asynchronously (customNativeStorage),
+  // so setUser(null) may not flush to localStorage before navigation.
+  try {
+    localStorage.removeItem('nightwatch_auth');
+  } catch {}
+  clearStoredUser();
+  sessionStorage.removeItem('guest_token');
+  sessionStorage.removeItem('guest_refresh_token');
   logoutUser({ skipRefresh: true } as RequestInit).catch(() => {});
   if (typeof window !== 'undefined') window.location.href = '/login';
 }
