@@ -229,7 +229,15 @@ export function useFullscreen({
           };
           try {
             if (orientation.lock) await orientation.lock('portrait-primary');
-            screen.orientation.unlock();
+            // Delay unlock so the device settles into portrait before
+            // freeing rotation — prevents the rotate-wall flash.
+            setTimeout(() => {
+              try {
+                screen.orientation.unlock();
+              } catch {
+                /* not supported */
+              }
+            }, 500);
           } catch {
             try {
               screen.orientation.unlock();
@@ -239,7 +247,7 @@ export function useFullscreen({
           }
         }
 
-        // Capacitor: lock back to portrait, then unlock so user can rotate freely
+        // Capacitor: lock back to portrait, then unlock after a delay
         if (
           typeof window !== 'undefined' &&
           window.Capacitor?.isNativePlatform?.()
@@ -249,7 +257,16 @@ export function useFullscreen({
               '@capacitor/screen-orientation'
             );
             await ScreenOrientation.lock({ orientation: 'portrait' });
-            await ScreenOrientation.unlock();
+            setTimeout(async () => {
+              try {
+                const { ScreenOrientation: SO } = await import(
+                  '@capacitor/screen-orientation'
+                );
+                await SO.unlock();
+              } catch {
+                /* plugin not available */
+              }
+            }, 500);
           } catch {
             /* plugin not available */
           }
