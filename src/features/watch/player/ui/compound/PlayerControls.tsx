@@ -78,7 +78,7 @@ export function PlayerMobileBottomRight({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden absolute bottom-6 right-3 pointer-events-auto">
+    <div className="md:hidden absolute bottom-3 right-3 pointer-events-auto">
       {children}
     </div>
   );
