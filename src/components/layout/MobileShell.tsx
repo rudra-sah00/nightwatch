@@ -23,6 +23,9 @@ export function MobileShell() {
     // Pre-load plugins that are dynamically imported elsewhere
     import('@anuradev/capacitor-phone-call-notification').catch(() => {});
 
+    // --- HIDE SPLASH SCREEN once the app has rendered ---
+    mobileBridge.hideSplash();
+
     // --- STATUS BAR: match dark theme ---
     const applyStatusBar = () => {
       const isDark = document.documentElement.classList.contains('dark');

@@ -20,8 +20,10 @@ const config: CapacitorConfig = {
       resize: KeyboardResize.None,
     },
     SplashScreen: {
-      launchAutoHide: true,
+      launchAutoHide: false,
       launchShowDuration: 0,
+      backgroundColor: '#000000',
+      showSpinner: false,
     },
   },
   ios: {
