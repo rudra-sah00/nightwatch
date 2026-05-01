@@ -1,5 +1,9 @@
 import { playVideo } from '@/features/watch/api';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import {
+  checkIsDesktop,
+  checkIsMobile,
+  desktopBridge,
+} from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
 
 import type { ShowDetails } from '@/types/content';
@@ -104,6 +108,29 @@ export async function startDesktopDownload({
     return;
   }
 
+  if (directUrl && checkIsMobile()) {
+    const { mobileDownloadManager } = await import(
+      '@/lib/mobile-download-manager'
+    );
+    await mobileDownloadManager.startDownload({
+      contentId: getOfflineIdentifier({
+        contentId,
+        type,
+        episode,
+        isDirectUrl: true,
+      }),
+      title:
+        type === 'series' && episode
+          ? `${showTitle} - S${season}E${episode}`
+          : showTitle,
+      m3u8Url: directUrl,
+      posterUrl,
+      quality,
+      metadata: show,
+    });
+    return;
+  }
+
   const server = contentId.includes(':') ? contentId.split(':')[0] : 's1';
 
   const response = await playVideo({
@@ -134,6 +161,27 @@ export async function startDesktopDownload({
         metadata: show,
       });
 
+      return true;
+    }
+
+    if (checkIsMobile()) {
+      const { mobileDownloadManager } = await import(
+        '@/lib/mobile-download-manager'
+      );
+      await mobileDownloadManager.startDownload({
+        contentId: getOfflineIdentifier({
+          contentId,
+          type,
+          season,
+          episode,
+          isDirectUrl: false,
+        }),
+        title: `${showTitle}${season ? ` S${season} E${episode}` : ''}`,
+        m3u8Url: response.masterPlaylistUrl,
+        posterUrl,
+        quality,
+        metadata: show,
+      });
       return true;
     }
   }

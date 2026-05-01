@@ -2,25 +2,24 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 export function useDownloads() {
   const { isDesktopApp, isMounted } = useDesktopApp();
+  const mobile = useIsMobile();
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
+  // Desktop (Electron)
   useEffect(() => {
     if (!isDesktopApp || !checkIsDesktop()) return;
 
-    // Initial load
     desktopBridge
       .getDownloads()
-      .then((items: DownloadItem[]) => {
-        setDownloads(items || []);
-      })
+      .then((items: DownloadItem[]) => setDownloads(items || []))
       .catch(console.error);
 
-    // Subscribe to progress
     const unsubscribe = desktopBridge.onDownloadProgress(
       (updatedItem: DownloadItem) => {
         setDownloads((prev) => {
@@ -45,45 +44,102 @@ export function useDownloads() {
     };
   }, [isDesktopApp]);
 
-  const cancelDownload = useCallback((contentId: string) => {
-    if (checkIsDesktop()) {
-      desktopBridge.cancelDownload(contentId);
+  // Mobile (Capacitor)
+  useEffect(() => {
+    if (!mobile) return;
 
-      // Optimistically remove it instantly from the UI
+    let unsubscribe: (() => void) | undefined;
+
+    import('@/lib/mobile-download-manager').then(
+      ({ mobileDownloadManager }) => {
+        mobileDownloadManager
+          .getDownloads()
+          .then((items) => setDownloads(items || []));
+
+        unsubscribe = mobileDownloadManager.onProgress(
+          (updatedItem: DownloadItem) => {
+            setDownloads((prev) => {
+              if (updatedItem.status === 'CANCELLED') {
+                return prev.filter(
+                  (i) => i.contentId !== updatedItem.contentId,
+                );
+              }
+              const exists = prev.find(
+                (i) => i.contentId === updatedItem.contentId,
+              );
+              if (exists) {
+                return prev.map((i) =>
+                  i.contentId === updatedItem.contentId ? updatedItem : i,
+                );
+              }
+              return [...prev, updatedItem];
+            });
+          },
+        );
+      },
+    );
+
+    return () => unsubscribe?.();
+  }, [mobile]);
+
+  const cancelDownload = useCallback(
+    (contentId: string) => {
+      if (checkIsDesktop()) {
+        desktopBridge.cancelDownload(contentId);
+      } else if (mobile) {
+        import('@/lib/mobile-download-manager').then(
+          ({ mobileDownloadManager }) =>
+            mobileDownloadManager.cancelDownload(contentId),
+        );
+      }
       setDownloads((prev) => prev.filter((i) => i.contentId !== contentId));
-    }
-  }, []);
+    },
+    [mobile],
+  );
 
-  const pauseDownload = useCallback((contentId: string) => {
-    if (checkIsDesktop()) {
-      desktopBridge.pauseDownload(contentId);
-
-      // Optimistically pause it instantly from the UI
+  const pauseDownload = useCallback(
+    (contentId: string) => {
+      if (checkIsDesktop()) {
+        desktopBridge.pauseDownload(contentId);
+      } else if (mobile) {
+        import('@/lib/mobile-download-manager').then(
+          ({ mobileDownloadManager }) =>
+            mobileDownloadManager.pauseDownload(contentId),
+        );
+      }
       setDownloads((prev) =>
         prev.map((i) =>
           i.contentId === contentId ? { ...i, status: 'PAUSED' } : i,
         ),
       );
-    }
-  }, []);
+    },
+    [mobile],
+  );
 
-  const resumeDownload = useCallback((contentId: string) => {
-    if (checkIsDesktop()) {
-      desktopBridge.resumeDownload(contentId);
-
-      // Optimistically resume it instantly from the UI
+  const resumeDownload = useCallback(
+    (contentId: string) => {
+      if (checkIsDesktop()) {
+        desktopBridge.resumeDownload(contentId);
+      } else if (mobile) {
+        import('@/lib/mobile-download-manager').then(
+          ({ mobileDownloadManager }) =>
+            mobileDownloadManager.resumeDownload(contentId),
+        );
+      }
       setDownloads((prev) =>
         prev.map((i) =>
           i.contentId === contentId ? { ...i, status: 'QUEUED' } : i,
         ),
       );
-    }
-  }, []);
+    },
+    [mobile],
+  );
 
   return {
     downloads,
     isDesktopApp,
     isMounted,
+    isMobile: mobile,
     cancelDownload,
     pauseDownload,
     resumeDownload,
