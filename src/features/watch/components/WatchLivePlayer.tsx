@@ -141,7 +141,11 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
               streamUrl={props.streamUrl}
               metadata={props.metadata}
             />
-            <LivePlayerState streamUrl={props.streamUrl} isPip={isPip} />
+            <LivePlayerState
+              streamUrl={props.streamUrl}
+              isPip={isPip}
+              onPip={() => setIsPip(true)}
+            />
           </Player.Root>
         </div>
       ) : (
@@ -171,9 +175,11 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
 function LivePlayerState({
   streamUrl,
   isPip,
+  onPip,
 }: {
   streamUrl: string | null;
   isPip?: boolean;
+  onPip?: () => void;
 }) {
   const { state, playerHandlers, metadata } = usePlayerContext();
   const t = useTranslations('watch.player');
@@ -247,14 +253,7 @@ function LivePlayerState({
           <Player.Header rightContent={recordButton} />
           {/* Mobile top: PiP left, settings right */}
           <Player.MobileTopBar>
-            <Player.PipButton
-              onPip={() => {
-                window.scrollTo({
-                  top: window.innerHeight,
-                  behavior: 'smooth',
-                });
-              }}
-            />
+            <Player.PipButton onPip={() => onPip?.()} />
             <Player.SettingsMenu />
           </Player.MobileTopBar>
           {/* Mobile center: skip back / play / skip forward */}

@@ -179,6 +179,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
             <VODPlayerState
               hideBackButton={props.hideBackButton}
               isPip={isPip}
+              onPip={() => setIsPip(true)}
             />
           </Player.Root>
         </div>
@@ -208,9 +209,11 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
 function VODPlayerState({
   hideBackButton,
   isPip,
+  onPip,
 }: {
   hideBackButton?: boolean;
   isPip?: boolean;
+  onPip?: () => void;
 }) {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
@@ -271,10 +274,7 @@ function VODPlayerState({
             <Player.MobileTopBar>
               <Player.PipButton
                 onPip={() => {
-                  window.scrollTo({
-                    top: window.innerHeight,
-                    behavior: 'smooth',
-                  });
+                  if (onPip) onPip();
                 }}
               />
               <Player.SettingsMenu />
