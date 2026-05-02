@@ -85,9 +85,14 @@ export function useHls({
   }, [_manualQualities, dispatch]);
 
   useEffect(() => {
-    if (!streamUrl || !videoRef.current) return;
+    if (!streamUrl || !videoRef.current) {
+      return;
+    }
 
     const video = videoRef.current;
+    const isNativePlatform =
+      typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.();
+
     let cancelled = false;
     // Capture native HLS handler so the cleanup closure can remove it
     let nativeLoadedMetadataHandler: (() => void) | null = null;
@@ -431,11 +436,23 @@ export function useHls({
           if (cancelled) return;
 
           // Ignore empty source errors triggered by cleanup or browser abort (e.g. backgrounding)
+          if (!video.error || video.error.code === MediaError.MEDIA_ERR_ABORTED)
+            return;
+
+          // On native iOS, error 4 (SRC_NOT_SUPPORTED) means the HLS session
+          // was invalidated by a previous mount. Treat it as stream expired
+          // so the player re-fetches a fresh session.
           if (
-            !video.error ||
-            video.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
-            video.error.code === MediaError.MEDIA_ERR_ABORTED
-          )
+            video.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
+            isNativePlatform &&
+            onStreamExpiredRef.current
+          ) {
+            dispatch({ type: 'SET_LOADING', isLoading: true });
+            onStreamExpiredRef.current();
+            return;
+          }
+
+          if (video.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
             return;
 
           const code = video.error.code;
@@ -512,10 +529,12 @@ export function useHls({
         )._nativeHlsHandlers;
       }
       if (video) {
-        // Safe cleanup to prevent ghost audio without triggering async event storms
-        // Important: Do not use video.load() as it fires 'stalled' events async in React 18 strict mode
         video.pause();
-        video.removeAttribute('src');
+        // Only strip src on HLS.js (web). On native iOS, removing src kills
+        // the session permanently — the same URL cannot be reloaded.
+        if (!isNativePlatform) {
+          video.removeAttribute('src');
+        }
       }
     };
   }, [streamUrl, videoRef, dispatch, isLive]); // Keep this minimal to avoid HLS re-init

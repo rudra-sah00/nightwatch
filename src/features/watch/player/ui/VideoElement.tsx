@@ -6,7 +6,6 @@ import { memo, useMemo } from 'react';
 import type { PlayerAction } from '../context/types';
 import { useVideoElement } from './use-video-element';
 
-// Hoisted style constant to prevent recreation on each render (rule 5.4)
 const VIDEO_STYLE: React.CSSProperties = {
   width: '100%',
   height: '100%',
@@ -28,15 +27,12 @@ interface VideoElementProps {
   }[];
   currentTrackId?: string | null;
   controls?: boolean;
-  /** @deprecated No longer used — objectFit is always contain. */
   isUltrawide?: boolean;
   ref?: React.Ref<HTMLVideoElement>;
 }
 
-// Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_SUBTITLE_TRACKS: VideoElementProps['subtitleTracks'] = [];
 
-// Memoized video element that should never re-render
 export const VideoElement = memo(function VideoElement({
   dispatch,
   onTimeUpdate,
@@ -59,9 +55,6 @@ export const VideoElement = memo(function VideoElement({
   });
   const t = useTranslations('watch.player');
 
-  // WKWebView enforces CORS strictly on media fetches — crossOrigin="anonymous"
-  // causes HLS segments to silently fail. Only set it on non-Capacitor platforms
-  // where it's needed for subtitle <track> elements.
   const crossOrigin = useMemo(
     () =>
       typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
