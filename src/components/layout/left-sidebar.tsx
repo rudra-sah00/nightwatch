@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BookOpen,
   Bot,
   Download,
   History,
@@ -70,6 +71,7 @@ export function LeftSidebar() {
       ? [{ href: '/downloads', label: t('downloads'), icon: Download }]
       : []),
     { href: '/music', label: t('music'), icon: Music },
+    { href: '/manga', label: 'Manga', icon: BookOpen },
     { href: '/ask-ai', label: 'Ask AI', icon: Bot },
   ];
 
