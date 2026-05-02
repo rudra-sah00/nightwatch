@@ -120,7 +120,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     position: 'fixed',
     bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
     right: '0.75rem',
-    width: '45vw',
+    width: '60vw',
     height: 'auto',
     aspectRatio: '16 / 9',
     zIndex: 9998,

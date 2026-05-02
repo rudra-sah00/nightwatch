@@ -8,11 +8,17 @@ project(':anuradev-capacitor-phone-call-notification').projectDir = new File('..
 include ':capacitor-community-keep-awake'
 project(':capacitor-community-keep-awake').projectDir = new File('../node_modules/.pnpm/@capacitor-community+keep-awake@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor-community/keep-awake/android')
 
+include ':capacitor-community-volume-buttons'
+project(':capacitor-community-volume-buttons').projectDir = new File('../node_modules/.pnpm/@capacitor-community+volume-buttons@8.0.0_@capacitor+core@8.3.1/node_modules/@capacitor-community/volume-buttons/android')
+
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/.pnpm/@capacitor+app@8.1.0_@capacitor+core@8.3.1/node_modules/@capacitor/app/android')
 
 include ':capacitor-clipboard'
 project(':capacitor-clipboard').projectDir = new File('../node_modules/.pnpm/@capacitor+clipboard@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/clipboard/android')
+
+include ':capacitor-filesystem'
+project(':capacitor-filesystem').projectDir = new File('../node_modules/.pnpm/@capacitor+filesystem@8.1.2_@capacitor+core@8.3.1/node_modules/@capacitor/filesystem/android')
 
 include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/haptics/android')
@@ -40,3 +46,9 @@ project(':capacitor-status-bar').projectDir = new File('../node_modules/.pnpm/@c
 
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge/android')
+
+include ':capgo-capacitor-incoming-call-kit'
+project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-incoming-call-kit/android')
+
+include ':ottimis-capacitor-volumes'
+project(':ottimis-capacitor-volumes').projectDir = new File('../node_modules/.pnpm/@ottimis+capacitor-volumes@7.0.0_@capacitor+core@8.3.1/node_modules/@ottimis/capacitor-volumes/android')

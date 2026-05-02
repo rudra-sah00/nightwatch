@@ -9,7 +9,6 @@ interface SubtitleTrackDef {
   src: string;
 }
 
-/** Options for {@link useVideoElement}. */
 interface UseVideoElementOptions {
   dispatch: React.Dispatch<PlayerAction>;
   onTimeUpdate?: (time: number) => void;
@@ -20,18 +19,8 @@ interface UseVideoElementOptions {
   ref?: React.Ref<HTMLVideoElement>;
 }
 
-// Stable empty array — prevents new reference on every parent render (rule 5.4)
 const EMPTY_SUBTITLE_TRACKS: SubtitleTrackDef[] = [];
 
-/**
- * Binds all native `<video>` element events to the player state dispatcher
- * and manages subtitle text track activation.
- *
- * Handles play, pause, timeupdate, duration, buffering, volume, errors
- * (with a debounced decode-error timer), and subtitle track mode toggling.
- *
- * @returns A merged ref callback for the video element and the computed subtitle tracks array.
- */
 export function useVideoElement({
   dispatch,
   onTimeUpdate,
@@ -102,8 +91,6 @@ export function useVideoElement({
     const handlePlaying = () => {
       clearPendingError();
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
-      // Playback recovered (e.g. after transient segment 404/retry),
-      // so clear any stale error overlay state.
       dispatch({ type: 'SET_ERROR', error: null });
     };
     const handleCanPlay = () => {
@@ -113,23 +100,9 @@ export function useVideoElement({
     };
     const handleError = (e: Event) => {
       const target = e.target as HTMLVideoElement;
-      // Only handle genuine decode errors (MEDIA_ERR_DECODE = 3): corrupt or
-      // unsupported codec that the engine-specific hooks (useHls / useMp4) do
-      // not already catch.
-      //
-      // MEDIA_ERR_ABORTED (1) and MEDIA_ERR_NETWORK (2): fired when HLS.js
-      // calls hls.destroy() mid-stream (e.g. during 401 / session expiry).
-      // useHls already handles those and dispatches the correct state — letting
-      // this handler also fire causes a double SET_ERROR that overrides the
-      // loading-state the 401 handler just set, producing the error-flash.
-      //
-      // MEDIA_ERR_SRC_NOT_SUPPORTED (4): fired when src is set to '' during
-      // cleanup. Not a real playback failure.
       if (!target?.error) return;
       if (target.error.code !== MediaError.MEDIA_ERR_DECODE) return;
 
-      // Avoid flashing the error overlay for transient decode hiccups that
-      // self-heal after HLS retries the next segments.
       clearPendingError();
       pendingErrorTimerRef.current = setTimeout(() => {
         pendingErrorTimerRef.current = null;

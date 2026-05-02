@@ -12,13 +12,21 @@ NProgress.configure({ showSpinner: false, minimum: 0.1, speed: 300 });
  * anchor clicks to start/stop the progress indicator on client-side navigations.
  * Injects a `<style>` tag to position the bar below the navbar and Electron title bar.
  */
+const SKIP_PROGRESS_PREFIXES = ['/watch/', '/live/', '/clip/'];
+
+function shouldSkipProgress(url: string): boolean {
+  const path = url.split('?')[0];
+  return SKIP_PROGRESS_PREFIXES.some((p) => path.startsWith(p));
+}
+
 export function ProgressBar() {
   useEffect(() => {
     const originalPushState = history.pushState.bind(history);
     const originalReplaceState = history.replaceState.bind(history);
 
     history.pushState = (...args) => {
-      NProgress.start();
+      const url = typeof args[2] === 'string' ? args[2] : '';
+      if (!shouldSkipProgress(url)) NProgress.start();
       requestAnimationFrame(() => NProgress.done());
       originalPushState(...args);
     };
@@ -36,6 +44,7 @@ export function ProgressBar() {
       if (anchor.target === '_blank') return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       if (href === window.location.pathname + window.location.search) return;
+      if (shouldSkipProgress(href)) return;
       NProgress.start();
     };
 

@@ -107,12 +107,12 @@ export function MobileFullPlayer({
         <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex flex-col h-full px-6">
-        {/* Drag handle + close */}
+      <div className="relative z-10 flex flex-col h-full px-7">
+        {/* Drag handle */}
         <button
           type="button"
           onClick={onClose}
-          className="shrink-0 flex justify-center pt-3 pb-2"
+          className="shrink-0 flex justify-center pt-3 pb-6"
         >
           <div className="w-10 h-1 rounded-full bg-white/30" />
         </button>
@@ -152,23 +152,16 @@ export function MobileFullPlayer({
             </div>
           </div>
         ) : (
-          /* ===== ALBUM ART / LYRICS with smooth crossfade ===== */
+          /* ===== MAIN VIEW (Apple Music style) ===== */
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Album art — shrinks and fades when lyrics are shown */}
-            <div
-              className="shrink-0 flex flex-col items-center transition-all duration-500 ease-out overflow-hidden"
-              style={{
-                maxHeight: showLyrics && hasLyrics ? '72px' : '60vh',
-                opacity: 1,
-              }}
-            >
-              {showLyrics && hasLyrics ? (
-                /* Compact header when lyrics visible */
-                <div className="w-full flex items-center gap-3 py-1">
+            {/* Album art — large, nearly full width */}
+            {showLyrics && hasLyrics ? (
+              <>
+                <div className="shrink-0 w-full flex items-center gap-3 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <img
                     src={currentTrack.image}
                     alt=""
-                    className="w-14 h-14 rounded-lg object-cover shrink-0 transition-all duration-500"
+                    className="w-14 h-14 rounded-lg object-cover shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-sm truncate">
@@ -179,165 +172,162 @@ export function MobileFullPlayer({
                     </p>
                   </div>
                 </div>
-              ) : (
-                /* Full album art */
-                <>
-                  <div className="w-[70vw] max-w-[320px] aspect-square mb-6 mt-2">
+                <div className="flex-1 relative min-h-0 overflow-hidden mb-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <FullPlayerLyrics
+                    lyrics={lyrics}
+                    currentLineIndex={currentLineIndex}
+                    duration={duration}
+                    seek={onSeek}
+                    lyricsRef={lyricsRef}
+                    variant="mobile"
+                  />
+                  <button
+                    type="button"
+                    onClick={onToggleLyrics}
+                    className="absolute bottom-2 right-2 p-2 rounded-full bg-white/10 text-white/60"
+                  >
+                    <Mic2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="w-full aspect-square max-h-[50vh]">
                     <img
                       src={currentTrack.image}
                       alt={currentTrack.title}
-                      className="w-full h-full object-cover rounded-2xl shadow-2xl transition-all duration-500"
+                      className="w-full h-full object-cover rounded-2xl shadow-2xl"
                     />
                   </div>
-                  <div className="w-full text-left mb-1">
-                    <h2 className="text-white font-bold text-xl truncate">
-                      {currentTrack.title}
-                    </h2>
-                    <p className="text-white/50 text-sm truncate">
-                      {currentTrack.artist}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Lyrics area — expands smoothly */}
-            <div
-              className="relative transition-all duration-500 ease-out overflow-hidden"
-              style={{
-                flex: showLyrics && hasLyrics ? 1 : 0,
-                opacity: showLyrics && hasLyrics ? 1 : 0,
-              }}
-            >
-              {hasLyrics && (
-                <FullPlayerLyrics
-                  lyrics={lyrics}
-                  currentLineIndex={currentLineIndex}
-                  duration={duration}
-                  seek={onSeek}
-                  lyricsRef={lyricsRef}
-                  variant="mobile"
-                />
-              )}
-              {showLyrics && hasLyrics && (
-                <button
-                  type="button"
-                  onClick={onToggleLyrics}
-                  className="absolute bottom-2 right-2 p-2.5 rounded-full bg-white/10 text-white/60"
-                >
-                  <Mic2 className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+                {/* Title + Artist */}
+                <div className="shrink-0 w-full mt-5 mb-4">
+                  <h2 className="text-white font-bold text-xl truncate">
+                    {currentTrack.title}
+                  </h2>
+                  <p className="text-white/50 text-sm truncate mt-0.5">
+                    {currentTrack.artist}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* ===== BOTTOM CONTROLS ===== */}
-        <div className="shrink-0 pb-1">
-          {/* Seek bar */}
-          <div className="w-full">
-            <button
-              type="button"
-              className="w-full py-2 cursor-pointer relative"
-              onClick={(e) => {
-                const bar = e.currentTarget.querySelector(
-                  '[data-seekbar]',
-                ) as HTMLElement;
-                if (!bar) return;
-                const rect = bar.getBoundingClientRect();
-                onSeek(
-                  Math.max(
-                    0,
-                    Math.min(100, ((e.clientX - rect.left) / rect.width) * 100),
-                  ),
-                );
-              }}
-            >
-              <div
-                data-seekbar
-                className="w-full h-1.5 bg-white/15 rounded-full relative"
+        {/* ===== CONTROLS (always pinned at bottom) ===== */}
+        {!showQueue && (
+          <div className="shrink-0">
+            {/* Seek bar */}
+            <div className="w-full mb-4">
+              <button
+                type="button"
+                className="w-full py-1 cursor-pointer relative"
+                onClick={(e) => {
+                  const bar = e.currentTarget.querySelector(
+                    '[data-seekbar]',
+                  ) as HTMLElement;
+                  if (!bar) return;
+                  const rect = bar.getBoundingClientRect();
+                  onSeek(
+                    Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        ((e.clientX - rect.left) / rect.width) * 100,
+                      ),
+                    ),
+                  );
+                }}
               >
                 <div
-                  className="h-full bg-white/80 rounded-full"
-                  style={{ width: `${progress}%` }}
-                />
+                  data-seekbar
+                  className="w-full h-1.5 bg-white/15 rounded-full relative"
+                >
+                  <div
+                    className="h-full bg-white/80 rounded-full"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </button>
+              <div className="flex justify-between mt-1">
+                <span className="text-white/40 text-[10px] font-mono">
+                  {formatTime(currentTime)}
+                </span>
+                <span className="text-white/40 text-[10px] font-mono">
+                  -{formatTime(Math.max(0, duration - currentTime))}
+                </span>
               </div>
-            </button>
-            <div className="flex justify-between mt-0.5">
-              <span className="text-white/40 text-[10px] font-mono">
-                {formatTime(currentTime)}
-              </span>
-              <span className="text-white/40 text-[10px] font-mono">
-                -{formatTime(Math.max(0, duration - currentTime))}
-              </span>
+            </div>
+
+            {/* Play controls */}
+            <div className="shrink-0 flex items-center justify-center gap-12 mb-6">
+              <button type="button" onClick={onPrev} className="text-white">
+                <SkipBack className="w-9 h-9 fill-current" />
+              </button>
+              <button
+                type="button"
+                onClick={onTogglePlay}
+                className="text-white"
+              >
+                {isPlaying ? (
+                  <Pause className="w-14 h-14 fill-current" />
+                ) : (
+                  <Play className="w-14 h-14 fill-current ml-1" />
+                )}
+              </button>
+              <button type="button" onClick={onNext} className="text-white">
+                <SkipForward className="w-9 h-9 fill-current" />
+              </button>
+            </div>
+
+            {/* Volume */}
+            <div className="shrink-0 flex items-center gap-3 mb-4">
+              <Volume1 className="w-3.5 h-3.5 text-white/30" />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={systemVol?.volume ?? volume}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  if (systemVol) systemVol.setSystemVolume(v);
+                  else onSetVolume(v);
+                }}
+                className="flex-1 h-1 accent-white cursor-pointer"
+              />
+              <Volume2 className="w-3.5 h-3.5 text-white/30" />
+            </div>
+
+            {/* Bottom bar: lyrics / airplay / queue */}
+            <div className="flex items-center justify-around pb-1">
+              <button
+                type="button"
+                onClick={onToggleLyrics}
+                className={`p-2.5 rounded-full transition-colors ${showLyrics ? 'bg-white/20 text-white' : hasLyrics ? 'text-white/50' : 'text-white/15'}`}
+                disabled={!hasLyrics}
+              >
+                <Mic2 className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={onShowAirPlay}
+                className="p-2.5 text-white/50"
+              >
+                <Airplay className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={onToggleQueue}
+                className={`p-2.5 rounded-full transition-colors ${showQueue ? 'bg-white/20 text-white' : 'text-white/50'}`}
+              >
+                <ListMusic className="w-5 h-5" />
+              </button>
             </div>
           </div>
-
-          {/* Play controls */}
-          <div className="flex items-center justify-center gap-10 my-2">
-            <button type="button" onClick={onPrev} className="text-white">
-              <SkipBack className="w-8 h-8 fill-current" />
-            </button>
-            <button type="button" onClick={onTogglePlay} className="text-white">
-              {isPlaying ? (
-                <Pause className="w-12 h-12 fill-current" />
-              ) : (
-                <Play className="w-12 h-12 fill-current ml-1" />
-              )}
-            </button>
-            <button type="button" onClick={onNext} className="text-white">
-              <SkipForward className="w-8 h-8 fill-current" />
-            </button>
-          </div>
-
-          {/* Volume */}
-          <div className="flex items-center gap-3 mb-2">
-            <Volume1 className="w-3.5 h-3.5 text-white/30" />
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={systemVol?.volume ?? volume}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                if (systemVol) {
-                  systemVol.setSystemVolume(v);
-                } else {
-                  onSetVolume(v);
-                }
-              }}
-              className="flex-1 h-1 accent-white cursor-pointer"
-            />
-            <Volume2 className="w-3.5 h-3.5 text-white/30" />
-          </div>
-
-          {/* Bottom bar: lyrics / airplay / queue */}
-          <div className="flex items-center justify-around pb-1">
-            <button
-              type="button"
-              onClick={onToggleLyrics}
-              className={`p-2.5 rounded-full transition-colors ${showLyrics ? 'bg-white/20 text-white' : hasLyrics ? 'text-white/50' : 'text-white/15'}`}
-              disabled={!hasLyrics}
-            >
-              <Mic2 className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={onShowAirPlay}
-              className="p-2.5 text-white/50"
-            >
-              <Airplay className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={onToggleQueue}
-              className={`p-2.5 rounded-full transition-colors ${showQueue ? 'bg-white/20 text-white' : 'text-white/50'}`}
-            >
-              <ListMusic className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
