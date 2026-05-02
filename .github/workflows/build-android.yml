@@ -61,43 +61,25 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Add Android platform
-        run: npx cap add android
-
-      - name: Set app icon
-        run: |
-          SRC="public/logo.png"
-          RES="android/app/src/main/res"
-          for pair in "mipmap-mdpi:48" "mipmap-hdpi:72" "mipmap-xhdpi:96" "mipmap-xxhdpi:144" "mipmap-xxxhdpi:192"; do
-            dir="${pair%%:*}"; size="${pair##*:}"
-            mkdir -p "$RES/$dir"
-            convert "$SRC" -resize "${size}x${size}" "$RES/$dir/ic_launcher.png"
-            cp "$RES/$dir/ic_launcher.png" "$RES/$dir/ic_launcher_round.png"
-          done
-          for pair in "mipmap-mdpi:108" "mipmap-hdpi:162" "mipmap-xhdpi:216" "mipmap-xxhdpi:324" "mipmap-xxxhdpi:432"; do
-            dir="${pair%%:*}"; size="${pair##*:}"
-            convert "$SRC" -resize "${size}x${size}" "$RES/$dir/ic_launcher_foreground.png"
-          done
-
-      - name: Sync Capacitor
+      - name: Sync Capacitor (production URL)
         run: npx cap sync android
 
-      - name: Build Debug APK
+      - name: Build Release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: nightwatch-android
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Upload APK to GitHub Release
         if: github.event_name == 'workflow_call'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
           TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
           echo "Uploading APK to release: $TAG"
           gh release upload "$TAG" "$APK#Nightwatch-Android.apk" --clobber
