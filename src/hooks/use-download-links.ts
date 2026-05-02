@@ -11,7 +11,12 @@ const RELEASES_FALLBACK =
   'https://github.com/rudra-sah00/nightwatch/releases/latest';
 
 /** Per-platform download URLs resolved from the latest GitHub release. */
-type DownloadLinks = { windows: string; mac: string; linux: string };
+type DownloadLinks = {
+  windows: string;
+  mac: string;
+  linux: string;
+  android: string;
+};
 
 /**
  * Fetches the latest GitHub release and resolves per-platform download URLs.
@@ -36,6 +41,7 @@ export function useDownloadLinks() {
           windows: find((n) => n.endsWith('.exe') && !n.endsWith('.blockmap')),
           mac: find((n) => n.endsWith('.dmg') && !n.endsWith('.blockmap')),
           linux: find((n) => n.endsWith('.AppImage')),
+          android: find((n) => n.endsWith('.apk')),
         });
       })
       .catch(() =>
@@ -43,6 +49,7 @@ export function useDownloadLinks() {
           windows: RELEASES_FALLBACK,
           mac: RELEASES_FALLBACK,
           linux: RELEASES_FALLBACK,
+          android: RELEASES_FALLBACK,
         }),
       );
   }, []);
