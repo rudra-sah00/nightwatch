@@ -450,27 +450,35 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const toggleMute = useCallback(() => {
     if (localTrackRef.current) {
-      const next = !isMuted;
-      localTrackRef.current.setEnabled(!next);
-      setIsMuted(next);
+      try {
+        const next = !isMuted;
+        localTrackRef.current.setEnabled(!next);
+        setIsMuted(next);
+      } catch {
+        // Track may have been disposed
+      }
     }
   }, [isMuted]);
 
   const toggleVideo = useCallback(async () => {
     if (!agoraClientRef.current) return;
-    if (isVideoOn) {
-      if (localVideoTrackRef.current) {
-        await agoraClientRef.current.unpublish([localVideoTrackRef.current]);
-        localVideoTrackRef.current.stop();
-        localVideoTrackRef.current.close();
-        localVideoTrackRef.current = null;
+    try {
+      if (isVideoOn) {
+        if (localVideoTrackRef.current) {
+          await agoraClientRef.current.unpublish([localVideoTrackRef.current]);
+          localVideoTrackRef.current.stop();
+          localVideoTrackRef.current.close();
+          localVideoTrackRef.current = null;
+        }
+        setIsVideoOn(false);
+      } else {
+        const videoTrack = await createCallVideoTrack(agoraClientRef.current);
+        localVideoTrackRef.current = videoTrack;
+        if (localVideoRef.current) videoTrack.play(localVideoRef.current);
+        setIsVideoOn(true);
       }
-      setIsVideoOn(false);
-    } else {
-      const videoTrack = await createCallVideoTrack(agoraClientRef.current);
-      localVideoTrackRef.current = videoTrack;
-      if (localVideoRef.current) videoTrack.play(localVideoRef.current);
-      setIsVideoOn(true);
+    } catch {
+      // Permission denied or camera unavailable — don't crash
     }
   }, [isVideoOn]);
 

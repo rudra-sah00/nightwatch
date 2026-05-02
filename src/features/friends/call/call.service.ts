@@ -89,6 +89,22 @@ export async function connectToAgoraCall(
 export async function createCallVideoTrack(
   client: IAgoraRTCClient,
 ): Promise<ICameraVideoTrack> {
+  // Pre-check camera permission (required for iOS/Android Capacitor)
+  try {
+    const testStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+    });
+    for (const track of testStream.getTracks()) track.stop();
+  } catch (err) {
+    if (
+      err instanceof DOMException &&
+      (err.name === 'NotAllowedError' || err.name === 'NotFoundError')
+    ) {
+      throw new Error('Camera access denied. Please allow camera in Settings.');
+    }
+    throw err;
+  }
+
   const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
   const videoTrack = await AgoraRTC.createCameraVideoTrack({
     encoderConfig: CALL_VIDEO_ENCODER,
