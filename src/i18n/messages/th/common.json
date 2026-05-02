@@ -249,7 +249,9 @@
       "noFriendsFound": "ไม่พบเพื่อน",
       "participants": "{count, plural, other {ผู้เข้าร่วม # คน}}",
       "you": "คุณ",
-      "callOverlay": "หน้าต่างสาย"
+      "callOverlay": "หน้าต่างสาย",
+      "speaker": "ลำโพง",
+      "earpiece": "หูฟัง"
     }
   },
   "landing": {

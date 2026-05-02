@@ -249,7 +249,9 @@
       "noFriendsFound": "कोई दोस्त नहीं मिला",
       "participants": "{count, plural, one {# प्रतिभागी} other {# प्रतिभागी}}",
       "you": "आप",
-      "callOverlay": "कॉल ओवरले"
+      "callOverlay": "कॉल ओवरले",
+      "speaker": "स्पीकर",
+      "earpiece": "ईयरपीस"
     }
   },
   "landing": {

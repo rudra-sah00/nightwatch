@@ -8,6 +8,12 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        registerPlugin(NWAudioSessionPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

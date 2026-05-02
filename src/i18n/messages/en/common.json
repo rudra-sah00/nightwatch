@@ -249,7 +249,9 @@
       "noFriendsFound": "No friends found",
       "participants": "{count, plural, one {# participant} other {# participants}}",
       "you": "You",
-      "callOverlay": "Call overlay"
+      "callOverlay": "Call overlay",
+      "speaker": "Speaker",
+      "earpiece": "Earpiece"
     }
   },
   "electron": {

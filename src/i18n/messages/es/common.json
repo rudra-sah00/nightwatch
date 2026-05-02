@@ -249,7 +249,9 @@
       "noFriendsFound": "No se encontraron amigos",
       "participants": "{count, plural, one {# participante} other {# participantes}}",
       "you": "Tú",
-      "callOverlay": "Ventana de llamada"
+      "callOverlay": "Ventana de llamada",
+      "speaker": "Altavoz",
+      "earpiece": "Auricular"
     }
   },
   "landing": {

@@ -249,7 +249,9 @@
       "noFriendsFound": "لم يتم العثور على أصدقاء",
       "participants": "{count, plural, one {مشارك #} other {# مشاركين}}",
       "you": "أنت",
-      "callOverlay": "نافذة المكالمة"
+      "callOverlay": "نافذة المكالمة",
+      "speaker": "مكبر الصوت",
+      "earpiece": "سماعة الأذن"
     }
   },
   "landing": {

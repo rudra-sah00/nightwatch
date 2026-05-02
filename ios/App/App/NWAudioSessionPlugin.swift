@@ -8,6 +8,8 @@ public class NWAudioSessionPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "setVoiceCallMode", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setMediaMode", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setOutputToSpeaker", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setOutputToEarpiece", returnType: CAPPluginReturnPromise),
     ]
 
     /// Switch audio session to voice call mode.
@@ -25,6 +27,26 @@ public class NWAudioSessionPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve()
         } catch {
             call.reject("Failed to set voice call mode: \(error.localizedDescription)")
+        }
+    }
+
+    /// Route audio output to the speaker.
+    @objc func setOutputToSpeaker(_ call: CAPPluginCall) {
+        do {
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+            call.resolve()
+        } catch {
+            call.reject("Failed to route to speaker: \(error.localizedDescription)")
+        }
+    }
+
+    /// Route audio output to the earpiece (default receiver).
+    @objc func setOutputToEarpiece(_ call: CAPPluginCall) {
+        do {
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+            call.resolve()
+        } catch {
+            call.reject("Failed to route to earpiece: \(error.localizedDescription)")
         }
     }
 

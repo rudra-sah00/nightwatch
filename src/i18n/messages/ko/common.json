@@ -249,7 +249,9 @@
       "noFriendsFound": "친구를 찾을 수 없습니다",
       "participants": "{count, plural, other {참가자 #명}}",
       "you": "나",
-      "callOverlay": "통화 오버레이"
+      "callOverlay": "통화 오버레이",
+      "speaker": "스피커",
+      "earpiece": "이어피스"
     }
   },
   "landing": {

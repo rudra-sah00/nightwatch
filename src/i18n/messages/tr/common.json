@@ -249,7 +249,9 @@
       "noFriendsFound": "Arkadaş bulunamadı",
       "participants": "{count, plural, one {# katılımcı} other {# katılımcı}}",
       "you": "Sen",
-      "callOverlay": "Arama penceresi"
+      "callOverlay": "Arama penceresi",
+      "speaker": "Hoparlör",
+      "earpiece": "Kulaklık"
     }
   },
   "landing": {

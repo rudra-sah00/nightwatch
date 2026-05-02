@@ -8,6 +8,7 @@ import {
   Plus,
   Video,
   VideoOff,
+  Volume2,
   X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -16,6 +17,7 @@ import { formatDuration } from '@/features/friends/call/call.utils';
 import { InviteSpotlight } from '@/features/friends/call/InviteSpotlight';
 import { PeerAvatar } from '@/features/friends/call/PeerAvatar';
 import { useCall } from '@/features/friends/hooks/use-call';
+import { checkIsMobile } from '@/lib/electron-bridge';
 
 /**
  * Floating call overlay that renders in three visual states:
@@ -47,6 +49,7 @@ export function CallOverlay() {
     participants,
     isMuted,
     isVideoOn,
+    isSpeaker,
     isRemoteVideoOn,
     remoteVideoRef,
     localVideoRef,
@@ -56,10 +59,13 @@ export function CallOverlay() {
     endCall,
     toggleMute,
     toggleVideo,
+    toggleSpeaker,
     inviteFriend,
   } = useCall();
 
   const t = useTranslations('common.friends.call');
+  const [isNativeMobile, setIsNativeMobile] = useState(false);
+  useEffect(() => setIsNativeMobile(checkIsMobile()), []);
 
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -330,6 +336,20 @@ export function CallOverlay() {
                 )}
               </button>
             )}
+            {callState === 'active' && isNativeMobile && (
+              <button
+                type="button"
+                onClick={toggleSpeaker}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                  isSpeaker
+                    ? 'bg-white/15 text-white'
+                    : 'bg-white/15 text-white/40'
+                }`}
+                aria-label={isSpeaker ? t('earpiece') : t('speaker')}
+              >
+                <Volume2 className="w-5 h-5" />
+              </button>
+            )}
             {callState === 'active' && (
               <button
                 type="button"
@@ -487,6 +507,20 @@ export function CallOverlay() {
                       ) : (
                         <VideoOff className="w-4 h-4" />
                       )}
+                    </button>
+                  )}
+                  {callState === 'active' && isNativeMobile && (
+                    <button
+                      type="button"
+                      onClick={toggleSpeaker}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                        isSpeaker
+                          ? 'bg-white/15 text-white'
+                          : 'bg-white/15 text-white/40'
+                      }`}
+                      aria-label={isSpeaker ? t('earpiece') : t('speaker')}
+                    >
+                      <Volume2 className="w-4 h-4" />
                     </button>
                   )}
                   {callState === 'active' && (

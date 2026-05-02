@@ -249,7 +249,9 @@
       "noFriendsFound": "未找到好友",
       "participants": "{count, plural, other {#位参与者}}",
       "you": "你",
-      "callOverlay": "通话窗口"
+      "callOverlay": "通话窗口",
+      "speaker": "扬声器",
+      "earpiece": "听筒"
     }
   },
   "landing": {

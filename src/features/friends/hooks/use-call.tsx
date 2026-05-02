@@ -63,6 +63,8 @@ interface CallContextType {
   isMuted: boolean;
   /** Whether the local camera is publishing video. */
   isVideoOn: boolean;
+  /** Whether the audio output is routed to the speaker (vs earpiece). */
+  isSpeaker: boolean;
   /** Whether the remote peer is sending video. */
   isRemoteVideoOn: boolean;
   /** Ref to the DOM element where the remote video track is rendered. */
@@ -83,6 +85,8 @@ interface CallContextType {
   toggleMute: () => void;
   /** Toggle the local camera on/off (publishes/unpublishes the video track). */
   toggleVideo: () => void;
+  /** Toggle audio output between speaker and earpiece (mobile only). */
+  toggleSpeaker: () => void;
   /** Invite an additional friend into the active call. */
   inviteFriend: (peer: CallPeer) => void;
 }
@@ -93,6 +97,7 @@ const CallContext = createContext<CallContextType>({
   participants: [],
   isMuted: false,
   isVideoOn: false,
+  isSpeaker: true,
   isRemoteVideoOn: false,
   remoteVideoRef: { current: null },
   localVideoRef: { current: null },
@@ -103,6 +108,7 @@ const CallContext = createContext<CallContextType>({
   endCall: () => {},
   toggleMute: () => {},
   toggleVideo: () => {},
+  toggleSpeaker: () => {},
   inviteFriend: () => {},
 });
 
@@ -155,6 +161,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [participants, setParticipants] = useState<CallPeer[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isSpeaker, setIsSpeaker] = useState(true);
   const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
 
@@ -336,6 +343,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     setIsVideoOn(false);
     setIsRemoteVideoOn(false);
     setIsMuted(false);
+    setIsSpeaker(true);
   }, [updateCallState]);
 
   // ── Agora connection ──────────────────────────────────────────────
@@ -482,6 +490,22 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isVideoOn]);
 
+  const toggleSpeaker = useCallback(() => {
+    if (!checkIsMobile()) return;
+    const next = !isSpeaker;
+    import('@capacitor/core').then(({ registerPlugin }) => {
+      const NWAudioSession = registerPlugin<{
+        setOutputToSpeaker: () => Promise<void>;
+        setOutputToEarpiece: () => Promise<void>;
+      }>('NWAudioSession');
+      (next
+        ? NWAudioSession.setOutputToSpeaker()
+        : NWAudioSession.setOutputToEarpiece()
+      ).catch(() => {});
+    });
+    setIsSpeaker(next);
+  }, [isSpeaker]);
+
   const inviteFriend = useCallback(
     (invitee: CallPeer) => {
       if (!socket || callStateRef.current !== 'active') return;
@@ -576,6 +600,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         participants,
         isMuted,
         isVideoOn,
+        isSpeaker,
         isRemoteVideoOn,
         remoteVideoRef,
         localVideoRef,
@@ -586,6 +611,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         endCall,
         toggleMute,
         toggleVideo,
+        toggleSpeaker,
         inviteFriend,
       }}
     >

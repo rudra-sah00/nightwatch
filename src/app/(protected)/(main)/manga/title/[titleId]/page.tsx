@@ -160,18 +160,49 @@ export default function MangaTitlePage() {
                 <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
                 {isFav ? 'Saved' : 'Save'}
               </button>
-              {resumeProgress && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(`/manga/chapter/${resumeProgress.chapterId}`)
+              {resumeProgress &&
+                (() => {
+                  const pct = resumeProgress.totalPages
+                    ? resumeProgress.pageIndex / resumeProgress.totalPages
+                    : 0;
+                  if (pct >= 0.95) {
+                    // Find next chapter
+                    const idx = chapters.findIndex(
+                      (c) => c.chapterId === resumeProgress.chapterId,
+                    );
+                    const next =
+                      idx >= 0 && idx < chapters.length - 1
+                        ? chapters[idx + 1]
+                        : null;
+                    if (!next) return null; // Last chapter, 95%+ done — no resume
+                    return (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(`/manga/chapter/${next.chapterId}`)
+                        }
+                        className="flex items-center gap-2 px-4 py-2 font-headline font-black uppercase text-xs tracking-widest border-[3px] border-border bg-neo-cyan text-black hover:brightness-110 transition-colors"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        Next {next.name}
+                      </button>
+                    );
                   }
-                  className="flex items-center gap-2 px-4 py-2 font-headline font-black uppercase text-xs tracking-widest border-[3px] border-border bg-neo-cyan text-black hover:brightness-110 transition-colors"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  Resume {resumeProgress.chapterName}
-                </button>
-              )}
+                  return (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/manga/chapter/${resumeProgress.chapterId}`,
+                        )
+                      }
+                      className="flex items-center gap-2 px-4 py-2 font-headline font-black uppercase text-xs tracking-widest border-[3px] border-border bg-neo-cyan text-black hover:brightness-110 transition-colors"
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      Resume {resumeProgress.chapterName}
+                    </button>
+                  );
+                })()}
             </div>
 
             {/* Meta badges */}

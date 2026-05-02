@@ -249,7 +249,9 @@
       "noFriendsFound": "Друзья не найдены",
       "participants": "{count, plural, one {# участник} few {# участника} many {# участников} other {# участников}}",
       "you": "Вы",
-      "callOverlay": "Окно звонка"
+      "callOverlay": "Окно звонка",
+      "speaker": "Динамик",
+      "earpiece": "Наушник"
     }
   },
   "landing": {

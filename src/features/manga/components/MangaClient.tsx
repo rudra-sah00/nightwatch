@@ -9,9 +9,8 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MangaTitle } from '@/features/manga/api';
 import {
   getMangaFavorites,
@@ -53,12 +52,11 @@ function MangaCard({
       )}
       <div className="aspect-[2/3] relative bg-muted">
         {title.portraitImageUrl ? (
-          <Image
+          <img
             src={title.portraitImageUrl}
             alt={title.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 18vw"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -159,8 +157,37 @@ export function MangaClient() {
 
   const displayTitles = titles;
 
+  const PAGE_SIZE = 30;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  // Reset visible count when tab changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on tab switch
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [tab]);
+
+  // Infinite scroll — load more when bottom sentinel is visible
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, titles.length));
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [titles.length]);
+
+  const visibleTitles = titles.slice(0, visibleCount);
+
   const handleRemove = async (titleId: number) => {
     setTitles((prev) => prev.filter((t) => t.titleId !== titleId));
+    setVisibleCount((prev) => Math.max(prev - 1, PAGE_SIZE));
     try {
       if (tab === 'saved') await removeMangaFavorite(titleId);
       if (tab === 'continue') await removeMangaProgress(titleId);
@@ -220,20 +247,27 @@ export function MangaClient() {
       {/* Grid */}
       {loading ? (
         <SkeletonGrid />
-      ) : displayTitles.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-6">
-          {displayTitles.map((t) => (
-            <MangaCard
-              key={t.titleId}
-              title={t}
-              onRemove={
-                tab === 'saved' || tab === 'continue'
-                  ? () => handleRemove(t.titleId)
-                  : undefined
-              }
-            />
-          ))}
-        </div>
+      ) : visibleTitles.length > 0 ? (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-6">
+            {visibleTitles.map((t) => (
+              <MangaCard
+                key={t.titleId}
+                title={t}
+                onRemove={
+                  tab === 'saved' || tab === 'continue'
+                    ? () => handleRemove(t.titleId)
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+          {visibleCount < titles.length && (
+            <div ref={loaderRef} className="flex justify-center py-8">
+              <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+            </div>
+          )}
+        </>
       ) : (
         <div className="mx-6 py-24 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
           <BookOpen className="w-12 h-12 text-foreground/20 mb-4" />

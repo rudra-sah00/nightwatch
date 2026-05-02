@@ -18,20 +18,29 @@ export default function ChapterReaderPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const progressSaved = useRef(false);
   const coverUrl = useRef('');
+  const [prevChapterId, setPrevChapterId] = useState<number | null>(null);
+  const [nextChapterId, setNextChapterId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!chapterId) return;
     setLoading(true);
     setCurrentPage(0);
-    progressSaved.current = false;
     getMangaChapter(Number(chapterId))
       .then((v) => {
         setViewer(v);
         getMangaDetail(v.titleId)
           .then((d) => {
             coverUrl.current = d.title.portraitImageUrl;
+            const idx = d.chapters.findIndex(
+              (c) => c.chapterId === Number(chapterId),
+            );
+            setPrevChapterId(idx > 0 ? d.chapters[idx - 1].chapterId : null);
+            setNextChapterId(
+              idx >= 0 && idx < d.chapters.length - 1
+                ? d.chapters[idx + 1].chapterId
+                : null,
+            );
           })
           .catch(() => {});
         // Restore reading position
@@ -75,7 +84,10 @@ export default function ChapterReaderPage() {
     return () => observer.disconnect();
   }, [viewer]);
 
-  // Save progress on page change (debounced)
+  // Track latest page in a ref so the save-on-exit always has the current value
+  const currentPageRef = useRef(0);
+  currentPageRef.current = currentPage;
+
   const saveProgress = useCallback(() => {
     if (!viewer || viewer.pages.length === 0) return;
     updateMangaProgress({
@@ -84,23 +96,23 @@ export default function ChapterReaderPage() {
       portraitImageUrl: coverUrl.current,
       chapterId: viewer.chapterId,
       chapterName: viewer.chapterName,
-      pageIndex: currentPage,
+      pageIndex: currentPageRef.current,
       totalPages: viewer.pages.length,
     }).catch(() => {});
-  }, [viewer, currentPage]);
+  }, [viewer]);
 
+  // Save on unmount, tab close, and every 30s as crash safety net
   useEffect(() => {
     if (!viewer) return;
-    const timer = setTimeout(saveProgress, 2000);
-    return () => clearTimeout(timer);
-  }, [saveProgress, viewer]);
-
-  // Save on unmount
-  useEffect(() => {
+    const onBeforeUnload = () => saveProgress();
+    window.addEventListener('beforeunload', onBeforeUnload);
+    const interval = setInterval(saveProgress, 30_000);
     return () => {
-      if (!progressSaved.current) saveProgress();
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      clearInterval(interval);
+      saveProgress();
     };
-  }, [saveProgress]);
+  }, [viewer, saveProgress]);
 
   if (loading) {
     return (
@@ -147,20 +159,30 @@ export default function ChapterReaderPage() {
             </p>
           </div>
           <div className="flex gap-1">
-            <button
-              type="button"
-              className="p-2 bg-card border-[2px] border-border hover:bg-foreground/5 transition-colors"
-              aria-label="Previous chapter"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className="p-2 bg-card border-[2px] border-border hover:bg-foreground/5 transition-colors"
-              aria-label="Next chapter"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            {prevChapterId ? (
+              <Link
+                href={`/manga/chapter/${prevChapterId}`}
+                className="p-2 bg-card border-[2px] border-border hover:bg-foreground/5 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Link>
+            ) : (
+              <span className="p-2 bg-card border-[2px] border-border opacity-30">
+                <ChevronLeft className="w-4 h-4" />
+              </span>
+            )}
+            {nextChapterId ? (
+              <Link
+                href={`/manga/chapter/${nextChapterId}`}
+                className="p-2 bg-card border-[2px] border-border hover:bg-foreground/5 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <span className="p-2 bg-card border-[2px] border-border opacity-30">
+                <ChevronRight className="w-4 h-4" />
+              </span>
+            )}
           </div>
         </div>
         {/* Progress bar */}
