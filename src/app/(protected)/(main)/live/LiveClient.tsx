@@ -205,15 +205,7 @@ function LiveContent() {
                 </div>
                 <div className="flex flex-col gap-4">
                   {schedule.map((match) => (
-                    <div
-                      key={match.id}
-                      style={{
-                        contentVisibility: 'auto',
-                        containIntrinsicSize: 'auto 200px',
-                      }}
-                    >
-                      <LiveMatchCard match={match} />
-                    </div>
+                    <LiveMatchCard key={match.id} match={match} />
                   ))}
                 </div>
               </section>
@@ -255,15 +247,7 @@ function LiveContent() {
                             </div>
                             <div className="flex flex-col gap-4">
                               {matches.map((match) => (
-                                <div
-                                  key={match.id}
-                                  style={{
-                                    contentVisibility: 'auto',
-                                    containIntrinsicSize: 'auto 200px',
-                                  }}
-                                >
-                                  <LiveMatchCard match={match} />
-                                </div>
+                                <LiveMatchCard key={match.id} match={match} />
                               ))}
                             </div>
                           </div>
@@ -287,15 +271,7 @@ function LiveContent() {
                     <div className="bg-transparent">
                       <div className="flex flex-col gap-4">
                         {endedMatches.map((match) => (
-                          <div
-                            key={match.id}
-                            style={{
-                              contentVisibility: 'auto',
-                              containIntrinsicSize: 'auto 200px',
-                            }}
-                          >
-                            <LiveMatchCard match={match} />
-                          </div>
+                          <LiveMatchCard key={match.id} match={match} />
                         ))}
                       </div>
                     </div>
