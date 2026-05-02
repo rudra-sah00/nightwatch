@@ -146,7 +146,7 @@ function LiveContent() {
           <div className="space-y-16">
             <section>
               <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
-              <div className="bg-background border-[4px] border-border  overflow-hidden">
+              <div className="flex flex-col gap-4">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
@@ -154,7 +154,7 @@ function LiveContent() {
             </section>
             <section>
               <div className="h-10 w-48 bg-neo-blue border-[4px] border-border  mb-8 animate-pulse" />
-              <div className="bg-background border-[4px] border-border  overflow-hidden">
+              <div className="flex flex-col gap-4">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
@@ -205,7 +205,15 @@ function LiveContent() {
                 </div>
                 <div className="flex flex-col gap-4">
                   {schedule.map((match) => (
-                    <LiveMatchCard key={match.id} match={match} />
+                    <div
+                      key={match.id}
+                      style={{
+                        contentVisibility: 'auto',
+                        containIntrinsicSize: 'auto 200px',
+                      }}
+                    >
+                      <LiveMatchCard match={match} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -247,7 +255,15 @@ function LiveContent() {
                             </div>
                             <div className="flex flex-col gap-4">
                               {matches.map((match) => (
-                                <LiveMatchCard key={match.id} match={match} />
+                                <div
+                                  key={match.id}
+                                  style={{
+                                    contentVisibility: 'auto',
+                                    containIntrinsicSize: 'auto 200px',
+                                  }}
+                                >
+                                  <LiveMatchCard match={match} />
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -271,7 +287,15 @@ function LiveContent() {
                     <div className="bg-transparent">
                       <div className="flex flex-col gap-4">
                         {endedMatches.map((match) => (
-                          <LiveMatchCard key={match.id} match={match} />
+                          <div
+                            key={match.id}
+                            style={{
+                              contentVisibility: 'auto',
+                              containIntrinsicSize: 'auto 200px',
+                            }}
+                          >
+                            <LiveMatchCard match={match} />
+                          </div>
                         ))}
                       </div>
                     </div>

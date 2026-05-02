@@ -178,14 +178,21 @@ export function RightSidebar() {
                   {t('online')} — {filteredOnline.length}
                 </p>
                 {filteredOnline.map((f) => (
-                  <FriendRow
+                  <div
                     key={f.id}
-                    id={f.id}
-                    name={f.name}
-                    photo={f.profilePhoto}
-                    isOnline
-                    activity={f.activity ?? null}
-                  />
+                    style={{
+                      contentVisibility: 'auto',
+                      containIntrinsicSize: 'auto 48px',
+                    }}
+                  >
+                    <FriendRow
+                      id={f.id}
+                      name={f.name}
+                      photo={f.profilePhoto}
+                      isOnline
+                      activity={f.activity ?? null}
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -196,14 +203,21 @@ export function RightSidebar() {
                   {t('offline')} — {filteredOffline.length}
                 </p>
                 {filteredOffline.map((f) => (
-                  <FriendRow
+                  <div
                     key={f.id}
-                    id={f.id}
-                    name={f.name}
-                    photo={f.profilePhoto}
-                    isOnline={false}
-                    activity={null}
-                  />
+                    style={{
+                      contentVisibility: 'auto',
+                      containIntrinsicSize: 'auto 48px',
+                    }}
+                  >
+                    <FriendRow
+                      id={f.id}
+                      name={f.name}
+                      photo={f.profilePhoto}
+                      isOnline={false}
+                      activity={null}
+                    />
+                  </div>
                 ))}
               </div>
             )}

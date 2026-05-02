@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
+import { memo } from 'react';
 
 /**
  * Layout primitive: a titled section wrapper used on the music home page.
@@ -57,7 +59,7 @@ export function ScrollRow({ children }: { children: React.ReactNode }) {
  * @param props.href - Navigation target (makes the card a link).
  * @param props.onClick - Click handler (makes the card a button if no `href`).
  */
-export function Card({
+export const Card = memo(function Card({
   image,
   title,
   subtitle,
@@ -72,11 +74,13 @@ export function Card({
 }) {
   const inner = (
     <div className="flex-shrink-0 w-36 md:w-40 cursor-pointer">
-      <div className="aspect-square bg-card border-[3px] border-border overflow-hidden">
-        <img
+      <div className="aspect-square bg-card border-[3px] border-border overflow-hidden relative">
+        <Image
           src={image}
           alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          fill
+          sizes="(min-width: 768px) 160px, 144px"
+          className="object-cover hover:scale-105 transition-transform duration-300"
         />
       </div>
       <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
@@ -100,4 +104,4 @@ export function Card({
     );
   }
   return inner;
-}
+});

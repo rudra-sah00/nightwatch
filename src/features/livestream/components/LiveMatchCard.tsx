@@ -87,7 +87,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   return (
     <>
       {matchModal}
-      <div className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-accent transition-colors rounded-md">
+      <div className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-accent transition-colors rounded-md overflow-hidden">
         {/* 1. Time / Status / League (Left) */}
         <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
           {isLive ? (
@@ -123,9 +123,9 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
         </div>
 
         {/* 2. Teams / Channel (Center) */}
-        <div className="flex flex-1 items-center justify-center gap-4 w-full">
+        <div className="flex flex-1 items-center justify-center gap-4 w-full min-w-0">
           {isChannelCard ? (
-            <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex w-full items-center justify-between gap-4 min-w-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 md:w-14 md:h-14 bg-card border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
                   {match.team1.avatar ? (
@@ -150,7 +150,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
               {/* Team 1 */}
               <div className="flex flex-1 items-center justify-end gap-2 md:gap-3 text-right min-w-0">
                 <div className="flex flex-col items-end min-w-0">
-                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
+                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase truncate max-w-full text-foreground">
                     {team1Name}
                   </span>
                   {(isLive || isEnded) && (
@@ -198,7 +198,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
                   )}
                 </div>
                 <div className="flex flex-col items-start min-w-0">
-                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase max-w-[80px] sm:max-w-[140px] md:max-w-[200px] truncate text-foreground">
+                  <span className="font-headline font-black text-[11px] sm:text-sm md:text-lg uppercase truncate max-w-full text-foreground">
                     {team2Name}
                   </span>
                   {(isLive || isEnded) && (
@@ -224,7 +224,7 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
             onClick={handleWatchClick}
             disabled={!canWatch}
             className={cn(
-              'w-full md:w-48 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors rounded-md',
+              'w-full md:w-auto md:min-w-[120px] md:max-w-[192px] md:px-6 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors rounded-md whitespace-nowrap',
               canWatch
                 ? 'bg-neo-red text-primary-foreground hover:bg-foreground hover:text-background'
                 : 'bg-transparent text-foreground opacity-50 cursor-not-allowed',

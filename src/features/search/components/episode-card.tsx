@@ -3,6 +3,7 @@
 import { Clock, Loader2, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { memo } from 'react';
 import { toast } from 'sonner';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useEpisodeCard } from '../hooks/use-episode-card';
@@ -24,7 +25,7 @@ interface EpisodeCardProps {
  * @param props - {@link EpisodeCardProps}
  * @returns The episode card button element.
  */
-export function EpisodeCard({
+export const EpisodeCard = memo(function EpisodeCard({
   episode,
   onPlay,
   isPlaying,
@@ -140,4 +141,4 @@ export function EpisodeCard({
       </div>
     </button>
   );
-}
+});

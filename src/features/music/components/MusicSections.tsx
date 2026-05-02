@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 import {
   getMixDetails,
@@ -93,6 +95,59 @@ export function MusicSections({
   const { charts, featured, artists, releases, radio, trendingSongs, genres } =
     data;
 
+  /** Play a single song by ID. */
+  const playSong = useCallback(
+    (id: string) => {
+      getSong(id)
+        .then((song) => {
+          if (song) onPlay(song, [song]);
+        })
+        .catch(() => {});
+    },
+    [onPlay],
+  );
+
+  /** Play the first track of a mix. */
+  const playMix = useCallback(
+    (id: string) => {
+      getMixDetails(id)
+        .then((mix) => {
+          if (mix.songs.length > 0) onPlay(mix.songs[0], mix.songs);
+        })
+        .catch(() => {});
+    },
+    [onPlay],
+  );
+
+  /** Start a radio station by name/language. */
+  const playRadio = useCallback(
+    (title: string, language?: string) => {
+      getRadioSongs(title, language)
+        .then((songs) => {
+          if (songs.length > 0) onPlay(songs[0], songs);
+        })
+        .catch(() => {});
+    },
+    [onPlay],
+  );
+
+  /** Start a radio station with toast feedback. */
+  const playRadioWithToast = useCallback(
+    (title: string, language: string) => {
+      toast.promise(
+        getRadioSongs(title, language || 'hindi').then((songs) => {
+          if (songs.length > 0) {
+            onPlay(songs[0], songs);
+          } else {
+            throw new Error('No songs available');
+          }
+        }),
+        { loading: title, success: title, error: 'Failed to load station' },
+      );
+    },
+    [onPlay],
+  );
+
   return (
     <>
       {/* User Playlists */}
@@ -137,11 +192,13 @@ export function MusicSections({
                 href={`/music/artist/${a.id}`}
                 className="flex-shrink-0 w-28 md:w-32 text-center"
               >
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-[3px] border-border overflow-hidden mx-auto hover:border-neo-yellow transition-colors">
-                  <img
+                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-[3px] border-border overflow-hidden mx-auto hover:border-neo-yellow transition-colors relative">
+                  <Image
                     src={a.image}
                     alt={a.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(min-width: 768px) 128px, 112px"
+                    className="object-cover"
                   />
                 </div>
                 <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
@@ -165,13 +222,7 @@ export function MusicSections({
                 href={r.albumId ? `/music/album/${r.albumId}` : undefined}
                 onClick={
                   r.type === 'song' && !r.albumId
-                    ? () => {
-                        getSong(r.id)
-                          .then((song) => {
-                            if (song) onPlay(song, [song]);
-                          })
-                          .catch(() => {});
-                      }
+                    ? () => playSong(r.id)
                     : undefined
                 }
               />
@@ -198,22 +249,9 @@ export function MusicSections({
                 }
                 onClick={
                   item.type === 'song'
-                    ? () => {
-                        getSong(item.id)
-                          .then((song) => {
-                            if (song) onPlay(song, [song]);
-                          })
-                          .catch(() => {});
-                      }
+                    ? () => playSong(item.id)
                     : item.type === 'mix'
-                      ? () => {
-                          getMixDetails(item.id)
-                            .then((mix) => {
-                              if (mix.songs.length > 0)
-                                onPlay(mix.songs[0], mix.songs);
-                            })
-                            .catch(() => {});
-                        }
+                      ? () => playMix(item.id)
                       : undefined
                 }
               />
@@ -234,15 +272,7 @@ export function MusicSections({
                   g.type === 'playlist' ? `/music/playlist/${g.id}` : undefined
                 }
                 onClick={
-                  g.type !== 'playlist'
-                    ? () => {
-                        getRadioSongs(g.title)
-                          .then((songs) => {
-                            if (songs.length > 0) onPlay(songs[0], songs);
-                          })
-                          .catch(() => {});
-                      }
-                    : undefined
+                  g.type !== 'playlist' ? () => playRadio(g.title) : undefined
                 }
               />
             ))}
@@ -258,24 +288,9 @@ export function MusicSections({
                 key={r.id}
                 image={r.image}
                 title={r.title}
-                onClick={() => {
-                  toast.promise(
-                    getRadioSongs(r.title, r.language || 'hindi').then(
-                      (songs) => {
-                        if (songs.length > 0) {
-                          onPlay(songs[0], songs);
-                        } else {
-                          throw new Error('No songs available');
-                        }
-                      },
-                    ),
-                    {
-                      loading: r.title,
-                      success: r.title,
-                      error: 'Failed to load station',
-                    },
-                  );
-                }}
+                onClick={() =>
+                  playRadioWithToast(r.title, r.language || 'hindi')
+                }
               />
             ))}
             <Link

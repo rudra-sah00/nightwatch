@@ -19,6 +19,12 @@ import type { ChatMessage } from '../../room/types';
 import { useChatScroll } from '../hooks/use-chat-scroll';
 import { useWatchPartyChat } from '../hooks/use-watch-party-chat';
 
+/** Hoisted to module scope — Intl constructors are expensive to instantiate. */
+const graphemeSegmenter =
+  typeof Intl !== 'undefined' && 'Segmenter' in Intl
+    ? new Intl.Segmenter('en', { granularity: 'grapheme' })
+    : null;
+
 interface TypingUser {
   userId: string;
   userName: string;
@@ -292,12 +298,9 @@ const ChatMessageItem = memo(function ChatMessageItem({
   // Detect if message is a single emoji
   const isSingleEmoji = useMemo(() => {
     const trimmed = message.content.trim();
-    // Regex for a single emoji (including complex ones with joiners)
-    // We check if it's one grapheme and that grapheme is an emoji
     try {
-      const segments = Array.from(
-        new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(trimmed),
-      );
+      if (!graphemeSegmenter) throw new Error('unsupported');
+      const segments = Array.from(graphemeSegmenter.segment(trimmed));
       return (
         segments.length === 1 &&
         /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base})/u.test(

@@ -173,6 +173,10 @@ export function OfflineLibrary() {
                   key={item.contentId}
                   onClick={() => handleSelect(item)}
                   className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  style={{
+                    contentVisibility: 'auto',
+                    containIntrinsicSize: 'auto 140px',
+                  }}
                 >
                   {/* Poster */}
                   <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">

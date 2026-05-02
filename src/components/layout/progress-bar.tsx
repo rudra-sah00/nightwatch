@@ -25,14 +25,12 @@ export function ProgressBar() {
     const originalReplaceState = history.replaceState.bind(history);
 
     history.pushState = (...args) => {
-      const url = typeof args[2] === 'string' ? args[2] : '';
-      if (!shouldSkipProgress(url)) NProgress.start();
-      requestAnimationFrame(() => NProgress.done());
+      NProgress.done();
       originalPushState(...args);
     };
 
     history.replaceState = (...args) => {
-      requestAnimationFrame(() => NProgress.done());
+      NProgress.done();
       originalReplaceState(...args);
     };
 
