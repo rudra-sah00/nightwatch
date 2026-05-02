@@ -221,6 +221,31 @@ export function useAskAi() {
       );
     };
 
+    const onOpenManga = (data: {
+      titleId?: number;
+      chapterId?: number;
+      url?: string;
+    }) => {
+      const url =
+        data.url ||
+        (data.chapterId
+          ? `/manga/chapter/${data.chapterId}`
+          : `/manga/title/${data.titleId}`);
+      // Stop session and navigate
+      activeRef.current = false;
+      playQueueRef.current = [];
+      nextPlayTimeRef.current = 0;
+      processorRef.current?.disconnect();
+      sourceRef.current?.disconnect();
+      audioCtxRef.current?.close();
+      playCtxRef.current?.close();
+      streamRef.current?.getTracks().forEach((t) => {
+        t.stop();
+      });
+      socket.emit('ask-ai:stop');
+      router.push(url);
+    };
+
     socket.on('ask-ai:contentStart', onContentStart);
     socket.on('ask-ai:textOutput', onTextOutput);
     socket.on('ask-ai:audioOutput', onAudioOutput);
@@ -233,6 +258,7 @@ export function useAskAi() {
     socket.on('ask-ai:playPlaylist', onPlayPlaylist);
     socket.on('ask-ai:endSession', onEndSession);
     socket.on('ask-ai:musicControl', onMusicControl);
+    socket.on('ask-ai:openManga', onOpenManga);
 
     return () => {
       socket.off('ask-ai:contentStart', onContentStart);
@@ -247,6 +273,7 @@ export function useAskAi() {
       socket.off('ask-ai:playPlaylist', onPlayPlaylist);
       socket.off('ask-ai:endSession', onEndSession);
       socket.off('ask-ai:musicControl', onMusicControl);
+      socket.off('ask-ai:openManga', onOpenManga);
     };
   }, [base64ToFloat32, router]);
 

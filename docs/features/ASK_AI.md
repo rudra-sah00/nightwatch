@@ -91,6 +91,11 @@ Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringif
 | `get_friends_activity` | FriendsService | Online friends list |
 | `play_content` | — | Emits `ask-ai:navigate` → frontend navigates to `/watch/...` |
 | `add_to_watchlist` | WatchlistService | Adds content to user's watchlist |
+| `search_manga` | MangaService | Search manga titles by name |
+| `get_manga_details` | MangaService | Get manga overview, chapters, tags, rating |
+| `get_manga_progress` | MangaService | User's in-progress manga with chapter and page position |
+| `get_manga_favorites` | MangaService | User's saved/favorited manga titles |
+| `open_manga` | — | Emits `ask-ai:openManga` → frontend navigates to manga title or chapter |
 
 ### Tool Flow
 
@@ -98,6 +103,15 @@ Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringif
 2. `contentEnd` with `type: TOOL` triggers execution
 3. Backend calls the appropriate service
 4. Result sent back via `toolResult` event
+
+### System Prompt Behavior
+
+The system prompt instructs the AI to:
+
+1. **Disambiguate content type** — When a user asks to search or find something, ask whether they mean movies/series, manga, or music before searching. Example: "Are you looking for the anime, the manga, or the soundtrack?"
+2. **Check availability** — After searching, tell the user if the content is available and offer to play/open it.
+3. **Continue watching/reading** — When asked "what was I watching/reading?", check both `get_continue_watching` (for video) and `get_manga_progress` (for manga) and present both.
+4. **Navigate directly** — Use `play_content` for video, `open_manga` for manga, and `ask-ai:playMusic` for music. Don't just describe — take the user there.
 5. Model incorporates result into spoken response
 
 ## Text Output Filtering
