@@ -38,7 +38,7 @@ jobs:
 
   release-please:
     needs: [check-commit, quality]
-    if: ${{ always() && needs.check-commit.outputs.is_release_commit != 'true' && needs.quality.result == 'success' }}
+    if: ${{ always() && (needs.check-commit.outputs.is_release_commit == 'true' || needs.quality.result == 'success') }}
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
