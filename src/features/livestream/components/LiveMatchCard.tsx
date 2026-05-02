@@ -87,7 +87,11 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
   return (
     <>
       {matchModal}
-      <div className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-accent transition-colors rounded-md overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setShowPrompt(true)}
+        className="group bg-card border-[3px] border-border p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-accent transition-colors rounded-md overflow-hidden w-full text-left cursor-pointer"
+      >
         {/* 1. Time / Status / League (Left) */}
         <div className="flex flex-col items-center md:items-start w-full md:w-32 flex-shrink-0">
           {isLive ? (
@@ -219,22 +223,19 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
 
         {/* 3. Action Button (Right) */}
         <div className="w-full md:w-auto flex-shrink-0 flex justify-end mt-4 md:mt-0">
-          <button
-            type="button"
-            onClick={handleWatchClick}
-            disabled={!canWatch}
+          <div
             className={cn(
               'w-full md:w-auto md:min-w-[120px] md:max-w-[192px] md:px-6 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors rounded-md whitespace-nowrap',
               canWatch
-                ? 'bg-neo-red text-primary-foreground hover:bg-foreground hover:text-background'
-                : 'bg-transparent text-foreground opacity-50 cursor-not-allowed',
+                ? 'bg-neo-red text-primary-foreground'
+                : 'bg-transparent text-foreground opacity-50',
             )}
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
             {t('watch')}
-          </button>
+          </div>
         </div>
-      </div>
+      </button>
     </>
   );
 }
