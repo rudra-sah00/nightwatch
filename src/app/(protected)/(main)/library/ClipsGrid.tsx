@@ -86,7 +86,7 @@ export function ClipsGrid() {
 
   const shareOrCopy = useCallback(async (url: string, title: string) => {
     if (checkIsMobile()) {
-      await mobileBridge.share({ title, url });
+      await mobileBridge.share({ title, url }).catch(() => {});
     } else {
       await navigator.clipboard.writeText(url);
     }
