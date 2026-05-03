@@ -4,6 +4,7 @@ import type {
   IMicrophoneAudioTrack,
   IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
 import {
   CALL_AUDIO_ENCODER,
@@ -32,27 +33,29 @@ export async function connectToAgoraCall(
   client: IAgoraRTCClient;
   audioTrack: IMicrophoneAudioTrack;
 }> {
-  // Pre-check mic permission (required for iOS Capacitor WebView)
-  try {
-    const testStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-    for (const track of testStream.getTracks()) track.stop();
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'NotAllowedError') {
-      throw new Error(
-        'Microphone access denied. Please allow microphone in Settings.',
-      );
+  // Pre-check mic permission (skip on Capacitor — double-acquire causes silent track on iOS WKWebView)
+  if (!checkIsMobile()) {
+    try {
+      const testStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      for (const track of testStream.getTracks()) track.stop();
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        throw new Error(
+          'Microphone access denied. Please allow microphone in Settings.',
+        );
+      }
+      if (
+        err instanceof TypeError ||
+        (err instanceof Error && err.message.includes('undefined'))
+      ) {
+        throw new Error(
+          'Microphone is not available. Try checking your permissions in Settings.',
+        );
+      }
+      throw err;
     }
-    if (
-      err instanceof TypeError ||
-      (err instanceof Error && err.message.includes('undefined'))
-    ) {
-      throw new Error(
-        'Microphone is not available. Try checking your permissions in Settings.',
-      );
-    }
-    throw err;
   }
 
   const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
@@ -89,20 +92,24 @@ export async function connectToAgoraCall(
 export async function createCallVideoTrack(
   client: IAgoraRTCClient,
 ): Promise<ICameraVideoTrack> {
-  // Pre-check camera permission (required for iOS/Android Capacitor)
-  try {
-    const testStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-    });
-    for (const track of testStream.getTracks()) track.stop();
-  } catch (err) {
-    if (
-      err instanceof DOMException &&
-      (err.name === 'NotAllowedError' || err.name === 'NotFoundError')
-    ) {
-      throw new Error('Camera access denied. Please allow camera in Settings.');
+  // Pre-check camera permission (skip on Capacitor — double-acquire crashes iOS WKWebView)
+  if (!checkIsMobile()) {
+    try {
+      const testStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      for (const track of testStream.getTracks()) track.stop();
+    } catch (err) {
+      if (
+        err instanceof DOMException &&
+        (err.name === 'NotAllowedError' || err.name === 'NotFoundError')
+      ) {
+        throw new Error(
+          'Camera access denied. Please allow camera in Settings.',
+        );
+      }
+      throw err;
     }
-    throw err;
   }
 
   const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
