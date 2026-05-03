@@ -186,14 +186,6 @@
     "downloadApp": "下载应用",
     "downloadFor": "下载 {os} 版"
   },
-  "whatsNew": {
-    "backToHome": "返回首页",
-    "title": "最新动态",
-    "description": "Nightwatch的最新更新、修复和功能。",
-    "noReleases": "未找到版本或加载失败。",
-    "noReleaseNotes": "*未提供版本说明。*",
-    "showMore": "显示更多（剩余{remaining}个）"
-  },
   "downloads": {
     "experienceStarting": "体验启动中",
     "preparingContent": "正在准备\"{title}\"..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

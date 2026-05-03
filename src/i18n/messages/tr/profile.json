@@ -34,11 +34,6 @@
       "dec": "Ara"
     }
   },
-  "releaseNotes": {
-    "title": "Sürüm Notları",
-    "description": "Nightwatch'ya eklenen en son özellikler, iyileştirmeler ve hata düzeltmelerini keşfedin.",
-    "viewButton": "YENİLİKLERİ GÖR"
-  },
   "updateForm": {
     "updatePhoto": "Fotoğrafı Güncelle",
     "displayName": "Görünen Ad",

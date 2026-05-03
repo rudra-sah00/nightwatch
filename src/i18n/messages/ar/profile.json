@@ -34,11 +34,6 @@
       "dec": "ديسمبر"
     }
   },
-  "releaseNotes": {
-    "title": "ملاحظات الإصدار",
-    "description": "اكتشف أحدث الميزات والتحسينات وإصلاحات الأخطاء المضافة إلى Nightwatch.",
-    "viewButton": "عرض الجديد"
-  },
   "updateForm": {
     "updatePhoto": "تحديث الصورة",
     "displayName": "الاسم المعروض",

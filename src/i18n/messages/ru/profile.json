@@ -34,11 +34,6 @@
       "dec": "дек"
     }
   },
-  "releaseNotes": {
-    "title": "Примечания к выпуску",
-    "description": "Узнайте о новейших функциях, улучшениях и исправлениях Nightwatch.",
-    "viewButton": "ПОСМОТРЕТЬ НОВОЕ"
-  },
   "updateForm": {
     "updatePhoto": "Обновить фото",
     "displayName": "Отображаемое имя",

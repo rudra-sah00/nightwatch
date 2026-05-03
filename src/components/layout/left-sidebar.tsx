@@ -11,7 +11,6 @@ import {
   Music,
   Plus,
   Radio,
-  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -53,7 +52,6 @@ export function LeftSidebar() {
   const { isDesktopApp, isMounted } = useDesktopApp();
   const t = useTranslations('common.nav');
   const td = useTranslations('common.desktopApp');
-  const tw = useTranslations('common.whatsNew');
   const osName = useOSName();
   const downloadUrl = useCurrentOSDownload();
   const mobile = useIsMobile();
@@ -75,7 +73,6 @@ export function LeftSidebar() {
     { href: '/ask-ai', label: 'Ask AI', icon: Bot },
   ];
 
-  const whatsNewHref = isMounted && isDesktopApp ? '/changelog' : '/whats-new';
   const showDownloadApp = isMounted && !isDesktopApp && !mobile && osName;
   const closeSidebar = () => setLeftOpen(false);
 
@@ -96,18 +93,6 @@ export function LeftSidebar() {
           {label}
         </Link>
       ))}
-      <Link
-        href={whatsNewHref}
-        onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap mt-auto ${
-          isActive('/changelog') || isActive('/whats-new')
-            ? 'bg-primary text-primary-foreground'
-            : 'text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5'
-        }`}
-      >
-        <Sparkles className="w-5 h-5 stroke-[2.5px] shrink-0" />
-        {tw('title')}
-      </Link>
       {showDownloadApp && downloadUrl && (
         <a
           href={downloadUrl}

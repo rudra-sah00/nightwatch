@@ -186,14 +186,6 @@
     "downloadApp": "앱 다운로드",
     "downloadFor": "{os}용 다운로드"
   },
-  "whatsNew": {
-    "backToHome": "홈으로 돌아가기",
-    "title": "새로운 소식",
-    "description": "Nightwatch의 최신 업데이트, 버그 수정 및 기능.",
-    "noReleases": "릴리스를 찾을 수 없거나 로드에 실패했습니다.",
-    "noReleaseNotes": "*릴리스 노트가 제공되지 않았습니다.*",
-    "showMore": "더 보기 (나머지 {remaining}개)"
-  },
   "downloads": {
     "experienceStarting": "체험 시작 중",
     "preparingContent": "\"{title}\" 준비 중..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

@@ -186,14 +186,6 @@
     "downloadApp": "Скачать Приложение",
     "downloadFor": "Скачать для {os}"
   },
-  "whatsNew": {
-    "backToHome": "Вернуться на Главную",
-    "title": "Что Нового",
-    "description": "Последние обновления, исправления и функции Nightwatch.",
-    "noReleases": "Релизы не найдены или не удалось загрузить.",
-    "noReleaseNotes": "*Примечания к релизу не предоставлены.*",
-    "showMore": "Показать Ещё ({remaining} осталось)"
-  },
   "downloads": {
     "experienceStarting": "Запуск Впечатления",
     "preparingContent": "Подготовка \"{title}\"..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

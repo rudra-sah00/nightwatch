@@ -186,14 +186,6 @@
     "downloadApp": "App herunterladen",
     "downloadFor": "Für {os} herunterladen"
   },
-  "whatsNew": {
-    "backToHome": "Zurück zur Startseite",
-    "title": "Neuigkeiten",
-    "description": "Neueste Updates, Fehlerbehebungen und Funktionen für Nightwatch.",
-    "noReleases": "Keine Versionen gefunden oder Laden fehlgeschlagen.",
-    "noReleaseNotes": "*Keine Versionshinweise vorhanden.*",
-    "showMore": "Mehr anzeigen ({remaining} übrig)"
-  },
   "downloads": {
     "experienceStarting": "Erlebnis startet",
     "preparingContent": "\"{title}\" wird vorbereitet..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

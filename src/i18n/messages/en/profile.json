@@ -50,11 +50,6 @@
       "dec": "Dec"
     }
   },
-  "releaseNotes": {
-    "title": "Release Notes",
-    "description": "Discover the latest features, improvements, and bug fixes added to Nightwatch.",
-    "viewButton": "VIEW WHAT'S NEW"
-  },
   "updateForm": {
     "updatePhoto": "Update Photo",
     "displayName": "Display Name",

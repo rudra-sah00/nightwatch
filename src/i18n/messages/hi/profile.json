@@ -34,11 +34,6 @@
       "dec": "दिस"
     }
   },
-  "releaseNotes": {
-    "title": "रिलीज़ नोट्स",
-    "description": "Nightwatch में जोड़ी गई नवीनतम सुविधाओं, सुधारों और बग फिक्स की खोज करें।",
-    "viewButton": "नया क्या है देखें"
-  },
   "updateForm": {
     "updatePhoto": "फोटो अपडेट करें",
     "displayName": "प्रदर्शन नाम",

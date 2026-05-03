@@ -15,7 +15,6 @@ const ROUTE_NAMES: Record<string, string> = {
   '/watchlist': 'Watchlist',
   '/live': 'Live',
   '/downloads': 'Downloads',
-  '/whats-new': "What's New",
   '/privacy': 'Privacy',
   '/terms': 'Terms',
   '/continue-watching': 'Continue Watching',

@@ -186,14 +186,6 @@
     "downloadApp": "ดาวน์โหลดแอป",
     "downloadFor": "ดาวน์โหลดสำหรับ {os}"
   },
-  "whatsNew": {
-    "backToHome": "กลับหน้าแรก",
-    "title": "มีอะไรใหม่",
-    "description": "อัปเดตล่าสุด การแก้ไขบั๊ก และฟีเจอร์ของ Nightwatch",
-    "noReleases": "ไม่พบรุ่นหรือโหลดล้มเหลว",
-    "noReleaseNotes": "*ไม่มีบันทึกรุ่น*",
-    "showMore": "แสดงเพิ่มเติม (เหลือ {remaining})"
-  },
   "downloads": {
     "experienceStarting": "กำลังเริ่มประสบการณ์",
     "preparingContent": "กำลังเตรียม \"{title}\"..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

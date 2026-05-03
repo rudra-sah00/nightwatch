@@ -34,11 +34,6 @@
       "dec": "ธ.ค."
     }
   },
-  "releaseNotes": {
-    "title": "บันทึกการอัปเดต",
-    "description": "ค้นพบฟีเจอร์ล่าสุด การปรับปรุง และการแก้ไขข้อบกพร่องที่เพิ่มใน Nightwatch",
-    "viewButton": "ดูสิ่งใหม่"
-  },
   "updateForm": {
     "updatePhoto": "อัปเดตรูปภาพ",
     "displayName": "ชื่อที่แสดง",

@@ -34,11 +34,6 @@
       "dec": "12月"
     }
   },
-  "releaseNotes": {
-    "title": "版本说明",
-    "description": "了解 Nightwatch 最新添加的功能、改进和错误修复。",
-    "viewButton": "查看新功能"
-  },
   "updateForm": {
     "updatePhoto": "更新头像",
     "displayName": "显示名称",

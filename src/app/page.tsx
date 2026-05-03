@@ -331,12 +331,6 @@ export default function LandingPage() {
             >
               {t('footer.privacy')}
             </Link>
-            <Link
-              href="/whats-new"
-              className="font-headline font-bold uppercase text-[10px] tracking-widest text-primary-foreground/50 dark:text-foreground/40 hover:text-neo-yellow transition-colors"
-            >
-              {t('footer.whatsNew')}
-            </Link>
           </div>
           <p className="font-headline font-medium uppercase text-[10px] tracking-[0.25em] text-primary-foreground/30 dark:text-foreground/20">
             {t('footer.copyright', { year: new Date().getFullYear() })}

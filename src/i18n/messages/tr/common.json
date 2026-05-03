@@ -186,14 +186,6 @@
     "downloadApp": "Uygulamayı İndir",
     "downloadFor": "{os} için İndir"
   },
-  "whatsNew": {
-    "backToHome": "Ana Sayfaya Dön",
-    "title": "Yenilikler",
-    "description": "Nightwatch'nın son güncellemeleri, hata düzeltmeleri ve özellikleri.",
-    "noReleases": "Sürüm bulunamadı veya yükleme başarısız.",
-    "noReleaseNotes": "*Sürüm notları sağlanmadı.*",
-    "showMore": "Daha Fazla Göster ({remaining} kalan)"
-  },
   "downloads": {
     "experienceStarting": "Deneyim Başlıyor",
     "preparingContent": "\"{title}\" hazırlanıyor..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

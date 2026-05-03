@@ -186,14 +186,6 @@
     "downloadApp": "ऐप डाउनलोड करें",
     "downloadFor": "{os} के लिए डाउनलोड करें"
   },
-  "whatsNew": {
-    "backToHome": "होम पर वापस जाएँ",
-    "title": "नया क्या है",
-    "description": "Nightwatch के नवीनतम अपडेट, बग फिक्स और फीचर्स।",
-    "noReleases": "कोई रिलीज़ नहीं मिली या लोड करने में विफल।",
-    "noReleaseNotes": "*कोई रिलीज़ नोट्स प्रदान नहीं किए गए।*",
-    "showMore": "और दिखाएँ ({remaining} शेष)"
-  },
   "downloads": {
     "experienceStarting": "अनुभव शुरू हो रहा है",
     "preparingContent": "\"{title}\" तैयार कर रहे हैं..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

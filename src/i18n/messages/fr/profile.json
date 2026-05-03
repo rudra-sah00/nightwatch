@@ -34,11 +34,6 @@
       "dec": "déc"
     }
   },
-  "releaseNotes": {
-    "title": "Notes de Version",
-    "description": "Découvrez les dernières fonctionnalités, améliorations et corrections de bugs ajoutées à Nightwatch.",
-    "viewButton": "VOIR LES NOUVEAUTÉS"
-  },
   "updateForm": {
     "updatePhoto": "Mettre à jour la Photo",
     "displayName": "Nom d'affichage",

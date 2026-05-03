@@ -186,14 +186,6 @@
     "downloadApp": "تحميل التطبيق",
     "downloadFor": "تحميل لـ {os}"
   },
-  "whatsNew": {
-    "backToHome": "العودة للرئيسية",
-    "title": "ما الجديد",
-    "description": "آخر التحديثات والإصلاحات والميزات في Nightwatch.",
-    "noReleases": "لم يتم العثور على إصدارات أو فشل التحميل.",
-    "noReleaseNotes": "*لم يتم تقديم ملاحظات الإصدار.*",
-    "showMore": "عرض المزيد ({remaining} متبقية)"
-  },
   "downloads": {
     "experienceStarting": "بدء التجربة",
     "preparingContent": "جارٍ تحضير \"{title}\"..."
@@ -316,7 +308,6 @@
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",
       "privacy": "Privacy",
-      "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
   },

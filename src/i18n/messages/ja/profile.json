@@ -34,11 +34,6 @@
       "dec": "12月"
     }
   },
-  "releaseNotes": {
-    "title": "リリースノート",
-    "description": "Nightwatchに追加された最新の機能、改善、バグ修正をご覧ください。",
-    "viewButton": "新着情報を見る"
-  },
   "updateForm": {
     "updatePhoto": "写真を更新",
     "displayName": "表示名",
