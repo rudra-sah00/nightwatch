@@ -37,7 +37,10 @@ export default function MangaTitlePage() {
     if (!titleId) return;
     setLoading(true);
     getMangaDetail(Number(titleId))
-      .then(setDetail)
+      .then((d) => {
+        setDetail(d);
+        document.title = `${d.title.name} — Nightwatch`;
+      })
       .catch(() => setDetail(null))
       .finally(() => setLoading(false));
     checkMangaFavorite(Number(titleId))

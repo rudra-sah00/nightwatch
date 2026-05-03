@@ -29,6 +29,7 @@ export default function ChapterReaderPage() {
     getMangaChapter(Number(chapterId))
       .then((v) => {
         setViewer(v);
+        document.title = `${v.chapterName} — ${v.titleName} — Nightwatch`;
         getMangaDetail(v.titleId)
           .then((d) => {
             coverUrl.current = d.title.portraitImageUrl;

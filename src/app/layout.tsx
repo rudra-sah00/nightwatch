@@ -31,7 +31,10 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Nightwatch',
+  title: {
+    default: 'Nightwatch',
+    template: '%s — Nightwatch',
+  },
   description: 'Your personal streaming companion',
   manifest: '/manifest.json',
   icons: {
