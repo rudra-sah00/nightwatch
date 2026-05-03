@@ -117,7 +117,6 @@ export function useOfflineContentDetailModal({
   // Auto-play trailer if available
   useEffect(() => {
     let stopped = false;
-    const isServer3 = contentId.startsWith('s3:');
 
     // Force stop trailer while playing so it unmounts completely
     // When we return, isPlaying will be false, and it will remount and autoPlay again!
@@ -127,7 +126,6 @@ export function useOfflineContentDetailModal({
     }
 
     if (
-      !isServer3 &&
       show?.trailers &&
       show.trailers.length > 0 &&
       !isPlaying &&
@@ -139,7 +137,7 @@ export function useOfflineContentDetailModal({
     return () => {
       stopped = true;
     };
-  }, [show, isPlaying, contentId, showTrailer]);
+  }, [show, isPlaying, showTrailer]);
 
   // Cleanup on unmount only
   useEffect(() => {

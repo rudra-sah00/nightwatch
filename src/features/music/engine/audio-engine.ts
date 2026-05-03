@@ -31,7 +31,11 @@ export class AudioEngine {
 
   constructor() {
     this.audio = new Audio();
-    this.audio.disableRemotePlayback = true;
+    // Allow media notification on mobile (Capacitor); suppress remote playback
+    // prompts (AirPlay/Cast) only on desktop web.
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      this.audio.disableRemotePlayback = true;
+    }
     this.state = {
       currentTrack: null,
       queue: [],

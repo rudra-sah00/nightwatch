@@ -63,6 +63,21 @@ export function setTokenExpiration(expiresInSeconds: number) {
 }
 
 /**
+ * Re-check token validity after app resume (Capacitor background → foreground).
+ * If the token has expired while JS timers were frozen, refresh immediately.
+ */
+export async function revalidateTokenOnResume(): Promise<boolean> {
+  if (!tokenExpiresAt) return true;
+  if (Date.now() < tokenExpiresAt - 60000) {
+    // Token still valid with >1 min margin — just reschedule the timer
+    scheduleTokenRefresh();
+    return true;
+  }
+  // Token expired or about to — refresh now
+  return refreshAccessToken();
+}
+
+/**
  * Attempt to refresh the access token
  * Returns true if refresh was successful, false otherwise
  */

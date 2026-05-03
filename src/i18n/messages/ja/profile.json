@@ -66,8 +66,6 @@
     "standard": "スタンダード",
     "balanced": "バランス",
     "performance": "パフォーマンス",
-    "highQuality": "高画質",
-    "hls4k": "HLS 4K",
     "ariaLabel": "サーバー選択"
   },
   "dangerZone": {

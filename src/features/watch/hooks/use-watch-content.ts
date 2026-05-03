@@ -34,7 +34,7 @@ export function useWatchContent() {
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
-    's1') as 's1' | 's2' | 's3';
+    's1') as 's1' | 's2';
   const { setActiveServer } = useServer();
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function useWatchContent() {
           const rawId = overrideMovieId || movieId || '';
           const baseIdFromRaw = rawId.replace(/(_S\d+E\d+|-ep\d+)$/, '');
           const currentSeriesId = overrideMovieId || seriesId || baseIdFromRaw;
-          const cleanSeriesId = currentSeriesId.replace(/^(s1|s2|s3):/, '');
+          const cleanSeriesId = currentSeriesId.replace(/^(s1|s2):/, '');
 
           let offlineContentId1 = rawId;
           let offlineContentId2 = rawId;
@@ -145,12 +145,10 @@ export function useWatchContent() {
             offlineContentId2,
             `${cleanSeriesId}_S${season || 1}E${episode || 1}`,
             `${cleanSeriesId}-ep${episode || 1}`,
-            `s1:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
-            `s1:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
-            `s2:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
-            `s2:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
-            `s3:${offlineContentId1.replace(/^(s1|s2|s3):/, '')}`,
-            `s3:${offlineContentId2.replace(/^(s1|s2|s3):/, '')}`,
+            `s1:${offlineContentId1.replace(/^(s1|s2):/, '')}`,
+            `s1:${offlineContentId2.replace(/^(s1|s2):/, '')}`,
+            `s2:${offlineContentId1.replace(/^(s1|s2):/, '')}`,
+            `s2:${offlineContentId2.replace(/^(s1|s2):/, '')}`,
           ]);
 
           const downloadedItem = fetchedDownloads.find(

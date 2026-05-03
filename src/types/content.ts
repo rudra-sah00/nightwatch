@@ -109,7 +109,7 @@ export interface WatchProgress extends ContentProgress {
   remainingMinutes: number;
   lastWatchedAt: string;
   /** Which server this progress entry was saved for */
-  providerId?: 's1' | 's2' | 's3';
+  providerId?: 's1' | 's2';
   episodeId?: string;
 }
 
@@ -120,7 +120,7 @@ export interface SearchResult {
   poster: string;
   year?: number;
   /** Which provider returned this result — used for badge display (pv = Prime Video via S1) */
-  provider?: 's1' | 's2' | 's3' | 'pv';
+  provider?: 's1' | 's2' | 'pv';
 }
 
 export interface PlayMovieParams {

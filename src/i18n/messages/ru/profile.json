@@ -66,8 +66,6 @@
     "standard": "Стандарт",
     "balanced": "Сбалансированный",
     "performance": "Производительность",
-    "highQuality": "Высокое качество",
-    "hls4k": "HLS 4K",
     "ariaLabel": "Выбор сервера"
   },
   "dangerZone": {

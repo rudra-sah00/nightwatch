@@ -40,7 +40,7 @@ interface StreamUrlsReturn {
   qualities: QualityOption[] | undefined;
   subtitleTracks: SubtitleTrack[] | undefined;
   apiDurationSeconds: number | undefined;
-  applyResponse: (server: 's1' | 's2' | 's3', response: PlayResponse) => void;
+  applyResponse: (server: 's1' | 's2', response: PlayResponse) => void;
   applyS2Subtitles: (response: PlayResponse) => void;
 }
 
@@ -123,7 +123,7 @@ export function useStreamUrls({
   ]);
 
   const applyResponse = useCallback(
-    (server: 's1' | 's2' | 's3', response: PlayResponse) => {
+    (server: 's1' | 's2', response: PlayResponse) => {
       try {
         const normalized = processResponse(server, response);
         setStreamUrl(normalized.streamUrl);

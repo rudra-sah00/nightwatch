@@ -25,8 +25,7 @@ src/capacitor/downloads/                   # Mobile-specific download engine
 │   └── mp4.ts                             # Direct MP4 download
 └── providers/
     ├── s1.ts                              # Server 1 → HLS
-    ├── s2.ts                              # Server 2 → MP4 or HLS (auto-detect)
-    └── s3.ts                              # Server 3 → HLS
+    └── s2.ts                              # Server 2 → MP4 or HLS (auto-detect)
 
 src/features/search/utils/download.ts      # Download initiation + quality sorting
 ```
@@ -272,7 +271,7 @@ For offline playback, the hook constructs watch URLs with full metadata:
 - Locks body scroll
 - Handles Escape key
 - Auto-play countdown logic
-- Trailer auto-start (skipped for Server 3 content)
+- Trailer auto-start (skipped for offline content)
 - Composes `useOfflineContentDetail` for data
 
 ## Desktop Download Flow (Electron)

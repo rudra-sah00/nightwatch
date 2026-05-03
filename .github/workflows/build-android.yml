@@ -64,22 +64,30 @@ jobs:
       - name: Sync Capacitor (production URL)
         run: npx cap sync android
 
+      - name: Decode Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > android/nightwatch-release.keystore
+
       - name: Build Release APK
         working-directory: android
+        env:
+          NIGHTWATCH_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          NIGHTWATCH_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: nightwatch-android
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload APK to GitHub Release
         if: github.event_name == 'workflow_call'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          APK="android/app/build/outputs/apk/release/app-release.apk"
           TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
           echo "Uploading APK to release: $TAG"
           gh release upload "$TAG" "$APK#Nightwatch-Android.apk" --clobber

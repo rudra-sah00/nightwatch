@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
@@ -306,7 +307,7 @@ export function ContentDetailModal({
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
               extraActions={
-                isDesktopApp || isMobile ? (
+                isDesktopApp || checkIsMobile() ? (
                   <DownloadMenu
                     show={show}
                     selectedSeason={selectedSeason}

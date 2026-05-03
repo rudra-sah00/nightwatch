@@ -51,12 +51,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       providerId:
         room.type === 'livestream'
           ? ('s1' as const)
-          : room.providerId ||
-            (room.contentId.startsWith('s3:')
-              ? 's3'
-              : room.contentId.startsWith('s2:')
-                ? 's2'
-                : 's1'),
+          : room.providerId || (room.contentId.startsWith('s2:') ? 's2' : 's1'),
     }),
     [
       room.title,

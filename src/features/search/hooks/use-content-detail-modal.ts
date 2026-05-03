@@ -123,10 +123,8 @@ export function useContentDetailModal({
   // Auto-play trailer if available
   useEffect(() => {
     let stopped = false;
-    const isServer3 = contentId.startsWith('s3:');
 
     if (
-      !isServer3 &&
       show?.trailers &&
       show.trailers.length > 0 &&
       !isPlaying &&
@@ -138,7 +136,7 @@ export function useContentDetailModal({
     return () => {
       stopped = true;
     };
-  }, [show, isPlaying, contentId, showTrailer]);
+  }, [show, isPlaying, showTrailer]);
 
   // Cleanup on unmount only
   useEffect(() => {

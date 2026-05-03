@@ -55,7 +55,7 @@ describe('Update Profile Schema', () => {
     ).toBe(true);
     expect(
       updateProfileSchema.safeParse({ preferredServer: 's3' }).success,
-    ).toBe(true);
+    ).toBe(false);
     expect(
       updateProfileSchema.safeParse({ preferredServer: 's4' }).success,
     ).toBe(false);

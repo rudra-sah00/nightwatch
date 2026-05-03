@@ -82,9 +82,7 @@
     "netflix": "Server 1",
     "standard": "Standard",
     "balanced": "Balanced",
-    "performance": "Performance",
-    "highQuality": "High Quality",
-    "hls4k": "HLS 4K"
+    "performance": "Performance"
   },
   "dangerZone": {
     "title": "Danger Zone",

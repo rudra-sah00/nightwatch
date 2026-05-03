@@ -47,20 +47,6 @@ describe('StreamUrlService', () => {
       expect(result.subtitleTracks).toHaveLength(1);
     });
 
-    it('should process S3 response with HLS token injection', () => {
-      const response: PlayResponse = {
-        success: true,
-        masterPlaylistUrl: '/api/stream/hls/abc',
-        movieId: '456',
-        type: 'movie',
-        title: 'Test',
-      };
-
-      const result = processResponse('s3', response);
-
-      expect(result.streamUrl).toContain('/abc');
-    });
-
     it('should throw error for unsuccessful response', () => {
       const response: PlayResponse = {
         success: false,
@@ -226,33 +212,6 @@ describe('StreamUrlService', () => {
       expect(() => processResponse('s2', response)).toThrow(
         'Invalid S2 response',
       );
-    });
-  });
-
-  describe('processS3Response', () => {
-    it('should throw error if masterPlaylistUrl is missing in S3', () => {
-      const response: PlayResponse = {
-        success: true,
-        masterPlaylistUrl: '',
-        movieId: '',
-        type: 'movie',
-        title: '',
-      };
-      expect(() => processResponse('s3', response)).toThrow(
-        'Invalid S3 response',
-      );
-    });
-
-    it('should extract token and normalize URLs for S3', () => {
-      const response: PlayResponse = {
-        success: true,
-        masterPlaylistUrl: '/api/stream/hls/TOK123/movie',
-        movieId: '1',
-        type: 'movie',
-        title: 'Test',
-      };
-      const result = processResponse('s3', response);
-      expect(result.streamUrl).toContain('/TOK123/');
     });
   });
 });

@@ -2,7 +2,7 @@
  * Mobile Download Manager — main entry point.
  * Equivalent of electron/modules/download-manager.js
  *
- * Routes downloads to the correct server provider (s1/s2/s3)
+ * Routes downloads to the correct server provider (s1/s2)
  * and exposes a unified API for the React hooks.
  */
 import { Directory, Filesystem } from '@capacitor/filesystem';
@@ -11,7 +11,6 @@ import { startHlsDownload } from './processors/hls';
 import { startMp4Download } from './processors/mp4';
 import { downloadS1 } from './providers/s1';
 import { downloadS2 } from './providers/s2';
-import { downloadS3 } from './providers/s3';
 import {
   activeAbortControllers,
   loadDownloads,
@@ -30,7 +29,6 @@ async function startDownloadTask(
 
   if (prefix === 's1') return downloadS1(contentId, m3u8Url);
   if (prefix === 's2') return downloadS2(contentId, m3u8Url);
-  if (prefix === 's3') return downloadS3(contentId, m3u8Url);
 
   // Fallback: detect by URL
   const isMp4 = m3u8Url.includes('.mp4') || !m3u8Url.includes('.m3u8');

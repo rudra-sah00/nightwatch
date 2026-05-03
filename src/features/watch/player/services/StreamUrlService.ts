@@ -120,13 +120,6 @@ function processS1Response(response: PlayResponse): NormalizedUrls {
 }
 
 /**
- * Processes a Server 3 (VidSrc.plus / HLS) PlayResponse.
- */
-function processS3Response(response: PlayResponse): NormalizedUrls {
-  return processHlsResponse(response, 'S3');
-}
-
-/**
  * Processes a Server 2 (SuperEmbed / MP4) PlayResponse.
  */
 function processS2Response(response: PlayResponse): NormalizedUrls {
@@ -153,12 +146,10 @@ function processS2Response(response: PlayResponse): NormalizedUrls {
  * Unified processor for any server response.
  */
 export function processResponse(
-  server: 's1' | 's2' | 's3',
+  server: 's1' | 's2',
   response: PlayResponse,
 ): NormalizedUrls {
   switch (server) {
-    case 's3':
-      return processS3Response(response);
     case 's2':
       return processS2Response(response);
     default:

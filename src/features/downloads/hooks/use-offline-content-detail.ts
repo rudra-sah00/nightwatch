@@ -15,7 +15,7 @@ import { useDownloads } from './use-downloads';
 
 /** Options for the {@link useOfflineContentDetail} hook. */
 interface UseOfflineContentDetailOptions {
-  /** Unique content identifier (may include provider prefix like `s1:`, `s2:`, `s3:`). */
+  /** Unique content identifier (may include provider prefix like `s1:`, `s2:`). */
   contentId: string;
   /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: { season?: number; episode?: number; episodeId?: string };

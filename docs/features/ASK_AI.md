@@ -83,7 +83,7 @@ Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringif
 
 | Tool | Service | Description |
 |------|---------|-------------|
-| `search_content` | ContentService | Search movies/shows across all 3 servers (parallel, deduped) |
+| `search_content` | ContentService | Search movies/shows across all providers (parallel, deduped) |
 | `get_content_details` | ContentService | Get description, cast, rating, seasons for a specific title |
 | `get_watchlist` | WatchlistService | User's saved watchlist items |
 | `get_continue_watching` | WatchService | Unfinished content with progress percentage |

@@ -368,7 +368,7 @@ export function UpdateProfileForm() {
         <div
           role="radiogroup"
           aria-label={t('serverSelection.ariaLabel')}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {[
             {
@@ -380,11 +380,6 @@ export function UpdateProfileForm() {
               id: 's2' as const,
               label: t('serverSelection.balanced'),
               sub: t('serverSelection.performance'),
-            },
-            {
-              id: 's3' as const,
-              label: t('serverSelection.highQuality'),
-              sub: t('serverSelection.hls4k'),
             },
           ].map((s) => {
             const isSelected = profileForm.preferredServer === s.id;

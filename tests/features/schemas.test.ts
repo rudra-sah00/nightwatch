@@ -140,9 +140,6 @@ describe('Profile Schema', () => {
       expect(
         updateProfileSchema.safeParse({ preferredServer: 's2' }).success,
       ).toBe(true);
-      expect(
-        updateProfileSchema.safeParse({ preferredServer: 's3' }).success,
-      ).toBe(true);
     });
   });
 

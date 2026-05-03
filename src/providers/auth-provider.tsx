@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
-import { setTokenExpiration } from '@/lib/fetch';
+import { revalidateTokenOnResume, setTokenExpiration } from '@/lib/fetch';
 import { offForceLogout, onForceLogout } from '@/lib/socket';
 import { useSocket } from '@/providers/socket-provider';
 import { clearCookiesAndRedirect, useAuthStore } from '@/store/use-auth-store';
@@ -37,6 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ).electronAPI.signalReady?.();
       }
     }
+  }, []);
+
+  // Revalidate auth token when the page becomes visible again.
+  // Covers laptop sleep, tab backgrounding, and Capacitor app resume —
+  // JS timers freeze in all these cases so the proactive refresh never fires.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') revalidateTokenOnResume();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
   const handleForceLogout = useCallback(

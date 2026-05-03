@@ -93,7 +93,7 @@ interface PlayerRootProps {
   /** Allow portrait playback on mobile (disables rotate wall) for inline layouts. */
   allowPortraitPlayback?: boolean;
   /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
-  providerId?: 's1' | 's2' | 's3';
+  providerId?: 's1' | 's2';
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
 }
