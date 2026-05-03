@@ -29,6 +29,7 @@ function getCricketScore(match: LiveMatch, team: 1 | 2): string {
 
 interface LiveMatchCardProps {
   match: LiveMatch;
+  compact?: boolean;
 }
 
 function asText(value: unknown, fallback = ''): string {
@@ -45,7 +46,7 @@ function asText(value: unknown, fallback = ''): string {
   return fallback;
 }
 
-export function LiveMatchCard({ match }: LiveMatchCardProps) {
+export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
   const {
     isLive,
     isEnded,
@@ -55,14 +56,14 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
     showPrompt,
     setShowPrompt,
     isCreatingParty,
-    handleWatchClick,
     handleWatchSolo,
     handleWatchParty,
   } = useLiveMatchCard(match);
 
   const t = useTranslations('live');
 
-  const isLivestream = match.id.startsWith('live-server1');
+  const isLivestream =
+    match.id.startsWith('live-server1') || match.id.startsWith('lt:');
   const isChannelCard =
     match.contentKind === 'channel' ||
     match.type === 'all_channels' ||
@@ -83,6 +84,37 @@ export function LiveMatchCard({ match }: LiveMatchCardProps) {
       onWatchParty={handleWatchParty}
     />
   );
+
+  if (compact) {
+    return (
+      <>
+        {matchModal}
+        <button
+          type="button"
+          onClick={() => setShowPrompt(true)}
+          className="group bg-card border-[3px] border-border p-3 flex flex-col items-center gap-2 hover:bg-accent transition-colors rounded-md cursor-pointer text-center"
+        >
+          <div className="w-12 h-12 bg-card border-[2px] border-border overflow-hidden flex items-center justify-center p-1 rounded-full">
+            {match.team1.avatar ? (
+              <img
+                src={match.team1.avatar}
+                alt={channelName}
+                className="w-full h-full object-contain bg-white"
+              />
+            ) : (
+              <div className="w-full h-full bg-secondary rounded-full" />
+            )}
+          </div>
+          <p className="font-headline font-black text-[10px] uppercase tracking-wider text-foreground truncate w-full leading-tight">
+            {channelName}
+          </p>
+          <span className="px-2 py-0.5 bg-neo-red text-white text-[8px] font-black uppercase tracking-widest border-[1px] border-border font-headline rounded-sm">
+            {t('liveNow')}
+          </span>
+        </button>
+      </>
+    );
+  }
 
   return (
     <>

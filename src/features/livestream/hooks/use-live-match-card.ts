@@ -29,7 +29,8 @@ export function useLiveMatchCard(match: LiveMatch) {
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
-  const isLivestream = match.id.startsWith('live-server1');
+  const isLivestream =
+    match.id.startsWith('live-server1') || match.id.startsWith('lt:');
   const canWatch =
     (isLive || isLivestream) &&
     (match.playType === 'PlayTypeVideo' ||
