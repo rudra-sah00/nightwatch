@@ -128,6 +128,7 @@ export function FloatingChat({
             placeholder={t('chat.typeSomething')}
             maxLength={200}
             aria-label={t('chat.sendMessage')}
+            data-allow-clipboard
             className="flex-1 text-xs font-black font-headline uppercase tracking-widest text-white placeholder:text-white/50 bg-black/80 backdrop-blur-sm border-[3px] border-white/20 px-3 py-2.5 outline-none focus:bg-black transition-colors min-w-0 rounded-md"
           />
           <Button

@@ -65,10 +65,15 @@ export default async function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('neo-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener('contextmenu',function(e){e.preventDefault()});['copy','cut','paste'].forEach(function(t){document.addEventListener(t,function(e){if(e.target.closest('[data-allow-clipboard]'))return;e.preventDefault()})})`,
+          }}
+        />
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground select-none`}
       >
         <SerwistProvider swUrl="/sw.js">
           <Suspense fallback={<div className="min-h-screen" />}>

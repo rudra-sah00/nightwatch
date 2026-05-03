@@ -115,6 +115,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   if (val.length <= 6) setOtp(val);
                 }}
                 disabled={isLoading}
+                data-allow-clipboard
                 className="h-[46px] text-base font-black uppercase text-center tracking-[0.5em] transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
@@ -241,6 +242,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isPending}
+                data-allow-clipboard
                 className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>

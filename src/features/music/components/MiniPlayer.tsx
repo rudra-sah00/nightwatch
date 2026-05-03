@@ -80,6 +80,7 @@ export function MiniPlayer() {
         <button
           type="button"
           onClick={() => setExpanded(true)}
+          onContextMenu={(e) => showSongMenu(e, currentTrack)}
           className="flex-shrink-0"
         >
           <div className="w-11 h-11 border-[2px] border-border overflow-hidden">
@@ -95,6 +96,7 @@ export function MiniPlayer() {
         <button
           type="button"
           onClick={() => setExpanded(true)}
+          onContextMenu={(e) => showSongMenu(e, currentTrack)}
           className="flex-1 min-w-0 text-left"
         >
           <p className="font-headline font-bold text-xs uppercase tracking-wider truncate">

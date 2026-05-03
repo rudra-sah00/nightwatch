@@ -263,6 +263,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('placeholder')}
+            data-allow-clipboard
             className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
           />
           <Button

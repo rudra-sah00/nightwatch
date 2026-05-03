@@ -65,12 +65,14 @@ export const Card = memo(function Card({
   subtitle,
   href,
   onClick,
+  onContextMenu,
 }: {
   image: string;
   title: string;
   subtitle?: string;
   href?: string;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }) {
   const inner = (
     <div className="flex-shrink-0 w-36 md:w-40 cursor-pointer">
@@ -94,11 +96,15 @@ export const Card = memo(function Card({
     </div>
   );
   if (href) {
-    return <Link href={href}>{inner}</Link>;
+    return (
+      <Link href={href} onContextMenu={onContextMenu}>
+        {inner}
+      </Link>
+    );
   }
   if (onClick) {
     return (
-      <button type="button" onClick={onClick}>
+      <button type="button" onClick={onClick} onContextMenu={onContextMenu}>
         {inner}
       </button>
     );

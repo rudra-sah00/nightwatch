@@ -12,6 +12,7 @@ import {
   type MusicTrack,
 } from '@/features/music/api';
 import { Card, ScrollRow, Section } from './MusicPrimitives';
+import { showSongMenu } from './SongContextMenu';
 import { UserPlaylists } from './UserPlaylists';
 
 /** A chart or featured playlist entry (id, title, cover image). */
@@ -225,6 +226,19 @@ export function MusicSections({
                     ? () => playSong(r.id)
                     : undefined
                 }
+                onContextMenu={
+                  r.type === 'song'
+                    ? (e) =>
+                        showSongMenu(e, {
+                          id: r.id,
+                          title: r.title,
+                          artist: r.artist,
+                          album: '',
+                          image: r.image,
+                          duration: 0,
+                        })
+                    : undefined
+                }
               />
             ))}
           </ScrollRow>
@@ -253,6 +267,19 @@ export function MusicSections({
                     : item.type === 'mix'
                       ? () => playMix(item.id)
                       : undefined
+                }
+                onContextMenu={
+                  item.type === 'song'
+                    ? (e) =>
+                        showSongMenu(e, {
+                          id: item.id,
+                          title: item.title,
+                          artist: item.subtitle,
+                          album: '',
+                          image: item.image,
+                          duration: 0,
+                        })
+                    : undefined
                 }
               />
             ))}

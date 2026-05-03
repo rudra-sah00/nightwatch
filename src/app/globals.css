@@ -7,6 +7,11 @@
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 
+[data-allow-clipboard] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 @theme {
   /* Neo-Brutalist Theme Tokens */
   --color-neo-bg: var(--neo-bg);

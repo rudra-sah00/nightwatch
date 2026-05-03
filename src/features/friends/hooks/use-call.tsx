@@ -175,26 +175,95 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
     // Native call UI for mobile (CallKit on iOS, notification on Android)
     if (checkIsMobile()) {
-      if (state === 'active' || state === 'incoming') {
+      if (state === 'incoming') {
         callIdRef.current = `nw-call-${Date.now()}`;
-        // Show Android notification with caller name
+        console.log(
+          '[NW-Call] Incoming call from:',
+          peerName,
+          'callId:',
+          callIdRef.current,
+        );
+
+        // iOS: show CallKit incoming call UI
+        import('@capgo/capacitor-incoming-call-kit')
+          .then(({ IncomingCallKit }) => {
+            console.log('[NW-Call] Triggering CallKit showIncomingCall');
+            return IncomingCallKit.showIncomingCall({
+              callId: callIdRef.current,
+              callerName: peerName || 'Nightwatch Call',
+              handle: peerName || 'Voice Call',
+              hasVideo: false,
+              ios: { handleType: 'generic', supportsHolding: false },
+            });
+          })
+          .then((res) =>
+            console.log(
+              '[NW-Call] CallKit showIncomingCall result:',
+              JSON.stringify(res),
+            ),
+          )
+          .catch((err) =>
+            console.warn('[NW-Call] CallKit showIncomingCall error:', err),
+          );
+
+        // Android: show incoming call notification with answer/decline buttons
         import('@anuradev/capacitor-phone-call-notification')
           .then(({ PhoneCallNotification }) =>
-            PhoneCallNotification.showCallInProgressNotification({
-              channelName: peerName || 'Nightwatch',
-              channelDescription:
-                state === 'incoming'
-                  ? `Incoming call from ${peerName || 'Unknown'}`
-                  : 'Voice call in progress',
+            PhoneCallNotification.showIncomingPhoneCallNotification({
+              callingName: peerName || 'Nightwatch',
+              channelName: 'Nightwatch Calls',
+              channelDescription: `Incoming call from ${peerName || 'Unknown'}`,
+              answerButtonText: 'Answer',
+              declineButtonText: 'Decline',
             }),
           )
           .catch(() => {});
-      } else if (state === 'idle') {
-        // Hide Android notification
+      } else if (state === 'active') {
+        console.log('[NW-Call] Call active with:', peerName);
+
+        // Android: switch to in-progress notification with end call button
         import('@anuradev/capacitor-phone-call-notification')
-          .then(({ PhoneCallNotification }) =>
-            PhoneCallNotification.hideCallInProgressNotification(),
+          .then(({ PhoneCallNotification }) => {
+            PhoneCallNotification.hideIncomingPhoneCallNotification().catch(
+              () => {},
+            );
+            return PhoneCallNotification.showCallInProgressNotification({
+              callingName: peerName || 'Nightwatch',
+              channelName: 'Nightwatch Calls',
+              channelDescription: 'Voice call in progress',
+              terminateButtonText: 'End Call',
+            });
+          })
+          .catch(() => {});
+      } else if (state === 'idle') {
+        console.log('[NW-Call] Call ended, cleaning up native UI');
+
+        // iOS: end CallKit call
+        import('@capgo/capacitor-incoming-call-kit')
+          .then(({ IncomingCallKit }) => {
+            console.log('[NW-Call] Triggering CallKit endAllCalls');
+            return IncomingCallKit.endAllCalls();
+          })
+          .then((res) =>
+            console.log(
+              '[NW-Call] CallKit endAllCalls result:',
+              JSON.stringify(res),
+            ),
           )
+          .catch((err) =>
+            console.warn('[NW-Call] CallKit endAllCalls error:', err),
+          );
+
+        // Android: hide all notifications
+        import('@anuradev/capacitor-phone-call-notification')
+          .then(({ PhoneCallNotification }) => {
+            PhoneCallNotification.hideIncomingPhoneCallNotification().catch(
+              () => {},
+            );
+            PhoneCallNotification.hideCallInProgressNotification().catch(
+              () => {},
+            );
+          })
           .catch(() => {});
       }
     }
@@ -316,6 +385,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   // ── Cleanup ───────────────────────────────────────────────────────
 
   const cleanup = useCallback(() => {
+    console.log(
+      '[NW-Call] cleanup() called, current state:',
+      callStateRef.current,
+    );
     if (localTrackRef.current) {
       localTrackRef.current.stop();
       localTrackRef.current.close();
@@ -404,6 +477,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   // ── Call actions ──────────────────────────────────────────────────
   const initiateCall = useCallback(
     (callPeer: CallPeer) => {
+      console.log(
+        '[NW-Call] initiateCall:',
+        callPeer.name,
+        'current state:',
+        callStateRef.current,
+      );
       if (!socket || callStateRef.current !== 'idle') return;
       setPeer(callPeer);
       peerRef.current = callPeer;
@@ -420,6 +499,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   );
 
   const acceptCall = useCallback(() => {
+    console.log(
+      '[NW-Call] acceptCall(), peer:',
+      peer?.name,
+      'state:',
+      callStateRef.current,
+    );
     if (!socket || !peer || callStateRef.current !== 'incoming') return;
     socket.emit(
       'call:accept',
@@ -445,16 +530,84 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [socket, peer, joinAgoraChannel, joinAgoraWithToken, cleanup]);
 
   const rejectCall = useCallback(() => {
+    console.log('[NW-Call] rejectCall(), peer:', peer?.name);
     if (!socket || !peer) return;
     socket.emit('call:reject', { callerId: peer.id });
     cleanup();
   }, [socket, peer, cleanup]);
 
   const endCall = useCallback(() => {
+    console.log('[NW-Call] endCall(), peer:', peer?.name);
     if (!socket || !peer) return;
     socket.emit('call:end', { peerId: peer.id });
     cleanup();
   }, [socket, peer, cleanup]);
+
+  // ── Native call UI event listeners (CallKit + Android notification) ─
+  const acceptCallRef = useRef(acceptCall);
+  const rejectCallRef = useRef(rejectCall);
+  const endCallRef = useRef(endCall);
+  useEffect(() => {
+    acceptCallRef.current = acceptCall;
+  }, [acceptCall]);
+  useEffect(() => {
+    rejectCallRef.current = rejectCall;
+  }, [rejectCall]);
+  useEffect(() => {
+    endCallRef.current = endCall;
+  }, [endCall]);
+
+  useEffect(() => {
+    if (!checkIsMobile()) return;
+    const listeners: Array<Promise<{ remove: () => Promise<void> }>> = [];
+
+    // iOS CallKit events
+    import('@capgo/capacitor-incoming-call-kit')
+      .then(({ IncomingCallKit }) => {
+        listeners.push(
+          IncomingCallKit.addListener('callAccepted', (e) => {
+            console.log('[NW-Call] CallKit callAccepted:', JSON.stringify(e));
+            acceptCallRef.current();
+          }),
+          IncomingCallKit.addListener('callDeclined', (e) => {
+            console.log('[NW-Call] CallKit callDeclined:', JSON.stringify(e));
+            rejectCallRef.current();
+          }),
+          IncomingCallKit.addListener('callEnded', (e) => {
+            console.log('[NW-Call] CallKit callEnded:', JSON.stringify(e));
+            endCallRef.current();
+          }),
+          IncomingCallKit.addListener('callTimedOut', (e) => {
+            console.log('[NW-Call] CallKit callTimedOut:', JSON.stringify(e));
+            rejectCallRef.current();
+          }),
+        );
+      })
+      .catch(() => {});
+
+    // Android notification button events
+    import('@anuradev/capacitor-phone-call-notification')
+      .then(({ PhoneCallNotification }) => {
+        listeners.push(
+          PhoneCallNotification.addListener('response', (data) => {
+            console.log(
+              '[NW-Call] Android notification response:',
+              data.response,
+            );
+            if (data.response === 'answer') acceptCallRef.current();
+            else if (data.response === 'decline') rejectCallRef.current();
+            else if (data.response === 'terminate') endCallRef.current();
+          }),
+        );
+      })
+      .catch(() => {});
+
+    return () => {
+      for (const lp of listeners) {
+        lp.then((l) => l.remove()).catch(() => {});
+      }
+    };
+  }, []);
 
   const toggleMute = useCallback(() => {
     if (localTrackRef.current) {
@@ -550,6 +703,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callerName: string;
       callerPhoto: string | null;
     }) => {
+      console.log(
+        '[NW-Call] Socket call:incoming from:',
+        data.callerName,
+        'current state:',
+        callStateRef.current,
+      );
       if (callStateRef.current !== 'idle') return;
       const incomingPeer = {
         id: data.callerId,
@@ -562,16 +721,29 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
 
     const onAccepted = (data: { channelName: string }) => {
+      console.log(
+        '[NW-Call] Socket call:accepted, channel:',
+        data.channelName,
+        'state:',
+        callStateRef.current,
+      );
       if (callStateRef.current === 'outgoing') {
         joinAgoraChannelRef.current(data.channelName);
       }
     };
 
     const onRejected = () => {
+      console.log(
+        '[NW-Call] Socket call:rejected, state:',
+        callStateRef.current,
+      );
       if (callStateRef.current === 'outgoing') cleanupRef.current();
     };
 
-    const onEnded = () => cleanupRef.current();
+    const onEnded = () => {
+      console.log('[NW-Call] Socket call:ended');
+      cleanupRef.current();
+    };
 
     const onParticipantLeft = (data: { userId: string }) => {
       setParticipants((prev) => prev.filter((p) => p.id !== data.userId));
