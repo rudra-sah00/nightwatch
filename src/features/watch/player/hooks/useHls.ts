@@ -208,6 +208,17 @@ export function useHls({
                 credentials: 'omit',
               });
             }
+            // cdnlivetv: suppress Referer to avoid cross-origin block
+            if (
+              context.url.includes('cdnlivetv') ||
+              context.url.includes('cdn-aws')
+            ) {
+              return new Request(context.url, {
+                ...initParams,
+                referrerPolicy: 'no-referrer',
+                credentials: 'omit',
+              });
+            }
             return new Request(context.url, initParams);
           },
         };
