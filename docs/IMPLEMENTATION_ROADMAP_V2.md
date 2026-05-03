@@ -208,9 +208,8 @@
 | 1 | Add server-side data prefetching to home page | `src/app/(protected)/(main)/home/page.tsx` | Currently a thin server component that just renders a client component. Prefetch trending/popular content server-side. |
 | 2 | Add server-side search prefetching | `src/app/(protected)/(main)/search/page.tsx` | Initial results are fetched server-side (good), but error handling silently swallows failures. Add proper error UI. |
 | 3 | Convert main layout to server component | `src/app/(protected)/(main)/layout.tsx` | Entire layout is `'use client'`. The navbar and layout chrome could be a server component with client islands. |
-| 4 | Fix whats-new page caching | `src/app/(public)/whats-new/page.tsx` | Uses `cache: 'force-cache'` — releases are stale until redeploy. Use `next: { revalidate: 3600 }` for hourly refresh. |
-| 5 | Add loading skeletons to all page.tsx files | All page files | Most pages have `Suspense fallback={null}`. Add proper skeleton fallbacks. |
-| 6 | Lazy-load heavy components | Watch party, livestream, profile | `EmojiPicker`, `Mermaid`, `ReactKonva`, `ActivityGraph` should use `React.lazy()` + Suspense. |
+| 4 | Add loading skeletons to all page.tsx files | All page files | Most pages have `Suspense fallback={null}`. Add proper skeleton fallbacks. |
+| 5 | Lazy-load heavy components | Watch party, livestream, profile | `EmojiPicker`, `Mermaid`, `ReactKonva`, `ActivityGraph` should use `React.lazy()` + Suspense. |
 
 ---
 

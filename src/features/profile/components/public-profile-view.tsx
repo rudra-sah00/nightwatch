@@ -25,7 +25,7 @@ interface PublicProfileViewProps {
 /**
  * Read-only public profile page displaying a user's avatar, stats (streak and
  * total watch hours), and a GitHub-style activity heatmap. Includes a link
- * back to the home page and a "What's New" section.
+ * back to the home page.
  */
 export function PublicProfileView({
   profile,
