@@ -330,5 +330,22 @@
     "forward": "進む",
     "goBack": "戻る",
     "goForward": "進む"
+  },
+  "manga": {
+    "title": "マンガ",
+    "searchPlaceholder": "マンガタイトルを検索...",
+    "searchAriaLabel": "マンガ検索",
+    "remove": "削除",
+    "badgeNew": "新着",
+    "badgeUpdate": "更新",
+    "tabTrending": "人気",
+    "tabLatest": "最新",
+    "tabSaved": "保存済み",
+    "tabContinue": "続きを読む",
+    "noResults": "マンガが見つかりません",
+    "resultsCount": "{count}件の結果",
+    "noSearchResults": "結果が見つかりません",
+    "noInternet": "インターネット接続がありません",
+    "backOnline": "オンラインに復帰"
   }
 }

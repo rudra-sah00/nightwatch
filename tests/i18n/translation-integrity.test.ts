@@ -12,6 +12,7 @@ const NAMESPACES = [
   'watch',
   'party',
   'profile',
+  'music',
 ] as const;
 
 type NestedRecord = { [key: string]: string | NestedRecord };

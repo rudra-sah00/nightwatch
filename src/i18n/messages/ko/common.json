@@ -330,5 +330,22 @@
     "forward": "앞으로",
     "goBack": "뒤로 가기",
     "goForward": "앞으로 가기"
+  },
+  "manga": {
+    "title": "만화",
+    "searchPlaceholder": "만화 제목 검색...",
+    "searchAriaLabel": "만화 검색",
+    "remove": "삭제",
+    "badgeNew": "신작",
+    "badgeUpdate": "업데이트",
+    "tabTrending": "인기",
+    "tabLatest": "최신",
+    "tabSaved": "저장됨",
+    "tabContinue": "이어읽기",
+    "noResults": "만화를 찾을 수 없습니다",
+    "resultsCount": "{count}개 결과",
+    "noSearchResults": "결과를 찾을 수 없습니다",
+    "noInternet": "인터넷 연결 없음",
+    "backOnline": "다시 온라인"
   }
 }

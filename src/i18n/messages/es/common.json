@@ -330,5 +330,22 @@
     "forward": "Adelante",
     "goBack": "Ir atrás",
     "goForward": "Ir adelante"
+  },
+  "manga": {
+    "title": "Manga",
+    "searchPlaceholder": "Buscar títulos de manga...",
+    "searchAriaLabel": "Buscar manga",
+    "remove": "Eliminar",
+    "badgeNew": "Nuevo",
+    "badgeUpdate": "Actualización",
+    "tabTrending": "Tendencia",
+    "tabLatest": "Recientes",
+    "tabSaved": "Guardados",
+    "tabContinue": "Continuar",
+    "noResults": "No se encontró manga",
+    "resultsCount": "{count} resultado(s)",
+    "noSearchResults": "No se encontraron resultados",
+    "noInternet": "Sin conexión a internet",
+    "backOnline": "De vuelta en línea"
   }
 }

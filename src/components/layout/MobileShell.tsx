@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { checkIsMobile } from '@/lib/electron-bridge';
@@ -16,6 +17,7 @@ export function MobileShell() {
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
+  const t = useTranslations('common.manga');
 
   useEffect(() => {
     if (!checkIsMobile()) return;
@@ -54,9 +56,9 @@ export function MobileShell() {
     // --- NETWORK DETECTION ---
     const unlistenNetwork = mobileBridge.onNetworkChange((status) => {
       if (!status.connected) {
-        toast.error('No internet connection');
+        toast.error(t('noInternet'));
       } else {
-        toast.success('Back online');
+        toast.success(t('backOnline'));
       }
     });
 
@@ -98,7 +100,7 @@ export function MobileShell() {
       unlistenKbHide();
       document.removeEventListener('touchstart', handleTapDismiss);
     };
-  }, [router]);
+  }, [router, t]);
 
   return null;
 }

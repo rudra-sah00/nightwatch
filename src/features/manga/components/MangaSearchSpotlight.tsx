@@ -3,6 +3,7 @@
 import { BookOpen, Loader2, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MangaTitle } from '@/features/manga/api';
 import { searchManga } from '@/features/manga/api';
@@ -14,6 +15,7 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
   const [closing, setClosing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useTranslations('common.manga');
 
   useEffect(() => {
     if (!window.Capacitor?.isNativePlatform?.()) {
@@ -75,7 +77,7 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
             onKeyDown={(e) => {
               if (e.key === 'Escape') close();
             }}
-            placeholder="Search manga titles..."
+            placeholder={t('searchPlaceholder')}
             className="flex-1 bg-transparent text-lg text-white font-body outline-none placeholder:text-white/40"
             autoComplete="off"
           />
@@ -101,7 +103,7 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
         {results && results.length > 0 && (
           <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
             <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] px-2 mb-2">
-              {results.length} result{results.length !== 1 ? 's' : ''}
+              {t('resultsCount', { count: results.length })}
             </p>
             {results.map((title) => (
               <Link
@@ -141,7 +143,7 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
         {results && results.length === 0 && (
           <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl p-8 text-center">
             <p className="text-white/30 font-headline uppercase tracking-widest text-sm">
-              No results found
+              {t('noSearchResults')}
             </p>
           </div>
         )}

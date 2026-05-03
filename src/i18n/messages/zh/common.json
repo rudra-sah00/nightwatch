@@ -330,5 +330,22 @@
     "forward": "前进",
     "goBack": "返回",
     "goForward": "前进"
+  },
+  "manga": {
+    "title": "漫画",
+    "searchPlaceholder": "搜索漫画标题...",
+    "searchAriaLabel": "搜索漫画",
+    "remove": "移除",
+    "badgeNew": "新",
+    "badgeUpdate": "更新",
+    "tabTrending": "热门",
+    "tabLatest": "最新",
+    "tabSaved": "已保存",
+    "tabContinue": "继续阅读",
+    "noResults": "未找到漫画",
+    "resultsCount": "{count} 个结果",
+    "noSearchResults": "未找到结果",
+    "noInternet": "无网络连接",
+    "backOnline": "已恢复在线"
   }
 }

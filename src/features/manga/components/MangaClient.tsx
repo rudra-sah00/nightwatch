@@ -10,6 +10,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MangaTitle } from '@/features/manga/api';
 import {
@@ -28,9 +29,11 @@ type Tab = 'ranking' | 'latest' | 'saved' | 'continue';
 function MangaCard({
   title,
   onRemove,
+  t,
 }: {
   title: MangaTitle;
   onRemove?: () => void;
+  t: (key: string) => string;
 }) {
   return (
     <Link
@@ -45,7 +48,7 @@ function MangaCard({
             onRemove();
           }}
           className="absolute top-1.5 right-1.5 z-10 p-1.5 bg-background/80 border-[2px] border-border opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-neo-red hover:text-white"
-          aria-label="Remove"
+          aria-label={t('remove')}
         >
           <X className="w-3 h-3" />
         </button>
@@ -65,12 +68,12 @@ function MangaCard({
         )}
         {title.updateStatus === 'new' && (
           <span className="absolute top-2 left-2 bg-neo-cyan text-black font-headline font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-[2px] border-border">
-            New
+            {t('badgeNew')}
           </span>
         )}
         {title.updateStatus === 'up' && (
           <span className="absolute top-2 left-2 bg-neo-yellow text-black font-headline font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-[2px] border-border">
-            Update
+            {t('badgeUpdate')}
           </span>
         )}
       </div>
@@ -107,6 +110,7 @@ export function MangaClient() {
   const [titles, setTitles] = useState<MangaTitle[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
+  const t = useTranslations('common.manga');
 
   const fetchData = useCallback(async (t: Tab) => {
     setLoading(true);
@@ -155,8 +159,6 @@ export function MangaClient() {
     fetchData(tab);
   }, [tab, fetchData]);
 
-  const displayTitles = titles;
-
   const PAGE_SIZE = 30;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -204,13 +206,13 @@ export function MangaClient() {
       {/* Header — like music */}
       <div className="flex items-center justify-between px-6 pt-6 pb-2">
         <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter">
-          Manga
+          {t('title')}
         </h1>
         <button
           type="button"
           onClick={() => setShowSearch(true)}
           className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-cyan hover:bg-neo-cyan/10 transition-colors"
-          aria-label="Search manga"
+          aria-label={t('searchAriaLabel')}
         >
           <Search className="w-4 h-4 text-foreground/50" />
         </button>
@@ -221,10 +223,10 @@ export function MangaClient() {
         <div className="flex gap-2 mb-6 px-6 overflow-x-auto no-scrollbar">
           {(
             [
-              ['ranking', TrendingUp, 'Trending'],
-              ['latest', Zap, 'Latest'],
-              ['saved', Heart, 'Saved'],
-              ['continue', History, 'Continue'],
+              ['ranking', TrendingUp, t('tabTrending')],
+              ['latest', Zap, t('tabLatest')],
+              ['saved', Heart, t('tabSaved')],
+              ['continue', History, t('tabContinue')],
             ] as const
           ).map(([key, Icon, label]) => (
             <button
@@ -250,13 +252,14 @@ export function MangaClient() {
       ) : visibleTitles.length > 0 ? (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-6">
-            {visibleTitles.map((t) => (
+            {visibleTitles.map((mt) => (
               <MangaCard
-                key={t.titleId}
-                title={t}
+                key={mt.titleId}
+                title={mt}
+                t={t}
                 onRemove={
                   tab === 'saved' || tab === 'continue'
-                    ? () => handleRemove(t.titleId)
+                    ? () => handleRemove(mt.titleId)
                     : undefined
                 }
               />
@@ -272,7 +275,7 @@ export function MangaClient() {
         <div className="mx-6 py-24 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
           <BookOpen className="w-12 h-12 text-foreground/20 mb-4" />
           <p className="font-headline font-black text-xl uppercase tracking-widest text-foreground/40">
-            No manga found
+            {t('noResults')}
           </p>
         </div>
       )}

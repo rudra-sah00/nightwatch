@@ -330,5 +330,22 @@
     "forward": "İleri",
     "goBack": "Geri git",
     "goForward": "İleri git"
+  },
+  "manga": {
+    "title": "Manga",
+    "searchPlaceholder": "Manga başlıkları ara...",
+    "searchAriaLabel": "Manga ara",
+    "remove": "Kaldır",
+    "badgeNew": "Yeni",
+    "badgeUpdate": "Güncelleme",
+    "tabTrending": "Trend",
+    "tabLatest": "En Yeni",
+    "tabSaved": "Kaydedilenler",
+    "tabContinue": "Devam Et",
+    "noResults": "Manga bulunamadı",
+    "resultsCount": "{count} sonuç",
+    "noSearchResults": "Sonuç bulunamadı",
+    "noInternet": "İnternet bağlantısı yok",
+    "backOnline": "Tekrar çevrimiçi"
   }
 }

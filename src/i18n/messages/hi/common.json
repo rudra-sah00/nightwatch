@@ -330,5 +330,22 @@
     "forward": "आगे",
     "goBack": "पीछे जाएं",
     "goForward": "आगे जाएं"
+  },
+  "manga": {
+    "title": "मंगा",
+    "searchPlaceholder": "मंगा शीर्षक खोजें...",
+    "searchAriaLabel": "मंगा खोजें",
+    "remove": "हटाएं",
+    "badgeNew": "नया",
+    "badgeUpdate": "अपडेट",
+    "tabTrending": "ट्रेंडिंग",
+    "tabLatest": "नवीनतम",
+    "tabSaved": "सहेजा गया",
+    "tabContinue": "जारी रखें",
+    "noResults": "कोई मंगा नहीं मिला",
+    "resultsCount": "{count} परिणाम",
+    "noSearchResults": "कोई परिणाम नहीं मिला",
+    "noInternet": "इंटरनेट कनेक्शन नहीं है",
+    "backOnline": "वापस ऑनलाइन"
   }
 }

@@ -330,5 +330,22 @@
     "forward": "ไปข้างหน้า",
     "goBack": "ย้อนกลับ",
     "goForward": "ไปข้างหน้า"
+  },
+  "manga": {
+    "title": "มังงะ",
+    "searchPlaceholder": "ค้นหาชื่อมังงะ...",
+    "searchAriaLabel": "ค้นหามังงะ",
+    "remove": "ลบ",
+    "badgeNew": "ใหม่",
+    "badgeUpdate": "อัปเดต",
+    "tabTrending": "มาแรง",
+    "tabLatest": "ล่าสุด",
+    "tabSaved": "บันทึกแล้ว",
+    "tabContinue": "อ่านต่อ",
+    "noResults": "ไม่พบมังงะ",
+    "resultsCount": "{count} ผลลัพธ์",
+    "noSearchResults": "ไม่พบผลลัพธ์",
+    "noInternet": "ไม่มีการเชื่อมต่ออินเทอร์เน็ต",
+    "backOnline": "กลับมาออนไลน์"
   }
 }

@@ -330,5 +330,22 @@
     "forward": "تقدم",
     "goBack": "رجوع",
     "goForward": "تقدم"
+  },
+  "manga": {
+    "title": "مانجا",
+    "searchPlaceholder": "ابحث عن عناوين المانجا...",
+    "searchAriaLabel": "بحث مانجا",
+    "remove": "إزالة",
+    "badgeNew": "جديد",
+    "badgeUpdate": "تحديث",
+    "tabTrending": "رائج",
+    "tabLatest": "أحدث",
+    "tabSaved": "محفوظ",
+    "tabContinue": "متابعة",
+    "noResults": "لم يتم العثور على مانجا",
+    "resultsCount": "{count} نتيجة",
+    "noSearchResults": "لم يتم العثور على نتائج",
+    "noInternet": "لا يوجد اتصال بالإنترنت",
+    "backOnline": "عدت متصلاً"
   }
 }

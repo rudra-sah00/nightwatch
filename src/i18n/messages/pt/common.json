@@ -330,5 +330,22 @@
     "forward": "Avançar",
     "goBack": "Voltar",
     "goForward": "Avançar"
+  },
+  "manga": {
+    "title": "Mangá",
+    "searchPlaceholder": "Pesquisar títulos de mangá...",
+    "searchAriaLabel": "Pesquisar mangá",
+    "remove": "Remover",
+    "badgeNew": "Novo",
+    "badgeUpdate": "Atualização",
+    "tabTrending": "Em alta",
+    "tabLatest": "Recentes",
+    "tabSaved": "Salvos",
+    "tabContinue": "Continuar",
+    "noResults": "Nenhum mangá encontrado",
+    "resultsCount": "{count} resultado(s)",
+    "noSearchResults": "Nenhum resultado encontrado",
+    "noInternet": "Sem conexão com a internet",
+    "backOnline": "De volta online"
   }
 }

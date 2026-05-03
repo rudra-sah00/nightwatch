@@ -330,5 +330,22 @@
     "forward": "Вперёд",
     "goBack": "Назад",
     "goForward": "Вперёд"
+  },
+  "manga": {
+    "title": "Манга",
+    "searchPlaceholder": "Поиск манги...",
+    "searchAriaLabel": "Поиск манги",
+    "remove": "Удалить",
+    "badgeNew": "Новое",
+    "badgeUpdate": "Обновление",
+    "tabTrending": "Популярное",
+    "tabLatest": "Новинки",
+    "tabSaved": "Сохранённое",
+    "tabContinue": "Продолжить",
+    "noResults": "Манга не найдена",
+    "resultsCount": "{count} результат(ов)",
+    "noSearchResults": "Результатов не найдено",
+    "noInternet": "Нет подключения к интернету",
+    "backOnline": "Снова онлайн"
   }
 }

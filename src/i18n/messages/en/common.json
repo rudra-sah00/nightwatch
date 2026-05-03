@@ -330,5 +330,22 @@
       "whatsNew": "What's New",
       "copyright": "© {year} Nightwatch. All rights reserved."
     }
+  },
+  "manga": {
+    "title": "Manga",
+    "searchPlaceholder": "Search manga titles...",
+    "searchAriaLabel": "Search manga",
+    "remove": "Remove",
+    "badgeNew": "New",
+    "badgeUpdate": "Update",
+    "tabTrending": "Trending",
+    "tabLatest": "Latest",
+    "tabSaved": "Saved",
+    "tabContinue": "Continue",
+    "noResults": "No manga found",
+    "resultsCount": "{count} result(s)",
+    "noSearchResults": "No results found",
+    "noInternet": "No internet connection",
+    "backOnline": "Back online"
   }
 }
