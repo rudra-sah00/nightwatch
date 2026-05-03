@@ -144,7 +144,7 @@ export function ProfileOverview() {
 
       {/* Watch Activity Heatmap */}
       <section
-        className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8 overflow-x-auto"
+        className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8"
         aria-label={t('activity.heatmapAriaLabel')}
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
@@ -166,11 +166,13 @@ export function ProfileOverview() {
           </div>
         </div>
 
-        <ActivityGraph
-          activity={activity}
-          createdAt={userCreatedAtDate}
-          isLoading={loadingActivity}
-        />
+        <div className="overflow-x-auto">
+          <ActivityGraph
+            activity={activity}
+            createdAt={userCreatedAtDate}
+            isLoading={loadingActivity}
+          />
+        </div>
       </section>
 
       <CreatorFooter isCompact={false} />

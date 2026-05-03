@@ -104,7 +104,7 @@ function ActivityGraphSkeleton() {
           ></div>
         ))}
       </div>
-      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/20">
+      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/20 min-w-[800px]">
         {monthLabels.map((m) => (
           <span key={m.key}>{m.label}</span>
         ))}
@@ -306,7 +306,7 @@ export function ActivityGraph({
           }),
         )}
       </div>
-      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/40">
+      <div className="flex justify-between mt-4 text-[10px] font-bold uppercase font-headline text-foreground/40 min-w-[800px]">
         {monthLabels.map((m) => (
           <span key={m.key}>{m.label}</span>
         ))}
