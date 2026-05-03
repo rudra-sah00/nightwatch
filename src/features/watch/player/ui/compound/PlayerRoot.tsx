@@ -235,7 +235,11 @@ export function PlayerRoot({
     (e: React.MouseEvent) => {
       if (!isMobile) return;
       const target = e.target as HTMLElement;
-      if (target.closest('button, a, input, [data-seekbar], [role="slider"]'))
+      if (
+        target.closest(
+          'button:not([data-tap-zone]), a, input, [data-seekbar], [role="slider"]',
+        )
+      )
         return;
       if (state.showControls) {
         contextValue.dispatch({ type: 'HIDE_CONTROLS' });

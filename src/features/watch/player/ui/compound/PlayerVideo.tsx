@@ -123,12 +123,14 @@ export function PlayerVideo() {
           <div className="absolute inset-0 z-[2] pointer-events-none">
             <button
               type="button"
+              data-tap-zone
               aria-label={t('aria.seekBackward')}
               className="absolute inset-y-0 left-0 w-1/3 pointer-events-auto bg-transparent"
               onClick={() => handleTapSeek('left')}
             />
             <button
               type="button"
+              data-tap-zone
               aria-label={t('aria.seekForward')}
               className="absolute inset-y-0 right-0 w-1/3 pointer-events-auto bg-transparent"
               onClick={() => handleTapSeek('right')}

@@ -15,79 +15,58 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { checkIsMobile, desktopBridge } from '@/lib/electron-bridge';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import {
   connectToAgoraCall,
   createCallVideoTrack,
   fetchCallToken,
 } from '../call/call.service';
-import { duckMediaElements } from '../call/call.utils';
+import {
+  destroyRingtones,
+  playRingtone,
+  preloadRingtones,
+  type RingtoneRefs,
+  startMediaDucking,
+} from '../call/call-media';
+import {
+  activateCallAudioSession,
+  deactivateCallAudioSession,
+  hideNativeCallUI,
+  registerNativeCallListeners,
+  showNativeActiveCall,
+  showNativeIncomingCall,
+  toggleAudioOutput,
+} from '../call/call-native';
 
-/**
- * Finite state machine for a voice/video call lifecycle.
- *
- * - `'idle'` — no call in progress.
- * - `'outgoing'` — local user initiated a call; waiting for the remote peer to accept.
- * - `'incoming'` — a remote peer is calling; ringtone is playing.
- * - `'active'` — call connected via Agora RTC; audio/video tracks are live.
- */
+// ── Types ───────────────────────────────────────────────────────────
+
 export type CallState = 'idle' | 'outgoing' | 'incoming' | 'active';
 
-/**
- * Minimal representation of a call participant (the remote peer or an invitee).
- */
 export interface CallPeer {
-  /** Unique user ID. */
   id: string;
-  /** Display name shown in the call overlay. */
   name: string;
-  /** Profile photo URL, or `null` for the default avatar. */
   photo: string | null;
 }
 
-/**
- * Shape of the call context exposed by {@link CallProvider}.
- *
- * Provides the current call state, peer info, media toggles, Agora video refs,
- * and action callbacks for initiating, accepting, rejecting, and ending calls.
- */
 interface CallContextType {
-  /** Current call lifecycle state. */
   callState: CallState;
-  /** The primary remote peer (caller or callee). */
   peer: CallPeer | null;
-  /** Additional participants in a group call. */
   participants: CallPeer[];
-  /** Whether the local microphone is muted. */
   isMuted: boolean;
-  /** Whether the local camera is publishing video. */
   isVideoOn: boolean;
-  /** Whether the audio output is routed to the speaker (vs earpiece). */
   isSpeaker: boolean;
-  /** Whether the remote peer is sending video. */
   isRemoteVideoOn: boolean;
-  /** Ref to the DOM element where the remote video track is rendered. */
   remoteVideoRef: React.RefObject<HTMLDivElement | null>;
-  /** Ref to the DOM element where the local video track is rendered. */
   localVideoRef: React.RefObject<HTMLDivElement | null>;
-  /** Elapsed call duration in seconds (resets on each new call). */
   callDuration: number;
-  /** Start an outgoing call to the given peer. */
   initiateCall: (peer: CallPeer) => void;
-  /** Accept an incoming call. */
   acceptCall: () => void;
-  /** Reject an incoming call. */
   rejectCall: () => void;
-  /** End the current active/outgoing call. */
   endCall: () => void;
-  /** Toggle the local microphone mute state. */
   toggleMute: () => void;
-  /** Toggle the local camera on/off (publishes/unpublishes the video track). */
   toggleVideo: () => void;
-  /** Toggle audio output between speaker and earpiece (mobile only). */
   toggleSpeaker: () => void;
-  /** Invite an additional friend into the active call. */
   inviteFriend: (peer: CallPeer) => void;
 }
 
@@ -112,50 +91,14 @@ const CallContext = createContext<CallContextType>({
   inviteFriend: () => {},
 });
 
-/**
- * Convenience hook to consume the {@link CallContextType} from the nearest
- * {@link CallProvider}.
- *
- * @returns The call context with state, peer info, and action callbacks.
- */
 export const useCall = () => useContext(CallContext);
 
-/**
- * Global call provider that manages the full voice/video call lifecycle.
- *
- * **Agora RTC connection** — on call acceptance, fetches a channel token from
- * the backend and joins an Agora RTC channel. Publishes a local microphone
- * track immediately; camera track is toggled on demand via `toggleVideo`.
- *
- * **Ringtone** — preloads `incoming-call.mp3` (looped, 50 % volume) and
- * `outgoing-call.mp3` (looped, 40 % volume). Playback starts/stops
- * automatically based on `callState`.
- *
- * **Media ducking** — when a call is incoming or active, all other `<audio>`
- * and `<video>` elements on the page are ducked to 20 % volume via
- * {@link duckMediaElements}. Volume is restored on cleanup. A `dm-call:start`
- * / `dm-call:end` custom event is dispatched for the music player to react.
- *
- * **Native mobile integration** —
- * - iOS: shows a CallKit incoming-call UI (green pill, lock-screen controls)
- *   via `@capgo/capacitor-incoming-call-kit`.
- * - Android: shows a persistent "call in progress" notification via
- *   `@anuradev/capacitor-phone-call-notification`.
- * - Both are dismissed when the call ends.
- *
- * **Socket events** — listens on:
- * - `call:incoming` — sets state to `'incoming'` with caller info.
- * - `call:accepted` — initiator joins the Agora channel.
- * - `call:rejected` / `call:ended` — cleans up all tracks and state.
- * - `call:participant_left` — removes a participant from the group list.
- *
- * Socket listeners are registered once (stable refs via `useRef`) to avoid
- * re-registration gaps that could cause missed events.
- *
- * @param props.children - Application tree that can access the call context.
- */
+// ── Provider ────────────────────────────────────────────────────────
+
 export function CallProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocket();
+
+  // ── State ─────────────────────────────────────────────────────────
   const [callState, setCallState] = useState<CallState>('idle');
   const [peer, setPeer] = useState<CallPeer | null>(null);
   const [participants, setParticipants] = useState<CallPeer[]>([]);
@@ -165,110 +108,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
 
+  // ── Refs ──────────────────────────────────────────────────────────
   const callStateRef = useRef<CallState>('idle');
   const peerRef = useRef<CallPeer | null>(null);
-  const callIdRef = useRef<string>(`nw-call-${Date.now()}`);
-
-  const updateCallState = useCallback((state: CallState, peerName?: string) => {
-    callStateRef.current = state;
-    setCallState(state);
-
-    // Native call UI for mobile (CallKit on iOS, notification on Android)
-    if (checkIsMobile()) {
-      if (state === 'incoming') {
-        callIdRef.current = `nw-call-${Date.now()}`;
-        console.log(
-          '[NW-Call] Incoming call from:',
-          peerName,
-          'callId:',
-          callIdRef.current,
-        );
-
-        // iOS: show CallKit incoming call UI
-        import('@capgo/capacitor-incoming-call-kit')
-          .then(({ IncomingCallKit }) => {
-            console.log('[NW-Call] Triggering CallKit showIncomingCall');
-            return IncomingCallKit.showIncomingCall({
-              callId: callIdRef.current,
-              callerName: peerName || 'Nightwatch Call',
-              handle: peerName || 'Voice Call',
-              hasVideo: false,
-              ios: { handleType: 'generic', supportsHolding: false },
-            });
-          })
-          .then((res) =>
-            console.log(
-              '[NW-Call] CallKit showIncomingCall result:',
-              JSON.stringify(res),
-            ),
-          )
-          .catch((err) =>
-            console.warn('[NW-Call] CallKit showIncomingCall error:', err),
-          );
-
-        // Android: show incoming call notification with answer/decline buttons
-        import('@anuradev/capacitor-phone-call-notification')
-          .then(({ PhoneCallNotification }) =>
-            PhoneCallNotification.showIncomingPhoneCallNotification({
-              callingName: peerName || 'Nightwatch',
-              channelName: 'Nightwatch Calls',
-              channelDescription: `Incoming call from ${peerName || 'Unknown'}`,
-              answerButtonText: 'Answer',
-              declineButtonText: 'Decline',
-            }),
-          )
-          .catch(() => {});
-      } else if (state === 'active') {
-        console.log('[NW-Call] Call active with:', peerName);
-
-        // Android: switch to in-progress notification with end call button
-        import('@anuradev/capacitor-phone-call-notification')
-          .then(({ PhoneCallNotification }) => {
-            PhoneCallNotification.hideIncomingPhoneCallNotification().catch(
-              () => {},
-            );
-            return PhoneCallNotification.showCallInProgressNotification({
-              callingName: peerName || 'Nightwatch',
-              channelName: 'Nightwatch Calls',
-              channelDescription: 'Voice call in progress',
-              terminateButtonText: 'End Call',
-            });
-          })
-          .catch(() => {});
-      } else if (state === 'idle') {
-        console.log('[NW-Call] Call ended, cleaning up native UI');
-
-        // iOS: end CallKit call
-        import('@capgo/capacitor-incoming-call-kit')
-          .then(({ IncomingCallKit }) => {
-            console.log('[NW-Call] Triggering CallKit endAllCalls');
-            return IncomingCallKit.endAllCalls();
-          })
-          .then((res) =>
-            console.log(
-              '[NW-Call] CallKit endAllCalls result:',
-              JSON.stringify(res),
-            ),
-          )
-          .catch((err) =>
-            console.warn('[NW-Call] CallKit endAllCalls error:', err),
-          );
-
-        // Android: hide all notifications
-        import('@anuradev/capacitor-phone-call-notification')
-          .then(({ PhoneCallNotification }) => {
-            PhoneCallNotification.hideIncomingPhoneCallNotification().catch(
-              () => {},
-            );
-            PhoneCallNotification.hideCallInProgressNotification().catch(
-              () => {},
-            );
-          })
-          .catch(() => {});
-      }
-    }
-  }, []);
-
+  const callIdRef = useRef(`nw-call-${Date.now()}`);
   const agoraClientRef = useRef<IAgoraRTCClient | null>(null);
   const localTrackRef = useRef<IMicrophoneAudioTrack | null>(null);
   const localVideoTrackRef = useRef<ICameraVideoTrack | null>(null);
@@ -276,139 +119,94 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const localVideoRef = useRef<HTMLDivElement | null>(null);
   const remoteVideoTrackRef = useRef<IRemoteVideoTrack | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const restoreVolumeRef = useRef<(() => void) | null>(null);
-  const ringtoneRef = useRef<{
-    incoming: HTMLAudioElement;
-    outgoing: HTMLAudioElement;
-  } | null>(null);
+  const restoreMediaRef = useRef<(() => void) | null>(null);
+  const ringtoneRef = useRef<RingtoneRefs | null>(null);
+
+  // ── Native state transition ───────────────────────────────────────
+  const updateCallState = useCallback((state: CallState, peerName?: string) => {
+    callStateRef.current = state;
+    setCallState(state);
+
+    if (!checkIsMobile()) return;
+    if (state === 'incoming') {
+      callIdRef.current = `nw-call-${Date.now()}`;
+      showNativeIncomingCall(callIdRef.current, peerName || '');
+    } else if (state === 'active') {
+      showNativeActiveCall(peerName || '');
+    } else if (state === 'idle') {
+      hideNativeCallUI();
+    }
+  }, []);
 
   // ── Ringtone preload ──────────────────────────────────────────────
   useEffect(() => {
-    const incoming = new Audio('/incoming-call.mp3');
-    incoming.loop = true;
-    incoming.volume = 0.5;
-    incoming.preload = 'auto';
-    incoming.load();
-
-    const outgoing = new Audio('/outgoing-call.mp3');
-    outgoing.loop = true;
-    outgoing.volume = 0.4;
-    outgoing.preload = 'auto';
-    outgoing.load();
-
-    ringtoneRef.current = { incoming, outgoing };
+    ringtoneRef.current = preloadRingtones();
     return () => {
-      incoming.pause();
-      outgoing.pause();
+      if (ringtoneRef.current) destroyRingtones(ringtoneRef.current);
     };
   }, []);
 
   // ── Duration timer ────────────────────────────────────────────────
   useEffect(() => {
-    if (callState === 'active') {
-      setCallDuration(0);
-      durationIntervalRef.current = setInterval(
-        () => setCallDuration((d) => d + 1),
-        1000,
-      );
-    } else {
+    if (callState !== 'active') {
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
         durationIntervalRef.current = null;
       }
       setCallDuration(0);
+      return;
     }
+    setCallDuration(0);
+    durationIntervalRef.current = setInterval(
+      () => setCallDuration((d) => d + 1),
+      1000,
+    );
     return () => {
       if (durationIntervalRef.current)
         clearInterval(durationIntervalRef.current);
     };
   }, [callState]);
 
-  // ── Media ducking + iOS audio session ──────────────────────────────
+  // ── Media ducking + audio session ─────────────────────────────────
   useEffect(() => {
-    if (callState === 'active' || callState === 'incoming') {
-      restoreVolumeRef.current = duckMediaElements(0.2);
-      window.dispatchEvent(new CustomEvent('dm-call:start'));
-      desktopBridge.setCallActive(true);
-      // iOS: switch to voice call audio session (earpiece, echo cancellation)
-      if (checkIsMobile()) {
-        import('@capacitor/core').then(({ registerPlugin }) => {
-          const NWAudioSession = registerPlugin<{
-            setVoiceCallMode: () => Promise<void>;
-          }>('NWAudioSession');
-          NWAudioSession.setVoiceCallMode().catch(() => {});
-        });
-      }
-    }
+    if (callState !== 'active' && callState !== 'incoming') return;
+    restoreMediaRef.current = startMediaDucking();
+    activateCallAudioSession();
     return () => {
-      if (restoreVolumeRef.current) {
-        restoreVolumeRef.current();
-        restoreVolumeRef.current = null;
-      }
-      desktopBridge.setCallActive(false);
-      // iOS: restore media playback audio session
-      if (checkIsMobile()) {
-        import('@capacitor/core').then(({ registerPlugin }) => {
-          const NWAudioSession = registerPlugin<{
-            setMediaMode: () => Promise<void>;
-          }>('NWAudioSession');
-          NWAudioSession.setMediaMode().catch(() => {});
-        });
-      }
+      restoreMediaRef.current?.();
+      restoreMediaRef.current = null;
+      deactivateCallAudioSession();
     };
   }, [callState]);
 
   // ── Ringtone playback ─────────────────────────────────────────────
   useEffect(() => {
     if (callState !== 'incoming' && callState !== 'outgoing') return;
-    const tones = ringtoneRef.current;
-    if (!tones) return;
-
-    const audio = callState === 'incoming' ? tones.incoming : tones.outgoing;
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
+    if (!ringtoneRef.current) return;
+    return playRingtone(ringtoneRef.current, callState);
   }, [callState]);
 
-  // ── Re-play remote video when ref target changes ────────────────
+  // ── Re-play remote video on ref change ────────────────────────────
   useEffect(() => {
     const track = remoteVideoTrackRef.current;
     const el = remoteVideoRef.current;
-    if (track && el && isRemoteVideoOn) {
-      track.play(el);
-    }
+    if (track && el && isRemoteVideoOn) track.play(el);
   });
 
   // ── Cleanup ───────────────────────────────────────────────────────
-
   const cleanup = useCallback(() => {
-    console.log(
-      '[NW-Call] cleanup() called, current state:',
-      callStateRef.current,
-    );
-    if (localTrackRef.current) {
-      localTrackRef.current.stop();
-      localTrackRef.current.close();
-      localTrackRef.current = null;
-    }
-    if (localVideoTrackRef.current) {
-      localVideoTrackRef.current.stop();
-      localVideoTrackRef.current.close();
-      localVideoTrackRef.current = null;
-    }
+    console.log('[NW-Call] cleanup(), state:', callStateRef.current);
+    localTrackRef.current?.stop();
+    localTrackRef.current?.close();
+    localTrackRef.current = null;
+    localVideoTrackRef.current?.stop();
+    localVideoTrackRef.current?.close();
+    localVideoTrackRef.current = null;
     remoteVideoTrackRef.current = null;
-    if (agoraClientRef.current) {
-      agoraClientRef.current.leave().catch(() => {});
-      agoraClientRef.current = null;
-    }
-    if (restoreVolumeRef.current) {
-      restoreVolumeRef.current();
-      restoreVolumeRef.current = null;
-    }
-    window.dispatchEvent(new CustomEvent('dm-call:end'));
+    agoraClientRef.current?.leave().catch(() => {});
+    agoraClientRef.current = null;
+    restoreMediaRef.current?.();
+    restoreMediaRef.current = null;
     updateCallState('idle');
     setPeer(null);
     peerRef.current = null;
@@ -431,9 +229,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
           onRemoteVideo: (track) => {
             remoteVideoTrackRef.current = track;
             setIsRemoteVideoOn(true);
-            if (remoteVideoRef.current) {
-              track.play(remoteVideoRef.current);
-            }
+            if (remoteVideoRef.current) track.play(remoteVideoRef.current);
           },
           onRemoteVideoStopped: () => {
             remoteVideoTrackRef.current = null;
@@ -449,23 +245,15 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     [updateCallState],
   );
 
-  const joinAgoraWithToken = useCallback(
-    async (channel: string, token: string, appId: string, uid: number) => {
+  const joinAgora = useCallback(
+    async (channel: string, token?: string, appId?: string, uid?: number) => {
       try {
-        await connectAgora(channel, token, appId, uid);
-      } catch (err) {
-        if (err instanceof Error) toast.error(err.message);
-        cleanup();
-      }
-    },
-    [connectAgora, cleanup],
-  );
-
-  const joinAgoraChannel = useCallback(
-    async (channel: string) => {
-      try {
-        const data = await fetchCallToken(channel);
-        await connectAgora(channel, data.token, data.appId, data.uid);
+        if (token && appId && uid) {
+          await connectAgora(channel, token, appId, uid);
+        } else {
+          const data = await fetchCallToken(channel);
+          await connectAgora(channel, data.token, data.appId, data.uid);
+        }
       } catch (err) {
         if (err instanceof Error) toast.error(err.message);
         cleanup();
@@ -477,12 +265,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   // ── Call actions ──────────────────────────────────────────────────
   const initiateCall = useCallback(
     (callPeer: CallPeer) => {
-      console.log(
-        '[NW-Call] initiateCall:',
-        callPeer.name,
-        'current state:',
-        callStateRef.current,
-      );
+      console.log('[NW-Call] initiateCall:', callPeer.name);
       if (!socket || callStateRef.current !== 'idle') return;
       setPeer(callPeer);
       peerRef.current = callPeer;
@@ -499,12 +282,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   );
 
   const acceptCall = useCallback(() => {
-    console.log(
-      '[NW-Call] acceptCall(), peer:',
-      peer?.name,
-      'state:',
-      callStateRef.current,
-    );
+    console.log('[NW-Call] acceptCall(), peer:', peer?.name);
     if (!socket || !peer || callStateRef.current !== 'incoming') return;
     socket.emit(
       'call:accept',
@@ -520,14 +298,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
           cleanup();
           return;
         }
-        if (res.token && res.appId && res.uid) {
-          joinAgoraWithToken(res.channelName, res.token, res.appId, res.uid);
-        } else {
-          joinAgoraChannel(res.channelName);
-        }
+        joinAgora(res.channelName, res.token, res.appId, res.uid);
       },
     );
-  }, [socket, peer, joinAgoraChannel, joinAgoraWithToken, cleanup]);
+  }, [socket, peer, joinAgora, cleanup]);
 
   const rejectCall = useCallback(() => {
     console.log('[NW-Call] rejectCall(), peer:', peer?.name);
@@ -543,7 +317,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     cleanup();
   }, [socket, peer, cleanup]);
 
-  // ── Native call UI event listeners (CallKit + Android notification) ─
+  // ── Native call UI event listeners ────────────────────────────────
   const acceptCallRef = useRef(acceptCall);
   const rejectCallRef = useRef(rejectCall);
   const endCallRef = useRef(endCall);
@@ -558,66 +332,22 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [endCall]);
 
   useEffect(() => {
-    if (!checkIsMobile()) return;
-    const listeners: Array<Promise<{ remove: () => Promise<void> }>> = [];
-
-    // iOS CallKit events
-    import('@capgo/capacitor-incoming-call-kit')
-      .then(({ IncomingCallKit }) => {
-        listeners.push(
-          IncomingCallKit.addListener('callAccepted', (e) => {
-            console.log('[NW-Call] CallKit callAccepted:', JSON.stringify(e));
-            acceptCallRef.current();
-          }),
-          IncomingCallKit.addListener('callDeclined', (e) => {
-            console.log('[NW-Call] CallKit callDeclined:', JSON.stringify(e));
-            rejectCallRef.current();
-          }),
-          IncomingCallKit.addListener('callEnded', (e) => {
-            console.log('[NW-Call] CallKit callEnded:', JSON.stringify(e));
-            endCallRef.current();
-          }),
-          IncomingCallKit.addListener('callTimedOut', (e) => {
-            console.log('[NW-Call] CallKit callTimedOut:', JSON.stringify(e));
-            rejectCallRef.current();
-          }),
-        );
-      })
-      .catch(() => {});
-
-    // Android notification button events
-    import('@anuradev/capacitor-phone-call-notification')
-      .then(({ PhoneCallNotification }) => {
-        listeners.push(
-          PhoneCallNotification.addListener('response', (data) => {
-            console.log(
-              '[NW-Call] Android notification response:',
-              data.response,
-            );
-            if (data.response === 'answer') acceptCallRef.current();
-            else if (data.response === 'decline') rejectCallRef.current();
-            else if (data.response === 'terminate') endCallRef.current();
-          }),
-        );
-      })
-      .catch(() => {});
-
-    return () => {
-      for (const lp of listeners) {
-        lp.then((l) => l.remove()).catch(() => {});
-      }
-    };
+    return registerNativeCallListeners({
+      acceptCall: () => acceptCallRef.current(),
+      rejectCall: () => rejectCallRef.current(),
+      endCall: () => endCallRef.current(),
+    });
   }, []);
 
+  // ── Media toggles ─────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
-    if (localTrackRef.current) {
-      try {
-        const next = !isMuted;
-        localTrackRef.current.setEnabled(!next);
-        setIsMuted(next);
-      } catch {
-        // Track may have been disposed
-      }
+    if (!localTrackRef.current) return;
+    try {
+      const next = !isMuted;
+      localTrackRef.current.setEnabled(!next);
+      setIsMuted(next);
+    } catch {
+      /* disposed */
     }
   }, [isMuted]);
 
@@ -633,31 +363,19 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         }
         setIsVideoOn(false);
       } else {
-        const videoTrack = await createCallVideoTrack(agoraClientRef.current);
-        localVideoTrackRef.current = videoTrack;
-        if (localVideoRef.current) videoTrack.play(localVideoRef.current);
+        const track = await createCallVideoTrack(agoraClientRef.current);
+        localVideoTrackRef.current = track;
+        if (localVideoRef.current) track.play(localVideoRef.current);
         setIsVideoOn(true);
       }
     } catch {
-      // Permission denied or camera unavailable — don't crash
+      /* permission denied */
     }
   }, [isVideoOn]);
 
   const toggleSpeaker = useCallback(() => {
-    if (!checkIsMobile()) return;
-    const next = !isSpeaker;
-    import('@capacitor/core').then(({ registerPlugin }) => {
-      const NWAudioSession = registerPlugin<{
-        setOutputToSpeaker: () => Promise<void>;
-        setOutputToEarpiece: () => Promise<void>;
-      }>('NWAudioSession');
-      (next
-        ? NWAudioSession.setOutputToSpeaker()
-        : NWAudioSession.setOutputToEarpiece()
-      ).catch(() => {});
-    });
-    setIsSpeaker(next);
-  }, [isSpeaker]);
+    setIsSpeaker((prev) => toggleAudioOutput(prev));
+  }, []);
 
   const inviteFriend = useCallback(
     (invitee: CallPeer) => {
@@ -666,11 +384,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         'call:invite',
         { inviteeId: invitee.id },
         (res: { success: boolean }) => {
-          if (res.success) {
+          if (res.success)
             setParticipants((prev) =>
               prev.some((p) => p.id === invitee.id) ? prev : [...prev, invitee],
             );
-          }
         },
       );
     },
@@ -678,16 +395,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   );
 
   // ── Socket event listeners ────────────────────────────────────────
-  // Use refs to avoid re-registering listeners when callbacks change.
-  // Re-registration creates a brief window where events can be missed,
-  // which is the root cause of the initiator not seeing the call overlay
-  // after the receiver accepts.
-  const joinAgoraChannelRef = useRef(joinAgoraChannel);
+  const joinAgoraRef = useRef(joinAgora);
   const cleanupRef = useRef(cleanup);
   const updateCallStateRef = useRef(updateCallState);
   useEffect(() => {
-    joinAgoraChannelRef.current = joinAgoraChannel;
-  }, [joinAgoraChannel]);
+    joinAgoraRef.current = joinAgora;
+  }, [joinAgora]);
   useEffect(() => {
     cleanupRef.current = cleanup;
   }, [cleanup]);
@@ -703,67 +416,48 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callerName: string;
       callerPhoto: string | null;
     }) => {
-      console.log(
-        '[NW-Call] Socket call:incoming from:',
-        data.callerName,
-        'current state:',
-        callStateRef.current,
-      );
+      console.log('[NW-Call] Socket call:incoming from:', data.callerName);
       if (callStateRef.current !== 'idle') return;
-      const incomingPeer = {
+      const p = {
         id: data.callerId,
         name: data.callerName,
         photo: data.callerPhoto,
       };
-      setPeer(incomingPeer);
-      peerRef.current = incomingPeer;
-      updateCallStateRef.current('incoming', incomingPeer.name);
+      setPeer(p);
+      peerRef.current = p;
+      updateCallStateRef.current('incoming', p.name);
     };
-
     const onAccepted = (data: { channelName: string }) => {
-      console.log(
-        '[NW-Call] Socket call:accepted, channel:',
-        data.channelName,
-        'state:',
-        callStateRef.current,
-      );
-      if (callStateRef.current === 'outgoing') {
-        joinAgoraChannelRef.current(data.channelName);
-      }
+      console.log('[NW-Call] Socket call:accepted, channel:', data.channelName);
+      if (callStateRef.current === 'outgoing')
+        joinAgoraRef.current(data.channelName);
     };
-
     const onRejected = () => {
-      console.log(
-        '[NW-Call] Socket call:rejected, state:',
-        callStateRef.current,
-      );
+      console.log('[NW-Call] Socket call:rejected');
       if (callStateRef.current === 'outgoing') cleanupRef.current();
     };
-
     const onEnded = () => {
       console.log('[NW-Call] Socket call:ended');
       cleanupRef.current();
     };
-
-    const onParticipantLeft = (data: { userId: string }) => {
+    const onLeft = (data: { userId: string }) =>
       setParticipants((prev) => prev.filter((p) => p.id !== data.userId));
-    };
 
     socket.on('call:incoming', onIncoming);
     socket.on('call:accepted', onAccepted);
     socket.on('call:rejected', onRejected);
     socket.on('call:ended', onEnded);
-    socket.on('call:participant_left', onParticipantLeft);
-
+    socket.on('call:participant_left', onLeft);
     return () => {
       socket.off('call:incoming', onIncoming);
       socket.off('call:accepted', onAccepted);
       socket.off('call:rejected', onRejected);
       socket.off('call:ended', onEnded);
-      socket.off('call:participant_left', onParticipantLeft);
+      socket.off('call:participant_left', onLeft);
     };
   }, [socket]);
 
+  // ── Render ────────────────────────────────────────────────────────
   return (
     <CallContext.Provider
       value={{
