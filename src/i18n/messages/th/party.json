@@ -243,7 +243,11 @@
     "sounds": "เสียง",
     "sketchFor": "วาดสำหรับ {name}",
     "soundsFor": "เสียงสำหรับ {name}",
-    "chatFor": "แชทสำหรับ {name}"
+    "chatFor": "แชทสำหรับ {name}",
+    "permissionUpdateFailed": "อัปเดตสิทธิ์ล้มเหลว",
+    "floatingTiles": "ผู้เข้าร่วมลอย",
+    "floatingTilesDesc": "แสดงไทล์วิดีโอที่ลากได้เมื่อแถบด้านข้างปิด",
+    "floatingTilesOverlay": "โอเวอร์เลย์ไทล์ผู้เข้าร่วมลอย"
   },
   "aria": {
     "partySidebar": "แถบด้านข้างปาร์ตี้",

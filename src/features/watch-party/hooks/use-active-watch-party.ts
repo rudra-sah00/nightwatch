@@ -209,5 +209,6 @@ export function useActiveWatchParty({
     handleNavigate,
     handleNextEpisode,
     handleAgoraReady,
+    participants: agoraParticipants,
   };
 }

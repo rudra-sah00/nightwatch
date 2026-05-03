@@ -336,5 +336,9 @@
     "noSearchResults": "Результатов не найдено",
     "noInternet": "Нет подключения к интернету",
     "backOnline": "Снова онлайн"
+  },
+  "server": {
+    "netflix": "Сервер 1",
+    "balanced": "Сервер 2"
   }
 }

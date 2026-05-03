@@ -1,5 +1,13 @@
-import { MessageSquare, PenTool, Settings, Volume2, X } from 'lucide-react';
+import {
+  MessageSquare,
+  PenTool,
+  Settings,
+  Users,
+  Volume2,
+  X,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -57,6 +65,9 @@ interface WatchPartySettingsProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  /** Whether floating participant tiles are enabled (shown when sidebar is closed) */
+  floatingTilesEnabled?: boolean;
+  onToggleFloatingTiles?: () => void;
   rtmSendMessage?: (msg: RTMMessage) => void;
 }
 
@@ -65,6 +76,8 @@ export function WatchPartySettings({
   isHost,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  floatingTilesEnabled = true,
+  onToggleFloatingTiles,
   rtmSendMessage,
 }: WatchPartySettingsProps) {
   const t = useTranslations('party');
@@ -75,21 +88,25 @@ export function WatchPartySettings({
     value: boolean,
   ) => {
     // Direct update with no mapping needed - backend schema now matches frontend types
-    updatePartyPermissions(room.id, { [key]: value }).then((response) => {
-      if (response.permissions && rtmSendMessage) {
-        rtmSendMessage({
-          type: 'PERMISSIONS_UPDATED',
-          permissions: response.permissions,
-        });
+    updatePartyPermissions(room.id, { [key]: value })
+      .then((response) => {
+        if (response.permissions && rtmSendMessage) {
+          rtmSendMessage({
+            type: 'PERMISSIONS_UPDATED',
+            permissions: response.permissions,
+          });
 
-        // Optimistically update local room state for host
-        window.dispatchEvent(
-          new CustomEvent('LOCAL_PERMISSIONS_UPDATED', {
-            detail: { permissions: response.permissions },
-          }),
-        );
-      }
-    });
+          // Optimistically update local room state for host
+          window.dispatchEvent(
+            new CustomEvent('LOCAL_PERMISSIONS_UPDATED', {
+              detail: { permissions: response.permissions },
+            }),
+          );
+        }
+      })
+      .catch(() => {
+        toast.error(t('settings.permissionUpdateFailed'));
+      });
   };
 
   const handleUserPermissionToggle = (
@@ -117,22 +134,26 @@ export function WatchPartySettings({
     };
 
     // Schema expects all three fields with specific names
-    updateMemberPermissions(room.id, memberId, merged).then((response) => {
-      if (response.permissions && rtmSendMessage) {
-        rtmSendMessage({
-          type: 'MEMBER_PERMISSIONS_UPDATED',
-          memberId,
-          permissions: response.permissions,
-        });
+    updateMemberPermissions(room.id, memberId, merged)
+      .then((response) => {
+        if (response.permissions && rtmSendMessage) {
+          rtmSendMessage({
+            type: 'MEMBER_PERMISSIONS_UPDATED',
+            memberId,
+            permissions: response.permissions,
+          });
 
-        // Optimistically update local room state for host
-        window.dispatchEvent(
-          new CustomEvent('LOCAL_MEMBER_PERMISSIONS_UPDATED', {
-            detail: { memberId, permissions: response.permissions },
-          }),
-        );
-      }
-    });
+          // Optimistically update local room state for host
+          window.dispatchEvent(
+            new CustomEvent('LOCAL_MEMBER_PERMISSIONS_UPDATED', {
+              detail: { memberId, permissions: response.permissions },
+            }),
+          );
+        }
+      })
+      .catch(() => {
+        toast.error(t('settings.permissionUpdateFailed'));
+      });
   };
 
   // Only guests should be listed in individual overrides (don't list the host)
@@ -198,6 +219,27 @@ export function WatchPartySettings({
                     label={t('settings.floatingChatOverlay')}
                   />
                 </div>
+
+                {onToggleFloatingTiles !== undefined ? (
+                  <div className="flex items-center justify-between border-t-[2px] border-border/10 pt-4">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-foreground stroke-[3px]" />
+                      <div className="flex flex-col">
+                        <p className="text-sm font-black font-headline uppercase tracking-widest text-foreground leading-none">
+                          {t('settings.floatingTiles')}
+                        </p>
+                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-foreground/70 mt-1">
+                          {t('settings.floatingTilesDesc')}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={floatingTilesEnabled}
+                      onCheckedChange={() => onToggleFloatingTiles?.()}
+                      label={t('settings.floatingTilesOverlay')}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : null}

@@ -243,7 +243,11 @@
     "sounds": "Sons",
     "sketchFor": "Dessin pour {name}",
     "soundsFor": "Sons pour {name}",
-    "chatFor": "Chat pour {name}"
+    "chatFor": "Chat pour {name}",
+    "permissionUpdateFailed": "Échec de la mise à jour de la permission",
+    "floatingTiles": "Participants flottants",
+    "floatingTilesDesc": "Afficher les tuiles vidéo déplaçables quand la barre latérale est fermée",
+    "floatingTilesOverlay": "Superposition des tuiles flottantes"
   },
   "aria": {
     "partySidebar": "Barre latérale de la fête",

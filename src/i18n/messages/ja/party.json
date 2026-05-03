@@ -243,7 +243,11 @@
     "sounds": "サウンド",
     "sketchFor": "{name}のスケッチ",
     "soundsFor": "{name}のサウンド",
-    "chatFor": "{name}のチャット"
+    "chatFor": "{name}のチャット",
+    "permissionUpdateFailed": "権限の更新に失敗しました",
+    "floatingTiles": "フローティング参加者",
+    "floatingTilesDesc": "サイドバーが閉じているときにドラッグ可能なビデオタイルを表示",
+    "floatingTilesOverlay": "フローティング参加者タイルオーバーレイ"
   },
   "aria": {
     "partySidebar": "パーティーサイドバー",

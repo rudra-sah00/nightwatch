@@ -60,6 +60,11 @@ interface WatchPartySidebarProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  /** Whether floating participant tiles are enabled (shown when sidebar is closed) */
+  floatingTilesEnabled?: boolean;
+  onToggleFloatingTiles?: () => void;
+  /** Whether the sidebar is currently visible (used to unmount video grid when hidden). */
+  isVisible?: boolean;
   // Theme sync from RTM
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
@@ -96,6 +101,9 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   onTabChange,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  floatingTilesEnabled = true,
+  onToggleFloatingTiles,
+  isVisible = true,
   rtmSendMessage,
   currentUserName: currentUserNameProp,
   isFullscreen = false,
@@ -170,14 +178,17 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
             />
           ) : null}
 
-          {/* Video Grid with profile photos */}
-          <VideoGrid
-            participants={participants}
-            currentUserId={currentUserId}
-            hostId={room.hostId}
-            isHost={isHost}
-            onKick={onKick}
-          />
+          {/* Video Grid with profile photos — unmount when sidebar hidden
+              so Agora tracks can be re-attached to floating tiles */}
+          {isVisible ? (
+            <VideoGrid
+              participants={participants}
+              currentUserId={currentUserId}
+              hostId={room.hostId}
+              isHost={isHost}
+              onKick={onKick}
+            />
+          ) : null}
         </div>
 
         {/* Chat Tab */}
@@ -267,6 +278,8 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
         onLeave={onLeave}
         floatingChatEnabled={floatingChatEnabled}
         onToggleFloatingChat={onToggleFloatingChat}
+        floatingTilesEnabled={floatingTilesEnabled}
+        onToggleFloatingTiles={onToggleFloatingTiles}
         isAgoraConnected={isAgoraConnected}
         rtmSendMessage={rtmSendMessage}
       />

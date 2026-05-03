@@ -336,5 +336,9 @@
     "noSearchResults": "未找到结果",
     "noInternet": "无网络连接",
     "backOnline": "已恢复在线"
+  },
+  "server": {
+    "netflix": "服务器 1",
+    "balanced": "服务器 2"
   }
 }

@@ -336,5 +336,9 @@
     "noSearchResults": "Sonuç bulunamadı",
     "noInternet": "İnternet bağlantısı yok",
     "backOnline": "Tekrar çevrimiçi"
+  },
+  "server": {
+    "netflix": "Sunucu 1",
+    "balanced": "Sunucu 2"
   }
 }

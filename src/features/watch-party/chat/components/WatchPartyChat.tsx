@@ -217,20 +217,6 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             width={300}
             onEmojiClick={onEmojiClick}
             previewConfig={{ showPreview: false }}
-            style={
-              {
-                '--epr-bg-color': '#ffffff',
-                '--epr-category-label-bg-color': '#ffffff',
-                '--epr-picker-border-color': 'transparent',
-                '--epr-search-input-bg-color': '#f5f0e8',
-                '--epr-search-input-border-color': 'var(--neo-border)',
-                '--epr-search-input-border-radius': '0px',
-                '--epr-hover-bg-color': 'var(--neo-yellow)',
-                '--epr-focus-bg-color': 'var(--neo-yellow)',
-                '--epr-highlight-color': 'var(--neo-yellow)',
-                borderRadius: '0px',
-              } as React.CSSProperties
-            }
           />
         </div>
       ) : null}
@@ -263,6 +249,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('placeholder')}
+            maxLength={200}
             data-allow-clipboard
             className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
           />

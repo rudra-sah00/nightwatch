@@ -243,7 +243,11 @@
     "sounds": "Sounds",
     "sketchFor": "Zeichnen für {name}",
     "soundsFor": "Sounds für {name}",
-    "chatFor": "Chat für {name}"
+    "chatFor": "Chat für {name}",
+    "permissionUpdateFailed": "Berechtigung konnte nicht aktualisiert werden",
+    "floatingTiles": "Schwebende Teilnehmer",
+    "floatingTilesDesc": "Ziehbare Video-Kacheln anzeigen wenn Seitenleiste geschlossen",
+    "floatingTilesOverlay": "Schwebende Teilnehmer-Kacheln"
   },
   "aria": {
     "partySidebar": "Party-Seitenleiste",

@@ -243,7 +243,11 @@
     "sounds": "ध्वनियाँ",
     "sketchFor": "{name} के लिए स्केच",
     "soundsFor": "{name} के लिए ध्वनियाँ",
-    "chatFor": "{name} के लिए चैट"
+    "chatFor": "{name} के लिए चैट",
+    "permissionUpdateFailed": "अनुमति अपडेट करने में विफल",
+    "floatingTiles": "फ्लोटिंग प्रतिभागी",
+    "floatingTilesDesc": "साइडबार बंद होने पर ड्रैग करने योग्य वीडियो टाइल दिखाएं",
+    "floatingTilesOverlay": "फ्लोटिंग प्रतिभागी टाइल ओवरले"
   },
   "aria": {
     "partySidebar": "पार्टी साइडबार",

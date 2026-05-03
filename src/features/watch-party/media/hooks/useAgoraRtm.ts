@@ -250,6 +250,11 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         setConnectionState('CONNECTING');
         await client.login({ token });
 
+        // Brief delay to let the presence service connect after login.
+        // Agora's presence sub-service initializes asynchronously and
+        // subscribe() with withPresence:true fails if called too early.
+        await new Promise((r) => setTimeout(r, 500));
+
         if (cleaned) {
           fallbackCleanup();
           return;

@@ -52,6 +52,8 @@ interface MediaControlsProps {
   /** Whether the floating chat overlay is enabled (shown when sidebar is closed) */
   floatingChatEnabled?: boolean;
   onToggleFloatingChat?: () => void;
+  floatingTilesEnabled?: boolean;
+  onToggleFloatingTiles?: () => void;
   /** Actual Agora RTC connection state — used to show real status in the badge */
   isAgoraConnected?: boolean;
   rtmSendMessage?: (msg: RTMMessage) => void;
@@ -85,6 +87,8 @@ export function MediaControls({
   room,
   floatingChatEnabled = false,
   onToggleFloatingChat,
+  floatingTilesEnabled = true,
+  onToggleFloatingTiles,
   isAgoraConnected = false,
   rtmSendMessage,
 }: MediaControlsProps) {
@@ -107,6 +111,8 @@ export function MediaControls({
           isHost={isHost}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={onToggleFloatingChat}
+          floatingTilesEnabled={floatingTilesEnabled}
+          onToggleFloatingTiles={onToggleFloatingTiles}
           rtmSendMessage={rtmSendMessage}
         />
 

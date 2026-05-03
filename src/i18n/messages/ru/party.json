@@ -243,7 +243,11 @@
     "sounds": "Звуки",
     "sketchFor": "Рисование для {name}",
     "soundsFor": "Звуки для {name}",
-    "chatFor": "Чат для {name}"
+    "chatFor": "Чат для {name}",
+    "permissionUpdateFailed": "Не удалось обновить разрешение",
+    "floatingTiles": "Плавающие участники",
+    "floatingTilesDesc": "Показывать перетаскиваемые видео-плитки при закрытой боковой панели",
+    "floatingTilesOverlay": "Наложение плавающих плиток участников"
   },
   "aria": {
     "partySidebar": "Боковая панель вечеринки",

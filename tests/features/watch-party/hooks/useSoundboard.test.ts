@@ -83,6 +83,7 @@ describe('useSoundboard', () => {
       'Audio',
       class {
         play = mockPlay;
+        pause = vi.fn();
         volume = 0;
       },
     );

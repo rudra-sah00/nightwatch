@@ -336,5 +336,9 @@
     "noSearchResults": "لم يتم العثور على نتائج",
     "noInternet": "لا يوجد اتصال بالإنترنت",
     "backOnline": "عدت متصلاً"
+  },
+  "server": {
+    "netflix": "الخادم 1",
+    "balanced": "الخادم 2"
   }
 }

@@ -336,5 +336,9 @@
     "noSearchResults": "No se encontraron resultados",
     "noInternet": "Sin conexión a internet",
     "backOnline": "De vuelta en línea"
+  },
+  "server": {
+    "netflix": "Servidor 1",
+    "balanced": "Servidor 2"
   }
 }

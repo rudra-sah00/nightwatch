@@ -243,7 +243,11 @@
     "sounds": "소리",
     "sketchFor": "{name}의 스케치",
     "soundsFor": "{name}의 소리",
-    "chatFor": "{name}의 채팅"
+    "chatFor": "{name}의 채팅",
+    "permissionUpdateFailed": "권한 업데이트 실패",
+    "floatingTiles": "플로팅 참가자",
+    "floatingTilesDesc": "사이드바가 닫혀 있을 때 드래그 가능한 비디오 타일 표시",
+    "floatingTilesOverlay": "플로팅 참가자 타일 오버레이"
   },
   "aria": {
     "partySidebar": "파티 사이드바",

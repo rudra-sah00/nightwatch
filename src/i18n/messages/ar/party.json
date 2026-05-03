@@ -243,7 +243,11 @@
     "sounds": "الأصوات",
     "sketchFor": "الرسم لـ {name}",
     "soundsFor": "الأصوات لـ {name}",
-    "chatFor": "الدردشة لـ {name}"
+    "chatFor": "الدردشة لـ {name}",
+    "permissionUpdateFailed": "فشل تحديث الإذن",
+    "floatingTiles": "المشاركون العائمون",
+    "floatingTilesDesc": "عرض مربعات الفيديو القابلة للسحب عند إغلاق الشريط الجانبي",
+    "floatingTilesOverlay": "تراكب مربعات المشاركين العائمة"
   },
   "aria": {
     "partySidebar": "الشريط الجانبي للحفلة",

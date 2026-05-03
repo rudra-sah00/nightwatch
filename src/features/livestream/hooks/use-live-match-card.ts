@@ -75,7 +75,9 @@ export function useLiveMatchCard(match: LiveMatch) {
     }
 
     setIsCreatingParty(true);
-    const proxyUrl = `/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
+    const proxyUrl = match.playPath?.startsWith('https://')
+      ? match.playPath
+      : `/api/livestream/playlist.m3u8?url=${encodeURIComponent(match.playPath || '')}&token=LIVESTREAM`;
     const roomTitle =
       match.contentKind === 'channel' || match.type === 'all_channels'
         ? match.channelName || match.team1.name

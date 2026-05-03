@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   appId: 'com.nightwatch.in',
   appName: 'Nightwatch',
   webDir: 'public',
+  backgroundColor: '#000000',
   server: {
     url: isDev
       ? process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000'

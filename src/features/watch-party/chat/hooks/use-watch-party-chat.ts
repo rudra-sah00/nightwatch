@@ -34,11 +34,19 @@ export function useWatchPartyChat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages only if user is near bottom
   useEffect(() => {
-    if (messageCount > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messageCount <= 0 || !messagesEndRef.current) return;
+    const container =
+      scrollContainerRef.current ?? messagesEndRef.current?.parentElement;
+    if (!container) return;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+    if (isNearBottom) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messageCount]);
 

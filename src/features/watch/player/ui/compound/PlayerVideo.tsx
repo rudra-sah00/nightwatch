@@ -91,17 +91,21 @@ export function PlayerVideo() {
   return (
     <div className="absolute inset-0 z-0 bg-black">
       {/* Ambient canvas — blurred live video frames fill any black bars from
-          letterbox (wide movies) or pillarbox (vertical content / ultrawide). */}
-      <canvas
-        ref={canvasRef}
-        width={128}
-        height={72}
-        className="absolute inset-0 w-full h-full"
-        style={{
-          filter: 'blur(20px) brightness(0.35)',
-          transform: 'scale(1.1)',
-        }}
-      />
+          letterbox (wide movies) or pillarbox (vertical content / ultrawide).
+          Disabled on mobile where the video fills the screen and the GPU cost
+          of continuous blur compositing hurts smoothness. */}
+      {!isMobile && (
+        <canvas
+          ref={canvasRef}
+          width={128}
+          height={72}
+          className="absolute inset-0 w-full h-full"
+          style={{
+            filter: 'blur(20px) brightness(0.35)',
+            transform: 'scale(1.1)',
+          }}
+        />
+      )}
       {/* Video layer sits above the canvas */}
       <div className="absolute inset-0 z-[1]">
         <VideoElement

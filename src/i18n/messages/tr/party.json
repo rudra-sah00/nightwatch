@@ -243,7 +243,11 @@
     "sounds": "Sesler",
     "sketchFor": "{name} için çizim",
     "soundsFor": "{name} için sesler",
-    "chatFor": "{name} için sohbet"
+    "chatFor": "{name} için sohbet",
+    "permissionUpdateFailed": "İzin güncellenemedi",
+    "floatingTiles": "Yüzen katılımcılar",
+    "floatingTilesDesc": "Kenar çubuğu kapalıyken sürüklenebilir video karoları göster",
+    "floatingTilesOverlay": "Yüzen katılımcı karoları"
   },
   "aria": {
     "partySidebar": "Parti kenar çubuğu",

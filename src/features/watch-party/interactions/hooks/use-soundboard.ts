@@ -67,11 +67,16 @@ export function useSoundboard({
     [t],
   );
 
+  const mountedRef = useRef(false);
+
   useEffect(() => {
     fetchSoundsData('', 1);
+    mountedRef.current = true;
   }, [fetchSoundsData]);
 
   useEffect(() => {
+    if (!mountedRef.current) return;
+
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     if (searchQuery.trim() === '') {
@@ -121,6 +126,14 @@ export function useSoundboard({
     audio.play().catch(() => {
       /* ignore play errors */
     });
+  }, []);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      currentAudioRef.current?.pause();
+      currentAudioRef.current = null;
+    };
   }, []);
 
   const handleTriggerSound = useCallback(

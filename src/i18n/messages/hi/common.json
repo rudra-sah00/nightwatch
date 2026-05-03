@@ -336,5 +336,9 @@
     "noSearchResults": "कोई परिणाम नहीं मिला",
     "noInternet": "इंटरनेट कनेक्शन नहीं है",
     "backOnline": "वापस ऑनलाइन"
+  },
+  "server": {
+    "netflix": "सर्वर 1",
+    "balanced": "सर्वर 2"
   }
 }

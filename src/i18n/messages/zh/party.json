@@ -243,7 +243,11 @@
     "sounds": "音效",
     "sketchFor": "{name} 的画板",
     "soundsFor": "{name} 的音效",
-    "chatFor": "{name} 的聊天"
+    "chatFor": "{name} 的聊天",
+    "permissionUpdateFailed": "更新权限失败",
+    "floatingTiles": "浮动参与者",
+    "floatingTilesDesc": "侧边栏关闭时显示可拖动的视频磁贴",
+    "floatingTilesOverlay": "浮动参与者磁贴叠加"
   },
   "aria": {
     "partySidebar": "派对侧边栏",

@@ -15,6 +15,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
+import { FloatingParticipants } from './FloatingParticipants';
 import { WatchPartyVideoArea } from './WatchPartyVideoArea';
 
 const WatchPartySidebar = dynamic(
@@ -113,6 +114,7 @@ export function ActiveWatchParty({
     handleNavigate,
     handleNextEpisode,
     handleAgoraReady,
+    participants: agoraParticipants,
   } = useActiveWatchParty({
     room,
     isHost,
@@ -136,6 +138,26 @@ export function ActiveWatchParty({
     setFloatingChatEnabled((prev) => {
       try {
         localStorage.setItem('wp:floatingChat', String(!prev));
+      } catch {
+        /* ignore */
+      }
+      return !prev;
+    });
+  };
+
+  // ── Floating tiles toggle (personal preference, persisted) ─────────────
+  const [floatingTilesEnabled, setFloatingTilesEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('wp:floatingTiles') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleFloatingTiles = () => {
+    setFloatingTilesEnabled((prev) => {
+      try {
+        localStorage.setItem('wp:floatingTiles', String(!prev));
       } catch {
         /* ignore */
       }
@@ -210,6 +232,9 @@ export function ActiveWatchParty({
           onTabChange={handleTabChange}
           floatingChatEnabled={floatingChatEnabled}
           onToggleFloatingChat={handleToggleFloatingChat}
+          floatingTilesEnabled={floatingTilesEnabled}
+          onToggleFloatingTiles={handleToggleFloatingTiles}
+          isVisible={showDesktopSidebar}
           rtmSendMessage={rtmSendMessage}
           rtmSendMessageToPeer={rtmSendMessageToPeer}
           currentUserName={currentUserName}
@@ -241,6 +266,13 @@ export function ActiveWatchParty({
           userId={currentUserId}
           currentUserName={currentUserName}
         />
+
+        {/* Floating participant tiles when sidebar is closed */}
+        {!showDesktopSidebar &&
+        floatingTilesEnabled &&
+        agoraParticipants.length > 0 ? (
+          <FloatingParticipants participants={agoraParticipants} />
+        ) : null}
       </main>
 
       {/* Floating chat overlay — text-only, no background, bottom-right */}

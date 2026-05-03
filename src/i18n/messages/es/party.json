@@ -243,7 +243,11 @@
     "sounds": "Sonidos",
     "sketchFor": "Dibujo para {name}",
     "soundsFor": "Sonidos para {name}",
-    "chatFor": "Chat para {name}"
+    "chatFor": "Chat para {name}",
+    "permissionUpdateFailed": "Error al actualizar el permiso",
+    "floatingTiles": "Participantes flotantes",
+    "floatingTilesDesc": "Mostrar mosaicos de video arrastrables cuando la barra lateral está cerrada",
+    "floatingTilesOverlay": "Superposición de mosaicos flotantes"
   },
   "aria": {
     "partySidebar": "Barra lateral de la fiesta",

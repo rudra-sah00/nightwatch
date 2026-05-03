@@ -243,7 +243,11 @@
     "sounds": "Sounds",
     "sketchFor": "Sketch for {name}",
     "soundsFor": "Sounds for {name}",
-    "chatFor": "Chat for {name}"
+    "chatFor": "Chat for {name}",
+    "permissionUpdateFailed": "Failed to update permission",
+    "floatingTiles": "Floating Participants",
+    "floatingTilesDesc": "Show draggable video tiles when sidebar is closed",
+    "floatingTilesOverlay": "Floating participant tiles overlay"
   },
   "aria": {
     "partySidebar": "Party sidebar",

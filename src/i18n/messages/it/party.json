@@ -243,7 +243,11 @@
     "sounds": "Suoni",
     "sketchFor": "Disegno per {name}",
     "soundsFor": "Suoni per {name}",
-    "chatFor": "Chat per {name}"
+    "chatFor": "Chat per {name}",
+    "permissionUpdateFailed": "Aggiornamento permesso fallito",
+    "floatingTiles": "Partecipanti fluttuanti",
+    "floatingTilesDesc": "Mostra riquadri video trascinabili quando la barra laterale è chiusa",
+    "floatingTilesOverlay": "Sovrapposizione riquadri fluttuanti"
   },
   "aria": {
     "partySidebar": "Barra laterale della festa",

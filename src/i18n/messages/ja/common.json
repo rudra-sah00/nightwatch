@@ -336,5 +336,9 @@
     "noSearchResults": "結果が見つかりません",
     "noInternet": "インターネット接続がありません",
     "backOnline": "オンラインに復帰"
+  },
+  "server": {
+    "netflix": "サーバー 1",
+    "balanced": "サーバー 2"
   }
 }

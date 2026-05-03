@@ -415,7 +415,14 @@ export function WatchPartySketch() {
             <div className="border-[4px] border-border ">
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
-                theme={appTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                theme={
+                  appTheme === 'dark' ||
+                  (appTheme === 'system' &&
+                    typeof window !== 'undefined' &&
+                    window.matchMedia('(prefers-color-scheme: dark)').matches)
+                    ? Theme.DARK
+                    : Theme.LIGHT
+                }
                 emojiStyle={EmojiStyle.NATIVE}
                 lazyLoadEmojis={true}
                 searchPlaceHolder={t('sketch.searchStickers')}

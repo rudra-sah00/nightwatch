@@ -1,5 +1,6 @@
 import { Video } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { ParticipantView } from './ParticipantView';
 
@@ -23,11 +24,15 @@ export function VideoGrid({
   onKick,
 }: VideoGridProps) {
   // Sort so the host is always first
-  const sorted = [...participants].sort((a, b) => {
-    if (a.identity === hostId) return -1;
-    if (b.identity === hostId) return 1;
-    return 0;
-  });
+  const sorted = useMemo(
+    () =>
+      [...participants].sort((a, b) => {
+        if (a.identity === hostId) return -1;
+        if (b.identity === hostId) return 1;
+        return 0;
+      }),
+    [participants, hostId],
+  );
 
   const t = useTranslations('party.video');
 

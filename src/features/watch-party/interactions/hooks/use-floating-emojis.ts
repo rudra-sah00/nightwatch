@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { onPartyInteraction } from '../../room/services/watch-party.api';
 
 /** Describes a single floating emoji animation instance. */
@@ -25,6 +25,14 @@ export interface FloatingEmoji {
 export function useFloatingEmojis() {
   const [activeEmojis, setActiveEmojis] = useState<FloatingEmoji[]>([]);
   const t = useTranslations('party.fallback');
+  const timeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  // Cleanup all timeouts on unmount
+  useEffect(() => {
+    return () => {
+      for (const id of timeoutsRef.current) clearTimeout(id);
+    };
+  }, []);
 
   const spawnEmoji = useCallback(
     (emoji: string, userName = t('someone')) => {
@@ -46,9 +54,11 @@ export function useFloatingEmojis() {
       ]);
 
       // Remove emoji after animation (4s max)
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        timeoutsRef.current.delete(timerId);
         setActiveEmojis((current) => current.filter((e) => e.id !== id));
       }, 4500);
+      timeoutsRef.current.add(timerId);
     },
     [t],
   );
