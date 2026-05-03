@@ -107,7 +107,6 @@ const {
 } = require('./downloads/state');
 const { downloadS1 } = require('./downloads/providers/s1');
 const { downloadS2 } = require('./downloads/providers/s2');
-const { downloadS3 } = require('./downloads/providers/s3');
 
 let currentActiveCount = 0;
 
@@ -119,8 +118,6 @@ async function startDownloadTask(eventSender, args) {
     return downloadS1(eventSender, args);
   } else if (prefix === 's2') {
     return downloadS2(eventSender, args);
-  } else if (prefix === 's3') {
-    return downloadS3(eventSender, args);
   } else {
     // Fallback if not prefixed
     const { startMp4Download } = require('./downloads/processors/mp4');
