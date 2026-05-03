@@ -35,12 +35,6 @@ export default function LiveMatchPlayerPage() {
       if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
         return;
 
-      // cdnlivetv streams are direct URLs — no proxy needed
-      if (match.playPath.startsWith('https://')) {
-        setSessionUrl(match.playPath);
-        return;
-      }
-
       setSessionLoading(true);
       try {
         const response = await playVideo({

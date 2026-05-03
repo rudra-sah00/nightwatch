@@ -9,14 +9,12 @@ import {
   Search,
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiveMatchSkeleton } from '@/components/ui/skeletons';
 import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
-import { useChannels } from '@/features/livestream/hooks/use-channels';
 import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
 import { useSports } from '@/features/livestream/hooks/use-sports';
-import type { LiveMatch } from '@/features/livestream/types';
 import { useLiveContent } from './use-live-content';
 
 function LiveContent() {
@@ -25,13 +23,7 @@ function LiveContent() {
   const t = useTranslations('live');
   const format = useFormatter();
 
-  const {
-    activeTab,
-    activeServer,
-    isPending,
-    handleTabChange,
-    handleServerChange,
-  } = useLiveContent();
+  const { activeTab, isPending, handleTabChange } = useLiveContent();
 
   const { sports } = useSports();
   const { schedule, isLoading, error, refresh } = useLivestreams(activeTab);
@@ -86,34 +78,8 @@ function LiveContent() {
       {/* Controls Bar — server toggle + sport selector */}
       <div className="container mx-auto px-6 md:px-10 mb-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Server Toggle */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleServerChange('1')}
-              className={`px-5 py-3 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border rounded-md transition-colors cursor-pointer ${
-                activeServer === '1'
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground hover:bg-muted'
-              }`}
-            >
-              Server 1
-            </button>
-            <button
-              type="button"
-              onClick={() => handleServerChange('2')}
-              className={`px-5 py-3 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border rounded-md transition-colors cursor-pointer ${
-                activeServer === '2'
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground hover:bg-muted'
-              }`}
-            >
-              Server 2
-            </button>
-          </div>
-
-          {/* Sport Selector — Server 1 only */}
-          {activeServer === '1' && (
+          {/* Sport Selector */}
+          {
             <div className="relative flex-grow min-w-0 w-full sm:w-auto">
               <button
                 type="button"
@@ -166,15 +132,13 @@ function LiveContent() {
                 </div>
               )}
             </div>
-          )}
+          }
         </div>
       </div>
 
       {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
-        {activeServer === '2' ? (
-          <Server2Channels />
-        ) : isLoading || isPending ? (
+        {isLoading || isPending ? (
           <div className="space-y-16">
             <section>
               <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
@@ -322,106 +286,6 @@ function LiveContent() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/** Converts a DB channel to a LiveMatch for the card component. */
-function channelToMatch(ch: {
-  id: string;
-  providerId: string;
-  name: string;
-  category: string | null;
-  icon: string | null;
-  status?: 'online' | 'offline';
-}): LiveMatch {
-  const slug = ch.providerId.replace(/^lt:/, '');
-  return {
-    id: ch.providerId,
-    team1: { id: slug, name: ch.name, score: '', avatar: ch.icon || '' },
-    team2: { id: '0', name: 'Live Stream', score: '', avatar: '' },
-    status: 'MatchIng',
-    startTime: Date.now(),
-    endTime: Date.now() + 7200000,
-    league: ch.category || 'All Channels',
-    type: 'all_channels',
-    timeDesc: '24/7',
-    playPath: `lt://${slug}`,
-    playType: 'PlayTypeVideo',
-    contentKind: 'channel',
-    channelName: ch.name,
-    channelStatus: ch.status,
-  };
-}
-
-const _REGION_ORDER = [
-  'UK',
-  'USA',
-  'Canada',
-  'Spain',
-  'France',
-  'Germany',
-  'Italy',
-  'Brazil',
-  'Middle East',
-  'Israel',
-  'Turkey',
-  'Poland',
-  'Serbia',
-  'Croatia',
-  'Netherlands',
-  'Greece',
-  'Romania',
-  'Bulgaria',
-  'Cyprus',
-  'Russia',
-  'Sweden',
-  'Africa',
-  'Portugal',
-  'Entertainment',
-  'International',
-];
-
-function Server2Channels() {
-  const t = useTranslations('live');
-  const [search, setSearch] = useState('');
-  const { channels, isLoading } = useChannels(1, 300, search);
-
-  const matches = useMemo(
-    () => channels.map((ch) => channelToMatch(ch)),
-    [channels],
-  );
-
-  return (
-    <div className="space-y-8">
-      <div className="relative w-full">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('searchChannels')}
-          className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
-        />
-      </div>
-
-      {isLoading ? (
-        <div className="flex flex-col gap-4">
-          <LiveMatchSkeleton />
-          <LiveMatchSkeleton />
-          <LiveMatchSkeleton />
-        </div>
-      ) : matches.length === 0 ? (
-        <p className="text-center py-12 font-headline font-bold uppercase tracking-widest text-muted-foreground">
-          {t('noChannelsFound')}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {matches.map((match) => (
-            <LiveMatchCard key={match.id} match={match} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

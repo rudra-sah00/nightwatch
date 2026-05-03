@@ -208,11 +208,8 @@ export function useHls({
                 credentials: 'omit',
               });
             }
-            // cdnlivetv: suppress Referer to avoid cross-origin block
-            if (
-              context.url.includes('cdnlivetv') ||
-              context.url.includes('cdn-aws')
-            ) {
+            // cdnlivetv / cdn-aws: suppress Referer to avoid cross-origin block
+            if (context.url.includes('cdn-aws')) {
               return new Request(context.url, {
                 ...initParams,
                 referrerPolicy: 'no-referrer',
@@ -221,6 +218,10 @@ export function useHls({
             }
             return new Request(context.url, initParams);
           },
+          // Validate that manifest/playlist responses are actually HLS content.
+          // Some CDNs return HTML/CSS error pages with 200 OK when tokens
+          // when tokens expire, which HLS.js blindly parses as M3U8 — producing
+          // garbage segment URLs and silent playback failure.
         };
 
         const hls = new Hls(finalConfig);
@@ -230,6 +231,27 @@ export function useHls({
         hls.attachMedia(video);
 
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+          // Detect garbage manifests: when a CDN returns non-HLS content
+          // (e.g. HTML/CSS block page) and the CF Worker rewrites every line
+          // as a proxied segment URL, HLS.js "parses" it but produces levels
+          // with no resolution or bitrate info. Reject these early.
+          if (
+            manualQualitiesRef.current.length === 0 &&
+            data.levels.length > 0 &&
+            data.levels.every(
+              (l: { height: number; bitrate: number }) =>
+                l.height === 0 && l.bitrate === 0,
+            )
+          ) {
+            dispatch({
+              type: 'SET_ERROR',
+              error:
+                'Live stream unavailable — source returned invalid content.',
+            });
+            hls.destroy();
+            return;
+          }
+
           dispatch({ type: 'SET_ERROR', error: null });
           dispatch({ type: 'SET_LOADING', isLoading: false });
 
@@ -341,6 +363,22 @@ export function useHls({
           const status =
             (data.response as { code?: number } | undefined)?.code ??
             (data as { response?: { code?: number } }).response?.code;
+
+          // Detect non-HLS content from CDNs that return HTML/CSS block pages
+          // with 200 OK when tokens expire. HLS.js fires manifestParsingError
+          // when the response body isn't a valid M3U8 playlist.
+          if (
+            data.fatal &&
+            (data.details as string) === 'manifestParsingError'
+          ) {
+            dispatch({
+              type: 'SET_ERROR',
+              error:
+                'Live stream unavailable — source returned invalid content.',
+            });
+            hls.destroy();
+            return;
+          }
 
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
             if (isLive) {
