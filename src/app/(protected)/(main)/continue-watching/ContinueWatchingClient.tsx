@@ -48,7 +48,7 @@ export default function ContinueWatchingClient() {
       </div>
 
       <div className="container mx-auto px-6 md:px-10">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
             <NeoSearchBar
               value={search}
