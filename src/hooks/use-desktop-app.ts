@@ -62,7 +62,7 @@ export function useDesktopApp() {
     if (isDesktopApp) {
       desktopBridge.copyToClipboard(text);
     } else if (typeof navigator !== 'undefined') {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text).catch(() => {});
     }
   };
 

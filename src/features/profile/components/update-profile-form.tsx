@@ -49,7 +49,7 @@ export function UpdateProfileForm() {
       if (checkIsDesktop() && desktopBridge.copyToClipboard) {
         desktopBridge.copyToClipboard(url);
       } else {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(url).catch(() => {});
       }
       toast.success(t('updateForm.publicLinkCopied'));
     } catch {
