@@ -66,13 +66,22 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
 
       if (isActive) {
         // Foreground — exit PiP
-        if (el.webkitPresentationMode === 'picture-in-picture') {
+        if (document.pictureInPictureElement === el) {
+          document.exitPictureInPicture().catch(() => {});
+        } else if (el.webkitPresentationMode === 'picture-in-picture') {
           el.webkitSetPresentationMode?.('inline');
         }
       } else {
-        // Background — enter PiP only if video is connected, playing, and has content
-        if (el.isConnected && !el.paused && el.currentTime > 0) {
-          el.webkitSetPresentationMode?.('picture-in-picture');
+        // Background — enter PiP only if video is playing and has content
+        if (!el.paused && el.readyState >= 2) {
+          // Prefer standard API (iOS 14.5+), fall back to webkit
+          if (typeof el.requestPictureInPicture === 'function') {
+            el.requestPictureInPicture().catch(() => {
+              el.webkitSetPresentationMode?.('picture-in-picture');
+            });
+          } else {
+            el.webkitSetPresentationMode?.('picture-in-picture');
+          }
         }
       }
     });

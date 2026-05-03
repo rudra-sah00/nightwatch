@@ -112,7 +112,7 @@ export function playerReducer(
 ): PlayerState {
   switch (action.type) {
     case 'PLAY':
-      return { ...state, isPlaying: true, isPaused: false };
+      return { ...state, isPlaying: true, isPaused: false, isLoading: false };
     case 'PAUSE':
       return { ...state, isPlaying: false, isPaused: true };
     case 'TOGGLE_PLAY':
