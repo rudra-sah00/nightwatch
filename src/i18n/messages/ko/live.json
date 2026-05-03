@@ -24,6 +24,8 @@
   "streamUnavailable": "스트림 불가",
   "watchPartyDesktopOnly": "워치 파티는 데스크톱에서만 사용할 수 있습니다.",
   "channelDetails": "채널 상세",
+  "channelOffline": "채널 오프라인",
+  "channelOnline": "라이브",
   "matchDetails": "경기 상세",
   "failedToLoadSchedule": "일정 로드 실패",
   "tryAgain": "다시 시도",

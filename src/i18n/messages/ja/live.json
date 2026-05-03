@@ -24,6 +24,8 @@
   "streamUnavailable": "ストリーム利用不可",
   "watchPartyDesktopOnly": "ウォッチパーティーはデスクトップでのみ利用可能です。",
   "channelDetails": "チャンネル詳細",
+  "channelOffline": "チャンネルオフライン",
+  "channelOnline": "ライブ",
   "matchDetails": "マッチ詳細",
   "failedToLoadSchedule": "スケジュールの読み込みに失敗",
   "tryAgain": "再試行",

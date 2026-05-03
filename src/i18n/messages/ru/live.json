@@ -24,6 +24,8 @@
   "streamUnavailable": "Трансляция недоступна",
   "watchPartyDesktopOnly": "Совместный просмотр доступен только на десктопе.",
   "channelDetails": "Информация о канале",
+  "channelOffline": "Канал офлайн",
+  "channelOnline": "В эфире",
   "matchDetails": "Информация о матче",
   "failedToLoadSchedule": "Не удалось загрузить расписание",
   "tryAgain": "Попробовать снова",

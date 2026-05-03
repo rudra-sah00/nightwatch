@@ -24,6 +24,8 @@
   "streamUnavailable": "Transmissão Indisponível",
   "watchPartyDesktopOnly": "Watch Party disponível apenas no desktop.",
   "channelDetails": "Detalhes do Canal",
+  "channelOffline": "Canal offline",
+  "channelOnline": "Ao vivo",
   "matchDetails": "Detalhes do Jogo",
   "failedToLoadSchedule": "Falha ao Carregar Programação",
   "tryAgain": "Tentar Novamente",

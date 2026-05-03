@@ -100,16 +100,14 @@ export function useSubtitleOverlay({
         if (!targetTrack && currentTrackId && currentTrackId !== 'off') {
           for (let i = 0; i < textTracks.length; i++) {
             const t = textTracks[i];
-            // Active subtitle track can be either hidden/showing depending on
-            // native player requirements.
-            if (t.mode !== 'disabled') {
+            if (t.mode === 'showing') {
               targetTrack = t;
               break;
             }
           }
         }
 
-        if (targetTrack && targetTrack.mode !== 'disabled') {
+        if (targetTrack && targetTrack.mode === 'showing') {
           const cues = targetTrack.activeCues;
           if (cues && cues.length > 0) {
             const parts: string[] = [];
@@ -141,7 +139,17 @@ export function useSubtitleOverlay({
       );
     }
 
+    // Safety: poll briefly for cue readiness after a track switch,
+    // in case the VTT is still loading and cuechange hasn't fired yet.
+    let pollCount = 0;
+    const pollTimer = setInterval(() => {
+      pollCount++;
+      handleCueChange();
+      if (pollCount >= 10) clearInterval(pollTimer);
+    }, 200);
+
     return () => {
+      clearInterval(pollTimer);
       cleanupListeners.forEach((remove) => {
         remove();
       });

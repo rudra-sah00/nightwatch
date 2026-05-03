@@ -24,6 +24,8 @@
   "streamUnavailable": "直播不可用",
   "watchPartyDesktopOnly": "观影派对仅在桌面端可用。",
   "channelDetails": "频道详情",
+  "channelOffline": "频道离线",
+  "channelOnline": "直播",
   "matchDetails": "赛事详情",
   "failedToLoadSchedule": "加载赛程失败",
   "tryAgain": "重试",

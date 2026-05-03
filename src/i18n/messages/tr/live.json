@@ -24,6 +24,8 @@
   "streamUnavailable": "Yayın Kullanılamıyor",
   "watchPartyDesktopOnly": "İzleme Partisi yalnızca masaüstünde kullanılabilir.",
   "channelDetails": "Kanal Detayları",
+  "channelOffline": "Kanal çevrimdışı",
+  "channelOnline": "Canlı",
   "matchDetails": "Maç Detayları",
   "failedToLoadSchedule": "Program Yüklenemedi",
   "tryAgain": "Tekrar Dene",

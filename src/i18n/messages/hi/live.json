@@ -24,6 +24,8 @@
   "streamUnavailable": "स्ट्रीम उपलब्ध नहीं",
   "watchPartyDesktopOnly": "वॉच पार्टी केवल डेस्कटॉप पर उपलब्ध है।",
   "channelDetails": "चैनल विवरण",
+  "channelOffline": "चैनल ऑफ़लाइन",
+  "channelOnline": "लाइव",
   "matchDetails": "मैच विवरण",
   "failedToLoadSchedule": "शेड्यूल लोड करने में विफल",
   "tryAgain": "पुनः प्रयास करें",

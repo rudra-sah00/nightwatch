@@ -24,6 +24,8 @@
   "streamUnavailable": "สตรีมไม่พร้อมใช้งาน",
   "watchPartyDesktopOnly": "ปาร์ตี้ดูหนังใช้ได้เฉพาะบนเดสก์ท็อป",
   "channelDetails": "รายละเอียดช่อง",
+  "channelOffline": "ช่องออฟไลน์",
+  "channelOnline": "สด",
   "matchDetails": "รายละเอียดแมตช์",
   "failedToLoadSchedule": "โหลดตารางไม่สำเร็จ",
   "tryAgain": "ลองอีกครั้ง",

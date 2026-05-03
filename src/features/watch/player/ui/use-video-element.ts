@@ -160,7 +160,7 @@ export function useVideoElement({
     const textTracks = video.textTracks;
 
     for (let i = 0; i < textTracks.length; i++) {
-      textTracks[i].mode = 'disabled';
+      textTracks[i].mode = 'hidden';
     }
 
     if (trackId && trackId !== 'off') {

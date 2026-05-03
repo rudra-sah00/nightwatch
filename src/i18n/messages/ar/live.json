@@ -24,6 +24,8 @@
   "streamUnavailable": "البث غير متاح",
   "watchPartyDesktopOnly": "حفلة المشاهدة متاحة فقط على سطح المكتب.",
   "channelDetails": "تفاصيل القناة",
+  "channelOffline": "القناة غير متصلة",
+  "channelOnline": "مباشر",
   "matchDetails": "تفاصيل المباراة",
   "failedToLoadSchedule": "فشل تحميل الجدول",
   "tryAgain": "حاول مرة أخرى",

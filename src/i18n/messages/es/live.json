@@ -24,6 +24,8 @@
   "streamUnavailable": "Stream No Disponible",
   "watchPartyDesktopOnly": "Watch Party solo está disponible en escritorio.",
   "channelDetails": "Detalles del Canal",
+  "channelOffline": "Canal sin conexión",
+  "channelOnline": "En vivo",
   "matchDetails": "Detalles del Partido",
   "failedToLoadSchedule": "Error al Cargar Horario",
   "tryAgain": "Intentar de Nuevo",
