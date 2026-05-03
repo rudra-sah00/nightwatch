@@ -70,8 +70,8 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
           el.webkitSetPresentationMode?.('inline');
         }
       } else {
-        // Background — enter PiP if video is playing
-        if (!el.paused && el.currentTime > 0) {
+        // Background — enter PiP only if video is connected, playing, and has content
+        if (el.isConnected && !el.paused && el.currentTime > 0) {
           el.webkitSetPresentationMode?.('picture-in-picture');
         }
       }

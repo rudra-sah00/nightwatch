@@ -426,6 +426,7 @@ function PipRegistrar({
       { streamUrl, watchUrl: pathname, title: metadata.title },
       videoRef.current!,
     );
+    return () => pip.unregister();
   }, [pip, streamUrl, pathname, metadata.title, videoRef]);
 
   return null;
