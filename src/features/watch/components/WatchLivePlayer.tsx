@@ -29,6 +29,8 @@ interface WatchLivePlayerProps {
   streamUrl: string | null;
   /** Metadata (title, poster) used by overlays and Discord Rich Presence. */
   metadata: VideoMetadata;
+  /** Second team/channel logo for match activity cards. */
+  secondaryPosterUrl?: string | null;
   /** Custom header content rendered above the player on mobile. */
   mobileHeaderContent?: React.ReactNode;
   /**
@@ -92,12 +94,22 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     socket.emit('watch:set_activity', {
       type: 'live',
       title: props.metadata.title,
+      artist: null,
+      season: null,
+      episode: null,
+      episodeTitle: null,
       posterUrl: props.metadata.posterUrl ?? null,
+      secondaryPosterUrl: props.secondaryPosterUrl ?? null,
     });
     return () => {
       socket.emit('watch:clear_activity');
     };
-  }, [socket, props.metadata.title, props.metadata.posterUrl]);
+  }, [
+    socket,
+    props.metadata.title,
+    props.metadata.posterUrl,
+    props.secondaryPosterUrl,
+  ]);
 
   // Local scroll-based PiP
   const playerSentinelRef = useRef<HTMLDivElement>(null);

@@ -79,5 +79,7 @@
   "clipSave": "Save",
   "clipCancel": "Cancel",
   "clipRename": "Rename clip",
-  "clipDelete": "Delete clip"
+  "clipDelete": "Delete clip",
+  "channelOffline": "Channel Offline",
+  "channelOnline": "Live"
 }

@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
+import { useSocket } from '@/providers/socket-provider';
 import type { MusicTrack } from '../api';
 import { getSong } from '../api';
 import {
@@ -198,6 +199,29 @@ export function MusicPlayerProvider({
       window.removeEventListener('dm-call:end', handleCallEnd);
     };
   }, []);
+
+  // Broadcast music activity to friends
+  const { socket } = useSocket();
+  useEffect(() => {
+    if (!socket?.connected) return;
+    if (state.currentTrack) {
+      socket.emit('watch:set_activity', {
+        type: 'music',
+        title: state.currentTrack.title,
+        artist: state.currentTrack.artist ?? null,
+        season: null,
+        episode: null,
+        episodeTitle: null,
+        posterUrl: state.currentTrack.image ?? null,
+        secondaryPosterUrl: null,
+      });
+    } else {
+      socket.emit('watch:clear_activity');
+    }
+    return () => {
+      socket.emit('watch:clear_activity');
+    };
+  }, [socket, state.currentTrack]);
 
   const play = useCallback((track: MusicTrack, queue?: MusicTrack[]) => {
     engineRef.current?.playTrack(track, queue);

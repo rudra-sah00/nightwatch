@@ -63,6 +63,10 @@ export interface Channel {
   category: string | null;
   /** URL of the channel icon, or `null`. */
   icon: string | null;
+  /** Whether the channel is currently online or offline. */
+  status?: 'online' | 'offline';
+  /** Current viewer count. */
+  viewers?: number;
 }
 
 /** Paginated response from the channels API. */

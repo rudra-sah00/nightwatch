@@ -1,11 +1,24 @@
-/** Describes what a friend is currently watching. */
+/**
+ * Describes a friend's current activity.
+ *
+ * Supported `type` values:
+ * - `'movie'`   — Watching a movie.
+ * - `'series'`  — Watching a TV series episode.
+ * - `'live'`    — Watching a livestream.
+ * - `'music'`   — Listening to a song.
+ * - `'reading'` — Reading manga/book (future).
+ */
 export interface FriendActivity {
   type: string;
   title: string;
+  /** Artist name (music). */
+  artist: string | null;
   season: number | null;
   episode: number | null;
   episodeTitle: string | null;
   posterUrl: string | null;
+  /** Second poster/logo (e.g. team2 in a live match). */
+  secondaryPosterUrl: string | null;
 }
 
 /** A friend's profile including online status and current activity. */

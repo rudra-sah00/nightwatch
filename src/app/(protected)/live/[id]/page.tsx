@@ -262,6 +262,7 @@ export default function LiveMatchPlayerPage() {
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}
+        secondaryPosterUrl={activeMatch.team2.avatar || null}
         mobileLayout="inline"
       />
 

@@ -32,6 +32,7 @@ export function useLiveMatchCard(match: LiveMatch) {
   const isLivestream =
     match.id.startsWith('live-server1') || match.id.startsWith('lt:');
   const canWatch =
+    match.channelStatus !== 'offline' &&
     (isLive || isLivestream) &&
     (match.playType === 'PlayTypeVideo' ||
       isLivestream ||

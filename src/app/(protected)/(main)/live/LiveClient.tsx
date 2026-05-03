@@ -333,6 +333,7 @@ function channelToMatch(ch: {
   name: string;
   category: string | null;
   icon: string | null;
+  status?: 'online' | 'offline';
 }): LiveMatch {
   const slug = ch.providerId.replace(/^lt:/, '');
   return {
@@ -349,6 +350,7 @@ function channelToMatch(ch: {
     playType: 'PlayTypeVideo',
     contentKind: 'channel',
     channelName: ch.name,
+    channelStatus: ch.status,
   };
 }
 

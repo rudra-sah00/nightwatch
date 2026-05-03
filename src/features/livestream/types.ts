@@ -36,6 +36,8 @@ export interface LiveMatch {
   contentKind?: 'match' | 'channel';
   /** Optional channel name for channel-focused lists */
   channelName?: string;
+  /** Online/offline status for channel cards */
+  channelStatus?: 'online' | 'offline';
 }
 
 export interface LivestreamScheduleResponse {

@@ -139,10 +139,12 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     socket.emit('watch:set_activity', {
       type: props.metadata.type ?? 'movie',
       title: props.metadata.title,
+      artist: null,
       season: props.metadata.season ?? null,
       episode: props.metadata.episode ?? null,
       episodeTitle: props.metadata.episodeTitle ?? null,
       posterUrl: props.metadata.posterUrl ?? null,
+      secondaryPosterUrl: null,
     });
     return () => {
       socket.emit('watch:clear_activity');

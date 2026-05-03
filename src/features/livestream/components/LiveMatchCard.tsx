@@ -68,6 +68,7 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
     match.contentKind === 'channel' ||
     match.type === 'all_channels' ||
     isLivestream;
+  const isChannelOffline = isChannelCard && match.channelStatus === 'offline';
   const providerName = isLivestream ? t('liveTV') : t('sportsToday');
   const team1Name = asText(match.team1?.name, t('teamFallback1'));
   const team2Name = asText(match.team2?.name, t('teamFallback2'));
@@ -174,6 +175,16 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
                   <p className="font-headline font-black text-sm md:text-lg uppercase truncate text-foreground">
                     {channelName}
                   </p>
+                  {isChannelOffline ? (
+                    <span className="inline-block px-2 py-0.5 bg-muted text-muted-foreground text-[9px] font-black uppercase tracking-widest border-[1px] border-border font-headline rounded-sm mt-1">
+                      {t('channelOffline')}
+                    </span>
+                  ) : isChannelCard ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest font-headline mt-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      {t('channelOnline')}
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -254,11 +265,14 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
           <button
             type="button"
             onClick={() => setShowPrompt(true)}
+            disabled={isChannelOffline}
             className={cn(
               'w-full md:w-auto md:min-w-[120px] md:max-w-[192px] md:px-6 h-12 md:h-16 flex items-center justify-center gap-3 font-black font-headline text-base md:text-xl uppercase tracking-[0.2em] border-[3px] md:border-[4px] border-border transition-colors rounded-md whitespace-nowrap cursor-pointer',
-              canWatch
-                ? 'bg-neo-red text-primary-foreground hover:bg-foreground hover:text-background'
-                : 'bg-card text-foreground hover:bg-accent',
+              isChannelOffline
+                ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                : canWatch
+                  ? 'bg-neo-red text-primary-foreground hover:bg-foreground hover:text-background'
+                  : 'bg-card text-foreground hover:bg-accent',
             )}
           >
             <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
