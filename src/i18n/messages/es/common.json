@@ -125,11 +125,9 @@
     "requirements": "Requisitos",
     "ariaLabel": "Requisitos de contraseña",
     "title": "Requisitos de Contraseña",
-    "minChars": "8+ caracteres",
+    "minChars": "6+ caracteres",
     "uppercase": "Mayúsculas (A-Z)",
-    "specialChar": "Carácter especial (!@#$%^&*)",
-    "breachNote": "Verificamos contraseñas contra",
-    "knownBreaches": "filtraciones conocidas"
+    "specialChar": "Carácter especial (!@#$%^&*)"
   },
   "actions": {
     "close": "Cerrar",

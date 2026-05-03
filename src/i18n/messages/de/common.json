@@ -125,11 +125,9 @@
     "requirements": "Anforderungen",
     "ariaLabel": "Passwortanforderungen",
     "title": "Passwortanforderungen",
-    "minChars": "8+ Zeichen",
+    "minChars": "6+ Zeichen",
     "uppercase": "Großbuchstaben (A-Z)",
-    "specialChar": "Sonderzeichen (!@#$%^&*)",
-    "breachNote": "Wir prüfen Passwörter gegen",
-    "knownBreaches": "bekannte Datenlecks"
+    "specialChar": "Sonderzeichen (!@#$%^&*)"
   },
   "actions": {
     "close": "Schließen",

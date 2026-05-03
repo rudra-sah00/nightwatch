@@ -125,11 +125,9 @@
     "requirements": "要件",
     "ariaLabel": "パスワード要件",
     "title": "パスワード要件",
-    "minChars": "8文字以上",
+    "minChars": "6文字以上",
     "uppercase": "大文字 (A-Z)",
-    "specialChar": "特殊文字 (!@#$%^&*)",
-    "breachNote": "パスワードを確認しています",
-    "knownBreaches": "既知の漏洩"
+    "specialChar": "特殊文字 (!@#$%^&*)"
   },
   "actions": {
     "close": "閉じる",

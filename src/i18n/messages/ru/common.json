@@ -125,11 +125,9 @@
     "requirements": "Требования",
     "ariaLabel": "Требования к паролю",
     "title": "Требования к Паролю",
-    "minChars": "8+ символов",
+    "minChars": "6+ символов",
     "uppercase": "Заглавные буквы (A-Z)",
-    "specialChar": "Спецсимвол (!@#$%^&*)",
-    "breachNote": "Мы проверяем пароли на",
-    "knownBreaches": "известные утечки"
+    "specialChar": "Спецсимвол (!@#$%^&*)"
   },
   "actions": {
     "close": "Закрыть",

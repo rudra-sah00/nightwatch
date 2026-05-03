@@ -100,20 +100,6 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                   <RequirementItem text={t('passwordInfo.uppercase')} />
                   <RequirementItem text={t('passwordInfo.specialChar')} />
                 </div>
-
-                {/* Breach note */}
-                <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-foreground/70 pt-4 border-t-[3px] border-border">
-                  {t('passwordInfo.breachNote')}{' '}
-                  <a
-                    href="https://haveibeenpwned.com/Passwords"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neo-blue underline hover:text-neo-red transition-colors"
-                  >
-                    {t('passwordInfo.knownBreaches')}
-                  </a>
-                  .
-                </p>
               </div>
             </div>
           </div>

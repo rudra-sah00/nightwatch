@@ -125,11 +125,9 @@
     "requirements": "요구사항",
     "ariaLabel": "비밀번호 요구사항",
     "title": "비밀번호 요구사항",
-    "minChars": "8자 이상",
+    "minChars": "6자 이상",
     "uppercase": "대문자 (A-Z)",
-    "specialChar": "특수문자 (!@#$%^&*)",
-    "breachNote": "비밀번호를 확인합니다",
-    "knownBreaches": "알려진 유출"
+    "specialChar": "특수문자 (!@#$%^&*)"
   },
   "actions": {
     "close": "닫기",
