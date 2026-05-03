@@ -160,10 +160,15 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
       // Only count horizontal swipes (dx > dy)
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
 
+      // Wider edge zone on mobile web (browser eats the outermost ~20px for
+      // its own back/forward gesture). Native Capacitor doesn't have that
+      // conflict so 40px is fine there.
+      const edgeZone = checkIsMobile() ? 40 : 80;
+
       if (dx > 0) {
         if (rightOpenRef.current) {
           setRightOpen(false);
-        } else if (startX < 40) {
+        } else if (startX < edgeZone) {
           setLeftOpen(true);
         }
       } else {
@@ -171,7 +176,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           setLeftOpen(false);
         } else {
           const w = container.getBoundingClientRect().width;
-          if (startX > w - 40) setRightOpen(true);
+          if (startX > w - edgeZone) setRightOpen(true);
         }
       }
     };
