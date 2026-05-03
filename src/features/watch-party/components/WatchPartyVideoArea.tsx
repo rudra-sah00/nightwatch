@@ -8,6 +8,7 @@ import { Player } from '@/features/watch/player';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
@@ -170,17 +171,18 @@ export function WatchPartyVideoArea({
     toast.success('Clip saved! Processing...');
   };
 
-  const recordButton = isHost ? (
-    <RecordButton
-      isRecording={clip.isRecording}
-      duration={clip.duration}
-      canStop={clip.canStop}
-      isStarting={clip.isStarting}
-      isStopping={clip.isStopping}
-      onStart={handleClipStart}
-      onStop={handleClipStop}
-    />
-  ) : null;
+  const recordButton =
+    isHost && !checkIsMobile() ? (
+      <RecordButton
+        isRecording={clip.isRecording}
+        duration={clip.duration}
+        canStop={clip.canStop}
+        isStarting={clip.isStarting}
+        isStopping={clip.isStopping}
+        onStart={handleClipStart}
+        onStop={handleClipStop}
+      />
+    ) : null;
 
   return (
     <Player.Root

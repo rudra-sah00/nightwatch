@@ -309,7 +309,26 @@ export function usePlayerRoot({
       metadata.type === 'series' ? nextEpisodeInfo !== null : undefined,
   });
 
+  // Ref bridge allows useKeyboard to access showControls (from usePlayerHandlers)
+  // despite the circular dependency (handlers need seek/togglePlay from keyboard).
+  const showControlsRef = useRef<() => void>(null);
+
+  const {
+    toggleFullscreen: nativeToggleFullscreen,
+    exitFullscreen,
+    isMobile: isMobileFullscreen,
+  } = useFullscreen({
+    containerRef,
+    dispatch,
+    playerIsFullscreen: state.isFullscreen,
+  });
+
   const handleBack = useCallback(() => {
+    // On mobile, if in fullscreen, exit fullscreen (back to portrait) instead of navigating away
+    if (isMobileFullscreen && state.isFullscreen) {
+      exitFullscreen();
+      return;
+    }
     isNavigatingRef.current = true;
     if (onBackProp) {
       onBackProp();
@@ -318,7 +337,13 @@ export function usePlayerRoot({
     } else {
       router.push('/home');
     }
-  }, [onBackProp, router]);
+  }, [
+    onBackProp,
+    router,
+    isMobileFullscreen,
+    state.isFullscreen,
+    exitFullscreen,
+  ]);
 
   const toggleCaptions = useCallback(() => {
     if (state.currentSubtitleTrack) {
@@ -330,16 +355,6 @@ export function usePlayerRoot({
       });
     }
   }, [state.currentSubtitleTrack, state.subtitleTracks]);
-
-  // Ref bridge allows useKeyboard to access showControls (from usePlayerHandlers)
-  // despite the circular dependency (handlers need seek/togglePlay from keyboard).
-  const showControlsRef = useRef<() => void>(null);
-
-  const { toggleFullscreen: nativeToggleFullscreen } = useFullscreen({
-    containerRef,
-    dispatch,
-    playerIsFullscreen: state.isFullscreen,
-  });
 
   const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
 

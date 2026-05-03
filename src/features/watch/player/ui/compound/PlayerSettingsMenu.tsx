@@ -15,7 +15,7 @@ export function PlayerSettingsMenu() {
   const t = useTranslations('watch');
   const isMobile = useMobileDetection();
   const isPortrait = useMobileOrientation();
-  const compact = isMobile && isPortrait;
+  const compact = isMobile && (isPortrait || state.isFullscreen);
 
   return (
     <section

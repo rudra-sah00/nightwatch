@@ -105,7 +105,10 @@ export function useClipRecorder({
       mozCaptureStream?: () => MediaStream;
     };
     const stream = videoEl.captureStream?.() || videoEl.mozCaptureStream?.();
-    if (!stream) return;
+    if (!stream) {
+      cleanup();
+      return;
+    }
 
     try {
       const { clipId: id } = await startClip(matchId, title, streamUrl);

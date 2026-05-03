@@ -6,7 +6,11 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import {
+  checkIsDesktop,
+  checkIsMobile,
+  desktopBridge,
+} from '@/lib/electron-bridge';
 import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
 import { Player, usePlayerContext } from '../player';
@@ -284,7 +288,7 @@ function LivePlayerState({
     toast.success('Clip saved! Processing...');
   };
 
-  const recordButton = (
+  const recordButton = checkIsMobile() ? null : (
     <RecordButton
       isRecording={clip.isRecording}
       duration={clip.duration}
