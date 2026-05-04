@@ -1,5 +1,60 @@
 # Changelog
 
+## [2.10.0](https://github.com/rudra-sah00/nightwatch/compare/v2.9.0...v2.10.0) (2026-05-04)
+
+
+### Features
+
+* add Android APK download to landing page ([96232c7](https://github.com/rudra-sah00/nightwatch/commit/96232c7499b3215761bc823df2e04e60e3660df5))
+* add Discord Rich Presence for manga reading ([c4fa72f](https://github.com/rudra-sah00/nightwatch/commit/c4fa72f6bb89375c99abc4588a70d117e8c5d467))
+* add manga section — browse, search, read chapters, favorites, continue reading ([6b4c152](https://github.com/rudra-sah00/nightwatch/commit/6b4c15299263ec0bfba1c3a3b7ae96664048cc86))
+* add manga tools to AI agent frontend ([58b6cac](https://github.com/rudra-sah00/nightwatch/commit/58b6cac44dcaf0db5edbfe8cb84554b347fe91a5))
+* add online/offline status for live channels ([8fa404e](https://github.com/rudra-sah00/nightwatch/commit/8fa404e490aa9c9c7f3156bcbf16c2f54ab02b83))
+* add Server 2 (DLHD) live TV channels with server toggle ([0c50f72](https://github.com/rudra-sah00/nightwatch/commit/0c50f7268403f9b735837c0281a8d823b8135250))
+* content protection, native call UI, music context menus ([72f0c4d](https://github.com/rudra-sah00/nightwatch/commit/72f0c4db17476ef3a5a3b0f02a66adada856305e))
+* **mobile:** CallKit outgoing calls, PiP fixes, auth form cleanup, playback proxy ([0eff938](https://github.com/rudra-sah00/nightwatch/commit/0eff938cf7f05255c5491f3cb2beb80fdc82ab26))
+* remove Server 3 provider entirely ([5cf60d3](https://github.com/rudra-sah00/nightwatch/commit/5cf60d315a23d83495b712e7523515f6fbd2f227))
+
+
+### Bug Fixes
+
+* add staleTimes to prevent full page reloads, redesign music language picker ([8cfe695](https://github.com/rudra-sah00/nightwatch/commit/8cfe6954ae15f56d9203d86a430b8746b98463a3))
+* AGP 8.9.1 + compileSdk 36 + targetSdk 34 ([87a56b1](https://github.com/rudra-sah00/nightwatch/commit/87a56b10ff265d1501a9423b4b02abb63c95cd3d))
+* **auth:** prevent double logout on SESSION_EXPIRED from apiFetch ([9f557b4](https://github.com/rudra-sah00/nightwatch/commit/9f557b4b374921dece537f0c029574a32a59511d))
+* Capacitor iOS playback, settings menu z-index, live skeleton & modal layout, Chromecast support ([191ed68](https://github.com/rudra-sah00/nightwatch/commit/191ed68cc1330dfb8626c8d784da397c9237e01e))
+* catch clipboard writeText rejection on permission denied ([03cc4bf](https://github.com/rudra-sah00/nightwatch/commit/03cc4bf3715452652719d98bf23f1386cfaa858d))
+* clear loading on play event, fix iOS PiP on background ([19b098e](https://github.com/rudra-sah00/nightwatch/commit/19b098e088c05ac06ad33f749265bc0ad381e096))
+* continue watching empty state spacing stacked to search bar ([ca891b5](https://github.com/rudra-sah00/nightwatch/commit/ca891b5be2e9e7de4921ce7afea3b0b0a25270b5))
+* **electron:** exclude mobile artifacts from build, fix Windows ICO format ([e5ded53](https://github.com/rudra-sah00/nightwatch/commit/e5ded5356120fa4065333e6f1a7358f49c015ec1))
+* **electron:** security hardening, cleanup, and battery optimization ([49f451a](https://github.com/rudra-sah00/nightwatch/commit/49f451a100ab01f84604e790b6863f09776f806f))
+* guard all Capacitor plugin calls against unhandled rejections ([27eeca2](https://github.com/rudra-sah00/nightwatch/commit/27eeca28a24180d489b734f649f60898a222408b))
+* i18n — add music to test, translate manga feature, fix hardcoded strings ([2132bac](https://github.com/rudra-sah00/nightwatch/commit/2132bac6e1f8d31bb03b21a35d03f1547e4518cf))
+* keep floating disc above sidebar (z-201 &gt; z-200) ([12c6388](https://github.com/rudra-sah00/nightwatch/commit/12c63883f05b858b9bc6a8dadf9985412f365f4e))
+* lower targetSdk to 34 and compileSdk to 35 for Android 11 compat ([3b90d23](https://github.com/rudra-sah00/nightwatch/commit/3b90d23c98ffad62a33382e78a253186e12a1450))
+* make entire live match card clickable to open modal ([adba0a9](https://github.com/rudra-sah00/nightwatch/commit/adba0a980999f599b9c52bc957d78b7cdc9d89e1))
+* manga page tab titles + global title template ([8bae8b7](https://github.com/rudra-sah00/nightwatch/commit/8bae8b7845db9dc0fbfe7d41687b7950909ac16c))
+* mobile perf, live page UI, progress bar, and SW precache ([b6342f7](https://github.com/rudra-sah00/nightwatch/commit/b6342f7b619af2e4b7f98bd38e57a2c403e80fbf))
+* mobile player bugs — clip loading, back button, settings sheet ([4da142f](https://github.com/rudra-sah00/nightwatch/commit/4da142f2177192bfdaf92448330a6485d402ab0e))
+* mobile UX improvements for profile dialogs, download menu, settings menu, keyboard shortcuts ([436684d](https://github.com/rudra-sah00/nightwatch/commit/436684d822d9633e22a1f83c2bb89fc2aad03f45))
+* no-referrer policy for cdnlivetv streams to avoid cross-origin block ([dda07f1](https://github.com/rudra-sah00/nightwatch/commit/dda07f1ebe9acdd947a306d698b90cc959984bd2))
+* only enter PiP when video is playing and connected ([95f59a2](https://github.com/rudra-sah00/nightwatch/commit/95f59a27b2f50bafd3a706c25ddfac8a469e6e36))
+* remove breach note from PasswordInfo, update min chars 8→6 ([b4cc520](https://github.com/rudra-sah00/nightwatch/commit/b4cc520e322d724bd98da0701acdb71b04c02f8b))
+* remove content-visibility from live cards (breaks fixed modal) ([d38ec24](https://github.com/rudra-sah00/nightwatch/commit/d38ec24be19d3773971eb8ab15f973682d0162e5))
+* silence bot SW registration and share cancel Sentry noise ([9cdd8ca](https://github.com/rudra-sah00/nightwatch/commit/9cdd8ca748aa6f5cf236e8a36fc2939beb4dc8cb))
+* simplify search channels placeholder across all locales ([e4f07fa](https://github.com/rudra-sah00/nightwatch/commit/e4f07fa3f7f1fca1dd8bf3bb571c81de817bef82))
+* skip getUserMedia pre-check on Capacitor iOS ([b2b2256](https://github.com/rudra-sah00/nightwatch/commit/b2b2256683214ecb8f9f2578fe15765afc26b841))
+* subtitle switching not displaying new track on S2 content ([132dc3f](https://github.com/rudra-sah00/nightwatch/commit/132dc3f086cbf66e2df48f3f666e8972ac51fbd9))
+* use cdnlivetv stream URL directly (no proxy) ([64fc531](https://github.com/rudra-sah00/nightwatch/commit/64fc531d32bbfdf45b36ad20702dce044ed81b7c))
+* validate HLS manifests and remove cdnlivetv provider ([cfea755](https://github.com/rudra-sah00/nightwatch/commit/cfea755629b57a0c09881d27c571c9cb34ee36a7))
+* watch activity scroll and month label overlap on mobile ([5198342](https://github.com/rudra-sah00/nightwatch/commit/5198342ea676a91988cd7c95d38379a1c2adc086))
+* watch button always opens modal, not just for live matches ([9ddccbe](https://github.com/rudra-sah00/nightwatch/commit/9ddccbe8c91e497fc92a681d2234e49528a3afe4))
+* widen sidebar swipe edge zone on mobile web for browser gesture conflict ([cc8c485](https://github.com/rudra-sah00/nightwatch/commit/cc8c485f13100c63abc87866c548774446513a7e))
+
+
+### Performance Improvements
+
+* infinite scroll, plain img, chapter nav, progress save optimization, English filter ([49962a3](https://github.com/rudra-sah00/nightwatch/commit/49962a33551389ee84efbfbe4f633c3e8940bd98))
+
 ## [2.9.0](https://github.com/rudra-sah00/nightwatch/compare/v2.8.0...v2.9.0) (2026-05-02)
 
 
