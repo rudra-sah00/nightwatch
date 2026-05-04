@@ -1,16 +1,7 @@
 // Suppress EPIPE errors from electron-log when stdout pipe is closed
 process.stdout?.on?.('error', () => {});
 process.stderr?.on?.('error', () => {});
-const {
-  app,
-  globalShortcut,
-  BrowserWindow,
-  ipcMain,
-  clipboard,
-  powerSaveBlocker,
-  Notification,
-  nativeImage,
-} = require('electron');
+const { app, globalShortcut, BrowserWindow } = require('electron');
 const _path = require('node:path');
 
 // --- LOAD .env FOR ELECTRON MAIN PROCESS ---
@@ -80,6 +71,7 @@ const {
   setupOfflineMediaProtocol,
   setupDownloadManager,
 } = require('./modules/download-manager.js');
+const { registerIpcHandlers } = require('./modules/ipc-handlers.js');
 
 // Share the single electron-store instance with the download state module
 require('./modules/downloads/state').setStore(store);
@@ -120,11 +112,8 @@ windows.registerProtocol();
 linux.registerProtocol();
 
 let internalAppIsQuitting = false;
-// Prevents IPC handlers from being registered more than once if the main
-// window is destroyed and recreated (e.g. macOS dock reopen via app.on('activate')).
 let listenersBootstrapped = false;
-// ID for the active powerSaveBlocker so it can be cleaned up on quit
-let globalPowerBlockerId = -1;
+let ipcCleanup = null;
 
 const triggerDeepLink = (url) => handleDeepLink(url, AppWindow.getInstance());
 
@@ -355,7 +344,7 @@ const startElectronApp = async () => {
         applicationName: 'Nightwatch',
         applicationVersion: currentVersion,
         version: currentVersion,
-        copyright: '© 2025 Nightwatch Labs',
+        copyright: '© 2026 Nightwatch Labs',
       });
 
       // NOTE: Do NOT patch Info.plist at runtime. Writing to Info.plist
@@ -453,404 +442,11 @@ const startElectronApp = async () => {
   if (listenersBootstrapped) return;
   listenersBootstrapped = true;
 
-  // --- STARTUP HEALTH CHECK ---
-  // React app signals 'app-ready' after hydration. If it never arrives,
-  // window.js triggers recovery. On success, reset the crash counter.
-  ipcMain.on('app-ready', () => {
-    store.set('consecutive-crashes', 0);
-    require('electron-log').info('[health] App ready — crash counter reset');
-  });
+  // --- REGISTER ALL IPC HANDLERS ---
+  const cleanupIpc = registerIpcHandlers({ store, AppWindow, discordLogic });
 
-  // --- OPEN EXTERNAL URL (default browser) ---
-  ipcMain.on('open-external', (_event, url) => {
-    const { shell } = require('electron');
-    if (
-      typeof url === 'string' &&
-      (url.startsWith('http://') || url.startsWith('https://'))
-    ) {
-      shell.openExternal(url);
-    }
-  });
-
-  // --- CLEAR CACHE & RELOAD (exposed to offline-bridge.html) ---
-  ipcMain.on('clear-cache-reload', async () => {
-    const ses = require('electron').session.defaultSession;
-    try {
-      await ses.clearStorageData({
-        storages: ['serviceworkers', 'cachestorage'],
-      });
-      await ses.clearCodeCaches({ urls: [] });
-      await ses.clearCache();
-    } catch (_e) {}
-    const win = AppWindow.getInstance();
-    if (win && !win.isDestroyed()) {
-      win.loadURL(app.isPackaged ? PROD_URL : 'http://localhost:3000');
-    }
-  });
-
-  // IPC Event listener for React letting us know the user changed rooms!
-  ipcMain.on('update-discord-status', (_event, presenceData) => {
-    console.log(
-      '[Main→Discord] IPC update-discord-status received:',
-      JSON.stringify(presenceData),
-    );
-    discordLogic.setActivity(presenceData);
-  });
-
-  ipcMain.on('clear-discord-status', () => {
-    console.log('[Main→Discord] IPC clear-discord-status received');
-    discordLogic.clearActivity();
-  });
-
-  // Native Clipboard API
-  ipcMain.on('copy-to-clipboard', (_event, text) => {
-    clipboard.writeText(text);
-  });
-
-  // Keep screen awake while watching media!
-  // -1 = no active blocker (0 is a valid Electron blocker ID, so don't use it as sentinel)
-  ipcMain.on('toggle-keep-awake', (_event, keepAwake) => {
-    if (keepAwake && globalPowerBlockerId === -1) {
-      globalPowerBlockerId = powerSaveBlocker.start('prevent-display-sleep');
-    } else if (!keepAwake && globalPowerBlockerId !== -1) {
-      powerSaveBlocker.stop(globalPowerBlockerId);
-      globalPowerBlockerId = -1;
-    }
-    // Sync backgroundThrottling with media state — disable throttling when
-    // media is active so audio/video doesn't desync in the background.
-    const win = AppWindow.getInstance();
-    if (win && !win.isDestroyed()) {
-      win.webContents.setBackgroundThrottling(!keepAwake);
-    }
-  });
-
-  // --- CALL-ACTIVE FLAG ---
-  // Suppresses window-blur IPC during active calls to prevent socket
-  // reconnection races that cause desktop-to-desktop call auto-disconnect.
-  ipcMain.on('set-call-active', (_event, active) => {
-    AppWindow.callActive = !!active;
-  });
-
-  // --- SMART POWER & BANDWIDTH SAVER ---
-  // If the user folds their laptop or locks their PC, forcefully pause the movie and show Away on Discord!
-  const triggerSleepPause = () => {
-    const win = AppWindow.getInstance();
-    if (win) {
-      // We send 'MediaPlayPause' because if it's playing, it will pause.
-      // (Note: To be entirely safe, we realistically just want to PAUSE. But standard play/pause hardware key is robust).
-      win.webContents.send('media-command', 'MediaPlayPause');
-      discordLogic.setActivity({
-        details: 'Away (System Locked)',
-        state: 'AFK from Watch Party',
-      });
-    }
-  };
-
-  const { powerMonitor } = require('electron');
-  powerMonitor.on('suspend', triggerSleepPause);
-  powerMonitor.on('lock-screen', triggerSleepPause);
-
-  const triggerResume = () => {
-    discordLogic.setActivity({
-      details: 'Back Online',
-      state: 'Browsing Homepage',
-    });
-  };
-  powerMonitor.on('resume', triggerResume);
-  powerMonitor.on('unlock-screen', triggerResume);
-
-  // --- TRUE PICTURE-IN-PICTURE OS SNAP ---
-  let prePipBounds = null;
-  let _pipTransitioning = false;
-  ipcMain.on('set-pip', (_event, isEnabled, opacityLevel = 1.0) => {
-    const win = AppWindow.getInstance();
-    if (!win) return;
-
-    // Lock to prevent blur/focus events from re-triggering PiP during animation
-    _pipTransitioning = true;
-    setTimeout(() => {
-      _pipTransitioning = false;
-    }, 600);
-
-    // Remove from taskbar when in PiP mode (feels more like a native overlay)
-    win.setSkipTaskbar(isEnabled);
-
-    const { screen } = require('electron');
-
-    if (isEnabled) {
-      // macOS: 'screen-saver' level renders above ALL fullscreen spaces and apps.
-      // Windows/Linux: 'pop-up-menu' renders above normal apps but below system UI.
-      // 'floating' (old value) does NOT penetrate macOS fullscreen spaces — that's the bug.
-      const alwaysOnTopLevel =
-        process.platform === 'darwin' ? 'screen-saver' : 'pop-up-menu';
-      win.setAlwaysOnTop(true, alwaysOnTopLevel);
-
-      // Also tell macOS to show this window on ALL fullscreen spaces + the desktop
-      if (process.platform === 'darwin') {
-        win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-      }
-
-      // Hide MacOS Traffic Lights (Red/Yellow/Green window buttons) for a seamless 16:9 rectangle
-      if (process.platform === 'darwin') win.setWindowButtonVisibility(false);
-
-      // Ghost Mode Transparency
-      if (opacityLevel < 1.0 && process.platform !== 'linux') {
-        win.setOpacity(opacityLevel);
-      }
-
-      // Calculate Bottom-Right Corner of current monitor
-      // Save bounds before we modify them so we can restore them later
-      if (!prePipBounds) prePipBounds = win.getBounds();
-      const winBounds = prePipBounds;
-      const currentScreen = screen.getDisplayNearestPoint({
-        x: winBounds.x,
-        y: winBounds.y,
-      });
-      const { x, y, width, height } = currentScreen.workArea;
-
-      const pipWidth = 480;
-      const pipHeight = Math.round(pipWidth * (9 / 16));
-      const padding = 24;
-
-      // Ensure 16:9 aspect ratio and snap
-      win.setAspectRatio(16 / 9);
-
-      // CRITICAL: Electron clamps setBounds() to the window's minWidth/minHeight
-      // (set to 800×540 in window.js). Without unlocking the minimum size first,
-      // the 480×270 PIP target is silently ignored and the window stays huge.
-      win.setMinimumSize(0, 0);
-
-      win.setBounds(
-        {
-          x: Math.round(x + width - pipWidth - padding),
-          y: Math.round(y + height - pipHeight - padding),
-          width: pipWidth,
-          height: pipHeight,
-        },
-        true,
-      ); // Animate transition
-
-      // Tell React to hide sidebars and make video true full-bleed
-      win.webContents.send('pip-mode-changed', true);
-    } else {
-      win.setAlwaysOnTop(false);
-      win.setOpacity(1.0);
-
-      // Restore normal workspace visibility
-      if (process.platform === 'darwin') {
-        win.setVisibleOnAllWorkspaces(false);
-      }
-
-      win.setAspectRatio(0); // unlock aspect ratio
-
-      // Restore minimum size constraints before expanding the window back
-      win.setMinimumSize(800, 540);
-
-      if (prePipBounds) {
-        win.setBounds(prePipBounds, true);
-        prePipBounds = null;
-      } else {
-        win.setSize(1280, 800, true);
-        win.center();
-      }
-
-      // Show traffic lights AFTER resize animation to prevent blinking
-      if (process.platform === 'darwin') {
-        setTimeout(() => {
-          if (win && !win.isDestroyed()) win.setWindowButtonVisibility(true);
-        }, 400);
-      }
-
-      win.webContents.send('pip-mode-changed', false);
-    }
-  });
-
-  // Dock & Taskbar Badges: E.g., showing a little '3' for 3 unread party chats
-  ipcMain.on('set-badge', (_event, badgeCount) => {
-    if (process.platform === 'darwin') {
-      app.dock.setBadge(badgeCount > 0 ? String(badgeCount) : '');
-      // Bounce the dock icon if they get an important invite while minimized!
-      if (badgeCount > 0) app.dock.bounce('informational');
-    } else {
-      // Windows / Linux Taskbar Red Badging
-      const win = AppWindow.getInstance();
-      if (win)
-        win.setOverlayIcon(
-          badgeCount > 0 ? AppWindow.trayImage : null,
-          badgeCount > 0 ? `${badgeCount} unread` : '',
-        );
-    }
-  });
-
-  // Native Keyboard Media Keys Registration
-  const mediaKeys = [
-    'MediaPlayPause',
-    'MediaNextTrack',
-    'MediaPreviousTrack',
-    'MediaStop',
-  ];
-
-  mediaKeys.forEach((key) => {
-    globalShortcut.register(key, () => {
-      const win = AppWindow.getInstance();
-      // Send the hardware press event to the Next.js React app
-      if (win) win.webContents.send('media-command', key);
-    });
-  });
-
-  // Trigger Actionable Native Desktop Notifications (e.g. for Party Invites or Chat)
-  ipcMain.on('show-notification', (_event, payload) => {
-    if (Notification.isSupported()) {
-      const { title, body, actions, replyPlaceholder, closeButtonText } =
-        payload;
-
-      const notification = new Notification({
-        title,
-        body,
-        actions,
-        replyPlaceholder,
-        closeButtonText,
-      });
-
-      // Forward native click/action events back to Next.js
-      notification.on('click', () => {
-        AppWindow.getInstance()?.show();
-        AppWindow.getInstance()?.webContents.send(
-          'notification-click',
-          payload,
-        );
-      });
-
-      notification.on('action', (_event, index) => {
-        if (actions?.[index]) {
-          AppWindow.getInstance()?.show();
-          AppWindow.getInstance()?.webContents.send('notification-action', {
-            ...payload,
-            actionSelected: actions[index].type,
-          });
-        }
-      });
-
-      notification.on('reply', (_event, reply) => {
-        AppWindow.getInstance()?.webContents.send('notification-reply', {
-          ...payload,
-          reply,
-        });
-      });
-
-      notification.show();
-    }
-  });
-
-  // Allow users to configure the app to launch quietly when their OS Boots
-  ipcMain.on('set-run-on-boot', (_event, enable) => {
-    app.setLoginItemSettings({
-      openAtLogin: enable,
-      openAsHidden: true, // Only show in tray when automatically booting
-      path: app.getPath('exe'),
-    });
-  });
-
-  // --- LOCAL CONFIG STORE ---
-  // Only allow the renderer to access specific keys (prevent reading internal settings)
-  const ALLOWED_STORE_KEYS = new Set([
-    'runOnBoot',
-    'concurrentDownloads',
-    'downloadSpeedLimit',
-    'nightwatch_auth',
-    'disable-gpu',
-  ]);
-  ipcMain.handle('store-get', (_event, key) => {
-    if (!ALLOWED_STORE_KEYS.has(key)) return undefined;
-    return store.get(key);
-  });
-  ipcMain.on('store-set', (_event, key, value) => {
-    if (!ALLOWED_STORE_KEYS.has(key)) return;
-    store.set(key, value);
-  });
-  ipcMain.on('store-delete', (_event, key) => {
-    if (!ALLOWED_STORE_KEYS.has(key)) return;
-    store.delete(key);
-  });
-
-  // --- REAL APP VERSION ---
-  // app.getVersion() returns the native binary's compile-time version.
-  // We read from package.json inside the ASAR for accuracy.
-  ipcMain.handle('get-app-version', () => getAppVersion());
-
-  ipcMain.handle('toggle-fullscreen', () => {
-    const win = AppWindow.getInstance();
-    if (win) win.setFullScreen(!win.isFullScreen());
-  });
-
-  // --- CUSTOM WINDOW CONTROLS (Windows) ---
-  ipcMain.on('window-minimize', () => {
-    const win = AppWindow.getInstance();
-    if (win) win.minimize();
-  });
-  ipcMain.on('window-maximize', () => {
-    const win = AppWindow.getInstance();
-    if (win) {
-      if (win.isMaximized()) win.unmaximize();
-      else win.maximize();
-    }
-  });
-  ipcMain.on('window-close', () => {
-    const win = AppWindow.getInstance();
-    if (win) win.close();
-  });
-
-  // --- NATIVE THEMING ---
-  const { nativeTheme } = require('electron');
-  ipcMain.on('set-native-theme', (_event, theme) => {
-    nativeTheme.themeSource = theme; // 'light', 'dark', or 'system'
-    const win = AppWindow.getInstance();
-    if (win) {
-      win.setBackgroundColor(theme === 'light' ? '#ffffff' : '#09090b');
-    }
-  });
-
-  // --- WINDOWS TASKBAR MEDIA CONTROLS ---
-  if (process.platform === 'win32') {
-    const win = AppWindow.getInstance();
-    if (win) {
-      // Setup small media buttons underneath the taskbar thumbnail preview
-      try {
-        // Create 16x16 icons from the app icon for thumbnail buttons
-        const iconPath = _path.join(__dirname, 'build', 'icon.png');
-        const baseIcon = require('node:fs').existsSync(iconPath)
-          ? nativeImage
-              .createFromPath(iconPath)
-              .resize({ width: 16, height: 16 })
-          : nativeImage.createEmpty();
-
-        const thumbButtons = [
-          {
-            tooltip: 'Previous',
-            icon: baseIcon,
-            flags: ['enabled'],
-            click: () =>
-              win.webContents.send('media-command', 'MediaPreviousTrack'),
-          },
-          {
-            tooltip: 'Play/Pause',
-            icon: baseIcon,
-            flags: ['enabled'],
-            click: () =>
-              win.webContents.send('media-command', 'MediaPlayPause'),
-          },
-          {
-            tooltip: 'Next',
-            icon: baseIcon,
-            flags: ['enabled'],
-            click: () =>
-              win.webContents.send('media-command', 'MediaNextTrack'),
-          },
-        ];
-        win.setThumbarButtons(thumbButtons);
-      } catch (_e) {}
-    }
-  }
+  // Store cleanup function for before-quit
+  ipcCleanup = cleanupIpc;
 };
 
 // Lifecycle Start hook
@@ -873,11 +469,7 @@ app.on('before-quit', () => {
   internalAppIsQuitting = true;
   AppWindow.setQuitting(true);
   try {
-    const { powerSaveBlocker } = require('electron');
-    if (globalPowerBlockerId !== -1) {
-      powerSaveBlocker.stop(globalPowerBlockerId);
-      globalPowerBlockerId = -1;
-    }
+    if (ipcCleanup) ipcCleanup();
   } catch (_e) {}
   try {
     if (discordLogic && typeof discordLogic.destroy === 'function') {
