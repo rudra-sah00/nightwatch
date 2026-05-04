@@ -33,6 +33,13 @@ const nextConfig: NextConfig = {
       'mermaid',
       'socket.io-client',
     ],
+    // Cache client-side router navigations to prevent full page reloads.
+    // Without this, Next.js 15+ refetches the RSC payload on every navigation
+    // which can cause hard reloads if the fetch is slow or fails.
+    staleTimes: {
+      dynamic: 300,
+      static: 300,
+    },
   },
   cacheComponents: true,
   logging: {
