@@ -151,14 +151,34 @@
         "from": "node_modules_electron",
         "to": "node_modules",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/android/build/**",
+          "!**/android/.gradle/**",
+          "!**/.git/**",
+          "!**/*.md",
+          "!**/*.map",
+          "!**/test/**",
+          "!**/tests/**",
+          "!**/__tests__/**"
         ]
-      }
+      },
+      "!node_modules",
+      "!src",
+      "!public",
+      "!ios",
+      "!android",
+      "!.next",
+      "!.git",
+      "!desktop-build",
+      "!docs",
+      "!tests",
+      "!coverage",
+      "!.venv"
     ],
     "npmRebuild": false,
     "appId": "com.nightwatch.app",
     "productName": "Nightwatch",
-    "copyright": "© 2025 Nightwatch Labs",
+    "copyright": "© 2026 Nightwatch Labs",
     "directories": {
       "output": "desktop-build"
     },
