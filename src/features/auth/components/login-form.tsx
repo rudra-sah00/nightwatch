@@ -169,7 +169,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                 onChange={handleChange}
                 disabled={isPending}
                 data-allow-clipboard
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
+                className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
 
@@ -199,7 +199,7 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isPending}
-                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
+                  className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
                 />
                 <button
                   type="button"

@@ -13,7 +13,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.3.1"),
         .package(name: "CapacitorCommunityKeepAwake", path: "../../../node_modules/.pnpm/@capacitor-community+keep-awake@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor-community/keep-awake"),
-        .package(name: "CapacitorCommunityVolumeButtons", path: "../../../node_modules/.pnpm/@capacitor-community+volume-buttons@8.0.0_@capacitor+core@8.3.1/node_modules/@capacitor-community/volume-buttons"),
+        .package(name: "CapacitorCommunityVolumeButtons", path: "../../../node_modules/.pnpm/@capacitor-community+volume-buttons@8.0.0_patch_hash=ad5f610abdf71ae165afd5083ae26afba7_92bc457206dada1fe2014cb514ace259/node_modules/@capacitor-community/volume-buttons"),
         .package(name: "CapacitorApp", path: "../../../node_modules/.pnpm/@capacitor+app@8.1.0_@capacitor+core@8.3.1/node_modules/@capacitor/app"),
         .package(name: "CapacitorClipboard", path: "../../../node_modules/.pnpm/@capacitor+clipboard@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/clipboard"),
         .package(name: "CapacitorFilesystem", path: "../../../node_modules/.pnpm/@capacitor+filesystem@8.1.2_@capacitor+core@8.3.1/node_modules/@capacitor/filesystem"),
@@ -26,7 +26,7 @@ let package = Package(
         .package(name: "CapacitorSplashScreen", path: "../../../node_modules/.pnpm/@capacitor+splash-screen@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/splash-screen"),
         .package(name: "CapacitorStatusBar", path: "../../../node_modules/.pnpm/@capacitor+status-bar@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/status-bar"),
         .package(name: "CapawesomeCapacitorBadge", path: "../../../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge"),
-        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-incoming-call-kit")
+        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit")
     ],
     targets: [
         .target(

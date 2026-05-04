@@ -19,6 +19,7 @@
 		B1C2D3E50000000000000004 /* NWVolumePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40000000000000003 /* NWVolumePlugin.swift */; };
 		C1D2E3F50000000000000006 /* NWAudioSessionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */; };
 		D1E2F4060000000000000008 /* NWPipPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F4050000000000000007 /* NWPipPlugin.swift */; };
+		E1F20507000000000000000A /* NWCallKitPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F205060000000000000009 /* NWCallKitPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		B1C2D3E40000000000000003 /* NWVolumePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWVolumePlugin.swift; sourceTree = "<group>"; };
 		C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWAudioSessionPlugin.swift; sourceTree = "<group>"; };
 		D1E2F4050000000000000007 /* NWPipPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWPipPlugin.swift; sourceTree = "<group>"; };
+		E1F205060000000000000009 /* NWCallKitPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCallKitPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 				C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */,
 				B1C2D3E40000000000000003 /* NWVolumePlugin.swift */,
 				D1E2F4050000000000000007 /* NWPipPlugin.swift */,
+				E1F205060000000000000009 /* NWCallKitPlugin.swift */,
 				A1B2C3D40000000000000001 /* NightwatchViewController.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
@@ -172,6 +175,7 @@
 				C1D2E3F50000000000000006 /* NWAudioSessionPlugin.swift in Sources */,
 				B1C2D3E50000000000000004 /* NWVolumePlugin.swift in Sources */,
 				D1E2F4060000000000000008 /* NWPipPlugin.swift in Sources */,
+				E1F20507000000000000000A /* NWCallKitPlugin.swift in Sources */,
 				A1B2C3D50000000000000002 /* NightwatchViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -38,6 +38,10 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
       _data: { streamUrl: string; watchUrl: string; title: string },
       videoEl: HTMLVideoElement,
     ) => {
+      console.log('[NW-PiP] register', {
+        title: _data.title,
+        src: _data.streamUrl?.substring(0, 60),
+      });
       videoElRef.current = videoEl;
     },
     [],
@@ -60,27 +64,46 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
         | (HTMLVideoElement & {
             webkitSetPresentationMode?: (mode: string) => void;
             webkitPresentationMode?: string;
+            webkitSupportsPresentationMode?: (mode: string) => boolean;
           })
         | null;
-      if (!el) return;
+      if (!el) {
+        console.log('[NW-PiP] no video element registered');
+        return;
+      }
 
       if (isActive) {
         // Foreground — exit PiP
-        if (document.pictureInPictureElement === el) {
-          document.exitPictureInPicture().catch(() => {});
-        } else if (el.webkitPresentationMode === 'picture-in-picture') {
+        if (el.webkitPresentationMode === 'picture-in-picture') {
           el.webkitSetPresentationMode?.('inline');
+        } else if (document.pictureInPictureElement === el) {
+          document.exitPictureInPicture().catch(() => {});
         }
       } else {
-        // Background — enter PiP only if video is playing and has content
         if (!el.paused && el.readyState >= 2) {
-          // Prefer standard API (iOS 14.5+), fall back to webkit
-          if (typeof el.requestPictureInPicture === 'function') {
-            el.requestPictureInPicture().catch(() => {
+          // On iOS Capacitor, let the system handle PiP automatically
+          // via allowsPictureInPictureMediaPlayback in WKWebViewConfiguration.
+          // Programmatic PiP via webkit/standard API has rendering bugs with MP4.
+          const platform = window.Capacitor?.getPlatform?.();
+          if (platform === 'ios') {
+            // PiP only works with HLS in WKWebView. MP4 direct playback has
+            // WebAVMediaSelectionOption bugs that prevent the PiP window from rendering.
+            // HLS sources go through blob: URLs or .m3u8 endpoints.
+            const src = el.src || el.currentSrc || '';
+            const isHLS = src.includes('.m3u8') || src.startsWith('blob:');
+            if (isHLS) {
               el.webkitSetPresentationMode?.('picture-in-picture');
+            }
+            return;
+          }
+          if (el.webkitSetPresentationMode) {
+            console.log('[NW-PiP] requesting PiP (webkit)');
+            el.webkitSetPresentationMode('picture-in-picture');
+          } else if (typeof el.requestPictureInPicture === 'function') {
+            console.log('[NW-PiP] requesting PiP (standard API)');
+            el.requestPictureInPicture().catch((e) => {
+              console.warn('[NW-PiP] standard PiP failed', e);
             });
-          } else {
-            el.webkitSetPresentationMode?.('picture-in-picture');
           }
         }
       }

@@ -6,7 +6,30 @@ import {
   extractTokenFromUrl,
   normalizeWatchUrls,
 } from '@/features/watch/utils';
+import { env } from '@/lib/env';
 import type { PlayResponse } from '@/types/content';
+
+/**
+ * Strip the backend origin from a URL so it becomes a relative path
+ * that goes through the Next.js rewrite proxy. This is needed because
+ * the backend returns absolute URLs with its own origin (e.g. localhost:4000)
+ * which isn't reachable from mobile devices.
+ */
+function toRelativeApiUrl(url: string): string {
+  const backendUrl =
+    (typeof window === 'undefined'
+      ? process.env.NEXT_PUBLIC_BACKEND_URL
+      : env.BACKEND_URL) || '';
+  if (backendUrl && url.startsWith(backendUrl)) {
+    return url.slice(backendUrl.length);
+  }
+  // Also strip common dev backend origins
+  const devOrigins = ['http://localhost:4000', 'http://127.0.0.1:4000'];
+  for (const origin of devOrigins) {
+    if (url.startsWith(origin)) return url.slice(origin.length);
+  }
+  return url;
+}
 
 export interface SubtitleTrack {
   id: string;
@@ -85,11 +108,12 @@ function processHlsResponse(
     throw new Error(`Invalid ${serverId} response`);
   }
 
-  const token = extractTokenFromUrl(response.masterPlaylistUrl) || '';
+  const streamUrl = toRelativeApiUrl(response.masterPlaylistUrl);
+  const token = extractTokenFromUrl(streamUrl) || '';
 
   const normalized = normalizeWatchUrls(
     {
-      streamUrl: response.masterPlaylistUrl,
+      streamUrl,
       captionUrl: response.captionSrt,
       spriteVtt: response.spriteVtt,
       subtitleTracks: response.subtitleTracks?.map((t, i) => ({

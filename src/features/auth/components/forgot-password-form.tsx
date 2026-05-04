@@ -69,7 +69,7 @@ export function ForgotPasswordForm(props: ReturnType<typeof useLoginForm>) {
               onChange={handleChange}
               disabled={isPending}
               data-allow-clipboard
-              className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
+              className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative"
             />
           </div>
 

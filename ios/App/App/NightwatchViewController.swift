@@ -12,5 +12,6 @@ class NightwatchViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NWVolumePlugin())
         bridge?.registerPluginInstance(NWAudioSessionPlugin())
         bridge?.registerPluginInstance(NWPipPlugin())
+        bridge?.registerPluginInstance(NWCallKitPlugin())
     }
 }

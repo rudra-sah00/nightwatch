@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@capacitor-community/volume-buttons@8.0.0':
+    hash: ad5f610abdf71ae165afd5083ae26afba72cc01b5ea48e3424e1c5a927b0a56b
+    path: patches/@capacitor-community__volume-buttons@8.0.0.patch
+  '@capgo/capacitor-incoming-call-kit@8.1.1':
+    hash: 4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c
+    path: patches/@capgo__capacitor-incoming-call-kit@8.1.1.patch
+
 importers:
 
   .:
@@ -16,7 +24,7 @@ importers:
         version: 8.0.1(@capacitor/core@8.3.1)
       '@capacitor-community/volume-buttons':
         specifier: 8.0.0
-        version: 8.0.0(@capacitor/core@8.3.1)
+        version: 8.0.0(patch_hash=ad5f610abdf71ae165afd5083ae26afba72cc01b5ea48e3424e1c5a927b0a56b)(@capacitor/core@8.3.1)
       '@capacitor/android':
         specifier: ^8.3.1
         version: 8.3.1(@capacitor/core@8.3.1)
@@ -64,7 +72,7 @@ importers:
         version: 8.0.2(@capacitor/core@8.3.1)
       '@capgo/capacitor-incoming-call-kit':
         specifier: ^8.1.1
-        version: 8.1.1(@capacitor/core@8.3.1)
+        version: 8.1.1(patch_hash=4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c)(@capacitor/core@8.3.1)
       '@marsidev/react-turnstile':
         specifier: ^1.4.1
         version: 1.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -8356,7 +8364,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.3.1
 
-  '@capacitor-community/volume-buttons@8.0.0(@capacitor/core@8.3.1)':
+  '@capacitor-community/volume-buttons@8.0.0(patch_hash=ad5f610abdf71ae165afd5083ae26afba72cc01b5ea48e3424e1c5a927b0a56b)(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 
@@ -8445,7 +8453,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.3.1
 
-  '@capgo/capacitor-incoming-call-kit@8.1.1(@capacitor/core@8.3.1)':
+  '@capgo/capacitor-incoming-call-kit@8.1.1(patch_hash=4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c)(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 

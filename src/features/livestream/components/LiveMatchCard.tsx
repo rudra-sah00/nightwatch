@@ -158,8 +158,8 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
         {/* 2. Teams / Channel (Center) */}
         <div className="flex flex-1 items-center justify-center gap-4 w-full min-w-0">
           {isChannelCard ? (
-            <div className="flex w-full items-center justify-between gap-4 min-w-0">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex w-full items-center justify-center md:justify-between gap-4 min-w-0">
+              <div className="flex flex-col md:flex-row items-center gap-3 min-w-0">
                 <div className="w-10 h-10 md:w-14 md:h-14 bg-card border-[2px] border-border flex-shrink-0 overflow-hidden flex items-center justify-center p-1 rounded-full">
                   {match.team1.avatar ? (
                     <img
@@ -171,7 +171,7 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
                     <div className="w-full h-full bg-secondary rounded-full" />
                   )}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 text-center md:text-left">
                   <p className="font-headline font-black text-sm md:text-lg uppercase truncate text-foreground">
                     {channelName}
                   </p>

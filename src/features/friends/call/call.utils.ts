@@ -10,17 +10,27 @@ export function formatDuration(seconds: number): string {
  * Returns a restore function that resets original volumes.
  */
 export function duckMediaElements(factor: number): () => void {
-  const saved: { el: HTMLMediaElement; vol: number }[] = [];
+  const saved: { el: HTMLMediaElement; vol: number; wasPlaying: boolean }[] =
+    [];
   for (const el of document.querySelectorAll<HTMLMediaElement>(
     'video, audio',
   )) {
-    saved.push({ el, vol: el.volume });
-    el.volume = Math.max(0, el.volume * factor);
+    const wasPlaying = !el.paused;
+    saved.push({ el, vol: el.volume, wasPlaying });
+    // Pause video elements entirely to prevent PiP from activating
+    if (el instanceof HTMLVideoElement && wasPlaying) {
+      el.pause();
+    } else {
+      el.volume = Math.max(0, el.volume * factor);
+    }
   }
   return () => {
-    for (const { el, vol } of saved) {
+    for (const { el, vol, wasPlaying } of saved) {
       try {
         el.volume = vol;
+        if (el instanceof HTMLVideoElement && wasPlaying) {
+          el.play().catch(() => {});
+        }
       } catch {
         // Element may have been removed
       }

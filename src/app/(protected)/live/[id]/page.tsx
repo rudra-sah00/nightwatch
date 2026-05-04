@@ -37,6 +37,10 @@ export default function LiveMatchPlayerPage() {
 
       setSessionLoading(true);
       try {
+        console.log('[NW-Play] Live: fetching stream', {
+          playPath: match.playPath,
+          matchId: match.id,
+        });
         const response = await playVideo({
           type: 'livestream',
           title: `${match.team1.name} vs ${match.team2.name}`,
@@ -44,11 +48,16 @@ export default function LiveMatchPlayerPage() {
         });
 
         if (response.success && response.masterPlaylistUrl) {
+          console.log('[NW-Play] Live: got stream URL', {
+            url: response.masterPlaylistUrl.substring(0, 80),
+          });
           setSessionUrl(response.masterPlaylistUrl);
         } else {
+          console.warn('[NW-Play] Live: no stream URL', response);
           setSessionError('failed_stream_session');
         }
       } catch (_err) {
+        console.error('[NW-Play] Live: stream error', _err);
         setSessionError('error_stream_server');
       } finally {
         setSessionLoading(false);

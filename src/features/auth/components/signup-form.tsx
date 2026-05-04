@@ -173,7 +173,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
+                className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
 
@@ -198,7 +198,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   value={formData.username}
                   onChange={handleChange}
                   disabled={isPending}
-                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
+                  className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative"
                 />
                 {usernameStatus && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -243,7 +243,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                 onChange={handleChange}
                 disabled={isPending}
                 data-allow-clipboard
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative"
+                className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative"
               />
             </div>
           </div>
@@ -315,7 +315,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isPending}
-                  className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
+                  className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em] pr-10"
                 />
                 <button
                   type="button"
@@ -351,7 +351,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
                   setConfirmPassword?.(e.target.value)
                 }
                 disabled={isPending}
-                className="h-[46px] text-xs font-black uppercase transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
+                className="h-[46px] text-xs font-black transition-[background-color,border-color,color,box-shadow] relative tracking-[0.2em]"
               />
             </div>
           </div>

@@ -70,6 +70,8 @@ export const VideoElement = memo(function VideoElement({
       style={VIDEO_STYLE}
       autoPlay
       playsInline
+      webkit-playsinline=""
+      x-webkit-airplay="allow"
       crossOrigin={crossOrigin}
       onClick={onClick}
       onKeyDown={(e) => {

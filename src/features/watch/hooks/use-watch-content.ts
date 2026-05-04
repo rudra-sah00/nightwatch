@@ -189,6 +189,12 @@ export function useWatchContent() {
         let response: PlayResponse;
 
         if (type === 'series' && season && episode) {
+          console.log('[NW-Play] VOD: fetching series stream', {
+            seriesId: overrideMovieId || seriesId || movieId,
+            season,
+            episode,
+            server,
+          });
           response = await playVideo({
             type: 'series',
             title: decodedTitle,
@@ -198,6 +204,10 @@ export function useWatchContent() {
             server,
           });
         } else {
+          console.log('[NW-Play] VOD: fetching movie stream', {
+            movieId: overrideMovieId || movieId,
+            server,
+          });
           response = await playVideo({
             type: 'movie',
             title: decodedTitle,
@@ -207,6 +217,10 @@ export function useWatchContent() {
         }
 
         if (response.success && response.masterPlaylistUrl) {
+          console.log('[NW-Play] VOD: got stream URL', {
+            url: response.masterPlaylistUrl,
+            server,
+          });
           // Unified response handling via StreamUrlService (called within useStreamUrls)
           applyResponse(server, response);
 
@@ -225,9 +239,17 @@ export function useWatchContent() {
             setS2ActiveTrackId(overrideMovieId || movieId || null);
           }
         } else {
+          console.warn('[NW-Play] VOD: no stream URL', {
+            success: response.success,
+          });
           setRefetchError('Failed to load stream');
         }
       } catch (err) {
+        console.error('[NW-Play] VOD: stream error', {
+          status: (err as { status?: number })?.status,
+          msg: (err as Error)?.message,
+          server,
+        });
         const httpStatus = (err as { status?: number })?.status;
         if (
           server === 's2' &&

@@ -4,6 +4,8 @@
  * All Capacitor plugin calls are platform-gated so iOS never touches the
  * Android-only `PhoneCallNotification` plugin and vice-versa.
  */
+
+import { registerPlugin } from '@capacitor/core';
 import { checkIsMobile } from '@/lib/electron-bridge';
 
 type CallActions = {
@@ -19,16 +21,45 @@ function getPlatform(): string {
   );
 }
 
+/** Native iOS outgoing call plugin using CXCallController. */
+const NWCallKit = registerPlugin<{
+  startOutgoingCall: (opts: {
+    handle: string;
+    displayName: string;
+  }) => Promise<{ callId: string }>;
+  reportOutgoingCallConnected: () => Promise<void>;
+  endCall: () => Promise<void>;
+}>('NWCallKit');
+
 // ── State transitions ───────────────────────────────────────────────
+
+/** Show native call UI for an outgoing call via CXStartCallAction. */
+export function showNativeOutgoingCall(peerName: string) {
+  if (getPlatform() === 'ios') {
+    NWCallKit.startOutgoingCall({
+      handle: peerName || 'Nightwatch Call',
+      displayName: peerName || 'Nightwatch Call',
+    }).catch(() => {});
+  }
+}
+
+/** Report that the outgoing call connected. */
+export function reportOutgoingCallConnected() {
+  if (getPlatform() === 'ios') {
+    NWCallKit.reportOutgoingCallConnected().catch(() => {});
+  }
+}
+
+/** End the outgoing call. */
+export function endNativeOutgoingCall() {
+  if (getPlatform() === 'ios') {
+    NWCallKit.endCall().catch(() => {});
+  }
+}
 
 /** Show the native incoming-call UI for the current platform. */
 export function showNativeIncomingCall(callId: string, peerName: string) {
   const platform = getPlatform();
-  console.log('[NW-Call] showNativeIncomingCall', {
-    platform,
-    peerName,
-    callId,
-  });
 
   if (platform === 'ios') {
     import('@capgo/capacitor-incoming-call-kit')
@@ -41,10 +72,7 @@ export function showNativeIncomingCall(callId: string, peerName: string) {
           ios: { handleType: 'generic', supportsHolding: false },
         }),
       )
-      .then((r) =>
-        console.log('[NW-Call] CallKit showIncomingCall ok', JSON.stringify(r)),
-      )
-      .catch((e) => console.warn('[NW-Call] CallKit showIncomingCall err', e));
+      .catch(() => {});
   }
 
   if (platform === 'android') {
@@ -64,10 +92,7 @@ export function showNativeIncomingCall(callId: string, peerName: string) {
 
 /** Switch native UI to the "call in progress" state. */
 export function showNativeActiveCall(peerName: string) {
-  const platform = getPlatform();
-  console.log('[NW-Call] showNativeActiveCall', { platform, peerName });
-
-  if (platform === 'android') {
+  if (getPlatform() === 'android') {
     import('@anuradev/capacitor-phone-call-notification')
       .then(({ PhoneCallNotification }) => {
         PhoneCallNotification.hideIncomingPhoneCallNotification().catch(
@@ -87,15 +112,12 @@ export function showNativeActiveCall(peerName: string) {
 /** Dismiss all native call UI. */
 export function hideNativeCallUI() {
   const platform = getPlatform();
-  console.log('[NW-Call] hideNativeCallUI', { platform });
 
   if (platform === 'ios') {
+    NWCallKit.endCall().catch(() => {});
     import('@capgo/capacitor-incoming-call-kit')
       .then(({ IncomingCallKit }) => IncomingCallKit.endAllCalls())
-      .then((r) =>
-        console.log('[NW-Call] CallKit endAllCalls ok', JSON.stringify(r)),
-      )
-      .catch((e) => console.warn('[NW-Call] CallKit endAllCalls err', e));
+      .catch(() => {});
   }
 
   if (platform === 'android') {
@@ -146,10 +168,6 @@ export function registerNativeCallListeners(actions: CallActions): () => void {
       .then(({ PhoneCallNotification }) => {
         listeners.push(
           PhoneCallNotification.addListener('response', (data) => {
-            console.log(
-              '[NW-Call] Android notification response:',
-              data.response,
-            );
             if (data.response === 'answer') actions.acceptCall();
             else if (data.response === 'decline') actions.rejectCall();
             else if (data.response === 'terminate') actions.endCall();

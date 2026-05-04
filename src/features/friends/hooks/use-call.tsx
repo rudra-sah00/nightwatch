@@ -32,10 +32,13 @@ import {
 import {
   activateCallAudioSession,
   deactivateCallAudioSession,
+  endNativeOutgoingCall,
   hideNativeCallUI,
   registerNativeCallListeners,
+  reportOutgoingCallConnected,
   showNativeActiveCall,
   showNativeIncomingCall,
+  showNativeOutgoingCall,
   toggleAudioOutput,
 } from '../call/call-native';
 
@@ -128,12 +131,16 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     setCallState(state);
 
     if (!checkIsMobile()) return;
-    if (state === 'incoming') {
+    if (state === 'outgoing') {
+      showNativeOutgoingCall(peerName || '');
+    } else if (state === 'incoming') {
       callIdRef.current = `nw-call-${Date.now()}`;
       showNativeIncomingCall(callIdRef.current, peerName || '');
     } else if (state === 'active') {
+      reportOutgoingCallConnected();
       showNativeActiveCall(peerName || '');
     } else if (state === 'idle') {
+      endNativeOutgoingCall();
       hideNativeCallUI();
     }
   }, []);
@@ -195,7 +202,6 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   // ── Cleanup ───────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
-    console.log('[NW-Call] cleanup(), state:', callStateRef.current);
     localTrackRef.current?.stop();
     localTrackRef.current?.close();
     localTrackRef.current = null;
@@ -265,11 +271,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   // ── Call actions ──────────────────────────────────────────────────
   const initiateCall = useCallback(
     (callPeer: CallPeer) => {
-      console.log('[NW-Call] initiateCall:', callPeer.name);
       if (!socket || callStateRef.current !== 'idle') return;
       setPeer(callPeer);
       peerRef.current = callPeer;
-      updateCallState('outgoing');
+      updateCallState('outgoing', callPeer.name);
       socket.emit(
         'call:initiate',
         { receiverId: callPeer.id },
@@ -282,7 +287,6 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   );
 
   const acceptCall = useCallback(() => {
-    console.log('[NW-Call] acceptCall(), peer:', peer?.name);
     if (!socket || !peer || callStateRef.current !== 'incoming') return;
     socket.emit(
       'call:accept',
@@ -304,14 +308,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [socket, peer, joinAgora, cleanup]);
 
   const rejectCall = useCallback(() => {
-    console.log('[NW-Call] rejectCall(), peer:', peer?.name);
     if (!socket || !peer) return;
     socket.emit('call:reject', { callerId: peer.id });
     cleanup();
   }, [socket, peer, cleanup]);
 
   const endCall = useCallback(() => {
-    console.log('[NW-Call] endCall(), peer:', peer?.name);
     if (!socket || !peer) return;
     socket.emit('call:end', { peerId: peer.id });
     cleanup();
@@ -416,7 +418,6 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callerName: string;
       callerPhoto: string | null;
     }) => {
-      console.log('[NW-Call] Socket call:incoming from:', data.callerName);
       if (callStateRef.current !== 'idle') return;
       const p = {
         id: data.callerId,
@@ -428,16 +429,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       updateCallStateRef.current('incoming', p.name);
     };
     const onAccepted = (data: { channelName: string }) => {
-      console.log('[NW-Call] Socket call:accepted, channel:', data.channelName);
       if (callStateRef.current === 'outgoing')
         joinAgoraRef.current(data.channelName);
     };
     const onRejected = () => {
-      console.log('[NW-Call] Socket call:rejected');
       if (callStateRef.current === 'outgoing') cleanupRef.current();
     };
     const onEnded = () => {
-      console.log('[NW-Call] Socket call:ended');
       cleanupRef.current();
     };
     const onLeft = (data: { userId: string }) =>
