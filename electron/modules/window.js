@@ -8,6 +8,7 @@ const {
 } = require('electron');
 const { TouchBarButton, TouchBarSpacer } = TouchBar || {};
 const windowStateKeeper = require('electron-window-state');
+const { PROD_URL, PROD_URL_WWW } = require('./constants');
 
 // Ensure native right-click menus are enabled
 (async () => {
@@ -76,7 +77,7 @@ class AppWindow {
         nodeIntegration: false,
         contextIsolation: true,
         spellcheck: true,
-        backgroundThrottling: false, // CRITICAL: Prevents video/audio desync when app is minimized!
+        backgroundThrottling: true, // Enabled by default; disabled via IPC when media is playing
         devTools: !require('electron').app.isPackaged,
         // Securely inject desktop APIs to Nextjs React
         preload: require('node:path').join(__dirname, '../preload.js'),
@@ -99,7 +100,7 @@ class AppWindow {
         // Only grant permissions to our own app origin
         const requestUrl = webContents.getURL();
         const isOwnOrigin =
-          requestUrl.startsWith('https://nightwatch.in') ||
+          requestUrl.startsWith(PROD_URL) ||
           requestUrl.startsWith('http://localhost');
 
         const allowedPermissions = [
@@ -122,13 +123,12 @@ class AppWindow {
       (process.env.NODE_ENV === 'development' ||
         !require('electron').app.isPackaged) &&
       !process.env.TEST_PROD;
-    const PROD_URL = process.env.TEST_PROD
+    const effectiveProdUrl = process.env.TEST_PROD
       ? 'http://localhost:3000'
-      : 'https://nightwatch.in';
-    const PROD_URL_WWW = 'https://www.nightwatch.in';
+      : PROD_URL;
 
     const isInternalUrl = (url) =>
-      url.startsWith(isDev ? 'http://localhost' : PROD_URL) ||
+      url.startsWith(isDev ? 'http://localhost' : effectiveProdUrl) ||
       url.startsWith(PROD_URL_WWW) ||
       url.startsWith('nightwatch://');
 
@@ -143,7 +143,7 @@ class AppWindow {
       // Production: load the remote app. On first visit (online) the Serwist
       // service worker installs and caches the full app shell. On subsequent
       // launches — even offline — the SW serves every route from cache.
-      this.mainWindow.loadURL(PROD_URL);
+      this.mainWindow.loadURL(effectiveProdUrl);
     }
 
     // Intercept window.open() / target="_blank" — open external links in default browser
@@ -214,7 +214,7 @@ class AppWindow {
           );
           if (this.mainWindow && !this.mainWindow.isDestroyed()) {
             this.mainWindow.loadFile(bridgePath, {
-              search: `url=${encodeURIComponent(PROD_URL)}`,
+              search: `url=${encodeURIComponent(effectiveProdUrl)}`,
             });
           }
         } else if (loadFailures === 2) {
@@ -229,7 +229,7 @@ class AppWindow {
             await ses.clearCache();
           } catch (_e) {}
           if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-            this.mainWindow.loadURL(PROD_URL);
+            this.mainWindow.loadURL(effectiveProdUrl);
           }
         } else {
           // Level 3: Nothing works — show local fallback, stop retrying
@@ -239,7 +239,7 @@ class AppWindow {
           );
           if (this.mainWindow && !this.mainWindow.isDestroyed()) {
             this.mainWindow.loadFile(bridgePath, {
-              search: `url=${encodeURIComponent(PROD_URL)}&failed=1`,
+              search: `url=${encodeURIComponent(effectiveProdUrl)}&failed=1`,
             });
           }
         }

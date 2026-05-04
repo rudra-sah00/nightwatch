@@ -75,6 +75,7 @@ const discordLogic = require('./modules/discord.js');
 const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
 const { getAppVersion } = require('./modules/version.js');
+const { PROD_URL } = require('./modules/constants.js');
 const {
   setupOfflineMediaProtocol,
   setupDownloadManager,
@@ -217,7 +218,7 @@ const startElectronApp = async () => {
 
     // CSP for our own app pages (nightwatch.in or localhost)
     const isAppPage =
-      details.url.startsWith('https://nightwatch.in') ||
+      details.url.startsWith(PROD_URL) ||
       details.url.startsWith('http://localhost');
 
     // Strip out any existing CORS headers to prevent duplicate header conflicts
@@ -483,9 +484,7 @@ const startElectronApp = async () => {
     } catch (_e) {}
     const win = AppWindow.getInstance();
     if (win && !win.isDestroyed()) {
-      win.loadURL(
-        app.isPackaged ? 'https://nightwatch.in' : 'http://localhost:3000',
-      );
+      win.loadURL(app.isPackaged ? PROD_URL : 'http://localhost:3000');
     }
   });
 
@@ -516,6 +515,12 @@ const startElectronApp = async () => {
     } else if (!keepAwake && globalPowerBlockerId !== -1) {
       powerSaveBlocker.stop(globalPowerBlockerId);
       globalPowerBlockerId = -1;
+    }
+    // Sync backgroundThrottling with media state — disable throttling when
+    // media is active so audio/video doesn't desync in the background.
+    const win = AppWindow.getInstance();
+    if (win && !win.isDestroyed()) {
+      win.webContents.setBackgroundThrottling(!keepAwake);
     }
   });
 
@@ -883,6 +888,12 @@ app.on('before-quit', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  // Clean up splash screen temp file
+  try {
+    const os = require('node:os');
+    const splashPath = _path.join(os.tmpdir(), 'nightwatch-splash.html');
+    require('node:fs').rmSync(splashPath, { force: true });
+  } catch (_e) {}
 });
 
 // --- WINDOWS JUMP LIST (#13) ---

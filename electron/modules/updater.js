@@ -2,6 +2,7 @@ const { autoUpdater } = require('electron-updater');
 const { app, net } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
+const crypto = require('node:crypto');
 const { createGunzip } = require('node:zlib');
 const { pipeline } = require('node:stream/promises');
 const { Readable } = require('node:stream');
@@ -11,10 +12,11 @@ const { getAppVersion } = require('./version');
 const GH_OWNER = 'rudra-sah00';
 const GH_REPO = 'nightwatch';
 const ASAR_ASSET_NAME = 'app.asar.gz';
+const ASAR_CHECKSUM_NAME = 'app.asar.gz.sha256';
 
 /**
- * Fetches the latest GitHub Release and returns its version + app.asar.gz URL.
- * No hardcoded versions — always queries the API dynamically.
+ * Fetches the latest GitHub Release and returns its version, app.asar.gz URL,
+ * and optional SHA-256 checksum URL.
  */
 async function fetchLatestAsarInfo() {
   const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/latest`;
@@ -28,7 +30,14 @@ async function fetchLatestAsarInfo() {
   const release = await res.json();
   const version = release.tag_name?.replace(/^v/, '');
   const asset = release.assets?.find((a) => a.name === ASAR_ASSET_NAME);
-  return { version, asarUrl: asset?.browser_download_url || null };
+  const checksumAsset = release.assets?.find(
+    (a) => a.name === ASAR_CHECKSUM_NAME,
+  );
+  return {
+    version,
+    asarUrl: asset?.browser_download_url || null,
+    checksumUrl: checksumAsset?.browser_download_url || null,
+  };
 }
 
 /**
@@ -151,7 +160,11 @@ function setupUpdater(splashWindow, onComplete) {
   const checkAsarUpdate = async () => {
     sendStatus('Checking resources...', 60);
     try {
-      const { version: remoteVersion, asarUrl } = await fetchLatestAsarInfo();
+      const {
+        version: remoteVersion,
+        asarUrl,
+        checksumUrl,
+      } = await fetchLatestAsarInfo();
       const localVersion = getAppVersion();
 
       log.info(
@@ -160,6 +173,17 @@ function setupUpdater(splashWindow, onComplete) {
 
       if (!asarUrl || !isNewer(remoteVersion, localVersion)) {
         log.info('[asar-updater] No ASAR update needed.');
+        sendStatus('Starting Nightwatch...', 100);
+        finish();
+        return;
+      }
+
+      // macOS: ASAR hot-swap invalidates the code signature, causing
+      // Gatekeeper SIGKILL. Only allow ASAR updates on Windows/Linux.
+      if (process.platform === 'darwin') {
+        log.info(
+          '[asar-updater] Skipping ASAR swap on macOS (preserves code signature). Use native updater.',
+        );
         sendStatus('Starting Nightwatch...', 100);
         finish();
         return;
@@ -185,6 +209,34 @@ function setupUpdater(splashWindow, onComplete) {
         const scaled = 65 + Math.floor(percent * 0.3); // 65% → 95%
         sendStatus(`Downloading update... ${percent}%`, scaled);
       });
+
+      // Verify integrity if a checksum file was published alongside the ASAR
+      if (checksumUrl) {
+        try {
+          const csRes = await net.fetch(checksumUrl, {
+            headers: { 'User-Agent': 'Nightwatch-Desktop' },
+          });
+          if (csRes.ok) {
+            const expectedHash = (await csRes.text()).trim().split(/\s/)[0];
+            const fileHash = crypto
+              .createHash('sha256')
+              .update(fs.readFileSync(tempPath))
+              .digest('hex');
+            if (fileHash !== expectedHash) {
+              throw new Error(
+                `Checksum mismatch: expected ${expectedHash}, got ${fileHash}`,
+              );
+            }
+            log.info('[asar-updater] SHA-256 checksum verified.');
+          }
+        } catch (csErr) {
+          log.error('[asar-updater] Checksum verification failed:', csErr);
+          fs.rmSync(tempPath, { force: true });
+          sendStatus('Starting Nightwatch...', 100);
+          finish();
+          return;
+        }
+      }
 
       // Swap: on Windows the running ASAR is locked, stage as .pending
       if (process.platform === 'win32') {

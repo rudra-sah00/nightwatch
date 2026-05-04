@@ -1,4 +1,5 @@
-const ALLOWED_HOST = 'nightwatch.in';
+const { PROD_DOMAIN } = require('./constants');
+const ALLOWED_HOST = PROD_DOMAIN;
 
 function handleDeepLink(url, mainWindow) {
   if (!mainWindow) return;
