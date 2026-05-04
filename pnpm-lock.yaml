@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@anuradev/capacitor-phone-call-notification@7.5.5':
+    hash: 32fd4e578096b067477ecbc9d66bbae2d17c374ce469381a8c11314aea12ac0d
+    path: patches/@anuradev__capacitor-phone-call-notification@7.5.5.patch
   '@capacitor-community/volume-buttons@8.0.0':
     hash: ad5f610abdf71ae165afd5083ae26afba72cc01b5ea48e3424e1c5a927b0a56b
     path: patches/@capacitor-community__volume-buttons@8.0.0.patch
@@ -18,7 +21,7 @@ importers:
     dependencies:
       '@anuradev/capacitor-phone-call-notification':
         specifier: ^7.5.5
-        version: 7.5.5(@capacitor/core@8.3.1)
+        version: 7.5.5(patch_hash=32fd4e578096b067477ecbc9d66bbae2d17c374ce469381a8c11314aea12ac0d)(@capacitor/core@8.3.1)
       '@capacitor-community/keep-awake':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.3.1)
@@ -8109,7 +8112,7 @@ snapshots:
       package-manager-detector: 1.6.0
       tinyexec: 1.0.2
 
-  '@anuradev/capacitor-phone-call-notification@7.5.5(@capacitor/core@8.3.1)':
+  '@anuradev/capacitor-phone-call-notification@7.5.5(patch_hash=32fd4e578096b067477ecbc9d66bbae2d17c374ce469381a8c11314aea12ac0d)(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 
