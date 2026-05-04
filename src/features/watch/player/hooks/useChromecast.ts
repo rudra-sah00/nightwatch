@@ -52,6 +52,13 @@ export function useChromecast({
       return;
 
     const init = () => {
+      if (
+        typeof cast === 'undefined' ||
+        !cast?.framework ||
+        typeof chrome === 'undefined' ||
+        !chrome?.cast
+      )
+        return;
       const ctx = cast.framework.CastContext.getInstance();
       ctx.setOptions({
         receiverApplicationId: DEFAULT_RECEIVER_APP_ID,
@@ -105,7 +112,13 @@ export function useChromecast({
   }, []);
 
   const startCast = useCallback(async () => {
-    if (!sdkReady.current || !streamUrl) return;
+    if (
+      !sdkReady.current ||
+      !streamUrl ||
+      typeof cast === 'undefined' ||
+      typeof chrome === 'undefined'
+    )
+      return;
     const ctx = cast.framework.CastContext.getInstance();
     try {
       await ctx.requestSession();
@@ -144,7 +157,7 @@ export function useChromecast({
   }, [streamUrl, title, posterUrl, isLive]);
 
   const stopCast = useCallback(() => {
-    if (!sdkReady.current) return;
+    if (!sdkReady.current || typeof cast === 'undefined') return;
     const ctx = cast.framework.CastContext.getInstance();
     ctx.endCurrentSession(true);
   }, []);
