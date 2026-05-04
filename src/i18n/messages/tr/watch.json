@@ -48,7 +48,9 @@
     "episodesTitle": "Bölümler",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "Büyüt",
-    "captionNone": "Yok"
+    "captionNone": "Yok",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "Kalite",

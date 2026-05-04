@@ -48,7 +48,9 @@
     "episodesTitle": "Folgen",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "Maximieren",
-    "captionNone": "Keine"
+    "captionNone": "Keine",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "Qualität",

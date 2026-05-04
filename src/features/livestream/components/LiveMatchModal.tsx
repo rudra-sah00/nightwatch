@@ -328,8 +328,8 @@ function LiveMatchModalContent({
         </div>
 
         {/* Details section */}
-        <div className="px-6 md:px-10 lg:px-16 py-6 md:py-10 bg-background flex-1 flex flex-col">
-          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10 flex-1">
+        <div className="px-6 md:px-10 lg:px-16 py-6 md:py-10 bg-background flex-shrink-0">
+          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
             {/* Title row */}
             <div className="text-center space-y-3 md:space-y-6">
               <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
@@ -360,57 +360,62 @@ function LiveMatchModalContent({
                 )}
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 mt-6">
-              {/* Watch Solo */}
+        {/* Spacer pushes action bar to bottom on short content */}
+        <div className="flex-1" />
+
+        {/* Action Bar — Sticky on mobile, relative on desktop */}
+        <div className="sticky bottom-0 sm:relative z-30 px-6 pb-6 md:px-10 md:pb-10 lg:px-16 lg:pb-16 bg-background border-t-[4px] border-border sm:border-t-0 flex-shrink-0">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4">
+            {/* Watch Solo */}
+            <button
+              type="button"
+              className={cn(
+                'w-full sm:w-auto sm:min-w-[220px] flex-1',
+                'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
+                !canWatch
+                  ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
+                  : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
+              )}
+              onClick={onWatchSolo}
+              disabled={!canWatch}
+            >
+              <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
+              <span className="truncate">
+                {canWatch
+                  ? t('watchSolo')
+                  : isUpcoming
+                    ? t('notStartedYet')
+                    : t('streamUnavailable')}
+              </span>
+            </button>
+
+            {/* Watch Party — desktop only */}
+            {!isMobile && (
               <button
                 type="button"
                 className={cn(
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
                   'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
-                  !canWatch
+                  isCreatingParty || !canWatch
                     ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
-                    : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
+                    : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
                 )}
-                onClick={onWatchSolo}
-                disabled={!canWatch}
+                onClick={onWatchParty}
+                disabled={isCreatingParty || !canWatch}
               >
-                <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
+                {isCreatingParty ? (
+                  <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
+                ) : (
+                  <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+                )}
                 <span className="truncate">
-                  {canWatch
-                    ? t('watchSolo')
-                    : isUpcoming
-                      ? t('notStartedYet')
-                      : t('streamUnavailable')}
+                  {isCreatingParty ? t('creating') : t('watchTogether')}
                 </span>
               </button>
-
-              {/* Watch Party — desktop only */}
-              {!isMobile && (
-                <button
-                  type="button"
-                  className={cn(
-                    'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
-                    isCreatingParty || !canWatch
-                      ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
-                      : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
-                  )}
-                  onClick={onWatchParty}
-                  disabled={isCreatingParty || !canWatch}
-                >
-                  {isCreatingParty ? (
-                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
-                  ) : (
-                    <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-                  )}
-                  <span className="truncate">
-                    {isCreatingParty ? t('creating') : t('watchTogether')}
-                  </span>
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>

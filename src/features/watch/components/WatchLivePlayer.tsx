@@ -371,6 +371,9 @@ function LivePlayerState({
             <div className="hidden min-[380px]:contents md:contents">
               <Player.SettingsMenu />
             </div>
+            <div className="hidden md:contents">
+              <Player.CastButton />
+            </div>
             <Player.Fullscreen />
           </Player.ControlRow>
           {/* Mobile: fullscreen bottom-right, then seekbar */}

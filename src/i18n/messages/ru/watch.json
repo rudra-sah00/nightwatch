@@ -48,7 +48,9 @@
     "episodesTitle": "Серии",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "Развернуть",
-    "captionNone": "Нет"
+    "captionNone": "Нет",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "Качество",

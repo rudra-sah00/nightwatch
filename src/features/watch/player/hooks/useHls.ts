@@ -533,7 +533,18 @@ export function useHls({
           dispatch({ type: 'SET_BUFFERING', isBuffering: false });
         };
 
-        video.src = streamUrl;
+        // Native AVPlayer doesn't resolve relative URLs against the WKWebView
+        // origin and can't follow Next.js rewrite proxies reliably. Point
+        // directly to the backend for absolute HLS URLs on Capacitor.
+        let absoluteStreamUrl = streamUrl;
+        if (streamUrl.startsWith('/') && isNativePlatform) {
+          const backendOrigin =
+            process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+          absoluteStreamUrl = `${backendOrigin}${streamUrl}`;
+        } else if (streamUrl.startsWith('/') && typeof window !== 'undefined') {
+          absoluteStreamUrl = `${window.location.origin}${streamUrl}`;
+        }
+        video.src = absoluteStreamUrl;
         video.addEventListener('loadedmetadata', nativeLoadedMetadataHandler);
         video.addEventListener('error', nativeErrorHandler);
         video.addEventListener('stalled', nativeStalledHandler);

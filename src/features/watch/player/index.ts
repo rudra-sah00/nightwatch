@@ -1,5 +1,6 @@
 export * from './context/PlayerContext';
 export * from './ui/compound/PlayerAudioSubtitleSelectors';
+export * from './ui/compound/PlayerCastButton';
 export * from './ui/compound/PlayerControls';
 export * from './ui/compound/PlayerEpisodePanel';
 export * from './ui/compound/PlayerFullscreen';
@@ -17,6 +18,7 @@ export * from './ui/compound/PlayerVolume';
 export * from './ui/controls/PipButton';
 
 import { PlayerAudioSubtitleSelectors } from './ui/compound/PlayerAudioSubtitleSelectors';
+import { PlayerCastButton } from './ui/compound/PlayerCastButton';
 import {
   PlayerControlRow,
   PlayerControls,
@@ -66,6 +68,7 @@ export const Player = {
   Fullscreen: PlayerFullscreen,
   SettingsMenu: PlayerSettingsMenu,
   AudioSubtitleSelectors: PlayerAudioSubtitleSelectors,
+  CastButton: PlayerCastButton,
   LiveBadge: PlayerLiveBadge,
   Header: PlayerHeader,
   SkipButtons: PlayerSkipButtons,

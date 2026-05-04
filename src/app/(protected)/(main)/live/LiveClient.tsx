@@ -141,7 +141,7 @@ function LiveContent() {
         {isLoading || isPending ? (
           <div className="space-y-16">
             <section>
-              <div className="h-10 w-48 bg-neo-red border-[4px] border-border  mb-8 animate-pulse" />
+              <div className="h-10 w-32 md:w-48 bg-neo-red border-[4px] border-border mb-8 animate-pulse rounded-md" />
               <div className="flex flex-col gap-4">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />
@@ -149,7 +149,7 @@ function LiveContent() {
               </div>
             </section>
             <section>
-              <div className="h-10 w-48 bg-neo-blue border-[4px] border-border  mb-8 animate-pulse" />
+              <div className="h-10 w-32 md:w-48 bg-neo-blue border-[4px] border-border mb-8 animate-pulse rounded-md" />
               <div className="flex flex-col gap-4">
                 <LiveMatchSkeleton />
                 <LiveMatchSkeleton />

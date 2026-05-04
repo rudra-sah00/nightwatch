@@ -404,6 +404,9 @@ function VODPlayerState({
                 <Player.AudioSubtitleSelectors />
               </div>
               <Player.SettingsMenu />
+              <div className="hidden md:contents">
+                <Player.CastButton />
+              </div>
               <Player.Fullscreen />
             </Player.ControlRow>
             {/* Mobile layout: fullscreen bottom-right, then seekbar pinned to bottom */}

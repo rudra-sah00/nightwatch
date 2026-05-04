@@ -275,7 +275,7 @@ export function SettingsMenu({
               {/* Backdrop */}
               <button
                 type="button"
-                className="fixed inset-0 z-[99] bg-black/60"
+                className="fixed inset-0 z-[10000] bg-black/60"
                 onClick={() => {
                   setIsOpen(false);
                   setCurrentScreen('main');
@@ -283,7 +283,10 @@ export function SettingsMenu({
                 aria-label="Close settings"
               />
               {/* Bottom sheet */}
-              <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background border-t-[4px] border-border max-h-[60vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom motion-safe:duration-200 motion-reduce:animate-none">
+              <div
+                data-settings-portal
+                className="fixed bottom-0 left-0 right-0 z-[10001] bg-background border-t-[4px] border-border max-h-[60vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom motion-safe:duration-200 motion-reduce:animate-none"
+              >
                 {currentScreen === 'main' && renderMainMenu()}
                 {currentScreen === 'quality' && renderQualityMenu()}
                 {currentScreen === 'speed' && renderSpeedMenu()}

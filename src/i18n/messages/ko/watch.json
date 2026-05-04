@@ -48,7 +48,9 @@
     "episodesTitle": "에피소드",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "최대화",
-    "captionNone": "없음"
+    "captionNone": "없음",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "화질",

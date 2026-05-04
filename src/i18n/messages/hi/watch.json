@@ -48,7 +48,9 @@
     "episodesTitle": "एपिसोड",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "बड़ा करें",
-    "captionNone": "कोई नहीं"
+    "captionNone": "कोई नहीं",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "गुणवत्ता",

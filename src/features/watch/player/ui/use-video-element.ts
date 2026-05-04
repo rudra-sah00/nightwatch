@@ -86,10 +86,12 @@ export function useVideoElement({
         dispatch({ type: 'UNMUTE' });
       }
     };
-    const handleWaiting = () =>
+    const handleWaiting = () => {
       dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+    };
     const handlePlaying = () => {
       clearPendingError();
+      dispatch({ type: 'SET_LOADING', isLoading: false });
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
       dispatch({ type: 'SET_ERROR', error: null });
     };

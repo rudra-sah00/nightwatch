@@ -22,7 +22,12 @@ export function useSettingsMenu({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      // Don't close if clicking inside the menu ref or inside the portalled
+      // bottom sheet (which lives outside the ref in document.body).
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        const inPortal = target.closest('[data-settings-portal]');
+        if (inPortal) return;
         setIsOpen(false);
         setCurrentScreen('main');
         onInteraction?.(false);

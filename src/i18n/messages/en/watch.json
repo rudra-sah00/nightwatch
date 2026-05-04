@@ -48,7 +48,9 @@
     "episodesTitle": "Episodes",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "Maximize",
-    "captionNone": "None"
+    "captionNone": "None",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "Quality",

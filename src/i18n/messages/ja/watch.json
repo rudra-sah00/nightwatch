@@ -48,7 +48,9 @@
     "episodesTitle": "エピソード",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "最大化",
-    "captionNone": "なし"
+    "captionNone": "なし",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "画質",

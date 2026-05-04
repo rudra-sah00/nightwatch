@@ -58,8 +58,8 @@ export function WatchProgressSkeleton() {
 /**
  * Skeleton placeholder for a live match/event row.
  *
- * Mirrors the {@link LiveMatchCard} layout: stacks vertically on mobile
- * (`flex-col`) and switches to horizontal on desktop (`md:flex-row`).
+ * Mirrors the {@link LiveMatchCard} channel layout on mobile (single row with
+ * logo + name) and the match layout on desktop (`md:flex-row` with two teams).
  */
 export function LiveMatchSkeleton() {
   return (
@@ -75,37 +75,34 @@ export function LiveMatchSkeleton() {
           <Skeleton width={48} height={10} />
         </div>
 
-        {/* Teams center */}
+        {/* Mobile: channel row — Desktop: teams center */}
         <div className="flex flex-1 items-center justify-center gap-4 w-full">
-          {/* Team 1 */}
-          <div className="flex flex-1 items-center justify-end gap-2 md:gap-3">
-            <div className="flex flex-col items-end gap-1">
-              <Skeleton width={72} height={16} />
-              <Skeleton width={40} height={14} />
-            </div>
+          {/* Mobile channel layout */}
+          <div className="flex md:hidden items-center gap-3 w-full">
             <Skeleton circle width={40} height={40} />
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <Skeleton width="60%" height={16} />
+              <Skeleton width={56} height={12} />
+            </div>
           </div>
 
-          {/* VS */}
-          <Skeleton width={32} height={28} />
-
-          {/* Team 2 */}
-          <div className="flex flex-1 items-center justify-start gap-2 md:gap-3">
-            <Skeleton circle width={40} height={40} />
-            <div className="flex flex-col items-start gap-1">
+          {/* Desktop teams layout */}
+          <div className="hidden md:flex flex-1 items-center justify-center gap-4 w-full">
+            <div className="flex flex-1 items-center justify-end gap-3">
               <Skeleton width={72} height={16} />
-              <Skeleton width={40} height={14} />
+              <Skeleton circle width={40} height={40} />
+            </div>
+            <Skeleton width={32} height={28} />
+            <div className="flex flex-1 items-center justify-start gap-3">
+              <Skeleton circle width={40} height={40} />
+              <Skeleton width={72} height={16} />
             </div>
           </div>
         </div>
 
         {/* Watch button */}
         <div className="w-full md:w-auto flex-shrink-0 flex justify-end mt-2 md:mt-0">
-          <Skeleton
-            width={192}
-            height={48}
-            containerClassName="w-full md:w-48 block"
-          />
+          <Skeleton height={48} containerClassName="w-full md:w-48 block" />
         </div>
       </div>
     </AppSkeletonTheme>

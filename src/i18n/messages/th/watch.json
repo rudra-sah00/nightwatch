@@ -48,7 +48,9 @@
     "episodesTitle": "ตอน",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "ขยาย",
-    "captionNone": "ไม่มี"
+    "captionNone": "ไม่มี",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "คุณภาพ",

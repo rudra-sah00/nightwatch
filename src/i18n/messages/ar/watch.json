@@ -48,7 +48,9 @@
     "episodesTitle": "الحلقات",
     "liveStreamSeekBar": "Live stream seek bar",
     "maximize": "تكبير",
-    "captionNone": "لا شيء"
+    "captionNone": "لا شيء",
+    "castStart": "Cast to device",
+    "castStop": "Stop casting"
   },
   "settings": {
     "quality": "الجودة",
