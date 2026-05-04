@@ -122,14 +122,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return;
-        const err = error as { status?: number };
+        const err = error as { status?: number; code?: string };
         if (err.status === 401 || err.status === 404) {
           disconnect();
           if (!controller.signal.aborted) {
             setUser(null);
             setIsLoading(false);
           }
-          clearCookiesAndRedirect(t('sessionExpired'));
+          // Only redirect if apiFetch didn't already fire auth:expired
+          // (code === 'SESSION_EXPIRED' means apiFetch already handled it)
+          if (err.code !== 'SESSION_EXPIRED') {
+            clearCookiesAndRedirect(t('sessionExpired'));
+          }
         } else {
           // Network error during deploy window — don't log out, just mark loaded
           if (!controller.signal.aborted) setIsLoading(false);
