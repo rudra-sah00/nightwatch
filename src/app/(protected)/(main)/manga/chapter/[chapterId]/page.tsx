@@ -11,6 +11,7 @@ import {
   getMangaProgress,
   updateMangaProgress,
 } from '@/features/manga/api';
+import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 export default function ChapterReaderPage() {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -66,6 +67,19 @@ export default function ChapterReaderPage() {
   }, [chapterId]);
 
   // Track scroll position to determine current page
+
+  // Discord Rich Presence for manga reading
+  useEffect(() => {
+    if (!viewer || !checkIsDesktop()) return;
+    desktopBridge.updateDiscordPresence({
+      details: `Reading: ${viewer.titleName}`,
+      state: viewer.chapterName,
+      largeImageText: viewer.titleName,
+      largeImageKey: 'nightwatch_logo',
+      startTimestamp: Date.now(),
+    });
+    return () => desktopBridge.clearDiscordPresence();
+  }, [viewer]);
   useEffect(() => {
     if (!viewer) return;
     const observer = new IntersectionObserver(
