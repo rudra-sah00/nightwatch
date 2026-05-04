@@ -39,7 +39,7 @@
   "match": "マッチ",
   "matches": "マッチ",
   "channels": "チャンネル",
-  "searchChannels": "900以上の24時間チャンネルを検索...",
+  "searchChannels": "チャンネルを検索...",
   "failedToLoadChannels": "チャンネルの読み込みに失敗",
   "noChannelsFoundSearch": "チャンネルが見つかりません",
   "desktopOnly": "デスクトップのみ",

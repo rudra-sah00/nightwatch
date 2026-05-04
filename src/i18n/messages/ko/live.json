@@ -39,7 +39,7 @@
   "match": "경기",
   "matches": "경기",
   "channels": "채널",
-  "searchChannels": "900개 이상의 24시간 채널 검색...",
+  "searchChannels": "채널 검색...",
   "failedToLoadChannels": "채널 로드 실패",
   "noChannelsFoundSearch": "채널을 찾을 수 없음",
   "desktopOnly": "데스크톱 전용",
