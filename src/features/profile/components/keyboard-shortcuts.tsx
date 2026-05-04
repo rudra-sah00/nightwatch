@@ -110,7 +110,6 @@ export function KeyboardShortcuts() {
   const isDesktop = checkIsDesktop();
 
   const groups = GROUPS.filter((g) => !g.desktopOnly || isDesktop);
-  const active = groups.find((g) => g.id === activeGroup) ?? groups[0];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -132,18 +131,27 @@ export function KeyboardShortcuts() {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+          className="absolute z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+          style={{
+            top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+            right: 'calc(2rem + env(safe-area-inset-right, 0px))',
+          }}
         >
           {tCancel('cancel')}
         </button>
 
-        <div className="flex flex-col items-center w-full max-w-lg px-6 h-full pt-16">
+        <div
+          className="flex flex-col items-center w-full max-w-lg px-6 h-full"
+          style={{
+            paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))',
+          }}
+        >
           <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
             {t('title')}
           </h2>
 
           {/* Group tabs */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6 shrink-0">
+          <div className="flex overflow-x-auto gap-2 mb-6 shrink-0 w-full no-scrollbar">
             {groups.map((group) => {
               const Icon = group.icon;
               return (
@@ -152,7 +160,7 @@ export function KeyboardShortcuts() {
                   type="button"
                   onClick={() => setActiveGroup(group.id)}
                   className={cn(
-                    'px-3 py-1.5 rounded-md font-headline font-bold uppercase text-xs tracking-wider transition-all duration-200',
+                    'px-3 py-1.5 rounded-md font-headline font-bold uppercase text-xs tracking-wider transition-all duration-200 shrink-0 whitespace-nowrap',
                     activeGroup === group.id
                       ? 'text-foreground font-black [text-shadow:0_0_12px_rgba(255,255,255,0.5)]'
                       : 'text-foreground/30 hover:text-foreground/60',
@@ -170,37 +178,46 @@ export function KeyboardShortcuts() {
             })}
           </div>
 
-          {/* Shortcuts list */}
-          <div
-            className="flex flex-col w-full gap-1 overflow-y-auto flex-1 pb-16"
-            key={active.id}
-          >
-            {active.shortcuts.map((shortcut) => (
+          {/* Shortcuts list — fixed position so tab switches don't shift layout */}
+          <div className="relative w-full flex-1 overflow-hidden">
+            {groups.map((group) => (
               <div
-                key={shortcut.label}
-                className="w-full px-6 py-4 flex items-center justify-between"
+                key={group.id}
+                className={cn(
+                  'absolute inset-0 flex flex-col w-full gap-1 overflow-y-auto pb-16 transition-opacity duration-200',
+                  activeGroup === group.id
+                    ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none',
+                )}
               >
-                <span className="text-lg font-headline font-bold tracking-wide text-foreground/60">
-                  {t(`actions.${shortcut.label}`)}
-                </span>
-                <div className="flex gap-2">
-                  {shortcut.keys.map((key) => (
-                    <kbd
-                      key={key}
-                      className="px-3 py-1.5 bg-foreground/10 border border-foreground/20 rounded-lg font-headline font-black text-sm uppercase text-foreground tracking-wider"
-                    >
-                      {key}
-                    </kbd>
-                  ))}
+                {group.shortcuts.map((shortcut) => (
+                  <div
+                    key={shortcut.label}
+                    className="w-full px-6 py-4 flex items-center justify-between"
+                  >
+                    <span className="text-lg font-headline font-bold tracking-wide text-foreground/60">
+                      {t(`actions.${shortcut.label}`)}
+                    </span>
+                    <div className="flex gap-2">
+                      {shortcut.keys.map((key) => (
+                        <kbd
+                          key={key}
+                          className="px-3 py-1.5 bg-foreground/10 border border-foreground/20 rounded-lg font-headline font-black text-sm uppercase text-foreground tracking-wider"
+                        >
+                          {key}
+                        </kbd>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="px-6 pt-4">
+                  <p className="text-xs font-bold uppercase font-headline text-foreground/20 tracking-widest">
+                    {t('note')}
+                  </p>
                 </div>
               </div>
             ))}
-
-            <div className="px-6 pt-4">
-              <p className="text-xs font-bold uppercase font-headline text-foreground/20 tracking-widest">
-                {t('note')}
-              </p>
-            </div>
           </div>
         </div>
       </DialogContent>

@@ -142,7 +142,7 @@ export function AppPreferences() {
             </DialogTrigger>
 
             <DialogContent
-              className="!fixed !inset-x-0 !bottom-0 !top-[var(--electron-titlebar-height,0px)] !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-[calc(100vh-var(--electron-titlebar-height,0px))] m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center justify-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500"
+              className="!fixed !inset-x-0 !bottom-0 !top-[var(--electron-titlebar-height,0px)] !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-[calc(100vh-var(--electron-titlebar-height,0px))] m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
               showCloseButton={false}
             >
               <DialogTitle className="sr-only">
@@ -151,12 +151,21 @@ export function AppPreferences() {
               <button
                 type="button"
                 onClick={() => setThemeOpen(false)}
-                className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+                className="absolute z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+                style={{
+                  top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+                  right: 'calc(2rem + env(safe-area-inset-right, 0px))',
+                }}
               >
                 {t('preferences.cancel')}
               </button>
 
-              <div className="flex flex-col items-center gap-8 w-full max-w-md px-6">
+              <div
+                className="flex flex-col items-center justify-center gap-8 w-full max-w-md px-6 h-full"
+                style={{
+                  paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))',
+                }}
+              >
                 <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground">
                   {t('preferences.themeSelection')}
                 </h2>

@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useDownloads } from '@/features/downloads/hooks/use-downloads';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useDownloadMenu } from '../hooks/use-download-menu';
@@ -351,10 +352,15 @@ export function DownloadMenu({
 }: DownloadMenuProps) {
   const router = useRouter();
   const { downloads } = useDownloads();
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDubId, setSelectedDubId] = useState<string>(show.id);
   const [selectedDubType, setSelectedDubType] = useState<ContentType>(
     show.contentType,
+  );
+  /** Mobile step: 'language' → 'quality' */
+  const [mobileStep, setMobileStep] = useState<'language' | 'quality'>(
+    'language',
   );
   const t = useTranslations('search');
 
@@ -409,7 +415,13 @@ export function DownloadMenu({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (open) setMobileStep('language');
+      }}
+    >
       <DialogTrigger asChild>
         <button
           type="button"
@@ -435,106 +447,245 @@ export function DownloadMenu({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="absolute top-8 right-8 z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
+          className="absolute z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors duration-300 focus:outline-none [-webkit-app-region:no-drag]"
+          style={{
+            top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+            right: 'calc(2rem + env(safe-area-inset-right, 0px))',
+          }}
         >
           {t('download.cancel')}
         </button>
 
-        {/* Left Column: Languages */}
-        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10 p-8 md:p-16 flex flex-col justify-start data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-left-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-left-8 duration-700 h-full overflow-hidden">
-          <h2 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40 mb-12">
-            {t('download.language')}
-          </h2>
-
-          <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-4">
-            {show.dubs && show.dubs.length > 1 ? (
-              show.dubs.map((dub) => {
-                const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
-                const isSelected = selectedDubId === dubId;
-
-                return (
-                  <button
-                    type="button"
-                    key={dubId}
-                    onClick={() => {
-                      setSelectedDubId(dubId);
-                      setSelectedDubType(dub.contentType);
-                    }}
-                    className={cn(
-                      'text-left group flex items-center gap-6 focus:outline-none transition-all duration-300',
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter transition-all duration-300',
-                        isSelected
-                          ? 'text-black dark:text-white translate-x-2'
-                          : 'text-black/30 dark:text-white/30 group-hover:text-black/60 dark:text-white/60',
-                      )}
-                    >
-                      {dub.lanName}
-                    </span>
-                    {isSelected && (
-                      <div className="w-3 h-3 rounded-full bg-black dark:bg-white animate-pulse" />
-                    )}
-                  </button>
-                );
-              })
-            ) : show.dubs && show.dubs.length === 1 ? (
-              <div className="text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter text-black dark:text-white">
-                {show.dubs[0].lanName}
-              </div>
-            ) : (
-              <div className="text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter text-black dark:text-white">
-                {t('download.original')}
-              </div>
+        {/* ── Mobile: step-based flow (language → quality) ── */}
+        {isMobile && (
+          <div className="flex flex-col w-full h-full overflow-hidden">
+            {/* Back button when on quality step */}
+            {mobileStep === 'quality' && (
+              <button
+                type="button"
+                onClick={() => setMobileStep('language')}
+                className="absolute z-50 text-foreground/50 hover:text-foreground font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+                style={{
+                  top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+                  left: 'calc(2rem + env(safe-area-inset-left, 0px))',
+                }}
+              >
+                ← {t('download.language')}
+              </button>
             )}
-          </div>
-        </div>
 
-        {/* Right Column: Qualities or Episodes */}
-        <div className="w-full md:w-2/3 p-8 md:p-16 flex flex-col justify-start overflow-y-auto custom-scrollbar">
-          {!isSeries ? (
-            <TransparentMovieSection
-              contentId={selectedDubId}
-              showTitle={show.title}
-              posterUrl={show.posterUrl}
-              onComplete={onComplete}
-              show={show}
-            />
-          ) : (
-            <div className="flex flex-col gap-6 w-full max-w-3xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-right-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
-              <div className="space-y-2 mb-8">
-                <h3 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
-                  {t('download.selectEpisode')}
-                </h3>
-                <p className="text-2xl font-bold text-black/80 dark:text-white/80">
-                  {t('contentDetail.season', { number: seasonNumber })}
-                </p>
+            <div
+              className="flex w-[200%] h-full transition-transform duration-300 ease-out"
+              style={{
+                transform:
+                  mobileStep === 'quality'
+                    ? 'translateX(-50%)'
+                    : 'translateX(0)',
+              }}
+            >
+              {/* Step 1: Language */}
+              <div
+                className="w-1/2 h-full p-8 flex flex-col overflow-y-auto"
+                style={{
+                  paddingTop: 'calc(5rem + env(safe-area-inset-top, 0px))',
+                }}
+              >
+                <h2 className="text-lg font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40 mb-8">
+                  {t('download.language')}
+                </h2>
+                <div className="flex flex-col gap-6">
+                  {show.dubs && show.dubs.length > 1 ? (
+                    show.dubs.map((dub) => {
+                      const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
+                      const isSelected = selectedDubId === dubId;
+                      return (
+                        <button
+                          type="button"
+                          key={dubId}
+                          onClick={() => {
+                            setSelectedDubId(dubId);
+                            setSelectedDubType(dub.contentType);
+                            setMobileStep('quality');
+                          }}
+                          className="text-left group flex items-center gap-6 focus:outline-none transition-all duration-300"
+                        >
+                          <span
+                            className={cn(
+                              'text-3xl font-headline font-black uppercase tracking-tighter transition-all duration-300',
+                              isSelected
+                                ? 'text-black dark:text-white translate-x-2'
+                                : 'text-black/30 dark:text-white/30 group-hover:text-black/60 dark:group-hover:text-white/60',
+                            )}
+                          >
+                            {dub.lanName}
+                          </span>
+                          {isSelected && (
+                            <div className="w-3 h-3 rounded-full bg-black dark:bg-white animate-pulse" />
+                          )}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setMobileStep('quality')}
+                      className="text-left text-3xl font-headline font-black uppercase tracking-tighter text-black dark:text-white"
+                    >
+                      {show.dubs?.[0]?.lanName || t('download.original')}
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="flex flex-col pr-4">
-                {seasonEpisodes.length === 0 ? (
-                  <p className="text-xl font-headline font-black uppercase text-black/30 dark:text-white/30">
-                    {t('download.noEpisodesAvailable')}
-                  </p>
+              {/* Step 2: Quality / Episodes */}
+              <div
+                className="w-1/2 h-full p-8 flex flex-col overflow-y-auto"
+                style={{
+                  paddingTop: 'calc(5rem + env(safe-area-inset-top, 0px))',
+                }}
+              >
+                {!isSeries ? (
+                  <TransparentMovieSection
+                    contentId={selectedDubId}
+                    showTitle={show.title}
+                    posterUrl={show.posterUrl}
+                    onComplete={onComplete}
+                    show={show}
+                  />
                 ) : (
-                  seasonEpisodes.map((ep) => (
-                    <TransparentEpisodeItem
-                      key={ep.episodeId}
-                      episode={ep}
-                      contentId={selectedDubId}
-                      showTitle={show.title}
-                      posterUrl={show.posterUrl}
-                      onComplete={onComplete}
-                      show={show}
-                    />
-                  ))
+                  <div className="flex flex-col gap-6 w-full">
+                    <div className="space-y-2 mb-4">
+                      <h3 className="text-lg font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
+                        {t('download.selectEpisode')}
+                      </h3>
+                      <p className="text-2xl font-bold text-black/80 dark:text-white/80">
+                        {t('contentDetail.season', { number: seasonNumber })}
+                      </p>
+                    </div>
+                    {seasonEpisodes.length === 0 ? (
+                      <p className="text-xl font-headline font-black uppercase text-black/30 dark:text-white/30">
+                        {t('download.noEpisodesAvailable')}
+                      </p>
+                    ) : (
+                      seasonEpisodes.map((ep) => (
+                        <TransparentEpisodeItem
+                          key={ep.episodeId}
+                          episode={ep}
+                          contentId={selectedDubId}
+                          showTitle={show.title}
+                          posterUrl={show.posterUrl}
+                          onComplete={onComplete}
+                          show={show}
+                        />
+                      ))
+                    )}
+                  </div>
                 )}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* ── Desktop: side-by-side layout ── */}
+        {!isMobile && (
+          <>
+            {/* Left Column: Languages */}
+            <div className="w-1/3 border-r border-black/10 dark:border-white/10 p-16 flex flex-col justify-start h-full overflow-hidden">
+              <h2 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40 mb-12">
+                {t('download.language')}
+              </h2>
+
+              <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-4">
+                {show.dubs && show.dubs.length > 1 ? (
+                  show.dubs.map((dub) => {
+                    const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
+                    const isSelected = selectedDubId === dubId;
+
+                    return (
+                      <button
+                        type="button"
+                        key={dubId}
+                        onClick={() => {
+                          setSelectedDubId(dubId);
+                          setSelectedDubType(dub.contentType);
+                        }}
+                        className={cn(
+                          'text-left group flex items-center gap-6 focus:outline-none transition-all duration-300',
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter transition-all duration-300',
+                            isSelected
+                              ? 'text-black dark:text-white translate-x-2'
+                              : 'text-black/30 dark:text-white/30 group-hover:text-black/60 dark:text-white/60',
+                          )}
+                        >
+                          {dub.lanName}
+                        </span>
+                        {isSelected && (
+                          <div className="w-3 h-3 rounded-full bg-black dark:bg-white animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })
+                ) : show.dubs && show.dubs.length === 1 ? (
+                  <div className="text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter text-black dark:text-white">
+                    {show.dubs[0].lanName}
+                  </div>
+                ) : (
+                  <div className="text-3xl md:text-4xl lg:text-5xl font-headline font-black uppercase tracking-tighter text-black dark:text-white">
+                    {t('download.original')}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Qualities or Episodes */}
+            <div className="w-2/3 p-16 flex flex-col justify-start overflow-y-auto custom-scrollbar">
+              {!isSeries ? (
+                <TransparentMovieSection
+                  contentId={selectedDubId}
+                  showTitle={show.title}
+                  posterUrl={show.posterUrl}
+                  onComplete={onComplete}
+                  show={show}
+                />
+              ) : (
+                <div className="flex flex-col gap-6 w-full max-w-3xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-right-8 data-[state=open]:fade-in data-[state=open]:slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
+                  <div className="space-y-2 mb-8">
+                    <h3 className="text-lg md:text-xl font-headline font-black uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
+                      {t('download.selectEpisode')}
+                    </h3>
+                    <p className="text-2xl font-bold text-black/80 dark:text-white/80">
+                      {t('contentDetail.season', { number: seasonNumber })}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col pr-4">
+                    {seasonEpisodes.length === 0 ? (
+                      <p className="text-xl font-headline font-black uppercase text-black/30 dark:text-white/30">
+                        {t('download.noEpisodesAvailable')}
+                      </p>
+                    ) : (
+                      seasonEpisodes.map((ep) => (
+                        <TransparentEpisodeItem
+                          key={ep.episodeId}
+                          episode={ep}
+                          contentId={selectedDubId}
+                          showTitle={show.title}
+                          posterUrl={show.posterUrl}
+                          onComplete={onComplete}
+                          show={show}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
