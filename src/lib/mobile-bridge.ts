@@ -39,19 +39,21 @@ export const isMobileNative = Capacitor.isNativePlatform();
 export const mobileBridge = {
   // --- Splash Screen ---
   /** Hide the native splash screen. */
-  hideSplash: () => SplashScreen.hide(),
+  hideSplash: () => SplashScreen.hide().catch(() => {}),
   /** Show the native splash screen. */
-  showSplash: () => SplashScreen.show(),
+  showSplash: () => SplashScreen.show().catch(() => {}),
 
   // --- Status Bar ---
   /** Set the status bar to dark (light content) style. */
-  setStatusBarDark: () => StatusBar.setStyle({ style: Style.Dark }),
+  setStatusBarDark: () =>
+    StatusBar.setStyle({ style: Style.Dark }).catch(() => {}),
   /** Set the status bar to light (dark content) style. */
-  setStatusBarLight: () => StatusBar.setStyle({ style: Style.Light }),
+  setStatusBarLight: () =>
+    StatusBar.setStyle({ style: Style.Light }).catch(() => {}),
   /** Hide the native status bar. */
-  hideStatusBar: () => StatusBar.hide(),
+  hideStatusBar: () => StatusBar.hide().catch(() => {}),
   /** Show the native status bar. */
-  showStatusBar: () => StatusBar.show(),
+  showStatusBar: () => StatusBar.show().catch(() => {}),
 
   // --- Clipboard ---
   /** Write {@link text} to the system clipboard. */
@@ -70,7 +72,7 @@ export const mobileBridge = {
       medium: ImpactStyle.Medium,
       heavy: ImpactStyle.Heavy,
     };
-    return Haptics.impact({ style: map[style] });
+    return Haptics.impact({ style: map[style] }).catch(() => {});
   },
   /**
    * Trigger a notification-style haptic feedback.
@@ -82,10 +84,10 @@ export const mobileBridge = {
       warning: NotificationType.Warning,
       error: NotificationType.Error,
     };
-    return Haptics.notification({ type: map[type] });
+    return Haptics.notification({ type: map[type] }).catch(() => {});
   },
   /** Trigger a simple vibration. */
-  hapticVibrate: () => Haptics.vibrate(),
+  hapticVibrate: () => Haptics.vibrate().catch(() => {}),
 
   // --- Keep Awake ---
   /**
@@ -93,15 +95,17 @@ export const mobileBridge = {
    * @param keep - `true` to prevent sleep, `false` to allow it.
    */
   setKeepAwake: (keep: boolean) =>
-    keep ? KeepAwake.keepAwake() : KeepAwake.allowSleep(),
+    (keep ? KeepAwake.keepAwake() : KeepAwake.allowSleep()).catch(() => {}),
 
   // --- Screen Orientation ---
   /** Lock the screen to landscape orientation. */
-  lockLandscape: () => ScreenOrientation.lock({ orientation: 'landscape' }),
+  lockLandscape: () =>
+    ScreenOrientation.lock({ orientation: 'landscape' }).catch(() => {}),
   /** Lock the screen to portrait orientation. */
-  lockPortrait: () => ScreenOrientation.lock({ orientation: 'portrait' }),
+  lockPortrait: () =>
+    ScreenOrientation.lock({ orientation: 'portrait' }).catch(() => {}),
   /** Unlock screen orientation to follow the device sensor. */
-  unlockOrientation: () => ScreenOrientation.unlock(),
+  unlockOrientation: () => ScreenOrientation.unlock().catch(() => {}),
 
   // --- Network ---
   /** Get the current network connection status. */
@@ -114,9 +118,11 @@ export const mobileBridge = {
   onNetworkChange: (
     cb: (status: { connected: boolean; connectionType: string }) => void,
   ) => {
-    const handle = Network.addListener('networkStatusChange', cb);
+    const handle = Network.addListener('networkStatusChange', cb).catch(
+      () => null,
+    );
     return () => {
-      handle.then((h) => h.remove());
+      handle.then((h) => h?.remove());
     };
   },
 
@@ -161,16 +167,18 @@ export const mobileBridge = {
 
   // --- Keyboard ---
   /** Programmatically hide the software keyboard. */
-  hideKeyboard: () => Keyboard.hide(),
+  hideKeyboard: () => Keyboard.hide().catch(() => {}),
   /**
    * Subscribe to keyboard show events.
    * @param cb - Called with `{ keyboardHeight }` when the keyboard appears.
    * @returns An unlisten function.
    */
   onKeyboardShow: (cb: (info: { keyboardHeight: number }) => void) => {
-    const handle = Keyboard.addListener('keyboardWillShow', cb);
+    const handle = Keyboard.addListener('keyboardWillShow', cb).catch(
+      () => null,
+    );
     return () => {
-      handle.then((h) => h.remove());
+      handle.then((h) => h?.remove());
     };
   },
   /**
@@ -179,9 +187,11 @@ export const mobileBridge = {
    * @returns An unlisten function.
    */
   onKeyboardHide: (cb: () => void) => {
-    const handle = Keyboard.addListener('keyboardWillHide', cb);
+    const handle = Keyboard.addListener('keyboardWillHide', cb).catch(
+      () => null,
+    );
     return () => {
-      handle.then((h) => h.remove());
+      handle.then((h) => h?.remove());
     };
   },
 
@@ -192,9 +202,9 @@ export const mobileBridge = {
    * @returns An unlisten function.
    */
   onAppStateChange: (cb: (state: { isActive: boolean }) => void) => {
-    const handle = App.addListener('appStateChange', cb);
+    const handle = App.addListener('appStateChange', cb).catch(() => null);
     return () => {
-      handle.then((h) => h.remove());
+      handle.then((h) => h?.remove());
     };
   },
   /**
@@ -203,9 +213,9 @@ export const mobileBridge = {
    * @returns An unlisten function.
    */
   onBackButton: (cb: () => void) => {
-    const handle = App.addListener('backButton', cb);
+    const handle = App.addListener('backButton', cb).catch(() => null);
     return () => {
-      handle.then((h) => h.remove());
+      handle.then((h) => h?.remove());
     };
   },
   /** Terminate the native app process. */

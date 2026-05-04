@@ -14,20 +14,22 @@ const isNative = Capacitor.isNativePlatform();
 
 /** Trigger a light impact haptic. Ideal for subtle button taps. */
 export function hapticLight() {
-  if (isNative) Haptics.impact({ style: ImpactStyle.Light });
+  if (isNative) Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
 }
 
 /** Trigger a medium impact haptic. Ideal for standard interactions. */
 export function hapticMedium() {
-  if (isNative) Haptics.impact({ style: ImpactStyle.Medium });
+  if (isNative) Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
 }
 
 /** Trigger a success notification haptic. */
 export function hapticSuccess() {
-  if (isNative) Haptics.notification({ type: NotificationType.Success });
+  if (isNative)
+    Haptics.notification({ type: NotificationType.Success }).catch(() => {});
 }
 
 /** Trigger an error notification haptic. */
 export function hapticError() {
-  if (isNative) Haptics.notification({ type: NotificationType.Error });
+  if (isNative)
+    Haptics.notification({ type: NotificationType.Error }).catch(() => {});
 }

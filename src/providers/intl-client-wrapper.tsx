@@ -24,7 +24,7 @@ function getMessageFallback({
   key: string;
   error: { code: string };
 }) {
-  const leafKey = key.split('.').pop() ?? key;
+  const leafKey = key?.split('.').pop() ?? key ?? namespace ?? '';
   return namespace ? `${namespace}.${leafKey}` : leafKey;
 }
 
