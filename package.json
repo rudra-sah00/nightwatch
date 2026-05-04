@@ -219,7 +219,7 @@
         "provider": "github",
         "owner": "rudra-sah00",
         "repo": "nightwatch",
-        "releaseType": "draft"
+        "releaseType": "release"
       }
     ]
   },
