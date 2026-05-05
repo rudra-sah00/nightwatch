@@ -2,7 +2,7 @@ import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { ChangePasswordInput, UpdateProfileInput } from './schema';
-import type { WatchActivity } from './types';
+import type { MusicActivity, WatchActivity } from './types';
 
 /**
  * User profile management and caching.
@@ -47,14 +47,32 @@ export { checkUsername } from '@/features/auth/api';
 export async function getWatchActivity(
   options?: RequestInit,
 ): Promise<WatchActivity[]> {
-  const { activity } = await apiFetch<{
+  const result = await apiFetch<{
     activity: { date: string; watchSeconds: number; level: number }[];
   }>('/api/watch/activity', options);
 
-  return activity.map((a) => ({
+  if (!result?.activity) return [];
+
+  return result.activity.map((a) => ({
     date: a.date,
     count: a.watchSeconds / 60,
     level: a.level as WatchActivity['level'],
+  }));
+}
+
+export async function getMusicActivity(
+  options?: RequestInit,
+): Promise<MusicActivity[]> {
+  const result = await apiFetch<{
+    activity: { date: string; listenSeconds: number; level: number }[];
+  }>('/api/music/activity', options);
+
+  if (!result?.activity) return [];
+
+  return result.activity.map((a) => ({
+    date: a.date,
+    count: a.listenSeconds / 60,
+    level: a.level as MusicActivity['level'],
   }));
 }
 
@@ -103,9 +121,15 @@ export async function getPublicProfile(
   id: string,
   options?: RequestInit,
 ): Promise<{
-  profile: User & { activity: { date: string; watchSeconds: number }[] };
+  profile: User & {
+    activity: { date: string; watchSeconds: number }[];
+    musicActivity: { date: string; listenSeconds: number }[];
+  };
 }> {
   return apiFetch<{
-    profile: User & { activity: { date: string; watchSeconds: number }[] };
+    profile: User & {
+      activity: { date: string; watchSeconds: number }[];
+      musicActivity: { date: string; listenSeconds: number }[];
+    };
   }>(`/api/user/public/${id}`, options);
 }

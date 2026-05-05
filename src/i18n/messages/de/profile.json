@@ -32,7 +32,10 @@
       "oct": "Okt",
       "nov": "Nov",
       "dec": "Dez"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "Foto aktualisieren",

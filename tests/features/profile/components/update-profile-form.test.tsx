@@ -49,7 +49,7 @@ describe('UpdateProfileForm', () => {
     vi.mocked(useProfileOverview).mockReturnValue({
       user: mockUser,
       logout: vi.fn(),
-      activity: [],
+      activity: { watch: [], music: [] },
       loadingActivity: false,
       isUploading: false,
       displayImage: null,

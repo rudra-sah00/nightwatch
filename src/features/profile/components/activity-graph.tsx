@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { WatchActivity } from '../types';
+import type { ActivityData } from '../types';
 
 // Helper to get ISO date string YYYY-MM-DD (Local)
 const toIso = (date: Date) => {
@@ -15,18 +15,26 @@ const toIso = (date: Date) => {
 
 /** Props for the {@link ActivityGraph} component. */
 interface ActivityGraphProps {
-  /** Array of daily watch activity records. */
-  activity: WatchActivity[];
+  /** Daily watch and music activity records. */
+  activity: ActivityData;
   /** Whether the activity data is still loading. */
   isLoading?: boolean;
 }
 
-const ACTIVITY_LEVEL_COLORS = [
-  'bg-secondary', // Level 0 - empty
-  'bg-neo-blue/40', // Level 1
-  'bg-neo-blue', // Level 2
-  'bg-neo-yellow', // Level 3
-  'bg-neo-red', // Level 4
+const WATCH_LEVEL_COLORS = [
+  'bg-secondary', // Level 0
+  'bg-activity-1', // Level 1
+  'bg-activity-2', // Level 2
+  'bg-activity-3', // Level 3
+  'bg-activity-4', // Level 4
+] as const;
+
+const MUSIC_LEVEL_COLORS = [
+  'bg-secondary', // Level 0
+  'bg-music-1', // Level 1
+  'bg-music-2', // Level 2
+  'bg-music-3', // Level 3
+  'bg-music-4', // Level 4
 ] as const;
 
 const MONTH_KEYS = [
@@ -85,7 +93,6 @@ function getMonthLabelsForSkeleton(t: (key: string) => string) {
   return labels;
 }
 
-/** Placeholder skeleton rendered while activity data is loading. */
 function ActivityGraphSkeleton() {
   const t = useTranslations('profile');
   const skeletonIds = useMemo(
@@ -113,24 +120,13 @@ function ActivityGraphSkeleton() {
   );
 }
 
-/**
- * Computes the 53-week grid data for the activity heatmap.
- *
- * Maps raw activity records onto a calendar grid spanning the last 52 weeks
- * plus the current partial week, assigning intensity levels (0–4) based on
- * watch minutes per day.
- *
- * @param activity - Array of daily watch activity records.
- * @param createdAt - Optional account creation date to grey out pre-creation days.
- * @returns Object containing the `weeks` 2D array for rendering.
- */
-function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
+function useActivityGraphData(activity: ActivityData, createdAt?: Date) {
   return useMemo(() => {
-    // Strip time to ensure consistent comparisons
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
-    const activityByDate = new Map(activity?.map((a) => [a.date, a]) ?? []);
+    const watchByDate = new Map(activity.watch?.map((a) => [a.date, a]) ?? []);
+    const musicByDate = new Map(activity.music?.map((a) => [a.date, a]) ?? []);
 
     const dayOfWeek = today.getDay();
     const daysToSubtract = 52 * 7 + dayOfWeek;
@@ -142,8 +138,10 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
     const weeksData: {
       date: Date;
       dateStr: string;
-      count: number;
-      level: number;
+      watchCount: number;
+      watchLevel: number;
+      musicCount: number;
+      musicLevel: number;
       isValid: boolean;
     }[][] = [];
 
@@ -158,34 +156,44 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
       const week = [];
       for (let d = 0; d < 7; d++) {
         const dateStr = toIso(currentDate);
-
-        const isAfterCreation = creationDay ? currentDate >= creationDay : true;
         const checkDate = new Date(currentDate);
         checkDate.setHours(0, 0, 0, 0);
         const isFuture = checkDate > todayMidnight;
 
-        let count = 0;
-        let level = 0;
+        let watchCount = 0;
+        let watchLevel = 0;
+        let musicCount = 0;
+        let musicLevel = 0;
 
-        if (isAfterCreation && !isFuture) {
-          const dayActivity = activityByDate.get(dateStr);
-          count = dayActivity?.count || 0;
+        if (!isFuture) {
+          const wDay = watchByDate.get(dateStr);
+          watchCount = wDay?.count || 0;
+          watchLevel = wDay?.level || 0;
+          if (watchCount > 0 && watchLevel === 0) {
+            if (watchCount > 120) watchLevel = 4;
+            else if (watchCount > 60) watchLevel = 3;
+            else if (watchCount > 30) watchLevel = 2;
+            else watchLevel = 1;
+          }
 
-          if (dayActivity?.level) {
-            level = dayActivity.level;
-          } else if (count > 0) {
-            if (count > 120) level = 4;
-            else if (count > 60) level = 3;
-            else if (count > 30) level = 2;
-            else level = 1;
+          const mDay = musicByDate.get(dateStr);
+          musicCount = mDay?.count || 0;
+          musicLevel = mDay?.level || 0;
+          if (musicCount > 0 && musicLevel === 0) {
+            if (musicCount > 120) musicLevel = 4;
+            else if (musicCount > 60) musicLevel = 3;
+            else if (musicCount > 30) musicLevel = 2;
+            else musicLevel = 1;
           }
         }
 
         week.push({
           date: new Date(currentDate),
           dateStr,
-          count,
-          level,
+          watchCount,
+          watchLevel,
+          musicCount,
+          musicLevel,
           isValid: !isFuture,
         });
 
@@ -198,14 +206,6 @@ function useActivityGraphData(activity: WatchActivity[], createdAt?: Date) {
   }, [activity, createdAt]);
 }
 
-/**
- * GitHub-style activity heatmap showing daily watch activity over the past year.
- *
- * Renders a 53×7 grid of colored cells with hover tooltips displaying watch
- * minutes and date. Shows a skeleton placeholder while loading.
- *
- * @param props - Activity data, optional account creation date, and loading flag.
- */
 export function ActivityGraph({
   activity,
   createdAt,
@@ -247,58 +247,77 @@ export function ActivityGraph({
               : isRightSide
                 ? 'right-0'
                 : 'left-1/2 -translate-x-1/2';
-            const arrowHorizontal = isLeftSide
-              ? 'left-1'
-              : isRightSide
-                ? 'right-1'
-                : 'left-1/2 -translate-x-1/2';
-
             const isTopRow = dayIndex < 3;
             const tooltipVertical = isTopRow
               ? 'top-full mt-2'
               : 'bottom-full mb-2';
-            const arrowVertical = isTopRow
-              ? 'bottom-full -mb-px border-b-primary border-t-transparent'
-              : 'top-full -mt-px border-t-primary border-b-transparent';
+
+            const hasWatch = day.watchLevel > 0;
+            const hasMusic = day.musicLevel > 0;
 
             return (
               <div
                 key={day.dateStr}
                 className={cn(
                   'w-3 h-3 border border-border/10 transition-colors relative group/cell',
-                  ACTIVITY_LEVEL_COLORS[day.level],
-                  day.isValid && day.level > 0
-                    ? 'hover:border-border hover:z-50'
-                    : '',
+                  !hasWatch && !hasMusic ? 'bg-secondary' : '',
                   !day.isValid ? 'opacity-0' : 'cursor-pointer',
                 )}
               >
-                {/* Tooltip */}
+                {/* Clipped Activity Bars */}
+                <div className="absolute inset-0 overflow-hidden">
+                  {/* Watch Activity (Left Half) */}
+                  <div
+                    className={cn(
+                      'absolute top-0 left-0 bottom-0 transition-colors',
+                      hasWatch || hasMusic ? 'w-1/2' : 'w-full',
+                      WATCH_LEVEL_COLORS[day.watchLevel],
+                    )}
+                  />
+                  {/* Music Activity (Right Half) */}
+                  <div
+                    className={cn(
+                      'absolute top-0 right-0 bottom-0 transition-colors',
+                      hasWatch || hasMusic ? 'w-1/2' : 'w-0',
+                      MUSIC_LEVEL_COLORS[day.musicLevel],
+                    )}
+                  />
+                </div>
+
+                {/* Tooltip (Outside overflow-hidden) */}
                 {day.isValid && (
                   <div
                     className={cn(
-                      'absolute hidden group-hover/cell:block z-50 whitespace-nowrap bg-primary text-primary-foreground font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
+                      'absolute hidden group-hover/cell:flex flex-col gap-1 z-50 whitespace-nowrap bg-primary text-primary-foreground font-headline tracking-tighter text-[11px] px-2 py-1 shadow-lg pointer-events-none uppercase font-bold',
                       tooltipHorizontal,
                       tooltipVertical,
                     )}
                   >
-                    <span>
-                      {day.count > 0
-                        ? t('activity.minSuffix', {
-                            count: Math.ceil(day.count),
-                          })
-                        : t('activity.noActivity')}
-                    </span>
-                    <span className="text-primary-foreground/60 ml-2">
-                      {formatDate(day.date)}
-                    </span>
-                    <div
-                      className={cn(
-                        'absolute border-4 border-transparent',
-                        arrowHorizontal,
-                        arrowVertical,
-                      )}
-                    />
+                    <div className="flex items-center justify-between gap-4">
+                      <span>{formatDate(day.date)}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5 border-t border-primary-foreground/20 pt-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-activity-4" />
+                        <span>
+                          {day.watchCount > 0
+                            ? t('activity.minSuffix', {
+                                count: Math.ceil(day.watchCount),
+                              })
+                            : t('activity.noWatch')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-music-4" />
+                        <span>
+                          {day.musicCount > 0
+                            ? t('activity.minMusicSuffix', {
+                                count: Math.ceil(day.musicCount),
+                              })
+                            : t('activity.noMusic')}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

@@ -32,7 +32,10 @@
       "oct": "ต.ค.",
       "nov": "พ.ย.",
       "dec": "ธ.ค."
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "อัปเดตรูปภาพ",

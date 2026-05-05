@@ -38,6 +38,7 @@ describe('PublicProfilePage (Server Component)', () => {
       { date: '2024-01-01', watchSeconds: 3600 },
       { date: '2024-01-02', watchSeconds: 7200 },
     ],
+    musicActivity: [],
   };
 
   it('renders correctly with user data using feature view', async () => {
@@ -91,7 +92,7 @@ describe('PublicProfilePage (Server Component)', () => {
 
     // For this test, we verify the page handles empty activity gracefully.
     vi.mocked(getPublicProfile).mockResolvedValue({
-      profile: { ...mockProfile, activity: [] },
+      profile: { ...mockProfile, activity: [], musicActivity: [] },
     });
 
     const page = await PublicProfilePage({

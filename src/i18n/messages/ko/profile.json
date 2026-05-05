@@ -32,7 +32,10 @@
       "oct": "10월",
       "nov": "11월",
       "dec": "12월"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "사진 업데이트",

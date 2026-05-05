@@ -28,13 +28,16 @@
     "submit": "OVERRIDE PASSWORD"
   },
   "activity": {
-    "title": "Watch Activity",
+    "title": "Activity",
     "less": "Less",
     "more": "More",
     "noActivity": "No activity",
-    "minSuffix": "{count} min",
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minSuffix": "{count} min watch",
+    "minMusicSuffix": "{count} min music",
     "last365": "Last 365 days of interaction",
-    "heatmapAriaLabel": "Watch activity heatmap for the past year",
+    "heatmapAriaLabel": "Interaction activity heatmap for the past year",
     "months": {
       "jan": "Jan",
       "feb": "Feb",

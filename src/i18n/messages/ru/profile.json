@@ -32,7 +32,10 @@
       "oct": "окт",
       "nov": "ноя",
       "dec": "дек"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "Обновить фото",

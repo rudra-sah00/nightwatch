@@ -32,7 +32,10 @@
       "oct": "Eki",
       "nov": "Kas",
       "dec": "Ara"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "Fotoğrafı Güncelle",

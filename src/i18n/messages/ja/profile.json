@@ -32,7 +32,10 @@
       "oct": "10月",
       "nov": "11月",
       "dec": "12月"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "写真を更新",

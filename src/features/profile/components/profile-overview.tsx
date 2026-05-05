@@ -151,18 +151,31 @@ export function ProfileOverview() {
           <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
             {t('activity.title')}
           </h2>
-          <div className="flex gap-2 items-center">
-            <span className="text-xs font-bold uppercase font-headline text-muted-foreground">
-              {t('activity.less')}
-            </span>
-            <div className="w-4 h-4 bg-muted"></div>
-            <div className="w-4 h-4 bg-primary/30"></div>
-            <div className="w-4 h-4 bg-primary/60"></div>
-            <div className="w-4 h-4 bg-primary"></div>
-            <div className="w-4 h-4 bg-destructive"></div>
-            <span className="text-xs font-bold uppercase font-headline text-muted-foreground">
-              {t('activity.more')}
-            </span>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2 items-center">
+              <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12">
+                Watch
+              </span>
+              <div className="flex gap-1.5 items-center">
+                <div className="w-3.5 h-3.5 bg-secondary"></div>
+                <div className="w-3.5 h-3.5 bg-activity-1"></div>
+                <div className="w-3.5 h-3.5 bg-activity-2"></div>
+                <div className="w-3.5 h-3.5 bg-activity-3"></div>
+                <div className="w-3.5 h-3.5 bg-activity-4"></div>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12">
+                Music
+              </span>
+              <div className="flex gap-1.5 items-center">
+                <div className="w-3.5 h-3.5 bg-secondary"></div>
+                <div className="w-3.5 h-3.5 bg-music-1"></div>
+                <div className="w-3.5 h-3.5 bg-music-2"></div>
+                <div className="w-3.5 h-3.5 bg-music-3"></div>
+                <div className="w-3.5 h-3.5 bg-music-4"></div>
+              </div>
+            </div>
           </div>
         </div>
 

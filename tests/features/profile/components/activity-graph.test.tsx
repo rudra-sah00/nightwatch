@@ -1,19 +1,24 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ActivityGraph } from '@/features/profile/components/activity-graph';
-import type { WatchActivity } from '@/features/profile/types';
+import type { ActivityData } from '@/features/profile/types';
 
 describe('ActivityGraph', () => {
-  const mockActivity: WatchActivity[] = [
-    { date: '2026-01-15', count: 30, level: 1 },
-    { date: '2026-01-16', count: 60, level: 2 },
-    { date: '2026-01-17', count: 90, level: 3 },
-    { date: '2026-01-18', count: 150, level: 4 },
-  ];
+  const mockActivity: ActivityData = {
+    watch: [
+      { date: '2026-01-15', count: 30, level: 1 },
+      { date: '2026-01-16', count: 60, level: 2 },
+      { date: '2026-01-17', count: 90, level: 3 },
+      { date: '2026-01-18', count: 150, level: 4 },
+    ],
+    music: [],
+  };
+
+  const emptyActivity: ActivityData = { watch: [], music: [] };
 
   describe('rendering', () => {
     it('renders without crashing', () => {
-      render(<ActivityGraph activity={[]} />);
+      render(<ActivityGraph activity={emptyActivity} />);
       // Month labels are now dynamic based on the 53-week range ending today
       const monthContainer = document.querySelector(
         '.flex.justify-between.mt-4',
@@ -23,7 +28,7 @@ describe('ActivityGraph', () => {
 
     it('renders loading skeleton when isLoading is true', () => {
       const { container } = render(
-        <ActivityGraph activity={[]} isLoading={true} />,
+        <ActivityGraph activity={emptyActivity} isLoading={true} />,
       );
       expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
     });
@@ -76,7 +81,7 @@ describe('ActivityGraph', () => {
 
   describe('empty state', () => {
     it('renders correctly with empty activity array', () => {
-      render(<ActivityGraph activity={[]} />);
+      render(<ActivityGraph activity={emptyActivity} />);
       // Should show dynamic month labels
       const monthContainer = document.querySelector(
         '.flex.justify-between.mt-4',

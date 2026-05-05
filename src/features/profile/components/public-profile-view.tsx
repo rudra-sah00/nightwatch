@@ -3,8 +3,9 @@
 import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import { CreatorFooter } from '@/components/ui/creator-footer';
-import type { WatchActivity } from '../types';
+import type { ActivityData } from '../types';
 import { ActivityGraph } from './activity-graph';
 
 /** Props for the {@link PublicProfileView} component. */
@@ -17,6 +18,7 @@ interface PublicProfileViewProps {
     profilePhoto: string | null;
     createdAt: string;
     activity: { date: string; watchSeconds: number }[];
+    musicActivity: { date: string; listenSeconds: number }[];
   };
   /** Pre-computed today's date (ISO string) from server to prevent hydration mismatch. */
   todayIso: string;
@@ -39,24 +41,40 @@ export function PublicProfileView({
   });
 
   // Map API activity to Heatmap component expectations
-  const mappedActivity: WatchActivity[] = profile.activity.map((a) => {
-    const minutes = Math.floor(a.watchSeconds / 60);
-    let level: 0 | 1 | 2 | 3 | 4 = 0;
-    if (minutes > 0) {
-      if (minutes > 120) level = 4;
-      else if (minutes > 60) level = 3;
-      else if (minutes > 30) level = 2;
-      else level = 1;
-    }
-    return {
-      date: a.date,
-      count: minutes,
-      level,
-    };
-  });
+  const mappedActivity = useMemo(() => {
+    const watch: ActivityData['watch'] = profile.activity.map((a) => {
+      const minutes = Math.floor(a.watchSeconds / 60);
+      let level: 0 | 1 | 2 | 3 | 4 = 0;
+      if (minutes > 0) {
+        if (minutes > 120) level = 4;
+        else if (minutes > 60) level = 3;
+        else if (minutes > 30) level = 2;
+        else level = 1;
+      }
+      return { date: a.date, count: minutes, level };
+    });
 
-  // Calculate accurate activity streak (consecutive days with activity)
-  const watchStreak = computeStreak(profile.activity, todayIso);
+    const music: ActivityData['music'] = profile.musicActivity.map((a) => {
+      const minutes = Math.floor(a.listenSeconds / 60);
+      let level: 0 | 1 | 2 | 3 | 4 = 0;
+      if (minutes > 0) {
+        if (minutes > 120) level = 4;
+        else if (minutes > 60) level = 3;
+        else if (minutes > 30) level = 2;
+        else level = 1;
+      }
+      return { date: a.date, count: minutes, level };
+    });
+
+    return { watch, music };
+  }, [profile.activity, profile.musicActivity]);
+
+  // Calculate accurate activity streak (consecutive days with any activity)
+  const watchStreak = computeStreak(
+    profile.activity,
+    profile.musicActivity,
+    todayIso,
+  );
   const totalWatchHours = Math.floor(
     profile.activity.reduce((acc, curr) => acc + curr.watchSeconds, 0) / 3600,
   );
@@ -151,8 +169,31 @@ export function PublicProfileView({
             <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
               {t('activity.title')}
             </h2>
-            <div className="text-sm font-bold opacity-40 uppercase tracking-widest font-headline">
-              {t('activity.last365')}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2 items-center justify-end">
+                <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12 text-right">
+                  Watch
+                </span>
+                <div className="flex gap-1">
+                  <div className="w-3 h-3 bg-secondary"></div>
+                  <div className="w-3 h-3 bg-activity-1"></div>
+                  <div className="w-3 h-3 bg-activity-2"></div>
+                  <div className="w-3 h-3 bg-activity-3"></div>
+                  <div className="w-3 h-3 bg-activity-4"></div>
+                </div>
+              </div>
+              <div className="flex gap-2 items-center justify-end">
+                <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12 text-right">
+                  Music
+                </span>
+                <div className="flex gap-1">
+                  <div className="w-3 h-3 bg-secondary"></div>
+                  <div className="w-3 h-3 bg-music-1"></div>
+                  <div className="w-3 h-3 bg-music-2"></div>
+                  <div className="w-3 h-3 bg-music-3"></div>
+                  <div className="w-3 h-3 bg-music-4"></div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -186,15 +227,17 @@ export function PublicProfileView({
  * @returns Number of consecutive active days (capped at 365).
  */
 function computeStreak(
-  activity: { date: string; watchSeconds: number }[],
+  watch: { date: string; watchSeconds: number }[],
+  music: { date: string; listenSeconds: number }[],
   todayIso: string,
 ) {
-  if (activity.length === 0) return 0;
+  if (watch.length === 0 && music.length === 0) return 0;
 
   let streak = 0;
-  const activeDates = new Set(
-    activity.filter((a) => a.watchSeconds > 0).map((a) => a.date),
-  );
+  const activeDates = new Set([
+    ...watch.filter((a) => a.watchSeconds > 0).map((a) => a.date),
+    ...music.filter((a) => a.listenSeconds > 0).map((a) => a.date),
+  ]);
 
   let currentDate = todayIso;
 

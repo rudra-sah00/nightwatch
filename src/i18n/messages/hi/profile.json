@@ -32,7 +32,10 @@
       "oct": "अक्टू",
       "nov": "नव",
       "dec": "दिस"
-    }
+    },
+    "noWatch": "No watch activity",
+    "noMusic": "No music activity",
+    "minMusicSuffix": "{count} min music"
   },
   "updateForm": {
     "updatePhoto": "फोटो अपडेट करें",

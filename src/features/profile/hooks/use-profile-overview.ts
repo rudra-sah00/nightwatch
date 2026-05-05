@@ -3,44 +3,54 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
-import { getWatchActivity, uploadProfileImage } from '../api';
-import type { WatchActivity } from '../types';
+import { getMusicActivity, getWatchActivity, uploadProfileImage } from '../api';
+import type { ActivityData } from '../types';
 
 /**
  * Hook that powers the profile overview page.
  *
- * Fetches watch-activity data on mount (and on window re-focus), handles
+ * Fetches watch and music activity data on mount (and on window re-focus), handles
  * profile-image uploads with an optimistic local preview, and derives
  * display values such as the formatted join date.
  *
- * @returns User data, activity list, upload helpers, display image URL,
+ * @returns User data, activity data, upload helpers, display image URL,
  *          file-input ref, formatted join date, and the `logout` action.
  */
 export function useProfileOverview() {
   const { user, logout, updateUser } = useAuth();
   const t = useTranslations('profile.messages');
   const format = useFormatter();
-  const [activity, setActivity] = useState<WatchActivity[]>([]);
+  const [activityData, setActivityData] = useState<ActivityData>({
+    watch: [],
+    music: [],
+  });
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const fetchActivity = useCallback(async () => {
+    try {
+      const [watch, music] = await Promise.all([
+        getWatchActivity(),
+        getMusicActivity(),
+      ]);
+      setActivityData({ watch, music });
+    } catch {
+      toast.error(t('activityFailed'));
+    }
+  }, [t]);
+
   useEffect(() => {
     setLoadingActivity(true);
-    getWatchActivity()
-      .then(setActivity)
-      .catch(() => toast.error(t('activityFailed')))
-      .finally(() => setLoadingActivity(false));
+    fetchActivity().finally(() => setLoadingActivity(false));
 
     const handleFocus = () => {
-      getWatchActivity()
-        .then(setActivity)
-        .catch(() => {});
+      fetchActivity();
     };
     window.addEventListener('focus', handleFocus, { passive: true });
     return () => window.removeEventListener('focus', handleFocus);
-  }, [t]);
+  }, [fetchActivity]);
 
   const handleFileClick = useCallback(() => {
     fileInputRef.current?.click();
@@ -93,7 +103,7 @@ export function useProfileOverview() {
   return {
     user,
     logout,
-    activity,
+    activity: activityData,
     loadingActivity,
     isUploading,
     displayImage,

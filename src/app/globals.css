@@ -71,6 +71,12 @@
   --color-activity-3: var(--activity-level-3);
   --color-activity-4: var(--activity-level-4);
 
+  --color-music-0: var(--music-level-0);
+  --color-music-1: var(--music-level-1);
+  --color-music-2: var(--music-level-2);
+  --color-music-3: var(--music-level-3);
+  --color-music-4: var(--music-level-4);
+
   /* Live indicator (red) */
   --color-live: var(--live-color);
   --color-live-strong: var(--live-color-strong);
@@ -159,16 +165,19 @@
     --radius: 0.5rem;
 
     /* ── App-wide accent tokens ──────────────────────────────── */
-    /* Activity graph level colors (GitHub-style heatmap) */
-    --activity-level-0: rgba(255, 255, 255, 0.06);
-    --activity-level-1: rgba(79, 70, 229, 0.6);
-    /* indigo-900/60 */
-    --activity-level-2: rgba(99, 102, 241, 0.8);
-    /* indigo-700/80 */
-    --activity-level-3: rgb(99, 102, 241);
-    /* indigo-600 */
-    --activity-level-4: rgb(129, 140, 248);
-    /* indigo-500 */
+    /* Watch Activity - Multi-Color Progression (Light Mode) */
+    --activity-level-0: rgba(0, 0, 0, 0.05);
+    --activity-level-1: #60a5fa; /* Sky Blue */
+    --activity-level-2: #818cf8; /* Indigo */
+    --activity-level-3: #a855f7; /* Purple */
+    --activity-level-4: #ec4899; /* Pink/Magenta */
+
+    /* Music Activity - Multi-Color Progression (Light Mode) */
+    --music-level-0: rgba(0, 0, 0, 0.05);
+    --music-level-1: #2dd4bf; /* Teal */
+    --music-level-2: #10b981; /* Emerald */
+    --music-level-3: #84cc16; /* Lime */
+    --music-level-4: #facc15; /* Yellow/Gold */
 
     /* Live indicator */
     --live-color: rgb(248, 113, 113);
@@ -328,6 +337,20 @@
 
     --subtitle-bg-color: rgba(244, 244, 245, 0.9);
     --subtitle-text-color: #09090b;
+
+    /* Watch Activity - Multi-Color Progression (Dark Mode) */
+    --activity-level-0: rgba(255, 255, 255, 0.1);
+    --activity-level-1: #3b82f6; /* Blue */
+    --activity-level-2: #6366f1; /* Indigo */
+    --activity-level-3: #8b5cf6; /* Violet */
+    --activity-level-4: #d946ef; /* Fuchsia/Glow */
+
+    /* Music Activity - Multi-Color Progression (Dark Mode) */
+    --music-level-0: rgba(255, 255, 255, 0.1);
+    --music-level-1: #14b8a6; /* Teal */
+    --music-level-2: #10b981; /* Emerald */
+    --music-level-3: #a3e635; /* Lime */
+    --music-level-4: #fde047; /* Bright Yellow */
   }
 
   /* Watch party sidebar — pink theme */
