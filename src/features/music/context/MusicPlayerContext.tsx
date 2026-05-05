@@ -204,24 +204,45 @@ export function MusicPlayerProvider({
   const { socket } = useSocket();
   useEffect(() => {
     if (!socket?.connected) return;
-    if (state.currentTrack) {
-      socket.emit('watch:set_activity', {
-        type: 'music',
-        title: state.currentTrack.title,
-        artist: state.currentTrack.artist ?? null,
-        season: null,
-        episode: null,
-        episodeTitle: null,
-        posterUrl: state.currentTrack.image ?? null,
-        secondaryPosterUrl: null,
-      });
-    } else {
+
+    const emitActivity = () => {
+      if (state.currentTrack) {
+        socket.emit('watch:set_activity', {
+          type: 'music',
+          title: state.currentTrack.title,
+          artist: state.currentTrack.artist ?? null,
+          season: null,
+          episode: null,
+          episodeTitle: null,
+          posterUrl: state.currentTrack.image ?? null,
+          secondaryPosterUrl: null,
+        });
+      }
+    };
+
+    let intervalId: NodeJS.Timeout;
+
+    if (state.isPlaying && state.currentTrack) {
+      // Emit immediately on play
+      emitActivity();
+      // Heartbeat every 3 minutes
+      intervalId = setInterval(emitActivity, 3 * 60 * 1000);
+    } else if (!state.currentTrack) {
+      // If queue finishes or track is cleared, clear immediately
       socket.emit('watch:clear_activity');
     }
+
     return () => {
-      socket.emit('watch:clear_activity');
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [socket, state.currentTrack]);
+  }, [socket, state.isPlaying, state.currentTrack]);
+
+  // Always clear on unmount
+  useEffect(() => {
+    return () => {
+      socket?.emit('watch:clear_activity');
+    };
+  }, [socket]);
 
   const play = useCallback((track: MusicTrack, queue?: MusicTrack[]) => {
     engineRef.current?.playTrack(track, queue);

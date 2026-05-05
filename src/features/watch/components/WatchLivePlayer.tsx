@@ -88,28 +88,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     }
   }, [props.metadata]);
 
-  const { socket } = useSocket();
-  useEffect(() => {
-    if (!socket?.connected) return;
-    socket.emit('watch:set_activity', {
-      type: 'live',
-      title: props.metadata.title,
-      artist: null,
-      season: null,
-      episode: null,
-      episodeTitle: null,
-      posterUrl: props.metadata.posterUrl ?? null,
-      secondaryPosterUrl: props.secondaryPosterUrl ?? null,
-    });
-    return () => {
-      socket.emit('watch:clear_activity');
-    };
-  }, [
-    socket,
-    props.metadata.title,
-    props.metadata.posterUrl,
-    props.secondaryPosterUrl,
-  ]);
+  // Activity tracking is handled inside LivePlayerState where play/pause state is available
 
   // Local scroll-based PiP
   const playerSentinelRef = useRef<HTMLDivElement>(null);
@@ -283,6 +262,45 @@ function LivePlayerState({
   const error = state.error;
   const isWaitingForStream = !streamUrl;
   const isLoading = state.isLoading || isWaitingForStream;
+  const { socket } = useSocket();
+
+  // Broadcast Live activity to friends with heartbeat while playing
+  useEffect(() => {
+    if (!socket?.connected) return;
+
+    const emitActivity = () => {
+      socket.emit('watch:set_activity', {
+        type: 'live',
+        title: metadata.title,
+        artist: null,
+        season: null,
+        episode: null,
+        episodeTitle: null,
+        posterUrl: metadata.posterUrl ?? null,
+        secondaryPosterUrl: (metadata as any).secondaryPosterUrl ?? null,
+      });
+    };
+
+    let intervalId: NodeJS.Timeout;
+
+    if (state.isPlaying) {
+      // Emit immediately on play
+      emitActivity();
+      // Heartbeat every 3 minutes to keep the 5-min Redis TTL alive
+      intervalId = setInterval(emitActivity, 3 * 60 * 1000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [socket, state.isPlaying, metadata]);
+
+  // Always clear activity when navigating away / unmounting
+  useEffect(() => {
+    return () => {
+      socket?.emit('watch:clear_activity');
+    };
+  }, [socket]);
 
   const clip = useClipRecorder({
     matchId: metadata.movieId,

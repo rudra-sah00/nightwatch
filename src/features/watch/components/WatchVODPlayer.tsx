@@ -132,24 +132,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
     }
   }, [props.metadata]);
 
-  // Broadcast VOD activity to friends (set once, clear on unmount)
-  const { socket } = useSocket();
-  useEffect(() => {
-    if (!socket?.connected) return;
-    socket.emit('watch:set_activity', {
-      type: props.metadata.type ?? 'movie',
-      title: props.metadata.title,
-      artist: null,
-      season: props.metadata.season ?? null,
-      episode: props.metadata.episode ?? null,
-      episodeTitle: props.metadata.episodeTitle ?? null,
-      posterUrl: props.metadata.posterUrl ?? null,
-      secondaryPosterUrl: null,
-    });
-    return () => {
-      socket.emit('watch:clear_activity');
-    };
-  }, [socket, props.metadata]);
+  // Activity tracking is handled inside VODPlayerState where play/pause state is available
 
   // Ref for IntersectionObserver-based in-app PiP on mobile
   const playerSentinelRef = useRef<HTMLDivElement>(null);
@@ -318,6 +301,45 @@ function VODPlayerState({
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();
   const t = useTranslations('watch.player');
+  const { socket } = useSocket();
+
+  // Broadcast VOD activity to friends with heartbeat while playing
+  useEffect(() => {
+    if (!socket?.connected) return;
+
+    const emitActivity = () => {
+      socket.emit('watch:set_activity', {
+        type: metadata.type ?? 'movie',
+        title: metadata.title,
+        artist: null,
+        season: metadata.season ?? null,
+        episode: metadata.episode ?? null,
+        episodeTitle: metadata.episodeTitle ?? null,
+        posterUrl: metadata.posterUrl ?? null,
+        secondaryPosterUrl: null,
+      });
+    };
+
+    let intervalId: NodeJS.Timeout;
+
+    if (state.isPlaying) {
+      // Emit immediately on play
+      emitActivity();
+      // Heartbeat every 3 minutes to keep the 5-min Redis TTL alive
+      intervalId = setInterval(emitActivity, 3 * 60 * 1000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [socket, state.isPlaying, metadata]);
+
+  // Always clear activity when navigating away / unmounting
+  useEffect(() => {
+    return () => {
+      socket?.emit('watch:clear_activity');
+    };
+  }, [socket]);
 
   return (
     <>
