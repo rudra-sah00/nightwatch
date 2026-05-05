@@ -277,7 +277,7 @@ function LivePlayerState({
         episode: null,
         episodeTitle: null,
         posterUrl: metadata.posterUrl ?? null,
-        secondaryPosterUrl: (metadata as any).secondaryPosterUrl ?? null,
+        secondaryPosterUrl: metadata.secondaryPosterUrl ?? null,
       });
     };
 

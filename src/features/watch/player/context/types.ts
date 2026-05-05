@@ -56,6 +56,8 @@ export interface VideoMetadata {
   providerId?: 's1' | 's2';
   /** API-sourced duration in seconds used as fallback when video.duration is Infinity (S2 MP4). */
   apiDurationSeconds?: number;
+  /** Second logo/poster for live events (e.g. away team logo). */
+  secondaryPosterUrl?: string;
 }
 
 // Player actions

@@ -18,6 +18,7 @@ import {
   type AudioEngineState,
   type RepeatMode,
 } from '../engine/audio-engine';
+import { useMusicProgress } from '../hooks/use-music-progress';
 
 /**
  * Shape of the value exposed by {@link MusicPlayerProvider} via React Context.
@@ -106,6 +107,9 @@ export function MusicPlayerProvider({
       engine.destroy();
     };
   }, []);
+
+  // Track daily listening time
+  useMusicProgress({ isPlaying: state.isPlaying });
 
   // Listen for Ask AI music play requests (no navigation needed)
   useEffect(() => {
