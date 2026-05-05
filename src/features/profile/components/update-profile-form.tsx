@@ -372,11 +372,6 @@ export function UpdateProfileForm() {
         >
           {[
             {
-              id: 's1' as const,
-              label: t('serverSelection.netflix'),
-              sub: t('serverSelection.standard'),
-            },
-            {
               id: 's2' as const,
               label: t('serverSelection.balanced'),
               sub: t('serverSelection.performance'),

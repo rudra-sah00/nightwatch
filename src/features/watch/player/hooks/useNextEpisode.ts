@@ -94,7 +94,8 @@ export function useNextEpisode({
           setNextEpisodeInfo(info);
         }
       } catch (_error) {
-        fetchedRef.current = false;
+        // Prevent infinite loops by keeping fetchedRef as true even on error
+        fetchedRef.current = true;
       }
     };
 
