@@ -4,7 +4,11 @@ import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
-import { revalidateTokenOnResume, setTokenExpiration } from '@/lib/fetch';
+import {
+  getTokenExpiresAt,
+  revalidateTokenOnResume,
+  setTokenExpiration,
+} from '@/lib/fetch';
 import { offForceLogout, onForceLogout } from '@/lib/socket';
 import { useSocket } from '@/providers/socket-provider';
 import { clearCookiesAndRedirect, useAuthStore } from '@/store/use-auth-store';
@@ -111,14 +115,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const syncProfile = async () => {
       try {
         invalidateProfileCache();
-        const [{ user: profileData }] = await Promise.all([
-          getProfile({ signal: controller.signal }),
-          Promise.resolve(setTokenExpiration(15 * 60)),
-        ]);
+        const { user: profileData } = await getProfile({
+          signal: controller.signal,
+        });
 
         if (!controller.signal.aborted) {
           useAuthStore.getState().updateUser(profileData);
           setIsLoading(false);
+
+          // Only arm the proactive refresh timer if it hasn't been set yet
+          // (i.e., this is a page reload — the verifyOtp flow already arms it
+          // on fresh logins via setTokenExpiration). Setting it unconditionally
+          // would reset it to T+15min on every navigation, causing the timer
+          // to fire AFTER the token has already expired on long sessions.
+          if (!getTokenExpiresAt()) {
+            setTokenExpiration(15 * 60);
+          }
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return;

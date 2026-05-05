@@ -63,6 +63,14 @@ export function setTokenExpiration(expiresInSeconds: number) {
 }
 
 /**
+ * Returns the current token expiration timestamp (ms since epoch), or null if not set.
+ * Used externally to check whether the timer is already armed before overwriting it.
+ */
+export function getTokenExpiresAt(): number | null {
+  return tokenExpiresAt;
+}
+
+/**
  * Re-check token validity after app resume (Capacitor background → foreground).
  * If the token has expired while JS timers were frozen, refresh immediately.
  */

@@ -19,6 +19,7 @@ export interface LoginResponse {
   accessToken?: string;
   refreshToken?: string;
   mobileAuthRedirectUrl?: string;
+  expiresIn?: number; // Seconds until access token expires — used to arm proactive refresh timer
 }
 
 export interface LogoutResponse {

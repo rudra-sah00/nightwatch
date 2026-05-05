@@ -8,6 +8,7 @@ import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { setTokenExpiration } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's
@@ -116,6 +117,11 @@ export const useAuthStore = create<AuthState>()(
           storeUser(response.user);
           sessionStorage.removeItem('guest_token');
           sessionStorage.removeItem('guest_refresh_token');
+          // Arm the proactive refresh timer to the exact token lifetime returned
+          // by the server so we refresh 1 minute early, not from page-load time.
+          if (response.expiresIn) {
+            setTokenExpiration(response.expiresIn);
+          }
           set({ user: response.user, isAuthenticated: true });
         }
         return response;
