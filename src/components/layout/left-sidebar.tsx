@@ -65,42 +65,62 @@ export function LeftSidebar() {
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
     { href: '/library', label: 'Library', icon: Library },
-    ...(isMounted && (isDesktopApp || mobile)
-      ? [{ href: '/downloads', label: t('downloads'), icon: Download }]
-      : []),
     { href: '/music', label: t('music'), icon: Music },
     { href: '/manga', label: 'Manga', icon: BookOpen },
     { href: '/ask-ai', label: 'Ask AI', icon: Bot },
   ];
 
+  const showDownloadsLink = isMounted && (isDesktopApp || mobile);
   const showDownloadApp = isMounted && !isDesktopApp && !mobile && osName;
   const closeSidebar = () => setLeftOpen(false);
 
+  const linkClass = (href: string) =>
+    `flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap ${
+      isActive(href)
+        ? 'bg-primary text-primary-foreground'
+        : 'text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5'
+    }`;
+
   const navContent = (onClick?: () => void) => (
-    <nav className="flex-1 flex flex-col gap-1.5 py-3 px-3 overflow-y-auto">
-      {links.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          onClick={onClick}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap ${
-            isActive(href)
-              ? 'bg-primary text-primary-foreground'
-              : 'text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5'
-          }`}
-        >
-          <Icon className="w-5 h-5 stroke-[2.5px] shrink-0" />
-          {label}
-        </Link>
-      ))}
-      {showDownloadApp && downloadUrl && (
-        <a
-          href={downloadUrl}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
-        >
-          <Monitor className="w-5 h-5 stroke-[2.5px] shrink-0" />
-          {td('downloadFor', { os: osName })}
-        </a>
+    <nav className="flex-1 flex flex-col py-3 px-3 overflow-y-auto">
+      {/* Main nav links — scrollable top section */}
+      <div className="flex flex-col gap-1.5">
+        {links.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClick}
+            className={linkClass(href)}
+          >
+            <Icon className="w-5 h-5 stroke-[2.5px] shrink-0" />
+            {label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Bottom section — Downloads + Download App CTA */}
+      {(showDownloadsLink || (showDownloadApp && downloadUrl)) && (
+        <div className="mt-auto flex flex-col gap-1.5 pt-3 border-t border-border/40">
+          {showDownloadsLink && (
+            <Link
+              href="/downloads"
+              onClick={onClick}
+              className={linkClass('/downloads')}
+            >
+              <Download className="w-5 h-5 stroke-[2.5px] shrink-0" />
+              {t('downloads')}
+            </Link>
+          )}
+          {showDownloadApp && downloadUrl && (
+            <a
+              href={downloadUrl}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl font-headline font-bold uppercase text-sm tracking-widest transition-colors whitespace-nowrap text-foreground/70 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
+            >
+              <Monitor className="w-5 h-5 stroke-[2.5px] shrink-0" />
+              {td('downloadFor', { os: osName })}
+            </a>
+          )}
+        </div>
       )}
     </nav>
   );
