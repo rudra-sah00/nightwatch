@@ -86,11 +86,15 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload APK to GitHub Release
-        if: github.event_name == 'workflow_call'
+        if: github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APK="android/app/build/outputs/apk/release/app-release.apk"
-          TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          fi
           echo "Uploading APK to release: $TAG"
           gh release upload "$TAG" "$APK#Nightwatch-Android.apk" --clobber
