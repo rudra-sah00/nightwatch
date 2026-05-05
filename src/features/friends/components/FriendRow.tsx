@@ -55,15 +55,17 @@ export function FriendRow({
           </span>
         )}
       </div>
-      <button
-        type="button"
-        onClick={() => initiateCall({ id, name, photo })}
-        disabled={callState !== 'idle'}
-        className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-30"
-        aria-label={`Call ${name}`}
-      >
-        <Phone className="w-4 h-4 text-foreground/40" />
-      </button>
+      {isOnline && (
+        <button
+          type="button"
+          onClick={() => initiateCall({ id, name, photo })}
+          disabled={callState !== 'idle'}
+          className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-30"
+          aria-label={`Call ${name}`}
+        >
+          <Phone className="w-4 h-4 text-foreground/40" />
+        </button>
+      )}
     </div>
   );
 }

@@ -66,11 +66,27 @@ export function useFriends() {
   useEffect(() => {
     if (!socket) return;
 
-    const onStatus = (data: { userId: string; isOnline: boolean }) => {
+    const onStatus = (data: {
+      userId: string;
+      isOnline: boolean;
+      activity?: FriendActivity | null;
+    }) => {
+      // Invalidate cache so a navigation remount fetches fresh data instead of
+      // serving the pre-socket-update snapshot.
+      invalidateFriendsCache();
       setFriends((prev) =>
-        prev.map((f) =>
-          f.id === data.userId ? { ...f, isOnline: data.isOnline } : f,
-        ),
+        prev.map((f) => {
+          if (f.id !== data.userId) return f;
+          // When going online, apply any piggybacked activity so the sidebar
+          // doesn't show "Online" with no activity until the next heartbeat.
+          // When going offline, always clear activity.
+          const activity = data.isOnline
+            ? data.activity !== undefined
+              ? data.activity
+              : f.activity
+            : null;
+          return { ...f, isOnline: data.isOnline, activity };
+        }),
       );
     };
 
@@ -78,6 +94,7 @@ export function useFriends() {
       userId: string;
       activity: FriendActivity | null;
     }) => {
+      invalidateFriendsCache();
       setFriends((prev) =>
         prev.map((f) =>
           f.id === data.userId ? { ...f, activity: data.activity } : f,

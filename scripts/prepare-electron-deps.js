@@ -24,18 +24,35 @@ const ENTRY_DEPS = [
 const projectRoot = process.cwd();
 
 function resolvePkg(name, fromDir) {
-  // Try require.resolve from the parent package's directory — works with pnpm symlinks
+  // First try: resolve the package's main entry point and find the nearest package.json
+  try {
+    const resolved = require.resolve(name, { paths: [fromDir] });
+    let dir = path.dirname(resolved);
+    while (dir && dir !== '/' && dir !== projectRoot) {
+      const pkgPath = path.join(dir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkgJson.name === name) return dir;
+      }
+      dir = path.dirname(dir);
+    }
+  } catch {}
+
+  // Second try: resolve package.json directly
   try {
     const pkgJson = require.resolve(`${name}/package.json`, {
       paths: [fromDir],
     });
     return path.dirname(pkgJson);
   } catch {}
+
   // Fallback: nested node_modules, then top-level
   const nested = path.join(fromDir, 'node_modules', name);
   if (fs.existsSync(nested)) return fs.realpathSync(nested);
   const topLevel = path.join(projectRoot, 'node_modules', name);
   if (fs.existsSync(topLevel)) return fs.realpathSync(topLevel);
+
+  // If it's a pnpm workspace, the package might be hoisted to the root of the .pnpm store
   return null;
 }
 
@@ -82,4 +99,45 @@ for (const [name, srcDir] of collected) {
   fs.cpSync(srcDir, destDir, { recursive: true });
 }
 
-console.log(`Prepared ${collected.size} packages in node_modules_electron/`);
+// --- GENERATE DUMMY PACKAGES FOR OPTIONAL SENTRY NODE INTEGRATIONS ---
+// @sentry/node@10 statically requires many server-side integrations (Prisma, Fastify, Hapi, etc.)
+// Because these are not in a try/catch, if the package is missing, the Electron main process crashes.
+// We don't want to bundle megabytes of server code in a desktop app, so we generate tiny dummy packages
+// that just export an empty object. This satisfies the require() without the bloat.
+const dummyPackages = [
+  '@prisma/instrumentation',
+  '@fastify/otel',
+  '@hapi/hapi',
+  'graphql',
+  'express',
+  'pg',
+  'mysql2',
+  'amqplib',
+  'dataloader',
+  'ioredis',
+  'kafkajs',
+  'koa',
+  'mongodb',
+  'mongoose',
+  'mysql',
+  'redis',
+  'tedious',
+  'undici',
+  'lru-memoizer',
+];
+
+for (const pkg of dummyPackages) {
+  const pkgDir = path.join(outDir, pkg);
+  if (!fs.existsSync(pkgDir)) {
+    fs.mkdirSync(pkgDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      JSON.stringify({ name: pkg, version: '1.0.0', main: 'index.js' }),
+    );
+    fs.writeFileSync(path.join(pkgDir, 'index.js'), 'module.exports = {};\n');
+  }
+}
+
+console.log(
+  `Prepared ${collected.size} real packages and ${dummyPackages.length} dummy packages in node_modules_electron/`,
+);

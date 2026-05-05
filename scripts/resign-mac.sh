@@ -21,36 +21,36 @@ fi
 # Find signing identity
 IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Development" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
 if [ -z "$IDENTITY" ]; then
-  echo "⚠️  No Apple Development identity found, using ad-hoc signing"
+  echo "No Apple Development identity found, using ad-hoc signing"
   IDENTITY="-"
 fi
-echo "🔑 Signing with: $IDENTITY"
+echo "Signing with: $IDENTITY"
 
 # Sign inside-out: dylibs → frameworks → helpers → main app
-echo "📦 Signing dylibs..."
+echo "Signing dylibs..."
 for lib in "$APP/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/"*.dylib; do
   [ -f "$lib" ] && codesign --force --sign "$IDENTITY" --entitlements "$ENT" "$lib"
 done
 
-echo "📦 Signing Electron Framework..."
+echo "Signing Electron Framework..."
 codesign --force --sign "$IDENTITY" --entitlements "$ENT" \
   "$APP/Contents/Frameworks/Electron Framework.framework"
 
-echo "📦 Signing other frameworks..."
+echo "Signing other frameworks..."
 for fw in "$APP/Contents/Frameworks/"*.framework; do
   name=$(basename "$fw")
   [ "$name" = "Electron Framework.framework" ] && continue
   codesign --force --sign "$IDENTITY" --entitlements "$ENT" "$fw"
 done
 
-echo "📦 Signing helper apps..."
+echo "Signing helper apps..."
 for helper in "$APP/Contents/Frameworks/"*.app; do
   codesign --force --deep --sign "$IDENTITY" --entitlements "$ENT" "$helper"
 done
 
-echo "📦 Signing main app..."
+echo "Signing main app..."
 codesign --force --sign "$IDENTITY" --entitlements "$ENT" "$APP"
 
-echo "✅ Verifying..."
+echo "Verifying..."
 codesign --verify --deep --strict "$APP" 2>&1
-echo "✅ Done. $APP is properly signed."
+echo "Done. $APP is properly signed."
