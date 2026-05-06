@@ -506,13 +506,15 @@ export function useHls({
 
           const code = video.error.code;
           const isExpired = code === MediaError.MEDIA_ERR_NETWORK;
-          if (isExpired && isLive) {
+          const isRecoverable =
+            isExpired || code === MediaError.MEDIA_ERR_DECODE;
+          if (isRecoverable && isLive) {
             const isLikelyStalled = video.paused || video.readyState < 3;
             if (isLikelyStalled) {
               dispatch({ type: 'SET_BUFFERING', isBuffering: true });
             }
             video.play().catch(() => {});
-          } else if (isExpired && onStreamExpiredRef.current) {
+          } else if (isRecoverable && onStreamExpiredRef.current) {
             dispatch({ type: 'SET_LOADING', isLoading: true });
             onStreamExpiredRef.current();
           } else {
