@@ -11,7 +11,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
@@ -54,6 +54,39 @@ export function MiniPlayer() {
     setVolume,
     removeFromQueue,
   } = player;
+
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    longPressTriggered.current = false;
+    const touch = e.touches[0];
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      if (currentTrack) {
+        const syntheticEvent = {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          preventDefault: () => {},
+        } as unknown as React.MouseEvent;
+        showSongMenu(syntheticEvent, currentTrack);
+      }
+    }, 500);
+  };
+
+  const onTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const onTouchMove = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
   const [showQueue, setShowQueue] = useState(false);
 
   if (!currentTrack) return null;
@@ -79,8 +112,13 @@ export function MiniPlayer() {
         {/* Cover */}
         <button
           type="button"
-          onClick={() => setExpanded(true)}
+          onClick={() => {
+            if (!longPressTriggered.current) setExpanded(true);
+          }}
           onContextMenu={(e) => showSongMenu(e, currentTrack)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onTouchMove={onTouchMove}
           className="flex-shrink-0"
         >
           <div className="w-11 h-11 border-[2px] border-border overflow-hidden">
@@ -95,8 +133,13 @@ export function MiniPlayer() {
         {/* Info */}
         <button
           type="button"
-          onClick={() => setExpanded(true)}
+          onClick={() => {
+            if (!longPressTriggered.current) setExpanded(true);
+          }}
           onContextMenu={(e) => showSongMenu(e, currentTrack)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onTouchMove={onTouchMove}
           className="flex-1 min-w-0 text-left"
         >
           <p className="font-headline font-bold text-xs uppercase tracking-wider truncate">
