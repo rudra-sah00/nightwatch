@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
-import { NeoSelect } from '@/components/ui/neo-select';
 import { type ClipFilters, toggleClipPublic } from '@/features/clips/api';
 import { ClipCard } from '@/features/clips/components/ClipCard';
 import { useClips } from '@/features/clips/hooks/use-clips';
@@ -15,16 +14,9 @@ import { checkIsMobile } from '@/lib/electron-bridge';
 import { mobileBridge } from '@/lib/mobile-bridge';
 import { useSocket } from '@/providers/socket-provider';
 
-const SORT_OPTIONS = [
-  { value: 'oldest', label: 'Oldest' },
-  { value: 'longest', label: 'Longest' },
-  { value: 'shortest', label: 'Shortest' },
-];
-
 export function ClipsGrid() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [sort, setSort] = useState('oldest');
   const router = useRouter();
   const { socket } = useSocket();
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -37,9 +29,8 @@ export function ClipsGrid() {
   const filters = useMemo<ClipFilters>(
     () => ({
       search: debouncedSearch || undefined,
-      sort: sort as ClipFilters['sort'],
     }),
-    [debouncedSearch, sort],
+    [debouncedSearch],
   );
 
   const { clips, isLoading, isLoadingMore, loadMore, refetch, remove, rename } =
@@ -124,7 +115,6 @@ export function ClipsGrid() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search clips..."
           />
-          <NeoSelect value={sort} options={SORT_OPTIONS} onChange={setSort} />
         </div>
       )}
 
