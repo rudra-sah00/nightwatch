@@ -5,7 +5,7 @@ import { finalizeClip, pushSegmentData, startClip } from '../api';
 
 const MAX_DURATION = 300;
 const MIN_DURATION = 5;
-const CHUNK_INTERVAL = 2000;
+const FLUSH_INTERVAL = 5000;
 
 /** Options for the {@link useClipRecorder} hook. */
 interface UseClipRecorderOptions {
@@ -20,14 +20,10 @@ interface UseClipRecorderOptions {
 /**
  * Manages the full lifecycle of recording a livestream clip.
  *
- * Captures the `<video>` element's MediaStream via `captureStream()`, records
- * chunks at a fixed interval, uploads each chunk to the backend, and finalizes
- * the clip on stop. Automatically pauses/resumes recording when the video
- * element pauses or buffers. Enforces a maximum duration of 300 seconds and a
- * minimum of 5 seconds before allowing stop.
- *
- * @param options - Recording configuration (match ID, title, stream URL).
- * @returns Recording state and control functions (`start`, `stop`, `isRecording`, etc.).
+ * Uses `MediaRecorder.requestData()` every 5s to progressively upload
+ * buffer flushes to the backend. Each flush is part of the same continuous
+ * WebM stream (not independent files), so the server concatenates bytes
+ * to produce one valid WebM. This provides crash safety without quality loss.
  */
 export function useClipRecorder({
   matchId,
@@ -42,21 +38,26 @@ export function useClipRecorder({
 
   const clipIdRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const flushRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
   const pausedAtRef = useRef(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunkIndexRef = useRef(0);
-  const pendingUploadsRef = useRef<Promise<void>[]>([]);
+  const segIndexRef = useRef(0);
+  const uploadsRef = useRef<Promise<void>[]>([]);
 
   const cleanup = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    if (flushRef.current) {
+      clearInterval(flushRef.current);
+      flushRef.current = null;
+    }
     recorderRef.current = null;
-    chunkIndexRef.current = 0;
     pausedAtRef.current = 0;
-    pendingUploadsRef.current = [];
+    segIndexRef.current = 0;
+    uploadsRef.current = [];
     setIsRecording(false);
     setDuration(0);
     setIsStarting(false);
@@ -78,9 +79,8 @@ export function useClipRecorder({
     return new Promise<void>((resolve) => {
       recorder.onstop = async () => {
         try {
-          // Wait for all chunk uploads to complete (including the final one)
-          await Promise.all(pendingUploadsRef.current);
-          pendingUploadsRef.current = [];
+          // Wait for all progressive uploads (including final ondataavailable)
+          await Promise.all(uploadsRef.current);
           await finalizeClip(id);
         } catch {
           /* toast handled by caller */
@@ -116,7 +116,7 @@ export function useClipRecorder({
       setClipId(id);
       startTimeRef.current = Date.now();
       pausedAtRef.current = 0;
-      chunkIndexRef.current = 0;
+      segIndexRef.current = 0;
       setIsRecording(true);
       setDuration(0);
       setIsStarting(false);
@@ -139,22 +139,25 @@ export function useClipRecorder({
         const currentId = clipIdRef.current;
         if (!currentId) return;
 
-        const chunkStart = (chunkIndexRef.current * CHUNK_INTERVAL) / 1000;
-        const chunkDuration = CHUNK_INTERVAL / 1000;
-        chunkIndexRef.current++;
-
-        const upload = e.data.arrayBuffer().then((buf) =>
-          pushSegmentData(currentId, buf, chunkStart, chunkDuration).catch(
-            () => {
-              /* non-fatal */
-            },
-          ),
-        );
-        pendingUploadsRef.current.push(upload);
+        const idx = segIndexRef.current++;
+        const upload = e.data
+          .arrayBuffer()
+          .then((buf) =>
+            pushSegmentData(currentId, buf, idx, 0).catch(() => {}),
+          );
+        uploadsRef.current.push(upload);
       };
 
-      recorder.start(CHUNK_INTERVAL);
+      // Start without timeslice — we control flushing via requestData()
+      recorder.start();
       recorderRef.current = recorder;
+
+      // Periodically flush buffer for crash safety
+      flushRef.current = setInterval(() => {
+        if (recorder.state === 'recording') {
+          recorder.requestData();
+        }
+      }, FLUSH_INTERVAL);
     } catch {
       cleanup();
     }
@@ -178,7 +181,6 @@ export function useClipRecorder({
     const resumeRecorder = () => {
       const r = recorderRef.current;
       if (r?.state === 'paused') {
-        // Shift start time forward so duration counter stays accurate
         if (pausedAtRef.current) {
           startTimeRef.current += Date.now() - pausedAtRef.current;
           pausedAtRef.current = 0;
@@ -199,8 +201,23 @@ export function useClipRecorder({
   }, [isRecording]);
 
   useEffect(() => {
+    const onBeforeUnload = () => {
+      // Flush remaining data and finalize via sendBeacon
+      const recorder = recorderRef.current;
+      const id = clipIdRef.current;
+      if (recorder?.state === 'recording' && id) {
+        recorder.stop();
+        navigator.sendBeacon(
+          `/api/clips/${id}/finalize`,
+          JSON.stringify({ emergency: true }),
+        );
+      }
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
     return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
       if (timerRef.current) clearInterval(timerRef.current);
+      if (flushRef.current) clearInterval(flushRef.current);
       if (recorderRef.current?.state === 'recording')
         recorderRef.current.stop();
     };
