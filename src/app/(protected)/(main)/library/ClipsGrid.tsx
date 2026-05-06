@@ -16,7 +16,6 @@ import { mobileBridge } from '@/lib/mobile-bridge';
 import { useSocket } from '@/providers/socket-provider';
 
 const SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest' },
   { value: 'oldest', label: 'Oldest' },
   { value: 'longest', label: 'Longest' },
   { value: 'shortest', label: 'Shortest' },
@@ -25,7 +24,7 @@ const SORT_OPTIONS = [
 export function ClipsGrid() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [sort, setSort] = useState('newest');
+  const [sort, setSort] = useState('oldest');
   const router = useRouter();
   const { socket } = useSocket();
   const loadMoreRef = useRef<HTMLDivElement>(null);
