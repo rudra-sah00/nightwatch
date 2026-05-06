@@ -101,7 +101,7 @@ export default function ChapterReaderPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.boundingClientRect.height > 10) {
             const idx = Number(entry.target.getAttribute('data-page'));
             if (!Number.isNaN(idx)) setCurrentPage(idx);
           }
