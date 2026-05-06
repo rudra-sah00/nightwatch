@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Film, Tv, X } from 'lucide-react';
+import { Clock, Film, Trash2, Tv } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React, { useMemo } from 'react';
@@ -240,13 +240,13 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
               className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors z-20"
               title={t('continueWatching.removeAriaLabel')}
             >
-              <X className="w-4 h-4 stroke-[3px]" />
+              <Trash2 className="w-4 h-4 stroke-[3px]" />
             </button>
           </div>
         </div>
 
         {/* Progress Bar Bottom Row */}
-        <div className="mt-8 flex items-center gap-4">
+        <div className="mt-8 hidden sm:flex items-center gap-4">
           <div className="flex-1 h-3 bg-secondary border-[2px] border-border overflow-hidden">
             <div
               className="h-full bg-neo-yellow transition-[width] duration-500 ease-out"

@@ -6,7 +6,6 @@ import {
   Pause,
   Play,
   Trash2,
-  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -334,7 +333,7 @@ export function OfflineLibrary() {
                             className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors"
                             aria-label={t('cancelDownload')}
                           >
-                            <X className="w-4 h-4 stroke-[3px]" />
+                            <Trash2 className="w-4 h-4 stroke-[3px]" />
                           </button>
                         )}
                       </div>
@@ -344,7 +343,7 @@ export function OfflineLibrary() {
                     {(item.status === 'DOWNLOADING' ||
                       item.status === 'QUEUED' ||
                       item.status === 'PAUSED') && (
-                      <div className="mt-8 flex items-center gap-4">
+                      <div className="mt-8 hidden sm:flex items-center gap-4">
                         <div
                           role="progressbar"
                           aria-valuenow={Math.round(item.progress || 0)}
