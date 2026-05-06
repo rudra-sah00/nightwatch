@@ -23,19 +23,10 @@ function LiveContent() {
   const t = useTranslations('live');
   const format = useFormatter();
 
-  const {
-    activeTab,
-    activeServer,
-    isPending,
-    handleTabChange,
-    handleServerChange,
-  } = useLiveContent();
+  const { activeTab, isPending, handleTabChange } = useLiveContent();
 
   const { sports } = useSports();
-  const { schedule, isLoading, error, refresh } = useLivestreams(
-    activeTab,
-    activeServer === '2' ? 'server2' : 'server1',
-  );
+  const { schedule, isLoading, error, refresh } = useLivestreams(activeTab);
 
   const isAllChannelsView = activeTab === 'all_channels';
 
@@ -87,32 +78,6 @@ function LiveContent() {
       {/* Controls Bar — server toggle + sport selector */}
       <div className="container mx-auto px-6 md:px-10 mb-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Server Toggle */}
-          <div className="flex border-[3px] border-border rounded-md overflow-hidden shrink-0">
-            <button
-              type="button"
-              onClick={() => handleServerChange('1')}
-              className={`px-4 py-3 font-headline font-black text-[10px] uppercase tracking-widest transition-colors ${
-                activeServer === '1'
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground hover:bg-muted'
-              }`}
-            >
-              Server 1
-            </button>
-            <button
-              type="button"
-              onClick={() => handleServerChange('2')}
-              className={`px-4 py-3 font-headline font-black text-[10px] uppercase tracking-widest transition-colors border-l-[3px] border-border ${
-                activeServer === '2'
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground hover:bg-muted'
-              }`}
-            >
-              Server 2
-            </button>
-          </div>
-
           {/* Sport Selector */}
           {
             <div className="relative flex-grow min-w-0 w-full sm:w-auto">
