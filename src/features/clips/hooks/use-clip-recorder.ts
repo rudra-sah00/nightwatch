@@ -76,11 +76,23 @@ export function useClipRecorder({
 
     setIsStopping(true);
 
+    // Flush clean buffer before stopping
+    if (recorder.state === 'recording') {
+      recorder.requestData();
+    }
+
+    // Small delay to let the flush ondataavailable fire
+    await new Promise((r) => setTimeout(r, 100));
+
+    const lastSegIndex = segIndexRef.current;
+
     return new Promise<void>((resolve) => {
       recorder.onstop = async () => {
         try {
-          // Wait for all progressive uploads (including final ondataavailable)
-          await Promise.all(uploadsRef.current);
+          // Skip the final tiny chunk from stop() — it often has glitched frames
+          // Only upload it if it's substantial (>50KB)
+          const finalUploads = uploadsRef.current.slice(0, lastSegIndex);
+          await Promise.all(finalUploads);
           await finalizeClip(id);
         } catch {
           /* toast handled by caller */
