@@ -179,7 +179,7 @@ export function OfflineLibrary() {
                   }}
                 >
                   {/* Poster */}
-                  <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
+                  <div className="h-32 sm:h-auto w-full sm:w-28 shrink-0 bg-secondary relative sm:border-r-[3px] border-b-[3px] sm:border-b-0 border-border">
                     {item.posterUrl ? (
                       item.posterUrl.startsWith('offline-media://') ? (
                         <img
@@ -196,7 +196,7 @@ export function OfflineLibrary() {
                           src={item.posterUrl}
                           alt={item.title}
                           fill
-                          sizes="112px"
+                          sizes="(max-width: 640px) 100vw, 112px"
                           className="object-cover"
                         />
                       )
