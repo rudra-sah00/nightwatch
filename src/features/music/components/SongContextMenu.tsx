@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   addTrackToPlaylist,
@@ -84,6 +84,11 @@ export function SongContextMenu() {
   const t = useTranslations('music');
   const { currentTrack, addToQueue, playNext, play } = useMusicPlayerContext();
   const [menu, setMenu] = useState<MenuEvent | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number }>({
+    left: 0,
+    top: 0,
+  });
+  const menuRef = useRef<HTMLMenuElement>(null);
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
   const [showPlaylists, setShowPlaylists] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -103,6 +108,21 @@ export function SongContextMenu() {
   }, []);
 
   const close = useCallback(() => setMenu(null), []);
+
+  useEffect(() => {
+    if (!menu || !menuRef.current) return;
+    const rect = menuRef.current.getBoundingClientRect();
+    let { x: left, y: top } = menu;
+    if (top + rect.height > window.innerHeight) {
+      top = menu.y - rect.height;
+    }
+    if (left + rect.width > window.innerWidth) {
+      left = menu.x - rect.width;
+    }
+    if (top < 0) top = 0;
+    if (left < 0) left = 0;
+    setPos({ left, top });
+  }, [menu]);
 
   useEffect(() => {
     if (!menu) return;
@@ -213,9 +233,10 @@ export function SongContextMenu() {
 
   return (
     <menu
+      ref={menuRef}
       data-song-menu
       className="fixed z-[10000] bg-card border-[3px] border-border shadow-lg py-1 min-w-[200px] list-none m-0 p-0"
-      style={{ left: menu.x, top: menu.y }}
+      style={{ left: pos.left, top: pos.top }}
     >
       {menu.onRemove && (
         <>
