@@ -11,7 +11,7 @@ import type { LiveMatch } from '../types';
  * @param sportType - Sport category to filter by (default `"basketball"`).
  * @returns Schedule array, loading/error states, and a `refresh` function.
  */
-export function useLivestreams(sportType = 'basketball') {
+export function useLivestreams(sportType = 'basketball', server = 'server1') {
   const [schedule, setSchedule] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -32,6 +32,7 @@ export function useLivestreams(sportType = 'basketball') {
         0,
         3,
         controller.signal,
+        server,
       );
 
       if (controller.signal.aborted) return;
@@ -50,7 +51,7 @@ export function useLivestreams(sportType = 'basketball') {
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, [sportType]);
+  }, [sportType, server]);
 
   useEffect(() => {
     loadSchedule();
