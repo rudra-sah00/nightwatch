@@ -54,10 +54,26 @@ export default function ChapterReaderPage() {
               saved.chapterId === Number(chapterId) &&
               saved.pageIndex > 0
             ) {
-              setTimeout(() => {
+              setCurrentPage(saved.pageIndex);
+              const scrollToSaved = () => {
                 const el = pageRefs.current[saved.pageIndex];
                 if (el) el.scrollIntoView({ behavior: 'instant' });
-              }, 300);
+              };
+              // Wait for the target image to have dimensions before scrolling
+              const waitForImage = () => {
+                const el = pageRefs.current[saved.pageIndex];
+                const img = el?.querySelector('img');
+                if (img && img.naturalHeight > 0) {
+                  scrollToSaved();
+                } else if (img) {
+                  img.addEventListener('load', scrollToSaved, { once: true });
+                  // Fallback if image takes too long
+                  setTimeout(scrollToSaved, 3000);
+                } else {
+                  setTimeout(scrollToSaved, 500);
+                }
+              };
+              setTimeout(waitForImage, 100);
             }
           })
           .catch(() => {});
@@ -226,7 +242,7 @@ export default function ChapterReaderPage() {
               src={page.imageUrl}
               alt={`Page ${i + 1}`}
               className="w-full h-auto"
-              loading={i < 3 ? 'eager' : 'lazy'}
+              loading={i <= currentPage + 1 ? 'eager' : 'lazy'}
             />
           </div>
         ))}
