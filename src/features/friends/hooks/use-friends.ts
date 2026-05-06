@@ -112,11 +112,19 @@ export function useFriends() {
     socket.on('friend:request_received', onRefresh);
     socket.on('friend:request_accepted', onRefresh);
 
+    // Re-fetch on (re)connect to get fresh activity state
+    const onConnect = () => {
+      invalidateFriendsCache();
+      fetchAll();
+    };
+    socket.on('connect', onConnect);
+
     return () => {
       socket.off('friend:status', onStatus);
       socket.off('friend:activity', onActivity);
       socket.off('friend:request_received', onRefresh);
       socket.off('friend:request_accepted', onRefresh);
+      socket.off('connect', onConnect);
     };
   }, [socket, fetchAll]);
 
