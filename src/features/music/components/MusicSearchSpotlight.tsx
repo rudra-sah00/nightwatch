@@ -12,6 +12,7 @@ import {
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { formatTime } from '../utils';
+import { showSongMenu } from './SongContextMenu';
 
 /**
  * Cmd+K style search spotlight overlay for discovering music.
@@ -46,6 +47,8 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const hasMoreRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
 
   useEffect(() => {
     // Don't auto-focus on mobile — causes iOS to zoom/scroll
@@ -215,8 +218,37 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
                       key={song.id}
                       type="button"
                       onClick={() => {
+                        if (longPressTriggered.current) return;
                         player.play(song, results.songs);
                         close();
+                      }}
+                      onContextMenu={(e) => showSongMenu(e, song)}
+                      onTouchStart={(e) => {
+                        longPressTriggered.current = false;
+                        const touch = e.touches[0];
+                        longPressTimer.current = setTimeout(() => {
+                          longPressTriggered.current = true;
+                          showSongMenu(
+                            {
+                              clientX: touch.clientX,
+                              clientY: touch.clientY,
+                              preventDefault: () => {},
+                            } as unknown as React.MouseEvent,
+                            song,
+                          );
+                        }, 500);
+                      }}
+                      onTouchEnd={() => {
+                        if (longPressTimer.current) {
+                          clearTimeout(longPressTimer.current);
+                          longPressTimer.current = null;
+                        }
+                      }}
+                      onTouchMove={() => {
+                        if (longPressTimer.current) {
+                          clearTimeout(longPressTimer.current);
+                          longPressTimer.current = null;
+                        }
                       }}
                       className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                     >

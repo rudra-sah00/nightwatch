@@ -109,6 +109,24 @@ export function SongContextMenu() {
 
   const close = useCallback(() => setMenu(null), []);
 
+  const reposition = useCallback(() => {
+    if (!menuRef.current || !menu) return;
+    requestAnimationFrame(() => {
+      if (!menuRef.current || !menu) return;
+      const rect = menuRef.current.getBoundingClientRect();
+      let { x: left, y: top } = menu;
+      if (top + rect.height > window.innerHeight) {
+        top = menu.y - rect.height;
+      }
+      if (left + rect.width > window.innerWidth) {
+        left = menu.x - rect.width;
+      }
+      if (top < 0) top = 0;
+      if (left < 0) left = 0;
+      setPos({ left, top });
+    });
+  }, [menu]);
+
   useEffect(() => {
     if (!menu || !menuRef.current) return;
     const rect = menuRef.current.getBoundingClientRect();
@@ -176,10 +194,11 @@ export function SongContextMenu() {
     try {
       const data = await getUserPlaylists();
       setPlaylists(data);
+      reposition();
     } catch {
       setPlaylists([]);
     }
-  }, []);
+  }, [reposition]);
 
   const handleAddToPlaylist = useCallback(
     async (playlistId: string) => {
@@ -235,7 +254,7 @@ export function SongContextMenu() {
     <menu
       ref={menuRef}
       data-song-menu
-      className="fixed z-[10000] bg-card border-[3px] border-border shadow-lg py-1 min-w-[200px] list-none m-0 p-0"
+      className="fixed z-[10000] bg-card border-[3px] border-border shadow-lg py-1 min-w-[200px] max-h-[80vh] overflow-y-auto list-none m-0 p-0"
       style={{ left: pos.left, top: pos.top }}
     >
       {menu.onRemove && (
