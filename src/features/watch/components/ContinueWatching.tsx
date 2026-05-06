@@ -174,13 +174,13 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
       className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       {/* Poster */}
-      <div className="w-20 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border">
+      <div className="h-32 sm:h-auto w-full sm:w-28 shrink-0 bg-secondary relative sm:border-r-[3px] border-b-[3px] sm:border-b-0 border-border">
         {item.posterUrl ? (
           <Image
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            sizes="(max-width: 640px) 80px, 112px"
+            sizes="(max-width: 640px) 100vw, 112px"
             className="object-cover"
             unoptimized={item.posterUrl.includes('/api/stream/')}
             loading={index < 4 ? 'eager' : 'lazy'}
