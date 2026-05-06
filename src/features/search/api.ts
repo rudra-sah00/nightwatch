@@ -37,12 +37,30 @@ export async function searchContent(
         )
         .catch(() => [] as SearchResult[]),
     ]);
-    // Interleave: S1 first, then PV results that aren't duplicates by title
-    const seen = new Set(s1Results.map((r) => r.title.toLowerCase()));
-    const uniquePv = pvResults.filter((r) => !seen.has(r.title.toLowerCase()));
-    const merged = [...s1Results, ...uniquePv];
-    searchResultsCache.set(cacheKey, merged);
-    return merged;
+    // Deduplicate by title, then sort by relevance to query
+    const seen = new Set<string>();
+    const all = [...s1Results, ...pvResults].filter((r) => {
+      const key = r.title.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const q = query.toLowerCase().trim();
+    all.sort((a, b) => {
+      const aTitle = a.title.toLowerCase();
+      const bTitle = b.title.toLowerCase();
+      const aExact = aTitle === q ? 0 : 1;
+      const bExact = bTitle === q ? 0 : 1;
+      if (aExact !== bExact) return aExact - bExact;
+      const aStarts = aTitle.startsWith(q) ? 0 : 1;
+      const bStarts = bTitle.startsWith(q) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      const aIncludes = aTitle.includes(q) ? 0 : 1;
+      const bIncludes = bTitle.includes(q) ? 0 : 1;
+      return aIncludes - bIncludes;
+    });
+    searchResultsCache.set(cacheKey, all);
+    return all;
   }
 
   const serverParam = `&server=${encodeURIComponent(server)}`;
