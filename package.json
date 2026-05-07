@@ -237,5 +237,6 @@
       "@capgo/capacitor-incoming-call-kit@8.1.1": "patches/@capgo__capacitor-incoming-call-kit@8.1.1.patch",
       "@anuradev/capacitor-phone-call-notification@7.5.5": "patches/@anuradev__capacitor-phone-call-notification@7.5.5.patch"
     }
-  }
+  },
+  "packageManager": "pnpm@10.29.2"
 }
