@@ -4,17 +4,21 @@ import {
   Airplay,
   ListMusic,
   Mic2,
+  Moon,
   Pause,
   Play,
   SkipBack,
   SkipForward,
+  SlidersHorizontal,
   Volume1,
   Volume2,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { MusicTrack, SyncedLyricLine } from '../api';
 import { formatTime } from '../utils';
+import { Equalizer } from './Equalizer';
 import { FullPlayerLyrics } from './FullPlayerLyrics';
+import { SleepTimer } from './SleepTimer';
 
 interface MobileFullPlayerProps {
   currentTrack: MusicTrack;
@@ -72,6 +76,8 @@ export function MobileFullPlayer({
 }: MobileFullPlayerProps) {
   const swipeStartY = useRef(0);
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const [showEq, setShowEq] = useState(false);
+  const [showSleep, setShowSleep] = useState(false);
 
   // Seek bar state
   const seekBarRef = useRef<HTMLDivElement>(null);
@@ -321,7 +327,7 @@ export function MobileFullPlayer({
         {/* ===== BOTTOM BAR ===== */}
         {!showQueue && (
           <div className="shrink-0 pb-1">
-            {/* Bottom bar: lyrics / airplay / queue */}
+            {/* Bottom bar: lyrics / eq / airplay / sleep / queue */}
             <div className="flex items-center justify-around pb-1">
               <button
                 type="button"
@@ -333,10 +339,24 @@ export function MobileFullPlayer({
               </button>
               <button
                 type="button"
+                onClick={() => setShowEq((v) => !v)}
+                className={`p-2.5 rounded-full transition-colors ${showEq ? 'bg-white/20 text-white' : 'text-white/50'}`}
+              >
+                <SlidersHorizontal className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
                 onClick={onShowAirPlay}
                 className="p-2.5 text-white/50"
               >
                 <Airplay className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSleep((v) => !v)}
+                className={`p-2.5 rounded-full transition-colors ${showSleep ? 'bg-white/20 text-white' : 'text-white/50'}`}
+              >
+                <Moon className="w-5 h-5" />
               </button>
               <button
                 type="button"
@@ -346,6 +366,12 @@ export function MobileFullPlayer({
                 <ListMusic className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Equalizer panel */}
+            {showEq && <Equalizer onClose={() => setShowEq(false)} />}
+
+            {/* Sleep Timer panel */}
+            {showSleep && <SleepTimer onClose={() => setShowSleep(false)} />}
           </div>
         )}
       </div>

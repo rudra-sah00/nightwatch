@@ -74,6 +74,24 @@ interface MusicPlayerContextValue {
   removeFromQueue: (index: number) => void;
   /** Show the native AirPlay / audio-output picker (Safari, Chrome, or fallback toast). */
   showAirPlay: () => void;
+  /** Set crossfade duration in seconds (0 = off). */
+  setCrossfadeDuration: (seconds: number) => void;
+  /** Enable/disable gapless playback. */
+  setGapless: (enabled: boolean) => void;
+  /** Current crossfade duration. */
+  crossfadeDuration: number;
+  /** Whether gapless is enabled. */
+  gapless: boolean;
+  /** Initialize the equalizer (must be called after user gesture). */
+  initEqualizer: () => void;
+  /** Set equalizer band gains. */
+  setEqBands: (bands: import('../engine/audio-engine').EqualizerBand[]) => void;
+  /** Get current equalizer bands. */
+  getEqBands: () => import('../engine/audio-engine').EqualizerBand[];
+  /** Set sleep timer in minutes (0 = cancel). */
+  setSleepTimer: (minutes: number) => void;
+  /** Timestamp when sleep timer ends, or null. */
+  sleepTimerEnd: number | null;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -94,6 +112,9 @@ export function MusicPlayerProvider({
     shuffle: false,
     repeat: 'off',
     volume: 1,
+    crossfadeDuration: 0,
+    gapless: true,
+    sleepTimerEnd: null,
   });
   const [expanded, setExpanded] = useState(false);
 
@@ -102,8 +123,21 @@ export function MusicPlayerProvider({
     engineRef.current = engine;
     const unsub = engine.subscribe(setState);
     engine.loadQueue();
+
+    // Listen for settings changes from AppPreferences
+    const onGapless = (e: Event) => {
+      engine.setGapless((e as CustomEvent).detail);
+    };
+    const onCrossfade = (e: Event) => {
+      engine.setCrossfadeDuration((e as CustomEvent).detail);
+    };
+    window.addEventListener('music:set-gapless', onGapless);
+    window.addEventListener('music:set-crossfade', onCrossfade);
+
     return () => {
       unsub();
+      window.removeEventListener('music:set-gapless', onGapless);
+      window.removeEventListener('music:set-crossfade', onCrossfade);
       engine.destroy();
     };
   }, []);
@@ -343,6 +377,20 @@ export function MusicPlayerProvider({
       playNext,
       removeFromQueue,
       showAirPlay,
+      crossfadeDuration: state.crossfadeDuration,
+      gapless: state.gapless,
+      sleepTimerEnd: state.sleepTimerEnd,
+      setCrossfadeDuration: (s: number) =>
+        engineRef.current?.setCrossfadeDuration(s),
+      setGapless: (v: boolean) => engineRef.current?.setGapless(v),
+      initEqualizer: () => engineRef.current?.initEqualizer(),
+      setEqBands: (b: import('../engine/audio-engine').EqualizerBand[]) =>
+        engineRef.current?.setEqBands(b),
+      getEqBands: () => engineRef.current?.getEqBands() ?? [],
+      setSleepTimer: (m: number) => {
+        if (m <= 0) engineRef.current?.clearSleepTimer();
+        else engineRef.current?.setSleepTimer(m);
+      },
     }),
     [
       state,

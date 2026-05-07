@@ -18,21 +18,80 @@ export interface AudioEngineState {
   shuffle: boolean;
   repeat: RepeatMode;
   volume: number;
+  crossfadeDuration: number;
+  gapless: boolean;
+  sleepTimerEnd: number | null;
 }
+
+export interface EqualizerBand {
+  frequency: number;
+  gain: number;
+}
+
+export const EQ_PRESETS: Record<string, EqualizerBand[]> = {
+  flat: [
+    { frequency: 60, gain: 0 },
+    { frequency: 230, gain: 0 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 0 },
+    { frequency: 14000, gain: 0 },
+  ],
+  bass: [
+    { frequency: 60, gain: 6 },
+    { frequency: 230, gain: 4 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: -1 },
+    { frequency: 14000, gain: -2 },
+  ],
+  treble: [
+    { frequency: 60, gain: -2 },
+    { frequency: 230, gain: -1 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 4 },
+    { frequency: 14000, gain: 6 },
+  ],
+  vocal: [
+    { frequency: 60, gain: -2 },
+    { frequency: 230, gain: 0 },
+    { frequency: 910, gain: 4 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: 1 },
+  ],
+  rock: [
+    { frequency: 60, gain: 5 },
+    { frequency: 230, gain: 3 },
+    { frequency: 910, gain: -1 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: 5 },
+  ],
+  electronic: [
+    { frequency: 60, gain: 5 },
+    { frequency: 230, gain: 3 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 2 },
+    { frequency: 14000, gain: 4 },
+  ],
+};
 
 type Listener = (state: AudioEngineState) => void;
 
 export class AudioEngine {
   private audio: HTMLAudioElement;
+  private nextAudio: HTMLAudioElement | null = null;
   private state: AudioEngineState;
   private listeners = new Set<Listener>();
   private interval: ReturnType<typeof setInterval> | null = null;
   private shuffledOrder: number[] = [];
+  private sleepTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Web Audio API for equalizer
+  private audioContext: AudioContext | null = null;
+  private sourceNode: MediaElementAudioSourceNode | null = null;
+  private eqFilters: BiquadFilterNode[] = [];
+  private eqBands: EqualizerBand[] = EQ_PRESETS.flat;
 
   constructor() {
     this.audio = new Audio();
-    // Allow media notification on mobile (Capacitor); suppress remote playback
-    // prompts (AirPlay/Cast) only on desktop web.
     if (!window.Capacitor?.isNativePlatform?.()) {
       this.audio.disableRemotePlayback = true;
     }
@@ -46,6 +105,9 @@ export class AudioEngine {
       shuffle: false,
       repeat: 'off',
       volume: 1,
+      crossfadeDuration: 0,
+      gapless: true,
+      sleepTimerEnd: null,
     };
 
     this.audio.onended = () => this.handleEnded();
@@ -98,6 +160,24 @@ export class AudioEngine {
         this.update({
           progress: (this.audio.currentTime / this.audio.duration) * 100,
         });
+        // Gapless: pre-buffer next track when 5s from end
+        if (
+          this.state.gapless &&
+          !this.state.crossfadeDuration &&
+          this.audio.duration - this.audio.currentTime < 5 &&
+          !this.nextAudio
+        ) {
+          this.preBufferNext();
+        }
+        // Crossfade: start crossfade when crossfadeDuration seconds from end
+        if (
+          this.state.crossfadeDuration > 0 &&
+          this.audio.duration - this.audio.currentTime <=
+            this.state.crossfadeDuration &&
+          !this.nextAudio
+        ) {
+          this.startCrossfade();
+        }
       }
     }, 250);
   }
@@ -106,6 +186,86 @@ export class AudioEngine {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
+    }
+  }
+
+  private getNextIndex(): number | null {
+    const { queue, queueIndex, repeat, shuffle } = this.state;
+    if (queue.length === 0) return null;
+    if (shuffle && this.shuffledOrder.length > 0) {
+      const pos = this.shuffledOrder.indexOf(queueIndex);
+      const next = pos + 1;
+      if (next >= this.shuffledOrder.length) {
+        return repeat === 'all' ? this.shuffledOrder[0] : null;
+      }
+      return this.shuffledOrder[next];
+    }
+    const next = queueIndex + 1;
+    if (next >= queue.length) {
+      return repeat === 'all' ? 0 : null;
+    }
+    return next;
+  }
+
+  private async preBufferNext() {
+    const nextIdx = this.getNextIndex();
+    if (nextIdx === null) return;
+    const nextTrack = this.state.queue[nextIdx];
+    if (!nextTrack) return;
+    try {
+      const url = await getStreamUrl(nextTrack.id);
+      this.nextAudio = new Audio();
+      this.nextAudio.preload = 'auto';
+      this.nextAudio.src = url;
+      this.nextAudio.volume = this.state.volume;
+    } catch {
+      this.nextAudio = null;
+    }
+  }
+
+  private async startCrossfade() {
+    const nextIdx = this.getNextIndex();
+    if (nextIdx === null) return;
+    const nextTrack = this.state.queue[nextIdx];
+    if (!nextTrack) return;
+
+    try {
+      const url = await getStreamUrl(nextTrack.id);
+      this.nextAudio = new Audio();
+      this.nextAudio.src = url;
+      this.nextAudio.volume = 0;
+      await this.nextAudio.play();
+
+      const duration = this.state.crossfadeDuration * 1000;
+      const steps = 30;
+      const stepTime = duration / steps;
+
+      // Fade out current, fade in next simultaneously
+      for (let i = 0; i <= steps; i++) {
+        const ratio = i / steps;
+        this.audio.volume = (1 - ratio) * this.state.volume;
+        if (this.nextAudio) this.nextAudio.volume = ratio * this.state.volume;
+        await new Promise((r) => setTimeout(r, stepTime));
+      }
+
+      // Swap audio elements
+      this.audio.pause();
+      this.audio.src = '';
+      this.audio = this.nextAudio;
+      this.nextAudio = null;
+      this.audio.onended = () => this.handleEnded();
+      this.audio.onloadedmetadata = () => {
+        this.update({ duration: this.audio.duration });
+      };
+      this.connectEqualizer();
+      this.update({
+        currentTrack: nextTrack,
+        queueIndex: nextIdx,
+        duration: this.audio.duration || 0,
+        progress: 0,
+      });
+    } catch {
+      this.nextAudio = null;
     }
   }
 
@@ -127,6 +287,32 @@ export class AudioEngine {
       this.audio.play();
       this.startProgressTimer();
       return;
+    }
+    // If crossfade already handled the transition, skip
+    if (this.state.crossfadeDuration > 0) return;
+
+    // Gapless: use pre-buffered audio if available
+    if (this.state.gapless && this.nextAudio) {
+      const nextIdx = this.getNextIndex();
+      if (nextIdx !== null && this.state.queue[nextIdx]) {
+        this.audio = this.nextAudio;
+        this.nextAudio = null;
+        this.audio.onended = () => this.handleEnded();
+        this.audio.onloadedmetadata = () => {
+          this.update({ duration: this.audio.duration });
+        };
+        this.audio.play();
+        this.connectEqualizer();
+        this.update({
+          currentTrack: this.state.queue[nextIdx],
+          queueIndex: nextIdx,
+          isPlaying: true,
+          progress: 0,
+          duration: this.audio.duration || 0,
+        });
+        this.startProgressTimer();
+        return;
+      }
     }
     this.next();
   }
@@ -312,8 +498,104 @@ export class AudioEngine {
     this.stop();
   }
 
+  // ─── Equalizer ─────────────────────────────────────────────────
+
+  private connectEqualizer() {
+    if (this.eqFilters.length === 0) return;
+    // Reconnect source if audio element changed
+    try {
+      if (!this.audioContext) return;
+      this.sourceNode?.disconnect();
+      this.sourceNode = this.audioContext.createMediaElementSource(this.audio);
+      let lastNode: AudioNode = this.sourceNode;
+      for (const filter of this.eqFilters) {
+        lastNode.connect(filter);
+        lastNode = filter;
+      }
+      lastNode.connect(this.audioContext.destination);
+    } catch {
+      // Already connected or context issue — ignore
+    }
+  }
+
+  initEqualizer() {
+    if (this.audioContext) return;
+    this.audioContext = new AudioContext();
+    this.sourceNode = this.audioContext.createMediaElementSource(this.audio);
+
+    // Create 5-band EQ
+    this.eqFilters = this.eqBands.map((band, i) => {
+      const filter = this.audioContext!.createBiquadFilter();
+      filter.type =
+        i === 0
+          ? 'lowshelf'
+          : i === this.eqBands.length - 1
+            ? 'highshelf'
+            : 'peaking';
+      filter.frequency.value = band.frequency;
+      filter.gain.value = band.gain;
+      if (filter.type === 'peaking') filter.Q.value = 1.4;
+      return filter;
+    });
+
+    // Connect chain: source → filter1 → filter2 → ... → destination
+    let lastNode: AudioNode = this.sourceNode;
+    for (const filter of this.eqFilters) {
+      lastNode.connect(filter);
+      lastNode = filter;
+    }
+    lastNode.connect(this.audioContext.destination);
+  }
+
+  setEqBands(bands: EqualizerBand[]) {
+    this.eqBands = bands;
+    for (let i = 0; i < bands.length && i < this.eqFilters.length; i++) {
+      this.eqFilters[i].gain.value = bands[i].gain;
+    }
+  }
+
+  getEqBands(): EqualizerBand[] {
+    return this.eqBands;
+  }
+
+  // ─── Sleep Timer ──────────────────────────────────────────────
+
+  setSleepTimer(minutes: number) {
+    this.clearSleepTimer();
+    if (minutes <= 0) return;
+    const end = Date.now() + minutes * 60 * 1000;
+    this.update({ sleepTimerEnd: end });
+    this.sleepTimer = setTimeout(
+      () => {
+        this.stop();
+        this.update({ sleepTimerEnd: null });
+      },
+      minutes * 60 * 1000,
+    );
+  }
+
+  clearSleepTimer() {
+    if (this.sleepTimer) {
+      clearTimeout(this.sleepTimer);
+      this.sleepTimer = null;
+    }
+    this.update({ sleepTimerEnd: null });
+  }
+
+  // ─── Settings ─────────────────────────────────────────────────
+
+  setCrossfadeDuration(seconds: number) {
+    this.update({ crossfadeDuration: Math.max(0, Math.min(12, seconds)) });
+  }
+
+  setGapless(enabled: boolean) {
+    this.update({ gapless: enabled });
+  }
+
   destroy() {
     this.stop();
+    this.clearSleepTimer();
+    this.audioContext?.close();
     this.listeners.clear();
   }
 

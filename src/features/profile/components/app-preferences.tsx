@@ -53,6 +53,8 @@ export function AppPreferences() {
   const [customSpeed, setCustomSpeed] = useState('');
   const [isDesktop, setIsDesktop] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [gaplessEnabled, setGaplessEnabled] = useState(true);
+  const [crossfadeSec, setCrossfadeSec] = useState(0);
 
   useEffect(() => {
     if (checkIsDesktop()) {
@@ -449,6 +451,73 @@ export function AppPreferences() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Music Playback */}
+      <div className="pt-8 border-t border-border">
+        <h3 className="font-headline font-black uppercase tracking-widest text-sm text-muted-foreground mb-6">
+          Music Playback
+        </h3>
+        <div className="space-y-6 max-w-2xl">
+          {/* Gapless */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Gapless Playback</p>
+              <p className="text-xs text-muted-foreground">
+                No silence between tracks
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const event = new CustomEvent('music:set-gapless', {
+                  detail: !gaplessEnabled,
+                });
+                window.dispatchEvent(event);
+                setGaplessEnabled((v) => !v);
+              }}
+              className={`w-10 h-6 rounded-full transition-colors ${gaplessEnabled ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white shadow transition-transform mx-1 ${gaplessEnabled ? 'translate-x-4' : ''}`}
+              />
+            </button>
+          </div>
+
+          {/* Crossfade */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Crossfade</p>
+                <p className="text-xs text-muted-foreground">
+                  Blend tracks together
+                </p>
+              </div>
+              <span className="text-sm font-mono text-muted-foreground">
+                {crossfadeSec}s
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={12}
+              step={1}
+              value={crossfadeSec}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setCrossfadeSec(val);
+                window.dispatchEvent(
+                  new CustomEvent('music:set-crossfade', { detail: val }),
+                );
+              }}
+              className="w-full accent-primary cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Off</span>
+              <span>12s</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
