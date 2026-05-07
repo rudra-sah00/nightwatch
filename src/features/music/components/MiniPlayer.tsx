@@ -15,6 +15,7 @@ import { useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
+import { MusicDevicePicker } from './MusicDevicePicker';
 import { showSongMenu } from './SongContextMenu';
 
 /**
@@ -208,6 +209,7 @@ export function MiniPlayer() {
               />
             </>
           )}
+          <MusicDevicePicker />
           <button
             type="button"
             onClick={() => setShowQueue((v) => !v)}
