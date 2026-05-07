@@ -21,25 +21,43 @@ function getDeviceName(): string {
  * 2. Discovers other devices (listens for device_online/offline)
  * 3. Handles single-device playback (stops local when another device starts)
  * 4. Broadcasts local playback start to other devices
+ * 5. Throttled state_update broadcast (every 5s, not every 250ms)
  *
  * Renders `null` — side-effect only.
  */
 export function MusicDeviceSync() {
   const { socket } = useSocket();
-  const { isPlaying, currentTrack, progress, duration, setRemoteControlling } =
-    useMusicPlayerContext();
+  const {
+    isPlaying,
+    currentTrack,
+    progress,
+    duration,
+    setRemoteControlling,
+    isRemoteControlling,
+  } = useMusicPlayerContext();
   const pathname = usePathname();
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
-  const prevTrackIdRef = useRef<string | null>(null);
 
   const deviceName = getDeviceName();
   const available = !BLOCKED_ROUTES.some((r) => pathname.startsWith(r));
-  const availableRef = useRef(available);
-  availableRef.current = available;
 
-  // ─── Advertise this device ──────────────────────────────────────
+  // Refs for values accessed in intervals/callbacks (avoid stale closures)
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+  const stateUpdateRef = useRef<NodeJS.Timeout | null>(null);
+  const isPlayingRef = useRef(isPlaying);
+  const availableRef = useRef(available);
+  const prevTrackIdRef = useRef<string | null>(null);
+  const currentTrackRef = useRef(currentTrack);
+  const progressRef = useRef(progress);
+  const durationRef = useRef(duration);
+
+  // Keep refs in sync
+  isPlayingRef.current = isPlaying;
+  availableRef.current = available;
+  currentTrackRef.current = currentTrack;
+  progressRef.current = progress;
+  durationRef.current = duration;
+
+  // ─── 1. Advertise this device (heartbeat 60s) ──────────────────
 
   useEffect(() => {
     if (!socket?.connected) return;
@@ -61,13 +79,13 @@ export function MusicDeviceSync() {
     };
   }, [socket, deviceName]);
 
-  // Re-advertise on state/availability change
+  // Re-advertise on play state or availability change
   useEffect(() => {
     if (!socket?.connected) return;
     socket.emit('music:device_online', { deviceName, isPlaying, available });
   }, [socket, deviceName, isPlaying, available]);
 
-  // ─── Discover other devices ─────────────────────────────────────
+  // ─── 2. Discover other devices ─────────────────────────────────
 
   useEffect(() => {
     if (!socket) return;
@@ -100,8 +118,6 @@ export function MusicDeviceSync() {
     socket.on('music:device_online', onOnline);
     socket.on('music:device_offline', onOffline);
     socket.on('music:request_devices', onRequestDevices);
-
-    // Discover existing devices on connect
     socket.emit('music:request_devices');
     socket.on('connect', () => socket.emit('music:request_devices'));
 
@@ -112,34 +128,65 @@ export function MusicDeviceSync() {
     };
   }, [socket, deviceName]);
 
-  // ─── Single-device playback enforcement ─────────────────────────
+  // ─── 3. Broadcast playback_started on NEW track only ───────────
 
-  // Broadcast when this device starts playing a new track
   useEffect(() => {
-    if (!socket?.connected || !currentTrack || !isPlaying) return;
-    if (prevTrackIdRef.current === currentTrack.id) return;
-    prevTrackIdRef.current = currentTrack.id;
+    if (!socket?.connected) return;
+    const track = currentTrackRef.current;
+    if (!track || !isPlayingRef.current) return;
+    if (prevTrackIdRef.current === track.id) return;
+    prevTrackIdRef.current = track.id;
 
     socket.emit('music:playback_started', {
       deviceName,
-      track: currentTrack,
+      track,
       isPlaying: true,
-      progress,
-      duration,
+      progress: progressRef.current,
+      duration: durationRef.current,
     });
-    // Clear remote state since we are now the active player
     setRemoteControlling(false);
-  }, [
-    socket,
-    currentTrack,
-    isPlaying,
-    deviceName,
-    progress,
-    duration,
-    setRemoteControlling,
-  ]);
+  }, [socket, deviceName, setRemoteControlling]);
 
-  // Listen for other devices starting playback → set remote state
+  // ─── 4. Throttled state_update broadcast (every 5s) ────────────
+
+  useEffect(() => {
+    if (
+      !socket?.connected ||
+      !currentTrack ||
+      !isPlaying ||
+      isRemoteControlling
+    ) {
+      if (stateUpdateRef.current) {
+        clearInterval(stateUpdateRef.current);
+        stateUpdateRef.current = null;
+      }
+      return;
+    }
+
+    const emitState = () => {
+      socket.emit('music:state_update', {
+        track: currentTrackRef.current,
+        isPlaying: isPlayingRef.current,
+        progress: progressRef.current,
+        duration: durationRef.current,
+      });
+    };
+
+    // Emit immediately on play/pause change
+    emitState();
+    // Then every 5s for position sync
+    stateUpdateRef.current = setInterval(emitState, 5000);
+
+    return () => {
+      if (stateUpdateRef.current) {
+        clearInterval(stateUpdateRef.current);
+        stateUpdateRef.current = null;
+      }
+    };
+  }, [socket, isPlaying, currentTrack?.id, isRemoteControlling, currentTrack]);
+
+  // ─── 5. Listen for other devices starting playback ─────────────
+
   useEffect(() => {
     if (!socket) return;
 
@@ -150,8 +197,6 @@ export function MusicDeviceSync() {
       isPlaying: boolean;
     }) => {
       if (data.socketId === socket.id) return;
-      // Another device started playing → we become passive observer
-      // Stop local playback if any
       window.dispatchEvent(
         new CustomEvent('music:remote-takeover', { detail: data }),
       );

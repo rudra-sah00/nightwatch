@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSocket } from '@/providers/socket-provider';
 import type { MusicTrack } from '../api';
 
@@ -53,7 +53,22 @@ export function useMusicDevices(
 ) {
   const { socket } = useSocket();
   const [devices, setDevices] = useState<Map<string, MusicDevice>>(new Map());
-  const [activeTarget, setActiveTarget] = useState<string | null>(null);
+  const [activeTarget, setActiveTargetRaw] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('nightwatch:music-active-target');
+  });
+  const activeTargetRef = useRef(activeTarget);
+  activeTargetRef.current = activeTarget;
+
+  const setActiveTarget = useCallback((value: string | null) => {
+    setActiveTargetRaw(value);
+    activeTargetRef.current = value;
+    if (value) {
+      sessionStorage.setItem('nightwatch:music-active-target', value);
+    } else {
+      sessionStorage.removeItem('nightwatch:music-active-target');
+    }
+  }, []);
   const [remoteState, setRemoteState] = useState<RemoteMusicState>({
     track: null,
     isPlaying: false,
@@ -81,7 +96,9 @@ export function useMusicDevices(
           next.delete(socketId);
           return next;
         });
-        setActiveTarget((t) => (t === socketId ? null : t));
+        setActiveTarget(
+          activeTargetRef.current === socketId ? null : activeTargetRef.current,
+        );
       }
     };
 
@@ -93,7 +110,7 @@ export function useMusicDevices(
     return () => {
       window.removeEventListener('music:device-update', onDeviceUpdate);
     };
-  }, [socket]);
+  }, [socket, setActiveTarget]);
 
   // ─── Receive state updates from target device ───────────────────
 
@@ -169,7 +186,7 @@ export function useMusicDevices(
     return () => {
       socket.off(EVENTS.TRANSFER_PLAYBACK, onTransfer);
     };
-  }, [socket]);
+  }, [socket, setActiveTarget]);
 
   // ─── Public API ─────────────────────────────────────────────────
 
