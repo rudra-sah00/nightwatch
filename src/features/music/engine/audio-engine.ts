@@ -114,6 +114,17 @@ export class AudioEngine {
     this.audio.onloadedmetadata = () => {
       this.update({ duration: this.audio.duration });
     };
+
+    // Load persisted settings
+    try {
+      const gapless = localStorage.getItem('nightwatch:gapless');
+      if (gapless !== null) this.state.gapless = gapless !== 'false';
+      const crossfade = localStorage.getItem('nightwatch:crossfade');
+      if (crossfade !== null)
+        this.state.crossfadeDuration = Number(crossfade) || 0;
+    } catch {
+      /* ignore */
+    }
   }
 
   /**
@@ -523,6 +534,14 @@ export class AudioEngine {
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaElementSource(this.audio);
 
+    // Load saved EQ from localStorage
+    try {
+      const saved = localStorage.getItem('nightwatch:eq-bands');
+      if (saved) this.eqBands = JSON.parse(saved);
+    } catch {
+      /* use default */
+    }
+
     // Create 5-band EQ
     this.eqFilters = this.eqBands.map((band, i) => {
       const filter = this.audioContext!.createBiquadFilter();
@@ -551,6 +570,11 @@ export class AudioEngine {
     this.eqBands = bands;
     for (let i = 0; i < bands.length && i < this.eqFilters.length; i++) {
       this.eqFilters[i].gain.value = bands[i].gain;
+    }
+    try {
+      localStorage.setItem('nightwatch:eq-bands', JSON.stringify(bands));
+    } catch {
+      /* quota exceeded */
     }
   }
 
@@ -585,11 +609,22 @@ export class AudioEngine {
   // ─── Settings ─────────────────────────────────────────────────
 
   setCrossfadeDuration(seconds: number) {
-    this.update({ crossfadeDuration: Math.max(0, Math.min(12, seconds)) });
+    const val = Math.max(0, Math.min(12, seconds));
+    this.update({ crossfadeDuration: val });
+    try {
+      localStorage.setItem('nightwatch:crossfade', String(val));
+    } catch {
+      /* ignore */
+    }
   }
 
   setGapless(enabled: boolean) {
     this.update({ gapless: enabled });
+    try {
+      localStorage.setItem('nightwatch:gapless', String(enabled));
+    } catch {
+      /* ignore */
+    }
   }
 
   destroy() {
