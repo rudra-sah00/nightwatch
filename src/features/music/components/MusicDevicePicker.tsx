@@ -69,6 +69,7 @@ export function MusicDevicePicker() {
     next,
     prev,
     togglePlay,
+    setRemoteControlling,
   } = player;
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -156,6 +157,20 @@ export function MusicDevicePicker() {
   const isControlling = !!activeTarget;
   const displayTrack = isControlling ? remoteState.track : currentTrack;
   const displayPlaying = isControlling ? remoteState.isPlaying : isPlaying;
+
+  // Sync remote state to context so MiniPlayer can show it
+  useEffect(() => {
+    setRemoteControlling(
+      isControlling,
+      remoteState.track,
+      remoteState.isPlaying,
+    );
+  }, [
+    isControlling,
+    remoteState.track,
+    remoteState.isPlaying,
+    setRemoteControlling,
+  ]);
 
   return (
     <>

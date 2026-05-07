@@ -92,6 +92,18 @@ interface MusicPlayerContextValue {
   setSleepTimer: (minutes: number) => void;
   /** Timestamp when sleep timer ends, or null. */
   sleepTimerEnd: number | null;
+  /** Whether playback is being controlled on another device. */
+  isRemoteControlling: boolean;
+  /** Track info from the remote device (when controlling). */
+  remoteTrack: import('../api').MusicTrack | null;
+  /** Whether the remote device is playing. */
+  remoteIsPlaying: boolean;
+  /** Set remote controlling state. */
+  setRemoteControlling: (
+    active: boolean,
+    track?: import('../api').MusicTrack | null,
+    playing?: boolean,
+  ) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -117,6 +129,9 @@ export function MusicPlayerProvider({
     sleepTimerEnd: null,
   });
   const [expanded, setExpanded] = useState(false);
+  const [remoteControlling, setRemoteControllingState] = useState(false);
+  const [remoteTrack, setRemoteTrack] = useState<MusicTrack | null>(null);
+  const [remoteIsPlaying, setRemoteIsPlaying] = useState(false);
 
   useEffect(() => {
     const engine = new AudioEngine();
@@ -391,10 +406,25 @@ export function MusicPlayerProvider({
         if (m <= 0) engineRef.current?.clearSleepTimer();
         else engineRef.current?.setSleepTimer(m);
       },
+      isRemoteControlling: remoteControlling,
+      remoteTrack,
+      remoteIsPlaying,
+      setRemoteControlling: (
+        active: boolean,
+        track?: MusicTrack | null,
+        playing?: boolean,
+      ) => {
+        setRemoteControllingState(active);
+        setRemoteTrack(track ?? null);
+        setRemoteIsPlaying(playing ?? false);
+      },
     }),
     [
       state,
       expanded,
+      remoteControlling,
+      remoteTrack,
+      remoteIsPlaying,
       play,
       togglePlay,
       next,

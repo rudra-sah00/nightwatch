@@ -53,6 +53,9 @@ export function MiniPlayer() {
     setExpanded,
     volume,
     setVolume,
+    isRemoteControlling,
+    remoteTrack,
+    remoteIsPlaying,
     removeFromQueue,
   } = player;
 
@@ -64,13 +67,13 @@ export function MiniPlayer() {
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
-      if (currentTrack) {
+      if (displayTrack) {
         const syntheticEvent = {
           clientX: touch.clientX,
           clientY: touch.clientY,
           preventDefault: () => {},
         } as unknown as React.MouseEvent;
-        showSongMenu(syntheticEvent, currentTrack);
+        displayTrack && showSongMenu(syntheticEvent, displayTrack);
       }
     }, 500);
   };
@@ -90,7 +93,11 @@ export function MiniPlayer() {
   };
   const [showQueue, setShowQueue] = useState(false);
 
-  if (!currentTrack) return null;
+  // Show MiniPlayer if local track OR remote controlling
+  const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
+  const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
+
+  if (!displayTrack) return null;
 
   return (
     <div className="sticky bottom-0 z-10 bg-card">
@@ -116,7 +123,7 @@ export function MiniPlayer() {
           onClick={() => {
             if (!longPressTriggered.current) setExpanded(true);
           }}
-          onContextMenu={(e) => showSongMenu(e, currentTrack)}
+          onContextMenu={(e) => displayTrack && showSongMenu(e, displayTrack)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
           onTouchMove={onTouchMove}
@@ -124,8 +131,8 @@ export function MiniPlayer() {
         >
           <div className="w-11 h-11 border-[2px] border-border overflow-hidden">
             <img
-              src={currentTrack.image}
-              alt={currentTrack.title}
+              src={displayTrack.image}
+              alt={displayTrack.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -137,17 +144,17 @@ export function MiniPlayer() {
           onClick={() => {
             if (!longPressTriggered.current) setExpanded(true);
           }}
-          onContextMenu={(e) => showSongMenu(e, currentTrack)}
+          onContextMenu={(e) => displayTrack && showSongMenu(e, displayTrack)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
           onTouchMove={onTouchMove}
           className="flex-1 min-w-0 text-left"
         >
           <p className="font-headline font-bold text-xs uppercase tracking-wider truncate">
-            {currentTrack.title}
+            {displayTrack.title}
           </p>
           <p className="text-foreground/40 text-[10px] font-headline uppercase tracking-wider truncate">
-            {currentTrack.artist}
+            {displayTrack.artist}
           </p>
         </button>
 
@@ -165,7 +172,7 @@ export function MiniPlayer() {
             onClick={togglePlay}
             className="w-8 h-8 flex items-center justify-center bg-neo-yellow border-[2px] border-border text-foreground"
           >
-            {isPlaying ? (
+            {displayPlaying ? (
               <Pause className="w-3 h-3 fill-current" />
             ) : (
               <Play className="w-3 h-3 fill-current ml-0.5" />
