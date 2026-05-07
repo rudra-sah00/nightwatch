@@ -7,6 +7,7 @@ import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
+import { ActiveDevices } from './active-devices';
 import { ActivityGraph } from './activity-graph';
 import { AppPreferences } from './app-preferences';
 import { UpdateProfileForm } from './update-profile-form';
@@ -141,6 +142,8 @@ export function ProfileOverview() {
           )}
         </div>
       </form>
+
+      <ActiveDevices />
 
       {/* Watch Activity Heatmap */}
       <section
