@@ -84,11 +84,12 @@ interface WatchActivity {
 
 `components/profile-overview.tsx`
 
-Main profile page layout composing four sections:
+Main profile page layout composing five sections:
 1. `UpdateProfileForm` — avatar + profile fields
-2. `AppPreferences` — theme, language, desktop settings
+2. `AppPreferences` — theme, language, desktop settings, music playback (gapless/crossfade)
 3. Password change form — current/new/confirm fields with show/hide toggle
-4. `ActivityGraph` — watch activity heatmap
+4. `ActiveDevices` — list of logged-in sessions with per-device sign-out
+5. `ActivityGraph` — watch activity heatmap
 
 Uses `useProfileOverview` for activity data and `useChangePasswordForm` for the password section. The password form uses `React.useActionState` for server-action-style submission.
 

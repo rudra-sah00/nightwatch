@@ -42,3 +42,38 @@ The desktop Electron app cannot use standard cookie-based auth because it loads 
 - Codes are single-use (consumed atomically via Redis `GETDEL`).
 - Codes expire after 5 minutes (Redis `EX 300`).
 - The code transitions through states: `pending` → `authorized:{userId}` → deleted on exchange.
+
+## Multi-Device Sessions
+
+The system supports concurrent sign-in across multiple devices (desktop, mobile, browser tabs). Each login creates an independent session.
+
+### Redis Key Structure
+
+| Key | Type | TTL | Purpose |
+|-----|------|-----|---------|
+| `session:{userId}:{sessionId}` | String (JSON) | 1 year | Session existence + device metadata |
+| `sessions:{userId}` | Set | None | All active session IDs for bulk invalidation |
+| `rt:{userId}:{sessionId}` | String | 1 year | Refresh token JTI for replay detection |
+| `rt_grace:{userId}:{sessionId}` | String | 60s | Grace JTI for concurrent refresh requests |
+
+### Session Metadata
+
+Each session stores `{ device: string, createdAt: number }` as JSON. The `device` field is the `User-Agent` header from the login request (or `"Desktop App"` for Electron auth).
+
+### Session Management API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/auth/sessions` | List all active sessions (device, createdAt, isCurrent) |
+| DELETE | `/api/auth/sessions/:sessionId` | Revoke a specific session (cannot revoke current) |
+
+### Bulk Invalidation
+
+Password change and password reset call `invalidateAllSessions(userId)` which:
+1. Reads all session IDs from the `sessions:{userId}` set.
+2. Deletes all per-session keys (`session:*`, `rt:*`, `rt_grace:*`).
+3. Deletes the set itself.
+
+### Legacy Migration
+
+For backwards compatibility with pre-multi-session deployments, `validateSession` checks the new key format first, then falls back to the legacy `session:{userId}` → `sessionId` format. On legacy match, the session is auto-migrated to the new format atomically.

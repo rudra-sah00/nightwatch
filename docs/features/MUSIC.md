@@ -12,7 +12,10 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 │    └── AudioEngine (singleton HTMLAudioElement)         │
 │          ├── Playback (play, pause, seek, next, prev)   │
 │          ├── Queue (shuffle, repeat, Redis-synced)       │
-│          └── Crossfade (300ms fade-out, 300ms fade-in)  │
+│          ├── Gapless (pre-buffers next track 5s early)  │
+│          ├── Crossfade (0–12s configurable blend)       │
+│          ├── Equalizer (5-band Web Audio API)           │
+│          └── Sleep Timer (auto-stop after duration)     │
 │                                                         │
 │  Components:                                            │
 │    MusicView ─── Home page (charts, featured, artists)  │
@@ -22,10 +25,14 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 │    SongContextMenu ── Right-click add to queue/playlist  │
 │    UserPlaylists ── User-created playlist cards          │
 │    MusicAutoStop ── Stops music on video route entry     │
+│    MusicDeviceSync ── Global device advertising          │
+│    MusicDevicePicker ── Spotify Connect-like transfer    │
+│    Equalizer ── 5-band EQ with presets panel            │
+│    SleepTimer ── Countdown timer panel                  │
 │    MusicDiscordPresence ── Desktop Discord RPC           │
 │    FloatingDisc ── Animated album art disc               │
 └──────────────────────┬──────────────────────────────────┘
-                       │ apiFetch (HTTP)
+                       │ apiFetch (HTTP) + Socket.IO
 ┌──────────────────────▼──────────────────────────────────┐
 │  Backend (Node.js / Express)                            │
 │                                                         │
@@ -36,6 +43,13 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 │    ├── Redis queue (music:queue:{userId}, 24h TTL)      │
 │    ├── PostgreSQL (user playlists + tracks)              │
 │    └── CF Worker proxy (stream URL with Referer header) │
+│                                                         │
+│  Socket.IO (music device events)                        │
+│    ├── music:device_online / music:device_offline        │
+│    ├── music:transfer_playback                          │
+│    ├── music:state_update                               │
+│    ├── music:command                                    │
+│    └── music:request_devices                            │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -46,11 +60,12 @@ src/features/music/
 ├── api.ts                          # All backend API functions (40 endpoints)
 ├── utils.ts                        # formatTime helper
 ├── engine/
-│   └── audio-engine.ts             # AudioEngine class (playback, queue, shuffle, repeat)
+│   └── audio-engine.ts             # AudioEngine class (playback, queue, gapless, crossfade, EQ, sleep)
 ├── context/
 │   └── MusicPlayerContext.tsx       # React Context wrapping AudioEngine
 ├── hooks/
-│   └── use-music-shortcuts.ts       # Global keyboard shortcuts (Space, ←→, ↑↓, M, S, R)
+│   ├── use-music-shortcuts.ts       # Global keyboard shortcuts (Space, ←→, ↑↓, M, S, R)
+│   └── use-music-devices.ts        # Device discovery + transfer + remote commands
 └── components/
     ├── MusicView.tsx               # Main music home page
     ├── FullPlayer.tsx              # Expanded player with synced lyrics
@@ -60,6 +75,10 @@ src/features/music/
     ├── UserPlaylists.tsx           # User playlist cards
     ├── MusicPrimitives.tsx         # Card, ScrollRow, Section primitives
     ├── MusicAutoStop.tsx           # Auto-stop on video routes
+    ├── MusicDeviceSync.tsx         # Global device advertising (headless)
+    ├── MusicDevicePicker.tsx       # Spotify Connect-like device picker modal
+    ├── Equalizer.tsx               # 5-band EQ panel with presets
+    ├── SleepTimer.tsx              # Sleep timer panel with countdown
     ├── MusicDiscordPresence.tsx    # Desktop Discord Rich Presence
     └── FloatingDisc.tsx            # Animated floating disc
 ```
@@ -81,14 +100,62 @@ Singleton class managing all playback state via a single `HTMLAudioElement`.
 | `shuffle` | `boolean` | Shuffle mode |
 | `repeat` | `'off' \| 'all' \| 'one'` | Repeat mode |
 | `volume` | `number` | 0–1 volume level |
+| `crossfadeDuration` | `number` | Crossfade seconds (0 = off, max 12) |
+| `gapless` | `boolean` | Gapless playback enabled |
+| `sleepTimerEnd` | `number \| null` | Timestamp when sleep timer fires |
 
 ### Key Behaviors
 
-- **Crossfade**: 300ms fade-out of current track, then fade-in of new track (20 steps × 15ms).
+- **Gapless Playback**: Pre-buffers the next track's audio element 5 seconds before the current track ends. On `ended` event, instantly swaps to the pre-buffered element with zero silence gap. Disabled when crossfade is active (crossfade handles transitions instead).
+- **Crossfade**: Configurable 0–12 seconds. When the current track reaches `crossfadeDuration` seconds from its end, a second audio element loads the next track and begins playing at volume 0. Both tracks fade simultaneously (30 steps) — current fades out, next fades in. After completion, the old element is discarded and the new one becomes primary.
+- **Equalizer**: 5-band parametric EQ using Web Audio API `BiquadFilterNode` chain (60Hz lowshelf, 230Hz peaking, 910Hz peaking, 3.6kHz peaking, 14kHz highshelf). Initialized on first user gesture (AudioContext requirement). 6 presets: flat, bass, treble, vocal, rock, electronic. Custom per-band gain (-12dB to +12dB). Settings persisted in `localStorage`.
+- **Sleep Timer**: Stops playback after a configured duration (15/30/45/60/120 min). Uses `setTimeout` with the engine's `stop()` method. Exposes `sleepTimerEnd` timestamp for UI countdown display.
+- **Crossfade (legacy)**: 300ms fade-out of current track on manual track change (`playTrack`), then fade-in of new track (20 steps × 15ms). This is separate from the configurable crossfade which handles automatic transitions.
 - **Shuffle**: Fisher-Yates shuffle of indices, current track always first.
 - **Queue persistence**: Loads from backend Redis on init (`getUserQueue`), persists additions via `addToUserQueue`. Queue has 24-hour TTL.
 - **Auto-continue**: When the queue ends (no repeat), fetches song recommendations via `getSongRecommendations` and continues playback. Falls back to stop if no recommendations available.
-- **Progress timer**: 250ms interval updating progress percentage.
+- **Progress timer**: 250ms interval updating progress percentage. Also triggers gapless pre-buffer and crossfade start checks.
+- **Settings persistence**: Gapless, crossfade duration, and EQ bands are saved to `localStorage` and restored on construction.
+
+## Device Connect (Spotify Connect-like)
+
+Transfer music playback between devices logged into the same account.
+
+### Architecture
+
+```
+Mobile (source)                    Server (Socket.IO)              Desktop (target)
+───────────────                    ────────────────                ────────────────
+MusicDeviceSync advertises ──→     Broadcasts to user room    ←── MusicDeviceSync advertises
+                                   Redis hash: music_devices:{userId}
+
+User taps device picker
+Selects "Desktop App" ──────→      music:transfer_playback ──────→ Receives track + queue + position
+Local stop() called                                                Calls play(track, queue) + seek(pos)
+
+                              ←── music:state_update ←────────────  Broadcasts state every render
+MiniPlayer shows remote state                                       (track, isPlaying, progress, duration)
+
+User taps play/pause ────────→     music:command ─────────────────→ Executes togglePlay/next/prev/seek
+```
+
+### Socket Events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `music:device_online` | All → All | `{ socketId, deviceName, isPlaying, available }` |
+| `music:device_offline` | All → All | `{ socketId }` |
+| `music:transfer_playback` | Source → Target | `{ targetSocketId, track, queue, progress, isPlaying }` |
+| `music:state_update` | Player → All | `{ socketId, track, isPlaying, progress, duration }` |
+| `music:command` | Controller → Player | `{ targetSocketId, command, value? }` |
+| `music:request_devices` | Any → All | `{}` (triggers re-advertise) |
+
+### Components
+
+- **`MusicDeviceSync`** (headless, in layout): Advertises this device globally on every page. Heartbeats every 60s. Emits `device_offline` on unmount/disconnect.
+- **`MusicDevicePicker`** (in MiniPlayer): Center modal showing all online devices. Handles transfer, remote state display, and remote controls (play/pause/next/prev).
+- **Availability**: Devices on `/watch/`, `/live/`, or `/watch-party/` routes advertise `available: false`. Transfer buttons are disabled for unavailable devices. Incoming transfers are silently rejected.
+- **Remote state in MiniPlayer**: When controlling a remote device, the MiniPlayer shows the remote track's title, artist, cover, and play state via `isRemoteControlling` / `remoteTrack` / `remoteIsPlaying` context fields.
 
 ## Synced Lyrics
 
