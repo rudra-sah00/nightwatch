@@ -86,14 +86,7 @@ export function MusicDevicePicker() {
     reclaimPlayback,
     setOnCommand,
     setOnTransfer,
-  } = useMusicDevices(
-    deviceName,
-    isPlaying,
-    isAvailable,
-    currentTrack,
-    progress,
-    duration,
-  );
+  } = useMusicDevices(currentTrack, isPlaying, progress, duration);
 
   // Handle incoming commands (when this device is the player)
   useEffect(() => {

@@ -46,10 +46,8 @@ const EVENTS = {
  * - Incoming commands (respond to commands from controller)
  */
 export function useMusicDevices(
-  deviceName: string,
-  isPlaying: boolean,
-  available: boolean,
   currentTrack: MusicTrack | null,
+  isPlaying: boolean,
   progress: number,
   duration: number,
 ) {
@@ -68,40 +66,34 @@ export function useMusicDevices(
   useEffect(() => {
     if (!socket) return;
 
-    const onOnline = (data: MusicDevice & { socketId: string }) => {
-      if (data.socketId === socket.id) return;
-      setDevices((prev) => {
-        const next = new Map(prev);
-        next.set(data.socketId, data);
-        return next;
-      });
+    // Listen for device updates from MusicDeviceSync (which runs globally)
+    const onDeviceUpdate = (e: Event) => {
+      const { type, device, socketId } = (e as CustomEvent).detail;
+      if (type === 'online') {
+        setDevices((prev) => {
+          const next = new Map(prev);
+          next.set(device.socketId, device);
+          return next;
+        });
+      } else if (type === 'offline') {
+        setDevices((prev) => {
+          const next = new Map(prev);
+          next.delete(socketId);
+          return next;
+        });
+        setActiveTarget((t) => (t === socketId ? null : t));
+      }
     };
 
-    const onOffline = (data: { socketId: string }) => {
-      setDevices((prev) => {
-        const next = new Map(prev);
-        next.delete(data.socketId);
-        return next;
-      });
-      setActiveTarget((t) => (t === data.socketId ? null : t));
-    };
+    window.addEventListener('music:device-update', onDeviceUpdate);
 
-    const onRequestDevices = () => {
-      socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying, available });
-    };
-
-    socket.on(EVENTS.DEVICE_ONLINE, onOnline);
-    socket.on(EVENTS.DEVICE_OFFLINE, onOffline);
-    socket.on(EVENTS.REQUEST_DEVICES, onRequestDevices);
-    socket.on('connect', () => socket.emit(EVENTS.REQUEST_DEVICES));
+    // Also request devices on mount (MusicDeviceSync handles the socket emit)
     socket.emit(EVENTS.REQUEST_DEVICES);
 
     return () => {
-      socket.off(EVENTS.DEVICE_ONLINE, onOnline);
-      socket.off(EVENTS.DEVICE_OFFLINE, onOffline);
-      socket.off(EVENTS.REQUEST_DEVICES, onRequestDevices);
+      window.removeEventListener('music:device-update', onDeviceUpdate);
     };
-  }, [socket, deviceName, isPlaying, available]);
+  }, [socket]);
 
   // ─── Receive state updates from target device ───────────────────
 
