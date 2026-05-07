@@ -7,6 +7,7 @@ import { MusicAutoStop } from '@/features/music/components/MusicAutoStop';
 import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPresence';
 import { MusicMediaSession } from '@/features/music/components/MusicMediaSession';
 import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
+import { RemoteDisc } from '@/features/remote-control/components/RemoteDisc';
 import { PipOverlay } from '@/features/watch/player/ui/overlays/PipOverlay';
 import { PipProvider } from '@/providers/pip-provider';
 
@@ -23,6 +24,7 @@ export default function ProtectedLayout({
           <PipOverlay />
           <FullPlayer />
           <FloatingDisc />
+          <RemoteDisc />
           <MusicAutoStop />
           <MusicDiscordPresence />
           <MusicMediaSession />

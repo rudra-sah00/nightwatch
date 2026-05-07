@@ -2,6 +2,7 @@ import { SkipBack, SkipForward } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useRemoteControlListener } from '@/features/remote-control/hooks/use-remote-control-listener';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
@@ -302,6 +303,14 @@ function VODPlayerState({
     useVODPlayerState();
   const t = useTranslations('watch.player');
   const { socket } = useSocket();
+
+  // Remote control: advertise stream to mobile devices
+  useRemoteControlListener({
+    metadata,
+    state,
+    playerHandlers,
+    onNextEpisode: metadata.type === 'series' ? nextEpisode.play : undefined,
+  });
 
   // Broadcast VOD activity to friends with heartbeat while playing
   useEffect(() => {

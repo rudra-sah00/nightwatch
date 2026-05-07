@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
+import { useRemoteControlListener } from '@/features/remote-control/hooks/use-remote-control-listener';
 import {
   checkIsDesktop,
   checkIsMobile,
@@ -263,6 +264,9 @@ function LivePlayerState({
   const isWaitingForStream = !streamUrl;
   const isLoading = state.isLoading || isWaitingForStream;
   const { socket } = useSocket();
+
+  // Remote control: advertise livestream to mobile devices
+  useRemoteControlListener({ metadata, state, playerHandlers });
 
   // Broadcast Live activity to friends with heartbeat while playing
   useEffect(() => {
