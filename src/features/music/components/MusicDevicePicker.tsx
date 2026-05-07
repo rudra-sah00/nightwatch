@@ -85,8 +85,8 @@ export function MusicDevicePicker() {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Don't show if no other devices
-  if (devices.length === 0) return null;
+  // Always show the button — popover will indicate if no devices available
+  const hasDevices = devices.length > 0;
 
   return (
     <div className="relative" ref={popoverRef}>
@@ -118,48 +118,54 @@ export function MusicDevicePicker() {
           </div>
 
           {/* Other devices */}
-          {devices.map((device) => {
-            const canTransfer = device.available;
-            return (
-              <button
-                key={device.socketId}
-                type="button"
-                disabled={!canTransfer}
-                onClick={() => {
-                  if (!currentTrack || !canTransfer) return;
-                  transferTo(
-                    device.socketId,
-                    currentTrack,
-                    queue,
-                    progress,
-                    isPlaying,
-                  );
-                  toast.success(`Playing on ${device.deviceName}`);
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-md mt-1 transition-colors ${
-                  canTransfer
-                    ? 'hover:bg-accent'
-                    : 'opacity-40 cursor-not-allowed'
-                }`}
-              >
-                <DeviceIcon name={device.deviceName} />
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-xs font-medium truncate">
-                    {device.deviceName}
-                  </p>
-                  {!canTransfer && (
-                    <p className="text-[9px] text-destructive/70">
-                      Watching video
+          {hasDevices ? (
+            devices.map((device) => {
+              const canTransfer = device.available;
+              return (
+                <button
+                  key={device.socketId}
+                  type="button"
+                  disabled={!canTransfer}
+                  onClick={() => {
+                    if (!currentTrack || !canTransfer) return;
+                    transferTo(
+                      device.socketId,
+                      currentTrack,
+                      queue,
+                      progress,
+                      isPlaying,
+                    );
+                    toast.success(`Playing on ${device.deviceName}`);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-md mt-1 transition-colors ${
+                    canTransfer
+                      ? 'hover:bg-accent'
+                      : 'opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <DeviceIcon name={device.deviceName} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-xs font-medium truncate">
+                      {device.deviceName}
                     </p>
+                    {!canTransfer && (
+                      <p className="text-[9px] text-destructive/70">
+                        Watching video
+                      </p>
+                    )}
+                  </div>
+                  {device.isPlaying && canTransfer && (
+                    <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
                   )}
-                </div>
-                {device.isPlaying && canTransfer && (
-                  <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
-                )}
-              </button>
-            );
-          })}
+                </button>
+              );
+            })
+          ) : (
+            <p className="text-[10px] text-foreground/40 px-2 py-3 text-center">
+              No other devices online
+            </p>
+          )}
         </div>
       )}
     </div>
