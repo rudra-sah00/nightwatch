@@ -63,41 +63,7 @@ export function useMusicDevices(
     duration: 0,
   });
 
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
-  const availableRef = useRef(available);
-  availableRef.current = available;
-
-  // ─── Advertise this device ──────────────────────────────────────
-
-  useEffect(() => {
-    if (!socket?.connected) return;
-
-    const advertise = () => {
-      socket.emit(EVENTS.DEVICE_ONLINE, {
-        deviceName,
-        isPlaying: isPlayingRef.current,
-        available: availableRef.current,
-      });
-    };
-
-    advertise();
-    heartbeatRef.current = setInterval(advertise, 60_000);
-
-    return () => {
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
-      socket.emit(EVENTS.DEVICE_OFFLINE);
-    };
-  }, [socket, deviceName]);
-
-  // Re-advertise on state/availability change
-  useEffect(() => {
-    if (!socket?.connected) return;
-    socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying, available });
-  }, [socket, deviceName, isPlaying, available]);
-
-  // ─── Listen for other devices ───────────────────────────────────
+  // ─── Listen for other devices (advertising handled by MusicDeviceSync) ─
 
   useEffect(() => {
     if (!socket) return;

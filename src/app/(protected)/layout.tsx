@@ -4,6 +4,7 @@ import { CallProvider } from '@/features/friends/hooks/use-call';
 import { FloatingDisc } from '@/features/music/components/FloatingDisc';
 import { FullPlayer } from '@/features/music/components/FullPlayer';
 import { MusicAutoStop } from '@/features/music/components/MusicAutoStop';
+import { MusicDeviceSync } from '@/features/music/components/MusicDeviceSync';
 import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPresence';
 import { MusicMediaSession } from '@/features/music/components/MusicMediaSession';
 import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
@@ -26,6 +27,7 @@ export default function ProtectedLayout({
           <FloatingDisc />
           <RemoteDisc />
           <MusicAutoStop />
+          <MusicDeviceSync />
           <MusicDiscordPresence />
           <MusicMediaSession />
           <MobileAppLifecycle />
