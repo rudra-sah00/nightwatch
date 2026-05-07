@@ -105,7 +105,7 @@ export function ActiveDevices() {
         Active Devices
       </h2>
 
-      <div className="space-y-3 max-w-2xl">
+      <div className="space-y-3">
         {sessions.map((session) => {
           const { icon: Icon, label, color } = parseDevice(session.device);
           return (

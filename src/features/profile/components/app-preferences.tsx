@@ -458,7 +458,7 @@ export function AppPreferences() {
         <h3 className="font-headline font-black uppercase tracking-widest text-sm text-muted-foreground mb-6">
           Music Playback
         </h3>
-        <div className="flex flex-col gap-8 max-w-2xl">
+        <div className="flex flex-col gap-8">
           {/* Gapless */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex flex-col gap-1">
