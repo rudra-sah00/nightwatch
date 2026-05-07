@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import type { VideoMetadata } from '../../watch/player/context/types';
@@ -35,33 +35,48 @@ export function useRemoteControlListener({
   // Don't run on mobile — mobile is the controller, not the listener
   const isMobile = checkIsMobile();
 
-  const getAdvertisePayload = useCallback(
-    () => ({
-      deviceName:
-        typeof window !== 'undefined' && 'electronAPI' in window
-          ? 'Desktop App'
-          : 'Browser',
-      type: metadata.type,
-      title: metadata.title,
-      posterUrl: metadata.posterUrl || null,
-      movieId: metadata.movieId,
-      seriesId: metadata.seriesId,
-      season: metadata.season,
-      episode: metadata.episode,
-      episodeTitle: metadata.episodeTitle,
-      isPlaying: state.isPlaying,
-      currentTime: state.currentTime,
-      duration: state.duration,
-    }),
-    [metadata, state.isPlaying, state.currentTime, state.duration],
-  );
+  // Use a ref for the advertise payload so the heartbeat always reads fresh state
+  // without causing the effect to re-run (which would emit STREAM_ENDED on every state change)
+  const payloadRef = useRef({
+    deviceName: 'Browser',
+    type: metadata.type,
+    title: metadata.title,
+    posterUrl: metadata.posterUrl || null,
+    movieId: metadata.movieId,
+    seriesId: metadata.seriesId,
+    season: metadata.season,
+    episode: metadata.episode,
+    episodeTitle: metadata.episodeTitle,
+    isPlaying: state.isPlaying,
+    currentTime: state.currentTime,
+    duration: state.duration,
+  });
 
-  // Advertise stream on mount + heartbeat
+  // Keep the ref in sync with latest values
+  payloadRef.current = {
+    deviceName:
+      typeof window !== 'undefined' && 'electronAPI' in window
+        ? 'Desktop App'
+        : 'Browser',
+    type: metadata.type,
+    title: metadata.title,
+    posterUrl: metadata.posterUrl || null,
+    movieId: metadata.movieId,
+    seriesId: metadata.seriesId,
+    season: metadata.season,
+    episode: metadata.episode,
+    episodeTitle: metadata.episodeTitle,
+    isPlaying: state.isPlaying,
+    currentTime: state.currentTime,
+    duration: state.duration,
+  };
+
+  // Advertise stream on mount + heartbeat (stable deps — only re-runs on socket/mount change)
   useEffect(() => {
     if (isMobile || !socket?.connected) return;
 
     const advertise = () => {
-      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, getAdvertisePayload());
+      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
     };
 
     advertise();
@@ -71,7 +86,7 @@ export function useRemoteControlListener({
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       socket.emit(REMOTE_EVENTS.STREAM_ENDED);
     };
-  }, [isMobile, socket, getAdvertisePayload]);
+  }, [isMobile, socket]);
 
   // Emit state updates on play/pause change (instant) and time (throttled 5s)
   useEffect(() => {
@@ -139,7 +154,7 @@ export function useRemoteControlListener({
     };
 
     const handleRequestAdvertise = () => {
-      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, getAdvertisePayload());
+      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
     };
 
     socket.on(REMOTE_EVENTS.COMMAND, handleCommand);
@@ -150,12 +165,5 @@ export function useRemoteControlListener({
       socket.off(REMOTE_EVENTS.REQUEST_ADVERTISE, handleRequestAdvertise);
       if (stateThrottleRef.current) clearTimeout(stateThrottleRef.current);
     };
-  }, [
-    isMobile,
-    socket,
-    state.isPlaying,
-    playerHandlers,
-    onNextEpisode,
-    getAdvertisePayload,
-  ]);
+  }, [isMobile, socket, state.isPlaying, playerHandlers, onNextEpisode]);
 }
