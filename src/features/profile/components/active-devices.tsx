@@ -87,8 +87,7 @@ export function ActiveDevices() {
   if (loading) {
     return (
       <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8 flex items-center gap-3">
-          <Monitor className="w-7 h-7 text-neo-blue" />
+        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8">
           Active Devices
         </h2>
         <div className="flex items-center justify-center py-8">
@@ -100,8 +99,7 @@ export function ActiveDevices() {
 
   return (
     <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
-      <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8 flex items-center gap-3">
-        <Monitor className="w-7 h-7 text-neo-blue" />
+      <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8">
         Active Devices
       </h2>
 
