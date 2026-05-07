@@ -458,17 +458,22 @@ export function AppPreferences() {
         <h3 className="font-headline font-black uppercase tracking-widest text-sm text-muted-foreground mb-6">
           Music Playback
         </h3>
-        <div className="space-y-6 max-w-2xl">
+        <div className="flex flex-col gap-8 max-w-2xl">
           {/* Gapless */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Gapless Playback</p>
-              <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+                <Zap className="w-4 h-4 text-neo-yellow" />
+                Gapless Playback
+              </span>
+              <p className="text-muted-foreground font-body text-sm max-w-sm">
                 No silence between tracks
               </p>
             </div>
             <button
               type="button"
+              role="switch"
+              aria-checked={gaplessEnabled}
               onClick={() => {
                 const event = new CustomEvent('music:set-gapless', {
                   detail: !gaplessEnabled,
@@ -476,43 +481,65 @@ export function AppPreferences() {
                 window.dispatchEvent(event);
                 setGaplessEnabled((v) => !v);
               }}
-              className={`w-10 h-6 rounded-full transition-colors ${gaplessEnabled ? 'bg-primary' : 'bg-muted'}`}
+              className={cn(
+                'relative inline-flex h-8 w-16 items-center rounded-full transition-colors shrink-0',
+                gaplessEnabled ? 'bg-neo-blue' : 'bg-secondary',
+              )}
             >
-              <div
-                className={`w-4 h-4 rounded-full bg-white shadow transition-transform mx-1 ${gaplessEnabled ? 'translate-x-4' : ''}`}
+              <span
+                className={cn(
+                  'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
+                  gaplessEnabled ? 'translate-x-9' : 'translate-x-1',
+                )}
               />
             </button>
           </div>
 
+          <div className="h-px bg-border w-full" />
+
           {/* Crossfade */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Crossfade</p>
-                <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-neo-green" />
+                  Crossfade
+                </span>
+                <p className="text-muted-foreground font-body text-sm max-w-sm">
                   Blend tracks together
                 </p>
               </div>
-              <span className="text-sm font-mono text-muted-foreground">
-                {crossfadeSec}s
+              <span className="text-sm font-headline font-bold text-foreground">
+                {crossfadeSec === 0 ? 'Off' : `${crossfadeSec}s`}
               </span>
             </div>
-            <input
-              type="range"
-              min={0}
-              max={12}
-              step={1}
-              value={crossfadeSec}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setCrossfadeSec(val);
-                window.dispatchEvent(
-                  new CustomEvent('music:set-crossfade', { detail: val }),
-                );
-              }}
-              className="w-full accent-primary cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-muted-foreground">
+            <div className="relative w-full h-8 flex items-center">
+              <div className="absolute inset-x-0 h-2 rounded-full bg-secondary" />
+              <div
+                className="absolute left-0 h-2 rounded-full bg-neo-green"
+                style={{ width: `${(crossfadeSec / 12) * 100}%` }}
+              />
+              <input
+                type="range"
+                min={0}
+                max={12}
+                step={1}
+                value={crossfadeSec}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setCrossfadeSec(val);
+                  window.dispatchEvent(
+                    new CustomEvent('music:set-crossfade', { detail: val }),
+                  );
+                }}
+                className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer"
+              />
+              <div
+                className="absolute w-5 h-5 rounded-full bg-foreground border-2 border-background shadow pointer-events-none"
+                style={{ left: `calc(${(crossfadeSec / 12) * 100}% - 10px)` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs font-headline text-muted-foreground">
               <span>Off</span>
               <span>12s</span>
             </div>
