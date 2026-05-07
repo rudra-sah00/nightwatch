@@ -1,11 +1,15 @@
 'use client';
 
 import { Monitor, Smartphone, Speaker, Volume2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicDevices } from '../hooks/use-music-devices';
+
+/** Routes where music playback is blocked (video/live/watch-party). */
+const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
 
 function getDeviceName(): string {
   if (checkIsDesktop()) return 'Desktop App';
@@ -23,27 +27,37 @@ function DeviceIcon({ name }: { name: string }) {
 /**
  * Device picker button + popover for the MiniPlayer.
  * Shows online devices and allows transferring playback (like Spotify Connect).
+ * Devices on video/live/watch-party pages are shown as unavailable.
  */
 export function MusicDevicePicker() {
   const { currentTrack, queue, progress, isPlaying, play, seek, togglePlay } =
     useMusicPlayerContext();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const deviceName = getDeviceName();
+
+  // This device is available for music if NOT on a blocked route
+  const isAvailable = !BLOCKED_ROUTES.some((r) => pathname.startsWith(r));
+
   const { devices, transferTo, onTransfer } = useMusicDevices(
     deviceName,
     isPlaying,
+    isAvailable,
   );
 
-  // Listen for incoming transfer requests
+  // Listen for incoming transfer requests — reject if on video page
   useEffect(() => {
     const unsub = onTransfer((data) => {
+      if (!isAvailable) {
+        // Silently reject — device is busy with video
+        return;
+      }
       if (data.track) {
         play(
           data.track as Parameters<typeof play>[0],
           data.queue as Parameters<typeof play>[1],
         );
-        // Seek to the transferred position after a short delay for load
         setTimeout(() => {
           seek(data.progress);
           if (!data.isPlaying) {
@@ -54,7 +68,7 @@ export function MusicDevicePicker() {
       }
     });
     return unsub;
-  }, [onTransfer, play, seek, togglePlay]);
+  }, [onTransfer, play, seek, togglePlay, isAvailable]);
 
   // Close popover on outside click
   useEffect(() => {
@@ -104,35 +118,48 @@ export function MusicDevicePicker() {
           </div>
 
           {/* Other devices */}
-          {devices.map((device) => (
-            <button
-              key={device.socketId}
-              type="button"
-              onClick={() => {
-                if (!currentTrack) return;
-                transferTo(
-                  device.socketId,
-                  currentTrack,
-                  queue,
-                  progress,
-                  isPlaying,
-                );
-                toast.success(`Playing on ${device.deviceName}`);
-                setOpen(false);
-              }}
-              className="w-full flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-accent transition-colors mt-1"
-            >
-              <DeviceIcon name={device.deviceName} />
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs font-medium truncate">
-                  {device.deviceName}
-                </p>
-              </div>
-              {device.isPlaying && (
-                <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
-              )}
-            </button>
-          ))}
+          {devices.map((device) => {
+            const canTransfer = device.available;
+            return (
+              <button
+                key={device.socketId}
+                type="button"
+                disabled={!canTransfer}
+                onClick={() => {
+                  if (!currentTrack || !canTransfer) return;
+                  transferTo(
+                    device.socketId,
+                    currentTrack,
+                    queue,
+                    progress,
+                    isPlaying,
+                  );
+                  toast.success(`Playing on ${device.deviceName}`);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-md mt-1 transition-colors ${
+                  canTransfer
+                    ? 'hover:bg-accent'
+                    : 'opacity-40 cursor-not-allowed'
+                }`}
+              >
+                <DeviceIcon name={device.deviceName} />
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-xs font-medium truncate">
+                    {device.deviceName}
+                  </p>
+                  {!canTransfer && (
+                    <p className="text-[9px] text-destructive/70">
+                      Watching video
+                    </p>
+                  )}
+                </div>
+                {device.isPlaying && canTransfer && (
+                  <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

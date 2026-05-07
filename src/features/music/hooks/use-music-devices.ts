@@ -8,12 +8,14 @@ export interface MusicDevice {
   deviceName: string;
   isPlaying: boolean;
   isCurrent: boolean;
+  available: boolean;
 }
 
 interface DeviceOnlinePayload {
   socketId: string;
   deviceName: string;
   isPlaying: boolean;
+  available: boolean;
 }
 
 interface TransferPayload {
@@ -34,12 +36,18 @@ const EVENTS = {
  * Hook that manages music device discovery and playback transfer.
  * Each device advertises itself on mount; other devices appear in the list.
  */
-export function useMusicDevices(deviceName: string, isPlaying: boolean) {
+export function useMusicDevices(
+  deviceName: string,
+  isPlaying: boolean,
+  available: boolean,
+) {
   const { socket } = useSocket();
   const [devices, setDevices] = useState<Map<string, MusicDevice>>(new Map());
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const isPlayingRef = useRef(isPlaying);
   isPlayingRef.current = isPlaying;
+  const availableRef = useRef(available);
+  availableRef.current = available;
 
   // Advertise this device
   useEffect(() => {
@@ -49,6 +57,7 @@ export function useMusicDevices(deviceName: string, isPlaying: boolean) {
       socket.emit(EVENTS.DEVICE_ONLINE, {
         deviceName,
         isPlaying: isPlayingRef.current,
+        available: availableRef.current,
       });
     };
 
@@ -61,11 +70,11 @@ export function useMusicDevices(deviceName: string, isPlaying: boolean) {
     };
   }, [socket, deviceName]);
 
-  // Re-advertise when play state changes
+  // Re-advertise when play state or availability changes
   useEffect(() => {
     if (!socket?.connected) return;
-    socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying });
-  }, [socket, deviceName, isPlaying]);
+    socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying, available });
+  }, [socket, deviceName, isPlaying, available]);
 
   // Listen for other devices
   useEffect(() => {
@@ -80,6 +89,7 @@ export function useMusicDevices(deviceName: string, isPlaying: boolean) {
           deviceName: data.deviceName,
           isPlaying: data.isPlaying,
           isCurrent: false,
+          available: data.available,
         });
         return next;
       });
@@ -94,7 +104,7 @@ export function useMusicDevices(deviceName: string, isPlaying: boolean) {
     };
 
     const onRequestDevices = () => {
-      socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying });
+      socket.emit(EVENTS.DEVICE_ONLINE, { deviceName, isPlaying, available });
     };
 
     socket.on(EVENTS.DEVICE_ONLINE, onOnline);
@@ -110,7 +120,7 @@ export function useMusicDevices(deviceName: string, isPlaying: boolean) {
       socket.off(EVENTS.DEVICE_OFFLINE, onOffline);
       socket.off(EVENTS.REQUEST_DEVICES, onRequestDevices);
     };
-  }, [socket, deviceName, isPlaying]);
+  }, [socket, deviceName, isPlaying, available]);
 
   const transferTo = useCallback(
     (
