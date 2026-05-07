@@ -1,20 +1,17 @@
 'use client';
 
 import {
-  ArrowLeft,
   Cast,
+  ChevronDown,
   Monitor,
   Pause,
   Play,
   SkipBack,
   SkipForward,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { checkIsMobile } from '@/lib/electron-bridge';
 import { useRemoteCommander } from '../hooks/use-remote-commander';
-import { useRemoteStreams } from '../hooks/use-remote-streams';
 import type { RemoteStreamAdvertise } from '../types';
 
 function formatTime(seconds: number): string {
@@ -107,7 +104,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
         )}
       </div>
 
-      {/* Progress bar — hidden for livestreams with no duration */}
+      {/* Progress bar — hidden for livestreams */}
       {hasDuration && !isLive ? (
         <div className="w-full max-w-xs space-y-1">
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -125,7 +122,6 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
 
       {/* Playback controls */}
       <div className="flex items-center gap-6">
-        {/* Hide seek for livestreams */}
         {!isLive ? (
           <button
             type="button"
@@ -177,85 +173,83 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
 }
 
 /**
- * Full-page remote control UI for mobile.
- * Shows device picker (if multiple) + playback controls.
- * Auto-navigates back when all streams end.
+ * Full-screen remote control overlay (slide-in-from-bottom, like music FullPlayer).
  */
-export function RemoteControlSheet() {
-  const { streams, activeStream, selectStream } = useRemoteStreams();
-  const router = useRouter();
-  const hadStreamsRef = useRef(false);
+export function RemoteControlSheet({
+  streams,
+  activeStream,
+  selectStream,
+  closing,
+  onClose,
+}: {
+  streams: RemoteStreamAdvertise[];
+  activeStream: RemoteStreamAdvertise | null;
+  selectStream: (socketId: string) => void;
+  closing: boolean;
+  onClose: () => void;
+}) {
+  const hadStreamsRef = useRef(streams.length > 0);
 
-  // Track if we ever had streams — if they all end, show toast and go back
+  // If all streams end while overlay is open, show toast and close
   useEffect(() => {
     if (streams.length > 0) {
       hadStreamsRef.current = true;
     } else if (hadStreamsRef.current) {
       toast.info('Playback ended on desktop');
-      router.back();
+      onClose();
     }
-  }, [streams.length, router]);
-
-  if (streams.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
-        <Cast className="w-16 h-16 text-muted-foreground/50" />
-        <p className="text-muted-foreground text-center">
-          No active streams found.
-          <br />
-          Start playing something on your desktop.
-        </p>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
+  }, [streams.length, onClose]);
 
   return (
-    <div className="flex flex-col h-full pt-safe">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
-          aria-label="Back"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <h1 className="text-base font-semibold">Remote Control</h1>
-      </div>
+    <div
+      className={`fixed inset-0 z-[10100] overflow-hidden duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+    >
+      {/* Background */}
+      <div className="absolute inset-0 bg-background" />
 
-      {/* Device picker */}
-      <StreamSelector
-        streams={streams}
-        activeStream={activeStream}
-        onSelect={selectStream}
-      />
+      {/* Content */}
+      <div className="relative flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+            aria-label="Close"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
+          <h1 className="text-sm font-medium text-muted-foreground">
+            Remote Control
+          </h1>
+          <div className="w-9" />
+        </div>
 
-      {/* Controls */}
-      <div className="flex-1 flex items-center justify-center pb-safe">
-        {activeStream ? <Controls stream={activeStream} /> : null}
+        {/* Device picker */}
+        <StreamSelector
+          streams={streams}
+          activeStream={activeStream}
+          onSelect={selectStream}
+        />
+
+        {/* Controls */}
+        <div className="flex-1 flex items-center justify-center">
+          {activeStream ? (
+            <Controls stream={activeStream} />
+          ) : (
+            <div className="flex flex-col items-center gap-4 px-6">
+              <Cast className="w-16 h-16 text-muted-foreground/50" />
+              <p className="text-muted-foreground text-center">
+                No active streams found.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-}
-
-/**
- * Page-level wrapper that redirects desktop users back to home.
- */
-export function RemoteControlPage() {
-  const router = useRouter();
-
-  if (!checkIsMobile()) {
-    router.replace('/home');
-    return null;
-  }
-
-  return <RemoteControlSheet />;
 }

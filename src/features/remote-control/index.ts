@@ -1,7 +1,4 @@
-export {
-  RemoteControlPage,
-  RemoteControlSheet,
-} from './components/RemoteControlSheet';
+export { RemoteControlSheet } from './components/RemoteControlSheet';
 export { RemoteDisc } from './components/RemoteDisc';
 export { useRemoteCommander } from './hooks/use-remote-commander';
 export { useRemoteControlListener } from './hooks/use-remote-control-listener';
