@@ -150,9 +150,10 @@ export function MusicDevicePicker() {
   useEffect(() => {
     if (activeTarget && !devices.find((d) => d.socketId === activeTarget)) {
       reclaimPlayback();
+      setRemoteControlling(false);
       toast.info('Device disconnected — playing here');
     }
-  }, [devices, activeTarget, reclaimPlayback]);
+  }, [devices, activeTarget, reclaimPlayback, setRemoteControlling]);
 
   const isControlling = !!activeTarget;
   const displayTrack = isControlling ? remoteState.track : currentTrack;
@@ -291,6 +292,7 @@ export function MusicDevicePicker() {
                 onClick={() => {
                   if (isControlling) {
                     reclaimPlayback();
+                    setRemoteControlling(false);
                     toast.success('Playing on this device');
                   }
                   setOpen(false);
@@ -325,6 +327,8 @@ export function MusicDevicePicker() {
                       onClick={() => {
                         if (!device.available) return;
                         if (currentTrack) {
+                          // Set remote state BEFORE stop() so MiniPlayer doesn't flash away
+                          setRemoteControlling(true, currentTrack, isPlaying);
                           transferToWithData(
                             device.socketId,
                             currentTrack,
@@ -334,7 +338,6 @@ export function MusicDevicePicker() {
                           );
                           stop();
                         } else {
-                          // No track — just set as target for future plays
                           transferTo(device.socketId);
                         }
                         toast.success(`Playing on ${device.deviceName}`);
