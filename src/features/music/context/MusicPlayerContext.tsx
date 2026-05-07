@@ -160,6 +160,16 @@ export function MusicPlayerProvider({
   // Track daily listening time
   useMusicProgress({ isPlaying: state.isPlaying });
 
+  // Stop local playback when another device takes over
+  useEffect(() => {
+    const onTakeover = () => {
+      engineRef.current?.stop();
+    };
+    window.addEventListener('music:remote-takeover', onTakeover);
+    return () =>
+      window.removeEventListener('music:remote-takeover', onTakeover);
+  }, []);
+
   // Listen for Ask AI music play requests (no navigation needed)
   useEffect(() => {
     const handleSong = (e: Event) => {
