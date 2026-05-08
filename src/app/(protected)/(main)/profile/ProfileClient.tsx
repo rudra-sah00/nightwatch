@@ -1,8 +1,9 @@
 'use client';
 
-import { Activity, ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
+import { ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { ActivityGraph } from '@/features/profile/components/activity-graph';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
 import { useProfileOverview } from '@/features/profile/hooks/use-profile-overview';
 
@@ -10,12 +11,15 @@ const sections = [
   { href: '/profile/preferences', icon: Palette, key: 'preferences' },
   { href: '/profile/security', icon: Shield, key: 'security' },
   { href: '/profile/devices', icon: Monitor, key: 'devices' },
-  { href: '/profile/activity', icon: Activity, key: 'activity' },
 ] as const;
 
 export default function ProfileClient() {
   const t = useTranslations('profile');
-  const { user } = useProfileOverview();
+  const { user, activity, loadingActivity } = useProfileOverview();
+
+  const userCreatedAtDate = user?.createdAt
+    ? new Date(user.createdAt)
+    : undefined;
 
   if (!user) return null;
 
@@ -38,6 +42,50 @@ export default function ProfileClient() {
           </Link>
         ))}
       </nav>
+
+      <section
+        className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8"
+        aria-label={t('activity.heatmapAriaLabel')}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
+            {t('activity.title')}
+          </h2>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2 items-center">
+              <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12">
+                Watch
+              </span>
+              <div className="flex gap-1.5 items-center">
+                <div className="w-3.5 h-3.5 bg-secondary" />
+                <div className="w-3.5 h-3.5 bg-activity-1" />
+                <div className="w-3.5 h-3.5 bg-activity-2" />
+                <div className="w-3.5 h-3.5 bg-activity-3" />
+                <div className="w-3.5 h-3.5 bg-activity-4" />
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-[10px] font-bold uppercase font-headline text-muted-foreground w-12">
+                Music
+              </span>
+              <div className="flex gap-1.5 items-center">
+                <div className="w-3.5 h-3.5 bg-secondary" />
+                <div className="w-3.5 h-3.5 bg-music-1" />
+                <div className="w-3.5 h-3.5 bg-music-2" />
+                <div className="w-3.5 h-3.5 bg-music-3" />
+                <div className="w-3.5 h-3.5 bg-music-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <ActivityGraph
+            activity={activity}
+            createdAt={userCreatedAtDate}
+            isLoading={loadingActivity}
+          />
+        </div>
+      </section>
     </main>
   );
 }
