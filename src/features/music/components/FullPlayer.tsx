@@ -211,12 +211,14 @@ export function FullPlayer() {
         )
     : seek;
   const handleSetVolume = isRemoteControlling
-    ? (v: number) =>
+    ? (v: number) => {
+        setVolume(v);
         window.dispatchEvent(
           new CustomEvent('music:remote-command', {
             detail: { command: 'volume', value: v },
           }),
-        )
+        );
+      }
     : setVolume;
 
   if (mobile) {
