@@ -1,16 +1,28 @@
 'use client';
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
-import { ActiveDevices } from './active-devices';
-import { ActivityGraph } from './activity-graph';
-import { AppPreferences } from './app-preferences';
 import { UpdateProfileForm } from './update-profile-form';
+
+const AppPreferences = dynamic(
+  () =>
+    import('./app-preferences').then((m) => ({ default: m.AppPreferences })),
+  { ssr: false },
+);
+const ActiveDevices = dynamic(
+  () => import('./active-devices').then((m) => ({ default: m.ActiveDevices })),
+  { ssr: false },
+);
+const ActivityGraph = dynamic(
+  () => import('./activity-graph').then((m) => ({ default: m.ActivityGraph })),
+  { ssr: false },
+);
 
 /**
  * Main profile page layout composing the update form, app preferences,
