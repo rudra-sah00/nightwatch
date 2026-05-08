@@ -109,9 +109,8 @@ export function FullPlayerLyrics({
                   ? 'scale(1)'
                   : 'scale(0.92)'
                 : undefined,
-              transition: v.scale
-                ? 'font-size 0.4s ease, color 0.4s ease, filter 0.5s ease, transform 0.4s ease'
-                : 'all 0.4s ease',
+              transition:
+                'color 0.4s ease, filter 0.5s ease, font-size 0.4s ease, font-weight 0.3s ease, transform 0.4s ease',
             }}
             onClick={() => {
               if (duration > 0) seek((line.time / duration) * 100);

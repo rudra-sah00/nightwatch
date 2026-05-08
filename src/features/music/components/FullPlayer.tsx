@@ -155,7 +155,7 @@ export function FullPlayer() {
         container.scrollTop = scrollTargetRef.current;
         return;
       }
-      container.scrollTop += diff * 0.08;
+      container.scrollTop += diff * 0.12;
       rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
