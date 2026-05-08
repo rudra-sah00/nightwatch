@@ -1,21 +1,19 @@
 'use client';
 
 import {
+  Camera,
   Globe,
   Loader2,
   LogOut,
   Monitor,
   Plus,
-  RefreshCw,
   Smartphone,
-  X,
 } from 'lucide-react';
-import QRCode from 'qrcode';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { qrInitiate, qrPollStatus } from '@/features/auth/qr-api';
+import { qrAuthorize } from '@/features/auth/qr-api';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
-import { useTheme } from '@/providers/theme-provider';
 
 interface Session {
   sessionId: string;
@@ -65,7 +63,14 @@ export function ActiveDevices() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
-  const [showAddDevice, setShowAddDevice] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(
+      checkIsMobile() || /mobile|android|iphone/i.test(navigator.userAgent),
+    );
+  }, []);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -116,21 +121,23 @@ export function ActiveDevices() {
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
           Active Devices
         </h2>
-        <button
-          type="button"
-          onClick={() => setShowAddDevice(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Add Device
-        </button>
+        {isMobile && (
+          <button
+            type="button"
+            onClick={() => setScanning(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Device
+          </button>
+        )}
       </div>
 
-      {showAddDevice && (
-        <AddDeviceQr
-          onClose={() => setShowAddDevice(false)}
+      {scanning && (
+        <QrScanner
+          onClose={() => setScanning(false)}
           onSuccess={() => {
-            setShowAddDevice(false);
+            setScanning(false);
             fetchSessions();
           }}
         />
@@ -202,149 +209,145 @@ export function ActiveDevices() {
   );
 }
 
-// ── Add Device QR Dialog ────────────────────────────────────────────────────
+// ── QR Scanner (mobile camera) ──────────────────────────────────────────────
 
-const QR_LIFETIME = 300;
-
-function AddDeviceQr({
+function QrScanner({
   onClose,
   onSuccess,
 }: {
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const { theme } = useTheme();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [code, setCode] = useState<string | null>(null);
-  const [secondsLeft, setSecondsLeft] = useState(QR_LIFETIME);
-  const [expired, setExpired] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const processingRef = useRef(false);
 
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const activeCode = useRef<string | null>(null);
-
-  const cleanup = useCallback(() => {
-    if (pollRef.current) clearInterval(pollRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    pollRef.current = null;
-    countdownRef.current = null;
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => {
+      t.stop();
+    });
+    streamRef.current = null;
   }, []);
 
-  const initiate = useCallback(async () => {
-    cleanup();
-    setLoading(true);
-    setExpired(false);
-    try {
-      const res = await qrInitiate();
-      setCode(res.code);
-      activeCode.current = res.code;
-      setSecondsLeft(QR_LIFETIME);
-      setLoading(false);
-
-      pollRef.current = setInterval(async () => {
-        if (!activeCode.current) return;
-        try {
-          const poll = await qrPollStatus(activeCode.current);
-          if (poll.status === 'authorized') {
-            cleanup();
-            toast.success('Device added successfully');
-            onSuccess();
-          } else if (poll.status === 'expired') {
-            cleanup();
-            setExpired(true);
-          }
-        } catch {
-          // Silent retry
-        }
-      }, 3000);
-
-      countdownRef.current = setInterval(() => {
-        setSecondsLeft((prev) => {
-          if (prev <= 1) {
-            cleanup();
-            setExpired(true);
-            return 0;
-          }
-          return prev - 1;
+  useEffect(() => {
+    let cancelled = false;
+    const start = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
         });
-      }, 1000);
-    } catch {
-      setLoading(false);
-      setExpired(true);
+        if (cancelled) {
+          stream.getTracks().forEach((t) => {
+            t.stop();
+          });
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch {
+        setError('Camera access denied');
+      }
+    };
+    start();
+    return () => {
+      cancelled = true;
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  // Scan frames using BarcodeDetector or manual parsing
+  useEffect(() => {
+    if (!('BarcodeDetector' in window)) {
+      setError('QR scanning not supported on this device');
+      return;
     }
-  }, [cleanup, onSuccess]);
+    const detector = new (
+      window as unknown as {
+        BarcodeDetector: new (opts: {
+          formats: string[];
+        }) => {
+          detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
+        };
+      }
+    ).BarcodeDetector({ formats: ['qr_code'] });
+    let raf: number;
 
-  useEffect(() => {
-    initiate();
-    return cleanup;
-  }, [initiate, cleanup]);
+    const scan = async () => {
+      if (
+        !videoRef.current ||
+        videoRef.current.readyState < 2 ||
+        processingRef.current
+      ) {
+        raf = requestAnimationFrame(scan);
+        return;
+      }
+      try {
+        const results = await detector.detect(videoRef.current);
+        if (results.length > 0) {
+          const url = results[0].rawValue;
+          if (url.includes('nightwatch://qr') || url.includes('code=')) {
+            processingRef.current = true;
+            const code = new URL(
+              url.replace('nightwatch://', 'https://x/'),
+            ).searchParams.get('code');
+            if (code) {
+              stopCamera();
+              try {
+                await qrAuthorize(code);
+                toast.success('Device authorized');
+                onSuccess();
+              } catch {
+                toast.error('Failed to authorize. QR may be expired.');
+                onClose();
+              }
+              return;
+            }
+          }
+        }
+      } catch {
+        // Detection failed, retry
+      }
+      raf = requestAnimationFrame(scan);
+    };
 
-  useEffect(() => {
-    if (!code || !canvasRef.current) return;
-    const isDark =
-      theme === 'dark' ||
-      (theme === 'system' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
-    QRCode.toCanvas(canvasRef.current, `nightwatch://qr?code=${code}`, {
-      width: 200,
-      margin: 2,
-      color: {
-        dark: isDark ? '#ffffff' : '#000000',
-        light: isDark ? '#000000' : '#ffffff',
-      },
-    });
-  }, [code, theme]);
+    raf = requestAnimationFrame(scan);
+    return () => cancelAnimationFrame(raf);
+  }, [onSuccess, onClose, stopCamera]);
 
   return (
-    <div className="mb-6 p-6 border-2 border-border rounded-xl bg-secondary/30 flex flex-col items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="mb-6 p-4 border-2 border-border rounded-xl bg-secondary/30 flex flex-col items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2">
-          <Smartphone className="w-4 h-4 text-muted-foreground" />
+          <Camera className="w-4 h-4 text-muted-foreground" />
           <p className="text-xs font-headline font-bold uppercase tracking-widest text-muted-foreground">
-            Scan with new device
+            Scan QR from desktop
           </p>
         </div>
         <button
           type="button"
           onClick={() => {
-            cleanup();
+            stopCamera();
             onClose();
           }}
-          className="p-1 rounded-md hover:bg-secondary transition-colors"
+          className="text-xs font-headline font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
         >
-          <X className="w-4 h-4 text-muted-foreground" />
+          Cancel
         </button>
       </div>
 
-      <div className="relative">
-        <canvas
-          ref={canvasRef}
-          className={`rounded-lg border-2 border-border transition-opacity ${expired ? 'opacity-20' : code ? 'opacity-100' : 'opacity-0'}`}
+      {error ? (
+        <p className="text-xs text-destructive font-bold py-8">{error}</p>
+      ) : (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full max-w-[280px] aspect-square rounded-lg object-cover"
         />
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
-        {expired && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button
-              type="button"
-              onClick={initiate}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-headline font-bold uppercase tracking-wider hover:bg-primary/90 active:scale-95 transition-all"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Refresh
-            </button>
-          </div>
-        )}
-      </div>
-
-      {!expired && (
-        <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-muted-foreground/60">
-          Expires in {Math.ceil(secondsLeft / 60)}m
-        </p>
       )}
     </div>
   );
