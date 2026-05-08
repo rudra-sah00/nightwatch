@@ -33,7 +33,9 @@ export function useRemoteControlListener({
   const stateThrottleRef = useRef<NodeJS.Timeout | null>(null);
 
   // Don't run on mobile — mobile is the controller, not the listener
-  const isMobile = checkIsMobile();
+  const isMobile =
+    checkIsMobile() ||
+    (typeof window !== 'undefined' && window.innerWidth < 768);
 
   // Use a ref for the advertise payload so the heartbeat always reads fresh state
   // without causing the effect to re-run (which would emit STREAM_ENDED on every state change)

@@ -30,8 +30,16 @@ export function useRemoteStreams() {
 
     const onAdvertise = (data: RemoteStreamAdvertise) => {
       if (!mountedRef.current) return;
+      // Don't show our own device
+      if (data.socketId === socket.id) return;
       setStreams((prev) => {
         const next = new Map(prev);
+        // Remove any stale entry from the same device (reconnect produces new socketId)
+        for (const [id, stream] of next) {
+          if (stream.deviceName === data.deviceName && id !== data.socketId) {
+            next.delete(id);
+          }
+        }
         next.set(data.socketId, data);
         return next;
       });
