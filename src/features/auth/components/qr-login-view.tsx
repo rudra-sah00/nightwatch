@@ -64,8 +64,8 @@ export function QrLoginView({ onSwitchToEmail }: QrLoginViewProps) {
           </div>
 
           {!isExpired && (
-            <p className="text-[9px] font-headline font-bold uppercase tracking-widest text-muted-foreground/60">
-              {t('qr.expiresIn', { minutes: Math.ceil(secondsLeft / 60) })}
+            <p className="text-[9px] font-headline font-bold uppercase tracking-widest text-muted-foreground/60 tabular-nums">
+              {`${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`}
             </p>
           )}
         </div>
