@@ -221,6 +221,8 @@ function QrScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [scannedCode, setScannedCode] = useState<string | null>(null);
+  const [authorizing, setAuthorizing] = useState(false);
   const processingRef = useRef(false);
 
   const stopCamera = useCallback(() => {
@@ -303,14 +305,7 @@ function QrScanner({
           ).searchParams.get('code');
           if (code) {
             stopCamera();
-            try {
-              await qrAuthorize(code);
-              toast.success('Device authorized');
-              onSuccess();
-            } catch {
-              toast.error('Failed to authorize. QR may be expired.');
-              onClose();
-            }
+            setScannedCode(code);
             return;
           }
         }
@@ -322,7 +317,20 @@ function QrScanner({
 
     raf = requestAnimationFrame(scan);
     return () => cancelAnimationFrame(raf);
-  }, [onSuccess, onClose, stopCamera]);
+  }, [stopCamera]);
+
+  const handleConfirm = async () => {
+    if (!scannedCode) return;
+    setAuthorizing(true);
+    try {
+      await qrAuthorize(scannedCode);
+      toast.success('Device authorized');
+      onSuccess();
+    } catch {
+      toast.error('Failed to authorize. QR may be expired.');
+      onClose();
+    }
+  };
 
   return (
     <div className="mb-6 p-4 border-2 border-border rounded-xl bg-secondary/30 flex flex-col items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -330,7 +338,7 @@ function QrScanner({
         <div className="flex items-center gap-2">
           <Camera className="w-4 h-4 text-muted-foreground" />
           <p className="text-xs font-headline font-bold uppercase tracking-widest text-muted-foreground">
-            Scan QR from desktop
+            {scannedCode ? 'Confirm login' : 'Scan QR from desktop'}
           </p>
         </div>
         <button
@@ -345,7 +353,33 @@ function QrScanner({
         </button>
       </div>
 
-      {error ? (
+      {scannedCode ? (
+        <div className="flex flex-col items-center gap-4 py-4 w-full">
+          <p className="text-sm font-headline font-bold text-center">
+            Are you sure you want to authorize this device to log in?
+          </p>
+          <div className="flex gap-3 w-full max-w-[280px]">
+            <button
+              type="button"
+              onClick={() => {
+                setScannedCode(null);
+                onClose();
+              }}
+              className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
+            >
+              Deny
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={authorizing}
+              className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {authorizing ? 'Authorizing...' : 'Approve'}
+            </button>
+          </div>
+        </div>
+      ) : error ? (
         <p className="text-xs text-destructive font-bold py-8">{error}</p>
       ) : (
         <video
