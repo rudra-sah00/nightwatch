@@ -49,6 +49,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Nightwatch needs microphone access for voice calls and live streaming.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Nightwatch needs camera access to scan QR codes for device login.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
