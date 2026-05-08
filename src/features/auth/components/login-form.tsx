@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, QrCode } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useState } from 'react';
@@ -31,7 +31,9 @@ import { AuthCard } from './auth-card';
  * @param props - Return value of {@link useLoginForm}.
  * @returns The login form element.
  */
-export function LoginForm(props: ReturnType<typeof useLoginForm>) {
+export function LoginForm(
+  props: ReturnType<typeof useLoginForm> & { onShowQr?: () => void },
+) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations('auth');
   const {
@@ -73,6 +75,15 @@ export function LoginForm(props: ReturnType<typeof useLoginForm>) {
             className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 hover:text-foreground transition-colors"
           >
             {t('otp.back')}
+          </button>
+        ) : props.onShowQr ? (
+          <button
+            type="button"
+            onClick={props.onShowQr}
+            className="text-foreground/40 hover:text-foreground transition-colors"
+            aria-label="QR Login"
+          >
+            <QrCode className="w-5 h-5" />
           </button>
         ) : undefined
       }

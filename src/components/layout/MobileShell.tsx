@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { useQrDeepLink } from '@/features/auth/hooks/use-qr-deep-link';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { mobileBridge } from '@/lib/mobile-bridge';
 
@@ -18,6 +19,8 @@ export function MobileShell() {
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
   const t = useTranslations('common.manga');
+
+  useQrDeepLink();
 
   useEffect(() => {
     if (!checkIsMobile()) return;

@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
 import { LoginForm } from '@/features/auth/components/login-form';
+import { QrLoginView } from '@/features/auth/components/qr-login-view';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
 import {
   checkIsDesktop,
@@ -27,6 +28,11 @@ export default function LoginClient() {
   const [copied, setCopied] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
+  const [showQr, setShowQr] = useState(false);
+
+  useEffect(() => {
+    if (!checkIsMobile()) setShowQr(true);
+  }, []);
 
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)
@@ -145,11 +151,13 @@ export default function LoginClient() {
           <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
             <div className="bg-background border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
               <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
-                {hookLoading ? null : loginHook.step === 'forgot' ||
+                {hookLoading ? null : showQr ? (
+                  <QrLoginView onSwitchToEmail={() => setShowQr(false)} />
+                ) : loginHook.step === 'forgot' ||
                   loginHook.step === 'forgot_success' ? (
                   <ForgotPasswordForm {...loginHook} />
                 ) : (
-                  <LoginForm {...loginHook} />
+                  <LoginForm {...loginHook} onShowQr={() => setShowQr(true)} />
                 )}
               </div>
             </div>
