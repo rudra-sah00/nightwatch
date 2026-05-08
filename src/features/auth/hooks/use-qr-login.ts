@@ -18,6 +18,8 @@ export function useQrLogin() {
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const activeCode = useRef<string | null>(null);
+  const mountedRef = useRef(true);
+  const initiatingRef = useRef(false);
 
   const cleanup = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -27,11 +29,15 @@ export function useQrLogin() {
   }, []);
 
   const initiate = useCallback(async () => {
+    if (initiatingRef.current) return;
+    initiatingRef.current = true;
     cleanup();
     setLoading(true);
     setStatus('pending');
+    setCode(null);
     try {
       const res = await qrInitiate();
+      if (!mountedRef.current) return;
       setCode(res.code);
       activeCode.current = res.code;
       setSecondsLeft(QR_LIFETIME);
@@ -41,6 +47,7 @@ export function useQrLogin() {
         if (!activeCode.current) return;
         try {
           const poll = await qrPollStatus(activeCode.current);
+          if (!mountedRef.current) return;
           if (poll.status === 'authorized' && poll.user) {
             cleanup();
             setStatus('authorized');
@@ -67,20 +74,29 @@ export function useQrLogin() {
         });
       }, 1000);
     } catch {
+      if (!mountedRef.current) return;
       setLoading(false);
       setStatus('expired');
+    } finally {
+      initiatingRef.current = false;
     }
   }, [cleanup, setUser]);
 
   useEffect(() => {
+    mountedRef.current = true;
     initiate();
-    return cleanup;
+    return () => {
+      mountedRef.current = false;
+      cleanup();
+    };
   }, [initiate, cleanup]);
 
   // Auto-refresh when expired
   useEffect(() => {
     if (status !== 'expired') return;
-    const timer = setTimeout(() => initiate(), 500);
+    const timer = setTimeout(() => {
+      if (mountedRef.current) initiate();
+    }, 1000);
     return () => clearTimeout(timer);
   }, [status, initiate]);
 
