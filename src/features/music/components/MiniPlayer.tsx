@@ -100,15 +100,16 @@ export function MiniPlayer() {
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
 
   // Interpolate remote progress locally for smooth bar animation
-  const [interpolatedProgress, setInterpolatedProgress] = useState(0);
+  const [interpolatedSeconds, setInterpolatedSeconds] = useState(0);
   const interpolateRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!isRemoteControlling || remoteDuration <= 0) {
-      setInterpolatedProgress(0);
+      setInterpolatedSeconds(0);
       return;
     }
-    setInterpolatedProgress(remoteProgress);
+    // remoteProgress is a percentage (0-100), convert to seconds
+    setInterpolatedSeconds((remoteProgress / 100) * remoteDuration);
   }, [remoteProgress, remoteDuration, isRemoteControlling]);
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export function MiniPlayer() {
     }
     if (!isRemoteControlling || !remoteIsPlaying || remoteDuration <= 0) return;
     interpolateRef.current = setInterval(() => {
-      setInterpolatedProgress((p) => Math.min(p + 1, remoteDuration));
+      setInterpolatedSeconds((s) => Math.min(s + 1, remoteDuration));
     }, 1000);
     return () => {
       if (interpolateRef.current) clearInterval(interpolateRef.current);
@@ -127,7 +128,7 @@ export function MiniPlayer() {
 
   const displayProgress = isRemoteControlling
     ? remoteDuration > 0
-      ? (interpolatedProgress / remoteDuration) * 100
+      ? (interpolatedSeconds / remoteDuration) * 100
       : 0
     : progress;
 
