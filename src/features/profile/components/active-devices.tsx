@@ -288,23 +288,30 @@ function QrScanner({
         const results = await detector.detect(videoRef.current);
         if (results.length > 0) {
           const url = results[0].rawValue;
-          if (url.includes('nightwatch://qr') || url.includes('code=')) {
+          if (!url.includes('nightwatch://qr')) {
             processingRef.current = true;
-            const code = new URL(
-              url.replace('nightwatch://', 'https://x/'),
-            ).searchParams.get('code');
-            if (code) {
-              stopCamera();
-              try {
-                await qrAuthorize(code);
-                toast.success('Device authorized');
-                onSuccess();
-              } catch {
-                toast.error('Failed to authorize. QR may be expired.');
-                onClose();
-              }
-              return;
+            toast.error('Please scan a valid Nightwatch QR code');
+            setTimeout(() => {
+              processingRef.current = false;
+            }, 2000);
+            raf = requestAnimationFrame(scan);
+            return;
+          }
+          processingRef.current = true;
+          const code = new URL(
+            url.replace('nightwatch://', 'https://x/'),
+          ).searchParams.get('code');
+          if (code) {
+            stopCamera();
+            try {
+              await qrAuthorize(code);
+              toast.success('Device authorized');
+              onSuccess();
+            } catch {
+              toast.error('Failed to authorize. QR may be expired.');
+              onClose();
             }
+            return;
           }
         }
       } catch {
