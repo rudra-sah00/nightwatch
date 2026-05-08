@@ -2,18 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import type { MusicDevice } from '../hooks/use-music-devices';
+import { getDeviceName } from '../utils';
 
 const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
-
-function getDeviceName(): string {
-  if (checkIsDesktop()) return 'Desktop App';
-  if (checkIsMobile()) return 'Mobile';
-  return 'Web Player';
-}
 
 /**
  * Headless component that:
@@ -34,6 +28,9 @@ export function MusicDeviceSync() {
     duration,
     setRemoteControlling,
     isRemoteControlling,
+    play,
+    seek,
+    togglePlay,
   } = useMusicPlayerContext();
   const pathname = usePathname();
 
@@ -119,12 +116,30 @@ export function MusicDeviceSync() {
     socket.on('music:device_offline', onOffline);
     socket.on('music:request_devices', onRequestDevices);
     socket.emit('music:request_devices');
-    socket.on('connect', () => socket.emit('music:request_devices'));
+    socket.emit('music:request_state');
+    socket.on('connect', () => {
+      socket.emit('music:request_devices');
+      socket.emit('music:request_state');
+    });
+
+    // Respond to state requests from other devices
+    const onRequestState = () => {
+      if (currentTrackRef.current && isPlayingRef.current) {
+        socket.emit('music:state_update', {
+          track: currentTrackRef.current,
+          isPlaying: isPlayingRef.current,
+          progress: progressRef.current,
+          duration: durationRef.current,
+        });
+      }
+    };
+    socket.on('music:request_state', onRequestState);
 
     return () => {
       socket.off('music:device_online', onOnline);
       socket.off('music:device_offline', onOffline);
       socket.off('music:request_devices', onRequestDevices);
+      socket.off('music:request_state', onRequestState);
     };
   }, [socket, deviceName]);
 
@@ -212,6 +227,64 @@ export function MusicDeviceSync() {
       socket.off('music:playback_started', onPlaybackStarted);
     };
   }, [socket, setRemoteControlling]);
+
+  // ─── 6. Auto-sync: pick up what's playing on other devices on page load ─
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onStateUpdate = (data: {
+      socketId: string;
+      track: Parameters<typeof setRemoteControlling>[1];
+      isPlaying: boolean;
+      progress: number;
+      duration: number;
+    }) => {
+      if (data.socketId === socket.id) return;
+      // Only auto-sync if we're not playing locally
+      if (currentTrackRef.current && isPlayingRef.current) return;
+      if (data.track && data.isPlaying) {
+        setRemoteControlling(
+          true,
+          data.track,
+          data.isPlaying,
+          data.progress,
+          data.duration,
+        );
+      }
+    };
+
+    socket.on('music:state_update', onStateUpdate);
+    return () => {
+      socket.off('music:state_update', onStateUpdate);
+    };
+  }, [socket, setRemoteControlling]);
+
+  // ─── 6. Handle incoming transfer (receive playback from another device) ─
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onTransfer = (data: {
+      track: Parameters<typeof play>[0];
+      queue: Parameters<typeof play>[1];
+      progress: number;
+      isPlaying: boolean;
+    }) => {
+      if (!availableRef.current) return;
+      window.dispatchEvent(new CustomEvent('music:transfer-received'));
+      play(data.track, data.queue ?? []);
+      setTimeout(() => {
+        seek(data.progress);
+        if (!data.isPlaying) togglePlay();
+      }, 500);
+    };
+
+    socket.on('music:transfer_playback', onTransfer);
+    return () => {
+      socket.off('music:transfer_playback', onTransfer);
+    };
+  }, [socket, play, seek, togglePlay]);
 
   return null;
 }

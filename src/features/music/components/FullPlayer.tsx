@@ -50,6 +50,9 @@ export function FullPlayer() {
     play,
     showAirPlay,
     queue,
+    isRemoteControlling,
+    remoteTrack,
+    remoteIsPlaying,
   } = useMusicPlayerContext();
 
   const mobile = useIsMobile();
@@ -71,21 +74,24 @@ export function FullPlayer() {
     }, 300);
   }, [setExpanded]);
 
-  const trackId = currentTrack?.id;
+  const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
+  const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
+
+  const trackId = displayTrack?.id;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
   useEffect(() => {
     setLyrics(null);
     setRecommendations([]);
     setShowLyrics(false);
     setShowQueue(false);
-    if (!currentTrack) return;
+    if (!displayTrack) return;
     getSyncedLyrics(
-      currentTrack.id,
-      currentTrack.title,
-      currentTrack.artist,
+      displayTrack.id,
+      displayTrack.title,
+      displayTrack.artist,
       duration,
     ).then(setLyrics);
-    getSongRecommendations(currentTrack.id)
+    getSongRecommendations(displayTrack.id)
       .then(setRecommendations)
       .catch(() => {});
   }, [trackId]);
@@ -127,7 +133,16 @@ export function FullPlayer() {
     return () => cancelAnimationFrame(rafRef.current);
   }, [currentLineIndex, expanded, showLyrics]);
 
-  if (!expanded || !currentTrack) return null;
+  if (!expanded || !displayTrack) {
+    if (expanded) {
+      console.warn('[FullPlayer] expanded=true but displayTrack is null', {
+        isRemoteControlling,
+        remoteTrack: !!remoteTrack,
+        currentTrack: !!currentTrack,
+      });
+    }
+    return null;
+  }
 
   const handleToggleLyrics = () => {
     if (!lyrics?.length) return;
@@ -140,11 +155,30 @@ export function FullPlayer() {
     if (!showQueue) setShowLyrics(false);
   };
 
+  const handleTogglePlay = isRemoteControlling
+    ? () =>
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', { detail: 'toggle_play' }),
+        )
+    : togglePlay;
+  const handleNext = isRemoteControlling
+    ? () =>
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', { detail: 'next' }),
+        )
+    : next;
+  const handlePrev = isRemoteControlling
+    ? () =>
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', { detail: 'prev' }),
+        )
+    : prev;
+
   if (mobile) {
     return (
       <MobileFullPlayer
-        currentTrack={currentTrack}
-        isPlaying={isPlaying}
+        currentTrack={displayTrack}
+        isPlaying={displayPlaying}
         progress={progress}
         duration={duration}
         volume={volume}
@@ -157,9 +191,9 @@ export function FullPlayer() {
         lyricsRef={lyricsRef}
         systemVol={systemVol}
         onClose={handleClose}
-        onTogglePlay={togglePlay}
-        onNext={next}
-        onPrev={prev}
+        onTogglePlay={handleTogglePlay}
+        onNext={handleNext}
+        onPrev={handlePrev}
         onSeek={seek}
         onSetVolume={setVolume}
         onPlay={play}
@@ -172,8 +206,8 @@ export function FullPlayer() {
 
   return (
     <DesktopFullPlayer
-      currentTrack={currentTrack}
-      isPlaying={isPlaying}
+      currentTrack={displayTrack}
+      isPlaying={displayPlaying}
       progress={progress}
       duration={duration}
       shuffle={shuffle}
@@ -185,9 +219,9 @@ export function FullPlayer() {
       closing={closing}
       lyricsRef={lyricsRef}
       onClose={handleClose}
-      onTogglePlay={togglePlay}
-      onNext={next}
-      onPrev={prev}
+      onTogglePlay={handleTogglePlay}
+      onNext={handleNext}
+      onPrev={handlePrev}
       onSeek={seek}
       onToggleShuffle={toggleShuffle}
       onCycleRepeat={cycleRepeat}

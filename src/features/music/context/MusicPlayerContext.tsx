@@ -98,11 +98,17 @@ interface MusicPlayerContextValue {
   remoteTrack: import('../api').MusicTrack | null;
   /** Whether the remote device is playing. */
   remoteIsPlaying: boolean;
+  /** Progress percentage from remote device. */
+  remoteProgress: number;
+  /** Duration in seconds from remote device. */
+  remoteDuration: number;
   /** Set remote controlling state. */
   setRemoteControlling: (
     active: boolean,
     track?: import('../api').MusicTrack | null,
     playing?: boolean,
+    progress?: number,
+    duration?: number,
   ) => void;
 }
 
@@ -132,6 +138,8 @@ export function MusicPlayerProvider({
   const [remoteControlling, setRemoteControllingState] = useState(false);
   const [remoteTrack, setRemoteTrack] = useState<MusicTrack | null>(null);
   const [remoteIsPlaying, setRemoteIsPlaying] = useState(false);
+  const [remoteProgress, setRemoteProgress] = useState(0);
+  const [remoteDuration, setRemoteDuration] = useState(0);
 
   useEffect(() => {
     const engine = new AudioEngine();
@@ -419,14 +427,20 @@ export function MusicPlayerProvider({
       isRemoteControlling: remoteControlling,
       remoteTrack,
       remoteIsPlaying,
+      remoteProgress,
+      remoteDuration,
       setRemoteControlling: (
         active: boolean,
         track?: MusicTrack | null,
         playing?: boolean,
+        prog?: number,
+        dur?: number,
       ) => {
         setRemoteControllingState(active);
         setRemoteTrack(track ?? null);
         setRemoteIsPlaying(playing ?? false);
+        if (prog !== undefined) setRemoteProgress(prog);
+        if (dur !== undefined) setRemoteDuration(dur);
       },
     }),
     [
@@ -435,6 +449,8 @@ export function MusicPlayerProvider({
       remoteControlling,
       remoteTrack,
       remoteIsPlaying,
+      remoteProgress,
+      remoteDuration,
       play,
       togglePlay,
       next,

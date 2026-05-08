@@ -175,30 +175,31 @@ export function useMusicDevices(
   );
 
   useEffect(() => {
-    if (!socket) return;
-
-    const onTransfer = (data: TransferPayload) => {
-      transferHandlerRef.current?.(data);
+    const onTransfer = () => {
+      transferHandlerRef.current?.(null as unknown as TransferPayload);
       setActiveTarget(null); // We are now the active player
     };
 
-    socket.on(EVENTS.TRANSFER_PLAYBACK, onTransfer);
+    window.addEventListener('music:transfer-received', onTransfer);
     return () => {
-      socket.off(EVENTS.TRANSFER_PLAYBACK, onTransfer);
+      window.removeEventListener('music:transfer-received', onTransfer);
     };
-  }, [socket, setActiveTarget]);
+  }, [setActiveTarget]);
 
   // ─── Public API ─────────────────────────────────────────────────
 
-  const transferTo = (targetSocketId: string) => {
+  const transferTo = (targetSocketId: string, onFail?: () => void) => {
     if (!socket || !currentTrack) return;
-    socket.emit(EVENTS.TRANSFER_PLAYBACK, {
-      targetSocketId,
-      track: currentTrack,
-      queue: [],
-      progress,
-      isPlaying,
-    });
+    socket.emit(
+      EVENTS.TRANSFER_PLAYBACK,
+      { targetSocketId, track: currentTrack, queue: [], progress, isPlaying },
+      (res: { success: boolean }) => {
+        if (!res?.success) {
+          setActiveTarget(null);
+          onFail?.();
+        }
+      },
+    );
     setActiveTarget(targetSocketId);
   };
 
@@ -208,15 +209,19 @@ export function useMusicDevices(
     q: MusicTrack[],
     prog: number,
     playing: boolean,
+    onFail?: () => void,
   ) => {
     if (!socket) return;
-    socket.emit(EVENTS.TRANSFER_PLAYBACK, {
-      targetSocketId,
-      track,
-      queue: q,
-      progress: prog,
-      isPlaying: playing,
-    });
+    socket.emit(
+      EVENTS.TRANSFER_PLAYBACK,
+      { targetSocketId, track, queue: q, progress: prog, isPlaying: playing },
+      (res: { success: boolean }) => {
+        if (!res?.success) {
+          setActiveTarget(null);
+          onFail?.();
+        }
+      },
+    );
     setActiveTarget(targetSocketId);
   };
 

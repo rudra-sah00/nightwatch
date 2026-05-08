@@ -11,7 +11,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
@@ -56,6 +56,8 @@ export function MiniPlayer() {
     isRemoteControlling,
     remoteTrack,
     remoteIsPlaying,
+    remoteProgress,
+    remoteDuration,
     removeFromQueue,
   } = player;
 
@@ -97,6 +99,38 @@ export function MiniPlayer() {
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
 
+  // Interpolate remote progress locally for smooth bar animation
+  const [interpolatedProgress, setInterpolatedProgress] = useState(0);
+  const interpolateRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!isRemoteControlling || remoteDuration <= 0) {
+      setInterpolatedProgress(0);
+      return;
+    }
+    setInterpolatedProgress(remoteProgress);
+  }, [remoteProgress, remoteDuration, isRemoteControlling]);
+
+  useEffect(() => {
+    if (interpolateRef.current) {
+      clearInterval(interpolateRef.current);
+      interpolateRef.current = null;
+    }
+    if (!isRemoteControlling || !remoteIsPlaying || remoteDuration <= 0) return;
+    interpolateRef.current = setInterval(() => {
+      setInterpolatedProgress((p) => Math.min(p + 1, remoteDuration));
+    }, 1000);
+    return () => {
+      if (interpolateRef.current) clearInterval(interpolateRef.current);
+    };
+  }, [isRemoteControlling, remoteIsPlaying, remoteDuration]);
+
+  const displayProgress = isRemoteControlling
+    ? remoteDuration > 0
+      ? (interpolatedProgress / remoteDuration) * 100
+      : 0
+    : progress;
+
   if (!displayTrack) return null;
 
   return (
@@ -112,7 +146,7 @@ export function MiniPlayer() {
       >
         <div
           className="h-full bg-neo-yellow transition-all duration-200"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${displayProgress}%` }}
         />
       </button>
 
@@ -162,14 +196,32 @@ export function MiniPlayer() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={prev}
+            onClick={() => {
+              if (isRemoteControlling) {
+                window.dispatchEvent(
+                  new CustomEvent('music:remote-command', { detail: 'prev' }),
+                );
+              } else {
+                prev();
+              }
+            }}
             className="p-1.5 text-foreground/40 hover:text-foreground transition-colors"
           >
             <SkipBack className="w-3.5 h-3.5 fill-current" />
           </button>
           <button
             type="button"
-            onClick={togglePlay}
+            onClick={() => {
+              if (isRemoteControlling) {
+                window.dispatchEvent(
+                  new CustomEvent('music:remote-command', {
+                    detail: 'toggle_play',
+                  }),
+                );
+              } else {
+                togglePlay();
+              }
+            }}
             className="w-8 h-8 flex items-center justify-center bg-neo-yellow border-[2px] border-border text-foreground"
           >
             {displayPlaying ? (
@@ -180,14 +232,30 @@ export function MiniPlayer() {
           </button>
           <button
             type="button"
-            onClick={next}
+            onClick={() => {
+              if (isRemoteControlling) {
+                window.dispatchEvent(
+                  new CustomEvent('music:remote-command', { detail: 'next' }),
+                );
+              } else {
+                next();
+              }
+            }}
             className="p-1.5 text-foreground/40 hover:text-foreground transition-colors"
           >
             <SkipForward className="w-3.5 h-3.5 fill-current" />
           </button>
           <button
             type="button"
-            onClick={stop}
+            onClick={() => {
+              if (isRemoteControlling) {
+                window.dispatchEvent(
+                  new CustomEvent('music:remote-command', { detail: 'stop' }),
+                );
+              } else {
+                stop();
+              }
+            }}
             className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
           >
             <Square className="w-3 h-3 fill-current" />

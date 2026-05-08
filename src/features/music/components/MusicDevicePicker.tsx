@@ -1,30 +1,11 @@
 'use client';
 
-import {
-  Monitor,
-  Pause,
-  Play,
-  SkipBack,
-  SkipForward,
-  Smartphone,
-  X,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { Monitor, Smartphone, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { useMusicDevices } from '../hooks/use-music-devices';
-import { formatTime } from '../utils';
-
-/** Routes where music playback is blocked. */
-const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
-
-function getDeviceName(): string {
-  if (checkIsDesktop()) return 'Desktop App';
-  if (checkIsMobile()) return 'Mobile';
-  return 'Web Player';
-}
+import { getDeviceName } from '../utils';
 
 /** Connect/devices icon */
 function ConnectIcon({ className }: { className?: string }) {
@@ -71,10 +52,8 @@ export function MusicDevicePicker() {
     togglePlay,
     setRemoteControlling,
   } = player;
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const deviceName = getDeviceName();
-  const isAvailable = !BLOCKED_ROUTES.some((r) => pathname.startsWith(r));
 
   const {
     devices,
@@ -108,18 +87,37 @@ export function MusicDevicePicker() {
     });
   }, [setOnCommand, togglePlay, next, prev, seek]);
 
-  // Handle incoming transfer (when this device receives playback)
+  // Handle incoming transfer (MusicDeviceSync handles the actual playback)
   useEffect(() => {
-    setOnTransfer((data) => {
-      if (!isAvailable) return;
-      play(data.track, data.queue);
-      setTimeout(() => {
-        seek(data.progress);
-        if (!data.isPlaying) togglePlay();
-      }, 500);
+    setOnTransfer(() => {
       toast.success('Playback transferred here');
     });
-  }, [setOnTransfer, play, seek, togglePlay, isAvailable]);
+  }, [setOnTransfer]);
+
+  // Forward remote commands from MiniPlayer to the target device
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const cmd = (e as CustomEvent).detail as string;
+      if (cmd === 'stop') {
+        const trackToPlay = remoteState.track;
+        if (trackToPlay) {
+          play(trackToPlay, []);
+        }
+        reclaimPlayback();
+        setRemoteControlling(false);
+      } else {
+        sendCommand(cmd);
+      }
+    };
+    window.addEventListener('music:remote-command', handler);
+    return () => window.removeEventListener('music:remote-command', handler);
+  }, [
+    sendCommand,
+    reclaimPlayback,
+    setRemoteControlling,
+    remoteState.track,
+    play,
+  ]);
 
   // Forward new local plays to target
   const prevTrackIdRef = useRef(currentTrack?.id);
@@ -149,22 +147,49 @@ export function MusicDevicePicker() {
   }, [devices, activeTarget, reclaimPlayback, setRemoteControlling]);
 
   const isControlling = !!activeTarget;
-  const displayTrack = isControlling ? remoteState.track : currentTrack;
-  const displayPlaying = isControlling ? remoteState.isPlaying : isPlaying;
 
   // Sync remote state to context so MiniPlayer can show it
+  // biome-ignore lint/correctness/useExhaustiveDependencies: progress/duration synced separately to avoid re-renders on every tick
   useEffect(() => {
-    setRemoteControlling(
-      isControlling,
-      remoteState.track,
-      remoteState.isPlaying,
-    );
+    if (!isControlling) {
+      if (remoteState.track === null) {
+        setRemoteControlling(false);
+      }
+      return;
+    }
+    if (remoteState.track) {
+      setRemoteControlling(
+        true,
+        remoteState.track,
+        remoteState.isPlaying,
+        remoteState.progress,
+        remoteState.duration,
+      );
+    }
   }, [
     isControlling,
     remoteState.track,
     remoteState.isPlaying,
     setRemoteControlling,
   ]);
+
+  // Sync progress/duration separately to avoid full re-render on every tick
+  const remoteProgressRef = useRef(remoteState.progress);
+  const remoteDurationRef = useRef(remoteState.duration);
+  remoteProgressRef.current = remoteState.progress;
+  remoteDurationRef.current = remoteState.duration;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lightweight progress-only sync
+  useEffect(() => {
+    if (!isControlling || !remoteState.track) return;
+    setRemoteControlling(
+      true,
+      remoteState.track,
+      remoteState.isPlaying,
+      remoteState.progress,
+      remoteState.duration,
+    );
+  }, [remoteState.progress, remoteState.duration]);
 
   return (
     <>
@@ -209,74 +234,6 @@ export function MusicDevicePicker() {
               </button>
             </div>
 
-            {/* Now playing on target (if controlling) */}
-            {isControlling && displayTrack && (
-              <div className="mx-5 mb-4 p-3 rounded-lg bg-neo-yellow/10 border border-neo-yellow/20">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={displayTrack.image}
-                    alt=""
-                    className="w-10 h-10 rounded border border-border object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold truncate">
-                      {displayTrack.title}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {displayTrack.artist}
-                    </p>
-                  </div>
-                </div>
-                {/* Remote controls */}
-                <div className="flex items-center justify-center gap-4 mt-3">
-                  <button
-                    type="button"
-                    onClick={() => sendCommand('prev')}
-                    className="p-1.5 text-foreground/60 hover:text-foreground"
-                  >
-                    <SkipBack className="w-4 h-4 fill-current" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => sendCommand('toggle_play')}
-                    className="w-8 h-8 flex items-center justify-center bg-neo-yellow border-2 border-border rounded-full"
-                  >
-                    {displayPlaying ? (
-                      <Pause className="w-3.5 h-3.5 fill-current" />
-                    ) : (
-                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => sendCommand('next')}
-                    className="p-1.5 text-foreground/60 hover:text-foreground"
-                  >
-                    <SkipForward className="w-4 h-4 fill-current" />
-                  </button>
-                </div>
-                {/* Progress */}
-                {remoteState.duration > 0 && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[9px] text-muted-foreground font-mono">
-                      {formatTime(remoteState.progress)}
-                    </span>
-                    <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-neo-yellow rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${(remoteState.progress / remoteState.duration) * 100}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-[9px] text-muted-foreground font-mono">
-                      {formatTime(remoteState.duration)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Device list */}
             <div className="px-3 pb-4 space-y-1">
               {/* This device */}
@@ -284,6 +241,11 @@ export function MusicDevicePicker() {
                 type="button"
                 onClick={() => {
                   if (isControlling) {
+                    // Play the remote track locally before clearing remote state
+                    const trackToPlay = remoteState.track;
+                    if (trackToPlay) {
+                      play(trackToPlay, []);
+                    }
                     reclaimPlayback();
                     setRemoteControlling(false);
                     toast.success('Playing on this device');
@@ -328,6 +290,13 @@ export function MusicDevicePicker() {
                             queue,
                             progress,
                             isPlaying,
+                            () => {
+                              // Transfer failed — reclaim
+                              setRemoteControlling(false);
+                              toast.error(
+                                `Failed to connect to ${device.deviceName}`,
+                              );
+                            },
                           );
                           stop();
                         } else {
