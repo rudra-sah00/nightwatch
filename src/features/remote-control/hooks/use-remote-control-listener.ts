@@ -73,20 +73,26 @@ export function useRemoteControlListener({
     duration: state.duration,
   };
 
-  // Advertise stream on mount + heartbeat (stable deps — only re-runs on socket/mount change)
+  // Advertise stream on mount + heartbeat + reconnect
   useEffect(() => {
-    if (isMobile || !socket?.connected) return;
+    if (isMobile || !socket) return;
 
     const advertise = () => {
-      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
+      if (socket.connected) {
+        socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
+      }
     };
 
     advertise();
-    heartbeatRef.current = setInterval(advertise, 60_000);
+    heartbeatRef.current = setInterval(advertise, 30_000);
+
+    // Re-advertise immediately on reconnect (new socketId, mobile needs fresh data)
+    socket.on('connect', advertise);
 
     return () => {
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
-      socket.emit(REMOTE_EVENTS.STREAM_ENDED);
+      socket.off('connect', advertise);
+      if (socket.connected) socket.emit(REMOTE_EVENTS.STREAM_ENDED);
     };
   }, [isMobile, socket]);
 

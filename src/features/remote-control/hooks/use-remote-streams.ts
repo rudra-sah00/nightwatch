@@ -55,22 +55,43 @@ export function useRemoteStreams() {
       setSelectedId((prev) => (prev === data.socketId ? null : prev));
     };
 
+    const requestAdvertise = () => {
+      if (socket.connected) {
+        socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
+      }
+    };
+
     socket.on(REMOTE_EVENTS.STREAM_ADVERTISE, onAdvertise);
     socket.on(REMOTE_EVENTS.STREAM_ENDED, onEnded);
 
-    // Ask other devices to advertise on mount
-    socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
+    // Request with retry: if socket isn't connected yet or desktop is slow to respond,
+    // retry a few times with backoff to ensure discovery
+    requestAdvertise();
+    const t1 = setTimeout(requestAdvertise, 1_000);
+    const t2 = setTimeout(requestAdvertise, 3_000);
 
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
       socket.off(REMOTE_EVENTS.STREAM_ADVERTISE, onAdvertise);
       socket.off(REMOTE_EVENTS.STREAM_ENDED, onEnded);
     };
   }, [socket]);
 
-  // Re-request on reconnect
+  // Re-request on reconnect (socket gets new id, need fresh advertise from desktop)
   useEffect(() => {
     if (!socket) return;
-    const onConnect = () => socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
+    const onConnect = () => {
+      // Clear stale streams from previous connection
+      setStreams(new Map());
+      setSelectedId(null);
+      // Request fresh advertise with retry
+      socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
+      const t = setTimeout(() => {
+        if (socket.connected) socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
+      }, 1_500);
+      return () => clearTimeout(t);
+    };
     socket.on('connect', onConnect);
     return () => {
       socket.off('connect', onConnect);
