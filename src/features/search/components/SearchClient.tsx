@@ -72,41 +72,38 @@ export function SearchClient({
 
   return (
     <div className="w-full">
-      <main className="container mx-auto px-6 py-12 md:px-10 min-h-[calc(100vh-80px)] animate-in fade-in overflow-x-clip">
+      <main className="container mx-auto px-4 sm:px-6 py-6 md:py-10 md:px-10 min-h-[calc(100vh-80px)] animate-in fade-in overflow-x-clip">
         <div className="w-full">
-          <div className="mb-12">
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 mb-4">
-              <h1 className="font-headline text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-foreground flex flex-wrap gap-x-4 items-baseline overflow-visible">
-                <span className="shrink-0">
-                  {isTransitioning || isPending
-                    ? t('results.searching')
-                    : t('results.resultsLabel')}
-                </span>
-                {/* Real Input Layer */}
-                <input
-                  value={searchInputQuery}
-                  onChange={(e) => setSearchInputQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    handleSearch(e);
-                    if (e.key === 'Enter') {
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  inputMode="search"
-                  className="text-neo-blue underline decoration-4 md:decoration-8 underline-offset-8 outline-none caret-[#0055ff] min-w-[2ch] inline-block bg-transparent border-none p-0 focus:bg-neo-yellow focus:text-foreground focus:no-underline transition-colors focus:px-2 rounded-sm font-black font-headline uppercase leading-none tracking-tighter relative z-10 text-inherit overflow-visible"
-                  style={{
-                    // +2ch buffer: uppercase condensed glyphs are wider than 1ch at large sizes
-                    width: `${Math.max(searchInputQuery.length + 1, 2)}ch`,
-                  }}
-                  aria-label={t('results.editQueryAriaLabel')}
-                />
-              </h1>
+          {/* Compact search header */}
+          <div className="mb-6 md:mb-10">
+            <div className="flex items-baseline gap-3 mb-2">
+              <span className="font-headline text-lg sm:text-xl md:text-2xl font-black uppercase tracking-widest text-foreground/50 shrink-0">
+                {isTransitioning || isPending
+                  ? t('results.searching')
+                  : t('results.resultsLabel')}
+              </span>
+              <input
+                value={searchInputQuery}
+                onChange={(e) => setSearchInputQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  handleSearch(e);
+                  if (e.key === 'Enter') {
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                inputMode="search"
+                className="font-headline text-lg sm:text-xl md:text-2xl font-black uppercase tracking-tighter text-neo-blue underline decoration-2 underline-offset-4 outline-none caret-neo-blue bg-transparent border-none p-0 focus:bg-neo-yellow focus:text-foreground focus:no-underline transition-colors focus:px-2 rounded-sm min-w-[3ch]"
+                style={{
+                  width: `${Math.max(searchInputQuery.length + 1, 3)}ch`,
+                }}
+                aria-label={t('results.editQueryAriaLabel')}
+              />
             </div>
-            <p className="font-headline font-bold text-xl uppercase tracking-widest text-foreground/70">
+            <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">
               {t('results.filmsFound', { count: results.length })}
             </p>
           </div>

@@ -4,7 +4,6 @@ import { Film } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { SearchSkeleton } from '@/components/ui/skeletons';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import {
@@ -40,11 +39,18 @@ export const SearchResults = React.memo(function SearchResults({
   if (isLoading) {
     return (
       <output
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
         aria-busy="true"
         aria-label={t('results.searchingAriaLabel')}
       >
-        {['res-sk-1', 'res-sk-2', 'res-sk-3', 'res-sk-4'].map((id) => (
+        {[
+          'res-sk-1',
+          'res-sk-2',
+          'res-sk-3',
+          'res-sk-4',
+          'res-sk-5',
+          'res-sk-6',
+        ].map((id) => (
           <SearchSkeleton key={id} />
         ))}
       </output>
@@ -67,7 +73,7 @@ export const SearchResults = React.memo(function SearchResults({
 
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
       style={{ contentVisibility: 'auto' }}
     >
       {uniqueResults.map((result, index) => (
@@ -98,62 +104,55 @@ const SearchResultItem = React.memo(function SearchResultItem({
   const t = useTranslations('search');
 
   return (
-    <Card className="p-2">
-      {/* Target Poster Container */}
-      <button
-        type="button"
-        className="group aspect-[2/3] border-[3px] border-border overflow-hidden relative mb-4 flex-shrink-0 cursor-pointer w-full p-0 bg-background"
-        onClick={() => onSelect(result)}
-        aria-label={t('results.viewDetailsFor', { title: result.title })}
-      >
+    <button
+      type="button"
+      className="group flex flex-col text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neo-blue rounded-lg overflow-hidden"
+      onClick={() => onSelect(result)}
+      aria-label={t('results.viewDetailsFor', { title: result.title })}
+    >
+      {/* Poster */}
+      <div className="aspect-[2/3] border-[2px] border-border overflow-hidden relative w-full bg-background rounded-lg">
         {imageError ? (
           <div className="absolute inset-0 flex items-center justify-center bg-background">
-            <Film className="w-12 h-12 text-foreground/20 stroke-[3px]" />
+            <Film className="w-8 h-8 text-foreground/20 stroke-[3px]" />
           </div>
         ) : (
           <Image
             src={getOptimizedImageUrl(result.poster)}
             alt={result.title}
             fill
-            className="object-cover grayscale contrast-125 group-hover:grayscale-0 transition-[filter] duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             onError={() => setImageError(true)}
             unoptimized={result.poster?.includes('/api/stream/')}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            loading={index < 4 ? 'eager' : 'lazy'}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            loading={index < 6 ? 'eager' : 'lazy'}
             priority={index === 0}
           />
         )}
 
-        {/* Release Year Badge */}
+        {/* Year badge */}
         {result.year ? (
-          <div className="absolute top-4 right-4 bg-neo-yellow border-[2px] border-border px-3 py-1 font-headline font-black uppercase text-sm text-foreground ">
+          <div className="absolute top-2 right-2 bg-neo-yellow border-[2px] border-border px-1.5 py-0.5 font-headline font-black text-[10px] text-foreground">
             {result.year}
           </div>
         ) : null}
 
-        {/* Provider Badge */}
+        {/* Provider badge */}
         {result.provider === 'pv' ? (
-          <div className="absolute bottom-3 left-3 bg-[#00a8e1] border-[2px] border-border px-2 py-0.5 font-headline font-black uppercase text-xs text-white tracking-wide">
-            Prime Video
+          <div className="absolute bottom-2 left-2 bg-[#00a8e1] border-[1.5px] border-border px-1.5 py-0.5 font-headline font-black uppercase text-[8px] text-white tracking-wide">
+            Prime
           </div>
         ) : result.provider === 's1' ? (
-          <div className="absolute bottom-3 left-3 bg-[#e50914] border-[2px] border-border px-2 py-0.5 font-headline font-black uppercase text-xs text-white tracking-wide">
+          <div className="absolute bottom-2 left-2 bg-[#e50914] border-[1.5px] border-border px-1.5 py-0.5 font-headline font-black uppercase text-[8px] text-white tracking-wide">
             Netflix
           </div>
         ) : null}
-      </button>
+      </div>
 
-      <CardContent className="px-2 pb-2">
-        {/* Title */}
-        <button
-          type="button"
-          className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter leading-tight mt-auto cursor-pointer hover:text-neo-blue text-foreground outline-none focus:text-neo-blue text-left w-full p-0 bg-transparent border-none appearance-none line-clamp-2"
-          title={result.title}
-          onClick={() => onSelect(result)}
-        >
-          {result.title}
-        </button>
-      </CardContent>
-    </Card>
+      {/* Title */}
+      <p className="font-headline text-xs sm:text-sm font-black uppercase tracking-tight leading-tight mt-2 line-clamp-2 group-hover:text-neo-blue transition-colors">
+        {result.title}
+      </p>
+    </button>
   );
 });
