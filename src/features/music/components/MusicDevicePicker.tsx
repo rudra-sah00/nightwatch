@@ -300,7 +300,10 @@ export function MusicDevicePicker() {
                         trackToPlay,
                         remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
                       );
-                      setTimeout(() => seek(prog), 300);
+                      // Seek after stream loads (playTrack: fetch URL ~200ms + play + fade-in 300ms)
+                      if (prog > 0) {
+                        setTimeout(() => seek(prog), 1500);
+                      }
                     }
                     reclaimPlayback();
                     setRemoteControlling(false);
