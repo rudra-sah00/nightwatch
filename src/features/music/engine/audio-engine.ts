@@ -71,6 +71,48 @@ export const EQ_PRESETS: Record<string, EqualizerBand[]> = {
     { frequency: 3600, gain: 2 },
     { frequency: 14000, gain: 4 },
   ],
+  pop: [
+    { frequency: 60, gain: -1 },
+    { frequency: 230, gain: 2 },
+    { frequency: 910, gain: 4 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: -1 },
+  ],
+  hiphop: [
+    { frequency: 60, gain: 7 },
+    { frequency: 230, gain: 4 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 1 },
+    { frequency: 14000, gain: 3 },
+  ],
+  jazz: [
+    { frequency: 60, gain: 3 },
+    { frequency: 230, gain: 0 },
+    { frequency: 910, gain: 2 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: 4 },
+  ],
+  classical: [
+    { frequency: 60, gain: 0 },
+    { frequency: 230, gain: 0 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: 5 },
+  ],
+  lofi: [
+    { frequency: 60, gain: 3 },
+    { frequency: 230, gain: 2 },
+    { frequency: 910, gain: -2 },
+    { frequency: 3600, gain: -1 },
+    { frequency: 14000, gain: -3 },
+  ],
+  loudness: [
+    { frequency: 60, gain: 6 },
+    { frequency: 230, gain: 3 },
+    { frequency: 910, gain: 0 },
+    { frequency: 3600, gain: 3 },
+    { frequency: 14000, gain: 6 },
+  ],
 };
 
 type Listener = (state: AudioEngineState) => void;

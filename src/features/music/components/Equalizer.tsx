@@ -109,31 +109,57 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
 
         {/* Band sliders — horizontal scroll on mobile */}
         <div className="flex items-end gap-4 h-44 overflow-x-auto no-scrollbar min-w-0">
-          {bands.map((band, i) => (
-            <div
-              key={band.frequency}
-              className="flex flex-col items-center gap-2 min-w-[36px]"
-            >
-              <span className="text-[9px] text-white/50 font-mono tabular-nums">
-                {band.gain > 0 ? '+' : ''}
-                {band.gain.toFixed(0)}
-              </span>
-              <input
-                type="range"
-                min={-12}
-                max={12}
-                step={0.5}
-                value={band.gain}
-                onChange={(e) => handleBandChange(i, Number(e.target.value))}
-                className="w-full h-28 accent-white appearance-none cursor-pointer [writing-mode:vertical-lr] [direction:rtl]"
-              />
-              <span className="text-[9px] text-white/40 font-mono">
-                {band.frequency >= 1000
-                  ? `${(band.frequency / 1000).toFixed(1)}k`
-                  : band.frequency}
-              </span>
-            </div>
-          ))}
+          {bands.map((band, i) => {
+            const pct = ((band.gain + 12) / 24) * 100;
+            return (
+              <div
+                key={band.frequency}
+                className="flex flex-col items-center gap-2 min-w-[40px]"
+              >
+                <span className="text-[9px] text-white/50 font-mono tabular-nums">
+                  {band.gain > 0 ? '+' : ''}
+                  {band.gain.toFixed(0)}
+                </span>
+                <div className="relative h-28 w-6 flex items-center justify-center">
+                  {/* Track background */}
+                  <div className="absolute w-1 h-full rounded-full bg-white/10" />
+                  {/* Fill from center */}
+                  <div
+                    className="absolute w-1 rounded-full bg-white/60 transition-all duration-100"
+                    style={{
+                      height: `${Math.abs(pct - 50)}%`,
+                      bottom: pct >= 50 ? '50%' : `${pct}%`,
+                      top: pct < 50 ? '50%' : undefined,
+                    }}
+                  />
+                  {/* Center line */}
+                  <div className="absolute w-2.5 h-[1px] bg-white/20 top-1/2" />
+                  {/* Invisible range input on top */}
+                  <input
+                    type="range"
+                    min={-12}
+                    max={12}
+                    step={0.5}
+                    value={band.gain}
+                    onChange={(e) =>
+                      handleBandChange(i, Number(e.target.value))
+                    }
+                    className="absolute w-full h-full opacity-0 cursor-pointer [writing-mode:vertical-lr] [direction:rtl]"
+                  />
+                  {/* Thumb indicator */}
+                  <div
+                    className="absolute w-3.5 h-3.5 rounded-full bg-white border-2 border-white/80 shadow-lg shadow-white/20 pointer-events-none transition-all duration-100"
+                    style={{ bottom: `calc(${pct}% - 7px)` }}
+                  />
+                </div>
+                <span className="text-[9px] text-white/40 font-mono">
+                  {band.frequency >= 1000
+                    ? `${(band.frequency / 1000).toFixed(1)}k`
+                    : band.frequency}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
