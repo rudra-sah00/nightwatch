@@ -180,13 +180,14 @@ export function MusicDeviceSync() {
         clearInterval(stateUpdateRef.current);
         stateUpdateRef.current = null;
       }
-      // Emit a final "stopped" update so remote controllers clear their state
+      // Emit a final state update so remote controllers know we paused/stopped
       if (socket?.connected && wasPlayingRef.current && !isRemoteControlling) {
         socket.emit('music:state_update', {
-          track: currentTrackRef.current,
+          track: currentTrackRef.current, // null = stopped, non-null = paused
           isPlaying: false,
           progress: progressRef.current,
           duration: durationRef.current,
+          queue: queueRef.current,
         });
       }
       wasPlayingRef.current = false;
@@ -265,14 +266,15 @@ export function MusicDeviceSync() {
       // Only auto-sync if we're not playing locally
       if (currentTrackRef.current && isPlayingRef.current) return;
 
-      // Target stopped playing — clear remote state
-      if (!data.isPlaying && remoteSourceRef.current === data.socketId) {
+      // Target fully stopped (no track) — clear remote state
+      if (!data.track && remoteSourceRef.current === data.socketId) {
         remoteSourceRef.current = null;
         setRemoteControlling(false);
         return;
       }
 
-      if (data.track && data.isPlaying) {
+      // Target has a track (playing or paused) — sync state
+      if (data.track) {
         remoteSourceRef.current = data.socketId;
         setRemoteControlling(
           true,
