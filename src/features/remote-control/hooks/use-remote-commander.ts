@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSocket } from '@/providers/socket-provider';
 import type {
   RemoteCommandType,
@@ -27,6 +27,7 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
     currentTime: activeStream?.currentTime ?? 0,
     duration: activeStream?.duration ?? 0,
   });
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sync initial state when target changes
   useEffect(() => {
@@ -38,6 +39,24 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
       });
     }
   }, [activeStream]);
+
+  // Local interpolation: increment currentTime every second while playing
+  useEffect(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (!state.isPlaying || state.duration <= 0) return;
+    intervalRef.current = setInterval(() => {
+      setState((prev) => ({
+        ...prev,
+        currentTime: Math.min(prev.currentTime + 1, prev.duration),
+      }));
+    }, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [state.isPlaying, state.duration]);
 
   // Listen for state updates from the target device
   useEffect(() => {
