@@ -329,9 +329,12 @@ export function MusicPlayerProvider({
     };
   }, [socket]);
 
-  const play = useCallback((track: MusicTrack, queue?: MusicTrack[], startAt?: number) => {
-    engineRef.current?.playTrack(track, queue, startAt);
-  }, []);
+  const play = useCallback(
+    (track: MusicTrack, queue?: MusicTrack[], startAt?: number) => {
+      engineRef.current?.playTrack(track, queue, startAt);
+    },
+    [],
+  );
 
   const togglePlay = useCallback(() => engineRef.current?.togglePlay(), []);
   const next = useCallback(() => engineRef.current?.next(), []);

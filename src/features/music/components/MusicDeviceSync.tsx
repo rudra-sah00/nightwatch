@@ -30,7 +30,6 @@ export function MusicDeviceSync() {
     setRemoteControlling,
     isRemoteControlling,
     play,
-    seek,
     togglePlay,
   } = useMusicPlayerContext();
   const pathname = usePathname();
@@ -324,7 +323,11 @@ export function MusicDeviceSync() {
       window.dispatchEvent(new CustomEvent('music:transfer-received'));
       setRemoteControlling(false);
       // Use startAt parameter for reliable seek after load
-      play(data.track, data.queue ?? [], data.progress > 0 ? data.progress : undefined);
+      play(
+        data.track,
+        data.queue ?? [],
+        data.progress > 0 ? data.progress : undefined,
+      );
       // If transfer was paused, pause after a short delay
       if (!data.isPlaying) {
         setTimeout(() => togglePlay(), 500);

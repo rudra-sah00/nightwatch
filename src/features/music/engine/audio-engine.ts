@@ -136,7 +136,10 @@ export class AudioEngine {
   private sourceNode: MediaElementAudioSourceNode | null = null;
   private eqFilters: BiquadFilterNode[] = [];
   private eqBands: EqualizerBand[] = EQ_PRESETS.flat;
-  private sourceNodes = new WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>();
+  private sourceNodes = new WeakMap<
+    HTMLAudioElement,
+    MediaElementAudioSourceNode
+  >();
 
   constructor() {
     this.audio = new Audio();

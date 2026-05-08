@@ -54,7 +54,6 @@ export function FullPlayer() {
     remoteProgress,
     remoteDuration,
     remoteQueue,
-    setRemoteControlling,
   } = useMusicPlayerContext();
 
   const mobile = useIsMobile();

@@ -93,5 +93,13 @@ export function useMusicShortcuts() {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [currentTrack, togglePlay, next, prev, setVolume, toggleShuffle, cycleRepeat]);
+  }, [
+    currentTrack,
+    togglePlay,
+    next,
+    prev,
+    setVolume,
+    toggleShuffle,
+    cycleRepeat,
+  ]);
 }
