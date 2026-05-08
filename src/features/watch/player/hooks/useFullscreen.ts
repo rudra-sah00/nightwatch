@@ -74,6 +74,7 @@ export function useFullscreen({
   const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
   const manualMobileFullscreenRef = useRef(false);
+  const orientationTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const lockedStylesRef = useRef<{
     htmlOverflow: string;
     bodyOverflow: string;
@@ -270,13 +271,15 @@ export function useFullscreen({
             if (orientation.lock) await orientation.lock('portrait-primary');
             // Delay unlock so the device settles into portrait before
             // freeing rotation — prevents the rotate-wall flash.
-            setTimeout(() => {
-              try {
-                screen.orientation.unlock();
-              } catch {
-                /* not supported */
-              }
-            }, 500);
+            orientationTimeoutsRef.current.push(
+              setTimeout(() => {
+                try {
+                  screen.orientation.unlock();
+                } catch {
+                  /* not supported */
+                }
+              }, 500),
+            );
           } catch {
             try {
               screen.orientation.unlock();
@@ -296,16 +299,18 @@ export function useFullscreen({
               '@capacitor/screen-orientation'
             );
             await ScreenOrientation.lock({ orientation: 'portrait' });
-            setTimeout(async () => {
-              try {
-                const { ScreenOrientation: SO } = await import(
-                  '@capacitor/screen-orientation'
-                );
-                await SO.unlock();
-              } catch {
-                /* plugin not available */
-              }
-            }, 500);
+            orientationTimeoutsRef.current.push(
+              setTimeout(async () => {
+                try {
+                  const { ScreenOrientation: SO } = await import(
+                    '@capacitor/screen-orientation'
+                  );
+                  await SO.unlock();
+                } catch {
+                  /* plugin not available */
+                }
+              }, 500),
+            );
           } catch {
             /* plugin not available */
           }
@@ -383,6 +388,15 @@ export function useFullscreen({
       mobileBridge.showStatusBar();
     }
   }, [playerIsFullscreen]);
+
+  // Clear orientation timeouts on unmount
+  useEffect(() => {
+    return () => {
+      for (const id of orientationTimeoutsRef.current) {
+        clearTimeout(id);
+      }
+    };
+  }, []);
 
   return { enterFullscreen, exitFullscreen, toggleFullscreen, isMobile };
 }

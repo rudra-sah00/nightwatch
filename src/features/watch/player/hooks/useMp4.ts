@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject, useCallback, useEffect } from 'react';
+import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import type { PlayerAction } from '../context/types';
 
 /** Options for {@link useMp4}. */
@@ -28,6 +28,10 @@ export function useMp4({
   manualQualities,
   onStreamExpired,
 }: UseMp4Options) {
+  // Stable ref for onStreamExpired to avoid effect re-runs on parent renders
+  const onStreamExpiredRef = useRef(onStreamExpired);
+  onStreamExpiredRef.current = onStreamExpired;
+
   // 1. Initial Source Setup & Event Listeners
   useEffect(() => {
     if (!streamUrl || !videoRef.current) return;
@@ -58,7 +62,7 @@ export function useMp4({
         return;
 
       dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
-      onStreamExpired?.();
+      onStreamExpiredRef.current?.();
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -70,7 +74,7 @@ export function useMp4({
       video.pause();
       video.removeAttribute('src'); // Better than src='' which can cause network requests
     };
-  }, [streamUrl, videoRef, dispatch, onStreamExpired]);
+  }, [streamUrl, videoRef, dispatch]);
 
   // 2. Separate effect to sync manual qualities when they change
   useEffect(() => {
@@ -120,12 +124,18 @@ export function useMp4({
         const newUrl = manualQualities[levelIndex].url;
 
         video.src = newUrl;
-        if (currentTime !== null) {
-          video.currentTime = currentTime;
-        }
-        if (wasPlaying) {
-          video.play().catch(() => {});
-        }
+
+        // Wait for metadata before seeking — setting currentTime before metadata is unreliable
+        const onMetadata = () => {
+          video.removeEventListener('loadedmetadata', onMetadata);
+          if (currentTime !== null) {
+            video.currentTime = currentTime;
+          }
+          if (wasPlaying) {
+            video.play().catch(() => {});
+          }
+        };
+        video.addEventListener('loadedmetadata', onMetadata);
 
         dispatch({
           type: 'SET_CURRENT_QUALITY',

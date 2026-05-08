@@ -95,6 +95,11 @@ export function useKeyboard({
       if (!video) return;
       const newVolume = Math.max(0, Math.min(1, video.volume + delta));
       video.volume = newVolume;
+      // Unmute when increasing volume while muted
+      if (delta > 0 && video.muted) {
+        video.muted = false;
+        dispatch({ type: 'TOGGLE_MUTE' });
+      }
       dispatch({ type: 'SET_VOLUME', volume: newVolume });
     },
     [videoRef, dispatch],
@@ -239,7 +244,11 @@ export function useKeyboard({
           break;
         case 'Escape':
           if (h.isFullscreen) {
-            document.exitFullscreen();
+            if (document.fullscreenElement) {
+              document.exitFullscreen().catch(() => {});
+            } else if (h.onToggleFullscreen) {
+              h.onToggleFullscreen();
+            }
           }
           break;
         case 'KeyC':

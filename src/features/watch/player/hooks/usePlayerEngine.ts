@@ -1,7 +1,7 @@
 'use client';
 
 import type HlsType from 'hls.js';
-import { type RefObject, useCallback, useMemo } from 'react';
+import { type RefObject, useCallback, useMemo, useRef } from 'react';
 import { useServer } from '@/providers/server-provider';
 import type { PlayerAction } from '../context/types';
 import { useHls } from './useHls';
@@ -38,6 +38,7 @@ export function usePlayerEngine({
   isLive = false,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
   const { activeServer } = useServer();
+  const nullHlsRef = useRef<HlsType | null>(null);
 
   // Determine engine type based on provider (prop or context) OR stream URL fallback
   const engineType = useMemo(() => {
@@ -107,6 +108,6 @@ export function usePlayerEngine({
     engineType,
     setQuality,
     setAudioTrack,
-    hlsRef: engineType === 'hls' ? hlsResult.hlsRef : { current: null },
+    hlsRef: engineType === 'hls' ? hlsResult.hlsRef : nullHlsRef,
   };
 }

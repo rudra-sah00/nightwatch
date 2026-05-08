@@ -607,21 +607,41 @@ export function useHls({
 
       const manualQualities = manualQualitiesRef.current;
       if (manualQualities.length > 0) {
+        const video = videoRef.current;
+        const savedTime = video?.currentTime ?? 0;
+        const wasPlaying = video ? !video.paused : false;
+
         if (levelIndex === -1) {
           hlsRef.current.loadSource(streamUrl || manualQualities[0].url);
-          return;
+        } else {
+          const selected = manualQualities[levelIndex];
+          if (selected) {
+            hlsRef.current.loadSource(selected.url);
+          } else {
+            return;
+          }
         }
 
-        const selected = manualQualities[levelIndex];
-        if (selected) {
-          hlsRef.current.loadSource(selected.url);
-          return;
+        // Restore position after manifest is parsed for the new source
+        const attachedVideo = videoRef.current;
+        if (attachedVideo) {
+          const onCanPlay = () => {
+            attachedVideo.removeEventListener('canplay', onCanPlay);
+            if (savedTime > 0) {
+              attachedVideo.currentTime = savedTime;
+            }
+            if (wasPlaying) {
+              attachedVideo.play().catch(() => {});
+            }
+          };
+          attachedVideo.addEventListener('canplay', onCanPlay);
         }
+        return;
       }
 
       hlsRef.current.currentLevel = levelIndex;
     },
-    [streamUrl],
+    [streamUrl, videoRef],
   );
 
   const setAudioTrack = useCallback(
