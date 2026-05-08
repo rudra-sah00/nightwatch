@@ -4,7 +4,6 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { CreatorFooter } from '@/components/ui/creator-footer';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
@@ -198,8 +197,6 @@ export function ProfileOverview() {
           />
         </div>
       </section>
-
-      <CreatorFooter isCompact={false} />
     </main>
   );
 }

@@ -3,7 +3,6 @@
 import { Activity, ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { CreatorFooter } from '@/components/ui/creator-footer';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
 import { useProfileOverview } from '@/features/profile/hooks/use-profile-overview';
 
@@ -39,8 +38,6 @@ export default function ProfileClient() {
           </Link>
         ))}
       </nav>
-
-      <CreatorFooter isCompact />
     </main>
   );
 }

@@ -4,7 +4,6 @@ import { Calendar, Home, User } from 'lucide-react';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import { CreatorFooter } from '@/components/ui/creator-footer';
 import type { ActivityData } from '../types';
 import { ActivityGraph } from './activity-graph';
 
@@ -211,8 +210,6 @@ export function PublicProfileView({
               <span>{t('publicProfile.coreVersion')}</span>
             </div>
           </div>
-
-          <CreatorFooter isCompact={false} />
         </div>
       </div>
     </div>
