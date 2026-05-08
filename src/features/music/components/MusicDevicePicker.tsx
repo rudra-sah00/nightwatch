@@ -83,9 +83,12 @@ export function MusicDevicePicker() {
         case 'seek':
           if (typeof value === 'number') seek(value);
           break;
+        case 'stop':
+          stop();
+          break;
       }
     });
-  }, [setOnCommand, togglePlay, next, prev, seek]);
+  }, [setOnCommand, togglePlay, next, prev, seek, stop]);
 
   // Handle incoming transfer (MusicDeviceSync handles the actual playback)
   useEffect(() => {
@@ -100,8 +103,11 @@ export function MusicDevicePicker() {
       const cmd = (e as CustomEvent).detail as string;
       if (cmd === 'stop') {
         const trackToPlay = remoteState.track;
+        const prog = remoteProgressRef.current;
+        sendCommand('stop'); // Stop playback on target device
         if (trackToPlay) {
           play(trackToPlay, []);
+          setTimeout(() => seek(prog), 300);
         }
         reclaimPlayback();
         setRemoteControlling(false);
@@ -117,6 +123,7 @@ export function MusicDevicePicker() {
     setRemoteControlling,
     remoteState.track,
     play,
+    seek,
   ]);
 
   // Forward new local plays to target
@@ -241,10 +248,12 @@ export function MusicDevicePicker() {
                 type="button"
                 onClick={() => {
                   if (isControlling) {
-                    // Play the remote track locally before clearing remote state
                     const trackToPlay = remoteState.track;
+                    const prog = remoteProgressRef.current;
+                    sendCommand('stop'); // Stop playback on target device
                     if (trackToPlay) {
                       play(trackToPlay, []);
+                      setTimeout(() => seek(prog), 300);
                     }
                     reclaimPlayback();
                     setRemoteControlling(false);

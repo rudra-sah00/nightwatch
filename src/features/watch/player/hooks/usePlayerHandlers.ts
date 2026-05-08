@@ -128,6 +128,21 @@ export function usePlayerHandlers({
     [dispatch, showControls],
   );
 
+  // Safety: if isInteracting gets stuck true (e.g. mouseLeave never fires on touch),
+  // force-reset after 5s of no activity
+  useEffect(() => {
+    if (!isInteractingRef.current) return;
+    const safety = setTimeout(() => {
+      if (isInteractingRef.current) {
+        isInteractingRef.current = false;
+        if (isPlayingRef.current && !isPausedRef.current) {
+          dispatch({ type: 'HIDE_CONTROLS' });
+        }
+      }
+    }, 5000);
+    return () => clearTimeout(safety);
+  });
+
   // Show controls when paused, and sync timer when playing
   useEffect(() => {
     if (isPaused) {
