@@ -308,18 +308,28 @@ export function MusicDeviceSync() {
     }) => {
       if (!availableRef.current) return;
       window.dispatchEvent(new CustomEvent('music:transfer-received'));
+      setRemoteControlling(false);
       play(data.track, data.queue ?? []);
-      setTimeout(() => {
-        seek(data.progress);
-        if (!data.isPlaying) togglePlay();
-      }, 500);
+      // Seek after playback starts — poll until progress timer is running
+      const seekAfterReady = () => {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (durationRef.current > 0 || attempts > 20) {
+            clearInterval(interval);
+            if (data.progress > 0) seek(data.progress);
+            if (!data.isPlaying) togglePlay();
+          }
+        }, 250);
+      };
+      seekAfterReady();
     };
 
     socket.on('music:transfer_playback', onTransfer);
     return () => {
       socket.off('music:transfer_playback', onTransfer);
     };
-  }, [socket, play, seek, togglePlay]);
+  }, [socket, play, seek, togglePlay, setRemoteControlling]);
 
   // ─── 7. Forward remote commands to the source device ───────────
   // When auto-synced (no explicit activeTarget in useMusicDevices),

@@ -166,8 +166,14 @@ export function MusicDevicePicker() {
     stop,
   ]);
 
-  // Target went offline
+  // Target went offline — only act after initial device discovery settles
+  const initialLoadRef = useRef(true);
   useEffect(() => {
+    // Skip the first render cycle — devices haven't been discovered yet
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+      return;
+    }
     if (activeTarget && !devices.find((d) => d.socketId === activeTarget)) {
       reclaimPlayback();
       setRemoteControlling(false);
