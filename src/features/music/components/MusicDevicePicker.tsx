@@ -55,6 +55,7 @@ export function MusicDevicePicker() {
     setEqBands,
     setRemoteControlling,
     remoteQueue,
+    isRemoteControlling,
   } = player;
   const [open, setOpen] = useState(false);
   const deviceName = getDeviceName();
@@ -286,10 +287,14 @@ export function MusicDevicePicker() {
               <button
                 type="button"
                 onClick={() => {
-                  if (isControlling) {
-                    const trackToPlay = remoteState.track;
-                    const prog = remoteProgressRef.current;
-                    sendCommand('stop'); // Stop playback on target device
+                  if (isControlling || isRemoteControlling) {
+                    const trackToPlay = isControlling
+                      ? remoteState.track
+                      : player.remoteTrack;
+                    const prog = isControlling
+                      ? remoteProgressRef.current
+                      : player.remoteProgress;
+                    if (isControlling) sendCommand('stop');
                     if (trackToPlay) {
                       play(
                         trackToPlay,
@@ -304,7 +309,7 @@ export function MusicDevicePicker() {
                   setOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  !isControlling
+                  !isControlling && !isRemoteControlling
                     ? 'bg-primary/10 border border-primary/20'
                     : 'hover:bg-accent'
                 }`}
@@ -312,11 +317,11 @@ export function MusicDevicePicker() {
                 <DeviceIcon name={deviceName} />
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium">{deviceName}</p>
-                  {!isControlling && (
+                  {!isControlling && !isRemoteControlling && isPlaying && (
                     <p className="text-[10px] text-primary">Listening on</p>
                   )}
                 </div>
-                {!isControlling && isPlaying && (
+                {!isControlling && !isRemoteControlling && isPlaying && (
                   <span className="w-2.5 h-2.5 bg-neo-yellow rounded-full animate-pulse" />
                 )}
               </button>
