@@ -134,7 +134,6 @@ export class AudioEngine {
 
   constructor() {
     this.audio = new Audio();
-    this.audio.crossOrigin = 'anonymous';
     if (!window.Capacitor?.isNativePlatform?.()) {
       this.audio.disableRemotePlayback = true;
     }
@@ -269,7 +268,7 @@ export class AudioEngine {
     try {
       const url = await getStreamUrl(nextTrack.id);
       this.nextAudio = new Audio();
-      this.nextAudio.crossOrigin = 'anonymous';
+      if (this.audioContext) this.nextAudio.crossOrigin = 'anonymous';
       this.nextAudio.preload = 'auto';
       this.nextAudio.src = url;
       this.nextAudio.volume = this.state.volume;
@@ -287,7 +286,7 @@ export class AudioEngine {
     try {
       const url = await getStreamUrl(nextTrack.id);
       this.nextAudio = new Audio();
-      this.nextAudio.crossOrigin = 'anonymous';
+      if (this.audioContext) this.nextAudio.crossOrigin = 'anonymous';
       this.nextAudio.src = url;
       this.nextAudio.volume = 0;
       await this.nextAudio.play();
@@ -579,6 +578,8 @@ export class AudioEngine {
       if (this.audioContext.state === 'suspended') this.audioContext.resume();
       return;
     }
+    // crossOrigin required for createMediaElementSource to work with CORS streams
+    this.audio.crossOrigin = 'anonymous';
     this.audioContext = new AudioContext();
     this.audioContext.resume();
     this.sourceNode = this.audioContext.createMediaElementSource(this.audio);

@@ -181,9 +181,6 @@ export function MusicDevicePicker() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: progress/duration synced separately to avoid re-renders on every tick
   useEffect(() => {
     if (!isControlling) {
-      if (remoteState.track === null) {
-        setRemoteControlling(false);
-      }
       return;
     }
     if (remoteState.track) {
