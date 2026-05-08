@@ -137,28 +137,33 @@ export function useSeekBar({
     [handleClick, disabled],
   );
 
-  const getSpriteStyle = useMemo((): SpriteData | null => {
-    if (hoverTime === null) return null;
-
+  // Compute which sprite frame to show — only recalculates sprite data when
+  // the frame index actually changes, not on every pixel of mouse movement.
+  const spriteFrameIndex = useMemo(() => {
+    if (hoverTime === null) return -1;
     if (vttSprites.length > 0) {
-      const cue = vttSprites.find(
+      return vttSprites.findIndex(
         (s) => hoverTime >= s.start && hoverTime < s.end,
       );
-      if (cue) {
-        return { url: cue.url, x: cue.x, y: cue.y, w: cue.w, h: cue.h };
-      }
+    }
+    if (!spriteSheet) return -1;
+    const { columns, rows, interval } = spriteSheet;
+    return Math.min(Math.floor(hoverTime / interval), columns * rows - 1);
+  }, [hoverTime, vttSprites, spriteSheet]);
+
+  const getSpriteStyle = useMemo((): SpriteData | null => {
+    if (spriteFrameIndex < 0) return null;
+
+    if (vttSprites.length > 0 && spriteFrameIndex < vttSprites.length) {
+      const cue = vttSprites[spriteFrameIndex];
+      return { url: cue.url, x: cue.x, y: cue.y, w: cue.w, h: cue.h };
     }
 
     if (!spriteSheet) return null;
 
-    const { imageUrl, width, height, columns, rows, interval } = spriteSheet;
-    const totalThumbnails = columns * rows;
-    const thumbnailIndex = Math.min(
-      Math.floor(hoverTime / interval),
-      totalThumbnails - 1,
-    );
-    const col = thumbnailIndex % columns;
-    const row = Math.floor(thumbnailIndex / columns);
+    const { imageUrl, width, height, columns, rows } = spriteSheet;
+    const col = spriteFrameIndex % columns;
+    const row = Math.floor(spriteFrameIndex / columns);
 
     return {
       url: imageUrl,
@@ -169,7 +174,7 @@ export function useSeekBar({
       totalW: columns * width,
       totalH: rows * height,
     };
-  }, [spriteSheet, hoverTime, vttSprites]);
+  }, [spriteFrameIndex, spriteSheet, vttSprites]);
 
   return {
     canPreview,
