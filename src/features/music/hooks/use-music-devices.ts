@@ -152,13 +152,13 @@ export function useMusicDevices(
   // ─── Handle incoming commands (when this device is the player) ──
 
   const commandHandlerRef = useRef<
-    ((cmd: string, value?: number) => void) | null
+    ((cmd: string, value?: unknown) => void) | null
   >(null);
 
   useEffect(() => {
     if (!socket) return;
 
-    const onCommand = (data: { command: string; value?: number }) => {
+    const onCommand = (data: { command: string; value?: unknown }) => {
       commandHandlerRef.current?.(data.command, data.value);
     };
 
@@ -251,7 +251,7 @@ export function useMusicDevices(
     transferToWithData,
     sendCommand,
     reclaimPlayback,
-    setOnCommand: (fn: (cmd: string, value?: number) => void) => {
+    setOnCommand: (fn: (cmd: string, value?: unknown) => void) => {
       commandHandlerRef.current = fn;
     },
     setOnTransfer: (fn: (data: TransferPayload) => void) => {
