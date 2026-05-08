@@ -30,7 +30,7 @@ export function AppSkeletonTheme({ children }: { children: React.ReactNode }) {
     <SkeletonTheme
       baseColor={isDark ? '#1a1a1a' : '#e5e5e5'}
       highlightColor={isDark ? '#2a2a2a' : '#f0f0f0'}
-      borderRadius={0}
+      borderRadius={8}
     >
       {children}
     </SkeletonTheme>
