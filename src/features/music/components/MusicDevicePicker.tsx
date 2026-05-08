@@ -252,7 +252,7 @@ export function MusicDevicePicker() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
@@ -260,7 +260,9 @@ export function MusicDevicePicker() {
             if (e.key === 'Escape') setOpen(false);
           }}
         >
-          <div className="w-[340px] max-w-[90vw] bg-card border-2 border-border rounded-xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 animate-in fade-in duration-200" />
+          <div className="relative w-[340px] max-w-[90vw] bg-card border-2 border-border rounded-xl shadow-2xl animate-in slide-in-from-bottom-6 duration-400 ease-out overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <div className="flex items-center gap-2">
