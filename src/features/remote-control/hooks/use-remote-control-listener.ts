@@ -31,11 +31,11 @@ export function useRemoteControlListener({
   const lastStateRef = useRef({ isPlaying: false, currentTime: 0 });
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const stateThrottleRef = useRef<NodeJS.Timeout | null>(null);
+  const isPlayingRef = useRef(state.isPlaying);
+  isPlayingRef.current = state.isPlaying;
 
   // Don't run on mobile — mobile is the controller, not the listener
-  const isMobile =
-    checkIsMobile() ||
-    (typeof window !== 'undefined' && window.innerWidth < 768);
+  const isMobile = checkIsMobile();
 
   // Use a ref for the advertise payload so the heartbeat always reads fresh state
   // without causing the effect to re-run (which would emit STREAM_ENDED on every state change)
@@ -116,11 +116,13 @@ export function useRemoteControlListener({
       };
     } else if (timeDelta >= 5 && !stateThrottleRef.current) {
       stateThrottleRef.current = setTimeout(() => {
-        socket.emit(REMOTE_EVENTS.STATE_UPDATE, {
-          isPlaying: state.isPlaying,
-          currentTime: state.currentTime,
-          duration: state.duration,
-        });
+        if (socket.connected) {
+          socket.emit(REMOTE_EVENTS.STATE_UPDATE, {
+            isPlaying: state.isPlaying,
+            currentTime: state.currentTime,
+            duration: state.duration,
+          });
+        }
         lastStateRef.current = {
           isPlaying: state.isPlaying,
           currentTime: state.currentTime,
@@ -128,6 +130,13 @@ export function useRemoteControlListener({
         stateThrottleRef.current = null;
       }, 5000);
     }
+
+    return () => {
+      if (stateThrottleRef.current) {
+        clearTimeout(stateThrottleRef.current);
+        stateThrottleRef.current = null;
+      }
+    };
   }, [isMobile, socket, state.isPlaying, state.currentTime, state.duration]);
 
   // Listen for remote commands
@@ -138,10 +147,10 @@ export function useRemoteControlListener({
       const cmd = data.command as string;
       switch (cmd) {
         case 'play':
-          if (!state.isPlaying) playerHandlers.togglePlay();
+          if (!isPlayingRef.current) playerHandlers.togglePlay();
           break;
         case 'pause':
-          if (state.isPlaying) playerHandlers.togglePlay();
+          if (isPlayingRef.current) playerHandlers.togglePlay();
           break;
         case 'toggle_play':
           playerHandlers.togglePlay();
@@ -162,7 +171,9 @@ export function useRemoteControlListener({
     };
 
     const handleRequestAdvertise = () => {
-      socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
+      if (socket.connected) {
+        socket.emit(REMOTE_EVENTS.STREAM_ADVERTISE, payloadRef.current);
+      }
     };
 
     socket.on(REMOTE_EVENTS.COMMAND, handleCommand);
@@ -171,7 +182,6 @@ export function useRemoteControlListener({
     return () => {
       socket.off(REMOTE_EVENTS.COMMAND, handleCommand);
       socket.off(REMOTE_EVENTS.REQUEST_ADVERTISE, handleRequestAdvertise);
-      if (stateThrottleRef.current) clearTimeout(stateThrottleRef.current);
     };
-  }, [isMobile, socket, state.isPlaying, playerHandlers, onNextEpisode]);
+  }, [isMobile, socket, playerHandlers, onNextEpisode]);
 }

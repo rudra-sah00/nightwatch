@@ -81,20 +81,21 @@ export function useRemoteStreams() {
   // Re-request on reconnect (socket gets new id, need fresh advertise from desktop)
   useEffect(() => {
     if (!socket) return;
+    let retryTimeout: NodeJS.Timeout | null = null;
     const onConnect = () => {
       // Clear stale streams from previous connection
       setStreams(new Map());
       setSelectedId(null);
       // Request fresh advertise with retry
       socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
-      const t = setTimeout(() => {
+      retryTimeout = setTimeout(() => {
         if (socket.connected) socket.emit(REMOTE_EVENTS.REQUEST_ADVERTISE);
       }, 1_500);
-      return () => clearTimeout(t);
     };
     socket.on('connect', onConnect);
     return () => {
       socket.off('connect', onConnect);
+      if (retryTimeout) clearTimeout(retryTimeout);
     };
   }, [socket]);
 
