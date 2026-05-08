@@ -242,7 +242,7 @@ export function MusicDevicePicker() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`p-1.5 transition-colors ${isControlling ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
+        className={`p-1.5 transition-colors ${isControlling || isRemoteControlling ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
         title="Connect to a device"
       >
         <ConnectIcon className="w-3.5 h-3.5" />
