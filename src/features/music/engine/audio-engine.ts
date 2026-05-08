@@ -578,8 +578,14 @@ export class AudioEngine {
       if (this.audioContext.state === 'suspended') this.audioContext.resume();
       return;
     }
-    // crossOrigin required for createMediaElementSource to work with CORS streams
+
+    // If audio is already playing, we need to reload with crossOrigin
+    const wasPlaying = !this.audio.paused;
+    const savedTime = this.audio.currentTime;
+    const hadSrc = !!this.audio.src && this.audio.src !== location.href;
+
     this.audio.crossOrigin = 'anonymous';
+
     this.audioContext = new AudioContext();
     this.audioContext.resume();
     this.sourceNode = this.audioContext.createMediaElementSource(this.audio);
@@ -614,6 +620,17 @@ export class AudioEngine {
       lastNode = filter;
     }
     lastNode.connect(this.audioContext.destination);
+
+    // Reload audio if it was playing (crossOrigin change requires re-fetch)
+    if (hadSrc) {
+      this.audio.load();
+      if (savedTime > 0) {
+        this.audio.currentTime = savedTime;
+      }
+      if (wasPlaying) {
+        this.audio.play().catch(() => {});
+      }
+    }
   }
 
   setEqBands(bands: EqualizerBand[]) {
