@@ -27,12 +27,12 @@ export default function ProfileClient() {
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-8 animate-in fade-in duration-200 w-full">
       <UpdateProfileForm />
 
-      <nav className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <nav className="flex flex-col gap-2">
         {sections.map(({ href, icon: Icon, key }) => (
           <Link
             key={key}
             href={href}
-            className="flex items-center gap-4 p-5 bg-card border border-border rounded-xl hover:bg-secondary/50 active:scale-[0.98] transition-all group"
+            className="flex items-center gap-4 px-5 py-4 bg-card border border-border rounded-xl hover:bg-secondary/50 active:scale-[0.99] transition-all group"
           >
             <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             <span className="flex-1 font-headline font-bold uppercase tracking-wider text-sm">
