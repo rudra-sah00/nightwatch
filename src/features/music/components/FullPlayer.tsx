@@ -210,16 +210,16 @@ export function FullPlayer() {
           }),
         )
     : seek;
-  const handleSetVolume = isRemoteControlling
-    ? (v: number) => {
-        setVolume(v);
-        window.dispatchEvent(
-          new CustomEvent('music:remote-command', {
-            detail: { command: 'volume', value: v },
-          }),
-        );
-      }
-    : setVolume;
+  const handleSetVolume = (v: number) => {
+    setVolume(v);
+    if (isRemoteControlling) {
+      window.dispatchEvent(
+        new CustomEvent('music:remote-command', {
+          detail: { command: 'volume', value: v },
+        }),
+      );
+    }
+  };
 
   if (mobile) {
     return (
