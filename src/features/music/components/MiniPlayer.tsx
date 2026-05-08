@@ -144,6 +144,7 @@ export function MiniPlayer() {
           const rect = e.currentTarget.getBoundingClientRect();
           const percent = ((e.clientX - rect.left) / rect.width) * 100;
           if (isRemoteControlling) {
+            setInterpolatedSeconds((percent / 100) * remoteDuration);
             window.dispatchEvent(
               new CustomEvent('music:remote-command', {
                 detail: { command: 'seek', value: percent },

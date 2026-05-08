@@ -16,8 +16,28 @@ const TIMER_OPTIONS = [
  * Sleep timer panel — pick a duration, music stops after that time.
  */
 export function SleepTimer({ onClose }: { onClose: () => void }) {
-  const { setSleepTimer, sleepTimerEnd } = useMusicPlayerContext();
+  const { setSleepTimer, sleepTimerEnd, isRemoteControlling } =
+    useMusicPlayerContext();
   const [remaining, setRemaining] = useState<string | null>(null);
+
+  const handleSetTimer = (minutes: number) => {
+    if (isRemoteControlling && minutes > 0) {
+      // For remote: use a local timeout that sends stop to the remote device
+      const ms = minutes * 60 * 1000;
+      const end = Date.now() + ms;
+      // Store in context for countdown display
+      setSleepTimer(minutes);
+      // Schedule remote stop
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', { detail: 'stop' }),
+        );
+      }, ms);
+      void end; // countdown handled by sleepTimerEnd in context
+    } else {
+      setSleepTimer(minutes);
+    }
+  };
 
   useEffect(() => {
     if (!sleepTimerEnd) {
@@ -66,7 +86,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
           </p>
           <button
             type="button"
-            onClick={() => setSleepTimer(0)}
+            onClick={() => handleSetTimer(0)}
             className="text-xs text-white/60 hover:text-white underline"
           >
             Cancel
@@ -81,7 +101,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
             key={opt.value}
             type="button"
             onClick={() => {
-              setSleepTimer(opt.value);
+              handleSetTimer(opt.value);
               onClose();
             }}
             className="px-4 py-3 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors"

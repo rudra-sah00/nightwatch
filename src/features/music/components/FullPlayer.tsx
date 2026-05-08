@@ -242,7 +242,17 @@ export function FullPlayer() {
         onPrev={handlePrev}
         onSeek={handleSeek}
         onSetVolume={handleSetVolume}
-        onPlay={play}
+        onPlay={
+          isRemoteControlling
+            ? (track) => {
+                window.dispatchEvent(
+                  new CustomEvent('music:remote-command', {
+                    detail: { command: 'play_track', value: track },
+                  }),
+                );
+              }
+            : play
+        }
         onToggleLyrics={handleToggleLyrics}
         onToggleQueue={handleToggleQueue}
       />
@@ -271,7 +281,17 @@ export function FullPlayer() {
       onToggleShuffle={toggleShuffle}
       onCycleRepeat={cycleRepeat}
       onSetVolume={handleSetVolume}
-      onPlay={play}
+      onPlay={
+        isRemoteControlling
+          ? (track) => {
+              window.dispatchEvent(
+                new CustomEvent('music:remote-command', {
+                  detail: { command: 'play_track', value: track },
+                }),
+              );
+            }
+          : play
+      }
     />
   );
 }

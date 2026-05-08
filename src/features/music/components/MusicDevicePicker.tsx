@@ -54,6 +54,7 @@ export function MusicDevicePicker() {
     initEqualizer,
     setEqBands,
     setRemoteControlling,
+    remoteQueue,
   } = player;
   const [open, setOpen] = useState(false);
   const deviceName = getDeviceName();
@@ -95,6 +96,11 @@ export function MusicDevicePicker() {
             setEqBands(value as unknown as Parameters<typeof setEqBands>[0]);
           }
           break;
+        case 'play_track':
+          if (value) {
+            play(value as unknown as Parameters<typeof play>[0], queue);
+          }
+          break;
         case 'stop':
           stop();
           break;
@@ -110,6 +116,8 @@ export function MusicDevicePicker() {
     setVolume,
     initEqualizer,
     setEqBands,
+    play,
+    queue,
   ]);
 
   // Handle incoming transfer (MusicDeviceSync handles the actual playback)
@@ -128,7 +136,10 @@ export function MusicDevicePicker() {
         const prog = remoteProgressRef.current;
         sendCommand('stop'); // Stop playback on target device
         if (trackToPlay) {
-          play(trackToPlay, []);
+          play(
+            trackToPlay,
+            remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
+          );
           setTimeout(() => seek(prog), 300);
         }
         reclaimPlayback();
@@ -146,6 +157,7 @@ export function MusicDevicePicker() {
     remoteState.track,
     play,
     seek,
+    remoteQueue,
   ]);
 
   // Forward new local plays to target
@@ -277,7 +289,10 @@ export function MusicDevicePicker() {
                     const prog = remoteProgressRef.current;
                     sendCommand('stop'); // Stop playback on target device
                     if (trackToPlay) {
-                      play(trackToPlay, []);
+                      play(
+                        trackToPlay,
+                        remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
+                      );
                       setTimeout(() => seek(prog), 300);
                     }
                     reclaimPlayback();
