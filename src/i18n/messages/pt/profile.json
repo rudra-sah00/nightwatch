@@ -168,5 +168,11 @@
       "mediaPrev": "Seek Backward"
     },
     "note": "Shortcuts are disabled when typing in text fields."
+  },
+  "nav": {
+    "preferences": "Preferences",
+    "security": "Security",
+    "devices": "Devices",
+    "activity": "Activity"
   }
 }
