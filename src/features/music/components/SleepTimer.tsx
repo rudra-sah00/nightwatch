@@ -1,6 +1,6 @@
 'use client';
 
-import { Moon, X } from 'lucide-react';
+import { Moon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
@@ -13,7 +13,7 @@ const TIMER_OPTIONS = [
 ];
 
 /**
- * Sleep timer panel — pick a duration, music stops after that time.
+ * Sleep timer — full-screen overlay with backdrop blur.
  */
 export function SleepTimer({ onClose }: { onClose: () => void }) {
   const { setSleepTimer, sleepTimerEnd, isRemoteControlling } =
@@ -22,18 +22,13 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
 
   const handleSetTimer = (minutes: number) => {
     if (isRemoteControlling && minutes > 0) {
-      // For remote: use a local timeout that sends stop to the remote device
       const ms = minutes * 60 * 1000;
-      const end = Date.now() + ms;
-      // Store in context for countdown display
       setSleepTimer(minutes);
-      // Schedule remote stop
       setTimeout(() => {
         window.dispatchEvent(
           new CustomEvent('music:remote-command', { detail: 'stop' }),
         );
       }, ms);
-      void end; // countdown handled by sleepTimerEnd in context
     } else {
       setSleepTimer(minutes);
     }
@@ -60,55 +55,73 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
   }, [sleepTimerEnd]);
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Moon className="w-4 h-4 text-white/60" />
-          <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-white">
-            Sleep Timer
-          </h3>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1.5 text-white/40 hover:text-white"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+    <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center animate-in fade-in duration-300">
+      {/* Backdrop */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/70 backdrop-blur-2xl"
+        aria-label="Close sleep timer"
+      />
 
-      {/* Active timer */}
-      {remaining && (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
-          <p className="text-sm text-white">
-            Stopping in <span className="font-mono font-bold">{remaining}</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => handleSetTimer(0)}
-            className="text-xs text-white/60 hover:text-white underline"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+      {/* Cancel button — top right */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute z-50 text-white/50 hover:text-white font-headline font-black uppercase tracking-[0.2em] text-sm transition-colors"
+        style={{
+          top: 'calc(2rem + env(safe-area-inset-top, 0px))',
+          right: 'calc(2rem + env(safe-area-inset-right, 0px))',
+        }}
+      >
+        Cancel
+      </button>
 
-      {/* Options */}
-      <div className="grid grid-cols-2 gap-2">
-        {TIMER_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => {
-              handleSetTimer(opt.value);
-              onClose();
-            }}
-            className="px-4 py-3 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
-          >
-            {opt.label}
-          </button>
-        ))}
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 animate-in slide-in-from-bottom-4 duration-500 ease-out">
+        <Moon className="w-10 h-10 text-white/40" />
+
+        <h2 className="text-2xl sm:text-3xl font-black font-headline uppercase tracking-tighter text-white">
+          Sleep Timer
+        </h2>
+
+        {/* Active timer countdown */}
+        {remaining && (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-5xl font-mono font-bold text-white tabular-nums">
+              {remaining}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                handleSetTimer(0);
+                onClose();
+              }}
+              className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white border border-white/10 hover:border-white/30 rounded-full transition-colors"
+            >
+              Cancel Timer
+            </button>
+          </div>
+        )}
+
+        {/* Options */}
+        {!remaining && (
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {TIMER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  handleSetTimer(opt.value);
+                  onClose();
+                }}
+                className="px-4 py-4 text-sm font-bold font-headline uppercase tracking-wider text-white/70 border border-white/15 rounded-xl hover:bg-white/10 hover:text-white hover:border-white/30 transition-all duration-200"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
