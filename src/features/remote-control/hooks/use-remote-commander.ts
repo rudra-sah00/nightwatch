@@ -59,11 +59,15 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
   }, [state.isPlaying, state.duration]);
 
   // Listen for state updates from the target device
+  const lastCommandRef = useRef(0);
+
   useEffect(() => {
     if (!socket || !targetSocketId) return;
 
     const onStateUpdate = (data: RemoteStateUpdate) => {
       if (data.socketId === targetSocketId) {
+        // Ignore stale updates within 2s of sending a command
+        if (Date.now() - lastCommandRef.current < 2000) return;
         setState({
           isPlaying: data.isPlaying,
           currentTime: data.currentTime,
@@ -74,6 +78,7 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
 
     const onAdvertise = (data: RemoteStreamAdvertise) => {
       if (data.socketId === targetSocketId) {
+        if (Date.now() - lastCommandRef.current < 2000) return;
         setState({
           isPlaying: data.isPlaying,
           currentTime: data.currentTime,
@@ -97,6 +102,7 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
       extra?: { seekSeconds?: number; seekTo?: number },
     ) => {
       if (!socket || !targetSocketId) return;
+      lastCommandRef.current = Date.now();
       socket.emit(REMOTE_EVENTS.COMMAND, {
         targetSocketId,
         command,
