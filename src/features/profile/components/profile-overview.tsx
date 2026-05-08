@@ -10,18 +10,14 @@ import { useChangePasswordForm } from '../hooks/use-change-password-form';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { UpdateProfileForm } from './update-profile-form';
 
-const AppPreferences = dynamic(
-  () =>
-    import('./app-preferences').then((m) => ({ default: m.AppPreferences })),
-  { ssr: false },
+const AppPreferences = dynamic(() =>
+  import('./app-preferences').then((m) => ({ default: m.AppPreferences })),
 );
-const ActiveDevices = dynamic(
-  () => import('./active-devices').then((m) => ({ default: m.ActiveDevices })),
-  { ssr: false },
+const ActiveDevices = dynamic(() =>
+  import('./active-devices').then((m) => ({ default: m.ActiveDevices })),
 );
-const ActivityGraph = dynamic(
-  () => import('./activity-graph').then((m) => ({ default: m.ActivityGraph })),
-  { ssr: false },
+const ActivityGraph = dynamic(() =>
+  import('./activity-graph').then((m) => ({ default: m.ActivityGraph })),
 );
 
 /**
@@ -42,7 +38,7 @@ export function ProfileOverview() {
   if (!user) return null;
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-12 animate-in fade-in zoom-in-95 duration-300 w-full overflow-x-hidden md:overflow-x-visible">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-12 animate-in fade-in duration-200 w-full overflow-x-hidden md:overflow-x-visible">
       <UpdateProfileForm />
 
       <AppPreferences />

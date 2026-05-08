@@ -78,10 +78,21 @@ export function ActiveDevices() {
         '/api/auth/sessions',
       );
       setSessions(data.sessions);
-    } catch {
-      // Silent fail
-    } finally {
       setLoading(false);
+    } catch {
+      // Retry once after 2s (covers race where cookies aren't set yet)
+      setTimeout(async () => {
+        try {
+          const data = await apiFetch<{ sessions: Session[] }>(
+            '/api/auth/sessions',
+          );
+          setSessions(data.sessions);
+        } catch {
+          // Give up
+        } finally {
+          setLoading(false);
+        }
+      }, 2000);
     }
   }, []);
 
