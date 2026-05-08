@@ -53,6 +53,8 @@ export function FullPlayer() {
     isRemoteControlling,
     remoteTrack,
     remoteIsPlaying,
+    remoteProgress,
+    remoteDuration,
   } = useMusicPlayerContext();
 
   const mobile = useIsMobile();
@@ -76,6 +78,8 @@ export function FullPlayer() {
 
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
+  const displayProgress = isRemoteControlling ? remoteProgress : progress;
+  const displayDuration = isRemoteControlling ? remoteDuration : duration;
 
   const trackId = displayTrack?.id;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
@@ -89,14 +93,14 @@ export function FullPlayer() {
       displayTrack.id,
       displayTrack.title,
       displayTrack.artist,
-      duration,
+      displayDuration,
     ).then(setLyrics);
     getSongRecommendations(displayTrack.id)
       .then(setRecommendations)
       .catch(() => {});
   }, [trackId]);
 
-  const currentTime = (progress / 100) * duration;
+  const currentTime = (displayProgress / 100) * displayDuration;
   const currentLineIndex = useMemo(() => {
     if (!lyrics) return -1;
     let idx = -1;
@@ -179,8 +183,8 @@ export function FullPlayer() {
       <MobileFullPlayer
         currentTrack={displayTrack}
         isPlaying={displayPlaying}
-        progress={progress}
-        duration={duration}
+        progress={displayProgress}
+        duration={displayDuration}
         volume={volume}
         queue={queue}
         lyrics={lyrics}
@@ -208,8 +212,8 @@ export function FullPlayer() {
     <DesktopFullPlayer
       currentTrack={displayTrack}
       isPlaying={displayPlaying}
-      progress={progress}
-      duration={duration}
+      progress={displayProgress}
+      duration={displayDuration}
       shuffle={shuffle}
       repeat={repeat}
       volume={volume}

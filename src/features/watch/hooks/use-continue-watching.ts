@@ -8,7 +8,6 @@ import {
   fetchContinueWatching as apiFetchContinueWatching,
   deleteWatchProgress,
   getCachedContinueWatching,
-  invalidateContinueWatchingCache,
 } from '../api';
 import type { WatchProgress } from '../types';
 
@@ -104,12 +103,8 @@ export function useContinueWatching({
     [onLoadComplete, activeServer],
   );
 
-  // Invalidate cache on unmount so navigating away then back always triggers a fresh fetch.
-  useEffect(() => {
-    return () => {
-      invalidateContinueWatchingCache();
-    };
-  }, []);
+  // Let the 30s TTL handle cache staleness — no need to invalidate on unmount.
+  // This prevents redundant re-fetches when navigating away briefly (e.g. /live → /home).
 
   useEffect(() => {
     fetchItems(true);

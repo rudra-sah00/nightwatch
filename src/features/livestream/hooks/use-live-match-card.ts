@@ -69,7 +69,7 @@ export function useLiveMatchCard(match: LiveMatch) {
 
   const handleWatchParty = () => {
     if (!user) {
-      toast.error(t('loginRequired'));
+      toast.error(t('loginRequired'), { id: 'live-login-required' });
       setShowPrompt(false);
       return;
     }
@@ -95,10 +95,12 @@ export function useLiveMatchCard(match: LiveMatch) {
       setIsCreatingParty(false);
       setShowPrompt(false);
       if (response.room) {
-        toast.success(t('creating'));
+        toast.success(t('creating'), { id: 'live-party-creating' });
         router.push(`/watch-party/${response.room.id}?new=true`);
       } else {
-        toast.error(response.error || tp('failedCreateRoom'));
+        toast.error(response.error || tp('failedCreateRoom'), {
+          id: 'live-party-error',
+        });
       }
     });
   };

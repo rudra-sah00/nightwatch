@@ -230,6 +230,8 @@ export function MusicDeviceSync() {
 
   // ─── 6. Auto-sync: pick up what's playing on other devices on page load ─
 
+  const remoteSourceRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -244,13 +246,25 @@ export function MusicDeviceSync() {
       // Only auto-sync if we're not playing locally
       if (currentTrackRef.current && isPlayingRef.current) return;
       if (data.track && data.isPlaying) {
-        setRemoteControlling(
-          true,
-          data.track,
-          data.isPlaying,
-          data.progress,
-          data.duration,
-        );
+        // Skip if already synced to this source (just update progress/duration)
+        if (remoteSourceRef.current === data.socketId) {
+          setRemoteControlling(
+            true,
+            data.track,
+            data.isPlaying,
+            data.progress,
+            data.duration,
+          );
+        } else {
+          remoteSourceRef.current = data.socketId;
+          setRemoteControlling(
+            true,
+            data.track,
+            data.isPlaying,
+            data.progress,
+            data.duration,
+          );
+        }
       }
     };
 

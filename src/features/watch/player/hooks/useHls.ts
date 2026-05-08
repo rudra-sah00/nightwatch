@@ -622,19 +622,25 @@ export function useHls({
           }
         }
 
-        // Restore position after manifest is parsed for the new source
-        const attachedVideo = videoRef.current;
-        if (attachedVideo) {
-          const onCanPlay = () => {
-            attachedVideo.removeEventListener('canplay', onCanPlay);
+        // Restore position after manifest is parsed for the new source.
+        // Using MANIFEST_PARSED instead of canplay avoids a race where canplay
+        // fires before HLS.js has set the duration, making currentTime assignment fail.
+        const hls = hlsRef.current;
+        if (hls) {
+          // biome-ignore lint/suspicious/noExplicitAny: HLS.js internal event not exported in types
+          const MANIFEST_PARSED = 'hlsManifestParsed' as any;
+          const onParsed = () => {
+            hls.off(MANIFEST_PARSED, onParsed);
+            const v = videoRef.current;
+            if (!v) return;
             if (savedTime > 0) {
-              attachedVideo.currentTime = savedTime;
+              v.currentTime = savedTime;
             }
             if (wasPlaying) {
-              attachedVideo.play().catch(() => {});
+              v.play().catch(() => {});
             }
           };
-          attachedVideo.addEventListener('canplay', onCanPlay);
+          hls.on(MANIFEST_PARSED, onParsed);
         }
         return;
       }

@@ -1,3 +1,4 @@
+import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type {
   LiveMatch,
@@ -9,6 +10,10 @@ export type {
   CricketMatchInfo,
   LiveMatch,
 } from './types';
+
+// Short TTL cache (60s) for schedule — avoids redundant fetches when
+// navigating away from /live and back quickly.
+const scheduleCache = createTTLCache<LiveMatch[]>(60 * 1000, 10);
 
 /**
  * Fetches the livestream schedule for a given sport type.
@@ -25,11 +30,17 @@ export const fetchLivestreamSchedule = async (
   daysForward = 3,
   signal?: AbortSignal,
 ): Promise<LiveMatch[]> => {
+  const cacheKey = `${sportType}:${daysBackward}:${daysForward}`;
+  const cached = scheduleCache.get(cacheKey);
+  if (cached) return cached;
+
   const data = await apiFetch<LivestreamScheduleResponse>(
     `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=server1`,
     { signal },
   );
-  return data?.items || [];
+  const items = data?.items || [];
+  scheduleCache.set(cacheKey, items);
+  return items;
 };
 
 /**
@@ -111,6 +122,12 @@ export const fetchChannels = async (
   return data || { channels: [], total: 0, page: 1, limit, totalPages: 0 };
 };
 
+// Sports list is essentially static — cache for 30 minutes.
+const sportsCache = createTTLCache<{ id: string; label: string }[]>(
+  30 * 60 * 1000,
+  1,
+);
+
 /**
  * Fetches the list of available sport categories for the livestream schedule.
  *
@@ -118,9 +135,14 @@ export const fetchChannels = async (
  * @returns Array of sport objects with `id` and `label`.
  */
 export const fetchSports = async (signal?: AbortSignal) => {
+  const cached = sportsCache.get('sports');
+  if (cached) return cached;
+
   const data = await apiFetch<{ data: { id: string; label: string }[] }>(
     `/api/livestream/sports`,
     { signal },
   );
-  return data?.data || [];
+  const sports = data?.data || [];
+  sportsCache.set('sports', sports);
+  return sports;
 };

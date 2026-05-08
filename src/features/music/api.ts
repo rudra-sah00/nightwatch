@@ -1,3 +1,4 @@
+import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 
 /** A single music track (song) with metadata from JioSaavn. */
@@ -137,13 +138,23 @@ export interface MusicHomeData {
   radio: { id: string; title: string; image: string; language: string }[];
 }
 
+// Client-side cache for music home data (10 min TTL).
+// Backend already caches in Redis for 6h — this avoids redundant fetches
+// when navigating away from /music and back.
+const musicHomeCache = createTTLCache<MusicHomeData>(10 * 60 * 1000, 1);
+
 /**
  * Fetch the music home page data (charts, featured, artists, releases, trending, radio).
  *
  * @returns Aggregated home page sections.
  */
 export async function getMusicHome(): Promise<MusicHomeData> {
-  return apiFetch('/api/music/home');
+  const cached = musicHomeCache.get('home');
+  if (cached) return cached;
+
+  const data = await apiFetch<MusicHomeData>('/api/music/home');
+  musicHomeCache.set('home', data);
+  return data;
 }
 
 /**
@@ -333,11 +344,19 @@ export async function setMusicLanguages(languages: string): Promise<void> {
  * @param language - Language filter (default `"hindi"`).
  * @returns Array of trending items.
  */
+const trendingCache = createTTLCache<
+  { id: string; title: string; type: string; image: string; subtitle: string }[]
+>(10 * 60 * 1000, 5);
+
 export async function getTrending(
   type: 'song' | 'album' | 'playlist' = 'song',
   language = 'hindi',
 ) {
-  return apiFetch<
+  const key = `${type}:${language}`;
+  const cached = trendingCache.get(key);
+  if (cached) return cached;
+
+  const data = await apiFetch<
     {
       id: string;
       title: string;
@@ -348,6 +367,8 @@ export async function getTrending(
   >(
     `/api/music/trending?type=${type}&language=${encodeURIComponent(language)}`,
   );
+  trendingCache.set(key, data);
+  return data;
 }
 
 /**
@@ -453,10 +474,19 @@ export async function getArtistStation(name: string): Promise<MusicTrack[]> {
  *
  * @returns Object containing genre categories.
  */
+const browseCache = createTTLCache<{
+  genres: { id: string; title: string; image: string; type: string }[];
+}>(10 * 60 * 1000, 1);
+
 export async function getBrowseModules() {
-  return apiFetch<{
+  const cached = browseCache.get('browse');
+  if (cached) return cached;
+
+  const data = await apiFetch<{
     genres: { id: string; title: string; image: string; type: string }[];
   }>('/api/music/browse');
+  browseCache.set('browse', data);
+  return data;
 }
 
 /**

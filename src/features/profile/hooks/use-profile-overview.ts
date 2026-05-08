@@ -37,7 +37,7 @@ export function useProfileOverview() {
       ]);
       setActivityData({ watch, music });
     } catch {
-      toast.error(t('activityFailed'));
+      toast.error(t('activityFailed'), { id: 'activity-load-failed' });
     }
   }, [t]);
 

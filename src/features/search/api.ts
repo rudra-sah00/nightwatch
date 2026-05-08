@@ -105,6 +105,10 @@ export async function getSearchSuggestions(
 
 const showDetailsCache = createTTLCache<ShowDetails>(5 * 60 * 1000, 50);
 
+// In-flight dedup: if the same content is requested while a fetch is pending,
+// reuse the existing promise instead of firing a second API call.
+const showDetailsInflight = new Map<string, Promise<ShowDetails>>();
+
 export async function getShowDetails(
   id: string,
   options?: RequestInit,
@@ -112,12 +116,25 @@ export async function getShowDetails(
   const cached = showDetailsCache.get(id);
   if (cached) return cached;
 
-  const { show } = await apiFetch<{ show: ShowDetails }>(
+  const inflight = showDetailsInflight.get(id);
+  if (inflight) return inflight;
+
+  const promise = apiFetch<{ show: ShowDetails }>(
     `/api/video/show/${id}`,
     options,
-  );
-  showDetailsCache.set(id, show);
-  return show;
+  )
+    .then(({ show }) => {
+      showDetailsCache.set(id, show);
+      showDetailsInflight.delete(id);
+      return show;
+    })
+    .catch((err) => {
+      showDetailsInflight.delete(id);
+      throw err;
+    });
+
+  showDetailsInflight.set(id, promise);
+  return promise;
 }
 
 /**

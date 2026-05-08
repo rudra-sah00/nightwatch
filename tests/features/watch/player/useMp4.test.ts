@@ -249,6 +249,11 @@ describe('useMp4', () => {
       result.current.setQuality?.(1); // switch to 720p
     });
 
+    // The implementation waits for loadedmetadata before seeking/playing
+    act(() => {
+      videoRef.current.dispatchEvent(new Event('loadedmetadata'));
+    });
+
     expect(videoRef.current.src).toContain('720.mp4');
     expect(videoRef.current.currentTime).toBe(42);
     expect(playSpy).toHaveBeenCalled();

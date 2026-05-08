@@ -135,11 +135,19 @@ export function MusicPlayerProvider({
     sleepTimerEnd: null,
   });
   const [expanded, setExpanded] = useState(false);
-  const [remoteControlling, setRemoteControllingState] = useState(false);
-  const [remoteTrack, setRemoteTrack] = useState<MusicTrack | null>(null);
-  const [remoteIsPlaying, setRemoteIsPlaying] = useState(false);
-  const [remoteProgress, setRemoteProgress] = useState(0);
-  const [remoteDuration, setRemoteDuration] = useState(0);
+  const [remoteState, setRemoteState] = useState<{
+    controlling: boolean;
+    track: MusicTrack | null;
+    isPlaying: boolean;
+    progress: number;
+    duration: number;
+  }>({
+    controlling: false,
+    track: null,
+    isPlaying: false,
+    progress: 0,
+    duration: 0,
+  });
 
   useEffect(() => {
     const engine = new AudioEngine();
@@ -424,11 +432,11 @@ export function MusicPlayerProvider({
         if (m <= 0) engineRef.current?.clearSleepTimer();
         else engineRef.current?.setSleepTimer(m);
       },
-      isRemoteControlling: remoteControlling,
-      remoteTrack,
-      remoteIsPlaying,
-      remoteProgress,
-      remoteDuration,
+      isRemoteControlling: remoteState.controlling,
+      remoteTrack: remoteState.track,
+      remoteIsPlaying: remoteState.isPlaying,
+      remoteProgress: remoteState.progress,
+      remoteDuration: remoteState.duration,
       setRemoteControlling: (
         active: boolean,
         track?: MusicTrack | null,
@@ -436,21 +444,19 @@ export function MusicPlayerProvider({
         prog?: number,
         dur?: number,
       ) => {
-        setRemoteControllingState(active);
-        setRemoteTrack(track ?? null);
-        setRemoteIsPlaying(playing ?? false);
-        if (prog !== undefined) setRemoteProgress(prog);
-        if (dur !== undefined) setRemoteDuration(dur);
+        setRemoteState((prev) => ({
+          controlling: active,
+          track: track !== undefined ? (track ?? null) : prev.track,
+          isPlaying: playing !== undefined ? playing : prev.isPlaying,
+          progress: prog !== undefined ? prog : prev.progress,
+          duration: dur !== undefined ? dur : prev.duration,
+        }));
       },
     }),
     [
       state,
       expanded,
-      remoteControlling,
-      remoteTrack,
-      remoteIsPlaying,
-      remoteProgress,
-      remoteDuration,
+      remoteState,
       play,
       togglePlay,
       next,

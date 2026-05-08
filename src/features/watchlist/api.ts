@@ -1,5 +1,10 @@
+import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { WatchlistItem } from './types';
+
+// Cache watchlist status checks (2 min TTL) to avoid redundant API calls
+// when opening the same content detail modal multiple times.
+const watchlistStatusCache = createTTLCache<boolean>(2 * 60 * 1000, 50);
 
 /**
  * Fetch the user's watchlist.
@@ -29,6 +34,7 @@ export async function addToWatchlist(item: {
     method: 'POST',
     body: JSON.stringify(item),
   });
+  watchlistStatusCache.set(item.contentId, true);
 }
 
 /**
@@ -43,6 +49,7 @@ export async function removeFromWatchlist(
   await apiFetch(`/api/user/watchlist?${params}`, {
     method: 'DELETE',
   });
+  watchlistStatusCache.set(contentId, false);
 }
 
 /**
@@ -52,10 +59,14 @@ export async function checkInWatchlist(
   contentId: string,
   providerId?: string,
 ): Promise<boolean> {
+  const cached = watchlistStatusCache.get(contentId);
+  if (cached !== undefined) return cached;
+
   const pId = providerId || contentId.split(':')[0] || 's1';
   const params = new URLSearchParams({ id: contentId, providerId: pId });
   const { inWatchlist } = await apiFetch<{ inWatchlist: boolean }>(
     `/api/user/watchlist/status?${params}`,
   );
+  watchlistStatusCache.set(contentId, inWatchlist);
   return inWatchlist;
 }
