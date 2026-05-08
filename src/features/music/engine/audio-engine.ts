@@ -376,6 +376,11 @@ export class AudioEngine {
         this.nextAudio = null;
       }
       this.crossfadeActive = false;
+      // If the track already ended while crossfade was in progress,
+      // handleEnded returned early trusting us. Fall back to next().
+      if (this.audio.ended) {
+        this.next();
+      }
     }
   }
 
@@ -411,6 +416,9 @@ export class AudioEngine {
         this.audio.onloadedmetadata = () => {
           this.update({ duration: this.audio.duration });
         };
+        if (this.audioContext?.state === 'suspended') {
+          this.audioContext.resume();
+        }
         this.audio.play().catch(() => this.update({ isPlaying: false }));
         this.connectEqualizer();
         this.update({
@@ -480,6 +488,11 @@ export class AudioEngine {
       const url = await getStreamUrl(track.id);
       if (this.playId !== myPlayId) return;
 
+      // Resume AudioContext if browser suspended it (e.g. tab backgrounded)
+      if (this.audioContext?.state === 'suspended') {
+        this.audioContext.resume();
+      }
+
       this.audio.src = url;
       this.audio.volume = 0;
       await this.audio.play();
@@ -512,7 +525,23 @@ export class AudioEngine {
       }
     } catch {
       if (this.playId === myPlayId) {
-        this.update({ isPlaying: false });
+        // Retry once after a short delay before giving up
+        try {
+          await new Promise((r) => setTimeout(r, 1000));
+          if (this.playId !== myPlayId) return;
+          const url = await getStreamUrl(track.id);
+          if (this.playId !== myPlayId) return;
+          this.audio.src = url;
+          this.audio.volume = this.state.volume;
+          await this.audio.play();
+          if (this.playId !== myPlayId) return;
+          this.update({ isPlaying: true });
+          this.startProgressTimer();
+        } catch {
+          if (this.playId === myPlayId) {
+            this.update({ isPlaying: false });
+          }
+        }
       }
     }
   }
@@ -524,6 +553,9 @@ export class AudioEngine {
       this.stopProgressTimer();
       this.update({ isPlaying: false });
     } else {
+      if (this.audioContext?.state === 'suspended') {
+        this.audioContext.resume();
+      }
       this.audio.play().catch(() => {
         this.stopProgressTimer();
         this.update({ isPlaying: false });
@@ -613,6 +645,9 @@ export class AudioEngine {
   setVolume(v: number) {
     const vol = Math.max(0, Math.min(1, v));
     this.audio.volume = vol;
+    if (this.nextAudio && !this.crossfadeActive) {
+      this.nextAudio.volume = vol;
+    }
     this.update({ volume: vol });
   }
 

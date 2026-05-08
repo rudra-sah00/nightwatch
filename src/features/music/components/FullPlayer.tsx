@@ -80,23 +80,47 @@ export function FullPlayer() {
   const displayDuration = isRemoteControlling ? remoteDuration : duration;
 
   const trackId = displayTrack?.id;
+  const lyricsLoadedWithDuration = useRef(false);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
   useEffect(() => {
     setLyrics(null);
     setRecommendations([]);
     setShowLyrics(false);
     setShowQueue(false);
+    lyricsLoadedWithDuration.current = false;
     if (!displayTrack) return;
     getSyncedLyrics(
       displayTrack.id,
       displayTrack.title,
       displayTrack.artist,
       displayDuration,
-    ).then(setLyrics);
+    ).then((result) => {
+      if (displayDuration > 0) lyricsLoadedWithDuration.current = true;
+      setLyrics(result);
+    });
     getSongRecommendations(displayTrack.id)
       .then(setRecommendations)
       .catch(() => {});
   }, [trackId]);
+
+  // Re-fetch lyrics once duration is available (initial fetch may have used duration=0)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional re-fetch when duration loads
+  useEffect(() => {
+    if (
+      !displayTrack ||
+      displayDuration <= 0 ||
+      lyricsLoadedWithDuration.current
+    )
+      return;
+    lyricsLoadedWithDuration.current = true;
+    getSyncedLyrics(
+      displayTrack.id,
+      displayTrack.title,
+      displayTrack.artist,
+      displayDuration,
+    ).then(setLyrics);
+  }, [displayDuration]);
 
   // Interpolate remote progress locally for smooth lyrics sync.
   // state_update arrives every 5s — between updates, tick progress forward 1s/s.
