@@ -9,12 +9,15 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  SlidersHorizontal,
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import { useState } from 'react';
 import type { MusicTrack, SyncedLyricLine } from '../api';
 import type { RepeatMode } from '../engine/audio-engine';
 import { formatTime } from '../utils';
+import { Equalizer } from './Equalizer';
 import { FullPlayerLyrics } from './FullPlayerLyrics';
 
 /**
@@ -106,6 +109,7 @@ export function DesktopFullPlayer({
   onPlay,
 }: DesktopFullPlayerProps) {
   const hasLyrics = lyrics && lyrics.length > 0;
+  const [showEq, setShowEq] = useState(false);
 
   return (
     <div
@@ -267,7 +271,17 @@ export function DesktopFullPlayer({
                 onChange={(e) => onSetVolume(Number(e.target.value))}
                 className="flex-1 h-1 accent-white cursor-pointer"
               />
+              <button
+                type="button"
+                onClick={() => setShowEq(true)}
+                className="p-1 text-white/30 hover:text-white transition-colors"
+                title="Equalizer"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+              </button>
             </div>
+
+            {showEq && <Equalizer onClose={() => setShowEq(false)} />}
           </div>
 
           {hasLyrics && (
