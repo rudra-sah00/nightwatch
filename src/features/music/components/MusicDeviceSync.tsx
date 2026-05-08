@@ -120,15 +120,15 @@ export function MusicDeviceSync() {
       });
     };
 
-    socket.on('music:device_online', onOnline);
-    socket.on('music:device_offline', onOffline);
-    socket.on('music:request_devices', onRequestDevices);
-    socket.emit('music:request_devices');
-    socket.emit('music:request_state');
-    socket.on('connect', () => {
+    const onConnect = () => {
       socket.emit('music:request_devices');
       socket.emit('music:request_state');
-    });
+      // Clear stale remote state on reconnect (issue 15)
+      if (remoteSourceRef.current) {
+        remoteSourceRef.current = null;
+        setRemoteControlling(false);
+      }
+    };
 
     // Respond to state requests from other devices
     const onRequestState = () => {
@@ -142,13 +142,21 @@ export function MusicDeviceSync() {
         });
       }
     };
+
+    socket.on('music:device_online', onOnline);
+    socket.on('music:device_offline', onOffline);
+    socket.on('music:request_devices', onRequestDevices);
     socket.on('music:request_state', onRequestState);
+    socket.on('connect', onConnect);
+    socket.emit('music:request_devices');
+    socket.emit('music:request_state');
 
     return () => {
       socket.off('music:device_online', onOnline);
       socket.off('music:device_offline', onOffline);
       socket.off('music:request_devices', onRequestDevices);
       socket.off('music:request_state', onRequestState);
+      socket.off('connect', onConnect);
     };
   }, [socket, deviceName, setRemoteControlling]);
 
@@ -315,27 +323,19 @@ export function MusicDeviceSync() {
       if (!availableRef.current) return;
       window.dispatchEvent(new CustomEvent('music:transfer-received'));
       setRemoteControlling(false);
-      play(data.track, data.queue ?? []);
-      // Seek after playback starts — poll until progress timer is running
-      const seekAfterReady = () => {
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts++;
-          if (durationRef.current > 0 || attempts > 20) {
-            clearInterval(interval);
-            if (data.progress > 0) seek(data.progress);
-            if (!data.isPlaying) togglePlay();
-          }
-        }, 250);
-      };
-      seekAfterReady();
+      // Use startAt parameter for reliable seek after load
+      play(data.track, data.queue ?? [], data.progress > 0 ? data.progress : undefined);
+      // If transfer was paused, pause after a short delay
+      if (!data.isPlaying) {
+        setTimeout(() => togglePlay(), 500);
+      }
     };
 
     socket.on('music:transfer_playback', onTransfer);
     return () => {
       socket.off('music:transfer_playback', onTransfer);
     };
-  }, [socket, play, seek, togglePlay, setRemoteControlling]);
+  }, [socket, play, togglePlay, setRemoteControlling]);
 
   // ─── 7. Forward remote commands to the source device ───────────
   // When auto-synced (no explicit activeTarget in useMusicDevices),

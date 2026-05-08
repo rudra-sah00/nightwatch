@@ -1,7 +1,7 @@
 'use client';
 
 import { Moon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
 const TIMER_OPTIONS = [
@@ -19,15 +19,33 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
   const { setSleepTimer, sleepTimerEnd, isRemoteControlling } =
     useMusicPlayerContext();
   const [remaining, setRemaining] = useState<string | null>(null);
+  const remoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up remote timer on unmount or cancel
+  useEffect(() => {
+    return () => {
+      if (remoteTimerRef.current) {
+        clearTimeout(remoteTimerRef.current);
+        remoteTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSetTimer = (minutes: number) => {
+    // Clear any existing remote timer
+    if (remoteTimerRef.current) {
+      clearTimeout(remoteTimerRef.current);
+      remoteTimerRef.current = null;
+    }
+
     if (isRemoteControlling && minutes > 0) {
       const ms = minutes * 60 * 1000;
       setSleepTimer(minutes);
-      setTimeout(() => {
+      remoteTimerRef.current = setTimeout(() => {
         window.dispatchEvent(
           new CustomEvent('music:remote-command', { detail: 'stop' }),
         );
+        remoteTimerRef.current = null;
       }, ms);
     } else {
       setSleepTimer(minutes);

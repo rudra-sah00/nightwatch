@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
 /**
@@ -39,6 +39,9 @@ export function useMusicShortcuts() {
     cycleRepeat,
   } = useMusicPlayerContext();
 
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+
   useEffect(() => {
     if (!currentTrack) return;
 
@@ -67,15 +70,15 @@ export function useMusicShortcuts() {
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setVolume(Math.min(1, volume + 0.1));
+          setVolume(Math.min(1, volumeRef.current + 0.1));
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setVolume(Math.max(0, volume - 0.1));
+          setVolume(Math.max(0, volumeRef.current - 0.1));
           break;
         case 'm':
         case 'M':
-          setVolume(volume > 0 ? 0 : 1);
+          setVolume(volumeRef.current > 0 ? 0 : 1);
           break;
         case 's':
         case 'S':
@@ -90,14 +93,5 @@ export function useMusicShortcuts() {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [
-    currentTrack,
-    togglePlay,
-    next,
-    prev,
-    volume,
-    setVolume,
-    toggleShuffle,
-    cycleRepeat,
-  ]);
+  }, [currentTrack, togglePlay, next, prev, setVolume, toggleShuffle, cycleRepeat]);
 }

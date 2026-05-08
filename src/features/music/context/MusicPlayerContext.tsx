@@ -47,7 +47,7 @@ interface MusicPlayerContextValue {
   /** Volume level from 0 (muted) to 1 (max). */
   volume: number;
   /** Start playing a track, optionally replacing the queue. */
-  play: (track: MusicTrack, queue?: MusicTrack[]) => void;
+  play: (track: MusicTrack, queue?: MusicTrack[], startAt?: number) => void;
   /** Toggle play / pause. */
   togglePlay: () => void;
   /** Skip to the next track. */
@@ -192,6 +192,7 @@ export function MusicPlayerProvider({
   }, []);
 
   // Listen for Ask AI music play requests (no navigation needed)
+  const duckVolRef = useRef(-1);
   useEffect(() => {
     const handleSong = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -233,17 +234,17 @@ export function MusicPlayerProvider({
           break;
       }
     };
-    const savedVolRef = { current: -1 };
     const handleDuck = (e: Event) => {
       const { duck } = (e as CustomEvent).detail as { duck: boolean };
       const engine = engineRef.current;
       if (!engine) return;
+      const currentVol = engine.getState().volume;
       if (duck) {
-        savedVolRef.current = state.volume;
-        engine.setVolume(Math.min(state.volume * 0.15, 0.1));
-      } else if (savedVolRef.current >= 0) {
-        engine.setVolume(savedVolRef.current);
-        savedVolRef.current = -1;
+        duckVolRef.current = currentVol;
+        engine.setVolume(Math.min(currentVol * 0.15, 0.1));
+      } else if (duckVolRef.current >= 0) {
+        engine.setVolume(duckVolRef.current);
+        duckVolRef.current = -1;
       }
     };
     window.addEventListener('ask-ai:play-music', handleSong);
@@ -256,7 +257,7 @@ export function MusicPlayerProvider({
       window.removeEventListener('ask-ai:music-control', handleControl);
       window.removeEventListener('ask-ai:duck', handleDuck);
     };
-  }, [state.volume]);
+  }, []);
 
   // Pause music when a DM voice call arrives, resume when it ends
   const wasPlayingBeforeCallRef = useRef(false);
@@ -328,8 +329,8 @@ export function MusicPlayerProvider({
     };
   }, [socket]);
 
-  const play = useCallback((track: MusicTrack, queue?: MusicTrack[]) => {
-    engineRef.current?.playTrack(track, queue);
+  const play = useCallback((track: MusicTrack, queue?: MusicTrack[], startAt?: number) => {
+    engineRef.current?.playTrack(track, queue, startAt);
   }, []);
 
   const togglePlay = useCallback(() => engineRef.current?.togglePlay(), []);
