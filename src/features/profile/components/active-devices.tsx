@@ -260,57 +260,55 @@ function QrScanner({
     };
   }, [stopCamera]);
 
-  // Scan frames using BarcodeDetector or manual parsing
+  // Scan frames using jsQR (works on all platforms including iOS)
   useEffect(() => {
-    if (!('BarcodeDetector' in window)) {
-      setError('QR scanning not supported on this device');
-      return;
-    }
-    const detector = new (
-      window as unknown as {
-        BarcodeDetector: new (opts: {
-          formats: string[];
-        }) => {
-          detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
-        };
-      }
-    ).BarcodeDetector({ formats: ['qr_code'] });
     let raf: number;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     const scan = async () => {
       if (
         !videoRef.current ||
         videoRef.current.readyState < 2 ||
-        processingRef.current
+        processingRef.current ||
+        !ctx
       ) {
         raf = requestAnimationFrame(scan);
         return;
       }
-      try {
-        const results = await detector.detect(videoRef.current);
-        if (results.length > 0) {
-          const url = results[0].rawValue;
-          if (!url.includes('nightwatch://qr')) {
-            processingRef.current = true;
-            toast.error('Please scan a valid Nightwatch QR code');
-            setTimeout(() => {
-              processingRef.current = false;
-            }, 2000);
-            raf = requestAnimationFrame(scan);
-            return;
-          }
+      const { videoWidth, videoHeight } = videoRef.current;
+      if (!videoWidth || !videoHeight) {
+        raf = requestAnimationFrame(scan);
+        return;
+      }
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+      ctx.drawImage(videoRef.current, 0, 0);
+      const imageData = ctx.getImageData(0, 0, videoWidth, videoHeight);
+
+      const { default: jsQR } = await import('jsqr');
+      const result = jsQR(imageData.data, videoWidth, videoHeight);
+
+      if (result) {
+        const url = result.data;
+        if (!url.includes('nightwatch://qr')) {
           processingRef.current = true;
-          const code = new URL(
-            url.replace('nightwatch://', 'https://x/'),
-          ).searchParams.get('code');
-          if (code) {
-            stopCamera();
-            setScannedCode(code);
-            return;
-          }
+          toast.error('Please scan a valid Nightwatch QR code');
+          setTimeout(() => {
+            processingRef.current = false;
+          }, 2000);
+          raf = requestAnimationFrame(scan);
+          return;
         }
-      } catch {
-        // Detection failed, retry
+        processingRef.current = true;
+        const code = new URL(
+          url.replace('nightwatch://', 'https://x/'),
+        ).searchParams.get('code');
+        if (code) {
+          stopCamera();
+          setScannedCode(code);
+          return;
+        }
       }
       raf = requestAnimationFrame(scan);
     };
@@ -333,63 +331,73 @@ function QrScanner({
   };
 
   return (
-    <div className="mb-6 p-4 border-2 border-border rounded-xl bg-secondary/30 flex flex-col items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-2">
-          <Camera className="w-4 h-4 text-muted-foreground" />
-          <p className="text-xs font-headline font-bold uppercase tracking-widest text-muted-foreground">
-            {scannedCode ? 'Confirm login' : 'Scan QR from desktop'}
-          </p>
+    <>
+      <div className="mb-6 p-4 border-2 border-border rounded-xl bg-secondary/30 flex flex-col items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <Camera className="w-4 h-4 text-muted-foreground" />
+            <p className="text-xs font-headline font-bold uppercase tracking-widest text-muted-foreground">
+              Scan QR from desktop
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              stopCamera();
+              onClose();
+            }}
+            className="text-xs font-headline font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cancel
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            stopCamera();
-            onClose();
-          }}
-          className="text-xs font-headline font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Cancel
-        </button>
+
+        {error ? (
+          <p className="text-xs text-destructive font-bold py-8">{error}</p>
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full max-w-[280px] aspect-square rounded-lg object-cover"
+          />
+        )}
       </div>
 
-      {scannedCode ? (
-        <div className="flex flex-col items-center gap-4 py-4 w-full">
-          <p className="text-sm font-headline font-bold text-center">
-            Are you sure you want to authorize this device to log in?
-          </p>
-          <div className="flex gap-3 w-full max-w-[280px]">
-            <button
-              type="button"
-              onClick={() => {
-                setScannedCode(null);
-                onClose();
-              }}
-              className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
-            >
-              Deny
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirm}
-              disabled={authorizing}
-              className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50"
-            >
-              {authorizing ? 'Authorizing...' : 'Approve'}
-            </button>
+      {scannedCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+          <div className="relative bg-card border-2 border-border rounded-xl p-6 w-full max-w-sm shadow-lg animate-in zoom-in-95 duration-200">
+            <p className="text-base font-headline font-bold text-center mb-6">
+              Are you sure you want to authorize this device to log in?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setScannedCode(null);
+                  onClose();
+                }}
+                className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
+              >
+                Deny
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={authorizing}
+                className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {authorizing ? 'Authorizing...' : 'Approve'}
+              </button>
+            </div>
           </div>
         </div>
-      ) : error ? (
-        <p className="text-xs text-destructive font-bold py-8">{error}</p>
-      ) : (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full max-w-[280px] aspect-square rounded-lg object-cover"
-        />
       )}
-    </div>
+    </>
   );
 }
