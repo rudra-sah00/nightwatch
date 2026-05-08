@@ -55,12 +55,12 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
   }, [sleepTimerEnd]);
 
   return (
-    <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center">
       {/* Backdrop */}
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-2xl"
+        className="absolute inset-0 bg-black/70 backdrop-blur-2xl animate-in fade-in duration-200"
         aria-label="Close sleep timer"
       />
 
@@ -78,7 +78,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
       </button>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 animate-in slide-in-from-bottom-4 duration-500 ease-out">
+      <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 animate-in slide-in-from-bottom-6 duration-400 ease-out">
         <Moon className="w-10 h-10 text-white/40" />
 
         <h2 className="text-2xl sm:text-3xl font-black font-headline uppercase tracking-tighter text-white">

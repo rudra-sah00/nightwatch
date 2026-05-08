@@ -51,12 +51,12 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center animate-in fade-in duration-300">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center">
+      {/* Backdrop — appears instantly */}
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-2xl"
+        className="absolute inset-0 bg-black/70 backdrop-blur-2xl animate-in fade-in duration-200"
         aria-label="Close equalizer"
       />
 
@@ -74,7 +74,7 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
       </button>
 
       {/* Content — centered */}
-      <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-6 animate-in slide-in-from-bottom-4 duration-500 ease-out">
+      <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-6 animate-in slide-in-from-bottom-6 duration-400 ease-out">
         {/* Title */}
         <h2 className="text-2xl sm:text-3xl font-black font-headline uppercase tracking-tighter text-white">
           Equalizer
