@@ -35,3 +35,10 @@ export async function qrAuthorize(code: string): Promise<{ success: boolean }> {
     body: JSON.stringify({ code }),
   });
 }
+
+export async function qrReject(code: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>('/api/auth/qr/reject', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { qrAuthorize } from '@/features/auth/qr-api';
+import { qrAuthorize, qrReject } from '@/features/auth/qr-api';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
 
@@ -379,6 +379,7 @@ function QrScanner({
               <button
                 type="button"
                 onClick={() => {
+                  if (scannedCode) qrReject(scannedCode).catch(() => {});
                   setScannedCode(null);
                   onClose();
                 }}
