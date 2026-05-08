@@ -7,6 +7,7 @@ import { qrInitiate, qrPollStatus } from '../qr-api';
 
 const POLL_INTERVAL = 3000;
 const QR_LIFETIME = 300;
+const MAX_RETRIES = 3;
 
 export function useQrLogin() {
   const setUser = useAuthStore((s) => s.setUser);
@@ -19,7 +20,7 @@ export function useQrLogin() {
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const activeCode = useRef<string | null>(null);
   const mountedRef = useRef(true);
-  const initiatingRef = useRef(false);
+  const retriesRef = useRef(0);
 
   const cleanup = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -28,9 +29,11 @@ export function useQrLogin() {
     countdownRef.current = null;
   }, []);
 
-  const initiate = useCallback(async () => {
-    if (initiatingRef.current) return;
-    initiatingRef.current = true;
+  const initiateRef = useRef<(() => Promise<void>) | null>(null);
+
+  initiateRef.current = async () => {
+    // Prevent overlapping calls
+    if (pollRef.current) return;
     cleanup();
     setLoading(true);
     setStatus('pending');
@@ -38,6 +41,7 @@ export function useQrLogin() {
     try {
       const res = await qrInitiate();
       if (!mountedRef.current) return;
+      retriesRef.current = 0;
       setCode(res.code);
       activeCode.current = res.code;
       setSecondsLeft(QR_LIFETIME);
@@ -59,7 +63,7 @@ export function useQrLogin() {
             setStatus('expired');
           }
         } catch {
-          // Silent retry
+          // Silent — will retry next interval
         }
       }, POLL_INTERVAL);
 
@@ -76,29 +80,38 @@ export function useQrLogin() {
     } catch {
       if (!mountedRef.current) return;
       setLoading(false);
-      setStatus('expired');
-    } finally {
-      initiatingRef.current = false;
+      // Only auto-retry up to MAX_RETRIES to prevent infinite loop
+      if (retriesRef.current < MAX_RETRIES) {
+        retriesRef.current++;
+        setStatus('expired');
+      }
     }
-  }, [cleanup, setUser]);
+  };
 
+  const refresh = useCallback(() => {
+    retriesRef.current = 0;
+    initiateRef.current?.();
+  }, []);
+
+  // Mount once — no deps to prevent re-firing
   useEffect(() => {
     mountedRef.current = true;
-    initiate();
+    initiateRef.current?.();
     return () => {
       mountedRef.current = false;
       cleanup();
     };
-  }, [initiate, cleanup]);
+  }, [cleanup]);
 
-  // Auto-refresh when expired
+  // Auto-refresh when expired (with retry limit)
   useEffect(() => {
     if (status !== 'expired') return;
+    if (retriesRef.current >= MAX_RETRIES) return;
     const timer = setTimeout(() => {
-      if (mountedRef.current) initiate();
-    }, 1000);
+      if (mountedRef.current) initiateRef.current?.();
+    }, 1500);
     return () => clearTimeout(timer);
-  }, [status, initiate]);
+  }, [status]);
 
-  return { code, status, secondsLeft, loading, refresh: initiate };
+  return { code, status, secondsLeft, loading, refresh };
 }
