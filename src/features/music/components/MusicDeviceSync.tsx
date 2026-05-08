@@ -222,6 +222,8 @@ export function MusicDeviceSync() {
 
   // ─── 5. Listen for other devices starting playback ─────────────
 
+  const remoteSourceRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -232,6 +234,7 @@ export function MusicDeviceSync() {
       isPlaying: boolean;
     }) => {
       if (data.socketId === socket.id) return;
+      remoteSourceRef.current = data.socketId;
       window.dispatchEvent(
         new CustomEvent('music:remote-takeover', { detail: data }),
       );
@@ -249,8 +252,6 @@ export function MusicDeviceSync() {
   }, [socket, setRemoteControlling]);
 
   // ─── 6. Auto-sync: pick up what's playing on other devices on page load ─
-
-  const remoteSourceRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!socket) return;
