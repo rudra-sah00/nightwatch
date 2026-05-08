@@ -454,7 +454,7 @@ export function AppPreferences() {
       </div>
 
       {/* Music Playback */}
-      <div className="pt-8 border-t border-border">
+      <div className="mt-8 pt-8 border-t border-border">
         <h3 className="font-headline font-black uppercase tracking-widest text-sm text-muted-foreground mb-6">
           Music Playback
         </h3>
