@@ -17,9 +17,6 @@ import { OfflineState } from '@/components/layout/OfflineState';
 import { RightSidebar } from '@/components/layout/right-sidebar';
 import { GlobalTour } from '@/components/ui/global-tour';
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
-import { MiniPlayer } from '@/features/music/components/MiniPlayer';
-import { SongContextMenu } from '@/features/music/components/SongContextMenu';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
@@ -52,7 +49,6 @@ const RIGHT_CLOSE_ZONE = 340;
 
 function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { expanded } = useMusicPlayerContext();
   useFriendNotifications();
   const pathname = usePathname() || '';
   const { isOffline, mounted } = useNetworkStatus();
@@ -232,9 +228,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
             <LeftSidebar />
             <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
               {showOfflineBlocker ? <OfflineState /> : children}
-              {!expanded && <MiniPlayer />}
             </div>
-            <SongContextMenu />
             <RightSidebar />
           </div>
         </div>

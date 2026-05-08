@@ -133,6 +133,7 @@ export function MusicDeviceSync() {
           isPlaying: isPlayingRef.current,
           progress: progressRef.current,
           duration: durationRef.current,
+          queue: queueRef.current,
         });
       }
     };
