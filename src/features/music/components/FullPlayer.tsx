@@ -9,7 +9,6 @@ import {
   type SyncedLyricLine,
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
-import { useSystemVolume } from '../hooks/use-system-volume';
 import { DesktopFullPlayer } from './DesktopFullPlayer';
 import { MobileFullPlayer } from './MobileFullPlayer';
 
@@ -64,7 +63,6 @@ export function FullPlayer() {
   const [showLyrics, setShowLyrics] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
-  const systemVol = useSystemVolume();
 
   const handleClose = useCallback(() => {
     setClosing(true);
@@ -236,7 +234,6 @@ export function FullPlayer() {
         showLyrics={showLyrics}
         showQueue={showQueue}
         lyricsRef={lyricsRef}
-        systemVol={systemVol}
         onClose={handleClose}
         onTogglePlay={handleTogglePlay}
         onNext={handleNext}

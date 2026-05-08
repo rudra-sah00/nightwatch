@@ -32,10 +32,6 @@ interface MobileFullPlayerProps {
   showLyrics: boolean;
   showQueue: boolean;
   lyricsRef: React.RefObject<HTMLDivElement | null>;
-  systemVol: {
-    volume: number | null;
-    setSystemVolume: (v: number) => Promise<void>;
-  } | null;
   onClose: () => void;
   onTogglePlay: () => void;
   onNext: () => void;
@@ -60,7 +56,6 @@ export function MobileFullPlayer({
   showLyrics,
   showQueue,
   lyricsRef,
-  systemVol,
   onClose,
   onTogglePlay,
   onNext,
@@ -308,11 +303,10 @@ export function MobileFullPlayer({
                 min={0}
                 max={1}
                 step={0.01}
-                value={systemVol?.volume ?? volume}
+                value={volume}
                 onChange={(e) => {
                   const v = Number(e.target.value);
-                  if (systemVol) systemVol.setSystemVolume(v);
-                  else onSetVolume(v);
+                  onSetVolume(v);
                 }}
                 className="flex-1 h-1 accent-white cursor-pointer"
               />
