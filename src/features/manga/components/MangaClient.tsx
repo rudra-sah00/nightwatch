@@ -38,7 +38,7 @@ function MangaCard({
   return (
     <Link
       href={`/manga/title/${title.titleId}`}
-      className="group bg-card border-[3px] border-border overflow-hidden hover:border-foreground/40 transition-colors relative"
+      className="group flex flex-col outline-none focus-visible:ring-2 focus-visible:ring-neo-blue rounded-lg overflow-hidden relative"
     >
       {onRemove && (
         <button
@@ -47,13 +47,13 @@ function MangaCard({
             e.preventDefault();
             onRemove();
           }}
-          className="absolute top-1.5 right-1.5 z-10 p-1.5 bg-background/80 border-[2px] border-border opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-neo-red hover:text-white"
+          className="absolute top-1.5 right-1.5 z-10 p-1.5 bg-black/60 backdrop-blur-sm rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-neo-red hover:text-white"
           aria-label={t('remove')}
         >
-          <X className="w-3 h-3" />
+          <X className="w-3 h-3 text-white" />
         </button>
       )}
-      <div className="aspect-[2/3] relative bg-muted">
+      <div className="aspect-[2/3] relative bg-muted border-[2px] border-border rounded-lg overflow-hidden">
         {title.portraitImageUrl ? (
           <img
             src={title.portraitImageUrl}
@@ -63,41 +63,36 @@ function MangaCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <BookOpen className="w-10 h-10 text-foreground/20" />
+            <BookOpen className="w-8 h-8 text-foreground/20" />
           </div>
         )}
         {title.updateStatus === 'new' && (
-          <span className="absolute top-2 left-2 bg-neo-cyan text-black font-headline font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-[2px] border-border">
+          <span className="absolute top-2 left-2 bg-neo-cyan text-black font-headline font-black text-[8px] uppercase tracking-widest px-1.5 py-0.5 border-[1.5px] border-border">
             {t('badgeNew')}
           </span>
         )}
         {title.updateStatus === 'up' && (
-          <span className="absolute top-2 left-2 bg-neo-yellow text-black font-headline font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-[2px] border-border">
+          <span className="absolute top-2 left-2 bg-neo-yellow text-black font-headline font-black text-[8px] uppercase tracking-widest px-1.5 py-0.5 border-[1.5px] border-border">
             {t('badgeUpdate')}
           </span>
         )}
       </div>
-      <div className="p-2.5">
-        <h3 className="font-headline font-black text-xs uppercase tracking-wide leading-tight line-clamp-2">
-          {title.name}
-        </h3>
-        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mt-1 line-clamp-1">
-          {title.author}
-        </p>
-      </div>
+      <p className="font-headline text-xs font-black uppercase tracking-tight leading-tight mt-2 line-clamp-2 group-hover:text-neo-blue transition-colors">
+        {title.name}
+      </p>
     </Link>
   );
 }
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 px-4 sm:px-6">
       {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map((id) => (
-        <div key={id} className="bg-card border-[3px] border-border">
-          <div className="aspect-[2/3] bg-muted animate-pulse" />
-          <div className="p-2.5 space-y-1.5">
-            <div className="h-3 bg-muted animate-pulse w-3/4" />
-            <div className="h-2 bg-muted animate-pulse w-1/2" />
+        <div key={id} className="flex flex-col">
+          <div className="aspect-[2/3] bg-muted animate-pulse rounded-lg border-[2px] border-border" />
+          <div className="mt-2 space-y-1">
+            <div className="h-3 bg-muted animate-pulse rounded w-3/4" />
+            <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
           </div>
         </div>
       ))}
@@ -251,7 +246,7 @@ export function MangaClient() {
         <SkeletonGrid />
       ) : visibleTitles.length > 0 ? (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 px-4 sm:px-6">
             {visibleTitles.map((mt) => (
               <MangaCard
                 key={mt.titleId}
