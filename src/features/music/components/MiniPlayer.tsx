@@ -142,7 +142,16 @@ export function MiniPlayer() {
         className="absolute top-0 left-0 right-0 h-1 bg-border cursor-pointer"
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
-          seek(((e.clientX - rect.left) / rect.width) * 100);
+          const percent = ((e.clientX - rect.left) / rect.width) * 100;
+          if (isRemoteControlling) {
+            window.dispatchEvent(
+              new CustomEvent('music:remote-command', {
+                detail: { command: 'seek', value: percent },
+              }),
+            );
+          } else {
+            seek(percent);
+          }
         }}
       >
         <div

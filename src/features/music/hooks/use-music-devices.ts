@@ -49,7 +49,7 @@ export function useMusicDevices(
   currentTrack: MusicTrack | null,
   isPlaying: boolean,
   progress: number,
-  duration: number,
+  _duration: number,
 ) {
   const { socket } = useSocket();
   const [devices, setDevices] = useState<Map<string, MusicDevice>>(new Map());
@@ -134,20 +134,7 @@ export function useMusicDevices(
     };
   }, [socket, activeTarget]);
 
-  // ─── Broadcast state when this device is playing (for controllers) ─
-
-  useEffect(() => {
-    if (!socket?.connected || !currentTrack) return;
-    // Only broadcast if no active target (we are the player)
-    if (activeTarget) return;
-
-    socket.emit(EVENTS.STATE_UPDATE, {
-      track: currentTrack,
-      isPlaying,
-      progress,
-      duration,
-    });
-  }, [socket, currentTrack, isPlaying, progress, duration, activeTarget]);
+  // State broadcasting is handled by MusicDeviceSync (throttled, includes queue).
 
   // ─── Handle incoming commands (when this device is the player) ──
 

@@ -105,6 +105,11 @@ export function MusicDeviceSync() {
           detail: { type: 'offline', socketId: data.socketId },
         }),
       );
+      // Clear remote source if the playing device disconnected
+      if (remoteSourceRef.current === data.socketId) {
+        remoteSourceRef.current = null;
+        setRemoteControlling(false);
+      }
     };
 
     const onRequestDevices = () => {
@@ -145,10 +150,11 @@ export function MusicDeviceSync() {
       socket.off('music:request_devices', onRequestDevices);
       socket.off('music:request_state', onRequestState);
     };
-  }, [socket, deviceName]);
+  }, [socket, deviceName, setRemoteControlling]);
 
   // ─── 3. Broadcast playback_started on NEW track only ───────────
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentTrack?.id triggers re-run on track change (reads from ref inside)
   useEffect(() => {
     if (!socket?.connected) return;
     const track = currentTrackRef.current;
@@ -164,7 +170,7 @@ export function MusicDeviceSync() {
       duration: durationRef.current,
     });
     setRemoteControlling(false);
-  }, [socket, deviceName, setRemoteControlling]);
+  }, [socket, deviceName, setRemoteControlling, currentTrack?.id]);
 
   // ─── 4. Throttled state_update broadcast (every 5s) ────────────
 

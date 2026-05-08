@@ -169,9 +169,9 @@ export function MusicDevicePicker() {
   // Target went offline — only act after initial device discovery settles
   const initialLoadRef = useRef(true);
   useEffect(() => {
-    // Skip the first render cycle — devices haven't been discovered yet
+    // Skip until devices have been discovered (at least one response received)
     if (initialLoadRef.current) {
-      initialLoadRef.current = false;
+      if (devices.length > 0) initialLoadRef.current = false;
       return;
     }
     if (activeTarget && !devices.find((d) => d.socketId === activeTarget)) {
@@ -359,6 +359,10 @@ export function MusicDevicePicker() {
                         ) : isActive ? (
                           <p className="text-[10px] text-primary">
                             Listening on
+                          </p>
+                        ) : device.isPlaying ? (
+                          <p className="text-[10px] text-neo-yellow font-bold">
+                            ♪ Now Playing
                           </p>
                         ) : null}
                       </div>
