@@ -137,11 +137,17 @@ async function refreshAccessToken(): Promise<boolean> {
         return true;
       }
 
-      // Refresh failed - session is invalid
-      tokenExpiresAt = null;
+      // Only treat 401/403 as "session truly invalid" — these mean the
+      // refresh token itself is rejected (expired, revoked, replayed).
+      // Transient errors (502 during deploy, 500 Redis hiccup) should NOT
+      // log the user out — the session is still valid, just unreachable.
+      if (response.status === 401 || response.status === 403) {
+        tokenExpiresAt = null;
+      }
       return false;
     } catch {
-      tokenExpiresAt = null;
+      // Network error (offline, DNS failure, etc.) — don't invalidate session.
+      // tokenExpiresAt stays set so apiFetch won't fire auth:expired.
       return false;
     } finally {
       isRefreshing = false;
@@ -230,16 +236,16 @@ export async function apiFetch<T>(
         return apiFetch<T>(endpoint, { ...options, skipRefresh: true });
       }
 
-      // Refresh failed - throw error to trigger logout
-      const error = new Error('SESSION_EXPIRED') as Error & ApiError;
-      error.status = 401;
-      error.code = 'SESSION_EXPIRED';
-
-      if (typeof window !== 'undefined') {
-        // Fire custom event so AuthProvider can handle global logout + redirect
+      // Refresh failed — only logout if session is truly invalid
+      // (tokenExpiresAt cleared by 401/403 from refresh endpoint).
+      // Transient errors (5xx, network) keep tokenExpiresAt set.
+      if (!tokenExpiresAt && typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth:expired'));
       }
 
+      const error = new Error('SESSION_EXPIRED') as Error & ApiError;
+      error.status = 401;
+      error.code = 'SESSION_EXPIRED';
       throw error;
     }
 
