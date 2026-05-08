@@ -12,19 +12,32 @@ const PRESET_NAMES = Object.keys(EQ_PRESETS);
  * Must be triggered by user gesture (initializes AudioContext).
  */
 export function Equalizer({ onClose }: { onClose: () => void }) {
-  const { initEqualizer, setEqBands, getEqBands } = useMusicPlayerContext();
+  const { initEqualizer, setEqBands, getEqBands, isRemoteControlling } =
+    useMusicPlayerContext();
   const [bands, setBands] = useState<EqualizerBand[]>(getEqBands);
   const [activePreset, setActivePreset] = useState('flat');
 
   const handleInit = () => {
-    initEqualizer();
+    if (!isRemoteControlling) initEqualizer();
+  };
+
+  const applyBands = (newBands: EqualizerBand[]) => {
+    if (isRemoteControlling) {
+      window.dispatchEvent(
+        new CustomEvent('music:remote-command', {
+          detail: { command: 'eq', value: newBands },
+        }),
+      );
+    } else {
+      setEqBands(newBands);
+    }
   };
 
   const applyPreset = (name: string) => {
     handleInit();
     const preset = EQ_PRESETS[name] || EQ_PRESETS.flat;
     setBands(preset);
-    setEqBands(preset);
+    applyBands(preset);
     setActivePreset(name);
   };
 
@@ -32,7 +45,7 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
     handleInit();
     const updated = bands.map((b, i) => (i === index ? { ...b, gain } : b));
     setBands(updated);
-    setEqBands(updated);
+    applyBands(updated);
     setActivePreset('');
   };
 

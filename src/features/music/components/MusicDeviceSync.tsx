@@ -26,6 +26,7 @@ export function MusicDeviceSync() {
     currentTrack,
     progress,
     duration,
+    queue,
     setRemoteControlling,
     isRemoteControlling,
     play,
@@ -46,6 +47,7 @@ export function MusicDeviceSync() {
   const currentTrackRef = useRef(currentTrack);
   const progressRef = useRef(progress);
   const durationRef = useRef(duration);
+  const queueRef = useRef(queue);
 
   // Keep refs in sync
   isPlayingRef.current = isPlaying;
@@ -53,6 +55,7 @@ export function MusicDeviceSync() {
   currentTrackRef.current = currentTrack;
   progressRef.current = progress;
   durationRef.current = duration;
+  queueRef.current = queue;
 
   // ─── 1. Advertise this device (heartbeat 60s) ──────────────────
 
@@ -164,6 +167,8 @@ export function MusicDeviceSync() {
 
   // ─── 4. Throttled state_update broadcast (every 5s) ────────────
 
+  const wasPlayingRef = useRef(false);
+
   useEffect(() => {
     if (
       !socket?.connected ||
@@ -175,8 +180,20 @@ export function MusicDeviceSync() {
         clearInterval(stateUpdateRef.current);
         stateUpdateRef.current = null;
       }
+      // Emit a final "stopped" update so remote controllers clear their state
+      if (socket?.connected && wasPlayingRef.current && !isRemoteControlling) {
+        socket.emit('music:state_update', {
+          track: currentTrackRef.current,
+          isPlaying: false,
+          progress: progressRef.current,
+          duration: durationRef.current,
+        });
+      }
+      wasPlayingRef.current = false;
       return;
     }
+
+    wasPlayingRef.current = true;
 
     const emitState = () => {
       socket.emit('music:state_update', {
@@ -184,6 +201,7 @@ export function MusicDeviceSync() {
         isPlaying: isPlayingRef.current,
         progress: progressRef.current,
         duration: durationRef.current,
+        queue: queueRef.current,
       });
     };
 
@@ -241,30 +259,29 @@ export function MusicDeviceSync() {
       isPlaying: boolean;
       progress: number;
       duration: number;
+      queue?: import('../api').MusicTrack[];
     }) => {
       if (data.socketId === socket.id) return;
       // Only auto-sync if we're not playing locally
       if (currentTrackRef.current && isPlayingRef.current) return;
+
+      // Target stopped playing — clear remote state
+      if (!data.isPlaying && remoteSourceRef.current === data.socketId) {
+        remoteSourceRef.current = null;
+        setRemoteControlling(false);
+        return;
+      }
+
       if (data.track && data.isPlaying) {
-        // Skip if already synced to this source (just update progress/duration)
-        if (remoteSourceRef.current === data.socketId) {
-          setRemoteControlling(
-            true,
-            data.track,
-            data.isPlaying,
-            data.progress,
-            data.duration,
-          );
-        } else {
-          remoteSourceRef.current = data.socketId;
-          setRemoteControlling(
-            true,
-            data.track,
-            data.isPlaying,
-            data.progress,
-            data.duration,
-          );
-        }
+        remoteSourceRef.current = data.socketId;
+        setRemoteControlling(
+          true,
+          data.track,
+          data.isPlaying,
+          data.progress,
+          data.duration,
+          data.queue,
+        );
       }
     };
 
@@ -299,6 +316,33 @@ export function MusicDeviceSync() {
       socket.off('music:transfer_playback', onTransfer);
     };
   }, [socket, play, seek, togglePlay]);
+
+  // ─── 7. Forward remote commands to the source device ───────────
+  // When auto-synced (no explicit activeTarget in useMusicDevices),
+  // the FullPlayer/MiniPlayer dispatch 'music:remote-command' events.
+  // Forward them directly via socket to the tracked remote source.
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const target = remoteSourceRef.current;
+      if (!target) return;
+
+      const command = typeof detail === 'string' ? detail : detail?.command;
+      const value = typeof detail === 'object' ? detail?.value : undefined;
+
+      socket.emit('music:command', {
+        targetSocketId: target,
+        command,
+        value,
+      });
+    };
+
+    window.addEventListener('music:remote-command', handler);
+    return () => window.removeEventListener('music:remote-command', handler);
+  }, [socket]);
 
   return null;
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Airplay,
   ListMusic,
   Mic2,
   Moon,
@@ -44,7 +43,6 @@ interface MobileFullPlayerProps {
   onSeek: (percent: number) => void;
   onSetVolume: (v: number) => void;
   onPlay: (track: MusicTrack, queue?: MusicTrack[]) => void;
-  onShowAirPlay: () => void;
   onToggleLyrics: () => void;
   onToggleQueue: () => void;
 }
@@ -70,7 +68,6 @@ export function MobileFullPlayer({
   onSeek,
   onSetVolume,
   onPlay,
-  onShowAirPlay,
   onToggleLyrics,
   onToggleQueue,
 }: MobileFullPlayerProps) {
@@ -343,13 +340,6 @@ export function MobileFullPlayer({
                 className={`p-2.5 rounded-full transition-colors ${showEq ? 'bg-white/20 text-white' : 'text-white/50'}`}
               >
                 <SlidersHorizontal className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={onShowAirPlay}
-                className="p-2.5 text-white/50"
-              >
-                <Airplay className="w-5 h-5" />
               </button>
               <button
                 type="button"

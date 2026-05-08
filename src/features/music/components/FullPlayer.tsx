@@ -48,13 +48,13 @@ export function FullPlayer() {
     volume,
     setVolume,
     play,
-    showAirPlay,
     queue,
     isRemoteControlling,
     remoteTrack,
     remoteIsPlaying,
     remoteProgress,
     remoteDuration,
+    remoteQueue,
   } = useMusicPlayerContext();
 
   const mobile = useIsMobile();
@@ -100,7 +100,34 @@ export function FullPlayer() {
       .catch(() => {});
   }, [trackId]);
 
-  const currentTime = (displayProgress / 100) * displayDuration;
+  // Interpolate remote progress locally for smooth lyrics sync.
+  // state_update arrives every 5s — between updates, tick progress forward 1s/s.
+  const [interpolatedTime, setInterpolatedTime] = useState(0);
+  const interpolateRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!isRemoteControlling || displayDuration <= 0) {
+      setInterpolatedTime(0);
+      return;
+    }
+    // Sync to latest server value
+    setInterpolatedTime((displayProgress / 100) * displayDuration);
+  }, [displayProgress, displayDuration, isRemoteControlling]);
+
+  useEffect(() => {
+    if (interpolateRef.current) clearInterval(interpolateRef.current);
+    if (!isRemoteControlling || !displayPlaying || displayDuration <= 0) return;
+    interpolateRef.current = setInterval(() => {
+      setInterpolatedTime((t) => Math.min(t + 1, displayDuration));
+    }, 1000);
+    return () => {
+      if (interpolateRef.current) clearInterval(interpolateRef.current);
+    };
+  }, [isRemoteControlling, displayPlaying, displayDuration]);
+
+  const currentTime = isRemoteControlling
+    ? interpolatedTime
+    : (displayProgress / 100) * displayDuration;
   const currentLineIndex = useMemo(() => {
     if (!lyrics) return -1;
     let idx = -1;
@@ -177,6 +204,22 @@ export function FullPlayer() {
           new CustomEvent('music:remote-command', { detail: 'prev' }),
         )
     : prev;
+  const handleSeek = isRemoteControlling
+    ? (percent: number) =>
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', {
+            detail: { command: 'seek', value: percent },
+          }),
+        )
+    : seek;
+  const handleSetVolume = isRemoteControlling
+    ? (v: number) =>
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', {
+            detail: { command: 'volume', value: v },
+          }),
+        )
+    : setVolume;
 
   if (mobile) {
     return (
@@ -186,7 +229,7 @@ export function FullPlayer() {
         progress={displayProgress}
         duration={displayDuration}
         volume={volume}
-        queue={queue}
+        queue={isRemoteControlling ? remoteQueue : queue}
         lyrics={lyrics}
         currentLineIndex={currentLineIndex}
         closing={closing}
@@ -198,10 +241,9 @@ export function FullPlayer() {
         onTogglePlay={handleTogglePlay}
         onNext={handleNext}
         onPrev={handlePrev}
-        onSeek={seek}
-        onSetVolume={setVolume}
+        onSeek={handleSeek}
+        onSetVolume={handleSetVolume}
         onPlay={play}
-        onShowAirPlay={showAirPlay}
         onToggleLyrics={handleToggleLyrics}
         onToggleQueue={handleToggleQueue}
       />
@@ -226,10 +268,10 @@ export function FullPlayer() {
       onTogglePlay={handleTogglePlay}
       onNext={handleNext}
       onPrev={handlePrev}
-      onSeek={seek}
+      onSeek={handleSeek}
       onToggleShuffle={toggleShuffle}
       onCycleRepeat={cycleRepeat}
-      onSetVolume={setVolume}
+      onSetVolume={handleSetVolume}
       onPlay={play}
     />
   );

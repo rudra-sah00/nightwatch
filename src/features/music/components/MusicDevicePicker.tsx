@@ -50,6 +50,9 @@ export function MusicDevicePicker() {
     next,
     prev,
     togglePlay,
+    setVolume,
+    initEqualizer,
+    setEqBands,
     setRemoteControlling,
   } = player;
   const [open, setOpen] = useState(false);
@@ -83,12 +86,31 @@ export function MusicDevicePicker() {
         case 'seek':
           if (typeof value === 'number') seek(value);
           break;
+        case 'volume':
+          if (typeof value === 'number') setVolume(value);
+          break;
+        case 'eq':
+          if (value) {
+            initEqualizer();
+            setEqBands(value as unknown as Parameters<typeof setEqBands>[0]);
+          }
+          break;
         case 'stop':
           stop();
           break;
       }
     });
-  }, [setOnCommand, togglePlay, next, prev, seek, stop]);
+  }, [
+    setOnCommand,
+    togglePlay,
+    next,
+    prev,
+    seek,
+    stop,
+    setVolume,
+    initEqualizer,
+    setEqBands,
+  ]);
 
   // Handle incoming transfer (MusicDeviceSync handles the actual playback)
   useEffect(() => {

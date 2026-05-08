@@ -102,6 +102,8 @@ interface MusicPlayerContextValue {
   remoteProgress: number;
   /** Duration in seconds from remote device. */
   remoteDuration: number;
+  /** Queue from the remote device. */
+  remoteQueue: import('../api').MusicTrack[];
   /** Set remote controlling state. */
   setRemoteControlling: (
     active: boolean,
@@ -109,6 +111,7 @@ interface MusicPlayerContextValue {
     playing?: boolean,
     progress?: number,
     duration?: number,
+    queue?: import('../api').MusicTrack[],
   ) => void;
 }
 
@@ -141,12 +144,14 @@ export function MusicPlayerProvider({
     isPlaying: boolean;
     progress: number;
     duration: number;
+    queue: MusicTrack[];
   }>({
     controlling: false,
     track: null,
     isPlaying: false,
     progress: 0,
     duration: 0,
+    queue: [],
   });
 
   useEffect(() => {
@@ -437,12 +442,14 @@ export function MusicPlayerProvider({
       remoteIsPlaying: remoteState.isPlaying,
       remoteProgress: remoteState.progress,
       remoteDuration: remoteState.duration,
+      remoteQueue: remoteState.queue,
       setRemoteControlling: (
         active: boolean,
         track?: MusicTrack | null,
         playing?: boolean,
         prog?: number,
         dur?: number,
+        q?: MusicTrack[],
       ) => {
         setRemoteState((prev) => ({
           controlling: active,
@@ -450,6 +457,7 @@ export function MusicPlayerProvider({
           isPlaying: playing !== undefined ? playing : prev.isPlaying,
           progress: prog !== undefined ? prog : prev.progress,
           duration: dur !== undefined ? dur : prev.duration,
+          queue: q !== undefined ? q : prev.queue,
         }));
       },
     }),
