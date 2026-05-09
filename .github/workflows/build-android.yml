@@ -91,10 +91,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APK="android/app/build/outputs/apk/release/app-release.apk"
+          cp "$APK" "android/app/build/outputs/apk/release/Nightwatch-Android.apk"
+          APK="android/app/build/outputs/apk/release/Nightwatch-Android.apk"
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             TAG="${{ github.ref_name }}"
           else
             TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
           fi
           echo "Uploading APK to release: $TAG"
-          gh release upload "$TAG" "$APK#Nightwatch-Android.apk" --clobber
+          gh release upload "$TAG" "$APK" --clobber
