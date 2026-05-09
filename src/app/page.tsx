@@ -89,7 +89,7 @@ const PLATFORM_BUTTONS = [
   },
   {
     key: 'tv' as const,
-    label: 'Android TV',
+    label: 'TV',
     icon: (
       <svg
         viewBox="0 0 24 24"
