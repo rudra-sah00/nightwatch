@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
 /** Routes that trigger automatic music stop (video playback pages). */
-const STOP_ROUTES = ['/watch/', '/live/', '/watch-party/'];
+const STOP_ROUTES = ['/watch/', '/live/', '/watch-party/', '/clip/'];
 
 /**
  * Headless component that automatically stops music playback when the user
