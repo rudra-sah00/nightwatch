@@ -1,66 +1,110 @@
 'use client';
 
-import {
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  Radio,
-  Search,
-} from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { ChevronDown, Play, Search, Tv, Users, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { LiveMatchSkeleton } from '@/components/ui/skeletons';
-import { LiveMatchCard } from '@/features/livestream/components/LiveMatchCard';
-import { useLivestreams } from '@/features/livestream/hooks/use-livestreams';
-import { useSports } from '@/features/livestream/hooks/use-sports';
-import { useLiveContent } from './use-live-content';
+import type { IptvChannel } from '@/features/livestream/api';
+import {
+  useIptvCategories,
+  useIptvChannels,
+} from '@/features/livestream/hooks/use-iptv';
+import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
+import { generateRoomId } from '@/features/watch-party/room/utils';
+import { useAuth } from '@/providers/auth-provider';
 
-function LiveContent() {
-  const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
-  const [server1Search, setServer1Search] = useState('');
+export default function LiveClient() {
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [page, setPage] = useState(1);
+  const [isCatOpen, setIsCatOpen] = useState(false);
   const t = useTranslations('live');
-  const format = useFormatter();
+  const router = useRouter();
 
-  const { activeTab, isPending, handleTabChange } = useLiveContent();
-
-  const { sports } = useSports();
-  const { schedule, isLoading, error, refresh } = useLivestreams(activeTab);
-
-  const isAllChannelsView = activeTab === 'all_channels';
-
-  // Separate live, upcoming, and ended matches
-  const endedMatches = schedule.filter((m) => m.status === 'MatchEnded');
-
-  // Group BOTH Live and Upcoming matches by date
-  const activeMatches = schedule.filter(
-    (m) => m.status === 'MatchIng' || m.status === 'MatchNotStart',
+  const { categories } = useIptvCategories();
+  const { channels, total, totalPages, isLoading } = useIptvChannels(
+    page,
+    30,
+    debouncedSearch,
+    selectedCategory,
   );
 
-  const upcomingByDate = activeMatches.reduce(
-    (acc, match) => {
-      const date = format.dateTime(new Date(match.startTime), {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      });
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(match);
-      return acc;
-    },
-    {} as Record<string, typeof activeMatches>,
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
+    null,
   );
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    setDebounceTimer(
+      setTimeout(() => {
+        setDebouncedSearch(val);
+        setPage(1);
+      }, 400),
+    );
+  };
 
-  const activeSport = sports.find((s) => s.id === activeTab);
+  const handleCategorySelect = (cat: string) => {
+    setSelectedCategory(cat === selectedCategory ? '' : cat);
+    setPage(1);
+    setIsCatOpen(false);
+  };
+
+  const { user } = useAuth();
+  const [selectedChannel, setSelectedChannel] = useState<IptvChannel | null>(
+    null,
+  );
+  const [isCreatingParty, setIsCreatingParty] = useState(false);
+
+  const handleChannelClick = (channel: IptvChannel) => {
+    if (channel.streamUrl) setSelectedChannel(channel);
+  };
+
+  const handleWatchSolo = () => {
+    if (!selectedChannel) return;
+    const params = new URLSearchParams({
+      title: selectedChannel.name,
+      type: 'iptv',
+      ...(selectedChannel.icon && { poster: selectedChannel.icon }),
+    });
+    router.push(`/live/${selectedChannel.id}?${params.toString()}`);
+    setSelectedChannel(null);
+  };
+
+  const handleWatchParty = async () => {
+    if (!selectedChannel) return;
+    if (!user) {
+      toast.error(t('loginRequired'), { id: 'iptv-login' });
+      setSelectedChannel(null);
+      return;
+    }
+    setIsCreatingParty(true);
+    const roomId = generateRoomId();
+    const response = await createPartyRoom(roomId, {
+      contentId: selectedChannel.id,
+      title: selectedChannel.name,
+      type: 'livestream',
+      streamUrl: selectedChannel.streamUrl!,
+      posterUrl: selectedChannel.icon || undefined,
+    });
+    setIsCreatingParty(false);
+    setSelectedChannel(null);
+    if (response.room) {
+      router.push(`/watch-party/${response.room.id}?new=true`);
+    } else {
+      toast.error(response.error || 'Failed to create room');
+    }
+  };
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
-      {/* Hero Header — clean, no controls */}
+      {/* Hero */}
       <div className="mb-8 bg-neo-yellow relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
         <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
-
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
             {t('heroTitle')}
@@ -75,221 +119,260 @@ function LiveContent() {
         </div>
       </div>
 
-      {/* Controls Bar — server toggle + sport selector */}
-      <div className="container mx-auto px-6 md:px-10 mb-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Sport Selector */}
-          {
-            <div className="relative flex-grow min-w-0 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setIsSportMenuOpen(!isSportMenuOpen)}
-                aria-haspopup="menu"
-                aria-expanded={isSportMenuOpen}
-                aria-controls="live-sport-menu"
-                className="flex items-center justify-between gap-4 px-5 py-3 font-headline font-black text-sm uppercase tracking-widest transition-colors duration-200 border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 min-w-0"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-3 h-3 bg-neo-red border-[2px] border-border rounded-full animate-pulse shrink-0" />
-                  <span className="truncate">{activeSport?.label}</span>
-                </div>
-                <ChevronDown
-                  className={`w-5 h-5 shrink-0 transition-transform duration-300 ${
-                    isSportMenuOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {isSportMenuOpen && (
-                <div
-                  id="live-sport-menu"
-                  role="menu"
-                  className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none p-2 max-h-[400px] overflow-y-auto no-scrollbar rounded-md shadow-md"
-                >
-                  <div className="flex flex-col gap-1">
-                    {sports.map((sport) => (
-                      <button
-                        type="button"
-                        key={sport.id}
-                        role="menuitem"
-                        onClick={() => {
-                          handleTabChange(sport.id);
-                          setIsSportMenuOpen(false);
-                        }}
-                        className={`w-full px-5 py-3 font-headline font-bold text-sm uppercase tracking-widest border-[2px] border-border transition-colors text-left flex items-center justify-between cursor-pointer rounded-md focus-visible:outline-none focus-visible:bg-muted ${
-                          activeTab === sport.id
-                            ? 'bg-muted text-foreground'
-                            : 'bg-background hover:bg-muted/80'
-                        }`}
-                      >
-                        {sport.label}
-                        {activeTab === sport.id && (
-                          <div className="w-3 h-3 bg-primary rounded-full" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          }
-        </div>
-      </div>
-
-      {/* Content */}
       <div className="container mx-auto px-6 md:px-10">
-        {isLoading || isPending ? (
-          <div className="space-y-16">
-            <section>
-              <div className="h-10 w-32 md:w-48 bg-neo-red border-[4px] border-border mb-8 animate-pulse rounded-md" />
-              <div className="flex flex-col gap-4">
-                <LiveMatchSkeleton />
-                <LiveMatchSkeleton />
-                <LiveMatchSkeleton />
-              </div>
-            </section>
-            <section>
-              <div className="h-10 w-32 md:w-48 bg-neo-blue border-[4px] border-border mb-8 animate-pulse rounded-md" />
-              <div className="flex flex-col gap-4">
-                <LiveMatchSkeleton />
-                <LiveMatchSkeleton />
-                <LiveMatchSkeleton />
-              </div>
-            </section>
+        {/* Search + Category */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="relative flex-grow">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder={t('searchChannels')}
+              className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
+            />
           </div>
-        ) : error ? (
-          <div className="py-20 text-center flex flex-col items-center">
-            <div className="bg-neo-red border-[4px] border-border  px-10 py-12 max-w-lg w-full flex flex-col items-center">
-              <Radio className="w-12 h-12 text-foreground mb-6" />
-              <p className="font-headline font-black text-2xl uppercase tracking-tighter text-foreground mb-8 bg-background px-4 py-2 border-[4px] border-border">
-                {t('failedToLoadSchedule')}
-              </p>
-              <Button
-                onClick={refresh}
-                className="bg-background text-foreground border-[3px] border-border px-8 py-4 font-headline text-lg font-black uppercase tracking-widest transition-colors hover:bg-muted"
-              >
-                {t('tryAgain')}
-              </Button>
-            </div>
+          <div className="relative sm:w-64">
+            <button
+              type="button"
+              onClick={() => setIsCatOpen(!isCatOpen)}
+              className="flex items-center justify-between gap-2 px-5 py-4 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md"
+            >
+              <span className="truncate">
+                {selectedCategory || 'All Categories'}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 shrink-0 transition-transform ${isCatOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {isCatOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded-md shadow-md">
+                <button
+                  type="button"
+                  onClick={() => handleCategorySelect('')}
+                  className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded ${!selectedCategory ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                >
+                  All Categories
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    type="button"
+                    key={cat}
+                    onClick={() => handleCategorySelect(cat)}
+                    className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded truncate ${selectedCategory === cat ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        ) : schedule.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border  text-center max-w-2xl mx-auto">
-            <Calendar className="w-20 h-20 text-neo-blue mb-6" />
-            <h3 className="text-4xl font-black font-headline uppercase tracking-tighter text-foreground mb-4">
-              {isAllChannelsView ? t('noChannelsFound') : t('noMatchesFound')}
+        </div>
+
+        {/* Count */}
+        <div className="mb-6 flex items-center justify-between">
+          <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+            {total.toLocaleString()} channels
+          </span>
+          {totalPages > 1 && (
+            <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+              Page {page}/{totalPages}
+            </span>
+          )}
+        </div>
+
+        {/* Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {[
+              'a',
+              'b',
+              'c',
+              'd',
+              'e',
+              'f',
+              'g',
+              'h',
+              'i',
+              'j',
+              'k',
+              'l',
+              'm',
+              'n',
+              'o',
+              'p',
+              'q',
+              'r',
+            ].map((id) => (
+              <div
+                key={id}
+                className="aspect-square bg-muted border-[3px] border-border rounded-lg animate-pulse"
+              />
+            ))}
+          </div>
+        ) : channels.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border text-center max-w-2xl mx-auto rounded-lg">
+            <Tv className="w-20 h-20 text-neo-blue mb-6" />
+            <h3 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
+              {t('noChannelsFound')}
             </h3>
-            <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-md">
-              {isAllChannelsView
-                ? t('noChannelsAvailable')
-                : t('noMatchesScheduled', {
-                    sport: activeSport?.label?.toLowerCase() || '',
-                  })}
-            </p>
           </div>
         ) : (
-          <div className="space-y-16">
-            {isAllChannelsView && (
-              <section>
-                <div className="relative w-full mb-8">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={server1Search}
-                    onChange={(e) => setServer1Search(e.target.value)}
-                    placeholder={t('searchChannels')}
-                    className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
-                  />
-                </div>
-                <div className="flex flex-col gap-4">
-                  {(server1Search
-                    ? schedule.filter((m) =>
-                        (m.channelName || m.team1?.name || '')
-                          .toLowerCase()
-                          .includes(server1Search.toLowerCase()),
-                      )
-                    : schedule
-                  ).map((match) => (
-                    <LiveMatchCard key={match.id} match={match} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {!isAllChannelsView && (
-              <>
-                {Object.keys(upcomingByDate).length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-4 mb-8 bg-neo-blue border-[4px] border-border px-5 py-3 inline-flex ">
-                      <Clock className="w-6 h-6 text-primary-foreground stroke-[3px]" />
-                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
-                        {t('schedule')}
-                      </h2>
-                    </div>
-                    <div className="space-y-8">
-                      {Object.entries(upcomingByDate).map(([date, matches]) => {
-                        const isToday =
-                          format.dateTime(new Date(), {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                          }) === date;
-                        return (
-                          <div key={date} className="mb-8">
-                            <div className="px-6 py-4 bg-background border-[4px] border-border mb-6 flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <Calendar className="w-6 h-6 text-foreground stroke-[3px]" />
-                                <span className="text-xl md:text-2xl font-black uppercase tracking-widest text-foreground font-headline mt-1">
-                                  {isToday ? t('today') : date}
-                                </span>
-                              </div>
-                              <span className="bg-primary text-neo-yellow px-3 py-1 text-sm font-black font-headline uppercase tracking-widest">
-                                {matches.length}{' '}
-                                {matches.length === 1
-                                  ? t('match')
-                                  : t('matches')}
-                              </span>
-                            </div>
-                            <div className="flex flex-col gap-4">
-                              {matches.map((match) => (
-                                <LiveMatchCard key={match.id} match={match} />
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </section>
-                )}
-                {endedMatches.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-4 mb-8 bg-primary border-[4px] border-border px-5 py-3 inline-flex ">
-                      <CheckCircle2 className="w-6 h-6 text-primary-foreground stroke-[3px]" />
-                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-primary-foreground font-headline">
-                        {t('completed')}
-                      </h2>
-                      <span className="bg-secondary text-secondary-foreground px-3 py-1 border-[3px] border-border text-sm font-black font-headline uppercase tracking-widest">
-                        {endedMatches.length}{' '}
-                        {endedMatches.length === 1 ? t('match') : t('matches')}
-                      </span>
-                    </div>
-                    <div className="bg-transparent">
-                      <div className="flex flex-col gap-4">
-                        {endedMatches.map((match) => (
-                          <LiveMatchCard key={match.id} match={match} />
-                        ))}
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {channels.map((channel) => (
+                <button
+                  key={channel.id}
+                  type="button"
+                  onClick={() => handleChannelClick(channel)}
+                  className="group flex flex-col items-center gap-3 p-4 bg-background border-[3px] border-border rounded-lg hover:border-neo-blue hover:bg-muted/50 transition-colors cursor-pointer"
+                >
+                  <div className="w-16 h-16 relative shrink-0 rounded-lg overflow-hidden bg-muted border-[2px] border-border">
+                    {channel.icon ? (
+                      <Image
+                        src={channel.icon}
+                        alt={channel.name}
+                        fill
+                        className="object-contain p-1"
+                        sizes="64px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Tv className="w-8 h-8 text-muted-foreground" />
                       </div>
-                    </div>
-                  </section>
-                )}
-              </>
+                    )}
+                  </div>
+                  <div className="text-center min-w-0 w-full">
+                    <p className="font-headline font-bold text-xs uppercase tracking-wider text-foreground truncate">
+                      {channel.name}
+                    </p>
+                    {channel.category && (
+                      <p className="font-headline text-[10px] uppercase tracking-widest text-muted-foreground truncate mt-1">
+                        {channel.category}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-10">
+                <Button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-muted disabled:opacity-40"
+                >
+                  Prev
+                </Button>
+                <span className="font-headline font-black text-sm uppercase tracking-widest px-4">
+                  {page}
+                </span>
+                <Button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-muted disabled:opacity-40"
+                >
+                  Next
+                </Button>
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
+
+      {/* Channel Detail Modal */}
+      {selectedChannel && (
+        <div
+          className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] overscroll-contain"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-default"
+            onClick={() => setSelectedChannel(null)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setSelectedChannel(null);
+            }}
+            aria-label="Close"
+            tabIndex={-1}
+          />
+          <div className="relative w-full h-full flex flex-col bg-card overflow-hidden pointer-events-auto">
+            {/* Header */}
+            <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center px-[max(1rem,env(safe-area-inset-left))] pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex-shrink-0 z-20 sticky top-0">
+              <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg truncate flex-1 min-w-0 pr-4">
+                {selectedChannel.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedChannel(null)}
+                className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0"
+              >
+                <X className="w-5 h-5 stroke-[3px]" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-card">
+              {/* Hero */}
+              <div className="w-full aspect-video md:h-[40vh] md:aspect-auto bg-primary border-b-[4px] border-border relative flex-shrink-0 flex items-center justify-center">
+                {selectedChannel.icon ? (
+                  <Image
+                    src={selectedChannel.icon}
+                    alt={selectedChannel.name}
+                    fill
+                    className="object-contain p-8 md:p-16"
+                    sizes="100vw"
+                  />
+                ) : (
+                  <Tv className="w-24 h-24 text-primary-foreground/50" />
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="p-6 md:p-10 bg-background flex-shrink-0 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-card border-2 border-border text-xs font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2">
+                    <Tv className="w-4 h-4 stroke-[3px]" /> Live TV
+                  </span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground leading-tight">
+                  {selectedChannel.name}
+                </h1>
+                {selectedChannel.category && (
+                  <p className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+                    {selectedChannel.category}
+                  </p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="sticky bottom-0 z-30 px-6 pb-6 md:px-10 md:pb-10 bg-background border-t-[4px] border-border flex-shrink-0">
+                <div className="flex flex-col sm:flex-row gap-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={handleWatchSolo}
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-blue border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-primary-foreground hover:opacity-90 transition-opacity"
+                  >
+                    <Play className="w-5 h-5 fill-current stroke-[3px]" />
+                    {t('watchSolo')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleWatchParty}
+                    disabled={isCreatingParty}
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-yellow border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-foreground hover:opacity-90 transition-opacity disabled:opacity-50 hidden sm:flex"
+                  >
+                    <Users className="w-5 h-5 stroke-[3px]" />
+                    {isCreatingParty ? 'Creating...' : t('watchTogether')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-export default function LiveClient() {
-  return <LiveContent />;
 }

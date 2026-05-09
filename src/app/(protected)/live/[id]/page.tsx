@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
+import { fetchIptvResolve } from '@/features/livestream/api';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
@@ -18,29 +19,44 @@ export default function LiveMatchPlayerPage() {
   const searchParams = useSearchParams();
   const matchId = params.id as string;
   const titleFromRoute = searchParams.get('title')?.trim() ?? '';
-  const { match, isLoading, error } = useLiveMatch(matchId);
+  const isIptv = searchParams.get('type') === 'iptv';
+  const iptvPoster = searchParams.get('poster') ?? null;
+  const { match, isLoading, error } = useLiveMatch(isIptv ? '' : matchId);
   const t = useTranslations('live');
   const format = useFormatter();
+
+  // IPTV resolve state (always declared, only used when isIptv)
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [resolving, setResolving] = useState(true);
+
+  useEffect(() => {
+    if (!isIptv) {
+      setResolving(false);
+      return;
+    }
+    fetchIptvResolve(matchId)
+      .then((url) => {
+        setResolvedUrl(url);
+        setResolving(false);
+      })
+      .catch(() => setResolving(false));
+  }, [matchId, isIptv]);
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isIptv) return;
     if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
       return;
 
     const initSession = async () => {
-      // PREVENT DOUBLE FIRE
       if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
         return;
 
       setSessionLoading(true);
       try {
-        console.log('[NW-Play] Live: fetching stream', {
-          playPath: match.playPath,
-          matchId: match.id,
-        });
         const response = await playVideo({
           type: 'livestream',
           title: `${match.team1.name} vs ${match.team2.name}`,
@@ -48,16 +64,11 @@ export default function LiveMatchPlayerPage() {
         });
 
         if (response.success && response.masterPlaylistUrl) {
-          console.log('[NW-Play] Live: got stream URL', {
-            url: response.masterPlaylistUrl.substring(0, 80),
-          });
           setSessionUrl(response.masterPlaylistUrl);
         } else {
-          console.warn('[NW-Play] Live: no stream URL', response);
           setSessionError('failed_stream_session');
         }
       } catch (_err) {
-        console.error('[NW-Play] Live: stream error', _err);
         setSessionError('error_stream_server');
       } finally {
         setSessionLoading(false);
@@ -65,7 +76,64 @@ export default function LiveMatchPlayerPage() {
     };
 
     initSession();
-  }, [match, sessionUrl, sessionLoading, sessionError]);
+  }, [match, sessionUrl, sessionLoading, sessionError, isIptv]);
+
+  // === IPTV Render ===
+  if (isIptv) {
+    if (resolving) return <PlayerLoadingSkeleton />;
+    if (!resolvedUrl) {
+      return (
+        <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
+          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
+            {t('streamUnavailableHeading')}
+          </h2>
+          <Link href="/live">
+            <Button
+              variant="default"
+              className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest"
+            >
+              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
+              {t('backToSchedule')}
+            </Button>
+          </Link>
+        </div>
+      );
+    }
+
+    const metadata: VideoMetadata = {
+      movieId: matchId,
+      title: titleFromRoute || 'Live TV',
+      type: 'livestream',
+      posterUrl: iptvPoster || undefined,
+      providerId: 's1',
+    };
+
+    return (
+      <div className="min-h-screen bg-background">
+        <WatchLivePlayer
+          streamUrl={resolvedUrl}
+          metadata={metadata}
+          secondaryPosterUrl={null}
+          mobileLayout="inline"
+        />
+        <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
+                {titleFromRoute || 'Live TV'}
+              </h1>
+              <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">
+                IPTV
+              </p>
+            </div>
+            <Badge variant="red" className="animate-pulse shrink-0">
+              {t('liveStream')}
+            </Badge>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <PlayerLoadingSkeleton />;

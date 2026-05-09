@@ -3,13 +3,13 @@ include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/.pnpm/@capacitor+android@8.3.1_@capacitor+core@8.3.1/node_modules/@capacitor/android/capacitor')
 
 include ':anuradev-capacitor-phone-call-notification'
-project(':anuradev-capacitor-phone-call-notification').projectDir = new File('../node_modules/.pnpm/@anuradev+capacitor-phone-call-notification@7.5.5_@capacitor+core@8.3.1/node_modules/@anuradev/capacitor-phone-call-notification/android')
+project(':anuradev-capacitor-phone-call-notification').projectDir = new File('../node_modules/.pnpm/@anuradev+capacitor-phone-call-notification@7.5.5_patch_hash=32fd4e578096b067477ecbc9d6_57453c8b234332d45ed36e9f7787bc00/node_modules/@anuradev/capacitor-phone-call-notification/android')
 
 include ':capacitor-community-keep-awake'
 project(':capacitor-community-keep-awake').projectDir = new File('../node_modules/.pnpm/@capacitor-community+keep-awake@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor-community/keep-awake/android')
 
 include ':capacitor-community-volume-buttons'
-project(':capacitor-community-volume-buttons').projectDir = new File('../node_modules/.pnpm/@capacitor-community+volume-buttons@8.0.0_@capacitor+core@8.3.1/node_modules/@capacitor-community/volume-buttons/android')
+project(':capacitor-community-volume-buttons').projectDir = new File('../node_modules/.pnpm/@capacitor-community+volume-buttons@8.0.0_patch_hash=ad5f610abdf71ae165afd5083ae26afba7_92bc457206dada1fe2014cb514ace259/node_modules/@capacitor-community/volume-buttons/android')
 
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/.pnpm/@capacitor+app@8.1.0_@capacitor+core@8.3.1/node_modules/@capacitor/app/android')
@@ -48,7 +48,7 @@ include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge/android')
 
 include ':capgo-capacitor-incoming-call-kit'
-project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-incoming-call-kit/android')
+project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit/android')
 
 include ':ottimis-capacitor-volumes'
 project(':ottimis-capacitor-volumes').projectDir = new File('../node_modules/.pnpm/@ottimis+capacitor-volumes@7.0.0_@capacitor+core@8.3.1/node_modules/@ottimis/capacitor-volumes/android')
