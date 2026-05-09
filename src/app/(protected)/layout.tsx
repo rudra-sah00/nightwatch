@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import { MobileAppLifecycle } from '@/components/layout/MobileAppLifecycle';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
 import { FloatingDisc } from '@/features/music/components/FloatingDisc';
@@ -23,24 +24,32 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CallProvider>
-      <MusicPlayerProvider>
-        <PipProvider>
-          <CallOverlay />
-          <PipOverlay />
-          <FullPlayer />
-          <FloatingDisc />
-          <RemoteDisc />
-          <MusicAutoStop />
-          <MusicDeviceSync />
-          <MusicDiscordPresence />
-          <MusicMediaSession />
-          <MobileAppLifecycle />
-          <div className="h-full bg-background flex flex-col overflow-hidden">
-            <main className="flex-1 w-full min-h-0">{children}</main>
-          </div>
-        </PipProvider>
-      </MusicPlayerProvider>
-    </CallProvider>
+    <FeatureErrorBoundary feature="Calls" silent>
+      <CallProvider>
+        <FeatureErrorBoundary feature="Music" silent>
+          <MusicPlayerProvider>
+            <PipProvider>
+              <FeatureErrorBoundary feature="Call Overlay" silent>
+                <CallOverlay />
+              </FeatureErrorBoundary>
+              <PipOverlay />
+              <FeatureErrorBoundary feature="Music Player" silent>
+                <FullPlayer />
+                <FloatingDisc />
+                <MusicAutoStop />
+                <MusicDeviceSync />
+                <MusicDiscordPresence />
+                <MusicMediaSession />
+              </FeatureErrorBoundary>
+              <RemoteDisc />
+              <MobileAppLifecycle />
+              <div className="h-full bg-background flex flex-col overflow-hidden">
+                <main className="flex-1 w-full min-h-0">{children}</main>
+              </div>
+            </PipProvider>
+          </MusicPlayerProvider>
+        </FeatureErrorBoundary>
+      </CallProvider>
+    </FeatureErrorBoundary>
   );
 }
