@@ -85,10 +85,6 @@
       "title": "ไลบรารีของคุณ",
       "description": "เรียกดูคลิปที่บันทึก การบันทึก และเนื้อหาที่รวบรวมไว้ในที่เดียว"
     },
-    "music": {
-      "title": "เพลง",
-      "description": "ฟังสถานีวิทยุและเพลงที่คัดสรรขณะเรียกดู"
-    },
     "askAi": {
       "title": "ถาม AI",
       "description": "พูดคุยกับผู้ช่วย AI ของคุณ ขอคำแนะนำ ค้นหาเนื้อหา หรือควบคุมการเล่นด้วยเสียงของคุณ"
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "ตัวตนผู้สร้าง",
@@ -203,47 +203,6 @@
     "forbidden": "คุณไม่มีสิทธิ์ดำเนินการนี้",
     "requestTimeout": "คำขอหมดเวลา กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
   },
-  "friends": {
-    "title": "เพื่อน",
-    "noFriends": "ยังไม่มีเพื่อน",
-    "online": "ออนไลน์",
-    "offline": "ออฟไลน์",
-    "accept": "ยอมรับ",
-    "reject": "ปฏิเสธ",
-    "pendingRequests": "คำขอ",
-    "addFriend": "เพิ่มเพื่อน",
-    "addFriendPlaceholder": "ป้อนชื่อผู้ใช้",
-    "requestSent": "ส่งคำขอเป็นเพื่อนแล้ว!",
-    "requestFailed": "ไม่สามารถส่งคำขอได้",
-    "noUsersFound": "ไม่พบผู้ใช้",
-    "sentRequests": "ส่งแล้ว",
-    "cancelRequest": "ยกเลิก",
-    "alreadyFriends": "เพื่อน",
-    "requestSentLabel": "ส่งแล้ว",
-    "requestReceived": "ได้รับ",
-    "blockedLabel": "ถูกบล็อก",
-    "unblockLabel": "ปลดบล็อก",
-    "searchFriends": "ค้นหาเพื่อน...",
-    "call": {
-      "incoming": "สายเรียกเข้า...",
-      "outgoing": "กำลังโทร...",
-      "decline": "ปฏิเสธ",
-      "accept": "รับสาย",
-      "end": "วางสาย",
-      "mute": "ปิดเสียง",
-      "unmute": "เปิดเสียง",
-      "cameraOn": "ปิดกล้อง",
-      "cameraOff": "เปิดกล้อง",
-      "invite": "เชิญเพื่อน",
-      "searchFriends": "ค้นหาเพื่อนเพื่อเพิ่ม...",
-      "noFriendsFound": "ไม่พบเพื่อน",
-      "participants": "{count, plural, other {ผู้เข้าร่วม # คน}}",
-      "you": "คุณ",
-      "callOverlay": "หน้าต่างสาย",
-      "speaker": "ลำโพง",
-      "earpiece": "หูฟัง"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "เซิร์ฟเวอร์ 1",
     "balanced": "เซิร์ฟเวอร์ 2"
+  },
+  "friends": {
+    "title": "เพื่อน",
+    "noFriends": "ยังไม่มีเพื่อน",
+    "online": "ออนไลน์",
+    "offline": "ออฟไลน์",
+    "accept": "ยอมรับ",
+    "reject": "ปฏิเสธ",
+    "pendingRequests": "คำขอ",
+    "addFriend": "เพิ่มเพื่อน",
+    "addFriendPlaceholder": "ป้อนชื่อผู้ใช้",
+    "requestSent": "ส่งคำขอเป็นเพื่อนแล้ว!",
+    "requestFailed": "ไม่สามารถส่งคำขอได้",
+    "noUsersFound": "ไม่พบผู้ใช้",
+    "sentRequests": "ส่งแล้ว",
+    "cancelRequest": "ยกเลิก",
+    "alreadyFriends": "เพื่อน",
+    "requestSentLabel": "ส่งแล้ว",
+    "requestReceived": "ได้รับ",
+    "blockedLabel": "ถูกบล็อก",
+    "unblockLabel": "ปลดบล็อก",
+    "searchFriends": "ค้นหาเพื่อน...",
+    "call": {
+      "incoming": "สายเรียกเข้า...",
+      "outgoing": "กำลังโทร...",
+      "decline": "ปฏิเสธ",
+      "accept": "รับสาย",
+      "end": "วางสาย",
+      "mute": "ปิดเสียง",
+      "unmute": "เปิดเสียง",
+      "cameraOn": "ปิดกล้อง",
+      "cameraOff": "เปิดกล้อง",
+      "invite": "เชิญเพื่อน",
+      "searchFriends": "ค้นหาเพื่อนเพื่อเพิ่ม...",
+      "noFriendsFound": "ไม่พบเพื่อน",
+      "participants": "{count, plural, other {ผู้เข้าร่วม # คน}}",
+      "you": "คุณ",
+      "callOverlay": "หน้าต่างสาย",
+      "speaker": "ลำโพง",
+      "earpiece": "หูฟัง"
+    }
   }
 }

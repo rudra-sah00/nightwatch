@@ -85,10 +85,6 @@
       "title": "आपकी लाइब्रेरी",
       "description": "अपने सहेजे गए क्लिप, रिकॉर्डिंग और एकत्रित सामग्री को एक ही जगह ब्राउज़ करें।"
     },
-    "music": {
-      "title": "संगीत",
-      "description": "ब्राउज़ करते समय क्यूरेटेड रेडियो स्टेशन और संगीत सुनें।"
-    },
     "askAi": {
       "title": "AI से पूछें",
       "description": "अपने AI सहायक से बात करें। सिफारिशें मांगें, सामग्री खोजें या अपनी आवाज़ से प्लेबैक नियंत्रित करें।"
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "निर्माता पहचान",
@@ -203,47 +203,6 @@
     "forbidden": "आपको यह कार्य करने की अनुमति नहीं है।",
     "requestTimeout": "अनुरोध का समय समाप्त हो गया। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।"
   },
-  "friends": {
-    "title": "दोस्त",
-    "noFriends": "अभी कोई दोस्त नहीं",
-    "online": "ऑनलाइन",
-    "offline": "ऑफ़लाइन",
-    "accept": "स्वीकार",
-    "reject": "अस्वीकार",
-    "pendingRequests": "अनुरोध",
-    "addFriend": "दोस्त जोड़ें",
-    "addFriendPlaceholder": "यूज़रनेम दर्ज करें",
-    "requestSent": "दोस्ती का अनुरोध भेजा गया!",
-    "requestFailed": "अनुरोध नहीं भेजा जा सका",
-    "noUsersFound": "कोई उपयोगकर्ता नहीं मिला",
-    "sentRequests": "भेजे गए",
-    "cancelRequest": "रद्द करें",
-    "alreadyFriends": "दोस्त",
-    "requestSentLabel": "भेजा गया",
-    "requestReceived": "आया हुआ",
-    "blockedLabel": "ब्लॉक किए गए",
-    "unblockLabel": "अनब्लॉक",
-    "searchFriends": "दोस्त खोजें...",
-    "call": {
-      "incoming": "इनकमिंग कॉल...",
-      "outgoing": "कॉल कर रहे हैं...",
-      "decline": "अस्वीकार",
-      "accept": "स्वीकार",
-      "end": "कॉल समाप्त",
-      "mute": "म्यूट",
-      "unmute": "अनम्यूट",
-      "cameraOn": "कैमरा बंद",
-      "cameraOff": "कैमरा चालू",
-      "invite": "दोस्त को आमंत्रित करें",
-      "searchFriends": "जोड़ने के लिए दोस्त खोजें...",
-      "noFriendsFound": "कोई दोस्त नहीं मिला",
-      "participants": "{count, plural, one {# प्रतिभागी} other {# प्रतिभागी}}",
-      "you": "आप",
-      "callOverlay": "कॉल ओवरले",
-      "speaker": "स्पीकर",
-      "earpiece": "ईयरपीस"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "सर्वर 1",
     "balanced": "सर्वर 2"
+  },
+  "friends": {
+    "title": "दोस्त",
+    "noFriends": "अभी कोई दोस्त नहीं",
+    "online": "ऑनलाइन",
+    "offline": "ऑफ़लाइन",
+    "accept": "स्वीकार",
+    "reject": "अस्वीकार",
+    "pendingRequests": "अनुरोध",
+    "addFriend": "दोस्त जोड़ें",
+    "addFriendPlaceholder": "यूज़रनेम दर्ज करें",
+    "requestSent": "दोस्ती का अनुरोध भेजा गया!",
+    "requestFailed": "अनुरोध नहीं भेजा जा सका",
+    "noUsersFound": "कोई उपयोगकर्ता नहीं मिला",
+    "sentRequests": "भेजे गए",
+    "cancelRequest": "रद्द करें",
+    "alreadyFriends": "दोस्त",
+    "requestSentLabel": "भेजा गया",
+    "requestReceived": "आया हुआ",
+    "blockedLabel": "ब्लॉक किए गए",
+    "unblockLabel": "अनब्लॉक",
+    "searchFriends": "दोस्त खोजें...",
+    "call": {
+      "incoming": "इनकमिंग कॉल...",
+      "outgoing": "कॉल कर रहे हैं...",
+      "decline": "अस्वीकार",
+      "accept": "स्वीकार",
+      "end": "कॉल समाप्त",
+      "mute": "म्यूट",
+      "unmute": "अनम्यूट",
+      "cameraOn": "कैमरा बंद",
+      "cameraOff": "कैमरा चालू",
+      "invite": "दोस्त को आमंत्रित करें",
+      "searchFriends": "जोड़ने के लिए दोस्त खोजें...",
+      "noFriendsFound": "कोई दोस्त नहीं मिला",
+      "participants": "{count, plural, one {# प्रतिभागी} other {# प्रतिभागी}}",
+      "you": "आप",
+      "callOverlay": "कॉल ओवरले",
+      "speaker": "स्पीकर",
+      "earpiece": "ईयरपीस"
+    }
   }
 }

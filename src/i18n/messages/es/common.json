@@ -85,10 +85,6 @@
       "title": "Tu Biblioteca",
       "description": "Explora tus clips guardados, grabaciones y contenido recopilado en un solo lugar."
     },
-    "music": {
-      "title": "Música",
-      "description": "Escucha estaciones de radio y música seleccionada mientras navegas."
-    },
     "askAi": {
       "title": "Pregunta a la IA",
       "description": "Habla con tu asistente de IA. Pide recomendaciones, busca contenido o controla la reproducción con tu voz."
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "Identidad del Creador",
@@ -203,47 +203,6 @@
     "forbidden": "No tienes permiso para realizar esta acción.",
     "requestTimeout": "La solicitud ha expirado. Verifica tu conexión e inténtalo de nuevo."
   },
-  "friends": {
-    "title": "Amigos",
-    "noFriends": "Sin amigos aún",
-    "online": "En línea",
-    "offline": "Desconectado",
-    "accept": "Aceptar",
-    "reject": "Rechazar",
-    "pendingRequests": "Solicitudes",
-    "addFriend": "Añadir amigo",
-    "addFriendPlaceholder": "Ingresa el usuario",
-    "requestSent": "¡Solicitud enviada!",
-    "requestFailed": "No se pudo enviar la solicitud",
-    "noUsersFound": "No se encontraron usuarios",
-    "sentRequests": "Enviadas",
-    "cancelRequest": "Cancelar",
-    "alreadyFriends": "Amigos",
-    "requestSentLabel": "Enviada",
-    "requestReceived": "Recibida",
-    "blockedLabel": "Bloqueados",
-    "unblockLabel": "Desbloquear",
-    "searchFriends": "Buscar amigos...",
-    "call": {
-      "incoming": "Llamada entrante...",
-      "outgoing": "Llamando...",
-      "decline": "Rechazar",
-      "accept": "Aceptar",
-      "end": "Finalizar",
-      "mute": "Silenciar",
-      "unmute": "Activar",
-      "cameraOn": "Cámara apagada",
-      "cameraOff": "Cámara encendida",
-      "invite": "Invitar amigo",
-      "searchFriends": "Buscar amigos para añadir...",
-      "noFriendsFound": "No se encontraron amigos",
-      "participants": "{count, plural, one {# participante} other {# participantes}}",
-      "you": "Tú",
-      "callOverlay": "Ventana de llamada",
-      "speaker": "Altavoz",
-      "earpiece": "Auricular"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "Servidor 1",
     "balanced": "Servidor 2"
+  },
+  "friends": {
+    "title": "Amigos",
+    "noFriends": "Sin amigos aún",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "pendingRequests": "Solicitudes",
+    "addFriend": "Añadir amigo",
+    "addFriendPlaceholder": "Ingresa el usuario",
+    "requestSent": "¡Solicitud enviada!",
+    "requestFailed": "No se pudo enviar la solicitud",
+    "noUsersFound": "No se encontraron usuarios",
+    "sentRequests": "Enviadas",
+    "cancelRequest": "Cancelar",
+    "alreadyFriends": "Amigos",
+    "requestSentLabel": "Enviada",
+    "requestReceived": "Recibida",
+    "blockedLabel": "Bloqueados",
+    "unblockLabel": "Desbloquear",
+    "searchFriends": "Buscar amigos...",
+    "call": {
+      "incoming": "Llamada entrante...",
+      "outgoing": "Llamando...",
+      "decline": "Rechazar",
+      "accept": "Aceptar",
+      "end": "Finalizar",
+      "mute": "Silenciar",
+      "unmute": "Activar",
+      "cameraOn": "Cámara apagada",
+      "cameraOff": "Cámara encendida",
+      "invite": "Invitar amigo",
+      "searchFriends": "Buscar amigos para añadir...",
+      "noFriendsFound": "No se encontraron amigos",
+      "participants": "{count, plural, one {# participante} other {# participantes}}",
+      "you": "Tú",
+      "callOverlay": "Ventana de llamada",
+      "speaker": "Altavoz",
+      "earpiece": "Auricular"
+    }
   }
 }

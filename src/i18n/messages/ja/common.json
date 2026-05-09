@@ -85,10 +85,6 @@
       "title": "ライブラリ",
       "description": "保存したクリップ、録画、収集したコンテンツをまとめて閲覧できます。"
     },
-    "music": {
-      "title": "ミュージック",
-      "description": "ブラウジング中にキュレーションされたラジオ局や音楽を聴けます。"
-    },
     "askAi": {
       "title": "AIに聞く",
       "description": "AIアシスタントと会話しましょう。おすすめを聞いたり、コンテンツを検索したり、音声で再生を操作できます。"
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "クリエイター情報",
@@ -203,47 +203,6 @@
     "forbidden": "この操作を実行する権限がありません。",
     "requestTimeout": "リクエストがタイムアウトしました。接続を確認して再試行してください。"
   },
-  "friends": {
-    "title": "フレンド",
-    "noFriends": "フレンドはまだいません",
-    "online": "オンライン",
-    "offline": "オフライン",
-    "accept": "承認",
-    "reject": "拒否",
-    "pendingRequests": "リクエスト",
-    "addFriend": "フレンド追加",
-    "addFriendPlaceholder": "ユーザー名を入力",
-    "requestSent": "フレンドリクエスト送信!",
-    "requestFailed": "リクエストを送信できませんでした",
-    "noUsersFound": "ユーザーが見つかりません",
-    "sentRequests": "送信済み",
-    "cancelRequest": "キャンセル",
-    "alreadyFriends": "フレンド",
-    "requestSentLabel": "送信済み",
-    "requestReceived": "受信",
-    "blockedLabel": "ブロック中",
-    "unblockLabel": "ブロック解除",
-    "searchFriends": "フレンドを検索...",
-    "call": {
-      "incoming": "着信中...",
-      "outgoing": "発信中...",
-      "decline": "拒否",
-      "accept": "応答",
-      "end": "通話終了",
-      "mute": "ミュート",
-      "unmute": "ミュート解除",
-      "cameraOn": "カメラオフ",
-      "cameraOff": "カメラオン",
-      "invite": "友達を招待",
-      "searchFriends": "追加する友達を検索...",
-      "noFriendsFound": "友達が見つかりません",
-      "participants": "{count, plural, other {#人の参加者}}",
-      "you": "あなた",
-      "callOverlay": "通話オーバーレイ",
-      "speaker": "スピーカー",
-      "earpiece": "イヤピース"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "サーバー 1",
     "balanced": "サーバー 2"
+  },
+  "friends": {
+    "title": "フレンド",
+    "noFriends": "フレンドはまだいません",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "accept": "承認",
+    "reject": "拒否",
+    "pendingRequests": "リクエスト",
+    "addFriend": "フレンド追加",
+    "addFriendPlaceholder": "ユーザー名を入力",
+    "requestSent": "フレンドリクエスト送信!",
+    "requestFailed": "リクエストを送信できませんでした",
+    "noUsersFound": "ユーザーが見つかりません",
+    "sentRequests": "送信済み",
+    "cancelRequest": "キャンセル",
+    "alreadyFriends": "フレンド",
+    "requestSentLabel": "送信済み",
+    "requestReceived": "受信",
+    "blockedLabel": "ブロック中",
+    "unblockLabel": "ブロック解除",
+    "searchFriends": "フレンドを検索...",
+    "call": {
+      "incoming": "着信中...",
+      "outgoing": "発信中...",
+      "decline": "拒否",
+      "accept": "応答",
+      "end": "通話終了",
+      "mute": "ミュート",
+      "unmute": "ミュート解除",
+      "cameraOn": "カメラオフ",
+      "cameraOff": "カメラオン",
+      "invite": "友達を招待",
+      "searchFriends": "追加する友達を検索...",
+      "noFriendsFound": "友達が見つかりません",
+      "participants": "{count, plural, other {#人の参加者}}",
+      "you": "あなた",
+      "callOverlay": "通話オーバーレイ",
+      "speaker": "スピーカー",
+      "earpiece": "イヤピース"
+    }
   }
 }

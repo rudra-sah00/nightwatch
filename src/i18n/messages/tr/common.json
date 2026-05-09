@@ -85,10 +85,6 @@
       "title": "Kütüphanen",
       "description": "Kayıtlı kliplerini, kayıtlarını ve topladığın içerikleri tek bir yerde gözat."
     },
-    "music": {
-      "title": "Müzik",
-      "description": "Gezinirken seçilmiş radyo istasyonlarını ve müzikleri dinle."
-    },
     "askAi": {
       "title": "Yapay Zekaya Sor",
       "description": "Yapay zeka asistanınla konuş. Öneriler iste, içerik ara veya sesinle oynatmayı kontrol et."
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "Yaratıcı Kimliği",
@@ -203,47 +203,6 @@
     "forbidden": "Bu işlemi gerçekleştirme izniniz yok.",
     "requestTimeout": "İstek zaman aşımına uğradı. Bağlantınızı kontrol edip tekrar deneyin."
   },
-  "friends": {
-    "title": "Arkadaşlar",
-    "noFriends": "Henüz arkadaş yok",
-    "online": "Çevrimiçi",
-    "offline": "Çevrimdışı",
-    "accept": "Kabul et",
-    "reject": "Reddet",
-    "pendingRequests": "İstekler",
-    "addFriend": "Arkadaş ekle",
-    "addFriendPlaceholder": "Kullanıcı adı girin",
-    "requestSent": "Arkadaşlık isteği gönderildi!",
-    "requestFailed": "İstek gönderilemedi",
-    "noUsersFound": "Kullanıcı bulunamadı",
-    "sentRequests": "Gönderilen",
-    "cancelRequest": "İptal",
-    "alreadyFriends": "Arkadaş",
-    "requestSentLabel": "Gönderildi",
-    "requestReceived": "Gelen",
-    "blockedLabel": "Engellenen",
-    "unblockLabel": "Engeli kaldır",
-    "searchFriends": "Arkadaş ara...",
-    "call": {
-      "incoming": "Gelen arama...",
-      "outgoing": "Aranıyor...",
-      "decline": "Reddet",
-      "accept": "Kabul et",
-      "end": "Sonlandır",
-      "mute": "Sessize al",
-      "unmute": "Sesi aç",
-      "cameraOn": "Kamera kapat",
-      "cameraOff": "Kamera aç",
-      "invite": "Arkadaş davet et",
-      "searchFriends": "Eklenecek arkadaş ara...",
-      "noFriendsFound": "Arkadaş bulunamadı",
-      "participants": "{count, plural, one {# katılımcı} other {# katılımcı}}",
-      "you": "Sen",
-      "callOverlay": "Arama penceresi",
-      "speaker": "Hoparlör",
-      "earpiece": "Kulaklık"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "Sunucu 1",
     "balanced": "Sunucu 2"
+  },
+  "friends": {
+    "title": "Arkadaşlar",
+    "noFriends": "Henüz arkadaş yok",
+    "online": "Çevrimiçi",
+    "offline": "Çevrimdışı",
+    "accept": "Kabul et",
+    "reject": "Reddet",
+    "pendingRequests": "İstekler",
+    "addFriend": "Arkadaş ekle",
+    "addFriendPlaceholder": "Kullanıcı adı girin",
+    "requestSent": "Arkadaşlık isteği gönderildi!",
+    "requestFailed": "İstek gönderilemedi",
+    "noUsersFound": "Kullanıcı bulunamadı",
+    "sentRequests": "Gönderilen",
+    "cancelRequest": "İptal",
+    "alreadyFriends": "Arkadaş",
+    "requestSentLabel": "Gönderildi",
+    "requestReceived": "Gelen",
+    "blockedLabel": "Engellenen",
+    "unblockLabel": "Engeli kaldır",
+    "searchFriends": "Arkadaş ara...",
+    "call": {
+      "incoming": "Gelen arama...",
+      "outgoing": "Aranıyor...",
+      "decline": "Reddet",
+      "accept": "Kabul et",
+      "end": "Sonlandır",
+      "mute": "Sessize al",
+      "unmute": "Sesi aç",
+      "cameraOn": "Kamera kapat",
+      "cameraOff": "Kamera aç",
+      "invite": "Arkadaş davet et",
+      "searchFriends": "Eklenecek arkadaş ara...",
+      "noFriendsFound": "Arkadaş bulunamadı",
+      "participants": "{count, plural, one {# katılımcı} other {# katılımcı}}",
+      "you": "Sen",
+      "callOverlay": "Arama penceresi",
+      "speaker": "Hoparlör",
+      "earpiece": "Kulaklık"
+    }
   }
 }

@@ -85,10 +85,6 @@
       "title": "라이브러리",
       "description": "저장한 클립, 녹화 및 수집한 콘텐츠를 한곳에서 탐색하세요."
     },
-    "music": {
-      "title": "음악",
-      "description": "탐색하면서 큐레이션된 라디오 방송국과 음악을 들으세요."
-    },
     "askAi": {
       "title": "AI에게 물어보기",
       "description": "AI 어시스턴트와 대화하세요. 추천을 요청하거나, 콘텐츠를 검색하거나, 음성으로 재생을 제어하세요."
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "크리에이터 정보",
@@ -203,47 +203,6 @@
     "forbidden": "이 작업을 수행할 권한이 없습니다.",
     "requestTimeout": "요청 시간이 초과되었습니다. 연결을 확인하고 다시 시도해 주세요."
   },
-  "friends": {
-    "title": "친구",
-    "noFriends": "친구가 없습니다",
-    "online": "온라인",
-    "offline": "오프라인",
-    "accept": "수락",
-    "reject": "거절",
-    "pendingRequests": "요청",
-    "addFriend": "친구 추가",
-    "addFriendPlaceholder": "사용자 이름 입력",
-    "requestSent": "친구 요청 전송!",
-    "requestFailed": "요청을 보낼 수 없습니다",
-    "noUsersFound": "사용자를 찾을 수 없습니다",
-    "sentRequests": "보낸 요청",
-    "cancelRequest": "취소",
-    "alreadyFriends": "친구",
-    "requestSentLabel": "전송됨",
-    "requestReceived": "수신",
-    "blockedLabel": "차단됨",
-    "unblockLabel": "차단 해제",
-    "searchFriends": "친구 검색...",
-    "call": {
-      "incoming": "수신 전화...",
-      "outgoing": "발신 중...",
-      "decline": "거절",
-      "accept": "수락",
-      "end": "통화 종료",
-      "mute": "음소거",
-      "unmute": "음소거 해제",
-      "cameraOn": "카메라 끄기",
-      "cameraOff": "카메라 켜기",
-      "invite": "친구 초대",
-      "searchFriends": "추가할 친구 검색...",
-      "noFriendsFound": "친구를 찾을 수 없습니다",
-      "participants": "{count, plural, other {참가자 #명}}",
-      "you": "나",
-      "callOverlay": "통화 오버레이",
-      "speaker": "스피커",
-      "earpiece": "이어피스"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "서버 1",
     "balanced": "서버 2"
+  },
+  "friends": {
+    "title": "친구",
+    "noFriends": "친구가 없습니다",
+    "online": "온라인",
+    "offline": "오프라인",
+    "accept": "수락",
+    "reject": "거절",
+    "pendingRequests": "요청",
+    "addFriend": "친구 추가",
+    "addFriendPlaceholder": "사용자 이름 입력",
+    "requestSent": "친구 요청 전송!",
+    "requestFailed": "요청을 보낼 수 없습니다",
+    "noUsersFound": "사용자를 찾을 수 없습니다",
+    "sentRequests": "보낸 요청",
+    "cancelRequest": "취소",
+    "alreadyFriends": "친구",
+    "requestSentLabel": "전송됨",
+    "requestReceived": "수신",
+    "blockedLabel": "차단됨",
+    "unblockLabel": "차단 해제",
+    "searchFriends": "친구 검색...",
+    "call": {
+      "incoming": "수신 전화...",
+      "outgoing": "발신 중...",
+      "decline": "거절",
+      "accept": "수락",
+      "end": "통화 종료",
+      "mute": "음소거",
+      "unmute": "음소거 해제",
+      "cameraOn": "카메라 끄기",
+      "cameraOff": "카메라 켜기",
+      "invite": "친구 초대",
+      "searchFriends": "추가할 친구 검색...",
+      "noFriendsFound": "친구를 찾을 수 없습니다",
+      "participants": "{count, plural, other {참가자 #명}}",
+      "you": "나",
+      "callOverlay": "통화 오버레이",
+      "speaker": "스피커",
+      "earpiece": "이어피스"
+    }
   }
 }

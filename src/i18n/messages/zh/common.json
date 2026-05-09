@@ -85,10 +85,6 @@
       "title": "你的资料库",
       "description": "在一个地方浏览你保存的剪辑、录制和收集的内容。"
     },
-    "music": {
-      "title": "音乐",
-      "description": "浏览时收听精选电台和音乐。"
-    },
     "askAi": {
       "title": "问AI",
       "description": "与AI助手对话。请求推荐、搜索内容或用语音控制播放。"
@@ -109,13 +105,17 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    }
   },
   "creatorFooter": {
     "title": "创作者身份",
@@ -203,47 +203,6 @@
     "forbidden": "您没有执行此操作的权限。",
     "requestTimeout": "请求超时。请检查连接后重试。"
   },
-  "friends": {
-    "title": "好友",
-    "noFriends": "暂无好友",
-    "online": "在线",
-    "offline": "离线",
-    "accept": "接受",
-    "reject": "拒绝",
-    "pendingRequests": "请求",
-    "addFriend": "添加好友",
-    "addFriendPlaceholder": "输入用户名",
-    "requestSent": "好友请求已发送！",
-    "requestFailed": "无法发送请求",
-    "noUsersFound": "未找到用户",
-    "sentRequests": "已发送",
-    "cancelRequest": "取消",
-    "alreadyFriends": "好友",
-    "requestSentLabel": "已发送",
-    "requestReceived": "收到",
-    "blockedLabel": "已屏蔽",
-    "unblockLabel": "取消屏蔽",
-    "searchFriends": "搜索好友...",
-    "call": {
-      "incoming": "来电中...",
-      "outgoing": "呼叫中...",
-      "decline": "拒绝",
-      "accept": "接听",
-      "end": "挂断",
-      "mute": "静音",
-      "unmute": "取消静音",
-      "cameraOn": "关闭摄像头",
-      "cameraOff": "开启摄像头",
-      "invite": "邀请好友",
-      "searchFriends": "搜索要添加的好友...",
-      "noFriendsFound": "未找到好友",
-      "participants": "{count, plural, other {#位参与者}}",
-      "you": "你",
-      "callOverlay": "通话窗口",
-      "speaker": "扬声器",
-      "earpiece": "听筒"
-    }
-  },
   "landing": {
     "brand": "Nightwatch",
     "badge": "Invite Only Beta",
@@ -291,9 +250,9 @@
         "title": "Go Live",
         "desc": "Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience."
       },
-      "friends": {
-        "title": "Friends & Messaging",
-        "desc": "DMs, voice calls, online presence, and friend requests — stay connected."
+      "music": {
+        "title": "Music Streaming",
+        "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
       },
       "downloads": {
         "title": "Offline Downloads",
@@ -340,5 +299,46 @@
   "server": {
     "netflix": "服务器 1",
     "balanced": "服务器 2"
+  },
+  "friends": {
+    "title": "好友",
+    "noFriends": "暂无好友",
+    "online": "在线",
+    "offline": "离线",
+    "accept": "接受",
+    "reject": "拒绝",
+    "pendingRequests": "请求",
+    "addFriend": "添加好友",
+    "addFriendPlaceholder": "输入用户名",
+    "requestSent": "好友请求已发送！",
+    "requestFailed": "无法发送请求",
+    "noUsersFound": "未找到用户",
+    "sentRequests": "已发送",
+    "cancelRequest": "取消",
+    "alreadyFriends": "好友",
+    "requestSentLabel": "已发送",
+    "requestReceived": "收到",
+    "blockedLabel": "已屏蔽",
+    "unblockLabel": "取消屏蔽",
+    "searchFriends": "搜索好友...",
+    "call": {
+      "incoming": "来电中...",
+      "outgoing": "呼叫中...",
+      "decline": "拒绝",
+      "accept": "接听",
+      "end": "挂断",
+      "mute": "静音",
+      "unmute": "取消静音",
+      "cameraOn": "关闭摄像头",
+      "cameraOff": "开启摄像头",
+      "invite": "邀请好友",
+      "searchFriends": "搜索要添加的好友...",
+      "noFriendsFound": "未找到好友",
+      "participants": "{count, plural, other {#位参与者}}",
+      "you": "你",
+      "callOverlay": "通话窗口",
+      "speaker": "扬声器",
+      "earpiece": "听筒"
+    }
   }
 }
