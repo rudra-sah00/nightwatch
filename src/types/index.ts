@@ -35,6 +35,6 @@ export interface ApiError {
 
 // WebSocket types
 export interface ForceLogoutPayload {
-  reason: 'new_login' | 'invalid_session';
+  reason: 'new_login' | 'invalid_session' | 'session_revoked';
   message: string;
 }
