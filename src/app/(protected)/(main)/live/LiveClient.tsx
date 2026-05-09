@@ -298,7 +298,7 @@ export default function LiveClient() {
             aria-label="Close"
             tabIndex={-1}
           />
-          <div className="relative w-full h-full flex flex-col bg-card overflow-hidden pointer-events-auto">
+          <div className="relative w-full h-full flex flex-col bg-background overflow-hidden pointer-events-auto">
             {/* Header */}
             <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center px-[max(1rem,env(safe-area-inset-left))] pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex-shrink-0 z-20 sticky top-0">
               <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg truncate flex-1 min-w-0 pr-4">
@@ -314,9 +314,9 @@ export default function LiveClient() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-card">
+            <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col bg-background">
               {/* Hero */}
-              <div className="w-full aspect-video md:h-[40vh] md:aspect-auto bg-primary border-b-[4px] border-border relative flex-shrink-0 flex items-center justify-center">
+              <div className="w-full aspect-video md:h-[40vh] md:aspect-auto bg-muted border-b-[4px] border-border relative flex-shrink-0 flex items-center justify-center">
                 {selectedChannel.icon ? (
                   <Image
                     src={selectedChannel.icon}
@@ -326,12 +326,12 @@ export default function LiveClient() {
                     sizes="100vw"
                   />
                 ) : (
-                  <Tv className="w-24 h-24 text-primary-foreground/50" />
+                  <Tv className="w-24 h-24 text-muted-foreground" />
                 )}
               </div>
 
               {/* Info */}
-              <div className="p-6 md:p-10 bg-background flex-shrink-0 space-y-4">
+              <div className="p-6 md:p-10 pb-32 bg-background flex-1 space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 bg-card border-2 border-border text-xs font-black font-headline uppercase tracking-widest text-foreground flex items-center gap-2">
                     <Tv className="w-4 h-4 stroke-[3px]" /> Live TV
