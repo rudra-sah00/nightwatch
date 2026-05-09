@@ -347,8 +347,8 @@ export default function LiveClient() {
                 )}
               </div>
 
-              {/* Actions */}
-              <div className="sticky bottom-0 z-30 px-6 pb-6 md:px-10 md:pb-10 bg-background border-t-[4px] border-border flex-shrink-0">
+              {/* Actions - fixed at bottom of viewport */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 bg-background border-t-[4px] border-border">
                 <div className="flex flex-col sm:flex-row gap-3 pt-6">
                   <button
                     type="button"
