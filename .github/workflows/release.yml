@@ -138,3 +138,10 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     uses: ./.github/workflows/build-android.yml
     secrets: inherit
+
+  build-android-tv:
+    name: Build Android TV APK (Release)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/build-android-tv.yml
+    secrets: inherit

@@ -101,6 +101,21 @@ export function checkIsMobile(): boolean {
   );
 }
 
+/**
+ * `true` when the app is running on an Android TV device.
+ * Set by the native MainActivity via `window.__ANDROID_TV__ = true`.
+ */
+export const isTV =
+  typeof window !== 'undefined' && window.__ANDROID_TV__ === true;
+
+/**
+ * Runtime check for Android TV environment.
+ * Re-evaluates on every call — useful in effects that run before module init.
+ */
+export function checkIsTV(): boolean {
+  return typeof window !== 'undefined' && window.__ANDROID_TV__ === true;
+}
+
 const api = () =>
   (
     window as unknown as {

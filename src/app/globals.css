@@ -784,3 +784,14 @@ a,
 button {
   -webkit-user-drag: none;
 }
+
+/* ─── Android TV: visible focus ring for D-pad navigation ─── */
+html.tv *:focus {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+html.tv *:focus:not(:focus-visible) {
+  outline: none;
+}

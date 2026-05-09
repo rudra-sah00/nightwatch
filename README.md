@@ -157,5 +157,19 @@ The `build-android.yml` GitHub Action builds a debug APK and attaches it to GitH
 gh workflow run build-android.yml
 ```
 
+### Android TV
+
+The app also ships an Android TV build that runs the same WebView-based app with D-pad spatial navigation support. The TV remote's arrow keys move focus between interactive elements, Enter selects, and Back navigates history.
+
+```bash
+# Build TV APK locally
+cd android && ./gradlew assembleRelease -PtvBuild
+
+# Trigger CI build
+gh workflow run build-android-tv.yml
+```
+
+The TV build uses a separate application ID (`com.nightwatch.in.tv`) so it can coexist with the mobile app on the Play Store.
+
 ---
 *For issues regarding the backend services or database administration, see the respective `nightwatch-backend` or `admin-nightwatch` repositories.*

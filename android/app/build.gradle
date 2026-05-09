@@ -4,7 +4,7 @@ android {
     namespace = "com.nightwatch.in"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.nightwatch.in"
+        applicationId project.hasProperty('tvBuild') ? "com.nightwatch.in.tv" : "com.nightwatch.in"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

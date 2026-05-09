@@ -23,5 +23,6 @@ declare global {
       isNativePlatform?: () => boolean;
       getPlatform?: () => string;
     };
+    __ANDROID_TV__?: boolean;
   }
 }
