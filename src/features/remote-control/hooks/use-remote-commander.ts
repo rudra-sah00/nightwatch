@@ -134,6 +134,11 @@ export function useRemoteCommander(activeStream: RemoteStreamAdvertise | null) {
                 prev.currentTime - (extra?.seekSeconds || 10),
               ),
             };
+          case 'seek_to':
+            return {
+              ...prev,
+              currentTime: extra?.seekTo ?? prev.currentTime,
+            };
           default:
             return prev;
         }

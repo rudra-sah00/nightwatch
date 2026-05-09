@@ -96,15 +96,22 @@ export function useRemoteControlListener({
     };
   }, [isMobile, socket]);
 
-  // Emit state updates on play/pause change (instant) and time (throttled 5s)
+  // Emit state updates on play/pause change (instant), seek (instant), and time (throttled 5s)
+  const prevTimeRef = useRef(state.currentTime);
+
   useEffect(() => {
     if (isMobile || !socket?.connected) return;
 
     const prev = lastStateRef.current;
     const playChanged = prev.isPlaying !== state.isPlaying;
     const timeDelta = Math.abs(prev.currentTime - state.currentTime);
+    // Detect a seek: large jump in a single frame (>2s skip in one render)
+    const frameDelta = Math.abs(prevTimeRef.current - state.currentTime);
+    const isSeeked = frameDelta > 2;
+    prevTimeRef.current = state.currentTime;
 
-    if (playChanged) {
+    if (playChanged || isSeeked) {
+      // Emit immediately on play/pause or seek
       socket.emit(REMOTE_EVENTS.STATE_UPDATE, {
         isPlaying: state.isPlaying,
         currentTime: state.currentTime,
@@ -114,6 +121,11 @@ export function useRemoteControlListener({
         isPlaying: state.isPlaying,
         currentTime: state.currentTime,
       };
+      // Clear any pending throttle
+      if (stateThrottleRef.current) {
+        clearTimeout(stateThrottleRef.current);
+        stateThrottleRef.current = null;
+      }
     } else if (timeDelta >= 5 && !stateThrottleRef.current) {
       stateThrottleRef.current = setTimeout(() => {
         if (socket.connected) {
@@ -130,13 +142,6 @@ export function useRemoteControlListener({
         stateThrottleRef.current = null;
       }, 5000);
     }
-
-    return () => {
-      if (stateThrottleRef.current) {
-        clearTimeout(stateThrottleRef.current);
-        stateThrottleRef.current = null;
-      }
-    };
   }, [isMobile, socket, state.isPlaying, state.currentTime, state.duration]);
 
   // Listen for remote commands
@@ -168,6 +173,18 @@ export function useRemoteControlListener({
           onNextEpisode?.();
           break;
       }
+
+      // Emit state update immediately after command so mobile gets fresh timestamp
+      // Use a short delay to let the player update its currentTime
+      setTimeout(() => {
+        if (socket?.connected) {
+          socket.emit(REMOTE_EVENTS.STATE_UPDATE, {
+            isPlaying: payloadRef.current.isPlaying,
+            currentTime: payloadRef.current.currentTime,
+            duration: payloadRef.current.duration,
+          });
+        }
+      }, 150);
     };
 
     const handleRequestAdvertise = () => {
