@@ -261,7 +261,7 @@ export default function LiveClient() {
                 <Button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-muted disabled:opacity-40"
+                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
                 >
                   Prev
                 </Button>
@@ -271,7 +271,7 @@ export default function LiveClient() {
                 <Button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-muted disabled:opacity-40"
+                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
                 >
                   Next
                 </Button>
