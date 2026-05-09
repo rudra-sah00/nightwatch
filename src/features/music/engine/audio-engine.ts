@@ -902,6 +902,26 @@ export class AudioEngine {
   async addToQueue(track: MusicTrack) {
     const queue = [...this.state.queue, track];
     this.update({ queue });
+    // Update shuffle order to include the new track
+    if (this.state.shuffle && this.shuffledOrder.length > 0) {
+      // Insert at random position after current
+      const currentPos = this.shuffledOrder.indexOf(this.state.queueIndex);
+      const insertAt =
+        currentPos +
+        1 +
+        Math.floor(
+          Math.random() * (this.shuffledOrder.length - currentPos - 1),
+        );
+      this.shuffledOrder.splice(
+        Math.min(insertAt, this.shuffledOrder.length),
+        0,
+        queue.length - 1,
+      );
+    }
+    // If nothing is playing, start playback
+    if (!this.state.currentTrack) {
+      await this.playTrack(track, queue);
+    }
     try {
       await addToUserQueue(track);
     } catch {
@@ -913,8 +933,29 @@ export class AudioEngine {
   playNext(track: MusicTrack) {
     const { queue, queueIndex } = this.state;
     const newQueue = [...queue];
-    newQueue.splice(queueIndex + 1, 0, track);
+    const insertIdx = queueIndex + 1;
+    newQueue.splice(insertIdx, 0, track);
     this.update({ queue: newQueue });
+    // Update shuffle order: insert right after current position
+    if (this.state.shuffle && this.shuffledOrder.length > 0) {
+      // Shift indices >= insertIdx up by 1
+      this.shuffledOrder = this.shuffledOrder.map((i) =>
+        i >= insertIdx ? i + 1 : i,
+      );
+      // Insert the new track index right after current in shuffle order
+      const currentPos = this.shuffledOrder.indexOf(queueIndex);
+      this.shuffledOrder.splice(currentPos + 1, 0, insertIdx);
+    }
+    // Invalidate pre-buffered next track (it's no longer the next)
+    if (this.nextAudio && !this.crossfadeActive) {
+      this.nextAudio.pause();
+      this.nextAudio.src = '';
+      this.nextAudio = null;
+    }
+    // If nothing is playing, start playback
+    if (!this.state.currentTrack) {
+      this.playTrack(track, newQueue);
+    }
     addToUserQueue(track).catch(() => {});
   }
 
@@ -922,8 +963,6 @@ export class AudioEngine {
    * Remove a track from the queue by its index.
    * Cannot remove the currently playing track. Adjusts `queueIndex` if the
    * removed track was before the current one.
-   *
-   * @param index - Zero-based index of the track to remove.
    */
   removeFromQueue(index: number) {
     const { queue, queueIndex } = this.state;
@@ -931,6 +970,21 @@ export class AudioEngine {
     const newQueue = queue.filter((_, i) => i !== index);
     const newIndex = index < queueIndex ? queueIndex - 1 : queueIndex;
     this.update({ queue: newQueue, queueIndex: newIndex });
+    // Update shuffle order: remove the index and shift others
+    if (this.state.shuffle && this.shuffledOrder.length > 0) {
+      this.shuffledOrder = this.shuffledOrder
+        .filter((i) => i !== index)
+        .map((i) => (i > index ? i - 1 : i));
+    }
+    // Invalidate pre-buffered next track if it was the removed one
+    if (this.nextAudio && !this.crossfadeActive) {
+      const nextIdx = this.getNextIndex();
+      if (nextIdx === null || newQueue[nextIdx]?.id !== queue[index + 1]?.id) {
+        this.nextAudio.pause();
+        this.nextAudio.src = '';
+        this.nextAudio = null;
+      }
+    }
     // Persist updated queue (fire-and-forget)
     this.persistQueue(newQueue);
   }
