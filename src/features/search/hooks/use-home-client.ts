@@ -43,6 +43,12 @@ export function useHomeClient({
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, startTransition] = useTransition();
   const [hasSearched, setHasSearched] = useState(!!initialQuery);
+
+  // When server provides fresh results (page navigation), use them immediately
+  useEffect(() => {
+    setResults(initialResults);
+    setIsLoading(false);
+  }, [initialResults]);
   const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
     null,
   );
