@@ -376,7 +376,9 @@ function VODPlayerState({
 
       {isPip ? null : (
         <>
-          <BufferingOverlay isVisible={state.isBuffering && !state.isLoading} />
+          <DebouncedBufferingOverlay
+            isVisible={state.isBuffering && !state.isLoading}
+          />
 
           <ErrorOverlay
             isVisible={!!state.error && !state.isLoading && !state.isBuffering}
@@ -518,4 +520,23 @@ function PipRegistrar({
   }, [pip, streamUrl, pathname, metadata.title, videoRef]);
 
   return null;
+}
+
+/**
+ * Debounced buffering overlay — prevents flash on quick seeks.
+ * Only shows the spinner if buffering persists for 300ms+.
+ */
+function DebouncedBufferingOverlay({ isVisible }: { isVisible: boolean }) {
+  const [debouncedVisible, setDebouncedVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setDebouncedVisible(false);
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedVisible(true), 300);
+    return () => clearTimeout(timer);
+  }, [isVisible]);
+
+  return <BufferingOverlay isVisible={debouncedVisible} />;
 }
