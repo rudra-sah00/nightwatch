@@ -16,6 +16,7 @@ type DownloadLinks = {
   mac: string;
   linux: string;
   android: string;
+  tv: string;
 };
 
 /**
@@ -41,7 +42,11 @@ export function useDownloadLinks() {
           windows: find((n) => n.endsWith('.exe') && !n.endsWith('.blockmap')),
           mac: find((n) => n.endsWith('.dmg') && !n.endsWith('.blockmap')),
           linux: find((n) => n.endsWith('.AppImage')),
-          android: find((n) => n.endsWith('.apk')),
+          android: find(
+            (n) =>
+              n.includes('Android') && !n.includes('TV') && n.endsWith('.apk'),
+          ),
+          tv: find((n) => n.includes('Android-TV') && n.endsWith('.apk')),
         });
       })
       .catch(() =>
@@ -50,6 +55,7 @@ export function useDownloadLinks() {
           mac: RELEASES_FALLBACK,
           linux: RELEASES_FALLBACK,
           android: RELEASES_FALLBACK,
+          tv: RELEASES_FALLBACK,
         }),
       );
   }, []);

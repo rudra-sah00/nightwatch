@@ -3,7 +3,6 @@
 import {
   ArrowRight,
   Download,
-  MessageCircle,
   MonitorPlay,
   Radio,
   Shield,
@@ -18,19 +17,11 @@ import { useDownloadLinks } from '@/hooks/use-download-links';
 import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
-const FEATURE_ICONS = [
-  MonitorPlay,
-  Users,
-  Radio,
-  MessageCircle,
-  Download,
-  Shield,
-] as const;
+const FEATURE_ICONS = [MonitorPlay, Users, Radio, Download, Shield] as const;
 const FEATURE_KEYS = [
   'watchTogether',
   'watchParties',
   'goLive',
-  'messaging',
   'offline',
   'secure',
 ] as const;
@@ -96,6 +87,21 @@ const PLATFORM_BUTTONS = [
       </svg>
     ),
   },
+  {
+    key: 'tv' as const,
+    label: 'Android TV',
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-5 h-5 shrink-0"
+        role="img"
+        aria-label="Android TV"
+      >
+        <path d="M21 17H3V5h18m0-2H3a2 2 0 00-2 2v12a2 2 0 002 2h7v2H8v2h8v-2h-2v-2h7a2 2 0 002-2V5a2 2 0 00-2-2z" />
+      </svg>
+    ),
+  },
 ];
 
 const BENTO_CONFIG = [
@@ -121,15 +127,6 @@ const BENTO_CONFIG = [
     key: 'live',
     icon: Radio,
     color: 'text-neo-red',
-    span: '',
-    bg: 'bg-card text-foreground',
-    descColor: 'text-foreground/50',
-    large: false,
-  },
-  {
-    key: 'friends',
-    icon: MessageCircle,
-    color: 'text-neo-cyan',
     span: '',
     bg: 'bg-card text-foreground',
     descColor: 'text-foreground/50',
