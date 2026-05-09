@@ -1,11 +1,11 @@
 'use client';
 
-import AgoraRTC, {
-  type IAgoraRTCClient,
-  type IAgoraRTCRemoteUser,
-  type ICameraVideoTrack,
-  type IMicrophoneAudioTrack,
-  type IRemoteVideoTrack,
+import type {
+  IAgoraRTCClient,
+  IAgoraRTCRemoteUser,
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+  IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -24,7 +24,24 @@ const AGORA_LOG_LEVEL = IS_PRODUCTION
   : process.env.NEXT_PUBLIC_AGORA_DEBUG === 'true'
     ? 0
     : 2;
-AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
+
+/** Lazily resolved Agora SDK default export. */
+let _AgoraRTC: typeof import('agora-rtc-sdk-ng').default | null = null;
+export async function getAgoraRTC() {
+  if (!_AgoraRTC) {
+    const mod = await import('agora-rtc-sdk-ng');
+    _AgoraRTC = mod.default;
+    _AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
+  }
+  return _AgoraRTC;
+}
+
+/** @internal Reset/inject for testing. */
+export function resetAgoraState(
+  mock?: typeof import('agora-rtc-sdk-ng').default,
+) {
+  _AgoraRTC = mock ?? null;
+}
 
 /**
  * Audio and Video encoding presets optimized for watch party sidebar tiles.
@@ -184,16 +201,18 @@ export function useAgora({
 
   // Register autoplay-failed handler with translated strings (once per mount)
   useEffect(() => {
-    AgoraRTC.onAutoplayFailed = () => {
-      toast.info(tp('enableAudio'), {
-        duration: 8000,
-        id: 'agora-autoplay',
-        action: {
-          label: tp('enableAudioAction'),
-          onClick: () => {},
-        },
-      });
-    };
+    getAgoraRTC().then((AgoraRTC) => {
+      AgoraRTC.onAutoplayFailed = () => {
+        toast.info(tp('enableAudio'), {
+          duration: 8000,
+          id: 'agora-autoplay',
+          action: {
+            label: tp('enableAudioAction'),
+            onClick: () => {},
+          },
+        });
+      };
+    });
   }, [tp]);
 
   // --- Refs for mutable SDK objects (not state — avoids re-renders) ---
@@ -264,6 +283,7 @@ export function useAgora({
         }
       }
 
+      const AgoraRTC = await getAgoraRTC();
       const devices = await AgoraRTC.getDevices();
 
       const audioInputs: MediaDevice[] = [];
@@ -586,96 +606,98 @@ export function useAgora({
     // rejection would show a spurious "Failed to connect" toast.
     let cleaned = false;
 
-    const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-    clientRef.current = client;
-
-    // --- Remote user event handlers ---
-
-    const handleUserPublished = async (
-      user: IAgoraRTCRemoteUser,
-      mediaType: 'audio' | 'video',
-    ) => {
+    const init = async () => {
+      const AgoraRTC = await getAgoraRTC();
       if (cleaned) return;
-      await client.subscribe(user, mediaType);
+      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      clientRef.current = client;
 
-      if (mediaType === 'audio' && user.audioTrack) {
-        user.audioTrack.play();
-        if (isDeafenedRef.current) {
-          user.audioTrack.setVolume(0);
+      // --- Remote user event handlers ---
+
+      const handleUserPublished = async (
+        user: IAgoraRTCRemoteUser,
+        mediaType: 'audio' | 'video',
+      ) => {
+        if (cleaned) return;
+        await client.subscribe(user, mediaType);
+
+        if (mediaType === 'audio' && user.audioTrack) {
+          user.audioTrack.play();
+          if (isDeafenedRef.current) {
+            user.audioTrack.setVolume(0);
+          }
         }
-      }
 
-      setRemoteUsers([...client.remoteUsers]);
-    };
+        setRemoteUsers([...client.remoteUsers]);
+      };
 
-    const handleUserUnpublished = () => {
-      if (cleaned) return;
-      setRemoteUsers([...client.remoteUsers]);
-    };
+      const handleUserUnpublished = () => {
+        if (cleaned) return;
+        setRemoteUsers([...client.remoteUsers]);
+      };
 
-    const handleUserJoined = (_user: IAgoraRTCRemoteUser) => {
-      if (cleaned) return;
-      setRemoteUsers([...client.remoteUsers]);
-    };
+      const handleUserJoined = (_user: IAgoraRTCRemoteUser) => {
+        if (cleaned) return;
+        setRemoteUsers([...client.remoteUsers]);
+      };
 
-    const handleUserLeft = (_user: IAgoraRTCRemoteUser) => {
-      if (cleaned) return;
-      setRemoteUsers([...client.remoteUsers]);
-    };
+      const handleUserLeft = (_user: IAgoraRTCRemoteUser) => {
+        if (cleaned) return;
+        setRemoteUsers([...client.remoteUsers]);
+      };
 
-    client.on('user-published', handleUserPublished);
-    client.on('user-unpublished', handleUserUnpublished);
-    client.on('user-joined', handleUserJoined);
-    client.on('user-left', handleUserLeft);
+      client.on('user-published', handleUserPublished);
+      client.on('user-unpublished', handleUserUnpublished);
+      client.on('user-joined', handleUserJoined);
+      client.on('user-left', handleUserLeft);
 
-    client
-      .join(appId, channel, token, uid)
-      .then(() => {
+      try {
+        await client.join(appId, channel, token, uid);
         if (cleaned) return;
         setIsClientReady(true);
         setConnectionState('CONNECTED');
         setRemoteUsers([...client.remoteUsers]);
-      })
-      .catch((_err) => {
-        // Only show error if this effect instance is still active.
-        // Stale rejections from StrictMode double-fire are silently ignored.
+      } catch (_err) {
         if (!cleaned) {
           toast.error(tp('failedConnectVoice'));
         }
-      });
+      }
+    };
+
+    init();
 
     return () => {
       cleaned = true;
 
-      // Detach core listeners explicitly
-      client.off('user-published', handleUserPublished);
-      client.off('user-unpublished', handleUserUnpublished);
-      client.off('user-joined', handleUserJoined);
-      client.off('user-left', handleUserLeft);
+      const client = clientRef.current;
+      if (client) {
+        // Detach core listeners
+        client.removeAllListeners();
 
-      // Cleanup local tracks
-      if (localAudioTrackRef.current) {
-        if (client.connectionState === 'CONNECTED') {
-          client.unpublish(localAudioTrackRef.current).catch(() => {});
+        // Cleanup local tracks
+        if (localAudioTrackRef.current) {
+          if (client.connectionState === 'CONNECTED') {
+            client.unpublish(localAudioTrackRef.current).catch(() => {});
+          }
+          localAudioTrackRef.current.close();
+          localAudioTrackRef.current = null;
         }
-        localAudioTrackRef.current.close();
-        localAudioTrackRef.current = null;
-      }
-      if (localVideoTrackRef.current) {
-        if (client.connectionState === 'CONNECTED') {
-          client.unpublish(localVideoTrackRef.current).catch(() => {});
+        if (localVideoTrackRef.current) {
+          if (client.connectionState === 'CONNECTED') {
+            client.unpublish(localVideoTrackRef.current).catch(() => {});
+          }
+          localVideoTrackRef.current.close();
+          localVideoTrackRef.current = null;
         }
-        localVideoTrackRef.current.close();
-        localVideoTrackRef.current = null;
+
+        client.leave().catch(() => {});
+        clientRef.current = null;
       }
 
       setIsClientReady(false);
       setConnectionState('DISCONNECTED');
       setAudioEnabled(false);
       setVideoEnabled(false);
-
-      client.leave().catch(() => {});
-      clientRef.current = null;
     };
   }, [token, appId, channel, uid, tp]);
 
@@ -722,6 +744,7 @@ export function useAgora({
           }
         }
 
+        const AgoraRTC = await getAgoraRTC();
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
           microphoneId: selectedAudioDeviceRef.current || undefined,
           encoderConfig: AUDIO_ENCODER_CONFIG,
@@ -790,6 +813,7 @@ export function useAgora({
           // Fall through, handleDeviceError will catch
         }
 
+        const AgoraRTC = await getAgoraRTC();
         const videoTrack = await AgoraRTC.createCameraVideoTrack({
           cameraId: selectedVideoDeviceRef.current || undefined,
           encoderConfig: VIDEO_ENCODER_CONFIG,

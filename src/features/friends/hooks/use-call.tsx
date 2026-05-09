@@ -11,6 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -198,6 +199,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     const track = remoteVideoTrackRef.current;
     const el = remoteVideoRef.current;
     if (track && el && isRemoteVideoOn) track.play(el);
+  });
+
+  // ── Re-play local video on ref change ─────────────────────────────
+  useEffect(() => {
+    const track = localVideoTrackRef.current;
+    const el = localVideoRef.current;
+    if (track && el && isVideoOn) track.play(el);
   });
 
   // ── Cleanup ───────────────────────────────────────────────────────
@@ -456,30 +464,46 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [socket]);
 
   // ── Render ────────────────────────────────────────────────────────
-  return (
-    <CallContext.Provider
-      value={{
-        callState,
-        peer,
-        participants,
-        isMuted,
-        isVideoOn,
-        isSpeaker,
-        isRemoteVideoOn,
-        remoteVideoRef,
-        localVideoRef,
-        callDuration,
-        initiateCall,
-        acceptCall,
-        rejectCall,
-        endCall,
-        toggleMute,
-        toggleVideo,
-        toggleSpeaker,
-        inviteFriend,
-      }}
-    >
-      {children}
-    </CallContext.Provider>
+  const value = useMemo(
+    () => ({
+      callState,
+      peer,
+      participants,
+      isMuted,
+      isVideoOn,
+      isSpeaker,
+      isRemoteVideoOn,
+      remoteVideoRef,
+      localVideoRef,
+      callDuration,
+      initiateCall,
+      acceptCall,
+      rejectCall,
+      endCall,
+      toggleMute,
+      toggleVideo,
+      toggleSpeaker,
+      inviteFriend,
+    }),
+    [
+      callState,
+      peer,
+      participants,
+      isMuted,
+      isVideoOn,
+      isSpeaker,
+      isRemoteVideoOn,
+      callDuration,
+      initiateCall,
+      acceptCall,
+      rejectCall,
+      endCall,
+      toggleMute,
+      toggleVideo,
+      toggleSpeaker,
+      inviteFriend,
+    ],
   );
+
+  return <CallContext.Provider value={value}>{children}</CallContext.Provider>;
 }

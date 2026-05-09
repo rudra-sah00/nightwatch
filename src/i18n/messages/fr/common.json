@@ -340,5 +340,50 @@
       "speaker": "Haut-parleur",
       "earpiece": "Écouteur"
     }
+  },
+  "clips": {
+    "subtitle": "Your clips and saved moments",
+    "searchPlaceholder": "Search clips...",
+    "noClips": "No clips yet",
+    "noClipsFound": "No clips found",
+    "emptyDescription": "Record moments from live streams to build your collection",
+    "clipReady": "Clip is ready!",
+    "linkCopied": "Link copied!",
+    "shared": "Clip shared! Link copied.",
+    "shareFailed": "Failed to share clip",
+    "processing": "Processing",
+    "failed": "Failed"
+  },
+  "remote": {
+    "title": "Remote Control",
+    "devices": "Devices",
+    "noStreams": "No active streams found.",
+    "live": "LIVE",
+    "seekBack": "Seek back 10s",
+    "seekForward": "Seek forward 10s",
+    "pause": "Pause",
+    "play": "Play",
+    "nextEpisode": "Next Episode →",
+    "playbackEnded": "Playback ended on desktop",
+    "remoteControl": "Remote control"
+  },
+  "askAi": {
+    "startConversation": "Start conversation",
+    "stopConversation": "Stop conversation",
+    "tapToTalk": "Tap to talk",
+    "listening": "Listening...",
+    "speaking": "Speaking...",
+    "you": "You",
+    "ai": "AI"
+  },
+  "recording": {
+    "started": "Recording started",
+    "saved": "Clip saved! Processing...",
+    "recordClip": "Record clip (max 5 min)"
+  },
+  "friendNotifications": {
+    "newRequest": "New friend request received",
+    "requestAccepted": "Friend request accepted!",
+    "incomingCall": "{name} is calling you..."
   }
 }

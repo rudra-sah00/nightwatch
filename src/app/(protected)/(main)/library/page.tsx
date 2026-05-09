@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { ClipsGrid } from './ClipsGrid';
 
-export const metadata: Metadata = {
-  title: 'Library | Nightwatch',
-};
-
 export default function LibraryPage() {
+  const t = useTranslations('common');
+
   return (
     <main className="pb-32 animate-in fade-in">
       {/* Hero Header */}
@@ -24,7 +24,7 @@ export default function LibraryPage() {
                 </span>
               </h1>
               <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-                Your clips and saved moments
+                {t('clips.subtitle')}
               </p>
             </div>
           </div>

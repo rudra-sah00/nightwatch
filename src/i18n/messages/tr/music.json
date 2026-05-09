@@ -41,5 +41,60 @@
   "trending": "Trending",
   "trendingSearches": "Trending Searches",
   "browseGenres": "Browse by Genre & Mood",
-  "artistRadio": "Artist Radio"
+  "artistRadio": "Artist Radio",
+  "devicePicker": {
+    "connect": "Connect",
+    "connectToDevice": "Connect to a device",
+    "listeningOn": "Listening on",
+    "watchingVideo": "Watching video",
+    "nowPlaying": "♪ Now Playing",
+    "noDevices": "No other devices found",
+    "transferredHere": "Playback transferred here",
+    "playingHere": "Playing on this device",
+    "playingOn": "Playing on {device}",
+    "connectFailed": "Failed to connect to {device}",
+    "disconnected": "Device disconnected — playing here"
+  },
+  "equalizer": {
+    "title": "Equalizer",
+    "close": "Close equalizer",
+    "cancel": "Cancel",
+    "resetFlat": "Reset to Flat",
+    "bass": "Bass",
+    "lowMid": "Low Mid",
+    "mid": "Mid",
+    "highMid": "High Mid",
+    "treble": "Treble"
+  },
+  "sleepTimer": {
+    "title": "Sleep Timer",
+    "close": "Close sleep timer",
+    "cancel": "Cancel",
+    "cancelTimer": "Cancel Timer",
+    "15min": "15 min",
+    "30min": "30 min",
+    "45min": "45 min",
+    "1hour": "1 hour",
+    "2hours": "2 hours"
+  },
+  "languagePicker": {
+    "title": "Music Languages",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "updated": "Languages updated"
+  },
+  "contextMenu": {
+    "playNext": "Play Next",
+    "playingNext": "Playing next",
+    "removeFromPlaylist": "Remove from Playlist",
+    "startRadio": "Start Song Radio",
+    "addToPlaylist": "Add to Playlist",
+    "alreadyInPlaylist": "Already in playlist"
+  },
+  "radio": {
+    "noSongsAvailable": "No songs available",
+    "failedToLoad": "Failed to load station"
+  },
+  "similarSongs": "Similar Songs",
+  "queue": "Queue — {count}"
 }

@@ -12,6 +12,7 @@ import {
   Volume1,
   Volume2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import type { MusicTrack, SyncedLyricLine } from '../api';
 import { formatTime } from '../utils';
@@ -67,6 +68,7 @@ export function MobileFullPlayer({
   onToggleQueue,
 }: MobileFullPlayerProps) {
   const swipeStartY = useRef(0);
+  const t = useTranslations('music');
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showEq, setShowEq] = useState(false);
   const [showSleep, setShowSleep] = useState(false);
@@ -135,7 +137,7 @@ export function MobileFullPlayer({
           /* ===== QUEUE MODE ===== */
           <div className="flex-1 min-h-0 flex flex-col">
             <p className="shrink-0 text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] pb-2">
-              Queue — {queue.length}
+              {t('queue', { count: queue.length })}
             </p>
             <div className="flex-1 overflow-y-auto no-scrollbar">
               {queue.map((track, i) => (
@@ -224,7 +226,7 @@ export function MobileFullPlayer({
                 className="w-full py-3 cursor-pointer relative"
                 role="slider"
                 tabIndex={0}
-                aria-label="Seek"
+                aria-label={t('seek')}
                 aria-valuenow={Math.round(seekPreview ?? progress)}
                 aria-valuemin={0}
                 aria-valuemax={100}

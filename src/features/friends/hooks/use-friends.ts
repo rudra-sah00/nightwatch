@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   acceptFriendRequest,
   type BlockedUser,
@@ -39,15 +39,20 @@ export function useFriends() {
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { socket } = useSocket();
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchAll = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const [f, p, s, b] = await Promise.all([
-        getFriends(),
-        getPendingRequests(),
-        getSentRequests(),
-        getBlockedUsers(),
+        getFriends({ signal: controller.signal }),
+        getPendingRequests({ signal: controller.signal }),
+        getSentRequests({ signal: controller.signal }),
+        getBlockedUsers({ signal: controller.signal }),
       ]);
+      if (controller.signal.aborted) return;
       setFriends(f);
       setPendingRequests(p);
       setSentRequests(s);
@@ -55,13 +60,25 @@ export function useFriends() {
     } catch {
       // Non-fatal
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchAll();
+    return () => {
+      abortRef.current?.abort();
+    };
   }, [fetchAll]);
+
+  const onlineFriends = useMemo(
+    () => friends.filter((f) => f.isOnline),
+    [friends],
+  );
+  const offlineFriends = useMemo(
+    () => friends.filter((f) => !f.isOnline),
+    [friends],
+  );
 
   useEffect(() => {
     if (!socket) return;
@@ -178,8 +195,8 @@ export function useFriends() {
 
   return {
     friends,
-    onlineFriends: friends.filter((f) => f.isOnline),
-    offlineFriends: friends.filter((f) => !f.isOnline),
+    onlineFriends,
+    offlineFriends,
     pendingRequests,
     sentRequests,
     blockedUsers,

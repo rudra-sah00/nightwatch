@@ -174,5 +174,31 @@
     "security": "Security",
     "devices": "Devices",
     "activity": "Activity"
+  },
+  "devices": {
+    "title": "Active Devices",
+    "addDevice": "Add Device",
+    "thisDevice": "This device",
+    "signedIn": "Signed in {time}",
+    "unknown": "Unknown",
+    "signOut": "Sign out",
+    "signOutAll": "Sign out all other devices",
+    "signedOutSuccess": "Device signed out",
+    "signedOutFailed": "Failed to sign out device",
+    "allSignedOut": "All other devices signed out",
+    "scanQr": "Scan QR from desktop",
+    "cancel": "Cancel",
+    "cameraAccessDenied": "Camera access denied",
+    "invalidQr": "Please scan a valid Nightwatch QR code",
+    "authorizePrompt": "Are you sure you want to authorize this device to log in?",
+    "deny": "Deny",
+    "approve": "Approve",
+    "authorizing": "Authorizing...",
+    "authorized": "Device authorized",
+    "authorizeFailed": "Failed to authorize. QR may be expired.",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago"
   }
 }

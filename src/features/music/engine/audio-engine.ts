@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/fetch';
 import type { MusicTrack } from '../api';
 import {
   addToUserQueue,
@@ -920,13 +921,10 @@ export class AudioEngine {
 
   private async persistQueue(queue: MusicTrack[]) {
     try {
-      const res = await fetch('/api/music/queue', {
+      await apiFetch('/api/music/queue', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(queue),
-        credentials: 'include',
       });
-      if (!res.ok) throw new Error();
     } catch {
       /* best-effort */
     }

@@ -9,6 +9,7 @@ import {
   SkipBack,
   SkipForward,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useRemoteCommander } from '../hooks/use-remote-commander';
@@ -30,12 +31,13 @@ function StreamSelector({
   activeStream: RemoteStreamAdvertise | null;
   onSelect: (socketId: string) => void;
 }) {
+  const t = useTranslations('common');
   if (streams.length <= 1) return null;
 
   return (
     <div className="flex flex-col gap-2 px-4 mb-6">
       <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-        Devices
+        {t('remote.devices')}
       </p>
       {streams.map((s) => (
         <button
@@ -60,6 +62,7 @@ function StreamSelector({
 }
 
 function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
+  const t = useTranslations('common');
   const { state, sendCommand } = useRemoteCommander(stream);
   const hasDuration = state.duration > 0 && Number.isFinite(state.duration);
   const progress = hasDuration ? (state.currentTime / state.duration) * 100 : 0;
@@ -95,7 +98,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
         ) : isLive ? (
           <p className="text-sm text-red-400 font-medium flex items-center justify-center gap-1.5">
             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            LIVE
+            {t('remote.live')}
           </p>
         ) : (
           <p className="text-sm text-muted-foreground capitalize">
@@ -127,7 +130,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
             type="button"
             onClick={() => sendCommand('seek_backward', { seekSeconds: 10 })}
             className="w-12 h-12 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Seek back 10s"
+            aria-label={t('remote.seekBack')}
           >
             <SkipBack className="w-5 h-5" />
           </button>
@@ -137,7 +140,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
           type="button"
           onClick={() => sendCommand('toggle_play')}
           className="w-16 h-16 rounded-full bg-primary flex items-center justify-center active:scale-90 transition-transform shadow-lg"
-          aria-label={state.isPlaying ? 'Pause' : 'Play'}
+          aria-label={state.isPlaying ? t('remote.pause') : t('remote.play')}
         >
           {state.isPlaying ? (
             <Pause className="w-7 h-7 text-primary-foreground fill-current" />
@@ -151,7 +154,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
             type="button"
             onClick={() => sendCommand('seek_forward', { seekSeconds: 10 })}
             className="w-12 h-12 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Seek forward 10s"
+            aria-label={t('remote.seekForward')}
           >
             <SkipForward className="w-5 h-5" />
           </button>
@@ -165,7 +168,7 @@ function Controls({ stream }: { stream: RemoteStreamAdvertise }) {
           onClick={() => sendCommand('next_episode')}
           className="px-5 py-2.5 rounded-full border border-border bg-card text-sm font-medium hover:bg-accent active:scale-95 transition-all"
         >
-          Next Episode →
+          {t('remote.nextEpisode')}
         </button>
       ) : null}
     </div>
@@ -188,6 +191,7 @@ export function RemoteControlSheet({
   closing: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations('common');
   const hadStreamsRef = useRef(streams.length > 0);
 
   // If all streams end while overlay is open, show toast and close
@@ -195,10 +199,10 @@ export function RemoteControlSheet({
     if (streams.length > 0) {
       hadStreamsRef.current = true;
     } else if (hadStreamsRef.current) {
-      toast.info('Playback ended on desktop');
+      toast.info(t('remote.playbackEnded'));
       onClose();
     }
-  }, [streams.length, onClose]);
+  }, [streams.length, onClose, t]);
 
   return (
     <div
@@ -224,7 +228,7 @@ export function RemoteControlSheet({
             <ChevronDown className="w-5 h-5" />
           </button>
           <h1 className="text-sm font-medium text-muted-foreground">
-            Remote Control
+            {t('remote.title')}
           </h1>
           <div className="w-9" />
         </div>
@@ -244,7 +248,7 @@ export function RemoteControlSheet({
             <div className="flex flex-col items-center gap-4 px-6">
               <Cast className="w-16 h-16 text-muted-foreground/50" />
               <p className="text-muted-foreground text-center">
-                No active streams found.
+                {t('remote.noStreams')}
               </p>
             </div>
           )}

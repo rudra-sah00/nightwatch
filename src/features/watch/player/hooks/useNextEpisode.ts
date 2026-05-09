@@ -139,15 +139,22 @@ export function useNextEpisode({
 
   // Play next episode
   const playNextEpisode = useCallback(async () => {
-    if (!nextEpisodeInfo || !metadata.seriesId || isLoadingNext) return;
+    if (!metadata.seriesId || isLoadingNext) return;
 
     setIsLoadingNext(true);
     try {
-      const url = await prepareNextEpisodeCommand(
-        nextEpisodeInfo,
-        metadata,
-        serverProp,
-      );
+      // Fetch on-demand if not already available (e.g. triggered from remote control)
+      let info = nextEpisodeInfo;
+      if (!info) {
+        info = await fetchNextEpisodeInfo(metadata);
+        if (info) setNextEpisodeInfo(info);
+      }
+      if (!info) {
+        setIsLoadingNext(false);
+        return;
+      }
+
+      const url = await prepareNextEpisodeCommand(info, metadata, serverProp);
       if (url) {
         onNavigate(url);
       } else {

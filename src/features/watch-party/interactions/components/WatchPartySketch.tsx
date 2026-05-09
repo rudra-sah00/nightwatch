@@ -1,4 +1,13 @@
-import EmojiPicker, { EmojiStyle, Theme } from 'emoji-picker-react';
+import { EmojiStyle, Theme } from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-[350px] h-[400px] bg-card rounded-lg animate-pulse" />
+  ),
+});
+
 import {
   ArrowUpRight,
   Camera,

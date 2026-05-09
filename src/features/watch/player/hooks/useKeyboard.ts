@@ -204,7 +204,7 @@ export function useKeyboard({
         case 'ArrowLeft':
           if (h.disabled) break;
           e.preventDefault();
-          h.seek(-5);
+          h.seek(-10);
           h.onInteraction?.();
           break;
         case 'KeyJ':
@@ -216,7 +216,7 @@ export function useKeyboard({
         case 'ArrowRight':
           if (h.disabled) break;
           e.preventDefault();
-          h.seek(5);
+          h.seek(10);
           h.onInteraction?.();
           break;
         case 'KeyL':

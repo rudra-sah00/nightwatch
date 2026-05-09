@@ -1,8 +1,13 @@
+import dynamic from 'next/dynamic';
 import { MobileAppLifecycle } from '@/components/layout/MobileAppLifecycle';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
 import { FloatingDisc } from '@/features/music/components/FloatingDisc';
-import { FullPlayer } from '@/features/music/components/FullPlayer';
+
+const FullPlayer = dynamic(() =>
+  import('@/features/music/components/FullPlayer').then((m) => m.FullPlayer),
+);
+
 import { MusicAutoStop } from '@/features/music/components/MusicAutoStop';
 import { MusicDeviceSync } from '@/features/music/components/MusicDeviceSync';
 import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPresence';

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
@@ -162,13 +163,15 @@ export function WatchPartyVideoArea({
     streamUrl: streamUrlOverride || room.streamUrl || null,
   });
 
+  const t = useTranslations('common');
+
   const handleClipStart = () => {
     clip.start();
-    toast.info('Recording started');
+    toast.info(t('recording.started'));
   };
   const handleClipStop = async () => {
     await clip.stop();
-    toast.success('Clip saved! Processing...');
+    toast.success(t('recording.saved'));
   };
 
   const recordButton =

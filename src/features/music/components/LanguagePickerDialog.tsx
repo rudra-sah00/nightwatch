@@ -1,6 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { setMusicLanguages } from '@/features/music/api';
@@ -56,6 +57,7 @@ export function LanguagePickerDialog({
   onClose,
   onApply,
 }: LanguagePickerDialogProps) {
+  const t = useTranslations('music');
   const toggle = (lang: string) => {
     const next = new Set(selectedLangs);
     if (next.has(lang)) {
@@ -71,7 +73,7 @@ export function LanguagePickerDialog({
     onClose();
     await setMusicLanguages(langs).catch(() => {});
     onApply();
-    toast.success('Languages updated');
+    toast.success(t('languagePicker.updated'));
   };
 
   return (
@@ -85,7 +87,9 @@ export function LanguagePickerDialog({
         className="!fixed !inset-x-0 !bottom-0 !top-[var(--electron-titlebar-height,0px)] !translate-x-0 !translate-y-0 z-[10100] !max-w-none w-screen h-[calc(100vh-var(--electron-titlebar-height,0px))] m-0 p-0 border-none bg-white/80 dark:bg-black/60 backdrop-blur-2xl shadow-none !flex flex-col items-center [-webkit-app-region:no-drag] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-500 overflow-hidden"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">Music Languages</DialogTitle>
+        <DialogTitle className="sr-only">
+          {t('languagePicker.title')}
+        </DialogTitle>
 
         {/* Cancel */}
         <button
@@ -97,7 +101,7 @@ export function LanguagePickerDialog({
             right: 'calc(2rem + env(safe-area-inset-right, 0px))',
           }}
         >
-          Cancel
+          {t('languagePicker.cancel')}
         </button>
 
         <div
@@ -105,7 +109,7 @@ export function LanguagePickerDialog({
           style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
         >
           <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter text-foreground shrink-0 mb-6">
-            Music Languages
+            {t('languagePicker.title')}
           </h2>
 
           {/* Language list */}
@@ -144,7 +148,7 @@ export function LanguagePickerDialog({
               onClick={handleApply}
               className="w-full max-w-md mx-auto block py-4 bg-neo-yellow border-[3px] border-border font-headline font-black uppercase tracking-[0.2em] text-foreground text-base hover:brightness-110 transition-all rounded-md"
             >
-              Apply
+              {t('languagePicker.apply')}
             </button>
           </div>
         </div>

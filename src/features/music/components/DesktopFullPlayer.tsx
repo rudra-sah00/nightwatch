@@ -13,6 +13,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { MusicTrack, SyncedLyricLine } from '../api';
 import type { RepeatMode } from '../engine/audio-engine';
@@ -108,6 +109,7 @@ export function DesktopFullPlayer({
   onSetVolume,
   onPlay,
 }: DesktopFullPlayerProps) {
+  const t = useTranslations('music');
   const hasLyrics = lyrics && lyrics.length > 0;
   const [showEq, setShowEq] = useState(false);
 
@@ -275,7 +277,7 @@ export function DesktopFullPlayer({
                 type="button"
                 onClick={() => setShowEq(true)}
                 className="p-1 text-white/30 hover:text-white transition-colors"
-                title="Equalizer"
+                title={t('equalizer.title')}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
               </button>
@@ -300,7 +302,7 @@ export function DesktopFullPlayer({
           {!hasLyrics && recommendations.length > 0 && (
             <div className="hidden md:flex flex-1 flex-col min-h-0 py-8 px-4 overflow-y-auto no-scrollbar">
               <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] mb-4">
-                Similar Songs
+                {t('similarSongs')}
               </p>
               {recommendations.map((song) => (
                 <button

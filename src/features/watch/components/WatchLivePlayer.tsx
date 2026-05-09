@@ -312,14 +312,16 @@ function LivePlayerState({
     streamUrl,
   });
 
+  const tc = useTranslations('common');
+
   const handleStart = () => {
     clip.start();
-    toast.info('Recording started');
+    toast.info(tc('recording.started'));
   };
 
   const handleStop = async () => {
     await clip.stop();
-    toast.success('Clip saved! Processing...');
+    toast.success(tc('recording.saved'));
   };
 
   const recordButton = checkIsMobile() ? null : (

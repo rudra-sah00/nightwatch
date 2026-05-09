@@ -174,8 +174,8 @@ export function SongContextMenu() {
     const { song } = menu;
     setMenu(null);
     playNext(song as MusicTrack);
-    toast.success('Playing next');
-  }, [menu, playNext]);
+    toast.success(t('contextMenu.playingNext'));
+  }, [menu, playNext, t]);
 
   const handleStartRadio = useCallback(async () => {
     if (!menu) return;
@@ -218,7 +218,7 @@ export function SongContextMenu() {
       } catch (err) {
         const msg = err instanceof Error ? err.message : '';
         if (msg.includes('409') || msg.includes('Already')) {
-          toast.info('Already in playlist');
+          toast.info(t('contextMenu.alreadyInPlaylist'));
         } else {
           toast.error(t('failedToAdd'));
         }
@@ -269,7 +269,7 @@ export function SongContextMenu() {
               className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors text-red-400"
             >
               <Trash2 className="w-4 h-4" />
-              Remove from Playlist
+              {t('contextMenu.removeFromPlaylist')}
             </button>
           </li>
           <li className="h-[2px] bg-border mx-2 my-1" />
@@ -284,7 +284,7 @@ export function SongContextMenu() {
               className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
             >
               <SkipForward className="w-4 h-4 text-foreground/40" />
-              Play Next
+              {t('contextMenu.playNext')}
             </button>
           </li>
           <li>
@@ -307,7 +307,7 @@ export function SongContextMenu() {
           className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
         >
           <Radio className="w-4 h-4 text-foreground/40" />
-          Start Song Radio
+          {t('contextMenu.startRadio')}
         </button>
       </li>
       <li className="h-[2px] bg-border mx-2 my-1" />
@@ -318,7 +318,7 @@ export function SongContextMenu() {
           className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
         >
           <ListMusic className="w-4 h-4 text-foreground/40" />
-          Add to Playlist
+          {t('contextMenu.addToPlaylist')}
         </button>
       </li>
 
@@ -360,7 +360,7 @@ export function SongContextMenu() {
                 className="w-full flex items-center gap-2 px-6 py-1.5 text-left font-headline font-bold text-[10px] uppercase tracking-wider hover:bg-neo-yellow/10 transition-colors text-neo-yellow"
               >
                 <Plus className="w-4 h-4" />
-                Create Playlist
+                {t('createPlaylist')}
               </button>
             </li>
           ) : (

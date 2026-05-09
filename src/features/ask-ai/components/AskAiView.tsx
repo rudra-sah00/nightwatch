@@ -1,6 +1,7 @@
 'use client';
 
 import { Play, Square } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAskAi } from '@/features/ask-ai/hooks/use-ask-ai';
 
 /**
@@ -11,6 +12,7 @@ import { useAskAi } from '@/features/ask-ai/hooks/use-ask-ai';
  * transcripts for both user and AI, and any error messages.
  */
 export function AskAiView() {
+  const t = useTranslations('common');
   const { state, transcript, userTranscript, error, start, stop } = useAskAi();
   const isActive = state !== 'idle';
 
@@ -38,7 +40,11 @@ export function AskAiView() {
                 ? 'bg-neo-blue/10 border-neo-blue/40'
                 : 'bg-primary/10 border-border hover:bg-primary/20'
           }`}
-          aria-label={isActive ? 'Stop conversation' : 'Start conversation'}
+          aria-label={
+            isActive
+              ? t('askAi.stopConversation')
+              : t('askAi.startConversation')
+          }
         >
           {isActive ? (
             <Square className="w-10 h-10 md:w-14 md:h-14 text-red-400 fill-current" />
@@ -50,9 +56,9 @@ export function AskAiView() {
 
       {/* Status */}
       <p className="font-headline font-black uppercase tracking-[0.2em] text-xs text-foreground/40">
-        {state === 'idle' && 'Tap to talk'}
-        {state === 'listening' && 'Listening...'}
-        {state === 'speaking' && 'Speaking...'}
+        {state === 'idle' && t('askAi.tapToTalk')}
+        {state === 'listening' && t('askAi.listening')}
+        {state === 'speaking' && t('askAi.speaking')}
       </p>
 
       {/* Transcripts */}
@@ -60,7 +66,7 @@ export function AskAiView() {
         {userTranscript && (
           <div className="text-right">
             <span className="text-foreground/30 font-headline font-bold uppercase tracking-widest text-[10px]">
-              You
+              {t('askAi.you')}
             </span>
             <p className="text-foreground/60 text-sm mt-1">{userTranscript}</p>
           </div>
@@ -68,7 +74,7 @@ export function AskAiView() {
         {transcript && (
           <div className="text-left">
             <span className="text-neo-blue font-headline font-bold uppercase tracking-widest text-[10px]">
-              AI
+              {t('askAi.ai')}
             </span>
             <p className="text-foreground text-sm mt-1 leading-relaxed">
               {transcript}

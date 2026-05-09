@@ -2,6 +2,7 @@
 
 import { Loader2, Scissors } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
@@ -15,6 +16,7 @@ import { mobileBridge } from '@/lib/mobile-bridge';
 import { useSocket } from '@/providers/socket-provider';
 
 export function ClipsGrid() {
+  const t = useTranslations('common');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const router = useRouter();
@@ -22,8 +24,8 @@ export function ClipsGrid() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const filters = useMemo<ClipFilters>(
@@ -40,13 +42,13 @@ export function ClipsGrid() {
     if (!socket) return;
     const onClipReady = () => {
       refetch();
-      toast.success('Clip is ready!');
+      toast.success(t('clips.clipReady'));
     };
     socket.on(WS_EVENTS.CLIP_READY, onClipReady);
     return () => {
       socket.off(WS_EVENTS.CLIP_READY, onClipReady);
     };
-  }, [socket, refetch]);
+  }, [socket, refetch, t]);
 
   useEffect(() => {
     const el = loadMoreRef.current;
@@ -87,22 +89,22 @@ export function ClipsGrid() {
       if (clip.isPublic && clip.shareId) {
         const url = `${window.location.origin}/clip/share/${clip.shareId}`;
         await shareOrCopy(url, clip.title);
-        toast.success('Link copied!');
+        toast.success(t('clips.linkCopied'));
       } else {
         try {
           const result = await toggleClipPublic(clip.id);
           if (result.isPublic && result.shareId) {
             const url = `${window.location.origin}/clip/share/${result.shareId}`;
             await shareOrCopy(url, clip.title);
-            toast.success('Clip shared! Link copied.');
+            toast.success(t('clips.shared'));
             refetch();
           }
         } catch {
-          toast.error('Failed to share clip');
+          toast.error(t('clips.shareFailed'));
         }
       }
     },
-    [refetch, shareOrCopy],
+    [refetch, shareOrCopy, t],
   );
 
   return (
@@ -113,7 +115,7 @@ export function ClipsGrid() {
           <NeoSearchBar
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search clips..."
+            placeholder={t('clips.searchPlaceholder')}
           />
         </div>
       )}
@@ -137,11 +139,11 @@ export function ClipsGrid() {
         <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
           <Scissors className="w-16 h-16 text-foreground/20 mb-6" />
           <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
-            {debouncedSearch ? 'No clips found' : 'No clips yet'}
+            {debouncedSearch ? t('clips.noClipsFound') : t('clips.noClips')}
           </p>
           {!debouncedSearch && (
             <p className="font-headline font-bold uppercase tracking-widest text-foreground/20 text-sm mt-3 max-w-sm">
-              Record moments from live streams to build your collection
+              {t('clips.emptyDescription')}
             </p>
           )}
         </div>

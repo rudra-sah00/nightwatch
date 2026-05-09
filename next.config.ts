@@ -29,8 +29,6 @@ const nextConfig: NextConfig = {
       'tailwind-merge',
       'class-variance-authority',
       'emoji-picker-react',
-      'react-markdown',
-      'mermaid',
       'socket.io-client',
     ],
     // Cache client-side router navigations to prevent full page reloads.

@@ -59,6 +59,25 @@ vi.mock('@/features/watch-party/interactions/hooks/use-sketch-overlay', () => ({
   }),
 }));
 
+// Mock next/dynamic to render components synchronously in tests
+vi.mock('next/dynamic', () => ({
+  default: (_importFn: unknown, _opts?: unknown) => {
+    return function EmojiPickerWrapper({
+      onEmojiClick,
+    }: {
+      onEmojiClick?: (emoji: { emoji: string }) => void;
+    }) {
+      return (
+        <button
+          type="button"
+          data-testid="emoji-picker"
+          onClick={() => onEmojiClick?.({ emoji: '😀' })}
+        />
+      );
+    };
+  },
+}));
+
 vi.mock('emoji-picker-react', () => ({
   default: () => <div data-testid="emoji-picker" />,
   Theme: { LIGHT: 'light', DARK: 'dark' },

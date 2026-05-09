@@ -1,6 +1,7 @@
 'use client';
 
 import { Monitor, Smartphone, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
@@ -37,6 +38,7 @@ function DeviceIcon({ name }: { name: string }) {
  * - Local playback stops on transfer
  */
 export function MusicDevicePicker() {
+  const t = useTranslations('music');
   const player = useMusicPlayerContext();
   const {
     currentTrack,
@@ -124,9 +126,9 @@ export function MusicDevicePicker() {
   // Handle incoming transfer (MusicDeviceSync handles the actual playback)
   useEffect(() => {
     setOnTransfer(() => {
-      toast.success('Playback transferred here');
+      toast.success(t('devicePicker.transferredHere'));
     });
-  }, [setOnTransfer]);
+  }, [setOnTransfer, t]);
 
   // Forward remote commands from MiniPlayer to the target device
   useEffect(() => {
@@ -190,9 +192,9 @@ export function MusicDevicePicker() {
     if (activeTarget && !devices.find((d) => d.socketId === activeTarget)) {
       reclaimPlayback();
       setRemoteControlling(false);
-      toast.info('Device disconnected — playing here');
+      toast.info(t('devicePicker.disconnected'));
     }
-  }, [devices, activeTarget, reclaimPlayback, setRemoteControlling]);
+  }, [devices, activeTarget, reclaimPlayback, setRemoteControlling, t]);
 
   const isControlling = !!activeTarget;
 
@@ -243,7 +245,7 @@ export function MusicDevicePicker() {
         type="button"
         onClick={() => setOpen(true)}
         className={`p-1.5 transition-colors ${isControlling || isRemoteControlling ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
-        title="Connect to a device"
+        title={t('devicePicker.connectToDevice')}
       >
         <ConnectIcon className="w-3.5 h-3.5" />
       </button>
@@ -269,7 +271,7 @@ export function MusicDevicePicker() {
               <div className="flex items-center gap-2">
                 <ConnectIcon className="w-4 h-4 text-neo-yellow" />
                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider">
-                  Connect
+                  {t('devicePicker.connect')}
                 </h3>
               </div>
               <button
@@ -307,7 +309,7 @@ export function MusicDevicePicker() {
                     }
                     reclaimPlayback();
                     setRemoteControlling(false);
-                    toast.success('Playing on this device');
+                    toast.success(t('devicePicker.playingHere'));
                   }
                   setOpen(false);
                 }}
@@ -321,7 +323,9 @@ export function MusicDevicePicker() {
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium">{deviceName}</p>
                   {!isControlling && !isRemoteControlling && isPlaying && (
-                    <p className="text-[10px] text-primary">Listening on</p>
+                    <p className="text-[10px] text-primary">
+                      {t('devicePicker.listeningOn')}
+                    </p>
                   )}
                 </div>
                 {!isControlling && !isRemoteControlling && isPlaying && (
@@ -353,7 +357,9 @@ export function MusicDevicePicker() {
                               // Transfer failed — reclaim
                               setRemoteControlling(false);
                               toast.error(
-                                `Failed to connect to ${device.deviceName}`,
+                                t('devicePicker.connectFailed', {
+                                  device: device.deviceName,
+                                }),
                               );
                             },
                           );
@@ -361,7 +367,11 @@ export function MusicDevicePicker() {
                         } else {
                           transferTo(device.socketId);
                         }
-                        toast.success(`Playing on ${device.deviceName}`);
+                        toast.success(
+                          t('devicePicker.playingOn', {
+                            device: device.deviceName,
+                          }),
+                        );
                         setOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
@@ -379,15 +389,15 @@ export function MusicDevicePicker() {
                         </p>
                         {!device.available ? (
                           <p className="text-[10px] text-destructive/70">
-                            Watching video
+                            {t('devicePicker.watchingVideo')}
                           </p>
                         ) : isActive ? (
                           <p className="text-[10px] text-primary">
-                            Listening on
+                            {t('devicePicker.listeningOn')}
                           </p>
                         ) : device.isPlaying ? (
                           <p className="text-[10px] text-neo-yellow font-bold">
-                            ♪ Now Playing
+                            {t('devicePicker.nowPlaying')}
                           </p>
                         ) : null}
                       </div>
@@ -399,7 +409,7 @@ export function MusicDevicePicker() {
                 })
               ) : (
                 <p className="text-xs text-foreground/40 text-center py-4">
-                  No other devices found
+                  {t('devicePicker.noDevices')}
                 </p>
               )}
             </div>

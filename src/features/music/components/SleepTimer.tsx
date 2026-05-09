@@ -1,23 +1,25 @@
 'use client';
 
 import { Moon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
-
-const TIMER_OPTIONS = [
-  { label: '15 min', value: 15 },
-  { label: '30 min', value: 30 },
-  { label: '45 min', value: 45 },
-  { label: '1 hour', value: 60 },
-  { label: '2 hours', value: 120 },
-];
 
 /**
  * Sleep timer — full-screen overlay with backdrop blur.
  */
 export function SleepTimer({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('music');
   const { setSleepTimer, sleepTimerEnd, isRemoteControlling } =
     useMusicPlayerContext();
+
+  const TIMER_OPTIONS = [
+    { label: t('sleepTimer.15min'), value: 15 },
+    { label: t('sleepTimer.30min'), value: 30 },
+    { label: t('sleepTimer.45min'), value: 45 },
+    { label: t('sleepTimer.1hour'), value: 60 },
+    { label: t('sleepTimer.2hours'), value: 120 },
+  ];
   const [remaining, setRemaining] = useState<string | null>(null);
   const remoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -79,7 +81,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-black/70 backdrop-blur-2xl animate-in fade-in duration-200"
-        aria-label="Close sleep timer"
+        aria-label={t('sleepTimer.close')}
       />
 
       {/* Cancel button — top right */}
@@ -92,7 +94,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
           right: 'calc(2rem + env(safe-area-inset-right, 0px))',
         }}
       >
-        Cancel
+        {t('sleepTimer.cancel')}
       </button>
 
       {/* Content */}
@@ -100,7 +102,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
         <Moon className="w-10 h-10 text-white/40" />
 
         <h2 className="text-2xl sm:text-3xl font-black font-headline uppercase tracking-tighter text-white">
-          Sleep Timer
+          {t('sleepTimer.title')}
         </h2>
 
         {/* Active timer countdown */}
@@ -117,7 +119,7 @@ export function SleepTimer({ onClose }: { onClose: () => void }) {
               }}
               className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white border border-white/10 hover:border-white/30 rounded-full transition-colors"
             >
-              Cancel Timer
+              {t('sleepTimer.cancelTimer')}
             </button>
           </div>
         )}

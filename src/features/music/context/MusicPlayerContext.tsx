@@ -117,6 +117,16 @@ interface MusicPlayerContextValue {
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
 
+/** Volatile progress state — updates every 250ms. Separated to avoid re-rendering stable consumers. */
+interface MusicProgressContextValue {
+  progress: number;
+  duration: number;
+}
+const MusicProgressContext = createContext<MusicProgressContextValue>({
+  progress: 0,
+  duration: 0,
+});
+
 export function MusicPlayerProvider({
   children,
 }: {
@@ -402,6 +412,11 @@ export function MusicPlayerProvider({
     setExpanded(false);
   }, []);
 
+  const progressValue = useMemo(
+    () => ({ progress: state.progress, duration: state.duration }),
+    [state.progress, state.duration],
+  );
+
   const value = useMemo(
     () => ({
       currentTrack: state.currentTrack,
@@ -466,7 +481,17 @@ export function MusicPlayerProvider({
       },
     }),
     [
-      state,
+      state.currentTrack,
+      state.queue,
+      state.isPlaying,
+      state.progress,
+      state.duration,
+      state.shuffle,
+      state.repeat,
+      state.volume,
+      state.crossfadeDuration,
+      state.gapless,
+      state.sleepTimerEnd,
       expanded,
       remoteState,
       play,
@@ -487,7 +512,9 @@ export function MusicPlayerProvider({
 
   return (
     <MusicPlayerContext.Provider value={value}>
-      {children}
+      <MusicProgressContext.Provider value={progressValue}>
+        {children}
+      </MusicProgressContext.Provider>
     </MusicPlayerContext.Provider>
   );
 }
@@ -513,4 +540,13 @@ export function useMusicPlayerContext() {
     );
   }
   return ctx;
+}
+
+/**
+ * Consume only the volatile progress/duration values.
+ * Components that only need progress should use this hook to avoid
+ * re-rendering when stable state (track, queue, controls) changes.
+ */
+export function useMusicPlaybackProgress() {
+  return useContext(MusicProgressContext);
 }

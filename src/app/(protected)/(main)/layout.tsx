@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -15,7 +16,12 @@ import { LeftSidebar } from '@/components/layout/left-sidebar';
 import { Navbar } from '@/components/layout/navbar';
 import { OfflineState } from '@/components/layout/OfflineState';
 import { RightSidebar } from '@/components/layout/right-sidebar';
-import { GlobalTour } from '@/components/ui/global-tour';
+
+const GlobalTour = dynamic(
+  () => import('@/components/ui/global-tour').then((m) => m.GlobalTour),
+  { ssr: false },
+);
+
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { checkIsMobile } from '@/lib/electron-bridge';

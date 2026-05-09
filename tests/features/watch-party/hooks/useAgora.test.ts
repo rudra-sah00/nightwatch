@@ -4,9 +4,13 @@ import type {
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
 } from 'agora-rtc-sdk-ng';
+import AgoraRTC from 'agora-rtc-sdk-ng';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useAgora } from '@/features/watch-party/media/hooks/useAgora';
+import {
+  resetAgoraState,
+  useAgora,
+} from '@/features/watch-party/media/hooks/useAgora';
 
 // Override global next-intl mock with a stable reference to prevent infinite re-render loops
 // caused by useTranslations() returning a new function on every call.
@@ -49,6 +53,7 @@ const { mockClient, mockAudioTrack, mockVideoTrack, mockCamera } = vi.hoisted(
     mockClient: {
       on: vi.fn(),
       off: vi.fn(),
+      removeAllListeners: vi.fn(),
       join: vi.fn().mockResolvedValue(1),
       leave: vi.fn().mockResolvedValue(undefined),
       subscribe: vi.fn().mockResolvedValue(undefined),
@@ -82,7 +87,7 @@ vi.mock('agora-rtc-sdk-ng', () => {
   return {
     default: {
       createClient: vi.fn().mockReturnValue(mockClient),
-      onAutoplayFailed: vi.fn(),
+      onAutoplayFailed: null as (() => void) | null,
       setLogLevel: vi.fn(),
       getDevices: vi.fn().mockResolvedValue([mockCamera]),
       createMicrophoneAudioTrack: vi.fn().mockResolvedValue(mockAudioTrack),
@@ -125,6 +130,11 @@ describe('useAgora', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockClient.connectionState = 'DISCONNECTED';
+    // Inject mock SDK so getAgoraRTC() resolves synchronously
+    resetAgoraState(
+      AgoraRTC as unknown as typeof import('agora-rtc-sdk-ng').default,
+    );
   });
 
   it('should initialize with all participants mapped from members immediately', async () => {
@@ -175,7 +185,9 @@ describe('useAgora', () => {
     );
 
     // Wait for join to complete
-    await waitFor(() => expect(result.current.isConnected).toBe(true));
+    await waitFor(() => expect(result.current.isConnected).toBe(true), {
+      timeout: 3000,
+    });
 
     // Enable audio first so localAudioTrackRef.current is set
     await act(async () => {
@@ -209,7 +221,9 @@ describe('useAgora', () => {
       }),
     );
 
-    await waitFor(() => expect(result.current.isConnected).toBe(true));
+    await waitFor(() => expect(result.current.isConnected).toBe(true), {
+      timeout: 3000,
+    });
 
     // Enable audio
     await act(async () => {
@@ -248,7 +262,9 @@ describe('useAgora', () => {
       }),
     );
 
-    await waitFor(() => expect(result.current.isConnected).toBe(true));
+    await waitFor(() => expect(result.current.isConnected).toBe(true), {
+      timeout: 3000,
+    });
 
     // Enable video to set localVideoTrackRef
     await act(async () => {
@@ -289,7 +305,9 @@ describe('useAgora', () => {
       }),
     );
 
-    await waitFor(() => expect(result.current.isConnected).toBe(true));
+    await waitFor(() => expect(result.current.isConnected).toBe(true), {
+      timeout: 3000,
+    });
 
     // Enable video
     await act(async () => {
@@ -338,10 +356,7 @@ describe('useAgora', () => {
     unmount();
 
     // Verify cleanup
-    expect(mockClient.off).toHaveBeenCalledWith(
-      'user-published',
-      expect.any(Function),
-    );
+    expect(mockClient.removeAllListeners).toHaveBeenCalled();
 
     // Should unpublish tracks if connected
     expect(mockClient.unpublish).toHaveBeenCalledWith(mockAudioTrack);
@@ -359,7 +374,9 @@ describe('useAgora', () => {
     it('should show toasts for RECONNECTING and DISCONNECTED states', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
 
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleConnectionStateChange = mockClient.on.mock.calls.find(
         (call) => call[0] === 'connection-state-change',
@@ -414,7 +431,9 @@ describe('useAgora', () => {
   describe('media event branches', () => {
     it('should handle user-published for audio and video', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleUserPublished = mockClient.on.mock.calls.find(
         (call) => call[0] === 'user-published',
@@ -441,7 +460,9 @@ describe('useAgora', () => {
 
     it('should handle user-joined and user-left', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleUserJoined = mockClient.on.mock.calls.find(
         (c) => c[0] === 'user-joined',
@@ -460,7 +481,9 @@ describe('useAgora', () => {
   describe('device error branches', () => {
     it('should handle permission denied and not found errors', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       // Force createMicrophoneAudioTrack to throw permission error
       const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
@@ -482,7 +505,9 @@ describe('useAgora', () => {
 
     it('should handle toggle failure while enabling', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
       // create works but publish fails
@@ -509,7 +534,9 @@ describe('useAgora', () => {
       }
 
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleException = mockClient.on.mock.calls.find(
         (call) => call[0] === 'exception',
@@ -525,7 +552,9 @@ describe('useAgora', () => {
     it('should update network quality only if changed', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
 
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleNetworkQuality = mockClient.on.mock.calls.find(
         (call) => call[0] === 'network-quality',
@@ -549,7 +578,9 @@ describe('useAgora', () => {
   describe('participant state logic', () => {
     it('should handle user-unpublished', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleUserUnpublished = mockClient.on.mock.calls.find(
         (call) => call[0] === 'user-unpublished',
@@ -568,7 +599,9 @@ describe('useAgora', () => {
       const { result } = renderHook(() =>
         useAgora({ ...defaultOptions, userId: 'user-1' }),
       );
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleVolumeIndicator = mockClient.on.mock.calls.find(
         (call) => call[0] === 'volume-indicator',
@@ -594,7 +627,9 @@ describe('useAgora', () => {
   describe('SDK exception handling', () => {
     it('should handle client exceptions via toast', async () => {
       const { result } = renderHook(() => useAgora(defaultOptions));
-      await waitFor(() => expect(result.current.isConnected).toBe(true));
+      await waitFor(() => expect(result.current.isConnected).toBe(true), {
+        timeout: 3000,
+      });
 
       const handleException = mockClient.on.mock.calls.find(
         (call) => call[0] === 'exception',

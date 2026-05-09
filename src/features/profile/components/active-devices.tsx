@@ -9,6 +9,7 @@ import {
   Plus,
   Smartphone,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { qrAuthorize, qrReject } from '@/features/auth/qr-api';
@@ -47,19 +48,23 @@ function parseDevice(ua: string): {
   return { icon: Globe, label: 'Browser', color: 'text-neo-yellow' };
 }
 
-function timeAgo(timestamp: number): string {
-  if (!timestamp) return 'Unknown';
+function timeAgo(
+  timestamp: number,
+  t: ReturnType<typeof useTranslations<'profile'>>,
+): string {
+  if (!timestamp) return t('devices.unknown');
   const diff = Date.now() - timestamp;
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('devices.justNow');
+  if (mins < 60) return t('devices.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('devices.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t('devices.daysAgo', { count: days });
 }
 
 export function ActiveDevices() {
+  const t = useTranslations('profile');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -80,7 +85,6 @@ export function ActiveDevices() {
       setSessions(data.sessions);
       setLoading(false);
     } catch {
-      // Retry once after 2s (covers race where cookies aren't set yet)
       setTimeout(async () => {
         try {
           const data = await apiFetch<{ sessions: Session[] }>(
@@ -105,9 +109,9 @@ export function ActiveDevices() {
     try {
       await apiFetch(`/api/auth/sessions/${sessionId}`, { method: 'DELETE' });
       setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
-      toast.success('Device signed out');
+      toast.success(t('devices.signedOutSuccess'));
     } catch {
-      toast.error('Failed to sign out device');
+      toast.error(t('devices.signedOutFailed'));
     } finally {
       setRevoking(null);
     }
@@ -117,7 +121,7 @@ export function ActiveDevices() {
     return (
       <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-8">
-          Active Devices
+          {t('devices.title')}
         </h2>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -130,7 +134,7 @@ export function ActiveDevices() {
     <section className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter">
-          Active Devices
+          {t('devices.title')}
         </h2>
         {isMobile && (
           <button
@@ -139,7 +143,7 @@ export function ActiveDevices() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
-            Add Device
+            {t('devices.addDevice')}
           </button>
         )}
       </div>
@@ -168,14 +172,16 @@ export function ActiveDevices() {
                   {label}
                   {session.isCurrent ? (
                     <span className="ml-2 text-xs text-neo-green font-semibold">
-                      This device
+                      {t('devices.thisDevice')}
                     </span>
                   ) : null}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {session.createdAt
-                    ? `Signed in ${timeAgo(session.createdAt)}`
-                    : 'Unknown'}
+                    ? t('devices.signedIn', {
+                        time: timeAgo(session.createdAt, t),
+                      })
+                    : t('devices.unknown')}
                 </p>
               </div>
               {!session.isCurrent ? (
@@ -190,7 +196,7 @@ export function ActiveDevices() {
                   ) : (
                     <LogOut className="w-3 h-3" />
                   )}
-                  Sign out
+                  {t('devices.signOut')}
                 </button>
               ) : null}
             </div>
@@ -209,11 +215,11 @@ export function ActiveDevices() {
               });
             }
             setSessions((prev) => prev.filter((s) => s.isCurrent));
-            toast.success('All other devices signed out');
+            toast.success(t('devices.allSignedOut'));
           }}
           className="mt-6 px-4 py-2 text-sm font-headline font-bold text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 active:scale-95 transition-all"
         >
-          Sign out all other devices
+          {t('devices.signOutAll')}
         </button>
       ) : null}
     </section>
@@ -229,6 +235,7 @@ function QrScanner({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const t = useTranslations('profile');
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -261,7 +268,7 @@ function QrScanner({
           videoRef.current.srcObject = stream;
         }
       } catch {
-        setError('Camera access denied');
+        setError(t('devices.cameraAccessDenied'));
       }
     };
     start();
@@ -269,7 +276,7 @@ function QrScanner({
       cancelled = true;
       stopCamera();
     };
-  }, [stopCamera]);
+  }, [stopCamera, t]);
 
   // Scan frames using jsQR (works on all platforms including iOS)
   useEffect(() => {
@@ -304,7 +311,7 @@ function QrScanner({
         const url = result.data;
         if (!url.includes('nightwatch://qr')) {
           processingRef.current = true;
-          toast.error('Please scan a valid Nightwatch QR code');
+          toast.error(t('devices.invalidQr'));
           setTimeout(() => {
             processingRef.current = false;
           }, 2000);
@@ -326,17 +333,17 @@ function QrScanner({
 
     raf = requestAnimationFrame(scan);
     return () => cancelAnimationFrame(raf);
-  }, [stopCamera]);
+  }, [stopCamera, t]);
 
   const handleConfirm = async () => {
     if (!scannedCode) return;
     setAuthorizing(true);
     try {
       await qrAuthorize(scannedCode);
-      toast.success('Device authorized');
+      toast.success(t('devices.authorized'));
       onSuccess();
     } catch {
-      toast.error('Failed to authorize. QR may be expired.');
+      toast.error(t('devices.authorizeFailed'));
       onClose();
     }
   };
@@ -348,7 +355,7 @@ function QrScanner({
           <div className="flex items-center gap-2">
             <Camera className="w-4 h-4 text-muted-foreground" />
             <p className="text-xs font-headline font-bold uppercase tracking-widest text-muted-foreground">
-              Scan QR from desktop
+              {t('devices.scanQr')}
             </p>
           </div>
           <button
@@ -359,7 +366,7 @@ function QrScanner({
             }}
             className="text-xs font-headline font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
           >
-            Cancel
+            {t('devices.cancel')}
           </button>
         </div>
 
@@ -384,7 +391,7 @@ function QrScanner({
           />
           <div className="relative bg-card border-2 border-border rounded-xl p-6 w-full max-w-sm shadow-lg animate-in zoom-in-95 duration-200">
             <p className="text-base font-headline font-bold text-center mb-6">
-              Are you sure you want to authorize this device to log in?
+              {t('devices.authorizePrompt')}
             </p>
             <div className="flex gap-3">
               <button
@@ -396,7 +403,7 @@ function QrScanner({
                 }}
                 className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
               >
-                Deny
+                {t('devices.deny')}
               </button>
               <button
                 type="button"
@@ -404,7 +411,7 @@ function QrScanner({
                 disabled={authorizing}
                 className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50"
               >
-                {authorizing ? 'Authorizing...' : 'Approve'}
+                {authorizing ? t('devices.authorizing') : t('devices.approve')}
               </button>
             </div>
           </div>

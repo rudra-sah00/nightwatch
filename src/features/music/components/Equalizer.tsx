@@ -1,22 +1,30 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { EQ_PRESETS, type EqualizerBand } from '../engine/audio-engine';
 
 const PRESET_NAMES = Object.keys(EQ_PRESETS);
 
-const BAND_LABELS = ['Bass', 'Low Mid', 'Mid', 'High Mid', 'Treble'];
-
 /**
  * Equalizer panel with presets and custom band sliders.
  * Must be triggered by user gesture (initializes AudioContext).
  */
 export function Equalizer({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('music');
   const { initEqualizer, setEqBands, getEqBands, isRemoteControlling } =
     useMusicPlayerContext();
   const [bands, setBands] = useState<EqualizerBand[]>(getEqBands);
   const [activePreset, setActivePreset] = useState('flat');
+
+  const BAND_LABELS = [
+    t('equalizer.bass'),
+    t('equalizer.lowMid'),
+    t('equalizer.mid'),
+    t('equalizer.highMid'),
+    t('equalizer.treble'),
+  ];
 
   const handleInit = () => {
     if (!isRemoteControlling) initEqualizer();
@@ -57,7 +65,7 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-black/70 backdrop-blur-2xl animate-in fade-in duration-200"
-        aria-label="Close equalizer"
+        aria-label={t('equalizer.close')}
       />
 
       {/* Cancel button — top right like language picker */}
@@ -70,14 +78,14 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
           right: 'calc(2rem + env(safe-area-inset-right, 0px))',
         }}
       >
-        Cancel
+        {t('equalizer.cancel')}
       </button>
 
       {/* Content — centered */}
       <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-6 animate-in slide-in-from-bottom-6 duration-400 ease-out">
         {/* Title */}
         <h2 className="text-2xl sm:text-3xl font-black font-headline uppercase tracking-tighter text-white">
-          Equalizer
+          {t('equalizer.title')}
         </h2>
 
         {/* Presets */}
@@ -164,7 +172,7 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
           onClick={() => applyPreset('flat')}
           className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white border border-white/10 hover:border-white/30 rounded-full transition-colors"
         >
-          Reset to Flat
+          {t('equalizer.resetFlat')}
         </button>
       </div>
     </div>

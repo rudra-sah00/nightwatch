@@ -2,6 +2,7 @@
 
 import { Cast } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useRemoteStreams } from '../hooks/use-remote-streams';
@@ -21,6 +22,7 @@ const HIDDEN_ROUTES = ['/watch/', '/live/'];
 export function RemoteDisc() {
   const { streams, activeStream, selectStream } = useRemoteStreams();
   const pathname = usePathname();
+  const t = useTranslations('common');
   const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
 
@@ -50,7 +52,7 @@ export function RemoteDisc() {
           type="button"
           onClick={() => setExpanded(true)}
           className="fixed bottom-6 left-4 z-[201] w-16 h-16 md:w-20 md:h-20 rounded-full border-[3px] border-border overflow-hidden shadow-lg hover:scale-110 active:scale-95 transition-transform animate-in zoom-in-50 duration-300 [-webkit-app-region:no-drag]"
-          aria-label="Remote control"
+          aria-label={t('remote.remoteControl')}
         >
           {activeStream?.posterUrl ? (
             <img
