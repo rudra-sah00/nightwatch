@@ -328,9 +328,15 @@ export function MusicDeviceSync() {
         data.queue ?? [],
         data.progress > 0 ? data.progress : undefined,
       );
-      // If transfer was paused, pause after a short delay
+      // If transfer was paused, pause once playback actually starts
       if (!data.isPlaying) {
-        setTimeout(() => togglePlay(), 500);
+        const checkPause = setInterval(() => {
+          if (isPlayingRef.current) {
+            clearInterval(checkPause);
+            togglePlay();
+          }
+        }, 100);
+        setTimeout(() => clearInterval(checkPause), 5000);
       }
     };
 
@@ -352,6 +358,8 @@ export function MusicDeviceSync() {
       const detail = (e as CustomEvent).detail;
       const target = remoteSourceRef.current;
       if (!target) return;
+      // Skip if MusicDevicePicker has an explicit activeTarget (it handles commands itself)
+      if (sessionStorage.getItem('nightwatch:music-active-target')) return;
 
       const command = typeof detail === 'string' ? detail : detail?.command;
       const value = typeof detail === 'object' ? detail?.value : undefined;

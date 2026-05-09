@@ -81,6 +81,22 @@ export function useMusicDevices(
   useEffect(() => {
     if (!socket) return;
 
+    // Clear stale activeTarget if no matching device discovered within 10s
+    let staleTimer: NodeJS.Timeout | null = null;
+    if (activeTargetRef.current) {
+      staleTimer = setTimeout(() => {
+        setDevices((current) => {
+          if (
+            activeTargetRef.current &&
+            !current.has(activeTargetRef.current)
+          ) {
+            setActiveTarget(null);
+          }
+          return current;
+        });
+      }, 10000);
+    }
+
     // Listen for device updates from MusicDeviceSync (which runs globally)
     const onDeviceUpdate = (e: Event) => {
       const { type, device, socketId } = (e as CustomEvent).detail;
@@ -108,6 +124,7 @@ export function useMusicDevices(
     socket.emit(EVENTS.REQUEST_DEVICES);
 
     return () => {
+      if (staleTimer) clearTimeout(staleTimer);
       window.removeEventListener('music:device-update', onDeviceUpdate);
     };
   }, [socket, setActiveTarget]);
@@ -197,6 +214,7 @@ export function useMusicDevices(
     prog: number,
     playing: boolean,
     onFail?: () => void,
+    onSuccess?: () => void,
   ) => {
     if (!socket) return;
     socket.emit(
@@ -206,6 +224,8 @@ export function useMusicDevices(
         if (!res?.success) {
           setActiveTarget(null);
           onFail?.();
+        } else {
+          onSuccess?.();
         }
       },
     );

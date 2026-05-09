@@ -169,8 +169,15 @@ export function MusicDevicePicker() {
     if (!activeTarget || !currentTrack) return;
     if (prevTrackIdRef.current !== currentTrack.id) {
       prevTrackIdRef.current = currentTrack.id;
-      transferToWithData(activeTarget, currentTrack, queue, 0, true);
-      stop();
+      transferToWithData(
+        activeTarget,
+        currentTrack,
+        queue,
+        0,
+        true,
+        undefined,
+        () => stop(),
+      );
     }
   }, [
     currentTrack?.id,
@@ -362,16 +369,24 @@ export function MusicDevicePicker() {
                                 }),
                               );
                             },
+                            () => {
+                              // Transfer succeeded — now safe to stop local
+                              stop();
+                              toast.success(
+                                t('devicePicker.playingOn', {
+                                  device: device.deviceName,
+                                }),
+                              );
+                            },
                           );
-                          stop();
                         } else {
                           transferTo(device.socketId);
+                          toast.success(
+                            t('devicePicker.playingOn', {
+                              device: device.deviceName,
+                            }),
+                          );
                         }
-                        toast.success(
-                          t('devicePicker.playingOn', {
-                            device: device.deviceName,
-                          }),
-                        );
                         setOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
