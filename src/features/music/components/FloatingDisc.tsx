@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
 /** Routes where the floating disc should be hidden (video playback stops music). */
-const VIDEO_ROUTES = ['/watch/', '/live/'];
+const VIDEO_ROUTES = ['/watch/', '/live/', '/watch-party/'];
 
 /**
  * Floating album-art disc (FAB) displayed on non-music, non-video pages
