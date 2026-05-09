@@ -568,6 +568,9 @@ export class AudioEngine {
     if (!this.state.currentTrack) return;
     if (this.state.isPlaying) {
       this.audio.pause();
+      if (this.nextAudio && this.crossfadeActive) {
+        this.nextAudio.pause();
+      }
       this.stopProgressTimer();
       this.update({ isPlaying: false });
     } else {
@@ -578,6 +581,9 @@ export class AudioEngine {
         this.stopProgressTimer();
         this.update({ isPlaying: false });
       });
+      if (this.nextAudio && this.crossfadeActive) {
+        this.nextAudio.play().catch(() => {});
+      }
       this.startProgressTimer();
       this.update({ isPlaying: true });
     }
@@ -603,7 +609,8 @@ export class AudioEngine {
             queue.length,
             queueIndex,
           );
-          nextIdx = this.shuffledOrder[0];
+          // Start from position 1 (position 0 is the current track)
+          nextIdx = this.shuffledOrder[1] ?? this.shuffledOrder[0];
         } else {
           await this.autoContinue();
           return;
@@ -635,10 +642,29 @@ export class AudioEngine {
       return;
     }
 
-    const { queue, queueIndex } = this.state;
+    const { queue, queueIndex, shuffle } = this.state;
     if (queue.length === 0) return;
 
-    const prevIdx = queueIndex - 1 < 0 ? queue.length - 1 : queueIndex - 1;
+    let prevIdx: number;
+    if (shuffle && this.shuffledOrder.length > 0) {
+      const currentPos = this.shuffledOrder.indexOf(queueIndex);
+      if (currentPos <= 0) {
+        // At start of shuffle order — restart current track
+        this.audio.currentTime = 0;
+        this.update({ progress: 0 });
+        return;
+      }
+      prevIdx = this.shuffledOrder[currentPos - 1];
+    } else {
+      if (queueIndex <= 0) {
+        // At start of queue — restart current track
+        this.audio.currentTime = 0;
+        this.update({ progress: 0 });
+        return;
+      }
+      prevIdx = queueIndex - 1;
+    }
+
     this.update({ queueIndex: prevIdx });
     await this.playTrack(queue[prevIdx]);
   }
