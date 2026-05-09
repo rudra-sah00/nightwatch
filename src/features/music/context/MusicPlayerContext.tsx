@@ -133,19 +133,23 @@ export function MusicPlayerProvider({
   children: React.ReactNode;
 }) {
   const engineRef = useRef<AudioEngine | null>(null);
-  const [state, setState] = useState<AudioEngineState>({
+  const [state, setState] = useState<
+    Omit<AudioEngineState, 'progress' | 'duration'>
+  >({
     currentTrack: null,
     queue: [],
     queueIndex: -1,
     isPlaying: false,
-    progress: 0,
-    duration: 0,
     shuffle: false,
     repeat: 'off',
     volume: 1,
     crossfadeDuration: 0,
     gapless: true,
     sleepTimerEnd: null,
+  });
+  const [progressState, setProgressState] = useState({
+    progress: 0,
+    duration: 0,
   });
   const [expanded, setExpanded] = useState(false);
   const [remoteState, setRemoteState] = useState<{
@@ -167,7 +171,59 @@ export function MusicPlayerProvider({
   useEffect(() => {
     const engine = new AudioEngine();
     engineRef.current = engine;
-    const unsub = engine.subscribe(setState);
+    let prevProgress = 0;
+    let prevDuration = 0;
+    let prevTrackId: string | null = null;
+    let prevIsPlaying = false;
+    let prevShuffle = false;
+    let prevRepeat: string = 'off';
+    let prevVolume = 1;
+    let prevCrossfade = 0;
+    let prevGapless = true;
+    let prevSleepEnd: number | null = null;
+    let prevQueue: MusicTrack[] = [];
+    const unsub = engine.subscribe((s) => {
+      // Update progress context separately (high frequency, 250ms)
+      if (s.progress !== prevProgress || s.duration !== prevDuration) {
+        prevProgress = s.progress;
+        prevDuration = s.duration;
+        setProgressState({ progress: s.progress, duration: s.duration });
+      }
+      // Update main state only when non-progress fields change
+      if (
+        s.currentTrack?.id !== prevTrackId ||
+        s.isPlaying !== prevIsPlaying ||
+        s.queue !== prevQueue ||
+        s.shuffle !== prevShuffle ||
+        s.repeat !== prevRepeat ||
+        s.volume !== prevVolume ||
+        s.crossfadeDuration !== prevCrossfade ||
+        s.gapless !== prevGapless ||
+        s.sleepTimerEnd !== prevSleepEnd
+      ) {
+        prevTrackId = s.currentTrack?.id ?? null;
+        prevIsPlaying = s.isPlaying;
+        prevQueue = s.queue;
+        prevShuffle = s.shuffle;
+        prevRepeat = s.repeat;
+        prevVolume = s.volume;
+        prevCrossfade = s.crossfadeDuration;
+        prevGapless = s.gapless;
+        prevSleepEnd = s.sleepTimerEnd;
+        setState({
+          currentTrack: s.currentTrack,
+          queue: s.queue,
+          queueIndex: s.queueIndex,
+          isPlaying: s.isPlaying,
+          shuffle: s.shuffle,
+          repeat: s.repeat,
+          volume: s.volume,
+          crossfadeDuration: s.crossfadeDuration,
+          gapless: s.gapless,
+          sleepTimerEnd: s.sleepTimerEnd,
+        });
+      }
+    });
     engine.loadQueue();
 
     // Listen for settings changes from AppPreferences
@@ -228,10 +284,10 @@ export function MusicPlayerProvider({
       if (!engine) return;
       switch (action) {
         case 'pause':
-          engine.togglePlay();
+          if (engine.getState().isPlaying) engine.togglePlay();
           break;
         case 'resume':
-          engine.togglePlay();
+          if (!engine.getState().isPlaying) engine.togglePlay();
           break;
         case 'next':
           engine.next();
@@ -409,21 +465,34 @@ export function MusicPlayerProvider({
   }, []);
   const stop = useCallback(() => {
     engineRef.current?.stop();
+    duckVolRef.current = -1;
     setExpanded(false);
   }, []);
 
   const progressValue = useMemo(
-    () => ({ progress: state.progress, duration: state.duration }),
-    [state.progress, state.duration],
+    () => ({
+      progress: progressState.progress,
+      duration: progressState.duration,
+    }),
+    [progressState.progress, progressState.duration],
   );
+
+  // Ref keeps latest progress/duration accessible inside the stable useMemo
+  // without adding it as a dependency (which would defeat the optimization).
+  const progressRef = useRef(progressState);
+  progressRef.current = progressState;
 
   const value = useMemo(
     () => ({
       currentTrack: state.currentTrack,
       queue: state.queue,
       isPlaying: state.isPlaying,
-      progress: state.progress,
-      duration: state.duration,
+      get progress() {
+        return progressRef.current.progress;
+      },
+      get duration() {
+        return progressRef.current.duration;
+      },
       shuffle: state.shuffle,
       repeat: state.repeat,
       expanded,
@@ -484,8 +553,6 @@ export function MusicPlayerProvider({
       state.currentTrack,
       state.queue,
       state.isPlaying,
-      state.progress,
-      state.duration,
       state.shuffle,
       state.repeat,
       state.volume,

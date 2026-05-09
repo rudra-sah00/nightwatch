@@ -353,7 +353,15 @@ export class AudioEngine {
         return;
       }
 
-      // Swap audio elements
+      // Swap audio elements — disconnect old source from AudioContext
+      const oldSource = this.sourceNodes.get(this.audio);
+      if (oldSource) {
+        try {
+          oldSource.disconnect();
+        } catch {
+          /* already disconnected */
+        }
+      }
       this.audio.pause();
       this.audio.src = '';
       this.audio = this.nextAudio;
@@ -509,11 +517,20 @@ export class AudioEngine {
             this.audio.currentTime = (startAt / 100) * this.audio.duration;
             this.update({ progress: startAt });
           }
+          // Notify transfer-pause listener after seek is done
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('music:transfer-playing'));
+          }
         };
         if (this.audio.duration > 0) {
           doSeek();
         } else {
           this.audio.addEventListener('loadedmetadata', doSeek, { once: true });
+        }
+      } else {
+        // No seek needed — notify immediately
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('music:transfer-playing'));
         }
       }
 
@@ -716,9 +733,12 @@ export class AudioEngine {
     }
   }
 
-  /** Connect an audio element to the EQ chain (used for crossfade incoming track) */
+  /** Connect an audio element to AudioContext destination during crossfade.
+   *  Uses a direct connection (bypassing shared EQ filters) to avoid routing
+   *  conflicts while both audio elements are active. After crossfade swap,
+   *  connectEqualizer() re-routes through the EQ chain properly. */
   private connectAudioToEq(audioEl: HTMLAudioElement) {
-    if (!this.audioContext || this.eqFilters.length === 0) return;
+    if (!this.audioContext) return;
     try {
       audioEl.crossOrigin = 'anonymous';
       let source = this.sourceNodes.get(audioEl);
@@ -726,12 +746,8 @@ export class AudioEngine {
         source = this.audioContext.createMediaElementSource(audioEl);
         this.sourceNodes.set(audioEl, source);
       }
-      let lastNode: AudioNode = source;
-      for (const filter of this.eqFilters) {
-        lastNode.connect(filter);
-        lastNode = filter;
-      }
-      lastNode.connect(this.audioContext.destination);
+      // Connect directly to destination — EQ will be applied after swap
+      source.connect(this.audioContext.destination);
     } catch {
       // Already connected or context issue
     }

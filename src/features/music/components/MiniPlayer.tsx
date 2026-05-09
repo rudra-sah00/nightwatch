@@ -13,7 +13,10 @@ import {
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import {
+  useMusicPlaybackProgress,
+  useMusicPlayerContext,
+} from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { MusicDevicePicker } from './MusicDevicePicker';
 import { showSongMenu } from './SongContextMenu';
@@ -36,6 +39,7 @@ import { showSongMenu } from './SongContextMenu';
  */
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
+  const { progress } = useMusicPlaybackProgress();
   const t = useTranslations('music');
   const mobile = useIsMobile();
   useMusicShortcuts();
@@ -43,7 +47,6 @@ export function MiniPlayer() {
   const {
     currentTrack,
     isPlaying,
-    progress,
     queue,
     togglePlay,
     next,

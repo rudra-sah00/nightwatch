@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import {
+  useMusicPlaybackProgress,
+  useMusicPlayerContext,
+} from '../context/MusicPlayerContext';
 
 /**
  * Syncs music metadata and playback controls to the OS Media Session.
@@ -9,15 +12,9 @@ import { useMusicPlayerContext } from '../context/MusicPlayerContext';
  * on both iOS and Android (via the standard Media Session API in the WebView).
  */
 export function MusicMediaSession() {
-  const {
-    currentTrack,
-    isPlaying,
-    duration,
-    progress,
-    togglePlay,
-    next,
-    prev,
-  } = useMusicPlayerContext();
+  const { currentTrack, isPlaying, togglePlay, next, prev } =
+    useMusicPlayerContext();
+  const { progress, duration } = useMusicPlaybackProgress();
 
   // Sync metadata when track changes
   useEffect(() => {

@@ -4,7 +4,10 @@ import { Monitor, Smartphone, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import {
+  useMusicPlaybackProgress,
+  useMusicPlayerContext,
+} from '../context/MusicPlayerContext';
 import { useMusicDevices } from '../hooks/use-music-devices';
 import { getDeviceName } from '../utils';
 
@@ -40,11 +43,10 @@ function DeviceIcon({ name }: { name: string }) {
 export function MusicDevicePicker() {
   const t = useTranslations('music');
   const player = useMusicPlayerContext();
+  const { progress, duration } = useMusicPlaybackProgress();
   const {
     currentTrack,
     queue,
-    progress,
-    duration,
     isPlaying,
     play,
     seek,
@@ -133,7 +135,10 @@ export function MusicDevicePicker() {
   // Forward remote commands from MiniPlayer to the target device
   useEffect(() => {
     const handler = (e: Event) => {
-      const cmd = (e as CustomEvent).detail as string;
+      if (!activeTarget) return;
+      const detail = (e as CustomEvent).detail;
+      const cmd = typeof detail === 'string' ? detail : detail?.command;
+      const value = typeof detail === 'object' ? detail?.value : undefined;
       if (cmd === 'stop') {
         const trackToPlay = remoteState.track;
         const prog = remoteProgressRef.current;
@@ -147,6 +152,8 @@ export function MusicDevicePicker() {
         }
         reclaimPlayback();
         setRemoteControlling(false);
+      } else if (cmd === 'seek') {
+        sendCommand(cmd, typeof value === 'number' ? value : undefined);
       } else {
         sendCommand(cmd);
       }
@@ -154,6 +161,7 @@ export function MusicDevicePicker() {
     window.addEventListener('music:remote-command', handler);
     return () => window.removeEventListener('music:remote-command', handler);
   }, [
+    activeTarget,
     sendCommand,
     reclaimPlayback,
     setRemoteControlling,
@@ -169,6 +177,7 @@ export function MusicDevicePicker() {
     if (!activeTarget || !currentTrack) return;
     if (prevTrackIdRef.current !== currentTrack.id) {
       prevTrackIdRef.current = currentTrack.id;
+      const transferredTrackId = currentTrack.id;
       transferToWithData(
         activeTarget,
         currentTrack,
@@ -176,7 +185,12 @@ export function MusicDevicePicker() {
         0,
         true,
         undefined,
-        () => stop(),
+        () => {
+          // Only stop local if the track hasn't changed since transfer was initiated
+          if (prevTrackIdRef.current === transferredTrackId) {
+            stop();
+          }
+        },
       );
     }
   }, [

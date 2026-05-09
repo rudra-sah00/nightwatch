@@ -3,7 +3,10 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { useSocket } from '@/providers/socket-provider';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import {
+  useMusicPlaybackProgress,
+  useMusicPlayerContext,
+} from '../context/MusicPlayerContext';
 import type { MusicDevice } from '../hooks/use-music-devices';
 import { getDeviceName } from '../utils';
 
@@ -24,14 +27,13 @@ export function MusicDeviceSync() {
   const {
     isPlaying,
     currentTrack,
-    progress,
-    duration,
     queue,
     setRemoteControlling,
     isRemoteControlling,
     play,
     togglePlay,
   } = useMusicPlayerContext();
+  const { progress, duration } = useMusicPlaybackProgress();
   const pathname = usePathname();
 
   const deviceName = getDeviceName();
@@ -330,13 +332,17 @@ export function MusicDeviceSync() {
       );
       // If transfer was paused, pause once playback actually starts
       if (!data.isPlaying) {
-        const checkPause = setInterval(() => {
+        const onPlaying = () => {
+          window.removeEventListener('music:transfer-playing', onPlaying);
           if (isPlayingRef.current) {
-            clearInterval(checkPause);
             togglePlay();
           }
-        }, 100);
-        setTimeout(() => clearInterval(checkPause), 5000);
+        };
+        window.addEventListener('music:transfer-playing', onPlaying);
+        // Fallback: if event never fires (e.g. stream error), clean up after 8s
+        setTimeout(() => {
+          window.removeEventListener('music:transfer-playing', onPlaying);
+        }, 8000);
       }
     };
 

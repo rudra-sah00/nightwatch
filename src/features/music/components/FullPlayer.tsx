@@ -8,7 +8,10 @@ import {
   type MusicTrack,
   type SyncedLyricLine,
 } from '../api';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import {
+  useMusicPlaybackProgress,
+  useMusicPlayerContext,
+} from '../context/MusicPlayerContext';
 import { DesktopFullPlayer } from './DesktopFullPlayer';
 import { MobileFullPlayer } from './MobileFullPlayer';
 
@@ -32,8 +35,6 @@ export function FullPlayer() {
   const {
     currentTrack,
     isPlaying,
-    progress,
-    duration,
     shuffle,
     repeat,
     expanded,
@@ -55,6 +56,7 @@ export function FullPlayer() {
     remoteDuration,
     remoteQueue,
   } = useMusicPlayerContext();
+  const { progress, duration } = useMusicPlaybackProgress();
 
   const mobile = useIsMobile();
   const [closing, setClosing] = useState(false);
