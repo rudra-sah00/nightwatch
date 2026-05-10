@@ -380,6 +380,15 @@ export function useHls({
             return;
           }
 
+          // 429 Rate Limited — back off before retrying to avoid a tight loop
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 429) {
+            dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+            setTimeout(() => {
+              if (!cancelled) hls.startLoad();
+            }, 5000);
+            return;
+          }
+
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR && status === 401) {
             if (isLive) {
               unauthorizedRetryCountRef.current += 1;

@@ -200,9 +200,11 @@ export const fetchIptvCategories = async (
 
 export const fetchIptvResolve = async (
   channelId: string,
+  signal?: AbortSignal,
 ): Promise<string | null> => {
   const data = await apiFetch<{ streamUrl: string }>(
     `/api/livestream/iptv/resolve/${channelId}`,
+    { signal },
   );
   return data?.streamUrl || null;
 };

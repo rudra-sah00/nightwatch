@@ -34,12 +34,18 @@ export default function LiveMatchPlayerPage() {
       setResolving(false);
       return;
     }
-    fetchIptvResolve(matchId)
+    const controller = new AbortController();
+    fetchIptvResolve(matchId, controller.signal)
       .then((url) => {
-        setResolvedUrl(url);
-        setResolving(false);
+        if (!controller.signal.aborted) {
+          setResolvedUrl(url);
+          setResolving(false);
+        }
       })
-      .catch(() => setResolving(false));
+      .catch(() => {
+        if (!controller.signal.aborted) setResolving(false);
+      });
+    return () => controller.abort();
   }, [matchId, isIptv]);
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
