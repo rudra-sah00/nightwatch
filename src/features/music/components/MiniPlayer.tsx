@@ -318,7 +318,8 @@ export function MiniPlayer() {
           </p>
           {queue.map((track, i) => (
             <button
-              key={track.id}
+              // biome-ignore lint/suspicious/noArrayIndexKey: queue allows duplicate track IDs, position is the identity
+              key={i}
               type="button"
               onClick={() => player.play(track, queue)}
               onContextMenu={(e) =>

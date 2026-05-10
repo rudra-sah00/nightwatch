@@ -147,8 +147,8 @@ export function MusicDevicePicker() {
           play(
             trackToPlay,
             remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
+            prog > 0 ? prog : undefined,
           );
-          setTimeout(() => seek(prog), 300);
         }
         reclaimPlayback();
         setRemoteControlling(false);
@@ -167,7 +167,6 @@ export function MusicDevicePicker() {
     setRemoteControlling,
     remoteState.track,
     play,
-    seek,
     remoteQueue,
   ]);
 
@@ -322,11 +321,8 @@ export function MusicDevicePicker() {
                       play(
                         trackToPlay,
                         remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
+                        prog > 0 ? prog : undefined,
                       );
-                      // Seek after stream loads (playTrack: fetch URL ~200ms + play + fade-in 300ms)
-                      if (prog > 0) {
-                        setTimeout(() => seek(prog), 1500);
-                      }
                     }
                     reclaimPlayback();
                     setRemoteControlling(false);

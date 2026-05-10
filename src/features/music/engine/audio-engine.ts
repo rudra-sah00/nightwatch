@@ -338,6 +338,18 @@ export class AudioEngine {
           }
           return;
         }
+        // Wait while paused — don't advance crossfade during pause
+        while (!this.state.isPlaying && !this.crossfadeAborted) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        if (this.crossfadeAborted || this.playId !== myPlayId) {
+          if (this.nextAudio) {
+            this.nextAudio.pause();
+            this.nextAudio.src = '';
+            this.nextAudio = null;
+          }
+          return;
+        }
         const ratio = i / steps;
         this.audio.volume = (1 - ratio) * this.state.volume;
         if (this.nextAudio) this.nextAudio.volume = ratio * this.state.volume;
@@ -884,6 +896,12 @@ export class AudioEngine {
   setCrossfadeDuration(seconds: number) {
     const val = Math.max(0, Math.min(12, seconds));
     this.update({ crossfadeDuration: val });
+    // Invalidate gapless pre-buffer if crossfade is now enabled
+    if (val > 0 && this.nextAudio && !this.crossfadeActive) {
+      this.nextAudio.pause();
+      this.nextAudio.src = '';
+      this.nextAudio = null;
+    }
     try {
       localStorage.setItem('nightwatch:crossfade', String(val));
     } catch {
@@ -932,14 +950,10 @@ export class AudioEngine {
     if (this.state.shuffle && this.shuffledOrder.length > 0) {
       // Insert at random position after current
       const currentPos = this.shuffledOrder.indexOf(this.state.queueIndex);
-      const insertAt =
-        currentPos +
-        1 +
-        Math.floor(
-          Math.random() * (this.shuffledOrder.length - currentPos - 1),
-        );
+      const remaining = Math.max(0, this.shuffledOrder.length - currentPos - 1);
+      const insertAt = currentPos + 1 + Math.floor(Math.random() * remaining);
       this.shuffledOrder.splice(
-        Math.min(insertAt, this.shuffledOrder.length),
+        Math.min(Math.max(0, insertAt), this.shuffledOrder.length),
         0,
         queue.length - 1,
       );
@@ -993,6 +1007,19 @@ export class AudioEngine {
   removeFromQueue(index: number) {
     const { queue, queueIndex } = this.state;
     if (index < 0 || index >= queue.length || index === queueIndex) return;
+
+    // If crossfade is active and we're removing the track being faded into, abort it
+    if (this.crossfadeActive && this.nextAudio) {
+      const nextIdx = this.getNextIndex();
+      if (nextIdx === index) {
+        this.crossfadeAborted = true;
+        this.crossfadeActive = false;
+        this.nextAudio.pause();
+        this.nextAudio.src = '';
+        this.nextAudio = null;
+      }
+    }
+
     const newQueue = queue.filter((_, i) => i !== index);
     const newIndex = index < queueIndex ? queueIndex - 1 : queueIndex;
     this.update({ queue: newQueue, queueIndex: newIndex });
@@ -1002,14 +1029,11 @@ export class AudioEngine {
         .filter((i) => i !== index)
         .map((i) => (i > index ? i - 1 : i));
     }
-    // Invalidate pre-buffered next track if it was the removed one
+    // Invalidate gapless pre-buffer — the next track may have changed
     if (this.nextAudio && !this.crossfadeActive) {
-      const nextIdx = this.getNextIndex();
-      if (nextIdx === null || newQueue[nextIdx]?.id !== queue[index + 1]?.id) {
-        this.nextAudio.pause();
-        this.nextAudio.src = '';
-        this.nextAudio = null;
-      }
+      this.nextAudio.pause();
+      this.nextAudio.src = '';
+      this.nextAudio = null;
     }
     // Persist updated queue (fire-and-forget)
     this.persistQueue(newQueue);
