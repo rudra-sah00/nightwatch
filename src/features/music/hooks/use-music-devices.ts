@@ -232,7 +232,7 @@ export function useMusicDevices(
     setActiveTarget(targetSocketId);
   };
 
-  const sendCommand = (command: string, value?: number) => {
+  const sendCommand = (command: string, value?: unknown) => {
     if (!socket || !activeTarget) return;
     socket.emit(EVENTS.COMMAND, {
       targetSocketId: activeTarget,

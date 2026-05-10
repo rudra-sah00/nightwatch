@@ -152,10 +152,8 @@ export function MusicDevicePicker() {
         }
         reclaimPlayback();
         setRemoteControlling(false);
-      } else if (cmd === 'seek') {
-        sendCommand(cmd, typeof value === 'number' ? value : undefined);
       } else {
-        sendCommand(cmd);
+        sendCommand(cmd, value);
       }
     };
     window.addEventListener('music:remote-command', handler);
