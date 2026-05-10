@@ -67,6 +67,13 @@ export function MiniPlayer() {
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
 
+  // Clear long-press timer on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+  }, []);
+
   const onTouchStart = (e: React.TouchEvent) => {
     longPressTriggered.current = false;
     const touch = e.touches[0];

@@ -334,9 +334,8 @@ export function MusicDeviceSync() {
       if (!data.isPlaying) {
         const onPlaying = () => {
           window.removeEventListener('music:transfer-playing', onPlaying);
-          if (isPlayingRef.current) {
-            togglePlay();
-          }
+          // Delay to let React state propagate (isPlaying: true) before toggling
+          requestAnimationFrame(() => togglePlay());
         };
         window.addEventListener('music:transfer-playing', onPlaying);
         // Fallback: if event never fires (e.g. stream error), clean up after 8s

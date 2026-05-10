@@ -150,9 +150,11 @@ export class AudioEngine {
           const idx = getNextIndex(this.ctx);
           if (idx !== null) preBufferNext(this.ctx, idx);
         }
-        // Crossfade trigger
+        // Crossfade trigger — only if track has played past the crossfade duration
+        // (prevents cascade when next track is shorter than crossfade duration)
         if (
           this.ctx.state.crossfadeDuration > 0 &&
+          this.ctx.audio.currentTime > this.ctx.state.crossfadeDuration &&
           this.ctx.audio.duration - this.ctx.audio.currentTime <=
             this.ctx.state.crossfadeDuration &&
           !this.ctx.nextAudio &&
@@ -199,12 +201,13 @@ export class AudioEngine {
         this.ctx.setAudio(this.ctx.nextAudio);
         this.ctx.setNextAudio(null);
         if (this.ctx.audioContext?.state === 'suspended') {
-          this.ctx.audioContext.resume();
+          this.ctx.audioContext.resume().then(() => connectEqualizer(this.ctx));
+        } else {
+          connectEqualizer(this.ctx);
         }
         this.ctx.audio
           .play()
           .catch(() => this.ctx.update({ isPlaying: false }));
-        connectEqualizer(this.ctx);
         this.ctx.update({
           currentTrack: this.ctx.state.queue[nextIdx],
           queueIndex: nextIdx,
@@ -391,10 +394,11 @@ export class AudioEngine {
 
   setVolume(v: number) {
     const vol = Math.max(0, Math.min(1, v));
-    this.ctx.audio.volume = vol;
-    if (this.ctx.nextAudio && !this.ctx.crossfadeActive) {
-      this.ctx.nextAudio.volume = vol;
+    if (!this.ctx.crossfadeActive) {
+      this.ctx.audio.volume = vol;
+      if (this.ctx.nextAudio) this.ctx.nextAudio.volume = vol;
     }
+    // During crossfade, only update state — the crossfade loop reads ctx.state.volume each step
     this.ctx.update({ volume: vol });
   }
 
