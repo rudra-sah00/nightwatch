@@ -100,14 +100,16 @@ export function usePlayerHandlers({
       clearTimeout(controlsTimeoutRef.current);
     }
 
-    if (isInteractingRef.current) return;
+    // Always schedule hide — use longer delay when interacting with controls
+    const delay = isInteractingRef.current ? 5000 : 3000;
 
     controlsTimeoutRef.current = setTimeout(() => {
-      // Read from refs — always current even after 3s delay
+      // Read from refs — always current even after delay
       if (isPlayingRef.current && !isPausedRef.current) {
+        isInteractingRef.current = false;
         dispatch({ type: 'HIDE_CONTROLS' });
       }
-    }, 3000);
+    }, delay);
   }, [dispatch]);
 
   // Handle user interaction (e.g. menu open)
