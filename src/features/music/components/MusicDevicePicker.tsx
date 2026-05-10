@@ -99,6 +99,9 @@ export function MusicDevicePicker() {
           if (value) {
             initEqualizer();
             setEqBands(value as unknown as Parameters<typeof setEqBands>[0]);
+            window.dispatchEvent(
+              new CustomEvent('music:eq-updated', { detail: value }),
+            );
           }
           break;
         case 'play_track':

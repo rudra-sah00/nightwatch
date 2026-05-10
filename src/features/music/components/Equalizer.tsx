@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { EQ_PRESETS, type EqualizerBand } from '../engine/audio-engine';
 
@@ -17,6 +17,19 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
     useMusicPlayerContext();
   const [bands, setBands] = useState<EqualizerBand[]>(getEqBands);
   const [activePreset, setActivePreset] = useState('flat');
+
+  // Sync UI when EQ is updated remotely
+  useEffect(() => {
+    const onEqUpdated = (e: Event) => {
+      const newBands = (e as CustomEvent).detail as EqualizerBand[];
+      if (newBands) {
+        setBands(newBands);
+        setActivePreset('');
+      }
+    };
+    window.addEventListener('music:eq-updated', onEqUpdated);
+    return () => window.removeEventListener('music:eq-updated', onEqUpdated);
+  }, []);
 
   const BAND_LABELS = [
     t('equalizer.bass'),
