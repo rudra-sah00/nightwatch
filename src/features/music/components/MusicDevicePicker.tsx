@@ -389,9 +389,14 @@ export function MusicDevicePicker() {
                                 }),
                               );
                             },
+                            device.deviceName,
                           );
                         } else {
-                          transferTo(device.socketId);
+                          transferTo(
+                            device.socketId,
+                            undefined,
+                            device.deviceName,
+                          );
                           toast.success(
                             t('devicePicker.playingOn', {
                               device: device.deviceName,
