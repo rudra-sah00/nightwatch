@@ -8,7 +8,7 @@ import {
   useMusicPlayerContext,
 } from '../context/MusicPlayerContext';
 import type { MusicDevice } from '../hooks/use-music-devices';
-import { getDeviceName } from '../utils';
+import { getDeviceId, getDeviceName } from '../utils';
 
 const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
 
@@ -37,6 +37,7 @@ export function MusicDeviceSync() {
   const pathname = usePathname();
 
   const deviceName = getDeviceName();
+  const deviceId = getDeviceId();
   const available = !BLOCKED_ROUTES.some((r) => pathname.startsWith(r));
 
   // Refs for values accessed in intervals/callbacks (avoid stale closures)
@@ -65,6 +66,7 @@ export function MusicDeviceSync() {
 
     const advertise = () => {
       socket.emit('music:device_online', {
+        deviceId,
         deviceName,
         isPlaying: isPlayingRef.current,
         available: availableRef.current,
@@ -78,13 +80,18 @@ export function MusicDeviceSync() {
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       socket.emit('music:device_offline');
     };
-  }, [socket, deviceName]);
+  }, [socket, deviceId, deviceName]);
 
   // Re-advertise on play state or availability change
   useEffect(() => {
     if (!socket?.connected) return;
-    socket.emit('music:device_online', { deviceName, isPlaying, available });
-  }, [socket, deviceName, isPlaying, available]);
+    socket.emit('music:device_online', {
+      deviceId,
+      deviceName,
+      isPlaying,
+      available,
+    });
+  }, [socket, deviceId, deviceName, isPlaying, available]);
 
   // ─── 2. Discover other devices ─────────────────────────────────
 
@@ -115,6 +122,7 @@ export function MusicDeviceSync() {
 
     const onRequestDevices = () => {
       socket.emit('music:device_online', {
+        deviceId,
         deviceName,
         isPlaying: isPlayingRef.current,
         available: availableRef.current,
@@ -159,7 +167,7 @@ export function MusicDeviceSync() {
       socket.off('music:request_state', onRequestState);
       socket.off('connect', onConnect);
     };
-  }, [socket, deviceName, setRemoteControlling]);
+  }, [socket, deviceId, deviceName, setRemoteControlling]);
 
   // ─── 3. Broadcast playback_started on NEW track only ───────────
 
@@ -172,6 +180,7 @@ export function MusicDeviceSync() {
     prevTrackIdRef.current = track.id;
 
     socket.emit('music:playback_started', {
+      deviceId,
       deviceName,
       track,
       isPlaying: true,

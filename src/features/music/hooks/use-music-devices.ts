@@ -6,6 +6,7 @@ import type { MusicTrack } from '../api';
 
 export interface MusicDevice {
   socketId: string;
+  deviceId: string;
   deviceName: string;
   isPlaying: boolean;
   available: boolean;
@@ -60,30 +61,30 @@ export function useMusicDevices(
   const activeTargetRef = useRef(activeTarget);
   activeTargetRef.current = activeTarget;
 
-  // Persist target device name for reconnection matching
-  const activeTargetNameRef = useRef<string | null>(
+  // Persist target device ID for reconnection matching
+  const activeTargetDeviceIdRef = useRef<string | null>(
     typeof window !== 'undefined'
-      ? sessionStorage.getItem('nightwatch:music-active-target-name')
+      ? sessionStorage.getItem('nightwatch:music-active-target-device-id')
       : null,
   );
 
   const setActiveTarget = useCallback(
-    (value: string | null, deviceName?: string) => {
+    (value: string | null, deviceId?: string) => {
       setActiveTargetRaw(value);
       activeTargetRef.current = value;
       if (value) {
         sessionStorage.setItem('nightwatch:music-active-target', value);
-        if (deviceName) {
+        if (deviceId) {
           sessionStorage.setItem(
-            'nightwatch:music-active-target-name',
-            deviceName,
+            'nightwatch:music-active-target-device-id',
+            deviceId,
           );
-          activeTargetNameRef.current = deviceName;
+          activeTargetDeviceIdRef.current = deviceId;
         }
       } else {
         sessionStorage.removeItem('nightwatch:music-active-target');
-        sessionStorage.removeItem('nightwatch:music-active-target-name');
-        activeTargetNameRef.current = null;
+        sessionStorage.removeItem('nightwatch:music-active-target-device-id');
+        activeTargetDeviceIdRef.current = null;
       }
     },
     [],
@@ -108,11 +109,11 @@ export function useMusicDevices(
           if (!activeTargetRef.current) return current;
           // Check if target exists by socket ID
           if (current.has(activeTargetRef.current)) return current;
-          // Check if target exists by device name (reconnected with new ID)
-          if (activeTargetNameRef.current) {
+          // Check if target exists by deviceId (reconnected with new socket ID)
+          if (activeTargetDeviceIdRef.current) {
             for (const [sid, dev] of current) {
-              if (dev.deviceName === activeTargetNameRef.current) {
-                setActiveTarget(sid, dev.deviceName);
+              if (dev.deviceId === activeTargetDeviceIdRef.current) {
+                setActiveTarget(sid, dev.deviceId);
                 return current;
               }
             }
@@ -133,13 +134,13 @@ export function useMusicDevices(
           next.set(device.socketId, device);
           return next;
         });
-        // Auto-reconnect: if this device matches our target by name but has a new socket ID
+        // Auto-reconnect: if this device matches our target by deviceId but has a new socket ID
         if (
-          activeTargetNameRef.current &&
-          device.deviceName === activeTargetNameRef.current &&
+          activeTargetDeviceIdRef.current &&
+          device.deviceId === activeTargetDeviceIdRef.current &&
           activeTargetRef.current !== device.socketId
         ) {
-          setActiveTarget(device.socketId, device.deviceName);
+          setActiveTarget(device.socketId, device.deviceId);
         }
       } else if (type === 'offline') {
         setDevices((prev) => {
@@ -147,13 +148,11 @@ export function useMusicDevices(
           next.delete(socketId);
           return next;
         });
-        // Don't clear activeTarget on offline if we have a name to reconnect with
+        // Don't clear activeTarget on offline if we have a deviceId to reconnect with
         if (activeTargetRef.current === socketId) {
-          if (!activeTargetNameRef.current) {
+          if (!activeTargetDeviceIdRef.current) {
             setActiveTarget(null);
           }
-          // If we have a name, keep activeTarget stale briefly — auto-reconnect
-          // will update it when the device comes back online with a new socket ID
         }
       }
     };
@@ -235,7 +234,7 @@ export function useMusicDevices(
   const transferTo = (
     targetSocketId: string,
     onFail?: () => void,
-    deviceName?: string,
+    deviceId?: string,
   ) => {
     if (!socket || !currentTrack) return;
     socket.emit(
@@ -248,7 +247,7 @@ export function useMusicDevices(
         }
       },
     );
-    setActiveTarget(targetSocketId, deviceName);
+    setActiveTarget(targetSocketId, deviceId);
   };
 
   const transferToWithData = (
@@ -259,7 +258,7 @@ export function useMusicDevices(
     playing: boolean,
     onFail?: () => void,
     onSuccess?: () => void,
-    deviceName?: string,
+    deviceId?: string,
   ) => {
     if (!socket) return;
     socket.emit(
@@ -274,7 +273,7 @@ export function useMusicDevices(
         }
       },
     );
-    setActiveTarget(targetSocketId, deviceName);
+    setActiveTarget(targetSocketId, deviceId);
   };
 
   const sendCommand = (command: string, value?: unknown) => {

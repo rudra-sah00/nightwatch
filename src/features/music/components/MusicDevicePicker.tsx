@@ -389,13 +389,13 @@ export function MusicDevicePicker() {
                                 }),
                               );
                             },
-                            device.deviceName,
+                            device.deviceId,
                           );
                         } else {
                           transferTo(
                             device.socketId,
                             undefined,
-                            device.deviceName,
+                            device.deviceId,
                           );
                           toast.success(
                             t('devicePicker.playingOn', {

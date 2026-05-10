@@ -18,6 +18,23 @@ export function formatTime(seconds: number): string {
 
 import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 
+const DEVICE_ID_KEY = 'nightwatch:device-id';
+
+/**
+ * Returns a stable unique device ID for this browser profile.
+ * Generated once on first access, persisted in localStorage.
+ * Survives page refreshes, logouts, and re-logins.
+ */
+export function getDeviceId(): string {
+  if (typeof window === 'undefined') return 'ssr';
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
 /**
  * Returns the display name for this device based on platform detection.
  * Supports a sessionStorage override for local testing.
