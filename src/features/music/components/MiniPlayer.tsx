@@ -61,6 +61,7 @@ export function MiniPlayer() {
     remoteIsPlaying,
     remoteProgress,
     remoteDuration,
+    remoteQueue,
     removeFromQueue,
   } = player;
 
@@ -108,6 +109,7 @@ export function MiniPlayer() {
   // Show MiniPlayer if local track OR remote controlling
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
+  const displayQueue = isRemoteControlling ? remoteQueue : queue;
 
   // Interpolate remote progress locally for smooth bar animation
   const [interpolatedSeconds, setInterpolatedSeconds] = useState(0);
@@ -318,27 +320,37 @@ export function MiniPlayer() {
       </div>
 
       {/* Queue panel */}
-      {showQueue && queue.length > 0 && (
+      {showQueue && displayQueue.length > 0 && (
         <div className="border-t-[2px] border-border max-h-48 overflow-y-auto px-4 py-2">
           <p className="font-headline font-black uppercase tracking-widest text-[10px] text-foreground/30 mb-1">
-            Queue — {queue.length}
+            Queue — {displayQueue.length}
           </p>
-          {queue.map((track, i) => (
+          {displayQueue.map((track, i) => (
             <button
               // biome-ignore lint/suspicious/noArrayIndexKey: queue allows duplicate track IDs, position is the identity
               key={i}
               type="button"
-              onClick={() => player.play(track, queue)}
+              onClick={() => {
+                if (isRemoteControlling) {
+                  window.dispatchEvent(
+                    new CustomEvent('music:remote-command', {
+                      detail: { command: 'play_track', value: track },
+                    }),
+                  );
+                } else {
+                  player.play(track, queue);
+                }
+              }}
               onContextMenu={(e) =>
                 showSongMenu(
                   e,
                   track,
-                  currentTrack?.id !== track.id
+                  !isRemoteControlling && currentTrack?.id !== track.id
                     ? () => removeFromQueue(i)
                     : undefined,
                 )
               }
-              className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:bg-card ${currentTrack?.id === track.id ? 'text-neo-yellow' : ''}`}
+              className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:bg-card ${displayTrack?.id === track.id ? 'text-neo-yellow' : ''}`}
             >
               <span className="w-4 text-foreground/20 text-[9px] font-mono text-right shrink-0">
                 {i + 1}
