@@ -136,9 +136,18 @@ export function MobileFullPlayer({
         {showQueue ? (
           /* ===== QUEUE MODE ===== */
           <div className="flex-1 min-h-0 flex flex-col">
-            <p className="shrink-0 text-white/30 font-headline font-bold uppercase tracking-widest text-[10px] pb-2">
-              {t('queue', { count: queue.length })}
-            </p>
+            <div className="shrink-0 flex items-center justify-between pb-2">
+              <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px]">
+                {t('queue', { count: queue.length })}
+              </p>
+              <button
+                type="button"
+                onClick={onToggleQueue}
+                className="text-white/50 text-xs font-bold uppercase tracking-wider"
+              >
+                {t('close')}
+              </button>
+            </div>
             <div className="flex-1 overflow-y-auto no-scrollbar">
               {queue.map((track, i) => (
                 <button

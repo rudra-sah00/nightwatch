@@ -13,24 +13,20 @@ import type { SyncedLyricLine } from '../api';
  */
 const config = {
   mobile: {
-    fontSizeCurrent: '1.75rem',
-    fontSizeOther: '1.25rem',
+    fontSize: '1.4rem',
     blurMax: 2,
     spaceClass: 'space-y-5',
     topSpacer: 'h-[20vh]',
     bottomSpacer: 'h-[30vh]',
     mask: 'linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%)',
-    scale: false,
   },
   desktop: {
-    fontSizeCurrent: '2rem',
-    fontSizeOther: '1.5rem',
+    fontSize: '1.6rem',
     blurMax: 2.5,
     spaceClass: 'space-y-6',
     topSpacer: 'h-[30vh]',
     bottomSpacer: 'h-[30vh]',
     mask: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
-    scale: true,
   },
 } as const;
 
@@ -94,7 +90,7 @@ export function FullPlayerLyrics({
             key={line.time}
             className="font-headline uppercase tracking-tight leading-snug cursor-pointer"
             style={{
-              fontSize: isCurrent ? v.fontSizeCurrent : v.fontSizeOther,
+              fontSize: v.fontSize,
               fontWeight: isCurrent ? 900 : 700,
               color: isCurrent
                 ? '#fff'
@@ -104,13 +100,8 @@ export function FullPlayerLyrics({
               filter: isCurrent
                 ? 'none'
                 : `blur(${Math.min(dist * 0.5, v.blurMax)}px)`,
-              transform: v.scale
-                ? isCurrent
-                  ? 'scale(1)'
-                  : 'scale(0.92)'
-                : undefined,
               transition:
-                'color 0.4s ease, filter 0.5s ease, font-size 0.4s ease, font-weight 0.3s ease, transform 0.4s ease',
+                'color 0.4s ease, filter 0.5s ease, font-weight 0.3s ease',
             }}
             onClick={() => {
               if (duration > 0) seek((line.time / duration) * 100);
