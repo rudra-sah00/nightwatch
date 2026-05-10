@@ -27,7 +27,7 @@ export async function playTrack(
   ctx.update({
     currentTrack: track,
     isPlaying: false,
-    progress: 0,
+    progress: startAt ?? 0,
     duration: 0,
   });
 
@@ -42,25 +42,42 @@ export async function playTrack(
 
     ctx.audio.src = url;
     ctx.audio.volume = 0;
+
+    // If startAt is provided, seek before playing to avoid audible playback from 0
+    if (startAt && startAt > 0) {
+      const seekBeforePlay = () => {
+        if (ctx.audio.duration > 0) {
+          ctx.audio.currentTime = (startAt / 100) * ctx.audio.duration;
+        }
+      };
+      // Try to seek on loadedmetadata before play
+      await new Promise<void>((resolve) => {
+        const onMeta = () => {
+          seekBeforePlay();
+          resolve();
+        };
+        if (ctx.audio.duration > 0) {
+          seekBeforePlay();
+          resolve();
+        } else {
+          ctx.audio.addEventListener('loadedmetadata', onMeta, { once: true });
+          // Fallback: don't block forever if metadata never loads
+          setTimeout(() => {
+            ctx.audio.removeEventListener('loadedmetadata', onMeta);
+            resolve();
+          }, 3000);
+        }
+      });
+      if (ctx.playId !== myPlayId) return;
+    }
+
     await ctx.audio.play();
     if (ctx.playId !== myPlayId) return;
 
     ctx.update({ isPlaying: true });
 
-    // Seek + notify transfer listener
-    if (startAt && startAt > 0) {
-      const doSeek = () => {
-        if (ctx.audio.duration > 0) {
-          ctx.audio.currentTime = (startAt / 100) * ctx.audio.duration;
-          ctx.update({ progress: startAt });
-        }
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('music:transfer-playing'));
-        }
-      };
-      if (ctx.audio.duration > 0) doSeek();
-      else ctx.audio.addEventListener('loadedmetadata', doSeek, { once: true });
-    } else if (typeof window !== 'undefined') {
+    // Notify transfer-pause listener
+    if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('music:transfer-playing'));
     }
 
