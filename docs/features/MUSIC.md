@@ -60,7 +60,14 @@ src/features/music/
 ├── api.ts                          # All backend API functions (40 endpoints)
 ├── utils.ts                        # formatTime helper
 ├── engine/
-│   └── audio-engine.ts             # AudioEngine class (playback, queue, gapless, crossfade, EQ, sleep)
+│   ├── audio-engine.ts             # Orchestrator class (public API, timer, lifecycle)
+│   ├── types.ts                    # State interfaces, EQ presets, EngineContext
+│   ├── playback.ts                 # Core play, fade-out, retry, autoContinue
+│   ├── crossfade.ts                # Crossfade logic with pause-aware step loop
+│   ├── gapless.ts                  # Pre-buffer management (preBufferNext, invalidate)
+│   ├── queue.ts                    # Queue ops, shuffle order, persistence
+│   ├── equalizer.ts                # Web Audio API 5-band EQ chain
+│   └── sleep-timer.ts              # Timer set/clear/expiry check
 ├── context/
 │   └── MusicPlayerContext.tsx       # React Context wrapping AudioEngine
 ├── hooks/
@@ -87,7 +94,19 @@ src/features/music/
 
 ## AudioEngine
 
-Singleton class managing all playback state via a single `HTMLAudioElement`.
+Modular singleton managing all playback state. The `AudioEngine` class in `audio-engine.ts` is a thin orchestrator (~430 lines) that delegates to focused sub-modules via a shared `EngineContext` object:
+
+| Module | Responsibility |
+|--------|---------------|
+| `types.ts` | State interfaces, EQ presets, `EngineContext` contract |
+| `playback.ts` | `playTrack`, `fadeOut`, retry logic, `autoContinue` |
+| `crossfade.ts` | Pause-aware crossfade loop, abort, audio swap |
+| `gapless.ts` | Pre-buffer next track, invalidation |
+| `queue.ts` | Add/remove/playNext, shuffle order, persistence |
+| `equalizer.ts` | Web Audio API init, connect, disconnect, band control |
+| `sleep-timer.ts` | Set/clear timer, frozen-tab fallback check |
+
+The `EngineContext` provides shared mutable state and mutator functions (`update`, `setAudio`, `setNextAudio`, `incrementPlayId`) so sub-modules can operate without circular imports back to the class.
 
 ### State
 
