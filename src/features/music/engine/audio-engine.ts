@@ -1,153 +1,55 @@
-import { apiFetch } from '@/lib/fetch';
 import type { MusicTrack } from '../api';
+import { abortCrossfade, startCrossfade } from './crossfade';
 import {
-  addToUserQueue,
-  getSongRecommendations,
-  getStreamUrl,
-  getUserQueue,
-} from '../api';
+  connectEqualizer,
+  destroyEqualizer,
+  getEqBands,
+  initEqualizer,
+  setEqBands,
+} from './equalizer';
+import { invalidatePreBuffer, preBufferNext } from './gapless';
+import { autoContinue, playTrack } from './playback';
+import {
+  addToQueue,
+  generateShuffleOrder,
+  getNextIndex,
+  getPrevIndex,
+  loadQueue,
+  playNextInQueue,
+  removeFromQueue,
+} from './queue';
+import {
+  checkSleepTimerExpired,
+  clearSleepTimer,
+  setSleepTimer,
+} from './sleep-timer';
+import {
+  type AudioEngineState,
+  type EngineContext,
+  EQ_PRESETS,
+  type EqualizerBand,
+  type RepeatMode,
+} from './types';
 
-export type RepeatMode = 'off' | 'all' | 'one';
-
-export interface AudioEngineState {
-  currentTrack: MusicTrack | null;
-  queue: MusicTrack[];
-  queueIndex: number;
-  isPlaying: boolean;
-  progress: number;
-  duration: number;
-  shuffle: boolean;
-  repeat: RepeatMode;
-  volume: number;
-  crossfadeDuration: number;
-  gapless: boolean;
-  sleepTimerEnd: number | null;
-}
-
-export interface EqualizerBand {
-  frequency: number;
-  gain: number;
-}
-
-export const EQ_PRESETS: Record<string, EqualizerBand[]> = {
-  flat: [
-    { frequency: 60, gain: 0 },
-    { frequency: 230, gain: 0 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 0 },
-    { frequency: 14000, gain: 0 },
-  ],
-  bass: [
-    { frequency: 60, gain: 6 },
-    { frequency: 230, gain: 4 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: -1 },
-    { frequency: 14000, gain: -2 },
-  ],
-  treble: [
-    { frequency: 60, gain: -2 },
-    { frequency: 230, gain: -1 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 4 },
-    { frequency: 14000, gain: 6 },
-  ],
-  vocal: [
-    { frequency: 60, gain: -2 },
-    { frequency: 230, gain: 0 },
-    { frequency: 910, gain: 4 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: 1 },
-  ],
-  rock: [
-    { frequency: 60, gain: 5 },
-    { frequency: 230, gain: 3 },
-    { frequency: 910, gain: -1 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: 5 },
-  ],
-  electronic: [
-    { frequency: 60, gain: 5 },
-    { frequency: 230, gain: 3 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 2 },
-    { frequency: 14000, gain: 4 },
-  ],
-  pop: [
-    { frequency: 60, gain: -1 },
-    { frequency: 230, gain: 2 },
-    { frequency: 910, gain: 4 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: -1 },
-  ],
-  hiphop: [
-    { frequency: 60, gain: 7 },
-    { frequency: 230, gain: 4 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 1 },
-    { frequency: 14000, gain: 3 },
-  ],
-  jazz: [
-    { frequency: 60, gain: 3 },
-    { frequency: 230, gain: 0 },
-    { frequency: 910, gain: 2 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: 4 },
-  ],
-  classical: [
-    { frequency: 60, gain: 0 },
-    { frequency: 230, gain: 0 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: 5 },
-  ],
-  lofi: [
-    { frequency: 60, gain: 3 },
-    { frequency: 230, gain: 2 },
-    { frequency: 910, gain: -2 },
-    { frequency: 3600, gain: -1 },
-    { frequency: 14000, gain: -3 },
-  ],
-  loudness: [
-    { frequency: 60, gain: 6 },
-    { frequency: 230, gain: 3 },
-    { frequency: 910, gain: 0 },
-    { frequency: 3600, gain: 3 },
-    { frequency: 14000, gain: 6 },
-  ],
-};
+export {
+  type AudioEngineState,
+  EQ_PRESETS,
+  type EqualizerBand,
+  type RepeatMode,
+} from './types';
 
 type Listener = (state: AudioEngineState) => void;
 
 export class AudioEngine {
-  private audio: HTMLAudioElement;
-  private nextAudio: HTMLAudioElement | null = null;
-  private state: AudioEngineState;
-  private listeners = new Set<Listener>();
-  private interval: ReturnType<typeof setInterval> | null = null;
-  private shuffledOrder: number[] = [];
-  private sleepTimer: ReturnType<typeof setTimeout> | null = null;
-
-  // Race condition guards
-  private playId = 0;
-  private crossfadeAborted = false;
-  private crossfadeActive = false;
-
-  // Web Audio API for equalizer
-  private audioContext: AudioContext | null = null;
-  private sourceNode: MediaElementAudioSourceNode | null = null;
-  private eqFilters: BiquadFilterNode[] = [];
-  private eqBands: EqualizerBand[] = EQ_PRESETS.flat;
-  private sourceNodes = new WeakMap<
-    HTMLAudioElement,
-    MediaElementAudioSourceNode
-  >();
+  private ctx: EngineContext;
 
   constructor() {
-    this.audio = new Audio();
+    const audio = new Audio();
     if (!window.Capacitor?.isNativePlatform?.()) {
-      this.audio.disableRemotePlayback = true;
+      audio.disableRemotePlayback = true;
     }
-    this.state = {
+
+    const state: AudioEngineState = {
       currentTrack: null,
       queue: [],
       queueIndex: -1,
@@ -162,292 +64,153 @@ export class AudioEngine {
       sleepTimerEnd: null,
     };
 
-    this.audio.onended = () => this.handleEnded();
-    this.audio.onloadedmetadata = () => {
-      this.update({ duration: this.audio.duration });
+    this.ctx = {
+      audio,
+      nextAudio: null,
+      state,
+      playId: 0,
+      crossfadeActive: false,
+      crossfadeAborted: false,
+      shuffledOrder: [],
+      audioContext: null,
+      sourceNode: null,
+      sourceNodes: new WeakMap(),
+      eqFilters: [],
+      eqBands: EQ_PRESETS.flat,
+      sleepTimerHandle: null,
+      progressInterval: null,
+      listeners: new Set(),
+      update: (partial) => {
+        this.ctx.state = { ...this.ctx.state, ...partial };
+        for (const fn of this.ctx.listeners) fn(this.ctx.state);
+      },
+      setAudio: (el) => {
+        this.ctx.audio = el;
+        this.ctx.audio.onended = () => this.handleEnded();
+        this.ctx.audio.onloadedmetadata = () => {
+          this.ctx.update({ duration: this.ctx.audio.duration });
+        };
+      },
+      setNextAudio: (el) => {
+        this.ctx.nextAudio = el;
+      },
+      incrementPlayId: () => ++this.ctx.playId,
     };
+
+    audio.onended = () => this.handleEnded();
+    audio.onloadedmetadata = () =>
+      this.ctx.update({ duration: audio.duration });
 
     // Load persisted settings
     try {
-      const gapless = localStorage.getItem('nightwatch:gapless');
-      if (gapless !== null) this.state.gapless = gapless !== 'false';
-      const crossfade = localStorage.getItem('nightwatch:crossfade');
-      if (crossfade !== null)
-        this.state.crossfadeDuration = Number(crossfade) || 0;
+      const g = localStorage.getItem('nightwatch:gapless');
+      if (g !== null) state.gapless = g !== 'false';
+      const c = localStorage.getItem('nightwatch:crossfade');
+      if (c !== null) state.crossfadeDuration = Number(c) || 0;
     } catch {
       /* ignore */
     }
   }
 
-  /**
-   * Register a listener that is called on every state change.
-   *
-   * @param fn - Callback receiving the latest {@link AudioEngineState}.
-   * @returns An unsubscribe function — call it to remove the listener.
-   */
   subscribe(fn: Listener) {
-    this.listeners.add(fn);
-    return () => this.listeners.delete(fn);
+    this.ctx.listeners.add(fn);
+    return () => this.ctx.listeners.delete(fn);
   }
 
-  /**
-   * Returns the current immutable state snapshot.
-   *
-   * @returns The latest {@link AudioEngineState}.
-   */
   getState() {
-    return this.state;
+    return this.ctx.state;
   }
 
-  /**
-   * Returns the underlying `HTMLAudioElement` for direct access
-   * (e.g. AirPlay picker, Web Audio API integration).
-   *
-   * @returns The internal audio element.
-   */
   getAudioElement() {
-    return this.audio;
+    return this.ctx.audio;
   }
 
-  private update(partial: Partial<AudioEngineState>) {
-    this.state = { ...this.state, ...partial };
-    for (const fn of this.listeners) {
-      fn(this.state);
-    }
-  }
+  // ─── Progress Timer ────────────────────────────────────────────
 
   private startProgressTimer() {
     this.stopProgressTimer();
-    this.interval = setInterval(() => {
-      // Sleep timer fallback: check if timer expired (handles frozen tabs)
-      if (this.state.sleepTimerEnd && Date.now() >= this.state.sleepTimerEnd) {
-        this.clearSleepTimer();
+    this.ctx.progressInterval = setInterval(() => {
+      if (checkSleepTimerExpired(this.ctx)) {
+        clearSleepTimer(this.ctx);
         this.stop();
         return;
       }
-
-      if (this.audio.duration) {
-        this.update({
-          progress: (this.audio.currentTime / this.audio.duration) * 100,
+      if (this.ctx.audio.duration) {
+        this.ctx.update({
+          progress:
+            (this.ctx.audio.currentTime / this.ctx.audio.duration) * 100,
         });
-        // Gapless: pre-buffer next track when 5s from end
+        // Gapless pre-buffer 5s from end
         if (
-          this.state.gapless &&
-          !this.state.crossfadeDuration &&
-          this.audio.duration - this.audio.currentTime < 5 &&
-          !this.nextAudio
+          this.ctx.state.gapless &&
+          !this.ctx.state.crossfadeDuration &&
+          this.ctx.audio.duration - this.ctx.audio.currentTime < 5 &&
+          !this.ctx.nextAudio
         ) {
-          this.preBufferNext();
+          const idx = getNextIndex(this.ctx);
+          if (idx !== null) preBufferNext(this.ctx, idx);
         }
-        // Crossfade: start crossfade when crossfadeDuration seconds from end
+        // Crossfade trigger
         if (
-          this.state.crossfadeDuration > 0 &&
-          this.audio.duration - this.audio.currentTime <=
-            this.state.crossfadeDuration &&
-          !this.nextAudio &&
-          !this.crossfadeActive
+          this.ctx.state.crossfadeDuration > 0 &&
+          this.ctx.audio.duration - this.ctx.audio.currentTime <=
+            this.ctx.state.crossfadeDuration &&
+          !this.ctx.nextAudio &&
+          !this.ctx.crossfadeActive
         ) {
-          this.startCrossfade();
+          const idx = getNextIndex(this.ctx);
+          if (idx !== null) {
+            startCrossfade(
+              this.ctx,
+              idx,
+              () => {},
+              () => this.next(),
+            );
+          }
         }
       }
     }, 250);
   }
 
   private stopProgressTimer() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
+    if (this.ctx.progressInterval) {
+      clearInterval(this.ctx.progressInterval);
+      this.ctx.progressInterval = null;
     }
   }
 
-  private getNextIndex(): number | null {
-    const { queue, queueIndex, repeat, shuffle } = this.state;
-    if (queue.length === 0) return null;
-    if (shuffle && this.shuffledOrder.length > 0) {
-      const pos = this.shuffledOrder.indexOf(queueIndex);
-      const next = pos + 1;
-      if (next >= this.shuffledOrder.length) {
-        return repeat === 'all' ? this.shuffledOrder[0] : null;
-      }
-      return this.shuffledOrder[next];
-    }
-    const next = queueIndex + 1;
-    if (next >= queue.length) {
-      return repeat === 'all' ? 0 : null;
-    }
-    return next;
-  }
-
-  private async preBufferNext() {
-    const nextIdx = this.getNextIndex();
-    if (nextIdx === null) return;
-    const nextTrack = this.state.queue[nextIdx];
-    if (!nextTrack) return;
-    try {
-      const url = await getStreamUrl(nextTrack.id);
-      this.nextAudio = new Audio();
-      if (this.audioContext) this.nextAudio.crossOrigin = 'anonymous';
-      this.nextAudio.preload = 'auto';
-      this.nextAudio.src = url;
-      this.nextAudio.volume = this.state.volume;
-    } catch {
-      this.nextAudio = null;
-    }
-  }
-
-  private async startCrossfade() {
-    const nextIdx = this.getNextIndex();
-    if (nextIdx === null) return;
-    const nextTrack = this.state.queue[nextIdx];
-    if (!nextTrack) return;
-
-    this.crossfadeActive = true;
-    this.crossfadeAborted = false;
-    const myPlayId = this.playId;
-
-    try {
-      const url = await getStreamUrl(nextTrack.id);
-      if (this.crossfadeAborted || this.playId !== myPlayId) return;
-
-      this.nextAudio = new Audio();
-      if (this.audioContext) this.nextAudio.crossOrigin = 'anonymous';
-      this.nextAudio.src = url;
-      this.nextAudio.volume = 0;
-
-      // Connect EQ to incoming track if available
-      this.connectAudioToEq(this.nextAudio);
-
-      await this.nextAudio.play();
-      if (this.crossfadeAborted || this.playId !== myPlayId) {
-        this.nextAudio.pause();
-        this.nextAudio.src = '';
-        this.nextAudio = null;
-        return;
-      }
-
-      const duration = this.state.crossfadeDuration * 1000;
-      const steps = 30;
-      const stepTime = duration / steps;
-
-      for (let i = 0; i <= steps; i++) {
-        if (this.crossfadeAborted || this.playId !== myPlayId) {
-          if (this.nextAudio) {
-            this.nextAudio.pause();
-            this.nextAudio.src = '';
-            this.nextAudio = null;
-          }
-          return;
-        }
-        // Wait while paused — don't advance crossfade during pause
-        while (!this.state.isPlaying && !this.crossfadeAborted) {
-          await new Promise((r) => setTimeout(r, 100));
-        }
-        if (this.crossfadeAborted || this.playId !== myPlayId) {
-          if (this.nextAudio) {
-            this.nextAudio.pause();
-            this.nextAudio.src = '';
-            this.nextAudio = null;
-          }
-          return;
-        }
-        const ratio = i / steps;
-        this.audio.volume = (1 - ratio) * this.state.volume;
-        if (this.nextAudio) this.nextAudio.volume = ratio * this.state.volume;
-        await new Promise((r) => setTimeout(r, stepTime));
-      }
-
-      if (this.crossfadeAborted || this.playId !== myPlayId) {
-        if (this.nextAudio) {
-          this.nextAudio.pause();
-          this.nextAudio.src = '';
-          this.nextAudio = null;
-        }
-        return;
-      }
-
-      // Swap audio elements — disconnect old source from AudioContext
-      const oldSource = this.sourceNodes.get(this.audio);
-      if (oldSource) {
-        try {
-          oldSource.disconnect();
-        } catch {
-          /* already disconnected */
-        }
-      }
-      this.audio.pause();
-      this.audio.src = '';
-      this.audio = this.nextAudio;
-      this.nextAudio = null;
-      this.audio.onended = () => this.handleEnded();
-      this.audio.onloadedmetadata = () => {
-        this.update({ duration: this.audio.duration });
-      };
-      this.connectEqualizer();
-      this.crossfadeActive = false;
-      this.update({
-        currentTrack: nextTrack,
-        queueIndex: nextIdx,
-        duration: this.audio.duration || 0,
-        progress: 0,
-      });
-    } catch {
-      if (this.nextAudio) {
-        this.nextAudio.pause();
-        this.nextAudio.src = '';
-        this.nextAudio = null;
-      }
-      this.crossfadeActive = false;
-      // If the track already ended while crossfade was in progress,
-      // handleEnded returned early trusting us. Fall back to next().
-      if (this.audio.ended) {
-        this.next();
-      }
-    }
-  }
-
-  private generateShuffleOrder(length: number, currentIndex: number): number[] {
-    const indices = Array.from({ length }, (_, i) => i).filter(
-      (i) => i !== currentIndex,
-    );
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-    return [currentIndex, ...indices];
-  }
+  // ─── Playback ─────────────────────────────────────────────────
 
   private handleEnded() {
     this.stopProgressTimer();
-    if (this.state.repeat === 'one') {
-      this.audio.currentTime = 0;
-      this.audio.play().catch(() => this.update({ isPlaying: false }));
+    if (this.ctx.state.repeat === 'one') {
+      this.ctx.audio.currentTime = 0;
+      this.ctx.audio.play().catch(() => this.ctx.update({ isPlaying: false }));
       this.startProgressTimer();
       return;
     }
-    // If crossfade successfully handled the transition, skip
-    if (this.state.crossfadeDuration > 0 && this.crossfadeActive) return;
+    if (this.ctx.state.crossfadeDuration > 0 && this.ctx.crossfadeActive)
+      return;
 
-    // Gapless: use pre-buffered audio if available
-    if (this.state.gapless && this.nextAudio) {
-      const nextIdx = this.getNextIndex();
-      if (nextIdx !== null && this.state.queue[nextIdx]) {
-        this.audio = this.nextAudio;
-        this.nextAudio = null;
-        this.audio.onended = () => this.handleEnded();
-        this.audio.onloadedmetadata = () => {
-          this.update({ duration: this.audio.duration });
-        };
-        if (this.audioContext?.state === 'suspended') {
-          this.audioContext.resume();
+    // Gapless transition
+    if (this.ctx.state.gapless && this.ctx.nextAudio) {
+      const nextIdx = getNextIndex(this.ctx);
+      if (nextIdx !== null && this.ctx.state.queue[nextIdx]) {
+        this.ctx.setAudio(this.ctx.nextAudio);
+        this.ctx.setNextAudio(null);
+        if (this.ctx.audioContext?.state === 'suspended') {
+          this.ctx.audioContext.resume();
         }
-        this.audio.play().catch(() => this.update({ isPlaying: false }));
-        this.connectEqualizer();
-        this.update({
-          currentTrack: this.state.queue[nextIdx],
+        this.ctx.audio
+          .play()
+          .catch(() => this.ctx.update({ isPlaying: false }));
+        connectEqualizer(this.ctx);
+        this.ctx.update({
+          currentTrack: this.ctx.state.queue[nextIdx],
           queueIndex: nextIdx,
           isPlaying: true,
           progress: 0,
-          duration: this.audio.duration || 0,
+          duration: this.ctx.audio.duration || 0,
         });
         this.startProgressTimer();
         return;
@@ -456,179 +219,83 @@ export class AudioEngine {
     this.next();
   }
 
-  private async fadeOut(duration = 500): Promise<void> {
-    if (!this.audio.src || this.audio.paused) return;
-    const steps = 20;
-    const stepTime = duration / steps;
-    for (let i = steps; i >= 0; i--) {
-      this.audio.volume = (i / steps) * this.state.volume;
-      await new Promise((r) => setTimeout(r, stepTime));
-    }
-    this.audio.pause();
-    this.audio.volume = this.state.volume;
-  }
-
   async playTrack(track: MusicTrack, queue?: MusicTrack[], startAt?: number) {
-    // Abort any in-progress crossfade
-    this.crossfadeAborted = true;
-    this.crossfadeActive = false;
+    abortCrossfade(this.ctx);
+    invalidatePreBuffer(this.ctx);
+    const myPlayId = this.ctx.incrementPlayId();
 
-    // Clean up nextAudio (issue 6: memory leak)
-    if (this.nextAudio) {
-      this.nextAudio.pause();
-      this.nextAudio.src = '';
-      this.nextAudio = null;
-    }
-
-    // Increment play ID to invalidate any concurrent playTrack calls
-    const myPlayId = ++this.playId;
-
-    console.log('[AudioEngine] playTrack called:', track.id, track.title);
     if (queue) {
       const idx = queue.findIndex((t) => t.id === track.id);
-      this.update({ queue, queueIndex: idx >= 0 ? idx : 0 });
-      if (this.state.shuffle) {
-        this.shuffledOrder = this.generateShuffleOrder(
+      this.ctx.update({ queue, queueIndex: idx >= 0 ? idx : 0 });
+      if (this.ctx.state.shuffle) {
+        this.ctx.shuffledOrder = generateShuffleOrder(
           queue.length,
           idx >= 0 ? idx : 0,
         );
       }
     }
 
-    this.update({
-      currentTrack: track,
-      isPlaying: false,
-      progress: 0,
-      duration: 0,
-    });
-
-    try {
-      await this.fadeOut(300);
-      if (this.playId !== myPlayId) return;
-
-      const url = await getStreamUrl(track.id);
-      if (this.playId !== myPlayId) return;
-
-      // Resume AudioContext if browser suspended it (e.g. tab backgrounded)
-      if (this.audioContext?.state === 'suspended') {
-        this.audioContext.resume();
-      }
-
-      this.audio.src = url;
-      this.audio.volume = 0;
-      await this.audio.play();
-      if (this.playId !== myPlayId) return;
-
-      this.update({ isPlaying: true });
+    await playTrack(this.ctx, track, startAt);
+    if (this.ctx.playId === myPlayId && this.ctx.state.isPlaying) {
       this.startProgressTimer();
-
-      // Seek to startAt position after metadata loads (for device transfer)
-      if (startAt && startAt > 0) {
-        const doSeek = () => {
-          if (this.audio.duration > 0) {
-            this.audio.currentTime = (startAt / 100) * this.audio.duration;
-            this.update({ progress: startAt });
-          }
-          // Notify transfer-pause listener after seek is done
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('music:transfer-playing'));
-          }
-        };
-        if (this.audio.duration > 0) {
-          doSeek();
-        } else {
-          this.audio.addEventListener('loadedmetadata', doSeek, { once: true });
-        }
-      } else {
-        // No seek needed — notify immediately
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('music:transfer-playing'));
-        }
-      }
-
-      // Fade in
-      const steps = 20;
-      for (let i = 1; i <= steps; i++) {
-        if (this.playId !== myPlayId) return;
-        this.audio.volume = (i / steps) * this.state.volume;
-        await new Promise((r) => setTimeout(r, 15));
-      }
-    } catch {
-      if (this.playId === myPlayId) {
-        // Retry once after a short delay before giving up
-        try {
-          await new Promise((r) => setTimeout(r, 1000));
-          if (this.playId !== myPlayId) return;
-          const url = await getStreamUrl(track.id);
-          if (this.playId !== myPlayId) return;
-          this.audio.src = url;
-          this.audio.volume = this.state.volume;
-          await this.audio.play();
-          if (this.playId !== myPlayId) return;
-          this.update({ isPlaying: true });
-          this.startProgressTimer();
-        } catch {
-          if (this.playId === myPlayId) {
-            this.update({ isPlaying: false });
-          }
-        }
-      }
     }
   }
 
   togglePlay() {
-    if (!this.state.currentTrack) return;
-    if (this.state.isPlaying) {
-      this.audio.pause();
-      if (this.nextAudio && this.crossfadeActive) {
-        this.nextAudio.pause();
+    if (!this.ctx.state.currentTrack) return;
+    if (this.ctx.state.isPlaying) {
+      this.ctx.audio.pause();
+      if (this.ctx.nextAudio && this.ctx.crossfadeActive) {
+        this.ctx.nextAudio.pause();
       }
       this.stopProgressTimer();
-      this.update({ isPlaying: false });
+      this.ctx.update({ isPlaying: false });
     } else {
-      if (this.audioContext?.state === 'suspended') {
-        this.audioContext.resume();
+      if (this.ctx.audioContext?.state === 'suspended') {
+        this.ctx.audioContext.resume();
       }
-      this.audio.play().catch(() => {
+      this.ctx.audio.play().catch(() => {
         this.stopProgressTimer();
-        this.update({ isPlaying: false });
+        this.ctx.update({ isPlaying: false });
       });
-      if (this.nextAudio && this.crossfadeActive) {
-        this.nextAudio.play().catch(() => {});
+      if (this.ctx.nextAudio && this.ctx.crossfadeActive) {
+        this.ctx.nextAudio.play().catch(() => {});
       }
       this.startProgressTimer();
-      this.update({ isPlaying: true });
+      this.ctx.update({ isPlaying: true });
     }
   }
 
   seek(percent: number) {
-    if (!this.audio.duration) return;
-    this.audio.currentTime = (percent / 100) * this.audio.duration;
-    this.update({ progress: percent });
+    if (!this.ctx.audio.duration) return;
+    this.ctx.audio.currentTime = (percent / 100) * this.ctx.audio.duration;
+    this.ctx.update({ progress: percent });
   }
 
   async next() {
-    const { queue, queueIndex, repeat, shuffle } = this.state;
+    const { queue, queueIndex, repeat, shuffle } = this.ctx.state;
     if (queue.length === 0) return;
 
     let nextIdx: number;
-    if (shuffle && this.shuffledOrder.length > 0) {
-      const currentShufflePos = this.shuffledOrder.indexOf(queueIndex);
-      const nextShufflePos = currentShufflePos + 1;
-      if (nextShufflePos >= this.shuffledOrder.length) {
+    if (shuffle && this.ctx.shuffledOrder.length > 0) {
+      const pos = this.ctx.shuffledOrder.indexOf(queueIndex);
+      if (pos + 1 >= this.ctx.shuffledOrder.length) {
         if (repeat === 'all') {
-          this.shuffledOrder = this.generateShuffleOrder(
+          this.ctx.shuffledOrder = generateShuffleOrder(
             queue.length,
             queueIndex,
           );
-          // Start from position 1 (position 0 is the current track)
-          nextIdx = this.shuffledOrder[1] ?? this.shuffledOrder[0];
+          nextIdx = this.ctx.shuffledOrder[1] ?? this.ctx.shuffledOrder[0];
         } else {
-          await this.autoContinue();
+          await autoContinue(
+            this.ctx,
+            () => this.stop(),
+            (t) => this.playTrack(t),
+          );
           return;
         }
       } else {
-        nextIdx = this.shuffledOrder[nextShufflePos];
+        nextIdx = this.ctx.shuffledOrder[pos + 1];
       }
     } else {
       nextIdx = queueIndex + 1;
@@ -636,89 +303,42 @@ export class AudioEngine {
         if (repeat === 'all') {
           nextIdx = 0;
         } else {
-          await this.autoContinue();
+          await autoContinue(
+            this.ctx,
+            () => this.stop(),
+            (t) => this.playTrack(t),
+          );
           return;
         }
       }
     }
 
-    this.update({ queueIndex: nextIdx });
+    this.ctx.update({ queueIndex: nextIdx });
     await this.playTrack(queue[nextIdx]);
   }
 
   async prev() {
-    // If more than 3 seconds in, restart current track
-    if (this.audio.currentTime > 3) {
-      this.audio.currentTime = 0;
-      this.update({ progress: 0 });
+    if (this.ctx.audio.currentTime > 3) {
+      this.ctx.audio.currentTime = 0;
+      this.ctx.update({ progress: 0 });
       return;
     }
-
-    const { queue, queueIndex, shuffle } = this.state;
-    if (queue.length === 0) return;
-
-    let prevIdx: number;
-    if (shuffle && this.shuffledOrder.length > 0) {
-      const currentPos = this.shuffledOrder.indexOf(queueIndex);
-      if (currentPos <= 0) {
-        // At start of shuffle order — restart current track
-        this.audio.currentTime = 0;
-        this.update({ progress: 0 });
-        return;
-      }
-      prevIdx = this.shuffledOrder[currentPos - 1];
-    } else {
-      if (queueIndex <= 0) {
-        // At start of queue — restart current track
-        this.audio.currentTime = 0;
-        this.update({ progress: 0 });
-        return;
-      }
-      prevIdx = queueIndex - 1;
+    const prevIdx = getPrevIndex(this.ctx);
+    if (prevIdx === null) {
+      this.ctx.audio.currentTime = 0;
+      this.ctx.update({ progress: 0 });
+      return;
     }
-
-    this.update({ queueIndex: prevIdx });
-    await this.playTrack(queue[prevIdx]);
-  }
-
-  toggleShuffle() {
-    const shuffle = !this.state.shuffle;
-    if (shuffle) {
-      this.shuffledOrder = this.generateShuffleOrder(
-        this.state.queue.length,
-        this.state.queueIndex,
-      );
-    }
-    this.update({ shuffle });
-  }
-
-  cycleRepeat() {
-    const modes: RepeatMode[] = ['off', 'all', 'one'];
-    const idx = modes.indexOf(this.state.repeat);
-    this.update({ repeat: modes[(idx + 1) % modes.length] });
-  }
-
-  setVolume(v: number) {
-    const vol = Math.max(0, Math.min(1, v));
-    this.audio.volume = vol;
-    if (this.nextAudio && !this.crossfadeActive) {
-      this.nextAudio.volume = vol;
-    }
-    this.update({ volume: vol });
+    this.ctx.update({ queueIndex: prevIdx });
+    await this.playTrack(this.ctx.state.queue[prevIdx]);
   }
 
   stop() {
-    this.crossfadeAborted = true;
-    this.crossfadeActive = false;
-    this.audio.pause();
-    this.audio.src = '';
-    if (this.nextAudio) {
-      this.nextAudio.pause();
-      this.nextAudio.src = '';
-      this.nextAudio = null;
-    }
+    abortCrossfade(this.ctx);
+    this.ctx.audio.pause();
+    this.ctx.audio.src = '';
     this.stopProgressTimer();
-    this.update({
+    this.ctx.update({
       currentTrack: null,
       isPlaying: false,
       progress: 0,
@@ -727,181 +347,87 @@ export class AudioEngine {
     });
   }
 
-  /** Auto-continue with recommendations when queue ends */
-  private async autoContinue() {
-    const track = this.state.currentTrack;
-    if (!track) {
-      this.stop();
-      return;
+  // ─── Queue ─────────────────────────────────────────────────────
+
+  async addToQueue(track: MusicTrack) {
+    addToQueue(this.ctx, track);
+    if (!this.ctx.state.currentTrack)
+      await this.playTrack(track, this.ctx.state.queue);
+  }
+
+  playNext(track: MusicTrack) {
+    playNextInQueue(this.ctx, track);
+    invalidatePreBuffer(this.ctx);
+    if (!this.ctx.state.currentTrack)
+      this.playTrack(track, this.ctx.state.queue);
+  }
+
+  removeFromQueue(index: number) {
+    removeFromQueue(this.ctx, index);
+  }
+
+  async loadQueue() {
+    await loadQueue(this.ctx);
+  }
+
+  // ─── Shuffle / Repeat / Volume ─────────────────────────────────
+
+  toggleShuffle() {
+    const shuffle = !this.ctx.state.shuffle;
+    if (shuffle) {
+      this.ctx.shuffledOrder = generateShuffleOrder(
+        this.ctx.state.queue.length,
+        this.ctx.state.queueIndex,
+      );
     }
-    try {
-      const recs = await getSongRecommendations(track.id);
-      if (recs.length > 0) {
-        this.update({ queue: recs, queueIndex: 0 });
-        await this.playTrack(recs[0]);
-        return;
-      }
-    } catch {
-      /* fall through */
+    this.ctx.update({ shuffle });
+  }
+
+  cycleRepeat() {
+    const modes: RepeatMode[] = ['off', 'all', 'one'];
+    const idx = modes.indexOf(this.ctx.state.repeat);
+    this.ctx.update({ repeat: modes[(idx + 1) % modes.length] });
+  }
+
+  setVolume(v: number) {
+    const vol = Math.max(0, Math.min(1, v));
+    this.ctx.audio.volume = vol;
+    if (this.ctx.nextAudio && !this.ctx.crossfadeActive) {
+      this.ctx.nextAudio.volume = vol;
     }
-    this.stop();
+    this.ctx.update({ volume: vol });
   }
 
   // ─── Equalizer ─────────────────────────────────────────────────
 
-  private connectEqualizer() {
-    if (this.eqFilters.length === 0 || !this.audioContext) return;
-    try {
-      this.sourceNode?.disconnect();
-      // Reuse existing source node if already created for this element
-      let source = this.sourceNodes.get(this.audio);
-      if (!source) {
-        source = this.audioContext.createMediaElementSource(this.audio);
-        this.sourceNodes.set(this.audio, source);
-      }
-      this.sourceNode = source;
-      let lastNode: AudioNode = this.sourceNode;
-      for (const filter of this.eqFilters) {
-        lastNode.connect(filter);
-        lastNode = filter;
-      }
-      lastNode.connect(this.audioContext.destination);
-    } catch {
-      // Context issue — ignore
-    }
-  }
-
-  /** Connect an audio element to AudioContext destination during crossfade.
-   *  Uses a direct connection (bypassing shared EQ filters) to avoid routing
-   *  conflicts while both audio elements are active. After crossfade swap,
-   *  connectEqualizer() re-routes through the EQ chain properly. */
-  private connectAudioToEq(audioEl: HTMLAudioElement) {
-    if (!this.audioContext) return;
-    try {
-      audioEl.crossOrigin = 'anonymous';
-      let source = this.sourceNodes.get(audioEl);
-      if (!source) {
-        source = this.audioContext.createMediaElementSource(audioEl);
-        this.sourceNodes.set(audioEl, source);
-      }
-      // Connect directly to destination — EQ will be applied after swap
-      source.connect(this.audioContext.destination);
-    } catch {
-      // Already connected or context issue
-    }
-  }
-
   initEqualizer() {
-    if (this.audioContext) {
-      if (this.audioContext.state === 'suspended') this.audioContext.resume();
-      return;
-    }
-
-    // If audio is already playing, we need to reload with crossOrigin
-    const wasPlaying = !this.audio.paused;
-    const savedTime = this.audio.currentTime;
-    const hadSrc = !!this.audio.src && this.audio.src !== location.href;
-
-    this.audio.crossOrigin = 'anonymous';
-
-    this.audioContext = new AudioContext();
-    this.audioContext.resume();
-    this.sourceNode = this.audioContext.createMediaElementSource(this.audio);
-
-    // Load saved EQ from localStorage
-    try {
-      const saved = localStorage.getItem('nightwatch:eq-bands');
-      if (saved) this.eqBands = JSON.parse(saved);
-    } catch {
-      /* use default */
-    }
-
-    // Create 5-band EQ
-    this.eqFilters = this.eqBands.map((band, i) => {
-      const filter = this.audioContext!.createBiquadFilter();
-      filter.type =
-        i === 0
-          ? 'lowshelf'
-          : i === this.eqBands.length - 1
-            ? 'highshelf'
-            : 'peaking';
-      filter.frequency.value = band.frequency;
-      filter.gain.value = band.gain;
-      if (filter.type === 'peaking') filter.Q.value = 1.4;
-      return filter;
-    });
-
-    // Connect chain: source → filter1 → filter2 → ... → destination
-    let lastNode: AudioNode = this.sourceNode;
-    for (const filter of this.eqFilters) {
-      lastNode.connect(filter);
-      lastNode = filter;
-    }
-    lastNode.connect(this.audioContext.destination);
-
-    // Reload audio if it was playing (crossOrigin change requires re-fetch)
-    if (hadSrc) {
-      this.audio.load();
-      if (savedTime > 0) {
-        this.audio.currentTime = savedTime;
-      }
-      if (wasPlaying) {
-        this.audio.play().catch(() => {});
-      }
-    }
+    initEqualizer(this.ctx);
   }
 
   setEqBands(bands: EqualizerBand[]) {
-    this.eqBands = bands;
-    for (let i = 0; i < bands.length && i < this.eqFilters.length; i++) {
-      this.eqFilters[i].gain.value = bands[i].gain;
-    }
-    try {
-      localStorage.setItem('nightwatch:eq-bands', JSON.stringify(bands));
-    } catch {
-      /* quota exceeded */
-    }
+    setEqBands(this.ctx, bands);
   }
 
   getEqBands(): EqualizerBand[] {
-    return this.eqBands;
+    return getEqBands(this.ctx);
   }
 
-  // ─── Sleep Timer ──────────────────────────────────────────────
+  // ─── Sleep Timer ───────────────────────────────────────────────
 
   setSleepTimer(minutes: number) {
-    this.clearSleepTimer();
-    if (minutes <= 0) return;
-    const end = Date.now() + minutes * 60 * 1000;
-    this.update({ sleepTimerEnd: end });
-    this.sleepTimer = setTimeout(
-      () => {
-        this.stop();
-        this.update({ sleepTimerEnd: null });
-      },
-      minutes * 60 * 1000,
-    );
+    setSleepTimer(this.ctx, minutes, () => this.stop());
   }
 
   clearSleepTimer() {
-    if (this.sleepTimer) {
-      clearTimeout(this.sleepTimer);
-      this.sleepTimer = null;
-    }
-    this.update({ sleepTimerEnd: null });
+    clearSleepTimer(this.ctx);
   }
 
-  // ─── Settings ─────────────────────────────────────────────────
+  // ─── Settings ──────────────────────────────────────────────────
 
   setCrossfadeDuration(seconds: number) {
     const val = Math.max(0, Math.min(12, seconds));
-    this.update({ crossfadeDuration: val });
-    // Invalidate gapless pre-buffer if crossfade is now enabled
-    if (val > 0 && this.nextAudio && !this.crossfadeActive) {
-      this.nextAudio.pause();
-      this.nextAudio.src = '';
-      this.nextAudio = null;
-    }
+    this.ctx.update({ crossfadeDuration: val });
+    if (val > 0) invalidatePreBuffer(this.ctx);
     try {
       localStorage.setItem('nightwatch:crossfade', String(val));
     } catch {
@@ -910,7 +436,7 @@ export class AudioEngine {
   }
 
   setGapless(enabled: boolean) {
-    this.update({ gapless: enabled });
+    this.ctx.update({ gapless: enabled });
     try {
       localStorage.setItem('nightwatch:gapless', String(enabled));
     } catch {
@@ -918,135 +444,12 @@ export class AudioEngine {
     }
   }
 
+  // ─── Lifecycle ─────────────────────────────────────────────────
+
   destroy() {
     this.stop();
-    this.clearSleepTimer();
-    this.sourceNode?.disconnect();
-    for (const f of this.eqFilters) f.disconnect();
-    this.eqFilters = [];
-    this.sourceNode = null;
-    this.audioContext?.close();
-    this.audioContext = null;
-    this.listeners.clear();
-  }
-
-  /** Load persisted queue from backend Redis */
-  async loadQueue() {
-    try {
-      const tracks = await getUserQueue();
-      if (tracks.length > 0) {
-        this.update({ queue: tracks });
-      }
-    } catch {
-      /* ignore — offline or no queue */
-    }
-  }
-
-  /** Add a track to the queue and persist to backend */
-  async addToQueue(track: MusicTrack) {
-    const queue = [...this.state.queue, track];
-    this.update({ queue });
-    // Update shuffle order to include the new track
-    if (this.state.shuffle && this.shuffledOrder.length > 0) {
-      // Insert at random position after current
-      const currentPos = this.shuffledOrder.indexOf(this.state.queueIndex);
-      const remaining = Math.max(0, this.shuffledOrder.length - currentPos - 1);
-      const insertAt = currentPos + 1 + Math.floor(Math.random() * remaining);
-      this.shuffledOrder.splice(
-        Math.min(Math.max(0, insertAt), this.shuffledOrder.length),
-        0,
-        queue.length - 1,
-      );
-    }
-    // If nothing is playing, start playback
-    if (!this.state.currentTrack) {
-      await this.playTrack(track, queue);
-    }
-    try {
-      await addToUserQueue(track);
-    } catch {
-      /* best-effort persist */
-    }
-  }
-
-  /** Insert a track right after the currently playing track */
-  playNext(track: MusicTrack) {
-    const { queue, queueIndex } = this.state;
-    const newQueue = [...queue];
-    const insertIdx = queueIndex + 1;
-    newQueue.splice(insertIdx, 0, track);
-    this.update({ queue: newQueue });
-    // Update shuffle order: insert right after current position
-    if (this.state.shuffle && this.shuffledOrder.length > 0) {
-      // Shift indices >= insertIdx up by 1
-      this.shuffledOrder = this.shuffledOrder.map((i) =>
-        i >= insertIdx ? i + 1 : i,
-      );
-      // Insert the new track index right after current in shuffle order
-      const currentPos = this.shuffledOrder.indexOf(queueIndex);
-      this.shuffledOrder.splice(currentPos + 1, 0, insertIdx);
-    }
-    // Invalidate pre-buffered next track (it's no longer the next)
-    if (this.nextAudio && !this.crossfadeActive) {
-      this.nextAudio.pause();
-      this.nextAudio.src = '';
-      this.nextAudio = null;
-    }
-    // If nothing is playing, start playback
-    if (!this.state.currentTrack) {
-      this.playTrack(track, newQueue);
-    }
-    addToUserQueue(track).catch(() => {});
-  }
-
-  /**
-   * Remove a track from the queue by its index.
-   * Cannot remove the currently playing track. Adjusts `queueIndex` if the
-   * removed track was before the current one.
-   */
-  removeFromQueue(index: number) {
-    const { queue, queueIndex } = this.state;
-    if (index < 0 || index >= queue.length || index === queueIndex) return;
-
-    // If crossfade is active and we're removing the track being faded into, abort it
-    if (this.crossfadeActive && this.nextAudio) {
-      const nextIdx = this.getNextIndex();
-      if (nextIdx === index) {
-        this.crossfadeAborted = true;
-        this.crossfadeActive = false;
-        this.nextAudio.pause();
-        this.nextAudio.src = '';
-        this.nextAudio = null;
-      }
-    }
-
-    const newQueue = queue.filter((_, i) => i !== index);
-    const newIndex = index < queueIndex ? queueIndex - 1 : queueIndex;
-    this.update({ queue: newQueue, queueIndex: newIndex });
-    // Update shuffle order: remove the index and shift others
-    if (this.state.shuffle && this.shuffledOrder.length > 0) {
-      this.shuffledOrder = this.shuffledOrder
-        .filter((i) => i !== index)
-        .map((i) => (i > index ? i - 1 : i));
-    }
-    // Invalidate gapless pre-buffer — the next track may have changed
-    if (this.nextAudio && !this.crossfadeActive) {
-      this.nextAudio.pause();
-      this.nextAudio.src = '';
-      this.nextAudio = null;
-    }
-    // Persist updated queue (fire-and-forget)
-    this.persistQueue(newQueue);
-  }
-
-  private async persistQueue(queue: MusicTrack[]) {
-    try {
-      await apiFetch('/api/music/queue', {
-        method: 'PUT',
-        body: JSON.stringify(queue),
-      });
-    } catch {
-      /* best-effort */
-    }
+    clearSleepTimer(this.ctx);
+    destroyEqualizer(this.ctx);
+    this.ctx.listeners.clear();
   }
 }
