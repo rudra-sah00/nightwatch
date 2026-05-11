@@ -20,6 +20,27 @@ export function GameFrame({
   const [_isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
 
+  // Refresh game auth cookie every 45 minutes to prevent 403s during long sessions
+  useEffect(() => {
+    const csrf =
+      typeof document !== 'undefined'
+        ? document.cookie
+            .split('; ')
+            .find((c) => c.startsWith('csrfToken='))
+            ?.split('=')[1]
+        : undefined;
+    const refreshCookie = () => {
+      fetch(`/api/games/${slug}/url`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrf ? { 'x-csrf-token': csrf } : {}),
+        },
+      }).catch(() => {});
+    };
+    const id = setInterval(refreshCookie, 45 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [slug]);
+
   // Duck music while game is active, restore on unmount
   useEffect(() => {
     window.dispatchEvent(
