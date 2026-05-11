@@ -221,7 +221,9 @@ function createBridge() {
     retryConnection: () => window.location.reload(),
     onMediaCommand: (cb: (cmd: string) => void) =>
       e.onMediaCommand(cb) as UnlistenFn,
-    toggleFullscreen: async () => {},
+    toggleFullscreen: async () => {
+      await e.toggleFullscreen();
+    },
     onFullscreenChanged: (cb: (fs: boolean) => void) =>
       e.onWindowFullscreenChanged(cb) as UnlistenFn,
     onWindowBlur: (cb: () => void) => e.onWindowBlur(cb) as UnlistenFn,

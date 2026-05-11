@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
-import { isMobile } from '@/lib/electron-bridge';
+import { checkIsDesktop, desktopBridge, isMobile } from '@/lib/electron-bridge';
 
 function gameApiFetch(path: string, opts: RequestInit = {}) {
   const csrf = getCookie('csrfToken');
@@ -41,7 +41,7 @@ export default function GamePage() {
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
-    // Capacitor native app — async is fine here since it doesn't use requestFullscreen
+    // Capacitor native app
     if (isMobile) {
       import('@/lib/mobile-bridge').then(({ mobileBridge }) => {
         if (isFullscreen) {
@@ -56,7 +56,13 @@ export default function GamePage() {
       return;
     }
 
-    // Browser + Electron — must be synchronous (user gesture required)
+    // Electron — use native BrowserWindow fullscreen
+    if (checkIsDesktop()) {
+      desktopBridge.toggleFullscreen();
+      return;
+    }
+
+    // Browser fallback
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
