@@ -49,6 +49,23 @@ export default function GamePage() {
     return () => document.removeEventListener('keydown', onKey);
   }, [isFullscreen]);
 
+  // Hide Electron drag region during fullscreen so game buttons are clickable
+  useEffect(() => {
+    if (!checkIsDesktop()) return;
+    const dragRegion = document.querySelector<HTMLElement>(
+      '[data-electron-drag-region]',
+    );
+    if (!dragRegion) return;
+    if (isFullscreen) {
+      dragRegion.style.display = 'none';
+    } else {
+      dragRegion.style.display = '';
+    }
+    return () => {
+      dragRegion.style.display = '';
+    };
+  }, [isFullscreen]);
+
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
@@ -94,7 +111,7 @@ export default function GamePage() {
       ref={containerRef}
       className={
         usesCssFullscreen
-          ? 'fixed inset-0 z-[9999] w-screen h-screen bg-black'
+          ? 'fixed inset-0 z-[99999] w-screen h-screen bg-black'
           : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3]'
       }
     >
