@@ -1,56 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
+import { getCookie } from '@/lib/cookies';
 
-const GAMES = [
-  {
-    id: 'subway-surfers',
-    title: 'Subway Surfers',
-    description: 'Endless runner — dodge obstacles, collect coins!',
-    thumbnail: '/games/subway-surfers/thumbnail.png',
-    video:
-      'https://v.poki-cdn.com/6b6c7d15-192b-4add-bba3-18eb57f2e348/thumbnail.3x3.h264.mp4',
-  },
-  {
-    id: 'temple-run-2',
-    title: 'Temple Run 2',
-    description: 'Run, jump, slide & fly through ancient temples!',
-    thumbnail: '/games/temple-run-2/thumbnail.png',
-    video:
-      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
-  },
-  {
-    id: 'temple-run-2-frozen-shadows',
-    title: 'Temple Run 2: Frozen Shadows',
-    description: 'Escape through icy mountains and frozen caves!',
-    thumbnail: '/games/temple-run-2-frozen-shadows/thumbnail.png',
-    video:
-      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
-  },
-  {
-    id: 'temple-run-2-spooky-summit',
-    title: 'Temple Run 2: Spooky Summit',
-    description: 'Run through haunted peaks and ghostly trails!',
-    thumbnail: '/games/temple-run-2-spooky-summit/thumbnail.png',
-    video:
-      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
-  },
-  {
-    id: 'temple-run-2-holi-festival',
-    title: 'Temple Run 2: Holi Festival',
-    description: 'Dash through colorful Holi celebrations!',
-    thumbnail: '/games/temple-run-2-holi-festival/thumbnail.png',
-    video:
-      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
-  },
-];
+interface Game {
+  slug: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  video: string;
+}
 
 export default function GamesPage() {
+  const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
 
-  const filtered = GAMES.filter(
+  useEffect(() => {
+    const csrf = getCookie('csrfToken');
+    fetch('/api/games', {
+      headers: { ...(csrf ? { 'x-csrf-token': csrf } : {}) },
+    })
+      .then((r) => r.json())
+      .then((data) => setGames(data.games ?? []))
+      .catch(() => {});
+  }, []);
+
+  const filtered = games.filter(
     (g) =>
       g.title.toLowerCase().includes(search.toLowerCase()) ||
       g.description.toLowerCase().includes(search.toLowerCase()),
@@ -90,8 +67,8 @@ export default function GamesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((game) => (
               <Link
-                key={game.id}
-                href={`/games/${game.id}`}
+                key={game.slug}
+                href={`/games/${game.slug}`}
                 className="group bg-card p-2 border-[3px] border-border"
               >
                 <div className="aspect-video bg-background flex items-center justify-center border-[3px] border-border overflow-hidden relative">

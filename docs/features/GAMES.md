@@ -274,6 +274,30 @@ Replace the original `index.html` with our template that includes:
 
 ### 5. Upload to MinIO
 
+#### Via Admin Panel (Recommended)
+
+1. Go to the admin panel at `https://admin.nightwatch.in/pages/games/`
+2. Create the game entry (slug, title, description)
+3. Upload the tar.gz archive of the game folder
+
+#### Via Admin API
+
+```bash
+# 1. Create game entry in database
+curl -X POST https://api.nightwatch.in/api/admin/games \
+  -H "Authorization: Bearer <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"slug":"new-game","title":"New Game","description":"A cool game","sortOrder":5}'
+
+# 2. Upload game files (tar.gz of the prepared game folder)
+tar czf /tmp/new-game.tar.gz --exclude='._*' new-game/
+curl -X POST https://api.nightwatch.in/api/admin/games/new-game/upload \
+  -H "Authorization: Bearer <admin-token>" \
+  -F "archive=@/tmp/new-game.tar.gz"
+```
+
+#### Via CLI (Manual)
+
 ```bash
 # Local
 AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin \
@@ -289,7 +313,33 @@ ssh rudra@rudrasahoo "cd /tmp && tar xzf {slug}.tar.gz && \
   rm -rf /tmp/{slug} /tmp/{slug}.tar.gz"
 ```
 
-### 6. Backend Route
+### 6. Database & Backend
+
+Games are stored in the `games` PostgreSQL table:
+
+```sql
+CREATE TABLE games (
+  id uuid PRIMARY KEY,
+  slug text NOT NULL UNIQUE,
+  title text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  active boolean NOT NULL DEFAULT true,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz DEFAULT now() NOT NULL
+);
+```
+
+**Public API:**
+- `GET /api/games` — returns all active games with thumbnail/video URLs (used by frontend)
+
+**Admin API** (requires admin token + Tailscale):
+- `GET /api/admin/games` — list all games (including inactive)
+- `POST /api/admin/games` — create game `{ slug, title, description?, sortOrder? }`
+- `POST /api/admin/games/:slug/upload` — upload tar.gz archive (max 100MB)
+- `PATCH /api/admin/games/:id` — update fields (title, description, active, sortOrder)
+- `DELETE /api/admin/games/:id` — remove game from DB
+
+Each game also needs a per-slug route for the iframe URL cookie:
 
 Create `src/modules/games/{slug}/controller.ts`:
 ```typescript
@@ -339,14 +389,11 @@ router.use('/{slug}', newGameRoutes);
 
 ### 7. Frontend
 
-1. **Game page**: Copy from an existing game page, update slug/title/API path
-2. **Config**: Add to `src/features/games/config.ts` GAME_DATA
-3. **Listing**: Add to `src/app/(protected)/(main)/games/page.tsx` GAMES array
-4. **Thumbnail**: Download from Poki CDN:
-   ```bash
-   curl -sL -H "Referer: https://poki.com/" -o public/games/{slug}/thumbnail.png \
-     "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=600,height=600,fit=cover,f=png/{IMAGE_HASH}/{slug}.png"
-   ```
+The games listing page (`src/app/(protected)/(main)/games/page.tsx`) fetches from `GET /api/games` — no hardcoded data. Adding a game to the DB automatically shows it on the frontend.
+
+For each game's play page, copy from an existing game page directory and update the slug/title/API path.
+
+**Thumbnail & Preview Video**: Upload `thumbnail.png` and `preview.mp4` to `nightwatch-games/{slug}/` in MinIO. The API constructs URLs automatically.
 
 ### 8. Electron CSP
 
