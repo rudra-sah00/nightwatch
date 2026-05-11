@@ -3,7 +3,6 @@
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
@@ -50,19 +49,38 @@ export default function GamePage() {
   }, [isFullscreen]);
 
   // Hide Electron drag region during fullscreen so game buttons are clickable
+  // Also disable transition-all on parent that creates a containing block for fixed
   useEffect(() => {
-    if (!checkIsDesktop()) return;
+    if (!(checkIsDesktop() || isMobile)) return;
+
     const dragRegion = document.querySelector<HTMLElement>(
       '[data-electron-drag-region]',
     );
-    if (!dragRegion) return;
+    // The parent with transition-all that breaks fixed positioning
+    const contentParent = containerRef.current?.closest(
+      '.transition-all',
+    ) as HTMLElement | null;
+
     if (isFullscreen) {
-      dragRegion.style.display = 'none';
+      if (dragRegion) dragRegion.style.display = 'none';
+      if (contentParent) {
+        contentParent.style.transition = 'none';
+        contentParent.style.transform = 'none';
+      }
     } else {
-      dragRegion.style.display = '';
+      if (dragRegion) dragRegion.style.display = '';
+      if (contentParent) {
+        contentParent.style.transition = '';
+        contentParent.style.transform = '';
+      }
     }
+
     return () => {
-      dragRegion.style.display = '';
+      if (dragRegion) dragRegion.style.display = '';
+      if (contentParent) {
+        contentParent.style.transition = '';
+        contentParent.style.transform = '';
+      }
     };
   }, [isFullscreen]);
 
@@ -104,41 +122,6 @@ export default function GamePage() {
   }, [isFullscreen]);
 
   const usesCssFullscreen = isFullscreen && (isMobile || checkIsDesktop());
-  const alwaysPortal = isMobile || checkIsDesktop();
-
-  const gameContent = (
-    <div
-      ref={containerRef}
-      className={
-        usesCssFullscreen
-          ? 'fixed inset-0 z-[99999] w-screen h-screen bg-black'
-          : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3]'
-      }
-    >
-      {usesCssFullscreen && (
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          className="absolute bottom-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
-        >
-          ✕ Exit
-        </button>
-      )}
-      {gameUrl ? (
-        <GameFrame
-          slug="subway-surfers"
-          title="Subway Surfers"
-          gameUrl={gameUrl}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-background">
-          <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
-            Loading game...
-          </p>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 gap-4">
@@ -164,7 +147,37 @@ export default function GamePage() {
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
       </div>
-      {alwaysPortal ? createPortal(gameContent, document.body) : gameContent}
+      <div
+        ref={containerRef}
+        className={
+          usesCssFullscreen
+            ? 'fixed inset-0 z-[99999] w-screen h-screen bg-black'
+            : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3]'
+        }
+      >
+        {usesCssFullscreen && (
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="absolute bottom-3 right-3 z-[100000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
+          >
+            ✕ Exit
+          </button>
+        )}
+        {gameUrl ? (
+          <GameFrame
+            slug="subway-surfers"
+            title="Subway Surfers"
+            gameUrl={gameUrl}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-background">
+            <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
+              Loading game...
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
