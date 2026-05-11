@@ -103,8 +103,17 @@ export default function GamePage() {
       </div>
       <div
         ref={containerRef}
-        className={`w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && isMobile ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
+        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && isMobile ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
       >
+        {isFullscreen && isMobile && (
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="absolute top-3 right-3 z-[60] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
+          >
+            ✕ Exit
+          </button>
+        )}
         {gameUrl ? (
           <GameFrame
             slug="subway-surfers"
