@@ -146,6 +146,13 @@ class AppWindow {
       this.mainWindow.loadURL(effectiveProdUrl);
     }
 
+    // Forward Escape key to renderer even when an iframe has focus
+    this.mainWindow.webContents.on('before-input-event', (_event, input) => {
+      if (input.key === 'Escape' && input.type === 'keyDown') {
+        this.mainWindow.webContents.send('global-escape-pressed');
+      }
+    });
+
     // Intercept window.open() / target="_blank" — open external links in default browser
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       if (isInternalUrl(url)) {

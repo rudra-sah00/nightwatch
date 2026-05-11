@@ -41,6 +41,20 @@ export default function GamePage() {
   // Escape key exits CSS-based fullscreen (Electron/Capacitor)
   useEffect(() => {
     if (!isFullscreen || !(checkIsDesktop() || isMobile)) return;
+
+    // Electron: use IPC since iframe captures keyboard events
+    if (checkIsDesktop()) {
+      const api = (
+        window as unknown as {
+          electronAPI?: { onGlobalEscape?: (cb: () => void) => () => void };
+        }
+      ).electronAPI;
+      if (api?.onGlobalEscape) {
+        return api.onGlobalEscape(() => setIsFullscreen(false));
+      }
+    }
+
+    // Mobile fallback
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsFullscreen(false);
     };

@@ -106,6 +106,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('window-fullscreen-changed', subscription);
   },
 
+  // Fired when Escape is pressed anywhere (including inside iframes)
+  onGlobalEscape: (callback) => {
+    ipcRenderer.removeAllListeners('global-escape-pressed');
+    const subscription = () => callback();
+    ipcRenderer.on('global-escape-pressed', subscription);
+    return () =>
+      ipcRenderer.removeListener('global-escape-pressed', subscription);
+  },
+
   // --- OFFLINE HLS DOWNLOADER ---
   startDownload: (config) => ipcRenderer.send('start-download', config),
   cancelDownload: (contentId) => ipcRenderer.send('cancel-download', contentId),
