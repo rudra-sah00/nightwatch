@@ -111,13 +111,13 @@ export default function GamePage() {
       </div>
       <div
         ref={containerRef}
-        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && (isMobile || checkIsDesktop()) ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
+        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && (isMobile || checkIsDesktop()) ? 'fixed inset-0 z-[9999] max-w-none w-screen h-screen border-0 rounded-none bg-black' : 'aspect-[4/3]'}`}
       >
         {isFullscreen && (isMobile || checkIsDesktop()) && (
           <button
             type="button"
             onClick={toggleFullscreen}
-            className="absolute top-3 right-3 z-[60] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
+            className="absolute top-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
           >
             ✕ Exit
           </button>
