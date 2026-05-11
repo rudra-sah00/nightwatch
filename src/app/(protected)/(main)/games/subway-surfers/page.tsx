@@ -48,12 +48,12 @@ export default function GamePage() {
     return () => document.removeEventListener('keydown', onKey);
   }, [isFullscreen]);
 
-  // Hide Electron drag region during fullscreen so game buttons are clickable
+  // Hide Electron drag region and navbar during fullscreen so game buttons are clickable
   // Also disable transition-all on parent that creates a containing block for fixed
   useEffect(() => {
     if (!(checkIsDesktop() || isMobile)) return;
 
-    const dragRegion = document.querySelector<HTMLElement>(
+    const dragRegions = document.querySelectorAll<HTMLElement>(
       '[data-electron-drag-region]',
     );
     // The parent with transition-all that breaks fixed positioning
@@ -62,13 +62,17 @@ export default function GamePage() {
     ) as HTMLElement | null;
 
     if (isFullscreen) {
-      if (dragRegion) dragRegion.style.display = 'none';
+      dragRegions.forEach((el) => {
+        el.style.display = 'none';
+      });
       if (contentParent) {
         contentParent.style.transition = 'none';
         contentParent.style.transform = 'none';
       }
     } else {
-      if (dragRegion) dragRegion.style.display = '';
+      dragRegions.forEach((el) => {
+        el.style.display = '';
+      });
       if (contentParent) {
         contentParent.style.transition = '';
         contentParent.style.transform = '';
@@ -76,7 +80,9 @@ export default function GamePage() {
     }
 
     return () => {
-      if (dragRegion) dragRegion.style.display = '';
+      dragRegions.forEach((el) => {
+        el.style.display = '';
+      });
       if (contentParent) {
         contentParent.style.transition = '';
         contentParent.style.transform = '';
