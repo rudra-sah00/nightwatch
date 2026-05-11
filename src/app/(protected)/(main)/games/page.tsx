@@ -21,6 +21,14 @@ const GAMES = [
     video:
       'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
   },
+  {
+    id: 'temple-run-2-frozen-shadows',
+    title: 'Temple Run 2: Frozen Shadows',
+    description: 'Escape through icy mountains and frozen caves!',
+    thumbnail: '/games/temple-run-2-frozen-shadows/thumbnail.png',
+    video:
+      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
+  },
 ];
 
 export default function GamesPage() {
