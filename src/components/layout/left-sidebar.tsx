@@ -4,6 +4,7 @@ import {
   BookOpen,
   Bot,
   Download,
+  Gamepad2,
   History,
   Home,
   Library,
@@ -67,6 +68,7 @@ export function LeftSidebar() {
     { href: '/library', label: 'Library', icon: Library },
     { href: '/music', label: t('music'), icon: Music },
     { href: '/manga', label: 'Manga', icon: BookOpen },
+    { href: '/games', label: 'Games', icon: Gamepad2 },
     { href: '/ask-ai', label: 'Ask AI', icon: Bot },
   ];
 
