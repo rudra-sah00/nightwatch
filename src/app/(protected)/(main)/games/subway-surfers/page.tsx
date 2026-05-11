@@ -48,7 +48,7 @@ export default function GamePage() {
         mobileBridge.unlockOrientation();
         mobileBridge.showStatusBar();
       } else {
-        mobileBridge.lockLandscape();
+        mobileBridge.lockPortrait();
         mobileBridge.hideStatusBar();
       }
       setIsFullscreen((prev) => !prev);
