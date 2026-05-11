@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
-import { isMobile } from '@/lib/electron-bridge';
+import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
 
 function gameApiFetch(path: string, opts: RequestInit = {}) {
   const csrf = getCookie('csrfToken');
@@ -38,6 +38,16 @@ export default function GamePage() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
+  // Escape key exits CSS-based fullscreen (Electron/Capacitor)
+  useEffect(() => {
+    if (!isFullscreen || !(checkIsDesktop() || isMobile)) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isFullscreen]);
+
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
@@ -56,7 +66,13 @@ export default function GamePage() {
       return;
     }
 
-    // Electron + Browser — use container element fullscreen
+    // Electron — CSS-based fullscreen (requestFullscreen fails with cross-origin iframes in sandbox)
+    if (checkIsDesktop()) {
+      setIsFullscreen((prev) => !prev);
+      return;
+    }
+
+    // Browser — native element fullscreen
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
@@ -95,9 +111,9 @@ export default function GamePage() {
       </div>
       <div
         ref={containerRef}
-        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && isMobile ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
+        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && (isMobile || checkIsDesktop()) ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
       >
-        {isFullscreen && isMobile && (
+        {isFullscreen && (isMobile || checkIsDesktop()) && (
           <button
             type="button"
             onClick={toggleFullscreen}
