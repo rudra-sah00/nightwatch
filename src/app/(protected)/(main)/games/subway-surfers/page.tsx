@@ -55,16 +55,7 @@ export default function GamePage() {
       return;
     }
 
-    // Electron — use native IPC
-    const win = window as unknown as {
-      electronAPI?: { toggleFullscreen?: () => Promise<void> };
-    };
-    if (win.electronAPI?.toggleFullscreen) {
-      await win.electronAPI.toggleFullscreen();
-      return;
-    }
-
-    // Browser — standard Fullscreen API
+    // Browser + Electron — standard Fullscreen API on the container element
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
