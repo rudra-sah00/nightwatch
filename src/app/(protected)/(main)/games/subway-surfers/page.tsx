@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
+import { isMobile } from '@/lib/electron-bridge';
 
 function gameApiFetch(path: string, opts: RequestInit = {}) {
   const csrf = getCookie('csrfToken');
@@ -37,14 +38,36 @@ export default function GamePage() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
+  const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
+
+    // Capacitor native app
+    if (isMobile) {
+      const { mobileBridge } = await import('@/lib/mobile-bridge');
+      if (isFullscreen) {
+        mobileBridge.unlockOrientation();
+        mobileBridge.showStatusBar();
+      } else {
+        mobileBridge.lockLandscape();
+        mobileBridge.hideStatusBar();
+      }
+      setIsFullscreen((prev) => !prev);
+      return;
+    }
+
+    // Mobile browser — use Fullscreen API (works on Android Chrome, Safari)
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      containerRef.current.requestFullscreen();
+      containerRef.current.requestFullscreen().catch(() => {
+        // Fallback for iOS Safari: use webkitRequestFullscreen
+        const el = containerRef.current as HTMLDivElement & {
+          webkitRequestFullscreen?: () => void;
+        };
+        el.webkitRequestFullscreen?.();
+      });
     }
-  }, []);
+  }, [isFullscreen]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 gap-4">
@@ -72,7 +95,7 @@ export default function GamePage() {
       </div>
       <div
         ref={containerRef}
-        className="w-full max-w-4xl aspect-[4/3] rounded-xl overflow-hidden border-[3px] border-border"
+        className={`w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && isMobile ? 'fixed inset-0 z-50 max-w-none border-0 rounded-none' : 'aspect-[4/3]'}`}
       >
         {gameUrl ? (
           <GameFrame

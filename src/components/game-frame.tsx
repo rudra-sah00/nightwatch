@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 
@@ -110,38 +110,6 @@ export function GameFrame({
       socket?.emit('watch:clear_activity');
     };
   }, [socket]);
-
-  const _toggleFullscreen = useCallback(async () => {
-    if (!containerRef.current) return;
-
-    // Electron
-    if (checkIsDesktop()) {
-      await desktopBridge.toggleFullscreen();
-      return;
-    }
-
-    // Capacitor (iOS/Android)
-    const { isMobile } = await import('@/lib/electron-bridge');
-    if (isMobile) {
-      const { mobileBridge } = await import('@/lib/mobile-bridge');
-      if (document.fullscreenElement) {
-        mobileBridge.unlockOrientation();
-        mobileBridge.showStatusBar();
-      } else {
-        mobileBridge.lockLandscape();
-        mobileBridge.hideStatusBar();
-      }
-      setIsFullscreen((prev) => !prev);
-      return;
-    }
-
-    // Browser
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      containerRef.current.requestFullscreen();
-    }
-  }, []);
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
