@@ -13,6 +13,14 @@ const GAMES = [
     video:
       'https://v.poki-cdn.com/6b6c7d15-192b-4add-bba3-18eb57f2e348/thumbnail.3x3.h264.mp4',
   },
+  {
+    id: 'temple-run-2',
+    title: 'Temple Run 2',
+    description: 'Run, jump, slide & fly through ancient temples!',
+    thumbnail: '/games/temple-run-2/thumbnail.png',
+    video:
+      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
+  },
 ];
 
 export default function GamesPage() {
