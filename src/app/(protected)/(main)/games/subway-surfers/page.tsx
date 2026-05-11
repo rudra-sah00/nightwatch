@@ -41,15 +41,6 @@ export default function GamePage() {
   const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
 
-    // Electron desktop app
-    const { checkIsDesktop, desktopBridge } = await import(
-      '@/lib/electron-bridge'
-    );
-    if (checkIsDesktop()) {
-      await desktopBridge.toggleFullscreen();
-      return;
-    }
-
     // Capacitor native app
     if (isMobile) {
       const { mobileBridge } = await import('@/lib/mobile-bridge');
@@ -64,7 +55,7 @@ export default function GamePage() {
       return;
     }
 
-    // Browser — use Fullscreen API
+    // Browser + Electron — use Fullscreen API
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
