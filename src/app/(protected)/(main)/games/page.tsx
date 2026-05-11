@@ -29,6 +29,22 @@ const GAMES = [
     video:
       'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
   },
+  {
+    id: 'temple-run-2-spooky-summit',
+    title: 'Temple Run 2: Spooky Summit',
+    description: 'Run through haunted peaks and ghostly trails!',
+    thumbnail: '/games/temple-run-2-spooky-summit/thumbnail.png',
+    video:
+      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
+  },
+  {
+    id: 'temple-run-2-holi-festival',
+    title: 'Temple Run 2: Holi Festival',
+    description: 'Dash through colorful Holi celebrations!',
+    thumbnail: '/games/temple-run-2-holi-festival/thumbnail.png',
+    video:
+      'https://v.poki-cdn.com/0e7e3ddd-4bfa-4713-82f6-1d27bda826c8/thumbnail.3x3.h264.mp4',
+  },
 ];
 
 export default function GamesPage() {
