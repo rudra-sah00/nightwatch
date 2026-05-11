@@ -1,6 +1,5 @@
 'use client';
 
-import { Maximize, Minimize } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
@@ -18,7 +17,7 @@ export function GameFrame({
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [_isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
 
   useEffect(() => {
@@ -85,7 +84,7 @@ export function GameFrame({
     };
   }, [socket]);
 
-  const toggleFullscreen = useCallback(() => {
+  const _toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -104,17 +103,6 @@ export function GameFrame({
         allowFullScreen
         title={title}
       />
-      <button
-        type="button"
-        onClick={toggleFullscreen}
-        className="absolute top-3 right-3 p-2 bg-black/50 hover:bg-black/80 rounded-lg text-white transition-colors z-10 hidden md:block"
-      >
-        {isFullscreen ? (
-          <Minimize className="w-5 h-5" />
-        ) : (
-          <Maximize className="w-5 h-5" />
-        )}
-      </button>
     </div>
   );
 }

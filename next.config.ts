@@ -108,7 +108,7 @@ const nextConfig: NextConfig = {
               `img-src 'self' blob: data: https: http://localhost:9000 ${backendOrigin} offline-media:`,
               "font-src 'self' data: https:",
               `connect-src 'self' data: wss: ws: https: http: offline-media: http://localhost:9000 ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
-              "frame-src 'self' https: blob: data: about: https://challenges.cloudflare.com",
+              "frame-src 'self' https: http://localhost:9000 http://minio:9000 blob: data: about: https://challenges.cloudflare.com",
               "worker-src 'self' blob: https:",
               `media-src 'self' blob: data: https: offline-media: http://localhost:9000 ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
               "object-src 'none'",
