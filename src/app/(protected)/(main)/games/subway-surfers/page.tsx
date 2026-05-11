@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
-import { useAuth } from '@/providers/auth-provider';
 
 function gameApiFetch(path: string, opts: RequestInit = {}) {
   const csrf = getCookie('csrfToken');
@@ -24,7 +23,6 @@ export default function GamePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [gameUrl, setGameUrl] = useState<string | null>(null);
-  const user = useAuth((s) => s.user);
 
   useEffect(() => {
     gameApiFetch('/api/games/subway-surfers/url')
@@ -32,73 +30,6 @@ export default function GamePage() {
       .then((data) => setGameUrl(data.url))
       .catch(() => {});
   }, []);
-
-  // Send leaderboard data to iframe once it loads
-  useEffect(() => {
-    if (!gameUrl) return;
-    const sendLeaderboard = () => {
-      gameApiFetch('/api/games/subway-surfers/leaderboard?limit=100')
-        .then((r) => r.json())
-        .then((data) => {
-          // Combine top 100 + current user if outside top 100
-          const entries = [...(data.leaderboard || [])];
-          if (data.currentUser) entries.push(data.currentUser);
-          setTimeout(() => {
-            const iframe = document.querySelector('iframe');
-            iframe?.contentWindow?.postMessage(
-              { type: 'nw:leaderboard-data', entries },
-              '*',
-            );
-          }, 2000);
-        })
-        .catch(() => {});
-    };
-    sendLeaderboard();
-  }, [gameUrl]);
-
-  // Bridge: nickname + score + leaderboard
-  useEffect(() => {
-    const handler = (e: MessageEvent) => {
-      if (e.data?.type === 'nw:request-nickname' && user) {
-        const iframe = document.querySelector('iframe');
-        iframe?.contentWindow?.postMessage(
-          { type: 'nw:set-nickname', name: user.username || user.name },
-          '*',
-        );
-      }
-      if (e.data?.type === 'nw:nickname-changed') {
-        gameApiFetch('/api/games/subway-surfers/nickname', {
-          method: 'PUT',
-
-          body: JSON.stringify({ nickname: e.data.name }),
-        }).catch(() => {});
-      }
-      if (
-        e.data?.type === 'nw:score-submit' ||
-        e.data?.type === 'nw:highscore'
-      ) {
-        const score = e.data.score;
-        if (score && score > 0) {
-          gameApiFetch('/api/games/subway-surfers/scores', {
-            method: 'POST',
-
-            body: JSON.stringify({ score, data: e.data.data || {} }),
-          }).catch(() => {});
-        }
-      }
-      if (e.data?.type === 'nw:save-sync' && e.data.score > 0) {
-        gameApiFetch('/api/games/subway-surfers/scores', {
-          method: 'POST',
-          body: JSON.stringify({
-            score: e.data.score,
-            data: { coins: e.data.coins || 0 },
-          }),
-        }).catch(() => {});
-      }
-    };
-    window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
-  }, [user]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
