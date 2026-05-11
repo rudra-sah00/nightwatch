@@ -87,6 +87,7 @@ export default function GamePage() {
   }, [isFullscreen]);
 
   const usesCssFullscreen = isFullscreen && (isMobile || checkIsDesktop());
+  const alwaysPortal = isMobile || checkIsDesktop();
 
   const gameContent = (
     <div
@@ -146,9 +147,7 @@ export default function GamePage() {
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
       </div>
-      {usesCssFullscreen
-        ? createPortal(gameContent, document.body)
-        : gameContent}
+      {alwaysPortal ? createPortal(gameContent, document.body) : gameContent}
     </div>
   );
 }
