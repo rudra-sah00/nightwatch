@@ -117,8 +117,8 @@ export function GameFrame({
         ref={iframeRef}
         src={gameUrl}
         className="w-full h-full"
-        sandbox="allow-scripts allow-same-origin allow-popups"
         allow="autoplay; fullscreen; gamepad"
+        allowFullScreen
         title={title}
       />
     </div>
