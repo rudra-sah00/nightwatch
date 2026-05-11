@@ -29,6 +29,15 @@ export function GameFrame({
       window.dispatchEvent(
         new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
       );
+      // Restore orientation on mobile if locked
+      import('@/lib/electron-bridge').then(({ isMobile }) => {
+        if (isMobile) {
+          import('@/lib/mobile-bridge').then(({ mobileBridge }) => {
+            mobileBridge.unlockOrientation();
+            mobileBridge.showStatusBar();
+          });
+        }
+      });
     };
   }, []);
 
@@ -102,8 +111,31 @@ export function GameFrame({
     };
   }, [socket]);
 
-  const _toggleFullscreen = useCallback(() => {
+  const _toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
+
+    // Electron
+    if (checkIsDesktop()) {
+      await desktopBridge.toggleFullscreen();
+      return;
+    }
+
+    // Capacitor (iOS/Android)
+    const { isMobile } = await import('@/lib/electron-bridge');
+    if (isMobile) {
+      const { mobileBridge } = await import('@/lib/mobile-bridge');
+      if (document.fullscreenElement) {
+        mobileBridge.unlockOrientation();
+        mobileBridge.showStatusBar();
+      } else {
+        mobileBridge.lockLandscape();
+        mobileBridge.hideStatusBar();
+      }
+      setIsFullscreen((prev) => !prev);
+      return;
+    }
+
+    // Browser
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
