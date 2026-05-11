@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
-import { checkIsDesktop, desktopBridge, isMobile } from '@/lib/electron-bridge';
+import { isMobile } from '@/lib/electron-bridge';
 
 function gameApiFetch(path: string, opts: RequestInit = {}) {
   const csrf = getCookie('csrfToken');
@@ -56,13 +56,7 @@ export default function GamePage() {
       return;
     }
 
-    // Electron — use native BrowserWindow fullscreen
-    if (checkIsDesktop()) {
-      desktopBridge.toggleFullscreen();
-      return;
-    }
-
-    // Browser fallback
+    // Electron + Browser — use container element fullscreen
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
