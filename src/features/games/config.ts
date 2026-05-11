@@ -1,6 +1,8 @@
-/** Maps game slug to Poki CDN embed URL */
+/** Maps game slug to proxied game URL via CF Worker (strips X-Frame-Options) */
 export function getGameUrl(gameId: string, versionId: string): string {
-  return `https://${gameId}.gdn.poki.com/${versionId}/index.html?country=IN&site_id=3&iso_lang=en&device=desktop&game_id=${gameId}&game_version_id=${versionId}`;
+  const cfWorker =
+    process.env.NEXT_PUBLIC_CF_WORKER_URL || 'https://cdn.nightwatch.in';
+  return `${cfWorker}/game/${gameId}/${versionId}/index.html?country=IN&site_id=3&iso_lang=en&device=desktop&game_id=${gameId}&game_version_id=${versionId}`;
 }
 
 export const GAME_DATA: Record<
