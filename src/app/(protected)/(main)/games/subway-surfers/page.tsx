@@ -3,6 +3,7 @@
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
@@ -85,6 +86,42 @@ export default function GamePage() {
     }
   }, [isFullscreen]);
 
+  const usesCssFullscreen = isFullscreen && (isMobile || checkIsDesktop());
+
+  const gameContent = (
+    <div
+      ref={containerRef}
+      className={
+        usesCssFullscreen
+          ? 'fixed inset-0 z-[9999] w-screen h-screen bg-black'
+          : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3]'
+      }
+    >
+      {usesCssFullscreen && (
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="absolute top-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
+        >
+          ✕ Exit
+        </button>
+      )}
+      {gameUrl ? (
+        <GameFrame
+          slug="subway-surfers"
+          title="Subway Surfers"
+          gameUrl={gameUrl}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-background">
+          <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
+            Loading game...
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 gap-4">
       <div className="w-full max-w-4xl flex items-center justify-between">
@@ -109,33 +146,9 @@ export default function GamePage() {
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
       </div>
-      <div
-        ref={containerRef}
-        className={`relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border ${isFullscreen && (isMobile || checkIsDesktop()) ? 'fixed inset-0 z-[9999] max-w-none w-screen h-screen border-0 rounded-none bg-black' : 'aspect-[4/3]'}`}
-      >
-        {isFullscreen && (isMobile || checkIsDesktop()) && (
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className="absolute top-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
-          >
-            ✕ Exit
-          </button>
-        )}
-        {gameUrl ? (
-          <GameFrame
-            slug="subway-surfers"
-            title="Subway Surfers"
-            gameUrl={gameUrl}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-background">
-            <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
-              Loading game...
-            </p>
-          </div>
-        )}
-      </div>
+      {usesCssFullscreen
+        ? createPortal(gameContent, document.body)
+        : gameContent}
     </div>
   );
 }
