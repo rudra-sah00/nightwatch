@@ -134,6 +134,12 @@ async function refreshAccessToken(): Promise<boolean> {
           // Default: assume 15 minute expiration
           setTokenExpiration(15 * 60);
         }
+
+        // Notify components that token was refreshed so they can refetch stale data
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:refreshed'));
+        }
+
         return true;
       }
 

@@ -71,6 +71,16 @@ export function useFriends() {
     };
   }, [fetchAll]);
 
+  // Refetch after token refresh (covers tab-active expiry where socket stays connected)
+  useEffect(() => {
+    const onRefreshed = () => {
+      invalidateFriendsCache();
+      fetchAll();
+    };
+    window.addEventListener('auth:refreshed', onRefreshed);
+    return () => window.removeEventListener('auth:refreshed', onRefreshed);
+  }, [fetchAll]);
+
   const onlineFriends = useMemo(
     () => friends.filter((f) => f.isOnline),
     [friends],
