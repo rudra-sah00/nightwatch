@@ -101,7 +101,7 @@ export default function GamePage() {
         <button
           type="button"
           onClick={toggleFullscreen}
-          className="absolute top-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
+          className="absolute bottom-3 right-3 z-[10000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
         >
           ✕ Exit
         </button>
