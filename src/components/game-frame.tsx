@@ -20,15 +20,33 @@ export function GameFrame({
   const [_isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
 
+  // Duck music while game is active, restore on unmount
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('ask-ai:duck', { detail: { duck: true } }),
+    );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
+      );
+    };
+  }, []);
+
+  // Kill iframe audio on unmount by destroying the iframe completely
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    return () => {
+      if (iframe) {
+        iframe.src = 'about:blank';
+        iframe.remove();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', onChange);
-      if (iframeRef.current) {
-        iframeRef.current.src = 'about:blank';
-      }
-    };
+    return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
   // Broadcast game activity to friends + Discord
