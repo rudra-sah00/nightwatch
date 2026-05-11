@@ -99,7 +99,7 @@ export function GameFrame({
         ref={iframeRef}
         src={gameUrl}
         className="w-full h-full"
-        sandbox="allow-scripts allow-same-origin allow-popups"
+        sandbox="allow-scripts allow-popups allow-pointer-lock"
         allow="autoplay; fullscreen; gamepad"
         title={title}
       />
