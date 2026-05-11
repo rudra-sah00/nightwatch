@@ -49,7 +49,7 @@ export function FriendRow({
         </span>
         {activity && (
           <span
-            className={`text-[10px] truncate block leading-tight ${activity.type === 'music' ? 'text-neo-blue/70' : 'text-neo-yellow/70'}`}
+            className={`text-[10px] truncate block leading-tight ${activity.type === 'music' ? 'text-neo-blue/70' : activity.type === 'game' ? 'text-neo-green/70' : 'text-neo-yellow/70'}`}
           >
             {formatActivity(activity)}
           </span>

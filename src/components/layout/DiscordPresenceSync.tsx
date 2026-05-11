@@ -38,6 +38,7 @@ export function DiscordPresenceSync() {
     if (
       pathname.includes('/watch/') ||
       pathname.includes('/party/') ||
+      pathname.includes('/games/') ||
       /^\/live\/[^/]+/.test(pathname) ||
       musicPresenceLock.isLocked()
     ) {

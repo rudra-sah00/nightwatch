@@ -1,7 +1,9 @@
-import { cookies } from 'next/headers';
-import { type NextRequest, NextResponse } from 'next/server';
+/** Maps game slug to Poki CDN embed URL */
+export function getGameUrl(gameId: string, versionId: string): string {
+  return `https://${gameId}.gdn.poki.com/${versionId}/index.html?country=IN&site_id=3&iso_lang=en&device=desktop&game_id=${gameId}&game_version_id=${versionId}`;
+}
 
-const GAMES: Record<
+export const GAME_DATA: Record<
   string,
   { gameId: string; versionId: string; title: string }
 > = {
@@ -271,30 +273,3 @@ const GAMES: Record<
     title: 'Blumgi Rocket',
   },
 };
-
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
-) {
-  const { slug } = await params;
-  const cookieStore = await cookies();
-  const session = cookieStore.get('accessToken') || cookieStore.get('session');
-
-  if (!session) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
-  const game = GAMES[slug];
-  if (!game) {
-    return new NextResponse('Game not found', { status: 404 });
-  }
-
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>${game.title}</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}iframe{width:100%;height:100%;border:none}</style></head><body><iframe src="https://${game.gameId}.gdn.poki.com/${game.versionId}/index.html?country=IN&site_id=3&iso_lang=en&device=desktop&game_id=${game.gameId}&game_version_id=${game.versionId}" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe></body></html>`;
-
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-Control': 'private, no-store',
-    },
-  });
-}

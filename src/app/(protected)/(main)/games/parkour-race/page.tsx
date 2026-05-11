@@ -3,6 +3,9 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { GameFrame } from '@/components/game-frame';
+import { GAME_DATA, getGameUrl } from '@/features/games/config';
+
+const game = GAME_DATA['parkour-race'];
 
 export default function GamePage() {
   const router = useRouter();
@@ -20,7 +23,11 @@ export default function GamePage() {
         </button>
       </div>
       <div className="w-full max-w-4xl aspect-[4/3] rounded-xl overflow-hidden border-[3px] border-border">
-        <GameFrame slug="parkour-race" title="parkour race" />
+        <GameFrame
+          slug="parkour-race"
+          title={game.title}
+          gameUrl={getGameUrl(game.gameId, game.versionId)}
+        />
       </div>
     </div>
   );

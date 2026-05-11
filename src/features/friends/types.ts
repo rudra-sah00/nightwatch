@@ -6,6 +6,7 @@
  * - `'series'`  — Watching a TV series episode.
  * - `'live'`    — Watching a livestream.
  * - `'music'`   — Listening to a song.
+ * - `'game'`    — Playing a game.
  * - `'reading'` — Reading manga/book (future).
  */
 export interface FriendActivity {

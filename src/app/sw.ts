@@ -26,6 +26,11 @@ const streamingPassthrough = [
     },
     handler: new NetworkOnly(),
   },
+  // Games proxy — HTML proxied from external CDN, must not be cached
+  {
+    matcher: /\/games\//i,
+    handler: new NetworkOnly(),
+  },
   // S2 MP4 streams served via the backend proxy
   {
     matcher: /\/api\/stream\//i,

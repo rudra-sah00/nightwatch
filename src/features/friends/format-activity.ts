@@ -7,6 +7,9 @@ import type { FriendActivity } from './types';
  * @returns A display string such as `"Watching Live: IPL"`, `"Listening to Shape of You"`, etc.
  */
 export function formatActivity(activity: FriendActivity): string {
+  if (activity.type === 'game') {
+    return `Playing ${activity.title}`;
+  }
   if (activity.type === 'music') {
     return activity.artist
       ? `Listening to ${activity.title} — ${activity.artist}`
