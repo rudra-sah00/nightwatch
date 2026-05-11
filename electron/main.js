@@ -235,7 +235,7 @@ const startElectronApp = async () => {
           "img-src 'self' data: blob: https: offline-media:",
           "media-src 'self' blob: https: offline-media:",
           "connect-src 'self' https: wss: ws: http://localhost:* offline-media:",
-          "frame-src 'self' https://challenges.cloudflare.com",
+          "frame-src 'self' https://challenges.cloudflare.com http://localhost:9000 https://*.nightwatch.in",
           "worker-src 'self' blob:",
         ].join('; '),
       ];
