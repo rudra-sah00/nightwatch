@@ -38,24 +38,25 @@ export default function GamePage() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  const toggleFullscreen = useCallback(async () => {
+  const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
-    // Capacitor native app
+    // Capacitor native app — async is fine here since it doesn't use requestFullscreen
     if (isMobile) {
-      const { mobileBridge } = await import('@/lib/mobile-bridge');
-      if (isFullscreen) {
-        mobileBridge.unlockOrientation();
-        mobileBridge.showStatusBar();
-      } else {
-        mobileBridge.lockPortrait();
-        mobileBridge.hideStatusBar();
-      }
+      import('@/lib/mobile-bridge').then(({ mobileBridge }) => {
+        if (isFullscreen) {
+          mobileBridge.unlockOrientation();
+          mobileBridge.showStatusBar();
+        } else {
+          mobileBridge.lockPortrait();
+          mobileBridge.hideStatusBar();
+        }
+      });
       setIsFullscreen((prev) => !prev);
       return;
     }
 
-    // Browser + Electron — standard Fullscreen API on the container element
+    // Browser + Electron — must be synchronous (user gesture required)
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
