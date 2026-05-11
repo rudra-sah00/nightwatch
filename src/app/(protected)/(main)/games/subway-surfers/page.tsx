@@ -144,7 +144,7 @@ export default function GamePage() {
   const usesCssFullscreen = isFullscreen && (isMobile || checkIsDesktop());
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 gap-4">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] max-md:min-h-0 max-md:h-full p-4 gap-4">
       <div className="w-full max-w-4xl flex items-center justify-between">
         <button
           type="button"
@@ -172,7 +172,7 @@ export default function GamePage() {
         className={
           usesCssFullscreen
             ? 'fixed inset-0 z-[99999] w-screen h-screen bg-black'
-            : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3]'
+            : 'relative w-full max-w-4xl rounded-xl overflow-hidden border-[3px] border-border aspect-[4/3] max-md:aspect-auto max-md:flex-1'
         }
       >
         {usesCssFullscreen && (
