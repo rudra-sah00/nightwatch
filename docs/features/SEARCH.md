@@ -134,7 +134,7 @@ Dropdown for selecting a season in series content. Click-outside dismissal via `
 `hooks/use-search-input.ts`
 
 Global search input management:
-- **Typeahead suggestions**: Fetched from Server 2 API with 200ms debounce, disabled on `/search` page
+- **Typeahead suggestions**: Fetched from Server 1 API with 200ms debounce, disabled on `/search` page
 - **Recent search history**: Persisted in `localStorage` (`wr_recent_searches`, max 5 entries)
 - **URL sync**: Query syncs with `?q=` URL param via `useSearchParams`
 - **Tab-to-complete**: Fills the first suggestion on Tab press
@@ -240,7 +240,7 @@ Fetches show/movie details by content ID with `useTransition` and `AbortControll
 `hooks/use-download-menu.ts`
 
 Download quality picker state:
-- Lazy-fetches qualities from API (Server 2 only)
+- Lazy-fetches qualities from API (Server 1 only)
 - Tracks existing offline downloads via `useDownloads`
 - `handleDesktopClick` triggers Electron bridge download with quality label
 - Computes `offlineIdentifier` for deduplication

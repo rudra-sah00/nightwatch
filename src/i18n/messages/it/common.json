@@ -93,10 +93,6 @@
       "title": "Impostazioni profilo",
       "description": "Gestisci il tuo account, le preferenze e visualizza la tua attività qui."
     },
-    "serverTip": {
-      "title": "Suggerimento Pro: Cambio server",
-      "description": "Nel tuo profilo, puoi passare tra Server 1 e Server 2. Hanno librerie di contenuti diverse!"
-    },
     "ready": {
       "title": "Sei pronto",
       "description": "Goditi l'esperienza cinematografica pura. Nessuna distrazione. Solo cinema."
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

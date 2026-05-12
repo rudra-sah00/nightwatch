@@ -1,6 +1,6 @@
 # Watch Content
 
-VOD and live video playback system built on a compound component player architecture. Supports HLS (Server 1/3) and direct MP4 (Server 2) streams, with mobile-specific inline PiP, swipe-to-dismiss, portrait seekbar, and fullscreen orientation locking.
+VOD and live video playback system built on a compound component player architecture. Supports HLS (Server 1/3) and direct MP4 (Server 1) streams, with mobile-specific inline PiP, swipe-to-dismiss, portrait seekbar, and fullscreen orientation locking.
 
 ## Directory Structure
 

@@ -97,10 +97,6 @@
       "title": "Profile Settings",
       "description": "Manage your account, preferences, and view your activity here."
     },
-    "serverTip": {
-      "title": "Pro Tip: Server Change",
-      "description": "Inside your profile, you can switch between Server 1 and Server 2. They have different content libraries! If you can't find a movie or show on one server, try switching to another."
-    },
     "ready": {
       "title": "You are ready",
       "description": "Enjoy the pure cinematic experience. No distractions. Just film."
@@ -115,7 +111,11 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "games": {
+      "title": "Games",
+      "description": "Take a break with browser games. Play right inside Nightwatch."
+    }
   },
   "creatorFooter": {
     "title": "Creator Identity",

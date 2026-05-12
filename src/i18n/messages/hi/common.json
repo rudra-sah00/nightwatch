@@ -93,10 +93,6 @@
       "title": "प्रोफ़ाइल सेटिंग्स",
       "description": "अपना खाता, प्राथमिकताएं प्रबंधित करें और अपनी गतिविधि देखें।"
     },
-    "serverTip": {
-      "title": "प्रो टिप: सर्वर बदलें",
-      "description": "अपनी प्रोफ़ाइल में, आप सर्वर 1 और सर्वर 2 के बीच स्विच कर सकते हैं। उनमें अलग-अलग कंटेंट लाइब्रेरी हैं!"
-    },
     "ready": {
       "title": "आप तैयार हैं",
       "description": "शुद्ध सिनेमाई अनुभव का आनंद लें। कोई विकर्षण नहीं। बस फिल्म।"
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

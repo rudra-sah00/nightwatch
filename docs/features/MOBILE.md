@@ -302,7 +302,7 @@ src/
 │       │   └── mp4.ts                 # Direct MP4 download
 │       └── providers/
 │           ├── s1.ts                  # Server 1 (HLS)
-│           └── s2.ts                  # Server 2 (MP4 or HLS)
+│           └── s2.ts                  # Server 1 (MP4 or HLS)
 └── providers/
     └── pip-provider.tsx               # Cross-route PiP + native background PiP
 ```

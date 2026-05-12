@@ -93,10 +93,6 @@
       "title": "إعدادات الملف الشخصي",
       "description": "أدر حسابك وتفضيلاتك واعرض نشاطك هنا."
     },
-    "serverTip": {
-      "title": "نصيحة احترافية: تغيير الخادم",
-      "description": "داخل ملفك الشخصي، يمكنك التبديل بين الخادم 1 والخادم 2. لديهم مكتبات محتوى مختلفة!"
-    },
     "ready": {
       "title": "أنت جاهز",
       "description": "استمتع بالتجربة السينمائية النقية. بدون تشتيت. فقط أفلام."
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

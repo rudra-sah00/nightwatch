@@ -93,10 +93,6 @@
       "title": "ตั้งค่าโปรไฟล์",
       "description": "จัดการบัญชี การตั้งค่า และดูกิจกรรมของคุณที่นี่"
     },
-    "serverTip": {
-      "title": "เคล็ดลับ: เปลี่ยนเซิร์ฟเวอร์",
-      "description": "ในโปรไฟล์ คุณสามารถสลับระหว่างเซิร์ฟเวอร์ 1 และเซิร์ฟเวอร์ 2 ได้ แต่ละเซิร์ฟเวอร์มีคลังเนื้อหาต่างกัน!"
-    },
     "ready": {
       "title": "คุณพร้อมแล้ว",
       "description": "เพลิดเพลินกับประสบการณ์ภาพยนตร์บริสุทธิ์ ไม่มีสิ่งรบกวน มีแต่ภาพยนตร์"
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

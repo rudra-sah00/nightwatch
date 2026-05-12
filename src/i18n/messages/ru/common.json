@@ -93,10 +93,6 @@
       "title": "Настройки профиля",
       "description": "Управляйте аккаунтом, настройками и просматривайте активность."
     },
-    "serverTip": {
-      "title": "Совет: Смена сервера",
-      "description": "В профиле можно переключаться между Сервером 1 и Сервером 2. У них разные библиотеки контента!"
-    },
     "ready": {
       "title": "Вы готовы",
       "description": "Наслаждайтесь чистым кинематографическим опытом. Без отвлечений. Только кино."
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

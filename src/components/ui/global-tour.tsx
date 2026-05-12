@@ -66,7 +66,6 @@ export function GlobalTour() {
             title,
             desc,
             t,
-            dark,
             isDesktopApp,
             setLeftOpen,
             setRightOpen,
@@ -197,7 +196,6 @@ function buildDesktopSteps(
   title: (t: string, c?: string) => string,
   desc: (t: string) => string,
   t: (key: string) => string,
-  dark: boolean,
   isDesktopApp: boolean,
   setLeftOpen: (v: boolean) => void,
   setRightOpen: (v: boolean) => void,
@@ -287,6 +285,15 @@ function buildDesktopSteps(
       },
     },
     {
+      element: 'a[href="/games"]',
+      popover: {
+        title: title(t('games.title')),
+        description: desc(t('games.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
       element: 'a[href="/ask-ai"]',
       popover: {
         title: title(t('askAi.title')),
@@ -317,15 +324,6 @@ function buildDesktopSteps(
         align: 'end',
       },
       onHighlightStarted: () => setRightOpen(false),
-    },
-    {
-      element: 'a[href="/profile"]',
-      popover: {
-        title: title(t('serverTip.title'), dark ? '#fb7185' : '#e63b2e'),
-        description: desc(t('serverTip.description')),
-        side: 'bottom',
-        align: 'end',
-      },
     },
     {
       popover: {

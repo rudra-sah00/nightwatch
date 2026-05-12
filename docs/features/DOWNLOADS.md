@@ -25,7 +25,7 @@ src/capacitor/downloads/                   # Mobile-specific download engine
 │   └── mp4.ts                             # Direct MP4 download
 └── providers/
     ├── s1.ts                              # Server 1 → HLS
-    └── s2.ts                              # Server 2 → MP4 or HLS (auto-detect)
+    └── s2.ts                              # Server 1 → MP4 or HLS (auto-detect)
 
 src/features/search/utils/download.ts      # Download initiation + quality sorting
 ```
@@ -109,7 +109,7 @@ GET /api/video/download-links?id={id}&type={movie|series}&season={n}&episode={n}
 
 `startDesktopDownload()` in `src/features/search/utils/download.ts` handles the full download initiation flow:
 
-1. **Direct URL path** (Server 2 MP4): passes the URL directly to the platform bridge
+1. **Direct URL path** (Server 1 MP4): passes the URL directly to the platform bridge
 2. **HLS path** (Server 1/3): resolves the master playlist via `playVideo()` API, then passes the m3u8 URL
 
 ```ts

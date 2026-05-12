@@ -93,10 +93,6 @@
       "title": "プロフィール設定",
       "description": "アカウント、設定を管理し、アクティビティを確認できます。"
     },
-    "serverTip": {
-      "title": "プロのヒント：サーバー変更",
-      "description": "プロフィール内で、サーバー1とサーバー2を切り替えられます。それぞれ異なるコンテンツライブラリがあります！"
-    },
     "ready": {
       "title": "準備完了",
       "description": "純粋な映画体験をお楽しみください。邪魔なし。映画だけ。"
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

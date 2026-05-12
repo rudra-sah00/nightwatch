@@ -93,10 +93,6 @@
       "title": "个人资料设置",
       "description": "管理您的账户、偏好设置并查看您的活动。"
     },
-    "serverTip": {
-      "title": "专业提示：切换服务器",
-      "description": "在您的个人资料中，可以在服务器1和服务器2之间切换。它们有不同的内容库！"
-    },
     "ready": {
       "title": "您已准备就绪",
       "description": "享受纯粹的电影体验。没有干扰。只有电影。"
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

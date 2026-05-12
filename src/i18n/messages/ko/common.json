@@ -93,10 +93,6 @@
       "title": "프로필 설정",
       "description": "계정, 환경설정을 관리하고 활동을 확인하세요."
     },
-    "serverTip": {
-      "title": "프로 팁: 서버 변경",
-      "description": "프로필에서 서버 1과 서버 2 사이를 전환할 수 있습니다. 각각 다른 콘텐츠 라이브러리가 있습니다!"
-    },
     "ready": {
       "title": "준비 완료",
       "description": "순수한 시네마 경험을 즐기세요. 방해 없이. 오직 영화만."
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {

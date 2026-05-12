@@ -93,10 +93,6 @@
       "title": "Profil Ayarları",
       "description": "Hesabınızı, tercihlerinizi yönetin ve etkinliğinizi buradan görüntüleyin."
     },
-    "serverTip": {
-      "title": "Pro İpucu: Sunucu Değişikliği",
-      "description": "Profilinizde Sunucu 1 ve Sunucu 2 arasında geçiş yapabilirsiniz. Farklı içerik kütüphaneleri var!"
-    },
     "ready": {
       "title": "Hazırsınız",
       "description": "Saf sinema deneyiminin tadını çıkarın. Dikkat dağıtıcı yok. Sadece film."
@@ -115,6 +111,10 @@
     "music": {
       "title": "Music",
       "description": "Listen to curated radio stations and music while you browse."
+    },
+    "games": {
+      "title": "Games",
+      "description": "Play browser games inside Nightwatch."
     }
   },
   "creatorFooter": {
