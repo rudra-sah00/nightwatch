@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         // WARNING: Wildcard hostname allows Next.js image optimization to fetch
@@ -71,7 +72,6 @@ const nextConfig: NextConfig = {
         pathname: '/**', // Allow local public files like /logo.png
       },
     ],
-    unoptimized: false,
     formats: ['image/webp'],
     deviceSizes: [640, 1080, 1920], // Focused breakpoints for standard devices
     imageSizes: [32, 64, 128, 256, 384],
