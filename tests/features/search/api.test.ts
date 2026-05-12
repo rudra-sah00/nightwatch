@@ -32,7 +32,7 @@ describe('Search API', () => {
 
       expect(apiFetch).toHaveBeenCalledTimes(2);
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test%20query&server=s2',
+        '/api/video/search?q=test%20query&server=s1',
         undefined,
       );
       expect(apiFetch).toHaveBeenCalledWith(
@@ -40,7 +40,7 @@ describe('Search API', () => {
         undefined,
       );
       expect(result).toEqual(
-        mockResults.map((r) => ({ ...r, provider: 's2' })),
+        mockResults.map((r) => ({ ...r, provider: 's1' })),
       );
     });
 
@@ -53,7 +53,7 @@ describe('Search API', () => {
       await searchContent('test', undefined, options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test&server=s2',
+        '/api/video/search?q=test&server=s1',
         options,
       );
       expect(apiFetch).toHaveBeenCalledWith(
@@ -65,11 +65,11 @@ describe('Search API', () => {
     it('should use single call for search', async () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ results: [] });
 
-      await searchContent('test', 's2');
+      await searchContent('test', 's1');
 
       expect(apiFetch).toHaveBeenCalledTimes(1);
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test&server=s2',
+        '/api/video/search?q=test&server=s1',
         undefined,
       );
     });
@@ -186,10 +186,10 @@ describe('Search API', () => {
     it('includes server param when provided', async () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ suggestions: ['Inception'] });
 
-      await getSearchSuggestions('inc', 's2');
+      await getSearchSuggestions('inc', 's1');
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search/suggest?q=inc&server=s2',
+        '/api/video/search/suggest?q=inc&server=s1',
         undefined,
       );
     });

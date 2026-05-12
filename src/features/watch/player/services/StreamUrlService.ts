@@ -170,11 +170,11 @@ function processS2Response(response: PlayResponse): NormalizedUrls {
  * Unified processor for any server response.
  */
 export function processResponse(
-  server: 's2' | 's2',
+  server: 's1' | 's1',
   response: PlayResponse,
 ): NormalizedUrls {
   switch (server) {
-    case 's2':
+    case 's1':
       return processS2Response(response);
     default:
       return processS1Response(response);

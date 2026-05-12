@@ -94,7 +94,7 @@ describe('Music API', () => {
       };
       mockApiFetch.mockResolvedValueOnce(mockLyrics);
 
-      const result = await getLyrics('s2');
+      const result = await getLyrics('s1');
 
       expect(mockApiFetch).toHaveBeenCalledWith('/api/music/lyrics/s1');
       expect(result).toEqual(mockLyrics);

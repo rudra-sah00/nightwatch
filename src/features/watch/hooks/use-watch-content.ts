@@ -34,7 +34,7 @@ export function useWatchContent() {
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
-    's2') as 's2' | 's2';
+    's1') as 's1' | 's1';
   const { setActiveServer } = useServer();
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useWatchContent() {
     S2AudioTrack[]
   >([]);
   const [s2ActiveTrackId, setS2ActiveTrackId] = useState<string | null>(() =>
-    server === 's2' ? movieId : null,
+    server === 's1' ? movieId : null,
   );
 
   const refetchStream = useCallback(
@@ -225,7 +225,7 @@ export function useWatchContent() {
           applyResponse(server, response);
 
           // Server 2 specific audio track handling
-          if (server === 's2') {
+          if (server === 's1') {
             if (response.audioTracks && response.audioTracks.length > 0) {
               setS2InitialAudioTracks(
                 response.audioTracks.map((t) => ({
@@ -252,7 +252,7 @@ export function useWatchContent() {
         });
         const httpStatus = (err as { status?: number })?.status;
         if (
-          server === 's2' &&
+          server === 's1' &&
           (httpStatus === 500 || httpStatus === 503) &&
           !s2ColdStartRetried.current
         ) {

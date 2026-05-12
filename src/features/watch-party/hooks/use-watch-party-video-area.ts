@@ -43,15 +43,15 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       movieId: room.contentId,
       seriesId: room.type === 'series' ? room.contentId : undefined,
       posterUrl: room.posterUrl || '',
-      // Livestreams are always HLS — force 's2' so the player never falls back to
-      // the user's activeServer preference ('s2'/MP4) and shows a blank screen.
+      // Livestreams are always HLS — force 's1' so the player never falls back to
+      // the user's activeServer preference ('s1'/MP4) and shows a blank screen.
       // For all other content, propagate the room's server so useWatchProgress
       // records progress with the correct providerId and useNextEpisode fetches
       // from the right API.
       providerId:
         room.type === 'livestream'
-          ? ('s2' as const)
-          : room.providerId || (room.contentId.startsWith('s2:') ? 's2' : 's2'),
+          ? ('s1' as const)
+          : room.providerId || (room.contentId.startsWith('s2:') ? 's1' : 's1'),
     }),
     [
       room.title,
@@ -85,7 +85,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   // The active track is the current content ID — one of the audio track IDs
   // will equal room.contentId when it's an S2 dub room.
   const initialAudioTrackId =
-    room.providerId === 's2' && initialAudioTracks.length > 1
+    room.providerId === 's1' && initialAudioTracks.length > 1
       ? room.contentId
       : undefined;
 

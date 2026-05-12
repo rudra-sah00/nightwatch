@@ -27,8 +27,8 @@ async function startDownloadTask(
 ): Promise<void> {
   const prefix = contentId.split(':')[0];
 
-  if (prefix === 's2') return downloadS1(contentId, m3u8Url);
-  if (prefix === 's2') return downloadS2(contentId, m3u8Url);
+  if (prefix === 's1') return downloadS1(contentId, m3u8Url);
+  if (prefix === 's1') return downloadS2(contentId, m3u8Url);
 
   // Fallback: detect by URL
   const isMp4 = m3u8Url.includes('.mp4') || !m3u8Url.includes('.m3u8');

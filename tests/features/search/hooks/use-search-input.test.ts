@@ -18,7 +18,7 @@ vi.mock('@/features/search/api', () => ({
 
 vi.mock('@/providers/server-provider', () => ({
   useServer: vi.fn(() => ({
-    activeServer: 's2',
+    activeServer: 's1',
     serverLabel: 'Balanced',
     setActiveServer: vi.fn(),
   })),
@@ -38,7 +38,7 @@ describe('useSearchInput', () => {
     // Restore server to s2 (clearAllMocks doesn't reset mockReturnValue overrides)
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
-      activeServer: 's2',
+      activeServer: 's1',
       serverLabel: 'Balanced',
       setActiveServer: vi.fn(),
     });
@@ -182,7 +182,7 @@ describe('useSearchInput', () => {
   it('does NOT fetch suggestions on s1 server', async () => {
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
-      activeServer: 's2',
+      activeServer: 's1',
       serverLabel: 'Server 2',
       setActiveServer: vi.fn(),
     });
@@ -220,7 +220,7 @@ describe('useSearchInput', () => {
     });
 
     await waitFor(() => {
-      expect(searchApi.getSearchSuggestions).toHaveBeenCalledWith('avan', 's2');
+      expect(searchApi.getSearchSuggestions).toHaveBeenCalledWith('avan', 's1');
     });
     // Hook now slices to 1 suggestion
     expect(result.current.suggestions).toEqual(['avengers']);

@@ -36,7 +36,7 @@ describe('Friends API', () => {
 
   describe('getPendingRequests', () => {
     it('fetches pending requests', async () => {
-      const requests = [{ id: 'r1', senderId: 's2', name: 'Bob' }];
+      const requests = [{ id: 'r1', senderId: 's1', name: 'Bob' }];
       vi.mocked(apiFetch).mockResolvedValueOnce({ data: requests });
 
       const result = await getPendingRequests();

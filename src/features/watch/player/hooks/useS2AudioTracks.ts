@@ -46,7 +46,7 @@ export interface S2AudioTrack {
 }
 
 interface UseS2AudioTracksProps {
-  /** Current server. Hook is a no-op when this is not 's2'. */
+  /** Current server. Hook is a no-op when this is not 's1'. */
   server: string;
   type: 'movie' | 'series';
   /** Encoded title from URL params (raw — will be decoded internally). */
@@ -140,7 +140,7 @@ export function useS2AudioTracks({
   // immediately trigger invalidateUserStream → stream:revoked on the active one.
   // Tracks will be fed back via initialTracks once refetchStream completes.
   useEffect(() => {
-    if (server !== 's2') return;
+    if (server !== 's1') return;
     if (skipDiscovery) return;
 
     let cancelled = false;
@@ -158,14 +158,14 @@ export function useS2AudioTracks({
             seriesId: seriesId || movieId || undefined,
             season: parseInt(season, 10),
             episode: parseInt(episode, 10),
-            server: 's2',
+            server: 's1',
           });
         } else {
           response = await playVideo({
             type: 'movie',
             title: decodedTitle,
             movieId: movieId || undefined,
-            server: 's2',
+            server: 's1',
           });
         }
 

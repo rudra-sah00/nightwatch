@@ -20,7 +20,7 @@ const mockPlayerContext = {
     episode: 2,
     posterUrl: 'https://img.example.com/poster.jpg',
     year: '2016',
-    providerId: 's2',
+    providerId: 's1',
   },
   onNavigate: vi.fn(),
   playerHandlers: {
@@ -80,8 +80,8 @@ const mockPanel = {
     },
   ],
   seasons: [
-    { seasonNumber: 1, seasonId: 's2', episodeCount: 8 },
-    { seasonNumber: 2, seasonId: 's2', episodeCount: 9 },
+    { seasonNumber: 1, seasonId: 's1', episodeCount: 8 },
+    { seasonNumber: 2, seasonId: 's1', episodeCount: 9 },
   ],
   selectedSeason: 1,
   isLoading: false,

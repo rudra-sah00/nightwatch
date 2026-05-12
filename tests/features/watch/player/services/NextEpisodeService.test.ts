@@ -84,7 +84,7 @@ describe('NextEpisodeService', () => {
 
       vi.mocked(getShowDetails).mockResolvedValue(
         makeShowDetails('show-same-season', 'Show', [
-          { seasonNumber: 1, seasonId: 's2', episodeCount: 2 },
+          { seasonNumber: 1, seasonId: 's1', episodeCount: 2 },
         ]),
       );
 
@@ -125,14 +125,14 @@ describe('NextEpisodeService', () => {
 
       vi.mocked(getShowDetails).mockResolvedValue(
         makeShowDetails('show-next-season', 'Show', [
-          { seasonNumber: 1, seasonId: 's2', episodeCount: 2 },
-          { seasonNumber: 2, seasonId: 's2', episodeCount: 1 },
+          { seasonNumber: 1, seasonId: 's1', episodeCount: 2 },
+          { seasonNumber: 2, seasonId: 's1', episodeCount: 1 },
         ]),
       );
 
       vi.mocked(getSeriesEpisodes).mockImplementation(
         (_sid, seasonId): ReturnType<typeof getSeriesEpisodes> => {
-          if (seasonId === 's2') {
+          if (seasonId === 's1') {
             return Promise.resolve({
               episodes: [
                 makeEpisode(1, { episodeId: 'ep1' }),
@@ -141,7 +141,7 @@ describe('NextEpisodeService', () => {
               totalEpisodes: 2,
             });
           }
-          if (seasonId === 's2') {
+          if (seasonId === 's1') {
             return Promise.resolve({
               episodes: [makeEpisode(1, { episodeId: 'ep3', title: 'S2E1' })],
               totalEpisodes: 1,
@@ -172,7 +172,7 @@ describe('NextEpisodeService', () => {
       const mockCached: ReturnType<typeof getCachedSeriesData> = {
         seriesId: 'show-cached',
         showDetails: makeShowDetails('show-cached', 'Show', [
-          { seasonNumber: 1, seasonId: 's2', episodeCount: 2 },
+          { seasonNumber: 1, seasonId: 's1', episodeCount: 2 },
         ]),
         loadedSeasons: {
           1: [makeEpisode(1), makeEpisode(2, { title: 'Cached Next' })],
@@ -201,7 +201,7 @@ describe('NextEpisodeService', () => {
 
       vi.mocked(getShowDetails).mockResolvedValue(
         makeShowDetails('show-no-season', 'Show', [
-          { seasonNumber: 1, seasonId: 's2', episodeCount: 1 },
+          { seasonNumber: 1, seasonId: 's1', episodeCount: 1 },
         ]),
       );
 
@@ -218,7 +218,7 @@ describe('NextEpisodeService', () => {
         title: 'Show',
         movieId: 'ep1',
         type: 'series',
-        providerId: 's2',
+        providerId: 's1',
       };
 
       vi.mocked(playVideo).mockResolvedValue({

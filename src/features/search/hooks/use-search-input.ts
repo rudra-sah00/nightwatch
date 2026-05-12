@@ -72,7 +72,7 @@ export function useSearchInput() {
   useEffect(() => {
     // We fetch suggestions based on raw query to support trailing space hints
     // but we still want a minimum character count.
-    if (!query || query.length < 2 || activeServer !== 's2' || isSearchPage) {
+    if (!query || query.length < 2 || activeServer !== 's1' || isSearchPage) {
       setSuggestions([]);
       return;
     }
@@ -97,7 +97,7 @@ export function useSearchInput() {
     if (
       !searchTerm ||
       searchTerm.length < 2 ||
-      activeServer !== 's2' ||
+      activeServer !== 's1' ||
       isSearchPage
     ) {
       setSuggestions([]);

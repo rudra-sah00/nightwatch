@@ -64,7 +64,7 @@ interface PlayerRootHookProps {
   initialAudioTrackId?: string;
   onBack?: () => void;
   isLive?: boolean;
-  providerId?: 's2' | 's2';
+  providerId?: 's1' | 's1';
   playbackRate?: number;
   skipProgressHistory?: boolean;
 }

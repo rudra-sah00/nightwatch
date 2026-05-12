@@ -111,7 +111,7 @@ export default function LiveMatchPlayerPage() {
       title: titleFromRoute || 'Live TV',
       type: 'livestream',
       posterUrl: iptvPoster || undefined,
-      providerId: 's2',
+      providerId: 's1',
     };
 
     return (
@@ -330,7 +330,7 @@ export default function LiveMatchPlayerPage() {
     title: displayTitle,
     type: 'livestream',
     posterUrl: activeMatch.team1.avatar,
-    providerId: 's2', // Force HLS engine
+    providerId: 's1', // Force HLS engine
   };
 
   const startLabel = format.dateTime(new Date(activeMatch.startTime), {

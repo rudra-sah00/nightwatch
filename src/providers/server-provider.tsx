@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { createContext, use, useEffect, useState } from 'react';
 
-type ServerId = 's2';
+type ServerId = 's1';
 
 interface ServerContextValue {
   activeServer: ServerId;
@@ -13,11 +13,11 @@ interface ServerContextValue {
 }
 
 const SERVER_LABEL_KEYS: Record<ServerId, string> = {
-  s2: 'server.balanced',
+  s1: 'server.balanced',
 };
 
 const ServerContext = createContext<ServerContextValue>({
-  activeServer: 's2',
+  activeServer: 's1',
   serverLabel: '',
   setActiveServer: () => {},
 });
@@ -34,7 +34,7 @@ export function ServerProvider({
 }: ServerProviderProps) {
   const t = useTranslations('common');
   const [activeServer, setActiveServer] = useState<ServerId>(
-    defaultServer ?? 's2',
+    defaultServer ?? 's1',
   );
 
   // Sync when the user's preferred server changes (e.g. after profile fetch)

@@ -28,7 +28,7 @@ export async function addToWatchlist(item: {
   contentType: 'Movie' | 'Series';
   title: string;
   posterUrl?: string;
-  providerId?: 's2' | 's2';
+  providerId?: 's1' | 's1';
 }): Promise<void> {
   await apiFetch('/api/user/watchlist', {
     method: 'POST',
@@ -62,7 +62,7 @@ export async function checkInWatchlist(
   const cached = watchlistStatusCache.get(contentId);
   if (cached !== undefined) return cached;
 
-  const pId = providerId || contentId.split(':')[0] || 's2';
+  const pId = providerId || contentId.split(':')[0] || 's1';
   const params = new URLSearchParams({ id: contentId, providerId: pId });
   const { inWatchlist } = await apiFetch<{ inWatchlist: boolean }>(
     `/api/user/watchlist/status?${params}`,

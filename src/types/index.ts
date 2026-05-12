@@ -5,7 +5,7 @@ export interface User {
   username: string | null;
   email: string;
   profilePhoto: string | null;
-  preferredServer: 's2';
+  preferredServer: 's1';
   sessionId: string;
   createdAt: string;
 }

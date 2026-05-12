@@ -145,7 +145,7 @@ describe('Watch API', () => {
       const result = await getContinueWatching();
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10&server=s2',
+        '/api/watch/continue-watching?limit=10&server=s1',
         undefined,
       );
       expect(result).toEqual(mockItems);
@@ -157,7 +157,7 @@ describe('Watch API', () => {
       await getContinueWatching(20);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=20&server=s2',
+        '/api/watch/continue-watching?limit=20&server=s1',
         undefined,
       );
     });
@@ -166,10 +166,10 @@ describe('Watch API', () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ items: [] });
 
       const options = { signal: new AbortController().signal };
-      await getContinueWatching(10, 's2', options);
+      await getContinueWatching(10, 's1', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10&server=s2',
+        '/api/watch/continue-watching?limit=10&server=s1',
         options,
       );
     });
@@ -178,21 +178,21 @@ describe('Watch API', () => {
   describe('Continue watching cache', () => {
     it('should invalidate cache', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
-      setContinueWatchingCache('s2', mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      expect(isContinueWatchingCacheFresh('s2')).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
 
       invalidateContinueWatchingCache();
 
-      expect(isContinueWatchingCacheFresh('s2')).toBe(false);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(false);
     });
 
     it('should set and check cache freshness', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
 
-      setContinueWatchingCache('s2', mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      expect(isContinueWatchingCacheFresh('s2')).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
     });
 
     it('should remove item from cache', () => {
@@ -201,11 +201,11 @@ describe('Watch API', () => {
         createMockProgress({ id: '2', title: 'Movie 2' }),
       ];
 
-      setContinueWatchingCache('s2', mockItems);
-      removeFromContinueWatchingCache('s2', '1');
+      setContinueWatchingCache('s1', mockItems);
+      removeFromContinueWatchingCache('s1', '1');
 
       // Cache should only have item 2
-      expect(isContinueWatchingCacheFresh('s2')).toBe(true);
+      expect(isContinueWatchingCacheFresh('s1')).toBe(true);
     });
   });
 
@@ -223,7 +223,7 @@ describe('Watch API', () => {
       const result = await getContentProgress('content-123');
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123?server=s2',
+        '/api/watch/progress/content-123?server=s1',
         undefined,
       );
       expect(result).toEqual(mockProgress);
@@ -252,7 +252,7 @@ describe('Watch API', () => {
       await getContentProgress('content-123', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123?server=s2',
+        '/api/watch/progress/content-123?server=s1',
         options,
       );
     });
@@ -367,16 +367,16 @@ describe('Watch API', () => {
     it('should return cached continue watching items', () => {
       const mockItems = [createMockProgress({ id: '1', title: 'Movie' })];
 
-      setContinueWatchingCache('s2', mockItems);
+      setContinueWatchingCache('s1', mockItems);
 
-      const result = getCachedContinueWatching('s2');
+      const result = getCachedContinueWatching('s1');
       expect(result).toEqual(mockItems);
     });
 
     it('should return null if cache is empty', () => {
       invalidateContinueWatchingCache();
 
-      const result = getCachedContinueWatching('s2');
+      const result = getCachedContinueWatching('s1');
       expect(result).toBeNull();
     });
   });
@@ -393,7 +393,7 @@ describe('Watch API', () => {
 
         fetchContentProgress('content-123', (progress, hasProgress) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/progress/content-123?server=s2',
+            '/api/watch/progress/content-123?server=s1',
             undefined,
           );
           expect(progress).toEqual(mockProgress);
@@ -435,9 +435,9 @@ describe('Watch API', () => {
 
         vi.mocked(apiFetch).mockResolvedValueOnce({ items: mockItems });
 
-        fetchContinueWatching(10, 's2', (result) => {
+        fetchContinueWatching(10, 's1', (result) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/continue-watching?limit=10&server=s2',
+            '/api/watch/continue-watching?limit=10&server=s1',
             undefined,
           );
           expect(result).toEqual(mockItems);
@@ -450,7 +450,7 @@ describe('Watch API', () => {
       return new Promise<void>((done) => {
         vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Fetch failed'));
 
-        fetchContinueWatching(10, 's2', (result, error) => {
+        fetchContinueWatching(10, 's1', (result, error) => {
           expect(result).toBeNull();
           expect(error).toBe('Fetch failed');
           done();
@@ -464,9 +464,9 @@ describe('Watch API', () => {
       return new Promise<void>((done) => {
         vi.mocked(apiFetch).mockResolvedValueOnce({ success: true });
 
-        deleteWatchProgress('progress-123', 's2', (success) => {
+        deleteWatchProgress('progress-123', 's1', (success) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/progress/progress-123?server=s2',
+            '/api/watch/progress/progress-123?server=s1',
             { method: 'DELETE' },
           );
           expect(success).toBe(true);
@@ -479,7 +479,7 @@ describe('Watch API', () => {
       return new Promise<void>((done) => {
         vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Delete failed'));
 
-        deleteWatchProgress('progress-123', 's2', (success) => {
+        deleteWatchProgress('progress-123', 's1', (success) => {
           expect(success).toBe(false);
           done();
         });

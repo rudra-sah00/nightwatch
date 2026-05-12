@@ -24,8 +24,8 @@ export function useUpdateProfileForm() {
   const { user, updateUser, logout } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
-  const [preferredServer, setPreferredServer] = useState<'s2' | 's2'>(
-    user?.preferredServer || 's2',
+  const [preferredServer, setPreferredServer] = useState<'s1' | 's1'>(
+    user?.preferredServer || 's1',
   );
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
@@ -41,7 +41,7 @@ export function useUpdateProfileForm() {
     if (user && !isInitialized.current) {
       const nextName = user.name || '';
       const nextUsername = user.username || '';
-      const nextServer = user.preferredServer || 's2';
+      const nextServer = user.preferredServer || 's1';
 
       if (name !== nextName) {
         setName(nextName);
@@ -86,12 +86,12 @@ export function useUpdateProfileForm() {
     ) => {
       const nameVal = formData.get('name') as string;
       const usernameVal = formData.get('username') as string;
-      const preferredServerVal = formData.get('preferredServer') as 's2' | 's2';
+      const preferredServerVal = formData.get('preferredServer') as 's1' | 's1';
 
       if (
         nameVal.trim() === (user?.name || '') &&
         usernameVal === (user?.username || '') &&
-        preferredServerVal === (user?.preferredServer || 's2')
+        preferredServerVal === (user?.preferredServer || 's1')
       ) {
         return { message: t('messages.noChanges'), type: 'info' };
       }
@@ -151,7 +151,7 @@ export function useUpdateProfileForm() {
   const hasChanges =
     name.trim() !== (user?.name || '') ||
     username !== (user?.username || '') ||
-    preferredServer !== (user?.preferredServer || 's2');
+    preferredServer !== (user?.preferredServer || 's1');
 
   const handleDeleteAccount = async () => {
     try {

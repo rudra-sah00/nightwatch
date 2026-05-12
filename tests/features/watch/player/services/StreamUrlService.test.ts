@@ -17,7 +17,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      const result = processResponse('s2', response);
+      const result = processResponse('s1', response);
 
       expect(result.streamUrl).toContain('/123');
     });
@@ -40,7 +40,7 @@ describe('StreamUrlService', () => {
         ],
       };
 
-      const result = processResponse('s2', response);
+      const result = processResponse('s1', response);
 
       expect(result.streamUrl).toBe('https://example.com/video.mp4');
       expect(result.qualities).toHaveLength(1);
@@ -56,7 +56,7 @@ describe('StreamUrlService', () => {
         title: '',
       };
 
-      expect(() => processResponse('s2', response)).toThrow(
+      expect(() => processResponse('s1', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -70,7 +70,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      expect(() => processResponse('s2', response)).toThrow(
+      expect(() => processResponse('s1', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -109,7 +109,7 @@ describe('StreamUrlService', () => {
   describe('extractTokenFromUrl', () => {
     it('should extract token from URL', () => {
       const url = '/api/stream/hls/xyz123/movie';
-      const result = processResponse('s2', {
+      const result = processResponse('s1', {
         success: true,
         masterPlaylistUrl: url,
         movieId: '1',
@@ -168,7 +168,7 @@ describe('StreamUrlService', () => {
         spriteVtt: 'sprite.vtt',
         durationSeconds: 3600,
       };
-      const result = processResponse('s2', response);
+      const result = processResponse('s1', response);
       expect(result.streamUrl).toBe('video.mp4');
       expect(result.qualities).toHaveLength(1);
       expect(result.subtitleTracks).toHaveLength(1);
@@ -185,7 +185,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
         subtitleTracks: [{ label: 'Unknown', language: '', url: 'sub.srt' }],
       };
-      const result = processResponse('s2', response);
+      const result = processResponse('s1', response);
       expect(result.subtitleTracks?.[0].id).toBe('track-0');
     });
 
@@ -197,7 +197,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: 'Test',
       };
-      const result = processResponse('s2', response);
+      const result = processResponse('s1', response);
       expect(result.captionUrl).toBeNull();
     });
 
@@ -209,7 +209,7 @@ describe('StreamUrlService', () => {
         type: 'movie',
         title: '',
       };
-      expect(() => processResponse('s2', response)).toThrow(
+      expect(() => processResponse('s1', response)).toThrow(
         'Invalid S2 response',
       );
     });
