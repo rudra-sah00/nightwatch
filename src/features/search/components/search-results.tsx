@@ -136,17 +136,6 @@ const SearchResultItem = React.memo(function SearchResultItem({
             {result.year}
           </div>
         ) : null}
-
-        {/* Provider badge */}
-        {result.provider === 'pv' ? (
-          <div className="absolute bottom-2 left-2 bg-[#00a8e1] border-[1.5px] border-border px-1.5 py-0.5 font-headline font-black uppercase text-[8px] text-white tracking-wide">
-            Prime
-          </div>
-        ) : result.provider === 's1' ? (
-          <div className="absolute bottom-2 left-2 bg-[#e50914] border-[1.5px] border-border px-1.5 py-0.5 font-headline font-black uppercase text-[8px] text-white tracking-wide">
-            Netflix
-          </div>
-        ) : null}
       </div>
 
       {/* Title */}

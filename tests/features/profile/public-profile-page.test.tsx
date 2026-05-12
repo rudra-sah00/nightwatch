@@ -32,7 +32,7 @@ describe('PublicProfilePage (Server Component)', () => {
     profilePhoto: 'https://example.com/photo.jpg',
     createdAt: '2024-01-01T00:00:00.000Z',
     email: 'test@example.com',
-    preferredServer: 's1' as const,
+    preferredServer: 's2' as const,
     sessionId: 'mock-session-id',
     activity: [
       { date: '2024-01-01', watchSeconds: 3600 },

@@ -126,7 +126,7 @@ describe('useWatchParty', () => {
         hostId: 'user-1',
         contentId: 'c1',
         type: 'movie',
-        streamUrl: 's1',
+        streamUrl: 's2',
         members: [
           { id: 'user-1', name: 'Host', isHost: true, joinedAt: Date.now() },
         ],
@@ -155,7 +155,7 @@ describe('useWatchParty', () => {
           contentId: 'c1',
           title: 'Test Movie',
           type: 'movie',
-          streamUrl: 's1',
+          streamUrl: 's2',
           posterUrl: 'p1',
         });
       });
@@ -179,7 +179,7 @@ describe('useWatchParty', () => {
           contentId: 'c1',
           title: 'T',
           type: 'movie',
-          streamUrl: 's1',
+          streamUrl: 's2',
         });
       });
 

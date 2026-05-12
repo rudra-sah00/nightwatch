@@ -13,7 +13,7 @@ interface UsePlayerEngineOptions {
   dispatch: React.Dispatch<PlayerAction>;
   onStreamExpired?: () => void;
   qualities?: { quality: string; url: string }[];
-  providerId?: 's1' | 's2';
+  providerId?: 's2' | 's2';
   isLive?: boolean;
 }
 
@@ -59,7 +59,7 @@ export function usePlayerEngine({
     // Fall back to provider preference for streams without a clear extension
     const effectiveProvider = providerIdProp || activeServer;
     if (effectiveProvider === 's2') return 'mp4';
-    if (effectiveProvider === 's1') return 'hls';
+    if (effectiveProvider === 's2') return 'hls';
 
     return 'hls';
   }, [streamUrl, providerIdProp, activeServer, isLive]);

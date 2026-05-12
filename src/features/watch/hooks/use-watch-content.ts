@@ -34,7 +34,7 @@ export function useWatchContent() {
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
-    's1') as 's1' | 's2';
+    's2') as 's2' | 's2';
   const { setActiveServer } = useServer();
 
   useEffect(() => {

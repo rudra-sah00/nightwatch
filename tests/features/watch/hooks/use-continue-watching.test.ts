@@ -52,9 +52,9 @@ describe('useContinueWatching — race condition and stale response guards', () 
       return s1Items;
     });
 
-    let setServer: (s: 's1' | 's2') => void = () => {};
+    let setServer: (s: 's2' | 's2') => void = () => {};
     function ControlledWrapper({ children }: { children: React.ReactNode }) {
-      const [server, setS] = React.useState<'s1' | 's2'>('s1');
+      const [server, setS] = React.useState<'s2' | 's2'>('s2');
       setServer = setS;
       return React.createElement(ServerProvider, {
         defaultServer: server,
@@ -158,9 +158,9 @@ describe('useContinueWatching — race condition and stale response guards', () 
     );
 
     // Wrap with mutable server state
-    let setServer: (s: 's1' | 's2') => void = () => {};
+    let setServer: (s: 's2' | 's2') => void = () => {};
     function ControlledWrapper({ children }: { children: React.ReactNode }) {
-      const [server, setS] = React.useState<'s1' | 's2'>('s1');
+      const [server, setS] = React.useState<'s2' | 's2'>('s2');
       setServer = setS;
       return React.createElement(ServerProvider, {
         defaultServer: server,
@@ -227,7 +227,7 @@ describe('useContinueWatching — race condition and stale response guards', () 
 
     const { result } = renderHook(() => useContinueWatching({}), {
       wrapper: ({ children }) =>
-        React.createElement(ServerProvider, { defaultServer: 's1', children }),
+        React.createElement(ServerProvider, { defaultServer: 's2', children }),
     });
 
     await waitFor(() => {

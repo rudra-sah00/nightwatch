@@ -40,7 +40,7 @@ describe('Search API', () => {
         undefined,
       );
       expect(result).toEqual(
-        mockResults.map((r) => ({ ...r, provider: 's1' })),
+        mockResults.map((r) => ({ ...r, provider: 's2' })),
       );
     });
 

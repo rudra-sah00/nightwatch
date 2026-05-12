@@ -13,7 +13,7 @@ export const updateProfileSchema = z.object({
     .min(3, 'validation.usernameMinLength')
     .regex(/^\w+$/, 'validation.usernameFormat')
     .optional(),
-  preferredServer: z.enum(['s1', 's2']).optional(),
+  preferredServer: z.enum(['s2']).optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

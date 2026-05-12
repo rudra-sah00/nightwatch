@@ -43,15 +43,15 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       movieId: room.contentId,
       seriesId: room.type === 'series' ? room.contentId : undefined,
       posterUrl: room.posterUrl || '',
-      // Livestreams are always HLS — force 's1' so the player never falls back to
+      // Livestreams are always HLS — force 's2' so the player never falls back to
       // the user's activeServer preference ('s2'/MP4) and shows a blank screen.
       // For all other content, propagate the room's server so useWatchProgress
       // records progress with the correct providerId and useNextEpisode fetches
       // from the right API.
       providerId:
         room.type === 'livestream'
-          ? ('s1' as const)
-          : room.providerId || (room.contentId.startsWith('s2:') ? 's2' : 's1'),
+          ? ('s2' as const)
+          : room.providerId || (room.contentId.startsWith('s2:') ? 's2' : 's2'),
     }),
     [
       room.title,

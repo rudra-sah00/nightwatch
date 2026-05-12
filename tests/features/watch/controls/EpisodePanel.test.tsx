@@ -27,7 +27,7 @@ vi.mock('next/image', () => ({
 const mockEpisodes: Episode[] = [
   {
     episodeId: 'ep1',
-    seriesId: 's1',
+    seriesId: 's2',
     episodeNumber: 1,
     seasonNumber: 1,
     title: 'Pilot',
@@ -37,7 +37,7 @@ const mockEpisodes: Episode[] = [
   },
   {
     episodeId: 'ep2',
-    seriesId: 's1',
+    seriesId: 's2',
     episodeNumber: 2,
     seasonNumber: 1,
     title: 'Chapter Two',
@@ -46,7 +46,7 @@ const mockEpisodes: Episode[] = [
   },
   {
     episodeId: 'ep3',
-    seriesId: 's1',
+    seriesId: 's2',
     episodeNumber: 3,
     seasonNumber: 1,
     title: 'Chapter Three',
@@ -209,7 +209,7 @@ describe('EpisodePanel', () => {
       render(
         <EpisodePanel
           {...defaultProps}
-          seasons={[{ seasonNumber: 1, seasonId: 's1', episodeCount: 8 }]}
+          seasons={[{ seasonNumber: 1, seasonId: 's2', episodeCount: 8 }]}
         />,
       );
 
@@ -456,7 +456,7 @@ describe('EpisodePanel', () => {
       const noThumbEpisode: Episode[] = [
         {
           episodeId: 'ep-nothumb',
-          seriesId: 's1',
+          seriesId: 's2',
           episodeNumber: 1,
           thumbnailUrl: '',
           title: 'No Thumb',
@@ -466,7 +466,7 @@ describe('EpisodePanel', () => {
         <EpisodePanel
           {...defaultProps}
           episodes={noThumbEpisode}
-          seasons={[{ seasonNumber: 1, seasonId: 's1', episodeCount: 1 }]}
+          seasons={[{ seasonNumber: 1, seasonId: 's2', episodeCount: 1 }]}
         />,
       );
 

@@ -36,7 +36,7 @@ describe('WatchProgressService', () => {
         movieId: '123',
         type: 'movie',
         title: 'Test Movie',
-        providerId: 's1',
+        providerId: 's2',
         posterUrl: 'poster',
       };
 
@@ -56,7 +56,7 @@ describe('WatchProgressService', () => {
         season: 1,
         episode: 1,
         title: 'Show',
-        providerId: 's1',
+        providerId: 's2',
       };
 
       const payload = prepareProgressPayload(mockVideo, metadata, null);
@@ -78,7 +78,7 @@ describe('WatchProgressService', () => {
         title: 'Test Show',
         season: 1,
         episode: 1,
-        providerId: 's1',
+        providerId: 's2',
         posterUrl: 'poster',
       };
 
@@ -90,7 +90,7 @@ describe('WatchProgressService', () => {
         progressSeconds: 100,
         durationSeconds: 1000,
         episodeId: '1-1',
-        providerId: 's1',
+        providerId: 's2',
         progressDelta: 50,
       });
     });
@@ -101,7 +101,7 @@ describe('WatchProgressService', () => {
         seriesId: 'show1',
         type: 'series',
         title: 'Test Show',
-        providerId: 's1',
+        providerId: 's2',
       };
 
       const payload = prepareProgressPayload(mockVideo, metadata, null);

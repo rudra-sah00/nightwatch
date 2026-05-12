@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { createContext, use, useEffect, useState } from 'react';
 
-type ServerId = 's1' | 's2';
+type ServerId = 's2';
 
 interface ServerContextValue {
   activeServer: ServerId;
@@ -13,7 +13,6 @@ interface ServerContextValue {
 }
 
 const SERVER_LABEL_KEYS: Record<ServerId, string> = {
-  s1: 'server.netflix',
   s2: 'server.balanced',
 };
 

@@ -73,7 +73,7 @@ describe('useWatchPartyVideoArea', () => {
 
   it('returns empty initialAudioTracks for s1 room even if audioTracks populated', () => {
     const room = makeRoom({
-      providerId: 's1',
+      providerId: 's2',
       type: 'movie',
       audioTracks: S2_TRACKS,
     });
@@ -111,7 +111,7 @@ describe('useWatchPartyVideoArea', () => {
 
   it('returns undefined initialAudioTrackId for s1 rooms', () => {
     const room = makeRoom({
-      providerId: 's1',
+      providerId: 's2',
       type: 'movie',
       audioTracks: S2_TRACKS,
     });
@@ -145,7 +145,7 @@ describe('useWatchPartyVideoArea', () => {
       },
     ];
     const room = makeRoom({
-      providerId: 's1',
+      providerId: 's2',
       type: 'movie',
       audioTracks: directTracks,
     });
@@ -255,7 +255,7 @@ describe('useWatchPartyVideoArea', () => {
     const room = makeRoom({ providerId: 's2', type: 'livestream' });
     const { result } = renderHook(() => useWatchPartyVideoArea(room));
 
-    expect(result.current.metadata.providerId).toBe('s1');
+    expect(result.current.metadata.providerId).toBe('s2');
   });
 
   it('metadata providerId matches room.providerId for non-livestream s2 room', () => {
@@ -269,6 +269,6 @@ describe('useWatchPartyVideoArea', () => {
     const room = makeRoom({ providerId: undefined, type: 'movie' });
     const { result } = renderHook(() => useWatchPartyVideoArea(room));
 
-    expect(result.current.metadata.providerId).toBe('s1');
+    expect(result.current.metadata.providerId).toBe('s2');
   });
 });

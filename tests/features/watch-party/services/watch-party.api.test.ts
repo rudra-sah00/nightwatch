@@ -51,7 +51,7 @@ describe('Watch Party API Service (REST & RTM Bridge)', () => {
         title: 'T',
         type: 'movie',
         contentId: 'c1',
-        streamUrl: 's1',
+        streamUrl: 's2',
       } as PartyCreatePayload);
 
       expect(global.fetch).toHaveBeenCalledWith(

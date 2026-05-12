@@ -22,13 +22,13 @@ describe('Friends Types', () => {
   it('FriendRequest has required fields', () => {
     const req: FriendRequest = {
       id: 'r1',
-      senderId: 's1',
+      senderId: 's2',
       createdAt: '2026-01-01',
       name: 'Bob',
       username: null,
       profilePhoto: null,
     };
-    expect(req.senderId).toBe('s1');
+    expect(req.senderId).toBe('s2');
   });
 
   it('SentRequest has required fields', () => {

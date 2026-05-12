@@ -15,7 +15,7 @@ describe('User Type', () => {
       username: 'johndoe',
       email: 'john@example.com',
       profilePhoto: 'https://example.com/photo.jpg',
-      preferredServer: 's1' as 's1' | 's2',
+      preferredServer: 's2' as 's2' | 's2',
       sessionId: 'session-abc',
       createdAt: '2024-01-15T10:00:00Z',
     };
@@ -32,7 +32,7 @@ describe('User Type', () => {
       username: null,
       email: 'john@example.com',
       profilePhoto: null,
-      preferredServer: 's1' as 's1' | 's2',
+      preferredServer: 's2' as 's2' | 's2',
       sessionId: 'session-abc',
       createdAt: '2024-01-15T10:00:00Z',
     };
@@ -51,7 +51,7 @@ describe('LoginResponse Type', () => {
         username: 'johndoe',
         email: 'john@example.com',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'session-abc',
         createdAt: '2024-01-15T10:00:00Z',
       },

@@ -78,7 +78,7 @@ describe('Profile Schema', () => {
       const result = updateProfileSchema.safeParse({
         name: 'Test User',
         username: 'testuser',
-        preferredServer: 's1',
+        preferredServer: 's2',
       });
       expect(result.success).toBe(true);
     });
@@ -135,7 +135,7 @@ describe('Profile Schema', () => {
 
     it('should accept preferredServer s1, s2, and s3', () => {
       expect(
-        updateProfileSchema.safeParse({ preferredServer: 's1' }).success,
+        updateProfileSchema.safeParse({ preferredServer: 's2' }).success,
       ).toBe(true);
       expect(
         updateProfileSchema.safeParse({ preferredServer: 's2' }).success,

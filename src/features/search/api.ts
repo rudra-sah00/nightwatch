@@ -17,53 +17,7 @@ export async function searchContent(
   const cached = searchResultsCache.get(cacheKey);
   if (cached) return cached;
 
-  // When S1 (Netflix) is selected, search both S1 and PV (Prime Video) in parallel
-  if (!server || server === 's1') {
-    const [s1Results, pvResults] = await Promise.all([
-      apiFetch<{ results: SearchResult[] }>(
-        `/api/video/search?q=${encodeURIComponent(query)}&server=s1`,
-        options,
-      )
-        .then(({ results }) =>
-          results.map((r) => ({ ...r, provider: 's1' as const })),
-        )
-        .catch(() => [] as SearchResult[]),
-      apiFetch<{ results: SearchResult[] }>(
-        `/api/video/search?q=${encodeURIComponent(query)}&server=pv`,
-        options,
-      )
-        .then(({ results }) =>
-          results.map((r) => ({ ...r, provider: 'pv' as const })),
-        )
-        .catch(() => [] as SearchResult[]),
-    ]);
-    // Deduplicate by title, then sort by relevance to query
-    const seen = new Set<string>();
-    const all = [...s1Results, ...pvResults].filter((r) => {
-      const key = r.title.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    const q = query.toLowerCase().trim();
-    all.sort((a, b) => {
-      const aTitle = a.title.toLowerCase();
-      const bTitle = b.title.toLowerCase();
-      const aExact = aTitle === q ? 0 : 1;
-      const bExact = bTitle === q ? 0 : 1;
-      if (aExact !== bExact) return aExact - bExact;
-      const aStarts = aTitle.startsWith(q) ? 0 : 1;
-      const bStarts = bTitle.startsWith(q) ? 0 : 1;
-      if (aStarts !== bStarts) return aStarts - bStarts;
-      const aIncludes = aTitle.includes(q) ? 0 : 1;
-      const bIncludes = bTitle.includes(q) ? 0 : 1;
-      return aIncludes - bIncludes;
-    });
-    searchResultsCache.set(cacheKey, all);
-    return all;
-  }
-
-  const serverParam = `&server=${encodeURIComponent(server)}`;
+  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { results } = await apiFetch<{ results: SearchResult[] }>(
     `/api/video/search?q=${encodeURIComponent(query)}${serverParam}`,
     options,

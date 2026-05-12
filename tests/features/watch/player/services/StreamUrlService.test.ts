@@ -17,7 +17,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      const result = processResponse('s1', response);
+      const result = processResponse('s2', response);
 
       expect(result.streamUrl).toContain('/123');
     });
@@ -56,7 +56,7 @@ describe('StreamUrlService', () => {
         title: '',
       };
 
-      expect(() => processResponse('s1', response)).toThrow(
+      expect(() => processResponse('s2', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -70,7 +70,7 @@ describe('StreamUrlService', () => {
         title: 'Test',
       };
 
-      expect(() => processResponse('s1', response)).toThrow(
+      expect(() => processResponse('s2', response)).toThrow(
         'Invalid S1 response',
       );
     });
@@ -109,7 +109,7 @@ describe('StreamUrlService', () => {
   describe('extractTokenFromUrl', () => {
     it('should extract token from URL', () => {
       const url = '/api/stream/hls/xyz123/movie';
-      const result = processResponse('s1', {
+      const result = processResponse('s2', {
         success: true,
         masterPlaylistUrl: url,
         movieId: '1',

@@ -45,7 +45,7 @@ describe('useS2AudioTracks', () => {
 
   it('returns empty tracks for s1', () => {
     const { result } = renderHook(() =>
-      useS2AudioTracks({ ...BASE_PROPS, server: 's1' }),
+      useS2AudioTracks({ ...BASE_PROPS, server: 's2' }),
     );
     expect(result.current.audioTracks).toHaveLength(0);
   });

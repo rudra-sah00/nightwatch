@@ -81,7 +81,7 @@ export function removeFromContinueWatchingCache(
 // Fetch continue watching via HTTP (for SSR or fallback)
 export async function getContinueWatching(
   limit = 10,
-  server = 's1',
+  server = 's2',
   options?: RequestInit,
 ): Promise<WatchProgress[]> {
   const result = await apiFetch<{ items: WatchProgress[] }>(
@@ -94,7 +94,7 @@ export async function getContinueWatching(
 // Fetch continue watching via HTTP
 export async function fetchContinueWatching(
   limit = 10,
-  server = 's1',
+  server = 's2',
   callback?: (items: WatchProgress[] | null, error?: string) => void,
 ): Promise<WatchProgress[] | null> {
   try {
@@ -112,7 +112,7 @@ export async function fetchContinueWatching(
 // Delete progress via HTTP
 export async function deleteWatchProgress(
   progressId: string,
-  server = 's1',
+  server = 's2',
   callback?: (success: boolean) => void,
 ): Promise<boolean> {
   try {
@@ -180,14 +180,14 @@ export function setProgressCache(
   });
 }
 
-/** Infer the provider ('s1' or 's2') from a content/series ID prefix.
+/** Infer the provider ('s2' or 's2') from a content/series ID prefix.
  * Handles both decoded ('s2:...') and URL-encoded ('s2%3A...') IDs. */
-function inferProviderFromId(id: string): 's1' | 's2' {
+function inferProviderFromId(id: string): 's2' | 's2' {
   try {
     const decoded = decodeURIComponent(id);
-    return decoded.startsWith('s2:') ? 's2' : 's1';
+    return decoded.startsWith('s2:') ? 's2' : 's2';
   } catch {
-    return id.startsWith('s2:') ? 's2' : 's1';
+    return id.startsWith('s2:') ? 's2' : 's2';
   }
 }
 

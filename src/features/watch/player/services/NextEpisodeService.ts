@@ -144,7 +144,7 @@ export async function prepareNextEpisodeCommand(
   if (!seriesId) return null;
 
   stopVideo();
-  const server = serverOverride || metadata.providerId || 's1';
+  const server = serverOverride || metadata.providerId || 's2';
 
   const response = await playVideo({
     type: 'series',

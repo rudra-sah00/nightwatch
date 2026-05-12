@@ -47,7 +47,7 @@ describe('useFriends', () => {
   const mockPending = [
     {
       id: 'r1',
-      senderId: 's1',
+      senderId: 's2',
       createdAt: '2026-01-01',
       name: 'Carol',
       username: 'carol',

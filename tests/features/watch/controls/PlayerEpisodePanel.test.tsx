@@ -80,7 +80,7 @@ const mockPanel = {
     },
   ],
   seasons: [
-    { seasonNumber: 1, seasonId: 's1', episodeCount: 8 },
+    { seasonNumber: 1, seasonId: 's2', episodeCount: 8 },
     { seasonNumber: 2, seasonId: 's2', episodeCount: 9 },
   ],
   selectedSeason: 1,

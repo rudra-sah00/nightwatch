@@ -21,7 +21,7 @@ import {
 } from '@/features/watch/player/hooks/series-cache';
 
 const mockShowDetails = {
-  id: 's1',
+  id: 's2',
   title: 'Test Show',
   contentType: 'series' as const,
   seasons: [
@@ -36,14 +36,14 @@ const mockShowDetails = {
 const mockEpisodes = [
   {
     episodeId: 'ep1',
-    seriesId: 's1',
+    seriesId: 's2',
     episodeNumber: 1,
     title: 'Pilot',
     thumbnailUrl: 'https://img.example.com/ep1.jpg',
   },
   {
     episodeId: 'ep2',
-    seriesId: 's1',
+    seriesId: 's2',
     episodeNumber: 2,
     title: 'Chapter Two',
     thumbnailUrl: 'https://img.example.com/ep2.jpg',
@@ -52,7 +52,7 @@ const mockEpisodes = [
 
 describe('useEpisodePanel', () => {
   const defaultOptions = {
-    seriesId: 's1',
+    seriesId: 's2',
     currentSeason: 1,
     currentEpisode: 1,
     isSeriesContent: true,
@@ -152,8 +152,8 @@ describe('useEpisodePanel', () => {
       });
 
       await waitFor(() => {
-        expect(getShowDetails).toHaveBeenCalledWith('s1');
-        expect(getSeriesEpisodes).toHaveBeenCalledWith('s1', 'season-1');
+        expect(getShowDetails).toHaveBeenCalledWith('s2');
+        expect(getSeriesEpisodes).toHaveBeenCalledWith('s2', 'season-1');
       });
     });
   });
@@ -269,7 +269,7 @@ describe('useEpisodePanel', () => {
 
       await waitFor(() => {
         expect(cacheSeriesData).toHaveBeenCalledWith(
-          's1',
+          's2',
           mockShowDetails,
           1,
           mockEpisodes,
@@ -333,7 +333,7 @@ describe('useEpisodePanel', () => {
       });
 
       await waitFor(() => {
-        expect(getSeriesEpisodes).toHaveBeenCalledWith('s1', 'season-2');
+        expect(getSeriesEpisodes).toHaveBeenCalledWith('s2', 'season-2');
       });
     });
   });

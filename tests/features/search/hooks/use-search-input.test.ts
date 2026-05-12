@@ -182,7 +182,7 @@ describe('useSearchInput', () => {
   it('does NOT fetch suggestions on s1 server', async () => {
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
-      activeServer: 's1',
+      activeServer: 's2',
       serverLabel: 'Netflix',
       setActiveServer: vi.fn(),
     });

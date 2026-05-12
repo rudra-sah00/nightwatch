@@ -13,7 +13,7 @@ const mockUser: User = {
   name: 'Test User',
   username: 'testuser',
   profilePhoto: null,
-  preferredServer: 's1' as 's1' | 's2',
+  preferredServer: 's2' as 's2' | 's2',
   sessionId: 'session-123',
   createdAt: new Date().toISOString(),
 };
@@ -187,7 +187,7 @@ describe('UpdateProfileForm', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith({
           name: 'New Name',
-          preferredServer: 's1',
+          preferredServer: 's2',
           username: 'testuser',
         });
       });
@@ -263,7 +263,7 @@ describe('UpdateProfileForm', () => {
       const noUsernameUser: User = {
         ...mockUser,
         username: null as unknown as string,
-        preferredServer: 's1',
+        preferredServer: 's2',
       };
       vi.mocked(useAuth).mockReturnValue({
         user: noUsernameUser,

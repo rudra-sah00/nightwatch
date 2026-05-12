@@ -142,7 +142,7 @@ describe('DownloadMenu', () => {
       render(
         <DownloadMenu
           show={s2SeriesShow}
-          selectedSeason={{ seasonNumber: 1, seasonId: 's1', episodeCount: 2 }}
+          selectedSeason={{ seasonNumber: 1, seasonId: 's2', episodeCount: 2 }}
           episodes={mockEpisodes}
         />,
       );
@@ -245,7 +245,7 @@ describe('DownloadMenu', () => {
       render(
         <DownloadMenu
           show={s2SeriesShow}
-          selectedSeason={{ seasonNumber: 1, seasonId: 's1', episodeCount: 2 }}
+          selectedSeason={{ seasonNumber: 1, seasonId: 's2', episodeCount: 2 }}
           episodes={mockEpisodes}
         />,
       );
@@ -296,7 +296,7 @@ describe('DownloadMenu', () => {
       render(
         <DownloadMenu
           show={s2SeriesShow}
-          selectedSeason={{ seasonNumber: 1, seasonId: 's1', episodeCount: 2 }}
+          selectedSeason={{ seasonNumber: 1, seasonId: 's2', episodeCount: 2 }}
           episodes={[mockEpisodes[0]]}
         />,
       );
@@ -333,7 +333,7 @@ describe('DownloadMenu', () => {
       render(
         <DownloadMenu
           show={s2SeriesShow}
-          selectedSeason={{ seasonNumber: 1, seasonId: 's1', episodeCount: 2 }}
+          selectedSeason={{ seasonNumber: 1, seasonId: 's2', episodeCount: 2 }}
           episodes={[mockEpisodes[0]]}
         />,
       );

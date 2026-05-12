@@ -32,7 +32,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -52,7 +52,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -72,7 +72,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -98,7 +98,7 @@ describe('Profile API', () => {
         name: 'Updated Name',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -122,7 +122,7 @@ describe('Profile API', () => {
         name: 'Updated Name',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -146,7 +146,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -311,7 +311,7 @@ describe('Profile API', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's2',
+        preferredServer: 's2' as 's2' | 's2',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
