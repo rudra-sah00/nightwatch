@@ -355,68 +355,8 @@ export function UpdateProfileForm() {
         </Button>
       </section>
 
-      {/* Server Selection */}
-      <section className="bg-card border border-border rounded-xl shadow-sm p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            {t('serverSelection.title')}
-          </h2>
-          {profileForm.isPending && (
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          )}
-        </div>
-        <div
-          role="radiogroup"
-          aria-label={t('serverSelection.ariaLabel')}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          {[
-            {
-              id: 's1' as const,
-              label: 'Server 2',
-              sub: t('serverSelection.standard'),
-            },
-            {
-              id: 's1' as const,
-              label: t('serverSelection.balanced'),
-              sub: t('serverSelection.performance'),
-            },
-          ].map((s) => {
-            const isSelected = profileForm.preferredServer === s.id;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
-                onClick={() => {
-                  profileForm.setPreferredServer(s.id);
-                  // Immediate save for server selection
-                  setTimeout(() => profileFormRef.current?.requestSubmit(), 0);
-                }}
-                className={cn(
-                  'flex flex-col items-start gap-1 p-6 border rounded-lg transition-[background-color,border-color,color,box-shadow] text-left w-full shadow-sm cursor-pointer',
-                  isSelected
-                    ? 'bg-primary text-primary-foreground border-primary ring-2 ring-primary ring-offset-2 ring-offset-background'
-                    : 'bg-card text-card-foreground border-border hover:border-primary/50 hover:bg-accent hover:text-accent-foreground hover:shadow-md',
-                )}
-              >
-                <span className="font-bold text-xl font-headline uppercase tracking-tight">
-                  {s.label}
-                </span>
-                <span className="text-sm uppercase opacity-90 font-medium tracking-wide">
-                  {s.sub}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <input
-          type="hidden"
-          name="preferredServer"
-          value={profileForm.preferredServer}
-        />
-      </section>
+      {/* Server is fixed to s1 - no selection needed */}
+      <input type="hidden" name="preferredServer" value="s1" />
 
       {/* Danger Zone */}
       <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">
