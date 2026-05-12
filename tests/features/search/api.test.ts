@@ -23,7 +23,7 @@ describe('Search API', () => {
         { id: '2', title: 'Movie 2', type: 'movie' },
       ];
 
-      // S1 path fires two parallel calls (s1 + pv)
+      // Default search path
       vi.mocked(apiFetch)
         .mockResolvedValueOnce({ results: mockResults })
         .mockResolvedValueOnce({ results: [] });
@@ -32,7 +32,7 @@ describe('Search API', () => {
 
       expect(apiFetch).toHaveBeenCalledTimes(2);
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test%20query&server=s1',
+        '/api/video/search?q=test%20query&server=s2',
         undefined,
       );
       expect(apiFetch).toHaveBeenCalledWith(
@@ -53,7 +53,7 @@ describe('Search API', () => {
       await searchContent('test', undefined, options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/video/search?q=test&server=s1',
+        '/api/video/search?q=test&server=s2',
         options,
       );
       expect(apiFetch).toHaveBeenCalledWith(
@@ -62,7 +62,7 @@ describe('Search API', () => {
       );
     });
 
-    it('should use single call for non-s1 servers', async () => {
+    it('should use single call for search', async () => {
       vi.mocked(apiFetch).mockResolvedValueOnce({ results: [] });
 
       await searchContent('test', 's2');
@@ -207,7 +207,7 @@ describe('Search API', () => {
       }
 
       // searchContent should have been called 110 times (no caching across different keys)
-      // Each S1 call fires 2 apiFetch calls (s1 + pv in parallel)
+      // Each search fires 1 apiFetch call
       expect(apiFetch).toHaveBeenCalledTimes(220);
     });
   });

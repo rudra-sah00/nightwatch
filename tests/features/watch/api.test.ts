@@ -145,7 +145,7 @@ describe('Watch API', () => {
       const result = await getContinueWatching();
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10&server=s1',
+        '/api/watch/continue-watching?limit=10&server=s2',
         undefined,
       );
       expect(result).toEqual(mockItems);
@@ -157,7 +157,7 @@ describe('Watch API', () => {
       await getContinueWatching(20);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=20&server=s1',
+        '/api/watch/continue-watching?limit=20&server=s2',
         undefined,
       );
     });
@@ -169,7 +169,7 @@ describe('Watch API', () => {
       await getContinueWatching(10, 's2', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/continue-watching?limit=10&server=s1',
+        '/api/watch/continue-watching?limit=10&server=s2',
         options,
       );
     });
@@ -223,7 +223,7 @@ describe('Watch API', () => {
       const result = await getContentProgress('content-123');
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123?server=s1',
+        '/api/watch/progress/content-123?server=s2',
         undefined,
       );
       expect(result).toEqual(mockProgress);
@@ -252,7 +252,7 @@ describe('Watch API', () => {
       await getContentProgress('content-123', options);
 
       expect(apiFetch).toHaveBeenCalledWith(
-        '/api/watch/progress/content-123?server=s1',
+        '/api/watch/progress/content-123?server=s2',
         options,
       );
     });
@@ -393,7 +393,7 @@ describe('Watch API', () => {
 
         fetchContentProgress('content-123', (progress, hasProgress) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/progress/content-123?server=s1',
+            '/api/watch/progress/content-123?server=s2',
             undefined,
           );
           expect(progress).toEqual(mockProgress);
@@ -437,7 +437,7 @@ describe('Watch API', () => {
 
         fetchContinueWatching(10, 's2', (result) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/continue-watching?limit=10&server=s1',
+            '/api/watch/continue-watching?limit=10&server=s2',
             undefined,
           );
           expect(result).toEqual(mockItems);
@@ -466,7 +466,7 @@ describe('Watch API', () => {
 
         deleteWatchProgress('progress-123', 's2', (success) => {
           expect(apiFetch).toHaveBeenCalledWith(
-            '/api/watch/progress/progress-123?server=s1',
+            '/api/watch/progress/progress-123?server=s2',
             { method: 'DELETE' },
           );
           expect(success).toBe(true);

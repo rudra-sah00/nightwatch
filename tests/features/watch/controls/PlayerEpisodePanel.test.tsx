@@ -20,7 +20,7 @@ const mockPlayerContext = {
     episode: 2,
     posterUrl: 'https://img.example.com/poster.jpg',
     year: '2016',
-    providerId: 'server1',
+    providerId: 's2',
   },
   onNavigate: vi.fn(),
   playerHandlers: {

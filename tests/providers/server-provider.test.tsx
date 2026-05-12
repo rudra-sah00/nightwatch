@@ -36,7 +36,7 @@ describe('ServerProvider / useServer', () => {
       ),
     });
     expect(result.current.activeServer).toBe('s2');
-    expect(result.current.serverLabel).toBe('server.netflix');
+    expect(result.current.serverLabel).toBe('server.s2');
   });
 
   it('setActiveServer updates active server and label', () => {

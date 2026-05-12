@@ -183,7 +183,7 @@ describe('useSearchInput', () => {
     const { useServer } = await import('@/providers/server-provider');
     vi.mocked(useServer).mockReturnValue({
       activeServer: 's2',
-      serverLabel: 'Netflix',
+      serverLabel: 'Server 2',
       setActiveServer: vi.fn(),
     });
 
