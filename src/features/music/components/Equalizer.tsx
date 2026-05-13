@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { EQ_PRESETS, type EqualizerBand } from '../engine/audio-engine';
 
@@ -45,15 +45,22 @@ export function Equalizer({ onClose }: { onClose: () => void }) {
 
   const applyBands = (newBands: EqualizerBand[]) => {
     if (isRemoteControlling) {
-      window.dispatchEvent(
-        new CustomEvent('music:remote-command', {
-          detail: { command: 'eq', value: newBands },
-        }),
-      );
+      // Throttle remote EQ commands to avoid flooding socket during slider drag
+      if (remoteEqTimerRef.current) clearTimeout(remoteEqTimerRef.current);
+      remoteEqTimerRef.current = setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent('music:remote-command', {
+            detail: { command: 'eq', value: newBands },
+          }),
+        );
+        remoteEqTimerRef.current = null;
+      }, 150);
     } else {
       setEqBands(newBands);
     }
   };
+
+  const remoteEqTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const applyPreset = (name: string) => {
     handleInit();

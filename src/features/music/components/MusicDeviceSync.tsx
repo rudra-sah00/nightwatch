@@ -132,10 +132,18 @@ export function MusicDeviceSync() {
     const onConnect = () => {
       socket.emit('music:request_devices');
       socket.emit('music:request_state');
-      // Clear stale remote state on reconnect (issue 15)
+      // Don't clear remote state on reconnect — let the state_update response
+      // confirm or deny. Only clear if no response arrives within 10s.
       if (remoteSourceRef.current) {
-        remoteSourceRef.current = null;
-        setRemoteControlling(false);
+        const staleSource = remoteSourceRef.current;
+        setTimeout(() => {
+          // If remoteSourceRef hasn't been updated (no state_update received),
+          // the remote device is likely gone
+          if (remoteSourceRef.current === staleSource) {
+            remoteSourceRef.current = null;
+            setRemoteControlling(false);
+          }
+        }, 10000);
       }
     };
 
@@ -175,7 +183,11 @@ export function MusicDeviceSync() {
   useEffect(() => {
     if (!socket?.connected) return;
     const track = currentTrackRef.current;
-    if (!track || !isPlayingRef.current) return;
+    if (!track || !isPlayingRef.current) {
+      // Reset so replaying the same track after stop still broadcasts
+      if (!track) prevTrackIdRef.current = null;
+      return;
+    }
     if (prevTrackIdRef.current === track.id) return;
     prevTrackIdRef.current = track.id;
 
@@ -277,6 +289,39 @@ export function MusicDeviceSync() {
 
   // ─── 6. Auto-sync: pick up what's playing on other devices on page load ─
 
+  // Guard: when reclaiming playback, block auto-sync until local playback starts.
+  // playTrack is async (fetches stream URL), so isPlayingRef.current may still be
+  // false when the next state_update arrives from the other device.
+  const reclaimingRef = useRef(false);
+  const reclaimTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const onReclaim = () => {
+      reclaimingRef.current = true;
+      // Fallback: clear after 10s if playback never starts (e.g. stream error)
+      if (reclaimTimeoutRef.current) clearTimeout(reclaimTimeoutRef.current);
+      reclaimTimeoutRef.current = setTimeout(() => {
+        reclaimingRef.current = false;
+        reclaimTimeoutRef.current = null;
+      }, 10000);
+    };
+    // Clear the guard once local playback actually starts
+    const onPlaying = () => {
+      reclaimingRef.current = false;
+      if (reclaimTimeoutRef.current) {
+        clearTimeout(reclaimTimeoutRef.current);
+        reclaimTimeoutRef.current = null;
+      }
+    };
+    window.addEventListener('music:reclaim-started', onReclaim);
+    window.addEventListener('music:transfer-playing', onPlaying);
+    return () => {
+      window.removeEventListener('music:reclaim-started', onReclaim);
+      window.removeEventListener('music:transfer-playing', onPlaying);
+      if (reclaimTimeoutRef.current) clearTimeout(reclaimTimeoutRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -289,8 +334,9 @@ export function MusicDeviceSync() {
       queue?: import('../api').MusicTrack[];
     }) => {
       if (data.socketId === socket.id) return;
-      // Only auto-sync if we're not playing locally
+      // Block auto-sync if we're playing locally OR reclaiming (playTrack in progress)
       if (currentTrackRef.current && isPlayingRef.current) return;
+      if (reclaimingRef.current) return;
 
       // Target fully stopped (no track) — clear remote state
       if (!data.track && remoteSourceRef.current === data.socketId) {
@@ -333,6 +379,7 @@ export function MusicDeviceSync() {
       if (!availableRef.current) return;
       window.dispatchEvent(new CustomEvent('music:transfer-received'));
       setRemoteControlling(false);
+      reclaimingRef.current = true;
       // Use startAt parameter for reliable seek after load
       play(
         data.track,
@@ -343,14 +390,14 @@ export function MusicDeviceSync() {
       if (!data.isPlaying) {
         const onPlaying = () => {
           window.removeEventListener('music:transfer-playing', onPlaying);
-          // Delay to let React state propagate (isPlaying: true) before toggling
-          requestAnimationFrame(() => togglePlay());
+          // Small delay ensures engine state is settled before toggling
+          setTimeout(() => togglePlay(), 50);
         };
         window.addEventListener('music:transfer-playing', onPlaying);
-        // Fallback: if event never fires (e.g. stream error), clean up after 8s
+        // Fallback: if event never fires (e.g. stream error), clean up after 10s
         setTimeout(() => {
           window.removeEventListener('music:transfer-playing', onPlaying);
-        }, 8000);
+        }, 10000);
       }
     };
 
@@ -361,22 +408,24 @@ export function MusicDeviceSync() {
   }, [socket, play, togglePlay, setRemoteControlling]);
 
   // ─── 7. Forward remote commands to the source device ───────────
-  // When auto-synced (no explicit activeTarget in useMusicDevices),
-  // the FullPlayer/MiniPlayer dispatch 'music:remote-command' events.
-  // Forward them directly via socket to the tracked remote source.
+  // Single command router: handles BOTH auto-synced (remoteSourceRef) and
+  // explicit target (sessionStorage) cases. MusicDevicePicker no longer
+  // has its own listener — all routing goes through here.
 
   useEffect(() => {
     if (!socket) return;
 
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      const target = remoteSourceRef.current;
-      if (!target) return;
-      // Skip if MusicDevicePicker has an explicit activeTarget (it handles commands itself)
-      if (sessionStorage.getItem('nightwatch:music-active-target')) return;
-
       const command = typeof detail === 'string' ? detail : detail?.command;
       const value = typeof detail === 'object' ? detail?.value : undefined;
+
+      // Determine target: explicit target takes priority over auto-synced source
+      const explicitTarget = sessionStorage.getItem(
+        'nightwatch:music-active-target',
+      );
+      const target = explicitTarget || remoteSourceRef.current;
+      if (!target) return;
 
       socket.emit('music:command', {
         targetSocketId: target,

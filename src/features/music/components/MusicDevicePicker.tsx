@@ -55,6 +55,8 @@ export function MusicDevicePicker() {
     prev,
     togglePlay,
     setVolume,
+    toggleShuffle,
+    cycleRepeat,
     initEqualizer,
     setEqBands,
     setRemoteControlling,
@@ -112,6 +114,12 @@ export function MusicDevicePicker() {
         case 'stop':
           stop();
           break;
+        case 'toggle_shuffle':
+          toggleShuffle();
+          break;
+        case 'cycle_repeat':
+          cycleRepeat();
+          break;
       }
     });
   }, [
@@ -122,6 +130,8 @@ export function MusicDevicePicker() {
     seek,
     stop,
     setVolume,
+    toggleShuffle,
+    cycleRepeat,
     initEqualizer,
     setEqBands,
     play,
@@ -135,38 +145,38 @@ export function MusicDevicePicker() {
     });
   }, [setOnTransfer, t]);
 
-  // Forward remote commands from MiniPlayer to the target device
+  // Handle reclaim-playback: stop remote and start playing locally
   useEffect(() => {
-    const handler = (e: Event) => {
-      if (!activeTarget) return;
-      const detail = (e as CustomEvent).detail;
-      const cmd = typeof detail === 'string' ? detail : detail?.command;
-      const value = typeof detail === 'object' ? detail?.value : undefined;
-      if (cmd === 'stop') {
-        const trackToPlay = remoteState.track;
-        const prog = remoteProgressRef.current;
-        sendCommand('stop'); // Stop playback on target device
-        if (trackToPlay) {
-          play(
-            trackToPlay,
-            remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
-            prog > 0 ? prog : undefined,
-          );
-        }
-        reclaimPlayback();
-        setRemoteControlling(false);
-      } else {
-        sendCommand(cmd, value);
+    const handler = () => {
+      const target = activeTarget;
+      const trackToPlay = remoteState.track;
+      const prog = remoteProgressRef.current;
+      const q =
+        remoteState.queue.length > 0
+          ? remoteState.queue
+          : remoteQueue.length > 0
+            ? remoteQueue
+            : trackToPlay
+              ? [trackToPlay]
+              : [];
+      if (target) sendCommand('stop');
+      // Signal reclaim so auto-sync doesn't re-enter remote mode
+      window.dispatchEvent(new CustomEvent('music:reclaim-started'));
+      if (trackToPlay) {
+        play(trackToPlay, q, prog > 0 ? prog : undefined);
       }
+      reclaimPlayback();
+      setRemoteControlling(false);
     };
-    window.addEventListener('music:remote-command', handler);
-    return () => window.removeEventListener('music:remote-command', handler);
+    window.addEventListener('music:reclaim-playback', handler);
+    return () => window.removeEventListener('music:reclaim-playback', handler);
   }, [
     activeTarget,
     sendCommand,
     reclaimPlayback,
     setRemoteControlling,
     remoteState.track,
+    remoteState.queue,
     play,
     remoteQueue,
   ]);
@@ -205,11 +215,16 @@ export function MusicDevicePicker() {
   // Target went offline — only act after initial device discovery settles
   const initialLoadRef = useRef(true);
   useEffect(() => {
-    // Skip until devices have been discovered (at least one response received)
+    // Wait 5s after mount before enabling offline detection to allow all devices to respond
     if (initialLoadRef.current) {
-      if (devices.length > 0) initialLoadRef.current = false;
-      return;
+      const timer = setTimeout(() => {
+        initialLoadRef.current = false;
+      }, 5000);
+      return () => clearTimeout(timer);
     }
+  }, []);
+  useEffect(() => {
+    if (initialLoadRef.current) return;
     if (activeTarget && !devices.find((d) => d.socketId === activeTarget)) {
       reclaimPlayback();
       setRemoteControlling(false);
@@ -317,11 +332,20 @@ export function MusicDevicePicker() {
                     const prog = isControlling
                       ? remoteProgressRef.current
                       : player.remoteProgress;
+                    const q = isControlling
+                      ? remoteState.queue.length > 0
+                        ? remoteState.queue
+                        : remoteQueue
+                      : remoteQueue;
                     if (isControlling) sendCommand('stop');
+                    // Signal reclaim so auto-sync doesn't re-enter remote mode
+                    window.dispatchEvent(
+                      new CustomEvent('music:reclaim-started'),
+                    );
                     if (trackToPlay) {
                       play(
                         trackToPlay,
-                        remoteQueue.length > 0 ? remoteQueue : [trackToPlay],
+                        q.length > 0 ? q : [trackToPlay],
                         prog > 0 ? prog : undefined,
                       );
                     }

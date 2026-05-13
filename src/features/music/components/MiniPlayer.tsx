@@ -272,9 +272,7 @@ export function MiniPlayer() {
             type="button"
             onClick={() => {
               if (isRemoteControlling) {
-                window.dispatchEvent(
-                  new CustomEvent('music:remote-command', { detail: 'stop' }),
-                );
+                window.dispatchEvent(new CustomEvent('music:reclaim-playback'));
               } else {
                 stop();
               }
@@ -287,7 +285,17 @@ export function MiniPlayer() {
             <>
               <button
                 type="button"
-                onClick={() => setVolume(volume > 0 ? 0 : 1)}
+                onClick={() => {
+                  const v = volume > 0 ? 0 : 1;
+                  setVolume(v);
+                  if (isRemoteControlling) {
+                    window.dispatchEvent(
+                      new CustomEvent('music:remote-command', {
+                        detail: { command: 'volume', value: v },
+                      }),
+                    );
+                  }
+                }}
                 className="p-1.5 text-foreground/20 hover:text-foreground transition-colors"
               >
                 {volume === 0 ? (
@@ -302,7 +310,17 @@ export function MiniPlayer() {
                 max={1}
                 step={0.01}
                 value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setVolume(v);
+                  if (isRemoteControlling) {
+                    window.dispatchEvent(
+                      new CustomEvent('music:remote-command', {
+                        detail: { command: 'volume', value: v },
+                      }),
+                    );
+                  }
+                }}
                 className="w-16 h-1 accent-neo-yellow cursor-pointer"
               />
             </>

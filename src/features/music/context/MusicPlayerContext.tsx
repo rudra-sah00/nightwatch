@@ -464,6 +464,10 @@ export function MusicPlayerProvider({
     );
   }, []);
   const stop = useCallback(() => {
+    // Restore volume before stopping if currently ducked
+    if (duckVolRef.current >= 0) {
+      engineRef.current?.setVolume(duckVolRef.current);
+    }
     engineRef.current?.stop();
     duckVolRef.current = -1;
     setExpanded(false);

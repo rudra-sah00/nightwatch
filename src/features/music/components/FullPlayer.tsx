@@ -304,8 +304,26 @@ export function FullPlayer() {
       onNext={handleNext}
       onPrev={handlePrev}
       onSeek={handleSeek}
-      onToggleShuffle={toggleShuffle}
-      onCycleRepeat={cycleRepeat}
+      onToggleShuffle={
+        isRemoteControlling
+          ? () =>
+              window.dispatchEvent(
+                new CustomEvent('music:remote-command', {
+                  detail: 'toggle_shuffle',
+                }),
+              )
+          : toggleShuffle
+      }
+      onCycleRepeat={
+        isRemoteControlling
+          ? () =>
+              window.dispatchEvent(
+                new CustomEvent('music:remote-command', {
+                  detail: 'cycle_repeat',
+                }),
+              )
+          : cycleRepeat
+      }
       onSetVolume={handleSetVolume}
       onPlay={
         isRemoteControlling

@@ -18,6 +18,7 @@ export interface RemoteMusicState {
   isPlaying: boolean;
   progress: number;
   duration: number;
+  queue: MusicTrack[];
 }
 
 interface TransferPayload {
@@ -94,6 +95,7 @@ export function useMusicDevices(
     isPlaying: false,
     progress: 0,
     duration: 0,
+    queue: [],
   });
 
   // ─── Listen for other devices (advertising handled by MusicDeviceSync) ─
@@ -180,6 +182,7 @@ export function useMusicDevices(
           isPlaying: data.isPlaying,
           progress: data.progress,
           duration: data.duration,
+          queue: data.queue ?? [],
         });
       }
     };
@@ -283,15 +286,38 @@ export function useMusicDevices(
       command,
       value,
     });
-    // Optimistic update
-    if (command === 'toggle_play') {
-      setRemoteState((s) => ({ ...s, isPlaying: !s.isPlaying }));
+    // Optimistic updates for responsive UI (state_update confirms within 5s)
+    switch (command) {
+      case 'toggle_play':
+        setRemoteState((s) => ({ ...s, isPlaying: !s.isPlaying }));
+        break;
+      case 'next':
+        setRemoteState((s) => ({ ...s, isPlaying: true, progress: 0 }));
+        break;
+      case 'prev':
+        setRemoteState((s) => ({ ...s, isPlaying: true, progress: 0 }));
+        break;
+      case 'seek':
+        if (typeof value === 'number')
+          setRemoteState((s) => ({ ...s, progress: value }));
+        break;
+      case 'volume':
+        // Volume is local state — no remote state to update
+        break;
     }
+    // Request immediate state confirmation from target
+    socket.emit('music:request_state');
   };
 
   const reclaimPlayback = () => {
     setActiveTarget(null);
-    setRemoteState({ track: null, isPlaying: false, progress: 0, duration: 0 });
+    setRemoteState({
+      track: null,
+      isPlaying: false,
+      progress: 0,
+      duration: 0,
+      queue: [],
+    });
   };
 
   return {

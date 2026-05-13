@@ -154,32 +154,101 @@ User taps device picker
 Selects "Desktop App" ──────→      music:transfer_playback ──────→ Receives track + queue + position
 Local stop() called                                                Calls play(track, queue) + seek(pos)
 
-                              ←── music:state_update ←────────────  Broadcasts state every render
-MiniPlayer shows remote state                                       (track, isPlaying, progress, duration)
+                              ←── music:state_update ←────────────  Broadcasts state every 5s
+MiniPlayer shows remote state                                       (track, isPlaying, progress, duration, queue)
 
-User taps play/pause ────────→     music:command ─────────────────→ Executes togglePlay/next/prev/seek
+User taps play/pause ────────→     music:command ─────────────────→ Executes togglePlay/next/prev/seek/volume/eq
+                                                               ←── Immediate state_update response
 ```
 
 ### Socket Events
 
 | Event | Direction | Payload |
 |-------|-----------|---------|
-| `music:device_online` | All → All | `{ socketId, deviceName, isPlaying, available }` |
+| `music:device_online` | All → All | `{ socketId, deviceId, deviceName, isPlaying, available }` |
 | `music:device_offline` | All → All | `{ socketId }` |
 | `music:transfer_playback` | Source → Target | `{ targetSocketId, track, queue, progress, isPlaying }` |
 | `music:state_update` | Player → All | `{ socketId, track, isPlaying, progress, duration, queue }` |
 | `music:command` | Controller → Player | `{ targetSocketId, command, value? }` |
 | `music:request_devices` | Any → All | `{}` (triggers re-advertise + Redis cache response) |
 | `music:request_state` | Any → All | `{}` (playing device responds with state_update) |
-| `music:playback_started` | Player → All | `{ socketId, deviceName, track, isPlaying, progress, duration }` |
+| `music:playback_started` | Player → All | `{ socketId, deviceId, deviceName, track, isPlaying, progress, duration }` |
 | `music:record_time` | Client → Server | `{ seconds, date, forceFlush? }` (listen time tracking) |
+
+### Commands
+
+| Command | Value | Effect |
+|---------|-------|--------|
+| `toggle_play` | — | Toggle play/pause |
+| `next` | — | Skip to next track |
+| `prev` | — | Previous track (or restart if >3s elapsed) |
+| `seek` | `number` (0–100%) | Seek to percentage position |
+| `volume` | `number` (0–1) | Set volume on target device |
+| `stop` | — | Stop playback on target |
+| `toggle_shuffle` | — | Toggle shuffle mode |
+| `cycle_repeat` | — | Cycle repeat: off → all → one → off |
+| `play_track` | `MusicTrack` | Play a specific track from queue |
+| `eq` | `EqualizerBand[]` | Set equalizer bands on target |
+
+### Command Routing
+
+All remote commands flow through a **single router** in `MusicDeviceSync` (section 7). UI components dispatch `music:remote-command` custom events; the router determines the target and forwards via socket:
+
+```
+UI (MiniPlayer, FullPlayer, Shortcuts, MediaSession)
+  │
+  ▼ window.dispatchEvent('music:remote-command', { command, value })
+  │
+MusicDeviceSync (single router)
+  │ Determines target:
+  │   1. Explicit target (sessionStorage 'nightwatch:music-active-target')
+  │   2. Auto-synced source (remoteSourceRef from state_update)
+  │
+  ▼ socket.emit('music:command', { targetSocketId, command, value })
+  │
+Target Device (MusicDevicePicker's setOnCommand handler)
+  │ Executes: togglePlay/next/prev/seek/setVolume/toggleShuffle/cycleRepeat/setEqBands
+  │
+  ▼ Immediate state_update broadcast (+ regular 5s interval)
+```
+
+Reclaim (bringing playback back to this device) uses a separate `music:reclaim-playback` event to avoid conflicts with the command router.
 
 ### Components
 
-- **`MusicDeviceSync`** (headless, in layout): Advertises this device globally on every page. Heartbeats every 60s. Emits `device_offline` on unmount/disconnect.
-- **`MusicDevicePicker`** (in MiniPlayer): Center modal showing all online devices. Handles transfer, remote state display, and remote controls (play/pause/next/prev).
+- **`MusicDeviceSync`** (headless, in layout): Advertises this device globally on every page. Heartbeats every 60s. Emits `device_offline` on unmount/disconnect. Single command router for all remote commands. Handles auto-sync, transfer reception, and reclaim guards.
+- **`MusicDevicePicker`** (in MiniPlayer): Center modal showing all online devices. Handles transfer, reclaim, remote state display, and incoming command execution.
+- **`MusicMediaSession`** (headless): Syncs track metadata and playback controls to the OS Media Session API. When remote controlling, shows remote track info and forwards media key actions as remote commands.
 - **Availability**: Devices on `/watch/`, `/live/`, or `/watch-party/` routes advertise `available: false`. Transfer buttons are disabled for unavailable devices. Incoming transfers are silently rejected.
-- **Remote state in MiniPlayer**: When controlling a remote device, the MiniPlayer shows the remote track's title, artist, cover, and play state via `isRemoteControlling` / `remoteTrack` / `remoteIsPlaying` context fields.
+- **Remote state in MiniPlayer**: When controlling a remote device, the MiniPlayer shows the remote track's title, artist, cover, and play state via `isRemoteControlling` / `remoteTrack` / `remoteIsPlaying` context fields. Progress is interpolated locally (1s/s between 5s state_update intervals).
+
+### Optimistic Updates
+
+When sending commands to a remote device, the UI applies optimistic state changes immediately:
+
+| Command | Optimistic Update |
+|---------|-------------------|
+| `toggle_play` | Invert `isPlaying` |
+| `next` / `prev` | Set `isPlaying: true`, `progress: 0` |
+| `seek` | Set `progress` to new value |
+
+After every command, `music:request_state` is emitted to get immediate confirmation from the target (reduces perceived lag from 5s to network RTT).
+
+### Reclaim Guard
+
+When reclaiming playback (transferring back to this device), `playTrack` is async (fetches stream URL). During this window, incoming `state_update` events from the old target could re-enter remote mode. A `reclaimingRef` guard blocks auto-sync during reclaim:
+
+1. Set `true` on `music:reclaim-started` event
+2. Cleared on `music:transfer-playing` event (audio actually started)
+3. Fallback: auto-cleared after 10s if playback never starts (stream error)
+
+### Reconnection Handling
+
+On socket reconnect:
+- Remote state is NOT immediately cleared (avoids UI flash)
+- `music:request_devices` and `music:request_state` are re-emitted
+- If no `state_update` arrives within 10s, remote state is cleared (device gone)
+- `useMusicDevices` auto-reconnects to target by stable `deviceId` when socket ID changes
 
 ## Synced Lyrics
 
@@ -411,11 +480,15 @@ On `music:request_devices`, the backend verifies each cached Redis entry's socke
 
 ### Single-Device Enforcement
 
-When a device starts playing a new track, it emits `music:playback_started`. All other devices in the user's room receive this event and stop local playback via the `music:remote-takeover` custom event. This ensures only one device plays at a time (Spotify Connect behavior).
+When a device starts playing a new track, it emits `music:playback_started`. All other devices in the user's room receive this event and stop local playback via the `music:remote-takeover` custom event. This ensures only one device plays at a time (Spotify Connect behavior). The `prevTrackIdRef` is reset on stop so replaying the same track correctly broadcasts to other devices.
 
 ### Auto-Sync on Page Load
 
-When a new device connects (or reconnects), it emits `music:request_state`. The currently-playing device responds with a `music:state_update` containing the full playback state. The new device enters remote-controlling mode, showing what's playing elsewhere without starting local playback.
+When a new device connects (or reconnects), it emits `music:request_state`. The currently-playing device responds with a `music:state_update` containing the full playback state (including queue). The new device enters remote-controlling mode, showing what's playing elsewhere without starting local playback.
+
+Auto-sync is blocked when:
+- The device is playing locally (`currentTrack` exists and `isPlaying` is true)
+- The device is in the process of reclaiming playback (`reclaimingRef` guard active)
 
 ## Listen Time Tracking
 
@@ -443,7 +516,7 @@ Music volume is automatically reduced during voice interactions:
 
 ### Ask AI Ducking
 
-When the Ask AI voice assistant activates, it dispatches `ask-ai:duck` with `{ duck: true }`. The music volume is reduced to `Math.min(currentVol * 0.15, 0.1)`. When the AI finishes, `{ duck: false }` restores the original volume. The duck state is cleared on `stop()` to prevent stale volume restoration.
+When the Ask AI voice assistant activates, it dispatches `ask-ai:duck` with `{ duck: true }`. The music volume is reduced to `Math.min(currentVol * 0.15, 0.1)`. When the AI finishes, `{ duck: false }` restores the original volume. On `stop()`, the volume is restored to the pre-duck level before clearing the duck state, ensuring the next track starts at the correct volume.
 
 ### DM Voice Call Ducking
 
@@ -468,6 +541,10 @@ During an active crossfade transition, the incoming audio element connects direc
 
 The old audio element's `MediaElementAudioSourceNode` is explicitly disconnected before the swap to prevent memory leaks in the Web Audio API graph.
 
+### Equalizer — Remote Control
+
+When remote controlling another device, EQ changes are forwarded via `music:remote-command` with `{ command: 'eq', value: EqualizerBand[] }`. Remote EQ commands are throttled to 150ms during slider drag to avoid flooding the socket. The receiving device applies bands via `initEqualizer()` + `setEqBands()` and dispatches `music:eq-updated` to sync any open Equalizer panels on other controlling devices.
+
 ## Queue Validation
 
 The `POST /queue` endpoint validates incoming track objects with a Zod schema:
@@ -487,6 +564,6 @@ Additional fields (e.g., `albumId`, `language`, `year`, `hasLyrics`) are passed 
 
 ## Mobile Integration
 
-- **Media Session API**: Track metadata, playback state, and position are synced to the OS via `navigator.mediaSession`. Lock screen controls (play/pause/next/prev) are registered. Position state is updated reactively via the progress context.
+- **Media Session API**: Track metadata, playback state, and position are synced to the OS via `navigator.mediaSession`. Lock screen controls (play/pause/next/prev) are registered. Position state is updated reactively via the progress context. When remote controlling another device, shows the remote track info and forwards media key actions as `music:remote-command` events.
 - **Background Playback**: On Capacitor (iOS/Android), the audio element continues playing when the app is backgrounded. Lock screen controls remain functional.
-- **Keyboard Shortcuts**: Global shortcuts registered via `useMusicShortcuts` — Space (play/pause), ←→ (prev/next), ↑↓ (volume ±10%), M (mute), S (shuffle), R (repeat cycle). Suppressed when input/textarea is focused.
+- **Keyboard Shortcuts**: Global shortcuts registered via `useMusicShortcuts` — Space (play/pause), ←→ (prev/next), ↑↓ (volume ±10%), M (mute), S (shuffle), R (repeat cycle). Suppressed when input/textarea is focused. When remote controlling, all shortcuts dispatch `music:remote-command` events instead of calling local engine methods.
