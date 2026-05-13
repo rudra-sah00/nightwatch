@@ -31,6 +31,13 @@ const streamingPassthrough = [
     matcher: /\/games\//i,
     handler: new NetworkOnly(),
   },
+  // Legacy game CDN — no longer exists, must not serve from cache
+  {
+    matcher({ url }: { url: URL }) {
+      return url.hostname === 's3.nightwatch.in';
+    },
+    handler: new NetworkOnly(),
+  },
   // S2 MP4 streams served via the backend proxy
   {
     matcher: /\/api\/stream\//i,
