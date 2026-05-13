@@ -136,10 +136,15 @@ export class AudioEngine {
         return;
       }
       if (this.ctx.audio.duration) {
-        this.ctx.update({
+        const updates: Partial<AudioEngineState> = {
           progress:
             (this.ctx.audio.currentTime / this.ctx.audio.duration) * 100,
-        });
+        };
+        // Sync duration to state if element has it but state doesn't
+        if (!this.ctx.state.duration && this.ctx.audio.duration > 0) {
+          updates.duration = this.ctx.audio.duration;
+        }
+        this.ctx.update(updates);
         // Gapless pre-buffer 5s from end
         if (
           this.ctx.state.gapless &&

@@ -144,6 +144,11 @@ export function MiniPlayer() {
       : 0
     : progress;
 
+  // Disable transition on progress reset (track change) to avoid bar animating from 99% → 0%
+  const prevProgressRef = useRef(displayProgress);
+  const skipTransition = displayProgress < prevProgressRef.current - 5;
+  prevProgressRef.current = displayProgress;
+
   if (!displayTrack) return null;
 
   return (
@@ -168,7 +173,7 @@ export function MiniPlayer() {
         }}
       >
         <div
-          className="h-full bg-neo-yellow transition-all duration-200"
+          className={`h-full bg-neo-yellow ${skipTransition ? '' : 'transition-all duration-200'}`}
           style={{ width: `${displayProgress}%` }}
         />
       </button>
