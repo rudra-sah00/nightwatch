@@ -175,7 +175,7 @@ export function WatchPartyVideoArea({
   };
 
   const recordButton =
-    isHost && !checkIsMobile() ? (
+    isHost && !checkIsMobile() && room.type === 'livestream' ? (
       <RecordButton
         isRecording={clip.isRecording}
         duration={clip.duration}
