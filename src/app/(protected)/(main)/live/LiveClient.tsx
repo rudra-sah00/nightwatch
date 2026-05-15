@@ -284,21 +284,11 @@ export default function LiveClient() {
       {/* Channel Detail Modal */}
       {selectedChannel && (
         <div
-          className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] overscroll-contain"
+          className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm overscroll-contain"
           role="dialog"
           aria-modal="true"
         >
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-default"
-            onClick={() => setSelectedChannel(null)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setSelectedChannel(null);
-            }}
-            aria-label="Close"
-            tabIndex={-1}
-          />
-          <div className="relative z-10 w-full h-full flex flex-col bg-background overflow-hidden">
+          <div className="relative w-full h-full flex flex-col bg-background overflow-hidden">
             {/* Header */}
             <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center px-[max(1rem,env(safe-area-inset-left))] pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex-shrink-0 z-20">
               <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg truncate flex-1 min-w-0 pr-4">
@@ -307,7 +297,7 @@ export default function LiveClient() {
               <button
                 type="button"
                 onClick={() => setSelectedChannel(null)}
-                className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0"
+                className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
               </button>
