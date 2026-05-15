@@ -287,6 +287,11 @@ export default function LiveClient() {
           className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm overscroll-contain"
           role="dialog"
           aria-modal="true"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setSelectedChannel(null);
+          }}
+          tabIndex={-1}
+          ref={(el) => el?.focus()}
         >
           <div className="relative w-full h-full flex flex-col bg-background overflow-hidden">
             {/* Header */}
@@ -296,8 +301,15 @@ export default function LiveClient() {
               </span>
               <button
                 type="button"
-                onClick={() => setSelectedChannel(null)}
-                className="p-1.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedChannel(null);
+                }}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  setSelectedChannel(null);
+                }}
+                className="p-2.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 cursor-pointer relative z-50"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
               </button>
