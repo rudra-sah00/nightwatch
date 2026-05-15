@@ -211,7 +211,7 @@ function LiveMatchModalContent({
       <div className="relative w-full h-full flex flex-col bg-background overflow-hidden">
         {/* Header / Close button */}
         <div
-          className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 flex-shrink-0 z-20 [-webkit-app-region:drag]"
+          className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 flex-shrink-0 z-20"
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))' }}
         >
           <div className="flex items-center gap-4">
@@ -234,7 +234,7 @@ function LiveMatchModalContent({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 [-webkit-app-region:no-drag]"
+            className="p-1.5 border-[3px] border-border bg-neo-red text-primary-foreground hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2"
             aria-label={t('closeModal')}
           >
             <X className="w-5 h-5 stroke-[3px]" />
