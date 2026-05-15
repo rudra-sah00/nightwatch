@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   workflow_dispatch:
   workflow_call:
+  release:
+    types: [published]
   push:
     tags:
       - 'v*'
