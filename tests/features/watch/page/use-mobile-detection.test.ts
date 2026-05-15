@@ -1,5 +1,15 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Mock electron-bridge so checkIsDesktop returns false (simulating non-Electron env)
+vi.mock('@/lib/electron-bridge', () => ({
+  checkIsDesktop: () => false,
+  checkIsMobile: () => false,
+  isDesktop: false,
+  isMobile: false,
+  desktopBridge: {},
+}));
+
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
 
 interface WindowWithTouch {
