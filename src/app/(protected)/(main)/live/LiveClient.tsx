@@ -4,8 +4,9 @@ import { ChevronDown, Play, Search, Tv, Users, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { Button } from '@/components/ui/button';
 import type { IptvChannel } from '@/features/livestream/api';
 import {
@@ -63,6 +64,15 @@ export default function LiveClient() {
     if (channel.streamUrl) setSelectedChannel(channel);
   };
 
+  // Disable sidebars while modal is open
+  const { setSidebarsDisabled } = useSidebar();
+  useEffect(() => {
+    if (selectedChannel) {
+      setSidebarsDisabled(true);
+      return () => setSidebarsDisabled(false);
+    }
+  }, [selectedChannel, setSidebarsDisabled]);
+
   const handleWatchSolo = () => {
     if (!selectedChannel) return;
     const params = new URLSearchParams({
@@ -100,193 +110,14 @@ export default function LiveClient() {
   };
 
   return (
-    <div className="min-h-full pb-32 overflow-x-hidden">
-      {/* Hero */}
-      <div className="mb-8 bg-neo-yellow relative overflow-hidden rounded-2xl">
-        <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
-        <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
-        <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
-            {t('heroTitle')}
-            <br />
-            <span className="bg-background px-4 inline-block border-[4px] border-border -rotate-1 ml-2 mt-2">
-              {t('heroTitleStream')}
-            </span>
-          </h1>
-          <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-            {t('heroSubtitle')}
-          </p>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 md:px-10">
-        {/* Search + Category */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder={t('searchChannels')}
-              className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
-            />
-          </div>
-          <div className="relative sm:w-64">
-            <button
-              type="button"
-              onClick={() => setIsCatOpen(!isCatOpen)}
-              className="flex items-center justify-between gap-2 px-5 py-4 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md"
-            >
-              <span className="truncate">
-                {selectedCategory || 'All Categories'}
-              </span>
-              <ChevronDown
-                className={`w-4 h-4 shrink-0 transition-transform ${isCatOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-            {isCatOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded-md shadow-md">
-                <button
-                  type="button"
-                  onClick={() => handleCategorySelect('')}
-                  className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded ${!selectedCategory ? 'bg-muted' : 'hover:bg-muted/80'}`}
-                >
-                  All Categories
-                </button>
-                {categories.map((cat) => (
-                  <button
-                    type="button"
-                    key={cat}
-                    onClick={() => handleCategorySelect(cat)}
-                    className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded truncate ${selectedCategory === cat ? 'bg-muted' : 'hover:bg-muted/80'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Count */}
-        <div className="mb-6 flex items-center justify-between">
-          <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-            {total.toLocaleString()} channels
-          </span>
-          {totalPages > 1 && (
-            <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-              Page {page}/{totalPages}
-            </span>
-          )}
-        </div>
-
-        {/* Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {[
-              'a',
-              'b',
-              'c',
-              'd',
-              'e',
-              'f',
-              'g',
-              'h',
-              'i',
-              'j',
-              'k',
-              'l',
-              'm',
-              'n',
-              'o',
-              'p',
-              'q',
-              'r',
-            ].map((id) => (
-              <div
-                key={id}
-                className="aspect-square bg-muted border-[3px] border-border rounded-lg animate-pulse"
-              />
-            ))}
-          </div>
-        ) : channels.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border text-center max-w-2xl mx-auto rounded-lg">
-            <Tv className="w-20 h-20 text-neo-blue mb-6" />
-            <h3 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
-              {t('noChannelsFound')}
-            </h3>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {channels.map((channel) => (
-                <button
-                  key={channel.id}
-                  type="button"
-                  onClick={() => handleChannelClick(channel)}
-                  className="group flex flex-col items-center gap-3 p-4 bg-background border-[3px] border-border rounded-lg hover:border-neo-blue hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  <div className="w-16 h-16 relative shrink-0 rounded-lg overflow-hidden bg-muted border-[2px] border-border">
-                    {channel.icon ? (
-                      <Image
-                        src={channel.icon}
-                        alt={channel.name}
-                        fill
-                        className="object-contain p-1"
-                        sizes="64px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Tv className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-center min-w-0 w-full">
-                    <p className="font-headline font-bold text-xs uppercase tracking-wider text-foreground truncate">
-                      {channel.name}
-                    </p>
-                    {channel.category && (
-                      <p className="font-headline text-[10px] uppercase tracking-widest text-muted-foreground truncate mt-1">
-                        {channel.category}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-10">
-                <Button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
-                >
-                  Prev
-                </Button>
-                <span className="font-headline font-black text-sm uppercase tracking-widest px-4">
-                  {page}
-                </span>
-                <Button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
-                >
-                  Next
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Channel Detail Modal */}
+    <>
+      {/* Channel Detail Modal — rendered outside main scroll container to avoid stacking context issues */}
       {selectedChannel && (
         <div
-          className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm overscroll-contain"
+          className="fixed inset-x-0 bottom-0 top-[var(--electron-titlebar-height,0px)] z-[100] bg-black/80 backdrop-blur-sm overscroll-contain [-webkit-app-region:no-drag]"
           role="dialog"
           aria-modal="true"
+          onClick={() => setSelectedChannel(null)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setSelectedChannel(null);
           }}
@@ -305,11 +136,7 @@ export default function LiveClient() {
                   e.stopPropagation();
                   setSelectedChannel(null);
                 }}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  setSelectedChannel(null);
-                }}
-                className="p-2.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 cursor-pointer relative z-50"
+                className="p-2.5 border-[3px] border-border bg-neo-red text-white hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-blue focus-visible:ring-offset-2 cursor-pointer"
               >
                 <X className="w-5 h-5 stroke-[3px]" />
               </button>
@@ -350,8 +177,8 @@ export default function LiveClient() {
               </div>
             </div>
 
-            {/* Actions - sticky at bottom */}
-            <div className="sticky bottom-0 z-30 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 bg-background border-t-[4px] border-border flex-shrink-0">
+            {/* Actions */}
+            <div className="flex-shrink-0 z-30 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 bg-background border-t-[4px] border-border">
               <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <button
                   type="button"
@@ -375,6 +202,187 @@ export default function LiveClient() {
           </div>
         </div>
       )}
-    </div>
+      <div className="min-h-full pb-32 overflow-x-hidden">
+        {/* Hero */}
+        <div className="mb-8 bg-neo-yellow relative overflow-hidden rounded-2xl">
+          <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
+          <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-red border-[4px] border-border opacity-20 rotate-12" />
+          <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
+              {t('heroTitle')}
+              <br />
+              <span className="bg-background px-4 inline-block border-[4px] border-border -rotate-1 ml-2 mt-2">
+                {t('heroTitleStream')}
+              </span>
+            </h1>
+            <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
+              {t('heroSubtitle')}
+            </p>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-6 md:px-10">
+          {/* Search + Category */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-grow">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder={t('searchChannels')}
+                className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
+              />
+            </div>
+            <div className="relative sm:w-64">
+              <button
+                type="button"
+                onClick={() => setIsCatOpen(!isCatOpen)}
+                className="flex items-center justify-between gap-2 px-5 py-4 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md"
+              >
+                <span className="truncate">
+                  {selectedCategory || 'All Categories'}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 shrink-0 transition-transform ${isCatOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {isCatOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded-md shadow-md">
+                  <button
+                    type="button"
+                    onClick={() => handleCategorySelect('')}
+                    className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded ${!selectedCategory ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                  >
+                    All Categories
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      type="button"
+                      key={cat}
+                      onClick={() => handleCategorySelect(cat)}
+                      className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded truncate ${selectedCategory === cat ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Count */}
+          <div className="mb-6 flex items-center justify-between">
+            <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+              {total.toLocaleString()} channels
+            </span>
+            {totalPages > 1 && (
+              <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+                Page {page}/{totalPages}
+              </span>
+            )}
+          </div>
+
+          {/* Grid */}
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {[
+                'a',
+                'b',
+                'c',
+                'd',
+                'e',
+                'f',
+                'g',
+                'h',
+                'i',
+                'j',
+                'k',
+                'l',
+                'm',
+                'n',
+                'o',
+                'p',
+                'q',
+                'r',
+              ].map((id) => (
+                <div
+                  key={id}
+                  className="aspect-square bg-muted border-[3px] border-border rounded-lg animate-pulse"
+                />
+              ))}
+            </div>
+          ) : channels.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border text-center max-w-2xl mx-auto rounded-lg">
+              <Tv className="w-20 h-20 text-neo-blue mb-6" />
+              <h3 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
+                {t('noChannelsFound')}
+              </h3>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {channels.map((channel) => (
+                  <button
+                    key={channel.id}
+                    type="button"
+                    onClick={() => handleChannelClick(channel)}
+                    className="group flex flex-col items-center gap-3 p-4 bg-background border-[3px] border-border rounded-lg hover:border-neo-blue hover:bg-muted/50 transition-colors cursor-pointer"
+                  >
+                    <div className="w-16 h-16 relative shrink-0 rounded-lg overflow-hidden bg-muted border-[2px] border-border">
+                      {channel.icon ? (
+                        <Image
+                          src={channel.icon}
+                          alt={channel.name}
+                          fill
+                          className="object-contain p-1"
+                          sizes="64px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Tv className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center min-w-0 w-full">
+                      <p className="font-headline font-bold text-xs uppercase tracking-wider text-foreground truncate">
+                        {channel.name}
+                      </p>
+                      {channel.category && (
+                        <p className="font-headline text-[10px] uppercase tracking-widest text-muted-foreground truncate mt-1">
+                          {channel.category}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 mt-10">
+                  <Button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
+                  >
+                    Prev
+                  </Button>
+                  <span className="font-headline font-black text-sm uppercase tracking-widest px-4">
+                    {page}
+                  </span>
+                  <Button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
