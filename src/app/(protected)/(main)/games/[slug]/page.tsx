@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { getCookie } from '@/lib/cookies';
@@ -20,17 +20,27 @@ function gameApiFetch(path: string, opts: RequestInit = {}) {
 }
 
 export default function GamePage() {
+  const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [gameUrl, setGameUrl] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
-    gameApiFetch('/api/games/stickman-hook/url')
+    gameApiFetch(`/api/games/${slug}/url`)
       .then((r) => r.json())
       .then((data) => setGameUrl(data.url))
       .catch(() => {});
-  }, []);
+
+    gameApiFetch('/api/games')
+      .then((r) => r.json())
+      .then((data) => {
+        const game = data.games?.find((g: { slug: string }) => g.slug === slug);
+        if (game) setTitle(game.title);
+      })
+      .catch(() => {});
+  }, [slug]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -38,11 +48,9 @@ export default function GamePage() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  // Escape key exits CSS-based fullscreen (Electron/Capacitor)
   useEffect(() => {
     if (!isFullscreen || !(checkIsDesktop() || isMobile)) return;
 
-    // Electron: use IPC since iframe captures keyboard events
     if (checkIsDesktop()) {
       const api = (
         window as unknown as {
@@ -54,7 +62,6 @@ export default function GamePage() {
       }
     }
 
-    // Mobile fallback
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsFullscreen(false);
     };
@@ -62,15 +69,12 @@ export default function GamePage() {
     return () => document.removeEventListener('keydown', onKey);
   }, [isFullscreen]);
 
-  // Hide Electron drag region and navbar during fullscreen so game buttons are clickable
-  // Also disable transition-all on parent that creates a containing block for fixed
   useEffect(() => {
     if (!(checkIsDesktop() || isMobile)) return;
 
     const dragRegions = document.querySelectorAll<HTMLElement>(
       '[data-electron-drag-region]',
     );
-    // The parent with transition-all that breaks fixed positioning
     const contentParent = containerRef.current?.closest(
       '.transition-all',
     ) as HTMLElement | null;
@@ -107,7 +111,6 @@ export default function GamePage() {
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
-    // Capacitor native app
     if (isMobile) {
       import('@/lib/mobile-bridge').then(({ mobileBridge }) => {
         if (isFullscreen) {
@@ -122,13 +125,11 @@ export default function GamePage() {
       return;
     }
 
-    // Electron — CSS overlay fullscreen (game fills the window)
     if (checkIsDesktop()) {
       setIsFullscreen((prev) => !prev);
       return;
     }
 
-    // Browser — native element fullscreen
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
@@ -185,11 +186,7 @@ export default function GamePage() {
           </button>
         )}
         {gameUrl ? (
-          <GameFrame
-            slug="stickman-hook"
-            title="Stickman Hook"
-            gameUrl={gameUrl}
-          />
+          <GameFrame slug={slug} title={title || slug} gameUrl={gameUrl} />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-background">
             <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
