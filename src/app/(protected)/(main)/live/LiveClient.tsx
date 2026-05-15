@@ -298,9 +298,9 @@ export default function LiveClient() {
             aria-label="Close"
             tabIndex={-1}
           />
-          <div className="relative w-full h-full flex flex-col bg-background overflow-hidden pointer-events-auto">
+          <div className="relative z-10 w-full h-full flex flex-col bg-background overflow-hidden">
             {/* Header */}
-            <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center px-[max(1rem,env(safe-area-inset-left))] pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex-shrink-0 z-20 sticky top-0">
+            <div className="border-b-[4px] border-border bg-background text-foreground flex justify-between items-center px-[max(1rem,env(safe-area-inset-left))] pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex-shrink-0 z-20">
               <span className="font-headline font-black uppercase tracking-widest text-foreground text-lg truncate flex-1 min-w-0 pr-4">
                 {selectedChannel.name}
               </span>
@@ -346,28 +346,28 @@ export default function LiveClient() {
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* Actions - fixed at bottom of viewport */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 bg-background border-t-[4px] border-border">
-                <div className="flex flex-col sm:flex-row gap-3 pt-6">
-                  <button
-                    type="button"
-                    onClick={handleWatchSolo}
-                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-blue border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-primary-foreground hover:opacity-90 transition-opacity"
-                  >
-                    <Play className="w-5 h-5 fill-current stroke-[3px]" />
-                    {t('watchSolo')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleWatchParty}
-                    disabled={isCreatingParty}
-                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-yellow border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-foreground hover:opacity-90 transition-opacity disabled:opacity-50 hidden sm:flex"
-                  >
-                    <Users className="w-5 h-5 stroke-[3px]" />
-                    {isCreatingParty ? 'Creating...' : t('watchTogether')}
-                  </button>
-                </div>
+            {/* Actions - sticky at bottom */}
+            <div className="sticky bottom-0 z-30 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 bg-background border-t-[4px] border-border flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-3 pt-6">
+                <button
+                  type="button"
+                  onClick={handleWatchSolo}
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-blue border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-primary-foreground hover:opacity-90 transition-opacity"
+                >
+                  <Play className="w-5 h-5 fill-current stroke-[3px]" />
+                  {t('watchSolo')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleWatchParty}
+                  disabled={isCreatingParty}
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-neo-yellow border-[3px] border-border font-headline font-black text-base uppercase tracking-widest text-foreground hover:opacity-90 transition-opacity disabled:opacity-50 hidden sm:flex"
+                >
+                  <Users className="w-5 h-5 stroke-[3px]" />
+                  {isCreatingParty ? 'Creating...' : t('watchTogether')}
+                </button>
               </div>
             </div>
           </div>
