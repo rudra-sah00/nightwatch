@@ -1,5 +1,111 @@
 # Changelog
 
+## [2.12.0](https://github.com/rudra-sah00/nightwatch/compare/v2.11.0...v2.12.0) (2026-05-15)
+
+
+### Features
+
+* add Android TV download button to landing page, remove messaging feature ([3b01ec3](https://github.com/rudra-sah00/nightwatch/commit/3b01ec31b4cbbb12d82b0b0ecb29247ec69f16bf))
+* add feature-level error boundaries for crash isolation ([1de38b2](https://github.com/rudra-sah00/nightwatch/commit/1de38b29235f284dd70b18cfe442856003743fbc))
+* add games arcade - 53 games with CDN iframe, fullscreen, auth-gated API route, hover video previews ([b775ba2](https://github.com/rudra-sah00/nightwatch/commit/b775ba20bf76f183760678ff2333202e9c077523))
+* add Games to tour, remove serverTip, update all docs and i18n ([921e8c2](https://github.com/rudra-sah00/nightwatch/commit/921e8c2fc2bee3ad04de20d357eadfdab108947b))
+* add Music bento card to landing page, replace messaging ([4b63cbd](https://github.com/rudra-sah00/nightwatch/commit/4b63cbd516e8fb7605e85368feccd744dbd7db8d))
+* add Temple Run 2 Frozen Shadows game ([ff6d922](https://github.com/rudra-sah00/nightwatch/commit/ff6d9220773ec182337f21596a9ebb02a8abc3f7))
+* add Temple Run 2 game ([6c893bd](https://github.com/rudra-sah00/nightwatch/commit/6c893bdfb6524d3804ad485592de2233586608d6))
+* add Temple Run 2 Spooky Summit & Holi Festival ([dd621c7](https://github.com/rudra-sah00/nightwatch/commit/dd621c7ba58a85138b6a56eec1200fab9c57b3a3))
+* **games:** add dinosaur-game page ([f0e5fe8](https://github.com/rudra-sah00/nightwatch/commit/f0e5fe8d8197c8d6653aa8b4d140ecdb046fbab5))
+* **games:** add drive-mad page ([d1cafe6](https://github.com/rudra-sah00/nightwatch/commit/d1cafe6a433e34cab5fa5b5c339f90a972b4d0ff))
+* **games:** add games arcade with 53 games, Subway Surfers integration ([eb72e1b](https://github.com/rudra-sah00/nightwatch/commit/eb72e1bd34b2fe6f890fb56e200b2eb8ce71ad4a))
+* **games:** add going-up-rooftop page ([aa7ca53](https://github.com/rudra-sah00/nightwatch/commit/aa7ca53685328f78d10bd5002fea970ed4fb061e))
+* **games:** add happy-glass page ([63fa5a5](https://github.com/rudra-sah00/nightwatch/commit/63fa5a5f84b3c72500ff15f087823f248e2b4238))
+* **games:** add level-devil page ([3bd2dd8](https://github.com/rudra-sah00/nightwatch/commit/3bd2dd8175207908102fd0777231697256a2fa58))
+* **games:** add monkey-mart page ([e54c272](https://github.com/rudra-sah00/nightwatch/commit/e54c27244fae518dcb1c559ae5905d89bf81e0c2))
+* **games:** add stickman-hook game page ([99134e2](https://github.com/rudra-sah00/nightwatch/commit/99134e2355acc523b04d4a2f40eb1907f60ae02f))
+* **games:** add stunt-bike-extreme page ([0db08dd](https://github.com/rudra-sah00/nightwatch/commit/0db08ddb5cbf5ea8d41c0f2b3d548e5fa5d22790))
+* **games:** add super-star-car page ([b525a24](https://github.com/rudra-sah00/nightwatch/commit/b525a24a3c8ed12162dbab146d1ff6b5fff129fa))
+* **games:** broadcast game activity to friends sidebar & Discord presence ([fc7b940](https://github.com/rudra-sah00/nightwatch/commit/fc7b940c657e9bf583e2a04bdf3352e4a1b2862b))
+* **games:** fetch games from API, serve assets from S3, add CDP capture script ([4b660a5](https://github.com/rudra-sah00/nightwatch/commit/4b660a53818d651c7d3f2570dcf8e8081c0c49d1))
+* **music:** stable device ID for reliable reconnection ([cae3552](https://github.com/rudra-sah00/nightwatch/commit/cae35524179198aafe0f83ccd3d7307631b927f5))
+* replace live page with IPTV channels grid, content sheet modal, resolve endpoint ([0ec6571](https://github.com/rudra-sah00/nightwatch/commit/0ec6571f50d1f0f1112bddbe217b81d5acdbce4c))
+
+
+### Bug Fixes
+
+* add 429 backoff in HLS.js and abort controller for IPTV resolve ([fca4b75](https://github.com/rudra-sah00/nightwatch/commit/fca4b7517a5bac87f58e5aad38b1fde05b0a0eb6))
+* add localhost:9000 and *.nightwatch.in to Electron CSP frame-src ([2b7309f](https://github.com/rudra-sah00/nightwatch/commit/2b7309fcabbccf449fd03b85eba50ea6b5fd504d))
+* add session_revoked to ForceLogoutPayload type ([3d09d15](https://github.com/rudra-sah00/nightwatch/commit/3d09d159d4866f3f043e3117bb8b6db9bf039212))
+* always use portal for game on Electron/mobile to prevent iframe remount ([50b9287](https://github.com/rudra-sah00/nightwatch/commit/50b92874dee6ca1dae060719104df92bb4c46614))
+* **auth:** dispatch auth:refreshed event after token refresh, refetch friends list ([9f96899](https://github.com/rudra-sah00/nightwatch/commit/9f968992378f0c45aa8cb22e0a2330bbef93a6ef))
+* consistent theme colors in channel modal, pin actions to viewport bottom ([396a332](https://github.com/rudra-sah00/nightwatch/commit/396a33204104030e6f6abf6f8babdadb3a3f19ed))
+* debounce VOD buffering overlay to prevent blank flash on seek (300ms threshold) ([ad34451](https://github.com/rudra-sah00/nightwatch/commit/ad34451f030d56c4f1b7a4af6d3bcb6a3c7dfc39))
+* disable parent transition-all during fullscreen instead of using portal ([361152b](https://github.com/rudra-sah00/nightwatch/commit/361152bb208a3215d184c7d71d60e0df42c323cd))
+* Electron game fullscreen uses CSS overlay only (no window resize) ([d6044f7](https://github.com/rudra-sah00/nightwatch/commit/d6044f7064a21ab1ee80cb4c2b5393b3d3e85c7d))
+* Electron game fullscreen uses native BrowserWindow + CSS overlay ([17a18ae](https://github.com/rudra-sah00/nightwatch/commit/17a18ae91494a81dfa083eff798661c632fe7f3c))
+* Escape key exits game fullscreen in Electron via before-input-event ([cc427cd](https://github.com/rudra-sah00/nightwatch/commit/cc427cde743a77e1890bc5113e9e7d6a44a120e4))
+* game fills available viewport height on mobile instead of fixed aspect ratio ([802b70f](https://github.com/rudra-sah00/nightwatch/commit/802b70f810e00d1cc8772e0899cff89696b2f2b6))
+* game fullscreen for Electron and Capacitor ([162151a](https://github.com/rudra-sah00/nightwatch/commit/162151a3f1cb1af9692d646c53308cdec2a22a0a))
+* game fullscreen overlay covers entire viewport on mobile/Electron ([5e1ddc8](https://github.com/rudra-sah00/nightwatch/commit/5e1ddc872b1e31fe377522d86cd5492bc4a5a58d))
+* **games:** add Electron fullscreen support to game page ([d238530](https://github.com/rudra-sah00/nightwatch/commit/d238530c4cf7e62385fc00381f59a20c898feda4))
+* **games:** add exit fullscreen button overlay for mobile ([e7b86d0](https://github.com/rudra-sah00/nightwatch/commit/e7b86d0fb7a1d6ad98ddc9fe840223b1be619f29))
+* **games:** add page titles for browser tab and Electron header ([6b32d08](https://github.com/rudra-sah00/nightwatch/commit/6b32d086cfbfabf23880bc9a357795792c6a37b4))
+* **games:** auto-refresh game cookie every 45min to prevent asset 403s ([7d465ee](https://github.com/rudra-sah00/nightwatch/commit/7d465ee316e0670b30f2e79cff9703ae3ca24e3b))
+* **games:** Electron fullscreen via native IPC (window.electronAPI.toggleFullscreen) ([16f2ce8](https://github.com/rudra-sah00/nightwatch/commit/16f2ce8958ec1544ae56d26c8fdf9f593bef3089))
+* **games:** fullscreen support for Capacitor + Electron + orientation cleanup ([6fcd68c](https://github.com/rudra-sah00/nightwatch/commit/6fcd68c204ccb540d8bdc813c97309a0e63f048b))
+* **games:** make fullscreen call synchronous to preserve user gesture for Electron ([8ff40ad](https://github.com/rudra-sah00/nightwatch/commit/8ff40ad737e1957e38a7080c2da5039e0400aac7))
+* **games:** mobile fullscreen with landscape lock + exit button for Capacitor and mobile browser ([ec16081](https://github.com/rudra-sah00/nightwatch/commit/ec16081b5774af3f24622bdb3eb61dd639613efb))
+* **games:** proxy game URLs through CF Worker to bypass X-Frame-Options ([bdbd114](https://github.com/rudra-sah00/nightwatch/commit/bdbd11435df71a79d66a07f0f1e02c3bcda52876))
+* **games:** remove allow-same-origin from sandbox to fully block sub-frames ([4b2b449](https://github.com/rudra-sah00/nightwatch/commit/4b2b4497d9cbc585675abfa48c70d17708b14daa))
+* **games:** remove sandbox attr to fix fullscreen (sitelock blocked at nginx+JS level) ([fd48248](https://github.com/rudra-sah00/nightwatch/commit/fd48248d077e400d304b2f508a6511d95aa3a38f))
+* **games:** restore allow-same-origin, will fix sitelock in game JS ([f4715fc](https://github.com/rudra-sah00/nightwatch/commit/f4715fc5dd2e2b3f71bd9fe612f69f4e5b4c83a4))
+* **games:** sandbox iframe to block Poki sitelock sub-frame ([cbdf1ec](https://github.com/rudra-sah00/nightwatch/commit/cbdf1ec4fd003ba8b10e31e8186e9ec3d6139b0b))
+* **games:** stop game audio on back navigation + duck music while playing ([bdd5759](https://github.com/rudra-sah00/nightwatch/commit/bdd57595b42ea3652fd7d744a069e63f17f64e86))
+* **games:** use element fullscreen for Electron (not window fullscreen) ([131e3e6](https://github.com/rudra-sah00/nightwatch/commit/131e3e6c1aaabd5345689fb6fd897e6fdae1fc48))
+* **games:** use portrait lock for Subway Surfers fullscreen on mobile ([7132a75](https://github.com/rudra-sah00/nightwatch/commit/7132a75390bfa5cb0fcb72e1bc436c4386ac6af5))
+* **games:** use standard Fullscreen API for Electron (toggleFullscreen was no-op) ([dbbeba6](https://github.com/rudra-sah00/nightwatch/commit/dbbeba6cff94d229b70c83f991f6b16558f92ad2))
+* hide all drag region elements (navbar + titlebar) during game fullscreen ([615506d](https://github.com/rudra-sah00/nightwatch/commit/615506d8552c971aae2d1432f096fabb7aaa68b0))
+* hide Electron drag region during game fullscreen so buttons are clickable ([1e1ae9e](https://github.com/rudra-sah00/nightwatch/commit/1e1ae9e31ea2d7705aced15dbf467efec746a963))
+* live page pagination button text invisible on hover ([158a02c](https://github.com/rudra-sah00/nightwatch/commit/158a02c39f8d7404762ad3b427d3e3feba850f3f))
+* music disc keeps rotating after returning from watch party ([59eb6e6](https://github.com/rudra-sah00/nightwatch/commit/59eb6e687064ec52739cee27cd901d3ba215a6a3))
+* music sync bugs - transfer safety, pause reliability, dedup commands ([7f178e8](https://github.com/rudra-sah00/nightwatch/commit/7f178e8d52c7714e1597bb199398ed25539647c1))
+* **music:** add close button to mobile queue, remove lyrics zoom ([8d54436](https://github.com/rudra-sah00/nightwatch/commit/8d5443640aa4ea67375856d0f64f60ad8b5b2e5a))
+* **music:** crossfade cascade, volume during fade, transfer-pause race, EQ resume ([42f2963](https://github.com/rudra-sah00/nightwatch/commit/42f296399a8b537c2a76d7a46b87f8148640b907))
+* **music:** crossfade pause, shuffle math, reclaim seek, queue key ([f160bab](https://github.com/rudra-sah00/nightwatch/commit/f160bab95656c0ed2676d780e9e43af0fa0e0483))
+* **music:** handle queue mutation edge cases ([50c85d5](https://github.com/rudra-sah00/nightwatch/commit/50c85d54ce39212e2c9b57df1b1d2654bbee0c6f))
+* **music:** playback edge cases in pause, prev, and shuffle ([3641722](https://github.com/rudra-sah00/nightwatch/commit/3641722c007c54b0aa5c2bbd3ca8b4c2a16293c0))
+* **music:** progress bar not showing on track change from queue ([a0914ac](https://github.com/rudra-sah00/nightwatch/commit/a0914ac2e2dfafb0274f45239ccc17a24cec8f08))
+* **music:** remote commands dropping value for volume/eq/play_track ([3604c65](https://github.com/rudra-sah00/nightwatch/commit/3604c6521cce151bbbfe073afcaca6c2dac06265))
+* **music:** resolve critical bugs, race conditions, and performance issues ([8b67a4e](https://github.com/rudra-sah00/nightwatch/commit/8b67a4ef10573ad2fdfe1cc126674c9ec50f068d))
+* **music:** robust cross-device sync, volume, and command routing ([00ec8f8](https://github.com/rudra-sah00/nightwatch/commit/00ec8f8a5dacebb9e7efa53ba8a7c380f35eecab))
+* **music:** seek before play on transfer to prevent audio starting from 0 ([18b6880](https://github.com/rudra-sah00/nightwatch/commit/18b6880a70b29af4cc7121da5ae3877f33cee5e2))
+* **music:** show remote queue when controlling target device ([198bc5c](https://github.com/rudra-sah00/nightwatch/commit/198bc5c921e01c09c5050fb64d1d95575d566bae))
+* **music:** stable reconnection via device name matching ([5ad7c52](https://github.com/rudra-sah00/nightwatch/commit/5ad7c52943810570cacdb55e0fe82240f020540b))
+* **music:** sync EQ UI on target device when updated remotely ([5c81bdf](https://github.com/rudra-sah00/nightwatch/commit/5c81bdf1d237e08140723d3597e4abaa7a341859))
+* pin watch solo/together buttons to bottom of viewport in channel modal ([15c3cb9](https://github.com/rudra-sah00/nightwatch/commit/15c3cb98942c25a46aa950348a2351eabb9f0daa))
+* **player:** controls not auto-hiding in fullscreen ([a0f2650](https://github.com/rudra-sah00/nightwatch/commit/a0f26505e39fd568fa12fb4c568205f911a38d85))
+* portal game fullscreen to document.body to escape transition-all containing block ([93ebb92](https://github.com/rudra-sah00/nightwatch/commit/93ebb92ed6e05fca5deb02c74766eaf88f6bef06))
+* prevent service worker from serving stale s3.nightwatch.in cache ([1d6cf52](https://github.com/rudra-sah00/nightwatch/commit/1d6cf52b6fb0e5bbe92e28b6515a8127d7363539))
+* remote control seek sync - emit state immediately on seek, detect seek jumps on desktop, add seek_to optimistic update ([a1d1205](https://github.com/rudra-sah00/nightwatch/commit/a1d120581b5b8718a761b821bfefef3ddc938beb))
+* remove duplicate search skeleton - eliminate Suspense fallback, use single client-side loading state ([bbba4d7](https://github.com/rudra-sah00/nightwatch/commit/bbba4d7f303cb9a9773fe850b0915e3bc6bcd7e8))
+* remove paths-ignore from release workflow to unblock version bump builds ([f905248](https://github.com/rudra-sah00/nightwatch/commit/f9052482e32632e3051ea1ebb069bcfce0229624))
+* remove server selection from profile (single server) ([8343b9d](https://github.com/rudra-sah00/nightwatch/commit/8343b9d7897b284baebbe61f6792f25c0fb9c62e))
+* rename APK files before upload to avoid filename collision ([0fabb34](https://github.com/rudra-sah00/nightwatch/commit/0fabb3493edf64a0cc833e2f909fd7a5503cb919))
+* search page showing skeleton after navigating from home ([ed1b6ef](https://github.com/rudra-sah00/nightwatch/commit/ed1b6effabe992d84005d4435cb042f6a78113dd))
+* shorten Android TV button label to 'TV' for consistent sizing ([5f07075](https://github.com/rudra-sah00/nightwatch/commit/5f0707572a97019be468ac0d764de111d0991d85))
+* stop music playback on clip route as well ([b9ff07c](https://github.com/rudra-sah00/nightwatch/commit/b9ff07c5463a97309fa1e11f21169fd300860d8a))
+* sync i18n locale files - replace bento.friends with bento.music across all languages ([8d5a022](https://github.com/rudra-sah00/nightwatch/commit/8d5a0221d303cdef8aa2044c3c83c64758acde5c))
+* use container fullscreen for game in Electron (not BrowserWindow) ([5d94d0c](https://github.com/rudra-sah00/nightwatch/commit/5d94d0c68048f5a40e4c2fa275eb42737e4ebfdf))
+* use CSS-based fullscreen for game in Electron ([8b1d768](https://github.com/rudra-sah00/nightwatch/commit/8b1d7688704953705007ef0b32cf31f7b214d949))
+
+
+### Performance Improvements
+
+* disable vercel image optimization (unoptimized: true) ([f50ef55](https://github.com/rudra-sah00/nightwatch/commit/f50ef556c450239aac20bc4ff03fff9229ee41ee))
+
+
+### Reverts
+
+* **games:** remove super-star-car ([fb7129e](https://github.com/rudra-sah00/nightwatch/commit/fb7129ebb05dc139e2fb209e52890305e5b9bdb0))
+
 ## [2.11.0](https://github.com/rudra-sah00/nightwatch/compare/v2.10.2...v2.11.0) (2026-05-09)
 
 
