@@ -208,10 +208,10 @@ function LiveMatchModalContent({
       aria-modal="true"
       aria-labelledby="live-match-modal-title"
     >
-      <div className="relative w-full h-full overflow-y-auto bg-background flex flex-col no-scrollbar">
+      <div className="relative w-full h-full flex flex-col bg-background overflow-hidden">
         {/* Header / Close button */}
         <div
-          className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 sticky top-0 z-20 [-webkit-app-region:drag]"
+          className="border-b-[4px] border-border bg-background flex justify-between items-center p-4 flex-shrink-0 z-20 [-webkit-app-region:drag]"
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))' }}
         >
           <div className="flex items-center gap-4">
@@ -241,181 +241,184 @@ function LiveMatchModalContent({
           </button>
         </div>
 
-        {/* Hero — team panels */}
-        <div className="relative w-full bg-background border-b-[4px] border-border">
-          {isChannelCard ? (
-            <div className="relative py-4 md:py-16">
-              <div className="max-w-2xl mx-auto flex flex-col items-center gap-3 md:gap-5 px-4">
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col">
+          {/* Hero — team panels */}
+          <div className="relative w-full bg-background border-b-[4px] border-border">
+            {isChannelCard ? (
+              <div className="relative py-4 md:py-16">
+                <div className="max-w-2xl mx-auto flex flex-col items-center gap-3 md:gap-5 px-4">
+                  <TeamPanel
+                    team={safeTeam1}
+                    score={safeTeam1.score}
+                    isLive={false}
+                    isEnded={false}
+                  />
+                  {isLive && (
+                    <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
+                      </span>
+                      <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
+                        {t('live')}
+                      </span>
+                    </div>
+                  )}
+                  {isUpcoming && (
+                    <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
+                      {formattedTime}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="relative flex items-stretch py-4 md:py-16">
                 <TeamPanel
                   team={safeTeam1}
                   score={safeTeam1.score}
-                  isLive={false}
-                  isEnded={false}
+                  isLive={isLive}
+                  isEnded={isEnded}
                 />
-                {isLive && (
-                  <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
+
+                {/* Centre column */}
+                <div className="flex-shrink-0 w-24 md:w-48 flex flex-col items-center justify-center gap-4 relative z-10 px-2 lg:px-4">
+                  {/* LIVE badge */}
+                  {isLive && (
+                    <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
+                      </span>
+                      <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
+                        {t('live')}
+                      </span>
+                    </div>
+                  )}
+                  {isEnded && (
+                    <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-neo-yellow border-[3px] border-border px-3 py-1 ">
+                      {t('final')}
                     </span>
-                    <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
-                      {t('live')}
+                  )}
+                  {isUpcoming && (
+                    <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
+                      {formattedTime}
                     </span>
-                  </div>
-                )}
-                {isUpcoming && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
-                    {formattedTime}
+                  )}
+
+                  {/* VS */}
+                  <span className="text-xl md:text-6xl font-black font-headline text-foreground tracking-widest">
+                    VS
                   </span>
-                )}
+
+                  {/* Live time desc */}
+                  {isLive && !isChannelCard && timeDesc && (
+                    <span className="text-[10px] md:text-sm font-bold font-headline uppercase tracking-widest text-foreground text-center">
+                      {timeDesc}
+                    </span>
+                  )}
+                </div>
+
+                <TeamPanel
+                  team={safeTeam2}
+                  score={safeTeam2.score}
+                  isLive={isLive}
+                  isEnded={isEnded}
+                />
               </div>
-            </div>
-          ) : (
-            <div className="relative flex items-stretch py-4 md:py-16">
-              <TeamPanel
-                team={safeTeam1}
-                score={safeTeam1.score}
-                isLive={isLive}
-                isEnded={isEnded}
-              />
+            )}
+          </div>
 
-              {/* Centre column */}
-              <div className="flex-shrink-0 w-24 md:w-48 flex flex-col items-center justify-center gap-4 relative z-10 px-2 lg:px-4">
-                {/* LIVE badge */}
-                {isLive && (
-                  <div className="flex items-center gap-2 bg-neo-red border-[3px] border-border px-3 py-1 ">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full bg-background opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 bg-background border-2 border-border" />
+          {/* Details section */}
+          <div className="px-6 md:px-10 lg:px-16 py-6 md:py-10 bg-background flex-shrink-0">
+            <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
+              {/* Title row */}
+              <div className="text-center space-y-3 md:space-y-6">
+                <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
+                  {isChannelCard ? (
+                    channelTitle
+                  ) : (
+                    <>
+                      {team1Name} <span className="text-neo-red">vs</span>{' '}
+                      {team2Name}
+                    </>
+                  )}
+                </h1>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {leagueName && (
+                    <span className="bg-background border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
+                      {leagueName}
                     </span>
-                    <span className="text-xs md:text-sm font-black font-headline text-primary-foreground uppercase tracking-widest">
-                      {t('live')}
+                  )}
+                  {isUpcoming && (
+                    <span className="bg-background border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
+                      {formattedDate} • {formattedTime}
                     </span>
-                  </div>
-                )}
-                {isEnded && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground uppercase tracking-widest bg-neo-yellow border-[3px] border-border px-3 py-1 ">
-                    {t('final')}
-                  </span>
-                )}
-                {isUpcoming && (
-                  <span className="text-xs md:text-sm font-black font-headline text-foreground bg-background border-[3px] border-border px-3 py-1 ">
-                    {formattedTime}
-                  </span>
-                )}
-
-                {/* VS */}
-                <span className="text-xl md:text-6xl font-black font-headline text-foreground tracking-widest">
-                  VS
-                </span>
-
-                {/* Live time desc */}
-                {isLive && !isChannelCard && timeDesc && (
-                  <span className="text-[10px] md:text-sm font-bold font-headline uppercase tracking-widest text-foreground text-center">
-                    {timeDesc}
-                  </span>
-                )}
-              </div>
-
-              <TeamPanel
-                team={safeTeam2}
-                score={safeTeam2.score}
-                isLive={isLive}
-                isEnded={isEnded}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Details section */}
-        <div className="px-6 md:px-10 lg:px-16 py-6 md:py-10 bg-background flex-shrink-0">
-          <div className="max-w-3xl mx-auto space-y-6 md:space-y-10">
-            {/* Title row */}
-            <div className="text-center space-y-3 md:space-y-6">
-              <h1 className="text-2xl md:text-4xl font-black font-headline text-foreground uppercase tracking-tighter leading-tight">
-                {isChannelCard ? (
-                  channelTitle
-                ) : (
-                  <>
-                    {team1Name} <span className="text-neo-red">vs</span>{' '}
-                    {team2Name}
-                  </>
-                )}
-              </h1>
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                {leagueName && (
-                  <span className="bg-background border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
-                    {leagueName}
-                  </span>
-                )}
-                {isUpcoming && (
-                  <span className="bg-background border-[3px] border-border px-4 py-1.5 text-xs md:text-sm font-black font-headline tracking-widest uppercase text-foreground">
-                    {formattedDate} • {formattedTime}
-                  </span>
-                )}
-                {typeName && typeName !== leagueName && (
-                  <span className="text-foreground text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-border px-4 py-1.5 bg-neo-yellow">
-                    {typeName}
-                  </span>
-                )}
+                  )}
+                  {typeName && typeName !== leagueName && (
+                    <span className="text-foreground text-xs md:text-sm font-black font-headline uppercase tracking-widest border-[3px] border-border px-4 py-1.5 bg-neo-yellow">
+                      {typeName}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Spacer pushes action bar to bottom on short content */}
-        <div className="flex-1" />
+          {/* Spacer pushes action bar to bottom on short content */}
+          <div className="flex-1" />
 
-        {/* Action Bar — Sticky on mobile, relative on desktop */}
-        <div className="sticky bottom-0 sm:relative z-30 px-6 pb-6 md:px-10 md:pb-10 lg:px-16 lg:pb-16 bg-background border-t-[4px] border-border sm:border-t-0 flex-shrink-0">
-          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4">
-            {/* Watch Solo */}
-            <button
-              type="button"
-              className={cn(
-                'w-full sm:w-auto sm:min-w-[220px] flex-1',
-                'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
-                !canWatch
-                  ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
-                  : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
-              )}
-              onClick={onWatchSolo}
-              disabled={!canWatch}
-            >
-              <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
-              <span className="truncate">
-                {canWatch
-                  ? t('watchSolo')
-                  : isUpcoming
-                    ? t('notStartedYet')
-                    : t('streamUnavailable')}
-              </span>
-            </button>
-
-            {/* Watch Party — desktop only */}
-            {!isMobile && (
+          {/* Action Bar — Sticky on mobile, relative on desktop */}
+          <div className="sticky bottom-0 sm:relative z-30 px-6 pb-6 md:px-10 md:pb-10 lg:px-16 lg:pb-16 bg-background border-t-[4px] border-border sm:border-t-0 flex-shrink-0">
+            <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4">
+              {/* Watch Solo */}
               <button
                 type="button"
                 className={cn(
                   'w-full sm:w-auto sm:min-w-[220px] flex-1',
                   'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
-                  isCreatingParty || !canWatch
+                  !canWatch
                     ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
-                    : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
+                    : 'bg-neo-yellow text-foreground hover:bg-neo-yellow/80',
                 )}
-                onClick={onWatchParty}
-                disabled={isCreatingParty || !canWatch}
+                onClick={onWatchSolo}
+                disabled={!canWatch}
               >
-                {isCreatingParty ? (
-                  <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
-                ) : (
-                  <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
-                )}
+                <Play className="w-5 h-5 md:w-6 md:h-6 fill-current stroke-[3px]" />
                 <span className="truncate">
-                  {isCreatingParty ? t('creating') : t('watchTogether')}
+                  {canWatch
+                    ? t('watchSolo')
+                    : isUpcoming
+                      ? t('notStartedYet')
+                      : t('streamUnavailable')}
                 </span>
               </button>
-            )}
+
+              {/* Watch Party — desktop only */}
+              {!isMobile && (
+                <button
+                  type="button"
+                  className={cn(
+                    'w-full sm:w-auto sm:min-w-[220px] flex-1',
+                    'flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-5 border-[4px] border-border font-black font-headline uppercase tracking-widest text-base md:text-lg transition-[background-color,color,border-color,opacity,transform] duration-200 whitespace-nowrap',
+                    isCreatingParty || !canWatch
+                      ? 'bg-background text-foreground/50 cursor-not-allowed opacity-70'
+                      : 'bg-primary text-primary-foreground hover:bg-neo-blue hover:text-white',
+                  )}
+                  onClick={onWatchParty}
+                  disabled={isCreatingParty || !canWatch}
+                >
+                  {isCreatingParty ? (
+                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin motion-reduce:animate-none" />
+                  ) : (
+                    <Users className="w-5 h-5 md:w-6 md:h-6 stroke-[3px]" />
+                  )}
+                  <span className="truncate">
+                    {isCreatingParty ? t('creating') : t('watchTogether')}
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
